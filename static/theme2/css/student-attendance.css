@@ -1,0 +1,237 @@
+.horizontal-table{
+  width: 100%;
+  max-height: 70vh;
+  padding:0  15px;
+  margin: 5px 0 20px 0;
+}
+.table-wrapper{
+   overflow: auto;
+   width: 100%;
+   max-height: 65vh;
+}
+.fixedtable {
+  margin: 0;
+  border: none;
+  /*border-collapse: separate;*/
+  border-spacing: 0;
+  table-layout: fixed;
+}
+.fixedtable thead{
+	position:relative;
+}
+.fixedtable thead.admin-h-scroll-view .h_scroll{
+	right:inherit;
+	top: 15px;
+	left: 5px;
+	background: #007fff;
+}
+.fixedtable thead.student-h-scroll-view .h_scroll{
+	right:inherit;
+	top: 5px;
+	left: 15px;
+	background: #007fff;
+}
+.fixedtable  th {
+  border: 1px solid #c9d0f9;
+  padding: 0.5rem 1rem;
+  border-bottom: 0
+}
+.fixedtable thead tr th:first-child:not(.fixedtable.modal-table thead th:first-child) {
+  border: 1px solid #c4ddf7;
+}
+.fixedtable td{
+  border: 1px solid #c9d0f9;
+  border-bottom: 0;
+  border-left: 0
+}
+
+.fixedtable thead th {
+  padding: 6px;
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+  width: 25vw;
+  color: #007fff;
+  text-align: center;
+  border-bottom: 0;
+  background: #e2f1ff
+}
+.fixedtable tbody th, .fixedtable tbody td{
+  text-align: left;
+}
+.fixedtable td {
+  background: #fff;
+  padding: 2px;
+  text-align: center;
+  color:#007fff;
+}
+
+.fixedtable tbody th {
+  text-align: left;
+  position: relative;
+}
+
+.fixedtable thead th:first-child:not(.fixedtable.modal-table thead th:first-child) {
+  position: sticky;
+  left: -1px;
+  z-index: 2;
+  background: #a0d0ff;
+  color:#0071e6;
+}
+.fixedtable tbody tr th {
+  position: sticky;
+  left: -1px;
+  background: white;
+  z-index: 1;
+}
+.fixedtable tbody tr th > table{border-collapse: collapse;}
+.fixedtable tbody tr th > table tr td:first-child{width:280px}
+
+/* .fixedtable tbody tr th > table tr td{white-space:nowrap} */
+.fixedtable.month-name tbody tr th:first-child{
+  min-width:65px;
+} 
+.fixedtable.student-name-column tbody tr th:first-child{
+  /* min-width:180px; */
+  padding: 0;
+}
+.fixedtable tbody tr th:first-child, .fixedtable tbody tr th:first-child > table tr td {
+  border: 1px solid #c4ddf7;
+  color: #007fff;
+  border-bottom: 0;
+  font-size: 11px;
+}
+.fixedtable.student-name-column tbody tr th:first-child a{   
+  display: inline-block;
+  width: 100%;
+  padding: 0.5rem 1rem;}
+.fixedtable.student-name-column tbody tr th:first-child a:hover{text-decoration: none;}
+.fixedtable tbody tr:last-child th:first-child{border-bottom:1px solid #c4ddf7;}
+.fixedtable tbody tr:last-child td{border-bottom:1px solid #c9d0f9;}
+.fixedtable .bg-danger{background-color: #fd4141 !important}
+
+
+
+.table-navigator{width: 100%;display:flex;text-align: right;justify-content: center;background: #007fff;padding: 5px;}
+.table-navigator .month-name{margin-left: auto;font-size: 18px;font-weight: 600;color:#fff;}
+.table-navigator .navigator{margin-left: auto;}
+.table-navigator .prev, .table-navigator .next{width: 30px;line-height: 30px;background:#e2f1ff;color:#007fff;text-align: center;display: inline-block;font-size: 20px;cursor: pointer;border-radius: 2px;}
+.selectDateWrapper{display: inline-block;}
+.selectDateWrapper .icon{}
+.selectDate{border:none; padding: 5px;}
+.selectDate:focus{outline: none;}
+.circle-icon{width: 15px;line-height: 15px;text-align: center;color:#fff;border-radius: 50%;display:inline-block;font-size: 11px;}
+.circle-icon:hover{text-decoration: none;color:#fff;}
+.circle-icon span[data-tooltip]{padding:0px !important;cursor: pointer;}
+
+@media(max-width: 990px){
+	.fixedtable thead th, .fixedtable tbody tr th {position:static !important}
+	.h_scroll{display: inline-block;width: 25px;animation: horizontal_move 1.5s ease-in-out infinite;-webkit-animation: horizontal_move 1.5s ease-in-out infinite;}
+	.h_scroll img{width:20px;}
+	@keyframes horizontal_move{
+	  0%{ transform: translateX(0px);-webkit-transform: translateX(0px);-moz-transform: translateX(0px);-ms-transform: translateX(0px); }
+	  50%{ transform: translateX(10px);-webkit-transform: translateX(10px);-moz-transform: translateX(10px);-ms-transform: translateX(10px); }
+	  100%{ transform: translateX(0px);-webkit-transform: translateX(0px);-moz-transform: translateX(0px);-ms-transform: translateX(0px); }
+	}
+}
+
+@media(max-width: 580px){
+  .fixedtable tbody tr th:first-child.headcol{cursor: pointer;width: auto;}
+}
+
+
+[data-tooltip] {
+  display: inline-block;
+  position: relative;
+  cursor: help;
+  padding: 4px;
+}
+/* Tooltip styling */
+[data-tooltip]:before {
+  content: attr(data-tooltip);
+  display: none;
+  position: absolute;
+  background: #000;
+  color: #fff;
+  padding: 4px 6px;
+  font-size: 14px;
+  line-height: 1.4;
+  min-width: 165px;
+  text-align: center;
+  border-radius: 4px;
+}
+/* Dynamic horizontal centering */
+[data-tooltip-position="top"]:before {
+  left: 50%;
+  -ms-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
+
+[data-tooltip-position="top"]:before {
+  bottom: 100%;
+  margin-bottom: 6px;
+}
+
+
+/* Tooltip arrow styling/placement */
+[data-tooltip]:after {
+  content: '';
+  display: none;
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+}
+/* Dynamic horizontal centering for the tooltip */
+[data-tooltip-position="top"]:after {
+  left: 50%;
+  margin-left: -6px;
+}
+
+[data-tooltip-position="top"]:after {
+  bottom: 100%;
+  border-width: 6px 6px 0;
+  border-top-color: #000;
+}
+
+
+
+/* Dynamic horizontal centering */
+[data-tooltip-position="left"]:before {
+  right: 100%;
+  -ms-transform: translateX(-3%);
+  -moz-transform: translateX(-3%);
+  -webkit-transform: translateX(-3%);
+  transform: translateX(-3%);
+}
+
+[data-tooltip-position="left"]:before {
+  top: calc(100% - 20px);
+  margin-bottom: 6px;
+}
+
+/* Dynamic horizontal centering for the tooltip */
+[data-tooltip-position="left"]:after {
+  right: calc(100% + 3px);
+  margin-right: -3px;
+}
+
+[data-tooltip-position="left"]:after {
+  top: calc(100% - 15px);
+  border-width: 7px 0px 7px 8px;
+  border-left-color: #000;
+}
+
+
+
+/* Show the tooltip when hovering */
+[data-tooltip]:hover:before,
+[data-tooltip]:hover:after {
+  display: block;
+  z-index: 50;
+}
+
+/* Demo purposes - ignore this margin */

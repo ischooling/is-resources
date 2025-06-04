@@ -1,0 +1,160 @@
+/* Checkmark style starts */
+@-moz-keyframes 
+dothabottomcheck {  0% {
+ height: 0;
+}
+ 100% {
+ height: 50px;
+}
+}
+@-webkit-keyframes 
+dothabottomcheck {  0% {
+ height: 0;
+}
+ 100% {
+ height: 50px;
+}
+}
+@keyframes 
+dothabottomcheck {  0% {
+ height: 0;
+}
+ 100% {
+ height: 10px;
+}
+}
+@keyframes 
+dothatopcheck {  0% {
+ height: 0;
+}
+ 50% {
+ height: 0;
+}
+ 100% {
+ height: 22px;
+}
+}
+@-webkit-keyframes 
+dothatopcheck {  0% {
+ height: 0;
+}
+ 50% {
+ height: 0;
+}
+ 100% {
+ height: 120px;
+}
+}
+@-moz-keyframes 
+dothatopcheck {  0% {
+ height: 0;
+}
+ 50% {
+ height: 0;
+}
+ 100% {
+ height: 120px;
+}
+}
+
+.checkbox {
+  height:20px;
+  width: 20px;
+  background-color: transparent;
+  border: 2px solid #464646;
+  border-radius: 5px;
+  position: relative;
+  display: inline-block;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -moz-transition: border-color ease 0.2s;
+  -o-transition: border-color ease 0.2s;
+  -webkit-transition: border-color ease 0.2s;
+  transition: border-color ease 0.2s;
+  cursor: pointer;
+}
+
+.checkbox::before,
+.checkbox::after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  height: 0;
+  width: 3px;
+  background-color: #fff;
+  display: inline-block;
+  -moz-transform-origin: left top;
+  -ms-transform-origin: left top;
+  -o-transform-origin: left top;
+  -webkit-transform-origin: left top;
+  transform-origin: left top;
+  border-radius: 5px;
+  content: ' ';
+  -webkit-transition: opacity ease .5;
+  -moz-transition: opacity ease .5;
+  transition: opacity ease .5;
+}
+
+.checkbox::before {
+  top: 15px;
+  left: 9px;
+  -moz-transform: rotate(-135deg);
+  -ms-transform: rotate(-135deg);
+  -o-transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+  transform: rotate(-135deg);
+}
+
+.checkbox::after {
+  top: 7px;
+  left: 1px;
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.checkbox.active { border-color: #fff; border-right:none; }
+
+.checkbox.active::after {
+  height: 10px;
+  -moz-animation: dothabottomcheck 0.2s ease 0s forwards;
+  -o-animation: dothabottomcheck 0.2s ease 0s forwards;
+  -webkit-animation: dothabottomcheck 0.2s ease 0s forwards;
+  animation: dothabottomcheck 0.2s ease 0s forwards;
+}
+
+.checkbox.active::before {
+  height: 22px;
+  -moz-animation: dothatopcheck 0.4s ease 0s forwards;
+  -o-animation: dothatopcheck 0.4s ease 0s forwards;
+  -webkit-animation: dothatopcheck 0.4s ease 0s forwards;
+  animation: dothatopcheck 0.4s ease 0s forwards;
+}
+
+.subject-main{ width:100%; margin:0 auto; overflow:hidden; margin-bottom:10px;}
+.subject-main input{ width:97%; height:30px; padding:5px; border-radius:2px; border:solid 1px #cfcfcf;background:#007fff; color:#fff;}
+
+
+.subject-main .select-sub{ list-style:none; font:normal 18px Arial, Helvetica, sans-serif; display:none;width:95%; 
+background:#fff; position:absolute; padding:0 0; margin:0 auto; left:15px; max-height:150px; overflow:auto; z-index:99;}
+.subject-main .select-sub li{ line-height:20px; padding:10px; color:#464646; min-height:45px; border:solid 1px #cfcfcf;}
+.subject-main .select-sub li span{ font-size:14px;}
+.subject-main .select-sub li .close{ width:auto; padding:0 20px; margin:0 auto; line-height:normal; height:30px; cursor:pointer}
+.subject-main .select-sub li label{ position:relative;}
+.subject-main .select-sub li span{ margin-left:10px; position:absolute;margin-top:2px;}
+.subject-main .select-sub li:first-child{ background:#cfcfcf;}
+
+
+.new-bg{ background:#090; color:#fff !important;}
+.new-bg a{color:#fff !important;}
+.content.sub-box{ width:100%; background:url(../../../img/drop-icon.png) no-repeat right 13px top 18px; padding-left:30px;
+min-height:40px; padding:3px 5px; border:solid 1px #cfcfcf; BORDER-RADIUS:2PX;}
+.content.sub-box p{ font:normal 12px Arial, Helvetica, sans-serif; color:#000; padding:5px 10px; background:#eaeaea;
+display:inline-block; margin:5px 5px ;}
+.error{ font-size:11px; color:#007fff;margin:0 auto;padding-right:1px;}
+
+.click-to-catalog{float: right;font-size: 12px;margin-top:5px;}

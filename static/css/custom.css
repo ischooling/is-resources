@@ -1,0 +1,96 @@
+@charset "utf-8";
+/* CSS Document */
+
+*{ margin:0 auto; padding:0 0;}
+.npd{ padding:0 0;}
+.clr{ clear:both;}
+
+/*================== Main Banner =================================*/
+
+.main-banner{ background:url(../img/main-banner.jpg) left top no-repeat; background-size:cover; min-height:500px; height:auto; box-shadow:1px 5px 8px #999;}
+.main-banner .banner-cnt{ width:100%; margin-top:80px; margin-left:50px}
+.main-banner .banner-cnt h1{ font:normal 45px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:15px 0; line-height:48px;}
+.main-banner .banner-cnt h2{ font:normal 35px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:15px 0; line-height:38px;}
+.main-banner .banner-cnt h3{ font:normal 30px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:0 0; line-height:34px;}
+.main-banner .banner-cnt p{ font:normal 15px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:0 0; line-height:15px;}
+
+.main-banner .main-form{ width:100%; background:#007fff; padding:0px; text-align:center; border-bottom:solid 2px #fff;}
+.main-banner .main-form .logo{ background:#fff; width:100%; padding:20px; text-align:center;}
+.main-banner .main-form .logo img{ width:50%; margin:0 auto; max-width:100%;}
+
+.main-banner .main-form input, .main-banner .main-form select{ width:80%; margin:5px auto; height:35px; border-radius:15px; padding:5px; color:#464646; border:none}
+.main-banner .main-form textarea{ width:80%; margin:10px auto; height:70px; resize:none; border-radius:15px; padding:5px; border:none;}
+.new-btn{ background:#464646; color:#fff !important; font-size:16px}
+
+/*================== About us =================================*/
+
+.about-us{ padding:50px 0;}
+.about-us h2{ font:bold 26px Arial, Helvetica, sans-serif; color:#007fff;}
+.about-us p{ font:normal 14px Verdana, Geneva, sans-serif; color:#464646; text-align:justify; line-height:22px;}
+.about-us ol{ margin-left:40px; font:normal 13px Verdana, Geneva, sans-serif; line-height:22px;}
+
+
+/*================== Process =================================*/
+
+.process-bg{ background:url(../img/process-bg.jpg) left top no-repeat; background-size:cover; height:auto; padding:40px 0; background-attachment:fixed}
+.process-bg h2{ font:bold 26px Arial, Helvetica, sans-serif; color:#464646; text-align:center; margin-bottom:30px}
+.process-bg h3{ font:normal 22px Arial, Helvetica, sans-serif; color:#464646; text-align:center;}
+.process-bg .steps{ text-align:center;}
+.process-bg .steps p{ font:normal 18px Arial, Helvetica, sans-serif; color:#fff; line-height:22px; text-transform:uppercase;}
+.process-bg .steps img{ width:auto; height:50px; margin-bottom:20px}
+.process-bg .step-1{ background:url(../img/arrow-2.png) right center #2c62e0 no-repeat; padding:30px 10px; height:200px}
+.process-bg .step-2{ background:url(../img/arrow-2.png) right center no-repeat, url(../img/arrow-1.png) left center #4a76fd no-repeat; padding:30px 10px; height:200px}
+.process-bg .step-3{ background:url(../img/arrow-2.png) right center no-repeat, url(../img/arrow-1.png) left center no-repeat #3c5ecc; padding:30px 10px; height:200px}
+.process-bg .step-4{ background:url(../img/arrow-2.png) right center no-repeat, url(../img/arrow-1.png) left center no-repeat #456df0; padding:30px 10px; height:200px}
+.process-bg .step-5{ background:url(../img/arrow-2.png) right center no-repeat, url(../img/arrow-1.png) left center no-repeat #027fff; padding:30px 10px; height:200px}
+.process-bg .step-6{ background:url(../img/arrow-1.png) left center no-repeat #2b65eb; padding:30px 10px; height:200px}
+
+
+
+/*================== Process =================================*/
+
+.carousel {width: 650px; max-width:100%; margin:0 auto;padding:50px 0;}
+.carousel .item {color: #999;font-size: 14px;text-align: center;overflow: hidden; height: 320px;}
+.carousel .item a {color: #eb7245;}
+.carousel .img-box {width: 145px;height: 145px;margin: 0 auto;border-radius: 50%;}
+.carousel .img-box img {width: 100%;height: 100%;display: block;border-radius: 50%;}
+.carousel .testimonial {padding: 30px 0 10px;}
+.carousel .overview {text-align: center;padding-bottom: 5px;}
+.carousel .overview b {color: #333;	font-size: 15px;text-transform: uppercase;display: block;padding-bottom: 5px;}
+.carousel .star-rating i {font-size: 18px;color: #ffdc12;}
+.carousel .carousel-control {width: 30px;height: 30px;border-radius: 50%; background: #999; text-shadow: none;top: 4px;}
+.carousel-control i {font-size: 20px;margin-right: 2px;}
+.carousel-control.left {left: auto;right: 40px;}
+.carousel-control.right i {	margin-right: -2px;}
+.carousel .carousel-indicators {bottom: 15px;}
+.carousel-indicators li, .carousel-indicators li.active {width: 11px;height: 11px;margin: 1px 5px;border-radius: 50%;}
+.carousel-indicators li {background: #e2e2e2;border-color: transparent;}
+.carousel-indicators li.active {border: none;background: #888;}
+
+
+/*================== footer =================================*/
+
+.footer{ width:100%; padding:20px; text-align:center; background:#007fff;}
+.footer p{ font:normal 12px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:0 0;}
+
+
+/*======================== Responsive ===========================*/
+
+
+@media only screen and (max-width: 1199px) {
+  .main-banner .banner-cnt {background-color: rgba(0,0,0,0.3); padding:15px; margin-left:0px; margin-top:120px}
+}
+
+@media only screen and (max-width: 991px) {
+	.main-banner .banner-cnt h1{ font-size:35px; line-height:35px}
+	.main-banner .banner-cnt h2{ font-size:30px; line-height:30px}
+	.main-banner .banner-cnt h3{ font-size:24px; line-height:24px}
+}
+@media only screen and (max-width: 800px) {
+	.about-us{ padding:50px;}
+}
+@media only screen and (max-width: 680px) {
+	.carousel .item{ height:420px;}
+}
+
+

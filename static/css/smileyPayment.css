@@ -1,0 +1,18 @@
+.no-notify{color:#007fff;text-align:center;font-weight:bold;margin-top:30px;}
+.no-notify p{margin-top:10px;font-size: 20px;}
+.no-notify i{font-size: 40px;color: #999999;}
+*{margin:0;padding:0;}
+height:auto;max-height:300px;overflow:auto
+.success{width:100%;margin:0 auto;float: left;}
+.top{background-color:#044383;text-align:left;padding:0 10px;}
+.content{text-align:center;padding:45px 0;width:70%;margin:0 auto}
+.payment-heading{color:#027efa;font-family:Verdana, Geneva, sans-serif;font-weight:normal;font-size:30px;}
+.icon-success{font-size:50px;margin-top:20px;color:#027efa;}
+.content-text:first-child{margin-top:50px;}
+.content-text{color:#393184;font-size:25px;padding:0 30px;margin-top:20px;}
+.content-button{margin-top:30px;}
+.return-button{background-color:#027efa;padding:10px 12px;color:#fff;text-decoration:none;font-size:19px;border-radius:5px;margin-top:20px;}
+.unsuccessful-text{font-size:20px;line-height:35px;}
+@media only screen and (max-width:480px){
+	.content-text{font-size:20px;}
+}

@@ -1,0 +1,4 @@
+@charset "utf-8";
+.enter-class-card-head{background: #007fff;font-size:18px;display: flex;width: 100%;align-items: center;justify-content: center;border-bottom:4px solid #044383;padding: 10px 4px;color:#fff;border-top-left-radius: 8px;border-top-right-radius:8px;}
+.enter-class-btn{background: #007fff;border:2px solid #044383;border-radius: 6px;position: relative;color:#fff;font-weight: 600;text-align: center;padding: 8px 10px;display: inline-block;text-decoration: none;cursor: pointer;text-transform: uppercase;margin: 12px 0px;}
+.enter-class-btn::before, .enter-class-btn::after{content: "";position: absolute;top:50%;transform: translateY(-50%);width: 4px;height: 18px;background: #003871;}

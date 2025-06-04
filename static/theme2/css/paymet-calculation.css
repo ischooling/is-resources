@@ -1,0 +1,4 @@
+.select2-container .select2-selection--single{min-height:38px;border:1px solid #ced4da !important;background-image:none !important;border-radius:.25rem}
+.select2-container--default .select2-selection--single .select2-selection__rendered, .select2-container--default .select2-selection--single .select2-selection__arrow{line-height:38px;height:38px;}
+selection--single .select2-selection__arrow {height: 26px;position: absolute;top: 1px;right: 1px;width: 20px;}
+input{outline:none}

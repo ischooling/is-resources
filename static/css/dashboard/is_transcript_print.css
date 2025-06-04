@@ -1,0 +1,531 @@
+* {
+	box-sizing: border-box;
+	margin: 0
+}
+
+table tr th, table tr td {
+	box-sizing: border-box;
+}
+
+@font-face {
+	font-family: verdana_4;
+	src: url(https://sms.internationalschooling.org/static/fonts/verdana_4.ttf);
+	font-weight: 400
+}
+
+@font-face {
+	font-family: tt0861m;
+	src: url(https://sms.internationalschooling.org/static/fonts/tt0861m.ttf)
+}
+
+body {
+	font-family: verdana_4
+}
+
+p {
+	padding: 0;
+	margin: 0;
+	line-height: 25px
+}
+
+.contract-page {
+	min-height: 1154px;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover
+}
+.row-line-height{line-height:30px;}
+table {
+	margin: 0 auto;
+}
+
+.personal-details {
+	border: 0px solid #71c4c1; /* background-color:rgba(237,246,245,.5); */
+	border-collapse: separate
+}
+/* .academic-details{background-color:rgba(237,246,245,.5)} */
+.academic-details tr th {
+	border: 1px solid #71c4c1;
+	font-size: 10px;
+	font-family: tt0861m !important;
+	border-bottom: 1px solid #71c4c1;
+	border-top: 1px solid #71c4c1
+}
+
+.academic-details tbody tr td, .academic-details tbody tr th {
+	font-size: 11px; /* border-right:1px solid #71c4c1 */
+}
+
+.subject {
+	padding-left: 15px;
+}
+
+.academic-details tbody tr th {
+	border-top: none
+}
+
+.academic-details tbody tr td:last-child {
+	/* border-right:1px solid #71c4c1 */
+	
+}
+
+.academic-details tbody tr.extra td {
+	border-bottom: 1px solid #71c4c1
+}
+
+.academic-details tbody tr.extra-last td {
+	/* border-bottom:1px solid #71c4c1 */
+	
+}
+
+.personal-details tbody tr td { /* border:1px solid #71c4c1; */
+	font-size: 12px
+}
+
+.academic-details tr th:nth-child(4) {
+	text-align: center;
+}
+
+.remarks-heading {
+	line-height: 12px;
+}
+
+.remarks-heading .remarks-heading-style {
+	font-size: 11px;
+	font-family: tt0861m
+}
+
+.remarks .remarks-content p {
+	font-size: 10px;
+	line-height: 10px;
+	font-weight: 400;
+	padding-left: 8px;
+}
+
+.remarks div { /* height:25.5mm !important; */
+	background-color: rgba(237, 246, 245, .5);
+	padding: 5px 0 0 5px;
+	font-weight: 400 !important;
+	font-size: 12px !important;
+	line-height: 15px
+}
+
+.remarks div ul {
+	margin: 0 !important
+}
+
+.remarks-heading  div p {
+	
+}
+
+.principal {
+	border-bottom: 2px solid #000
+}
+
+.grades {
+	float: right;
+	width: 100%
+}
+
+.grades .personal-details tbody tr td {
+	border: 1px solid #71c4c1;
+	font-size: 8px;
+	border-bottom: none !important;
+	border-right: none !important
+}
+
+.grades .personal-details tbody tr td:last-child {
+	border-right: 1px solid #71c4c1 !important
+}
+
+.grades .personal-details tbody tr:last-child td {
+	border-bottom: 1px solid #71c4c1 !important
+}
+
+.grades p {
+	font-size: 16px;
+	font-family: tt0861m !important
+}
+
+.signature {
+	float: left;
+	width: 100%;
+	margin-top: 0
+}
+
+@page {
+	margin: 4mm;
+	size: 8.5in 11in;
+	-webkit-size: 8.5in 11in
+}
+
+.personal-details tbody tr:last-child td.borderno {
+	border-bottom: none !important
+}
+
+.personal-details tbody tr td.borderno:last-child {
+	border-right: none !important
+}
+
+.borderno {
+	border: none !important;
+	border-bottom: 2px solid #71c4c1 !important;
+	border-right: 2px solid #71c4c1 !important
+}
+
+#foot {
+	margin-top: 0
+}
+
+#head {
+	padding: 0px 39px 0;
+	display: inline-block;
+	width: 100%;
+}
+
+#basic-details {
+	padding: 0px 37.795275591px 0;
+	padding-top: 6px;
+}
+
+.marks {
+	padding: 0px 37.795275591px;
+	padding-top: 14px;
+}
+
+#foot {
+	padding: 0px 37.795275591px;
+}
+
+.downloadpage {
+	margin: 30px auto;
+}
+
+.border-none {
+	border: 0px !important
+}
+
+.site-logo {
+	max-width: 200px;
+	float: left;
+	margin-top: 58px;
+}
+
+.multiple-logos {
+	max-width: 246px;
+	float: right;
+	margin-top: 0px;
+	margin-right: 9px;
+	display: none
+}
+
+.bar-code-img {
+	display:inline-block;
+	width:100%;
+	
+}
+.bar-code-img img{
+	width: 69px; float: right;
+}
+.multiple-logos span {
+	border-top: 1px solid #55aae2;
+	border-bottom: 1px solid #55aae2;
+	display: inline-block;
+	width: 100%;
+	position: relative
+}
+
+.multiple-logos span .round-label {
+	position: absolute;
+	top: -18px;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+	display: inline-block;
+	padding: 6px 12px;
+	border-radius: 24px;
+	background: #55aae2;
+	color: #fff;
+	text-transform: uppercase;
+	width: max-content;
+	font-weight: 600;
+	font-size: 14px;
+	font-family: tt0861m !important
+}
+
+.multiple-logos img {
+	width: 100%;
+	max-width: 350px;
+	margin: 0 0 0px 0;
+	opacity: 0
+}
+
+.transcrit-title {
+	float: left;
+	text-align: center;
+}
+
+.divider-tabel-border td {
+	border-bottom: 1px solid #71c4c1
+}
+
+#last {
+	width: 100%;
+	float: left
+}
+
+#last .stamp {
+	width: 34.8%;
+	float: left;
+	text-align: center;
+	padding-top: 0px
+}
+
+.stamp img {
+	width: 50%;
+	display: inline-block
+}
+
+.right-area {
+	float: right;
+	width: 62.2%;
+	box-sizing: border-box
+}
+
+.row-format {
+	width: 100%;
+	float: left;
+	border-bottom: 2px solid #71c4c1
+}
+
+.right-area .border-wrapper {
+	width: 100%; /* border:1px solid #71c4c1; */
+	box-sizing: border-box;
+	float: left
+}
+
+.row-format .cell {
+	display: inline-block;
+	padding: 4px 12px;
+	border-right: 2px solid #71c4c1;
+	box-sizing: border-box;
+	float: left
+}
+
+.right-area .remarks {
+	float: right;
+	width: 100%
+}
+
+.text-right {
+	text-align: right
+}
+
+.text-center {
+	text-align: center
+}
+
+b {
+	font-family: tt0861m
+}
+
+@
+-moz-document url-prefix (){ .
+	right-area {width: 64.9%
+}
+
+#last .stamp {
+	width: 35.1%;
+}
+
+.firefox-subject-view[style] {
+	width: 242px !important;
+}
+
+}
+.hide-on-print {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.GPA, .printdate {
+	position: relative;
+	top: -10px;
+}
+.grade-cell{
+	position:relative;
+	top:5px;
+}
+
+.grades-cell {
+	text-align: center
+}
+
+.course-cell {
+	position: relative;
+	padding-left: 5px;
+}
+
+.first-row {
+	position: relative;
+	top: -1px;
+}
+
+@media print {
+
+	html {
+		zoom: 1;
+		margin: 0 0;
+	}
+	.contract-page {
+		min-height: inherit !important
+	}
+	/* #head{padding-top:5px;} */
+	.downloadpage {
+		display: none;
+	}
+	/* @page{size:A4; margin:0mm 0mm 0mm 0mm;padding:0 0;} */
+
+	/* #foot[style]{bottom:25px !important} */
+	.contract-page {
+		background-image: none !important
+	}
+	.multiple-logos, .transcrit-title, .hide-on-print, .stamp {
+		opacity: 0 !important
+	}
+	.personal-details tbody tr td, .personal-details, .academic-details tr th,
+		.academic-details, .academic-details tbody tr td, .table tr th, .table tr td,
+		.table, .right-area .border-wrapper {
+		border-color: rgba(113, 196, 193, 0) !important;
+		border-right-color: rgba(113, 196, 193, 0) !important;
+	}
+	.academic-details, .personal-details, .remarks div {
+		background-color: rgba(237, 246, 245, 0) !important
+	}
+	.hide-on-print {
+		opacity: 0;
+		visibility: hidden;
+	}
+	.stamp, .grades {
+		display: none !important
+	}
+	.bar-code-img {
+		margin-top: 0
+	}
+	#head {
+		width: 100%;
+		padding: 0 0px !important;
+	}
+	#basic-details, .marks {
+		padding: 0 0px !important
+	}
+	.site-logo img {
+		position: relative;
+		top: -10px;
+		left: 10px;
+	}
+	.bar-code-img img {
+		position: relative;
+		top:10px;
+		right: 39px;
+		width:66px;
+	}
+	#basic-details {
+		position: relative;
+		top: 0px;
+	}
+	#basic-details {margin-top:12px;margin-left:2px;}
+	#marks {
+		position: relative;
+		top: 20px;
+	}
+	.row-line-height{line-height:34px;}
+	.first-row {
+		position: relative;
+		top: 0px;
+	}
+	.rollno {
+		position: relative;
+		left: 20px;
+	}
+	.gradename {
+		position: relative;
+		left:4px
+	}
+	.status {
+		position: relative;
+		left: -12px
+	}
+	.graduateddate {
+		position: relative;
+		left: -19px
+	}
+	.sname {
+		position: relative;
+		left: 20px;
+		bottom:4px;
+	}
+	.dob {
+		position: relative;
+		left: -19px;
+		bottom:2px;
+	}
+	.nationality {
+		position: relative;
+		left: 20px;
+		bottom:6px;
+	}
+	.gender {
+		position: relative;
+		left: -19px;
+		bottom:4px;
+	}
+	.guardianname {
+		position: relative;
+		left: 20px;
+		bottom:8px;
+	}
+	.schoolname {
+		position: relative;
+		left: 20px;
+		bottom:10px;
+	}
+	.grade-cell {
+		position: relative;
+		left: 22px;
+		top:5px;
+	}
+	.course-cell {
+		position: relative;
+		left: 35px;
+		padding-left: 0 !important
+	}
+	.subject-cell {
+		position: relative;
+		left: 28px;
+	}
+	.grades-cell {
+		position: relative;
+		left: 97px;
+		text-align: left
+	}
+	.credits-cell {
+		position: relative;
+		left: 39px
+	}
+	.printdate {
+		position: relative;
+		left:36px;
+		top:-17px
+	}
+	.GPA {
+		position: relative;
+		left: 39px;
+		top:-14px;
+	}
+	.remarks:last-child {
+		position: relative;
+		left: -4px;
+		top:22px;
+	}
+}

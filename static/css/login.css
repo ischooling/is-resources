@@ -1,0 +1,309 @@
+@font-face{
+        font-family:'FontAwesome';
+        src:url('../fonts/fontawesome-webfont.eot?v=4.7.0');
+        src:url('../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'),url('../fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'),url('../fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'),url('../fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'),url('../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');font-weight:normal;font-style:normal
+}	
+.fa{display:inline-block;font:normal normal normal 14px/1 FontAwesome;font-size:inherit;text-rendering:auto;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.fa-info-circle:before{content:"\f05a"}.fa-envelope-o:before{content:"\f003"}.fa-lock:before{content:"\f023"}.fa-eye:before{content:"\f06e"}.fa-eye-slash:before{content:"\f070"}.fa-refresh:before{content:"\f021"}.fa-envelope:before{content:"\f0e0"}.fa-user-o:before{content:"\f2c0"}
+.text-white {color: #fff !important;}
+.input-with-icon .form-control:invalid{background-image: inherit !important;}
+.full{width: 100%;display: inline-block;position: relative;}
+.valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;top: 8px;color: green;transform: scale(0); visibility: hidden;opacity: 1;font-size: 20px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
+.valid-field.true:after{content:"\f00c";color: green;right: 50px !important;z-index: 9;}
+.valid-field.false:after{content:"\f00d";color: red;right: 50px !important;z-index: 9;}
+.true.valid-field:after, .false.valid-field:after{visibility: visible;opacity: 1;transform: scale(1);}
+.true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
+.false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
+.captch-field.valid-field.false:after, .captch-field.valid-field.true:after{right: 155px !important;}
+#statusMessage.modal-body{margin: 0 auto;padding:15px 0;font-size: 18px;color: #666;font-weight: bold;margin-top:0 !important;}
+.modal-dialog { margin: 30px auto; top: 20%;}
+.modal-body p{ padding:10px 0 10px;}
+.cookies {position: fixed;width: 100%;background: rgba(0, 0, 0, 0.8);height: auto;text-align: center;z-index: 99999 !important;bottom: 0;padding:10px 0;}
+.cookies p {font: normal 12px Arial, Helvetica, sans-serif;color: #fff;padding: 15px 0;margin: 0 auto;display:inline-block;}
+.cookies p strong {font-size: 16px;font-weight: normal;line-height: 24px}
+.cookies p a {background: #007fff;padding: 10px;transition: all 0.3s;border: solid 1px #fff;border-radius:50px;color:#fff;display:inline-block;}
+.cookies p a:hover {background: #fff;padding: 10px;color: #007fff;border: solid 1px #077fff}
+.cookies .cks-cls {float: right;position: absolute;right: 80px;text-decoration: none;color: #000;top: 15px;border: solid 1px #cfcfcf;padding: 3px 7px;border-radius: 50%;background: #cfcfcf;cursor: pointer;transition: all 0.3s;}
+.cookies .cks-cls:hover {background: purple;color: #fff;}
+.loader-bg{ background:rgba(0,0,0,0.5); width:100%; height:100%; min-height:100%; z-index: 9999; left: 0; top: 0; position: fixed;}
+.loader{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%); width: 150px;height: 150px;background: transparent;border: 3px solid #fff;border-radius: 50%;text-align: center;line-height: 150px;font-family: sans-serif;font-size: 20px;color: #fff;letter-spacing:4px;text-transform: uppercase;box-shadow: 0 0 10px rgba(0,159,255,0.3);}
+.loader:before {content: '';position: absolute;top: -3px;left: -3px;width: 100%;height: 100%;border: 3px solid transparent;border-top: 3px solid #009fff;border-right: 3px solid #009fff;border-radius: 50%;animation: animateCircle 2s linear infinite;}
+.loader span {display: block;position: absolute;top: calc(50% - 2px);left: 50%;width: 50%;height: 4px;background: transparent;transform-origin:left;animation: animate 2s linear infinite;}
+.loader span:before {content:'';position: absolute;width: 16px;height: 16px;border-radius: 50%;background-color: #009fff;top: -6px;right: -8px;box-shadow: 0 0 20px #009fff;}
+@keyframes animateCircle{0%{transform: rotate(0deg);}100%{transform: rotate(360deg);}}
+@keyframes animate{0%{transform: rotate(45deg);}100%{transform: rotate(405deg);}}
+.unique-loader {height: 100vh;width: 100vw;position: fixed;top: 0;right: 0;background-color: #00000055;display: flex;align-items: center;justify-content: center;z-index: 99999999;}
+.new-loader-2024 {width: 13%;}
+@media only screen and (max-width: 900px) {.new-loader-2024 {width: 40%;}}
+@media only screen and (max-width: 500px) {.new-loader-2024 {width: 35%;}}
+.login-bg{position: relative;z-index: 2;}
+body.default-theme:after{content: '';background:var(--login-bg-color);width: 100%;height: 100vh;left:0;top:0;position: fixed;background-size: 100% 100%;z-index: 1;}
+label.control-label{margin-top:10px !important;font-size:14px !important;}
+.login{position: relative;z-index: 1;overflow: hidden;}
+.login-logo.eid_logo_align_2022{margin-top: 12px;margin-left: 100px;}
+.new-year-img{width:100%;display:inline-block;text-align:center}
+.new-year-img img{max-width:435px;width:100%;display:inline-block }
+input:not([type="submit"]), input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.0) inset;transition: background-color 5000s ease-in-out 0s; }
+.login-wrapper{width:100%;float:left;text-align:center;margin-top:30px;}
+.christmas-theme-2022 .login-wrapper{text-align:left;}
+.christmas-text-img{float:right;max-width:335px;margin-top:100px;display:none}
+.christmas-theme-2022 .christmas-text-img{float:left;max-width:375px;margin-top:100px;margin-right:30px;display:inline-block}
+.login-wrapper .sms {font-weight: 700;font-size: 18px;display:inline-block;width:100%;color:#027fff;margin:15px 0;text-transform:uppercase;}
+.login-2023-theme .input-group {border-bottom: 2px solid #eee;}
+.login-2023-theme .input-group .input-group-addon{background-color: transparent !important;border:none !important}
+.login-2023-theme .input-group .input-group-addon i{color:#b8b8b8 !important}
+.login-2023-theme .input-group .form-control{background-image: none !important;border: none !important;box-shadow: none !important;padding-left: 2px !important;}
+.login-2023-theme .input-group:focus-within{border-color:#027fff;transition: all 0.5s ease-in-out;}
+.login {background: rgba(255, 255, 255, 1);box-shadow: 1px 2px 6px #999;border-radius: 20px;min-height: 100px;max-width:400px;width:100%;text-align: center;padding: 15px 15px;display:inline-block;position:relative;right:9px;}
+.christmas-theme-2022.login{display: inherit;}
+.login h1 {font: normal 22px Arial, Helvetica, sans-serif;/* text-transform: uppercase; */font-size:16px;}
+.user-circle{width:96px;height:96px;padding:8px;background:#fff;border-radius:50%;display:inline-block;margin:0 0 15px 0;filter: drop-shadow(0px 0px 24px rgba(11, 101, 255, 0.20));/* transform: translate3d(-1000%,0px,0px); */transition: all 0.5s ease-in-out;/* -webkit-transform: translate3d(0%,0px,0px); */-webkit-transition: all 0.5s ease-in-out;animation: slideLeft 2s;}
+
+@keyframes slideLeft{
+    from{transform: translate3d(-300%,0px,0px);}
+    to{transform: translate3d(0px,0px,0px);}
+}
+.user-circle .circle-border{width:80px;height:80px;padding:10px;/* border:3px solid ; */border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.user-circle .circle-border .user-icon{font-size:40px;width:inherit !important;transition: all 0.1s ease-in-out;-webkit-transition: all 0.1s ease-in-out;animation: zoomIn 10s;animation-duration:5s;}
+@keyframes zoomIn{
+    from{transform: scale(0);}
+    to{transform: scale(1);}
+}
+.login-logo {margin-top: 75px}
+.login .form-group p {font-size: 15px;line-height: 18px}
+.login .form-group p a {transition: all .3s}
+.login .form-group p a:hover {color: #464646}
+.login .form-group p span {font-size: 11px;}
+.login .form-group p span a {text-decoration: none;}
+.login .form-group {margin: auto}
+.login .form-group INPUT[TYPE=SUBMIT] {font: bold 15px Arial, Helvetica, sans-serif}
+.login .form-group button {border-radius: 50px;width: 50%;height: 45px;font: bold 15px Arial, Helvetica, sans-serif}
+.login .fa {width: 12px}
+/* Change the white to any color ;) */
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus,input:-webkit-autofill:active  {-webkit-box-shadow: 0 0 0 30px #d3dce1 inset !important;}
+.form-group.label-static label.control-label, .form-group.label-floating.is-focused label.control-label, .form-group.label-floating:not(.is-empty) label.control-label{z-index:3}
+.new-year-theme-2025 .container > .row{width: 100%;}
+.new-year-theme-2025 .container > .row .login-wrapper{display: flex;flex-wrap: wrap;gap:30px;float: none !important;align-items: center;}
+.new-year-theme-2025 .container > .row .login-wrapper img{display: inline-block;float: none !important;width: 100%;}
+.new-year-theme-2025 .new-year-2025{display: inline-block;float: none;}
+@media only screen and (min-width:1600px) {
+    .sms{font-weight: 700;font-size: 25px;position: relative;}
+}
+@media only screen and (max-width:1100px) {
+    .christmas-theme-2022 .login-wrapper{text-align:right;}
+    .christmas-theme-2022 .christmas-text-img{float:left;max-width:275px;margin-top:100px;}
+}
+@media only screen and (max-width:980px) {
+    .login-logo img {width: 300px}
+    .new-year-theme-2025 .container > .row .login-wrapper{justify-content: center;}
+}
+@media only screen and (max-width:800px) {
+    body {/* background:url(${PATH_FOLDER_IMAGE}new-year-bg.jpg) center top; */background-size: cover !important;background-attachment:fixed !important;background-position-x:92% !important;}
+    .login-logo img {max-width: 300px;width: 100%;}
+}
+@media (max-width:767px) {
+    .christmas-theme-2022 .login-wrapper{text-align:center;}
+    .christmas-theme-2022 .christmas-text-img{float:none;display:block;max-width:275px !important;margin:20px auto 0;background: #fff;border-radius: 5px;margin-bottom: 15px;padding: 5px 20px;margin:0 auto 20px;}
+    .login-wrapper{margin-top:5px;}
+    .login {border-radius: 10px;position: static;width: 50%;margin-bottom: 20px;margin: 0 auto}
+    .login-logo {margin: 15px auto;text-align: center}
+    .login-logo.eid_logo_align_2022{margin-left:0}
+
+}
+@media(max-width:700px){
+    /* body{background:url(${PATH_FOLDER_IMAGE}eid_mubarak_login_page_is_mobile_S700_2022.png${SCRIPT_VERSION}) #dee3e7;} */
+}
+@media only screen and (max-width:640px) {
+    .login {border-radius: 10px;position: static;width: 100%}
+}
+
+.ball-rotate {position:relative}
+.ball-rotate>div {background-color:#3f6ad8;width:15px;height:15px;border-radius:100%;margin:2px;animation-fill-mode:both;position:relative}
+.ball-rotate>div:first-child {animation:rotate 1s 0s cubic-bezier(0.7, -0.13, 0.22, 0.86) infinite}
+.ball-rotate>div:before, .ball-rotate>div:after {background-color:#027fff;width:15px;height:15px;border-radius:100%;margin:2px;content:"";position:absolute;opacity:0.8}
+.ball-rotate>div:before {top:0px;left:-28px}
+.ball-rotate>div:after {top:0px;left:25px}
+@keyframes rotate {
+    0% {transform:rotate(0deg) scale(1)}
+    50% {transform:rotate(180deg) scale(0.6)}
+    100% {transform:rotate(360deg) scale(1)}
+}
+
+.checkbox label,
+.radio label,
+label {
+  font-size: 14px;
+  line-height: 1.42857;
+  color: #AAAAAA;
+  font-weight: 400;
+}
+
+label.control-label {
+  font-size: 11px;
+  line-height: 1.07143;
+  color: #AAAAAA;
+  font-weight: 400;
+  margin: 16px 0 0 0;
+}
+.input-group .label-floating span{  position:absolute; top:9px; right:-8px; z-index:0;}
+.btn{border: none;
+  border-radius: 3px;
+  position: relative;
+  padding: 12px 30px;
+  margin: 10px 1px;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  will-change: box-shadow, transform;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn::-moz-focus-inner {
+  border: 0;
+}
+.btn, .btn.btn-default {
+  box-shadow: 0 2px 2px 0 rgba(153, 153, 153, 0.14), 0 3px 1px -2px rgba(153, 153, 153, 0.2), 0 1px 5px 0 rgba(153, 153, 153, 0.12);
+}
+.btn, .btn:hover, .btn:focus, .btn:active, .btn.active, .btn:active:focus, .btn:active:hover, .btn.active:focus, .btn.active:hover, .open > .btn.dropdown-toggle, .open > .btn.dropdown-toggle:focus, .open > .btn.dropdown-toggle:hover, .btn.btn-default, .btn.btn-default:hover, .btn.btn-default:focus, .btn.btn-default:active, .btn.btn-default.active, .btn.btn-default:active:focus, .btn.btn-default:active:hover, .btn.btn-default.active:focus, .btn.btn-default.active:hover, .open > .btn.btn-default.dropdown-toggle, .open > .btn.btn-default.dropdown-toggle:focus, .open > .btn.btn-default.dropdown-toggle:hover {
+  background-color: #15db9e;
+  color: #FFFFFF;
+}
+.btn:focus, .btn:active, .btn:hover, .btn.btn-default:focus, .btn.btn-default:active, .btn.btn-default:hover {
+  box-shadow: 0 14px 26px -12px rgba(153, 153, 153, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(153, 153, 153, 0.2);
+}
+.btn.disabled, .btn.disabled:hover, .btn.disabled:focus, .btn.disabled.focus, .btn.disabled:active, .btn.disabled.active, .btn:disabled, .btn:disabled:hover, .btn:disabled:focus, .btn:disabled.focus, .btn:disabled:active, .btn:disabled.active, .btn[disabled], .btn[disabled]:hover, .btn[disabled]:focus, .btn[disabled].focus, .btn[disabled]:active, .btn[disabled].active, fieldset[disabled] .btn, fieldset[disabled] .btn:hover, fieldset[disabled] .btn:focus, fieldset[disabled] .btn.focus, fieldset[disabled] .btn:active, fieldset[disabled] .btn.active, .btn.btn-default.disabled, .btn.btn-default.disabled:hover, .btn.btn-default.disabled:focus, .btn.btn-default.disabled.focus, .btn.btn-default.disabled:active, .btn.btn-default.disabled.active, .btn.btn-default:disabled, .btn.btn-default:disabled:hover, .btn.btn-default:disabled:focus, .btn.btn-default:disabled.focus, .btn.btn-default:disabled:active, .btn.btn-default:disabled.active, .btn.btn-default[disabled], .btn.btn-default[disabled]:hover, .btn.btn-default[disabled]:focus, .btn.btn-default[disabled].focus, .btn.btn-default[disabled]:active, .btn.btn-default[disabled].active, fieldset[disabled] .btn.btn-default, fieldset[disabled] .btn.btn-default:hover, fieldset[disabled] .btn.btn-default:focus, fieldset[disabled] .btn.btn-default.focus, fieldset[disabled] .btn.btn-default:active, fieldset[disabled] .btn.btn-default.active {
+  box-shadow: none;
+}
+.btn.btn-simple, .btn.btn-default.btn-simple {
+  background-color: transparent;
+  color: #999999;
+  box-shadow: none;
+}
+.btn.btn-simple:hover, .btn.btn-simple:focus, .btn.btn-simple:active, .btn.btn-default.btn-simple:hover, .btn.btn-default.btn-simple:focus, .btn.btn-default.btn-simple:active {
+  background-color: transparent;
+  color: #999999;
+}
+/* .btn.btn-primary {
+  box-shadow: 0 2px 2px 0 rgba(0, 159, 255, 0.14), 0 3px 1px -2px rgba(0, 159, 255, 0.2), 0 1px 5px 0 rgba(0, 159, 255, 0.12);
+} */
+.btn.btn-primary, .btn.btn-primary:hover, .btn.btn-primary:focus, .btn.btn-primary:active, .btn.btn-primary.active, .btn.btn-primary:active:focus, .btn.btn-primary:active:hover, .btn.btn-primary.active:focus, .btn.btn-primary.active:hover, .open > .btn.btn-primary.dropdown-toggle, .open > .btn.btn-primary.dropdown-toggle:focus, .open > .btn.btn-primary.dropdown-toggle:hover {
+  background-color: #007fff;
+  color: #FFFFFF;
+}
+/* .btn.btn-primary:focus, .btn.btn-primary:active, .btn.btn-primary:hover {
+  box-shadow: 0 14px 26px -12px rgba(0, 159, 255, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 159, 255, 0.2);
+} */
+.btn.btn-primary.disabled, .btn.btn-primary.disabled:hover, .btn.btn-primary.disabled:focus, .btn.btn-primary.disabled.focus, .btn.btn-primary.disabled:active, .btn.btn-primary.disabled.active, .btn.btn-primary:disabled, .btn.btn-primary:disabled:hover, .btn.btn-primary:disabled:focus, .btn.btn-primary:disabled.focus, .btn.btn-primary:disabled:active, .btn.btn-primary:disabled.active, .btn.btn-primary[disabled], .btn.btn-primary[disabled]:hover, .btn.btn-primary[disabled]:focus, .btn.btn-primary[disabled].focus, .btn.btn-primary[disabled]:active, .btn.btn-primary[disabled].active, fieldset[disabled] .btn.btn-primary, fieldset[disabled] .btn.btn-primary:hover, fieldset[disabled] .btn.btn-primary:focus, fieldset[disabled] .btn.btn-primary.focus, fieldset[disabled] .btn.btn-primary:active, fieldset[disabled] .btn.btn-primary.active {
+  box-shadow: none;
+}
+.btn.btn-primary.btn-simple {
+  background-color: transparent;
+  color: #9c27b0;
+  box-shadow: none;
+}
+.btn.btn-primary.btn-simple:hover, .btn.btn-primary.btn-simple:focus, .btn.btn-primary.btn-simple:active {
+  background-color: transparent;
+  color: #9c27b0;
+}
+.btn.btn-info {
+  box-shadow: 0 2px 2px 0 rgba(0, 188, 212, 0.14), 0 3px 1px -2px rgba(0, 188, 212, 0.2), 0 1px 5px 0 rgba(0, 188, 212, 0.12);
+}
+.btn.btn-info, .btn.btn-info:hover, .btn.btn-info:focus, .btn.btn-info:active, .btn.btn-info.active, .btn.btn-info:active:focus, .btn.btn-info:active:hover, .btn.btn-info.active:focus, .btn.btn-info.active:hover, .open > .btn.btn-info.dropdown-toggle, .open > .btn.btn-info.dropdown-toggle:focus, .open > .btn.btn-info.dropdown-toggle:hover {
+  background-color: #00bcd4;
+  color: #FFFFFF;
+}
+.btn.btn-info:focus, .btn.btn-info:active, .btn.btn-info:hover {
+  box-shadow: 0 14px 26px -12px rgba(0, 188, 212, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 188, 212, 0.2);
+}
+.btn.btn-info.disabled, .btn.btn-info.disabled:hover, .btn.btn-info.disabled:focus, .btn.btn-info.disabled.focus, .btn.btn-info.disabled:active, .btn.btn-info.disabled.active, .btn.btn-info:disabled, .btn.btn-info:disabled:hover, .btn.btn-info:disabled:focus, .btn.btn-info:disabled.focus, .btn.btn-info:disabled:active, .btn.btn-info:disabled.active, .btn.btn-info[disabled], .btn.btn-info[disabled]:hover, .btn.btn-info[disabled]:focus, .btn.btn-info[disabled].focus, .btn.btn-info[disabled]:active, .btn.btn-info[disabled].active, fieldset[disabled] .btn.btn-info, fieldset[disabled] .btn.btn-info:hover, fieldset[disabled] .btn.btn-info:focus, fieldset[disabled] .btn.btn-info.focus, fieldset[disabled] .btn.btn-info:active, fieldset[disabled] .btn.btn-info.active {
+  box-shadow: none;
+}
+.btn.btn-info.btn-simple {
+  background-color: transparent;
+  color: #00bcd4;
+  box-shadow: none;
+}
+.btn.btn-info.btn-simple:hover, .btn.btn-info.btn-simple:focus, .btn.btn-info.btn-simple:active {
+  background-color: transparent;
+  color: #00bcd4;
+}
+.btn.btn-success {
+  box-shadow: 0 2px 2px 0 rgba(76, 175, 80, 0.14), 0 3px 1px -2px rgba(76, 175, 80, 0.2), 0 1px 5px 0 rgba(76, 175, 80, 0.12);
+}
+.btn.btn-success, .btn.btn-success:hover, .btn.btn-success:focus, .btn.btn-success:active, .btn.btn-success.active, .btn.btn-success:active:focus, .btn.btn-success:active:hover, .btn.btn-success.active:focus, .btn.btn-success.active:hover, .open > .btn.btn-success.dropdown-toggle, .open > .btn.btn-success.dropdown-toggle:focus, .open > .btn.btn-success.dropdown-toggle:hover {
+  background-color: #4caf50;
+  color: #FFFFFF;
+}
+.btn.btn-success:focus, .btn.btn-success:active, .btn.btn-success:hover {
+  box-shadow: 0 14px 26px -12px rgba(76, 175, 80, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(76, 175, 80, 0.2);
+}
+.btn.btn-success.disabled, .btn.btn-success.disabled:hover, .btn.btn-success.disabled:focus, .btn.btn-success.disabled.focus, .btn.btn-success.disabled:active, .btn.btn-success.disabled.active, .btn.btn-success:disabled, .btn.btn-success:disabled:hover, .btn.btn-success:disabled:focus, .btn.btn-success:disabled.focus, .btn.btn-success:disabled:active, .btn.btn-success:disabled.active, .btn.btn-success[disabled], .btn.btn-success[disabled]:hover, .btn.btn-success[disabled]:focus, .btn.btn-success[disabled].focus, .btn.btn-success[disabled]:active, .btn.btn-success[disabled].active, fieldset[disabled] .btn.btn-success, fieldset[disabled] .btn.btn-success:hover, fieldset[disabled] .btn.btn-success:focus, fieldset[disabled] .btn.btn-success.focus, fieldset[disabled] .btn.btn-success:active, fieldset[disabled] .btn.btn-success.active {
+  box-shadow: none;
+}
+.btn.btn-success.btn-simple {
+  background-color: transparent;
+  color: #4caf50;
+  box-shadow: none;
+}
+.btn.btn-success.btn-simple:hover, .btn.btn-success.btn-simple:focus, .btn.btn-success.btn-simple:active {
+  background-color: transparent;
+  color: #4caf50;
+}
+.btn.btn-warning {
+  box-shadow: 0 2px 2px 0 rgba(255, 152, 0, 0.14), 0 3px 1px -2px rgba(255, 152, 0, 0.2), 0 1px 5px 0 rgba(255, 152, 0, 0.12);
+}
+.btn.btn-warning, .btn.btn-warning:hover, .btn.btn-warning:focus, .btn.btn-warning:active, .btn.btn-warning.active, .btn.btn-warning:active:focus, .btn.btn-warning:active:hover, .btn.btn-warning.active:focus, .btn.btn-warning.active:hover, .open > .btn.btn-warning.dropdown-toggle, .open > .btn.btn-warning.dropdown-toggle:focus, .open > .btn.btn-warning.dropdown-toggle:hover {
+  background-color: #ff9800;
+  color: #FFFFFF;
+}
+.btn.btn-warning:focus, .btn.btn-warning:active, .btn.btn-warning:hover {
+  box-shadow: 0 14px 26px -12px rgba(255, 152, 0, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(255, 152, 0, 0.2);
+}
+.btn.btn-warning.disabled, .btn.btn-warning.disabled:hover, .btn.btn-warning.disabled:focus, .btn.btn-warning.disabled.focus, .btn.btn-warning.disabled:active, .btn.btn-warning.disabled.active, .btn.btn-warning:disabled, .btn.btn-warning:disabled:hover, .btn.btn-warning:disabled:focus, .btn.btn-warning:disabled.focus, .btn.btn-warning:disabled:active, .btn.btn-warning:disabled.active, .btn.btn-warning[disabled], .btn.btn-warning[disabled]:hover, .btn.btn-warning[disabled]:focus, .btn.btn-warning[disabled].focus, .btn.btn-warning[disabled]:active, .btn.btn-warning[disabled].active, fieldset[disabled] .btn.btn-warning, fieldset[disabled] .btn.btn-warning:hover, fieldset[disabled] .btn.btn-warning:focus, fieldset[disabled] .btn.btn-warning.focus, fieldset[disabled] .btn.btn-warning:active, fieldset[disabled] .btn.btn-warning.active {
+  box-shadow: none;
+}
+.btn.btn-warning.btn-simple {
+  background-color: transparent;
+  color: #ff9800;
+  box-shadow: none;
+}
+.btn.btn-warning.btn-simple:hover, .btn.btn-warning.btn-simple:focus, .btn.btn-warning.btn-simple:active {
+  background-color: transparent;
+  color: #ff9800;
+}
+.btn.btn-danger {
+  box-shadow: 0 2px 2px 0 rgba(244, 67, 54, 0.14), 0 3px 1px -2px rgba(244, 67, 54, 0.2), 0 1px 5px 0 rgba(244, 67, 54, 0.12);
+}
+.btn.btn-danger, .btn.btn-danger:hover, .btn.btn-danger:focus, .btn.btn-danger:active, .btn.btn-danger.active, .btn.btn-danger:active:focus, .btn.btn-danger:active:hover, .btn.btn-danger.active:focus, .btn.btn-danger.active:hover, .open > .btn.btn-danger.dropdown-toggle, .open > .btn.btn-danger.dropdown-toggle:focus, .open > .btn.btn-danger.dropdown-toggle:hover {
+  background-color: #f44336;
+  color: #FFFFFF;
+}
+.btn.btn-danger:focus, .btn.btn-danger:active, .btn.btn-danger:hover {
+  box-shadow: 0 14px 26px -12px rgba(244, 67, 54, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(244, 67, 54, 0.2);
+}
+.btn.btn-danger.disabled, .btn.btn-danger.disabled:hover, .btn.btn-danger.disabled:focus, .btn.btn-danger.disabled.focus, .btn.btn-danger.disabled:active, .btn.btn-danger.disabled.active, .btn.btn-danger:disabled, .btn.btn-danger:disabled:hover, .btn.btn-danger:disabled:focus, .btn.btn-danger:disabled.focus, .btn.btn-danger:disabled:active, .btn.btn-danger:disabled.active, .btn.btn-danger[disabled], .btn.btn-danger[disabled]:hover, .btn.btn-danger[disabled]:focus, .btn.btn-danger[disabled].focus, .btn.btn-danger[disabled]:active, .btn.btn-danger[disabled].active, fieldset[disabled] .btn.btn-danger, fieldset[disabled] .btn.btn-danger:hover, fieldset[disabled] .btn.btn-danger:focus, fieldset[disabled] .btn.btn-danger.focus, fieldset[disabled] .btn.btn-danger:active, fieldset[disabled] .btn.btn-danger.active {
+  box-shadow: none;
+}
+.btn.btn-danger.btn-simple {
+  background-color: transparent;
+  color: #f44336;
+  box-shadow: none;
+}
+.btn.btn-danger.btn-simple:hover, .btn.btn-danger.btn-simple:focus, .btn.btn-danger.btn-simple:active {
+  background-color: transparent;
+  color: #f44336;
+}
+.btn:focus, .btn:active, .btn:active:focus {
+  outline: 0;
+}
+.btn.btn-round {
+  border-radius: 30px;
+}
+.btn:not(.btn-just-icon):not(.btn-fab) .fa {
+  font-size: 18px;
+  margin-top: -2px;
+  position: relative;
+  top: 2px;
+}
