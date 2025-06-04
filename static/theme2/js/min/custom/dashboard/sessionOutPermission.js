@@ -1,0 +1,1 @@
+async function getUserShortProfile(r){var e={};e.userId=r;var t=await getDataBasedUrlAndPayload("get-user-short-profile",e);return localStorage.setItem("profile"+r,JSON.stringify(t)),t}window.getUserShortProfile=getUserShortProfile;

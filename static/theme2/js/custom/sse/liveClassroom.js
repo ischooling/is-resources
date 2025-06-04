@@ -457,40 +457,6 @@ function getNowRunClassChart(data){
 
 }
 
-function getClassMeetingRunning(meetingId){
-  $.ajax({
-      type : "GET",
-      contentType : "application/json",
-      url : getURLForHTML('dashboard','live-class-with-meeting'+"/"+SCHOOL_ID+"/"+meetingId),
-      dataType : 'json',
-      success : function(data) {
-          if (data['status'] == '0' || data['status'] == '2'|| data['status'] == '3') {
-              if(data['status'] == '3'){
-                  redirectLoginPage();
-              }else{
-                  if(tt=='theme2'){
-                  }else if(tt=='theme1'){
-                      //showMessage(true, data['message']);
-                  }
-              }
-          }else {
-                 // getNowRunClassChart(data);
-                 var liveTbl= liveClassTable(data.liveClassrooms);
-                 $('#live-class-now-meetingid').append(liveTbl);
-                  setTimeout(getColleps(), 5000);
-              
-          }
-      },
-      error : function(e) {
-          if(tt=='theme2'){
-              showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-          }else if(tt=='theme1'){
-              showMessage(true, TECHNICAL_GLITCH);
-          }
-      }
-  });
-  
-}
 
 function getCurrentClassLive(){
   $.ajax({

@@ -1109,15 +1109,15 @@ function callStatesNew(formId, value, elementId, bindElementId) {
   return true;
 }
 
-function validateRequestForMaster(formId, elementId) {
-  if (
-    $("#" + formId + " #" + elementId).val() == "" ||
-    $("#" + formId + " #" + elementId).val() <= 0
-  ) {
-    return false;
-  }
-  return true;
-}
+// function validateRequestForMaster(formId, elementId) {
+//   if (
+//     $("#" + formId + " #" + elementId).val() == "" ||
+//     $("#" + formId + " #" + elementId).val() <= 0
+//   ) {
+//     return false;
+//   }
+//   return true;
+// }
 
 function callForResetPassword(formId, moduleId) {
   hideMessage("");
@@ -3174,26 +3174,6 @@ function callTeacherEventSubjectsByGradeId(
   });
 }
 
-function getRequestForMaster(formId, key, value, requestExtra, requestExtra1) {
-  var request = {};
-  var authentication = {};
-  var requestData = {};
-  requestData["requestKey"] = key;
-  requestData["requestValue"] = value;
-  if (requestExtra != undefined) {
-    requestData["requestExtra"] = requestExtra;
-  }
-  if (requestExtra1 != undefined) {
-    requestData["requestExtra1"] = requestExtra1;
-  }
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = "COMMON";
-  request["authentication"] = authentication;
-  request["requestData"] = requestData;
-  return request;
-}
 function getRequestForMaster(
   formId,
   key,
@@ -4295,10 +4275,7 @@ function convertMsToTime(milliseconds) {
   seconds = seconds % 60;
   minutes = minutes % 60;
   hours = hours % 24;
-
-  return `${padTo2Digits(hours)}h ${padTo2Digits(minutes)}m ${padTo2Digits(
-    seconds
-  )}s`;
+  return `${padTo2Digits(hours)}h ${padTo2Digits(minutes)}m ${padTo2Digits(seconds)}s`;
 }
 function padTo2Digits(num) {
   return num.toString().padStart(2, "0");

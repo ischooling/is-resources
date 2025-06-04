@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  * Common Styles for Fancytree Skins.
  *
@@ -33182,5 +33181,6 @@ input:checked + .small-switch-slider:before {
 	}
 }
 /* custom check box aazim ends */
+#userActivityContent .app-page-title{display: none !important;}
 .iti__country-list{z-index: 10 !important;}
 #userActivityContent .app-page-title{display: none !important;}

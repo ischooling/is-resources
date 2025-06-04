@@ -1,0 +1,1 @@
+$(document).ready((()=>{Ladda.bind(".ladda-button",{timeout:2e3})}));

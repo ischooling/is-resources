@@ -16,15 +16,7 @@ function dashboardActivityHeader(){
     return html;
 }
 
-async function dashboardActivityContent(data){
-    var activitiesList = await dashboardActivityListContent(data);
-    var html = `<div class="card-body card-activity">
-                    <ul class="vertical-nav-menu" id="main-nav1">
-                        ${activitiesList}
-                    </ul>
-                </div>`;
-    return html;
-}
+async function dashboardActivityContent(data){var activitiesList = await dashboardActivityListContent(data);var html = `<div class="card-body card-activity"><ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul></div>`;return html;}
 function dashboardActivityListContent(data){
     return new Promise((resolve, reject) => {
         try {
@@ -244,3 +236,4 @@ function activityPageStyle(){
         </style>`;
     return html;
 }
+window.getActivityContent = getActivityContent;

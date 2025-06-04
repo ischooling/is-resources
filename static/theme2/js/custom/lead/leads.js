@@ -3,7 +3,6 @@ $(function () {
 	// $('[data-toggle="tooltip"]').tooltip()
 });
 
-
 function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
  hideMessage('');
  var flag=true;
@@ -6273,28 +6272,6 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 		reponse['series']=series;
 	}	
 	return reponse;
-}
-
-function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName) {
-	var authentication = {};
-	var leadReportRequest = {};
-	leadReportRequest['schoolId'] = SCHOOL_ID;
-	leadReportRequest['modeSearch'] = modeSearch;
-	leadReportRequest['startDate'] = startDate;
-	leadReportRequest['endDate'] = endDate;
-	if(campaignName!=undefined && campaignName!=""){
-		leadReportRequest['reportType']="LEAD-LIST";
-	}else{
-		leadReportRequest['reportType']="CAMPAIGN-LIST";
-	}
-   
-	authentication['hash'] = getHash();
-	authentication['schoolId'] = SCHOOL_ID;
-	authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userId'] = USER_ID;
-	authentication['userType'] = 'COMMON';
-	leadReportRequest['authentication'] = authentication;
-	return leadReportRequest;
 }
 
 function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid) {

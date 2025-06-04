@@ -1,0 +1,1 @@
+function windowRedirectToDashboard(o){customLoader(!0),location.replace(o)}

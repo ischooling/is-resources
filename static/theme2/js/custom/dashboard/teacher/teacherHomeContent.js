@@ -17,7 +17,7 @@ async function rendereTeacherHomeContent(){
     callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);
     if(commonProfileDTO.declarecheckshow == 'show' && commonProfileDTO.isAgreementUpdated){
-        $('head').append(`<script src="${PATH_FOLDER_JS2}custom/teacher/signupTeacherStage6.js${SCRIPT_VERSION}">`)
+        $('head').append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/teacher/signupTeacherStage6.js${SCRIPT_VERSION}">`)
         if($("#teacherAgreementModal").length>0){
             $("#teacherAgreementModal").remove();
         }

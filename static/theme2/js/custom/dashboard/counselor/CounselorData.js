@@ -394,21 +394,6 @@ function getCounselorDetails(userId) {
 	return responseData;
 }
 
-function getRequestForCounselorDetails(formId, userId){
-	if(userId=='' || userId==undefined){
-		userId=USER_ID;
-	}
-	var filterRequest = {};
-	var authentication = {};
-	authentication['hash'] = getHash();
-	authentication['schoolId'] = SCHOOL_ID;
-	authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = USER_ROLE;
-	authentication['userId'] = userId;
-	filterRequest['authentication'] = authentication;
-	return filterRequest;
-}
-
 function getCounselorDashboardDetailsData(userId) {
 	var responseData={};
 	$.ajax({
@@ -549,25 +534,6 @@ function getCounselorStudentGrade(formId, elementId ,userId, learningProgramCode
 		}
 	});
 	return true;
-}
-
-
-
-function getRequestForCounselorCommissionRate(formId, userId, learningProgramCode, enrollmentFor){
-	if(userId=='' || userId==undefined){
-		userId=USER_ID;
-	}
-	var filterRequest = {};
-	var authentication = {};
-	authentication['hash'] = getHash();
-	authentication['schoolId'] = SCHOOL_ID;
-	authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = USER_ROLE;
-	authentication['userId'] = userId;
-	authentication['learningProgram'] = learningProgramCode;
-	authentication['enrollmentFor'] = enrollmentFor;
-	filterRequest['authentication'] = authentication;
-	return filterRequest;
 }
 
 function getCounselorEnrollmentChart(eventid, lable, series){

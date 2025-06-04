@@ -2217,66 +2217,6 @@ function validateRequestForSubmitSyllabus(formId, moduleId) {
   return true;
 }
 
-function submitPlacementSyllabus(formId, moduleId) {
-  hideMessage("");
-  if (!validateRequestForSubmitPlacementSyllabus(formId, moduleId)) {
-    return false;
-  }
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLFor("dashboard", "placement-syllabus-submit"),
-    data: JSON.stringify(
-      getRequestForSubmitPlacementSyllabus(formId, moduleId)
-    ),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
-      } else {
-        showMessage(false, data["message"]);
-        $("#" + formId)[0].reset();
-        setTimeout(function () {
-          callDashboardPageSchool("32");
-        }, 1000);
-      }
-      return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
-  });
-}
-
-function getRequestForSubmitPlacementSyllabus(formId, moduleId) {
-  var request = {};
-  var authentication = {};
-  var requestData = {};
-  var syllabusDTO = {};
-  syllabusDTO["standardId"] = $("#" + formId + " #gradId").val();
-  syllabusDTO["subjectId"] = $("#" + formId + " #subjectId").val();
-  syllabusDTO["taskName"] = "SYLLABUS";
-  if (editor1 != undefined) {
-    syllabusDTO["content"] = escapeCharacters(editor1.getData());
-  }
-  requestData["syllabusDTO"] = syllabusDTO;
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = moduleId;
-  authentication["userId"] = $("#" + formId + " #userId").val();
-  request["authentication"] = authentication;
-  request["requestData"] = requestData;
-  return request;
-}
-
-function validateRequestForSubmitPlacementSyllabus(formId, moduleId) {
-  return true;
-}
-
 function submitSlot(formId, moduleId) {
   hideMessage("");
   if (!validateRequestForSubmitSlot(formId, moduleId)) {

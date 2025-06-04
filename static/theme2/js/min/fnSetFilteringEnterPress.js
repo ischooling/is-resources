@@ -1,0 +1,1 @@
+jQuery.fn.dataTableExt.oApi.fnSetFilteringEnterPress=function(n){var t=this;return this.each((function(n){$.fn.dataTableExt.iApiIndex=n;var e=$("input",t.fnSettings().aanFeatures.f);return e.unbind("keyup search input").bind("keyup search input",(function(n){(""==e.val().length||e.val().length>2&&13==n.keyCode)&&t.fnFilter(e.val())})),this})),this};

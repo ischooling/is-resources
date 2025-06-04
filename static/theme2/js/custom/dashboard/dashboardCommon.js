@@ -1933,23 +1933,6 @@ function getTeacherSearchSubject(userId) {
 	return subjectDTO;
 
 }
-function showOtherReason(id) {
-	if ($("#reasonEnrollEnd" + id).val() == 'Other') {
-		$("#otherReason" + id).show();
-	} else {
-		$("#otherReason" + id).val('');
-		$("#otherReason" + id).hide();
-	}
-}
-
-function changeTeacher(id, teacherId, standardId) {
-	//getTeacherCompensationStandard("", "steachAmount"+id, teacherId, standardId);
-	//$("#stdEnrollDate"+id).val('');
-	$("#steachEnrollStartDate" + id).val('');
-	$("#steachEnrollEndDate" + id).val('');
-	$("#reasonEnrollEnd" + id).val('');
-	$("#otherReason" + id).val('');
-}
 
 function subjectBasedTeacherList(subjectId) {
 	hideMessage('');

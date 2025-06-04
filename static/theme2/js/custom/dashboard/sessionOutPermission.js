@@ -11,3 +11,4 @@ async function getUserShortProfile(userId){
 	localStorage.setItem('profile'+userId,JSON.stringify(responseData));
 	return responseData;
 }
+window.getUserShortProfile = getUserShortProfile;

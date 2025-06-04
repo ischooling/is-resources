@@ -1,0 +1,1 @@
+function abc(){return"<div></div>"}
