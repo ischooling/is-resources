@@ -325,18 +325,21 @@ async function generateEnrollmentContent(courseProviderId,UNIQUEUUID, moduleName
 				+'</ul>'
 			+'</div>'
 		+'</div>'
-	+'</div>'
-	+'<div id="commonloaderId" class="unique-loader loader-bg" style="display:none;">'
-      if(SCHOOL_ID==1){
-        html+=`<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />`;
-      }else{
-        html+=
-        `<div id="commonloaderBody" class="loader" style="display:none">
-          Please Wait... <span></span>
-        </div>`;
-      } 
-    html+='</div>'
-	+logOutModalContent()
+	+'</div>';
+	 if(SCHOOL_ID==1){
+		html+='<div id="commonloaderId" class="unique-loader loader-bg" style="display:none;">'
+			+'<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />'
+		+'</div>';
+	 }else{
+		html+='<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
+			+'<div class="ball-rotate">'
+				+'<div style="background-color: rgb(247, 185, 36);"></div>'
+			+'</div>'
+			+'<p>Loading ...</p>'
+		+'</div>';
+	 }
+	
+	html+=logOutModalContent()
 	return html;
 }
 

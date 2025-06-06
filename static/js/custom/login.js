@@ -281,7 +281,7 @@ function getRequestForLogin(formId, moduleId, loginType) {
 	loginDTO['timezone'] = timezone;
 	loginDTO['userName'] = $("#" + formId + " #email").val().trim();
 	loginDTO['password'] = encode($("#" + formId + " #password").val().trim());
-	loginDTO['captcha'] = $("#" + formId + " #captcha").val().trim();
+	loginDTO['captcha'] = $("#" + formId + " #captcha").val().toUpperCase().trim();
 	loginDTO['location'] = $("#" + formId + " #location").val().trim();
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;

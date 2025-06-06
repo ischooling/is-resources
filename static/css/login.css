@@ -307,3 +307,114 @@ label.control-label {
   position: relative;
   top: 2px;
 }
+
+:root{--pc:#7a3269;--sc:#013b4b;} 
+.theme-text{color:var(--pc)}
+.theme-bg{background:var(--pc)}
+.theme-border{border-color:var(--pc)}
+.theme-border-after:after, .theme-border-before:before {border-color:var(--pc)}
+.alternate-bg{background:var(--sc);}
+/* COLOR THEME CSS FOR BACKGROUD COLOR */
+.primary-bg, .primary-hov-bg:hover, .primary-bg-before:before, .primary-bg-after:after, .primary-bg-active.active a, .primary-bg-active.active-tab, .primary-bg-active-tab-anchor.active-tab > a{background-color:var(--pc)  !important}
+.secondary-bg, .secondary-hov-bg:hover, .secondary-bg-before:before, .secondary-bg-after:after, .secondary-bg-active.active a, .secondary-bg-active.active-tab, .secondary-bg-active-tab-anchor.active-tab > a{background-color:var(--sc) !important}
+.tertiary-bg, .tertiary-hov-bg:hover, .tertiary-bg-before:before, .tertiary-bg-after:after, .tertiary-bg-active.active a, .tertiary-bg-active.active-tab, .tertiary-bg-active-tab-anchor.active-tab > a{background-color:#007fff !important}
+.quartary-bg, .quartary-hov-bg:hover, .quartary-bg-before:before, .quartary-bg-after:after, .quartary-bg-active.active a, .quartary-bg-active.active-tab, .quartary-bg-active-tab-anchor.active-tab > a{background-color:#007fff !important}
+.black-bg, .black-hov-bg:hover, .black-bg-before:before, .black-bg-after:after, .black-bg-active.active a, .black-bg-active.active-tab, .black-bg-active-tab-anchor.active-tab > a{background-color:#000 !important}
+.white-bg, .white-hov-bg:hover, .white-bg-before:before, .white-bg-after:after, .white-bg-active.active a, .white-bg-active.active-tab, .white-bg-active-tab-anchor.active-tab > a{background-color:#fff !important}
+.light-gray-bg{background-color:#f7f7f7 !important}
+
+/* COLOR THEME CSS FOR TEXT COLOR */
+.primary-txt-color, .primary-hov-txt:hover{color:var(--pc)  !important}
+.secondary-txt-color, .secondary-hov-txt:hover{color:var(--sc) !important}
+.tertiary-txt-color, .tertiary-hov-txt:hover{color:#007fff !important}
+.quartary-txt-color, .quartary-hov-txt:hover{color:#007fff !important}
+.black-txt-color, .black-hov-txt:hover{color:#000 !important}
+.white-txt-color, .white-hov-txt:hover{color:#fff !important}
+
+/* CHECKED RADIO BUTTON BG COLOR */
+input[type=radio]:checked~.primary-bg-checked, input[type=checkbox]:checked~.primary-bg-checked{background-color:var(--pc)  !important}
+input[type=radio]:checked~.secondary-bg-checked, input[type=checkbox]:checked~.secondary-bg-checked{background-color:var(--sc)  !important}
+input[type=radio]:checked~.tertiary-bg-checked, input[type=checkbox]:checked~.tertiary-bg-checked{background-color:#007fff  !important}
+input[type=radio]:checked~.quartary-bg-checked, input[type=checkbox]:checked~.quartary-bg-checked{background-color:#007fff  !important}
+input[type=radio]:checked~.black-bg-checked, input[type=checkbox]:checked~.black-bg-checked{background-color:#000  !important}
+input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white-bg-checked{background-color:#fff  !important}
+
+ 
+/* COLOR THEME CSS FOR BORDER COLOR */
+.primary-border-color, .primary-hov-border-color:hover, .primary-focus-border-color:focus{border-color:var(--pc)  !important}
+.secondary-border-color, .secondary-hov-border-color:hover, .secondary-focus-border-color:focus{border-color:var(--sc) !important}
+.tertiary-border-color, .tertiary-hov-border-color:hover, .tertiary-focus-border-color:focus{border-color:#007fff !important}
+.quartary-border-color, .quartary-hov-border-color:hover, .quartary-focus-border-color:focus{border-color:#007fff !important}
+.black-border-color, .black-hov-border-color:hover, .black-focus-border-color:focus{border-color:#000 !important}
+.white-border-color, .white-hov-border-color:hover, .white-focus-border-color:focus{border-color:#fff !important}
+
+.primary-border-top-color, .primary-hov-border-top-color:hover, .primary-focus-border-top-color:focus{border-top-color:var(--pc)  !important}
+.secondary-border-top-color, .secondary-hov-border-top-color:hover, .secondary-focus-border-top-color:focus{border-top-color:var(--sc) !important}
+.tertiary-border-top-color, .tertiary-hov-border-top-color:hover, .tertiary-focus-border-top-color:focus{border-top-color:#007fff !important}
+.quartary-border-top-color, .quartary-hov-border-top-color:hover, .quartary-focus-border-top-color:focus{border-top-color:#007fff !important}
+.black-border-top-color, .black-hov-border-top-color:hover, .black-focus-border-top-color:focus{border-top-color:#000 !important}
+.white-border-top-color, .white-hov-border-top-color:hover, .white-focus-border-top-color:focus{border-top-color:#fff !important}
+
+.primary-border-right-color, .primary-hov-border-right-color:hover, .primary-focus-border-right-color:focus{border-right-color:var(--pc)  !important}
+.secondary-border-right-color, .secondary-hov-border-right-color:hover, .secondary-focus-border-right-color:focus{border-right-color:var(--sc) !important}
+.tertiary-border-right-color, .tertiary-hov-border-right-color:hover, .tertiary-focus-border-right-color:focus{border-right-color:#007fff !important}
+.quartary-border-right-color, .quartary-hov-border-right-color:hover, .quartary-focus-border-right-color:focus{border-right-color:#007fff !important}
+.black-border-right-color, .black-hov-border-right-color:hover, .black-focus-border-right-color:focus{border-right-color:#000 !important}
+.white-border-right-color, .white-hov-border-right-color:hover, .white-focus-border-right-color:focus{border-right-color:#fff !important}
+
+.primary-border-bottom-color, .primary-hov-border-bottom-color:hover, .primary-focus-border-bottom-color:focus{border-bottom-color:var(--pc)  !important}
+.secondary-border-bottom-color, .secondary-hov-border-bottom-color:hover, .secondary-focus-border-bottom-color:focus{border-bottom-color:var(--sc) !important}
+.tertiary-border-bottom-color, .tertiary-hov-border-bottom-color:hover, .tertiary-focus-border-bottom-color:focus{border-bottom-color:#007fff !important}
+.quartary-border-bottom-color, .quartary-hov-border-bottom-color:hover, .quartary-focus-border-bottom-color:focus{border-bottom-color:#007fff !important}
+.black-border-bottom-color, .black-hov-border-bottom-color:hover, .black-focus-border-bottom-color:focus{border-bottom-color:#000 !important}
+.white-border-bottom-color, .white-hov-border-bottom-color:hover, .white-focus-border-bottom-color:focus{border-bottom-color:#fff !important}
+
+.primary-border-left-color, .primary-hov-border-left-color:hover, .primary-focus-border-left-color:focus{border-left-color:var(--pc)  !important}
+.secondary-border-left-color, .secondary-hov-border-left-color:hover, .secondary-focus-border-left-color:focus{border-left-color:var(--sc) !important}
+.tertiary-border-left-color, .tertiary-hov-border-left-color:hover, .tertiary-focus-border-left-color:focus{border-left-color:#007fff !important}
+.quartary-border-left-color, .quartary-hov-border-left-color:hover, .quartary-focus-border-left-color:focus{border-left-color:#007fff !important}
+.black-border-left-color, .black-hov-border-left-color:hover, .black-focus-border-left-color:focus{border-left-color:#000 !important}
+.white-border-left-color, .white-hov-border-left-color:hover, .white-focus-border-left-color:focus{border-left-color:#fff !important}
+.gray-border-color{border-color:#e5e5e5 !important}
+
+
+/* TEXT TRANSFORM CSS*/
+.txt-upper-case{text-transform:uppercase !important}
+.txt-lower-case{text-transform:lowercase !important}
+.txt-capitalize-case{text-transform:capitalize !important}
+
+
+/* SELECT2 OPTION THUMBNAIL BACKGROUND COLOR */
+.primary-select2-option-bg .select2-results__options > li.select2-results__option, .primary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice, .primary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .primary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus, .primary-select2-option-bg .select2-selection__choice{background-color:var(--pc)  !important}
+.secondary-select2-option-bg .select2-results__options > li.select2-results__option, .secondary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice, .secondary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .secondary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus, .secondary-select2-option-bg .select2-selection__choice{background-color:var(--sc) !important}
+.tertiary-select2-option-bg .select2-results__options > li.select2-results__option, .tertiary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice, .tertiary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .tertiary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus, .tertiary-select2-option-bg .select2-selection__choice{background-color:#007fff !important}
+.quartary-select2-option-bg .select2-results__options > li.select2-results__option, .quartary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice, .quartary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .quartary-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus, .quartary-select2-option-bg .select2-selection__choice{background-color:#007fff !important}
+.black-select2-option-bg .select2-results__options > li.select2-results__option, .black-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice, .black-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .black-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus, .black-select2-option-bg .select2-selection__choice{background-color:#000 !important}
+.white-select2-option-bg .select2-results__options > li.select2-results__option, .white-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice, .white-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .white-select2-option-bg .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus, .white-select2-option-bg .select2-selection__choice{background-color:#fff !important}
+
+/* SELECT2 OPTION THUMBNAIL BACKGROUND HOVER COLOR */
+.primary-select2-hov-option-bg .select2-container--default .select2-results__option[aria-selected=true]{background-color:var(--pc)  !important}
+.secondary-select2-hov-option-bg .select2-container--default .select2-results__option[aria-selected=true]{background-color:var(--sc) !important}
+.tertiary-select2-hov-option-bg .select2-container--default .select2-results__option[aria-selected=true]{background-color:#007fff !important}
+.quartary-select2-hov-option-bg .select2-container--default .select2-results__option[aria-selected=true]{background-color:#007fff !important}
+.black-select2-hov-option-bg .select2-container--default .select2-results__option[aria-selected=true]{background-color:#000 !important}
+.white-select2-hov-option-bg .select2-container--default .select2-results__option[aria-selected=true]{background-color:#fff !important}
+
+
+/* SELECT2 OPTION THUMBNAIL TEXT COLOR */
+.primary-select2-option-txt .select2-results__options > li.select2-results__option, .primary-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:var(--pc)  !important}
+.secondary-select2-option-txt .select2-results__options > li.select2-results__option, .secondary-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:var(--sc) !important}
+.tertiary-select2-option-txt .select2-results__options > li.select2-results__option, .tertiary-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:#007fff !important}
+.quartary-select2-option-txt .select2-results__options > li.select2-results__option, .quartary-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:#007fff !important}
+.black-select2-option-txt .select2-results__options > li.select2-results__option, .black-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:#000 !important}
+.white-select2-option-txt .select2-results__options > li.select2-results__option, .white-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:#fff !important}
+
+.signupButton{
+    border: 2px solid var(--pc) !important;
+    transition: background-color 0.3s ease
+}
+.signupButton:hover{
+    background-color: white !important;
+    color: var(--pc) !important;
+    border: 2px solid var(--pc) !important;
+}

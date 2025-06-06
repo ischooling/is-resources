@@ -9801,7 +9801,7 @@ function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, ne
 					var leadnew = $("#leadNoMove").val();
 					var chkAll = this;
 					
-					var chkRows = $("#leadDataList").find(".checkLead");
+					var chkRows = $(".leadDataList").find(".checkLead");
 					chkRows.each(function () {
 						$(this)[0].checked = chkAll.checked;
 					});

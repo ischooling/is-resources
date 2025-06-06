@@ -1087,7 +1087,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 		var leads = data[i];
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
-		+'<table class="table table-bordered font-12 border-radius-table mt-2" style="min-width:1380px;width:100%" id="leadDataList">'
+		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1380px;width:100%" id="leadDataList">'
 			+'<thead class="bg-primary">'
 			+'<tr>'
 				+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important;width:230px;">';
