@@ -5305,13 +5305,23 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				$(".leadlist-status-"+leadId).html("<b>"+$('#leadStatus-'+leadId+' option:selected').text()+"</b>")
 				$(".leadlist-remark-"+leadId).html("<b>"+data['extra3']+"</b>");
 
-				$(".nextSchedule-"+leadId).addClass(""+data['extra2']+"-leadno-bg");
-				$(".nextFollow-"+leadId).addClass(""+data['extra2']+"-leadno-bg");
-				$(".leadlist-remark-"+leadId).addClass(""+data['extra2']+"-leadno-bg");
+				var lType=leadType.toString().toLowerCase();
+				$(".nextSchedule-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
+				$(".nextFollow-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
+				$(".leadlist-remark-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
+				
+				var clsLead=$(".lead-row-"+leadId).attr('class');
+				var arrCss = clsLead.split(" ");
+				var lastCssRow = arrCss[arrCss.length - 1];
+				var lastCssNew = clsLead.replace(lastCssRow, ""+lType+"-"+data['extra2']+"-bg");
+				$(".lead-row-"+leadId).attr('class',lastCssNew)//addClass(""+lType+"-"+data['extra2']+"-bg");
 
-
-				$(".lead-row-"+leadId).addClass(""+data['extra2']+"-bg");
-				$(".lead-row-td-"+leadId).addClass(""+data['extra2']+"-leadno-bg");
+				var clsLeadTd=$(".lead-row-td-"+leadId).attr('class');
+				var arrCssTd = clsLeadTd.split(" ");
+				var lastCssRowTd = arrCssTd[arrCssTd.length - 1];
+				var lastCssNewTd = clsLeadTd.replace(lastCssRowTd, ""+lType+"-"+data['extra2']+"-leadno-bg");
+				$(".lead-row-td-"+leadId).attr('class',lastCssNewTd)
+				//$(".lead-row-td-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
 
 				$('#leadStatus-'+leadId).val(0);
 				$('#followupRemarks-'+leadId).val('');

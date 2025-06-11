@@ -120,6 +120,24 @@ function getDesiredObject(type) {
         }
     });
 }
+async function getOnetimeDetails(schoolId,requestFor){
+	try{
+		var responseData = await  getDesiredObject('one-time-details'+schoolId);
+		if(typeof responseData =='object'){
+			if(!responseData.ntc){
+				return responseData;
+			}
+		}
+		var data = {};
+		data["schoolId"] = schoolId;
+		data["requestFor"] = requestFor;
+		responseData = await getDataBasedUrlAndPayload('one-time-details', data);
+		localStorage.setItem('one-time-details'+schoolId,JSON.stringify(responseData));
+		return responseData;
+	}catch(e){
+		showMessage(true, e)
+	}
+}
 
 async function getSchoolSettingsLinks(schoolId){
 	try{
@@ -183,9 +201,27 @@ var debouncing = function (mainFun, delay) {
 };
 
 async function initiateSetting(){
-	schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
-    schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
-    schoolSettings = await getSchoolSettingsOffice(SCHOOL_ID);
+	var requestFor=[];
+	var requestEntityOffice={};
+	requestEntityOffice['entity']='office';
+	requestFor.push(requestEntityOffice);
+
+	var requestEntityLinks={};
+	requestEntityLinks['entity']='links';
+	requestFor.push(requestEntityLinks);
+
+	var requestEntityTechnical={};
+	requestEntityTechnical['entity']='technical';
+	requestFor.push(requestEntityTechnical);
+
+	var requestEntitySettings={};
+	requestEntitySettings['setttings']='SCRIPT_VERSION';
+	requestFor.push(requestEntitySettings);
+
+	var onetimedetails = await getOnetimeDetails(SCHOOL_ID,requestFor);
+	schoolSettingsLinks = JSON.parse(onetimedetails.schoolSettingsLinks);
+	schoolSettingsTechnical = JSON.parse(onetimedetails.schoolSettingsTechnical);
+	schoolSettings = JSON.parse(onetimedetails.schoolSettings);
 }
 async function loginPageOnLoadEvent(){
 	callLocationAndSelectCountryNew('loginForm');		

@@ -238,7 +238,7 @@ function loginFormContent(userName){
                     <input type="text" name="captcha" id="captcha" class="form-control" style="width: 58%; float:left;text-transform: uppercase;" value="" pattern="^[_A-z0-9]{1,}$" minlength="6" maxlength="6" required>
                         ${/*onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);"*/''}
                     <span style="background: #009eff;padding: 1px 0px;border-radius: 4px;">
-                        <img id="captchaImage" alt="Captcha" src="${APP_BASE_URL}${SCHOOL_UUID}/api/v1/common/captcha.jpg?payload=`+getPrimaryColor()+`&v=`+new Date().getTime()+`" style="width:130px; height: 25px;position:relative;left:2px" loding="lazy" />
+                        <img id="captchaImage" alt="Captcha" src="${APP_BASE_URL}${SCHOOL_UUID}/api/v1/common/captcha.jpg?payload=`+getPrimaryColor()+`&v=`+new Date().getTime()+`" style="width:105px; height: 25px;position:relative;left:4px" loding="lazy" />
                         <a class="refresh-link text-white" href="javascript:void(0);" title="Refresh"
                             onClick="return refreshCaptcha('captchaImage');" style="display: inline-block;padding: 0px 8px;border-left:1px solid rgba(255, 255, 255, 0.3);color:#fff">
                             <i class="fa fa-refresh"></i>

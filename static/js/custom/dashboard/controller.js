@@ -372,6 +372,17 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam) {
     );
   } else if (pageNo === "meeting-management") {
     getMeetingManagementContent("Meeting Management");
+  } else if (pageNo == "graduation-ceremony-attendees") {
+    $("#dashboardContentInHTML").html(
+      getGraduationCeremonyAttendeesContent(
+        "Graduation Ceremony Attendees",
+        roleAndModule,
+        SCHOOL_ID,
+        USER_ID,
+        USER_ROLE
+      )
+    );
+    loadGraduationCeremonyAttendees();
   }
 }
 

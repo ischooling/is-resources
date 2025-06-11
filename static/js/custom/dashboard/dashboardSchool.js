@@ -321,6 +321,8 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     // $('#userPaymentHistoryDetails').hide();
     // callForDashboardData('formIdIfAny','payment-history-content?moduleId='+moduleId+'&userId=');
     getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "graduation-ceremony-attendees") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "conflicted-user-list") {
     callForDashboardData(
       "formIdIfAny",
