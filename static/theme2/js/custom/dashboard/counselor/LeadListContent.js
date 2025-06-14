@@ -389,8 +389,10 @@ function getLeadListMasterContent(roleAndModule, objRights){
 	}
 	html+=getMoveLeadsPopup(objRights);
 	html+=getDiscardLeadModel();
-	html+=getWatiTemplatesHtml();
 	html+=deleteWarning();
+	if($('#logData').length<1){
+		$("body").append(getWatiTemplatesHtml());
+	}
 	return html;
 }
 
@@ -399,8 +401,11 @@ function getWatiTemplatesHtml(){
 	html+='<div class="for_watiLogsTableData done" id="logData"> </div>'
 	+'<div class="for_allWatiTemplatesList done" id="allWatiTemplatesList"> </div>'
 	+'<div class="for_mbroadcastWatiSendTable done" id="usrPopData"> </div>'
+	+'<div class="for_userPopDataEmaildone" id="userPopDataEmail"> </div>'
 	+'<div id="allWatiUsersList"> </div>'
-	+'<div class="for_successFailedWatiMessagesModal done" id="usrPopDataOnResend"> </div>';
+	+'<div class="for_successFailedWatiMessagesModal done" id="usrPopDataOnResend"> </div>'
+	+'<div class="for_successFailedEmailMessagesModal done" id="usrPopDataOnResendEmail"> </div>'
+	+'<div class="for_allEmailTemplatesList done" id="allEmailTemplatesList"></div>';
 	return html;
 }
 

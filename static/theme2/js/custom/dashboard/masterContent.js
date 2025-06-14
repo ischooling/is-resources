@@ -279,7 +279,7 @@ function getStandardContentForFlexy(){
 	return getGrades(getGradesData(actualGrades));
 }
 
-function getStandardContentForFlexy(){
+function getStandardContentForDualDimploma(){
 	var actualGrades=['8','9','10','11','12'];
 	return getGrades(getGradesData(actualGrades));
 }
@@ -295,11 +295,6 @@ function getStandardContentByCourseProviderId(schoolId, courseProviderId){
 	}else{
 		actualGrades=['1','2','3','4','5','6','7','8','9','10','11','12'];
 	}
-	return getGrades(getGradesData(actualGrades));
-}
-
-function getStandardContentOfFlexy(){
-	var actualGrades=['19','9','10','20','21'];
 	return getGrades(getGradesData(actualGrades));
 }
 

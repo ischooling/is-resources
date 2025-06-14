@@ -4,7 +4,8 @@
 function getB2CListHeaderContent(roleAndModule, objRights){
 	var html='<div class="row px-3 pt-3 pb-1">';
 	html+='<div class="col-lg-12 col-md-12 col-sm-12 col-12 order-lg-6 mb-3 text-right">';
-	html+='<button class="btn-shadow btn btn-secondary text-white  btn-full-mobile mb-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
+	html+='<button class="btn-shadow btn btn-secondary text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
+	html+='<button class="btn-shadow btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates()" >Email Broadcast</button>';
 			
 			html+='<div class="">';
 				if(objRights.discardPermission){

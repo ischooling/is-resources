@@ -139,7 +139,7 @@
 
 	.mobile-frame {max-width: 270px;width: 100%; height: 485px;max-height: 485px;overflow-y:hidden; background-color: #ede4db;border: 8px solid #fff;border-radius: 28px;box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);position: relative;}
 	.mobile-frame::before {content: "";display: block;position: absolute;top: 10px;left: 50%;transform: translateX(-50%);width: 60px;height: 5px;background-color: #666;border-radius: 10px;}
-	.screen {width: 100%;height: 90%;background-color: #ede4db;overflow: hidden;overflow-y: auto;}
+	.screen {width: 100%;height: 100%;background-color: #ede4db;overflow: auto;}
 	.mobile-frame-top-bar{position: sticky;left: 0;top: 0;z-index: 1;}
 	.status-bar {height: 20px;background-color: #064e46;color: #fff;display: flex;justify-content: space-between;align-items: center;padding:6px 10px 0px;font-size: 12px;}
 	.status-bar .time {font-weight: bold;}

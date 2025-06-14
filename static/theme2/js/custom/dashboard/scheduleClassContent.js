@@ -25,6 +25,7 @@ function meetingDataByType(data, userId){
 		
 	}
 }
+
 function getMeetingTitle(){
 	var stname = $('#classroomSessionFilter #studentName option:selected').text().split('(')[0].trim();
 	var subjectName =$('#classroomSessionFilter #subjectIds option:selected').text();
@@ -32,7 +33,7 @@ function getMeetingTitle(){
 	var meetingSubject =  stname + " | " + subjectName;
 	
 	$('#classroomSessionFilter #meetingSubject').val(meetingSubject);
-	getTeacherList('classroomSessionFilter');
+	// getTeacherList('classroomSessionFilter');
 }
 
 function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,controllType, requestType){

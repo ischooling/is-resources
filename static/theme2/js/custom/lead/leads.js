@@ -1,4 +1,9 @@
 var watiTemplateContent;
+var emailTemplateContent;
+// var emailStatusInterval = null;
+// var pendingEmails = [];
+var successfulEmails = [];
+var failedOrOtherEmails = [];
 $(function () {
 	// $('[data-toggle="tooltip"]').tooltip()
 });
@@ -5956,6 +5961,7 @@ function gotoBackWatiModal(){
 function selfModalHide(modalID){
 	$("#"+modalID).modal("hide");
 	viewWatiTemplate(false);
+	viewEmailTemplate(false);
 }
 
 function callLeadDemoList(modeSearch, startDate, endDate) {
@@ -7145,12 +7151,21 @@ function updateWatiLogsLink(leadId){  //wati_logs_link_${leads.leadModifyDTO.lea
 }
 
 function closeModalAndFlushData(){
-	//console.log("closeModalAndFlushData method :: clicked ");
+	// if (emailStatusInterval) {
+	// 	clearInterval(emailStatusInterval);
+	// 	emailStatusInterval = null;
+	// }
+	// pendingEmails = [];
+	// successfulEmails = [];
+	// failedOrOtherEmails = [];
 	$("input#allchecked").prop('checked',false);
+	$("input#allCheckedEmail").prop('checked',false);
 	$('input[name="chk-users-lead"]').prop('checked',false);
+	$('input[name="chk-users-lead-email"]').prop('checked',false);
 	$(".stmsg").html('');
 	$("#successFailedWatiMessagesModalClose").modal("hide");
 	$('#allchecked').prop('checked',false);
+	$('#allCheckedEmail').prop('checked',false);
 	//added to flush all checked box
 	$("input#selectLeadAll").prop('checked',false);
 	$('input[name="lead-move-another"]').prop('checked',false);
@@ -9909,4 +9924,550 @@ function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, ne
 	 });
 }
 
+function getEmailTemplates() {	
+	var moveleadNo = $("#leadNoMove").val();
+	if(moveleadNo==''){
+		showMessageTheme2(0, 'Please check any one lead','',false);
+		return false;
+	}
 
+	var leads=$("#leadNoMove").val();
+	var selected = new Array();
+	$('input[name="lead-move-another"]').each(function() {
+		selected.push($(this).val());
+   	});
+	leads=leads.substring(1,leads.length);
+
+	var request={}
+	request['userId']=USER_ID;
+	request['leadIds']=leads;
+
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLFor('leads','get-broadcast-lead-mail-template'),
+		data : JSON.stringify(request),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			if (data['statusCode'] == '0' || data['statusCode'] == '2' || data['statusCode'] == 'E001' || data['statusCode'] == 'E002') {
+				showMessageTheme2(0, data['message'],'',false);
+			} else {
+				emailTemplateContent=data;
+				$.each(emailTemplateContent.emailTemplate, function(index, obj) {
+					if(obj.customParams != null && obj.customParams != ''){
+						$.each(obj.customParams, function(i, param) {
+							var placeholder = "{{" + param.paramName + "}}";
+							var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							if (obj.bodyOriginal.includes("*{{"+param.paramName+"}}*")) {
+								var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							} else {
+								var regex = placeholder;
+							}
+							obj.body = obj.body.replace(regex, param.paramValue);
+							obj.bodyOriginal = obj.bodyOriginal.replace(regex, "<b>"+param.paramValue+"</b>");
+						});
+					}
+				});
+				
+				var allEmailTemplatesListPopup = $("#allEmailTemplatesList");
+				allEmailTemplatesListPopup.html('');
+				$("#allEmailTemplatesList").html(customEmailTemplatesList(data.responseBody));
+				var isDataTable = $.fn.dataTable.isDataTable("#emailBroadcastTable");
+				if(isDataTable){
+					$("#emailBroadcastTable").dataTable().fnDestroy();
+				}
+				$("#emailBroadcastTable").DataTable({
+					theme:"bootstrap4",
+				});
+				$('#customEmailTemplatesList').modal('show');
+				
+				var userListPopup = $("#userPopDataEmail");
+				userListPopup.html(emailBroadcastSendModal(data));
+
+				$("#emailBroadcastSendModal").modal("hide");
+				return false;
+			}
+			return false;
+		},
+		error : function(e) {
+			return false;
+		}
+	});
+}
+
+function viewEmailTemplate(flag, indexNumber, templateName){
+	if(flag){
+		$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
+		$(".email-wrapper").addClass("active-email-template");
+		$(".email-template").removeClass("hide-email-template");
+		$(".email-template").addClass("show-email-template");
+		$("#previewEmailTemplate").html('');
+		$("#previewEmailTemplateSecond").html('');
+		$("#previewEmailTemplateThird").html('');
+		setTimeout(function(){
+			$("#previewEmailTemplate").html(getViewTemplateEmail(emailTemplateContent.responseBody.templates[indexNumber]));
+			$("#previewEmailTemplateSecond").html(getViewTemplateEmail(emailTemplateContent.responseBody.templates[indexNumber]));
+			$("#previewEmailTemplateThird").html(getViewTemplateEmail(emailTemplateContent.responseBody.templates[indexNumber]));
+		},200)
+	}else{
+		$(".email-wrapper").removeClass("active-email-template");
+		$(".email-template").addClass("hide-email-template");
+		$(".email-template").removeClass("show-email-template");
+	}
+}
+
+function gotoBackEmailModal(){
+	// if (emailStatusInterval) {
+	// 	clearInterval(emailStatusInterval);
+	// 	emailStatusInterval = null;
+	// }
+	$('#allCheckedEmail').prop('checked',false);
+	$('input[name="chk-users-lead-email"]').prop('checked',false);
+	$('#allCheckedFailedEmail').prop('checked',false);
+	$('input[name="chk-users-lead-email-resend"]').prop('checked',false);
+	$("#emailBroadcastSendModal").modal("hide");
+	$("#customEmailTemplatesList").modal("show");
+	viewEmailTemplate(false);
+}
+
+function sendEmailNotification(templateName, subject, index, templateId){
+	var request={};
+	$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
+	$('#templateNameEmail').html('<b>' + templateName + '</b> ');
+	boolval =true;
+	$('#viewMethodCallingEmail').html('<a href="javascript:void(0)" class="btn btn-primary btn-sm rounded-circle" onclick="viewEmailTemplate('+boolval+','+index+', `'+templateName+'`);" > <i class="fa fa-eye text-white"></i> </a>');
+	$('#confirm_btn_data_email').html('<a id="confirm_btn_email" class="btn btn-primary mr-2" href="javascript:void(0);" >SEND</a>');
+	$('#selectionCountEmail').html('<span>Selected- </span><span id="selectedCountEmail">0</span> / <span id="totalCountEmail">0</span>');
+	$("#emailBroadcastSendModal").modal("show");
+	$("#customEmailTemplatesList").modal("hide");
+
+	var totalCheckboxes = $(".checkToSendEmail").length;
+    $("#totalCountEmail").text(totalCheckboxes);
+	
+	$("#confirm_btn_email").click(function () {
+		var sleads ='';
+		var leadNo='';
+		var selectedEmails = [];
+		$.each($("input[name='chk-users-lead-email']:checked"), function(){
+			let leadId = $(this).val();
+			let email = $(this).data("email");
+			leadNo = leadNo+','+$(this).val();
+			if (email) selectedEmails.push(email);
+		});
+		
+		sleads = sleads + leadNo;
+		var selectedLeads = sleads.substring(1,sleads.length); 
+		if(selectedLeads==''){ 
+			$('#remarksresetDelete2').modal('hide');
+			showMessageTheme2(0, 'Please check any one user to send message','',false);
+			return false;
+		}else{
+			const selectedUsers = emailTemplateContent.users.filter(user => selectedEmails.includes(user.email));
+			$("input[name='chk-users-lead-email']:checked").each(function () {
+				let email = $(this).data("email");
+				let leadId = $(this).val();
+				let name = $(this).data("name") || '';
+				let grade = $(this).data("grade") || '';
+				let leadVerifiedStatus = $(this).data("leadverifiedstatus") || '';
+				let mobileNo = $(this).data("mobile") || '';
+				let phoneNumber = $(this).data("phone") || '';
+				let isdCode = $(this).data("isdcode") || '';
+
+				if (email && !emailTemplateContent.users.find(u => u.email === email)) {
+					selectedUsers.push({
+						email: email,
+						leadId: leadId,
+						name: name,
+						grade: grade,
+						leadVerifiedStatus: leadVerifiedStatus,
+						mobileNo: mobileNo,
+						phoneNumber: phoneNumber,
+						isdCode: isdCode,
+					});
+				}
+			});
+			emailTemplateContent.users = selectedUsers;
+			showWarningMessageShow('Are you sure you want to send this data?','sendEmailNotificationToUser( '+index+',\''+templateName+'\',\''+subject+'\',\''+selectedLeads+'\',\'send\',\''+templateId+'\')', 'info-modal-sm');
+		}
+	});
+
+	$(".checkToSendEmail").click(function(){
+		updateSelectionCountEmail();
+		var arrChkBox = [];
+		if($(".checkToSendEmail:checked").length>0){
+			if($(".checkToSendEmail:checked").length == $(".checkToSendEmail").length){
+				$("#allCheckedEmail").prop("checked",true);
+			}else{
+				$("#allCheckedEmail").prop("checked",false);
+			}
+		}else{
+			$("#allCheckedEmail").prop("checked",false);
+		}
+	});
+	$("#allCheckedEmail").click(function(){
+		if($(this).prop("checked")){
+			$(".checkToSendEmail").prop("checked",true);
+		}else{
+			$(".checkToSendEmail").prop("checked",false);
+		}
+		updateSelectionCountEmail();
+	});
+
+	function updateSelectionCountEmail(){
+        var selectedCount = $(".checkToSendEmail:checked").length;
+        $("#selectedCountEmail").text(selectedCount);
+    }
+}
+
+function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_status,templateId) {	
+	$("#resetDeleteErrorWarningNo1").click(function(){
+		$("#remarksresetDelete2").hide();
+	});
+	$("#resetDeleteErrorWarningYes1").click(function(){
+		$("input#allCheckedEmail").prop('checked', false);
+		$("input#allCheckedFailedEmail").prop('checked', false);
+		$("input#selectLeadAll").prop('checked', false); 
+		$('input[name="chk-users-lead-email"]').prop('checked', false);
+		$('input[name="lead-move-another"]').prop('checked', false);
+	});
+	$("#resetDeleteErrorWarningYes2").click(function(){
+		$("input#allCheckedEmail").prop('checked', false);
+		$("input#allCheckedFailedEmail").prop('checked', false);
+		$("input#selectLeadAll").prop('checked', false); 
+		$('input[name="chk-users-lead-email"]').prop('checked', false);
+		$('input[name="lead-move-another"]').prop('checked', false);
+	});
+	$("#customEmailTemplatesList").click(function(){
+		$("#selectLeadAll").prop("checked", false);
+	});
+
+	$('#templateNameEmail').html('<b>' + templateName + '</b> '); 
+	var selectedLeadIds = leadID.split(',');
+	var filteredEmailContent = JSON.parse(JSON.stringify(emailTemplateContent));
+	filteredEmailContent.users = filteredEmailContent.users.filter(function(user) {
+		return selectedLeadIds.includes(user.leadId);
+	});
+
+	var request={}
+	request['userId']=USER_ID;
+	request['templateId']=templateId;
+	request['sendBestTime']= $("input[name='mailBroadcastTime']:checked").val() == "now"? false: true;
+	request['recipientsUserDetails'] = filteredEmailContent.users.map(user => ({
+		email: user.email,
+		grade: user.grade,
+		fullName: user.name,
+		firstName: user.name.split(' ')[0]
+	}));
+	request['templateSubject']=subject;
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLFor('leads','send-broadcast-lead-mail'),
+		data : JSON.stringify(request),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			if (data['statusCode'] == 'EX01' || data['statusCode'] == 'E004' ) {
+				showMessageTheme2(0, data['message'],'',false);
+				$("input#allCheckedEmail").prop('checked', false);
+				$('input[name="chk-users-lead-email"]').prop('checked', false);
+				return false;
+			} else {
+				// if (d_status === 'resend') {
+				// 	let selectedEmails = [];
+				// 	$(".checkToSendEmailFailed:checked").each(function () {
+				// 		let email = $(this).data("email");
+				// 		if (email) selectedEmails.push(email);
+				// 	});
+				
+				// 	pendingEmails = emailTemplateContent.users
+				// 		.filter(user => selectedEmails.includes(user.email))
+				// 		.map(user => user.email);
+					
+				// 	pendingEmails = [...new Set(pendingEmails)];
+				// 	emailTemplateContent.users = emailTemplateContent.users.filter(user => selectedEmails.includes(user.email));
+				// } else {
+				// 	pendingEmails = emailTemplateContent.users.map(user => user.email);
+				// }
+				$("#emailBroadcastSendModal").modal("hide");
+				$("#customEmailTemplatesList").modal("hide");
+				$("input#allCheckedFailedEmail").prop('checked', false);
+				$("input#selectLeadAll").prop('checked', false); 
+				$('input[name="chk-users-lead-email"]').prop('checked', false);
+				$('input[name="lead-move-another"]').prop('checked', false);
+				$('#allCheckedFailedEmail').prop('checked', false);
+				$('input[name="chk-users-lead-email-resend"]').prop('checked', false);
+				$("#successFailedEmailMessagesModal").remove();
+				$("body #usrPopDataOnResendEmail").append(`<div id="successFailedEmailMessagesModal" class="modal fade fade-scale" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" data-backdrop="static" aria-hidden="true"></div>`);
+				$("#successFailedEmailMessagesModal").html(successFailedEmailMessagesModal(emailTemplateContent));
+				successfulEmails = emailTemplateContent.users
+				failedOrOtherEmails = [];
+				$("#successfulEmailsCount").text(emailTemplateContent.users.length);
+				$("#failedEmailsCount").text(0);
+				$("#successEmailTableDiv").html(successEmailTableContent());
+				$("#failedEmailTableDiv").html(failedEmailTableContent());
+				$('#selectionCountOnFailedEmail').html('<span>Selected- </span><span id="selectedCountEmailFailed">0</span> / <span id="totalCountEmailFailed">0</span>');
+				var totalCheckboxes = $(".checkToSendEmailFailed").length;
+				$("#totalCountEmailFailed").text(totalCheckboxes);
+
+				$(".checkToSendEmailFailed").click(function(){
+					updateSelectionCountEmailSF();
+					var arrChkBox = [];
+					if($(".checkToSendEmailFailed:checked").length>0){
+						if($(".checkToSendEmailFailed:checked").length == $(".checkToSendEmailFailed").length){
+							$("#allCheckedFailedEmail").prop("checked",true);
+						}else{
+							$("#allCheckedFailedEmail").prop("checked",false);
+						}
+					}else{
+						$("#allCheckedFailedEmail").prop("checked",false);
+					}
+				});
+				$("#allCheckedFailedEmail").click(function(){
+					if($(this).prop("checked")){
+						$(".checkToSendEmailFailed").prop("checked",true);
+					}else{
+						$(".checkToSendEmailFailed").prop("checked",false);
+					}
+					updateSelectionCountEmailSF();
+				});
+			
+				function updateSelectionCountEmailSF(){
+					var selectedCountEmailFailed = $(".checkToSendEmailFailed:checked").length;
+					$("#selectedCountEmailFailed").text(selectedCountEmailFailed);
+				}
+				openSuccessFailedEmailMessages(indexNo, templateName, subject, templateId);
+				setTimeout(() => {
+					$("#successFailedEmailMessagesModal").modal("show");
+				}, 1000);
+				// emailStatusInterval = setInterval(function() {
+				// 	getStatusOfSentEmails(data.actionId);
+				// }, 10000);
+			}
+		},
+		error : function(e) {
+			return false;
+		}
+	});
+}
+
+function openSuccessFailedEmailMessages(indexSF,templateName, subject, templateId) {
+	if($("#successFailedEmailStyle").length < 1){
+		$("head").append(`
+			<style id="successFailedEmailStyle">
+				#successEmailTable, #failedEmailTable {
+					border-collapse: collapse;
+					border-radius: 10px;
+				}
+				#successEmailTable td, th , #failedEmailTable td, th {
+					border: 1px solid #f7f7f7;
+				}
+				#successEmailTable tr:nth-child(odd), #failedEmailTable tr:nth-child(odd) {
+					background-color: #F7F7F7;
+				}
+			</style>
+		`)
+	}
+	$("#successEmailTableDiv").slideDown();
+	$("#failedEmailTableDiv").slideUp();
+	$("#successEmailTable").dataTable();
+	var table = $('#failedEmailTable').DataTable();
+	if (table) {
+        table.destroy();
+    }
+	var count=table.rows().count()
+	$("#failedEmailTable").dataTable({
+		lengthMenu: [[count], [count]],
+		lengthChange: false,
+		paging: false,
+		info: false
+    });
+
+	$("#successEmailDiv").css("cursor", "pointer");
+	$("#failedEmailDiv").css("cursor", "default");
+
+	$("#chevron_failed_email").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	$("#chevron_success_email").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+
+	$("#successEmailDiv").click(function() {
+		$("#successEmailTableDiv").slideDown(500);
+		$("#failedEmailTableDiv").slideUp(500);
+		$("#failedEmailDiv").css("cursor", "pointer");
+		$("#successEmailDiv").css("cursor", "default");
+
+		$("#chevron_success_email").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_failed_email").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	});
+
+	$("#failedEmailDiv").click(function() {
+		$("#failedEmailTableDiv").slideDown(500);
+		$("#successEmailTableDiv").slideUp(500);
+		$("#successEmailDiv").css("cursor", "pointer");
+		$("#failedEmailDiv").css("cursor", "default");
+
+		$("#chevron_failed_email").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_success_email").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	});
+
+	$('#resendEmailMessagesData').html('<a id="resend_btn_email" class="btn btn-primary px-3 py-2 mr-2 mt-3 float-right" href="javascript:void(0);">Resend</a>');
+	$('#selectionCountOnFailedEmail').html('<span>Selected- </span><span id="selectedCountEmailFailed">0</span> / <span id="totalCountEmailFailed">0</span>');
+	$('#templateNameEmailSF').html();
+	$('#templateNameEmailSF').html('<b>' + templateName + '</b> ');
+	boolvalSF =true;
+	$('#viewMethodCallingEmailSF').html();
+    $('#viewMethodCallingEmailSF').html('<a href="javascript:void(0)" class="btn btn-primary btn-sm rounded-circle" onclick="viewEmailTemplate('+boolvalSF+','+indexSF+', `'+templateName+'`);" > <i class="fa fa-eye text-white"></i> </a>');
+	$("#resend_btn_email").click(function () {
+		var sleads ='';
+		var leadNo='';
+		$.each($("input[name='chk-users-lead-email-resend']:checked"), function(){
+			leadNo = leadNo+','+$(this).val();
+		});
+		
+		sleads = sleads + leadNo;
+		var selectedLeads = sleads.substring(1,sleads.length); 
+		if(selectedLeads==''){
+			$('#remarksresetDelete2').modal('hide');
+			showMessageTheme2(0, 'Please check any one user to send message','',false);
+			return false;
+		}else{
+			showWarningMessageShow('Are you sure you want to resend the message?','sendEmailNotificationToUser( '+indexSF+',\''+templateName+'\',\''+subject+'\',\''+selectedLeads+'\',\'resend\',\''+templateId+'\')', 'info-modal-sm');
+		}
+	});
+
+	var totalCheckboxes = $(".checkToSendEmailFailed").length;
+    $("#totalCountEmailFailed").text(totalCheckboxes);
+
+	$(".checkToSendEmailFailed").click(function(){
+		updateSelectionCountEmailSF();
+		var arrChkBox = [];
+		if($(".checkToSendEmailFailed:checked").length>0){
+			if($(".checkToSendEmailFailed:checked").length == $(".checkToSendEmailFailed").length){
+				$("#allCheckedFailedEmail").prop("checked",true);
+			}else{
+				$("#allCheckedFailedEmail").prop("checked",false);
+			}
+		}else{
+			$("#allCheckedFailedEmail").prop("checked",false);
+		}
+	});
+	$("#allCheckedFailedEmail").click(function(){
+		if($(this).prop("checked")){
+			$(".checkToSendEmailFailed").prop("checked",true);
+		}else{
+			$(".checkToSendEmailFailed").prop("checked",false);
+		}
+		updateSelectionCountEmailSF();
+	});
+
+	function updateSelectionCountEmailSF(){
+        var selectedCountEmailFailed = $(".checkToSendEmailFailed:checked").length;
+        $("#selectedCountEmailFailed").text(selectedCountEmailFailed);
+    }
+}
+
+function updateEmailLogsLink(leadId){ 
+	$("#email_logs_link_"+leadId).show();
+}
+
+function getViewTemplateEmail(data){
+	const iframeId = "templatePreviewFrame_" + Date.now();
+	var html=
+		`<div class="main-card card mx-auto" style="height: 400px;">
+			<iframe id="${iframeId}" style="width:100%; height:100%; border:none;"></iframe>
+		</div>`
+
+		setTimeout(() => {
+			const iframe = document.getElementById(iframeId);
+			if (iframe && iframe.contentWindow) {
+				const doc = iframe.contentWindow.document;
+				doc.open();
+				doc.write(data.htmlContent);
+				doc.close();
+			}
+		}, 0);
+	
+    return html;
+}
+
+function getStatusOfSentEmails(actionId) {
+	if (pendingEmails.length === 0) return;
+	var body = {
+		emails: pendingEmails.join(','),
+		actionId: actionId
+	}
+	$.ajax({
+		type: "POST",
+		contentType : "application/json",
+		url: getURLFor('leads', 'get-broadcast-lead-mail-status'),
+		data: JSON.stringify(body),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		  success: function (response) {
+			successfulEmails = [];
+			failedOrOtherEmails = [];
+			if (Array.isArray(response.emailAndStatus)) {
+				const responseEmails = response.emailAndStatus.map(item => item.email);
+
+				pendingEmails = pendingEmails.filter(email => !responseEmails.includes(email));
+
+				response.emailAndStatus.forEach(item => {
+					const user = emailTemplateContent.users.find(u => u.email === item.email);
+					if (user) {
+						if (item.status.toLowerCase() === "success") {
+							successfulEmails.push(user);
+						} else {
+							failedOrOtherEmails.push(user);
+						}
+					}
+				});
+
+				if (pendingEmails.length === 0) {
+					clearInterval(emailStatusInterval);
+					emailStatusInterval = null;
+					$("#successfulEmailsCount").text(emailTemplateContent.users.length);
+					// $("#failedEmailsCount").text(failedOrOtherEmails.length);
+					$("#failedEmailsCount").text(0);
+					$("#successEmailTableDiv").html(successEmailTableContent());
+					$("#failedEmailTableDiv").html(failedEmailTableContent());
+					$('#selectionCountOnFailedEmail').html('<span>Selected- </span><span id="selectedCountEmailFailed">0</span> / <span id="totalCountEmailFailed">0</span>');
+					var totalCheckboxes = $(".checkToSendEmailFailed").length;
+    				$("#totalCountEmailFailed").text(totalCheckboxes);
+
+					$(".checkToSendEmailFailed").click(function(){
+						updateSelectionCountEmailSF();
+						var arrChkBox = [];
+						if($(".checkToSendEmailFailed:checked").length>0){
+							if($(".checkToSendEmailFailed:checked").length == $(".checkToSendEmailFailed").length){
+								$("#allCheckedFailedEmail").prop("checked",true);
+							}else{
+								$("#allCheckedFailedEmail").prop("checked",false);
+							}
+						}else{
+							$("#allCheckedFailedEmail").prop("checked",false);
+						}
+					});
+					$("#allCheckedFailedEmail").click(function(){
+						if($(this).prop("checked")){
+							$(".checkToSendEmailFailed").prop("checked",true);
+						}else{
+							$(".checkToSendEmailFailed").prop("checked",false);
+						}
+						updateSelectionCountEmailSF();
+					});
+				
+					function updateSelectionCountEmailSF(){
+						var selectedCountEmailFailed = $(".checkToSendEmailFailed:checked").length;
+						$("#selectedCountEmailFailed").text(selectedCountEmailFailed);
+					}
+
+					$("#preSuccessFailedDiv").css("display", "none");
+					$("#finalSuccessFailedDiv").css("display", "flex");
+				}
+			}
+		}
+	});
+}

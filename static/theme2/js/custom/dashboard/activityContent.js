@@ -226,13 +226,8 @@ function activityPageStyle(){
             .pdf-down p a:hover{ background:#004ff;}
             .activity-wrapper{max-width: 450px;width:100%;padding:8px;margin: 0px auto;background:#fff;box-shadow: 0 0 2px 3px rgb(211 211 211 / 30%);}
             .activity-box{width: 100%;text-align: center;border-radius: 0px;padding:10px 12px;border: 4px solid #0081ff;display: flex;justify-content: center;flex-wrap: wrap;align-items: flex-start;position:relative;}
-            .activity-box:before{content:"";background:url('http://164.52.198.42:8070/istest/static/theme2/images/round-png-img.png');width:135px;height:112px;background-repeat:no-repeat;background-size:contain;position:absolute;left:0;top:-1px;}
-            .activity-box:after{content:"";background:url('http://164.52.198.42:8070/istest/static/theme2/images/round-png-img.png');width:135px;height:112px;background-repeat:no-repeat;background-size:contain;position:absolute;right:-1px;bottom:-1px;transform:rotate(180deg);-webkit-transform:rotate(180deg);-ms-transform:rotate(180deg);}
             .activity-title{font-size:14px;width:100%;}
             .activity-block{display:inline-block;border:2px solid #001272;padding:8px;}
-            .extracurricular-activities-bg{background:url('http://164.52.198.42:8070/istest/static/theme2/images/extracurricular-activities.jpg') center center;background-repeat:no-repeat;background-size:cover;}
-            .academic-activities-bg{background:url('http://164.52.198.42:8070/istest/static/theme2/images/academic-activities.jpg') center center;background-repeat:no-repeat;background-size:cover;}
-            .festival-activities-bg{background:url('http://164.52.198.42:8070/istest/static/theme2/images/festival-activites.jpg') center center;background-repeat:no-repeat;background-size:cover;}
         </style>`;
     return html;
 }

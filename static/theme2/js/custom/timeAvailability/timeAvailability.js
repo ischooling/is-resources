@@ -3159,7 +3159,7 @@ function getEventList(eventList, userId,prestartTime, preendTime, userRoleId, mi
 					if(events.activated=='Y' && events.slotActiveByUser=='Y'){
 						eActive="N";
 					}
-					html+='<div class="mx-1 widget-chart widget-chart2 text-left mb-2 '+((userRoleId==3)?'p-1':'px-2 pt-1 pb-2 card-top-border')+'  '+borderClass+' rounded w-100  '+((events.activated=='N' && events.slotActiveByUser=='N')?"envetn_overlay":"")+'" style="'+((userRoleId==3)?'min-width:135px;border-radius:0px !important; max-width:135px; border:2px solid '+lightbgObj[e]+'':'min-width:300px')+' ">'
+					html+='<div class="mx-1 widget-chart widget-chart2 text-left mb-2 '+((userRoleId==3)?'p-1':'px-2 pt-1 pb-2 card-top-border')+'  dynamic-'+borderClass+' rounded w-100  '+((events.activated=='N' && events.slotActiveByUser=='N')?"envetn_overlay":"")+'" style="'+((userRoleId==3)?'min-width:135px;border-radius:0px !important; max-width:135px; border:2px solid '+lightbgObj[e]+'':'min-width:300px')+' ">'
 							+'<div class="full position-absolute text-left bg-white pl-2 text-center" style="left:0pxright:0px;top:0;z-index:1">'
 									+'<b class="start-copy-msg-'+e+'"></b>'
 								// +'<a href="javascript:void(0)" class="cursor mr-2" style="color:#ccc"><i class="fa fa-edit"></i></a>'

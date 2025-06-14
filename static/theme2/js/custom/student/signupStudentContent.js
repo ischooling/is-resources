@@ -328,7 +328,7 @@ async function generateEnrollmentContent(courseProviderId,UNIQUEUUID, moduleName
 	+'</div>';
 	 if(SCHOOL_ID==1){
 		html+='<div id="commonloaderId" class="unique-loader loader-bg" style="display:none;">'
-			+'<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />'
+			+'<img src="'+PATH_FOLDER_IMAGE2+'loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />'
 		+'</div>';
 	 }else{
 		html+='<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
@@ -745,8 +745,8 @@ function getStudentDetailsContent(data){
 					+'<div class="form-holder valid-field">'
 						+'<i class="zmdi zmdi zmdi-book"></i>'
 						+'<select name="studyingGradeId" id="studyingGradeId" tabindex="'+(++tabindex)+'">'
-							+'<option value="">Student Current Grade*</option>'
-							+getStandardContentForFlexy(data.signupStudent.studyingGradeId)
+							+'<option value="0">Student Current Grade*</option>'
+							+getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)
 						+'</select>'
 					+'</div>'
 					+'<div class="form-holder valid-field">'
