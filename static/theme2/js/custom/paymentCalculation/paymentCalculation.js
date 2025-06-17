@@ -1010,7 +1010,7 @@ function saveAdvanceFeeDetails(status) {
 				dataType: 'json',
 				global: false,
 				success: function (data) {
-
+					customLoader(false);
 					if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 						if (data['status'] == '3') {
 							redirectLoginPage()
@@ -1037,6 +1037,7 @@ function saveAdvanceFeeDetails(status) {
 					}
 				},
 				error: function (e) {
+					customLoader(false);
 					if (checkonlineOfflineStatus()) {
 						return;
 					} else {
@@ -1048,7 +1049,6 @@ function saveAdvanceFeeDetails(status) {
 			showMessageTheme2(2, "1st Installment Fee amount can not be zero.");
 		}
 	}
-
 }
 
 function getRequestForSaveAdvanceFeeDetails(status) {

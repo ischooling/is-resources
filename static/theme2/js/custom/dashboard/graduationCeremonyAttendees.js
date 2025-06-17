@@ -26,7 +26,9 @@ function loadGraduationCeremonyAttendees(){
                     <td>${attendee.foodAllergy}</td>
                     <td>`;
                         if(paymentLink != "N/A"){
-                            tbodyHtml+=`<button class="btn btn-sm copy-link-btn rounded border-0" style="background-color:#027FFF;" data-link="${paymentLink}">Copy Payment Link</button>`;
+                            tbodyHtml+=`<input type="text" value="${paymentLink}" id="graduationPaymentLink${index}" class="position-absolute" style="top:0;left:0;opacity:0;"/>
+                            <button onclick="copyURL('graduationPaymentLink${index}','copy-msg-${index}');" class="btn btn-sm copy-link-btn rounded border-0" style="background-color:#027FFF;">Copy Payment Link</button>
+                            <b class="copy-msg-${index}"></b>`;
                         }else{
                             tbodyHtml+=`N/A`;
                         }
@@ -40,21 +42,6 @@ function loadGraduationCeremonyAttendees(){
                 $('#attendeesTable').DataTable().destroy();
             }
             $('#attendeesTable').DataTable();
-
-            $('.copy-link-btn').on('click', function () {
-                const link = $(this).data('link');
-                const $btn = $(this);
-            
-                navigator.clipboard.writeText(link).then(() => {
-                    $btn.text('Copied!')
-                        .css('background-color', '#28a745');
-            
-                    setTimeout(() => {
-                        $btn.text('Copy Payment Link')
-                            .css('background-color', '#027FFF');
-                    }, 1500);
-                });
-            });
         },
         error: function(err) {
             console.error("Failed to fetch attendee data", err);
@@ -62,3 +49,18 @@ function loadGraduationCeremonyAttendees(){
         }
     });
 }
+
+// function copyGraduationLink(src){
+//     const link = $(src).data('link');
+//     const $btn = $(src);
+
+//     navigator.clipboard.writeText(link).then(() => {
+//         $btn.text('Copied!')
+//             .css('background-color', '#28a745');
+
+//         setTimeout(() => {
+//             $btn.text('Copy Payment Link')
+//                 .css('background-color', '#027FFF');
+//         }, 1500);
+//     });
+// }

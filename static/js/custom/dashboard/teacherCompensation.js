@@ -1641,7 +1641,6 @@ function getStudentLmsGrade(userid,startdate,enddate, newTheme) {
 }
 
 function callZoomRecording(formId, meetingid, reportId, meetingtype) {
-    //console.log("callSchoolCalendar", userId);
 	var urlparam = '?meetingid='+meetingid+'&reportId='+reportId+'&meetingtype='+meetingtype
     $.ajax({
             type : "GET",

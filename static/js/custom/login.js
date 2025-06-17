@@ -638,21 +638,23 @@ function callForEmailForgot(formId, moduleId) {
 }
 
 $(document).on("show.bs.modal", ".modal", function (e) {
-  const modal = $(this);
-  const backdrops = $(".modal-backdrop");
-  const modals = $(".modal.in").not(this);
-  // Calculate new z-index
-  let baseZIndex = 1050;
-  let zIndex = baseZIndex + modals.length * 20; // Each stacked modal increases z-index
+	if(USER_ID == ''){
+		const modal = $(this);
+		const backdrops = $(".modal-backdrop");
+		const modals = $(".modal.in").not(this);
+		// Calculate new z-index
+		let baseZIndex = 1050;
+		let zIndex = baseZIndex + modals.length * 20; // Each stacked modal increases z-index
 
-  modal.css("z-index", zIndex);
+		modal.css("z-index", zIndex);
 
-  setTimeout(() => {
-    let backdrop = $(".modal-backdrop").last();
-    backdrop
-      .css("z-index", zIndex - 10) // Ensure backdrop is behind modal
-      .addClass("modal-stack");
-  }, 10);
+		setTimeout(() => {
+			let backdrop = $(".modal-backdrop").last();
+			backdrop
+			.css("z-index", zIndex - 10) // Ensure backdrop is behind modal
+			.addClass("modal-stack");
+		}, 10);
+	}
 });
 
 

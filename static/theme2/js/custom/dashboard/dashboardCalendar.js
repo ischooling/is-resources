@@ -345,19 +345,19 @@ function getFullCalendar(CALENDAR_EVENT_DATA) {
             day: 'Daily'
         },
 		forceEventDuration: true,
-        themeSystem: "bootstrap4",
-        bootstrapFontAwesome: true,
-        defaultView: initialView,
-        defaultDate: todayDate(),
-        timeFormat: 'h(:mm)a',
-        navLinks: true,
-        editable: false,
-        allDayDefault: false,
-        eventLimit: true,
-        eventStartEditable: false,
-        minTime: '00:00:00',
-        maxTime: '24:00:00',
-        slotDuration: '00:30:00',
+		themeSystem: "bootstrap4",
+		bootstrapFontAwesome: true,
+		defaultView: initialView,
+		defaultDate: todayDate(),
+		timeFormat: 'h(:mm)a',
+		navLinks: true,
+		editable: false,
+		allDayDefault: false,
+		eventLimit: true,
+		eventStartEditable: false,
+		minTime: '00:00:00',
+		maxTime: '24:00:00',
+		slotDuration: '00:30:00',
 		events:CALENDAR_EVENT_DATA,
 		eventClick: function(info) {
             if (info.url) {
@@ -675,26 +675,28 @@ function scrollEvent(){
 
 function calendarEventBind(){
 	$(document).on('click', '.fc-day-header, .fc-next-button, .fc-prev-button, .fc-agendaDay-button, .fc-agendaWeek-button', function () {
-		var viewName = $('#schoolcalendar').fullCalendar('getView').name;
-        var b = $('#schoolcalendar').fullCalendar('getDate');
-        var startdate = b.format('YYYY-MM-DD');
-        var enddate = b.format('YYYY-MM-DD');
-		if(viewName === 'agendaDay' || viewName == "listDay") {
-
-		} else if(viewName === 'agendaWeek' || viewName === 'listWeek') {
-			const today = new Date(startdate);
-			const dates = startAndEndOfWeek(today);
-			startdate = dates[0];
-			enddate = dates[1];
-		} 
-		// else if (viewName === 'month') {
-		// 	const today = new Date(startdate);
-		// 	const dates = startAndEndOfMonth(today);
-		// 	startdate = dates[0];
-		// 	enddate = dates[1];
-		// }
-		callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, true)
-	});
-
+		if(getSession()){
+			var viewName = $('#schoolcalendar').fullCalendar('getView').name;
+			var b = $('#schoolcalendar').fullCalendar('getDate');
+			var startdate = b.format('YYYY-MM-DD');
+			var enddate = b.format('YYYY-MM-DD');
+			if(viewName === 'agendaDay' || viewName == "listDay") {
 	
+			} else if(viewName === 'agendaWeek' || viewName === 'listWeek') {
+				const today = new Date(startdate);
+				const dates = startAndEndOfWeek(today);
+				startdate = dates[0];
+				enddate = dates[1];
+			} 
+			// else if (viewName === 'month') {
+			// 	const today = new Date(startdate);
+			// 	const dates = startAndEndOfMonth(today);
+			// 	startdate = dates[0];
+			// 	enddate = dates[1];
+			// }
+			callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, true)
+		}else{
+			redirectLoginPage();
+		}
+	});
 }

@@ -540,7 +540,7 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 					$('#studentId').val('');
 					meetingDataByType('STUDENT_DOUBT_SESSION');
 					$("#recurringClassShowModel").modal('hide');
-					$('#'+formId+" #meetingType").val(meetingType).trigger("change");
+					//$('#'+formId+" #meetingType").val(meetingType).trigger("change");
 					if(meetingType=="CUSTOM"){
 						$("#meetingLinkInput").val(data.extra);
 						if(!$("#copyMeetingLinkModal").hasClass("show")){

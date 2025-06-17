@@ -284,6 +284,8 @@ function registerExternalClass(checkValidation,type,userId,entityId,entityType,s
             if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
                 if (data['status'] == '3') {
                     redirectLoginPage();
+                }else{
+                    showMessageTheme2(0, data['message']);
                 }
             } else {
                 $('#server-message').html(data['message']);

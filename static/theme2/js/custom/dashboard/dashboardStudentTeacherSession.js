@@ -968,7 +968,7 @@ function courseProviderList(formId, elementId) {
 						// 	dropdown.append('<option value="' + v.key + '">' + v.value + ' </option>');
 						// 	//dropdown.prop("disabled",true)
 						// }
-						if (v.key == 36 || v.key == 37 || v.key == 38|| v.key==39|| v.key==40) {
+						if (v.key == 36 || v.key == 37 || v.key == 38|| v.key==39|| v.key==40 || v.key==41) {
 							if(v.key == 37){
 								dropdown.append('<option value="' + v.key + '" selected>' + v.value + ' </option>');
 							}else{
@@ -977,7 +977,7 @@ function courseProviderList(formId, elementId) {
 							//dropdown.prop("disabled",true)
 						}
 					} else {
-						if (v.key == 36 || v.key == 37 || v.key == 38|| v.key==39|| v.key==40) {
+						if (v.key == 36 || v.key == 37 || v.key == 38|| v.key==39|| v.key==40 || v.key==41) {
 							dropdown.append('<option value="' + v.key + '">' + v.value + ' </option>');
 							//dropdown.prop("disabled",true)
 						}
