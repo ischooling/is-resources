@@ -195,7 +195,8 @@ function getAllCourseDetails(isGradeChange, courseId) {
 	if (standardId == '' || standardId == 0) {
 		$('#courseSubjectDetails').html('')
 	}
-	$("#addAndRemoveLoader").css({ "display": "block" });
+	
+	//$("#addAndRemoveLoader").css({ "display": "block" });
 	$.ajax({
 		type: "POST",
 		contentType: "application/json",

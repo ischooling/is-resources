@@ -444,7 +444,6 @@ function updateCalendarView() {
 
 var updateEventIconsStyle = true;
 function updateEventIcons(info, element, todayClassArray, viewName) {
-	debugger
 	if(updateEventIconsStyle){
 		$("head").append('<style>.tooltip-inner{max-width:500px;width:fit-content}.fc-scroller.fc-time-grid-container[style]{height:425px !important}</style>');
 		updateEventIconsStyle=false;
