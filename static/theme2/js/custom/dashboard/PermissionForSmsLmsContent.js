@@ -52,7 +52,7 @@ async function topHeaderContent(data){
                         html+=`</div>
                         <div style="align-items: center;display: flex; margin-left: auto;padding-right:20px;">
                             <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill btn-shadow btn-shine btn btn-primary">
-                                Logout
+                                Log out
                             </a>
                         </div>
                     </div>

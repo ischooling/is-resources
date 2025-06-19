@@ -355,10 +355,14 @@ function getCounselorPartnerChartContent(commissionRate){
 function getCounselorEnrollmentLinksContent(data){
 	var html=
 		`<div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mb-2">
-			<h5 class="font-weight-semi-bold text-dark">Your Enrollment Links</h5>
+			<h5 class="font-weight-semi-bold text-dark mt-3">Enrollments & Seats Reservation Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">
-					<div class="d-flex flex-wrap">`;
+					<div class="d-flex mb-3 rounded-pill bg-light border overflow-hidden" style="width: fit-content; position: relative; z-index: 10;">
+						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-white bg-primary border-0" id="enrollmentTabBtn" onclick="toggleLinkTab('enrollment')">Your Enrollment Links</button>
+						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-dark bg-transparent border-0" id="seatTabBtn" onclick="toggleLinkTab('seat')">Seat Reservation Links</button>
+					</div>
+					<div id="enrollmentLinksSection" class="d-flex flex-wrap" style="gap:5px;">`;
 						$.each(data.schoolServiceLinks.learningProgramLinks, function(k,learningProgram){
 							html+=
 							`<div>
@@ -366,6 +370,24 @@ function getCounselorEnrollmentLinksContent(data){
 								<b class="${learningProgram.learningProgramCode}_class_${k} mx-1"></b>
 								<div style="top:18px;left:0;position:absolute;">
 									<input type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
+								</div>
+							</div>`;
+						});
+					html+=`</div>
+					<div id="seatLinksSection" class="d-none flex-wrap" style="gap:5px;">`;
+						$.each(data.schoolServiceLinks.learningProgramRasLinks, function(k,learningProgram){
+							const excludedLabels = [
+								"Flexy Program",
+								"English Learning Program - One to One",
+								"English Learning Program - Self Study"
+							];
+							if (excludedLabels.includes(learningProgram.label)) return;
+							html+=
+							`<div>
+								<a href="javascript:void(0)" class="bg-seat-light-primary text-seat-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k+"_seat"}','${learningProgram.learningProgramCode}_class_${k+"_seat"}')">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
+								<b class="${learningProgram.learningProgramCode}_class_${k+"_seat"} mx-1"></b>
+								<div style="top:18px;left:0;position:absolute;">
+									<input type="text" id="${learningProgram.learningProgramCode}_id_${k+"_seat"}" value="${learningProgram.link}" style="opacity:0;height:0px">
 								</div>
 							</div>`;
 						});

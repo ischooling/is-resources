@@ -32,14 +32,14 @@ function getReserveSeatSlideContent(data){
 				+'<div class="reserve-seat-content-wrapper position-relative p-3">';
 					if(details.eligibleFor=='ADV'){
 						if(details.monthName != null && details.monthName != undefined && details.monthName != ''){
-							html+='<h6 style="font-size:14px"><b>ENROLL FOR '+details.activeSessionYear+' GROUP LEARNING!</b></h6>'
+							html+='<h6 style="font-size:14px"><b>Enroll for '+details.activeSessionYear+' Group Learning!</b></h6>'
 							+'<P>Click on "Enroll Now" to enroll for the '+details.activeSessionYear+' Group Learning!</P>';
 						}else{
-							html+='<h6 style="font-size:14px"><b>ENROLL FOR THE NEXT GRADE!</b></h6>'
+							html+='<h6 style="font-size:14px"><b>Enroll for the next grade!</b></h6>'
 							+'<P>Click on "Enroll Now" to enroll for the next grade!</P>';
 						}
 					}else if(details.eligibleFor=='BAE'){
-						html+='<h6 style="font-size:14px">RESERVE A SEAT FOR NEXT GRADE</h6>'
+						html+='<h6 style="font-size:14px">Reserve a seat for next grade</h6>'
 						+'<P>Kindly Click on "Reserve" to reserve a seat for the next grade.</P>';
 					}
 					html+=

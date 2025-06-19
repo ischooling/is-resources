@@ -11,7 +11,7 @@ function getAnnouncementContent(data, userId, index){
 function dashboardAnnouncementHeader(data, userId, index){
     var html=
         `<div class="card-header theme-bg text-white justify-content-between card-header-primary d-flex">
-            <h6 id="announcementHeaderContent" class="pull-left m-0 font-size-md">`;
+            <h6 id="announcementHeaderContent" class="pull-left m-0 font-size-md text-capitalize">`;
                 if(data.newAnnouncementCount!=null && data.newAnnouncementCount>0){
                     //html+=data.newAnnouncementCount+' New Announcement(s)';
                     html+=`<span id="newAnnouncementCount">${data.newAnnouncementCount}</span> New Announcement(s)`

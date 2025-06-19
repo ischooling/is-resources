@@ -74,7 +74,7 @@ function generateTeacherEnrollmentContent(moduleName){
         `<div class="wrapper-style">
             <a class="tab-and-mobile-logout-btn primary-bg white-txt-color" style="background: #027FFF;" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
                 <i class="zmdi zmdi-power"></i>
-                Logout
+                Log out
             </a>`;
             if(DEPLOYMENT_MODE=='PROD'){
                 html+=
@@ -106,7 +106,7 @@ function generateTeacherEnrollmentContent(moduleName){
             ${/*<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>*/''}`;
             // html+=`<div class="fixed-button">
             //     <a class="primary-bg white-txt-color" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
-            //         Logout
+            //         Log out
             //     </a>
             //     <a class="primary-bg white-txt-color" href="${schoolSettingsLinks.schoolWebsite}/contact-us/" target="_blank">Contact US</a>
             // </div>`;
@@ -231,7 +231,7 @@ function inReviewForTeacherDetailsModalContent(){
                         </div>
                     </div>
                     <div class="modal-footer" style="padding:0 15px">
-                        <button type="button" class="btn k8-theme-btn primary-bg white-txt-color" onclick="logout();">Logout</button>
+                        <button type="button" class="btn k8-theme-btn primary-bg white-txt-color" onclick="logout();">Log out</button>
                     </div>
                 </div>
             </div>

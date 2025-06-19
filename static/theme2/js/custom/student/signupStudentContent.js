@@ -209,7 +209,7 @@ async function generateEnrollmentContent(courseProviderId,UNIQUEUUID, moduleName
 	var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	var html=
 	'<div class="wrapper-style">'
-		+'<a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()"><i class="zmdi zmdi-power"></i> Logout</a>'
+		+'<a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()"><i class="zmdi zmdi-power"></i> Log out</a>'
 		+'<section class="full">'
 			+'<div class="full mb-2">'
 				+'<div class="logo">'
@@ -231,7 +231,7 @@ async function generateEnrollmentContent(courseProviderId,UNIQUEUUID, moduleName
 		+'</section>'
 		+'<input type="hidden" id="courseProviderId" value="'+courseProviderId+'" />'
 		+'<div class="fixed-button one-btn">'
-			+'<a class="primary-bg white-txt-color" href="'+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'" class="tab-and-mobile-logout-btn primary-bg"><i class="zmdi zmdi-power"></i> Logout</i></a>'
+			+'<a class="primary-bg white-txt-color" href="'+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'" class="tab-and-mobile-logout-btn primary-bg"><i class="zmdi zmdi-power"></i> Log out</i></a>'
 		+'</div>';
 		if(MAINTENANCEDOWNTIME !=''){
 			html+='<div class="full">'
@@ -3669,7 +3669,7 @@ function logoutModalLogout(data){
 							+'</h4>'
 							+'<br/>'
 							+'<p class="text-center">'
-								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Logout</button>'
+								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
 							+'</p>'
 						+'</div>'
 					+'</div>'
@@ -3707,7 +3707,7 @@ function logoutModalLogout(data){
 // 							+'If you would like to choose another payment method, kindly <a href="javascript:void(0);" onclick="$(\'#wu_payment_warning\').modal(\'hide\');callSigninStudentPay(this,\'signup\');" class="anchor-color">click here</a>'
 // 							+'<br/>'
 // 							+'<p class="text-center">'
-// 								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Logout</button>'
+// 								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
 // 							+'</p>'
 // 						+'</div>'
 // 					+'</div>'
@@ -3744,7 +3744,7 @@ function logoutModalLogout(data){
 // 									+'You can contact us at <u>'+data.contactEmail+'</u> for more information regarding elementary enrollment.'
 // 								+'</span>'
 // 								+'<p class="text-center">'
-// 									+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Logout</button>'
+// 									+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
 // 								+'</p>'
 // 							+'</div>'
 // 						+'</form>'
@@ -3768,7 +3768,7 @@ function goToDashboardWarningMessageModal(data){
 						+'<h4 class="modal-title fw-600 text-center" id="submitApplicationMsg"></h4>'
 						+'<hr />'
 						+'<div class="full text-center">'
-							+'<button type="button" class="btn theme-bg primary-hov-bg text-white" onclick="logoutConfimation(true, \''+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'\')" >Logout</button>'
+							+'<button type="button" class="btn theme-bg primary-hov-bg text-white" onclick="logoutConfimation(true, \''+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'\')" >Log out</button>'
 						+'</div>'
 					+'</div>'
 				+'</div>'

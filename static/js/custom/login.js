@@ -557,10 +557,10 @@ function getRequestForForgot(formId, moduleId) {
   return request;
 }
 function refreshCaptcha(id) {
-  if (id != undefined && id != "" && $("#" + id).length > 0) {
-    document.images[id].src =
-      BASE_URL + API_VERSION + "common/captcha.jpg?v=" + new Date().getTime();
-  }
+	var primaryColor=ROOTCSS.split(':#')[1].split(';')[0];
+	if (id != undefined && id != '' && $('#' + id).length > 0) {
+		document.images[id].src = BASE_URL + API_VERSION + 'common/captcha.jpg?payload='+primaryColor+'&v=' + new Date().getTime();
+	}
 }
 function getURLForCommon(suffixUrl) {
   return BASE_URL + API_VERSION + "common" + "/" + suffixUrl;

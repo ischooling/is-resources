@@ -57,7 +57,7 @@ async function loginContent(userName){
                                             </span>
                                         </div>
                                     </div>
-                                    <h1 class="primary-txt-color">  User Login</h1>`;
+                                    <h1 class="primary-txt-color">User Log In</h1>`;
 
                                     html+=loginFormContent(userName);
                                     html+=
@@ -237,7 +237,7 @@ function loginFormContent(userName){
                 <div class="form-group label-floating">
                     <input type="text" name="captcha" id="captcha" class="form-control" style="width: 58%; float:left;text-transform: uppercase;" value="" pattern="^[_A-z0-9]{1,}$" minlength="6" maxlength="6" required>
                         ${/*onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);"*/''}
-                    <span style="background: #009eff;padding: 1px 0px;border-radius: 4px;">
+                    <span style="background: var(--pc);padding: 1px 0px;border-radius: 4px;">
                         <img id="captchaImage" alt="Captcha" src="${APP_BASE_URL}${SCHOOL_UUID}/api/v1/common/captcha.jpg?payload=`+getPrimaryColor()+`&v=`+new Date().getTime()+`" style="width:105px; height: 25px;position:relative;left:4px" loding="lazy" />
                         <a class="refresh-link text-white" href="javascript:void(0);" title="Refresh"
                             onClick="return refreshCaptcha('captchaImage');" style="display: inline-block;padding: 0px 8px;border-left:1px solid rgba(255, 255, 255, 0.3);color:#fff">
@@ -248,16 +248,18 @@ function loginFormContent(userName){
             </div>
 
             <div class="form-group text-center">
-                <input type="submit" class="btn primary-bg white-txt-color" id="loginButton" value="Login">
-                <p>
-                    <span class="primary-txt-color">© ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName}<br />`;
+                <input type="submit" class="btn primary-bg white-txt-color" id="loginButton" value="Log In">
+                <p> 
+                        
+                    <span class="primary-txt-color">`;
                         if(schoolSettingsLinks.termasOfUserUrl != ''){
                             html+=`<a class="black-txt-color" href="${schoolSettingsLinks.termasOfUserUrl}" target="blank">Terms of use </a>`;
                         }
                         if(schoolSettingsLinks.privacyPolicyUrl != ''){
                             html+=`| <a class="black-txt-color" href="${schoolSettingsLinks.privacyPolicyUrl}" target="blank">Privacy Policy</a>`;
                         }
-                    html+=`</span>
+                        html+=`<br />© ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName}
+                    </span>
                 </p>
             </div>
         </form>`

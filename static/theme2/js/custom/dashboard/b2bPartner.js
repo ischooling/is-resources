@@ -877,3 +877,29 @@ function callB2BDashboardLead(moduleId,leadType) {
 	
 	return leadCommonDTO;
 }
+
+function toggleLinkTab(type){
+	if(type === 'enrollment'){
+		$('#enrollmentTabBtn')
+			.addClass('text-white bg-primary')
+			.removeClass('text-dark bg-transparent');
+
+		$('#seatTabBtn')
+			.addClass('text-dark bg-transparent')
+			.removeClass('text-white bg-seat-primary');
+
+		$('#enrollmentLinksSection').removeClass('d-none').addClass('d-flex');
+		$('#seatLinksSection').addClass('d-none').removeClass('d-flex');
+	} else {
+		$('#seatTabBtn')
+			.addClass('bg-seat-primary')
+			.removeClass('text-dark bg-transparent');
+
+		$('#enrollmentTabBtn')
+			.addClass('text-dark bg-transparent')
+			.removeClass('text-white bg-primary');
+
+		$('#seatLinksSection').removeClass('d-none').addClass('d-flex');
+		$('#enrollmentLinksSection').removeClass('d-flex').addClass('d-none');
+	}
+}

@@ -11,7 +11,7 @@ async function getActivityContent(data){
 function dashboardActivityHeader(){
     var html=
         `<div class="card-header activities-bg-head text-white">
-            <h6 class="m-0 font-size-md">Activities</h6>
+            <h6 class="m-0 font-size-md text-capitalize">Activities</h6>
         </div>`;
     return html;
 }

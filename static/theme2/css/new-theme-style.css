@@ -33208,3 +33208,15 @@ input:checked + .small-switch-slider:before {
 #userActivityContent .app-page-title{display: none !important;}
 .iti__country-list{z-index: 10 !important;}
 #userActivityContent .app-page-title{display: none !important;}
+
+/* counselor side and partner side links */
+.bg-seat-primary{
+	background-color: #0053AD !important;
+	color: white !important;
+}
+.bg-seat-light-primary{
+	background-color: #E5EEF7 !important;
+}
+.text-seat-primary{
+	color: #0053AD !important;
+}
