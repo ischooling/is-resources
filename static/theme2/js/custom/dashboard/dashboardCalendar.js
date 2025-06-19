@@ -219,30 +219,37 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
                     redirectLoginPage();
                     reject('Redirected to login');
                 } else {
-				var finalEvents=[];
+					var finalEvents=[];
                     var events = data.event || [];
-				if(events.length>0){
-					// events.sort((a, b) => new Date(a.start) - new Date(b.start));
-					events.forEach(obj => {
-						if(obj.id.startsWith("announce", 0) || obj.id.startsWith("holiday", 0)){
-							finalEvents.push(obj);
-						}else{
-							obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
-							obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
-							var baseDate=obj.start.split('T')[0];
-							if($.inArray(baseDate,data.holidays)<0){
+					if(events.length>0){
+						// events.sort((a, b) => new Date(a.start) - new Date(b.start));
+						events.forEach(obj => {
+							if(obj.id.startsWith("announce", 0) || obj.id.startsWith("holiday", 0)){
 								finalEvents.push(obj);
+							}else{
+								obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
+								obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
+								var baseDate=obj.start.split('T')[0];
+								if($.inArray(baseDate,data.holidays)<0){
+									finalEvents.push(obj);
+								}
 							}
-						}
-					});
-				}
-				$('#schoolcalendar').fullCalendar('removeEvents')
-				//$('#schoolcalendar').fullCalendar('destroy');
-				getFullCalendar(finalEvents, viewName);
-				if(flag){
-					$("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
-				}
-				resolve(finalEvents); // return event array
+						});
+					}
+					$('#schoolcalendar').fullCalendar('removeEvents')
+					//$('#schoolcalendar').fullCalendar('destroy');
+					getFullCalendar(finalEvents, viewName);
+					if(flag){
+						$("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
+					}
+					resolve(finalEvents); // return event array
+					if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
+						$(".upcoming-icon").addClass("upcoming-week-view-icon");
+						$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
+					}else{
+						$(".upcoming-icon").removeClass("upcoming-week-view-icon");
+						$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
+					}
                 }
             },
             error: function (e) {
@@ -328,7 +335,7 @@ $(document).ready(function() {
 	},1000);
 });
 // var data1=getStudentDashboardDetails();
-function getFullCalendar(CALENDAR_EVENT_DATA) {
+function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
 	todayClassArray = [];
 	var initialView = window.innerWidth < 768 ? 'listDay' : 'agendaDay';
 	
@@ -394,7 +401,7 @@ function getFullCalendar(CALENDAR_EVENT_DATA) {
 				}
 				
 			}
-			updateEventIcons(event, element, todayClassArray);
+			updateEventIcons(event, element, todayClassArray, viewName);
 		},
 
         eventAfterAllRender: function() {
@@ -436,7 +443,8 @@ function updateCalendarView() {
 }
 
 var updateEventIconsStyle = true;
-function updateEventIcons(info, element, todayClassArray) {
+function updateEventIcons(info, element, todayClassArray, viewName) {
+	debugger
 	if(updateEventIconsStyle){
 		$("head").append('<style>.tooltip-inner{max-width:500px;width:fit-content}.fc-scroller.fc-time-grid-container[style]{height:425px !important}</style>');
 		updateEventIconsStyle=false;
@@ -464,7 +472,7 @@ function updateEventIcons(info, element, todayClassArray) {
 				element.find('.upcoming-icon').remove(); // Remove existing icons
 				if(currentMilliseconds >= eventStartMilliseconds && currentMilliseconds <= eventEndMilliseconds) {
 					element.find(".fc-time span").find(".upcoming-symbol").remove();
-					var liveIcon = $('<b class="blink d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
+					var liveIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
 					orignalClassBg = element.css("background-color");
 					orignalClassborderColor = element.css("border-color");
 					element.find(".fc-time span").append(liveIcon);
@@ -480,6 +488,13 @@ function updateEventIcons(info, element, todayClassArray) {
 					}
 				}
 				$('[data-toggle="tooltip"]').tooltip();
+				if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
+					$(".upcoming-icon").addClass("upcoming-week-view-icon");
+					$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
+				}else{
+					$(".upcoming-icon").removeClass("upcoming-week-view-icon");
+					$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
+				}
 			}
 		}, 1000);
 		//console.log(todayClassArray);

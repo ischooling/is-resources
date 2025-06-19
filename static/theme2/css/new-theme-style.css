@@ -31489,7 +31489,8 @@ to { background-color: rgb(6, 145, 6); }
 .live-symbol{position:absolute;bottom:-4px; right: 0;padding: 6px;}
 .upcoming-class-blink[style], .upcoming-class-blink{background-color: #453900 !important;border-color:#70621e !important;color:#fff}
 .upcoming-class-blink .upcoming-icon.live-symbol{position:absolute;bottom:-12px; right: 0;padding: 6px;}
-
+.upcoming-week-view-icon{padding: 0px;bottom: -4px;background: #433a11;right: 4px;}
+.live-week-view-icon{padding: 0px;bottom: -2px;background:#0f7c0f;right: 0px;width: 100%;}
 /* datepicker custom css  */
 .datepicker-container[style]{z-index: 2000 !important}
 /* custom media query start here */
