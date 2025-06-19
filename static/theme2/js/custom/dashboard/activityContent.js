@@ -10,7 +10,7 @@ async function getActivityContent(data){
 }
 function dashboardActivityHeader(){
     var html=
-        `<div class="card-header activities-bg-head text-white">
+        `<div class="card-header activities-bg-head text-white rounded-top-left-10 rounded-top-right-10">
             <h6 class="m-0 font-size-md text-capitalize">Activities</h6>
         </div>`;
     return html;
