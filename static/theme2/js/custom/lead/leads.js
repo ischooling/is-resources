@@ -7752,6 +7752,8 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showZadarmaDetails('${leadCounselor.zadarma}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-success text-white text-center  badge font-12\">${leadCounselor.zadarmaCount}</button></td>`;
 				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showWatiDetails('${leadCounselor.wati}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-warning text-white text-center badge font-12\">${leadCounselor.watiCount}</button></td>`;
 				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showWhatsappDetails('${leadCounselor.whatsappIds}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-primary text-white text-center badge font-12\">${leadCounselor.whatsappCount}</button></td>`;
+				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showMailBrodcastDetails('${leadCounselor.mailIds}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-info text-white text-center badge font-12\">${leadCounselor.mailCount}</button></td>`;
+
 			}else{
 				
 				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\">";
@@ -7856,13 +7858,15 @@ function getLogsFootHtml(data, fontSize){
 	var zadarmatotal=0;
 	var watitotal=0;
 	var whatsapptotal=0;
+	var mailtotal=0;
 
 	if(leadListCounselor.length>0){
 		for (let ind = 0; ind < leadListCounselor.length; ind++) {
 			const leadCounselor = leadListCounselor[ind];
 			zadarmatotal+=leadCounselor.zadarmaCount;
 			watitotal+=leadCounselor.watiCount;	
-			whatsapptotal+=leadCounselor.whatsappCount;			
+			whatsapptotal+=leadCounselor.whatsappCount;
+			mailtotal+=leadCounselor.mailCount;
 			sr=sr+1;
 		}
 	}
@@ -7877,6 +7881,7 @@ function getLogsFootHtml(data, fontSize){
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+zadarmatotal+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+watitotal+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+whatsapptotal+"</th>";
+	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+mailtotal+"</th>";
 	htmlRet +="</tr>";
 	return htmlRet;
 }
@@ -8237,6 +8242,45 @@ function showZadarmaDetails(zadarmaIds) {
 	});
 }
 
+var currentPageMail = 1;
+var currentMailIds = null;
+function showMailBrodcastDetails(mailIds) {
+	var body = {
+		ids: mailIds,
+		pageNo: currentPageMail,
+		pageCount: 10,
+	}
+	$.ajax({
+		url: getURLFor('leads', 'get-broadcast-mail-Log'),
+		type: "POST",
+		data: JSON.stringify(body),
+		contentType: "application/json",
+		success: function (response) {
+		try {
+			if(response.statusCode === 0){
+				ZadarmaOrWati = "mail";
+				if(currentMailIds != mailIds){
+					mailData = [...response.logs,...response.unMatchLogs];
+					populateMailRecords(response.logs,response.unMatchLogs,"Mail Logs", response.totalPages,mailIds.split(",").length);
+				}else{
+					mailData = [...response.logs,...response.unMatchLogs];
+					renderMailTable(response.logs, response.totalPages,mailIds.split(",").length,[...new Set(response.logs.map((elem,_) => elem.id)),...new Set(response.unMatchLogs.map((elem,_) => elem.id))].length);
+					renderUnMatchMailTable(response.unMatchLogs);
+				}
+				currentMailIds = mailIds;
+			}else if(response.status === '3'){
+				redirectLoginPage();
+			}else{
+				showMessageTheme2(0, response.message);
+			}
+		} catch (error) {
+			console.log("Error Fetching Data:", error);
+			
+		}
+		}
+	});
+}
+
 var currentPageWati = 1;
 var currentWatiIds = null;
 function showWatiDetails(watiIds){
@@ -8341,6 +8385,21 @@ function getFilterZadarmaLeadNo(searchValue, totalPages) {
         item.leadNo.toLowerCase().includes(searchValue)
     );
     renderZadarmaTable(filteredData, totalPages,currentZadarmaIds.split(",").length,[...new Set(zadarmaData.map((elem,index) => elem.callId))].length);
+	if(searchValue != ""){
+		$(".pagination").hide();
+	}else{
+		$(".pagination").show();
+	}
+}
+
+let mailData = [];
+
+function getFilterMailLeadNo(searchValue, totalPages) {
+    searchValue = searchValue.trim().toLowerCase();
+    const filteredData = mailData.filter(item => 
+        item.leadNo.toLowerCase().includes(searchValue)
+    );
+    renderMailTable(filteredData.filter((data,_) => data.leadNo != ""), totalPages,currentMailIds.split(",").length,[...new Set(mailData.map((elem,_) => elem.id))].length);
 	if(searchValue != ""){
 		$(".pagination").hide();
 	}else{
@@ -8621,6 +8680,289 @@ function closeZadarmaModal() {
 	currentZadarmaIds = '';
 }
 
+
+function populateMailRecords(data, data2,meetingTitle, totalPages,totalCount){
+	$("<style>")
+	  .prop("type", "text/css")
+	  .html(`
+		.recurring-modal-backdrop {
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  background: rgba(0, 0, 0, 0.5);
+		  display: none;
+		  z-index: 999;
+		}
+  
+		.recurring-modal {
+		  position: fixed;
+		  top: 0;
+		  right: -90%;
+		  width: 90%;
+		  height: 100vh;
+		  background: white;
+		  box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2);
+		  transition: right 0.3s ease-in-out;
+		  z-index: 1000;
+		}
+  
+		.recurring-modal.open {
+		  right: 0;
+		}
+  
+		.modal-header {
+		  display: flex;
+		  justify-content: space-between;
+		  align-items: center;
+		  padding: 15px;
+		  background: #007bff;
+		  color: white;
+		}
+  
+		.modal-body {
+		  padding: 20px;
+		}
+  
+		.session-block {
+		  margin-bottom: 15px;
+		  border-bottom: 1px solid #ddd;
+		  padding-bottom: 10px;
+		}
+  
+		.close-btn {
+		  background: transparent;
+		  border: none;
+		  font-size: 24px;
+		  color: white;
+		  cursor: pointer;
+		}
+  
+		.play-btn {
+		  background: #007bff;
+		  color: white;
+		  border: none;
+		  padding: 5px 10px;
+		  cursor: pointer;
+		  border-radius: 5px;
+		}
+  
+		.play-btn:hover {
+		  background: #0056b3;
+		}
+  
+		.accordion-btn {
+		  background: #D7EBFF;
+		  padding: 5px 10px;
+		  width: 100%;
+		  text-align: left;
+		  cursor: pointer;
+		  font-weight: bold;
+		  border-radius: 5px;
+		  
+		}
+  
+		.accordion-btn:focus {
+		  outline: 0px !important;
+		}
+  
+		.recording-list {
+		  padding: 10px;
+		  background: #fff;
+		  border-radius: 5px;
+		}
+	  `)
+	.appendTo("head");
+	var modalContent = `
+	  <div id="mailLogBackdrop" class="recurring-modal-backdrop" onclick="closeMailModal();"></div>
+	  <div id="mailLogModal" class="recurring-modal email-wrapper">
+		<div class="p-3" style="background-color:#027FFF;">
+		  <h5 class="mb-0" style="color: white;font-size:18px;font-weight: 700;">${meetingTitle}</h5>
+		   <button onclick="closeMailModal();" type="button" class="p-2 cursor" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-30px;top:35px;background-color: white !important;border-radius: 5px 0px 0px 5px;font-size: 35px;border:0px;color:#000;">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="p-3" style="width:300px; margin-left:auto;">
+			<input placeholder="Search" type="text" onchange="getFilterMailLeadNo(this.value, ${totalPages})" class="form-control">
+		</div>
+		<div style="background-color: #fff; height: 100vh;">
+		  <div class="px-5" style="height: 80vh;overflow-y:auto;">
+			<table id="recurring-recordings-table" class="w-100 table table-bordered border-radius-table">
+			  <thead style="position: sticky;top: 0;z-index: 1;">
+				<tr style="font-size: 14px;">
+					<th class="p-2 rounded-top-left-10 border-right-0 border-primary" style="background-color:rgb(200, 224, 247); font-weight: normal; color:rgb(38, 146, 253)">Lead No</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Mail Send Via</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Sent To</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Mail Subject</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">messagesSent</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Mail Status</th>
+				  <th class="p-2 rounded-top-right-10 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Action</th>
+				</tr>
+			  </thead>
+			  <tbody id="mailLogModalTableBody"></tbody>
+			</table>
+			<div id="unMatchMailTable"></div>
+			<div id="mailPagination"></div>
+		  </div>
+		</div>
+	  </div>
+	  <div id="emailBroadcastLogsTemplate2" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-md" style='width: 80% !important;'>
+				<div class="modal-content border-0">
+					<div class="modal-header py-1 text-white bg-primary">
+						<p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+						<button type="button" class="close text-white" onclick="hideEmailTemplate()"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body px-1">
+						<div class="mx-auto">
+							<div class="screen">
+								<div class="content">
+									<div class="full" id="emailBroadcastLogsTemplatePreview2" style="font-size:13px"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	$("body").append(modalContent);
+	$("#mailPagination").html(renderPagination(currentPageMail, totalPages,totalCount,[...new Set(data.map((elem,_) => elem.id)),...new Set(data2.map((elem,_) => elem.id))].length));
+    renderMailTable(data, totalPages,totalCount,[...new Set(data.map((elem,_) => elem.id)),...new Set(data2.map((elem,_) => elem.id))].length);
+	renderUnMatchMailTable(data2)
+	setTimeout(() => {
+	  $("#mailLogBackdrop").fadeIn(200);
+	  $("#mailLogModal").addClass("open");
+	  $("body").css("overflow", "hidden");
+	}, 50);
+}
+function hideEmailTemplate(){
+	$('#emailBroadcastLogsTemplate2').modal('hide')
+}
+
+function renderMailTable(data, totalPages,totalCount,countItemCounts) {
+	$("#mailPagination").html(renderPagination(currentPageMail, totalPages,totalCount,countItemCounts));
+    const groupedData = data.reduce((acc, item) => {
+        const key = item.leadNo;
+        acc[key] = acc[key] || [];
+        acc[key].push(item);
+        return acc;
+    }, {});
+
+    let modalContent = ``;
+    $.each(Object.entries(groupedData), function(index,calls){
+		let dynamicIndex = (currentPageMail - 1) * 10 + index + 1;
+		if(calls[1].length===1){
+			modalContent+=
+			`<tr id="row_id_${dynamicIndex}">
+				<td class="py-2 border-right-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].leadNo}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">Brevo</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].mail}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].subject}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${changeDateFormat(new Date(calls[1][0].sentDateTime.slice(0,19)),'mm-dd-yyyy')} | ${calls[1][0].sentDateTime.slice(10,16)}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].status}</td>
+				<td class="py-2 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">
+					<button onClick="getEmailBroadcastLogsTemplate2(${calls[1][0].campignId},'${calls[1][0].mail}')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px">View Broadcast</button>
+				</td>
+			</tr>`;
+		}else{
+			modalContent+=
+			`<tr id="row_id_${dynamicIndex}" style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-bottom: 0; border-color: blue">
+				<td class="py-2 border-right-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[0]}</td>
+				<td colspan="7" class="py-2 pl-0 pr-2 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">
+				<table class="w-100 table mb-0 border">
+					<thead style="background-color:#f2f2f2;">
+						<tr style="font-size:12px">
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Mail Send Via</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Sent To</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Mail Subject</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">messagesSent</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Mail Status</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0 cursor" onclick="toggleSelfTable(\'row_id_${dynamicIndex}\')">
+								Broadcast List 
+								<span class="d-inline-block float-right " >
+									<i id="row_id_${dynamicIndex}_icon" class="fa fa-angle-up"></i>
+								</span>
+							</th>
+						</tr>
+					</thead>
+					<tbody id="row_id_${dynamicIndex}_body">`;
+						$.each(calls[1], function(i, call){
+							modalContent+=
+							`<tr>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">Brevo</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.mail}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.subject}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${changeDateFormat(new Date(call.sentDateTime.slice(0,19)),'mm-dd-yyyy')} | ${call.sentDateTime.slice(10,16)}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.status}</td>								
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">
+									<button onClick="getEmailBroadcastLogsTemplate2(${call.campignId},'${call.mail}')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px">View Broadcast</button>
+								</td>
+							</tr>`;
+						});
+					modalContent+=`</tbody>
+				</table>
+			</tr>`;
+		}
+	});
+    $("#mailLogModalTableBody").html(modalContent);
+	if (!data || data.length === 0) {
+		$("#mailLogModalTableBody").html('<tr><td colspan="9" class="text-center py-5" style="font-size: 16px;font-weight: 700;">No recordings found</td></tr>');
+	}
+}
+
+function renderUnMatchMailTable(data) {
+    let modalContent = ``;
+		if(data.length >0){
+			modalContent+= `<h1 style="color:#f79797; font-size:14px">No lead number found for these mail broadcast.</h1>`;
+			modalContent+=
+			`<table class="w-100 table mb-0 border border-color-#ff1414 mb-4">
+					<thead style="background-color:#f79797;">
+						<tr style="font-size:12px">
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Mail Send Via</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Sent To</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Mail Subject</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">messagesSent</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Mail Status</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">
+								Action 
+							</th>
+						</tr>
+					</thead>
+					<tbody >`;
+						$.each(data, function(i, call){
+							modalContent+=
+							`<tr>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">Brevo</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.mail}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.subject}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${changeDateFormat(new Date(call.sentDateTime.slice(0,19)),'mm-dd-yyyy')} | ${call.sentDateTime.slice(10,16)}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.status}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">
+									<button onClick="getEmailBroadcastLogsTemplate2(${call.campignId},'${call.mail}')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px">View Broadcast</button>
+								</td>
+							</tr>`;
+						});
+					modalContent+=`</tbody>
+				</table>`;
+		}
+    $("#unMatchMailTable").html(modalContent);
+}
+
+function closeMailModal() {
+	$("#mailLogModal").removeClass("open");
+	$("#mailLogBackdrop").fadeOut(200);
+	
+	setTimeout(() => {
+	  $("#mailLogModal").remove();
+	  $("#mailLogBackdrop").remove()
+	  $("body").css("overflow", "auto");
+	}, 300);
+	currentPageMail = 1;
+	currentMailIds = '';
+}
+
+
 let watiData = []
 
 function getFilterWatiLeadNo(searchValue, totalPages) {
@@ -8628,7 +8970,7 @@ function getFilterWatiLeadNo(searchValue, totalPages) {
     const filteredData = watiData.filter(item => 
         item.leadNo.toLowerCase().includes(searchValue)
     );
-    renderWatiTable(filteredData, totalPages,currentWatiIds.split(",").length,watiData.map((elem,index) => elem.leadNo).length);
+    renderWatiTable(filteredData, totalPages,currentWatiIds.split(",").length,watiData.map((elem,_) => elem.leadNo).length);
 	if(searchValue != ""){
 		$(".pagination").hide();
 	}else{
@@ -9672,6 +10014,9 @@ function goToPage(page) {
 	}else if(ZadarmaOrWati == 'wati'){
 		currentPageWati = page;
 		showWatiDetails(currentWatiIds);
+	}else if(ZadarmaOrWati == 'mail'){
+		currentPageMail = page;
+		showMailBrodcastDetails(currentMailIds);
 	}else{
 		currentPageWhatsapp = page;
 		showWhatsappDetails(currentWhatsappIds);
@@ -10015,6 +10360,10 @@ function viewEmailTemplate(flag, indexNumber, templateName){
 		$(".email-wrapper").removeClass("active-email-template");
 		$(".email-template").addClass("hide-email-template");
 		$(".email-template").removeClass("show-email-template");
+		$("#emailBroadcastLogsModal .modal-dialog").css('margin-left', '');
+		$("#emailBroadcastLogsModal .modal-dialog").animate({
+			margin: '24px auto'
+		}, 300);
 	}
 }
 
@@ -10033,6 +10382,8 @@ function gotoBackEmailModal(){
 }
 
 function sendEmailNotification(templateName, subject, index, templateId){
+	templateName = atob(templateName)
+	subject = atob(subject);
 	var request={};
 	$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
 	$('#templateNameEmail').html('<b>' + templateName + '</b> ');
@@ -10089,7 +10440,12 @@ function sendEmailNotification(templateName, subject, index, templateId){
 				}
 			});
 			emailTemplateContent.users = selectedUsers;
-			showWarningMessageShow('Are you sure you want to send this data?','sendEmailNotificationToUser( '+index+',\''+templateName+'\',\''+subject+'\',\''+selectedLeads+'\',\'send\',\''+templateId+'\')', 'info-modal-sm');
+			if($("#sendConfirmationModal").length >= 1){
+				$("#sendConfirmationModal").remove();
+			}
+			$("body").append(sendConfirmationModal(`sendEmailNotificationToUser(${index}, '${btoa(templateName)}', '${btoa(subject)}', '${selectedLeads}', 'send', '${templateId}')`));
+			$("#sendConfirmationModal").modal("show");
+			// showWarningMessageShow('Are you sure you want to send this data?','sendEmailNotificationToUser( '+index+',\''+templateName+'\',\''+btoa(subject)+'\',\''+selectedLeads+'\',\'send\',\''+templateId+'\')', 'info-modal-sm');
 		}
 	});
 
@@ -10122,6 +10478,8 @@ function sendEmailNotification(templateName, subject, index, templateId){
 }
 
 function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_status,templateId) {	
+	templateName = atob(templateName)
+	subject = atob(subject)
 	$("#resetDeleteErrorWarningNo1").click(function(){
 		$("#remarksresetDelete2").hide();
 	});
@@ -10158,7 +10516,9 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 		email: user.email,
 		grade: user.grade,
 		fullName: user.name,
-		firstName: user.name.split(' ')[0]
+		firstName: user.name.split(' ')[0],
+		leadId: user.leadId,
+
 	}));
 	request['templateSubject']=subject;
 	$.ajax({
@@ -10194,6 +10554,7 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 				// }
 				$("#emailBroadcastSendModal").modal("hide");
 				$("#customEmailTemplatesList").modal("hide");
+				$("#sendConfirmationModal").modal("hide");
 				$("input#allCheckedFailedEmail").prop('checked', false);
 				$("input#selectLeadAll").prop('checked', false); 
 				$('input[name="chk-users-lead-email"]').prop('checked', false);
@@ -10333,7 +10694,7 @@ function openSuccessFailedEmailMessages(indexSF,templateName, subject, templateI
 			showMessageTheme2(0, 'Please check any one user to send message','',false);
 			return false;
 		}else{
-			showWarningMessageShow('Are you sure you want to resend the message?','sendEmailNotificationToUser( '+indexSF+',\''+templateName+'\',\''+subject+'\',\''+selectedLeads+'\',\'resend\',\''+templateId+'\')', 'info-modal-sm');
+			// showWarningMessageShow('Are you sure you want to resend the message?','sendEmailNotificationToUser( '+indexSF+',\''+templateName+'\',\''+subject+'\',\''+selectedLeads+'\',\'resend\',\''+templateId+'\')', 'info-modal-sm');
 		}
 	});
 
@@ -10388,7 +10749,6 @@ function getViewTemplateEmail(data){
 				doc.close();
 			}
 		}, 0);
-	
     return html;
 }
 
@@ -10467,6 +10827,96 @@ function getStatusOfSentEmails(actionId) {
 					$("#preSuccessFailedDiv").css("display", "none");
 					$("#finalSuccessFailedDiv").css("display", "flex");
 				}
+			}
+		}
+	});
+}
+
+function getEmailBroadcastLogs(email, name, leadId){
+	var body = {
+		email: email,
+		schoolId: SCHOOL_ID,
+		leadId :leadId,
+	}
+	$.ajax({
+		type: "POST",
+		contentType : "application/json",
+		url: getURLFor('leads', 'get-broadcast-lead-mail-log'),
+		data: JSON.stringify(body),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success: function (response) {
+			if(response.statusCode == 0 || response.statusCode == 2){
+				showMessageTheme2(0, response.message);
+			}else if(response.logArray == "Data not found"){
+				showMessageTheme2(0, response.logArray)
+			}else{
+				if($("#emailBroadcastLogsModal").length == 1){
+					$("#emailBroadcastLogsModal").remove();
+				}
+				$("body").append(emailBroadcastLogsModal(response.logArray, name, email));
+				$("#emailBroadcastLogsModal").modal("show");
+			}
+		}
+	});
+}
+
+function getEmailBroadcastLogsTemplate2(actionId,userEmail){
+	var body = {
+		actionId: actionId,
+		email: userEmail,
+		schoolId: SCHOOL_ID
+	}
+	$.ajax({
+		type: "POST",
+		contentType : "application/json",
+		url: getURLFor('leads', 'get-broadcast-mail-statistics'),
+		data: JSON.stringify(body),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success: function (response) {
+			if(response.status == 0){
+				showMessageTheme2(0, response.message);
+			}else{
+				$("#emailBroadcastLogsTemplatePreview2").html(getViewTemplateEmail(response.logObject.body))
+				$("#emailBroadcastLogsTemplate2").modal("show");
+				$("#emailBroadcastLogsModal .modal-dialog").animate({
+					'margin-left': '15%'
+				}, 300);
+				$(".email-wrapper").addClass("active-email-template");
+				$(".email-template").addClass("show-email-template");
+				$(".email-template").removeClass("hide-email-template");
+			}
+		}
+	});
+}
+
+function getEmailBroadcastLogsTemplate(actionId,userEmail){
+	var body = {
+		actionId: actionId,
+		email: userEmail,
+		schoolId: SCHOOL_ID
+	}
+	$.ajax({
+		type: "POST",
+		contentType : "application/json",
+		url: getURLFor('leads', 'get-broadcast-mail-statistics'),
+		data: JSON.stringify(body),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success: function (response) {
+			if(response.status == 0){
+				showMessageTheme2(0, response.message);
+			}else{
+				$("#emailBroadcastLogsTemplateWrapper").html(emailBroadcastLogsTemplateContent())
+				$("#emailBroadcastLogsTemplatePreview").html(getViewTemplateEmail(response.logObject.body))
+				viewEmailTemplate(true);
+				$("#emailBroadcastLogsModal .modal-dialog").animate({
+					'margin-left': '15%'
+				}, 300);
 			}
 		}
 	});

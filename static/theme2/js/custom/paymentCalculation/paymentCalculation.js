@@ -43,7 +43,7 @@ function getPaymentDetails() {
 				var customPlan = paymentDetails['customPlan'];
 				var studentDetails = paymentDetails['studentDetails'];
 				var selectedCourseDetails = paymentDetails['selectedCourseDetails'];
-				$('.studentDetails').html(studentDetails['enrollmentType'] + ' | ' + studentDetails['grade'] + ' | ' + studentDetails['learingPlan'] + ' | ' + studentDetails['studentName']);
+				$('.studentDetails').html(studentDetails['enrollmentType'] + ' | ' + studentDetails['enrollmentFor'] + ' | ' + studentDetails['learingPlan'] + ' | ' + studentDetails['studentName']);
 				var thead = '<tr><th>S.No</th><th>Course Name</th><th class="text-center">AP/H/REG/ADV</th><th class="text-right">Credit</th><th class="text-right">Course Fee</th><th class="text-right">Material Fee</th></tr>'
 				$("#selectedCourses thead").append(thead);
 

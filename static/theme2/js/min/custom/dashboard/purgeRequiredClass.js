@@ -1,1 +1,1 @@
-function requiredClass(){`<i class="pe-7s-rocket"></i>``<i class="pe-7s-timer"></i>`}
+function requiredClass(){}

@@ -1341,441 +1341,435 @@ function getCourseSelectionContent(csr){
 					}
 				}
 			// }
-			html+=
-			'<div class="course-img-wrapper" style="min-height:275px;display:'+(((csr.standardId>=11 && csr.standardId<=17) || csr.standardId==8)?"block;":"none;")+'">'
-				+'<div class="form-row" style="justify-content: space-between;">';
-					
-					// if(csr.standardId>=11 && csr.standardId<=17){
-					// 	html+='<div class="form-holder selected-course-view" style="width:100%">';
-					// }
-					// if(csr.registrationType !='BATCH' || csr.courseProviderId == 39){
-					// 	html+='<div class="form-holder selected-course-view">';
-					// }else{
-					// 	html+='<div class="form-holder selected-course-view" style="width:100%">';
-					// }
-
-					html+='<div class="form-holder selected-course-view" style="width:100%">'
-						+'<div class="fixed-item full">'
-							+'<div class="full selected-course primary-bg primary-border-color head">'
-								+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
-									if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-										if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
-											html+=csr.selectedSubjects.length;
-											html+=' Mandatory / Fixed ';
-											if(csr.selectedSubjects.length>1){
-												html+=' Courses worth '+csr.totalCredit+' credits';
-											}else{
-												html+=' Course worth '+csr.totalCredit+' credit';
-											}
-											
-										}else{
-											html+='You have '+csr.selectedSubjects.length;
-											if(csr.selectedSubjects.length>1){
-												html+=' Courses worth '+csr.totalCredit+' credits';
-											}else{
-												html+=' Course worth '+csr.totalCredit+' credit';
-											}
-										}
-									}else{
-										html+='Please select a course';
-									}
-								html+=
-								'</h4>';
-								// 
-								// if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-								// 	html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">Remove ALL&nbsp;<i class="fa fa-trash"></i></span>';
-								// }
-							html+='</div>'
-							+'<div class="full selected-course-view">'
-								+'<div class="selected-course primary-border-color">'
-									+'<div class="selected-course-list">';
+			
+			if(csr.requiredFixedCourses){
+				html+=
+				'<div class="course-img-wrapper" style="min-height:275px;">'
+					+'<div class="form-row" style="justify-content: space-between;">';
+						html+='<div class="form-holder selected-course-view" style="width:100%">'
+							+'<div class="fixed-item full">'
+								+'<div class="full selected-course primary-bg primary-border-color head">'
+									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
 										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-											html+=
-											'<div class="course-category">';
-												$.each(csr.selectedSubjects, function(k, courseDetails) {
-													html+=
-													'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-														+'<span class="count">'+(k+1)+'.&nbsp;</span>'
-														+'<div class="selected_course_name">'
-															+'<div class="course-icon"></div>'
-															+'<div class="course-name-wrapper">'
-																+'<h4 class="course-name">'
-																	+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
-																	+'<span class="price">'
-																		+' <b>';
-																			if(csr.showCourseFee =='Y'){
-																				html+=courseDetails.coursePriceSelectedString;
-																			}
-																			html+=
-																		'</b>'
-																	+'</span>'
-																+'</h4>'
-															+'</div>'
-															+'<div class="add-course-btn">'
-																// +'<span class="white-txt-color mr-1"><i class="fa fa-check"></i></span>';
-																if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
-																	$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
-																		html+=
-																		'<span class="1 remove-icon upgradeCourses primary-txt-color"';
-																			if(upgradeCourse.warningMessage==''){
-																				html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
-																			}else{
-																				html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
-																			}
-																			html+=upgradeCourse.buttonLabel;
-																			if(courseDetails.courseTypeOriginal == 'Regular'){
-																				html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
-																			}else{
-																				html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
-																			}
-																		html+=
-																		'</span>';
-																		if(upgradeCourse.courseType == "ADV"){
-																			html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																		}else if(upgradeCourse.courseType == "HON"){
-																			html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																		};
-																	});
-																}
-																
-																if(courseDetails.courseDescriptionUrl != null && courseDetails.courseDescriptionUrl!=''){
-																	//html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
-																	html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+courseDetails.courseDescriptionUrl+`', '`+courseDetails.courseName+`')" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">Course Summary</a>`;
-																}
-															html+=
-															'</div>'
-														+'</div>'
-													+'</div>';
-												});
-											html+=
-												'<div id="addAndRemoveLoader" class="loader-bg" style="display: none;">'
-													+'<div class="loader">Please Wait... <span></span></div>'
-												+'</div>'
-											+'</div>';
-											if(csr.courseMaterialFeeDetails!=null && csr.courseMaterialFeeDetails.totalEntityFee>0){
-												html+=
-												'<div class="course-category">'
-													+'<span class="category-name">External Material Fee</span>'
-													+'<div class="course-item">'
-														+'<div class="course-name-wrapper" id="totalEntityFee">';
-														$.each(csr.courseMaterialFeeDetails.description, function(k, desc) {
-															html+=
-															'<h4 class="course-name">'
-																+desc
-															+'</h4>';
-														});
-														html+=
-														'</div>'
-													+'</div>'
-													+'<div class="course-item">'
-														+'<div class="course-name-wrapper">'
-															+'<h4 class="course-name">External Material Fee: <span class="price"> '+csr.courseMaterialFeeDetails.totalEntityFeeString+'</span></h4>'
-														+'</div>'
-													+'</div>'
-												+'</div>';
-											}
-										}
-									html+=
-									'</div>'
-								+'</div>'
-							+'</div>'
-						+'</div>'
-					+'</div>'		
-				+'</div>'
-			+'</div>'
-
-			+'<div class="course-selection-wrapper" style="min-height:275px; display:'+(((csr.standardId>=11 && csr.standardId<=17) || csr.standardId==8)?"none;":"block;")+'">'
-				+'<div class="form-row" style="justify-content: space-between;">';
-					//+'<div class="form-holder selected-course-view">'
-						if(csr.registrationType !='BATCH' && csr.courseProviderId != 39){
-							html+='<div class="form-holder selected-course-view">';
-						}else{
-							html+='<div class="form-holder selected-course-view" style="width:100%">';
-						}
-						html+='<div class="fixed-item full">'
-							+'<div class="full selected-course primary-bg primary-border-color head">'
-								+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
-									if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-										if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
-											html+=csr.selectedSubjects.length;
-											html+=' Mandatory / Fixed ';
-											if(csr.selectedSubjects.length>1){
-												html+=' Courses worth '+csr.totalCredit+' credits';
-											}else{
-												html+=' Course worth '+csr.totalCredit+' credit';
-											}
-										}else{
-											html+='You have '+csr.selectedSubjects.length;
-											if(csr.selectedSubjects.length>1){
-												html+=' Courses worth '+csr.totalCredit+' credits';
-											}else{
-												html+=' Course worth '+csr.totalCredit+' credit';
-											}
-										}
-									}else{
-										html+='Please select a course';
-									}
-								html+=
-								'</h4>';
-								if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-									html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">Remove ALL&nbsp;<i class="fa fa-trash"></i></span>';
-								}
-							html+=
-							'</div>'
-							+'<div class="full selected-course-view">'
-								+'<div class="selected-course primary-border-color">'
-									+'<div class="selected-course-list">';
-										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-											html+=
-											'<div class="course-category">';
-												$.each(csr.selectedSubjects, function(k, courseDetails) {
-													html+=
-													'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-														+'<span class="count">'+(k+1)+'.&nbsp;</span>'
-														+'<div class="selected_course_name">'
-															+'<div class="course-icon"></div>'
-															+'<div class="course-name-wrapper">'
-																+'<h4 class="course-name">'
-																	+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
-																	+'<span class="price">'
-																		+' <b class="ml-3">';
-																			if(csr.showCourseFee =='Y'){
-																				html+=courseDetails.coursePriceSelectedString;
-																			}
-																			html+=
-																		'</b>'
-																	+'</span>'
-																+'</h4>'
-															+'</div>'
-															+'<div class="add-course-btn">';
-																// +'<span class="white-txt-color mr-1"><i class="fa fa-check"></i></span>';
-																if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
-																	$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
-																		html+=
-																		'<span class="remove-icon upgradeCourses primary-txt-color"';
-																			if(upgradeCourse.warningMessage==''){
-																				html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
-																			}else{
-																				html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
-																			}
-																			html+=upgradeCourse.buttonLabel;
-																			if(courseDetails.courseTypeOriginal == 'Regular'){
-																				html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
-																			}else{
-																				html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
-																			}
-																		html+=
-																		'</span>';
-																		if(upgradeCourse.courseType == "ADV"){
-																			html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																		}else if(upgradeCourse.courseType == "HON"){
-																			html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																		};
-																	});
-																}
-																if(courseDetails.courseMandatory==1){
-																	if(csr.registrationType != 'BATCH' && csr.courseProviderId != 39){
-																		html+= '<span class="mandatory-btn">Mandatory</span>';
-																	}else{
-																		// if(courseDetails.courseDescriptionUrl!=null && courseDetails.courseDescriptionUrl!=''){
-																			// html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
-																		// }
-																		if(courseDetails.courseDescriptionUrl!=null && courseDetails.courseDescriptionUrl!=''){
-																			// html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
-																			html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+courseDetails.courseDescriptionUrl+`', '`+courseDetails.courseName+`')" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">Course Summary</a>`;
-																		}
-																	}
-																}else if(courseDetails.courseMandatory==0){
-																	html+= '<span class="remove-icon removeAllCourses" onclick="removeCourse(\''+courseDetails.courseId+'\',\''+courseDetails.categoryId+'\',\'ft_courses\')">Remove <i class="fa fa-trash" title="Remove Course"></i></span>';
-																}
-															html+=
-															'</div>'
-														+'</div>'
-													+'</div>';
-												});
-											html+=
-												'<div id="addAndRemoveLoader" class="loader-bg" style="display: none;">'
-													+'<div class="loader">Please Wait... <span></span></div>'
-												+'</div>'
-											+'</div>';
-											if(csr.courseMaterialFeeDetails!=null && csr.courseMaterialFeeDetails.totalEntityFee>0){
-												html+=
-												'<div class="course-category">'
-													+'<span class="category-name">External Material Fee</span>'
-													+'<div class="course-item">'
-														+'<div class="course-name-wrapper" id="totalEntityFee">';
-														$.each(csr.courseMaterialFeeDetails.description, function(k, desc) {
-															html+=
-															'<h4 class="course-name">'
-																+desc
-															+'</h4>';
-														});
-														html+=
-														'</div>'
-													+'</div>'
-													+'<div class="course-item">'
-														+'<div class="course-name-wrapper">'
-															+'<h4 class="course-name">External Material Fee: <span class="price"> '+csr.courseMaterialFeeDetails.totalEntityFeeString+'</span></h4>'
-														+'</div>'
-													+'</div>'
-												+'</div>';
-											}
-										}
-									html+=
-									'</div>'
-								+'</div>'
-							+'</div>'
-						+'</div>'
-					+'</div>';
-					var availeCourseForSelection=false;
-					$.each(csr.availableCourses, function(availableCoursesLoop, courseDetails) {
-						if(courseDetails.subjects.length>0){
-							availeCourseForSelection=true;
-						}
-					});
-					if(availeCourseForSelection){
-						html+=
-						'<div class="form-holder course-selection-list">'
-							+'<ul class="custom-tab-wrapper">'
-								+'<li class="active-tab primary-bg white-txt-color">'
-									+'<a href="javascript:void(0)" id="ft_courses">'
-										+'<label class="full_form">';
-										if(csr.minCourseLimit>csr.totalCredit){
-											if(csr.maxCourseLimit-csr.totalCredit <= 1){
-												html+='PLEASE SELECT A COURSE ';
-											}else{
-												html+='PLEASE SELECT COURSES ';
-											}
-											if(csr.totalCredit<csr.maxCourseLimit){
-												if(csr.totalCredit==0){
-													html+='WORTH '+(csr.minCourseLimit);
+											if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
+												html+=csr.selectedSubjects.length;
+												html+=' Mandatory / Fixed ';
+												if(csr.selectedSubjects.length>1){
+													html+=' Courses worth '+csr.totalCredit+' credits';
 												}else{
-													html+='WORTH '+(csr.maxCourseLimit-csr.totalCredit);
-												}
-											}
-											if(csr.maxCourseLimit-csr.totalCredit <= 1){
-												html+=' CREDIT';
-											}else{
-												html+=' CREDITS';
-											}
-										}else{
-											html+='SELECT EXTRA COURSES';
-										}
-										html+='<br>'
-											+'<span style="font-size:12px">';
-												if(csr.registrationType == 'SCHOLARSHIP'){
-													html+=
-													'(PLEASE NOTE - LIVE CLASSES ARE NOT OFFERED IN THIS PROGRAM)';
+													html+=' Course worth '+csr.totalCredit+' credit';
 												}
 												
-											html+='</span>'
-										+'</label>';
-										if(csr.eligibleForRecommendedCourse){
-											html+='<button class="btn white-bg primary-txt-color pull-right" style="margin:0px;font-weight:bold;padding:4px !important;text-transform:capitalize;box-shadow:0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.70);font-size:13px" onclick="recommendedCourse()">Add Recommended Courses</button>'
+											}else{
+												html+='You have '+csr.selectedSubjects.length;
+												if(csr.selectedSubjects.length>1){
+													html+=' Courses worth '+csr.totalCredit+' credits';
+												}else{
+													html+=' Course worth '+csr.totalCredit+' credit';
+												}
+											}
+										}else{
+											html+='Please select a course';
 										}
 									html+=
-									'</a>'
-								+'</li>'
-							+'</ul>'
-							+'<div id="ft_coursesC" class="full-time-courses custom-tab-item">'
-								+'<div class="course-selection-list">'
-									+'<ul class="accordion">';
-										$.each(csr.availableCourses, function(availableCoursesLoop, courseDetails) {
-											if(courseDetails.subjects.length>0){
+									'</h4>';
+									// 
+									// if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
+									// 	html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">Remove ALL&nbsp;<i class="fa fa-trash"></i></span>';
+									// }
+								html+='</div>'
+								+'<div class="full selected-course-view">'
+									+'<div class="selected-course primary-border-color">'
+										+'<div class="selected-course-list">';
+											if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 												html+=
-												'<li>'
-													+'<div class="student-details-info">'
-														+'<div class="full">'
-															+'<h4 id="'+(availableCoursesLoop+1)+'" class="a-title courseSelectId-'+courseDetails.courseId+'" courseCreditLimit="'+courseDetails.courseCreditLimit+'" parentSubjectId="'+courseDetails.parentSubjectId+'">'
-																+courseDetails.courseName;
-																if(courseDetails.courseDescription!=null && courseDetails.courseDescription!=''){
-																	html+='<i class="fa fa-info-circle" data-toggle="tooltip" title="'+courseDetails.courseDescription+'"></i>';
-																}
-																html+=
-																'<i class="fa plus-icon fa-angle-down primary-txt-color"></i>'
-															+'</h4>'
-														+'</div>'
-														+'<div class="a-content'+(courseDetails.subjects>6?'overflow-auto':'')+'">';
-															$.each(courseDetails.subjects, function(loop1, subject) {
-																html+=
-																'<div class="course-item border-around theme-border">'
-																	+'<div class="course-icon"><i class="fa fa-book"></i></div>'
-																		+'<div class="course-name-wrapper bg-border">'
-																			+'<h4 class="course-name open-dropdown">'
-																				+'<div  style="margin-right:auto">'
-																					+'<label id="course_name_'+subject.subjectId+'" for="course_id_'+subject.subjectId+'" class="m-0 course-type-title primary-txt-color">'
-																						+subject.subjectName
-																					+'</label>'
-																					+'<ul class="no-teacher">';
-																						if(subject.remarks == '0' && csr.registrationType != 'SCHOLARSHIP'){
-																							html+='<li style="float:none;">&#8226; This course does not offer live classes</li>';
-																						}
-																						if(SHOW_PAYMENT_OPTION=='Y'){
-																							if(subject.materialFee >0 ){
-																								html+='<li style="float:none;">&#8226; '+subject.materialFeeString+' extra for External Materials.</li>';
-																							}
-																							if($('#learingProgramHeader').attr('val')!='ONE_TO_ONE_FLEX'){
-																								if(subject.additionalFee !=null && subject.additionalFee > 0){
-																									var creditsLimitsOver=creditLimitOver(csr.standardId, csr.totalCredit);
-																									if(creditsLimitsOver){
-																										html+='<li style="float:none;">&#8226; '+subject.subjectPriceString+' extra for '+subject.courseType+' Courses.</li>';
-																									}else{
-																										html+='<li style="float:none;">&#8226; '+subject.additionalFeeString+' extra for '+subject.courseType+' Courses.</li>';
-																									}
-																								}
-																							}
-																						}
-																					html+=
-																					'</ul>'
-																				+'</div>'
-																				+'<div style="display: flex;flex-direction: column;justify-content: center;align-items: center;width: 15%;text-align: center;">'
-																					+'<label class="m-0 course-type-title primary-txt-color pull-right">';
-																						if(csr.showCourseFee =='Y'){
-																							html+=`<p>`+subject.subjectPriceString+`</p>`;
-																						}
-																						html+=
-																						subject.subjectCredit+' Credit&nbsp;'
-																					+'</label>';
-																					if(subject.courseDescriptionUrl!=null && subject.courseDescriptionUrl!=''){
-																						html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="view-course-details theme-text">Course Summary</a>`;
-																						// html+=`<a href="javascriptVoid(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="btn btn-sm" style="background-color:transparent;font-size:8px;margin:0px;box-shadow:0px 0px;color:#007fff;">Course Summary</a>`;
-																					}
+												'<div class="course-category">';
+													$.each(csr.selectedSubjects, function(k, courseDetails) {
+														html+=
+														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
+															+'<span class="count">'+(k+1)+'.&nbsp;</span>'
+															+'<div class="selected_course_name">'
+																+'<div class="course-icon"></div>'
+																+'<div class="course-name-wrapper">'
+																	+'<h4 class="course-name">'
+																		+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
+																		+'<span class="price">'
+																			+' <b>';
+																				if(csr.showCourseFee =='Y'){
+																					html+=courseDetails.coursePriceSelectedString;
+																				}
 																				html+=
-																				'</div>'
-																				+'<div>'
-																					+'<label for="course_id_'+subject.subjectId+'" class="m-0 add-course-button primary-bg secondary-hov-bg white-txt-color">'
-																						+'<input class="add-course-checkbox" id="course_id_'+subject.subjectId+'"'
-																						+' value="'+subject.subjectId+'" onclick="assignEvent('+(loop1+1)+','+subject.subjectId+','+courseDetails.courseId+',\'ft_courses\','+courseDetails.userReachedMaxLimit+','+courseDetails.courseCreditLimit+','+courseDetails.courseSelectedCredit+','+subject.subjectCredit+','+(csr.registrationType=='SCHOLARSHIP' ? 1 : subject.remarks)+',\''+subject.courseType+'\',\'add\','+csr.standardId+','+csr.totalCredit+',\''+subject.courseFeeString+'\')" type="radio" name="course_id_'+courseDetails.courseId+'">'
-																						+'<p><i class="fa fa-plus white-txt-color" title="add Course"></i></p>'
-																						+'<p>Add</p>'
-																					+'</label>'
-																				+'</div>'
-																			+'</h4>'
-																		+'</div>'
-																+'</div>';
+																			'</b>'
+																		+'</span>'
+																	+'</h4>'
+																+'</div>'
+																+'<div class="add-course-btn">'
+																	// +'<span class="white-txt-color mr-1"><i class="fa fa-check"></i></span>';
+																	if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
+																		$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
+																			html+=
+																			'<span class="1 remove-icon upgradeCourses primary-txt-color"';
+																				if(upgradeCourse.warningMessage==''){
+																					html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
+																				}else{
+																					html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
+																				}
+																				html+=upgradeCourse.buttonLabel;
+																				if(courseDetails.courseTypeOriginal == 'Regular'){
+																					html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
+																				}else{
+																					html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
+																				}
+																			html+=
+																			'</span>';
+																			if(upgradeCourse.courseType == "ADV"){
+																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																			}else if(upgradeCourse.courseType == "HON"){
+																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																			};
+																		});
+																	}
+																	
+																	if(courseDetails.courseDescriptionUrl != null && courseDetails.courseDescriptionUrl!=''){
+																		//html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
+																		html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+courseDetails.courseDescriptionUrl+`', '`+courseDetails.courseName+`')" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">Course Summary</a>`;
+																	}
+																html+=
+																'</div>'
+															+'</div>'
+														+'</div>';
+													});
+												html+=
+													'<div id="addAndRemoveLoader" class="loader-bg" style="display: none;">'
+														+'<div class="loader">Please Wait... <span></span></div>'
+													+'</div>'
+												+'</div>';
+												if(csr.courseMaterialFeeDetails!=null && csr.courseMaterialFeeDetails.totalEntityFee>0){
+													html+=
+													'<div class="course-category">'
+														+'<span class="category-name">External Material Fee</span>'
+														+'<div class="course-item">'
+															+'<div class="course-name-wrapper" id="totalEntityFee">';
+															$.each(csr.courseMaterialFeeDetails.description, function(k, desc) {
+																html+=
+																'<h4 class="course-name">'
+																	+desc
+																+'</h4>';
 															});
 															html+=
-														'</div>'
-													+'</div>'
-												+'</li>';
+															'</div>'
+														+'</div>'
+														+'<div class="course-item">'
+															+'<div class="course-name-wrapper">'
+																+'<h4 class="course-name">External Material Fee: <span class="price"> '+csr.courseMaterialFeeDetails.totalEntityFeeString+'</span></h4>'
+															+'</div>'
+														+'</div>'
+													+'</div>';
+												}
 											}
-										});
+										html+=
+										'</div>'
+									+'</div>'
+								+'</div>'
+							+'</div>'
+						+'</div>'		
+					+'</div>'
+				+'</div>';
+			}else {
+				html+=
+				'<div class="course-selection-wrapper" style="min-height:275px; display:'+((csr.requiredFixedCourses)?"none;":"block;")+'">'
+					+'<div class="form-row" style="justify-content: space-between;">';
+						//+'<div class="form-holder selected-course-view">'
+							if(csr.registrationType !='BATCH' && csr.courseProviderId != 39){
+								html+='<div class="form-holder selected-course-view">';
+							}else{
+								html+='<div class="form-holder selected-course-view" style="width:100%">';
+							}
+							html+='<div class="fixed-item full">'
+								+'<div class="full selected-course primary-bg primary-border-color head">'
+									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
+										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
+											if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
+												html+=csr.selectedSubjects.length;
+												html+=' Mandatory / Fixed ';
+												if(csr.selectedSubjects.length>1){
+													html+=' Courses worth '+csr.totalCredit+' credits';
+												}else{
+													html+=' Course worth '+csr.totalCredit+' credit';
+												}
+											}else{
+												html+='You have '+csr.selectedSubjects.length;
+												if(csr.selectedSubjects.length>1){
+													html+=' Courses worth '+csr.totalCredit+' credits';
+												}else{
+													html+=' Course worth '+csr.totalCredit+' credit';
+												}
+											}
+										}else{
+											html+='Please select a course';
+										}
 									html+=
-									'</ul>'
+									'</h4>';
+									if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
+										html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">Remove ALL&nbsp;<i class="fa fa-trash"></i></span>';
+									}
+								html+=
+								'</div>'
+								+'<div class="full selected-course-view">'
+									+'<div class="selected-course primary-border-color">'
+										+'<div class="selected-course-list">';
+											if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
+												html+=
+												'<div class="course-category">';
+													$.each(csr.selectedSubjects, function(k, courseDetails) {
+														html+=
+														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
+															+'<span class="count">'+(k+1)+'.&nbsp;</span>'
+															+'<div class="selected_course_name">'
+																+'<div class="course-icon"></div>'
+																+'<div class="course-name-wrapper">'
+																	+'<h4 class="course-name">'
+																		+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
+																		+'<span class="price">'
+																			+' <b class="ml-3">';
+																				if(csr.showCourseFee =='Y'){
+																					html+=courseDetails.coursePriceSelectedString;
+																				}
+																				html+=
+																			'</b>'
+																		+'</span>'
+																	+'</h4>'
+																+'</div>'
+																+'<div class="add-course-btn">';
+																	// +'<span class="white-txt-color mr-1"><i class="fa fa-check"></i></span>';
+																	if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
+																		$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
+																			html+=
+																			'<span class="remove-icon upgradeCourses primary-txt-color"';
+																				if(upgradeCourse.warningMessage==''){
+																					html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
+																				}else{
+																					html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
+																				}
+																				html+=upgradeCourse.buttonLabel;
+																				if(courseDetails.courseTypeOriginal == 'Regular'){
+																					html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
+																				}else{
+																					html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
+																				}
+																			html+=
+																			'</span>';
+																			if(upgradeCourse.courseType == "ADV"){
+																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																			}else if(upgradeCourse.courseType == "HON"){
+																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																			};
+																		});
+																	}
+																	if(courseDetails.courseMandatory==1){
+																		if(csr.registrationType != 'BATCH' && csr.courseProviderId != 39){
+																			html+= '<span class="mandatory-btn">Mandatory</span>';
+																		}else{
+																			// if(courseDetails.courseDescriptionUrl!=null && courseDetails.courseDescriptionUrl!=''){
+																				// html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
+																			// }
+																			if(courseDetails.courseDescriptionUrl!=null && courseDetails.courseDescriptionUrl!=''){
+																				// html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
+																				html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+courseDetails.courseDescriptionUrl+`', '`+courseDetails.courseName+`')" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">Course Summary</a>`;
+																			}
+																		}
+																	}else if(courseDetails.courseMandatory==0){
+																		html+= '<span class="remove-icon removeAllCourses" onclick="removeCourse(\''+courseDetails.courseId+'\',\''+courseDetails.categoryId+'\',\'ft_courses\')">Remove <i class="fa fa-trash" title="Remove Course"></i></span>';
+																	}
+																html+=
+																'</div>'
+															+'</div>'
+														+'</div>';
+													});
+												html+=
+													'<div id="addAndRemoveLoader" class="loader-bg" style="display: none;">'
+														+'<div class="loader">Please Wait... <span></span></div>'
+													+'</div>'
+												+'</div>';
+												if(csr.courseMaterialFeeDetails!=null && csr.courseMaterialFeeDetails.totalEntityFee>0){
+													html+=
+													'<div class="course-category">'
+														+'<span class="category-name">External Material Fee</span>'
+														+'<div class="course-item">'
+															+'<div class="course-name-wrapper" id="totalEntityFee">';
+															$.each(csr.courseMaterialFeeDetails.description, function(k, desc) {
+																html+=
+																'<h4 class="course-name">'
+																	+desc
+																+'</h4>';
+															});
+															html+=
+															'</div>'
+														+'</div>'
+														+'<div class="course-item">'
+															+'<div class="course-name-wrapper">'
+																+'<h4 class="course-name">External Material Fee: <span class="price"> '+csr.courseMaterialFeeDetails.totalEntityFeeString+'</span></h4>'
+															+'</div>'
+														+'</div>'
+													+'</div>';
+												}
+											}
+										html+=
+										'</div>'
+									+'</div>'
 								+'</div>'
 							+'</div>'
 						+'</div>';
-					}
-				html+=
-				'</div>';
-				// if(csr.registrationType =='BATCH'  || csr.courseProviderId == 39){
-				// 	html+='<div class="form-row sfd" style="justify-content: space-between;">'
-				// 		+'<div class="add-course-from-dashboard-notes primary-txt-color text-center theme-border">'
-				// 			+'You can add more courses from your dashboard for an extra fee after your enrollment is confirmed.'
-				// 		+'</div>'
-				// 	+'</div>';
-				// }
-			html+='</div>'
+						var availeCourseForSelection=false;
+						$.each(csr.availableCourses, function(availableCoursesLoop, courseDetails) {
+							if(courseDetails.subjects.length>0){
+								availeCourseForSelection=true;
+							}
+						});
+						if(availeCourseForSelection){
+							html+=
+							'<div class="form-holder course-selection-list">'
+								+'<ul class="custom-tab-wrapper">'
+									+'<li class="active-tab primary-bg white-txt-color">'
+										+'<a href="javascript:void(0)" id="ft_courses">'
+											+'<label class="full_form">';
+											if(csr.minCourseLimit>csr.totalCredit){
+												if(csr.maxCourseLimit-csr.totalCredit <= 1){
+													html+='PLEASE SELECT A COURSE ';
+												}else{
+													html+='PLEASE SELECT COURSES ';
+												}
+												if(csr.totalCredit<csr.maxCourseLimit){
+													if(csr.totalCredit==0){
+														html+='WORTH '+(csr.minCourseLimit);
+													}else{
+														html+='WORTH '+(csr.maxCourseLimit-csr.totalCredit);
+													}
+												}
+												if(csr.maxCourseLimit-csr.totalCredit <= 1){
+													html+=' CREDIT';
+												}else{
+													html+=' CREDITS';
+												}
+											}else{
+												html+='SELECT EXTRA COURSES';
+											}
+											html+='<br>'
+												+'<span style="font-size:12px">';
+													if(csr.registrationType == 'SCHOLARSHIP'){
+														html+=
+														'(PLEASE NOTE - LIVE CLASSES ARE NOT OFFERED IN THIS PROGRAM)';
+													}
+													
+												html+='</span>'
+											+'</label>';
+											if(csr.eligibleForRecommendedCourse){
+												html+='<button class="btn white-bg primary-txt-color pull-right" style="margin:0px;font-weight:bold;padding:4px !important;text-transform:capitalize;box-shadow:0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.70);font-size:13px" onclick="recommendedCourse()">Add Recommended Courses</button>'
+											}
+										html+=
+										'</a>'
+									+'</li>'
+								+'</ul>'
+								+'<div id="ft_coursesC" class="full-time-courses custom-tab-item">'
+									+'<div class="course-selection-list">'
+										+'<ul class="accordion">';
+											$.each(csr.availableCourses, function(availableCoursesLoop, courseDetails) {
+												if(courseDetails.subjects.length>0){
+													html+=
+													'<li>'
+														+'<div class="student-details-info">'
+															+'<div class="full">'
+																+'<h4 id="'+(availableCoursesLoop+1)+'" class="a-title courseSelectId-'+courseDetails.courseId+'" courseCreditLimit="'+courseDetails.courseCreditLimit+'" parentSubjectId="'+courseDetails.parentSubjectId+'">'
+																	+courseDetails.courseName;
+																	if(courseDetails.courseDescription!=null && courseDetails.courseDescription!=''){
+																		html+='<i class="fa fa-info-circle" data-toggle="tooltip" title="'+courseDetails.courseDescription+'"></i>';
+																	}
+																	html+=
+																	'<i class="fa plus-icon fa-angle-down primary-txt-color"></i>'
+																+'</h4>'
+															+'</div>'
+															+'<div class="a-content'+(courseDetails.subjects>6?'overflow-auto':'')+'">';
+																$.each(courseDetails.subjects, function(loop1, subject) {
+																	html+=
+																	'<div class="course-item border-around theme-border">'
+																		+'<div class="course-icon"><i class="fa fa-book"></i></div>'
+																			+'<div class="course-name-wrapper bg-border">'
+																				+'<h4 class="course-name open-dropdown">'
+																					+'<div  style="margin-right:auto">'
+																						+'<label id="course_name_'+subject.subjectId+'" for="course_id_'+subject.subjectId+'" class="m-0 course-type-title primary-txt-color">'
+																							+subject.subjectName
+																						+'</label>'
+																						+'<ul class="no-teacher">';
+																							if(subject.remarks == '0' && csr.registrationType != 'SCHOLARSHIP'){
+																								html+='<li style="float:none;">&#8226; This course does not offer live classes</li>';
+																							}
+																							if(SHOW_PAYMENT_OPTION=='Y'){
+																								if(subject.materialFee >0 ){
+																									html+='<li style="float:none;">&#8226; '+subject.materialFeeString+' extra for External Materials.</li>';
+																								}
+																								if($('#learingProgramHeader').attr('val')!='ONE_TO_ONE_FLEX'){
+																									if(subject.additionalFee !=null && subject.additionalFee > 0){
+																										var creditsLimitsOver=creditLimitOver(csr.standardId, csr.totalCredit);
+																										if(creditsLimitsOver){
+																											html+='<li style="float:none;">&#8226; '+subject.subjectPriceString+' extra for '+subject.courseType+' Courses.</li>';
+																										}else{
+																											html+='<li style="float:none;">&#8226; '+subject.additionalFeeString+' extra for '+subject.courseType+' Courses.</li>';
+																										}
+																									}
+																								}
+																							}
+																						html+=
+																						'</ul>'
+																					+'</div>'
+																					+'<div style="display: flex;flex-direction: column;justify-content: center;align-items: center;width: 15%;text-align: center;">'
+																						+'<label class="m-0 course-type-title primary-txt-color pull-right">';
+																							if(csr.showCourseFee =='Y'){
+																								html+=`<p>`+subject.subjectPriceString+`</p>`;
+																							}
+																							html+=
+																							subject.subjectCredit+' Credit&nbsp;'
+																						+'</label>';
+																						if(subject.courseDescriptionUrl!=null && subject.courseDescriptionUrl!=''){
+																							html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="view-course-details theme-text">Course Summary</a>`;
+																							// html+=`<a href="javascriptVoid(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="btn btn-sm" style="background-color:transparent;font-size:8px;margin:0px;box-shadow:0px 0px;color:#007fff;">Course Summary</a>`;
+																						}
+																					html+=
+																					'</div>'
+																					+'<div>'
+																						+'<label for="course_id_'+subject.subjectId+'" class="m-0 add-course-button primary-bg secondary-hov-bg white-txt-color">'
+																							+'<input class="add-course-checkbox" id="course_id_'+subject.subjectId+'"'
+																							+' value="'+subject.subjectId+'" onclick="assignEvent('+(loop1+1)+','+subject.subjectId+','+courseDetails.courseId+',\'ft_courses\','+courseDetails.userReachedMaxLimit+','+courseDetails.courseCreditLimit+','+courseDetails.courseSelectedCredit+','+subject.subjectCredit+','+(csr.registrationType=='SCHOLARSHIP' ? 1 : subject.remarks)+',\''+subject.courseType+'\',\'add\','+csr.standardId+','+csr.totalCredit+',\''+subject.courseFeeString+'\')" type="radio" name="course_id_'+courseDetails.courseId+'">'
+																							+'<p><i class="fa fa-plus white-txt-color" title="add Course"></i></p>'
+																							+'<p>Add</p>'
+																						+'</label>'
+																					+'</div>'
+																				+'</h4>'
+																			+'</div>'
+																	+'</div>';
+																});
+																html+=
+															'</div>'
+														+'</div>'
+													+'</li>';
+												}
+											});
+										html+=
+										'</ul>'
+									+'</div>'
+								+'</div>'
+							+'</div>';
+						}
+					html+=
+					'</div>';
+					// if(csr.registrationType =='BATCH'  || csr.courseProviderId == 39){
+					// 	html+='<div class="form-row sfd" style="justify-content: space-between;">'
+					// 		+'<div class="add-course-from-dashboard-notes primary-txt-color text-center theme-border">'
+					// 			+'You can add more courses from your dashboard for an extra fee after your enrollment is confirmed.'
+					// 		+'</div>'
+					// 	+'</div>';
+					// }
+				html+='</div>'
+			}
 		+'</div>';
 	}
 	return html;
@@ -1971,7 +1965,7 @@ function paymentModalContentWithData(cdrDTO){
 		+'<div class="label-floating feePayMode">'
 			+'<div class="col-md-12 col-sm-12 col-xs-12 p-0">'
 				+'<div class="payment-item">';
-				if(cdrDTO.bookASeatOpted == 1 && !cdrDTO.bookAnEnrollmentPaidStatus){
+				if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 					html+=
 					'<div class="radio radio-payment-option white-txt-color">'
 						+'<input id="pay-registration" value="1" type="radio" name="payModeCheckboxes">'
@@ -2049,7 +2043,7 @@ function paymentModalContentWithData(cdrDTO){
 							+'<div class="row">'
 								+'<div class="col-md-12">'
 									+'<div class="table-responsive">';
-									if(cdrDTO.bookASeatOpted == 1 && !cdrDTO.bookAnEnrollmentPaidStatus){
+									if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 										html+=
 										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'
@@ -2838,12 +2832,14 @@ function getAnnualPaymentTable(cdrDTO){
 			}
 		}
 		if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA' ){
-			html+=
-			'<tr>'
-				+'<td>Enrollment Fee</td>'
-				+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
-				+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
-			+'</tr>';
+			if(cdrDTO.enrollmentFee.enrollmentFee>0){
+				html+=
+				'<tr>'
+					+'<td>Enrollment Fee</td>'
+					+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
+					+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
+				+'</tr>';
+			}
 		}
 		html+=
 		'<tr>'
@@ -3150,7 +3146,7 @@ function callPaymentStudentModal(data){
 									+'<div role="tabpanel" id="credit-card-payment" class="tab-pane '+(data.pgs!=null?"active":"")+' credit-card-payment flex-item primary-border-color">'
 										+'<div id="primary-pg" style="display:block;">'
 											+'<div class="payment-icon lg">';
-												if(data.pgName=='Stripe'){
+												if(data.pgName=='STRIPE'){
 													html+='<img src="'+PATH_FOLDER_IMAGE+'STRIPE.png">';
 												}else if(data.pgName=='Smoovpay'){
 													html+='<img src="'+PATH_FOLDER_IMAGE+'SMOOVPAY.png">';

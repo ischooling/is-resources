@@ -1423,7 +1423,7 @@ function paymentModalContentWithData(cdrDTO){
 		+'<div class="label-floating feePayMode">'
 			+'<div class="col-md-12 col-sm-12 col-xs-12 p-0">'
 				+'<div class="payment-item">';
-				if(cdrDTO.bookASeatOpted == 1 && !cdrDTO.bookAnEnrollmentPaidStatus){
+				if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 					html+=
 					'<div class="radio radio-payment-option white-txt-color">'
 						+'<input id="pay-registration" value="1" type="radio" name="payModeCheckboxes">'
@@ -1503,7 +1503,7 @@ function paymentModalContentWithData(cdrDTO){
 							+'<div class="row">'
 								+'<div class="col-md-12">'
 									+'<div class="table-responsive">';
-									if(cdrDTO.bookAnEnrollmentPaidStatus!=null && !cdrDTO.bookAnEnrollmentPaidStatus){
+									if(cdrDTO.bookAnEnrollmentPaidStatus!=null && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 										html+=
 										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'

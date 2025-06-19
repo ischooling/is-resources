@@ -257,6 +257,7 @@ function deleteWarning(warningMessage, callbackFunction) {
 		+'</div>';
 	return html;
 }
+
 function cropModal(){
 	var html=
 	'<div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static">'
@@ -1595,13 +1596,14 @@ function customEmailTemplatesList(tdata) {
 											
 											if(tdata.templates){
 												const userFirstName = USER_FULL_NAME.split(" ")[0];
+												let indexValue = 0;
 												$.each(tdata.templates, function(index, element) {
 													if (element.name.toLowerCase().includes(userFirstName.toLowerCase())) {
-														var count = index + 1;
+														indexValue++
 														var templateName = element.name;
 														let subject = element.subject;
 														html+=`<tr id="table_row_`+templateName+`">
-															<td style="vertical-align: middle !important;" class="font-weight-bold">`+ count +`</td>
+															<td style="vertical-align: middle !important;" class="font-weight-bold">`+ indexValue+`</td>
 															<td style="vertical-align: middle !important;" class="font-weight-bold">`+templateName+`</td>
 															<td style="vertical-align: middle !important;" class="text-center">
 																<a href="javascript:void(0)" class="btn btn-outline-dark btn-sm" style="text-decoration: none !important;" onclick="viewEmailTemplate(true, `+index+`, '`+templateName+`')">
@@ -1609,7 +1611,7 @@ function customEmailTemplatesList(tdata) {
 																</a>
 															</td>
 															<td style="vertical-align: middle !important;" class="text-center">
-																<a href="javascript:void(0)" class="btn btn-primary btn-sm text-white" style="text-decoration: none !important;" onclick="sendEmailNotification(\'`+templateName+`\','`+subject+`',`+index+`,\'`+element.id+`\')">
+																<a href="javascript:void(0)" class="btn btn-primary btn-sm text-white" style="text-decoration: none !important;" onclick="sendEmailNotification(\'`+btoa(templateName)+`\','`+btoa(subject)+`',`+index+`,\'`+element.id+`\')">
 																	Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
 																</a>
 															</td>
@@ -1695,21 +1697,21 @@ function emailBroadcastSendModal(data){
 				<div class="modal-dialog" style="width:40%;">
 					<div class="d-flex flex-wrap email-wrapper">
 						<div class="modal-content border-0">
-							<div class="modal-header py-1 bg-primary text-white">
-								<div class="fsize-1 mb-0">
+							<div class="modal-header py-1 bg-primary text-white align-items-center">
+								<div class="d-flex fsize-1 mb-0 align-items-center">
+									<button type="button" class="btn mr-2 btn-primary btn-sm d-flex align-items-center" style='gap:5px;' onclick="gotoBackEmailModal()">
+										<svg style='width:15px;' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+										</svg>
+										<span>Back</span>
+									</button>
 									<span class="">Selected Template: </span>
 									<span class="" id="templateNameEmail"></span>
 									<span class="" id="viewMethodCallingEmail"></span>
 								</div>
 								<div class="d-flex align-items-center">
-										<button type="button" class="btn btn-primary btn-sm d-flex align-items-center" style='gap:5px;' onclick="gotoBackEmailModal()">
-											<svg style='width:15px;' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-												<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-											</svg>
-											<span>Back</span>
-										</button>
-										<button id="emailBroadcastSendModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('emailBroadcastSendModal'); closeModalAndFlushData();">&times;</button>
-									</div>
+									<button id="emailBroadcastSendModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('emailBroadcastSendModal'); closeModalAndFlushData();">&times;</button>
+								</div>
 								</div>
 							<div class="modal-body pt-1">
 								<form id="sendEmailBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
@@ -1777,8 +1779,8 @@ function emailBroadcastSendModal(data){
 											<span id="selectionCountEmail" class="mb-2 bg-primary text-white px-3 p-2 rounded-5"></span>
 										</div>
 										<div class="d-flex justify-content-center align-items-center">
-											<input type="radio" name="mailBroadcastTime" value="now" checked><h6 class="mb-0 ml-1"> Send Now </h6>
-											<input type="radio" name="mailBroadcastTime" class="ml-3" value="bestTime"><h6 class="mb-0 ml-1"> Send At Best Time </h6>
+											<input type="radio" name="mailBroadcastTime" value="now" checked><p class="mb-0 ml-1"> Send Now </p>
+											<input type="radio" name="mailBroadcastTime" class="ml-3" value="bestTime"><p class="mb-0 ml-1"> Send At Best Time </p>
 										</div>
 										<div id="confirm_btn_data_email"></div>
 									</div>	
@@ -1847,19 +1849,19 @@ function successFailedEmailMessagesModal(allData) {
 		`<div class="modal-dialog" style="width:40%;">
 			<div class="d-flex flex-wrap email-wrapper">
 				<div class="modal-content border-0">
-					<div class="modal-header py-1 bg-primary text-white">
-						<div class="fsize-1 mb-0">
-							<span class="">Selected Template: </span>
-							<span class="" id="templateNameEmailSF"></span>
-							<span class="" id="viewMethodCallingEmailSF"></span>
-						</div>
-						<div class="d-flex align-items-center">
-							<button type="button" class="btn btn-primary btn-sm d-flex align-items-center" style='gap:5px;' onclick="selfModalHide('successFailedEmailMessagesModal');gotoBackEmailModal()">
+					<div class="modal-header py-1 bg-primary text-white align-items-center">
+						<div class="d-flex align-items-center fsize-1 mb-0">
+							<button type="button" class="btn btn-primary btn-sm d-flex align-items-center mr-2" style='gap:5px;' onclick="selfModalHide('successFailedEmailMessagesModal');gotoBackEmailModal()">
 								<svg style='width:15px;' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
 								</svg>
 								<span>Back</span>
 							</button>
+							<span class="">Selected Template: </span>
+							<span class="" id="templateNameEmailSF"></span>
+							<span class="" id="viewMethodCallingEmailSF"></span>
+						</div>
+						<div class="d-flex align-items-center">
 							<button id="successFailedEmailMessagesModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('successFailedEmailMessagesModal'); closeModalAndFlushData();">&times;</button>
 						</div>
 					</div>
@@ -1929,7 +1931,7 @@ function successFailedEmailMessagesModal(allData) {
 
 									<div id="failedEmailTableDiv" class="full table-responsive px-1 font-12"></div>
 								</div>
-								<div id="resendEmailMessagesData">Resend</div>
+								${(failedOrOtherEmails.length > 0)? '<div id="resendEmailMessagesData">Resend</div>' :''}
 							</form>
 						</div>
 					</div>
@@ -2067,6 +2069,115 @@ function failedEmailTableContent(){
 		</table>
 		<div id="selectedMessageCountOnFailedEmail" class="my-2">
 			<span id="selectionCountOnFailedEmail" class="mb-2 bg-primary text-white px-3 p-2 rounded-5 font-12"></span>
+		</div>`;
+	return html;
+}
+
+function emailBroadcastLogsModal(data, name, email) {
+	let html = `
+		<style>
+			#emailBroadcastLogsModal {
+				border-collapse: collapse;
+				border-radius: 10px;
+			}
+			#emailBroadcastLogsModal td, th {
+				border: 1px solid #f7f7f7;
+			}
+		</style>
+		<div id="emailBroadcastLogsModal" class="modal fade fade-scale" role="dialog" aria-labelledby="emailBroadcastLogs" aria-hidden="true">
+			<div class="modal-dialog" style='width: 70%;'>
+				<div class="d-flex flex-wrap email-wrapper">
+					<div class="modal-content border-0">
+						<div class="modal-header py-1 bg-primary text-white">
+							<h5 class="modal-title">Email Broadcast Logs </h5>
+							<button type="button" class="close text-white" onclick="selfModalHide('emailBroadcastLogsModal')">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1">
+							<div class="flex-grow-1">
+								<div class="full mb-1 mt-1 table-responsive" style="max-height:80vh !important;">
+									<table class="table" id="emailBroadcastLogsTableData" style="font-size:14px; min-width:450px">
+										<thead style="position:sticky;top:0;z-index:10;">
+											<tr style='background-color:#E7F3FF'>
+												<th class="border text-primary">S.No.</th>
+												<th class="border text-primary">Sender</th>
+												<th class="border text-primary">Email Subject</th>
+												<th class="border text-primary">Sent Time</th>
+												<th class="border text-primary">Action</th>
+											</tr>
+										</thead>
+										<tbody>`;
+											if(data.length > 0){
+												$.each(data, function(index, item){
+													var parsedData = JSON.parse(data[index])
+													html+=`<tr>
+														<td>${index + 1}</td>
+														<td>${parsedData.senderName}</td>
+														<td>${parsedData.subject}</td>
+														<td>${parsedData.time}</td>
+														<td>
+															<button class="btn btn-primary btn-sm" onclick="getEmailBroadcastLogsTemplate(${parsedData.actionExecutionId},'${email}')">View Template</button>
+														</td>
+													<tr>`
+												})
+											}else{
+												html+=`<tr colspan="5">No Email Logs Found</tr>`
+											}
+										html+=`</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="emailBroadcastLogsTemplateWrapper"></div> 
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function emailBroadcastLogsTemplateContent(){
+	var html=
+		`<div id="emailBroadcastLogsTemplate" class="modal fade fade-scale" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-md" style='width: 80% !important;'>
+				<div  class="modal-content border-0 email-template" style="max-width:450px;">
+					<div class="modal-header py-1 text-white bg-primary">
+						<p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+						<button type="button" class="close text-white" onclick="viewEmailTemplate(false)"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body px-1">
+						<div class="mx-auto">
+							<div class="screen">
+								<div class="content">
+									<div class="full" id="emailBroadcastLogsTemplatePreview" style="font-size:13px"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function sendConfirmationModal(functionName){
+	var html =
+		`<div class="modal fade" id="sendConfirmationModal">
+			<div class="modal-dialog modal-sm" role="document" style="box-shadow: none; width: 450px; max-width: 100%; margin-top: 8%;">
+				<div class="modal-content text-center">
+					<div class="modal-header justify-content-center bg-primary" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>
+					<div class="modal-body delete-modal">
+						<p class="heading" style="color: #027FFF; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to send this data?</p>
+					</div>
+					<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">
+						<div class="text-center" style="margin: 0 auto;">
+							<button onclick="${functionName}" type="button" class="btn mr-1" style="color: #027FFF !important; border: 1px solid #027FFF !important; background: transparent !important;">Yes</button>
+							<button type="button" class="btn text-white" style="background:#027FFF" data-dismiss="modal">No</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>`;
 	return html;
 }

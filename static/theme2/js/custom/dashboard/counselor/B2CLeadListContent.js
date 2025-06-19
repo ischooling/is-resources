@@ -1545,29 +1545,29 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;">';
 					if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
 						if(leads.leadStatus=='Unassigned'){
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\');" ><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Update.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\');" ><i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleModule.updated=='Y'){
 								var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
 								var discardFun ="return showNewDiscardLeadModelFunction('"+disFun+"','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/discard.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
 						}else{
 							if(roleModule.updated=='Y' ){
 								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\');" >'
-									+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Update.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+									+'<i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
 							if(roleModule.updated=='Y' ){
 								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Clone" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
-									+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Clone.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+									+'<i class="fa fa-clone" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
 							if(roleModule.updated=='Y' ){
 								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Partner with B2B" onclick="callLeadsByLeadId(\'leadDataPopupB2BForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupB2BForm\',\'B2C-B2B\','+objRights.discardPermission+');" >'
-									+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Partner.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+									+'<i class="fa fa-handshake" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Activity logs" onclick="getAsPost(\'/dashboard/lead-followup-log-data?moduleId=moduleId='+objRights.moduleId+'&leadNo='+leads.leadNo+'&leadType=B2C\')">'
-									+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Activity-logs.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+									+'<i class="fa fa-tasks" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update chat support" onclick="renderChatContent(\''+objRights.discardPermission+'\',\''+USER_ID+'\',\''+leads.leadId+'\')">'
-									+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/chat-support.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';	
+									+'<i class="fa fa-comment" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';	
 							if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleAndModule.updated=='Y'){
 								//var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
 								var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
@@ -1580,8 +1580,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									// +'<i class="fa fa-trash text-danger"></i></a><br/>';
 								}
 							}
-							html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/book.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
-							html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/book.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+							html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+							html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="WhatsApp chat log" onclick="callOpenWatsAppMessage(\'watsAppMsgModal\',\''+leads.leadId+'\');"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/WhatsApp.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
 							if(leads.whatsAppVerifiedStatus == 'NA'){
 							}else{
@@ -1593,7 +1593,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Wati.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a>';
 							}
 							if(leads.zadarmaCount>0){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs" onclick="getZadarmaLogs(\''+leads.phoneIsd+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Zadarma.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a>';
+								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs" onclick="getZadarmaLogs(\''+leads.phoneIsd+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Zadarma.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+							}
+							if(leads.emailBroadcastCount>0){
+								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
 						}
 						
