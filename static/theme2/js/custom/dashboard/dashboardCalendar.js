@@ -473,7 +473,7 @@ function updateEventIcons(info, element, todayClassArray) {
 					if($(".upcoming-class-blink").length < 1){
 						var closestEvent = getClosestUpcomingEvent(todayClassArray);
 						if (closestEvent && closestEvent.title === info.title) {
-							var upcomingIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg upcoming-icon">🕒 Upcoming</b>'); 
+							var upcomingIcon=$('<b class="d-inline-block pull-right live-symbol font-size-lg upcoming-icon"> <img style="width:34px;filter:brightness(0) invert(1);left:10px" class="timer-img position-relative"  src="'+PATH_FOLDER_IMAGE2+'timer.gif"/> Upcoming</b>'); 
 							element.addClass("upcoming-class-blink");
 							element.find(".fc-time span").append(upcomingIcon);
 						}

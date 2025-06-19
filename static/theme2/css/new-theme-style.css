@@ -26311,7 +26311,7 @@ a[data-goto]:hover {
 	opacity:.25
 }
 .fc-event .fc-content {
-	position:relative;
+	/* position:relative; */
 	z-index:2
 }
 .fc-event .fc-resizer {
@@ -31486,9 +31486,9 @@ table td.child ul li{white-space: normal;}
 from { background-color: rgb(0 192 0); }
 to { background-color: rgb(6, 145, 6); }
 }
-.live-symbol{position:absolute;top:50%;transform: translateY(-50%);right: 0;padding: 6px;background-color:rgb(0 124 0);}
+.live-symbol{position:absolute;bottom:-4px; right: 0;padding: 6px;}
 .upcoming-class-blink[style], .upcoming-class-blink{background-color: #453900 !important;border-color:#70621e !important;color:#fff}
-.upcoming-class-blink .upcoming-icon.live-symbol{position:absolute;top:50%;transform: translateY(-50%);right: 0;background-color: #453900 !important;padding: 6px;}
+.upcoming-class-blink .upcoming-icon.live-symbol{position:absolute;bottom:-12px; right: 0;padding: 6px;}
 
 /* datepicker custom css  */
 .datepicker-container[style]{z-index: 2000 !important}
