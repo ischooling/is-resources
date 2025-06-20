@@ -1483,7 +1483,7 @@ function getCourseSelectionContent(csr){
 							if(csr.registrationType !='BATCH' && csr.courseProviderId != 39){
 								html+='<div class="form-holder selected-course-view">';
 							}else{
-								html+='<div class="form-holder selected-course-view" style="width:100%">';
+								html+='<div class="form-holder selected-course-view" '+( csr.courseProviderId != 39 ? 'style="width:100%"':'')+'>';
 							}
 							html+='<div class="fixed-item full">'
 								+'<div class="full selected-course primary-bg primary-border-color head">'
