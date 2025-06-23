@@ -545,42 +545,44 @@ function saveEditData(formId, rowUniqueID) {
 //Save Edit Cancel Button Function
 
 $(document).on("click", ".edit-button", function () {    
-   
     var row = $(this).closest("tr");
     var currentValue = row.find(".textValue").text();
     row.find(".edit-button, .textValue").addClass("d-none");
     row.find(".save-button, .cancel-button, .inputValue").removeClass("d-none");
     row.find(".metaValue").val(currentValue);
-    var currentSession =$(this).parent().closest("tr").find(".session-td").text()
-    var sY =  $(this).parent().closest("tr").find(".session-td").attr("data-startyear").split("-");
-    var sM =  $(this).parent().closest("tr").find(".session-td").attr("data-startmonth");
-    var sD =  $(this).parent().closest("tr").find(".session-td").attr("data-startday");
-    var eY =  $(this).parent().closest("tr").find(".session-td").attr("data-endyear").split("-");
-    var eM =  $(this).parent().closest("tr").find(".session-td").attr("data-endmonth");
-    var eD =  $(this).parent().closest("tr").find(".session-td").attr("data-endday");
-    var eeY =  $(this).parent().closest("tr").find(".session-td").attr("data-eendyear").split("-");
-	var eeM =  $(this).parent().closest("tr").find(".session-td").attr("data-eendmonth");
-	var eeD =  $(this).parent().closest("tr").find(".session-td").attr("data-eendday");
-    sY = parseInt(sY[0])-1;
-    eY = parseInt(eY[1]);
-    eeY = parseInt(eeY[1]);
-   
-    $(".session-td").val(currentSession).trigger("change");
-    $('.sessionStartDate').datepicker("remove");
-    $('.sessionStartDate').datepicker({  
-        format: 'yyyy-mm-dd',
-         startDate: new Date(sY+'-'+sM+'-'+sD),
-         endDate: new Date(eY+'-'+eM+'-'+eD)
-    });
-    $('.sessionStartDate').datepicker('setDate',new Date(sY+'-'+sM+'-'+sD));
+    if($(this).parent().closest("tr").find(".session-td").length > 0){
+        var currentSession =$(this).parent().closest("tr").find(".session-td").text()
+        var sY =  $(this).parent().closest("tr").find(".session-td").attr("data-startyear").split("-");
+        var sM =  $(this).parent().closest("tr").find(".session-td").attr("data-startmonth");
+        var sD =  $(this).parent().closest("tr").find(".session-td").attr("data-startday");
+        var eY =  $(this).parent().closest("tr").find(".session-td").attr("data-endyear").split("-");
+        var eM =  $(this).parent().closest("tr").find(".session-td").attr("data-endmonth");
+        var eD =  $(this).parent().closest("tr").find(".session-td").attr("data-endday");
+        var eeY =  $(this).parent().closest("tr").find(".session-td").attr("data-eendyear").split("-");
+        var eeM =  $(this).parent().closest("tr").find(".session-td").attr("data-eendmonth");
+        var eeD =  $(this).parent().closest("tr").find(".session-td").attr("data-eendday");
+        sY = parseInt(sY[0])-1;
+        eY = parseInt(eY[1]);
+        eeY = parseInt(eeY[1]);
+    
+        $(".session-td").val(currentSession).trigger("change");
+        $('.sessionStartDate').datepicker("remove");
+        $('.sessionStartDate').datepicker({  
+            format: 'yyyy-mm-dd',
+            startDate: new Date(sY+'-'+sM+'-'+sD),
+            endDate: new Date(eY+'-'+eM+'-'+eD)
+        });
+        $('.sessionStartDate').datepicker('setDate',new Date(sY+'-'+sM+'-'+sD));
 
-    $('.sessionEndDate').datepicker("remove");
-    $('.sessionEndDate').datepicker({ 
-        format: 'yyyy-mm-dd', 
-         startDate: new Date(sY+'-'+sM+'-'+sD),
-         endDate: new Date(eeY+'-'+eeM+'-'+eeD)
-      });
-    $('.sessionEndDate').datepicker('setDate',new Date(eY+'-'+eM+'-'+eD));
+        $('.sessionEndDate').datepicker("remove");
+        $('.sessionEndDate').datepicker({ 
+            format: 'yyyy-mm-dd', 
+            startDate: new Date(sY+'-'+sM+'-'+sD),
+            endDate: new Date(eeY+'-'+eeM+'-'+eeD)
+        });
+        $('.sessionEndDate').datepicker('setDate',new Date(eY+'-'+eM+'-'+eD));
+    }
+    
 });
 $(document).on("click", ".save-button", function () {
     var row = $(this).closest("tr");
