@@ -25,7 +25,9 @@ function loadGraduationCeremonyAttendees(){
                     <td>${attendee.amountStatus}</td>
                     <td>${attendee.foodAllergy}</td>
                     <td>`;
-                        if(paymentLink != "N/A"){
+                        if(attendee.amountStatus == "SUCCESS"){
+                            tbodyHtml+=`N/A`;
+                        }else if(paymentLink != "N/A"){
                             tbodyHtml+=`<input type="text" value="${paymentLink}" id="graduationPaymentLink${index}" class="position-absolute" style="top:0;left:0;opacity:0;"/>
                             <button onclick="copyURL('graduationPaymentLink${index}','copy-msg-${index}');" class="btn btn-sm copy-link-btn rounded border-0" style="background-color:#027FFF;">Copy Payment Link</button>
                             <b class="copy-msg-${index}"></b>`;
