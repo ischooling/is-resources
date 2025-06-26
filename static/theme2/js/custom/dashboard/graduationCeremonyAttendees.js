@@ -52,17 +52,18 @@ function loadGraduationCeremonyAttendees(){
     });
 }
 
-// function copyGraduationLink(src){
-//     const link = $(src).data('link');
-//     const $btn = $(src);
-
-//     navigator.clipboard.writeText(link).then(() => {
-//         $btn.text('Copied!')
-//             .css('background-color', '#28a745');
-
-//         setTimeout(() => {
-//             $btn.text('Copy Payment Link')
-//                 .css('background-color', '#027FFF');
-//         }, 1500);
-//     });
-// }
+function sendGraduationCeremonyMailToEligibleStudents(){
+    $.ajax({
+        type: "POST",
+        url: `${APP_BASE_URL}${SCHOOL_UUID}/send-graduation-ceremony-mail`,
+        contentType: "application/json",
+        dataType: 'json',
+        success: function (response) {
+            if(response.status == "SUCCESS"){
+                showMessage(false, response.message);
+            }else{
+                showMessage(false, response.message);
+            }
+        }
+    });
+}

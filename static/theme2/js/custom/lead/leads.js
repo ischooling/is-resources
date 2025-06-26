@@ -1641,7 +1641,7 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  leadAddFormRequestDTO['recordsPerPage']=recordsPerPage;
  //console.log(JSON.stringify(leadAddFormRequestDTO));
  //console.log(JSON.stringify(leadModifyDetailDTO));
- console.log(leadAddFormRequestDTO);
+ //console.log(leadAddFormRequestDTO);
  return leadAddFormRequestDTO;
 }
 
@@ -2555,7 +2555,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 					$("#"+formId+" #stateId").on("change",function(){
 						callCities(''+formId+'', this.value, 'stateId');
 					});
-					callLeadAssignUserList(''+formId+'',leadType,'leadAssignTo', true, columnPermission, USER_ID, false);
+					callLeadAssignUserList(''+formId+'',leadType,'leadAssignTo', true, columnPermission, USER_ID);
 					setTimeout(function() {
 						$("#"+formId+" #leadAssignTo").val(data.leadDashboardCommon.leadCommonDTO[0].leadModifyDTO.assignTo).trigger('change');
 						$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus).trigger('change');
@@ -7443,61 +7443,42 @@ function getRequestForLeadAssign(formId, key, value,  discardPermission,  reques
   return request;
 }
 
-function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPermission, userId, selectStatus) {
-    hideMessageTheme2('');
-    customLoader(false);
-
-    const requestData = getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission, userId);
-
-    return new Promise(function(resolve, reject) {
-        $.ajax({
-            type: "POST",
-            contentType: "application/json",
-            url: getURLForCommon('masters'),
-            data: JSON.stringify(requestData),
-            dataType: 'json',
-            cache: false,
-            async: true,
-            timeout: 600000,
-            success: function(data) {
-                resolve(data);
-            },
-            error: function(err) {
-                reject(err);
-            }
-        });
-    }).then(function(data) {
-        if (data['status'] === '0' || data['status'] === '2') {
-            showMessageTheme2(true, data['message']);
-            return null;  // Indicate error or early exit
-        }
-		const result = data['mastersData']['data'];
-        const dropdown = $("#" + formId + " #" + elementId);
-        dropdown.html('');
-        dropdown.append('<option value="0">Select Assign</option>');
-		$.each(result, function(k, v) {
-            if (keyStatus) {
-                if (discardPermission) {
-                    dropdown.append('<option value="' + v.key + '">' + v.value + ' - (' + v.extra + ')</option>');
-                } else {
-                    if (selectStatus) {
-                        dropdown.append('<option value="' + v.key + '" ' + (v.key == userId ? 'selected' : '') + '>' + v.value + ' - (' + v.extra + ')</option>');
-                    } else {
-                        dropdown.append('<option value="' + v.key + '">' + v.value + ' - (' + v.extra + ')</option>');
-                    }
-                }
-            } else {
-                dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
-            }
-        });
-		return result;
-    }).catch(function(error) {
-        console.error('Error occurred:', error);
-        throw error;
-    });
+function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPermission,  userId) {
+	hideMessageTheme2('');
+	customLoader(false);
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission,  userId)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(true, data['message']);
+			} else {
+				//console.log(data['mastersData']['data']);
+				result = data['mastersData']['data'];
+				dropdown = $("#"+formId+" #"+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="0">Select Assign</option>');
+				$.each(result, function (k, v) {
+					if(keyStatus){
+						dropdown.append('<option value="' + v.key + '" >' + v.value + ' - (' + v.extra + ')</option>');
+					}else{
+						dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
+					}
+				});
+				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
+			}
+		},
+		error: function (e) {
+			//showMessage(true, e.responseText);
+			console.log(e);
+		}
+	});
 }
-
-
 
 
 function callLeadCounselorsList(formId, modeSearch, startDate, endDate, elementId, sublistStatus, countryId, campaignId ) {

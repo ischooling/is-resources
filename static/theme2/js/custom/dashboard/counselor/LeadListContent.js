@@ -16,13 +16,9 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	var objRights = objRight.objectRights;
 	OBJECT_RIGHTS=objRights;
 	LEAD_CATEGORY=objRights.leadType;
-	var html= getLeadListMasterContent(roleAndModule, objRights);
+    var html=getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
-	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	getB2CLeadPopjs(objRights, roleAndModule);
-	
-	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-	getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', objRights, roleAndModule);
 	
 	$("#btnClickLeadMove").on('click',function() {
 		moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
@@ -81,7 +77,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		}
 		
 		$('#moveLeads').modal('show');
-		callLeadAssignUserList('moveLeadNewForm',''+objRights.leadType+'','leadDemoAssignMove', true, objRights.discardPermission, USER_ID, false);
+		callLeadAssignUserList('moveLeadNewForm',''+objRights.leadType+'','leadDemoAssignMove', true, objRights.discardPermission, USER_ID);
 		$("#moveLeadNewForm #leadDemoAssignMove").select2({
 			theme:"bootstrap4",
 			dropdownParent:"#moveLeadNewForm"
@@ -175,7 +171,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			callCities(''+formId+'', this.value, 'stateId');
 		});
 
-		callLeadAssignUserList(''+formId+'',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID, false);
+		callLeadAssignUserList(''+formId+'',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID);
 		
 
 		setTimeout(function() {
@@ -279,7 +275,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		});
 		callLeadSourceList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadSource', true);
 		callLeadStatusList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadStatus', false);
-		callLeadAssignUserList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID, false);
+		callLeadAssignUserList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID);
 	});
 
 	$('.checkRadioLead').on('click',function() {
@@ -324,6 +320,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	setTimeout(function() {
 		curentTimeStamp(objRights.timeZoneOffset);
 	}, 800);
+
+	
+	
+
 }
 
 
@@ -372,8 +372,8 @@ function getLeadListMasterContent(roleAndModule, objRights){
 		html+=getLeadFormB2BPopup(objRights);
 		html+=getLeadMergeB2BFormPopup(objRights);
 		html+='<div id="LeadPartnerUserFormB2BPopup"></div>';
-		//callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-		//getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', objRights, roleAndModule);
+		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', objRights, roleAndModule);
 		
 	}else{
 		html+=getLeadAdvanceSearchPopup(objRights);
@@ -383,7 +383,8 @@ function getLeadListMasterContent(roleAndModule, objRights){
 		html+=getLeadMergeFormPopup(objRights);
 		html+=getLeadCampaignListPopup();
 		html+=getLeadWatsApp();
-		
+		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', objRights, roleAndModule);
 		
 	}
 	html+=getMoveLeadsPopup(objRights);
@@ -600,18 +601,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	// 	$("#leadUpdateSource").val(leadSourceId).trigger('change');
 	// 	$("#updateNewLeadModal").modal('show');	
 	// }
-	$("#advanceLeadNewSearchForm .leadSearchCampaign").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
-	});
-	$("#advanceLeadNewSearchForm .leadSearchTemplate").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
-	});
-	$("#advanceLeadNewSearchForm .leadSearchDeliveredStatus").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
-	});
+
 	
 
 	getSessionMasterList('advanceLeadNewSearchForm', 'leadAcadmicYear', true);
@@ -622,17 +612,17 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	callLeadStatusList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadStatusSearch', false);
 	callPCountries('advanceLeadNewSearchForm', 0, 'countryId');
 	callUTMSourceList('advanceLeadNewSearchForm',''+objectRights.leadType+'','utmSourceSearch', true);
-	
-	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadCreatedBy', true, objectRights.discardPermission,USER_ID, false);
-	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadDemoAssignSearch', true, objectRights.discardPermission, USER_ID, false);
+	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadAssignToSearch', true, objectRights.discardPermission, USER_ID);
+	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadCreatedBy', true, objectRights.discardPermission,USER_ID);
+	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadDemoAssignSearch', true, objectRights.discardPermission, USER_ID);
 	//callTemplateList(true, 'leadSearchTemplate', $("#leadAssignToSearch").val());
 	
 	callCampainList(true,'leadSearchCampaign');
-	// setTimeout(function() {
-	// 	if(objectRights.discardPermission){}else{
-	// 		$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
-	// 	}
-	// }, 1000);
+	setTimeout(function() {
+		if(objectRights.discardPermission){}else{
+			$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
+		}
+	}, 1000);
 
 	
 

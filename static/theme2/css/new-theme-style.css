@@ -33221,3 +33221,18 @@ input:checked + .small-switch-slider:before {
 .text-seat-primary{
 	color: #0053AD !important;
 }
+.scale-btn-animate {
+	animation: scaleAnimation 2s ease-in-out infinite;
+}
+
+@keyframes scaleAnimation {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}

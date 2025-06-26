@@ -232,6 +232,7 @@ function callInneraction(actionType, arg0) {
 		callForDashboardData('formIdIfAny', 'attendance-content' + arg0);
 	} else if (actionType == '1a') {// It has been written in dashboardSchool.js
 		callForDashboardData('formIdIfAny', 'profile-view-content?userId=' + arg0 + '&actionType=' + actionType);
+		// getAsPost('/dashboard/profile-view-content?userId=' + arg0 + '&actionType=' + actionType);
 	} else if (actionType == '1StudentAdmin') {
 		callForDashboardData('formIdIfAny', 'student-profile-view-content?userId=' + arg0);
 		//	}else if(actionType=='1ParentStudentAdmin'){

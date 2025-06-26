@@ -23,6 +23,15 @@ function rendereDashboardContent(isParent){
             window.setTimeout(function(){$('#welcomeNoteModal').modal('hide');},8000)
         }
         var dashboardData=getStudentDashboardDetails();
+        if(dashboardData.showGraduationCeremonyPopup == "Y"){
+            if($("#graduationCeremonyModal").length >= 1){
+                $("#graduationCeremonyModal").remove();
+            }
+            $("body").append(studentGraduationCeremontPopup());
+            setTimeout(() => {
+                $("#graduationCeremonyModal").modal("show");
+            }, 2000);
+        }
         videoUrl=dashboardData.videoUrl;
         if (isParent!=="false") {
             dashboardData ['isParent'] = true;
@@ -49,6 +58,15 @@ function rendereDashboardContent(isParent){
             $('#batchStudentMappingId').val(data.batchStudentMappingId);
         }else{
             $('#batchImpAnnouncementModal').modal('hide'); 
+        }
+        if(data.showGraduationCeremonyPopup == "Y"){
+            if($("#graduationCeremonyModal").length >= 1){
+                $("#graduationCeremonyModal").remove();
+            }
+            $("body").append(studentGraduationCeremontPopup());
+            setTimeout(() => {
+                $("#graduationCeremonyModal").modal("show");
+            }, 2000);
         }
 		data=getStudentMigraionOptionDetails();
         if (isParent!=="false") {
@@ -498,4 +516,36 @@ function onPlayerStateChange(event) {
 function playAgain(){
 	player.seekTo(0);
 	player.playVideo();
+}
+
+function studentGraduationCeremontPopup(){
+    var html = 
+        `<div class="modal fade" id="graduationCeremonyModal" tabindex="-1" role="dialog" aria-labelledby="graduationCeremonyLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered box-shadow-none" role="document">
+                <div class="modal-content shadow-lg rounded-4 border-0">
+                    <div class="modal-header p-0 bg-white border-0">
+                        <button type="button" class="text-white btn btn-sm btn-danger d-flex ml-auto mr-2 mt-2 rounded-circle" data-dismiss="modal" aria-label="Close" style="font-size: 16px !important; margin: 0;">
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body px-5 pt-2 pb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="text-center text-lg-start mb-4 mb-lg-0">
+                                <h4 class="mb-3 font-weight-bold text-dark">
+                                    We are Celebrating our <span class="text-primary">First Graduation Ceremony 2025</span>
+                                    <i class="fa fa-graduation-cap text-dark" aria-hidden="true"></i>
+                                </h4>
+                                <p class="mb-4" style="font-size:16px;">
+                                    We are here to honor your hard work, celebrate your academic excellence,
+                                    and applaud your holistic growth — the journey that shaped you into who you are today.
+                                </p>
+                                <a href="https://join.internationalschooling.org/event-form" target="_blank" class="btn btn-primary px-4 py-2 rounded-10 font-weight-bold scale-btn-animate" style="font-size:14px;">
+                                    Fill Form to Join →
+                                </a>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
 }
