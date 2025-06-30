@@ -1163,6 +1163,9 @@ function getParentDetailsContent(data){
 
 function renderCourseSelectionContent(csr){
 	$('#signupStage3Content').html(getCourseSelectionContent(csr));
+	if(csr.courseProviderId == '39' && csr.availableCourses[0].subjects.length<1){
+		$("#exactPath").css({'width':'100%'});
+	}
 	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
 		$('#gradeId').val(csr.standardId);
 	}
@@ -1483,7 +1486,7 @@ function getCourseSelectionContent(csr){
 							if(csr.registrationType !='BATCH' && csr.courseProviderId != 39){
 								html+='<div class="form-holder selected-course-view">';
 							}else{
-								html+='<div class="form-holder selected-course-view" style="width:100%">';
+								html+='<div class="form-holder selected-course-view" '+( csr.courseProviderId != 39 ? 'style="width:100%"':'id="exactPath"')+'>';
 							}
 							html+='<div class="fixed-item full">'
 								+'<div class="full selected-course primary-bg primary-border-color head">'
