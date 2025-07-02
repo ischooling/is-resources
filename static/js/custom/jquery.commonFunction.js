@@ -8,6 +8,7 @@ var editor1;
 var editor2;
 var editor3;
 var editor4;
+var IGNORECOUNTRYARRAY = ['AQ', 'BV', 'HM', 'TF', 'UM'];
 var globalEntityId = "";
 // var reviewDone = false;
 // var submitted = false;

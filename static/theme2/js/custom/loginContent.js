@@ -1,5 +1,5 @@
 
-async function loginContent(userName){
+async function loginContent(userName, fromSpoof){
     var html =``;
             html+=marqueeContent();
             html+=
@@ -59,7 +59,7 @@ async function loginContent(userName){
                                     </div>
                                     <h1 class="primary-txt-color">User Log In</h1>`;
 
-                                    html+=loginFormContent(userName);
+                                    html+=loginFormContent(userName, fromSpoof);
                                     html+=
                                     `<div class="form-group"></div>
                                 </div>
@@ -193,11 +193,12 @@ function CommonLandingImageContent(data){
     </div>`;
 }
 
-function loginFormContent(userName){
+function loginFormContent(userName, fromSpoof){
     var html=
     `
         <form class="input-with-icon login-2023-theme" id="loginForm" name="loginForm" method="post" autocomplete="off">
 	        <input type="hidden" name="location" id="location" value="{}" />
+            <input type="hidden" name="fromSpoof" id="fromSpoof" value="${fromSpoof}" />
             <div class="text-left">
                 <label class="control-label" style="font-size: 12px !important;">Email</label>
                 <div class="input-group valid-field">

@@ -54,6 +54,7 @@ function getRequestForLogin(formId, moduleId, loginType) {
 	loginDTO['password'] = encode($("#" + formId + " #password").val().trim());
 	loginDTO['captcha'] = $("#" + formId + " #captcha").val().trim();
 	loginDTO['location'] = $("#" + formId + " #location").val().trim();
+	loginDTO['fromSpoof'] = $("#" + formId + " #fromSpoof").val().trim();
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;

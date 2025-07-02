@@ -7,6 +7,9 @@ function signupTeacherStage2OnLoadEvent(signupTeacher){
 		// COUNTRY CODE SCRIPT
 		inputContact = document.querySelector("#phone_no");
 		itiContcat = window.intlTelInput(inputContact);
+		if(IGNORECOUNTRYARRAY.includes(signupTeacher.countryData)) {
+			signupTeacher.countryData	= "US";
+		}
 		itiContcat.setCountry(signupTeacher.countryData =='' ? 'US' : signupTeacher.countryData);
 		inputContact.addEventListener('countrychange', function(e) {
 			$('#countryData').val(itiContcat.getSelectedCountryData().iso2);
@@ -64,10 +67,16 @@ function signupTeacherStage2OnLoadEvent(signupTeacher){
 		if($(this).val() != null){
 			$('#countryId').valid();
 			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
+			if (IGNORECOUNTRYARRAY.includes(selectedCountry)) {
+				selectedCountry	= "US";
+			}
 			if($('#countryId').valid()){
 				validEndInvalidField(true, "countryId");
 			}
 			if(selectedCountry !=undefined && selectedCountry != ''){
+				if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
+					selectedCountry	= "US";
+				}
 				itiContcat.setCountry(selectedCountry);
 			}else{
 				$("#stateId").html("<option value=''>Select State/Province*</option>");

@@ -389,9 +389,9 @@ function renderStudentDetails(data){
 	if(!scriptExecuted){
 		inputContact = document.querySelector("#contactNumber");
 		itiContcat = window.intlTelInput(inputContact);
-		if(signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null){
-			itiContcat.setCountry('us');
-		}else{
+		if(IGNORECOUNTRYARRAY.includes(signupStudent.countryCode) || signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null) {
+            itiContcat.setCountry('us');
+        }else{
 			itiContcat.setCountry(signupStudent.countryCode);
 		}
 		inputContact.addEventListener('countrychange', function(e) {
@@ -604,6 +604,9 @@ function renderStudentDetails(data){
 	$("#countryId").on("change",function(){
 		$('#countryId').valid();
 		var selectedCountry =  $('option:selected', this).attr("dail-country-code");
+		if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
+			selectedCountry	= "US";
+		}
 		callStates('signupStage1', this.value, 'countryId', 'stateId', 'cityId');
 		if( selectedCountry !=undefined && selectedCountry != ''){
 			itiContcat.setCountry(selectedCountry);
@@ -785,7 +788,12 @@ function renderParentDetails(data){
 			inputParentPhone = document.querySelector("#parentPhoneNumber");
 			itiParent = window.intlTelInput(inputParentPhone);
 			if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
-				itiParent.setCountry(signupParent.countryIsdCode2);
+				if(IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2)) {
+					selectedCountry	= "US";
+				}else{
+					itiParent.setCountry(signupParent.countryIsdCode2);
+				}
+				
 			}else{
 				//itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
 			}
@@ -960,6 +968,9 @@ function renderParentDetails(data){
 			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
 			if(selectedCountry != undefined && selectedCountry != ''){
 				$('#pCountryId').valid();
+				if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
+					selectedCountry	= "US";
+				}
 				itiParent.setCountry(selectedCountry);
 				callStates('signupStage2', this.value, 'pCountryId', 'pStateId', 'pCityId');
 				$("#pCityId").html("<option value=''>Select City*</option>");

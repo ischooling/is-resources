@@ -22,6 +22,7 @@ function getRequestForLogin(formId, moduleId, loginType) {
 	if(timezone=='Asia/Calcutta'){
 		timezone='Asia/Kolkata';
 	}
+	loginDTO['fromSpoof'] = $("#" + formId + " #fromSpoof").val().trim();
 	loginDTO['timezone'] = timezone;
 	loginDTO['userName'] = $("#" + formId + " #email").val().trim();
 	loginDTO['password'] = encode($("#" + formId + " #password").val().trim());
