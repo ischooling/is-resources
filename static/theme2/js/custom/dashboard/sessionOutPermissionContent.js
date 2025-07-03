@@ -22,6 +22,7 @@ function sessionOutPermissionContent(data){
                                 <div class="position-relative form-group mb-1 themeTwo">
                                     <label class="text-white">Password <span style="color: red;">*</span></label> 
                                     <input type="hidden" name="location" id="location" value="{}"/>
+                                    <input type="hidden" name="fromSpoof" id="fromSpoof" value="N"/>
                                     <input type="hidden" name="email" id="email" class="form-control" value="${data.emailId}" maxlength="50">
                                     <input name="password" id="password" class="form-control themeTow" autocomplete="off" type="password" pattern="^[_A-z0-9@#]{1,}$" maxlength="20"  value="" >
                                     <span style="position: absolute; right: 0; bottom: 8px; display: inline-block; width: 35px; cursor: pointer" class="show-password">

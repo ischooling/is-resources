@@ -260,7 +260,7 @@ function getLeadFormPopup(objRights){
 	+'						<label class="m-0">Grade*</label>'
 	+'						<select name="leadGrade" id="leadGrade" class="form-control" >'
 	+'							<option value="">Select Grade</option>'
-	+getStandardContent(objRights.schoolId,true, false)
+	+getStandardContent(SCHOOL_ID,true, false)
 	+'						</select>'
 	+'					</div>'
 	+'					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
@@ -582,7 +582,7 @@ function getLeadAdvanceSearchPopup(objRights){
 	+'	<label class="m-0">Grade</label>'
 	+'	<select name="leadGradeSearch" id="leadGradeSearch" class="form-control" >'
 	+'		<option value="0">Select Grade</option>'
-	+getStandardContent(objRights.schoolId,true, false)
+	+getStandardContent(SCHOOL_ID,true, false)
 	+'	</select>'
 	+'</div>'
 	+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">'
@@ -773,7 +773,7 @@ function getLeadMergeFormPopup(objRights){
 	+'					<label class="m-0">Grade*</label>'
 	+'					<select name="leadGrade" id="leadGrade" class="form-control" >'
 	+'						<option value="">Select Grade</option>'
-	+getStandardContent(objRights.schoolId,true, false)
+	+getStandardContent(SCHOOL_ID,true, false)
 	+'					</select>'
 	+'				</div>'
 	+'				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
