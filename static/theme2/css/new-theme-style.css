@@ -10740,6 +10740,33 @@ border-radius:1rem
 .font-10 {
 	font-size: 10px;
 }
+.font-14 {
+	font-size: 14px;
+}
+.font-16 {
+	font-size: 16px;
+}
+.font-18 {
+	font-size: 18px;
+}
+.font-20 {
+	font-size: 20px;
+}
+.font-22 {
+	font-size: 22px;
+}
+.font-24 {
+	font-size: 24px;
+}
+.font-26 {
+	font-size: 26px;
+}
+.font-28 {
+	font-size: 28px;
+}
+.font-30 {
+	font-size: 30px;
+}
 .font-size-xlg {
 	font-size:1.3rem !important
 }
@@ -33125,11 +33152,12 @@ input:checked + .small-switch-slider:before {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 .clock-box{width: fit-content;display: inline-block;}
-.clock-bg{width: fit-content;display: inline-block;padding: 1px 6px;border-radius: 4px;position: relative;}
-.clock-bg:not(.user_current_second)::before{content:''; position: absolute;top:50%;transform: translateY(-50%); left:0%;width:3px;height:6px;background:#fff;}
-.clock-bg:not(.user_current_second, .user_current_mins)::after{content:''; position: absolute;top:50%;transform: translateY(-50%); right:0%;width:3px;height:6px;background:#fff;}
-.user_current_mins{border-top-right-radius: 0px;}
-.user_current_second{position: absolute;top:0;left:100%;font-size:12px;border-top-left-radius: 0px;border-bottom-left-radius: 0px;padding: 1px 3px;}
+.clock-bg{width: fit-content;display: inline-block;padding: 1px;border-radius: 4px;position: relative;}
+/* .clock-bg:not(.user_current_second)::before{content:''; position: absolute;top:50%;transform: translateY(-50%); left:0%;width:3px;height:6px;background:#fff;} */
+/* .clock-bg:not(.user_current_second, .user_current_mins)::after{content:''; position: absolute;top:50%;transform: translateY(-50%); right:0%;width:3px;height:6px;background:#fff;} */
+/* .user_current_mins{border-top-right-radius: 0px;} */
+/* .user_current_second{position: absolute;top:0;left:100%;font-size:12px;border-top-left-radius: 0px;border-bottom-left-radius: 0px;padding: 1px 3px;} */
+.user_current_am_pm{position: absolute;bottom:5px;left:100%;font-size:14px;border-top-left-radius: 0px;border-bottom-left-radius: 0px;padding: 1px 3px;}
 
 
 .btn-theme-activity{background-color: #04989a;}

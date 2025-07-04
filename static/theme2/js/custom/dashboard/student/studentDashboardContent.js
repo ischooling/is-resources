@@ -158,202 +158,155 @@ function slideMenu(val){
     });
 }
 
-function dashboardContent(data){
-	var html=
-    '<div class="app-page-title pt-1 pb-1 mb-2">'
-		+'<div class="page-title-wrapper">'
-			+'<div class="page-title-heading w-100">'
-            //     +'<div class="page-title-icon"> <i class="pe-7s-users icon-gradient bg-ripe-malin"> </i> </div>';
-            //         if(!data.isParent){
-            //             html += '<div> You are observing '+data.userName+'\'s dashboard </div>'
-            //         }else{
-            //             html += '<div>'+data.userName+' <span id="currentTimeForUser" class="d-none"></span></div>'
-            //             +'<div class="ml-auto">'
-            //                 +'<span class="user_timezone d-inline-block">'
-            //                     +'<label>'+data.userTimezone+'&nbsp;</label>'
-            //                     +'<div class="font-size-md">&nbsp;</div>'
-            //                 +'</span>'
-            //                 +'<span class="clock-box ml-1">'
-            //                     +'<label class="user_current_day bg-primary text-white clock-bg"></label>'
-            //                     +'<div class="font-size-md text-center font-weight-semi-bold">Day</div>'
-            //                 +'</span>'
-            //                 +'<span class="clock-box ml-1">'
-            //                     +'<label class="user_current_hour bg-primary text-white clock-bg"></label>'
-            //                     +'<div class="font-size-md text-center font-weight-semi-bold">Hr</div>'
-            //                 +'</span>'
-            //                 +'<span class="clock-box ml-1 position-relative mr-3">'
-            //                     +'<label class="user_current_mins bg-primary text-white clock-bg"></label>'
-            //                     +'<label class="user_current_second bg-primary text-white clock-bg"></label>'
-            //                     +'<div class="font-size-md text-center font-weight-semi-bold">Min</div>'
-            //                 +'</span>'
-            //                 +'<span class="clock-box ml-2">'
-            //                     +'<label class="user_current_am_pm bg-primary text-white clock-bg"></label>'
-            //                     +'<div class="font-size-md">&nbsp;</div>'
-            //                 +'</span>'
-            //             +'</div>'
-            //         }
-            // html+='</div>'
-            +'<div class="page-title-actions mt-0 mb-1 d-lg-none pt-4">'
-				+'<div class="d-inline-block">'
-					+'<label class="switch">'
-						+'<input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, \''+data.isPayLmsPaymentPending+'\');" changeUrl="'+data.lmsProviderURL+'" />'
-						+'<span class="switch-label" data-on="" data-off="LMS"></span>'
-						+'<span class="switch-handle"></span>'
-					+'</label>'
-				+'</div>'
-			+'</div>'
-		+'</div>'
-	+'</div>'
-    +dashboardSchoolCalendar(data)
-    if(USER_ROLE == "STUDENT"){
-        html+=calendarMeetingLinkValidate();
+function dashboardContent(data) {
+    let html = `
+    <div class="app-page-title pt-1 pb-1 mb-2">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading w-100">
+                <!-- Optional code can go here, like the user dashboard observation -->
+            </div>
+            <div class="page-title-actions mt-0 mb-1 d-lg-none pt-4">
+                <div class="d-inline-block">
+                    <label class="switch">
+                        <input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, '${data.isPayLmsPaymentPending}');" changeUrl="${data.lmsProviderURL}" />
+                        <span class="switch-label" data-on="" data-off="LMS"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    ${dashboardSchoolCalendar(data)}`;
+    if (USER_ROLE === "STUDENT") {
+        html += calendarMeetingLinkValidate();
     }
-	return html;
-}
-
-function dashboardAnnouncement(data){
-	var html = 
-    '<div class="card box-shadow-none">'
-        +'<div class="card-header theme-bg text-white justify-content-between card-header-primary d-flex">'
-            +'<h6 class="pull-left m-0 font-size-md">';
-                if(data.schoolAnnouncements!=null && data.schoolAnnouncements.newAnnouncementCount>0){
-                    html+=data.schoolAnnouncements.newAnnouncementCount+' New Announcement(s)';
-                }else{
-                    html+='Announcement';
-                }
-                html+=
-            '</h6>'
-        +'</div>'
-		+'<div class="card-body announcement-card-scroll">'
-            +'<div class="announcement-wrapper">'
-                +'<ul>';
-                if(data.schoolAnnouncements!=null && data.schoolAnnouncements.schoolAnnounceDTO.length>0){
-                    $.each(data.schoolAnnouncements.schoolAnnounceDTO, function(k, schoolAnnounce) {
-                        html+=
-                        '<li class="col-md-12 col-sm-12 col-12 p-0">'
-							+'<div class="announcement-anchor" onclick="showAnnounceDataById('+schoolAnnounce.announceId+','+moduleId+');">'
-                                +'<div class="announcement-list">'
-                                    +'<span class="annoucement-icon">'
-                                        +'<i class="fa fa-bullhorn"></i>';
-										if(schoolAnnounce.replyStatus == 'N'){
-											html+='<label class="new-label">New</label>'
-                                        }
-                                        html+=
-									'</span>'
-									+'<h4 class="announcement-title">'
-                                        +'<span>'+schoolAnnounce.announceTitle;
-                                            if(schoolAnnounce.replyStatus == 'N' && schoolAnnounce.latestStstus == 'Y'){
-                                                html+=
-                                                '<label class="m-0 announcement-ribbon">New</label>'
-												+'<i class="fa fa-star announcement-ribbon-star"></i>';
-                                            }
-                                            html+=
-                                        '</span>'
-                                    +'</h4>'
-                                +'</div>'
-                            +'</div>'
-                        +'</li>';
-                    });
-                }else{
-                    html+='<li class="col-md-12 col-sm-12 col-xs-12 text-center">No new announcements</li>';
-                }
-                html+=
-				'</ul>'
-            +'</div>'
-        +'</div>'
-	+'</div>';
-	return html;
-}
-
-function dashboardSchoolCalendar(data){
-    html=
-	'<div class="main-card mb-3">'
-        +'<div class="full">'
-            +'<div class="card-body px-0 pb-0">'
-                +'<div class="row">';
-                    if(data.userRole == 'STUDENT' || data.userRole == 'TEACHER'){
-                        html+=
-                        '<div class="col-lg-8 col-md-8 col-sm-12 col-12 pt-2">';
-                    }else{
-                        html+=
-                        '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">';
-                    }
-                        html+=
-                            '<div class="full  mt-1">'
-                                +'<div class="card">'
-                                    +'<div class="card-body">'
-                                        +'<span id="currentTimeForUser" class="d-none"></span>'
-                                        +'<div class="text-center mb-2">'
-                                            +'<span class="user_timezone d-inline-block font-size-lg">'
-                                                +'<label>'+data.userTimezone+'&nbsp;</label>'
-                                                // +'<div class="font-size-md">&nbsp;</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-1">'
-                                                +'<label class="user_current_day bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                // +'<div class="font-size-md text-center font-weight-semi-bold">Day</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-1">'
-                                                +'<label class="user_current_hour bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                // +'<div class="font-size-md text-center font-weight-semi-bold">Hr</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-1 position-relative mr-3">'
-                                                +'<label class="user_current_mins bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                +'<label class="user_current_second bg-primary text-white clock-bg time-label"></label>'
-                                                // +'<div class="font-size-md text-center font-weight-semi-bold">Min</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-2">'
-                                                +'<label class="user_current_am_pm bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                // +'<div class="font-size-md">&nbsp;</div>'
-                                            +'</span>'
-                                        +'</div>'
-
-                                        +'<hr/>'
-                                        +'<div class="position-relative" style="z-index:0;" id="schoolcalendar"></div>'
-                                    +'</div>'
-                                +'</div>'
-                            +'</div>'
-                        +'</div>';
-                    if(data.userRole == 'STUDENT' || data.userRole == 'TEACHER'){
-                        html+=
-                        '<div class="col-lg-4 col-md-4 col-sm-12 pt-2 col-12 animated zoomIn">'
-                            +'<div class="full" id="announcementDiv">'
-                            +'</div>'
-                            +'<div class="full mt-3" id="activityDiv">'
-                            +'</div>'
-                        +'</div>';
-                    }
-                    html+=
-                '</div>'
-            +'</div>'
-        +'</div>'
-    +'</div>'
-    +'<div id="announceDataId" class="full"></div>'
-    +holidayOne()
-    +onBordingMandotryVideo()
-    
-   // +feedbackPop(data.schoolLogo);
     return html;
 }
 
-function holidayOne(){
-	var html=
-	'<div class="modal fade calendarbox" id="holiday1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'
-		+'<div class="modal-dialog" role="document">'
-			+'<div class="modal-content">'
-				+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
-					+'<h5 class="modal-title" id="calendarbox_title"></h5>'
-					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">X</span>'
-					+'</button>'
-				+'</div>'
-				+'<div class="modal-body">'
-					+'<p class="activity_type"><b><span class="activity"></span></b></p>'
-				+'</div>'
-			+'</div>'
-		+'</div>'
-	+'</div>'
-	return html;
+
+function dashboardAnnouncement(data) {
+    let html = `
+    <div class="card box-shadow-none">
+        <div class="card-header theme-bg text-white justify-content-between card-header-primary d-flex">
+            <h6 class="pull-left m-0 font-size-md">
+                ${data.schoolAnnouncements != null && data.schoolAnnouncements.newAnnouncementCount > 0 
+                    ? `${data.schoolAnnouncements.newAnnouncementCount} New Announcement(s)` 
+                    : 'Announcement'}
+            </h6>
+        </div>
+        <div class="card-body announcement-card-scroll">
+            <div class="announcement-wrapper">
+                <ul>
+                    ${data.schoolAnnouncements != null && data.schoolAnnouncements.schoolAnnounceDTO.length > 0
+                        ? data.schoolAnnouncements.schoolAnnounceDTO.map(schoolAnnounce => `
+                            <li class="col-md-12 col-sm-12 col-12 p-0">
+                                <div class="announcement-anchor" onclick="showAnnounceDataById(${schoolAnnounce.announceId}, ${moduleId});">
+                                    <div class="announcement-list">
+                                        <span class="annoucement-icon">
+                                            <i class="fa fa-bullhorn"></i>
+                                            ${schoolAnnounce.replyStatus === 'N' ? '<label class="new-label">New</label>' : ''}
+                                        </span>
+                                        <h4 class="announcement-title">
+                                            <span>${schoolAnnounce.announceTitle}
+                                                ${schoolAnnounce.replyStatus === 'N' && schoolAnnounce.latestStstus === 'Y' 
+                                                    ? `<label class="m-0 announcement-ribbon">New</label><i class="fa fa-star announcement-ribbon-star"></i>`
+                                                    : ''}
+                                            </span>
+                                        </h4>
+                                    </div>
+                                </div>
+                            </li>
+                        `).join('') 
+                        : '<li class="col-md-12 col-sm-12 col-xs-12 text-center">No new announcements</li>'
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>`;
+    return html;
 }
+
+function dashboardSchoolCalendar(data) {
+    debugger
+    var html=`
+    <div class="main-card mb-3">
+        <div class="full">
+            <div class="card-body px-0 pb-0">
+                <div class="row">
+                    ${data.userRole === 'STUDENT' || data.userRole === 'TEACHER' ? `
+                    <div class="col-lg-8 col-md-8 col-sm-12 col-12 pt-2">` : `
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">`}
+                        <div class="full mt-1">
+                            <div class="card">
+                                <div class="card-body">
+                                    <span id="currentTimeForUser" class="d-none"></span>
+                                    <div class="text-left d-flex align-items-center">
+                                        <span class="d-inline-block country-flag mr-2">
+                                            <img src="${PATH_FOLDER_FONT2}${data.countryISOCode}.svg" class="rounded" width="45px" alt="Flag"/>
+                                        </span>
+                                        <span class="user_timezone d-inline-block font-size-lg font-weight-semi-bold text-dark">
+                                            <label>${data.userTimezone}&nbsp;</label>
+                                        </span>
+                                        <!--<span class="clock-box">
+                                            <label class="user_current_day clock-bg font-size-lg time-label"></label>
+                                        </span>
+                                        <span class="clock-box">
+                                            <label class="user_current_hour clock-bg font-size-lg time-label"></label>
+                                        </span>
+                                        <span class="clock-box position-relative">
+                                            <label class="user_current_mins clock-bg font-size-lg time-label"></label>
+                                            <label class="user_current_second clock-bg font-size-lg time-label"></label>
+                                        </span>
+                                        <span class="clock-box">
+                                            <label class="user_current_am_pm clock-bg font-size-lg time-label"></label>
+                                        </span>-->
+                                        <div class="clock-box">
+                                            <span class="user_current_time clock-bg font-30 text-primary font-weight-semi-bold time-label"></span>
+                                        </div>
+                                    </div>
+                                    <hr/>
+                                    <div class="position-relative" style="z-index:0;" id="schoolcalendar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${data.userRole === 'STUDENT' || data.userRole === 'TEACHER' ? `
+                    <div class="col-lg-4 col-md-4 col-sm-12 pt-2 col-12 animated zoomIn">
+                        <div class="full" id="announcementDiv"></div>
+                        <div class="full mt-3" id="activityDiv"></div>
+                    </div>` : ``}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="announceDataId" class="full"></div>
+    ${holidayOne()}
+    ${onBordingMandotryVideo()}`;
+    // +feedbackPop(data.schoolLogo); // optional call if needed
+    return html;
+}
+
+
+function holidayOne() {
+    var html = `
+    <div class="modal fade calendarbox" id="holiday1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header pt-2 pb-2 theme-bg text-white">
+                    <h5 class="modal-title" id="calendarbox_title"></h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="activity_type"><b><span class="activity"></span></b></p>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    return html;
+}
+
 
 function batchImpAnnouncementModal(){
     var html = `<div id="batchImpAnnouncementModal" class="modal fade bd-example-modal-lg fade-scale" data-backdrop="static" data-keyboard="false" tabindex="" role="dialog">

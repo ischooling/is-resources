@@ -5074,3 +5074,45 @@ function getWelcomeMessage(){
       return "Good evening";
   }
 }
+
+function generateTinyUrls() {
+  const $urlInputs = $('.tinyUrl');
+  const uniqueUrls = {};
+  $urlInputs.each(function() {
+      const url = $(this).val().trim();
+      if (url) {
+          uniqueUrls[url] = true;
+      }
+  });
+  const urls = Object.keys(uniqueUrls);
+  if (!urls.length) {
+      console.log("No URLs found to shorten");
+      return;
+  }
+  fetch("https://www.issg.co/api/create-short-urls", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ urls })
+  })
+  .then(response => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+  })
+  .then(data => {
+      const urlMap = {};
+      data.urls.forEach(item => {
+          urlMap[item.original] = item.short;
+      });
+      $urlInputs.each(function() {
+          const originalUrl = $(this).val().trim();
+          if (originalUrl && urlMap[originalUrl]) {
+              $(this).val(urlMap[originalUrl]);
+          }
+      });
+  })
+  .catch(error => {
+      console.error("Fetch error:", error);
+  });
+}

@@ -328,10 +328,11 @@ $(document).ready(function() {
 		hours = hours ? hours : 12; // The hour '0' should be '12'
 		hours = hours<=9 ? '0'+hours:hours;
 		$(".user_current_day").text(month+" "+day+","+" "+year);
-		$(".user_current_hour").text(hours);
-		$(".user_current_mins").text(minutes);
-		$(".user_current_second").text(seconds);
-		$(".user_current_am_pm").text(ampm);
+		// $(".user_current_hour").text(hours);
+		// $(".user_current_mins").text(minutes);
+		// $(".user_current_second").text(seconds);
+		// $(".user_current_am_pm").text(ampm);
+		$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
 	},1000);
 });
 // var data1=getStudentDashboardDetails();

@@ -2,6 +2,7 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 	customLoader(true);
 	var commissionRate = await getPartnerCommissionRate('','partnerCommitionRate',userId);
 	$("#dashboardContentInHTML").html(partnerDashboardContent(title, roleAndModule, schoolId, userId, role, commissionRate));
+	generateTinyUrls();
 	//console.log("render",commissionRate)
 	// getEnrollmentChart('chart-pie-enroll-one');
 	// getEnrollmentChart('chart-pie-enroll-group');
@@ -335,7 +336,7 @@ function getEnrollmentLinksContent(data){
 								<a href="javascript:void(0)" class="bg-light-primary text-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k}','${learningProgram.learningProgramCode}_class_${k}')">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
 								<b class="${learningProgram.learningProgramCode}_class_${k} mx-1"></b>
 								<div style="top:18px;left:0;position:absolute;">
-									<input type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
+									<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
 								</div>
 							</div>`;
 						});
@@ -353,7 +354,7 @@ function getEnrollmentLinksContent(data){
 								<a href="javascript:void(0)" class="bg-seat-light-primary text-seat-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k+"_seat"}','${learningProgram.learningProgramCode}_class_${k+"_seat"}')">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
 								<b class="${learningProgram.learningProgramCode}_class_${k+"_seat"} mx-1"></b>
 								<div style="top:18px;left:0;position:absolute;">
-									<input type="text" id="${learningProgram.learningProgramCode}_id_${k+"_seat"}" value="${learningProgram.link}" style="opacity:0;height:0px">
+									<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k+"_seat"}" value="${learningProgram.link}" style="opacity:0;height:0px">
 								</div>
 							</div>`;
 						});

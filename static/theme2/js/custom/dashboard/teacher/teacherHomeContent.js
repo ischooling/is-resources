@@ -234,65 +234,68 @@ function teacherAgreementView(data){
     return html;
 }
 
-function dashboardSchoolCalendar(data){
-    var html=
-    '<div class="main-card mb-3">'
-        +'<div class="full">'
-            +'<div class="card-body pt-lg-3 pt-0 px-0 pb-0">'
-                // +'<div class="full home-page-skeleton-wrapper">'
-                //     +getDashboardSkeleton();
-                // html+='</div>'
-                +'<div class="home-page-wrapper">'
-                    +'<div class="row">'
-                        +'<div class="col-lg-8 col-md-12 col-sm-12 col-12 pt-2">'
-                            +'<div class="full mt-1">'
-                                +'<div class="card">'
-                                    +'<div class="card-body">'
-                                        +'<span id="currentTimeForUser" class="d-none"></span>'
-                                        +'<div class="text-center mb-2">'
-                                            +'<span class="user_timezone font-size-lg">'
-                                                +'<label>'+data.userTimezone+'&nbsp;</label>'
-                                                    // +'<div class="font-size-md">&nbsp;</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-1">'
-                                                +'<label class="user_current_day bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                // +'<div class="font-size-md text-center font-weight-semi-bold">Day</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-1">'
-                                                +'<label class="user_current_hour bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                // +'<div class="font-size-md text-center font-weight-semi-bold">Hr</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-1 position-relative mr-3">'
-                                                +'<label class="user_current_mins bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                +'<label class="user_current_second bg-primary text-white clock-bg time-label"></label>'
-                                                // +'<div class="font-size-md text-center font-weight-semi-bold">Min</div>'
-                                            +'</span>'
-                                            +'<span class="clock-box ml-2">'
-                                                +'<label class="user_current_am_pm bg-primary text-white clock-bg font-size-lg time-label"></label>'
-                                                // +'<div class="font-size-md">&nbsp;</div>'
-                                            +'</span>'
-                                        +'</div>'
-                                        +'<hr/>'
-                                        +'<div class="position-relative" style="z-index:0;" id="schoolcalendar"></div>'
-                                    +'</div>'
-                                +'</div>'
-                            +'</div>'
-                        +'</div>'
-                        +'<div class="col-lg-4 col-md-12 col-sm-12 pt-2 col-12">'
-                            +'<div class="full" id="announcementDiv"></div>'
-                            +'<div class="full mt-3" id="activityDiv"></div>'
-                        +'</div>'
-                    +'</div>'
-                +'</div>'
-            +'</div>'
-        +'</div>'
-    +'</div>'
-    +'<div id="announceDataId" class="full"></div>'
-    +holidayOne()
-    +onBordingMandotryVideo()
-   // +feedbackPop(data.schoolLogo);
+function dashboardSchoolCalendar(data) {
+    var html = `
+    <div class="main-card mb-3">
+        <div class="full">
+            <div class="card-body pt-lg-3 pt-0 px-0 pb-0">
+                <!-- <div class="full home-page-skeleton-wrapper"> -->
+                <!--     ${getDashboardSkeleton()} -->
+                <!-- </div> -->
+                <div class="home-page-wrapper">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-12 col-sm-12 col-12 pt-2">
+                            <div class="full mt-1">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <span id="currentTimeForUser" class="d-none"></span>
+                                        <div class="text-left d-flex align-items-center">
+                                            <span class="d-inline-block country-flag mr-2">
+                                                <img src="${PATH_FOLDER_FONT2}${data.countryISOCode}.svg" class="rounded" width="45px" alt="Flag"/>
+                                            </span>
+                                            <span class="user_timezone d-inline-block font-size-lg font-weight-semi-bold text-dark">
+                                                <label>${data.userTimezone}&nbsp;</label>
+                                            </span>
+                                            <!--<span class="clock-box ml-1">
+                                                <label class="user_current_day bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                            </span>
+                                            <span class="clock-box ml-1">
+                                                <label class="user_current_hour bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                            </span>
+                                            <span class="clock-box ml-1 position-relative mr-3">
+                                                <label class="user_current_mins bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                                <label class="user_current_second bg-primary text-white clock-bg time-label"></label>
+                                            </span>
+                                            <span class="clock-box ml-2">
+                                                <label class="user_current_am_pm bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                            </span>-->
+                                            <div class="clock-box">
+                                                <span class="user_current_time clock-bg font-30 text-primary font-weight-semi-bold time-label"></span>
+                                            </div>
+                                        </div>
+                                        <hr/>
+                                        <div class="position-relative" style="z-index:0;" id="schoolcalendar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 col-sm-12 pt-2 col-12">
+                            <div class="full" id="announcementDiv"></div>
+                            <div class="full mt-3" id="activityDiv"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="announceDataId" class="full"></div>
+    ${holidayOne()}
+    ${onBordingMandotryVideo()}
+    ${/*feedbackPop(data.schoolLogo)*/''}
+    `;
     return html;
 }
+
 function holidayOne(){
 	var html=
 	'<div class="modal fade calendarbox" id="holiday1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'
