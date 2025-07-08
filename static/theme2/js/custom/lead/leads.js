@@ -8227,8 +8227,9 @@ var currentZadarmaIds = null;
 function showZadarmaDetails(zadarmaIds) {
 	var body = {
 		ids: zadarmaIds,
+		filterType: $('#sortzadarmalogs').val(),
 		pageNo: currentPageZadarma,
-		pageCount: 10,
+		pageCount: $('#zadarmaPagging').val(),
 	}
 	$.ajax({
 		url: BASE_URL + CONTEXT_PATH + "zadarma/v1/get-logs-by-ids",
@@ -8240,13 +8241,15 @@ function showZadarmaDetails(zadarmaIds) {
 			if(response.statusCode === 0){
 				ZadarmaOrWati = "zadarma";
 				if(currentZadarmaIds != zadarmaIds){
-					zadarmaData = [...response.logs,...response.unMatchLogs];
-					populateZadarmaRecords(response.logs,response.unMatchLogs,"Zadarma Logs", response.totalPages,zadarmaIds.split(",").length);
+					zadarmaData = response.logs;
+					populateZadarmaRecords(response.logs,response.unMatchLogs,"Zadarma Logs", response.totalPages,response.totalCount);
 				}else{
-					zadarmaData = [...response.logs,...response.unMatchLogs];
-					renderZadarmaTable(response.logs, response.totalPages,zadarmaIds.split(",").length,[...new Set(response.logs.map((elem,index) => elem.callId)),...new Set(response.unMatchLogs.map((elem,index) => elem.callId))].length);
+					zadarmaData = response.logs;
+					renderZadarmaTable(response.logs);
 					renderUnMatchZadarmaTable(response.unMatchLogs);
+					$("#zadarmaPagination").html(renderPagination(currentPageZadarma, response.totalPages,response.totalCount,[...new Set(response.logs.map((elem,index) => elem.callId)),...new Set(response.unMatchLogs.map((elem,index) => elem.callId))].length));
 				}
+				
 				currentZadarmaIds = zadarmaIds;
 			}else if(response.status === '3'){
 				redirectLoginPage();
@@ -8257,6 +8260,38 @@ function showZadarmaDetails(zadarmaIds) {
 			console.log("Error Fetching Data:", error);
 			
 		}
+		}
+	});
+}
+
+function showZadarmaSortDetails() {
+	var body = {
+		ids: currentZadarmaIds,
+		filterType: $('#sortzadarmalogs').val(),
+		pageNo: 1,
+		pageCount: $('#zadarmaPagging').val(),
+	}
+	$.ajax({
+		url: BASE_URL + CONTEXT_PATH + "zadarma/v1/get-logs-by-ids",
+		type: "POST",
+		data: JSON.stringify(body),
+		contentType: "application/json",
+		success: function (response) {
+			try {
+				if(response.statusCode === 0){
+					ZadarmaOrWati = "zadarma";
+					zadarmaData = response.logs;
+					renderZadarmaTable(response.logs);
+					renderUnMatchZadarmaTable(response.unMatchLogs);
+					$("#zadarmaPagination").html(renderPagination(currentPageZadarma, response.totalPages,response.totalCount,[...new Set(response.logs.map((elem,index) => elem.callId)),...new Set(response.unMatchLogs.map((elem,index) => elem.callId))].length));
+				}else if(response.status === '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, response.message);
+				}
+			} catch (error) {
+				console.log("Error Fetching Data:", error);
+			}
 		}
 	});
 }
@@ -8398,16 +8433,18 @@ function getFilterLeadNo(searchValue) {
 }
 let zadarmaData = [];
 
-function getFilterZadarmaLeadNo(searchValue, totalPages) {
+function getFilterZadarmaLeadNo(searchValue, totalPages,totalCount) {
     searchValue = searchValue.trim().toLowerCase();
     const filteredData = zadarmaData.filter(item => 
         item.leadNo.toLowerCase().includes(searchValue)
     );
-    renderZadarmaTable(filteredData, totalPages,currentZadarmaIds.split(",").length,[...new Set(zadarmaData.map((elem,index) => elem.callId))].length);
+    renderZadarmaTable(filteredData, totalPages,totalCount);
 	if(searchValue != ""){
 		$(".pagination").hide();
+		$("#unMatchZadarmaTable").hide();
 	}else{
 		$(".pagination").show();
+		$("#unMatchZadarmaTable").show();
 	}
 }
 
@@ -8528,8 +8565,21 @@ function populateZadarmaRecords(data, data2,meetingTitle, totalPages,totalCount)
 			<span aria-hidden="true">&times;</span>
 		  </button>
 		</div>
-		<div class="p-3" style="width:300px; margin-left:auto;">
-			<input placeholder="Search" type="text" onchange="getFilterZadarmaLeadNo(this.value, ${totalPages})" class="form-control">
+		<div class="p-3 d-flex px-5" style="margin-left:auto; justify-content: space-between;">
+			<select name="zadarmaPagging" id="zadarmaPagging" class="mr-2 w-5 px-2 rounded-lg" onchange="showZadarmaSortDetails()">
+				<option value="10" selected="">10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+			</select>
+			<div class="d-flex" style="width:450px;">
+				<select class="form-control mr-2 w-50" id="sortzadarmalogs" name="sortzadarmalogs" onchange="showZadarmaSortDetails()">
+					<option value="ALL" selected="">All</option>
+					<option value="ATTENDED">Attended Call</option>
+					<option value="UNATTENDED">Un Attended Call</option>
+				</select>
+				<input placeholder="Search" type="text" class="w-50 px-2" onkeydown="getFilterZadarmaLeadNo(this.value, ${totalPages}, ${totalCount})" class="form-control">
+			</div>
 		</div>
 		<div style="background-color: #fff; height: 100vh;">
 		  <div class="px-5" style="height: 80vh;overflow-y:auto;">
@@ -8555,9 +8605,9 @@ function populateZadarmaRecords(data, data2,meetingTitle, totalPages,totalCount)
 	  </div>
 	`;
 	$("body").append(modalContent);
-	$("#zadarmaPagination").html(renderPagination(currentPageZadarma, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.callId)),...new Set(data2.map((elem,index) => elem.callId))].length));
-    renderZadarmaTable(data, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.callId)),...new Set(data2.map((elem,index) => elem.callId))].length);
+    renderZadarmaTable(data);
 	renderUnMatchZadarmaTable(data2)
+	$("#zadarmaPagination").html(renderPagination(currentPageZadarma, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.callId)),...new Set(data2.map((elem,index) => elem.callId))].length));
 	setTimeout(() => {
 	  $("#zadarmaLogBackdrop").fadeIn(200);
 	  $("#zadarmaLogModal").addClass("open");
@@ -8565,8 +8615,7 @@ function populateZadarmaRecords(data, data2,meetingTitle, totalPages,totalCount)
 	}, 50);
 }
 
-function renderZadarmaTable(data, totalPages,totalCount,countItemCounts) {
-	$("#zadarmaPagination").html(renderPagination(currentPageZadarma, totalPages,totalCount,countItemCounts));
+function renderZadarmaTable(data) {
     const groupedData = data.reduce((acc, item) => {
         const key = item.leadNo;
         acc[key] = acc[key] || [];
