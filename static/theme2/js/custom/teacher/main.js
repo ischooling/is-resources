@@ -25,7 +25,7 @@ $(function(){
 
     },"Please enter a date in the format dd/mm/yyyy" );
 
-    form = $("#teacherSignupStage2");
+    form = $("#teacherSignupStage1");
     form.validate({});
 
     $('.separate-user input').click(function(){
@@ -94,7 +94,6 @@ $(function(){
     });
     $(document).mouseup(function(e){
         var optionContainer = $(".select-option-wrapper");
-        // if (!optionContainer.is(e.target) && optionContainer.has(e.target).length === 0){
         if (!optionContainer.is(e.target)){
             optionContainer.removeClass('show');
         }
@@ -144,14 +143,11 @@ $(function(){
     });
 });
  
- 
-// function displaySection(sectionNumber){
-//     hideMessage('');
-//     $('#formSteps div').steps('setStep', sectionNumber);
-// }
- 
 function closeSubmitSlotModel(){
     $('#submitInterviewSlotModal').modal('hide');
+}
+function closeVerificationModal(){
+    $('#submitVerificationModal').modal('hide');
 }
  
 function setSteps(step){
@@ -162,53 +158,72 @@ function setSteps(step){
         console.log("Invalid Step")
     }
     if ( step === 1) {
-        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-1.png');
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-personal-details-active.png');
         $('.actions > ul > li:first-child').attr('style', 'opacity:0');
-        $(".step1, .step2, .step3, .step4").removeClass("done-step");
+        $(".step1, .step2, .step3, .step4, .step5").removeClass("done-step-teacher");
     } else {
-        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-1.png');
-        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-2-deactive.png');
-        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-3-deactive.png');
-        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-4-deactive.png');
-        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-5-deactive.png');
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-personal-details-active.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-professional-details-deactive.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-application-under-review-deactive.png');
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-verification-deactive.png');
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-deactive.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png');
         $('.actions > ul > li:first-child').attr('style', 'opacity:0');
-        $(".step1, .step2, .step3, .step4").removeClass("done-step");
+        $(".step1, .step2, .step3, .step4, .step5").removeClass("done-step-teacher");
     }
     if ( step === 2) {
-        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-2.png');
-        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-3-deactive.png');
-        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-4-deactive.png');
-        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-5-deactive.png');
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-professional-details-active.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-application-under-review-deactive.png');
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-verification-deactive.png');
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-deactive.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png');
         $('.actions > ul > li:first-child').attr('style', 'opacity:1');
-        $(".step1").addClass("done-step")
-        $(".step2, .step3, .step4").removeClass("done-step");
+        $(".step1").addClass("done-step-teacher")
+        $(".step2, .step3, .step4, .step5").removeClass("done-step-teacher");
         } else {
-        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-2-deactive.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-professional-details-deactive.png');
     }
 
     if ( step === 3) {
-        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-3.png');
-        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-4-deactive.png');
-        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-5-deactive.png');
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-application-under-review-active.png');
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-verification-deactive.png');
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-deactive.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png');
         $('.actions > ul > li:first-child').attr('style', 'opacity:1');
-        $(".step1, .step2").addClass("done-step")
-        $(".step3, .step4").removeClass("done-step");
+        $(".step1, .step2").addClass("done-step-teacher")
+        $(".step3, .step4").removeClass("done-step-teacher");
 
     } else {
-        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-3-deactive.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-application-under-review-deactive.png');
     }
     if ( step === 4) {
-        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-4.png');
-        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-5-deactive.png');
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-verification-active.png');
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-deactive.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png');
+        $('.actions > ul > li:first-child').attr('style', 'opacity:1');
+        $(".step1, .step2, .step3").addClass("done-step-teacher")
+        $(".step4, .step5").removeClass("done-step-teacher");
+        $(".prev-btn").hide();
+        $(".next-btn").css("margin-left", "auto");
+    } else {
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-verification-deactive.png');
+    }
+    if ( step === 5) {
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-active.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png');
         $('.actions > ul > li:first-child').attr('style', 'opacity:0');
-        $(".step1, .step2, .step3").addClass("done-step")
-        $(".step4").removeClass("done-step");
+        $(".step1, .step2, .step3, .step4").addClass("done-step-teacher")
+        $(".step5").removeClass("done-step-teacher");
         $( ".dropdown-toggle" ).hover(function(event) {
             var offsetTop=$(this).offset().top+$(this).outerHeight()-$(window).scrollTop();
             var offsetBottom=$(window).outerHeight()-$(this).outerHeight()-$(this).offset().top+$(window).scrollTop();
@@ -225,27 +240,25 @@ function setSteps(step){
             function() {
                 $(this).parent().find(".tooltip-content").css({"display":"none"})
             });
-            $(".prev-btn").hide();
             $(".next-btn").css("margin-left", "auto");
     } else {
-        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-4-deactive.png');
-       // $('.actions ul li:nth-child(2) a').attr({'onclick':""})
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-deactive.png');
     }
     if ( sectionLength == step) {
-        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/complete-step.png');
-        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-5.png');
+        $('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-complete-step.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-active.png');
         $('.actions > ul > li:first-child').attr('style', 'opacity:1');
-        $(".step1, .step2, .step3, .step4").addClass("done-step");
+        $(".step1, .step2, .step3, .step4, .step5").addClass("done-step-teacher");
         $(".next-btn").hide();
         $(".finish-btn").show();
     } else {
-        // $(".prev-btn").css({"visibility":"visible", "opacity":"1"});
         $(".next-btn").show();
         $(".finish-btn").hide();
-        $('.steps ul li:nth-child(5) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacherSignup/step-5-deactive.png');
+        $('.steps ul li:nth-child(6) a img').attr('src',PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png');
     }
 }
 
@@ -260,11 +273,11 @@ function base64ImageFileAsURL(f, fileType, src, uploadType) {
 		if(f.type.length && (acceptFileTypes.test(f.type) || acceptFileTypesPDF.test(f.type))) {
 
 		}else {
-			showMessage(false, 'Please upload files in following formats (jpg, jpeg, pdf or png).');
+			showMessageTheme2(false, 'Please upload files in following formats (jpg, jpeg, pdf or png).');
 			uploadFlag = false;
 			return false;
 		} if(f.size > 10276044.8){
-			showMessage(false, MAX_SIZE_LIMIT_FOR_TEACHER);
+			showMessageTheme2(false, MAX_SIZE_LIMIT_FOR_TEACHER);
 			uploadFlag = false;
 			return false;
 		}
@@ -296,6 +309,17 @@ function base64ImageFileAsURL(f, fileType, src, uploadType) {
                 })
                 bankUploadDocsObj.push(obj);
             }
+            if(uploadType == "verify"){
+                verifyUploadDocsObj.filter(function(item){
+                    if(item.fileType == fileType){
+                        var index = getObjectIndex(verifyUploadDocsObj, fileType);
+                        if(index != -1){
+                            verifyUploadDocsObj.splice(index, 1);
+                        }
+                    }
+                })
+                verifyUploadDocsObj.push(obj);
+            }
 			$("#fileupload" + elemId + "Span").text(f.name);
             validEndInvalidField(true, "fileupload" + elemId + "Span");
 		}
@@ -320,10 +344,10 @@ function uploadDocsFun(src, uploadType) {
 async function moveStep(moveType, isRender){
     var sectionLength = $(".step").length;
     var currentStep = $(".step.active-step").index()+1;
+    var signupStage1Form = $('#teacherSignupStage1');
     var signupStage2Form = $('#teacherSignupStage2');
-    var signupStage3Form = $('#teacherSignupStage3');
-    var signupStage5Form = $('#teacherSignupStage5');
-    var signupStage6Form = $('#teacherSignupStage6');
+    // var signupStage5Form = $('#teacherSignupStage5');
+    // var signupStage6Form = $('#teacherSignupStage6');
     var isBackButtonClicked=false;
     if(getSession()){
         if(moveType == "prev"){
@@ -355,12 +379,12 @@ async function moveStep(moveType, isRender){
         if(moveType == "next"){
             if(nextStep === 1){
                 setSteps(1);
-                getStage2Data();
+                getStage1Data();
             }
             else if(nextStep==2){
-                if (signupStage2Form.valid()) {
+                if (signupStage1Form.valid()) {
                     if(!isRender){
-                        var serverCheck = await callForSignupTeacherBasicDetailsForm('teacherSignupStage2');
+                        var serverCheck = await callForSignupTeacherBasicDetailsForm('teacherSignupStage1');
                         if(serverCheck){
                             setSteps(2);
                             return true;
@@ -368,7 +392,7 @@ async function moveStep(moveType, isRender){
                             return false;
                         }
                     }else{
-                        await getStage2Data();
+                        await getStage1Data();
                         if(signupPage < 3){
                             return false;
                         }else{
@@ -381,12 +405,12 @@ async function moveStep(moveType, isRender){
             }
             else if(nextStep==3){
                 if(GRADES_TAUGHT.length!==0){
-                    if (signupStage3Form.valid()) {
+                    if (signupStage2Form.valid()) {
                         if(submitted==true){
                             setSteps(2);
                             return true;
                         }
-                        var serverCheck =callForSignupTeacherUpdateProfile('teacherSignupStage3',elementary_subjects,middleSchool_subjects,highSchool_subjects);
+                        var serverCheck =callForSignupTeacherUpdateProfile('teacherSignupStage2',elementary_subjects,middleSchool_subjects,highSchool_subjects);
                         if(serverCheck){
                             setSteps(3);
                             showSkeleton(true, 'step3');
@@ -399,7 +423,7 @@ async function moveStep(moveType, isRender){
                         return false;
                     }
                 }else{
-                    showMessage(2, 'Please choose grades taught', "", true);
+                    showMessageTheme2(2, 'Please choose grades taught');
                     return false;
                 }
             }
@@ -414,15 +438,23 @@ async function moveStep(moveType, isRender){
                 }
             }
             else if(nextStep==5){
-                if(signupStage5Form.valid()){
-                    var serverCheck = callForSignupTeacherAgreement('teacherSignupStage5','','','');
-                    if(serverCheck){
-                        setSteps(5);
-                        return true;
-                    } else {
-                        return false;
+                if(reviewDone==false){
+                    if(verificationValidationOnSave("teacherSignupStage4")){
+                        $('#submitVerificationModal').modal({backdrop: 'static', keyboard: false});
                     }
+                    return false;
                 }else{
+                    setSteps(5);
+                    getStage5Data();
+                    return true;
+                }
+            }
+            else if(nextStep==6){
+                var serverCheck = callForSignupTeacherAgreement('teacherSignupStage5','','','');
+                if(serverCheck){
+                    setSteps(6);
+                    return true;
+                } else {
                     return false;
                 }
             }
@@ -463,17 +495,14 @@ async function moveStep(moveType, isRender){
             if(nextStep == sectionLength){
                 $(".next-btn").show();
                 $(".finish-btn").hide(); 
+                $(".prev-btn").hide(); 
             }
         }
         if(moveType == "finish"){
-            if(signupStage6Form.valid()){
-                var serverCheck= await callForSignupTeacherAccountAndContact('teacherSignupStage6');
-                if(serverCheck){
-                    return true;
-                } else {
-                    return false;
-                }
-            }else{
+            var serverCheck= await callForSignupTeacherAccountAndContact('teacherSignupStage6');
+            if(serverCheck){
+                return true;
+            } else {
                 return false;
             }
         }
@@ -483,11 +512,11 @@ async function moveStep(moveType, isRender){
 }
 
 function getFormsValidation(){
+    var signupStage1Form = $('#teacherSignupStage1');
     var signupStage2Form = $('#teacherSignupStage2');
-    var signupStage3Form = $('#teacherSignupStage3');
-    var signupStage5Form = $('#teacherSignupStage5');
-    var signupStage6Form = $('#teacherSignupStage6');
-    signupStage2Form.validate({
+    // var signupStage5Form = $('#teacherSignupStage5');
+    // var signupStage6Form = $('#teacherSignupStage6');
+    signupStage1Form.validate({
         rules: {
             teacherFirstName: {
                 required: true,
@@ -533,7 +562,7 @@ function getFormsValidation(){
         }
     });
 
-    signupStage3Form.validate({
+    signupStage2Form.validate({
         rules: {
             highestQualificationId: {
                 required: true,
@@ -619,78 +648,78 @@ function getFormsValidation(){
         }
     });
 
-    signupStage5Form.validate({
-        rules: {
-            accountPersonName: {
-                required: true,
-            },
-            bankName: {
-                required: true
-            },
-            bankBranchName: {
-                required: true,
-            },
-            bankBranchAddress:{
-                required:true
-            },
-            accountNumber:{
-                required:true,
-            },
-            swiftCode: {
-                required: true,
-            },
-            paypalEmailId:{
-                required:true
-            },
+    // signupStage5Form.validate({
+    //     rules: {
+    //         accountPersonName: {
+    //             required: true,
+    //         },
+    //         bankName: {
+    //             required: true
+    //         },
+    //         bankBranchName: {
+    //             required: true,
+    //         },
+    //         bankBranchAddress:{
+    //             required:true
+    //         },
+    //         accountNumber:{
+    //             required:true,
+    //         },
+    //         swiftCode: {
+    //             required: true,
+    //         },
+    //         paypalEmailId:{
+    //             required:true
+    //         },
 
-        },
-        messages:{
-            accountPersonName: {
-                required: "Please Enter Account Holder Name",
-            },
-            bankName: {
-                required: "Please Enter Bank Name"
-            },
-            bankBranchName: {
-                required: "Please Enter Bank Branch Name",
-            },
-            bankBranchAddress:{
-                required: "Please Enter Bank Branch Address"
-            },
-            accountNumber:{
-                required: "Please Enter the Account Number/IBAN/CLABE",
-            },
-            swiftCode: {
-                required: "Please Enter Swift Code",
-            },
-            paypalEmailId: {
-                required: "PayPal Email",
-            },
+    //     },
+    //     messages:{
+    //         accountPersonName: {
+    //             required: "Please Enter Account Holder Name",
+    //         },
+    //         bankName: {
+    //             required: "Please Enter Bank Name"
+    //         },
+    //         bankBranchName: {
+    //             required: "Please Enter Bank Branch Name",
+    //         },
+    //         bankBranchAddress:{
+    //             required: "Please Enter Bank Branch Address"
+    //         },
+    //         accountNumber:{
+    //             required: "Please Enter the Account Number/IBAN/CLABE",
+    //         },
+    //         swiftCode: {
+    //             required: "Please Enter Swift Code",
+    //         },
+    //         paypalEmailId: {
+    //             required: "PayPal Email",
+    //         },
+    //     }
+    // });
 
-        }
-    });
-
-    signupStage6Form.validate({
-        rules: {
-            agreementDeclarationConfirm: {
-                required: true,
-            },
-        },
-        messages:{
-            agreementDeclarationConfirm:{
-                required: "Please accept the declaration",
-            },
-        }
-    });
+    // signupStage6Form.validate({
+    //     rules: {
+    //         agreementDeclarationConfirm: {
+    //             required: true,
+    //         },
+    //     },
+    //     messages:{
+    //         agreementDeclarationConfirm:{
+    //             required: "Please accept the declaration",
+    //         },
+    //     }
+    // });
 }
 
 function createStepsImage(){
     // Create Steps Image
-    $('.steps ul li:first-child').append('<span class="step-arrow step1"/>').find('a').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacherSignup/step-1.png" alt=""> ').append('<span class="step-order">Step 01</span>');
-    $('.steps ul li:nth-child(2').append('<span class="step-arrow step2"/>').find('a').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacherSignup/step-2-deactive.png" alt="">').append('<span class="step-order">Step 02</span>');
-    $('.steps ul li:nth-child(3)').append('<span class="step-arrow step3"/>').find('a').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacherSignup/step-3-deactive.png" alt="">').append('<span class="step-order">Step 03</span>');
-    $('.steps ul li:nth-child(4)').append('<span class="step-arrow step4"/>').find('a').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacherSignup/step-4-deactive.png" alt="">').append('<span class="step-order">Step 04</span>');
-    $('.steps ul li:last-child a').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacherSignup/step-5-deactive.png" alt="">').append('<span class="step-order">Step 05</span>');
+    $('.steps ul li:first-child').append('<span class="step-arrow-teacher step1"/>').find('a').append('<span class="step-order" style="text-transform: capitalize !important;">Step 01</span>').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-personal-details-active.png" alt=""> ').append('<span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Personal Details</span>');
+    $('.steps ul li:nth-child(2').append('<span class="step-arrow-teacher step2"/>').find('a').append('<span class="step-order" style="text-transform: capitalize !important;">Step 02</span>').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-professional-details-deactive.png" alt="">').append('<span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Professional Details</span>');
+    $('.steps ul li:nth-child(3)').append('<span class="step-arrow-teacher step3"/>').find('a').append('<span class="step-order" style="text-transform: capitalize !important;">Step 03</span>').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-application-under-review-deactive.png" alt="">').append('<span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Application Under Review</span>');
+    $('.steps ul li:nth-child(4)').append('<span class="step-arrow-teacher step4"/>').find('a').append('<span class="step-order" style="text-transform: capitalize !important;">Step 04</span>').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-verification-deactive.png" alt="">').append('<span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Verification</span>');
+    $('.steps ul li:nth-child(5)').append('<span class="step-arrow-teacher step5"/>').find('a').append('<span class="step-order" style="text-transform: capitalize !important;">Step 05</span>').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-contract-details-deactive.png" alt="">').append('<span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Contract Details</span>');
+    $('.steps ul li:last-child a').append('<span class="step-order" style="text-transform: capitalize !important;">Step 06</span>').append('<img src="'+PATH_FOLDER_IMAGE2+'/teacher-signup-new/teacher-bank-details-deactive.png" alt="">').append('<span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Bank Details</span>');
 }
 
 function buildDropdownCountry(result, dropdown, emptyMessage) {

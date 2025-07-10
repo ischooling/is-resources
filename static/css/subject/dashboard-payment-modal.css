@@ -68,7 +68,7 @@
 	line-height: 25px;
 }
 
-@ keyframes rippleOn {
+@keyframes rippleOn {
 	0% {
 		opacity: 0;
 	}
@@ -80,7 +80,7 @@
 	}
 }
 
-@ keyframes rippleOff {
+@keyframes rippleOff {
 	0% {
 		opacity: 0;
 	}

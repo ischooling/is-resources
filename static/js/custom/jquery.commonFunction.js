@@ -8,7 +8,7 @@ var editor1;
 var editor2;
 var editor3;
 var editor4;
-var IGNORECOUNTRYARRAY = ['AQ', 'BV', 'HM', 'TF', 'UM'];
+var IGNORECOUNTRYARRAY = ['AQ', 'BV', 'HM', 'TF', 'UM', 'aq', 'bv', 'hm', 'tf', 'um'];
 var globalEntityId = "";
 // var reviewDone = false;
 // var submitted = false;
@@ -3445,6 +3445,23 @@ function changeDateFormat(date, dateFormat) {
       ":" +
       (date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds())
     );
+  }else if ("MMM dd, yyyy hh:mm:ss A" == dateFormat) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+  
+    return (
+      M.months[date.getMonth()] + " " +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + ", " +
+      date.getFullYear() + " " +
+      (hours > 9 ? hours : "0" + hours) + ":" +
+      (minutes > 9 ? minutes : "0" + minutes) + ":" +
+      (seconds > 9 ? seconds : "0" + seconds) + " " +
+      ampm
+    );
   } else if ("dd-mm-yyyy" == dateFormat) {
     return (
       (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
@@ -4659,4 +4676,12 @@ function getWelcomeMessage(){
   } else if (timeOfDay >= 21 && timeOfDay < 24) {
       return "Good evening";
   }
+}
+
+function checkValueValidation(value, defaultValue){
+	if(value == null || value == undefined || value == ""){
+		return defaultValue;
+	}else{
+		return value;
+	}
 }

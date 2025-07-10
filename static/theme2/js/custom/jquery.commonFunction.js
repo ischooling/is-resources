@@ -8,7 +8,7 @@ var editor1;
 var editor2;
 var editor3;
 var editor4;
-var IGNORECOUNTRYARRAY = ['AQ', 'BV', 'HM', 'TF', 'UM'];
+var IGNORECOUNTRYARRAY = ['AQ', 'BV', 'HM', 'TF', 'UM', 'aq', 'bv', 'hm', 'tf', 'um'];
 var globalEntityId = "";
 var reviewDone = false;
 var submitted = false;
@@ -3855,6 +3855,23 @@ function changeDateFormat(date, dateFormat) {
       ":" +
       (date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds())
     );
+  }else if ("MMM dd, yyyy hh:mm:ss A" == dateFormat) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+  
+    return (
+      M.months[date.getMonth()] + " " +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + ", " +
+      date.getFullYear() + " " +
+      (hours > 9 ? hours : "0" + hours) + ":" +
+      (minutes > 9 ? minutes : "0" + minutes) + ":" +
+      (seconds > 9 ? seconds : "0" + seconds) + " " +
+      ampm
+    );
   } else if ("dd-mm-yyyy" == dateFormat) {
     return (
       (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
@@ -5075,6 +5092,7 @@ function getWelcomeMessage(){
   }
 }
 
+
 function generateTinyUrls() {
   const $urlInputs = $('.tinyUrl');
   const uniqueUrls = {};
@@ -5115,4 +5133,46 @@ function generateTinyUrls() {
   .catch(error => {
       console.error("Fetch error:", error);
   });
+}
+
+function checkValueValidation(value, defaultValue){
+	if(value == null || value == undefined || value == ""){
+		return defaultValue;
+	}else{
+		return value;
+	}
+}
+
+function getTimezoneIdByTimeName(timeZoneName) {
+  var responseData={};
+  $.ajax({
+    type: "POST",
+    contentType: "application/json",
+    url: getURLForCommon('masters'),
+    data: JSON.stringify(getTimezoneIdByTimeNameRequest('GET_TIMEZONE_ID', timeZoneName)),
+    dataType: 'json',
+    cache: false,
+    timeout: 600000,
+    async : false,
+    success: function(response) {
+    responseData=response;
+    },
+    error: function(e) {
+      console.log(e);
+    }
+  });
+  return responseData;
+}
+
+function getTimezoneIdByTimeNameRequest(key, value){
+	var request = {};
+	var requestData = {};
+	var authentication = {};
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	requestData['requestKey'] = key;
+	requestData['requestValue'] = value;
+	request['requestData'] = requestData;
+	request['authentication'] = authentication;
+	return request;
 }

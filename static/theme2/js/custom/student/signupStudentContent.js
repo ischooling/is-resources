@@ -385,7 +385,6 @@ function renderStudentDetails(data){
 	}else{
 		createSelect2Element('signupStage1', 'applyStandardId');
 	}
-
 	if(!scriptExecuted){
 		inputContact = document.querySelector("#contactNumber");
 		itiContcat = window.intlTelInput(inputContact);
@@ -709,7 +708,7 @@ function getStudentDetailsContent(data){
 					+'<span style="color:#444;position:absolute;top:100%;left:0">You must have a valid ID of your nationality<span>'
 				+'</div>'
 			+'</div>'
-			+'<div class="form-row mb-2">'
+			+'<div class="form-row mb-4">'
 				+'<strong>Student\'s Current Location</strong>'
 			+'</div>'
 			+'<div class="form-row">'
@@ -1207,63 +1206,66 @@ function renderCourseSelectionContent(csr){
 	},1500);
 
 	
-$('.accordion .a-title').unbind().bind('click', function(){
-	$(this).parent().closest('li').find('.a-content').stop().slideToggle();
-	$(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
-	$(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-plus');
-	$(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-minus');
-	$(this).parent().closest('li').siblings().find('.a-content').slideUp();
-});
+	$('.accordion .a-title').unbind().bind('click', function () {
+		const $li = $(this).closest('li');
+		const $icon = $(this).find('.plus-icon');
+		$li.find('.a-content').stop().slideToggle();
+		$icon.toggleClass('fa-plus fa-minus');
+		$li.siblings().each(function () {
+			$(this).find('.a-content').slideUp();
+			$(this).find('.plus-icon').removeClass('fa-minus').addClass('fa-plus');
+		});
+	});
 
-$('.custom-tab-wrapper li a:not(:first)').addClass('inactive');
-$('.custom-tab-item').hide();
-$('.custom-tab-item:first').show();
-$('.custom-tab-wrapper li a').unbind().bind('click', function(){
-	var tabID = $(this).attr('id'), tabFullForm = $(this).attr('full-form')
-	if ($(this).hasClass('inactive')) {
-		$('.custom-tab-wrapper li a').addClass('inactive');
-		$('.custom-tab-wrapper li').removeClass('active-tab');
-		$(this).removeClass('inactive')
-		$(this).parent().addClass('active-tab')
+	$('.custom-tab-wrapper li a:not(:first)').addClass('inactive');
+	$('.custom-tab-item').hide();
+	$('.custom-tab-item:first').show();
+	$('.custom-tab-wrapper li a').unbind().bind('click', function(){
+		var tabID = $(this).attr('id'), tabFullForm = $(this).attr('full-form')
+		if ($(this).hasClass('inactive')) {
+			$('.custom-tab-wrapper li a').addClass('inactive');
+			$('.custom-tab-wrapper li').removeClass('active-tab');
+			$(this).removeClass('inactive')
+			$(this).parent().addClass('active-tab')
 
-		$('.custom-tab-item').hide();
-		$('#' + tabID + 'C').slideDown('slow');
-		$('.accordion li:first-child .a-content').show();
-	}
-});
-// $(".course-radio-btn-wrapper ul li").unbind().bind('click', function(){
-// 	if($('.course-radio-btn-wrapper ul li input').is(":checked", true) ){
-// 		$(this).parent().parent().removeClass('deactive-course-selection')
-// 	}
-// })
+			$('.custom-tab-item').hide();
+			$('#' + tabID + 'C').slideDown('slow');
+			$('.accordion li:first-child .a-content').show();
+		}
+	});
+	// $(".course-radio-btn-wrapper ul li").unbind().bind('click', function(){
+	// 	if($('.course-radio-btn-wrapper ul li input').is(":checked", true) ){
+	// 		$(this).parent().parent().removeClass('deactive-course-selection')
+	// 	}
+	// })
 
-$("#noTeacherAssistanceAvailableNo").on("click", function(){
-	$(".course-check-box input").prop("checked", false);
-});
+	$("#noTeacherAssistanceAvailableNo").on("click", function(){
+		$(".course-check-box input").prop("checked", false);
+	});
 
-$('.course-name').click(function(){
-	if($(this).hasClass('open-dropdown')){
-		$(this).parent().css({"border-color":"#dcdcdc"});
-		$(this).parent().parent().css({"border-color":"#dcdcdc"});
-		$(this).parent().parent().siblings().find('.bg-border').css({"border-color":"#e6d7fb", "background":"transparent"});
-		$(this).parent().parent().siblings().css({"border-color":"#e6d7fb"});
-		// $('.course-radio-btn-wrapper').parent().find(".course-name a").css({"color":"#333"});
-	}
-	else{
-		$(this).parent().css({"border-color":"#e6d7fb"});
-		$(this).parent().parent().css({"border-color":"#e6d7fb"});
-	}
-	// if($(this).parent().parent().find('.course-radio-btn-wrapper').hasClass('open')){
-	// 	$('.course-radio-btn-wrapper.open').parent().find(".course-name a").css({"color":"#333"});
-	// 	$('.course-radio-btn-wrapper.open').parent().find('.bg-border').css({"background":"#dcdcdc"});
-	// 	$('.course-radio-btn-wrapper.open').parent().siblings().find('.course-check-box input').prop("checked", false);
-	// }else{
-	// 	$('.course-radio-btn-wrapper').parent().find(".course-name a").css({"color":"#333"});	
-	// }
-});
-// $('.course-radio-btn-wrapper.open').parent().find(".course-name a").css({"color":"#333"});
-// $('.course-radio-btn-wrapper.open').parent().find('.bg-border').css({"background":"#dcdcdc"});
-// $('.course-radio-btn-wrapper.open').parent().css({"border-color":"#dcdcdc"});
+	$('.course-name').click(function(){
+		if($(this).hasClass('open-dropdown')){
+			$(this).parent().css({"border-color":"#dcdcdc"});
+			$(this).parent().parent().css({"border-color":"#dcdcdc"});
+			$(this).parent().parent().siblings().find('.bg-border').css({"border-color":"#e6d7fb", "background":"transparent"});
+			$(this).parent().parent().siblings().css({"border-color":"#e6d7fb"});
+			// $('.course-radio-btn-wrapper').parent().find(".course-name a").css({"color":"#333"});
+		}
+		else{
+			$(this).parent().css({"border-color":"#e6d7fb"});
+			$(this).parent().parent().css({"border-color":"#e6d7fb"});
+		}
+		// if($(this).parent().parent().find('.course-radio-btn-wrapper').hasClass('open')){
+		// 	$('.course-radio-btn-wrapper.open').parent().find(".course-name a").css({"color":"#333"});
+		// 	$('.course-radio-btn-wrapper.open').parent().find('.bg-border').css({"background":"#dcdcdc"});
+		// 	$('.course-radio-btn-wrapper.open').parent().siblings().find('.course-check-box input').prop("checked", false);
+		// }else{
+		// 	$('.course-radio-btn-wrapper').parent().find(".course-name a").css({"color":"#333"});	
+		// }
+	});
+	// $('.course-radio-btn-wrapper.open').parent().find(".course-name a").css({"color":"#333"});
+	// $('.course-radio-btn-wrapper.open').parent().find('.bg-border').css({"background":"#dcdcdc"});
+	// $('.course-radio-btn-wrapper.open').parent().css({"border-color":"#dcdcdc"});
 
 }
 
@@ -2351,7 +2353,7 @@ function studentDetailsPreview(data){
 						+'</tr>'
 						if($('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA'){
 							html+=
-							+'<tr>'
+							'<tr>'
 								+'<th>Student\'s School Name</th>'
 								+'<td>'+signupStudent.studyingSchoolName+'</td>'
 							+'</tr>'
@@ -3365,7 +3367,7 @@ function callPaymentStudentModal(data){
 													+'</ul>';
 												}
 												html+=
-												'<p>Please clearly identify Student Name and City/State/Country in the reference information that accompanies the wire transfer, so that we can properly credit your account.</p>'
+												'<p>Please clearly identify Student Name and City/State/Country in the reference information that accompanies the bank transfer, so that we can properly credit your account.</p>'
 												+'<p>Your SMS profile will be created after the complete payment is processed in '+SCHOOL_NAME+'\'s bank Account</p>'
 											+'</div>'
 											+'<div class="payment-form">'

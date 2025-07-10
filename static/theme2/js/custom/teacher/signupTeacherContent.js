@@ -8,25 +8,33 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     $("body").append(generateTeacherEnrollmentContent(moduleName) + loaderContent());
     createStepsImage();
     getFormsValidation();
-    if(signupPage >= 5){
-        await getStage5Data();
-    }
-    if(signupPage==6){
-        await getStage6Data();
-    }else if(signupPage < 5){
-        if(signupPage>=2){
-            if(signupPage == 2){
+    if(signupPage >= 5 && signupPage <=6){
+        await getStage4Data();
+        if(signupPage == 6){
+            $("#submitVerificationModal").modal('hide');
+		    $('#inReviewForTeacherVerificationModal').modal({backdrop: 'static', keyboard: false});
+        }
+    }else{
+        if(signupPage >= 7){
+            await getStage5Data();
+        }
+        if(signupPage==8){
+            await getStage6Data();
+        }else if(signupPage < 5){
+            if(signupPage>=2){
+                if(signupPage == 2){
+                    await getStage1Data();
+                }
+            }
+            if(signupPage>=3){
+                if(signupPage == 3){
+                    await getStage1Data('2');
+                }
                 await getStage2Data();
             }
-        }
-        if(signupPage>=3){
-            if(signupPage == 3){
-                await getStage2Data('2');
+            if(signupPage>=4){
+                await getStage3Data();
             }
-            await getStage3Data();
-        }
-        if(signupPage>=4){
-            await getStage4Data();
         }
     }
     $('.select-option-wrapper .option').click(function() {
@@ -37,9 +45,9 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     });
 
     $('[data-toggle="tooltip"]').tooltip().show();
-    $('#editStageFirstName').text($("#teacherSignupStage2 #teacherFirstName").val());
-    $('#editStageMiddleName').text($('#teacherSignupStage2 #teacherMiddleName').val());
-    $('#editStageLastName').text($('#teacherSignupStage2 #teacherLastName').val());
+    $('#editStageFirstName').text($("#teacherSignupStage1 #teacherFirstName").val());
+    $('#editStageMiddleName').text($('#teacherSignupStage1 #teacherMiddleName').val());
+    $('#editStageLastName').text($('#teacherSignupStage1 #teacherLastName').val());
     var startDate = new Date();
     startDate.setFullYear(startDate.getFullYear()-99);
     
@@ -63,7 +71,7 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
         } else {
             $("#payTabData").attr("disabled", true);
         }
-        $("#teacherSignupContentStage3 #select_course .close, #teacherSignupContentStage3 #select_course .k8-theme-btn").click(function(){
+        $("#teacherSignupContentStage2 #select_course .close, #teacherSignupContentStage2 #select_course .k8-theme-btn").click(function(){
             $(".modal-backdrop").remove();
         });
     });
@@ -102,14 +110,7 @@ function generateTeacherEnrollmentContent(moduleName){
                         </h1>
                     </section>`
                 }
-            html+=`</section>
-            ${/*<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>*/''}`;
-            // html+=`<div class="fixed-button">
-            //     <a class="primary-bg white-txt-color" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
-            //         Log out
-            //     </a>
-            //     <a class="primary-bg white-txt-color" href="${schoolSettingsLinks.schoolWebsite}/contact-us/" target="_blank">Contact US</a>
-            // </div>`;
+            html+=`</section>`;
             if(MAINTENANCEDOWNTIME !=''){
                 html+=
                 `<div class="full">
@@ -117,8 +118,8 @@ function generateTeacherEnrollmentContent(moduleName){
                 </div>`;
             }
             html+=
-            `<div id="messageDiv" class="server-error-message" style="display: none;">
-                <span id="messageDiv1" class="msg error"><i class="fa fa-times"></i> Error Message </span>
+            `<div class="server-message">
+                <span class="msg error" id="msgTheme2"><i class="fa fa-exclamation-triangle"></i>&nbsp;Failed to fetch meetings.</span>
             </div>
             <div id="formSteps">
                 <div class="steps clearfix">
@@ -128,35 +129,42 @@ function generateTeacherEnrollmentContent(moduleName){
                         <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
                         <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
                         <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
+                        <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
                     </ul>
                 </div>
                 <div class="content">
                     <section class="step active-step" id="step-1">
                         <div class="full step-1-skeleton"></div>
-                        <form id="teacherSignupStage2" name="teacherSignupStage2" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
-                            <div id="teacherSignupContentStage2"></div>
+                        <form id="teacherSignupStage1" name="teacherSignupStage1" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+                            <div id="teacherSignupContentStage1"></div>
                         </form>
                     </section>
                     <section class="step" id="step-2">
                         <div class="full step-2-skeleton"></div>
-                        <form id="teacherSignupStage3" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
-                            <div id="teacherSignupContentStage3"></div>
+                        <form id="teacherSignupStage2" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+                            <div id="teacherSignupContentStage2"></div>
                         </form>
                     </section>
                     <section class="step" id="step-3">
                         <div class="full step-3-skeleton"></div>
-                        <form id="teacherSignupStage4" name="teacherSignupStage4" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
-                            <div id="teacherSignupContentStage4"></div>
+                        <form id="teacherSignupStage3" name="teacherSignupStage3" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+                            <div id="teacherSignupContentStage3"></div>
                         </form>
                     </section>
                     <section class="step" id="step-4">
                         <div class="full step-4-skeleton"></div>
-                        <form id="teacherSignupStage5" name="teacherSignupStage5" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
-                            <div id="teacherSignupContentStage5"></div>
+                        <form id="teacherSignupStage4" name="teacherSignupStage4" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+                            <div id="teacherSignupContentStage4"></div>
                         </form>
                     </section>
                     <section class="step" id="step-5">
                         <div class="full step-5-skeleton"></div>
+                        <form id="teacherSignupStage5" name="teacherSignupStage5" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+                            <div id="teacherSignupContentStage5"></div>
+                        </form>
+                    </section>
+                    <section class="step" id="step-6">
+                        <div class="full step-6-skeleton"></div>
                         <form id="teacherSignupStage6" name="teacherSignupStage6" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
                             <div id="teacherSignupContentStage6"></div>
                         </form>
@@ -179,6 +187,9 @@ function generateTeacherEnrollmentContent(moduleName){
         </div>`;
         html+=submitInterviewSlotModalContent();
         html+=inReviewForTeacherDetailsModalContent();
+        html+=`<div id="demoVideoWrapper"></div>`;
+        html+=submitVerificationModal();
+        html+=inReviewForTeacherVerificationModal();
         html+=vedioInstructionModalContent();
     return html;
 }
@@ -239,6 +250,64 @@ function inReviewForTeacherDetailsModalContent(){
     return html;
 }
 
+function submitVerificationModal(){
+    var html=
+        `<div id="submitVerificationModal" class="modal modal-design fade" role="dialog">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header primary-bg white-txt-color">
+                        <button type="button" class="close secondary-bg white-txt-color" onclick="return closeVerificationModal()">&times;</button>
+                        <h4 class="modal-title">Confirmation</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h4>
+                            <b>Dear <span>${USER_FULL_NAME}</span>,<br>
+                                <br>
+                                Please review your documents carefully before submitting, as no changes can be made once your verification documents have been submitted.
+                                <br>
+                                <br>
+                                Thanks<br>
+                                ${schoolSettingsOffice.schoolName}</b>
+                        </h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn k8-theme-btn secondary-bg white-txt-color" onclick="saveVerificationDetails('teacherSignupStage4');">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}
+
+function inReviewForTeacherVerificationModal(){
+    var html=
+        `<div id="inReviewForTeacherVerificationModal" class="modal modal-design fade" role="dialog" data-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header primary-bg white-txt-color">
+                        <h4 class="modal-title">Documents Under Verification</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-body" style="margin-top: 0 !important">
+                            <p style="font: bold 16px Arial, Helvetica, sans-serif; text-align: justify">Dear 
+                                <span class="text-capitalize" id="teacherFullName">${USER_FULL_NAME}</span>
+                                <td></td>,<br>
+                                <br>
+                                Your verification documents are currently <span class="text-primary primary-txt-color">under review</span>. We will get back to you within 1 week.
+                                <br>
+                                <br> Thanks<br> ${schoolSettingsOffice.schoolName}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding:0 15px">
+                        <button type="button" class="btn k8-theme-btn primary-bg white-txt-color" onclick="logout();">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}
+
 function vedioInstructionModalContent(){
     var html=
         `<div class="modal fade modal-design " id="vedioInstruction" role="dialog">
@@ -292,13 +361,69 @@ function vedioInstructionModalContent(){
     return html;
 }
 
+function videoInstructionModalContent() {
+    var html = `
+        <div id="videoInstructionBackdrop" class="video-instruction-backdrop" onclick="closeVideoInstructionModal();"></div>
+        <div id="videoInstructionModal" class="video-instruction-modal">
+            <div style="background-color:#027FFF; position: relative;padding:8px;">
+                <h5 class="mb-0" style="color: white; font-size: 18px; font-weight: 700;">
+                    Teachers Demo Video Instructions
+                </h5>
+                <button onclick="closeVideoInstructionModal();" type="button" data-dismiss="modal" aria-label="Close"
+                    style="position: absolute; left: -25px; top: 41px; background-color: white !important; border-radius: 5px 0px 0px 5px; font-size: 26px; border: 0px; color: #4f4f4f;padding: 5px;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div style="background-color: #F1F3F5; height: 100vh; overflow-y: auto;padding: 35px;color:#4f4f4f;">
+                <div style="border:1px solid #4f4f4f;border-radius:14px;padding:16px;max-height:300px;overflow-y:auto">
+                    <h5><b>1. To qualify for the next round, you are requested to record a demo class of 4-7 minutes duration on the topic of your choice from our 
+                    <a class="primary-txt-color" href="https://internationalschooling.org/course-catalog/" target="_blank">Course Catalog</a></b></h5>
+                    <h6 style="margin:5px 0px;"><b>Following are the general guidelines which can help to make the video:</b></h6>
+                    <ul>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>First and foremost you must find a quiet and well-lit place, free from any kind of distractions.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>You need to have a stable internet connection.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>You will need to check whether your computer’s audio and webcam are working fine.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>You need to dress professionally and have the right posture and body language.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>The medium of instruction must be in English.</li>
+                    </ul><br>
+
+                    <h5><b>2. Please remember that you have to record the video with a mindset that you are in front of a student, so you have to first introduce yourself and then proceed with the demo of the particular course you are applying for.</b></p>
+
+                    <h6 style="color:#027FFF;margin:5px 0px;"><b>Your demo video will be judged on the following criteria by our panel:</b></h6>
+                    <ul>
+                        <li style="font-size:13px;">
+                            <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Content Knowledge 
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Voice Modulation     
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Presentation & Confidence
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Engagement Strategies
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Technical Efficiency
+                        </li>
+                    </ul>
+                    <p style="color:#027FFF;margin:10px 0px;"><b>You are free to be as creative and innovative in your demo video as you like.</b></p>
+                    <h5><b>3. You will have two attempts to record your demo class, but only one final recording may be submitted. You can choose which recording to submit for approval.</b></p>
+                </div>
+                <div id="recordingSection"></div>
+                <h5 id="recordingWaitingText" style="font-weight: bold; color: #FFC008; margin-top: 12px; display: none;"></h5>
+                <div class="d-flex text-right" style="justify-content:space-between; align-items:center;">
+                    <a id="recordYourDemoInsideBtn" href="javascript:void(0);" class="btn btn-primary" style="border-radius: 6px;font-weight: bold;margin-top: 3%;">
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <span>Record your Demo<span>
+                    </a>
+                    <button id="approveDemoBtn" onclick="approvedDemoRecording();" class="btn btn-primary rounded mt-3" style="display: none;">Approve</button>
+                </div>
+            </div>
+        </div>
+    `;
+    return html;
+}
+
 function getTeacherBasicInfoContent(signupTeacher){
     signupTeacher = signupTeacher.details.teacher;
     var html=
         `<input type="hidden" id="userId" value="${USER_ID}" />
         <input type="hidden" id="countryData" value="IN" />
         <input type="hidden" id="countryIsd" value="91" />
-        <h3 id="first_step" >Basic Information</h3>
+        <h3 id="first_step" >Personal Details</h3>
             <div class="form-row">
                 <div class="form-holder">
                     <div class="form-group">
@@ -408,23 +533,13 @@ function getTeacherBasicInfoContent(signupTeacher){
                             <input type="tel" class="form-control-field" id="phone_no" name="phone_no"
                                 placeholder="Phone Number*"
                                 value=""  
-                                onkeydown="return M.digit(event);">
+                                onkeydown="return M.digit(event);"
+                                maxlength="20"    
+                            >
                         </div>
                     </div>
                 </div>
-            </div>`
-            // <div class="form-row text-center">
-            //     <div class="notes">
-            //         <p>
-            //             <b>Note:</b> Kindly use the English language while providing information. If you do not have an English keyboard, add the input language for:
-            //         </p>
-            //         <ul>
-            //             <li><a class="primary-txt-color primary-border-color" href="https://support.microsoft.com/en-sg/help/4027670/windows-10-add-and-switch-input-and-display-language-preferences" target="_blank">Windows 10</a></li>
-            //             <li><a class="primary-txt-color primary-border-color" href="https://support.microsoft.com/en-sg/help/17424/windows-change-keyboard-layout" target="_blank">Windows 7/8.1</a></li>
-            //             <li><a class="primary-txt-color primary-border-color" href="https://support.apple.com/en-sg/guide/mac-help/mchlp1406/10.15/mac/10.15" target="_blank">macOS</a></li>
-            //         </ul>
-            //     </div>
-            // </div>`
+            </div>`;
     return html;
 }
 
@@ -440,7 +555,7 @@ function getTeacherProfessionalDetailsContent(stup){
         <input type="hidden" id="teacherCV" value="${stup.uploadDocumentCVName}" />
         <input type="hidden" id="experienceDoc" value="${stup.uploadDocumentExperienceName}" />
         <input type="hidden" id="lastSalarySlip" value="${stup.uploadDocumentLastSalarySlip}" />
-        <h3 id="second_step">Academic & Professional Details</h3>
+        <h3 id="second_step">Professional Details</h3>
         <div class="form-row">
             <div class="form-holder">
                 <div class="icon-field valid-field">
@@ -478,32 +593,16 @@ function getTeacherProfessionalDetailsContent(stup){
                 </div>
             </div>
             <div class="form-holder">
-                ${/*<div class="col-lg-4 col-md-3 col-sm-3 col-xs-12" style="padding: 0px;">
-                    <label>Are you currently employed elsewhere?</label>
-                    <div class="full">
-                        <label class="switch">
-                            <input
-                                id="currentlyWorking" name="currentlyWorking"
-                                class="switch-input currently_working" type="checkbox"  onchange="changeOrgNameLabel()"
-                                changeUrl="https://internationalschooling.owschools.com/owsoo/login/auth"
-                                value="${stup.currentlyWorking=='Y'?'Y':'N'}" ${stup.currentlyWorking=='Y'?'checked':''} />
-                            <span class="switch-label primary-bg-checked" data-on="Yes" data-off="No"></span>
-                            <span class="switch-handle"></span>
-                        </label>
-                    </div>
-                </div>*/''}
-                ${/*<div class="col-lg-8 col-md-3 col-sm-3 col-xs-12" style="padding: 0px;">*/''}
-                    <div class="icon-field valid-field">
-                        <i class="zmdi zmdi-case"></i> <input type="text"
-                            class="form-control-field"
-                            id="lastOrganizationName"
-                            name="lastOrganizationName"
-                            placeholder="Last Organization Name*"
-                            onkeydown="return M.isAddressLine(event);"
-                            value="${escapeCharacters(stup.lastOrganizationName)}"
-                            maxlength="100" style="text-transform:capitalize" >
-                    </div>
-                ${/*</div>*/''}
+                <div class="icon-field valid-field">
+                    <i class="zmdi zmdi-case"></i> <input type="text"
+                        class="form-control-field"
+                        id="lastOrganizationName"
+                        name="lastOrganizationName"
+                        placeholder="Last Organization Name*"
+                        onkeydown="return M.isAddressLine(event);"
+                        value="${escapeCharacters(stup.lastOrganizationName)}"
+                        maxlength="100" style="text-transform:capitalize" >
+                </div>
             </div>
         </div>
 
@@ -584,32 +683,57 @@ function getTeacherProfessionalDetailsContent(stup){
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-holder des-holder">
-                <div class="form-group">
-                    <div class="icon-field error-top-0  valid-field">
-                        <a class="primary-txt-color" data-toggle="modal" data-target="#vedioInstruction"> <i
-                            class="zmdi zmdi-info" data-toggle="tooltip" title=""
-                            data-original-title="Demo Video Instructions"></i>
-                        </a>
-                        <input
-                            type="text"
-                            onkeydown="return M.isAddressLine(event);"
-                            class="form-control-field"
-                            id="demoVedioLink"
-                            name="demoVedioLink"
-                            placeholder="Please provide a link of your demo*"
-                            value="${escapeCharacters(stup.demoVedioLink)}"
-                        />
+        </div>`;
+        
+        if(stup.demoVedioLink != null && stup.demoVedioLink != undefined && stup.demoVedioLink != ""){
+            html+=`<div class="form-row">
+                <div class="form-holder des-holder">
+                    <div class="form-group">
+                        <div class="icon-field error-top-0  valid-field">
+                            <a class="primary-txt-color" data-toggle="modal" data-target="#vedioInstruction"> <i
+                                class="zmdi zmdi-info" data-toggle="tooltip" title=""
+                                data-original-title="Demo Video Instructions"></i>
+                            </a>
+                            <input
+                                type="text"
+                                onkeydown="return M.isAddressLine(event);"
+                                class="form-control-field"
+                                id="demoVedioLink"
+                                name="demoVedioLink"
+                                placeholder="Please provide a link of your demo*"
+                                value="${escapeCharacters(stup.demoVedioLink)}"
+                            />
+                        </div>
+                        <span>The link should be publicly accessible e.g. public
+                            YouTube, or Google Drive links (Click on the info icon for the
+                            instructions).</span>
                     </div>
-                    <span>The link should be publicly accessible e.g. public
-                        YouTube, or Google Drive links (Click on the info icon for the
-                        instructions).</span>
                 </div>
-            </div>
-        </div>
-        <div class="form-row">
+            </div>`
+        }else{
+            html+=`<div style="margin: 20px 0px;">
+                <h3 class="text-left mb-0">Record Your Demo</h3>
+                <div id="approvedDemoRecording"></div>`;
+                entityIds = stup.sessionEntityIdList;
+                if(entityIds.length == 2){
+                    html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <span>Select Recording(s)</span>
+                    <a>`;
+                }else if(entityIds.length == 1){
+                    html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <span>Record your Demo (2nd Attempt)</span>
+                    <a>`;
+                }else{
+                    html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <span>Record your Demo</span>
+                    <a>`;
+                }
+            html+=`</div>`
+        }
+        html+=`<div class="form-row">
             <div class="form-holder">
                 <div class="custom-checkbox-policy">
                     <input type="checkbox"
@@ -638,7 +762,7 @@ function getTeacherProfessionalDetailsContent(stup){
 function getTeacherReviewAndApprovalContent(){
     var html=
         `<h3>
-            Review & Approval <br>
+           Application Under Review <br>
             <p style="font-size: 14px;">Kindly Review your details</p>
         </h3>
         <div class="form-row">
@@ -649,7 +773,7 @@ function getTeacherReviewAndApprovalContent(){
                             <div class="basic-information">
                                 <div class="full">
                                     <h4 class="a-title ">
-                                        Basic Information <i class="fa plus-icon fa-minus"></i>
+                                        Personal Details <i class="fa plus-icon fa-minus"></i>
                                     </h4>
                                 </div>
                                 <div class="a-content" style="display: none;">
@@ -695,7 +819,7 @@ function getTeacherReviewAndApprovalContent(){
                             <div class="academic-professional-details">
                                 <div class="full">
                                     <h4 class="a-title ">
-                                        Academic & Professional Details <i class="fa fa-plus plus-icon"></i>
+                                        Professional Details <i class="fa fa-plus plus-icon"></i>
                                     </h4>
                                 </div>
                                 <div class="a-content overflow-auto">
@@ -714,10 +838,6 @@ function getTeacherReviewAndApprovalContent(){
                                                     <th>Total Online Teaching Experience:</th>
                                                     <td></strong> <span id="edittotalExperianceFromYYYY"></span> Years</td>
                                                 </tr>
-                                                ${/*<tr>
-                                                    <th>Are you currently employed elsewhere?:</th>
-                                                    <td></strong> <span id="editStage3currentlyWorkingHere"></span></td>
-                                                </tr>*/''}
                                                 <tr>
                                                     <th>Last/Current Organization Name:</th>
                                                     <td> <span id="editStage3lastOrganizationName"></span></td>
@@ -772,6 +892,192 @@ function getTeacherReviewAndApprovalContent(){
     return html;
 }
 
+function getTeacherVerificationDetailsContent(data){
+    console.log(data);
+    var html=
+        `<style>
+            .valid-check:after{translate: -12px;}
+        </style>
+        <input type="hidden" id="countryData1" value="${data.employeeReference?.[0]?.isoCode || 'US'}">
+        <input type="hidden" id="countryIsd1" value="${data.employeeReference?.[0]?.isdCode || '1'}">
+        <input type="hidden" id="countryData2" value="${data.employeeReference?.[1]?.isoCode || 'US'}">
+        <input type="hidden" id="countryIsd2" value="${data.employeeReference?.[1]?.isdCode || '1'}">
+        <h3 style="margin-bottom: 30px !important;">Verification</h3>
+        <div>
+            <h3 class="text-left">COMPLETE SOCIAL MEDIA DETAILS (BACKGROUND CHECK)</h3>
+            <div style="border: #eee 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px; ">
+                <p style="color: red; margin-bottom: 15px">You can add links to all your social media profiles. However, adding at least one profile link in mandatory(*).</p>
+                <div class="form-row mb-2">
+                    <div class="form-holder" style="flex: 1; min-width: 250px;">
+                        <div class="form-group">
+                            <label for="linkedinProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
+                                LinkedIn Profile URL
+                            </label>
+                            <input id="linkedinProfileUrl" name="linkedinProfileUrl" type="text" class="form-control-field" placeholder="LinkedIn Profile URL" value="${checkValueValidation(data.teacherVerification.linkedIn, "")}">
+                        </div>
+                    </div>
+                    <div class="form-holder" style="flex: 1; min-width: 250px;">
+                        <div class="form-group">
+                            <label for="facebookProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
+                                Facebook Profile URL
+                            </label>
+                            <input id="facebookProfileUrl" name="facebookProfileUrl" type="text" class="form-control-field" placeholder="Facebook Profile URL" value="${checkValueValidation(data.teacherVerification.facebook, "")}">
+                        </div>
+                    </div>
+                    <div class="form-holder" style="flex: 1; min-width: 250px;">
+                        <div class="form-group">
+                            <label for="instagramProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
+                                Instagram Profile URL
+                            </label>
+                            <input id="instagramProfileUrl" name="instagramProfileUrl" type="text" class="form-control-field" placeholder="Instagram Profile URL" value="${checkValueValidation(data.teacherVerification.instagram, "")}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row mt-2">
+                    <div class="form-holder" style="width: 500px !important;">
+                        <div class="form-group">
+                            <label for="twitterProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
+                                X (Twitter) Profile URL
+                            </label>
+                            <input id="twitterProfileUrl" name="twitterProfileUrl" type="text" class="form-control-field" placeholder="Twitter/X Profile URL" value="${checkValueValidation(data.teacherVerification.twitter, "")}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-holder">
+                        <div class="custom-checkbox-policy" style="align-items: center !important;">
+                            <input type="checkbox"
+                                class="mb-2"
+                                name="socialMediaCheckbox"
+                                id="socialMediaCheckbox"
+                                value="${data.teacherVerification?.haveSocialMediaAccount == "Y" ? "Y" : "N"}"
+                                ${data.teacherVerification?.haveSocialMediaAccount == "Y" ? "checked" : ""}
+                            >
+                            <label for="socialMediaCheckbox" class="ml-3" style="color:gray;font-size:15px;">I hereby declare that I do not have any active social media accounts.</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-left">RECOMMENDATION LETTER OR ANY REFERENCE</h3>
+            <div style="border: #eee 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px; ">
+                <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
+                <div class="form-row">
+                    <div class="form-holder">
+                        <label class="full">Recommendation Letter 1</label>
+                        <div class="full upload-item-wrapper clone-item">
+                            <div class="upload-btn-wrapper mt-1 upload-item">
+                                <div class="uploaded-file valid-field valid-check" id="fileupload7Span" >${checkValueValidation(data.attachments.recommendationLetter1Name, "Upload Recommendation Letter 1")}</div>
+                                <input onchange="uploadDocsFun(this, \'verify\');" class="file-input" type="file" name="fileupload7" id="fileupload7" fileType="73" elem-id="7"> <span
+                                    class="upload-btn primary-txt-color"> <i class="fa fa-upload"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-holder">
+                        <label class="full">Recommendation Letter 2</label>
+                        <div class="full">
+                            <div class="upload-btn-wrapper mt-1">
+                                <div class="uploaded-file valid-field valid-check" id="fileupload8Span">${checkValueValidation(data.attachments.recommendationLetter2Name, "Upload Recommendation Letter 2")}</div>
+                                <input onchange="uploadDocsFun(this, \'verify\');" class="file-input" type="file" name="fileupload8" id="fileupload8" fileType="74" elem-id="8"> <span
+                                    class="upload-btn primary-txt-color"> <i class="fa fa-upload"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h6 class="mb-1" style="font-weight: bold;color: gray;">Reference 1</h6>
+                    <div class="form-row d-flex flex-wrap gap-3">
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference1Name" type="text" class="form-control-field" placeholder="Name" value="${data.employeeReference?.[0]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
+                        </div>
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference1Email" type="email" class="form-control-field" placeholder="Email" value="${data.employeeReference?.[0]?.email || ''}" maxlength="50">
+                        </div>
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference1Phone" type="tel" class="form-control-field" placeholder="Phone Number" value="${data.employeeReference?.[0]?.number || ''}" maxlength="20">
+                        </div>
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference1Designation" type="text" class="form-control-field" placeholder="Designation" value="${data.employeeReference?.[0]?.designation || ''}" maxlength="50">
+                        </div>
+                    </div>
+                    <h6 class="mt-2 mb-1" style="font-weight: bold;color: gray;">Reference 2</h6>
+                    <div class="form-row d-flex flex-wrap gap-3">
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference2Name" type="text" class="form-control-field" placeholder="Name" value="${data.employeeReference?.[1]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
+                        </div>
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference2Email" type="email" class="form-control-field" placeholder="Email" value="${data.employeeReference?.[1]?.email || ''}" maxlength="50">
+                        </div>
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference2Phone" type="tel" class="form-control-field" placeholder="Phone Number" value="${data.employeeReference?.[1]?.number || ''}" maxlength="20">
+                        </div>
+                        <div class="form-holder" style="flex: 1; min-width: 200px;">
+                            <input id="reference2Designation" type="text" class="form-control-field" placeholder="Designation" value="${data.employeeReference?.[1]?.designation || ''}" maxlength="50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-left">POLICE VERIFICATION</h3>
+            <div style="border: #eee 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px; color: gray;">
+                <p class="mb-2">I, ${USER_FULL_NAME} do hereby declare and undertake that:</p>
+                <p class="mb-2">I have undergone a police verification process in my city/town of residence and obtained a valid police clearance certificate.</p>
+                <p class="mb-2">The verification confirms that I do not have any criminal record, and I am eligible for employment as per the institution's requirements.</p>
+                <p class="mb-2">I take full responsibility for the accuracy of this information and understand that any false declaration may result in disciplinary action, including termination of employment.</p>
+                <p class="mb-4">I also undertake to notify the institution immediately in case of any legal proceedings initiated against me in the future.</p>
+                <div class="form-row">
+                    <div class="form-holder">
+                        <div class="custom-checkbox-policy" style="align-items: center !important;">
+                            <input type="checkbox"
+                                class="mb-2"
+                                name="policeVerificationCheck"
+                                id="policeVerificationCheck"
+                                value="${data.teacherVerification?.policeVerificationAcceptance == "Y" ? "Y" : "N"}"
+                                ${data.teacherVerification?.policeVerificationAcceptance == "Y" ? "checked" : ""}
+                            >
+                            <label for="policeVerificationCheck" class="ml-3" style="color:gray;font-size:15px;">I declare that the above statements are true and correct to the best of my knowledge and belief.</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-left">UPLOAD DOCUMENTS</h3>
+            <div style="border: #eee 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px; ">
+                <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
+                <div class="form-row">
+                    <div class="form-holder">
+                        <label class="full">Police Verification<sup class="text-danger">*</sup></label>
+                        <div class="full upload-item-wrapper clone-item">
+                            <div class="upload-btn-wrapper mt-1 upload-item">
+                                <div class="uploaded-file valid-field valid-check" id="fileupload9Span" >${checkValueValidation(data.attachments.policeVerificationName, "Upload Police Verification")}</div>
+                                <input onchange="uploadDocsFun(this, \'verify\');" class="file-input" type="file" name="fileupload9" id="fileupload9" fileType="72" elem-id="9"> <span
+                                    class="upload-btn primary-txt-color"> <i class="fa fa-upload"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-holder">
+                        <label class="full">Last Salary Slip<sup class="text-danger">*</sup></label>
+                        <div class="full">
+                            <div class="upload-btn-wrapper mt-1">
+                                <div class="uploaded-file valid-field valid-check" id="fileupload10Span">${checkValueValidation(data.attachments.previousSalarySlipName, "Upload Last Salary Slip")}</div>
+                                <input onchange="uploadDocsFun(this, \'verify\');" class="file-input" type="file" name="fileupload10" id="fileupload10" fileType="41" elem-id="10"> <span
+                                    class="upload-btn primary-txt-color"> <i class="fa fa-upload"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}
+
 function getContractDetailsContent(agreement){
     agreement = agreement.details.teacherAgreementDetails;
     var html=
@@ -781,7 +1087,7 @@ function getContractDetailsContent(agreement){
 
         <h3>Contract Details</h3>
 
-        <div class="form-row or">
+        <div class="form-row">
             <div class="form-holder paypal-details primary-border-color">
                 <div class="contact-detail-header">
                     <div class="com_logo">
@@ -864,11 +1170,11 @@ function getContractDetailsContent(agreement){
                         <div class="custom-checkbox-policy">
                             <br /> <br />
                             <input type="checkbox" class="wishSameParent" id="agreementDeclarationConfirm" name="agreementDeclarationConfirm" ${agreement.firstReset == 22 ? 'checked':''}>
-                            <span class="undertaking ml-2" style="color: #000">By
+                            <label for="agreementDeclarationConfirm" class="undertaking ml-2" style="color: #000;cursor:pointer;">By
                                 clicking (ticking) the box here, I understand the responsibility
                                 to abide by all the rules, regulations and the above mentioned
                                 policies/points as established by ${schoolSettingsOffice.schoolName}
-                            </span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -1242,7 +1548,6 @@ function getTeacherBankAccountDetails(){
                         </div>
                         <div class="full upload-item-wrapper">
                             <div class="upload-btn-wrapper mt-1 upload-item">
-                                ${/*<div class="uploaded-file valid-field valid-check" id="fileupload5Span">${tupDTO.uploadDocumentAddressProof!=null?tupDTO.uploadDocumentAddressProof:'No file Selected*'}</div>*/''}
                                 <div class="uploaded-file valid-field valid-check" id="fileupload5Span">No file Selected*</div>
                                 <input onchange="uploadDocsFun(this, \'bank\')" class="file-input" type="file" name="fileupload5" id="fileupload5" fileType="15" elem-id="5"
                                     onblur="" /> <span class="upload-btn primary-txt-color"> <i
@@ -1251,34 +1556,6 @@ function getTeacherBankAccountDetails(){
                             </div>
                         </div>
                     </div>
-                     ${/*<div class="form-holder ">
-                        <div class="form-group p-0 m-0">
-                            <label class="primary-txt-color">Passport <supclass="sup">*</sup></label><label class="custom-tooltip primary-txt-color"> 
-                                        ${/*<!-- <i class="zmdi zmdi-eye dropdown-toggle"></i> -->
-                                <div class="tooltip-content">
-                                    <span class="full tooltip-heading"><strong>The
-                                            following documents can be used to verify your
-                                            identification:</strong></span>
-                                    <p>Please confirm your citizenship and if you are holding
-                                        any permanent residency. Kindly provide document proof issued
-                                        by government authorities demonstrating the citizenship or
-                                        lawful permanent residency in the country.</p>
-                                    <p>For proof of citizenship, you can provide a copy of your
-                                        passport or a valid government-issued national ID.</p>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="full upload-item-wrapper">
-                            <div class="upload-btn-wrapper mt-1 upload-item">
-                                ${/*<div class="uploaded-file valid-field valid-check" id="fileupload6Span">${tupDTO.uploadDocumentIdentityProof!=null?tupDTO.uploadDocumentIdentityProof:'No file Selected*'}</div>
-                                <div class="uploaded-file valid-field valid-check" id="fileupload6Span">No file Selected*</div>
-                                <input onchange="uploadDocsFun(this, \'bank\')" class="file-input" type="file" name="fileupload6" id="fileupload6" fileType="19" elem-id="6"
-                                    onblur="" /> <span class="upload-btn primary-txt-color"> <i
-                                        class="fa fa-upload"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>*/''}
                 </div>
             </div>
         </div>`
@@ -1301,11 +1578,6 @@ function gradeSelectionModal(data){
                         <div class="container-fluid relative-select2 primary-select2-option-bg white-select2-option-txt secondary-select2-hov-option-bg p-0">
                             <div class="full relative-wrapper grade_selection_wrapper">
                                 <select id="e2_2" name="e2_2" multiple="multiple" style="width: 100%" class="select2-multi-col course-selection-dropdown">`;
-                                    // if(allSchoolgradeList != undefined){
-                                    //     $.each(allSchoolgradeList, function(i, grade){
-                                    //         html+=`<option value="${grade.key}">${grade.value}</option>`;
-                                    //     }); 
-                                    // }
                                     html+=getStandardContentByCourseProviderId(SCHOOL_ID);
                                 html+=`</select>
                             </div>
@@ -1433,7 +1705,7 @@ function courseSelectionModal(data){
 
 function step1Skeleton(){
 	var html=
-	`<h3 class="alternate-txt-color">Basic Information</h3>
+	`<h3 class="alternate-txt-color">Personal Details</h3>
 	<div class="step1-skeleton">
 		<div class="form-row">
 			<div class="form-holder skeleton" style="height:32px"></div>
@@ -1453,21 +1725,13 @@ function step1Skeleton(){
 			<div class="form-holder skeleton" style="height:32px"></div>
 			<div class="form-holder skeleton" style="height:32px"></div>
 		</div>
-		${/*<div class="form-row">
-			<div class="form-holder skeleton" style="height:14px"></div>
-		</div>
-		<div class="form-row" style="justify-content:center;">
-			<div class="form-holder skeleton" style="max-width:97px;height:14px"></div>
-			<div class="form-holder skeleton" style="max-width:97px;height:14px"></div>
-			<div class="form-holder skeleton" style="max-width:97px;height:14px"></div>
-		</div>*/''}
 	</div>`;
 	return html;
 }
 
 function step2Skeleton(){
 	var html=
-	`<h3 class="alternate-txt-color">Academic & Professional Details</h3>
+	`<h3 class="alternate-txt-color">Professional Details</h3>
 	<div class="step1-skeleton">
 		<div class="form-row">
 			<div class="form-holder skeleton" style="height:32px"></div>
@@ -1496,10 +1760,7 @@ function step2Skeleton(){
             </div>
 		</div>
         <div class="form-row" style="margin-bottom:5px;">
-			<div class="form-holder skeleton" style="height:32px;"></div>
-		</div>
-        <div class="form-row">
-            <div class="form-holder skeleton" style="height:14px;"></div>
+			<div class="form-holder skeleton" style="height:45px;width:200px !important;"></div>
 		</div>
         <br/>
 		<div class="form-row" style="margin-bottom:4px;">
@@ -1521,7 +1782,7 @@ function step2Skeleton(){
 function step3Skeleton(){
 	var html=
 	`<h3 class="alternate-txt-color">
-        Review & Approval
+        Application Under Review
         <br/>
         <p style="font-size: 14px;">Kindly Review your details</p>
     </h3>
@@ -1573,6 +1834,49 @@ function step3Skeleton(){
 
 function step4Skeleton(){
 	var html=
+	`<h3 class="alternate-txt-color" style="margin-bottom: 30px !important;">Verification</h3>
+	<div class="step1-skeleton">
+		<div style="border: rgb(232, 237, 239) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px;">
+			<div class="form-holder skeleton" style="height:14px;margin-bottom:15px;width:50% !important"></div>
+            <div class="form-row">
+                 <div class="form-holder skeleton" style="height:32px"></div>
+                <div class="form-holder skeleton" style="height:32px"></div>
+                <div class="form-holder skeleton" style="height:32px"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-holder skeleton" style="height:32px;width:33.3% !important;"></div>
+            </div>
+            <div class="form-holder skeleton" style="height:14px;margin-bottom:15px;width:50% !important"></div>
+		</div>
+		<div style="border: rgb(232, 237, 239) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px;">
+            <div class="form-row">
+                <div class="form-holder skeleton" style="height:32px;width:25% !important;"></div>
+                <div class="form-holder skeleton" style="height:32px;width:25% !important;"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-holder skeleton" style="height:32px"></div>
+                <div class="form-holder skeleton" style="height:32px"></div>
+                <div class="form-holder skeleton" style="height:32px"></div>
+                <div class="form-holder skeleton" style="height:32px"></div>
+            </div>
+		</div>
+		<div style="border: rgb(232, 237, 239) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px;">
+            <div class="form-row">
+                <div class="form-holder skeleton" style="height:80px;"></div>
+            </div>
+		</div>
+		<div style="border: rgb(232, 237, 239) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px;">
+            <div class="form-row">
+                <div class="form-holder skeleton" style="height:32px;width:25% !important;"></div>
+                <div class="form-holder skeleton" style="height:32px;width:25% !important;"></div>
+            </div>
+		</div>
+	</div>`;
+	return html;
+}
+
+function step5Skeleton(){
+	var html=
 	`<h3 class="alternate-txt-color">Contract Details</h3>
 	<div class="step1-skeleton">
 		<div class="form-row">
@@ -1582,7 +1886,7 @@ function step4Skeleton(){
 	return html;
 }
 
-function step5Skeleton(){
+function step6Skeleton(){
 	var html=
 	`<h3 class="alternate-txt-color">Account Details</h3>
 	<div class="step1-skeleton">
@@ -1649,35 +1953,24 @@ function step5Skeleton(){
 	return html;
 }
 
-// function showSkeleton(stepNum){
-// 	if(stepNum == 1){
-// 		$("#step-1").html(step1Skeleton());
-// 	}else if(stepNum == 2){
-// 		$("#step-2").html(step2Skeleton());
-// 	}else if(stepNum == 3){
-// 		$("#step-3").html(step3Skeleton());
-// 	}else if(stepNum == 4){
-// 		$("#step-4").html(step4Skeleton());
-// 	}else if(stepNum == 5){
-// 		$("#step-5").html(step5Skeleton());
-//     }
-// }
-
 function showSkeleton (isShow, skeletonType){
     if(isShow && skeletonType == "step1"){
         $(".step-1-skeleton").html(step1Skeleton()).show();
-        $("#teacherSignupStage2").hide();
+        $("#teacherSignupStage1").hide();
     }else if(isShow && skeletonType == "step2"){
         $(".step-2-skeleton").html(step2Skeleton()).show();
-        $("#teacherSignupStage3").hide();
+        $("#teacherSignupStage2").hide();
     }else if(isShow && skeletonType == "step3"){
         $(".step-3-skeleton").html(step3Skeleton()).show();
-        $("#teacherSignupStage4").hide();
+        $("#teacherSignupStage3").hide();
     }else if(isShow && skeletonType == "step4"){
         $(".step-4-skeleton").html(step4Skeleton()).show();
-        $("#teacherSignupStage5").hide();
+        $("#teacherSignupStage4").hide();
     }else if(isShow && skeletonType == "step5"){
         $(".step-5-skeleton").html(step5Skeleton()).show();
+        $("#teacherSignupStage5").hide();
+    }else if(isShow && skeletonType == "step6"){
+        $(".step-6-skeleton").html(step6Skeleton()).show();
         $("#teacherSignupStage6").hide();
     }
 }
@@ -1695,4 +1988,76 @@ function loaderContent(){
         } 
         html+=`</div>`;
     return html;
+}
+
+function populateRecordingModal(recordings, title) {
+    const titles = {
+        "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
+        "active_speaker.mp4": "Active Speaker",
+        "shared_screen_with_gallery_view.mp4": "Shared Screen With Gallery View",
+        "gallery_view.mp4": "Gallery View",
+        "shared_screen.mp4": "Shared Screen",
+        "shared_screen_with_speaker_view_CC.mp4": "Shared Screen With Speaker View CC",
+        "-1.1.mp4": "Recording",
+        "-1.2.mp4": "Recording 2",
+        "audio_only": "Audio File",
+    };
+
+    let modalContent = `
+        <div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+            <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%; margin: auto; margin-top:50px;">
+                <div class="">
+                    <div style="padding: 15px 10px; background: #027FFF; display: flex; justify-content: space-between; align-items: center;">
+                        <h5 style="font-size: 18px; font-weight: bold; color: #FFF; margin-bottom: 0px;">Available Recordings | ${title}</h5>
+                        <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
+                    </div>
+                    <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">
+    `;
+    if (recordings.length > 0) {
+        modalContent += `<div class="session-block pb-4">`;
+    
+        const transcriptUrl = recordings[recordings.length - 1]?.url;
+    
+        recordings.forEach((urlObj, index) => {
+            let label = "Recording";
+            for (const key in titles) {
+                if (urlObj.url.includes(key)) {
+                    label = titles[key];
+                    break;
+                }
+            }
+    
+            modalContent += `
+                <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
+                    <h4>${index + 1}. ${label}</h4>
+                    <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${urlObj.url}', '${label}')">Play</button>
+                </div>
+            `;
+        });
+    
+        if (transcriptUrl) {
+            modalContent += `
+                <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
+                    <h4>${recordings.length + 1}. Transcript</h4>
+                    <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                </div>`;
+        }
+    
+        modalContent += `</div>`;
+    }
+
+    modalContent += `
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    let modalElement = $("#recordingModal");
+    if (modalElement.length > 0) {
+        modalElement.remove();
+    }
+
+    $("body").append(modalContent);
+    $("#recordingModal").modal("show");
 }

@@ -188,7 +188,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "teacher-profile-request-content?moduleId=" +
         moduleId +
-        "&ids=13,24&types=0,1"
+        "&ids=13,24,20,21&types=0,1"
     );
   } else if (pageNo == "pending-interview-remarks") {
     callForDashboardData(

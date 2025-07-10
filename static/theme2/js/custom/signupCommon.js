@@ -533,6 +533,8 @@ function validMailPermission(flag, elementID){
 		validEndInvalidField(true, "email");
 		if($("#email").val().trim() == $("#confirmEmail").val().trim()){
 			validEndInvalidField(true, "confirmEmail");
+		}else if($("#confirmEmail").val().trim() == ""){
+			// do nothing
 		}else{
 			validEndInvalidField(true, "email");
 			validEndInvalidField(false, "confirmEmail");

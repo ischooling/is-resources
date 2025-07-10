@@ -1654,7 +1654,7 @@ function changeLearningProgamGradePlatformModal(studentStandardId, currentLearni
 	data['standardId'] = newStandardId;
 	data['courseProviderId'] = newCourseProviderId;
 	var currentEnrollmentFor='enrollment';
-	if(currentLmsPlatform==39){
+	if(newCourseProviderId==39){
 		currentEnrollmentFor='exact-path-enrollment';
 	}
 	data['enrollmentFor'] = currentEnrollmentFor;
@@ -1711,4 +1711,146 @@ function courseDetails(subjectsList, grade){
 		</div>`;
 	return html;
 
+}
+
+function openTeacherReferencesModal(id){
+	if($(`#teacherReferencesModal${id}`).length >= 1){
+		$(`#teacherReferencesModal${id}`).remove();
+	}
+	$("body").append(teacherReferencesModal(id));
+	$(`#teacherReferencesModal${id}`).modal("show");
+
+	setTimeout(() => {
+		const phoneInput = document.querySelector(`#reference${id}Phone`);
+		const reference = employeeReferences[id];
+		const isoCode = reference?.isoCode || 'in';
+		const number = reference?.phoneNumber || '';
+		const iti = window.intlTelInput(phoneInput, {
+			initialCountry: isoCode,
+			separateDialCode: true,
+		});
+		if (number) iti.setNumber(`+${reference.isdCode}${number}`);
+	}, 500);
+}
+
+function closeTeacherReferencesModal(id){
+	$(`#teacherReferencesModal${id}`).modal("hide");
+}
+
+function validateReference(refNum) {
+	const name = $(`#reference${refNum}Name`).val().trim();
+	const email = $(`#reference${refNum}Email`).val().trim();
+	const phone = $(`#reference${refNum}Phone`).val().trim();
+	const designation = $(`#reference${refNum}Designation`).val().trim();
+
+	const anyFilled = name || email || phone || designation;
+	const allFilled = name && email && phone && designation;
+
+	if (anyFilled && !allFilled) {
+		showMessageTheme2(2, `Please fill all fields for Reference ${parseInt(refNum) + 1}.`, "", true);
+		return false;
+	}
+	return true;
+}
+
+function extractReference(refNum) {
+	const name = $(`#reference${refNum}Name`).val().trim();
+	const email = $(`#reference${refNum}Email`).val().trim();
+	const phoneInput = document.querySelector(`#reference${refNum}Phone`);
+	const designation = $(`#reference${refNum}Designation`).val().trim();
+	const primaryId = $(`#reference${refNum}PrimaryId`).val();
+
+	const iti = window.intlTelInputGlobals.getInstance(phoneInput);
+	const countryData = iti.getSelectedCountryData();
+	const isdCode = countryData ? parseInt(countryData.dialCode) : null;
+	const isoCode = countryData ? countryData.iso2 : null;
+
+	const phone = $(phoneInput).val().trim();
+
+	if (name && email && phone && isdCode && designation) {
+		return {
+			referenceId: primaryId || null,
+			name,
+			email,
+			isdCode,
+			isoCode,
+			number: phone,
+			designation
+		};
+	}
+	return null;
+}
+
+function teacherReferencesModal(id){
+	const reference = employeeReferences[id];
+	const name = reference?.name || '';
+	const email = reference?.email || '';
+	const phoneNumber = reference?.phoneNumber || '';
+	const isdCode = reference?.isdCode || '';
+	const isoCode = reference?.isoCode || 'in';
+	const designation = reference?.designation || '';
+	const primaryId = reference?.id || '';
+	var html=
+		`<div class="modal fade" id="teacherReferencesModal${id}" tabindex="-1" aria-labelledby="teacherReferencesModalLabel${id}" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header bg-primary text-white">
+						<h5 class="modal-title" id="teacherReferencesModalLabel${id}">Edit Employee Reference ${id + 1}</h5>
+					</div>
+					<div class="modal-body">
+						<input type="hidden" id="reference${id}PrimaryId" value="${primaryId}" />
+
+						<div class="form-group">
+							<label>Name</label>
+							<input type="text" class="form-control" id="reference${id}Name" value="${name}" />
+						</div>
+						<div class="form-group">
+							<label>Email</label>
+							<input type="email" class="form-control" id="reference${id}Email" value="${email}" />
+						</div>
+						<div class="form-group">
+							<label>Phone Number</label>
+							<input type="tel" class="form-control" id="reference${id}Phone" onkeydown="return M.digit(event);" />
+						</div>
+						<div class="form-group">
+							<label>Designation</label>
+							<input type="text" class="form-control" id="reference${id}Designation" value="${designation}" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="saveReference(${id})">Save</button>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeTeacherReferencesModal('${id}')">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>`
+	return html;
+}
+
+function saveReference(id) {
+	if (!validateReference(id)) return;
+	const ref = extractReference(id);
+	if (!ref) return;
+	$.ajax({
+		type: "POST",
+		url: `${APP_BASE_URL}${SCHOOL_UUID}/teacher/signup/update-teacher-employee-reference-details`,
+		data: JSON.stringify(ref),
+		dataType: "json",
+		contentType: "application/json",
+		success: function(res) {
+			if(res.status == 1){
+				showMessageTheme2(1, 'Reference saved successfully');
+				$(`#ref${id}Name`).text(ref.name);
+				$(`#ref${id}Email`).text(ref.email);
+				$(`#ref${id}Phone`).text(`+${ref.isdCode}${ref.number}`);
+				$(`#ref${id}Designation`).text(ref.designation);
+				$(`#teacherReferencesModal${id}`).modal('hide');
+			}else{
+				showMessageTheme2(0, res.message);
+			}
+		},
+		error: function() {
+			showMessageTheme2(0, 'Error saving reference');
+		}
+	});
 }

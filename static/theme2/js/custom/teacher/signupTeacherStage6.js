@@ -250,7 +250,7 @@ function signupTeacherStage6OnLoadEvent(){
 function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType) {
 
 	if (!$('#agreementDeclarationConfirm').is(':checked')) {
-		showMessage(2, ' Please Accept the Declaration.',"", true);
+		showMessageTheme2(2, ' Please Accept the Declaration.');
 		return false
 	}
 	if(userId==''){
@@ -281,7 +281,7 @@ function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType
 				if(response.status == "3"){
 					redirectLoginPage();
 				}else if(response.status == "0" || response.status == "3"){
-					showMessage(0, res.message,"", true);
+					showMessageTheme2(0, res.message,"", true);
 				}
 				flag=false;
 			}else{
@@ -295,7 +295,7 @@ function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType
 						$("#timePreferencePopup").modal("hide");	
 					}
 				}
-				showMessage(1, 'Teacher Agreement details updated successfully.',"", true);
+				showMessageTheme2(1, 'Teacher Agreement details updated successfully.',"", true);
 				flag=true;
 			}
 		},
@@ -306,221 +306,88 @@ function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType
 	return flag;
 }
 
-// function callForSignupTeacherAccountAndContact(formId) {
-// 	if($("#"+formId+" #accountCurrency").val()==''){
-// 		showMessage(2, 'Please choose account currency.', "", true);
-// 		return false
-// 	}
-// 	if($("#"+formId+" #accountNumber").val()==''){
-// 		showMessage(2, 'Account number can\'t blank.', "", true);
-// 		return false
-// 	}
-// 	if($("#"+formId+" #accountCategory").val()==''){
-// 		showMessage(2, 'Please choose account type.', "", true);
-// 		return false
-// 	}
-	
-// 	if($("#"+formId+" #accountHolderFirstName").val()==''){
-// 		showMessage(2, 'Account holder first name can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderLastName").val()==''){
-// 		showMessage(2, 'Account holder last name can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderAddress").val()==''){
-// 		showMessage(2, 'Account holder address can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderCountryId").val()==null || $("#"+formId+" #accountHolderCountryId").val()==''){
-// 		showMessage(2, 'Please choose account holder country.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderStateId").val()==null || $("#"+formId+" #accountHolderStateId").val()==''){
-// 		showMessage(2, 'Please choose account holder state.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderCityId").val()==null || $("#"+formId+" #accountHolderCityId").val()==''){
-// 		showMessage(2, 'Please choose account holder city.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderPostal").val()==''){
-// 		showMessage(2, 'Account holder postal code can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #accountHolderPhone").val()==''){
-// 		showMessage(2, 'Account holder phone number can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if(!validateEmail($("#"+formId+" #accountHolderEmail").val())){
-// 		showMessage(2, 'Account holder Email can\'t blank.', "", true);
-// 		return false
-// 	}
-	
-// 	if($("#"+formId+" #bankName").val()==''){
-// 		showMessage(2, 'Bank name can\'t blank.', "", true);
-// 		return false
-// 	}
-	
-// 	if($("#"+formId+" #bankBranchName").val()==''){
-// 		showMessage(2, 'Bank branch name can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #bankBranchAddress").val()==''){
-// 		showMessage(2, 'Bank branch address can\'t blank.', "", true);
-// 		return false
-// 	}
-	
-// 	if($("#"+formId+" #bankCountryId").val()==null || $("#"+formId+" #bankCountryId").val()==''){
-// 		showMessage(2, 'Please choose bank country.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #bankStateId").val()==null || $("#"+formId+" #bankStateId").val()==''){
-// 		showMessage(2, 'Please choose bank state.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #bankCityId").val()==null || $("#"+formId+" #bankCityId").val()==''){
-// 		showMessage(2, 'Please choose bank city.', "", true);
-// 		return false
-// 	}
-
-// 	if($("#"+formId+" #bankPostal").val()==''){
-// 		showMessage(2, 'Bank postal code can\'t blank.', "", true);
-// 		return false
-// 	}
-
-// 	if ($("#"+formId+" #fileupload5Span").html()=='' || $("#"+formId+" #fileupload5Span").html()=='No file Selected*') {
-// 		showMessage(2, 'Upload document for Address Proof.', "", true);
-// 		return false
-// 	}
-// 	// if ($("#"+formId+" #fileupload6Span").html()=='' || $("#"+formId+" #fileupload6Span").html()=='No file Selected*') {
-// 	// 	showMessage(2, 'Please upload Passport.',"",  true);
-// 	// 	return false
-// 	// }
-
-// 	var flag = false;
-// 	$.ajax({
-// 		type : "POST",
-// 		contentType : "application/json",
-// 		url : getURLForHTML('teacher/signup','/save-teacher-bank-details'),
-// 		data : JSON.stringify(getRequestForTeacherAccountAndContact(formId)),
-// 		dataType : 'json',
-// 		contentType : "application/json",
-// 		async:false,
-// 		success : function(response) {
-// 			if(response.statusCode == "FAILED"){
-// 				if(response.status == "3"){
-// 					redirectLoginPage();
-// 				}else if(response.status == "0" || response.status == "3"){
-// 					showMessage(0, response.message,"", true);
-// 				}
-// 				flag=true;
-// 			}else{
-// 				setTimeout(function(){
-// 					goAhead(BASE_URL+CONTEXT_PATH+SCHOOL_UUID+"/dashboard/teacher/"+UNIQUEUUID, '');
-// 				}, 1000);
-// 			}
-// 		},
-// 		error : function(e) {
-// 			$("#nextStep").prop("disabled", false)
-// 		}
-// 	});
-// 	return flag;
-// }
-
 function callForSignupTeacherAccountAndContact(formId) {
     return new Promise((resolve, reject) => {
         let flag = false;
 
         if ($("#" + formId + " #accountCurrency").val() == '') {
-            showMessage(2, 'Please choose account currency.', "", true);
+            showMessageTheme2(2, 'Please choose account currency.');
             return false;
         }
         if ($("#" + formId + " #accountNumber").val() == '') {
-            showMessage(2, 'Account number can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Account number can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #accountCategory").val() == '') {
-            showMessage(2, 'Please choose account type.', "", true);
+            showMessageTheme2(2, 'Please choose account type.');
             return false;
         }
         if ($("#" + formId + " #accountHolderFirstName").val() == '') {
-            showMessage(2, 'Account holder first name can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Account holder first name can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #accountHolderLastName").val() == '') {
-            showMessage(2, 'Account holder last name can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Account holder last name can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #accountHolderAddress").val() == '') {
-            showMessage(2, 'Account holder address can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Account holder address can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #accountHolderCountryId").val() == null || $("#" + formId + " #accountHolderCountryId").val() == '') {
-            showMessage(2, 'Please choose account holder country.', "", true);
+            showMessageTheme2(2, 'Please choose account holder country.');
             return false;
         }
         if ($("#" + formId + " #accountHolderStateId").val() == null || $("#" + formId + " #accountHolderStateId").val() == '') {
-            showMessage(2, 'Please choose account holder state.', "", true);
+            showMessageTheme2(2, 'Please choose account holder state.');
             return false;
         }
         if ($("#" + formId + " #accountHolderCityId").val() == null || $("#" + formId + " #accountHolderCityId").val() == '') {
-            showMessage(2, 'Please choose account holder city.', "", true);
+            showMessageTheme2(2, 'Please choose account holder city.');
             return false;
         }
         if ($("#" + formId + " #accountHolderPostal").val() == '') {
-            showMessage(2, 'Account holder postal code can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Account holder postal code can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #accountHolderPhone").val() == '') {
-            showMessage(2, 'Account holder phone number can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Account holder phone number can\'t be blank.');
             return false;
         }
         if (!validateEmail($("#" + formId + " #accountHolderEmail").val())) {
-            showMessage(2, 'Invalid Email.', "", true);
+            showMessageTheme2(2, 'Invalid Email.');
             return false;
         }
         if ($("#" + formId + " #bankName").val() == '') {
-            showMessage(2, 'Bank name can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Bank name can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #bankBranchName").val() == '') {
-            showMessage(2, 'Bank branch name can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Bank branch name can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #bankBranchAddress").val() == '') {
-            showMessage(2, 'Bank branch address can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Bank branch address can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #bankCountryId").val() == null || $("#" + formId + " #bankCountryId").val() == '') {
-            showMessage(2, 'Please choose bank country.', "", true);
+            showMessageTheme2(2, 'Please choose bank country.');
             return false;
         }
         if ($("#" + formId + " #bankStateId").val() == null || $("#" + formId + " #bankStateId").val() == '') {
-            showMessage(2, 'Please choose bank state.', "", true);
+            showMessageTheme2(2, 'Please choose bank state.');
             return false;
         }
         if ($("#" + formId + " #bankCityId").val() == null || $("#" + formId + " #bankCityId").val() == '') {
-            showMessage(2, 'Please choose bank city.', "", true);
+            showMessageTheme2(2, 'Please choose bank city.');
             return false;
         }
         if ($("#" + formId + " #bankPostal").val() == '') {
-            showMessage(2, 'Bank postal code can\'t be blank.', "", true);
+            showMessageTheme2(2, 'Bank postal code can\'t be blank.');
             return false;
         }
         if ($("#" + formId + " #fileupload5Span").html() == '' || $("#" + formId + " #fileupload5Span").html() == 'No file Selected*') {
-            showMessage(2, 'Upload document for Address Proof.', "", true);
+            showMessageTheme2(2, 'Upload document for Address Proof.');
             return false;
         }
 
@@ -535,11 +402,11 @@ function callForSignupTeacherAccountAndContact(formId) {
                     if (response.status === "3") {
                         redirectLoginPage();
                     } else {
-                        showMessage(0, response.message, "", true);
+                        showMessageTheme2(0, response.message);
                     }
                     return reject(flag);
                 } else {
-					showMessage(1, "Redirecting to Dashboard");
+					showMessageTheme2(1, "Redirecting to Dashboard");
                     setTimeout(function () {
                         goAhead(BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/teacher/" + UNIQUEUUID, '');
                     }, 1000);
@@ -563,7 +430,7 @@ function getRequestForTeacherAccountAndContact(formId){
 	var accountType = "BANK_ACCOUNT";
 	
 	teacherPaymentInfoDTO['userId'] = USER_ID;
-	teacherPaymentInfoDTO['attachements'] = bankUploadDocsObj;
+	teacherPaymentInfoDTO['attachments'] = bankUploadDocsObj;
 	teacherPaymentInfoDTO['accountType'] = accountType;
 	teacherPaymentInfoDTO['accountCurrency'] = $("#"+formId+" #accountCurrency").val();
 	teacherPaymentInfoDTO['accountNumber'] = $("#"+formId+" #accountNumber").val();
@@ -602,11 +469,11 @@ function getRequestForTeacherAccountAndContact(formId){
 }
 
 async function getStage6Data(){
-	setSteps(5);
-	showSkeleton(true, "step5");
+	setSteps(6);
+	showSkeleton(true, "step6");
 	reviewDone = true;
 	$("#teacherSignupContentStage6").html(getTeacherBankAccountDetails());
 	signupTeacherStage6OnLoadEvent();
-	$(".step-5-skeleton").hide();
+	$(".step-6-skeleton").hide();
 	$("#teacherSignupStage6").show();
 }

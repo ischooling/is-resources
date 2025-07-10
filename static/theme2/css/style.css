@@ -237,9 +237,25 @@ button:focus {
     z-index: 1;
     border:1px solid #a8e2a8;
 }
+.steps ul li .step-arrow-teacher {
+	position: absolute;
+	top: 50%;
+	/* left: 113%;
+	max-width: 57%; */
+	width: 100%;
+    height: 6px;
+    z-index: 1;
+    border:1px solid #EBEBEB;
+	background-color: #EBEBEB;
+}
 
 .steps ul li .step-arrow.done-step{
 	background:#007000;
+	border:none;
+}
+
+.steps ul li .step-arrow-teacher.done-step-teacher{
+	background:#0279FE;
 	border:none;
 }
 
@@ -1587,32 +1603,16 @@ input::placeholder {
 	display: inline-block;
 }
 
-@ keyframes shake-animation {
-	0% {
-		transform: translate(0, 0)
-	}
-	1 .78571 % {
-		transform: translate(5px, 0)
-	}
-	3 .57143 % {
-		transform: translate(0, 0)
-	}
-	5 .35714 % {
-		transform: translate(5px, 0)
-	}
-	7 .14286 % {
-		transform: translate(0, 0)
-	}
-	8 .92857 % {
-		transform: translate(5px, 0)
-	}
-	10 .71429 % {
-		transform: translate(0, 0)
-	}
-	100% {
-		transform: translate (0, 0)
-	}
-}
+@keyframes shake-animation {
+	0% { transform:translate(0,0) }
+   1.78571% { transform:translate(5px,0) }
+   3.57143% { transform:translate(0,0) }
+   5.35714% { transform:translate(5px,0) }
+   7.14286% { transform:translate(0,0) }
+   8.92857% { transform:translate(5px,0) }
+   10.71429% { transform:translate(0,0) }
+   100% { transform:translate(0,0) }
+ }
 
 .custom-tab-wrapper {
 	width: 100%;
@@ -1964,7 +1964,7 @@ input::placeholder {
 /* form validation error css */
 
 label.error {
-	bottom: 100%;
+	bottom: 90%;
 	position: absolute;
 	left: 0;
 	color: red;
@@ -2397,13 +2397,9 @@ label.error {
 		transform: translateY(-50%);
 		opacity: 0
 	}
-	50% {
-		-webkit-transform: translateY(0);
-		transform: translateY:(0);
-		opacity: 1
-	}
+	50% {-webkit-transform: translateY(0);transform: translateY(0);opacity: 1}
 	100% {
-		-webkit-transform: translateY:(50%);
+		-webkit-transform: translateY(50%);
 		transform: translateY (50%);
 		opacity: 0
 	}
@@ -2744,7 +2740,7 @@ label.error {
 
 /* Safari */
 
-@ -webkit-keyframes spin {
+@-webkit-keyframes spin {
 	0% {
 		-webkit-transform: rotate(0deg);
 	}
@@ -2753,7 +2749,7 @@ label.error {
 	}
 }
 
-@ keyframes spin {
+@keyframes spin {
 	0% {
 		transform: rotate(0deg);
 	}

@@ -938,7 +938,8 @@ function getMeetingFormData() {
   if (meetingType === "2") {
     return {
       userId: USER_ID,
-      gmType: $("#generalMeetingType").val(),
+      gmType: $("#generalMeetingType option:selected").val(),
+      gmTypeText: $("#generalMeetingType option:selected").text(),
       title: $('#topic').val(),
       hostUserId: $('#host').val(),
       timezone: $('#timezone').val(),
@@ -948,7 +949,8 @@ function getMeetingFormData() {
   }
   return {
     userId: USER_ID,
-    gmType: $("#generalMeetingType").val(),
+    gmType: $("#generalMeetingType option:selected").val(),
+    gmTypeText: $("#generalMeetingType option:selected").text(),
     title: $('#topic').val(),
     startDate: formattedDate,
     startTime: convertToAmPmForSaveBody(`${$('#hour').val()}`),
@@ -1133,7 +1135,7 @@ function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, 
     attendeesList += `</ul>`;
   }
   $("#formDataTitle").text("Manage " + "`" + formData.title + "`")
-  $("#generalMeetingTypeTitle").text(formData.gmType)
+  $("#generalMeetingTypeTitle").text(formData.gmTypeText)
   $("#formDataTitle1").text(formData.title)
   $("#hostDetailsExtra").text(hostDetails.extra)
   $("#meetingTypeName").text(meetingTypeName);
@@ -2007,7 +2009,7 @@ function getGeneralMeetingTypeList(id){
     dataType: 'json',
     url: BASE_URL + CONTEXT_PATH + "api/v1/get-meeting-types",
     success: function (response) {
-      var list = response.data.meetingTypes
+      var list = response.data.meetingTypes;
       var dropdown = $(id);
       dropdown.empty();
 
@@ -2015,11 +2017,9 @@ function getGeneralMeetingTypeList(id){
 
       if (list && list.length > 0) {
         list.forEach(function(type) {
-          dropdown.append(`<option value="${type}">${type}</option>`);
+          dropdown.append(`<option value="${type.id}">${type.type}</option>`);
         });
       }
-
-      dropdown.append('<option value="Other">Other</option>');
 
       $(dropdown).select2({
         placeholder: "Select General Meeting Type",

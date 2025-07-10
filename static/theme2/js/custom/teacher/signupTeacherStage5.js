@@ -3,9 +3,9 @@ function signupTeacherStage5OnLoadEvent(){
 }
 
 function previewFillSection(){
-	$('#editStage2FirstNamePopup').text(toTitleCase($("#teacherSignupStage2 #teacherFirstName").val()));
-	$('#editStage2MiddleNamePopup').text(toTitleCase($('#teacherSignupStage2 #teacherMiddleName').val()));
-	$('#editStage2LastNamePopup').text(toTitleCase($('#teacherSignupStage2 #teacherLastName').val()));
+	$('#editStage2FirstNamePopup').text(toTitleCase($("#teacherSignupStage1 #teacherFirstName").val()));
+	$('#editStage2MiddleNamePopup').text(toTitleCase($('#teacherSignupStage1 #teacherMiddleName').val()));
+	$('#editStage2LastNamePopup').text(toTitleCase($('#teacherSignupStage1 #teacherLastName').val()));
 }
 
 function previewFillDeclaration(){
@@ -14,8 +14,8 @@ function previewFillDeclaration(){
 }
 
 async function getStage5Data(){
-	setSteps(4);
-	showSkeleton(true, 'step4')
+	setSteps(5);
+	showSkeleton(true, 'step5');
 	reviewDone = true;
 	var payload = {};
 	payload['userId'] = USER_ID;
@@ -23,6 +23,6 @@ async function getStage5Data(){
 	$("#teacherSignupContentStage5").html(getContractDetailsContent(responseData));
 	signupTeacherStage5OnLoadEvent();
 	$(".prev-btn").hide();
-	$(".step-4-skeleton").hide();
+	$(".step-5-skeleton").hide();
 	$("#teacherSignupStage5").show();
 }

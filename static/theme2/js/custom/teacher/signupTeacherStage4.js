@@ -1,168 +1,192 @@
-function signupTeacherStage4OnLoadEvent(){
-	FULL_NAME=$("#teacherSignupStage2 #teacherFirstName").val()+" "+$('#teacherSignupStage2 #teacherMiddleName').val()+" "+$('#teacherSignupStage2 #teacherLastName').val();
-	$("#fullName").text(FULL_NAME);
-	$('.accordion li:first-child .a-content').show();
-	$('.accordion .a-title').click(function() {
-		$(this).parent().closest('li').find('.a-content').slideToggle();
-		$(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
-		$(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-minus')
-		$(this).parent().closest('li').siblings().find('.plus-icon').addClass('fa-plus')
-		$(this).parent().closest('li').siblings().find('.a-content').slideUp();
-	});
-	getTeacherSignupDetailInReviewStage();
-}
-
-function checkLinkValid(e, src){
-	var url = $(src).attr("href").trim();
-	try {
-		if (!url.startsWith("http") && !url.includes('://')) {
-			throw new Error('URL is invalid');
-		}
-
-		if (url.includes(' ')) {
-			throw new Error("URL contains spaces.");
-		}
-
-		if ((url.match(/https?:\/\//g) || []).length > 1) {
-			throw new Error("Multiple URLs detected.");
-		}
-
-		new URL(url);
-	} catch (error) {
-		e.preventDefault();
-		showMessage(0, `Invalid Link: '${url}'`)
-	}
-}
-
-function previewFillSectionTeacher1(){
-	var phonecode = $('#countryIsd').val() == "+null" ? 1 : $('#countryIsd').val();
-	var cCode = $('#teacherSignupStage2 #countryCode option:selected').text();
-
-	
-	$('#editStage2FirstName').text(toTitleCase($("#teacherSignupStage2 #teacherFirstName").val()));
-	$('#editStage2MiddleName').text(toTitleCase($('#teacherSignupStage2 #teacherMiddleName').val()));
-	$('#editStage2LastName').text(toTitleCase($('#teacherSignupStage2 #teacherLastName').val()));
-	$('#editStage2Country').text($('#teacherSignupStage2 #countryId option:selected').text());
-	$('#editStage2State').text($('#teacherSignupStage2 #stateId option:selected').text());
-	$('#editStage2City').text($('#teacherSignupStage2 #cityId option:selected').text());
-	$('#editStage2Gender').text($('#teacherSignupStage2 #teacherGender option:selected').text());
-	var dob =$('#teacherSignupStage2 #teacherDob').val().split('-');
-	$('#editStage2Dob').text(dob);
-	$('#editStage2Email').text($('#teacherSignupStage2 #teacherEmailId').val());
-	$('#editStage2Phoneno').text("+" + phonecode + " "+$('#teacherSignupStage2 #phone_no').val() );
-}
-function previewFillSectionTeacher2(){
-	$('#editStage3highestQualificationId').text($("#teacherSignupStage3 #highestQualificationId  option:selected").text());
-	$('#editStage3teacherSupportingDocumentCertificate').text($('#teacherSignupStage3 #fileupload1Span').html());
-	$('#editStage3lastOrganizationName').text(toTitleCase($('#teacherSignupStage3 #lastOrganizationName').val()));
-	$('#editStage3teacherSubjectSpecialization').text(toTitleCase($('#teacherSignupStage3 #teacherSubjectSpecialization').val()));
-	if($('#teacherSignupStage3 #currentlyWorking').is(':checked')){
-		$('#editStage3currentlyWorkingHere').text('Yes');
-	}else{
-		$('#editStage3currentlyWorkingHere').text('No');
-	}
-	$('#edittotalExperianceFromYYYY').text($('#teacherSignupStage3 #totalExperianceFromYYYY option:selected').text());
-	$('#edittotalExperianceFromMM').text($('#teacherSignupStage3 #totalExperianceFromMM option:selected').text());
-	
-	$('#editStage3lastJobFromYYYY').text($('#teacherSignupStage3 #lastJobFromYYYY option:selected').text());
-	$('#editStage3lastJobFromMM').text($('#teacherSignupStage3 #lastJobFromMM option:selected').text());
-	if($('#teacherSignupStage3 #lastJobToYYYY  option:selected').text()!='' || $('#teacherSignupStage3 #lastJobToYYYY  option:selected').text()!='YYYY*'){
-		$('#editStage3lastJobToYYYY').text($('#teacherSignupStage3 #lastJobToYYYY  option:selected').text());
-		$('#editStage3lastJobToMM').text($('#teacherSignupStage3 #lastJobToMM option:selected').text());
-	}else{
-		$('#editStage3lastJobToYYYY').text('Present');
-	}
-	if($('#editStage3currentlyWorkingHere').text()=='Yes'){
-		$('#editStage3lastJobToYYYY').text('Present');
-		$('#editStage3lastJobToMM').text('');
-	}
-	
-	$('#editStage3lastJobDesc').text(toSentenceCase($('#teacherSignupStage3 #lastJobDesc').val()));
-	$("#editCoursesTaught").text(SUBJECTS_TAUGHT.map(subject => subject.replace("All Courses - Language Arts, Mathematics, Science, Technology, Art", "Language Arts, Mathematics, Science, Technology, Art")).join(", "));
-	var selectedGrade = getGradesNameByIds(GRADES_TAUGHT).map(function(grade) {
-		return grade.value;
-	}).join(", ");
-	$("#editGradesTaught").text(selectedGrade);
-	
-	$('#editStage3teacherSupportingDocumentAcademic').text($("#teacherSignupStage3 #fileupload2Span").html());
-	$('#editStage3teacherSupportingDocumentExperiance').text(
-		($("#teacherSignupStage3 #fileupload3Span").html() == undefined || $("#teacherSignupStage3 #fileupload3Span").html() === "" || $("#teacherSignupStage3 #fileupload3Span").html() === "Upload Proof of last Work-Experience")
-		? "NA" 
-		: $("#teacherSignupStage3 #fileupload3Span").html()
-	);
-	$('#editStage3teacherSupportingDocumentCV').text($("#teacherSignupStage3 #fileupload1Span").html());
-	$('#editStage3teacherPassport').text($("#teacherSignupStage3 #fileupload4Span").html());
-	
-	if($('#teacherSignupStage3 #editStage3optionsCheckboxes').is(':checked')){
-		$('#editStage3optionsCheckboxes').text('Y');
-	}else{
-		$('#editStage3optionsCheckboxes').text('N');
-	}
-	$('#editStage3teacherDemoVedioLink').html('<a onclick="checkLinkValid(event, this)" class="primary-txt-color" href="'+$('#teacherSignupStage3 #demoVedioLink').val()+'" target="blank">View</a>');
-}
-
-
-function getTeacherSignupDetailInReviewStage() {
-	previewFillSectionTeacher1();
-	previewFillSectionTeacher2();
-}
-function callForSignupTeacherReviewAndApproval(formId) {
-	$('#submitReviewForTeacherDetailsModal').modal('show');
-	tabActiveStatus(3);
-	signupPage=4;
-}
-function getRequestForPendingApproval(){
-	var request = {};
-	var authentication = {};
-	var data = {};
-	data['requestKey'] = 'SEND_MAIL_FOR_PENDING_APPROVAL';
-	data['requestValue'] = '1';
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = 'TEACHER';
-	authentication['userId'] = USER_ID;
-	request['authentication'] = authentication;
-	request['data'] = data;
-	return request;
-}
-function submitSignupTeacherReviewAndApproval(){
-	hideMessage('');
-	$.ajax({
-		type : "POST",
-		contentType : "application/json",
-		url : getURLForHTML('teacher','signup/profile-confirmation'),
-		data : JSON.stringify(getRequestForPendingApproval()),
-		dataType : 'json',
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(0, stringMessage[1],"", true);
-			}else{
-				$('#submitInterviewSlotModal').modal('hide');
-				showMessage(1, 'Request has been sent successfully for approval',"", true);
-				$('#inReviewForTeacherDetailsModal').modal({backdrop: 'static', keyboard: false});
-				$('#teacherFullName').html($("#teacherSignupStage2 #teacherFirstName").val()+ " "+ $('#teacherSignupStage2 #teacherMiddleName').val()+" "+$('#teacherSignupStage2 #teacherLastName').val());
+var verifyUploadDocsObj = [];
+function signupTeacherStage4OnLoadEvent(data){
+	$('#socialMediaCheckbox').on('change', function () {
+		const isChecked = $(this).is(':checked');
+		const fields = [
+			{ input: '#linkedinProfileUrl', sup: '#linkedinStar' },
+			{ input: '#facebookProfileUrl', sup: '#facebookStar' },
+			{ input: '#instagramProfileUrl', sup: '#instagramStar' },
+			{ input: '#twitterProfileUrl', sup: '#twitterStar' }
+		];
+		fields.forEach(field => {
+			if (isChecked) {
+				$(field.input).val('').prop('disabled', true);
+				$(field.sup).hide();
+			} else {
+				$(field.input).prop('disabled', false);
+				$(field.sup).show();
 			}
-		},
-		error : function(e) {
-			//showMessage(0, e.responseText,"", true);
-			$("#nextStep").prop("disabled", false);
+		});
+	});
+	$('#socialMediaCheckbox').trigger('change');
+
+	const phoneIds = ['#reference1Phone', '#reference2Phone'];
+	phoneIds.forEach((selector, index) => {
+		const input = document.querySelector(selector);
+		if (input) {
+			const iti = window.intlTelInput(input, {
+				initialCountry: 'us',
+			});
+			const ref = data.employeeReference[index];
+			if (ref?.isdCode && ref?.isoCode) {
+				if(IGNORECOUNTRYARRAY.includes(ref.isoCode.toLowerCase())) {
+					ref.isoCode	= "US";
+				}
+				iti.setCountry(ref.isoCode.toLowerCase());
+				input.value = ref.number;
+				$('#countryData' + (index + 1)).val(ref.isoCode.toLowerCase());
+				$('#countryIsd' + (index + 1)).val(ref.isdCode);
+			}
+			input.addEventListener('countrychange', function () {
+				const countryData = iti.getSelectedCountryData();
+				$('#countryData' + (index + 1)).val(countryData.iso2);
+				$('#countryIsd' + (index + 1)).val(countryData.dialCode);
+			});
 		}
 	});
 }
 
-async function getStage4Data(response){
-	if(response != undefined){
-		SUBJECTS_TAUGHT = response.elementrySelectedSubject.concat(response.middleSelectedSubject, response.highSelectedSubject);
-		SUBJECTS_TAUGHT_BACKUP = SUBJECTS_TAUGHT;
-	}
-	setSteps(3);
-	showSkeleton(true, 'step3');
-	await getStage2Data();
-	$("#teacherSignupContentStage4").html(getTeacherReviewAndApprovalContent());
-	signupTeacherStage4OnLoadEvent();
-	if(signupPage == 4){
-		$("#submitInterviewSlotModal").modal('hide');
-		$('#inReviewForTeacherDetailsModal').modal({backdrop: 'static', keyboard: false});
-	}
-	$(".step-3-skeleton").hide();
+async function getStage4Data(){
+	setSteps(4);
+	showSkeleton(true, 'step4');
+	var payload = {};
+	payload['userId'] = USER_ID;
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-verification-details', payload, '/teacher/signup');
+	$("#teacherSignupContentStage4").html(getTeacherVerificationDetailsContent(responseData.details));
+	signupTeacherStage4OnLoadEvent(responseData.details);
+	$(".prev-btn").hide();
+	$(".step-4-skeleton").hide();
 	$("#teacherSignupStage4").show();
+}
+
+function verificationValidationOnSave(formId){
+    // 1. Social media validation
+    if (!$('#socialMediaCheckbox').is(':checked')) {
+        const socialLinks = [
+            $('#linkedinProfileUrl').val().trim(),
+            $('#facebookProfileUrl').val().trim(),
+            $('#instagramProfileUrl').val().trim(),
+            $('#twitterProfileUrl').val().trim()
+        ];
+
+        const hasOneSocial = socialLinks.some(link => link !== '');
+        if (!hasOneSocial) {
+            showMessageTheme2(2, 'Please provide at least one social media link.');
+            return false;
+        }
+    }
+
+    // 2. Police declaration checkbox
+    if (!$('#policeVerificationCheck').is(':checked')) {
+        showMessageTheme2(2, 'Please accept the police verification declaration.');
+        return false;
+    }
+
+	// 3. Reference validation
+    const validateReference = (refNum) => {
+        const name = $(`#reference${refNum}Name`).val().trim();
+        const email = $(`#reference${refNum}Email`).val().trim();
+        const phone = $(`#reference${refNum}Phone`).val().trim();
+        const designation = $(`#reference${refNum}Designation`).val().trim();
+
+        const anyFilled = name || email || phone || designation;
+        const allFilled = name && email && phone && designation;
+
+        if (anyFilled && !allFilled) {
+            showMessageTheme2(2, `Please fill all fields for Reference ${refNum}.`);
+            return false;
+        }
+        return true;
+    };
+
+    // 4. File upload validation
+    if (
+        $("#" + formId + " #fileupload9Span").html().trim() === '' ||
+        $("#" + formId + " #fileupload9Span").html().trim() === 'Upload Police Verification'
+    ) {
+        showMessageTheme2(2, 'Please Upload Police Verification');
+        return false;
+    }
+
+    if (
+        $("#" + formId + " #fileupload10Span").html().trim() === '' ||
+        $("#" + formId + " #fileupload10Span").html().trim() === 'Upload Last Salary Slip'
+    ) {
+        showMessageTheme2(2, 'Please Upload Last Salary Slip');
+        return false;
+    }
+
+
+    if (!validateReference(1) || !validateReference(2)) {
+        return false;
+    }
+	return true;
+}
+
+function getRequestForVerification() {
+	const dontHaveSocial = $('#socialMediaCheckbox').is(':checked');
+	const socialMediaDetails = {
+		linkedIn: dontHaveSocial ? '' : $('#linkedinProfileUrl').val().trim(),
+		facebook: dontHaveSocial ? '' : $('#facebookProfileUrl').val().trim(),
+		instagram: dontHaveSocial ? '' : $('#instagramProfileUrl').val().trim(),
+		twitter: dontHaveSocial ? '' : $('#twitterProfileUrl').val().trim(),
+		dontHaveSocialMediaAccount: dontHaveSocial ? 'Y' : 'N'
+	};
+
+	const referenceDetails = [];
+	const extractReference = (refNum) => {
+		const name = $(`#reference${refNum}Name`).val().trim();
+		const email = $(`#reference${refNum}Email`).val().trim();
+		const phoneInput = document.querySelector(`#reference${refNum}Phone`);
+		const designation = $(`#reference${refNum}Designation`).val().trim();
+
+		const iti = window.intlTelInputGlobals.getInstance(phoneInput);
+		const countryData = iti.getSelectedCountryData();
+		const isdCode = countryData ? parseInt(countryData.dialCode) : null;
+		const isoCode = countryData ? countryData.iso2 : null;
+
+		const phone = $(phoneInput).val().trim();
+
+		if (name && email && phone && isdCode && designation) {
+			referenceDetails.push({
+				name,
+				email,
+				isdCode,
+				isoCode,
+				number: phone,
+				designation
+			});
+		}
+	};
+	extractReference(1);
+	extractReference(2);
+
+	const requestData = {
+		requestData: {
+			referenceDetails,
+			socialMediaDetails,
+			userId: USER_ID,
+			policeVerification: $('#policeVerificationCheck').is(':checked') ? 'Y' : 'N',
+			attachments: verifyUploadDocsObj
+		}
+	};
+
+	console.log(requestData);
+	return requestData;
+}
+
+async function saveVerificationDetails(formId){
+	if(verificationValidationOnSave(formId)){
+		const requestBody = getRequestForVerification();
+		const saveResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl( true, false, 'save-teacher-verification', requestBody, 'teacher/signup');
+		if (saveResponse.statusCode === "SUCCESS") {
+            showMessageTheme2(1, 'Verification submitted successfully');
+			$("#submitVerificationModal").modal("hide");
+			setTimeout(() => {
+				$('#inReviewForTeacherVerificationModal').modal({backdrop: 'static', keyboard: false});
+			}, 500);
+        } else {
+            showMessageTheme2(0, saveResponse.message);
+        }
+	}
 }

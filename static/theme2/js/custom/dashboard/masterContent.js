@@ -315,27 +315,47 @@ function getStandardContent(schoolId,fullGrade, selectOption){
 	return getGrades(getGradesData(actualGrades), selectOption);
 }
 
-function getLmsPlatformContent(schoolId){
-	var html='<option value="">Select LMS Platform</option>';
-	if(schoolId==5){
-		html+='<option value="36">BUZZ</option>';
-	}else if(schoolId==1){
-		html+='<option value="37">BUZZ-GC</option>';
-		html+='<option value="38">BUZZ-GR</option>';
-		html+='<option value="36">BUZZ</option>';
-		html+='<option value="39">Exact-Path</option>';
-		html+='<option value="40">Edmentum-Canvas</option>';
-		html+='<option value="41">Courseware</option>';
-		
-		html+='<option value="1">Agilix Buzz</option>';
-		html+='<option value="2">Odysseyware</option>';
-		html+='<option value="31">Buzz</option>';
-	}else{
-		html+='<option value="37">BUZZ-GC</option>';
-		html+='<option value="38">BUZZ-GR</option>';
-		html+='<option value="41">Courseware</option>';
-	}
+function getLmsPlatformContent(schoolId) {
+	var html = '<option value="">Select LMS Platform</option>';
+
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster1('LMS-PLATFORM-LIST', schoolId)),
+		dataType: 'json',
+		async: false,
+		success: function (data) {
+			if (data.status === '0' || data.status === '2') {
+				showMessage(true, data.message);
+			} else {
+				var result = data.mastersData?.data;
+				if (Array.isArray(result) && result.length > 0) {
+					result.forEach(function (v) {
+						html += `<option value="${v.key}">${v.value}</option>`;
+					});
+				}
+			}
+		},
+		error: function (e) {
+			console.error(e);
+		}
+	});
+
 	return html;
+}
+
+function getRequestForMaster1(key, value) {
+	var request = {};
+	var authentication = {};
+	var requestData = {};
+	requestData['requestKey'] = key;
+	requestData['requestValue'] = value;
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	request['authentication'] = authentication;
+	request['requestData'] = requestData;
+	return request;
 }
 
 function getWaringContent1(){
