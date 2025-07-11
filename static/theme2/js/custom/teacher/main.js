@@ -481,6 +481,7 @@ async function moveStep(moveType, isRender){
             if(prevStep == 1 ){
                 $(".prev-btn").css({"visibility":"hidden", "opacity":"0"});
                 GRADES_TAUGHT = [];
+                applyGradeflag = false;
                 $("#e2_2").val(GRADES_TAUGHT).trigger("change");
                 SUBJECTS_TAUGHT = [];
                 $(".elementary-0").val([]).trigger("change");

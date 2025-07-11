@@ -584,7 +584,6 @@ async function showGradeList() {
 		   });
 		   gradeList.select2("open");
 		}
-		
 	$("#select_grade").modal("show");
 }
 
@@ -594,6 +593,11 @@ async function showSelectedCourseList(){
 		return false;
 	}
 	me.data('requestRunning', true);
+	$('.custom-tab-wrapper li').removeClass('active-tab');
+	$('.custom-tab-wrapper li a').addClass('inactive');
+	var firstTab = $('.custom-tab-wrapper li:first');
+	firstTab.addClass('active-tab');
+	firstTab.find('a').removeClass('inactive');
 
 	if(!applySubejctflag){
 		var payload = {};
@@ -733,14 +737,14 @@ async function startDemoRecordingFun(attempt){
 	payload['timezone'] = timezoneData.mastersData.masterDTO.value;
 	payload['meetingType'] = "1";
 	payload['gmType'] = "16";
-	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'create-teacher-registration-demo-meeting', payload, '/teacher/signup');
-	if(responseData.status == "success"){
+	responseDataDemoRecording = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'create-teacher-registration-demo-meeting', payload, '/teacher/signup');
+	if(responseDataDemoRecording.status == "success"){
 		const payloadToStartMeeting = {
-			entityId: responseData.data.meetingId,
+			entityId: responseDataDemoRecording.data.meetingId,
 			entityType: "GENERAL_MEETINGS"
 		};
-		if (!entityIds.includes(responseData.data.meetingId)) {
-			entityIds.push(responseData.data.meetingId);
+		if (!entityIds.includes(responseDataDemoRecording.data.meetingId)) {
+			entityIds.push(responseDataDemoRecording.data.meetingId);
 		}
 		const encodedPayload = btoa(JSON.stringify(payloadToStartMeeting));
 		const queryParams = `?payload=${encodeURIComponent(encodedPayload)}`;
@@ -752,7 +756,7 @@ async function startDemoRecordingFun(attempt){
 			success: function (response) { 
 				if(response.status == 1){
 					window.open(response.redirectUrl, '_blank');
-					// if(responseData.data.meetingsExist == false){
+					// if(responseDataDemoRecording.data.meetingsExist == false){
 					// 	if(attempt == 1){
 					// 		// $("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
 					// 		// $('#recordYourDemoInsideBtn').show().attr('data-attempt', '2');
@@ -770,13 +774,13 @@ async function startDemoRecordingFun(attempt){
 					recordingPollingInterval = null;
 					// setTimeout(() => {
 						// if(recordingIntervalCount == 0){
-							getDemoRecordings(responseData.data.meetingId);
+							getDemoRecordings(responseDataDemoRecording.data.meetingId);
 							recordingPollingInterval = setInterval(() => {
-								getDemoRecordings(responseData.data.meetingId);
+								getDemoRecordings(responseDataDemoRecording.data.meetingId);
 							}, 10000);
 						// }
 					// }, 30000);
-					$("#recordingWaitingText").text("The recording is not started yet")
+					$("#recordingWaitingText").html("The recording is not started yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
 					$("#recordingWaitingText").show();
 					if(entityIds.length == 2){
 						$("#recordYourDemoInsideBtn").hide();
@@ -812,7 +816,7 @@ async function getDemoRecordings(meetingId) {
 	// }
     if (responseData.statusCode === "SUCCESS") {
 		if(responseData.meetingStatus == "not start"){
-			$("#recordingWaitingText").text("The recording is not started yet")
+			$("#recordingWaitingText").html("The recording is not started yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
 			$("#recordingWaitingText").show();
 			if(entityIds.length == 1){
 				$("#recordYourDemoInsideBtn span").text("Record Your Demo");
@@ -820,7 +824,7 @@ async function getDemoRecordings(meetingId) {
 				$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('1')`);
 			}
 		}else if(responseData.meetingStatus == "start"){
-			$("#recordingWaitingText").text("The recording is not ended yet")
+			$("#recordingWaitingText").html("The recording is not ended yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
 			$("#recordingWaitingText").show();
 			$("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
 			$('#recordYourDemoInsideBtn').show().attr('data-attempt', '2');
