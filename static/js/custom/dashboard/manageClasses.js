@@ -48,7 +48,7 @@ function classroomSessionsData(elementId, argument, userId, role) {
 				}
 			} else {
 				$('#manageSessionContentDiv').html(manageClassroomTable(elementId, role));
-				$('#' + elementId + ' > tbody').append(getClassroomBody(data.sessions, userId, role, data.resetMeetingRights));
+				$('#' + elementId + ' > tbody').append(getClassroomBody(data.sessions, userId, role, data.resetMeetingRights, data.showClassCancelOption));
 				var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
 				if (isDataTable) {
 					$('#' + elementId).dataTable().fnDestroy();
@@ -317,15 +317,25 @@ function submitMeetingForStudentSessionSlots(formId, moduleId, controllType, rol
 						setTimeout(function () { callDashboardPageSchool(roleModuleId, 'create-manage-sessions', ''); }, 1000);
 					}
 					else if (controllType == 'UPDATE') {
+						
 						meetingId = $('#updateMeetingResultForm #meetingId').val();
 						userId = $('#updateMeetingResultForm #userId').val();
 						meetingCurStatus = $('#updateMeetingResultForm #meetingCurStatus').val();
 						meetingResult = $('#updateMeetingResultForm #meetingResult').val();
-						var changeClassroomSessionContent = '<a id="updateStatus' + meetingId + '" href="javascript:void(0);" onclick="meetingResultModal(' + meetingId + ',' + userId + ',\'' + meetingResult + '\',\'' + meetingCurStatus + '\',\'' + role + '\')">Change</a>';
+						var showClassCancelOption = $('.markSession' + meetingId).attr("data-showClassCancelOption");
+						if(meetingResult != "Cancelled"){
+							var changeClassroomSessionContent = '<a id="updateStatus' + meetingId + '" href="javascript:void(0);" onclick="meetingResultModal(' + meetingId + ',' + userId + ',\'' + meetingResult + '\',\'' + meetingCurStatus + '\',\'' + role + '\',\''+showClassCancelOption+'\')">Change</a> | ';
+							changeClassroomSessionContent += '<a id="resetClass' + meetingId + '" href="javascript:void(0);" onclick="submitMeetingForStudentSessionSlots(' + meetingId + ',\'SCHOOL\',\'RESET\','+roleModuleId+', \'STUDENT_DOUBT_SESSION\', \'' + role + '\',\''+showClassCancelOption+'\')">Reset Class</a>';
+						}
+						if(meetingResult == "Reschedule Session"){
+							meetingResult ="Reschedule Class";
+						}
 						meetingResult = '<strong>' + meetingResult + '</strong><br/>';
 						if ('TEACHER' != role) {
-							meetingResult += ' | ';
-							meetingResult += changeClassroomSessionContent;
+							if($('#updateMeetingResultForm #meetingResult').val() != "Cancelled"){
+								meetingResult += ' | ';
+								meetingResult += changeClassroomSessionContent;
+							}
 						}
 						$('.markSession' + meetingId).html(meetingResult);
 
@@ -489,7 +499,7 @@ function getRequestForSubmitMeetingForStudentSessionSlots(formId, moduleId, cont
 	return request;
 }
 
-function meetingResultModal(meetingId, userId, meetingresult, meetingCurStatus, role) {
+function meetingResultModal(meetingId, userId, meetingresult, meetingCurStatus, role,showClassCancelOption) {
 	$('#updateMeetingResultModal').modal('show');
 	$('#updateMeetingResultForm #userId').val(userId);
 	$('#updateMeetingResultForm #meetingId').val(meetingId);
@@ -505,7 +515,10 @@ function meetingResultModal(meetingId, userId, meetingresult, meetingCurStatus, 
 		} else {
 			html += '<option value="Missed by Teacher">Missed by Teacher</option>';
 		}
-		html += '<option value="Completed">Completed</option>'
+		html += '<option value="Completed">Completed</option>';
+	}
+	if (showClassCancelOption == 'Y') {
+		html += '<option value="Cancelled">Cancel Class</option>';
 	}
 	$('#updateMeetingResultForm #meetingResult').html(html);
 	//	$('#updateMeetingResultForm #meetingResult option:selected').val(meetingresult);

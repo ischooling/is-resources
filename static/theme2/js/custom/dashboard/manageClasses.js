@@ -47,7 +47,7 @@ function classroomSessionsData(elementId, argument, userId, role) {
 				}
 			} else {
 				$('#manageSessionContentDiv').html(manageClassroomTable(elementId, role));
-				$('#' + elementId + ' > tbody').append(getClassroomBody(data.sessions, userId, role, data.resetMeetingRights));
+				$('#' + elementId + ' > tbody').append(getClassroomBody(data.sessions, userId, role, data.resetMeetingRights, data.showClassCancelOption));
 				var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
 				if (isDataTable) {
 					$('#' + elementId).dataTable().fnDestroy();
@@ -189,7 +189,7 @@ function saveClassroomSessionMeetingUrl(moduleId, role) {
 	submitMeetingForStudentSessionSlots("meetingUrlForm", "SCHOOL", "ADDURL", moduleId, "STUDENT_DOUBT_SESSION", role);
 }
 function sendClassroomSessionMail(moduleId, role) {
-	submitMeetingForStudentSessionSlots("sendMailForm", "SCHOOL", "SENDMAIL", moduleId, "STUDENT_DOUBT_SESSION", role);
+	submitMeetingForStudentSessionSlots("sendMailForm", "SCHOOL", "SENDMAIL", moduleId, "showCanSTUDENT_DOUBT_SESSION", role);
 }
 function publishClassroomSession(moduleId, role) {
 	submitMeetingForStudentSessionSlots("publishRecordForm", "SCHOOL", "PUBLISH_RECORD", moduleId, "STUDENT_DOUBT_SESSION", role);
@@ -370,6 +370,9 @@ function submitMeetingForStudentSessionSlots(formId, moduleId, controllType, rol
 						userId = $('#updateMeetingResultForm #userId').val();
 						meetingCurStatus = $('#updateMeetingResultForm #meetingCurStatus').val();
 						meetingResult = $('#updateMeetingResultForm #meetingResult').val();
+						if(meetingResult == "Reschedule Session"){
+							meetingResult ="Reschedule Class";
+						}
 						var changeClassroomSessionContent = '<a id="updateStatus' + meetingId + '" href="javascript:void(0);" onclick="meetingResultModal(' + meetingId + ',' + userId + ',\'' + meetingResult + '\',\'' + meetingCurStatus + '\',\'' + role + '\')">Change</a>';
 						meetingResult = '<strong>' + meetingResult + '</strong><br/>';
 						if ('TEACHER' != role) {
@@ -542,8 +545,7 @@ function getRequestForSubmitMeetingForStudentSessionSlots(formId, moduleId, cont
 	return request;
 }
 
-function meetingResultModal(meetingId, userId, meetingresult, meetingCurStatus, role) {
-
+function meetingResultModal(meetingId, userId, meetingresult, meetingCurStatus, role,showClassCancelOption) {
 	$('#updateMeetingResultModal').modal('show');
 	$('#updateMeetingResultForm #userId').val(userId);
 	$('#updateMeetingResultForm #meetingId').val(meetingId);
@@ -559,8 +561,11 @@ function meetingResultModal(meetingId, userId, meetingresult, meetingCurStatus, 
 	} else {
 		html += '<option value="Missed by Teacher">Missed by Teacher</option>';
 	}
-	html += '<option value="Completed">Completed</option>'
+	html += '<option value="Completed">Completed</option>';
 	// }
+	if (showClassCancelOption == 'Y') {
+		html += '<option value="Cancelled">Cancel Class</option>';
+	}
 	$('#updateMeetingResultForm #meetingResult').html(html);
 	//	$('#updateMeetingResultForm #meetingResult option:selected').val(meetingresult);
 	if (meetingresult == '') {

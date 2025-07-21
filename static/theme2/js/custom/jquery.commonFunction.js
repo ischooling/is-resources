@@ -74,6 +74,10 @@ function redirectLoginPage() {
       $("#captcha").val("");
       $("#sessionOutPermission").modal({ backdrop: "static", keyboard: false });
       refreshCaptcha("captchaImage");
+      $("#continueSession").click(function(event) {
+        event.preventDefault();
+        callUserLogin('continueSessionForm', '', 'CONTINUE');
+      });
     } else {
       window.setTimeout(function () {
         window.location =
@@ -457,6 +461,9 @@ function resetDropdown(dropdown, emptyMessage) {
 $(document).ajaxStart(function () {
   customLoader(true);
 });
+$(document).ajaxStop(function () {
+  customLoader(false);
+});
 //var ajaxCalls = 0;
 function customLoader(needToShow) {
   //console.log("2"+new Date());
@@ -609,9 +616,7 @@ function checkonlineOfflineStatus() {
 //$( document ).ajaxComplete(function() {
 //	customLoader(false);
 //});
-$(document).ajaxStop(function () {
-  customLoader(false);
-});
+
 
 function goAheadGet(url, hash) {
   var form = $(

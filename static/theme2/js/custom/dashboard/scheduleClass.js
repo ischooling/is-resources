@@ -118,11 +118,15 @@ function toggleFilter(elementID){
 	$('#'+elementID).stop().slideToggle();
 }
 
-function updateClassroomSession(moduleId, role){
+function updateClassroomSession(moduleId, role, formId){
 	if($('#meetingResult').val()=="N/A" || $('#meetingResult').val()==""){
 		showMessage(true, 'Please Choose Mark Session');
 	}else{
-		submitMeetingForStudentSessionSlots("updateMeetingResultForm","SCHOOL","UPDATE",moduleId, "STUDENT_DOUBT_SESSION", role);
+		if($('#meetingResult').val()=="Cancelled"){
+			showWarningMessage('Are you sure you want to cancel class? Once cancelled, you would not be able to change class status again.', 'submitMeetingForStudentSessionSlots("updateMeetingResultForm","SCHOOL","UPDATE",'+moduleId+', "STUDENT_DOUBT_SESSION", \''+role+'\')')
+		}else{
+			submitMeetingForStudentSessionSlots(formId,"SCHOOL","UPDATE",moduleId, "STUDENT_DOUBT_SESSION", role);
+		}
 	}
 }
 function validateRequestForSubmitMeetingForStudentSessionSlots(formId,moduleId,controllType){
@@ -181,12 +185,13 @@ function validateRequestForSubmitMeetingForStudentSessionSlots(formId,moduleId,c
 	}
 
 
-function meetingResultModal(meetingId, userId,meetingresult, meetingCurStatus, role){
+function meetingResultModal(meetingId, userId,meetingresult, meetingCurStatus, role,showClassCancelOption){
 	$('#updateMeetingResultModal').modal('show');
 	$('#updateMeetingResultForm #userId').val(userId);
 	$('#updateMeetingResultForm #meetingId').val(meetingId);
 	$('#updateMeetingResultForm #meetingCurStatus').val(meetingCurStatus);
-
+	var classStartDateTime = new Date($(".markSession"+meetingId).attr("data-start-dateTime"));
+	
 	html='<option value="" selected>Select Status</option>';
 	
 	html+='<option value="Reschedule Session">Reschedule Class</option>';
@@ -195,9 +200,14 @@ function meetingResultModal(meetingId, userId,meetingresult, meetingCurStatus, r
 	}else{
 		html+='<option value="Missed by Teacher">Missed by Teacher</option>';
 	}
-	html+='<option value="Completed">Completed</option>'
-	
+	html+='<option value="Completed">Completed</option>';
+	if (showClassCancelOption == 'Y') {
+		html += '<option value="Cancelled">Cancel Class</option>';
+	}
 	$('#updateMeetingResultForm #meetingResult').html(html);
+	if(new Date() > classStartDateTime){
+		$('#updateMeetingResultForm #meetingResult option[value="Cancelled"]').remove();
+	}
 //	$('#updateMeetingResultForm #meetingResult option:selected').val(meetingresult);
 	if(meetingresult==''){
 		if($('#updateMeetingResultForm #meetingResult option:selected').val().trim()==''){

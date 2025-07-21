@@ -975,33 +975,33 @@ function getRequestForTeacherRemainingTime(callfrom, teacherUserId, userRole, ca
 	return teacherAssignRequest;
 }
 
-function getRequestForTeacherTimeToShowWeeklyCalendar(teacherUserId, userRole, callType,studentStandardId,stDate) {
+function getRequestForTeacherTimeToShowWeeklyCalendar(subjectId, teacherUserId, userRole, callType,studentStandardId,stDate) {
 	var teacherAssignRequest = {};
 	teacherAssignRequest['userId'] = teacherUserId;
 	teacherAssignRequest['userRole'] = userRole;
 	teacherAssignRequest['schoolId'] = SCHOOL_ID;
 	teacherAssignRequest['callType'] = callType;
 	teacherAssignRequest['startDate'] = stDate;
+	teacherAssignRequest['subjectid']=subjectId;
 	teacherAssignRequest['dataType']="CUSTOM"
 	teacherAssignRequest['studentStandardId'] = studentStandardId;
+	teacherAssignRequest['sessionUserId'] = USER_ID;
 	console.log(teacherAssignRequest);
 	return teacherAssignRequest;
 }
 
-function getTeacherTimeToShowWeeklyCalendar(teacherUserId,userRole,callType,studentStandardId,stDate) {
+function getTeacherTimeToShowWeeklyCalendar(subjectId, teacherUserId,userRole,callType,studentStandardId,stDate) {
 	var responseData=null;
-	customLoader(true);
 	return new Promise (function(resolve, reject) {$.ajax({
 			type: "POST",
 			contentType: "application/json",
 			url: getURLForHTML('teacherautoassign', 'get-teacher-time-to-show-weekly-calendar'),
-			data: JSON.stringify(getRequestForTeacherTimeToShowWeeklyCalendar(teacherUserId,userRole,callType,studentStandardId,stDate)),
+			data: JSON.stringify(getRequestForTeacherTimeToShowWeeklyCalendar(subjectId, teacherUserId,userRole,callType,studentStandardId,stDate)),
 			dataType: 'json',
 			cache: false,
 			timeout: 600000,
-			async: true,
 			success: function(data) {
-				customLoader(false);
+				//customLoader(false);
 				console.log(data);
 				resolve(data);
 			  },

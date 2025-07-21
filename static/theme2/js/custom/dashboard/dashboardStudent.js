@@ -609,11 +609,6 @@ function bookSessionBack(){
 	$(".confirmBookSession").hide();
 }
 
-function bookSessionTerm(formId){
-	getBookSessionPayment(formId);
-}
-
-
 $(document).on("click","#chkvalBookSession", function(){
 	if($("#chkvalBookSession").is(":checked")){
 		$("#payTabBookingSessionModal #payBookingSessionTabData").removeAttr("disabled");
@@ -621,72 +616,6 @@ $(document).on("click","#chkvalBookSession", function(){
 		$("#payTabBookingSessionModal #payBookingSessionTabData").attr("disabled", true);
 	}
 });
-
-
-
-function applyAddonScholarship(formId, appliedScholarshipCode ){
-	hideMessage('');
-	if($('#scholarshipCodeInside').length>0){
-		if (!validateCharacters($('#scholarshipCodeInside').val().trim())) {
-			showMessageTheme2(0, 'Please use the English Keyboard while providing information','',true);
-			return false
-		}
-		if($('#scholarshipCodeInside').val().trim()=='' || $('#scholarshipCodeInside').val().trim()==' '){
-			showMessageTheme2(0, "Enter a valid Scholarship code.",'',true);
-			return false;
-		}
-	}
-	$.ajax({
-		type : "POST",
-		contentType : "application/json",
-		url : getURLForHTML('dashboard','apply-addon-scholarship'),
-		data : JSON.stringify(getRequestForStudentAddonScholarship(formId, appliedScholarshipCode)),
-		dataType : 'json',
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-				if(data['status'] == '3'){
-					redirectLoginPage();
-				}else{
-					showMessageTheme2(0, data['message'],'',true);
-				}
-				return false;
-			}else{
-				if(appliedScholarshipCode==2){
-					$('#'+formId+' #scholarshipCodeInside').val('');
-					$('#'+formId+' #scholarshipCode').val('');
-					$('#scholarshipCodeInside').val('');
-					showMessageTheme2(1, ' Discount code removed successfully ','',true);
-				}else{
-					showMessageTheme2(1, ' Discount code applied successfully','',true);
-				}
-				var passData = $('#userIdAddon').val().trim()+'&type=add&bookId=';
-				console.log("data to pass ",passData);
-				setTimeout(function(){callInneraction('addToCart',passData); },1000);
-			}
-
-			return false;
-		}
-	});
-}
-
-function getRequestForStudentAddonScholarship(formId, appliedScholarshipCode){
-	var request = {};
-	var authentication = {};
-	var data = {};
-	data['requestKey']='APPLY-SCHOLARSHIP';
-	data['scholarshipCode']=$("#scholarshipCodeInside").val().trim();
-	data['appliedScholarshipCode']=appliedScholarshipCode;
-	data['paymentMode']='annually'
-	data['scholarshipFor']='Teacher Assistance';
-	authentication['userId'] = $("#userIdAddon").val().trim();
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = 'STUDENT';
-	authentication['schoolId'] = SCHOOL_ID;
-	request['authentication'] = authentication;
-	request['data'] = data;
-	return request;
-}
-
 
 function withdrawnRequest(userId){
 	$.ajax({

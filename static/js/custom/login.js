@@ -97,7 +97,6 @@ function getNeedToCall(){
 	return needToCall;
 }
 
-
 async function getFreshValue(type, key){
 	const metaValue = await getSettingsByTypeAndKey(type,key);
 	const formData = {
@@ -258,8 +257,9 @@ async function loginPageOnLoadEvent(){
 	$("#marqueeDiv").css({"color":"red"});
 	$("#loginButton").click(function(event) {
 		event.preventDefault();
-		callUserLogin('loginForm', moduleId, 'FRESH');
+		callUserLogin('loginForm', 'FRESH');
 	});
+	
 	$("#forgotSubmit").click(function(){
 		callForEmailForgot('forgetForm', moduleId, "messageTypeTheme2");
 	});
@@ -305,7 +305,7 @@ function validateRequestForLogin(formId) {
 	return true;
 }
 
-function getRequestForLogin(formId, moduleId, loginType) {
+function getRequestForLogin(formId,loginType) {
 	var request = {};
 	var authentication = {};
 	var loginDTO = {};
@@ -380,7 +380,7 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 }
 
 const callUserLogin = debouncing(callUserLoginFun, 300);
-function callUserLoginFun(formId, moduleId, loginType) {
+function callUserLoginFun(formId, loginType) {
 	if($("#modalMessage.in").length>0){
         hideMessage('');
 		return false;
@@ -394,7 +394,7 @@ function callUserLoginFun(formId, moduleId, loginType) {
 		type : "POST",
 		contentType : "application/json",
 		url : getURLForCommon('login'),
-		data : JSON.stringify(getRequestForLogin(formId, moduleId, loginType)),
+		data : JSON.stringify(getRequestForLogin(formId, loginType)),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
@@ -657,8 +657,6 @@ $(document).on("show.bs.modal", ".modal", function (e) {
 		}, 10);
 	}
 });
-
-
 
 function validEndInvalidField(flag, ele) {
   if (flag) {

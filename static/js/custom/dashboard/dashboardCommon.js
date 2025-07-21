@@ -39,9 +39,6 @@ function callForDashboardData(formId, actionUrl, replaceDiv) {
 					closeMenu();
 					if (replaceDiv == undefined || replaceDiv == '') {
 						$('#dashboardContentInHTML').html(htmlContent);
-						if (actionUrl.startsWith('add-to-cart-request-data')) {
-							getCartDetails(USER_ID);
-						}
 					} else {
 						if (replaceDiv == 'section-linebox') {
 							$('#teacherAgreementModal').modal('show');
@@ -110,9 +107,6 @@ function callForDashboardDataForPasswordChange(formId, actionUrl, replaceDiv, sh
 				} else {
 					if (replaceDiv == undefined || replaceDiv == '') {
 						$('#dashboardContentInHTML').html(htmlContent);
-						if (actionUrl.startsWith('add-to-cart-request-data')) {
-							getCartDetails(USER_ID);
-						}
 					} else {
 						if (replaceDiv == 'section-linebox') {
 							$('#teacherAgreementModal').modal('show');
@@ -1632,52 +1626,6 @@ function notificationContentListingWithQueries(elementId, argument) {
 	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
 }
 
-
-function getBookSessionPayment(formId) {
-	hideMessage('');
-	if ($("#" + formId + " #planId").val() == '') {
-		showMessage(true, "Please select a plan");
-		alert("Please select a plan");
-		return false;
-	}
-	var data = {};
-	data['userId'] = USER_ID;
-	data['subjectId'] = $("#" + formId + " #subjectId").val();
-	data['amount'] = $("#" + formId + " #amount").val();
-	data['planId'] = $("#" + formId + " #planId").val();
-	data['planAmount'] = $("#" + formId + " #planAmount").val();
-	data['studentSessionId'] = $("#" + formId + " #studentSessionId").val();
-	data['subjectBookStatus'] = $("#" + formId + " #subjectBookStatus").val();
-	$.ajax({
-		type: "POST",
-		contentType: "application/json",
-		url: getURLForHTML('dashboard', 'booksession-plan-content'),
-		data: JSON.stringify(data),
-		dataType: 'html',
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					if (stringMessage[0] == "SESSIONOUT") {
-						redirectLoginPage();
-					} else {
-						showMessage(true, stringMessage[1]);
-					}
-				} else {
-					$("#bookSessionPaymentModal").modal('hide');
-					$("#payTabBookingSessionModal").modal('show');
-					$('#bookSessionTermModal').html(htmlContent)
-				}
-				return false;
-			}
-		},
-		error: function (e) {
-			return false;
-		}
-	});
-}
-
 function getAssignedSubjectToTeacher(userId) {
 	hideMessage('');
 	$('#assignSubjectsTeacher').modal({
@@ -1953,13 +1901,51 @@ function getTeacherSearchSubject(userId) {
 	return subjectDTO;
 
 }
-function showOtherReason(id) {
-	if ($("#reasonEnrollEnd" + id).val() == 'Other') {
-		$("#otherReason" + id).show();
+function showOtherReason(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType) {
+	debugger;
+	$("#assigTeacherLinkList" + subjectId).show();
+	if ($("#reasonEnrollEnd" + subjectId).val() == 'Other') {
+		$("#otherReason" + subjectId).show();
 	} else {
-		$("#otherReason" + id).val('');
-		$("#otherReason" + id).hide();
+		debugger;
+		$("#otherReason" + subjectId).val('');
+		$("#otherReason" + subjectId).hide();
+		var endDate = new Date($("#steachEnrollEndDate" + subjectId).val());
+		var currentDate = new Date();
+		if(endDate<currentDate){
+			if ($("#reasonEnrollEnd" + subjectId).val().trim() == 'Teacher Replaced' || $("#reasonEnrollEnd" + subjectId).val().trim() == 'Teacher Withdrawn') {
+				var teacherName = $("#teacherId" + subjectId + ' option:selected').text().trim().split("(")[0];
+				var studentName = $("#studentNameWarning").val().trim();
+				var subjectName = $("#subjectName" + subjectId).text().trim().split("- ")[1].split("(")[0];
+				checkPastUpdatedMeetingStatus(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType)
+			}
+		}
 	}
+}
+
+function checkPastUpdatedMeetingStatus(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType){
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLFor('dashboard', 'student-teacher-past-class-details'),
+		data: JSON.stringify(getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+				$("#assigTeacherLinkList" + subjectId).hide();
+				return false;
+			} else {
+				$("#assigTeacherLinkList" + subjectId).show();
+				return true;
+			}
+		},
+		error: function (e) {
+			return false;
+		}
+	});
 }
 
 function changeTeacher(id, teacherId, standardId) {

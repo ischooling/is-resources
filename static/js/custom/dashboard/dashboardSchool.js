@@ -865,10 +865,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "student-task-content?moduleId=" + moduleId
     );
   } else if (pageNo == "book-a-session") {
-    callForDashboardData(
-      "formIdIfAny",
-      "student-book-a-session-subjects?moduleId=" + moduleId
-    );
+     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "fee-details") {
     callForDashboardData(
       "formIdIfAny",
@@ -1278,12 +1275,6 @@ function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId) {
     );
   } else if (actionType == "12b") {
     callCommonPaymentGateway("paymentForm", "student", arg0);
-  } else if (actionType == "addonpayment") {
-    callForDashboardData(
-      "formIdIfAny",
-      "student-addons-subject-content?subjectId=" + arg0,
-      "subject-plan"
-    );
   } else if (actionType == "1a") {
     callForDashboardData(
       "formIdIfAny",

@@ -739,10 +739,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "student-task-content?moduleId=" + moduleId
     );
   } else if (pageNo == "book-a-session") {
-    callForDashboardData(
-      "formIdIfAny",
-      "student-book-a-session-subjects?moduleId=" + moduleId
-    );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "fee-details") {
     callForDashboardData(
       "formIdIfAny",
@@ -756,10 +753,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
   } else if (pageNo == "student-handbook") {
     callForDashboardData("formIdIfAny", "studenthandbook?moduleId=" + moduleId);
   } else if (pageNo == "student-addon") {
-    callForDashboardData(
-      "formIdIfAny",
-      "student-addons-content?moduleId=" + moduleId
-    );
+    renderBuyExtraClasses(USER_ID);
   } else if (pageNo == "01addonfee") {
     callForDashboardData("formIdIfAny", "student-session-content");
   } else if (pageNo == "notifications" || pageNo == "parent-notifications") {
@@ -1189,16 +1183,6 @@ function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId) {
     );
   } else if (actionType == "12b") {
     callCommonPaymentGateway("paymentForm", "student", arg0);
-  } else if (actionType == "addonpayment") {
-    callForDashboardData(
-      "formIdIfAny",
-      "student-addons-subject-content?subjectId=" +
-        arg0 +
-        "&moduleId=" +
-        roleModuleId +
-        "&extraSubjStatus=" +
-        replaceDiv
-    );
   } else if (actionType == "1a") {
     callForDashboardData(
       "formIdIfAny",

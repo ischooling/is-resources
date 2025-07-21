@@ -47,14 +47,16 @@ function sessionOutPermissionContent(data){
                                 </div>
                                 <p class="error" id="captchaError" style="color:red;font-weight:600"></p>
                             </div>
+                            <div class="col-md-12">'
+                                <input type="submit" class="btn btn-info btn-shadow" id="continueSession" value="Submit">
+                            </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer bg-transparent pt-0 border-0">
-                    <button type="button" class="btn btn-info btn-shadow" onclick="callUserLogin('continueSessionForm', 'STUDENT', 'CONTINUE');">Submit</button>
+                <div class="modal-footer bg-transparent pt-0 border-0 flex-wrap justify-content-center">
+                    <div style="color:#fff;padding-left:1rem">Logged in as ${data.emailId}</div>
+                    <div style="color:#fff;padding-left:1rem">Not You? <a href="javascript:void(0)" style="color:#009eff;font-weight:600" onclick="loginAsDifferentUser();">Log in as a different user</a> </div>
                 </div>
-                <div style="color:#fff;padding-left:1rem">Logged in as ${data.emailId}</div>
-                <div style="color:#fff;padding-left:1rem">Not You? <a href="javascript:void(0)" style="color:#009eff;font-weight:600" onclick="loginAsDifferentUser();">Log in as a different user</a> </div>
             </div>
         </div>
     </div>`;

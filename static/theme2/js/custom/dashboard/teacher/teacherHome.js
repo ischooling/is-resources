@@ -1,5 +1,4 @@
 async function callTeacherLastAttendance(formId, userId, startdate, enddate){ 
-	
 	try{
 		var data = getRequestForTeacherLastclass(formId, userId, startdate, enddate)
 		var responseData = await getDashboardDataBasedUrlAndPayload(false, false,'teacher-last-class', data);

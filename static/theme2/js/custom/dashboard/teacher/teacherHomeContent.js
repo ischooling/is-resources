@@ -27,6 +27,8 @@ async function rendereTeacherHomeContent(){
             $("#preferenceTimeavailabilityFlag").val(true);
         }
     }
+    callTeacherClassesToUpdateStatus()
+    
     
 }
 
@@ -481,4 +483,74 @@ function getDashboardSkeleton(){
 
 function displayCourseDetails(descriptionUrl){
 	window.open(descriptionUrl);
+}
+
+function meetingStatusUpdateModal(data){
+	var html=
+	`<div class="modal fade" id="teacherMeetingStatus" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header bg-primary py-2">
+                    <h5 class="modal-title text-white">Update Class Status (${data.classDetails.classCount})</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+					    <span aria-hidden="true">&times;</span>
+				    </button>
+				</div>
+				<div class="modal-body">
+                    <div style="width:100%; text-align: center;font-weight: bold;display:none;color:red;margin-bottom: 10px;" id="teacherMeetingStatusErrorTxt"></div>
+					<div class="full table-responsize" style="max-height: 450px;overflow-y: auto;">
+                        <form id="updatePendingMeetingResultForm" action="javascript:void(0);">
+                            <table class="table table-borderedtable table-bordered font-12 table-striped" id="teacherMeetingStatusTable" style="min-width:768px">
+                                <thead class="bg-primary text-white">
+                                    <tr>
+                                        <th>S.no</th>
+                                        <th>Your class timing details</th>
+                                        <th>Student Details</th>
+                                        <th>Class status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`
+                                    +meetingStatusUpdateModalBodyContent(data);
+                                html+=
+                                `</tbody>
+                            </table>
+                        </form>
+					</div>
+				</div>
+				<div class="modal-footer text-right">
+                    <a href="javascript:void(0)" class="btn btn-success btn-sm" onclick="updateBulkClassStatus();">Update All</a>
+                </div>    
+            </div>
+		</div>
+	</div>`;
+	return html;
+}
+
+function meetingStatusUpdateModalBodyContent(data){
+	var html=``;
+	if(data.classDetails != '' && data.classDetails.classDetails.length>0){
+		$.each(data.classDetails.classDetails, function(i,v){
+            html+=
+			`<tr data-meetingid="${v.meetingId}" data-userid="${v.userId}">
+                <td style="vertical-align: top;">${++i}</td>
+                <td>
+                    <span class="full">Start: ${v.meetingStartDateTime}</span>
+					<span class="full">End: ${v.meetingEndDateTime}</span>
+                </td>
+				<td style="vertical-align: top;">
+					<span class="full">Name: ${v.attendeName}</span>
+					<span class="full">Course: ${v.subjectName}</span>
+				</td>
+				<td>
+                    <select class="form-control status" name="meetingResult" id="meetingResult" required="">
+                        <option value="" selected="">Select Status</option>
+                        <option value="Reschedule Session">Reschedule Class</option>
+                        <option value="Missed by Student">Missed by Student</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </td>
+            </tr>`;
+		});
+	}
+	return html;
 }

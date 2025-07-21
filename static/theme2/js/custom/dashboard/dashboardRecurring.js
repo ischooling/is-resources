@@ -3,7 +3,7 @@ function validateRequestForRecurringClass(formId){
 	if(formId!='classroomSessionFilter'){
 		if(meetingType!="CUSTOM"){
 			if($("#" + formId + " #studentId").val()==undefined || $("#" + formId + " #studentId").val()==''){
-				showMessage(true, "Search student using email or name");
+				showMessage(true, "Search student using StudentId");
 				return false;
 			}
 			if($("#" + formId + " #subjectIds").val()==undefined || $("#" + formId + " #subjectIds").val()==''){
@@ -15,10 +15,10 @@ function validateRequestForRecurringClass(formId){
 				return false;
 			}
 		
-			if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
-				showMessage(true, "CLass Type is required.");
-				return false;
-			}
+			// if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
+			// 	showMessage(true, "CLass Type is required.");
+			// 	return false;
+			// }
 		}
 
 		if($("#" + formId + " #meetingVendor").val()==undefined || $("#" + formId + " #meetingVendor").val()==''){
@@ -250,7 +250,7 @@ function submitRecurringClass(formId,moduleId) {
 
 					window.setTimeout(function(){callDashboardPageSchool(moduleId,'recurring-class-list')},1000)
 				}
-				
+				$(".classRecodsTumbs").hide();
 			}
 			return false;
 		},
@@ -277,7 +277,7 @@ function getRequestForRecurringClass(formId) {
 		recurringClassDTO['studUserId'] = $("#" + formId + " #studentId").val();
 		recurringClassDTO['subjectIds'] = $("#" + formId + " #subjectIds").val();
 		recurringClassDTO['teachUserId'] = $("#" + formId + " #teacherId").val();
-		recurringClassDTO['recurringType'] = $("#" + formId + " #recurringType").val();
+		recurringClassDTO['recurringType'] = 'Complement';
 		recurringClassDTO['meetingVendor'] = $("#" + formId + " #meetingVendor").val();
 		recurringClassDTO['joiningLink'] = $("#" + formId + " #joiningLink").val();
 		recurringClassDTO['showLinkBefore'] = $("#" + formId + " #showLinkBefore").val();
@@ -297,12 +297,12 @@ function getRequestForRecurringClass(formId) {
 	recurringClassDTO['startDate'] = changeDateFormat(classStartDate, 'mm-dd-yyyy');
 	var classEndDate =getDateInDateFormat($("#"+formId+" #classEndDate").val());
 	recurringClassDTO['endDate'] = changeDateFormat(classEndDate, 'mm-dd-yyyy');
-	
+	daysDifference = getDaysDifference(classStartDate, classEndDate);
 	recurringClassDTO['timezoneId'] = $("#" + formId + " #countryTimezoneFromId").val();
 	recurringClassDTO['studentTimezoneId'] = $("#" + formId + " #studentTimezoneId").val();
 	recurringClassDTO['classDuration'] = $("#" + formId + " #classDuration").val();
 	recurringClassDTO['buffertime'] = $("#" + formId + " #bufferTime").val();
-
+	recurringClassDTO['checkDateSpecific']=daysDifference;
 
 	var scheduleTime=[];
 	var i=1;
@@ -783,6 +783,7 @@ function callRecurringShow(formId) {
 				//showMessage(false, data['message']);
 				var saveForcefully= data['extra'];
 				var dateSpecificDays = data['dateSpecificDays'];
+				var saveForcefullyIfClassCountExceeds = data['saveForcefullyIfClassCountExceeds'];
 				var meetingFor = $("#meetingType").val();
 				var html='';
 				$("#teacherAvailabilityTable #teacherAvailabilityTbody").html(html);
@@ -874,15 +875,27 @@ function callRecurringShow(formId) {
 					$(".proceedRecurringClassbtn").show();
 					$("#saveForcefully").val(saveForcefully);
 				}
+				debugger;
 				var recurringclass = data['recurringClassList'];
 				var htmlRecu = "";
 				var inc=1;
 				var validRecurringClass=true;
+				var availableClassCount =0;
+				var notAvailabileClassCount=0;
+				var totalAvailableClass = $('#totalClass').html() - $('#totalBookedClass').html();
+				$('.proceedRecurringClassbtn').html('<i class="fa fa-check"></i> Save');
 				for(var i=0;i<recurringclass.length;i++){
-					if(recurringclass[i]['slotAvailable']!='Available'){
+					if(recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA'){
 						htmlRecu = htmlRecu +"<tr class='text-danger'>";
+						if(recurringclass[i]['classBookedStatus']=='NA'){
+							notAvailabileClassCount++;
+						}
+						if(recurringclass[i]['slotAvailable']=='Available'){
+							availableClassCount++;
+						}
 					}else{
 						htmlRecu = htmlRecu +"<tr>";
+						availableClassCount++;
 					}
 					htmlRecu = htmlRecu +" <td>"+(inc++)+"</td>";
 					// htmlRecu = htmlRecu +" <td>"+recurringclass[i]['studentName']+"</td>";
@@ -908,10 +921,24 @@ function callRecurringShow(formId) {
 					}else{
 						htmlRecu = htmlRecu +" <td>"+reason+"</td>";
 					}
+					if(totalAvailableClass == 0){
+						htmlRecu = htmlRecu +" <td>Student does not have any classes to book</td>";
+					}else{
+						var weekClassStatus =recurringclass[i]['classBookedStatus'];
+						if(weekClassStatus=="NA"){
+							htmlRecu = htmlRecu +" <td>Student does not have any classes to book</td>";
+						}else{
+							htmlRecu = htmlRecu +" <td>"+weekClassStatus+"</td>";
+						}
+					}
 					htmlRecu = htmlRecu +"</tr>";
-					if(recurringclass[i]['slotAvailable']!='Available'){
+					if(recurringclass[i]['slotAvailable']!='Available' || weekClassStatus=='NA'){
 						validRecurringClass=false;
 					}
+				}
+				if(saveForcefullyIfClassCountExceeds == 'Y' &&  notAvailabileClassCount>0 && availableClassCount==recurringclass.length){
+					validRecurringClass = true;
+					$('.proceedRecurringClassbtn').html('<i class="fa fa-check"></i> Save anyway');
 				}
 				if(validRecurringClass){
 					$('.proceedRecurringClassbtn').show();
@@ -920,6 +947,12 @@ function callRecurringShow(formId) {
 					$('.proceedRecurringClassbtn').hide();
 					$(".validator-message").show()
 				}
+				// if(availableClassCount>totalAvailableClass && notAvailabileClassCount==0 && saveForcefullyIfClassCountExceeds=='N'){
+				// 	$('.proceedRecurringClassbtn').hide();
+				// 	$(".validator-message-count").show()
+				// }else{
+				// 	$(".validator-message-count").hide()
+				// }
 				$("#trRecurring").html(htmlRecu);
 				if(meetingTypeValue == "ODM"){
 					$("#meetingType").val("ODM");
@@ -929,6 +962,7 @@ function callRecurringShow(formId) {
 					$(".hide-on-odm").show();
 					$(".hide-on-rm, #meetingTypeNote").hide();
 				}
+				$('#recurringClassShowModelValidation .modal-body').animate({scrollTop: "0px"}, 'slow');
 			}
 		}
 	});
@@ -955,21 +989,21 @@ function checkUpdates(){
 
 function getStudentDetails(formId,moduleId) {
 	hideMessage('');
-	var userNameOrEmail='';
+	var rollNo='';
 	if($('#'+formId+ ' #meetingType').val() == null || $('#'+formId+ ' #meetingType').val() == undefined || $('#'+formId+ ' #meetingType').val() == ''){
 		showMessage(true, 'Meeting Type Required');
 		return false;
 	}
 	if(formId=='classroomSessionFilter'){
-		userNameOrEmail = $('#'+formId+ ' #studentName option:selected').attr('data-studentemail');
+		rollNo = $('#'+formId+ ' #studentName option:selected').attr('data-studentemail');
 	}else{
-		userNameOrEmail = $('#'+formId+ ' #userNameOrEmail').val().trim();
+		rollNo = $('#'+formId+ ' #rollNo').val().trim();
 	}
-	if(userNameOrEmail==''){
+	if(rollNo==''){
 		return false;
 	}
 	var data={};
-          data['userNameOrEmail']=userNameOrEmail;
+          data['rollNo']=rollNo;
           data['schoolId']=SCHOOL_ID;
 	$.ajax({
 		type : "POST",
@@ -986,7 +1020,7 @@ function getStudentDetails(formId,moduleId) {
 				$('#'+formId+ ' #studentStandardId').html('');
 			}
 			if (data['status'] == '0' || data['status'] == '2') {
-				if(formId=='classroomSessionFilter'){
+				if(formId=='classroomSessionFilter' && tt=='theme2'){
 					showMessageTheme2(0, data['message']);
 				}else{
 					showMessage(true, data['message']);
@@ -1001,6 +1035,7 @@ function getStudentDetails(formId,moduleId) {
 					$('#'+formId+ ' #studentTimezoneId').val(userData['studentTimezoneId']);
 					$('#'+formId+ ' #learningProgram').val(userData['registrationType']);
 					$('#'+formId+ ' #gradeName').val(userData['gradeName']);
+					$('#'+formId+ ' #standardId').val(userData['standardId']);
 					$('#'+formId+ ' #studentStandardId').val(userData['studentStandardId']);
 					if(userData['meetingVendor']!=undefined && userData['meetingVendor']!=''){
 						$("#"+formId+" #meetingVendor").val(userData['meetingVendor']);
@@ -1011,6 +1046,11 @@ function getStudentDetails(formId,moduleId) {
 					}
 				} 	
 				callSubjectNameByStudent(formId, userData['userId']);
+				if((data.userData.standardId >= 11 && data.userData.standardId <= 17) || (data.userData.standardId == 19) || (data.userData.registrationType == "SSP")){
+					bookedCalssCotentFun(0, userData['studentStandardId'])
+				}else{
+					$("#classRecodsTumbs").html("")
+				}
 				$("#selectTeacher").show();
 				$("#customTeacherDropDown").hide();
 				//showMessage(false, data['message']);
@@ -1047,6 +1087,13 @@ function getTeacherList(formId){
 			}
 		}
 	}
+	var standardId = $("#"+formId+" #standardId").val();
+	var registrationType = $("#"+formId+" #learningProgram").val();
+	if((standardId < 11 || standardId == 18 || standardId>19) && (registrationType != "SSP")){
+		bookedCalssCotentFun($("#"+formId+" #subjectIds").val(), $("#"+formId+" #studentStandardId").val())
+	}
+
+	
 }
 
 function resetRecurring(formId,moduleId){
@@ -1082,7 +1129,6 @@ function resetRecurring(formId,moduleId){
 }
 
 function getSplitTime(formId){
-	
 	if(formId=='classroomSessionFilter'){
 		var classDuration = $("#"+formId+" #classDuration").val();
 		if(classDuration=='00'){
@@ -1163,7 +1209,13 @@ function getSplitTime(formId){
 		}
 
 	}
-	
+	// var standardId = $("#"+formId+" #standardId").val();
+	// var registrationType = $("#"+formId+" #learningProgram").val();
+	// if((standardId < 11 || standardId == 18 || standardId>19) && (registrationType != "SSP")){
+	// 	bookedCalssCotentFun($("#"+formId+" #subjectIds").val(), $("#"+formId+" #studentStandardId").val(),startDate,endDate)
+	// }else{
+	// 	bookedCalssCotentFun(0, $("#"+formId+" #studentStandardId").val(),startDate,endDate)
+	// }
 	callTimeSlotByStartTime('recurringClass','00:00:00','23:59:00',classDuration, bufferTime, startFromTime, endDate, teacherTimezone);
 }
 
@@ -1266,6 +1318,7 @@ function resetUpdateRecurringClass(formId,moduleId){
 	$('#'+formId+' #joiningLink').prop('readonly',true);
 }
 
+
 // Function to convert time range strings into comparable time objects
 function parseTimeFor(timeStr) {
 	if(timeStr!=' Not Available '){
@@ -1320,3 +1373,99 @@ function findMatchingAndMissMatchingSlots(slots, givetime) {
     ];
 }
 
+
+function bookedCalssCotentFun(subjectId, studentStandardId,startDate,endDate) {
+	var data = {};
+	data['userId'] = USER_ID;
+	data['subjectId'] = subjectId;
+	data['studentStandardId'] = studentStandardId;
+	data['callFrom']=USER_ROLE;
+	data['startDate'] = startDate;
+	data['endDate'] = endDate;
+	data['dateType'] = "";
+	// data['roleModuleId'] = roleModuleId;
+	$.ajax({
+		type: "GET",
+		contentType: "application/json",
+		url: getURLForHTML('dashboard', 'student-booked-classes-details?payload='+encode(JSON.stringify(data))),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			console.log(data);
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					showMessage(true, data['message'], '');
+				}
+			} else {
+				$("#classRecodsTumbs").html(getClassRecodsContent(data.subjectCountDatials));
+				$("#classRecodsTumbs").show();
+				var $element = $('#classRecodsTumbs');
+				var originalOffsetTop = $element.offset().top;
+				$(window).on('scroll', function () {
+					if ($(window).scrollTop() >= originalOffsetTop) {
+						$element.css({
+							position: 'fixed',
+							top: '5px',
+							left:'0',
+							width: '100%',
+							zIndex: 1000
+						});
+					} else {
+						$element.css({
+							position: 'relative',
+							top: '',
+							zIndex: ''
+						});
+					}
+				});
+			}
+			customLoader(false);
+		},
+		error: function (e) {
+			//showMessage(true, TECHNICAL_GLITCH);
+		}
+	});
+
+}
+
+function getClassRecodsContent(data){
+	var html=
+		`<div class="d-flex flex-wrap course-detials justify-content-center mb-3">
+			<span class="d-inline-flex px-2 border border-primary rounded bg-light-primary flex-column text-center mr-1 mb-1" style="flex-grow: 1;color:#007fff;">
+				<div class="bold font-10">Total</div>
+				<div class="bold font-10" id="totalClass">${data.total}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-success text-success rounded bg-light-success flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Booked</div>
+				<div class="bold font-10" id="totalBookedClass">${data.booked}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-warning text-warning rounded bg-light-warning flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Left</div>
+				<div class="bold font-10" id="totalLeftClass">${data.left}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-danger text-danger rounded bg-light-danger flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Expired</div>
+				<div class="bold font-10">${data.expired}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-dark text-dark rounded bg-light flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Missed by Student</div>
+				<div class="bold font-10">${data.missedByYou}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-orange text-orange rounded bg-light-orange flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Rescheduled</div>
+				<div class="bold font-10" id="totalReschedule">${data.rescheduled}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-alternate text-alternate rounded bg-light-alternate flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Completed</div>
+				<div class="bold font-10" id="totalCompleted">${data.completed}</div>
+			</span>
+			<span class="d-inline-flex px-1 border border-pink text-pink rounded bg-light-pink flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
+				<div class="bold font-10">Class Missed by Teacher</div>
+				<div class="bold font-10">${data.missedByTeacher}</div>
+			</span>
+		</div>`;
+	return html;
+}

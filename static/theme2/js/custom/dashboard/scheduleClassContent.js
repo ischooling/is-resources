@@ -132,11 +132,11 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 	if(formId=='recurringClass'){
 		meetingFor=meetingType;
 		duration = $('#'+formId+' #classDuration').val();
-		var userNameOrEmail = $('#'+formId+' #userNameOrEmail').val();
+		var userNameOrEmail = $('#'+formId+' #studentId').val();
 		if(meetingType!="CUSTOM"){
 			if(userNameOrEmail==undefined  || userNameOrEmail==null || userNameOrEmail==0 || userNameOrEmail==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Student Email is required");
+				showMessage(true, "StudentId is required");
 				return false;
 	
 			}
@@ -162,10 +162,10 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 				return false;
 			}
 		}
-		if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
-			showMessage(true, "Class Type is required.");
-			return false;
-		}
+		// if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
+		// 	showMessage(true, "Class Type is required.");
+		// 	return false;
+		// }
 		if(meetingVendor==undefined  || meetingVendor==null || meetingVendor==0 || meetingVendor==''){
 			showMessage(true, "Meeting Vendor is required.");
 			return false;
@@ -311,14 +311,23 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 						$(".meetingSlotAdd > span").text("Save");
 					}
 				}
+				debugger;
 				var recurringclass = data['recurringClassList'];
 				var htmlRecu = "";
 				var inc=1;
+				var totalAvailableClass = $('#totalClass').html() - $('#totalBookedClass').html();
+				var saveForcefullyIfClassCountExceeds = data['saveForcefullyIfClassCountExceeds'];
 				var validRecurringClass=true;
+				var showValidatemessage=true;
+				var notAvailabileClassCount=0;
+				$('.meetingSlotAdd').html('<i class="fa fa-check"></i> Create Class');
 				for(var i=0;i<recurringclass.length;i++){
-					if(recurringclass[i]['slotAvailable']!='Available'){
+					if(recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA'){
 						$("#teacherAvailabilityWarningTitle").html(``);
 						htmlRecu = htmlRecu +"<tr class='text-danger'>";
+						if(recurringclass[i]['slotAvailable']!='Available'){
+							notAvailabileClassCount++;
+						}
 					}else{
 						htmlRecu = htmlRecu +"<tr>";
 					}
@@ -346,9 +355,30 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 					}else{
 						htmlRecu = htmlRecu +" <td>"+reason+"</td>";
 					}
+					if(totalAvailableClass == 0){
+						htmlRecu = htmlRecu +" <td>Student does not have any classes to book</td>";
+					}else{
+						var weekClassStatus =recurringclass[i]['classBookedStatus'];
+						if(weekClassStatus=="NA"){
+							htmlRecu = htmlRecu +" <td> Student does not have any classes to book</td>";
+						}else{
+							htmlRecu = htmlRecu +" <td>"+weekClassStatus+"</td>";
+						}
+					}
+					
 					htmlRecu = htmlRecu +"</tr>";
-					if(recurringclass[i]['slotAvailable']!='Available'){
+					if(recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA'){
 						validRecurringClass=false;
+						
+						if(recurringclass[i]['classBookedStatus']=='NA'){
+							showValidatemessage=false;
+						}
+					}
+					if(USER_ROLE != 'TEACHER'){
+						if(saveForcefullyIfClassCountExceeds == 'Y' && recurringclass[i]['classBookedStatus']=='NA' && recurringclass[i]['slotAvailable']=='Available'){
+							validRecurringClass = true;
+							$('.meetingSlotAdd').html('<i class="fa fa-check"></i> Create Class anyway');
+						}
 					}
 				}
 				if(validRecurringClass){
@@ -356,10 +386,21 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 					$(".validator-message").hide()
 				}else{
 					$('.meetingSlotAdd').hide();
-					$(".validator-message").show()
+					if(showValidatemessage){
+						$(".validator-message").show()
+					}else{
+						$(".validator-message").hide()
+					}
 				}
 				$("#trRecurring").html(htmlRecu);
-				
+				if(USER_ROLE != 'TEACHER'){
+					if(totalAvailableClass<=0 && saveForcefullyIfClassCountExceeds=='N'){
+						$('.meetingSlotAdd').hide();
+						$(".validator-message-count").show()
+					}else{
+						$(".validator-message-count").hide()
+					}
+				}
 
 				if(meetingTypeValue==null || meetingTypeValue==undefined || meetingTypeValue==''){
 					meetingTypeValue ="ODM";
@@ -381,6 +422,7 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 				// }else{
 				// 	showMessage(false, data['message']);
 				// }
+				
 				if(controllType=='ADD'){
 					$('#'+formId)[0].reset();
 					meetingDataByType('STUDENT_DOUBT_SESSION');
@@ -416,11 +458,11 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 	}
 	if(formId=='recurringClass'){
 		duration = $('#'+formId+' #classDuration').val();
-		var userNameOrEmail = $('#'+formId+' #userNameOrEmail').val();
+		var userNameOrEmail = $('#'+formId+' #studentId').val();
 		if(meetingType!="CUSTOM"){
 			if(userNameOrEmail==undefined  || userNameOrEmail==null || userNameOrEmail==0 || userNameOrEmail==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Student Email is required");
+				showMessage(true, "StudentID is required");
 				return false;
 	
 			}
@@ -445,10 +487,10 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 	
 			}
 		}
-		if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
-			showMessage(true, "Class Type is required.");
-			return false;
-		}
+		// if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
+		// 	showMessage(true, "Class Type is required.");
+		// 	return false;
+		// }
 
 	}else{
 		if(meetingFor=="PTM" || meetingFor == "CUSTOM"){
@@ -554,7 +596,7 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 					$("#customTitleDiv").hide();
 					// setTimeout(function(){ callDashboardPageSchool(moduleId,'schedule-a-session',''); }, 1000);
 				}
-		
+				$(".classRecodsTumbs").hide();
 			}
 			customLoader(false);
 			$("#modalMessage, #recurringClassShowModelValidation").modal("hide");
@@ -801,7 +843,7 @@ function getRecurringClassContent(moduleId){
 				+'<div class="row hide-on-odm col-12 row" id="timeSlotSession" style="display:none"></div>'
 				+'<div class="col-md-12 text-right hide-on-odm" style="display: none;">'
 					+'<button class="btn btn-primary mr-1" type="button" onclick="callRecurringShow(\'classroomSessionFilter\')">Check Class Availability</button>'
-					+'<button class="btn btn-success proceedRecurringClassbtn mr-1" type="submit" onclick="booksclassOutsideAvailabilityConfirmationModal(\'hide-on-odm\',\'classroomSessionFilter\','+moduleId+');" style="display: none;"> <i class="fa fa-check"></i> Save</button>'
+					+'<button class="btn btn-success mr-1" type="button" onclick="booksclassOutsideAvailabilityConfirmationModal(\'hide-on-odm\',\'classroomSessionFilter\','+moduleId+');" style="display: none;"> <i class="fa fa-check"></i> Save</button>'
 					+'<button class="btn btn-info" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+moduleId+')">Reset</button>'
 				+'</div>'
 			return html;
@@ -922,7 +964,7 @@ function getUpdateMeetingResultModal(roleAndModule, role){
 					+'</div>'
 					+'<div class="modal-footer">';
 						if(roleAndModule.updated=='Y'){
-							html+='<button type="button" class="send btn btn-primary  text-left meetingSaveResult" onClick="updateClassroomSession(\''+roleAndModule.moduleId+'\',\''+role+'\');"><i class="fa fa-envelope-o"></i> Save</button>';
+							html+='<button type="button" class="send btn btn-primary  text-left meetingSaveResult" onClick="updateClassroomSession(\''+roleAndModule.moduleId+'\',\''+role+'\', \'updateMeetingResultForm\');"><i class="fa fa-envelope-o"></i> Save</button>';
 						}
 						html+='<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">Close</button>'
 					+'</div>'
@@ -1084,6 +1126,7 @@ function validateOneDayMeetingByTeacherModal(moduleId){
 												+'<th class="" style="font-weight: bold">Class Timings</th>'
 												+'<th class="" style="font-weight: bold">Slot Available</th>'
 												+'<th class="" style="font-weight: bold">Reason for Availability</th>'
+												+'<th class="" style="font-weight: bold">Student\'s Weekly Class Status</th>'
 											+'</tr>'
 										+'</thead>'
 										+'<tbody id="trRecurring"></tbody>'

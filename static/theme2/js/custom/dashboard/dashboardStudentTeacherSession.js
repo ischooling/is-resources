@@ -3567,3 +3567,137 @@ function getAvailability(userId){
 	getAsPost('/timeavailability/time-availability?moduleId=182&schoolId=' + SCHOOL_ID +'&euid='+userId);
 	customLoader(false)
 }
+
+function callTeacherClassesToUpdateStatus() {
+	var data = {};
+	data['userId'] = USER_ID;
+	customLoader(true);
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLForHTML('dashboard', 'get-all-class-for-status-update'),
+		data: JSON.stringify(data),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		async: true,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					//showMessageTheme2(2, "",'',true);
+				}
+			} else {
+				if($("#teacherMeetingStatus").length<1){
+					$("body").append(meetingStatusUpdateModal(data.details))
+				}
+				if(data.details.classDetails != '' && data.details.showUpdateClassPopupStatus){
+					$("#teacherMeetingStatus").modal("show");
+				}
+			}
+			customLoader(false);
+		},
+		error: function (e) {
+			showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
+		}
+	});
+}
+
+function updateBulkClassStatus() {
+	var classSaveFlag = true;
+	var rowIndex = 0;
+	var statusNotSelectedLength = $('select.status').filter(function() {
+    	return $(this).find('option:first').is(':selected');
+	}).length;
+	if(statusNotSelectedLength == $("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr").length){
+		$("#teacherMeetingStatusErrorTxt").text('Status field is required.');
+		$("#teacherMeetingStatusErrorTxt").show();
+		setTimeout(function(){
+			$("#teacherMeetingStatusErrorTxt").hide();
+		},2000);
+		return false;
+	}else{
+		var data=[];
+		$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr").each(function(i){
+			var demoStatus = $(this).find(".status").val();
+			if(demoStatus!=''){
+				var ddata={};
+				ddata['meetingId']=$(this).attr("data-meetingId");
+				ddata['userId']=$(this).attr("data-userId");
+				ddata['schoolId']=SCHOOL_ID;
+				ddata['status']=demoStatus;
+				data.push(ddata);
+			}
+		});
+	}
+	if(!classSaveFlag){
+		$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr:nth-child("+rowIndex+")").css({"background-color":"#f6c85a"});
+		
+		//showMessage(false, "Status field is required.");
+		$("#teacherMeetingStatusErrorTxt").text('Status field is required.');
+		$("#teacherMeetingStatusErrorTxt").show();
+		setTimeout(function(){
+			$("#teacherMeetingStatusErrorTxt").hide();
+		},2000);
+		return false;
+	}else{
+		if(rowIndex%2){
+			$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr:nth-child("+rowIndex+")").css({"background-color":"rgba(237, 240, 255, 1)"});
+		}else{
+			$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr:nth-child("+rowIndex+")").css({"background-color":"white"});
+		}
+		
+	}
+	customLoader(true);
+	 $.ajax({
+		 type : "POST",
+		 contentType : "application/json",
+		 url : getURLForHTML('dashboard','update-bulk-meeting-status-by-teacher'),
+		 data : JSON.stringify(data),
+		 dataType : 'json',
+		 async:true,
+		 success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, data['message'],'',true);
+				}
+			} else {
+				var totalRowSaveCount = $('select.status').filter(function() {
+					return $(this).find('option:not(:first)').is(':selected');
+				}).length;
+				var demoTotalCount = parseInt($(".demoTotalCount").text());
+				demoTotalCount=demoTotalCount - totalRowSaveCount;
+				if(demoTotalCount > 0){
+					$(".demoTotalCount").text(demoTotalCount)
+				}else{
+					$(".demoTotalCount").text("0");	
+				}
+				
+				$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr").each(function(i){
+					var demoStatus = $(this).find(".status").val();
+					if(demoStatus != ""  && demoStatus != undefined && demoStatus != null){
+						$(this).remove();
+					}
+				});
+				if($("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr").length<1){
+					$('#teacherMeetingStatus').modal('hide');
+				}
+
+				$("#teacherMeetingStatusErrorTxt").text(data['message']).css({"color":"green"});
+				$("#teacherMeetingStatusErrorTxt").show();
+				setTimeout(function(){
+					$("#teacherMeetingStatusErrorTxt").hide();
+					$("#teacherMeetingStatusErrorTxt").text("").css({"color":"red"});
+				},3000);
+				customLoader(false);
+			}
+		 },
+		 error:function(e){
+			// console.log(e);
+			 customLoader(false);
+		 }
+	 });
+}

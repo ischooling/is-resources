@@ -277,6 +277,8 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		});
 	} else if (pageNo === "meeting-management") {
     	getMeetingManagementContent("Meeting Management")
+	} else if (pageNo === "book-a-session") {
+    	renderBookClassContent('','','', true, moduleId);
   	}
 }
 

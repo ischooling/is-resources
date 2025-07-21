@@ -67,6 +67,10 @@ function redirectLoginPage() {
       $("#captcha").val("");
       $("#sessionOutPermission").modal({ backdrop: "static", keyboard: false });
       refreshCaptcha("captchaImage");
+      $("#continueSession").click(function(event) {
+        event.preventDefault();
+        callUserLogin('continueSessionForm', '','CONTINUE');
+      });
     } else {
       window.setTimeout(function () {
         window.location =
@@ -3680,6 +3684,7 @@ $(document).on("hidden.bs.modal", function () {
   if ($(".modal.show").length < 1) {
     $(".modal-backdrop").remove();
     $(".navbar-toggler").css("margin-right", "0px");
+    $("body").removeAttr("style");
   }
 });
 

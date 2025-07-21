@@ -121,3 +121,37 @@ function getMonthDescription(currentDate) {
 	details['name']=m.format('MMMM');
     return details;
 }
+
+function getDateAfterNDays(n) {
+    const today = new Date();
+    today.setDate(today.getDate() + n);
+
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+
+    return `${year}-${month}-${day}`;
+}
+
+function getWeeksBetweenDates(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffInMs = Math.abs(end - start);
+    const weeks = diffInMs / (7 * 24 * 60 * 60 * 1000);
+    return Math.floor(weeks);
+}
+
+function getSaturdayAfterNDays(n) {
+    const today = new Date();
+    today.setDate(today.getDate() + n);
+
+    const dayOfWeek = today.getDay();
+    const daysToSaturday = 6 - dayOfWeek;
+    today.setDate(today.getDate() + daysToSaturday);
+
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+
+    return `${year}-${month}-${day}`;
+}

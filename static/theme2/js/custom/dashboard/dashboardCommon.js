@@ -33,9 +33,6 @@ function callForDashboardData(formId, actionUrl, replaceDiv) {
 				} else {
 					if (replaceDiv == undefined || replaceDiv == '') {
 						$('#dashboardContentInHTML').html(htmlContent);
-						if (actionUrl.startsWith('add-to-cart-request-data')) {
-							getCartDetails(USER_ID);
-						}
 					} else {
 						if (replaceDiv == 'section-linebox') {
 							$('#teacherAgreementModal').modal('show');
@@ -104,9 +101,6 @@ function callForDashboardDataForPasswordChange(formId, actionUrl, replaceDiv, sh
 				} else {
 					if (replaceDiv == undefined || replaceDiv == '') {
 						$('#dashboardContentInHTML').html(htmlContent);
-						if (actionUrl.startsWith('add-to-cart-request-data')) {
-							getCartDetails(USER_ID);
-						}
 					} else {
 						if (replaceDiv == 'section-linebox') {
 							$('#teacherAgreementModal').modal('show');
@@ -183,9 +177,6 @@ function callDashboardMenu(pageNo) {
 	} else if (pageNo == '01unread') {
 		callForDashboardData('formIdIfAny', 'email-inbox-read-content?readType=unread&schoolId=' + SCHOOL_ID);
 	}
-	//	else if(pageNo=='addToCart'){
-	//		callForDashboardData('formIdIfAny','changed-password-request');
-	//	}
 }
 function callCommonDashboardPage(pageNo) {
 	if (pageNo == '1') {
@@ -250,8 +241,6 @@ function callInneraction(actionType, arg0) {
 		callForDashboardData('formIdIfAny', 'reject-school-profile-view-content?userId=' + arg0);
 	} else if (actionType == 'rejectSchoolProfileView') {
 		callForDashboardData('formIdIfAny', 'reject-school-profile-view-content?userId=' + arg0);
-	} else if (actionType == 'addToCart') {
-		callForDashboardData('formIdIfAny', 'add-to-cart-request-data?userId=' + arg0);
 	}
 }
 function validateChangePassword(formId) {
@@ -1576,129 +1565,6 @@ function notificationContentListingWithQueries(elementId, argument) {
 	});
 	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
 
-}
-
-
-function getBookSessionPayment(formId) {
-	hideMessage('');
-	//		setTimeout(function(){$('body').addClass("modal-open");},1000);
-	if ($("#" + formId + " #planId").val().trim() == '') {
-		showMessageTheme2(0, ' Please select a plan', '', false);
-		return false;
-	}
-	if ($("#" + formId + " #planId").val().trim() != 'plan-one' && $("#" + formId + " #planId").val().trim() != 'discoveryAddOn') {
-		if ($("#" + formId + " #choosePlanStartDate").val().trim() == '' || $("#" + formId + " #choosePlanStartDate").val().trim() == undefined) {
-			showMessageTheme2(0, ' Please select plan start date', '', false);
-			return false;
-		}
-	}
-	if ($("#" + formId + " #planId").val().trim() != 'plan-one' && $("#" + formId + " #planId").val().trim() != 'discoveryAddOn') {
-		planStartDate = $("#" + formId + " #choosePlanStartDate").val().trim();
-		planEndDate = $("#" + formId + " #choosePlanEndDate").val().trim();
-	}
-	var data = {};
-	data['userId'] = USER_ID;
-	data['subjectId'] = $("#" + formId + " #subjectId").val();
-	data['amount'] = $("#" + formId + " #amount").val();
-	data['planId'] = $("#" + formId + " #planId").val();
-	data['planAmount'] = $("#" + formId + " #planAmount").val();
-	data['studentSessionId'] = $("#" + formId + " #studentSessionId").val();
-	data['subjectBookStatus'] = $("#" + formId + " #subjectBookStatus").val();
-	data['sessionCount'] = $("#" + formId + " #planCount").val();
-	data['finalSessionCount'] = $("#" + formId + " #totalPlanCount").val()
-	data['planStartDate'] = planStartDate;
-	data['planEndDate'] = planEndDate;
-	$.ajax({
-		type: "POST",
-		contentType: "application/json",
-		url: getURLForHTML('dashboard', 'booksession-plan-content'),
-		data: JSON.stringify(data),
-		dataType: 'html',
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					if (stringMessage[0] == "SESSIONOUT") {
-						redirectLoginPage();
-					} else {
-						showMessageTheme2(0, stringMessage[1], '', false);
-					}
-				} else {
-					showMessageTheme2(1, " Item added to your cart successfully", '', false);
-					getCartDetails(USER_ID);
-				}
-				return false;
-			}
-		}
-	});
-}
-
-function getCartDetails(userId) {
-	var postData = {};
-	postData['userId'] = userId;
-	$.ajax({
-		type: "POST",
-		contentType: "application/json",
-		url: getURLForHTML('dashboard', 'get-cart-details'),
-		data: JSON.stringify(postData),
-		dataType: 'html',
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					if (stringMessage[0] == "SESSIONOUT") {
-						redirectLoginPage();
-					} else {
-						showMessageTheme2(0, stringMessage[1], '', false);
-					}
-				} else {
-					$('#cartTotalList').html(htmlContent);
-				}
-				return false;
-			}
-		}
-	});
-}
-
-function addToCartPayment(amount, bookingIds, subjectId) {
-	hideMessage('');
-	var data = {};
-	data['amount'] = amount;
-	data['bookingIds'] = bookingIds;
-	data['subjectId'] = subjectId;
-	data['userId'] = USER_ID;
-	$.ajax({
-		type: "POST",
-		contentType: "application/json",
-		url: getURLForHTML('dashboard', 'cart-to-payment-content'),
-		data: JSON.stringify(data),
-		dataType: 'html',
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					if (stringMessage[0] == "SESSIONOUT") {
-						redirectLoginPage();
-					} else {
-						showMessageTheme2(0, stringMessage[1], '', false);
-					}
-				} else {
-					//	        			showMessageTheme2(1,stringMessage[1],'',false);
-					//	        			$("#bookSessionPaymentModal").modal('hide');
-					$("#payTabBookingSessionModal").modal('show');
-					$('#bookSessionTermModal').html(htmlContent)
-				}
-				return false;
-			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
-		}
-	});
 }
 
 function showOtherReason(id) {

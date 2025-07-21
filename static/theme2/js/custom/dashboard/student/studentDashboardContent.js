@@ -39,10 +39,12 @@ function rendereDashboardContent(isParent){
         renderStudentDashboard(dashboardData);
         renderAnnouncement(dashboardData.userId)
         renderActitify(dashboardData.userId)
-        getCartDetails(dashboardData.userId);
-        setTimeout(function () {
+        getCartCount(dashboardData.userId);
+
+        // setTimeout(function () {
             getReserveASeatForNextGrade(dashboardData.userId);
-        }, 10000);
+        // }, 10000);
+        
         $("#timeStuStandardId").val(dashboardData.studentStandardId);
         if(data.showStudentCourseSelectionModel=='Y'){
             getStudentTimePreference(data.studentId, data.standardId, data.providerId);
@@ -227,7 +229,6 @@ function dashboardAnnouncement(data) {
 }
 
 function dashboardSchoolCalendar(data) {
-    debugger
     var html=`
     <div class="main-card mb-3">
         <div class="full">
@@ -306,7 +307,6 @@ function holidayOne() {
     </div>`;
     return html;
 }
-
 
 function batchImpAnnouncementModal(){
     var html = `<div id="batchImpAnnouncementModal" class="modal fade bd-example-modal-lg fade-scale" data-backdrop="static" data-keyboard="false" tabindex="" role="dialog">
