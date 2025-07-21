@@ -1086,8 +1086,12 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	+'</div>';
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
-		var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, USER_TIMEZONE,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
-		var currentTimeStr=curentTime.date+' '+curentTime.time;
+		var currentTimeStr="";
+		if(leads.leadTimeZone!=''){
+			var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, USER_TIMEZONE,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
+			currentTimeStr=curentTime.date+' '+curentTime.time;
+		}
+		
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
 		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1380px;width:100%" id="leadDataList">'
