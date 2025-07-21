@@ -328,7 +328,7 @@ function classThumbItemContent(subjectList, moduleId) {
   html +=
     weekStartAndEndDage.startDatetime + " - " + weekStartAndEndDage.endDatetime;
   html += `</span>`;
-  if (DEPLOYMENT_MODE != "prod") {
+  if (DEPLOYMENT_MODE != "PROD") {
     html += `<span class="d-inline-block ml-1">
                 <input type="text" name="bookingDate" id="bookingDate" class="form-control w-fit-content"/>
             </span>`;

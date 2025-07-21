@@ -152,9 +152,8 @@ function fireworksContent(){
 function marqueeContent(){
     var html =``;
     if(MAINTENANCEDOWNTIME != ''){
-        
             html+=`<div class="marquee">
-                <marquee id="marqueeDiv" direction="left" style="font-size: 15px; font-weight: normal; line-height: 26px; margin-top: 0px;" width="100%" height="26px;">
+                <marquee id="marqueeDiv" direction="left" style="font-size: 15px; font-weight: normal; line-height: 26px; margin-top: 0px; position:relative; z-index:9" width="100%" height="26px;">
                     ${MAINTENANCEDOWNTIME}
                 </marquee>
             </div>`;
