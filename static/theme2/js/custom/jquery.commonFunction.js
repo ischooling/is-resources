@@ -1,14 +1,25 @@
-var BASE_TIMEZONE='Asia/Singapore';
-var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + '/' + 'api/v1/';
-var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + '/' + 'api/v1/';
-var GLOBAL_EMAIL = '';
+var BASE_TIMEZONE = "Asia/Singapore";
+var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";
+var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "/" + "api/v1/";
+var GLOBAL_EMAIL = "";
 var GRADE_CAL_RULE = {};
 var DEFAULT_SEARCH_STATE = true;
 var editor1;
 var editor2;
 var editor3;
 var editor4;
-var IGNORECOUNTRYARRAY = ['AQ', 'BV', 'HM', 'TF', 'UM', 'aq', 'bv', 'hm', 'tf', 'um'];
+var IGNORECOUNTRYARRAY = [
+  "AQ",
+  "BV",
+  "HM",
+  "TF",
+  "UM",
+  "aq",
+  "bv",
+  "hm",
+  "tf",
+  "um",
+];
 var globalEntityId = "";
 var reviewDone = false;
 var submitted = false;
@@ -28,6 +39,7 @@ var MAX_SIZE_LIMIT = "Please upload maximum 5MB file in size.";
 var MAX_SIZE_LIMIT_FOR_TEACHER = "Please upload maximum 10 MB file in size.";
 var pattern = /^(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[A-Z])(?=.*[a-z]).{8,20}$/;
 var sumUnseen;
+var AJAXREQUESTCOUNT=0;
 var date = new Date();
 var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -74,9 +86,9 @@ function redirectLoginPage() {
       $("#captcha").val("");
       $("#sessionOutPermission").modal({ backdrop: "static", keyboard: false });
       refreshCaptcha("captchaImage");
-      $("#continueSession").click(function(event) {
+      $("#continueSession").click(function (event) {
         event.preventDefault();
-        callUserLogin('continueSessionForm', '', 'CONTINUE');
+        callUserLogin("continueSessionForm", "", "CONTINUE");
       });
     } else {
       window.setTimeout(function () {
@@ -87,10 +99,16 @@ function redirectLoginPage() {
   }
 }
 function refreshCaptcha(id) {
-	var primaryColor=ROOTCSS.split(':#')[1].split(';')[0];
-	if (id != undefined && id != '' && $('#' + id).length > 0) {
-		document.images[id].src = BASE_URL + API_VERSION + 'common/captcha.jpg?payload='+primaryColor+'&v=' + new Date().getTime();
-	}
+  var primaryColor = ROOTCSS.split(":#")[1].split(";")[0];
+  if (id != undefined && id != "" && $("#" + id).length > 0) {
+    document.images[id].src =
+      BASE_URL +
+      API_VERSION +
+      "common/captcha.jpg?payload=" +
+      primaryColor +
+      "&v=" +
+      new Date().getTime();
+  }
 }
 function getURLForHTML(apiType, suffixUrl) {
   return (
@@ -459,10 +477,23 @@ function resetDropdown(dropdown, emptyMessage) {
   //	dropdown.append('<option disabled selected> </option>');
 }
 $(document).ajaxStart(function () {
-  customLoader(true);
+  // customLoader(true);
 });
 $(document).ajaxStop(function () {
-  customLoader(false);
+  // customLoader(false);
+});
+
+$(document).ajaxSend(function () {
+  ++AJAXREQUESTCOUNT;
+  customLoader(true);
+});
+
+$(document).ajaxComplete(function () {
+  --AJAXREQUESTCOUNT;
+  if(AJAXREQUESTCOUNT <= 0) {
+    AJAXREQUESTCOUNT = 0; // prevent negative values
+    customLoader(false);
+  }
 });
 //var ajaxCalls = 0;
 function customLoader(needToShow) {
@@ -495,9 +526,12 @@ function customLoader(needToShow) {
       // }
       setTimeout(function () {
         //if(ajaxCalls == 0){
-        $("#commonloaderIdNewLoader").addClass("hide-loader");
-        $("#commonloaderId").hide();
-        $("#commonloaderBody").hide();
+          if(AJAXREQUESTCOUNT <= 0){
+            $("#commonloaderIdNewLoader").addClass("hide-loader");
+            $("#commonloaderId").hide();
+            $("#commonloaderBody").hide();
+          }
+        
         //}
       }, 1000);
       // console.log("4"+new Date());
@@ -616,7 +650,6 @@ function checkonlineOfflineStatus() {
 //$( document ).ajaxComplete(function() {
 //	customLoader(false);
 //});
-
 
 function goAheadGet(url, hash) {
   var form = $(
@@ -3860,21 +3893,27 @@ function changeDateFormat(date, dateFormat) {
       ":" +
       (date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds())
     );
-  }else if ("MMM dd, yyyy hh:mm:ss A" == dateFormat) {
+  } else if ("MMM dd, yyyy hh:mm:ss A" == dateFormat) {
     let hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12;
-  
+
     return (
-      M.months[date.getMonth()] + " " +
-      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + ", " +
-      date.getFullYear() + " " +
-      (hours > 9 ? hours : "0" + hours) + ":" +
-      (minutes > 9 ? minutes : "0" + minutes) + ":" +
-      (seconds > 9 ? seconds : "0" + seconds) + " " +
+      M.months[date.getMonth()] +
+      " " +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      ", " +
+      date.getFullYear() +
+      " " +
+      (hours > 9 ? hours : "0" + hours) +
+      ":" +
+      (minutes > 9 ? minutes : "0" + minutes) +
+      ":" +
+      (seconds > 9 ? seconds : "0" + seconds) +
+      " " +
       ampm
     );
   } else if ("dd-mm-yyyy" == dateFormat) {
@@ -4178,10 +4217,11 @@ $(document).on("hidden.bs.modal", ".modal", function () {
     const topModal = $(".modal.show").last();
     const newZIndex = 1050 + ($(".modal.show").length - 1) * 20;
     topModal.css("z-index", newZIndex);
-    $(".modal-backdrop").last().css("z-index", newZIndex - 10);
+    $(".modal-backdrop")
+      .last()
+      .css("z-index", newZIndex - 10);
   }
 });
-
 
 $(document).ready(function () {
   $(".hamburger").on("click", function () {
@@ -4298,7 +4338,9 @@ function convertMsToTime(milliseconds) {
   seconds = seconds % 60;
   minutes = minutes % 60;
   hours = hours % 24;
-  return `${padTo2Digits(hours)}h ${padTo2Digits(minutes)}m ${padTo2Digits(seconds)}s`;
+  return `${padTo2Digits(hours)}h ${padTo2Digits(minutes)}m ${padTo2Digits(
+    seconds
+  )}s`;
 }
 function padTo2Digits(num) {
   return num.toString().padStart(2, "0");
@@ -4579,21 +4621,23 @@ function getSettingRequest(schoolId) {
 // 	return responseData;
 // }
 
-async function getSchoolSettingsTechnical(schoolId){
-	try{
-		var responseData = await  getDesiredObject('sst'+schoolId);
-		if(typeof responseData =='object'){
-			if(!responseData.ntc){
-				return responseData;
-			}
-		}
-		responseData = await getDataBasedUrlAndPayload('technical', getSettingRequest(schoolId));
-		localStorage.setItem('sst'+schoolId,JSON.stringify(responseData));
-		return responseData;
-	}catch(e){
-		showMessage(true, e);
-
-	}
+async function getSchoolSettingsTechnical(schoolId) {
+  try {
+    var responseData = await getDesiredObject("sst" + schoolId);
+    if (typeof responseData == "object") {
+      if (!responseData.ntc) {
+        return responseData;
+      }
+    }
+    responseData = await getDataBasedUrlAndPayload(
+      "technical",
+      getSettingRequest(schoolId)
+    );
+    localStorage.setItem("sst" + schoolId, JSON.stringify(responseData));
+    return responseData;
+  } catch (e) {
+    showMessage(true, e);
+  }
 }
 
 // function getSchoolSettingsLinks(schoolId){
@@ -4620,53 +4664,65 @@ async function getSchoolSettingsTechnical(schoolId){
 // 	return responseData;
 // }
 
-async function getSchoolSettingsLinks(schoolId){
-	try{
-		var responseData = await  getDesiredObject('sslink'+schoolId);
-		if(typeof responseData =='object'){
-			if(!responseData.ntc){
-				return responseData;
-			}
-		}
-		responseData = await getDataBasedUrlAndPayload('links', getSettingRequest(schoolId));
-		localStorage.setItem('sslink'+schoolId,JSON.stringify(responseData));
-		return responseData;
-	}catch(e){
-		showMessage(true, e)
-	}
+async function getSchoolSettingsLinks(schoolId) {
+  try {
+    var responseData = await getDesiredObject("sslink" + schoolId);
+    if (typeof responseData == "object") {
+      if (!responseData.ntc) {
+        return responseData;
+      }
+    }
+    responseData = await getDataBasedUrlAndPayload(
+      "links",
+      getSettingRequest(schoolId)
+    );
+    localStorage.setItem("sslink" + schoolId, JSON.stringify(responseData));
+    return responseData;
+  } catch (e) {
+    showMessage(true, e);
+  }
 }
 
-async function getSchoolSettingsOffice(schoolId){
-	try{
-		var responseData = await  getDesiredObject('ssoffice'+schoolId);
-		if(typeof responseData =='object'){
-			if(!responseData.ntc){
-				return responseData;
-			}
-		}
-		responseData = await getDataBasedUrlAndPayload('office', getSettingRequest(schoolId));
-		localStorage.setItem('ssoffice'+schoolId,JSON.stringify(responseData));
-		return responseData;
-	}catch(e){
-		showMessage(true, e)
-	}
+async function getSchoolSettingsOffice(schoolId) {
+  try {
+    var responseData = await getDesiredObject("ssoffice" + schoolId);
+    if (typeof responseData == "object") {
+      if (!responseData.ntc) {
+        return responseData;
+      }
+    }
+    responseData = await getDataBasedUrlAndPayload(
+      "office",
+      getSettingRequest(schoolId)
+    );
+    localStorage.setItem("ssoffice" + schoolId, JSON.stringify(responseData));
+    return responseData;
+  } catch (e) {
+    showMessage(true, e);
+  }
 }
-async function getCommonCustomScript(userId,schoolId){
-	try{
-		var responseData = await  getDesiredObject('commonscript'+schoolId);
-		if(typeof responseData =='object'){
-			if(!responseData.ntc){
-				return responseData;
-			}
-		}
-		var data={};
-		data['userId']=userId;
-		responseData = await getDataBasedUrlAndPayload('common-script-variables', data);
-		localStorage.setItem('commonscript'+schoolId,JSON.stringify(responseData));
-		return responseData;
-	}catch(e){
-		showMessage(true, e)
-	}
+async function getCommonCustomScript(userId, schoolId) {
+  try {
+    var responseData = await getDesiredObject("commonscript" + schoolId);
+    if (typeof responseData == "object") {
+      if (!responseData.ntc) {
+        return responseData;
+      }
+    }
+    var data = {};
+    data["userId"] = userId;
+    responseData = await getDataBasedUrlAndPayload(
+      "common-script-variables",
+      data
+    );
+    localStorage.setItem(
+      "commonscript" + schoolId,
+      JSON.stringify(responseData)
+    );
+    return responseData;
+  } catch (e) {
+    showMessage(true, e);
+  }
 }
 function getSettingsByTypeAndKey(type, key) {
   var responseData = {};
@@ -4913,7 +4969,6 @@ function getDashboardDataBasedUrlAndPayload(
             }
           }
         } else {
-          customLoader(false);
           resolve(data);
         }
       },
@@ -4931,253 +4986,267 @@ function getDashboardDataBasedUrlAndPayload(
   });
 }
 
-function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage, url, payload, parentUrl){
+function getDashboardDataBasedUrlAndPayloadWithParentUrl(
+  globalflag,
+  showMessage,
+  url,
+  payload,
+  parentUrl
+) {
   return new Promise(function (resolve, reject) {
-      $.ajax({
-          type : "POST",
-          contentType : "application/json",
-          url: getURLForHTML(parentUrl, url),
-          data : JSON.stringify(payload),
-          dataType : 'json',
-          global : globalflag,
-          success : function(data) {
-              if (data.status == '0' || data.status == '2' || data.status == '3') {
-                  if(data.status == '3'){
-                      redirectLoginPage();
-                  }else{
-                      if(showMessage){
-                          if(tt=='theme1'){
-                              showMessage(false, data.message);
-                          }else{
-                              showMessageTheme2(0, data.message,'',true);
-                          }
-                      }
-                  }
+    $.ajax({
+      type: "POST",
+      contentType: "application/json",
+      url: getURLForHTML(parentUrl, url),
+      data: JSON.stringify(payload),
+      dataType: "json",
+      global: globalflag,
+      success: function (data) {
+        if (data.status == "0" || data.status == "2" || data.status == "3") {
+          if (data.status == "3") {
+            redirectLoginPage();
+          } else {
+            if (showMessage) {
+              if (tt == "theme1") {
+                showMessage(false, data.message);
               } else {
-                  resolve(data);
+                showMessageTheme2(0, data.message, "", true);
               }
-          },
-          error: function (xhr, status, e) {
-              if(showMessage){
-                  if(tt=='theme1'){
-                      showMessage(false, e.responseText);
-                  }else{
-                      showMessageTheme2(0, e.responseText,'',true);
-                  }
-              }
-              reject(e);
+            }
           }
-      });
+        } else {
+          resolve(data);
+        }
+      },
+      error: function (xhr, status, e) {
+        if (showMessage) {
+          if (tt == "theme1") {
+            showMessage(false, e.responseText);
+          } else {
+            showMessageTheme2(0, e.responseText, "", true);
+          }
+        }
+        reject(e);
+      },
+    });
   });
 }
-function getActualData(){
-	var responseData={};
-	if(LOCATION_SERVICE_BYPASS=='true'){
-		responseData=JSON.parse(DEFAULT_LOCATION);
-	}else{
-		$.ajax({
-			global: false,
-			type : "GET",
-			url : PRO_IP_API_URL,
-			async : false,
-			success : function(data) {
-				responseData=data;
-			}
-		});
-	}
-	return responseData;
+function getActualData() {
+  var responseData = {};
+  if (LOCATION_SERVICE_BYPASS == "true") {
+    responseData = JSON.parse(DEFAULT_LOCATION);
+  } else {
+    $.ajax({
+      global: false,
+      type: "GET",
+      url: PRO_IP_API_URL,
+      async: false,
+      success: function (data) {
+        responseData = data;
+      },
+    });
+  }
+  return responseData;
 }
-function getCurrentTimeFromDateAsString(date){
-	return getCurrentTimeFromDate(new Date(date))
-}
-
-function getCurrentTimeOnly(){
-	return getCurrentTimeFromDate(new Date())
+function getCurrentTimeFromDateAsString(date) {
+  return getCurrentTimeFromDate(new Date(date));
 }
 
-function getCurrentTimeFromDate(date){
-	return (date.getHours() > 9 ? date.getHours() : ('0' + date.getHours())) + ':' + (date.getMinutes() > 9 ? date.getMinutes() : ('0' + date.getMinutes())) + ':' + (date.getSeconds() > 9 ? date.getSeconds() : ('0' + date.getSeconds()));
-}
-function getBeforeAndAfterDate(date, hours){
-	var now = new Date(date);
-	return new Date(now.getTime()+(hours * 60 * 60 * 1000));
+function getCurrentTimeOnly() {
+  return getCurrentTimeFromDate(new Date());
 }
 
-function getDataBasedUrlAndPayload(url, payload){
-	return new Promise(function (resolve, reject) {
-		$.ajax({
-			type : "POST",
-			contentType : "application/json",
-			url : getURLFor(url,''),
-			data : JSON.stringify(payload),
-			dataType : 'json',
-			//global: false,
-			success : function(data) {
-				resolve(data);
-			},
-			error: function (xhr, status, e) {
-				reject(e);
-				if(tt=='theme1'){
-					showMessage(true, TECHNICAL_GLITCH);
-				}else{
-					showMessageTheme2(0, TECHNICAL_GLITCH,'',true);
-				}
-			}
-		});
-	});
+function getCurrentTimeFromDate(date) {
+  return (
+    (date.getHours() > 9 ? date.getHours() : "0" + date.getHours()) +
+    ":" +
+    (date.getMinutes() > 9 ? date.getMinutes() : "0" + date.getMinutes()) +
+    ":" +
+    (date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds())
+  );
+}
+function getBeforeAndAfterDate(date, hours) {
+  var now = new Date(date);
+  return new Date(now.getTime() + hours * 60 * 60 * 1000);
 }
 
-function getNeedToCall(){
-	const needToCall = {
-		"ntc": true
-	};
-	return needToCall;
+function getDataBasedUrlAndPayload(url, payload) {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      type: "POST",
+      contentType: "application/json",
+      url: getURLFor(url, ""),
+      data: JSON.stringify(payload),
+      dataType: "json",
+      //global: false,
+      success: function (data) {
+        resolve(data);
+      },
+      error: function (xhr, status, e) {
+        reject(e);
+        if (tt == "theme1") {
+          showMessage(true, TECHNICAL_GLITCH);
+        } else {
+          showMessageTheme2(0, TECHNICAL_GLITCH, "", true);
+        }
+      },
+    });
+  });
 }
-async function getFreshValue(type, key){
-	const metaValue = await getSettingsByTypeAndKey(type,key);
-	const formData = {
-		"metaType": key,
-		"metaKey": metaValue
-	};
-	localStorage.setItem(key,JSON.stringify(formData));
+
+function getNeedToCall() {
+  const needToCall = {
+    ntc: true,
+  };
+  return needToCall;
+}
+async function getFreshValue(type, key) {
+  const metaValue = await getSettingsByTypeAndKey(type, key);
+  const formData = {
+    metaType: key,
+    metaKey: metaValue,
+  };
+  localStorage.setItem(key, JSON.stringify(formData));
 }
 
 function getDesiredObject(type) {
-    var scriptVersionType = 'SCRIPT_VERSION';
-    return new Promise((resolve, reject) => {
-        if (localStorage.getItem(scriptVersionType) == null) {
-            getFreshValue('CONFIGURATION', scriptVersionType)
-                .then(() => {
-                    checkAndReturn(type, resolve);
-                })
-                .catch(reject);
-        } else {
-            checkAndReturn(type, resolve);
-        }
-    });
+  var scriptVersionType = "SCRIPT_VERSION";
+  return new Promise((resolve, reject) => {
+    if (localStorage.getItem(scriptVersionType) == null) {
+      getFreshValue("CONFIGURATION", scriptVersionType)
+        .then(() => {
+          checkAndReturn(type, resolve);
+        })
+        .catch(reject);
+    } else {
+      checkAndReturn(type, resolve);
+    }
+  });
 }
 
 function checkAndReturn(type, resolve) {
-	var scriptVersionType = 'SCRIPT_VERSION';
-	var svObject = JSON.parse(localStorage.getItem(scriptVersionType));
-	var data=JSON.parse(svObject.metaKey);
-	if (data.data.metaValue != SCRIPT_VERSION) {
-		localStorage.clear();
-		resolve(getNeedToCall());
-	} else {
-		if (localStorage.getItem(type) == null) {
-			resolve(getNeedToCall());
-		} else {
-			resolve(JSON.parse(localStorage.getItem(type)));
-		}
-	}
+  var scriptVersionType = "SCRIPT_VERSION";
+  var svObject = JSON.parse(localStorage.getItem(scriptVersionType));
+  var data = JSON.parse(svObject.metaKey);
+  if (data.data.metaValue != SCRIPT_VERSION) {
+    localStorage.clear();
+    resolve(getNeedToCall());
+  } else {
+    if (localStorage.getItem(type) == null) {
+      resolve(getNeedToCall());
+    } else {
+      resolve(JSON.parse(localStorage.getItem(type)));
+    }
+  }
 }
-function getPrimaryColor(){
-	var primaryColor=ROOTCSS.split(':#')[1].split(';')[0];
-	return primaryColor;
+function getPrimaryColor() {
+  var primaryColor = ROOTCSS.split(":#")[1].split(";")[0];
+  return primaryColor;
 }
-function showMessageTheme2Content(){
-	var html =
-	`<div class="server-message">
+function showMessageTheme2Content() {
+  var html = `<div class="server-message">
 		<span class="msg" id="msgTheme2"></span>
-	</div>`
-	return html;
+	</div>`;
+  return html;
 }
 
-function getWelcomeMessage(){
+function getWelcomeMessage() {
   var timeOfDay = new Date().getHours();
   if (timeOfDay >= 0 && timeOfDay < 12) {
-      return "Good morning";
+    return "Good morning";
   } else if (timeOfDay >= 12 && timeOfDay < 16) {
-      return "Good afternoon";
+    return "Good afternoon";
   } else if (timeOfDay >= 16 && timeOfDay < 21) {
-      return "Good evening";
+    return "Good evening";
   } else if (timeOfDay >= 21 && timeOfDay < 24) {
-      return "Good evening";
+    return "Good evening";
   }
 }
 
-
 function generateTinyUrls() {
-  const $urlInputs = $('.tinyUrl');
+  const $urlInputs = $(".tinyUrl");
   const uniqueUrls = {};
-  $urlInputs.each(function() {
-      const url = $(this).val().trim();
-      if (url) {
-          uniqueUrls[url] = true;
-      }
+  $urlInputs.each(function () {
+    const url = $(this).val().trim();
+    if (url) {
+      uniqueUrls[url] = true;
+    }
   });
   const urls = Object.keys(uniqueUrls);
   if (!urls.length) {
-      console.log("No URLs found to shorten");
-      return;
+    console.log("No URLs found to shorten");
+    return;
   }
   fetch("https://www.issg.co/api/create-short-urls", {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ urls })
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ urls }),
   })
-  .then(response => {
+    .then((response) => {
       if (!response.ok) throw new Error("Network response was not ok");
       return response.json();
-  })
-  .then(data => {
+    })
+    .then((data) => {
       const urlMap = {};
-      data.urls.forEach(item => {
-          urlMap[item.original] = item.short;
+      data.urls.forEach((item) => {
+        urlMap[item.original] = item.short;
       });
-      $urlInputs.each(function() {
-          const originalUrl = $(this).val().trim();
-          if (originalUrl && urlMap[originalUrl]) {
-              $(this).val(urlMap[originalUrl]);
-          }
+      $urlInputs.each(function () {
+        const originalUrl = $(this).val().trim();
+        if (originalUrl && urlMap[originalUrl]) {
+          $(this).val(urlMap[originalUrl]);
+        }
       });
-  })
-  .catch(error => {
+    })
+    .catch((error) => {
       console.error("Fetch error:", error);
-  });
+    });
 }
 
-function checkValueValidation(value, defaultValue){
-	if(value == null || value == undefined || value == ""){
-		return defaultValue;
-	}else{
-		return value;
-	}
+function checkValueValidation(value, defaultValue) {
+  if (value == null || value == undefined || value == "") {
+    return defaultValue;
+  } else {
+    return value;
+  }
 }
 
 function getTimezoneIdByTimeName(timeZoneName) {
-  var responseData={};
+  var responseData = {};
   $.ajax({
     type: "POST",
     contentType: "application/json",
-    url: getURLForCommon('masters'),
-    data: JSON.stringify(getTimezoneIdByTimeNameRequest('GET_TIMEZONE_ID', timeZoneName)),
-    dataType: 'json',
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(
+      getTimezoneIdByTimeNameRequest("GET_TIMEZONE_ID", timeZoneName)
+    ),
+    dataType: "json",
     cache: false,
     timeout: 600000,
-    async : false,
-    success: function(response) {
-    responseData=response;
+    async: false,
+    success: function (response) {
+      responseData = response;
     },
-    error: function(e) {
+    error: function (e) {
       console.log(e);
-    }
+    },
   });
   return responseData;
 }
 
-function getTimezoneIdByTimeNameRequest(key, value){
-	var request = {};
-	var requestData = {};
-	var authentication = {};
-	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = 'COMMON';
-	requestData['requestKey'] = key;
-	requestData['requestValue'] = value;
-	request['requestData'] = requestData;
-	request['authentication'] = authentication;
-	return request;
+function getTimezoneIdByTimeNameRequest(key, value) {
+  var request = {};
+  var requestData = {};
+  var authentication = {};
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = "COMMON";
+  requestData["requestKey"] = key;
+  requestData["requestValue"] = value;
+  request["requestData"] = requestData;
+  request["authentication"] = authentication;
+  return request;
 }

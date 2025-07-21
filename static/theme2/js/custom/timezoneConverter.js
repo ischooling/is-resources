@@ -334,6 +334,7 @@ function convertTime(dateTime, datetimeFormat, fromTimezone, toTimezone, outputD
 	data['ampm']=m.format('a');
 	data['offset']=m.format('Z');
 	data['timezone']=m.tz();
+	return data;
 }
 
 function convertU2L(dateTime, toTimezone, outputDateFormat){

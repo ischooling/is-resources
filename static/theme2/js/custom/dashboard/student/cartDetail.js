@@ -12,14 +12,14 @@ async function getCartCount(userId) {
 	var payload = {};
 	payload['schoolId'] = SCHOOL_ID;
 	payload['userId'] = userId;
-	var data = await getDashboardDataBasedUrlAndPayload(false, false,'get-cart-count', payload);
+	var data = await getDashboardDataBasedUrlAndPayload(true, false,'get-cart-count', payload);
 	$("#cartCounts").html(cartCountContent(data, userId));
 }
 async function getCartDetails(userId) {
     var payload = {};
     payload['schoolId'] = SCHOOL_ID;
     payload['userId'] = userId;
-    var data = await getDashboardDataBasedUrlAndPayload(false, false,'get-cart-details', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, false,'get-cart-details', payload);
     $("#dashboardContentInHTML").html(cartHeaderContent(data.details)+cartDetailContent(data.details, userId));
 }
 
