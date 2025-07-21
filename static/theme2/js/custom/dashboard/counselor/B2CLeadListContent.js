@@ -1086,6 +1086,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	+'</div>';
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
+		var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, USER_TIMEZONE,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
+		var currentTimeStr=curentTime.date+' '+curentTime.time;
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
 		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1380px;width:100%" id="leadDataList">'
@@ -1355,6 +1357,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 												+'<tr>'
 													+'<th class="border-0 p-1" style="width:165px;background-color:'+(leads.leadStatus=='Converted'?'#baf3cd':'#f0ddc1')+';">Lead To Enrolled:</th>'
 													+'<td class="border-0 p-1">'+(leads.leadTotalDay!=''?leads.leadTotalDay:'0')+'</td>'
+												+'</tr>'
+												+'<tr>'
+													+'<th class="border-0 p-1">Current Time:</th>'
+													+'<td class="border-0 p-1 bold">'+(currentTimeStr)+'</td>'
 												+'</tr>';
 												if(objRights.discardPermission){
 													html+='<tr>'
