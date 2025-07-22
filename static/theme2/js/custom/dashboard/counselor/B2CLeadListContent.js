@@ -1364,7 +1364,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 													+'<td class="border-0 p-1">'+(leads.leadTotalDay!=''?leads.leadTotalDay:'0')+'</td>'
 												+'</tr>'
 												+'<tr>'
-													+'<th class="border-0 p-1">Current Time:</th>'
+													+'<th class="border-0 p-1">Lead’s Current Time:</th>'
 													+'<td class="border-0 p-1 bold">'+(currentTimeStr)+'</td>'
 												+'</tr>';
 												if(objRights.discardPermission){

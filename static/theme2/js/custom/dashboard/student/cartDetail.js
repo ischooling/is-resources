@@ -12,14 +12,14 @@ async function getCartCount(userId) {
 	var payload = {};
 	payload['schoolId'] = SCHOOL_ID;
 	payload['userId'] = userId;
-	var data = await getDashboardDataBasedUrlAndPayload(true, false,'get-cart-count', payload);
+	var data = await getDashboardDataBasedUrlAndPayload(true, true,'get-cart-count', payload);
 	$("#cartCounts").html(cartCountContent(data, userId));
 }
 async function getCartDetails(userId) {
     var payload = {};
     payload['schoolId'] = SCHOOL_ID;
     payload['userId'] = userId;
-    var data = await getDashboardDataBasedUrlAndPayload(true, false,'get-cart-details', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, true,'get-cart-details', payload);
     $("#dashboardContentInHTML").html(cartHeaderContent(data.details)+cartDetailContent(data.details, userId));
 }
 
@@ -29,7 +29,7 @@ async function updateCartDetails(userId, type, bookId){
     payload['userId'] = userId;
     payload['type'] = type;
     payload['bookId'] = bookId;
-    var data = await getDashboardDataBasedUrlAndPayload(false, false,'update-cart-details', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, true,'update-cart-details', payload);
     $("#dashboardContentInHTML").html(cartHeaderContent(data.details)+cartDetailContent(data.details, userId));
     $("#cartCounts").html(cartCountContent(data.details, userId));
 }
@@ -41,7 +41,7 @@ async function addToCartPayment(amount, bookingIds, subjectId){
     payload['amount'] = amount;
     payload['bookingIds'] = bookingIds;
     payload['subjectId'] = subjectId;
-    var data = await getDashboardDataBasedUrlAndPayload(false, false,'cart-payment', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, true,'cart-payment', payload);
     $("#payTabBookingSessionModal").remove();
     $("body").append(renderCartPaymentTerms(data.details));
     $("#payTabBookingSessionModal").modal('show');
@@ -67,7 +67,7 @@ async function addToCartOrBuyNow(type, planId, planName, singleClassFee, planAmo
     payload['sessionCount'] = planCount;
     payload['planStartDate'] = planStartDate;
     payload['planEndDate'] = planEndDate;
-    var data = await getDashboardDataBasedUrlAndPayload(false, false,'add-to-cart', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, true,'add-to-cart', payload);
     if(data.status != "1"){
         showMessageTheme2(0, data.message, '', false);
         return false;

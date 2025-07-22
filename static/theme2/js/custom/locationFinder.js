@@ -464,8 +464,36 @@ function callLocationForPayment(){
 		});
 	}
 }
-function callLocationForPaymentFill(data){
+async function callLocationForPaymentFill(data){
 	if(data!=undefined && data !=''){
 		$("#location").val(JSON.stringify(data));
 	}
+}
+
+async function callLocationForPaymentPromise() {
+    if (LOCATION_SERVICE_BYPASS == 'true') {
+        await callLocationForPaymentFill(JSON.parse(DEFAULT_LOCATION));
+    } else {
+        try {
+            const data = await new Promise((resolve, reject) => {
+                $.ajax({
+                    global: false,
+                    type: "GET",
+                    url: PRO_IP_API_URL,
+                    success: function (data) {
+                        resolve(data);
+                    },
+                    error: function (e) {
+                        if (checkonlineOfflineStatus()) {
+                            return reject('Offline');
+                        }
+                        reject(e);
+                    }
+                });
+            });
+            await callLocationForPaymentFill(data);
+        } catch (e) {
+            console.error(e);
+        }
+    }
 }

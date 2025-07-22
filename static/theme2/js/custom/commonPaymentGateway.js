@@ -477,8 +477,8 @@ function callClientCommonPaymentGatewayOffline(formId, moduleId,userId,userPayme
 	});
 }
 
-function callClientCommonPaymentGateway(formId, moduleId,userId,userPaymentDetailsId, termCondi, paymentByUserId){
-	callLocationForPayment();
+async function callClientCommonPaymentGateway(formId, moduleId,userId,userPaymentDetailsId, termCondi, paymentByUserId){
+	await callLocationForPaymentPromise();
 	customLoader(true);
 	$.ajax({
 		type : "POST",
@@ -487,7 +487,7 @@ function callClientCommonPaymentGateway(formId, moduleId,userId,userPaymentDetai
 		data : JSON.stringify(getRequestForClientPayment(formId, moduleId,userId,userPaymentDetailsId, termCondi,paymentByUserId)),
 		dataType : 'html',
 		global : false,
-		success : function(htmlContent) {
+		success : async function(htmlContent) {
 			//customLoader(false);
 			var stringMessage = [];
         		stringMessage = htmlContent.split("|");
@@ -509,6 +509,7 @@ function callClientCommonPaymentGateway(formId, moduleId,userId,userPaymentDetai
 				if(termCondi=='booksession' || termCondi=='extension' ){
 					$("#payTabBookingSessionModal").modal('hide');
 					$("#paymentBookSessionModel").html(htmlContent);
+					await getAirwallexMethods();
 					$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false})
 					$('#courseFeeModalTNC').modal('hide');
 				}else{
@@ -550,8 +551,9 @@ function continueWorking(){
 	},1000);
 }
 
-function callSigninStudentPay(formId, callingFrom){
+async function callSigninStudentPay(formId, callingFrom){
 	hideModalMessage(true);
+	await getAirwallexMethods();
 	$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false})
 	//setTimeout(function(){$('body').addClass('modal-open');},1000);
 	$('#courseFeeModalTNC').modal('hide');
@@ -610,4 +612,36 @@ function showAlternatePG(){
 function showPrimaryPG(){
 	$('#primary-pg').show(1000);
 	$('#alternate-pg').hide(1000)
+}
+
+async function getAirwallexMethods(){
+	var counrtyCode = JSON.parse($("#location").val()).countryCode;
+	$.ajax({
+        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-airwallex-payment-methods?schoolId=${btoa(SCHOOL_ID)}&countryCode=${btoa(counrtyCode)}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+			var onclickAttr = $("#alternatePayButton").attr("onclick");
+			var html = '';
+            if (response.methods && response.methods.length > 0) {
+                $.each(response.methods, function (index, method) {
+                    html+=
+					`<a href="javascript:void(0);" onclick="${onclickAttr}">
+						<div class="payment-method-icon">`;
+							if(method.image == ""){
+								html+=`<p style="font-size: 14px;">${method.labelName}</p>`
+							}else{
+								html+=
+								`<img src="${PATH_FOLDER_IMAGE2}payment-gateway/${method.image}">
+								<p>${method.labelName}</p>`
+							}
+						html+=`</div>
+					</a>`;
+                });
+            } else {
+                html+='<div>No Payment Methods Available</div>';
+            }
+            $("#paymentMethods").html(html);
+		}
+	})
 }

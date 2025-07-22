@@ -161,10 +161,10 @@ function removeAllCourse() {
 	apCourseSelectionFlag = false;
 }
 
-function showPaymentTermCondMode() {
+async function showPaymentTermCondMode() {
 	hideModalMessage('');
 	if(SHOW_PAYMENT_OPTION=='Y'){
-		callLocationForPayment();
+		await callLocationForPaymentPromise();
 		if ($("#payMode").val() == 'registration') {
 			if ($('#bookAnEnrollmentTNC').length > 0) {
 				$('#courseFeeModalTNC').modal('hide');
@@ -174,6 +174,7 @@ function showPaymentTermCondMode() {
 			}
 		} else {
 			if ($('#callPaymentStudentModal').length > 0) {
+				await getAirwallexMethods();
 				$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false })
 			} else {
 				showMessage(0, 'No payment gateway enabled, please contact administrator!');
@@ -184,6 +185,38 @@ function showPaymentTermCondMode() {
 		$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
 		$('#goToDashboardWarningMessage').hide();
 	}
+}
+
+async function getAirwallexMethods(){
+	var counrtyCode = JSON.parse($("#location").val()).countryCode;
+	$.ajax({
+        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-airwallex-payment-methods?schoolId=${btoa(SCHOOL_ID)}&countryCode=${btoa(counrtyCode)}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+			var onclickAttr = $("#airwallexPayButton").attr("onclick");
+			var html = '';
+            if (response.methods && response.methods.length > 0) {
+                $.each(response.methods, function (index, method) {
+                    html+=
+					`<a href="javascript:void(0);" onclick="${onclickAttr}">
+						<div class="payment-method-icon">`;
+							if(method.image == ""){
+								html+=`<p style="font-size: 14px;">${method.labelName}</p>`
+							}else{
+								html+=
+								`<img src="${PATH_FOLDER_IMAGE2}payment-gateway/${method.image}">
+								<p>${method.labelName}</p>`
+							}
+						html+=`</div>
+					</a>`;
+                });
+            } else {
+                html+='<div>No Payment Methods Available</div>';
+            }
+            $("#paymentMethods").html(html);
+		}
+	})
 }
 
 function getAllCourseDetails(isGradeChange, courseId) {

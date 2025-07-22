@@ -125,7 +125,7 @@ async function buyCustomClass(type, planId, planName, singleClassFee, userId) {
     payload['sessionCount'] = planCount;
     payload['planStartDate'] = planStartDate;
     payload['planEndDate'] = planEndDate;
-    var data = await getDashboardDataBasedUrlAndPayload(false, false,'add-to-cart', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, true,'add-to-cart', payload);
     if(data.status != "1"){
         showMessageTheme2(0, data.message, '', false);
         return false;

@@ -776,9 +776,10 @@ function validateElement(formId, fieldId, fielderrorId) {
   return flag;
 }
 
-function callEvaluatonPay(formId, callingFrom) {
+async function callEvaluatonPay(formId, callingFrom) {
   hideModalMessage(true);
   $("#evaluationDataSubmit").attr("disabled", false);
+  await getAirwallexMethods();
   $("#callPaymentStudentModal").modal({ backdrop: "static", keyboard: false });
   $("#evaluationRequestFormModal").modal("hide");
   setTimeout(function () {
