@@ -36,6 +36,7 @@ async function renderBookClassContent(
       );
     } else {
       $("#dashboardContentInHTML").html(
+        pageTitleContent(data, moduleId, false) +
           getBookClassContent(
             data,
             moduleId,
@@ -43,7 +44,6 @@ async function renderBookClassContent(
             responseData.details.classPlanCount
           )
       );
-      $("#pageTitle").html(pageTitleContent(data, moduleId, false));
     }
     if ($('[data-toggle="tooltip"]').length > 0) {
       $('[data-toggle="tooltip"]').tooltip();
@@ -116,24 +116,22 @@ function getBookClassContent(
   showAcademicYearValidation,
   classPlanCount
 ) {
-  var html=
-    `<div id="bookClassContent" data-moduleId="${moduleId}">
-      <div id="pageTitle"></div>
-      <div id="classPlanCount" data-classPlanCount="${classPlanCount}"></div>
-      <div class="main-card mb-3 card">
-        <div class="card-body">`;
-          if (showAcademicYearValidation == "Y") {
-            html += `<h4 class="my-3 font-weight-semi-bold text-center text-primary">Your academic year has not started yet. You will be able to book your classes once your academic year starts</h4>`;
-          } else {
-            html += `<div id="totalClassSectionWrapper">` + classesThumbsContent(data);
-            html +=
-              `</div>` +
-              classesThumbsButtletPointContent(classPlanCount, data.registerType) +
-              classThumbItemContent(data.subjectList, moduleId);
-          }
-        html+=`</div>
-      </div>
-    </div>`;
+  var html = `<div id="bookClassContent" data-moduleId="${moduleId}">
+            <div id="classPlanCount" data-classPlanCount="${classPlanCount}"></div>
+            <div class="main-card mb-3 card">
+                <div class="card-body">`;
+  if (showAcademicYearValidation == "Y") {
+    html += `<h4 class="my-3 font-weight-semi-bold text-center text-primary">Your academic year has not started yet. You will be able to book your classes once your academic year starts</h4>`;
+  } else {
+    html += `<div id="totalClassSectionWrapper">` + classesThumbsContent(data);
+    html +=
+      `</div>` +
+      classesThumbsButtletPointContent(classPlanCount, data.registerType) +
+      classThumbItemContent(data.subjectList, moduleId);
+  }
+  html += `</div>
+            </div>
+        </div>`;
   return html;
 }
 
@@ -881,24 +879,16 @@ function bookClassFilterFormContent(
                         </div> 
                         <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2 datepickerEndWrapper">
                             <input class="form-control datepicker" name="endDate" value="Mar 25, 2025" id="endDate" placeholder="End Date" disabled readonly/>    
-                        </div>
-                        <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2">
-                            <select class="form-control" name="classStatus" id="classStatus">
-                                <option value="">Select Status</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Reschedule Session">Reschedule Session</option>
-                                <option value="Missed by Student">Missed by Student</option>
-                            </select>
                         </div> 
-                        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 text-lg-left text-right">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 text-lg-left text-right">
                             <a href="javascript:void(0)" class="btn btn-danger btn-lg float-none float-lg-left mr-1 mb-1" onclick="bookedCalssCotentFormReset(\'bookClassOneToOne\')">Reset</a>    
                             <a href="javascript:void(0)" class="btn btn-success btn-lg float-none float-lg-left mb-1" onclick="bookedCalssCotentFun('${subjectID}','${moduleId}','${studentStandardId}','filter','','')">Search</a>`;
   if (subjectID != 0) {
-    html += `<a href="javascript:void(0)" class="btn btn-lg float-none float-lg-right mb-1 ml-1 filterBookAClassBtn ${
+    html += `<a href="javascript:void(0)" class="btn btn-lg float-none float-lg-right mb-1 filterBookAClassBtn ${
       weekLeftClassCount > 0 ? "btn-primary" : "btn-dark"
     }" onclick="bookingSlotModalNew('${subjectID}','${moduleId}','${studentStandardId}',${teacherAssignFlag},${weekLeftClassCount},${assignedTeacherCount});">Book a Class (${weekLeftClassCount})</a>`;
   } else {
-    html += `<a href="javascript:void(0)" class="btn btn-primary btn-lg float-none float-lg-right mb-1 ml-1 filterBookAClassBtn ${
+    html += `<a href="javascript:void(0)" class="btn btn-primary btn-lg float-none float-lg-right mb-1 filterBookAClassBtn ${
       weekLeftClassCount > 0 ? "btn-primary" : "btn-dark"
     }" onclick="bookingSlotModalForElementry('${subjectID}','${moduleId}','${studentStandardId}',${teacherAssignFlag},${weekLeftClassCount},${assignedTeacherCount});">Book a Class (${weekLeftClassCount})</a>`;
   }
