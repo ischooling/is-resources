@@ -1088,7 +1088,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 		var leads = data[i];
 		var currentTimeStr="";
 		if(leads.leadTimeZone!=''){
-			var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, USER_TIMEZONE,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
+			var timezoneG = getSystemTimezone();//Intl.DateTimeFormat().resolvedOptions().timeZone;
+			var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
 			currentTimeStr=curentTime.date+' '+curentTime.time;
 		}
 		
