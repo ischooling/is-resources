@@ -143,7 +143,7 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 		payload['activityId'] = activityId;
 		payload['meetingId'] = meetingId;
 		payload['userId'] = USER_ID;
-		responseData = await getDashboardDataBasedUrlAndPayload(true, false, 'view-extra-activity', payload);
+		responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'view-extra-activity', payload);
 		if (responseData.status == 1) {
 			$('#dashboardContentInHTML').html(viewActivityContent(responseData));
 			await studentExtraActivityOnLoadEvent(responseData);

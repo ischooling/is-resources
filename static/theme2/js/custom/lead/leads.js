@@ -1620,6 +1620,12 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  leadModifyDetailDTO['newTheme'] = typeTheme;
  leadModifyDetailDTO['moduleId'] = moduleId;
  leadModifyDetailDTO['schoolUUID'] = SCHOOL_UUID;
+ var zadarmaCallDone="";
+ var zselectedValue = $('input[name="checkLeadForZCall"]:checked').val();
+ if(zselectedValue!=undefined && zselectedValue!=""){
+	zadarmaCallDone=zselectedValue;
+ }
+ leadModifyDetailDTO['zadarmaCallDone'] = zadarmaCallDone;
  leadModifyDTO['leadFrom']=leadFrom;
  leadModifyDTO['clickFrom']=clickFrom;//$("#"+formId+" #clickFrom").val();
  leadModifyDTO['userId']=USER_ID;
@@ -1652,6 +1658,7 @@ function advanceLeadSearchStudentReset(formId, leadType){
  $("#"+formId+" #leadSourceSearch").val('').trigger('change');
  $("#"+formId+" #leadStatusSearch").val('').trigger('change');
  $("#"+formId+" #leadFullSearch").val('');
+ $('#'+formId+' input[name="checkLeadForZCall"]').prop('checked', false);
  
 if(leadType=='B2B'){}else{
 	$("#"+formId+" #leadAssignToSearch").val('').trigger('change');
