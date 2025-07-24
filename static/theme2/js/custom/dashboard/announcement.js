@@ -13,7 +13,7 @@ async function showAnnounceDataById(announceId, moduleId){
 		data['announceId'] = announceId;
 		data['moduleId'] = moduleId;
 		data['userId'] = USER_ID;
-		responseData = await getDashboardDataBasedUrlAndPayload(false,false, 'school-announce-data', data);
+		responseData = await getDashboardDataBasedUrlAndPayload(true,true, 'school-announce-data', data);
         if(responseData.status==1){
             if($("#announcementbyIdData").length>0){
                 $("#announcementbyIdData").remove();

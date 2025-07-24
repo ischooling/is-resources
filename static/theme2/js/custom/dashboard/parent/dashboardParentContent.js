@@ -5,7 +5,7 @@ async function newDashboardParentContent(){
     commonProfileDTO = await getUserShortProfile(USER_ID);
     var payload = {};
     payload['userId'] = USER_ID;
-    responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'get-students-by-parent', payload);
+    responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'get-students-by-parent', payload);
     var html=
         `<div class="app-container body-tabs-shadow fixed-header fixed-sidebar">`
             html+=await topHeaderContent(responseData);

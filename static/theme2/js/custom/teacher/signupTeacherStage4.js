@@ -51,7 +51,7 @@ async function getStage4Data(){
 	showSkeleton(true, 'step4');
 	var payload = {};
 	payload['userId'] = USER_ID;
-	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-verification-details', payload, '/teacher/signup');
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-verification-details', payload, '/teacher/signup');
 	$("#teacherSignupContentStage4").html(getTeacherVerificationDetailsContent(responseData.details));
 	signupTeacherStage4OnLoadEvent(responseData.details);
 	$(".prev-btn").hide();
@@ -178,7 +178,7 @@ function getRequestForVerification() {
 async function saveVerificationDetails(formId){
 	if(verificationValidationOnSave(formId)){
 		const requestBody = getRequestForVerification();
-		const saveResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl( true, false, 'save-teacher-verification', requestBody, 'teacher/signup');
+		const saveResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl( true, true, 'save-teacher-verification', requestBody, 'teacher/signup');
 		if (saveResponse.statusCode === "SUCCESS") {
             showMessageTheme2(1, 'Verification submitted successfully');
 			$("#submitVerificationModal").modal("hide");

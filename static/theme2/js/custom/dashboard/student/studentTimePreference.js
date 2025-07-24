@@ -86,7 +86,7 @@ async function getStudentTimePreference(studentId, standardId, providerId){
 	data['standardId']=standardId;
 	data['providerId']=providerId;
 	data['userId']=USER_ID;
-    var responseData = await getDashboardDataBasedUrlAndPayload(false, false,'student-course-selection-content-theme2', data);
+    var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'student-course-selection-content-theme2', data);
     if(responseData.status == '1'){
         if($("#timePreferencePopup").length>0){
             $("#timePreferencePopup").remove();

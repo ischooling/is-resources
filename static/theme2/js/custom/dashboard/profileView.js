@@ -1386,7 +1386,7 @@ async function showSelectedCourseList(){
 	if(!applySubejctflag){
 		var payload = {};
 		payload['userId'] = USER_ID;
-		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-signup-subject-details', payload, '/teacher/signup');
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-subject-details', payload, '/teacher/signup');
 		if(responseData.statusCode == "SUCCESS"){
 			$("#select_course").remove();
 			$("body").append(courseSelectionModal(responseData.details));
@@ -1570,7 +1570,7 @@ async function getSelectedSubjectes(){
 		var payload = {};
 		payload['userId'] = USER_ID;
 		payload['subjectList'] = subjectList;
-		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'save-subject-from-teacher-profile', payload, '/teacher/signup');
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'save-subject-from-teacher-profile', payload, '/teacher/signup');
 		if(responseData.statusCode == "SUCCESS"){
 			showMessageTheme2(1, responseData.message);
 			$(".lastsubTaughtView").text(elementary_subjects.concat(middleSchool_subjects, highSchool_subjects).join(", ").replace("All Courses - Language Arts, Mathematics, Science, Technology, Art", 'Language Arts, Mathematics, Science, Technology, Art'));

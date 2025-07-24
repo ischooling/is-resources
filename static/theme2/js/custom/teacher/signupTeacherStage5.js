@@ -19,7 +19,7 @@ async function getStage5Data(){
 	reviewDone = true;
 	var payload = {};
 	payload['userId'] = USER_ID;
-	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-signup-agreement-details', payload, '/teacher/signup');
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-agreement-details', payload, '/teacher/signup');
 	$("#teacherSignupContentStage5").html(getContractDetailsContent(responseData));
 	signupTeacherStage5OnLoadEvent();
 	$(".prev-btn").hide();

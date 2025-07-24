@@ -1,7 +1,7 @@
 async function callTeacherLastAttendance(formId, userId, startdate, enddate){ 
 	try{
 		var data = getRequestForTeacherLastclass(formId, userId, startdate, enddate)
-		var responseData = await getDashboardDataBasedUrlAndPayload(false, false,'teacher-last-class', data);
+		var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'teacher-last-class', data);
 		var classlist = data['teacherClass']['teacheClassList'];
 		if(classlist!=null){
 			var tblHtml='';

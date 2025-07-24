@@ -9,7 +9,7 @@ async function rendereTeacherHomeContent(){
     }
     var payload = {};
     payload['userId'] = USER_ID;
-    var responseData = await getDashboardDataBasedUrlAndPayload(false, false,'get-teacher-dashboard', payload);
+    var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'get-teacher-dashboard', payload);
     renderTeacherDashboard(responseData);
     getTeacherTimePreference();
 	renderAnnouncement(responseData.userId)

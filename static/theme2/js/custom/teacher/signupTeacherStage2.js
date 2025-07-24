@@ -602,7 +602,7 @@ async function showSelectedCourseList(){
 	if(!applySubejctflag){
 		var payload = {};
 		payload['userId'] = USER_ID;
-		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-signup-subject-details', payload, '/teacher/signup');
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-subject-details', payload, '/teacher/signup');
 		if(responseData.statusCode == "SUCCESS"){
 			$("#select_course").remove();
 			$("body").append(courseSelectionModal(responseData.details));
@@ -663,13 +663,13 @@ async function getStage2Data(){
 	showSkeleton(true, "step2");
 	var payload = {};
 	payload['userId'] = USER_ID;
-	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-academic-professional-details', payload, 'teacher/signup');
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-academic-professional-details', payload, 'teacher/signup');
 	$("#teacherSignupContentStage2").html(getTeacherProfessionalDetailsContent(responseData));	
 	signupTeacherStage2OnLoadEvent(responseData);
 	loadApprovedDemoIfExists(responseData.recordingUrls);
 	$("#totalExperianceFromYYYY").val(responseData.details.teacherDetails.totalExpYear).trigger("change");
 	GRADES_TAUGHT = responseData.details.teacherDetails.selectedGrades != ""? responseData.details.teacherDetails.selectedGrades.replaceAll(" ", "").split(',') : [];
-	responseDataSubjects = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-signup-subject-details', {userId: USER_ID}, '/teacher/signup');
+	responseDataSubjects = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-subject-details', {userId: USER_ID}, '/teacher/signup');
 	SUBJECTS_TAUGHT_BACKUP=responseDataSubjects.details.subjectDetails.elementrySelectedSubject.concat(responseDataSubjects.details.subjectDetails.middleSelectedSubject, responseDataSubjects.details.subjectDetails.highSelectedSubject);
 	SUBJECTS_TAUGHT=responseDataSubjects.details.subjectDetails.elementrySelectedSubject.concat(responseDataSubjects.details.subjectDetails.middleSelectedSubject, responseDataSubjects.details.subjectDetails.highSelectedSubject);
 	elementary_subjects= responseDataSubjects.details.subjectDetails.elementrySelectedSubject;
@@ -737,7 +737,7 @@ async function startDemoRecordingFun(attempt){
 	payload['timezone'] = timezoneData.mastersData.masterDTO.value;
 	payload['meetingType'] = "1";
 	payload['gmType'] = "16";
-	responseDataDemoRecording = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'create-teacher-registration-demo-meeting', payload, '/teacher/signup');
+	responseDataDemoRecording = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'create-teacher-registration-demo-meeting', payload, '/teacher/signup');
 	if(responseDataDemoRecording.status == "success"){
 		const payloadToStartMeeting = {
 			entityId: responseDataDemoRecording.data.meetingId,
@@ -799,13 +799,7 @@ async function getDemoRecordings(meetingId) {
         entityName: "GENERAL_MEETINGS"
     };
 
-    const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(
-        false,
-        false,
-        'get-teacher-demo-recordings',
-        payload,
-        '/teacher/signup'
-    );
+    const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-demo-recordings', payload, '/teacher/signup');
 	recordingIntervalCount++;
 	if (recordingIntervalCount >= 240) {
 		clearInterval(recordingPollingInterval);

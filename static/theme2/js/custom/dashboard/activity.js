@@ -6,7 +6,7 @@ async function renderActitify(userId) {
 		var localDatetime = changeDateFormat(new Date(), 'yyyy-mm-dd') + ' ' + getCurrentTimeOnly()
 		payload['startDatetime'] = convertLocalToUTCWithFormat(getBeforeAndAfterDate(localDatetime, -24), USER_TIMEZONE, DATETIME_UTC_FORMATTER);
 		payload['endDatetime'] = convertLocalToUTCWithFormat(getBeforeAndAfterDate(localDatetime, 24), USER_TIMEZONE, DATETIME_UTC_FORMATTER);
-		responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'get-acivity-details', payload);
+		responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'get-acivity-details', payload);
 		if (responseData.status == 1) { //console.log("ACT DATA :: " + JSON.stringify(responseData));
 			$('#activityDiv').html(await getActivityContent(responseData));
 			$("#main-nav1").metisMenu({
@@ -143,7 +143,7 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 		payload['activityId'] = activityId;
 		payload['meetingId'] = meetingId;
 		payload['userId'] = USER_ID;
-		responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'view-extra-activity', payload);
+		responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'view-extra-activity', payload);
 		if (responseData.status == 1) {
 			$('#dashboardContentInHTML').html(viewActivityContent(responseData));
 			await studentExtraActivityOnLoadEvent(responseData);

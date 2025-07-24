@@ -434,7 +434,7 @@ async function syncLMS(token){
 	var payload = {};
 	payload['schoolId'] = SCHOOL_ID;
 	payload['accessToken'] = token;
-    var data = await getDashboardDataBasedUrlAndPayload(false, false,'sis-sync', payload);
+    var data = await getDashboardDataBasedUrlAndPayload(true, true,'sis-sync', payload);
 	if (data.status == "1") {
 		$("#syncLMSWrapper").removeClass("d-none");
 		lmsSyncInterval = setInterval(syncLMSProcess, 30000);
@@ -447,7 +447,7 @@ async function syncLMSProcess() {
 	countCheck++;
 	var payload = {};
 	payload['schoolId'] = SCHOOL_ID;
-	var data = await getDashboardDataBasedUrlAndPayload(false, false,'sis-sync-status', payload);
+	var data = await getDashboardDataBasedUrlAndPayload(true, true,'sis-sync-status', payload);
 	if (data.status == "1") {
 		$(".lms-sync-process-1 #process-status-1").html(getSyncLMSProcessStatusContent(data.details.CSV_DOWNLOAD ));
 		$(".lms-sync-process-2 #process-status-2").html(getSyncLMSProcessStatusContent(data.details.CSV_UPLOAD));

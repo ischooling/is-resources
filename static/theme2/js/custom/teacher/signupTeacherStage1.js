@@ -150,7 +150,7 @@ async function callForSignupTeacherBasicDetailsForm(formId) {
 	hideMessage('');
 	$("#nextStep").prop("disabled", true);
 	const requestData = getRequestForTeacherBasicDetails(formId);
-	const saveResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, false, 'save-basic-details', requestData, 'teacher/signup');
+	const saveResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'save-basic-details', requestData, 'teacher/signup');
 	if(saveResponse.statusCode == "SUCCESS"){
 		showMessageTheme2(1, 'Personal details updated successfully.');
 		getStage2Data();
@@ -309,7 +309,7 @@ async function getStage1Data(step){
 	}
 	var payload = {};
 	payload['userId'] = USER_ID;
-	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-basic-details', payload, '/teacher/signup');
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-basic-details', payload, '/teacher/signup');
 	$("#teacherSignupContentStage1").html(getTeacherBasicInfoContent(responseData));
 	$(".step-1-skeleton").hide();
 	$("#teacherSignupStage1").show();

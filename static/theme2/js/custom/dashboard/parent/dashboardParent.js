@@ -1,7 +1,7 @@
 async function changeStudentByParent(studentId, studentDashboardRedirectUrl) {
 	var payload = {};
 	payload['studentId'] = studentId;
-	responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'select-student-by-parent', payload);
+	responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'select-student-by-parent', payload);
 	if (responseData.status == 1) {
 		location.replace(studentDashboardRedirectUrl);
 	}

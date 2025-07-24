@@ -695,7 +695,7 @@ function getLeadAdvanceSearchPopup(objRights){
 	+'		<option value="UNSUBSCRIBED" >UNSUBSCRIBED</option>'
 	+'	</select>'
 	+'</div>';
-	if(objRights.discardPermission){
+	if(objRights.discardPermission && USER_ROLE=='DIRECTOR'){
 		html+='<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 ">'
 			+'<input type="radio"  name="checkLeadForZCall" value="Y" /> Zadarma Call Done'
 			+'<input type="radio" name="checkLeadForZCall" value="N" /> Zadarma Call Not Done'
@@ -1374,11 +1374,14 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 													+'<th class="border-0 p-1">Lead’s Current Time:</th>'
 													+'<td class="border-0 p-1 bold">'+(currentTimeStr)+'</td>'
 												+'</tr>';
-												if(objRights.discardPermission){
-													html+='<tr>'
-													+'<th class="border-0 p-1">Call status:</th>'
-													+'<td class="border-0 p-1">'+(leads.zadarmaCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCount+')</td>'
-													+'</tr>';
+												if(objRights.discardPermission ){
+													if(USER_ROLE=='DIRECTOR'){
+														html+='<tr>'
+														+'<th class="border-0 p-1">Call status:</th>'
+														+'<td class="border-0 p-1">'+(leads.zadarmaCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCount+')</td>'
+														+'</tr>';
+													}
+
 													html+='<tr>'
 													+'<th class="border-0 p-1">Step:</th>'
 													+'<td class="border-0 p-1">'+(leads.curentStage!=''?leads.curentStage:'N/A')+'</td>'

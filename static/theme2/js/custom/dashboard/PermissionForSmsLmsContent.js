@@ -6,7 +6,7 @@ async function permissionForLmsSmsContent(){
     commonProfileDTO = await getUserShortProfile(USER_ID);
     var payload = {};
     payload['userId'] = USER_ID;
-    responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'get-lms-details', payload);
+    responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'get-lms-details', payload);
     var html=
         `<div class="app-container body-tabs-shadow fixed-header fixed-sidebar">`
             html+=await topHeaderContent();

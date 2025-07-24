@@ -177,7 +177,7 @@ function callTeacherAvailabilityMenu(modalID){
 
 async function getTeacherTimePreference(){
     var data={}; data['userId']=USER_ID;
-    var responseData = await getDashboardDataBasedUrlAndPayload(false, false,'get-teacher-time-preference', data);
+    var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'get-teacher-time-preference', data);
     if(responseData.status == '1'){
         if($("#timePreferencePopup").length>0){
             $("#timePreferencePopup").remove();
