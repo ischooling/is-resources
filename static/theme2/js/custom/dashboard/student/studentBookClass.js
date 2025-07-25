@@ -363,6 +363,10 @@ function bookedCalssCotentFun(
     $("#bookClassOneToOne #endDate").val() != undefined
       ? $("#bookClassOneToOne #endDate").val()
       : "";
+  data["classStatus"] =
+    $("#bookClassOneToOne #classStatus").val() != undefined
+      ? $("#bookClassOneToOne #classStatus").val()
+      : "";
   data["dateType"] = $("#bookClassOneToOne #selectedType").val();
   // data['roleModuleId'] = roleModuleId;
   $.ajax({

@@ -885,9 +885,10 @@ function bookClassFilterFormContent(
                         <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2">
                             <select class="form-control" name="classStatus" id="classStatus">
                                 <option value="">Select Status</option>
+                                 <option value="Booked">Booked</option>
                                 <option value="Completed">Completed</option>
                                 <option value="Reschedule Session">Reschedule Session</option>
-                                <option value="Missed by Student">Missed by Student</option>
+                                <option value="Missed by Student">Missed by you</option>
                             </select>
                         </div> 
                         <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 text-lg-left text-right">
