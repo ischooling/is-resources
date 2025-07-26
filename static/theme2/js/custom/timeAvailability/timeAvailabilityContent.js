@@ -78,39 +78,39 @@ function renderCounselorCotent(data){
 	
 
 }
-function getLocationAndSelectCountry(formId, uiData) {
-	console.log(formId);
-	$.ajax({
-		global: false,
-		type: "GET",
-		url: PRO_IP_API_URL,
-		success: function (data) {
-			renderCounselorCotent(uiData);
-			getLocationAndSelectCountryFill(formId, data, uiData)
-		},
-		error: function(e){
-			if (checkonlineOfflineStatus()) {
-				return;
-			}
-		}
+function getLocationAndSelectCountry() {
+	return new Promise(function (resolve, reject) {
+		hideMessageTheme2("");
+		$.ajax({
+			type: "GET",
+			contentType: "application/json",
+			url: PRO_IP_API_URL,
+			success: function (data) {
+				resolve(JSON.stringify(data));
+			},
+			error: function (e) {
+				resolve(DEFAULT_LOCATION);
+			},
+		});
 	});
 }
 
-function getLocationAndSelectCountryFill(formId, data, uiData) {
-	if (data != undefined && data != '') {
+function getLocationAndSelectCountryFill(formId, locationData, uiData) {
+	console.log('locationData '+locationData)
+	if (locationData != undefined && locationData != '') {
 		if ($("#" + formId + " #countryTimezoneId").length) {
 			if(uiData.sendUserEmail){
-				if(uiData.newFormateTimeZone!=""){
+				if(uiData.newFormateTimeZone!=undefined && uiData.newFormateTimeZone!=""){
 					$('#countryTimezoneId').val(uiData.newFormateTimeZone).trigger('change')	
 				}else{
-					$('#countryTimezoneId').val(data.timezone).trigger('change')
+					$('#countryTimezoneId').val(locationData.timezone).trigger('change')
 				}
 			}else{
-				$('#countryTimezoneId').val(data.timezone).trigger('change')
+				$('#countryTimezoneId').val(locationData.timezone).trigger('change')
 			}
 		}
-		$('#countryId').val(data.country);//.trigger('change')
-		$("#location").val(JSON.stringify(data));
+		$('#countryId').val(locationData.country);//.trigger('change')
+		$("#location").val(JSON.stringify(locationData));
 		//getCalendarForMeeting("bookMeetingCalendar","","Month", ""+data.timezone+"");
 	}
 }

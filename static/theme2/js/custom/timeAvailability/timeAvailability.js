@@ -3414,7 +3414,7 @@ function dataForBookAnEventSlot() {
 		 data : JSON.stringify(data),
 		 dataType : 'json',
 		 async:true,
-		 success : function(data) {
+		 success : async function(data) {
 			customLoader(false);
 			if (data['status'] == '0' || data['status'] == '2') {
 				
@@ -3422,7 +3422,12 @@ function dataForBookAnEventSlot() {
 				data["forAllCounselor"] = $("#forAllCounselor").val();
 				data["counselorAutoSelect"] = $("#counselorAutoSelect").val();
 				data["demoRoleId"] = $("#demoRoleId").val();
-				getLocationAndSelectCountry('bookSlotForEventForm', data);
+				var locationData = await getLocationAndSelectCountry();
+				locationData = JSON.parse(locationData);
+				renderCounselorCotent(data);
+				setTimeout( function() {
+				}, 1000);
+				getLocationAndSelectCountryFill('bookSlotForEventForm', locationData, data);
 				customLoader(false);
 				// renderStudentEnrollmentRecord(data, moduleId, clickFrom, currentPage);
 				
