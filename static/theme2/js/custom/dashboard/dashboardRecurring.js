@@ -875,7 +875,6 @@ function callRecurringShow(formId) {
 					$(".proceedRecurringClassbtn").show();
 					$("#saveForcefully").val(saveForcefully);
 				}
-				debugger;
 				var recurringclass = data['recurringClassList'];
 				var htmlRecu = "";
 				var inc=1;

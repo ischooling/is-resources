@@ -90,6 +90,9 @@ function getLocationAndSelectCountry() {
 			},
 			error: function (e) {
 				resolve(DEFAULT_LOCATION);
+				if (checkonlineOfflineStatus()) {
+					return;
+				}
 			},
 		});
 	});

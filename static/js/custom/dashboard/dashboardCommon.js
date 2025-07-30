@@ -1902,12 +1902,10 @@ function getTeacherSearchSubject(userId) {
 
 }
 function showOtherReason(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType) {
-	debugger;
 	$("#assigTeacherLinkList" + subjectId).show();
 	if ($("#reasonEnrollEnd" + subjectId).val() == 'Other') {
 		$("#otherReason" + subjectId).show();
 	} else {
-		debugger;
 		$("#otherReason" + subjectId).val('');
 		$("#otherReason" + subjectId).hide();
 		var endDate = new Date($("#steachEnrollEndDate" + subjectId).val());

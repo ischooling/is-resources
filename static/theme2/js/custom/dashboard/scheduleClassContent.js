@@ -311,7 +311,6 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 						$(".meetingSlotAdd > span").text("Save");
 					}
 				}
-				debugger;
 				var recurringclass = data['recurringClassList'];
 				var htmlRecu = "";
 				var inc=1;
