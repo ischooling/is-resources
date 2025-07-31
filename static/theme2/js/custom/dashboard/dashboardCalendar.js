@@ -1,7 +1,7 @@
 
 function validateRequestForSchoolHoliday(formId){
 	if($("#"+formId+" #holidayFor").val()==''){
-		showMessage(1, "Please select holiday for");
+		showMessageTheme2(0, "Please select holiday for");
 		return false;
 	}
 
@@ -11,87 +11,36 @@ function validateRequestForSchoolHoliday(formId){
 	//if(selectRole.indexOf(str2) != -1){
 	if(selectRole=="STUDENT"){
 		if($("#"+formId+" #enrollType").val()==''){
-			showMessage(1, "Please select Enrollment type for");
+			showMessageTheme2(0, "Please select Enrollment type for");
 			return false;
 		}
 	}
 	
 	if($("#"+formId+" #holidayHome").val()==''){
-		showMessage(1, "Please enter holiday Subject");
+		showMessageTheme2(0, "Please enter holiday Subject");
 		return false;
 	}
 	var str = $("#"+formId+" #holidayHome").val();
 	if(str.length>100){
-		showMessage(1, "You cannot have more than 100 characters in Subject");
+		showMessageTheme2(0, "You cannot have more than 100 characters in Subject");
 		return false;
 	}
 	if($("#"+formId+" #holidayStartDate").val()==''){
-		showMessage(1, "Please select start date");
+		showMessageTheme2(0, "Please select start date");
 		return false;
 	}
 	// if($("#"+formId+" #holidayType").val()==''){
-	// 	showMessage(1, "Please select holiday type");
+	// 	showMessageTheme2(0, "Please select holiday type");
 	// 	return false;
 	// }
 	if($("#"+formId+" #lmsPlatform").val()==''){
-		showMessage(1, "Please select LMS Platform");
+		showMessageTheme2(0, "Please select LMS Platform");
 		return false;
 	}
-	// if($("#"+formId+" #startTimeInHrs").val()==''){
-	// 	showMessage(1, "Please select Start time(hrs)");
-	// 	return false;
-	// }
-	// if($("#"+formId+" #startTimeInMin").val()==''){
-	// 	showMessage(1, "Please select Start time(Min)");
-	// 	return false;
-	// }
-
-	// if($("#"+formId+" #holidayEndDate").val()==''){
-	// 	showMessage(1, "Please select end date");
-	// 	return false;
-	// }
-	// if($("#"+formId+" #endTimeInHrs").val()==''){
-	// 	showMessage(1, "Please select End time(hrs)");
-	// 	return false;
-	// }
-	// if($("#"+formId+" #endTimeInMin").val()==''){
-	// 	showMessage(1, "Please select End time(Min)");
-	// 	return false;
-	// }
-	
-	// if(editor1!=undefined){
-	// 	var str = escapeCharacters(editor1.getData());
-	// 	if(str==''){
-	// 		showMessage(1, "Please add description ");
-	// 		return false;
-	// 	}
-	// 	if(str.length>250){
-	// 		showMessage(1, "You cannot have more than 250 characters in description !");
-	// 		return false;
-	// 	}
-	// }
-	// if($("#"+formId+" #holidayStartDate").val()!='' && $("#"+formId+" #startTimeInHrs").val()!='' && $("#"+formId+" #startTimeInMin").val()!=''){
-	// 	var holidayStartDate=$("#"+formId+" #holidayStartDate").val();
-	// 	holidayStartDate=holidayStartDate.split("-");
-	// 	var holidayDateTime=new Date(holidayStartDate[2]+'/'+holidayStartDate[0]+'/'+holidayStartDate[1]+' '+$("#"+formId+" #startTimeInHrs").val().trim()+':'+$("#"+formId+" #startTimeInMin").val().trim()+':00');
-	// 	var currentDate= new Date();
-	// 	if(currentDate>holidayDateTime){
-	// 		showMessage(1, "Please select future time duration");
-	// 		return false;
-	// 	}
-	// 	var holidayendDate=$("#"+formId+" #holidayEndDate").val();
-	// 	holidayendDate=holidayendDate.split("-");
-	// 		var holidayendDateTime=new Date(holidayendDate[2]+'/'+holidayendDate[0]+'/'+holidayendDate[1]+' '+$("#"+formId+" #endTimeInHrs").val().trim()+':'+$("#"+formId+" #endTimeInMin").val().trim()+':00');
-	// 		if(holidayDateTime>holidayendDateTime){
-	// 			showMessage(1, 'Please select start date must be less then end date');
-	// 			return false;
-	// 		}
-	// }
-	
 	return true;
 }
 function submitSchoolHoliday(formId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if(!validateRequestForSchoolHoliday(formId)){
 		return false;
 	}
@@ -131,7 +80,7 @@ function submitSchoolHoliday(formId) {
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','school-holiday-submit'),
 		data : JSON.stringify(fdata),
 		dataType : 'json',
@@ -140,7 +89,7 @@ function submitSchoolHoliday(formId) {
 		//enctype: 'multipart/form-data',
 		success : function(data) {
 			if (data.status == '0' || data.status == '2') {
-				showMessage(true, data.message);
+				showMessageTheme2(0, data.message);
 			} else {
 				$('#'+formId+ ' #enrollType').val('').trigger("change");
 				$('#'+formId+ ' #holidayFor').val('').trigger("change");
@@ -152,19 +101,15 @@ function submitSchoolHoliday(formId) {
 				initEditor(1, 'mymceHoliday','Please start here', true);
 				$("#"+formId+" #fileupload1Span").text('No file chosen...');
 				$('#'+formId)[0].reset();
-				showMessage(false, data.message);
+				showMessageTheme2(1, data.message);
 				
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
 }
 function updateSchoolHolidays(userId,holidayid,controllType,moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	// var fdata = new FormData();
 	// fdata.append('userId',userId);
 	// fdata.append('holidayId',holidayid);
@@ -176,7 +121,7 @@ function updateSchoolHolidays(userId,holidayid,controllType,moduleId) {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','holidays-update'),
 		data : JSON.stringify(fdata),
 		dataType : 'json',
@@ -185,14 +130,11 @@ function updateSchoolHolidays(userId,holidayid,controllType,moduleId) {
 		//enctype: 'multipart/form-data',
 		success : function(data) {
 			if (data.status == '0' || data.status == '2') {
-				showMessage(true, data.message);
+				showMessageTheme2(0, data.message);
 			} else {
-				showMessage(false, data.message);
+				showMessageTheme2(1, data.message);
 				setTimeout(function (){callDashboardPageSchool(moduleId,'holiday-list');},1000);
 			}
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});
@@ -204,7 +146,7 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
     return new Promise((resolve, reject) => {
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-calendar'),
             data: JSON.stringify(getRequestForSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate)),
             dataType: 'json',
@@ -251,10 +193,6 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 						$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
 					}
                 }
-            },
-            error: function (e) {
-                console.error(e);
-                reject(e);
             }
         });
     });
@@ -312,29 +250,64 @@ function getHash() {
 }
 var todayClassArray = [];
 $(document).ready(function() {
-    setInterval(function(){
-		var userTime = new Date($("#currentTimeForUser").text());
-		var year = userTime.getFullYear();
-		var month = userTime.toLocaleString('en-US', {month: 'short'});
-		var day = userTime.getDate();
-		var hours = userTime.getHours();
-		var minutes = userTime.getMinutes();
-		var seconds = userTime.getSeconds();
-		var ampm = hours >= 12 ? 'PM' : 'AM';
-		minutes = minutes<=9 ? '0'+minutes:minutes;
-		seconds = seconds<=9 ? '0'+seconds:seconds;
-		// Convert hours from 24-hour to 12-hour format
-		hours = hours % 12;
-		hours = hours ? hours : 12; // The hour '0' should be '12'
-		hours = hours<=9 ? '0'+hours:hours;
-		$(".user_current_day").text(month+" "+day+","+" "+year);
-		// $(".user_current_hour").text(hours);
-		// $(".user_current_mins").text(minutes);
-		// $(".user_current_second").text(seconds);
-		// $(".user_current_am_pm").text(ampm);
-		$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
-	},1000);
+	// setInterval(function(){
+	// 	if($("#currentTimeForUser").length>0){
+	// 		var userTime = new Date($("#currentTimeForUser").text());
+	// 		var year = userTime.getFullYear();
+	// 		var month = userTime.toLocaleString('en-US', {month: 'short'});
+	// 		var day = userTime.getDate();
+	// 		var hours = userTime.getHours();
+	// 		var minutes = userTime.getMinutes();
+	// 		var seconds = userTime.getSeconds();
+	// 		var ampm = hours >= 12 ? 'PM' : 'AM';
+	// 		minutes = minutes<=9 ? '0'+minutes:minutes;
+	// 		seconds = seconds<=9 ? '0'+seconds:seconds;
+	// 		// Convert hours from 24-hour to 12-hour format
+	// 		hours = hours % 12;
+	// 		hours = hours ? hours : 12; // The hour '0' should be '12'
+	// 		hours = hours<=9 ? '0'+hours:hours;
+	// 		$(".user_current_day").text(month+" "+day+","+" "+year);
+	// 		// $(".user_current_hour").text(hours);
+	// 		// $(".user_current_mins").text(minutes);
+	// 		// $(".user_current_second").text(seconds);
+	// 		// $(".user_current_am_pm").text(ampm);
+	// 		$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
+	// 	}
+	// },1000);
+	calendarTimeInterval()
 });
+
+
+function calendarTimeInterval() {
+	var userTimeInterval = setInterval(function () {
+        if($("#currentTimeForUser").length>0){
+			var userTime = new Date($("#currentTimeForUser").text());
+			var year = userTime.getFullYear();
+			var month = userTime.toLocaleString('en-US', {month: 'short'});
+			var day = userTime.getDate();
+			var hours = userTime.getHours();
+			var minutes = userTime.getMinutes();
+			var seconds = userTime.getSeconds();
+			var ampm = hours >= 12 ? 'PM' : 'AM';
+			minutes = minutes<=9 ? '0'+minutes:minutes;
+			seconds = seconds<=9 ? '0'+seconds:seconds;
+			// Convert hours from 24-hour to 12-hour format
+			hours = hours % 12;
+			hours = hours ? hours : 12; // The hour '0' should be '12'
+			hours = hours<=9 ? '0'+hours:hours;
+			$(".user_current_day").text(month+" "+day+","+" "+year);
+			// $(".user_current_hour").text(hours);
+			// $(".user_current_mins").text(minutes);
+			// $(".user_current_second").text(seconds);
+			// $(".user_current_am_pm").text(ampm);
+			$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
+		} else {
+			clearInterval(userTimeInterval);
+        }
+    }, 1000);
+}
+
+
 // var data1=getStudentDashboardDetails();
 function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
 	todayClassArray = [];
@@ -420,7 +393,9 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
 }
 
 $(window).off('resize').on('resize', function() {
-	updateCalendarView();
+	if($('#schoolcalendar').length>0){
+		updateCalendarView();
+	}
 });
 function updateCalendarView() {
 	if(window.innerWidth < 768) {
@@ -565,16 +540,17 @@ function startAndEndOfMonth(date) {
 
 
 function callTeacherLastAttendance(formId, userId, startdate, enddate) {
+	//console.log('callTeacherLastAttendance');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'teacher-last-class'),
 		data : JSON.stringify(getRequestForTeacherLastclass(formId, userId,startdate, enddate)),
 		dataType : 'json',
 		async : true,
 		success : function(data) {
 		if (data['status'] == '0' || data['status'] == '2') {
-			showMessage(true, data['message']);
+			//showMessageTheme2(0, data['message']);
 			} else {
 			// console.log(data['teacherClass']['teacheClassList']);
 			var classlist = data['teacherClass']['teacheClassList'];
@@ -600,9 +576,6 @@ function callTeacherLastAttendance(formId, userId, startdate, enddate) {
 				window.setTimeout(function(){$('#modalTeacherClass').modal('hide');;},8000);
 			}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -629,7 +602,7 @@ function getNeedAnyHelpForTeacher(userId){
 	postData['userId'] = userId;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'need-any-help-teacher'),
 		data: JSON.stringify(postData),
 		dataType: 'json',

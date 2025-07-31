@@ -1,11 +1,12 @@
-function showPaymentRemarksModal(formId, moduleId, userId, userPaymentDetailsId, studentName, paymentTitle){
+function showPaymentRemarksModal(formId, moduleId, userId, userPaymentDetailsId, studentName, paymentTitle, serialNumber){
 	$('#'+formId+' #userPaymentDetailsId').val(userPaymentDetailsId);
 	$('#'+formId+' #userId').val(userId);
 	$('#'+formId+' #moduleId').val(moduleId);
+	$('#'+formId+' #serialNumber').val(serialNumber);
 	$('#paymentRemarksTitle').html(studentName+' - '+paymentTitle);
-	
+	$('#'+formId+' #remarksStatus').val('');
+	$('#paymentRemarksForm #remarks').val('');
 	$('#paymentRemarks').modal('show');
-	
 }
 function validateRequestForPaymentRemarks(formId){
 	
@@ -28,21 +29,28 @@ function updatePaymentRemarks(formId, moduleId){
 	$("#"+formId+" #addApproveRejectRemarks").prop("disabled", true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('dashboard','approve-reject-payment'),
 		data : JSON.stringify(getRequestForPaymentRemarks(formId, moduleId)),
 		dataType : 'json',
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 				$("#"+formId+" #addApproveRejectRemarks").prop("disabled", false);
 			} else {
+				showMessageTheme2(1, data['message']);
 				$('#paymentRemarks').modal('hide');
-				showMessage(true, data['message']);
-				setTimeout(function(){
-					callSchoolInneraction('17a',$('#'+formId+' #userId').val(),'userPaymentHistoryDetails');
-				}, 2000);
-				
+				var serialNumber = $("#" + formId + " #serialNumber").val()
+				$('#remarks-'+serialNumber).html($("#" + formId + " #remarks").val());
+				$('#review-'+serialNumber).html('-');
+				$('#payment-status-'+serialNumber).removeClass('fa-hourglass-start')
+				if($("#" + formId + " #remarksStatus").val()=='Approve'){
+					$('#payment-status-'+serialNumber).addClass('fa-check')
+					$('#payment-status-message-'+serialNumber).html(' SUCCESS')
+				}else if($("#" + formId + " #remarksStatus").val()=='Decline'){
+					$('#payment-status-'+serialNumber).addClass('fa-times')
+					$('#payment-status-message-'+serialNumber).html(' REJECTED')
+				}
 			}
 			return false;
 		}

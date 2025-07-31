@@ -149,5 +149,59 @@
 	.content {padding: 10px 6px 20px 4px;font-size: 16px;color: #333;}
 	.circle{width: 30px;height: 30px;background-color: #fff;text-align: center;display: inline-block;border-radius: 50%;margin-left:7px;font-size: 8px;color:#000;line-height: 30px;font-weight: 900;}
 
+ /*Reports*/
+	.tblLead{
+			width:90%
+	}
+	.tblLead , th, td{
+		border: 1px solid #aba7a7;
+		clear: both;
+		margin-top: 0.75rem !important;
+		margin-bottom: 0.75rem !important;
+		max-width: none !important;
+		border-collapse: separate !important;
+		border-spacing: 0;	
+	}
+	.hidecounselorLead{
+		display:none;
+	}
+	.hideChartdate{
+        display:none;
+    }
+	.hidetimeCountrydate{
+        display:none;
+    }
+	.hidestudentdate{
+        display:none;
+    }
+	.hideschooldemo{
+        display:none;
+    }
+	.hidedaywise{
+        display:none;
+    }
+	.hidecampaignLead{
+       display:none;
+  	} 
+	@keyframes rotate {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}   
 
+	.rotate {
+		animation: rotate 1s linear infinite;
+	}
 
+	.row-status-PENDING{background:#fff !important}
+	.row-status-RESCHEDULE{background:#90b4ec !important}
+	.row-status-COMPLETED{background:#a1cea1 !important}
+	.row-status-AUTO{background:#ff7e7e !important}
+
+	.email_logs_slide_popup{width:80%;max-width: 900px; position:fixed;z-index: 999999; top:0;right: 0;transform: translateX(+101%);-webkit-transform: translateX(+101%);-moz-transform: translateX(+101%); transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;  height:100%;overflow-y: auto;}
+.email_logs_slide_popup.viewSlideContent{transform: translateX(0%);-webkit-transform: translateX(0px);-moz-transform: translateX(0px);}
+.iframe-content{position: relative;}
+.iframe-content:after{content: '';width:100%;height: 100%;background: rgba(255, 255, 255, 0.0);position: absolute;left: 0;top:0}

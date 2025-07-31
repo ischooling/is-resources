@@ -96,14 +96,13 @@ function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, ro
 			+dashboardHeaderContent()
 			+'<div class="app-main  pb-4">'
 				+'<div class="col p-0">'
-					+'<div class="app-main__inner pt-2">'
+					+'<div class="app-main__inner">'
 						+partnerDashboardContent(title, roleAndModule, schoolId, userId, role)
 					+'</div>'
 				+'</div>'
 			+'</div>'
 		+'</div>'
 		+dashboardFooterContent()
-		+loaderContent();
 		$('body').html(html);
 		var data = getPartnerDashboardDetailsData(userId);
 		$("#chartContentDiv").html(partnerDashboardLPContent(data));
@@ -157,7 +156,7 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 	localStorage.setItem('convertYear',data.counselor.convertYear);
 	localStorage.setItem('referralCode',data.schoolServiceLinks.referralCode);
 	var html = 
-		`<div class="app-page-title">
+		`<div class="app-page-title mb-3 py-2">
 			<div class="page-title-wrapper">
 				<div class="page-title-heading">
 					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
@@ -449,7 +448,7 @@ async function dashboardFooterContent(){
 		+'<div class="app-footer">'
 			+'<div class="app-footer__inner">'
 				+'<div class="col">'
-					+'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
+					+ `<p style="margin: 0">Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>`
 				+'</div>'
 			+'</div>'
 		+'</div>'
@@ -460,53 +459,25 @@ async function dashboardFooterContent(){
 	return html;
 }
 
-function loaderContent(){
-	var html=
-	'<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
-		// +'<div class="loader primary-border-top-color">'
-		if(SCHOOL_ID==1){
-			// html+=
-			// '<div class="full">'
-			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'is_loader.gif" alt="${SCHOOL_NAME} Loader"/>'
-			// +'</div>';
-			html+=`
-				<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024" />
-			`
-		}else{
-			html+=
-			'<div class="ball-rotate">'
-				+'<div style="background-color: rgb(247, 185, 36);"></div>'
-			+'</div>'
-			+'<p>Loading ...</p>'
-		}
-		html+=
-		// '</div>'
-	+'</div>';
-	return html;
-}
-
 ///////Enrolled Page 
-function renderPartnerList(title, roleAndModule, schoolId, userId, role){
-	//console.log(USER_ROLE);
+async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	if(role=='B2B_PARTNER'){
 		$("#dashboardContentInHTML").html(partnerListContent(title, localStorage.getItem('referralCode')));
-	}else if(USER_ROLE=='STUDENT_COUNSELOR' || USER_ROLE=='B2B_LEAD'){
+	}else if(USER_ROLE=='STUDENT_COUNSELOR' || USER_ROLE=='B2B_LEAD' || USER_ROLE=='DIRECTOR'){
 		$("#dashboardContentInHTML").html(partnerListContent('Partner '+title, ''));
 	}else{
 		// $("#partnerEnrollmentList").html(partnerListContent(title, ''));
-		var html =
-		'<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">'
-			+dashboardHeaderContent()
-			+'<div class="app-main  pb-4">'
+		var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
+			html+= await dashboardHeaderContent();
+			html+='<div class="app-main  pb-4">'
 				+'<div class="col p-0">'
-					+'<div class="app-main__inner pt-2">'
+					+'<div class="app-main__inner">'
 						+partnerListContent(title, '')
 					+'</div>'
 				+'</div>'
 			+'</div>'
-		+'</div>'
-		+dashboardFooterContent()
-		+loaderContent();
+		+'</div>';
+		html+= await dashboardFooterContent();
 		$('body').html(html);
 	}
 	
@@ -604,7 +575,7 @@ function partnerListContent(title, referralCode){
 
 function pageTitleEnrolledContent(title){
 	var html = 
-		'<div class="app-page-title">'
+		'<div class="app-page-title mb-3 py-2">'
 			+'<div class="page-title-wrapper">'
 				+'<div class="page-title-heading">'
 					+'<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>'
@@ -824,11 +795,11 @@ function B2BStudentListfilterForm(referralCode){
 				+'</div>'
 				+'<div class="col-12 mt-2 text-right">';
 				if(referralCode==''){
-					html+='<a href="javascript:void(0)" class="btn btn-success btn-shadow float-right pr-4 pl-4 ml-2" id="bulkCommission">Bulk Commission</a>';
+					html+='<a href="javascript:void(0)" class="btn btn-success  float-right pr-4 pl-4 ml-2" id="bulkCommission">Bulk Commission</a>';
 				}
 
-				html+='<a href="javascript:void(0)" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="searchEnrolled">Search</a>'
-					+'<a href="javascript:void(0)" class="btn btn-primary btn-shadow float-right pr-4 pl-4 mr-2" onclick="resetEnrollmentForm(\'partnerEnrollFilterForm\')">Reset</a>'
+				html+='<a href="javascript:void(0)" class="btn btn-success  float-right pr-4 pl-4" id="searchEnrolled"><i class="fa fa-search"></i>&nbsp;Search</a>'
+					+'<a href="javascript:void(0)" class="btn btn-danger  float-right pr-4 pl-4 mr-2" onclick="resetEnrollmentForm(\'partnerEnrollFilterForm\')"><i class="fa fa-undo"></i>&nbsp;Reset</a>'
 				+'</div>'
 			+'</div>'
 		+'</div></form>';
@@ -1163,8 +1134,8 @@ function B2BStudentListCommissionPopup(){
 	+'</div>'
 	+'<div class="modal-footer">'
 	+'<div class="full mt-1">'
-	+'<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="btnClickCommission">Update</button>'
-	+'<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 mr-2" data-dismiss="modal">Close</button>'
+	+'<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnClickCommission">Update</button>'
+	+'<button type="button" class="btn btn-primary  float-right pr-4 pl-4 mr-2" data-dismiss="modal">Close</button>'
 	+'</div>'
 	+'</div>'
 	+'</form>'

@@ -10,7 +10,7 @@ function callForDashboardData(formId, actionUrl, replaceDiv) {
 	$.ajax({
 		global: flag,
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', actionUrl.split('?')[0]),
 		data: JSON.stringify(parseUrlToJson(actionUrl)),
 		dataType: 'html',
@@ -23,10 +23,10 @@ function callForDashboardData(formId, actionUrl, replaceDiv) {
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 					}
 				} else if (stringMessage[0] == "SUCCESS") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 					if (stringMessage[1].indexOf("Counselor") != -1) {
 						callDashboardPageSchool('mc30');
 					}
@@ -57,10 +57,6 @@ function callForDashboardData(formId, actionUrl, replaceDiv) {
 				customLoader(false);
 				return false;
 			}
-		},
-		error: function (e) {
-			//	showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -91,10 +87,10 @@ function callForDashboardDataForPasswordChange(formId, actionUrl, replaceDiv, sh
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 					}
 				} else if (stringMessage[0] == "SUCCESS") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 					if (stringMessage[1].indexOf("Counselor") != -1) {
 						callDashboardPageSchool('mc30');
 					}
@@ -122,10 +118,6 @@ function callForDashboardDataForPasswordChange(formId, actionUrl, replaceDiv, sh
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//	showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -218,7 +210,8 @@ function callInneraction(actionType, arg0) {
 	} else if (actionType == 'attendance') {
 		callForDashboardData('formIdIfAny', 'attendance-content' + arg0);
 	} else if (actionType == '1a') {// It has been written in dashboardSchool.js
-		callForDashboardData('formIdIfAny', 'profile-view-content/' + SCHOOL_UUID + '?userId=' + arg0 + '&actionType=' + actionType);
+		//callForDashboardData('formIdIfAny', 'profile-view-content/' + SCHOOL_UUID + '?userId=' + arg0 + '&actionType=' + actionType);
+		renderProfilePage(arg0);
 	} else if (actionType == '1StudentAdmin') {
 		callForDashboardData('formIdIfAny', 'student-profile-view-content?userId=' + arg0);
 	} else if (actionType == '1ParentStudentAdmin') {
@@ -289,7 +282,7 @@ function changePassword(dashboardFor) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'changed-password-content'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -298,14 +291,14 @@ function changePassword(dashboardFor) {
 				if (data['status'] == '3') {
 					redirectLoginPage();
 				} else {
-					showMessageTheme2(false, data['message'], '', true);
+					showMessageTheme2(0, data['message'], '', true);
 				}
 			} else {
 				$('#changePasswordModal').modal('hide');
 				// var local = JSON.parse(localStorage.getItem("profile"+USER_ID));
 				// local.lastPassUpdatedDate = false;
 				// localStorage.setItem("profile"+USER_ID, JSON.stringify(local));
-				showMessageTheme2(true, data['message'], '', true);
+				showMessageTheme2(1, data['message'], '', true);
 			}
 		}
 	});
@@ -314,7 +307,7 @@ function changePassword(dashboardFor) {
 function inquiryReplyData(roleModuleId) {
 	if (editor1 != undefined) {
 		if (editor1.getData() == '') {
-			showMessage(true, 'Please enter description');
+			showMessageTheme2(0, 'Please enter description');
 			return false
 		}
 	}
@@ -322,7 +315,7 @@ function inquiryReplyData(roleModuleId) {
 	//	var data = $('#enquiryForm').serialize();
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('common', 'inquiry-reply'),
 		data: JSON.stringify(request),
 		dataType: 'html',
@@ -336,21 +329,17 @@ function inquiryReplyData(roleModuleId) {
 					if (stringMessage[0] == "SESSIONOUT") {
 						/*redirectLoginPage();*/
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 					}
 				} else {
-					//showMessage(true, "Password successfully changed");
-					//showMessage(true, stringMessage[1]);
+					//showMessageTheme2(0, "Password successfully changed");
+					//showMessageTheme2(0, stringMessage[1]);
 					//$('#dashboardContentInHTML').html(htmlContent)
 					$('#queriesModel').modal('hide');
 					setTimeout(function () { callDashboardPageSchool(roleModuleId, 'inquiries'); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -390,18 +379,18 @@ function callForUpdateProfile(formId, moduleId, dashboardFor, roleModuleId, scho
 	if (moduleId == 'STUDENT') {
 		if (!$('#checkParentDetails').is(':checked') && $('#checkForParentDetails').val().trim() == 'Y') {
 			if (!emailCheck($('#guardianEmail').val().trim(), moduleId)) {
-				showMessage(true, "Email already exist");
+				showMessageTheme2(0, "Email already exist");
 				return false;
 			}
 		}
 	} else if (moduleId == 'TEACHER') {
 		if ($('#' + formId + ' #nationalityId').val().trim() == '' || $('#' + formId + ' #nationalityId').val() == null) {
-			showMessage(true, 'Nationality is required');
+			showMessageTheme2(0, 'Nationality is required');
 			return false;
 		}
 		if ($("#" + formId + " #officialEmailId").val().trim() != "") {
 			if (!validateEmail($("#" + formId + " #officialEmailId").val().trim())) {
-				showMessage(true, 'Official Email is invalid');
+				showMessageTheme2(0, 'Official Email is invalid');
 				return false;
 			}
 		}
@@ -416,43 +405,43 @@ function callForUpdateProfile(formId, moduleId, dashboardFor, roleModuleId, scho
 
 		} else {
 			if ($('#' + formId + ' #accountPersonName').val().trim() == '' || $('#' + formId + ' #accountPersonName').val().trim() == undefined) {
-				showMessage(true, 'Account Holder Name is required');
+				showMessageTheme2(0, 'Account Holder Name is required');
 				return false;
 			}
 			if ($('#' + formId + ' #bankName').val().trim() == '' || $('#' + formId + ' #bankName').val().trim() == undefined) {
-				showMessage(true, 'Bank Name is required');
+				showMessageTheme2(0, 'Bank Name is required');
 				return false;
 			}
 			if ($('#' + formId + ' #bankBranchName').val().trim() == '' || $('#' + formId + ' #bankBranchName').val().trim() == undefined) {
-				showMessage(true, 'Bank Branch Name is required');
+				showMessageTheme2(0, 'Bank Branch Name is required');
 				return false;
 			}
 			if ($('#' + formId + ' #bankBranchAddress').val().trim() == '' || $('#' + formId + ' #bankBranchAddress').val().trim() == undefined) {
-				showMessage(true, 'Bank Branch Address is required');
+				showMessageTheme2(0, 'Bank Branch Address is required');
 				return false;
 			}
 			if ($('#' + formId + ' #accountNo').val().trim() == '' || $('#' + formId + ' #accountNo').val().trim() == undefined) {
-				showMessage(true, 'Account Number is required');
+				showMessageTheme2(0, 'Account Number is required');
 				return false;
 			}
 		}
 		//if($('#'+formId+ ' #swiftCode').val().trim()!='' && ( $('#'+formId+ ' #swiftCode').val().trim().length<8 || $('#'+formId+ ' #swiftCode').val().trim().length>11)){
-		//showMessage(true, 'Swift code should be between 8 to 11 digits');
+		//showMessageTheme2(0, 'Swift code should be between 8 to 11 digits');
 		//return false;
 		//}
 		//if($('#'+formId+ ' #routeNo').val().trim()!='' && $('#'+formId+ ' #routeNo').val().trim().length<9){
-		//showMessage(true, 'Routing Number should be atleast 9 digit');
+		//showMessageTheme2(0, 'Routing Number should be atleast 9 digit');
 		//return false;
 		//}
 		if (accountType == 'BANK_ACCOUNT') {
 
 		} else {
 			if (!validateEmail($("#" + formId + " #payPalEmail").val())) {
-				showMessage(true, 'PayPal Emaild ID is invalid');
+				showMessageTheme2(0, 'PayPal Emaild ID is invalid');
 				return false;
 			}
 			//			if ($("#"+formId+" #payPalAccountHolderName").val().trim()=="") {
-			//				showMessage(true, 'PayPal account holder Name is required');
+			//				showMessageTheme2(0, 'PayPal account holder Name is required');
 			//				return false
 			//			}
 		}
@@ -460,16 +449,16 @@ function callForUpdateProfile(formId, moduleId, dashboardFor, roleModuleId, scho
 
 		} else {
 			if ($("#" + formId + " #payPalIsdCode").val().trim() == '' || $("#" + formId + " #payPalIsdCode").val() == null) {
-				showMessage(false, 'Please choose PayPal ISD Code');
+				showMessageTheme2(0, 'Please choose PayPal ISD Code');
 				return false
 			}
 			if ($("#" + formId + " #payPalMobile").val().trim() == "" || ($("#" + formId + " #payPalMobile").val().trim().length < 4 || $("#" + formId + " #payPalMobile").val().trim().length > 15)) {
-				showMessage(true, 'PayPal Mobile Number is required');
+				showMessageTheme2(0, 'PayPal Mobile Number is required');
 				return false
 			}
 		}
 	}
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'update-profile-content'),
@@ -485,11 +474,11 @@ function callForUpdateProfile(formId, moduleId, dashboardFor, roleModuleId, scho
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 						//tabActiveStatus(3);
 					}
 				} else {
-					showMessageTheme2(false, 'Profile has been updated successfully');
+					showMessageTheme2(1, 'Profile has been updated successfully');
 					if (stringMessage[1] == '2') {
 						//setTimeout(function () { callDashboardPageSchool(roleModuleId, 'manage-user-list'); }, 2000);// hard coded roleModuleID for temporary purpose
 						setTimeout(function () { callDashboardPageSchool(roleModuleId, 'manage-user-list', '', '&schoolId='+schoolId+'&userClickFrom=list&registrationType=ONE_TO_ONE&themeType='); }, 2000);// hard coded roleModuleID for temporary purpose
@@ -500,11 +489,6 @@ function callForUpdateProfile(formId, moduleId, dashboardFor, roleModuleId, scho
 				return false;
 			}
 			return false;
-		},
-		error: function (e) {
-			//	showMessage(true, e.responseText);
-			$("#nextStep").prop("disabled", false);
-			tabActiveStatus(3);
 		}
 	});
 }
@@ -641,7 +625,7 @@ function callCommonAction(formId, actionUrl, module, actionType, userId, request
 	console.log('formId=>' + formId + ', actionUrl=>' + actionUrl + ', module=>' + module + ', actionType=>' + actionType + ', userId=>' + userId)
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor(module, actionUrl),
 		data: JSON.stringify(getRequestForAction(formId, module, actionType, userId, requestExtra, requestExtra1)),
 		dataType: 'json',
@@ -649,9 +633,9 @@ function callCommonAction(formId, actionUrl, module, actionType, userId, request
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				if (actionType == 'approve') {
 					$('#approvedRequest' + userId).text('Approved');
 					//setTimeout(function(){ callDashboardPageSchool(roleModuleId,'teacher-profile'); }, 1000);
@@ -670,13 +654,6 @@ function callCommonAction(formId, actionUrl, module, actionType, userId, request
 				}
 			}
 			return false;
-		},
-		error: function (e) {
-			if (actionUrl == 'pending-approve-school-visit') {
-				$('#PendingRemarkModal').modal('show');
-			}
-
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -696,13 +673,13 @@ function getRequestForAction(formId, module, actionType, userId, requestExtra, r
 	return request;
 }
 function createSchoolEvent() {
-	hideMessage('');
+	hideMessageTheme2('');
 	//	if(!validateRequestForSubmitScholarship(formId)){
 	//		return false;
 	//	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'create-event'),
 		data: JSON.stringify(getRequestForCreateEvent()),
 		dataType: 'json',
@@ -710,9 +687,9 @@ function createSchoolEvent() {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				//alert("Event created successfully");
 				$('#eventModal').modal('toggle');
 				if ($('#dashboardFor').val() == 'TEACHER') {
@@ -722,10 +699,6 @@ function createSchoolEvent() {
 				}
 
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -761,13 +734,13 @@ function getRequestForCreateEvent() {
 }
 
 function submitSendEmailSubmit(formId, moduleId, mailType) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateRequestForSendEmail(formId, moduleId)) {
 		return false;
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'compose-email-submit'),
 		data: JSON.stringify(getRequestForsendEmail(formId, moduleId, mailType)),
 		dataType: 'json',
@@ -775,16 +748,12 @@ function submitSendEmailSubmit(formId, moduleId, mailType) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#' + formId)[0].reset();
 
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -830,13 +799,13 @@ function validateRequestForSendEmail(formId, moduleId) {
 	return true;
 }
 function callForUserSignUp(formId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if ($('#roleUser').val().trim() == '' || $('#roleUser').val().trim() == 0) {
-		showMessage(true, 'Role Type is required.');
+		showMessageTheme2(0, 'Role Type is required.');
 		return false;
 	}
 	if ($('#emailId').val().trim() == '') {
-		showMessage(true, 'Email is required.');
+		showMessageTheme2(0, 'Email is required.');
 		return false;
 	}
 
@@ -849,7 +818,7 @@ function callForUserSignUp(formId) {
 	$("#signup").prop("disabled", true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForSignup('enrollment/stage-1', moduleId),
 		data: JSON.stringify(getRequestForSignup(formId, moduleId)),
 		dataType: 'json',
@@ -860,23 +829,18 @@ function callForUserSignUp(formId) {
 				if (data['statusCode'] == '0001') {
 					$('#allReadyEmail #emailVerify').show();
 				}
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 				showHideDiv(false, 'signupShortForm');
 				showHideDiv(true, 'accountConfirmation');
 			} else {
-				//showMessage(false, data['message']);
+				//showMessageTheme2(1, data['message']);
 				showHideDiv(true, 'signupShortForm');
 				showHideDiv(false, 'accountConfirmation');
 				$('#emailId').html($("#" + formId + " #email").val());
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			}
 			$("#signup").prop("disabled", false);
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
-			$("#signup").prop("disabled", false);
 		}
 	});
 }
@@ -903,77 +867,73 @@ function getRequestForSignup(formId, moduleId) {
 	return request;
 }
 
-function getTeacherList(formId, moduleId, newteacher) {
+// function getTeacherList(formId, moduleId, newteacher) {
 
-	$.ajax({
-		type: "POST",
-		contentType: "application/json",
-		url: getURLFor('dashboard', 'teacher-mapping-list'),
-		data: JSON.stringify(getRequestTeacherForStudent(formId, moduleId)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
-			} else {
-				var result = data.dashboardDTO.studentTeacherMappingDTOList;
-				tBodyRow = '<select id="teachername" name="teachername">';
-				tBodyRow += '<option value=0>--Select Teacher--</option>';
-				$.each(result, function (vKey, vVal) {
-					var selt = "";
-					var teacherName = vVal.teacherName + '  ' + vVal.subjectName;
-					if (teacherName == newteacher) {
-						selt = "selected";
-					}
-					tBodyRow += '<option value=' + vVal.teacherId + ' ' + selt + '>' + teacherName + '</option>';
-				});
-				tBodyRow += '</select>';
-				$(".teacherselect").html(tBodyRow);
+// 	$.ajax({
+// 		type: "POST",
+// 		contentType: "application/json",
+// 		url: getURLFor('dashboard', 'teacher-mapping-list'),
+// 		data: JSON.stringify(getRequestTeacherForStudent(formId, moduleId)),
+// 		dataType: 'json',
+// 		cache: false,
+// 		timeout: 600000,
+// 		success: function (data) {
+// 			if (data['status'] == '0' || data['status'] == '2') {
+// 				showMessageTheme2(0, data['message']);
+// 			} else {
+// 				var result = data.dashboardDTO.studentTeacherMappingDTOList;
+// 				tBodyRow = '<select id="teachername" name="teachername">';
+// 				tBodyRow += '<option value=0>--Select Teacher--</option>';
+// 				$.each(result, function (vKey, vVal) {
+// 					var selt = "";
+// 					var teacherName = vVal.teacherName + '  ' + vVal.subjectName;
+// 					if (teacherName == newteacher) {
+// 						selt = "selected";
+// 					}
+// 					tBodyRow += '<option value=' + vVal.teacherId + ' ' + selt + '>' + teacherName + '</option>';
+// 				});
+// 				tBodyRow += '</select>';
+// 				$(".teacherselect").html(tBodyRow);
 
-			}
-			return false;
-		},
-		error: function (e) {
-			//	showMessage(true, e.responseText);
-			return false;
-		}
-	});
-}
+// 			}
+// 			return false;
+// 		}
+// 	});
+// }
 
-function getRequestTeacherForStudent(formId, moduleId) {
-	var request = {};
-	var authentication = {};
-	var requestData = {};
+// function getRequestTeacherForStudent(formId, moduleId) {
+// 	var request = {};
+// 	var authentication = {};
+// 	var requestData = {};
 
-	var subject = $("#" + formId + " #subjectid").val();
+// 	var subject = $("#" + formId + " #subjectid").val();
 
-	var placementSubject = $("#" + formId + " #placementSubjectid").val();
+// 	var placementSubject = $("#" + formId + " #placementSubjectid").val();
 
-	requestData['requestKey'] = "subject";
-	if (subject != '' && subject != 0) {
-		requestData['requestValue'] = subject;
-	}
-	requestData['requestExtra'] = "placementSubject";
-	if (placementSubject != '' && placementSubject != 0) {
-		requestData['requestExtra1'] = placementSubject;
-	}
-	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = moduleId;
-	authentication['userId'] = $("#" + formId + " #userId").val();
-	request['authentication'] = authentication;
-	request['requestData'] = requestData;
-	return request;
-}
+// 	requestData['requestKey'] = "subject";
+// 	if (subject != '' && subject != 0) {
+// 		requestData['requestValue'] = subject;
+// 	}
+// 	requestData['requestExtra'] = "placementSubject";
+// 	if (placementSubject != '' && placementSubject != 0) {
+// 		requestData['requestExtra1'] = placementSubject;
+// 	}
+// 	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+// 	authentication['userType'] = moduleId;
+// 	authentication['userId'] = $("#" + formId + " #userId").val();
+// 	request['authentication'] = authentication;
+// 	request['requestData'] = requestData;
+// 	return request;
+// }
 
 function submitStudentTeacherMapp(formId, moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateRequestStudentTeacherMapp(formId, moduleId)) {
 		return false;
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'student-teacher-mapping-submit'),
 		data: JSON.stringify(getRequestForStudentTeacherMapp(formId, moduleId)),
 		dataType: 'json',
@@ -981,16 +941,12 @@ function submitStudentTeacherMapp(formId, moduleId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#' + formId)[0].reset();
 				setTimeout(function () { callDashboardPageSchool('3'); }, 1000);
 			}
-			return false;
-		},
-		error: function (e) {
-			//	showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -1030,18 +986,18 @@ function validateRequestStudentTeacherMapp(formId, moduleId) {
 
 function emailCheckForMail(emailId, moduleId) {
 	var result = "";
-	hideMessage('');
+	hideMessageTheme2('');
 	if (emailId.indexOf(',') == -1) {
 		// will not be triggered because str has _..
 		if (!validateEmail(emailId)) {
-			showMessage(false, 'Email is either empty or invalid');
+			showMessageTheme2(1, 'Email is either empty or invalid');
 			return false
 		}
 	}
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('is-user-available'),
 		data: JSON.stringify(getCallRequestForEmailCheckForMail(emailId, moduleId)),
 		dataType: 'json',
@@ -1052,13 +1008,9 @@ function emailCheckForMail(emailId, moduleId) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				result = true;
 			} else {
-				showMessage(true, "Email doesn't exist");
+				showMessageTheme2(0, "Email doesn't exist");
 				result = false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 	return result;
@@ -1080,14 +1032,14 @@ function getCallRequestForEmailCheckForMail(emailId, moduleId) {
 function callCommonWireTransferPayment(formId, moduleId) {
 
 	if (!validateCharacters($('#wireTransferNumber').val().trim())) {
-		showMessage(false, 'Please use the English Keyboard while providing information');
+		showMessageTheme2(0, 'Please use the English Keyboard while providing information');
 		return false
 	}
 
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('school', 'call-wireTransferPayment'),
 		data: JSON.stringify(getRequestForCommonWireTransferPayment(formId, moduleId)),
 		dataType: 'json',
@@ -1095,18 +1047,15 @@ function callCommonWireTransferPayment(formId, moduleId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(1, data['message']);
 				//$('#callWireTransferModalInProcess').modal('show');
 				$('#callPaymentModal').modal('hide');
 				$('#callWireTransferModal').modal('hide');
 				location.reload();
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -1178,7 +1127,7 @@ function callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailSt
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'send-to-dashboard'),
-		contentType: 'application/json',
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(data),
 		dataType: 'html',
 		cache: false,
@@ -1194,27 +1143,23 @@ function callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailSt
 						return false;
 					}
 				}
-				showMessage(true, stringMessage[1]);
+				showMessageTheme2(1, stringMessage[1]);
 				DEFAULT_SEARCH_STATE = true; callDashboardPageSchool('2b', 'studentTab', '', '&schoolId=' + SCHOOL_ID);
 				return false;
 			}
-		},
-		error: function (e) {
-			showMessage(true, e.responseText);
 		}
-		//showMessage(true, e.responseText);
 	});
 }
 
 function callForServerDownMessage(roleModuleId) {
 	if ($('#message').val().trim() == null || $('#message').val().trim() == undefined || $('#message').val().trim() == '') {
-		showMessage(false, 'Maintenance message is mandatory');
+		showMessageTheme2(1, 'Maintenance message is mandatory');
 		return false
 	}
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'maintenance-down-message-activity'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(getRequestForServerDownMessage()),
 		dataType: 'html',
 		success: function (htmlContent) {
@@ -1226,17 +1171,14 @@ function callForServerDownMessage(roleModuleId) {
 					if (obj.statusResponse.status == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, obj.statusResponse.message);
+						showMessageTheme2(0, obj.statusResponse.message);
 					}
 				} else if (obj.statusResponse.status == "SUCCESS") {
-					showMessage(true, obj.statusResponse.message);
+					showMessageTheme2(1, obj.statusResponse.message);
 					setTimeout(function () { callDashboardPageSchool(roleModuleId, 'maintenance-down-message'); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(true, e.responseText);
 		}
 	});
 }
@@ -1262,7 +1204,7 @@ function callForServerDownMessageEmail(id, roleModuleId) {
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'maintenance-down-message-activity'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(getRequestForServerDownMessageEmail(id)),
 		dataType: 'html',
 		success: function (htmlContent) {
@@ -1274,17 +1216,14 @@ function callForServerDownMessageEmail(id, roleModuleId) {
 					if (obj.statusResponse.status == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, obj.statusResponse.message);
+						showMessageTheme2(0, obj.statusResponse.message);
 					}
 				} else if (obj.statusResponse.status == "SUCCESS") {
-					showMessage(true, obj.statusResponse.message);
+					showMessageTheme2(1, obj.statusResponse.message);
 					setTimeout(function () { callDashboardPageSchool(roleModuleId, 'maintenance-down-message'); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(true, e.responseText);
 		}
 	});
 }
@@ -1306,7 +1245,7 @@ function callForServerDownMessageMarquee(id, roleModuleId) {
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'maintenance-down-message-activity'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(getRequestForServerDownMessageMarquee(id)),
 		dataType: 'html',
 		success: function (htmlContent) {
@@ -1318,17 +1257,14 @@ function callForServerDownMessageMarquee(id, roleModuleId) {
 					if (obj.statusResponse.status == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, obj.statusResponse.message);
+						showMessageTheme2(0, obj.statusResponse.message);
 					}
 				} else if (obj.statusResponse.status == "SUCCESS") {
-					showMessage(true, obj.statusResponse.message);
+					showMessageTheme2(1, obj.statusResponse.message);
 					setTimeout(function () { callDashboardPageSchool(roleModuleId, 'maintenance-down-message'); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(true, e.responseText);
 		}
 	});
 }
@@ -1416,7 +1352,7 @@ function calculateTotalSubjectSelected() {
 	CURRENT_SUBJECTS = selSubjectd.substr(1);
 	CURRENT_PLACEMENT_SUBJECTS = selPlacementSubjectd.substr(1);
 	if (CURRENT_SUBJECTS == '' && CURRENT_PLACEMENT_SUBJECTS == '') {
-		showMessage(true, 'Please select at least one subject to proceed.');
+		showMessageTheme2(0, 'Please select at least one subject to proceed.');
 		return false;
 	}
 	var countSubjects = CURRENT_SUBJECTS.split(',').length;
@@ -1435,7 +1371,7 @@ function calculateTotalSubjectSelected() {
 }
 
 function showAssignedSubjectToTeacherContent(userId, providerId, flaxStatus) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'assigned-subject-to-teacher-content'),
@@ -1448,7 +1384,7 @@ function showAssignedSubjectToTeacherContent(userId, providerId, flaxStatus) {
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					//				$('.teacherAddCourseSelectionlist').hide();
 					if (providerId == 1 && flaxStatus == "") {
@@ -1465,25 +1401,20 @@ function showAssignedSubjectToTeacherContent(userId, providerId, flaxStatus) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
 function submitForTeacherInterviewSlots(formId, moduleId, controllType, roleModuleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if ('ADDURL' == controllType) {
 		if ($('#interviewLink').val().trim() == '' || $('#interviewLink').val().trim() == undefined) {
-			showMessage(true, 'Interview Link is required');
+			showMessageTheme2(0, 'Interview Link is required');
 			return false;
 		}
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'meetingslots-submit'),
 		data: JSON.stringify(getRequestForsubmitForTeacherInterviewSlots(formId, moduleId, controllType)),
 		dataType: 'json',
@@ -1491,9 +1422,9 @@ function submitForTeacherInterviewSlots(formId, moduleId, controllType, roleModu
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				if (controllType == 'ADDURL') {
 					$('#interviewLinkModal').modal('toggle');
 					$('#' + formId)[0].reset();
@@ -1504,9 +1435,6 @@ function submitForTeacherInterviewSlots(formId, moduleId, controllType, roleModu
 					setTimeout(function () { callDashboardPageSchool(roleModuleId, 'pending-interview-remarks'); }, 1000);
 				}
 			}
-			return false;
-		},
-		error: function (e) {
 			return false;
 		}
 	});
@@ -1567,24 +1495,87 @@ function notificationContentListingWithQueries(elementId, argument) {
 
 }
 
-function showOtherReason(id) {
-	if ($("#reasonEnrollEnd" + id).val() == 'Other') {
-		$("#otherReason" + id).show();
-	} else {
-		$("#otherReason" + id).val('');
-		$("#otherReason" + id).hide();
-	}
+// function showOtherReason(id) {
+// 	if ($("#reasonEnrollEnd" + id).val() == 'Other') {
+// 		$("#otherReason" + id).show();
+// 	} else {
+// 		$("#otherReason" + id).val('');
+// 		$("#otherReason" + id).hide();
+// 	}
+// }
+
+// function changeTeacher(id, teacherId, standardId) {
+// 	//getTeacherCompensationStandard("", "steachAmount"+id, teacherId, standardId);
+// 	//$("#stdEnrollDate"+id).val('');
+// 	$("#steachEnrollStartDate" + id).val('');
+// 	$("#steachEnrollEndDate" + id).val('');
+// 	$("#reasonEnrollEnd" + id).val('');
+// 	$("#otherReason" + id).val('');
+// }
+
+function showOtherReason(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType) {
+    $("#assigTeacherLinkList" + subjectId).show();
+    if ($("#reasonEnrollEnd" + subjectId).val() == 'Other') {
+        $("#otherReason" + subjectId).show();
+    } else {
+        $("#otherReason" + subjectId).val('');
+        $("#otherReason" + subjectId).hide();
+        var endDate = new Date($("#steachEnrollEndDate" + subjectId).val());
+        var currentDate = new Date();
+        if(endDate<currentDate){
+            if ($("#reasonEnrollEnd" + subjectId).val().trim() == 'Teacher Replaced' || $("#reasonEnrollEnd" + subjectId).val().trim() == 'Teacher Withdrawn') {
+                var teacherName = $("#teacherId" + subjectId + ' option:selected').text().trim().split("(")[0];
+                var studentName = $("#studentNameWarning").val().trim();
+                var subjectName = $("#subjectName" + subjectId).text().trim().split("- ")[1].split("(")[0];
+                checkPastUpdatedMeetingStatus(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType)
+            }
+        }
+    }
+}
+
+function checkPastUpdatedMeetingStatus(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType){
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: getURLFor('dashboard', 'student-teacher-past-class-details'),
+        data: JSON.stringify(getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType)),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        success: function (data) {
+            if (data['status'] == '0' || data['status'] == '2') {
+                showMessageTheme2(1, data['message']);
+                $("#assigTeacherLinkList" + subjectId).hide();
+                return false;
+            } else {
+                $("#assigTeacherLinkList" + subjectId).show();
+                return true;
+            }
+        },
+        error: function (e) {
+            return false;
+        }
+    });
 }
 
 function changeTeacher(id, teacherId, standardId) {
 	//getTeacherCompensationStandard("", "steachAmount"+id, teacherId, standardId);
 	//$("#stdEnrollDate"+id).val('');
+	var start_Date = new Date();
+	$("#steachEnrollStartDate" + id).attr('value', '');
 	$("#steachEnrollStartDate" + id).val('');
+	$("#steachEnrollStartDate" + id).datepicker("remove");
+	$("#steachEnrollStartDate" + id).datepicker({
+		autoclose: true,
+		format: 'mm-dd-yyyy',
+		startDate: start_Date,
+		"setDate": start_Date,
+	});
+
 	$("#steachEnrollEndDate" + id).val('');
 	$("#reasonEnrollEnd" + id).val('');
 	$("#otherReason" + id).val('');
 }
-
 
 function helpSupport() {
 	setTimeout(function () {
@@ -1597,7 +1588,7 @@ function helpSupport() {
 }
 
 function showPopupAddBatches(userId, providerId, flaxStatus) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'assigned-subject-to-teacher-content'),
@@ -1610,7 +1601,7 @@ function showPopupAddBatches(userId, providerId, flaxStatus) {
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					//				$('.teacherAddCourseSelectionlist').hide();
 					if (providerId == 1 && flaxStatus == "") {
@@ -1627,23 +1618,20 @@ function showPopupAddBatches(userId, providerId, flaxStatus) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			return false;
 		}
 	});
 }
 
 function callForUpdateCourseFee(roleModuleId, schoolId) {
 	var userId = $('#userId').val();
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateUpdateCourseTeacherDTO()) {
 		return false;
 	}
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'update-teacher-course'),
 		data: JSON.stringify(getRequestForCourseTeacher()),
 		dataType: 'html',
@@ -1655,11 +1643,11 @@ function callForUpdateCourseFee(roleModuleId, schoolId) {
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 						//tabActiveStatus(3);
 					}
 				} else {
-					showMessage(false, 'Courses Updated');
+					showMessageTheme2(1, 'Courses Updated');
 					$('#assignSubjectsTeacher').modal('hide');
 					//callDashboardPageSchool(roleModuleId,'approved-teachers');
 					//$('.modal-backdrop').remove();
@@ -1667,24 +1655,17 @@ function callForUpdateCourseFee(roleModuleId, schoolId) {
 				return false;
 			}
 			return false;
-		},
-		error: function (e) {
-			//	showMessage(true, e.responseText);
-			$("#nextStep").prop("disabled", false);
-			tabActiveStatus(3);
 		}
 	});
 }
 function getRequestForCourseTeacher() {
 	var request = {};
 	var authentication = {};
-	var requestData = {};
-	requestData['updateProfileTeacherDTO'] = updateCourseTeacherDTO();
+	request['updateProfileTeacherDTO'] = updateCourseTeacherDTO();
 	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	authentication['userId'] = $("#userId").val();
 	request['authentication'] = authentication;
-	request['requestData'] = requestData;
 	return request;
 }
 function updateCourseTeacherDTO() {
@@ -1706,7 +1687,7 @@ function updateCourseTeacherDTO() {
 		subjectDTO['lmsSubjectId'] = lmssubjectId;
 		subjectDTO['selectId'] = selectid;
 		if ($("#selectSubjectDate-" + subjectId).val() == '') {
-			showMessage(true, 'Please choose start date of ' + $("#selectSubjectName-" + subjectId).text());
+			showMessageTheme2(0, 'Please choose start date of ' + $("#selectSubjectName-" + subjectId).text());
 			return false;
 		}
 		subjectDTO['startDate'] = $(this).find(".selectSubjectDate").val();//$("#selectSubjectDate-"+subjectId).val();
@@ -1718,7 +1699,7 @@ function updateCourseTeacherDTO() {
 
 	CURRENT_SUBJECTS = selSubjectd.substr(1);
 	if (CURRENT_SUBJECTS == '') {
-		showMessage(true, 'Please select at least one subject to proceed.');
+		showMessageTheme2(0, 'Please select at least one subject to proceed.');
 		return false;
 	}
 	var countSubjects = CURRENT_SUBJECTS.split(',').length;
@@ -1743,7 +1724,7 @@ function validateUpdateCourseTeacherDTO() {
 		selSubjectd = selSubjectd + "," + subjectId;
 		subjectDTO['subjectId'] = subjectId;
 		if ($("#selectSubjectDate-" + subjectId).val() == '') {
-			showMessage(true, 'Please choose start date of ' + $("#selectSubjectName-" + subjectId).text());
+			showMessageTheme2(0, 'Please choose start date of ' + $("#selectSubjectName-" + subjectId).text());
 			return false;
 		}
 		subjectDTO['startDate'] = $("#selectSubjectDate-" + subjectId).val();
@@ -1752,7 +1733,7 @@ function validateUpdateCourseTeacherDTO() {
 
 	CURRENT_SUBJECTS = selSubjectd.substr(1);
 	if (CURRENT_SUBJECTS == '') {
-		showMessage(true, 'Please select at least one subject to proceed.');
+		showMessageTheme2(0, 'Please select at least one subject to proceed.');
 		return false;
 	}
 
@@ -1761,7 +1742,7 @@ function validateUpdateCourseTeacherDTO() {
 
 
 function getTeacherSubjectList(userId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$('#teacherAssignSubjectModal').modal({
 		backdrop: 'static',
 		keyboard: false,
@@ -1778,18 +1759,13 @@ function getTeacherSubjectList(userId) {
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					$("#userId").val(userId);
 					$('#assignSubjectToTeacher').html(htmlContent);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -1801,11 +1777,11 @@ function getTeacherSearchSubject(userId) {
 }
 
 function subjectBasedTeacherList(subjectId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	resetDropdown($("#teacherId"), 'Select Teacher');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		//data : JSON.stringify(getRequestForMaster('formId', 'TEACHER-LIST-BY-SUBJECT-ID', subjectId)),
 		data: JSON.stringify(getRequestForMaster('formId', 'TEACHER-LIST-FOR-BATCH-BY-SUBJECT_ID', subjectId)),
@@ -1814,7 +1790,7 @@ function subjectBasedTeacherList(subjectId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				//buildDropdown(data['mastersData']['courseList'], $("#"+formId+" #"+toElementId), 'Select course');
 				var result = data['mastersData']['teacherList'];
@@ -1826,10 +1802,6 @@ function subjectBasedTeacherList(subjectId) {
 				});
 
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			$("#" + formId + " #courseId").prop("disabled", false);
 		}
 	});
 }
@@ -1842,7 +1814,152 @@ function IpAddressFlush(){
 		timeout : 600000,
 		async:false,
 		success : function(response) {
-			showMessage(true,response.message)
+			showMessageTheme2(1,response.message)
 		}
 	})
+}
+
+
+function getAssignedSubjectToTeacher(userId) {
+	hideMessageTheme2('');
+	$('#assignSubjectsTeacher').modal({
+		backdrop: 'static',
+		keyboard: false,
+	});
+
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', 'subject-list-teacher'),
+		data: JSON.stringify(getSearchSubject(userId)),
+		dataType: 'html',
+		cache: false,
+		timeout: 600000,
+		success: function (htmlContent) {
+			if (htmlContent != "") {
+				var stringMessage = [];
+				stringMessage = htmlContent.split("|");
+				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
+					showMessageTheme2(0, stringMessage[1]);
+				} else {
+					$("#userId").val(userId);
+					$('#teacherAssignedCourse').html(htmlContent);
+					getSubjectListToTeacher(userId);
+					
+				}
+				return false;
+			}
+		}
+	});
+}
+
+function getSubjectListToTeacher(userId) {
+	hideMessageTheme2('');
+	if(!getSession()){
+		redirectLoginPage();
+		 return false;
+	}
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', 'assigned-subject-teacher'),
+		data: JSON.stringify(getSearchSubject(userId)),
+		dataType: 'html',
+		cache: false,
+		timeout: 600000,
+		success: function (htmlContent) {
+			if (htmlContent != "") {
+				var stringMessage = [];
+				stringMessage = htmlContent.split("|");
+				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
+					showMessageTheme2(0, stringMessage[1]);
+				} else {
+					$("#userId").val(userId);
+					$('#teacherAddCourseSelectionlist').html(htmlContent);
+					//		    			if($("#standardId").val()>=11 && $("#standardId").val()<=17){
+					//		    				getSelectedSubject();
+					//		    			}
+				}
+				return false;
+			}
+		}
+	});
+}
+function getSearchSubject(userId) {
+	var subjectDTO = {};
+	subjectDTO['subjectName'] = $.trim($('#courseName').val());
+	subjectDTO['standardId'] = $('#standardId').val();
+	subjectDTO['courseType'] = $('#courseType').val();
+	subjectDTO['providerId'] = $('#courseProvider').val();
+	subjectDTO['flaxStatus'] = $('#flaxStatus').val();
+	subjectDTO['userId'] = userId;
+
+	return subjectDTO;
+
+}
+
+
+function getSelectedSubject() {
+	//$(".selectedSubject").html('');
+	var addHtmlBind = true;
+	$(".subjectIds").each(function () {
+		var subjectId = $(this).attr('id').split("-")[1];
+
+		$(".allSelectedSubject").each(function () {
+			var idVal = $(this).attr('data-subjectid');
+			if (subjectId == idVal) {
+				addHtmlBind = false;
+			}
+		});
+		if (addHtmlBind) {
+			if ($("#subjectId-" + subjectId).hasClass("greenDiv")) {
+				var strtDate = $("#subjectStartDate-" + subjectId).val().split("-")[2] + '-' + $("#subjectStartDate-" + subjectId).val().split("-")[0] + '-' + $("#subjectStartDate-" + subjectId).val().split("-")[1]
+				var htmlVar = "<div class=\"col-md-12 block allSelectedSubject\" id='selectedSubject-" + subjectId + "' data-subjectid=\"" + subjectId + "\">";
+				htmlVar = htmlVar + "<input type=\"hidden\" name=\"selectSubjectId\" id=\"selectSubjectId-" + subjectId + "\" value=\"" + subjectId + "\"/>";
+				htmlVar = htmlVar + "<div class=\"col-md-6\">" + $("#subjectName-" + subjectId).text() + "</div>";
+				htmlVar = htmlVar + "<div class=\"col-md-2\" id=\"selectSubjectDate-" + subjectId + "\">" + strtDate + "</div>";
+				htmlVar = htmlVar + "<div class=\"col-md-2\" id=\"selectSubjectDate-" + subjectId + "\">" + strtDate + "</div>";
+				htmlVar = htmlVar + "<div class=\"col-md-2\" id=\"selectSubjectEndDate-" + subjectId + "\">2999-12-31</div>";
+				htmlVar = htmlVar + "<div class=\"col-md-2 text-center\"><a href=\"javascript:void(0);\" class=\"click-to-catalog\" onclick=\"return removeLi('" + subjectId + "');\" style=\"font-size:14px;color:red;\"><i class=\"fa fa-times\"></i></a></div></div>";
+				$(".selectedSubject").append(htmlVar);
+			}
+		}
+
+	});
+}
+
+
+function changeSchool(schoolId) {
+	var data = {};
+	data['schoolId'] = schoolId;
+	data['userId'] = USER_ID;
+	actionUrl = 'select-school'
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', actionUrl),
+		data: JSON.stringify(data),
+		dataType: 'html',
+		cache: false,
+		timeout: 600000,
+		async: false,
+		success: function (htmlContent) {
+			if (htmlContent != "") {
+				var stringMessage = [];
+				stringMessage = htmlContent.split("|");
+				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
+					if (stringMessage[0] == "SESSIONOUT") {
+						redirectLoginPage();
+					} else {
+						showMessageTheme2(0, stringMessage[1]);
+					}
+				} else if (stringMessage[0] == "SUCCESS") {
+					showMessageTheme2(1, stringMessage[1]);
+					SCHOOL_ID=schoolId;
+					window.location.reload();
+				}
+				return false;
+			}
+		}
+	});
 }

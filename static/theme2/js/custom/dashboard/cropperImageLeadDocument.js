@@ -1,4 +1,4 @@
-    var cropper;
+    var cropperImageLeadDocs;
     var currentInputId;
     var currentThumbId;
     var base64URLElementID;
@@ -125,14 +125,14 @@
     // }
 
     $(document).on('shown.bs.modal','#cropModal', function () {
-      cropper = new Cropper($('#cropModalImg')[0], {
+      cropperImageLeadDocs = new Cropper($('#cropModalImg')[0], {
         aspectRatio: NaN,
       // viewMode: 3,
       });
     }).on('hidden.bs.modal','#cropModal', function() {
-      if(cropper!=null){
-        cropper.destroy();
-        cropper=null;
+      if(cropperImageLeadDocs!=null){
+        cropperImageLeadDocs.destroy();
+        cropperImageLeadDocs=null;
       }
     });
     
@@ -140,12 +140,12 @@
       customLoader(true);
       var initialAvatarURL;
       
-      if (cropper!=null){
-        canvas = cropper.getCroppedCanvas({
+      if (cropperImageLeadDocs!=null){
+        canvas = cropperImageLeadDocs.getCroppedCanvas({
          // width: 160,
           //height: 160,
         });
-        cropper.cropped = true;
+        cropperImageLeadDocs.cropped = true;
         //initialAvatarURL = $('#' + base64URLElementID).attr('src');
         $('#' + base64URLElementID).attr('thumbType', 'img');
         $('#' + base64URLElementID).attr('data-PDFURL', canvas.toDataURL());
@@ -176,10 +176,10 @@
     }
     // Rotate Image Function
     function rotateImage() {
-      if (!cropper) {
+      if (!cropperImageLeadDocs) {
         return;
       }
-      cropper.rotate(90);
+      cropperImageLeadDocs.rotate(90);
     }
 
 function viewAttachment(src, modalId, attachmentType, uploadFileAttr){

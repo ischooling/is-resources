@@ -30,7 +30,7 @@ function sendmail(id) {
     }
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'sendmail-for-advance-payment-for-second-time'),
         data: JSON.stringify(data),
         dataType: 'json',
@@ -40,14 +40,10 @@ function sendmail(id) {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, responce['message']);
-                    } else {
-                        showMessage(0, responce['message'], '', true);
-                    }
+                    showMessageTheme2(0, responce['message'], '', true);
                 }
             } else {
-                showMessage(1, responce['message'], '', true);
+                showMessageTheme2(1, responce['message'], '', true);
             }
         }
     });
@@ -56,22 +52,22 @@ function sendmail(id) {
 function advancePaymentSearchStudent(formId, moduleId) {
     var dateFrom = $("#" + formId + " #paymentDateFrom").val();
     var dateTo = $("#" + formId + " #paymentDateTo").val();
-    hideMessage('');
+    hideMessageTheme2('');
     if (dateFrom != "" && dateFrom != undefined) {
         if (dateTo == "" || dateTo == undefined) {
-            showMessage(true, "Payment Date To field is mandatory if you choose a date from Payment Date From field.");
+            showMessageTheme2(0, "Payment Date To field is mandatory if you choose a date from Payment Date From field.");
             return false;
         }
     }
     if (dateTo != "" && dateTo != undefined) {
         if (dateFrom == "" || dateFrom == undefined) {
-            showMessage(true, "Payment Date From field is mandatory if you choose a date from Payment Date To field.");
+            showMessageTheme2(0, "Payment Date From field is mandatory if you choose a date from Payment Date To field.");
             return false;
         }
     }
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'advance-payment-search-content'),
         data: JSON.stringify(getCallRequestForAdvancePaymentSearchStudent(formId, moduleId)),
         dataType: 'json',
@@ -82,11 +78,7 @@ function advancePaymentSearchStudent(formId, moduleId) {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, data['message']);
-                    } else {
-                        showMessageTheme2(0, data['message'], '', true);
-                    }
+                    showMessageTheme2(0, data['message'], '', true);
                 }
                 $('#' + elementId + ' tbody').html('')
             } else {
@@ -99,7 +91,6 @@ function advancePaymentSearchStudent(formId, moduleId) {
                             $('#' + elementId).dataTable().fnDestroy();
                         }
                         $('#' + elementId + ' tbody').html(getAdvancePaymentSearchResult(formId, data));
-
                         var table = $('#' + elementId).DataTable();//{ "pagingType": "full" }
                         $("#autoWeeklyMailStudent").DataTable();
                         // table.on('page.dt', function () {
@@ -107,7 +98,7 @@ function advancePaymentSearchStudent(formId, moduleId) {
                         // });
                     //}
                 }else{
-                    showMessage(false, data['message']);
+                    showMessageTheme2(0, data['message']);
                     $('#' + elementId + ' tbody').html('')
                 }
             }
@@ -213,14 +204,14 @@ function searchStudentByNameAndEmail() {
         'studentId' : studentId
     }
 
-    hideMessage('');
+    hideMessageTheme2('');
     if (searchName == '' && searchEmail == '' && studentId == '' ) {
-        showMessage(true, 'To search desired user, required either name or email or student id');
+        showMessageTheme2(0, 'To search desired user, required either name or email or student id');
         return false;
     }
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'search-student'),
         data: JSON.stringify(data),
         dataType: 'json',
@@ -230,11 +221,7 @@ function searchStudentByNameAndEmail() {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, data['message']);
-                    } else {
-                        showMessageTheme2(0, data['message'], '', true);
-                    }
+                    showMessageTheme2(0, data['message'], '', true);
                 }
             } else {
                 if (data.results.length > 0) {
@@ -255,7 +242,7 @@ function searchStudentByNameAndEmail() {
 }
 
 function addExternalPayment(formId) {
-    hideMessage('');
+    hideMessageTheme2('');
     $('#addPaymentModal').modal('show');
     $('.hideWhenlearningProgramFlexy').show();
     $('#copyViewPaymentUrlElement, #viewPaymentUrlElementWrapper').hide();
@@ -284,7 +271,7 @@ function addExternalPayment(formId) {
 }
 
 function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, paymentNameFlag, marksPublished) {
-    hideMessage('');
+    hideMessageTheme2('');
     $('#addPaymentModal').modal('show');
     $("#addStudentPaymentbtn").show();
     $("#closePaymentModal").show();
@@ -325,7 +312,7 @@ function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, pay
 
 }
 function getStudentDetailsForPayment(formId, needToShowMessage) {
-    hideMessage('');
+    hideMessageTheme2('');
     var userNameOrEmail = $('#' + formId + ' #studentEmail1').val().trim();
     if (userNameOrEmail == '') {
         return false;
@@ -336,7 +323,7 @@ function getStudentDetailsForPayment(formId, needToShowMessage) {
     }
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'get-student-for-payment'),
         data: JSON.stringify(data),
         dataType: 'json',
@@ -349,17 +336,13 @@ function getStudentDetailsForPayment(formId, needToShowMessage) {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, data['message']);
-                    } else {
-                        showMessageTheme2(0, data['message'], '', true);
-                    }
+                   showMessageTheme2(0, data['message'], '', true);
                 }
                 $('#addStudentPaymentbtn').show();
             } else {
                 if (needToShowMessage) {
                     $('#addStudentPaymentbtn').hide();
-                    showMessage(true, 'User is already registered, kindly search and add the payment');
+                    showMessageTheme2(2, 'User is already registered, kindly search and add the payment');
                 } else {
                     var userData = data['userData'];
                     if (userData['studentName'] != '') {
@@ -395,29 +378,29 @@ function getStudentDetailsForPayment(formId, needToShowMessage) {
 function addStudentPayment(formId, moduleId) {
     var studentEmail = $("#" + formId + " #studentEmail1").val();
     if (studentEmail == null || studentEmail == undefined || studentEmail == '') {
-        showMessage(true, "Email is mandatory.");
+        showMessageTheme2(0, "Email is mandatory.");
         return false;
     }
     var studentName = $("#" + formId + " #studentName1").val();
     if (studentName == null || studentName == undefined || studentName == '') {
-        showMessage(true, "Student name is mandatory.");
+        showMessageTheme2(0, "Student name is mandatory.");
         return false;
     }
     var learningProgram = $("#" + formId + " #learningProgram1").val();
     if (learningProgram == null || learningProgram == undefined || learningProgram == '') {
-        showMessage(true, "Learning Program is mandatory.");
+        showMessageTheme2(0, "Learning Program is mandatory.");
         return false;
     }
     if(learningProgram != "ONE_TO_ONE_FLEX"){
         var grade = $("#" + formId + " #standardId1").val();
         if (grade == null || grade == undefined || grade == '') {
-            showMessage(true, "Grade is mandatory.");
+            showMessageTheme2(0, "Grade is mandatory.");
             return false;
         }
     }
     var paymentTitle = $("#" + formId + " #paymentType1").val();
     if (paymentTitle == null || paymentTitle == undefined || paymentTitle == '') {
-        showMessage(true, "Payment Title is mandatory.");
+        showMessageTheme2(0, "Payment Title is mandatory.");
         return false;
     }
     var paymentName1 = $("#" + formId + " #paymentName1").val();
@@ -425,14 +408,14 @@ function addStudentPayment(formId, moduleId) {
         var installmentNumber1 = $("#" + formId + " #installmentNumber1").val();
         var numberOfMonth1 = $("#" + formId + " #numberOfMonth1").val();
         if (installmentNumber1 == undefined || installmentNumber1 == '' || numberOfMonth1 == undefined || numberOfMonth1 == '') {
-            showMessage(true, "Payment Name is mandatory.");
+            showMessageTheme2(0, "Payment Name is mandatory.");
             return false;
         }
     }
     /*
     var userRefNumber =$("#"+formId+" #userRefNumber1").val();
     if(userRefNumber  == ""){
-        showMessage(true,"Enter User Reference Number");
+        showMessageTheme2(0,"Enter User Reference Number");
         return false;
     }
     */
@@ -440,19 +423,19 @@ function addStudentPayment(formId, moduleId) {
     // var regAmount = $("#" + formId + " #registrationAmount").val();
     // if (paymentTitle == "REGISTRATION_FEE" || paymentTitle == "REGISTRATION_FEE_ADV") {
     //     if (regAmount == 0) {
-    //         showMessage(true, "Registration Fee is a mandatory field!");
+    //         showMessageTheme2(0, "Registration Fee is a mandatory field!");
     //         return false;
     //     }
     // } else {
     if (payableAmount == 0) {
-        showMessage(true, "Pay Fee can not be zero.");
+        showMessageTheme2(0, "Pay Fee can not be zero.");
         return false;
     }
     // }
     // var additionalAmount =$("#"+formId+" #additionalAmount").val();
     var currency1 = $("#" + formId + " #currency1").val();
     if (currency1 == "0" || currency1 == "" || currency1 == undefined) {
-        showMessage(true, "Choose the currency in which the payment is being done.");
+        showMessageTheme2(0, "Choose the currency in which the payment is being done.");
         return false;
     }
     // var paymentGateway1 =$("#"+formId+" #paymentGateway1").val();
@@ -461,43 +444,43 @@ function addStudentPayment(formId, moduleId) {
     var status = $("#" + formId + " #status1").val();
     if (status == "SUCCESS") {
         if (paymentDate == "" || paymentDate == undefined) {
-            showMessage(true, "Payment Date is a mandatory field.");
+            showMessageTheme2(0, "Payment Date is a mandatory field.");
             return false;
         }
     }
     if (scheduleDate == "" || scheduleDate == undefined) {
-        showMessage(true, "Please Enter the scheduled payment date.");
+        showMessageTheme2(0, "Please Enter the scheduled payment date.");
         return false;
     }
     // if (status == "SCHEDULED") {
     //     if (paymentTitle == "REGISTRATION_FEE" || paymentTitle == "REGISTRATION_FEE_ADV") {
     //     } else {
     //         if (scheduleDate == "" || scheduleDate == undefined) {
-    //             showMessage(true, "Please Enter the scheduled payment date.");
+    //             showMessageTheme2(0, "Please Enter the scheduled payment date.");
     //             return false;
     //         }
     //     }
     // }
     if (status == "INITIATED") {
         if (paymentDate == "" || paymentDate == undefined) {
-            showMessage(true, "Please Enter the payment date.");
+            showMessageTheme2(0, "Please Enter the payment date.");
             return false;
         }
     }
     if (status == "0" || status == "" || status == undefined) {
-        showMessage(true, "Please select the Payment Status.");
+        showMessageTheme2(0, "Please select the Payment Status.");
         return false;
     }
     /*
     var transactionNumber =$("#"+formId+" #transactionNumber").val();
     if(transactionNumber=="" && status!='SCHEDULED'){
-        showMessage(true,"Please enter the transaction number.");
+        showMessageTheme2(0,"Please enter the transaction number.");
         return false;
     }
     */
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'save-payment'),
         data: JSON.stringify(getRequestDataForAddPaymentDetails(formId, moduleId)),
         dataType: 'json',
@@ -507,11 +490,7 @@ function addStudentPayment(formId, moduleId) {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, data['message']);
-                    } else {
-                        showMessageTheme2(0, data['message'], '', true);
-                    }
+                    showMessageTheme2(0, data['message'], '', true);
                 }
             } else {
                 $("#viewPaymentUrlElementWrapper").show();
@@ -519,7 +498,7 @@ function addStudentPayment(formId, moduleId) {
                 $("#closePaymentModal").hide();
                 $("#addStudentPaymentbtn").hide();
                 $("#copyViewPaymentUrlElement").show();
-                showMessage(1, "Payment Created");
+                showMessageTheme2(1, "Payment Created");
                 // if(roleAndModule.viewed=='Y'){
                 //     window.setTimeout(function () {
                 //         advancePaymentSearchStudentReset('advancePaymentSearchForm');
@@ -591,7 +570,7 @@ function getRequestDataForAddPaymentDetails(formId, moduleId) {
 function editStudentPayment(formId, moduleId) {
     var paymentTitle = $("#" + formId + " #paymentType2").val();
     if (paymentTitle == "" || paymentTitle == undefined) {
-        showMessage(true, "Payment Title is mandatory.");
+        showMessageTheme2(0, "Payment Title is mandatory.");
         return false;
     }
     var paymentName2 = $("#" + formId + " #paymentName2").val();
@@ -599,58 +578,58 @@ function editStudentPayment(formId, moduleId) {
         var installmentNumber2 = $("#" + formId + " #installmentNumber2").val();
         var numberOfMonth2 = $("#" + formId + " #numberOfMonth2").val();
         if (installmentNumber2 == undefined || installmentNumber2 == '' || numberOfMonth2 == undefined || numberOfMonth2 == '') {
-            showMessage(true, "Payment Name is mandatory.");
+            showMessageTheme2(0, "Payment Name is mandatory.");
             return false;
         }
     }
     var userRefNumber = $("#" + formId + " #userRefNumber2").val();
     if (userRefNumber == "") {
-        showMessage(true, "Enter User Reference Number");
+        showMessageTheme2(0, "Enter User Reference Number");
         return false;
     }
     var payableAmount = $("#" + formId + " #payableAmount2").val();
     if (payableAmount == 0) {
-        showMessage(true, "Pay Amount can not be zero.");
+        showMessageTheme2(0, "Pay Amount can not be zero.");
         return false;
     }
     var currency2 = $("#" + formId + " #currency2").val();
     if (currency2 == undefined || currency2 == "0" || currency2 == "") {
-        showMessage(true, "Choose the currency in which the payment is being done.");
+        showMessageTheme2(0, "Choose the currency in which the payment is being done.");
         return false;
     }
     var status = $("#" + formId + " #status2").val();
     if (status == undefined || status == "0" || status == "") {
-        showMessage(true, "Please select the Payment Status.");
+        showMessageTheme2(0, "Please select the Payment Status.");
         return false;
     }
     var paymentDate = $("#" + formId + " #paymentDate2").val();
     var scheduleDate = $("#" + formId + " #scheduleDate2").val();
     if (status == "SUCCESS") {
         if (paymentDate == "" || paymentDate == undefined) {
-            showMessage(true, "Payment Date is a mandatory field.");
+            showMessageTheme2(0, "Payment Date is a mandatory field.");
             return false;
         }
     }
     if (status == "SCHEDULED") {
         if (scheduleDate == "" || scheduleDate == undefined) {
-            showMessage(true, "Please Enter the scheduled payment date.");
+            showMessageTheme2(0, "Please Enter the scheduled payment date.");
             return false;
         }
     }
     // if(status=="INITIATED"){
     // 	if(paymentDate =="" || paymentDate == undefined){
-    // 		showMessage(true,"Please Enter the payment date.");
+    // 		showMessageTheme2(0,"Please Enter the payment date.");
     // 		return false;
     // 	}
     // }
     var transactionNumber = $("#" + formId + " #transactionNumber2").val();
     if (transactionNumber == "" && status != "SCHEDULED") {
-        showMessage(true, "Please enter the transaction number.");
+        showMessageTheme2(0, "Please enter the transaction number.");
         return false;
     }
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'edit-payment'),
         data: JSON.stringify(getRequestDataForEditPaymentDetails(formId, moduleId)),
         dataType: 'json',
@@ -667,13 +646,13 @@ function editStudentPayment(formId, moduleId) {
                     }
                 }
             } else {
-                showMessage(true, data['message']);
+                showMessageTheme2(0, data['message']);
                 $('#editPaymentModal').modal('hide');
                 window.setTimeout(function () {
-                    hideMessage('')
+                    hideMessageTheme2('')
                 }, 500)
                 window.setTimeout(function () {
-                    hideMessage('')
+                    hideMessageTheme2('')
                     $('#advSearchSubmitButtion').trigger('click');
                 }, 800)
             }
@@ -721,7 +700,7 @@ function showPaymentPopup(id,controlType) {
     var data = { "id": id };
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'get-user-payment'),
         data: JSON.stringify(data),
         dataType: 'json',
@@ -743,10 +722,10 @@ function showPaymentPopup(id,controlType) {
                     backdrop: 'static',
                     keyboard: false,
                 });
-                $("#paymentType2").select2().val(data.userPaymentDetails.paymentTitle).trigger('change');
-                $("#status2").select2().val(data.userPaymentDetails.status).trigger('change');
-                $("#currency2").select2().val(data.userPaymentDetails.selectedCurrency).trigger('change');
-                $("#paymentGateway2").select2().val(data.userPaymentDetails.pgName).trigger('change');
+                $("#paymentType2").select2({theme:"bootstrap4", dropdownParent: "#editPaymentModal .modal-body",}).val(data.userPaymentDetails.paymentTitle).trigger('change');
+                $("#status2").select2({theme:"bootstrap4", dropdownParent: "#editPaymentModal .modal-body",}).val(data.userPaymentDetails.status).trigger('change');
+                $("#currency2").select2({theme:"bootstrap4"}).val(data.userPaymentDetails.selectedCurrency).trigger('change');
+                $("#paymentGateway2").select2({theme:"bootstrap4", dropdownParent: "#editPaymentModal .modal-body",}).val(data.userPaymentDetails.pgName).trigger('change');
                 initEditor(1, 'descriptionDivBox', 'Put description if any', false);
                 $("#paymentDate2").datepicker({
                     autoclose: true,
@@ -787,7 +766,7 @@ function deletePayment(id, rowID) {
     var data = { "id": id };
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'delete-user-payment'),
         data: JSON.stringify(data),
         dataType: 'json',
@@ -797,27 +776,20 @@ function deletePayment(id, rowID) {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, data['message']);
-                    } else {
-                        showMessageTheme2(0, data['message'], '', true);
-                    }
+                    showMessageTheme2(0, data['message'], '', true);
                 }
             } else {
-                showMessage(true, data['message']);
+                showMessageTheme2(0, data['message']);
                 var table = $('#advPaymentSearch').DataTable();
                 table.row($("#"+rowID)).remove().draw();
                 // window.setTimeout(function(){
-                // 	hideMessage('')
+                // 	hideMessageTheme2('')
                 // },500)
                 // window.setTimeout(function () {
-                //     hideMessage('')
+                //     hideMessageTheme2('')
                 //     $('#advSearchSubmitButtion').trigger('click');
                 // }, 3100)
             }
-        },
-        error: function (e) {
-            return false;
         }
     });
 }
@@ -836,13 +808,13 @@ function mapUnregisteredUserPayment(formId, unregistredPaymentId, schoolId, user
 }
 
 function mapUnregisteredUserPaymentProcess(formId) {
-    hideMessage('');
+    hideMessageTheme2('');
     var email = $('#' + formId + ' #mapToUsers').val();
     var unregistredPaymentId = $('#' + formId + ' #unregistredPaymentId').val();
     var request = { email: email, unregistredPaymentId: unregistredPaymentId, schoolId: SCHOOL_ID };
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'map-unregistered-payment'),
         data: JSON.stringify(request),
         dataType: 'json',
@@ -859,7 +831,7 @@ function mapUnregisteredUserPaymentProcess(formId) {
                     }
                 }
             } else {
-                showMessage(true, data['message']);
+                showMessageTheme2(0, data['message']);
                 $('#mapStudentModal').modal('hide');
             }
             return false;

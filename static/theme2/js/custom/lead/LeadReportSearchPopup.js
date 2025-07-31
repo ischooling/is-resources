@@ -1,8 +1,12 @@
 function openModal(tabFrom){
     if(tabFrom == 'leadReport'){
         $(".enrollType").hide();
+        $(".leadSource").show();
+        $(".leadStatus").show();
+        $(".demoAssign").show();
+        $(".acadmicYearDiv").show();
     }else if(tabFrom == 'enrollmentList'){
-        //$(".enrollType").hide();
+        $(".enrollType").show();
         $(".leadSource").hide();
         $(".leadStatus").hide();
         $(".demoAssign").hide();

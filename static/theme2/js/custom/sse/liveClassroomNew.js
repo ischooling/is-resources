@@ -15,7 +15,7 @@ function getCurrentClassLiveNew(){
   }
   $.ajax({
       type : "POST",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : getURLForHTML('dashboard','live-class-new'),
       data : JSON.stringify(data),
       dataType : 'json',
@@ -32,9 +32,6 @@ function getCurrentClassLiveNew(){
              // showMessageTheme2(data['status'], data['message'],'',true);
               // setTimeout(getColleps(), 5000);
           }
-      },
-      error : function(e) {
-        showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
       }
   });
 }
@@ -42,7 +39,7 @@ function getCurrentClassLiveNew(){
 function getLiveAttendeeDetails(src,elementId,meetingId,attendanceCalculated,parentRowId){
   $.ajax({
     type : "POST",
-    contentType : "application/json",
+    contentType : APPLICATION_JSON_VALUE,
     url : getURLForHTML('dashboard','live-class-attendance-new'),
     data : JSON.stringify({'meetingId' : meetingId, 'schoolId' : SCHOOL_ID}),
     dataType : 'json',
@@ -58,9 +55,6 @@ function getLiveAttendeeDetails(src,elementId,meetingId,attendanceCalculated,par
             $("#viewAttendanceModal").modal("show");
           
       }
-    },
-    error : function(e) {
-      showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
     }
   });
 }
@@ -69,7 +63,7 @@ function getLiveAttendeeDetails(src,elementId,meetingId,attendanceCalculated,par
 function calculateAttendance(elementId,meetingId,attendanceCalculated){
   $.ajax({
       type : "GET",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : BASE_URL+CONTEXT_PATH+'crons/api-zoom-attendance-new?schoolId=1&meetingId='+meetingId,
       dataType : 'json',
       success : function(data) {
@@ -86,9 +80,6 @@ function calculateAttendance(elementId,meetingId,attendanceCalculated){
               showMessageTheme2(2, data['message'],'',true);
              }
           }
-      },
-      error : function(e) {
-        showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
       }
   });
 }
@@ -107,7 +98,7 @@ function getSchoolClassTime(){
   }
   $.ajax({
       type : "POST",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : getURLForHTML('dashboard','school-class-time'),
       data : JSON.stringify(data),
       dataType : 'json',
@@ -135,9 +126,6 @@ function getSchoolClassTime(){
               }
 ;
           }
-      },
-      error : function(e) {
-        showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
       }
   });
 }

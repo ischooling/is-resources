@@ -67,7 +67,7 @@ async function getAnnouncementDetails(userId, startFrom, pageSize){
 		postData['pageSize'] = pageSize;
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'get-announcement-details'),
 			data : JSON.stringify(postData),
 			dataType : 'json',
@@ -76,6 +76,9 @@ async function getAnnouncementDetails(userId, startFrom, pageSize){
 				resolve(data);
 			},
 			error: function (xhr, status, e) {
+				if (checkonlineOfflineStatus()) {
+					return;
+				}
 				showMessage(true, e.responseText);
 				reject(e);
 			}

@@ -4,10 +4,10 @@ function sessionOutPermissionContent(data){
         <div class="modal-dialog modal-sm modal-dialog-centered" style="box-shadow: none !important">
             <div class="modal-content border-0 bg-transparent">
                 <div class="modal-header pt-2 pb-2 pl-0 pr-0 bg-transparent text-white border-0">
-                    <h5 class="modal-title fsize-1 full text-center" id="exampleModalLabel">Your session has been logged out</h5>
+                    <h5 class="modal-title fsize-1 full text-center" >Your session has been logged out</h5>
                     ${/*<button type="button" class="close text-white" data-dismiss="modal"
                         aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>*/''}
                 </div>
                 <div class="modal-body pt-0 pb-0 bg-transparent">
@@ -48,7 +48,7 @@ function sessionOutPermissionContent(data){
                                 <p class="error" id="captchaError" style="color:red;font-weight:600"></p>
                             </div>
                             <div class="col-md-12">'
-                                <input type="submit" class="btn btn-info btn-shadow" id="continueSession" value="Submit">
+                                <input type="submit" class="btn btn-info " id="continueSession" value="Submit">
                             </div>
                         </div>
                     </form>

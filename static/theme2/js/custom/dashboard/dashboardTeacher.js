@@ -67,10 +67,6 @@ function createRatingAjax(params) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -82,7 +78,7 @@ function submitTask(formId, moduleId) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'task-submit'),
 		data: JSON.stringify(getRequestForSubmitTask(formId, moduleId)),
 		dataType: 'json',
@@ -96,10 +92,6 @@ function submitTask(formId, moduleId) {
 				$('#' + formId)[0].reset();
 				$("#" + formId + " #schoolId").val(1);
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -142,7 +134,7 @@ function submitPTMRemarksSlots(formId, moduleId) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'ptm-remarks-submit'),
 		data: JSON.stringify(getRequestForSubmitPTMRemarksSlots(formId, moduleId)),
 		dataType: 'json',
@@ -156,10 +148,6 @@ function submitPTMRemarksSlots(formId, moduleId) {
 				$('#' + formId)[0].reset();
 
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -327,7 +315,7 @@ function calendarDateMeeting(replaceId, startDate, slotType) {
 	var request = { startDate: startDate, slotType: slotType, disabledDate: inActDate };
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'meeting-dates'),
 		data: JSON.stringify(request),
 		dataType: 'html',
@@ -350,10 +338,6 @@ function calendarDateMeeting(replaceId, startDate, slotType) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -402,10 +386,6 @@ function calendarDateMeetingSlots(formId, moduleId, controlType, replaceId, requ
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -539,9 +519,6 @@ function meetingSlotsList(formId, replaceId, requestType, newTheme) {
 				return false;
 			}
 			customLoader(false);
-		},
-		error: function (e) {
-			return false;
 		}
 	});
 }

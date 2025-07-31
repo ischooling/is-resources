@@ -36,7 +36,7 @@ function submitEvaluationRemarks(formId,moduleId,finalSubmit,status) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','evaluation-remarks-submit'),
 		data : JSON.stringify(getRequestForSubmitEvaluationRemarks(formId, moduleId,finalSubmit,status)),
 		dataType : 'json',
@@ -52,10 +52,6 @@ function submitEvaluationRemarks(formId,moduleId,finalSubmit,status) {
 					location.reload();
 				}
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});

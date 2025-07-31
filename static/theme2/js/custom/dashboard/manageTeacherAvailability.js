@@ -16,7 +16,7 @@ function scrollMoreAvailability(){
 function courseProviderList(formId, elementId) {
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster('formId', 'ALL-COURSE-PROVIDER-LIST', 'courseProList')),
 		dataType: 'json',
@@ -62,7 +62,7 @@ function getAllTimeZone(fromTimeId) {
 	$("#"+fromTimeId).append('<option  value="">Select Timezone</option>');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('', 'TIMEZONE-LIST', '')),
 		dataType : 'json',
@@ -99,7 +99,7 @@ function callTeacherListForAvailability(formId, teacherUserId) {
 
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('report', 'get-teacher-availability'),
         data: JSON.stringify(getRequestForTeacherAvailability(formId, teacherUserId)),
         dataType: 'json',
@@ -165,10 +165,6 @@ function callTeacherListForAvailability(formId, teacherUserId) {
 				// }
 				customLoader(false);
             }
-        },
-        error: function(e) {
-            console.log(e);
-            customLoader(false);
         }
     });
 }
@@ -234,7 +230,7 @@ function getAllRecommendedTeacher(formId) {
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacherautoassign', 'student-teacher-subject-list'),
 		data : JSON.stringify(getDataForAllRecommendedTeacher(formId)),
 		async:true,
@@ -287,7 +283,7 @@ function getAllRecommendedTeacherBySubject(subjectId, elementId, elementrySubjec
 	customLoader(false);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacherautoassign', 'teacher-recommended-list'),
 		data : JSON.stringify(getDataForRecommendedTeacherBySubject(subjectId)),
 		//async:true,
@@ -313,6 +309,8 @@ function getAllRecommendedTeacherBySubject(subjectId, elementId, elementrySubjec
 				}
 				
 			}
+		},error: {
+
 		}
 	});
 }
@@ -341,7 +339,7 @@ function getTeacherTimeAvailable(teacherUserId, subjectId) {
 	customLoader(false);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacherautoassign', 'teacher-available-time'),
 		data : JSON.stringify(getDataForTeacherTimeAvailable(teacherUserId, subjectId)),
 		//async:true,
@@ -362,7 +360,11 @@ function getTeacherTimeAvailable(teacherUserId, subjectId) {
 				$(".booked-"+teacherUserId).text(data.booked);
 
 			}
-		}
+		},error: function(e) {
+            if (checkonlineOfflineStatus()) {
+                return;
+            }
+        }
 	});
 }
 
@@ -371,7 +373,7 @@ function saveAutoAssignTeacherRequest(formId, subjectId,teacherUserId, elementry
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacherautoassign','save-auto-assign-teacher'),
 		data : JSON.stringify(getRequestForAutoAssignTeacherRequest(formId, subjectId,teacherUserId,elementrySubjectID)),
 		dataType : 'json',
@@ -401,9 +403,6 @@ function saveAutoAssignTeacherRequest(formId, subjectId,teacherUserId, elementry
 					
 			}
 			return false;
-		},
-		error : function(e) {
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -471,7 +470,7 @@ function sendMailFromAutoTeacherAssign(subjectId) {
 	data["subjectId"] = subjectId;
 	$.ajax({
 	  type: "GET",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  url: getURLForHTML('teacherautoassign', "send-mail-from-auto-assign-teacher?payload="+encode(JSON.stringify(data))),
 	  dataType: "json",
 	  cache: false,
@@ -482,9 +481,6 @@ function sendMailFromAutoTeacherAssign(subjectId) {
 			} else {
 				showMessageTheme2(1, data['message'],'',true);
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -496,7 +492,7 @@ function callTeacherAvailability(formId, teacherUserId, elementId, sreno) {
 	
 		var request = $.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('report', 'get-teacher-availability-content'),
 			data : JSON.stringify(getRequestForTeacherAvailability(formId, teacherUserId)),
 			dataType : 'json',
@@ -592,7 +588,7 @@ function getTimeAvailableTeacherHtml(teacherList, userId){
 						}
 					htmlTime+='</span>';		
 					//htmlTime+='<br/><span class="d-inline-block bg-alternate text-white p-1 font-weight-bold mr-1 mb-1 text-center" style="min-width:30px;" id="ass_student_' + teachlist.teacherId + '">0</span>';
-					htmlTime+='<br/><span class="d-inline-block bg-info text-white p-1 font-weight-bold mr-1 mb-1 text-center" id="total_student_' + teachlist.teacherId + '">0</span>= ';
+					htmlTime+='<br/><span class="d-inline-block bg-primary text-white p-1 font-weight-bold mr-1 mb-1 text-center" id="total_student_' + teachlist.teacherId + '">0</span>= ';
 					htmlTime+='<span class="d-inline-block bg-dark text-white p-1 font-weight-bold mr-1 mb-1 text-center" style="min-width:30px;" id="pl_student_' + teachlist.teacherId + '">0</span>+ ';
 					htmlTime+='<span class="d-inline-block text-white p-1 font-weight-bold mr-1 mb-1 text-center" style="min-width:30px; background-color: #ff059d;" id="gl_student_' + teachlist.teacherId + '">0</span>';
 					htmlTime+='</td>';
@@ -693,7 +689,7 @@ function getTimeCalculateHtml(teacherList, userId, elementId, sreno){
 							}
 					htmlTime+='</span>';		
 					//htmlTime+='<br/><span class="d-inline-block bg-alternate text-white p-1 font-weight-bold mr-1 mb-1 text-center" style="min-width:30px;" id="ass_student_' + teachlist.teacherId + '">0</span>';
-					htmlTime+='<br/><span class="d-inline-block bg-info text-white p-1 font-weight-bold mr-1 mb-1 text-center" id="total_student_' + teachlist.teacherId + '">0</span>= ';
+					htmlTime+='<br/><span class="d-inline-block bg-primary text-white p-1 font-weight-bold mr-1 mb-1 text-center" id="total_student_' + teachlist.teacherId + '">0</span>= ';
 					htmlTime+='<span class="d-inline-block bg-dark text-white p-1 font-weight-bold mr-1 mb-1 text-center" style="min-width:30px;" id="pl_student_' + teachlist.teacherId + '">0</span>+ ';
 					htmlTime+='<span class="d-inline-block text-white p-1 font-weight-bold mr-1 mb-1 text-center" style="min-width:30px; background-color: #ff059d;" id="gl_student_' + teachlist.teacherId + '">0</span>';
 					htmlTime+='</td>';
@@ -813,7 +809,7 @@ function getAssignStudentOfTeacher(title, reporttype, spanid, teacherId, working
 	$('#stdAssignToTimeAvailList').DataTable().destroy();
 	var request = $.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'teacher-assign-student-content'),
 		data: JSON.stringify(getRequestForAssignStdOfTeacher(title, reporttype, teacherId, workingHrs)),
 		dataType: 'json',
@@ -994,7 +990,7 @@ function getTeacherTimeToShowWeeklyCalendar(subjectId, teacherUserId,userRole,ca
 	var responseData=null;
 	return new Promise (function(resolve, reject) {$.ajax({
 			type: "POST",
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			url: getURLForHTML('teacherautoassign', 'get-teacher-time-to-show-weekly-calendar'),
 			data: JSON.stringify(getRequestForTeacherTimeToShowWeeklyCalendar(subjectId, teacherUserId,userRole,callType,studentStandardId,stDate)),
 			dataType: 'json',
@@ -1021,7 +1017,7 @@ function callTeacherRemainingTime(callfrom, teacherId, teacherUserId, userRole, 
 	$(".timeOccupiedNext").html('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-teacher-time-preference-datewise'),
 		data: JSON.stringify(getRequestForTeacherRemainingTime(callfrom, teacherUserId, userRole, callType, autoForwordStatus)),
 		dataType: 'json',
@@ -1121,7 +1117,7 @@ function callTimeBookingTeacher(callfrom, bookingId, bookType, startDate, iddate
 	data['startDate']=startDate;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-booking-time'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -1326,7 +1322,7 @@ function callSubjectNameByStudentUserID(formId, value, standardId, eleId) {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','SUBJECT-BY-STUDENT',value)),
 		dataType : 'json',

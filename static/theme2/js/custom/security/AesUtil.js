@@ -27,7 +27,7 @@ function getSecreteKey() {
 	var KEYS = {};
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH +SCHOOL_UUID+ '/api/v1/token',
 		dataType: 'json',
 		async: false,

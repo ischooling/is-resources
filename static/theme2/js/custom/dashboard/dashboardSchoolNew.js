@@ -100,7 +100,7 @@ function submitProspective(formId,moduleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','prospective-form-submit'),
 		data : JSON.stringify(getRequestForSubmitProspective(formId, moduleId)),
 		dataType : 'json',
@@ -114,13 +114,10 @@ function submitProspective(formId,moduleId) {
 				location.reload();
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
+
 function addlmsContent(controlType,studentId,roleModuleId,lmsId) {
 	hideMessage('');
 	console.log(controlType);
@@ -134,7 +131,7 @@ function addlmsContent(controlType,studentId,roleModuleId,lmsId) {
 	data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType : 'application/json',
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','add-lms-Content'),
 		data : JSON.stringify(data),
 		dataType : 'html',
@@ -429,7 +426,7 @@ function submitEvaluationForm(formId,moduleId,finalSubmit,evalStage) {
 	callCurrentStep(evalStage+1);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','evaluation-form-submit'),
 		data : JSON.stringify(getRequestForSubmitEvaluationForm(formId, moduleId,finalSubmit,evalStage)),
 		dataType : 'json',
@@ -455,10 +452,6 @@ function submitEvaluationForm(formId,moduleId,finalSubmit,evalStage) {
 					}
 				}
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -855,7 +848,7 @@ function saveSubject(formId,moduleId, roleModuleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','save-subjects'),
 		data : JSON.stringify(getRequestForSaveSubject(formId, moduleId)),
 		dataType : 'json',
@@ -878,10 +871,6 @@ function saveSubject(formId,moduleId, roleModuleId) {
 				showMessage(true, data['message']);
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -892,7 +881,7 @@ function savePreSubject(formId,moduleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','save-pre-subjects'),
 		data : JSON.stringify(getRequestForSavePreSubject(formId, moduleId)),
 		dataType : 'json',
@@ -916,10 +905,6 @@ function savePreSubject(formId,moduleId) {
 				//callSubjectSearch();
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -931,7 +916,7 @@ function adminSaveSubject(formId,moduleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','admin-save-subjects'),
 		data : JSON.stringify(getRequestForSaveSubject(formId, moduleId)),
 		dataType : 'json',
@@ -952,10 +937,6 @@ function adminSaveSubject(formId,moduleId) {
 				
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -966,7 +947,7 @@ function adminSavePreSubject(formId,moduleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','admin-save-subjects'),
 		data : JSON.stringify(getRequestForSavePreSubject(formId, moduleId)),
 		dataType : 'json',
@@ -986,10 +967,6 @@ function adminSavePreSubject(formId,moduleId) {
 				//callSubjectSearch();
 				
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -1143,7 +1120,7 @@ function saveRM(formId,moduleId) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','save-RM'),
 		data : JSON.stringify(getRequestForSaveRM(formId, moduleId)),
 		dataType : 'json',
@@ -1158,10 +1135,6 @@ function saveRM(formId,moduleId) {
 				$('#callEditSubjectInfoModal').modal('hide');*/
 				//callSubjectSearch();
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -1255,7 +1228,7 @@ function saveStudentMarks(formId,moduleId) {
 //	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','save-student-marks'),
 		data : JSON.stringify(getRequestForSaveStudentMarks(formId, moduleId)),
 		dataType : 'json',
@@ -1269,10 +1242,6 @@ function saveStudentMarks(formId,moduleId) {
 				$('#callMarksModal').modal('hide');
 				callSearchData('student-marks');
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -1491,10 +1460,6 @@ function createRow(keyId) {
 	        		}
 	    			return false;
 				}
-			},
-			error : function(e) {
-				//showMessage(true, e.responseText);
-				return false;
 			}
 		});
 		
@@ -1533,10 +1498,6 @@ function callForAddTravelsDetails(formId) {
         		}
     			return false;
 			}
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 	
@@ -1766,7 +1727,7 @@ function saveMarksGrade(formId,moduleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','save-grades'),
 		data : JSON.stringify(getRequestForSaveMarkGrade(formId, moduleId)),
 		dataType : 'json',
@@ -1783,10 +1744,6 @@ function saveMarksGrade(formId,moduleId) {
 				}, 1000);
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -1795,7 +1752,7 @@ function deleteMarksGrade(formId,moduleId,gradeId) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('school','save-grades'),
 		data : JSON.stringify(getRequestForSaveMarkGrade(formId, moduleId,'Y',gradeId)),
 		dataType : 'json',
@@ -1811,10 +1768,6 @@ function deleteMarksGrade(formId,moduleId,gradeId) {
 					callDashboardPageSchoolB2B('markgrade');
 				}, 1000);
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -1885,7 +1838,7 @@ function sendLMSStudentMailContent(lmsId) {
 	data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','lms-student-performance-send-mail'),
 		data : JSON.stringify(data),
 		dataType : 'html',
@@ -1906,11 +1859,6 @@ function sendLMSStudentMailContent(lmsId) {
 	        		}
 	    			return false;
 				}
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			$("#nextStep").prop("disabled", false);
-			tabActiveStatus(1);
 		}
 	});
 }

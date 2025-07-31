@@ -16,11 +16,11 @@ function bindLeaveData(userLeaveDTO){
 			'<td>' +
 			'<div class="btn-group">';
 			if(value.status != 'Initiated' && value.status != 'Panding' && value.status != 'panding' && USER_ROLE == "TEACHER"){
-				tableHtml += '<button type="button" class="btn btn-danger dropdown-toggle  btn-sm"data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Action" style="background-color:#007fff !important;border-color:#007fff;box-shadow:none;" disabled>' +
+				tableHtml += '<button type="button" class="btn btn-danger  dropdown-toggle  btn-sm"data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Action" style="background-color:#007fff !important;border-color:#007fff;box-shadow:none;" disabled>' +
 			'<i class="fa fa-ellipsis-v"></i>' +
 			'</button>';
 			}else{
-				tableHtml += '<button type="button" class="btn btn-danger dropdown-toggle  btn-sm"data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Action" style="background-color:#007fff !important;border-color:#007fff;box-shadow:none;">' +
+				tableHtml += '<button type="button" class="btn btn-danger  dropdown-toggle  btn-sm"data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Action" style="background-color:#007fff !important;border-color:#007fff;box-shadow:none;">' +
 			'<i class="fa fa-ellipsis-v"></i>' +
 			'</button>';
 			}
@@ -45,7 +45,7 @@ function getManageLeaveContent(title, roleAndModule, schoolId, userId, role, new
 	var html='';
 
 	if(newTheme){
-		html+='<div class="app-page-title">'
+		html+='<div class="app-page-title mb-3 py-2">'
 		+'	<div class="page-title-wrapper">'
 		+'		<div class="page-title-heading">'
 		+'			<div class="page-title-icon"> <i class="fa fa-calendar-plus text-primary"> </i> </div>'
@@ -54,7 +54,7 @@ function getManageLeaveContent(title, roleAndModule, schoolId, userId, role, new
 		+'	</div>'
 		+'</div>';
 	}else{
-		html+='<div class="app-page-title">'
+		html+='<div class="app-page-title mb-3 py-2">'
 		+'	<div class="page-title-wrapper">'
 		+'		<div class="page-title-heading">'
 		+'			<div class="page-title-icon"> <i class="fa fa-calendar-plus text-primary"> </i> </div>'
@@ -109,10 +109,10 @@ function modelForSaveAndUpdateLeave(userId,leaveUniqueId,userRole){
 var html = '<div class="modal fade fade-scale" id="leaveFromModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'
 +'<div class="modal-dialog modal-md" role="document">'
 	+'<div class="modal-content">'
-		+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
+		+'<div class="modal-header py-2 bg-primary text-white">'
 			+'<h5 class="modal-title text-white" id="feedback_title">Leave From</h5>'
 +'				<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-+'					<span aria-hidden="true">×</span>'
++'					<span aria-hidden="true">&times;</span>'
 +'				</button>'
 +'			</div>'
 +'			<div class="modal-body">'
@@ -123,7 +123,7 @@ var html = '<div class="modal fade fade-scale" id="leaveFromModal" tabindex="-1"
 +'								<input type="hidden" id="control"/>'
 +'								<input type="hidden" id="leaveid"/>'
 +'								<label for="">Teacher Name</label>'
-+'								<input type="text" name="teacherName" id="teacherName" class="form-control" value="Bhagat Singh Garakoti" placeholder="Teacher"  disabled/>'
++'								<input type="text" name="teacherName" id="teacherName" class="form-control" value="" placeholder="Teacher"  disabled/>'
 +'							</div>'
 +'						</div>'
 +'						<div class="col-12">'
@@ -175,10 +175,10 @@ function modelForUpdateLeaveStatus(userId,leaveUniqueId,userRole){
 	var html = '<div class="modal fade fade-scale" id="leaveFromModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'
 	+'<div class="modal-dialog modal-md" role="document">'
 	+'		<div class="modal-content">'
-	+'			<div class="modal-header pt-2 pb-2 theme-bg text-white">'
+	+'			<div class="modal-header py-2 bg-primary text-white">'
 	+'				<h5 class="modal-title text-white" id="feedback_title">Approvel From</h5>'
 	+'				<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-	+'					<span aria-hidden="true">×</span>'
+	+'					<span aria-hidden="true">&times;</span>'
 	+'				</button>'
 	+'			</div>'
 	+'			<div class="modal-body">'

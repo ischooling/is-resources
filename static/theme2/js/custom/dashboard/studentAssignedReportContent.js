@@ -67,8 +67,8 @@ function getStudentAssigneFilterContent(roleAndModule, schoolId, userId, role){
 								+'<input type="hidden" name="orderBy" id="orderBy" class="form-control" value="asc" maxlength="4"/>'
 							+'</div>'
 							+'<div class="col-xl-4 col-lg-4 col-md-4 col-sm-5 col-xs-12 mt-3">'
-								+'<button class="btn btn-success btn-shadow float-right pr-4 pl-4 mr-2" onclick="studentAssginedReportSearch(\'studentAssignedReportFilter\',\''+roleAndModule.moduleId+'\','+userId+',\''+role+'\');"><i class="fa fa-check"></i>&nbsp;Apply</button>'
-								+'<button class="btn btn-primary btn-shadow float-right pr-4 pl-4 mr-2" onclick="studentAssginedReportSearchReset(\'studentAssignedReportFilter\')"><i class="fa fa-check"></i>&nbsp;Reset</button>'
+								+'<button class="btn btn-success  float-right pr-4 pl-4 mr-2" onclick="studentAssginedReportSearch(\'studentAssignedReportFilter\',\''+roleAndModule.moduleId+'\','+userId+',\''+role+'\');"><i class="fa fa-check"></i>&nbsp;Apply</button>'
+								+'<button class="btn btn-primary  float-right pr-4 pl-4 mr-2" onclick="studentAssginedReportSearchReset(\'studentAssignedReportFilter\')"><i class="fa fa-check"></i>&nbsp;Reset</button>'
 							+'</div>'
 						+'</div>'
 					+'</div>'
@@ -82,7 +82,7 @@ function getStudentAssigneFilterContent(roleAndModule, schoolId, userId, role){
 function getStudentAssignedReportContent(title, roleAndModule, schoolId, userId, role){
 	ROLE_MODULE_ID = roleAndModule.moduleId;
 	var html= 
-		`<div class="app-page-title">
+		`<div class="app-page-title mb-3 py-2">
 			<div class="page-title-wrapper">
 				<div class="page-title-heading">
 					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
@@ -363,7 +363,7 @@ function studentAssignedReportContent(data, divId, role){
 					+'<table class=\"table row-height-small table-bordered  text-center\">'
 						+'<thead>'
 							+'<tr class=\"bg-dark-gray\">'
-								+'<th class=\"text-white bg-primary\"><b>Sr. no.</b></th>'
+								+'<th class=\"text-white bg-primary\"><b>S. No.</b></th>'
 								+'<th class=\"text-white bg-primary\"><b>Teacher Name</b></th>'
 								+'<th class=\"text-white bg-primary\"><b>Location</b></th>'
 								+'<th class=\"text-white bg-primary\"><b>Employee Status</b></th>'
@@ -391,10 +391,10 @@ function filterTeacherReportModal(schoolId){
 	html='<div class="modal fade bd-example-modal-lg fade-scale square-field" id="studentAssignFilterModal">'
 		+'<div class="modal-dialog modal-lg">'
 			+'<div class="modal-content border-0">'
-				+'<div class="modal-header  theme-bg text-white">'
-					+'<h4 class="modal-title">Filter</h4>'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title">Filter</h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" paria-label="Close">'
-						+'<span aria-hidden="true">×</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<form action="javascript:void(0);" id="studentAssignFilterForm" name="studentAssignFilterForm" autocomplete="off">'
@@ -463,9 +463,9 @@ function filterTeacherReportModal(schoolId){
 						+'</div>'
 						+'<br/>'
 						+'<div class="text-right">'
-							+'<button type="button" id="studentAssignWithFilterBtn" class="btn btn-success btn-shadow  pr-4 pl-4" onClick="getStudentAssignedReportWithFilterSubmit(\'TSF\',\'\',\'\');">Search</button>'
-							+'<button type="button" class="btn btn-danger btn-shadow pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-							+'<button type="button"  class="btn btn-primary btn-shadow  pr-4 pl-4" onClick="studentAssgineFilterReset(\'studentAssignFilterForm\')">Reset</button>'
+							+'<button type="button" id="studentAssignWithFilterBtn" class="btn btn-success   pr-4 pl-4" onClick="getStudentAssignedReportWithFilterSubmit(\'TSF\',\'\',\'\');">Search</button>'
+							+'<button type="button" class="btn btn-danger  pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+							+'<button type="button"  class="btn btn-primary   pr-4 pl-4" onClick="studentAssgineFilterReset(\'studentAssignFilterForm\')">Reset</button>'
 						+'</div>'	
 					+'</div>'
 				+'</form>'
@@ -498,7 +498,7 @@ function getStudentAssignedReportWithFilterBody(result, userId, role){
 		}else if(v.color=='YELLOW'){
 			customClass='bg-warning';
 		}else if(v.color=='BLUE'){
-			customClass='bg-info text-white';
+			customClass='bg-primary text-white';
 		}else{
 			customClass='bg-danger text-white';
 		}

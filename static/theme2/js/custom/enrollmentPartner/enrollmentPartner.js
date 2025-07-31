@@ -9,7 +9,7 @@ function getEnrollmentPartnerTracker(payload) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/enrollment-partner/tracker',
 		data : JSON.stringify(getRequestForEnrollmentPartnerTrackerDetails(payload)),
 		dataType : 'json',
@@ -39,7 +39,7 @@ function getEnrollmentPartnerDetails(payload) {
 	var responseData={};
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/enrollment-partner/details?payload='+payload,
 		dataType : 'json',
 		async : false,
@@ -112,7 +112,7 @@ function saveEnrollmentPartnerDetails(formId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/enrollment-partner/save',
 		data : JSON.stringify(getRequestForEnrollmentPartnerDetails(formId)),
 		dataType : 'json',

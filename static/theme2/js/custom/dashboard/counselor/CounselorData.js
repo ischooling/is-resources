@@ -6,7 +6,7 @@ function callStudentListByCounselor(formId) {
 	
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'get-student-enrolled-counselor'),
 			data : JSON.stringify(getRequestForCounselorEnrolledList(formId)),
 			dataType : 'json',
@@ -38,10 +38,7 @@ function callStudentListByCounselor(formId) {
 						// $("#campaignlist").html(html);
 						// $('#tblCampaignList').dataTable();
 				}
-			},
-		   error : function(e) {
-			   console.log(e);
-		   }
+			}
 	   });
    }
 
@@ -94,7 +91,7 @@ function callCounselorCountries(formId, value, elementId, preSelected) {
 	$("#" + formId + " #" + elementId).html('<option value="">Select country</option>');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'COUNTRIES-LIST', value)),
 		dataType: 'json',
@@ -136,7 +133,7 @@ function getCounselorCommissionRate(formId, elementId ,userId) {
 	return new Promise(function(resolve, reject){
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-counselor-commission-rate',
 			data : JSON.stringify(getRequestForPartnerCommissionRate(formId, userId)),
 			dataType : 'json',
@@ -160,13 +157,6 @@ function getCounselorCommissionRate(formId, elementId ,userId) {
 					// });
 	
 				}
-			},error: function(xhr, status, error) {
-				if (checkonlineOfflineStatus()) {
-					return;
-				}
-				console.error('Error: ' + error);
-				reject(error);
-				customLoader(false);
 			}
 		});
 	});
@@ -218,7 +208,7 @@ function callPartnerListBy(formId, elementId) {
 	$("#" + formId + " #" + elementId).html('<option dail-referral-code="" value="">Select Partner</option>');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-partner-list'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -235,9 +225,6 @@ function callPartnerListBy(formId, elementId) {
 					$("#" + formId + " #" + elementId).append('<option dail-referral-code="'+v.extra+'" value="'+v.key+'">'+v.value+'</option>');
 				});
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -285,7 +272,7 @@ function updateStudentCounselorCommissionRate(studentStandardId, updateStatus, a
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-transfer-payment',
 		data : JSON.stringify(requestData),
 		dataType : 'json',
@@ -370,7 +357,7 @@ function getCounselorDetails(userId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/counselor-content',
 		data : JSON.stringify(getRequestForCounselorDetails(userId)),
 		dataType : 'json',
@@ -398,7 +385,7 @@ function getCounselorDashboardDetailsData(userId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/counselor-learning-program-content',
 		data : JSON.stringify(getRequestForCounselorDetails(userId)),
 		dataType : 'json',
@@ -442,7 +429,7 @@ function getReferralCodeAndLinksDetails(userId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/referral-and-links',
 		data : JSON.stringify(getRequestForReferralCodeAndLink(userId)),
 		dataType : 'json',
@@ -475,7 +462,7 @@ function getCounselorStudentGrade(formId, elementId ,userId, learningProgramCode
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-counselor-student-list-gradewise',
 		data : JSON.stringify(getRequestForCounselorCommissionRate(formId, userId, learningProgramCode, enrollmentFor)),
 		dataType : 'json',
@@ -693,8 +680,7 @@ function getCounselorRegisterDataByGrade(data, dataType){
 						grade_9_total=grade_9_total+ parseInt(gradeWiseStudent.totalStudent);
 						grade_9_lableStr="Grade 9 - 12";
 	
-				}
-				else if(gradeWiseStudent.standard_id==9
+				}else if(gradeWiseStudent.standard_id==9
 					|| gradeWiseStudent.standard_id==10
 					|| gradeWiseStudent.standard_id==19
 					|| gradeWiseStudent.standard_id==20
@@ -767,7 +753,7 @@ function applyDiscountMsgShow(discountEleID){
 function callB2BDashboardLead(moduleId,leadType) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'b2b-dashboard-lead'),
 			data : JSON.stringify(getRequestForB2bDashboard(moduleId,leadType)),
 			dataType : 'json',
@@ -795,10 +781,7 @@ function callB2BDashboardLead(moduleId,leadType) {
 					
 					
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    
@@ -1096,7 +1079,7 @@ function saveCounselorCommissionRate(formId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-counselor-commission-rate',
 		data : JSON.stringify(getRequestForSaveCounselorCommissionRate(formId)),
 		dataType : 'json',
@@ -1316,7 +1299,7 @@ function fetchCounselorCommissionRate(formId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/filter-counselor-commission-rate',
 		data : JSON.stringify(getRequestForFilterCounselorCommissionRate(formId)),
 		dataType : 'json',
@@ -1368,14 +1351,13 @@ function getLeadListData(moduleId ,leadFrom, clickFrom, startDate, endDate, coun
 	return new Promise(function(resolve, reject){
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/lead-list',
 			data : JSON.stringify(getRequestForLeadList(moduleId ,leadFrom, clickFrom, startDate, endDate, country, campaign, currentPage, userId, leadType)),
 			dataType : 'json',
 			async:true,
 			global : true,
 			success : function(data) {
-				console.log(data);
 				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 					if (data['status'] == '3') {
 						redirectLoginPage();
@@ -1385,12 +1367,43 @@ function getLeadListData(moduleId ,leadFrom, clickFrom, startDate, endDate, coun
 					resolve(data)
 	
 				}
-			},error: function(xhr, status, error) {
-				if (checkonlineOfflineStatus()) {
-					return;
+			}
+		});
+	});
+}
+
+function getRequestForLeadReports(moduleId , userId){
+	if(userId=='' || userId==undefined){
+		userId=USER_ID;
+	}
+	var data={};
+	data['userId']=userId;
+	data['moduleId'] = moduleId;
+	return data;
+}
+
+function getLeadReportData(moduleId, userId) {
+	//"lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
+	return new Promise(function(resolve, reject){
+		$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/lead-reports',
+			data : JSON.stringify(getRequestForLeadReports(moduleId, userId)),
+			dataType : 'json',
+			async:true,
+			global : true,
+			success : function(data) {
+				//console.log(data);
+				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+					if (data['status'] == '3') {
+						redirectLoginPage();
+					} 
+					return reject()
+				}else{
+					resolve(data)
+	
 				}
-				console.error('Error: ' + error);
-				reject(error);
 			}
 		});
 	});
@@ -1420,4 +1433,32 @@ function toggleLinkTab(type){
 		$('#seatLinksSection').removeClass('d-none').addClass('d-flex');
 		$('#enrollmentLinksSection').removeClass('d-flex').addClass('d-none');
 	}
+}
+
+function callMasterCampainList(formId, value, elementId) {
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(getRequestForMaster(formId, "CAMPAIN-LIST", value)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      //console.log(data);
+      if (data["status"] == "0" || data["status"] == "2") {
+        showMessageTheme2(0, stringMessage[1], "serverError", "");
+      } else {
+        //buildDropdown(data['data'], $('#campainid'), 'Select city');
+		var campaignList=data.mastersData.data
+        $("#" + formId + " #" + elementId).html( '<option value="">Select Campain</option>');
+        var dropdown = $("#" + formId + " #" + elementId);
+		
+        $.each(campaignList, function (k, v) {
+          dropdown.append('<option value="' + v.value +'" >' + v.value +'('+v.extra+')</option>');
+        });
+      }
+      return false;
+    }
+  });
 }

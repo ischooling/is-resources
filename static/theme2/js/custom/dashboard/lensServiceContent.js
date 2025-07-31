@@ -27,8 +27,7 @@ function renderClassDetails(){
 					+'</tbody>'
 				+'</table>'
 			+'</div>'
-		+'</div>'
-		+customLoaderContent();
+		+'</div>';
 	return html;    
 }
 function lensClassContent(lensClassDetails){
@@ -59,14 +58,14 @@ function getClassSessionModal(data){
 					+'<div class="modal-header bg-primary py-2">'
 						+'<h5 class="modal-title text-white" id="exampleModalLongTitle">Class Session</h5>'
 						+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-							+'<span aria-hidden="true">×</span>'
+							+'<span aria-hidden="true">&times;</span>'
 						+'</button>'
 					+'</div>'
 					+'<div class="modal-body">'
 						+getClassSessionContent(data)
 					+'</div>'
 					+'<div class="modal-footer">'
-						+'<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+						+'<button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>'
 						// +'<button type="button" class="btn btn-primary">Save changes</button>'
 					+'</div>'
 				+'</div>'
@@ -153,7 +152,7 @@ function openVideoModal(videoUrl){
 				+'<div class="modal-content">'
 					+'<div class="modal-header bg-primary py-2">'
 						+'<h5 class="modal-title text-white" id="exampleModalLongTitle">Class Session</h5>'
-						+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 					+'</div>'
 					+'<div class="modal-body">'
 						+'<video width="100%" height="500" controls class="videoTag">'
@@ -161,7 +160,7 @@ function openVideoModal(videoUrl){
 							+'Your browser does not support the video tag.'
 						+'</video>'
 					+'</div>'
-					+'<div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div>'
+					+'<div class="modal-footer"><button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button></div>'
 				+'</div>'
 			+'</div>'
 		+'</div>';
@@ -339,22 +338,5 @@ function getClassSessionRatingAndFeeback(data){
 				+'</div>'
 			+'</div>'
 		+'</div>';
-	return html;
-}
-
-function customLoaderContent(){
-	// var html = 
-	// 	'<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
-	// 		+'<div class="loader primary-border-top-color">'
-	// 			+'<div class="full">'
-	// 				+'<img src="'+PATH_FOLDER_IMAGE2+'is_loader.gif" alt="'+SCHOOL_NAME+' Loader"/>'
-	// 			+'</div>'
-	// 		+'</div>'
-	// 	+'</div>';
-	var html = `
-		<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">
-			<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024" />
-		</div>
-	`
 	return html;
 }

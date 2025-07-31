@@ -87,7 +87,7 @@ async function renderTeacherDashboard(data){
 
 function dashboardContentTeacher(data){
     var html=
-    '<div class="app-page-title pt-1 pb-1 mb-2">'
+    '<div class="app-page-title mb-3 py-2">'
 		+'<div class="page-title-wrapper">'
 			+'<div class="page-title-heading w-100">'
         +'</div>'
@@ -123,14 +123,13 @@ function teacherAgreementContent(data, responseData){
             <input type="hidden" id="userId" value="${data.userId}">
             <div class="modal-dialog modal-xl" role="document" style="top:0%;">
                 <div class="modal-content">
-                    <div class="modal-header text-white theme-bg py-2">
-                        <h4 class="modal-title" id="exampleModalLabel1" style="color:#fff;">Teacher Agreement</h4>	
-                        ${/*button type="button" class="close" data-dismiss="modal"
-                            aria-label="Close" style="margin-top:-22px;">
-                            <span aria-hidden="true" style="color:#fff;">&times;</span>
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Teacher Agreement</h5>	
+                        ${/*button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
                         </button>*/''}
                     </div>
-                    <div class="modal-body" style="height:400px;overflow:auto;width:100%;">
+                    <div class="modal-body" style="max-height:400px;overflow:auto;width:100%;">
                         <section id="section-linebox" class="text-left">`
                             html+=teacherAgreementView(responseData)
                         html+=`</section>
@@ -303,7 +302,7 @@ function holidayOne(){
 	'<div class="modal fade calendarbox" id="holiday1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'
 		+'<div class="modal-dialog" role="document">'
 			+'<div class="modal-content">'
-				+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
+				+'<div class="modal-header py-2 bg-primary text-white">'
 					+'<h5 class="modal-title" id="calendarbox_title"></h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
 						+'<span aria-hidden="true">X</span>'
@@ -360,7 +359,7 @@ function onBordingMandotryVideo(){
 //         var localDatetime=changeDateFormat(new Date(), 'yyyy-mm-dd')+' '+getCurrentTimeOnly()
 // 		payload['startDatetime'] = convertLocalToUTCWithFormat(getBeforeAndAfterDate(localDatetime,-24),USER_TIMEZONE, DATETIME_UTC_FORMATTER);
 // 		payload['endDatetime'] = convertLocalToUTCWithFormat(getBeforeAndAfterDate(localDatetime,24),USER_TIMEZONE, DATETIME_UTC_FORMATTER);
-// 		responseData = await getDashboardDataBasedUrlAndPayload(false, false,'get-acivity-details', payload,true);
+// 		responseData = await getDashboardDataBasedUrlAndPayload(true, false,'get-acivity-details', payload,true);
 //         if(responseData.status==1){
 //             $('#activityContent').html(dashboardActivityConent(responseData));
 //             var activitylength = $(".card-activity .vertical-nav-menu > .sub-menu").length;

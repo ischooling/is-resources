@@ -4,7 +4,7 @@ function callForCount(userId, schoolId) {
 		url : getURLFor('dashboard', 'notification-log-activity'),
 		data : JSON.stringify(getRequestForCount(userId,schoolId)),
 		dataType : 'json',
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		success : function(htmlContent) {
 			if (htmlContent != "") {
 				$('#hideBlinking').removeClass('icon-anim-pulse');

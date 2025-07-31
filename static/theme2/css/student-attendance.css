@@ -23,13 +23,13 @@
 	right:inherit;
 	top: 15px;
 	left: 5px;
-	background: #007fff;
+	background: var(--pc);
 }
 .fixedtable thead.student-h-scroll-view .h_scroll{
 	right:inherit;
 	top: 5px;
 	left: 15px;
-	background: #007fff;
+	background: var(--pc);
 }
 .fixedtable  th {
   border: 1px solid #c9d0f9;
@@ -51,7 +51,7 @@
   top: -1px;
   z-index: 1;
   width: 25vw;
-  color: #007fff;
+  color: var(--pc);
   text-align: center;
   border-bottom: 0;
   background: #e2f1ff
@@ -63,7 +63,7 @@
   background: #fff;
   padding: 2px;
   text-align: center;
-  color:#007fff;
+  color:var(--pc);
 }
 
 .fixedtable tbody th {
@@ -97,7 +97,7 @@
 }
 .fixedtable tbody tr th:first-child, .fixedtable tbody tr th:first-child > table tr td {
   border: 1px solid #c4ddf7;
-  color: #007fff;
+  color: var(--pc);
   border-bottom: 0;
   font-size: 11px;
 }
@@ -112,10 +112,10 @@
 
 
 
-.table-navigator{width: 100%;display:flex;text-align: right;justify-content: center;background: #007fff;padding: 5px;}
+.table-navigator{width: 100%;display:flex;text-align: right;justify-content: center;background: var(--pc);padding: 5px;}
 .table-navigator .month-name{margin-left: auto;font-size: 18px;font-weight: 600;color:#fff;}
 .table-navigator .navigator{margin-left: auto;}
-.table-navigator .prev, .table-navigator .next{width: 30px;line-height: 30px;background:#e2f1ff;color:#007fff;text-align: center;display: inline-block;font-size: 20px;cursor: pointer;border-radius: 2px;}
+.table-navigator .prev, .table-navigator .next{width: 30px;line-height: 30px;background:#e2f1ff;color:var(--pc);text-align: center;display: inline-block;font-size: 20px;cursor: pointer;border-radius: 2px;}
 .selectDateWrapper{display: inline-block;}
 .selectDateWrapper .icon{}
 .selectDate{border:none; padding: 5px;}

@@ -10,7 +10,7 @@ function getStudentDashboardOrMigrationSection() {
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/dashboard/dashboard-or-migration',
 		data : JSON.stringify(getRequestForStudentDashboardSelection()),
 		dataType : 'json',
@@ -42,7 +42,7 @@ function getStudentDashboardDetails() {
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/dashboard/get-student-dashboard',
 		data : JSON.stringify(getRequestForStudentDashboardSelection()),
 		dataType : 'json',
@@ -74,7 +74,7 @@ function getStudentMigraionOptionDetails() {
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/get-migration-option-details',
 		data : JSON.stringify(getRequestForStudentDashboardSelection()),
 		dataType : 'json',
@@ -109,7 +109,7 @@ function callForStudentNextSession(nextGradeId, nextGradeName, enrollmentType, r
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/standard-id',
 		data: JSON.stringify(getRequestForStudentNextSession(nextGradeId, enrollmentType, registrationType)),
 		dataType: 'json',
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		global: false,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
@@ -156,7 +156,7 @@ function getCourseCategoryByGradeId() {
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/get-course-categories',
 		data: JSON.stringify(getRequestForCourseCategory()),
 		dataType: 'json',
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		global: false,
 		success: function (data) {
 			var dropdown = $('#courseCategory');
@@ -287,17 +287,14 @@ function openCourseDetailModal(courseDescriptionUrl, subjectName) {
     $.ajax({
         url: BASE_URL+CONTEXT_PATH+SCHOOL_UUID+"/dashboard/get-course-summary",
         method: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         data: JSON.stringify(requestBody),
         success: function (response) {
             const data = JSON.parse(response);
             modalContent.html(`
                 <p>${data.data.OVERVIEW || "No overview available."}</p>
             `);
-        },
-        error: function (error) {
-            console.error("Error fetching course details:", error);
-        },
+        }
     });
 	return false;
 }

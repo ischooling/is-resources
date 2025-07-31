@@ -78,7 +78,7 @@
   font-weight:700;
 }
 .shake-animation{
-	color:#001173 !important;
+	color:var(--pc) !important;
 	font-weight:bold;
 	font-size:13px;
 	padding:0px 20px;margin-bottom:0;

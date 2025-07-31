@@ -28,10 +28,6 @@ function getSchoolSettingDetails() {
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -43,7 +39,7 @@ function saveSchoolSettings(formId, schoolId, updateFor) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','send-referralcode-to-user'),
 		data : JSON.stringify(getRequestForUserReferral(formId, moduleId,isForSpecificUser)),
 		dataType : 'json',
@@ -91,7 +87,7 @@ function saveSchoolSettingData(formId, moduleName, settingId,schoolId){
 	$("#errMsg").text('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','save-school-setting-lms-role-pg-data'),
 		data : JSON.stringify(getRequestForSaveSchoolSettingData(formId,moduleName, settingId,schoolId)),
 		dataType : 'json',
@@ -315,10 +311,6 @@ function lmsProviderChagedDetails(schoolId) {
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -330,7 +322,7 @@ function getAdmissionCycles() {
 	$("#stateId").prop("disabled", true);
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForAdmissionCycle('dashboard', 'admission-cycle', session),
 		dataType : 'json',
 		async : false,
@@ -341,9 +333,6 @@ function getAdmissionCycles() {
 				showMessage(0, data['message'], true)
 			}
 
-		},
-		error : function(e) {
-			/* $("#stateId").prop("disabled", false); */
 		}
 	});
 	return true;
@@ -356,7 +345,7 @@ function saveEditAdmissionCycle(formId, id){
 	console.log('schoolsettings');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForAdmissionCycle('dashboard', 'admission-cycle', ''),
 		data : JSON.stringify(getDataForAdmissionCycle(formId, id)),
 		dataType : 'json',
@@ -371,9 +360,6 @@ function saveEditAdmissionCycle(formId, id){
 				return false;
 			}
 
-		},
-		error : function(e) {
-			/* $("#stateId").prop("disabled", false); */
 		}
 	});
 }
@@ -539,7 +525,7 @@ function dltAdmissionCycle(id){
 	console.log('schoolsettings');
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForAdmissionCycle('dashboard', 'dlt-admission-cycle', id),
 		dataType : 'json',
 		async : false,
@@ -553,9 +539,6 @@ function dltAdmissionCycle(id){
 				return false;
 			}
 
-		},
-		error : function(e) {
-			/* $("#stateId").prop("disabled", false); */
 		}
 	});
 
@@ -590,7 +573,7 @@ function editAdmissionCycle(id){
 	console.log('schoolsettings');
 	$.ajax({
 		type : "get",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForAdmissionCycle('dashboard', 'get-admission-cycle', id),
 		dataType : 'json',
 		async : false,
@@ -604,9 +587,6 @@ function editAdmissionCycle(id){
 				return false;
 			}
 
-		},
-		error : function(e) {
-			/* $("#stateId").prop("disabled", false); */
 		}
 	});
 

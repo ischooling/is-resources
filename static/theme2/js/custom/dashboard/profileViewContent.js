@@ -4,10 +4,10 @@ function teacherBankDetialsContent(bankDetails, userId){
 	'<div class="modal fade modal-design" id="editProfileModal" role="dialog">'
 		+'<div class="modal-dialog modal-xl" role="document">'
 			+'<div class="modal-content border-0">'
-				+'<div class="modal-header  theme-bg text-white pt-2 pb-2">'
-					+'<h4 class="modal-title" id="exampleModalLabel">Edit Bank Details</h4>'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title" >Edit Bank Details</h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">×</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div class="modal-body">'
@@ -376,10 +376,10 @@ function courseSelectionModal(data){
     `<div class="modal modal-design fade " id="select_course" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-style">
             <div class="modal-content">
-                <div class="modal-header pt-2 pb-2 theme-bg text-white">
+                <div class="modal-header py-2 bg-primary text-white">
 					<h5 class="modal-title">Courses Taught</h5>
 					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">×</span>
+						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
                 <div class="modal-body">

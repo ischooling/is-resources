@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	
 	$.validator.addMethod("letterRegex", function(value, element) {
 		return this.optional(element) || /^[A-Z-a-z\s]+$/.test(value);
 	}, "Field must contain only letters");
@@ -160,7 +161,7 @@ function callForSignupStudentDetails() {
 	$(".prev-btn, .next-btn").addClass("disabled");
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/save-student-details',
 		data : JSON.stringify(getRequestForStudent()),
 		dataType : 'json',
@@ -350,7 +351,7 @@ function callForStudentSelection() {
 	showSkeleton(true, "step1");
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/get-student-details',
 		data : JSON.stringify(getRequestForStudentSelection()),
 		dataType : 'json',

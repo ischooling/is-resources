@@ -70,7 +70,7 @@ function saveOfflineClasses(formId, modalID){
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('meeting','offline'),
 		data : JSON.stringify(getRequestForOfflineClass(formId)),
 		dataType : 'json',
@@ -131,7 +131,7 @@ function advanceofflineClassSearch(formId, elementId, moduleId,userId, role){
 	checkTextBox(formId);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('meeting','offline-list'),
 		data : JSON.stringify(getRequestForOfflineClassFilter(formId)),
 		dataType : 'json',
@@ -189,7 +189,7 @@ function deleteOfflineClasses(offlineId){
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('meeting','offline'),
 		data : JSON.stringify(getRequestForDeleteOfflineClass(offlineId)),
 		dataType : 'json',
@@ -274,7 +274,7 @@ function deleteRow(element){
 function joinOfflineMeeting(userId, offlineId){
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('meeting','offline-join'+'/'+userId+'/'+offlineId),
 		dataType : 'json',
 		success : function(data) {

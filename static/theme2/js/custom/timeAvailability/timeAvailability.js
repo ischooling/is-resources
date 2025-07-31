@@ -162,7 +162,7 @@ function getCalendarDateAvailability(formId, userId, elementId, startDate, visit
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-calendar-date'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -1371,7 +1371,7 @@ function getCalendarAvailabilityData(formId, userId,elementId, startDate, slotTy
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-calendar-availability'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		async : false,
@@ -1387,7 +1387,7 @@ function getTeacherTotalAvailability(teacherUserId) {
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('report', 'get-teacher-availability'),
 		data : JSON.stringify(getRequestForTeacherTotalAvailability(teacherUserId)),
 		dataType : 'json',
@@ -1436,7 +1436,7 @@ function getTeacherRemainingTime(callfrom, teacherUserId, userRole, modalID, cal
 	customLoader(false);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-teacher-time-preference-datewise'),
 		data: JSON.stringify(getRequestForTeacherRemainingTime(callfrom, teacherUserId, userRole, callType, autoForwordStatus)),
 		dataType: 'json',
@@ -1446,11 +1446,6 @@ function getTeacherRemainingTime(callfrom, teacherUserId, userRole, modalID, cal
 		success: function (data) {
 			console.log(data);
 			responseData=data;
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} 
 		}
 	});
 	return responseData
@@ -1464,7 +1459,7 @@ function getCalendarAvailability(formId, userId,elementId, startDate, slotType, 
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-calendar-availability'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -1985,7 +1980,7 @@ function saveTimeCalendarAvailability(callFrom, userId, modalID, prestartTime, p
 	
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('timeavailability', 'save-time-availablity'),
 		data: JSON.stringify(getRequestForTimeAvailability(callFrom, userId, modalID, prestartTime, preendTime, userRoleId)),
 		dataType: 'json',
@@ -2006,10 +2001,6 @@ function saveTimeCalendarAvailability(callFrom, userId, modalID, prestartTime, p
 				getUserAvailability('user-time-available',userId,'', prestartTime, preendTime, userRoleId);
 				saveAvailabilityOfActiveEvents('CALL-CALENDAR','ALL', userRoleId);
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -2093,7 +2084,7 @@ function getUserAvailability(elementId, userId, slotType, prestartTime, preendTi
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-user-availability'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -2131,10 +2122,6 @@ function getUserAvailability(elementId, userId, slotType, prestartTime, preendTi
 					
                 }
 				return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -2285,7 +2272,7 @@ function saveTimeCalendarWeekWise(userId,dayid,timeSlotAvailability, controlType
 	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('timeavailability', 'save-availablity-weekwise'),
 		data: JSON.stringify(getRequestForTimeCalendarWeekWise(userId,dayid,timeSlotAvailability, prestartTime, preendTime,callTime, controlType, userRoleId, min, max, slotBufferLimit)),
 		dataType: 'json',
@@ -2365,11 +2352,6 @@ function saveTimeCalendarWeekWise(userId,dayid,timeSlotAvailability, controlType
 					});
 				}
 			}
-			customLoader(false);
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			customLoader(false);
 			return false;
 		}
@@ -2459,7 +2441,7 @@ function getUserWeeklyAvailability(elementId, userId, slotType, prestartTime, pr
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-user-week-availability'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -2528,10 +2510,6 @@ function getUserWeeklyAvailability(elementId, userId, slotType, prestartTime, pr
 					});
                 }
 				return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -2991,7 +2969,7 @@ function removeTimePrefRence(divid, timeid, userId, dateWise, prestartTime, pree
 		$.ajax({
 			type: "POST",
 			url: getURLFor('timeavailability', 'remove-time-prefrence'),
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			data: JSON.stringify(request),
 			dataType: 'json',
 			cache: false,
@@ -3006,10 +2984,6 @@ function removeTimePrefRence(divid, timeid, userId, dateWise, prestartTime, pree
 						getUserAvailability('user-time-available',userId,'', prestartTime, preendTime, userRoleId);
 					}
 					return false;
-			},
-			error: function (e) {
-				//showMessage(true, e.responseText);
-				return false;
 			}
 		});
 	}else{
@@ -3065,7 +3039,7 @@ function getMeetingEvents(lUserId,prestartTime, preendTime, userRoleId, min, max
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-meeting-events'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -3083,10 +3057,6 @@ function getMeetingEvents(lUserId,prestartTime, preendTime, userRoleId, min, max
 				var htmlDrp = getEventDropdownList(data.eventList, 'eventDropdownList');
                 }
 				return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -3285,8 +3255,8 @@ function getEventDropdownList(eventDrpList, dropdownElementId){
 	
 	html+='</ul>';
 	html+='<div class="full text-center mt-3">';
-	html+='<a href="javascript:void(0)" class="btn btn-outline-primary mr-2">Cancel</a>';
-	html+='<a href="javascript:void(0)" class="btn btn-primary" onclick="saveAvailabilityOfActiveEvents(\'EVENTS-SAVE\',\'ALL\')">Save</a>';
+	html+='<a href="javascript:void(0)" class="btn btn-danger mr-2">Cancel</a>';
+	html+='<a href="javascript:void(0)" class="btn btn-success" onclick="saveAvailabilityOfActiveEvents(\'EVENTS-SAVE\',\'ALL\')">Save</a>';
 	html+='</div>';
 	html+='</div>';
 	$("."+dropdownElementId).html(html);
@@ -3337,7 +3307,7 @@ function saveAvailabilityOfActiveEvents(callFrom, scheduleType, userRoleId){
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('timeavailability', 'save-availablity-activeon-events'),
 		data: JSON.stringify(getRequestForSaveAvailabilityOfActiveEvents(scheduleType,eventList, userRoleId, callFrom)),
 		dataType: 'json',
@@ -3354,10 +3324,6 @@ function saveAvailabilityOfActiveEvents(callFrom, scheduleType, userRoleId){
 					}
 				}
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -3409,7 +3375,7 @@ function dataForBookAnEventSlot() {
 	customLoader(true);
 	$.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','get-data-for-book-slot'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',
@@ -3432,10 +3398,6 @@ function dataForBookAnEventSlot() {
 				// renderStudentEnrollmentRecord(data, moduleId, clickFrom, currentPage);
 				
 			}
-		 },
-		 error:function(e){
-			// console.log(e);
-			 customLoader(false);
 		 }
 	 });
 }
@@ -3463,7 +3425,7 @@ function callFreeSlotsToBookEvent(visitDate,dayId) {
 	
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('timeavailability', 'get-free-slots-to-book-event'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -3544,7 +3506,7 @@ function getCalendarForMeeting(elementId,  startDate, slotType, timeZone) {
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'get-calendar-meeting-book'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -3582,10 +3544,6 @@ function getCalendarForMeeting(elementId,  startDate, slotType, timeZone) {
 					customLoader(false);
                 }
 				return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -3707,7 +3665,7 @@ function getRefreshWeek(callFrom,userId,selectDate,dayId, prestartTime, preendTi
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'refresh-time-prefrence'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		cache: false,
@@ -3728,10 +3686,6 @@ function getRefreshWeek(callFrom,userId,selectDate,dayId, prestartTime, preendTi
 					}
                 }
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -3741,7 +3695,7 @@ function inactiveMeetingSlotType(userId,slotTypeId,activeSlot,overlayEleWrapper,
 	$.ajax({
 		type: "POST",
 		url: getURLFor('timeavailability', 'inactive-meeting-slottype'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
 		async: false,
@@ -3785,6 +3739,8 @@ function inactiveMeetingSlotType(userId,slotTypeId,activeSlot,overlayEleWrapper,
 						$("."+overlayEleWrapper).find(".check-disable-overlay").addClass("envetn_overlay");
 					}
 				}
+				$('[data-toggle="tooltip"]').tooltip('dispose');
+				$('[data-toggle="tooltip"]').tooltip();
 			}
 			return false;
 		}
@@ -3841,7 +3797,7 @@ function scheduleMeetingForEvent(formId){
 	$("#thankyouPageSkeleton").show();
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: getURLFor('timeavailability','meetingslots-new-submit-for-event'),
 		data : JSON.stringify(getRequestForSubmitMeetingForEvent(formId)),
 		dataType : 'json',
@@ -4134,7 +4090,7 @@ function getEditEvents(eventId,controlType, userId,prestartTime, preendTime, use
 	data['userId'] = userId;
 	$.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','get-data-for-add-edit-event'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',
@@ -4281,11 +4237,7 @@ function getEditEvents(eventId,controlType, userId,prestartTime, preendTime, use
 				});
 				customLoader(false);
 			}
-		 },
-		error:function(e){
-		// console.log(e);
-			customLoader(false);
-		}
+		 }
 	});
 }
 
@@ -4304,7 +4256,7 @@ function saveDataAddEditEvents(formId, controlType){
 	customLoader(true);
 	$.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','save-data-of-add-edit-event'),
 		 data : JSON.stringify(getDataForSaveDataAddEditEvents(formId,controlType)),
 		 dataType : 'json',
@@ -4320,11 +4272,7 @@ function saveDataAddEditEvents(formId, controlType){
 			} else {
 				customLoader(false);
 			}
-		 },
-		error:function(e){
-		// console.log(e);
-			customLoader(false);
-		}
+		 }
 	});
 }
 
@@ -4553,7 +4501,7 @@ function renderAddEditEventModal(data,userId, prestartTime, preendTime, userRole
 														// +'</ul>'
 														+'<div class="bold my-2">'
 															+'<span>What hours are you available? </span>'
-															+'<a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm float-right bhagat1" onclick="addSingleRowTime(\'createNewEventModal\',\''+userId+'\',\'daySpecifictime\',\''+prestartTime+'\',\''+preendTime+'\', \''+userRoleId+'\',\''+min+'\', \''+max+'\', \''+slotBufferLimit+'\',\''+slotDateLimit+'\', \''+slotDayLimit+'\',\'\',\'0\');" style="line-height:0"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i></a>'
+															+'<a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm float-right" onclick="addSingleRowTime(\'createNewEventModal\',\''+userId+'\',\'daySpecifictime\',\''+prestartTime+'\',\''+preendTime+'\', \''+userRoleId+'\',\''+min+'\', \''+max+'\', \''+slotBufferLimit+'\',\''+slotDateLimit+'\', \''+slotDayLimit+'\',\'\',\'0\');" style="line-height:0"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i></a>'
 														+'</div>'
 														+'<div class="row overflow-y-auto scrollbar-container" style="height:170px">'
 															+'<div class="col-12 daySpecifictime"></div>'
@@ -4588,7 +4536,7 @@ function renderAddEditEventModal(data,userId, prestartTime, preendTime, userRole
 						+'</form>'
 					+'</div>'
 					+'<div class="modal-footer">'
-						+'<button type="button" class="btn btn-secondary close-modal-btn" data-dismiss="modal">Close</button>'
+						+'<button type="button" class="btn btn-danger  close-modal-btn" data-dismiss="modal">Close</button>'
 						+'<button type="button" class="btn btn-primary close-modal-btn" id="">Apply</button>'
 					+'</div>'
 				+' </div>'
@@ -4603,10 +4551,10 @@ function bookSlotDetailsModal(){
 			'<div id="bookSlotDetailsModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
 				+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">'
 					+'<div class="modal-content border-0">'
-						+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
-							+'<h5 class="modal-title" id="exampleModalLabel">Booked Slot Detials</h5>'
+						+'<div class="modal-header py-2 bg-primary text-white">'
+							+'<h5 class="modal-title" >Booked Slot Detials</h5>'
 							+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-								+'<span aria-hidden="true">×</span>'
+								+'<span aria-hidden="true">&times;</span>'
 							+'</button>'
 						+'</div>'
 						+'<div class="modal-body">'
@@ -4618,7 +4566,7 @@ function bookSlotDetailsModal(){
 									+'</li>'
 									+'<li class="d-flex flex-wrap">'
 										+'<label class="m-0 font-weight-bold mr-1">Invitee Name:</label>'
-										+'<span>Bhagat Singh Garakoti</span>'
+										+'<span>Dummy Text</span>'
 									+'</li>'
 									+'<li class="d-flex flex-wrap">'
 										+'<label class="m-0 font-weight-bold mr-1">Event Duration:</label>'
@@ -4636,7 +4584,7 @@ function bookSlotDetailsModal(){
 							+'</div>'
 						+'</div>'
 						+'<div class="modal-footer">'
-							+'<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+							+'<button type="button" class="btn btn-primary  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
 						+'</div>'
 					+'</div>'
 				+'</div>'
@@ -4659,7 +4607,7 @@ function callMeetingBooking(callfrom, bookingId, bookType, startDate, entityType
 	data['entityId']=entityId;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('timeavailability', 'get-meeting-booking-time'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -4681,11 +4629,6 @@ function callMeetingBooking(callfrom, bookingId, bookType, startDate, entityType
 			}
 			
 			customLoader(false);
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} 
 		}
 	});
 }
@@ -4805,7 +4748,7 @@ function getTeacherMeetingStatus(availableType, weekDayId, userId, daySlotId, di
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('timeavailability', 'get-meeting-status-booking-time'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -4847,11 +4790,6 @@ function getTeacherMeetingStatus(availableType, weekDayId, userId, daySlotId, di
 			}
 			
 			customLoader(false);
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} 
 		}
 	});
 	return response;
@@ -5076,7 +5014,7 @@ function callTimeBookingTeacher(callfrom, bookingId, bookType, startDate, iddate
 	data['startDate']=startDate;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-booking-time'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -5096,11 +5034,6 @@ function callTimeBookingTeacher(callfrom, bookingId, bookType, startDate, iddate
 				$(".meetingDetailclass"+bookingId).html(html);
 			}
 			customLoader(false);
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} 
 		}
 	});
 }
@@ -5266,7 +5199,7 @@ function markAsReschedule(){
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'remove-availability-reschedule-class'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -5297,12 +5230,6 @@ function markAsReschedule(){
 				});
 			}
 			customLoader(false);
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} 
-			customLoader(false);
 		}
 	});
 }
@@ -5317,7 +5244,7 @@ function sendMailCancelClassSlotRemove(status, batchTeacherMappingId, classDate)
 	data.userId = USER_ID
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard','class-cancel-and-reschedule'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -5376,7 +5303,7 @@ function showWarningMessageShow(warningMessage1, functionName1, bodyMsg) {
 			var strText = "Please note that any recurring class created for this student will be deactivated after the student is withdrawn. If for any reason the class is not deactivated, kindly do the same from the Recurring Class menu";
 			$("#statusMessage-1").html(strText);
 		} else {
-			$("#statusMessage-1").html('<i class="fa fa-refresh fa-4x" style="color:#337ab7 !important;"></i>');
+			$("#statusMessage-1").html('<i class="fa fa-sync fa-4x text-primary"></i>');
 		}
 		$('#resetDeleteErrorWarningYes1').attr('onclick', functionName1);
 		$('#remarksresetDelete1').modal('show');
@@ -5432,7 +5359,7 @@ function getCounselerByDateTimeAndTimeZone(date, startTime, endTime, timeZone, s
 	}
 	$.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','get-counselor-for-demo-book'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',
@@ -5473,7 +5400,7 @@ function resetAllDateSpecificDayAndUserId(userId,dayId,prestartTime, preendTime,
     $.ajax({
         type: "POST",
         url: getURLFor('timeavailability', 'refresh-all-time-prefrence'),
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         data: JSON.stringify(request),
         dataType: 'json',
         cache: false,
@@ -5489,10 +5416,6 @@ function resetAllDateSpecificDayAndUserId(userId,dayId,prestartTime, preendTime,
                     getCalendarAvailability('timeAvailabilityPopup', userId,"timeCalendar","","Month", prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit);
                     
                 }
-            return false;
-        },
-        error: function (e) {
-            //showMessage(true, e.responseText);
             return false;
         }
     });

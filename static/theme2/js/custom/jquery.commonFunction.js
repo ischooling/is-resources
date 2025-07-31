@@ -1,3 +1,4 @@
+var APPLICATION_JSON_VALUE = "application/json";
 var BASE_TIMEZONE = "Asia/Singapore";
 var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";
 var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "/" + "api/v1/";
@@ -52,7 +53,7 @@ function copyToClipboardText(originalValue) {
 }
 window.addEventListener("offline", (event) => {
   if (tt == "theme1") {
-    showMessage(
+    showMessageTheme2(
       true,
       "Your device is offline, please check your internet connection."
     );
@@ -68,7 +69,7 @@ window.addEventListener("offline", (event) => {
 
 window.addEventListener("online", (event) => {
   if (tt == "theme1") {
-    showMessage(false, "You are back online");
+    showMessageTheme2(false, "You are back online");
   } else {
     showMessageTheme2(1, "You are back online", "", true);
   }
@@ -176,6 +177,21 @@ function getURLForSignup(suffixUrl, module) {
 }
 
 $(document).ready(function () {
+  var stickyHeaderHeight = $('.sticky-header').height();
+  $('.app-container').css({ "margin-top": stickyHeaderHeight - 59 });
+  $('.close-message').click(function () {
+    $(this).parent().hide().promise().done(function () {
+      var stickyHeaderHeight = $('.sticky-header').height();
+      $('.app-container').css({ "margin-top": stickyHeaderHeight - 59 });
+    });
+  });
+  if($("#themeColor").length<1){
+    $("head").append(`<style id="themeColor">${ROOTCSS}</style>`);
+  }
+  if($("#commonloaderId").length<1 && $("#commonloaderIdNewLoader").length<1){
+    $("body").append(getLoaderContent());
+    $("head").append(`<style>.loader-style.hide-loader{display: none !important;}</style>`)
+  }
   //$('[data-toggle="tooltip"]').tooltip();
 });
 function setPagePosition(position) {
@@ -262,7 +278,7 @@ function showModalMessage(messageType, message, id) {
 
   // $('#callPaymentStudentModal .modal-body').animate({scrollTop: "0px"
   // }, 'slow');
-  showMessage(messageType, message, id, false);
+  showMessageTheme2(messageType, message, id, false);
 }
 function hideModalMessage(signupError, id) {
   if (!signupError) {
@@ -271,7 +287,7 @@ function hideModalMessage(signupError, id) {
     $(".messageModalDiv").hide();
   }
 }
-function showMessageBankDetails(isWarnig, message, id) {
+function showMessageTheme2BankDetails(isWarnig, message, id) {
   if (isWarnig) {
     $("#errorHeading").html("Error! Be focus on work");
     $("#statusMessageBD").addClass("danger-color");
@@ -288,7 +304,7 @@ function showMessageBankDetails(isWarnig, message, id) {
     $("#modalMessageBD").hide();
   }, 5000);
 }
-function showMessage(messageType, message, id, msgHide) {
+function showMessageTheme2(messageType, message, id, msgHide) {
   if (message == "") {
     return false;
   } else {
@@ -326,6 +342,46 @@ function showMessage(messageType, message, id, msgHide) {
     }
   }
 }
+
+function showMessage(messageType, message, id, msgHide) {
+  if (message == "") {
+    return false;
+  } else {
+    $("#messageDiv1").removeClass("error");
+    $("#messageDiv1").removeClass("success");
+    $("#messageDiv1").removeClass("notification");
+    $("#messageDiv").show();
+    if (messageType == 0 || messageType == false) {
+      $("#messageDiv1").addClass("error");
+      $("#messageDiv1").html(
+        '<i class="fa fa-times-circle"></i> ' + message
+      );
+    } else if (messageType == 1 || messageType == true) {
+      $("#messageDiv1").addClass("success");
+      $("#messageDiv1").html(
+        '<i class="fa fa-check-circle"></i> ' + message
+      );
+    } else if (messageType == 2) {
+      $("#messageDiv1").addClass("notification");
+      $("#messageDiv1").html(
+        '<i class="fa fa-info-circle"></i> ' + message
+      );
+    }
+    $(".server-error-message").addClass("show");
+    setTimeout(function () {
+      if ($(".server-error-message").hasClass("show")) {
+        $(".server-error-message").removeClass("show");
+      }
+    }, 5000);
+
+    if (msgHide) {
+      setTimeout(function () {
+        $(".server-error-message").removeClass("show");
+      }, 3000);
+    }
+  }
+}
+
 function hideMessage(signupError, id) {
   if (!signupError) {
     $("#messageDiv1").html("");
@@ -387,7 +443,7 @@ function showHideDiv(isHide, divId) {
 function getHash() {
   return Math.random().toString(36);
 }
-function showMessageRequestDemoPage(isWarnig, message, id, fid) {
+function showMessageTheme2RequestDemoPage(isWarnig, message, id, fid) {
   //	$('#'+id).parent().removeClass('error-message-hide');
   $("#" + id)
     .parent()
@@ -415,7 +471,7 @@ function hideMessageRequestDemoPage(id, fid) {
   //	$('#'+id).parent().addClass('error-message-hide');
   $("#" + id).html("");
 }
-function showMessageErrorNew(isWarnig, message, id) {
+function showMessageTheme2ErrorNew(isWarnig, message, id) {
   if (!isWarnig) {
     $("#" + id).addClass("success-msg");
   }
@@ -476,15 +532,23 @@ function resetDropdown(dropdown, emptyMessage) {
   dropdown.html("");
   //	dropdown.append('<option disabled selected> </option>');
 }
-$(document).ajaxStart(function () {
-  // customLoader(true);
+$(document).ajaxStart(function (e) {
+  // ++AJAXREQUESTCOUNT;
+  // console.log("AJAX call started:");
+  customLoader(true);
 });
 $(document).ajaxStop(function () {
-  // customLoader(false);
+  //  --AJAXREQUESTCOUNT;
+  // if (AJAXREQUESTCOUNT <= 0) {
+  //   AJAXREQUESTCOUNT = 0; // just to be safe, avoid negative counts
+  //   // console.log("All AJAX calls completed");
+    customLoader(false);
+  // }
 });
 
 $(document).ajaxSend(function () {
   ++AJAXREQUESTCOUNT;
+  console.log("AJAX call started, active count:", AJAXREQUESTCOUNT);
   customLoader(true);
 });
 
@@ -495,56 +559,19 @@ $(document).ajaxComplete(function () {
     customLoader(false);
   }
 });
-//var ajaxCalls = 0;
 function customLoader(needToShow) {
-  //console.log("2"+new Date());
-  if (needToShow) {
-    if (signupPage == 0) {
-      //ajaxCalls++;
-      // console.log("3a"+new Date());
-      // setTimeout(function(){
-      // 	//$('#commonloaderIdNewLoader').removeClass('hide-loader')
-      // 	$('#commonloaderId').show();
-      // 	$('#commonloaderBody').show();
-      // }, 100);
-      $("#commonloaderIdNewLoader").removeClass("hide-loader");
-      $("#commonloaderId").show();
-      $("#commonloaderBody").show();
-    } else {
-      /*setTimeout(function(){
-				$('#commonloaderId').show();
-				$('#commonloaderBody').show();
-			}, 800);*/
-      // console.log("3"+new Date());
-      $("#commonloaderId").hide();
-      $("#commonloaderBody").hide();
-    }
-  } else {
-    if (signupPage == 0) {
-      // if(ajaxCalls>0){
-      // 	ajaxCalls--;
-      // }
-      setTimeout(function () {
-        //if(ajaxCalls == 0){
-          if(AJAXREQUESTCOUNT <= 0){
-            $("#commonloaderIdNewLoader").addClass("hide-loader");
-            $("#commonloaderId").hide();
-            $("#commonloaderBody").hide();
-          }
-        
-        //}
-      }, 1000);
-      // console.log("4"+new Date());
-      $("#topProfileImage").show();
-      $(".dt-responsive tbody tr td:first-child").addClass("dtr-control");
-    } else {
-      setTimeout(function () {
-        // console.log("5"+new Date());
+  if(needToShow){
+    $("#commonloaderIdNewLoader").removeClass("hide-loader");
+  }else{
+    setTimeout(function () {
+        if(AJAXREQUESTCOUNT <= 0){
+        $("#commonloaderIdNewLoader").addClass("hide-loader");
         $("#commonloaderId").hide();
         $("#commonloaderBody").hide();
-      }, 800);
-    }
-  }
+        }
+      }, 200);
+      $(".dt-responsive tbody tr td:first-child").addClass("dtr-control");
+  } 
 }
 function customLoaderExternalPage(needToShow) {
   if (needToShow) {
@@ -558,7 +585,7 @@ function customLoaderExternalPage(needToShow) {
 $.ajaxSetup({
   beforeSend: function (xhr, settings) {
     if (settings.data != undefined) {
-      if (settings.contentType == "application/json") {
+      if (settings.contentType == APPLICATION_JSON_VALUE) {
         // var KEUS = getSecreteKey();
         // AesUtil(KEUS.KEYSIZE, KEUS.ITERATIONS);
         var payload = {};
@@ -596,8 +623,8 @@ $(document).ajaxError(function (event, jqxhr, settings, exception) {
   }
   if (!navigator.onLine) {
     if (tt == "theme1") {
-      showMessage(
-        true,
+      showMessageTheme2(
+        0,
         "Your device is offline, please check your internet connection."
       );
     } else {
@@ -616,22 +643,22 @@ $(document).ajaxError(function (event, jqxhr, settings, exception) {
     console.log("parse Response is:" + jqxhr.status);
     var hasProperty = parseResponse.hasOwnProperty("message");
     if (hasProperty) {
-      showMessage(1, parseResponse.message);
-      showModalMessage(1, TECHNICAL_GLITCH);
+      showMessageTheme2(0, parseResponse.message);
+      showModalMessage(0, TECHNICAL_GLITCH);
     } else {
-      showMessage(1, TECHNICAL_GLITCH);
-      showModalMessage(1, TECHNICAL_GLITCH);
+      showMessageTheme2(0, TECHNICAL_GLITCH);
+      showModalMessage(0, TECHNICAL_GLITCH);
     }
   } else {
-    showMessage(1, TECHNICAL_GLITCH);
-    showModalMessage(1, TECHNICAL_GLITCH);
+    showMessageTheme2(0, TECHNICAL_GLITCH);
+    showModalMessage(0, TECHNICAL_GLITCH);
   }
 });
 
 function checkonlineOfflineStatus() {
   if (!navigator.onLine) {
     if (tt == "theme1") {
-      showMessage(
+      showMessageTheme2(
         true,
         "Your device is offline, please check your internet connection."
       );
@@ -647,9 +674,7 @@ function checkonlineOfflineStatus() {
   }
   return false;
 }
-//$( document ).ajaxComplete(function() {
-//	customLoader(false);
-//});
+
 
 function goAheadGet(url, hash) {
   var form = $(
@@ -695,7 +720,7 @@ function callEmailCheck(formId, moduleId) {
   $("#email").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("is-user-available"),
     data: JSON.stringify(getRequestForEmailCheck(formId, moduleId)),
     dataType: "json",
@@ -726,15 +751,12 @@ function callEmailCheck(formId, moduleId) {
           hideStep1Div();
           $("#userDeclined").show();
         } else {
-          showMessage(1, data["message"]);
+          showMessageTheme2(1, data["message"]);
         }
       }
       $("#" + formId + " #email").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      $("#" + formId + " #email").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -748,7 +770,7 @@ function validateRequestForEmailCheck(formId) {
   ) {
     $("#" + formId + " #email").css("color", "#a9a9a9");
     validEndInvalidField(false, "email");
-    showMessage(false, "email", "Student email is either empty or invalid");
+    showMessageTheme2(false, "email", "Student email is either empty or invalid");
     return false;
   }
   validEndInvalidField(true, "email");
@@ -776,12 +798,12 @@ function emailCheck(emailId, moduleId) {
   var result = "";
   hideMessage("");
   if (!validateEmail(emailId)) {
-    showMessage(0, "Email is either empty or invalid");
+    showMessageTheme2(0, "Email is either empty or invalid");
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("is-user-available"),
     data: JSON.stringify(getCallRequestForEmailCheck(emailId, moduleId)),
     dataType: "json",
@@ -791,15 +813,12 @@ function emailCheck(emailId, moduleId) {
     success: function (data) {
       //console.log('data=> '+JSON.stringify(data));
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(0, "Email already exist");
+        showMessageTheme2(0, "Email already exist");
         result = false;
       } else {
         result = true;
       }
-    },
-    error: function (e) {
-      console.log("ERROR : ", e);
-    },
+    }
   });
   return result;
 }
@@ -838,14 +857,14 @@ function callCities(formId, value, stateId, cityId) {
   $("#" + formId + " #" + cityId).prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster("formId", "CITIES-LIST", value)),
     dataType: "json",
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["cities"],
@@ -855,11 +874,7 @@ function callCities(formId, value, stateId, cityId) {
       }
       $("#" + formId + " #" + cityId).prop("disabled", false);
       flag = true;
-    },
-    error: function (e) {
-      $("#" + formId + " #" + cityId).prop("disabled", false);
-      flag = false;
-    },
+    }
   });
   return flag;
 }
@@ -875,14 +890,14 @@ function callCitiesNew(formId, value, elementId, bindElementId) {
   $("#" + formId + " #" + bindElementId).prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster("formId", "CITIES-LIST", value)),
     dataType: "json",
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["cities"],
@@ -892,50 +907,81 @@ function callCitiesNew(formId, value, elementId, bindElementId) {
       }
       $("#" + formId + " #" + bindElementId).prop("disabled", false);
       flag = true;
-    },
-    error: function (e) {
-      $("#" + formId + " #" + bindElementId).prop("disabled", false);
-      flag = false;
-    },
+    }
   });
   return flag;
 }
+// function getAllCountryTimezone(formId, value, elementId) {
+//   hideMessage("");
+//   $.ajax({
+//     type: "POST",
+//     contentType: "application/json",
+//     url: getURLForCommon("masters"),
+//     data: JSON.stringify(getRequestForMaster(formId, "TIMEZONE-LIST", value)),
+//     dataType: "json",
+//     cache: false,
+//     timeout: 600000,
+//     success: function (data) {
+//       if (data["status"] == "0" || data["status"] == "2") {
+//         showMessageTheme2(1, data["message"]);
+//       } else {
+//         $.each(data["mastersData"]["countryTimeZones"], function (k, v) {
+//           $("#" + formId + " #" + elementId).append(
+//             '<option custom_timezone_id="' +
+//               v.key +
+//               '" value="' +
+//               v.value +
+//               '">(' +
+//               v.extra +
+//               ") - " +
+//               v.extra1 +
+//               "/" +
+//               v.extra3 +
+//               "</option>"
+//           );
+//         });
+//         if ($("#" + formId + "Alternet #" + elementId).length) {
+//           $("#" + formId + "Alternet #" + elementId).html(
+//             $("#" + formId + " #" + elementId).html()
+//           );
+//         }
+//       }
+//     },
+//   });
+// }
 function getAllCountryTimezone(formId, value, elementId) {
   hideMessage("");
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLForCommon("masters"),
-    data: JSON.stringify(getRequestForMaster(formId, "TIMEZONE-LIST", value)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
-      } else {
-        $.each(data["mastersData"]["countryTimeZones"], function (k, v) {
-          $("#" + formId + " #" + elementId).append(
-            '<option custom_timezone_id="' +
-              v.key +
-              '" value="' +
-              v.value +
-              '">(' +
-              v.extra +
-              ") - " +
-              v.extra1 +
-              "/" +
-              v.extra3 +
-              "</option>"
-          );
-        });
-        if ($("#" + formId + "Alternet #" + elementId).length) {
-          $("#" + formId + "Alternet #" + elementId).html(
-            $("#" + formId + " #" + elementId).html()
-          );
+
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      type: "POST",
+      contentType: APPLICATION_JSON_VALUE,
+      url: getURLForCommon("masters"),
+      data: JSON.stringify(getRequestForMaster(formId, "TIMEZONE-LIST", value)),
+      dataType: "json",
+      cache: false,
+      timeout: 600000,
+      success: function (data) {
+        if (data["status"] == "0" || data["status"] == "2") {
+          showMessageTheme2(1, data["message"]);
+          reject(new Error(data["message"]));
+        } else {
+          const optionsHtml = data["mastersData"]["countryTimeZones"]
+            .map((v) => 
+              `<option custom_timezone_id="${v.key}" value="${v.value}">(${v.extra}) - ${v.extra1}/${v.extra3}</option>`
+            )
+            .join("");
+
+          $("#" + formId + " #" + elementId).html(optionsHtml);
+
+          if ($("#" + formId + "Alternet #" + elementId).length) {
+            $("#" + formId + "Alternet #" + elementId).html(optionsHtml);
+          }
+
+          resolve(data);
         }
       }
-    },
+    });
   });
 }
 function callISDCode(formId, value, elementId) {
@@ -944,7 +990,7 @@ function callISDCode(formId, value, elementId) {
   );
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster(formId, "COUNTRIES-LIST", value)),
     dataType: "json",
@@ -952,7 +998,7 @@ function callISDCode(formId, value, elementId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         $.each(data["mastersData"]["countries"], function (k, v) {
           $("#" + formId + " #" + elementId).append(
@@ -981,14 +1027,14 @@ function callCountries(formId, value, elementId, eventBinder) {
   );
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster(formId, "COUNTRIES-LIST", value)),
     dataType: "json",
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         $.each(data["mastersData"]["countries"], function (k, v) {
           $("#" + formId + " #" + elementId).append(
@@ -1017,14 +1063,14 @@ function callCountriesOption(formId, value, elementId, preSelected) {
   );
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster(formId, "COUNTRIES-LIST", value)),
     dataType: "json",
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdownCountry(
           data["mastersData"]["countries"],
@@ -1064,7 +1110,7 @@ function callStates(formId, value, countryId, stateId, cityId) {
   $("#" + stateId).prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -1077,7 +1123,7 @@ function callStates(formId, value, countryId, stateId, cityId) {
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["states"],
@@ -1086,10 +1132,7 @@ function callStates(formId, value, countryId, stateId, cityId) {
         );
       }
       $("#" + formId + " #" + stateId).prop("disabled", false);
-    },
-    error: function (e) {
-      $("#" + formId + " #" + stateId).prop("disabled", false);
-    },
+    }
   });
   return true;
 }
@@ -1124,14 +1167,14 @@ function callStatesNew(formId, value, elementId, bindElementId) {
 
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster(formId, "STATES-LIST", value)),
     dataType: "json",
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["states"],
@@ -1140,10 +1183,7 @@ function callStatesNew(formId, value, elementId, bindElementId) {
         );
       }
       $("#" + formId + " #" + bindElementId).prop("disabled", false);
-    },
-    error: function (e) {
-      $("#" + formId + " #" + bindElementId).prop("disabled", false);
-    },
+    }
   });
   return true;
 }
@@ -1199,7 +1239,7 @@ function callForResetPassword(formId, moduleId) {
   $.ajax({
     type: "POST",
     url: getURLForCommon("reset-password"),
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     data: JSON.stringify(getRequestForReset(formId, moduleId)),
     dataType: "json",
     success: function (data) {
@@ -1211,20 +1251,16 @@ function callForResetPassword(formId, moduleId) {
         if (data["status"] == "3") {
           redirectLoginPage();
         } else {
-          if (tt == "theme1") {
-            showMessage(false, data["message"]);
-          } else {
-            showMessageTheme2(0, data["message"], "", true);
-          }
+          showMessageTheme2(0, data["message"], "", true);
         }
       } else {
         if (data["statusCode"] == "S001") {
-          showMessage(true, data["message"]);
+          showMessageTheme2(true, data["message"]);
           setTimeout(function () {
             logout();
           }, 1500);
         } else {
-          showMessage(true, data["message"]);
+          showMessageTheme2(true, data["message"]);
         }
       }
       return false;
@@ -1266,7 +1302,7 @@ function callForEmailForgot(formId, moduleId) {
   //$("#resendEmail").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("forgot-password"),
     data: JSON.stringify(getRequestForForgot(formId, moduleId)),
     dataType: "json",
@@ -1274,7 +1310,7 @@ function callForEmailForgot(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        //showMessage(1, data['message']);
+        //showMessageTheme2(1, data['message']);
         if (data["statusCode"] == "0047") {
           showWrapper(true);
           $("#emailNotVerify").html(data["message"]);
@@ -1283,21 +1319,16 @@ function callForEmailForgot(formId, moduleId) {
           $("#emailVerify").hide();
           $("#userDeclined").hide();
         } else {
-          showMessage(1, data["message"]);
+          showMessageTheme2(1, data["message"]);
         }
       } else {
         $("#forgotPassword #emailid").val().trim("");
         $("#forgotPassword").modal("hide");
-        showMessage(0, data["message"]);
+        showMessageTheme2(0, data["message"]);
       }
       //$("#resendEmail").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-      console.log("ERROR : ", e);
-      //$("#resendEmail").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -1311,7 +1342,7 @@ function validateForEmailForgot(formId) {
     )
   ) {
     $("#" + formId + " #emailid").css("color", "#a9a9a9");
-    showMessage(0, "Please enter a valid email.");
+    showMessageTheme2(0, "Please enter a valid email.");
     return false;
   }
   return true;
@@ -1334,6 +1365,7 @@ function getRequestForForgot(formId, moduleId) {
   return request;
 }
 
+
 function callForEmailResend(emailId, moduleId, sendStatus) {
   hideMessage("");
   if (!validateForEmailResend(emailId)) {
@@ -1342,7 +1374,7 @@ function callForEmailResend(emailId, moduleId, sendStatus) {
   $("#resendEmail").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("resend-email-verification"),
     data: JSON.stringify(
       getRequestForEmailResend(emailId, moduleId, sendStatus)
@@ -1353,26 +1385,24 @@ function callForEmailResend(emailId, moduleId, sendStatus) {
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
         if (data["statusCode"] == "0022") {
-          showServerMessageWrapper(false, data["message"]);
+          showMessageTheme2(0, data["message"],'',true);
+          
         } else {
-          showServerMessageWrapper(false, data["message"]);
+          showMessageTheme2(0, data["message"],'',true);
         }
       } else {
-        showServerMessageWrapper(false, data["message"]);
+        showMessageTheme2(1, data["message"],'',true);
       }
       $("#resendEmail").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      $("#resendEmail").prop("disabled", false);
-    },
+    }
   });
 }
 
 function validateForEmailResend(emailId) {
   //GLOBAL_EMAIL
   if (!validateEmail(emailId)) {
-    showMessage(0, "Email is either empty or invalid");
+    showMessageTheme2(0, "Email is either empty or invalid");
     return false;
   }
   return true;
@@ -1401,7 +1431,7 @@ function validateRequestForContact(formId) {
       .trim() == 0 ||
     $("#" + formId + " #countryId").val() == null
   ) {
-    showMessage(1, "Country is required");
+    showMessageTheme2(1, "Country is required");
     return false;
   }
   if (
@@ -1410,7 +1440,7 @@ function validateRequestForContact(formId) {
       .trim() == 0 ||
     $("#" + formId + " #stateId").val() == null
   ) {
-    showMessage(1, "State is required");
+    showMessageTheme2(1, "State is required");
     return false;
   }
   if (
@@ -1419,7 +1449,7 @@ function validateRequestForContact(formId) {
       .trim() == 0 ||
     $("#" + formId + " #cityId").val() == null
   ) {
-    showMessage(1, "City is required");
+    showMessageTheme2(1, "City is required");
     return false;
   }
   if (
@@ -1427,7 +1457,7 @@ function validateRequestForContact(formId) {
       .val()
       .trim() == ""
   ) {
-    showMessage(1, "Name is required");
+    showMessageTheme2(1, "Name is required");
     return false;
   }
 
@@ -1438,7 +1468,7 @@ function validateRequestForContact(formId) {
         .trim()
     )
   ) {
-    showMessage(0, "Email is either empty or invalid");
+    showMessageTheme2(0, "Email is either empty or invalid");
     return false;
   }
   if (
@@ -1446,7 +1476,7 @@ function validateRequestForContact(formId) {
       .val()
       .trim() == 0
   ) {
-    showMessage(1, "Country Code is required");
+    showMessageTheme2(1, "Country Code is required");
     return false;
   }
 
@@ -1455,7 +1485,7 @@ function validateRequestForContact(formId) {
       .val()
       .trim() == 0
   ) {
-    showMessage(1, "Contact Number is required");
+    showMessageTheme2(1, "Contact Number is required");
     return false;
   }
   if (
@@ -1463,7 +1493,7 @@ function validateRequestForContact(formId) {
       .val()
       .trim() == 0
   ) {
-    showMessage(1, "Contact Description is required");
+    showMessageTheme2(1, "Contact Description is required");
     return false;
   }
 
@@ -1474,7 +1504,7 @@ function validateRequestForContact(formId) {
         .trim()
     )
   ) {
-    showMessage(0, "Either captcha is empty or invalid");
+    showMessageTheme2(0, "Either captcha is empty or invalid");
     return false;
   }
   return true;
@@ -1531,7 +1561,7 @@ function callUserContact(formId, moduleId) {
   $("#login").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("contact"),
     data: JSON.stringify(getRequestForContact(formId, moduleId)),
     dataType: "json",
@@ -1540,20 +1570,16 @@ function callUserContact(formId, moduleId) {
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
         refreshCaptcha("captchaImage");
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         //customLoader(true);
-        showMessage(0, data["message"]);
+        showMessageTheme2(0, data["message"]);
         // LOGIC TO DISPLAY DASHBOARD
         // LOGIC TO DISPLAY SIGN-PROCESS
       }
       $("#login").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-      $("#login").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -1631,7 +1657,7 @@ function bindFileUpload(uploadIndex, uploadCategoryId, uploadUserId) {
           isError = true;
         }
         if (uploadErrors.length > 0) {
-          showMessage(1, uploadErrors.join("\n"));
+          showMessageTheme2(0, uploadErrors.join("\n"));
           return false;
         }
         data.process().done(function () {
@@ -1728,7 +1754,7 @@ function bindFileUpload(uploadIndex, uploadCategoryId, uploadUserId) {
         $("#fileupload" + uploadIndex + "ProgressStatus").addClass(
           "label-error"
         );
-        showMessage(1, MAX_SIZE_LIMIT);
+        showMessageTheme2(0, MAX_SIZE_LIMIT);
       },
     })
     .prop("disabled", !$.support.fileInput)
@@ -1779,7 +1805,7 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
           isError = true;
         }
         if (uploadErrors.length > 0) {
-          showMessage(1, uploadErrors.join("\n"));
+          showMessageTheme2(0, uploadErrors.join("\n"));
           return false;
         }
         data.process().done(function () {
@@ -1854,7 +1880,7 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
         $("#fileupload" + uploadIndex + "ProgressStatus")
           .removeClass("progress-bar-success")
           .addClass("progress-bar-danger");
-        showMessage(1, MAX_SIZE_LIMIT);
+        showMessageTheme2(0, MAX_SIZE_LIMIT);
       },
     })
     .prop("disabled", !$.support.fileInput)
@@ -1939,7 +1965,7 @@ function bindFileUploadNew1(
             "37" == uploadCategoryId ||
             "38" == uploadCategoryId
           ) {
-            showMessageErrorNew(
+            showMessageTheme2ErrorNew(
               true,
               uploadErrors.join("\n"),
               "evaluationDocsError"
@@ -1947,7 +1973,7 @@ function bindFileUploadNew1(
             return false;
           } else {
             if (tt == "theme1") {
-              showMessage(0, uploadErrors.join("\n"), "", false);
+              showMessageTheme2(0, uploadErrors.join("\n"), "", false);
               setTimeout(function () {
                 $("#fileupload" + uploadIndex + "Span").html(
                   "No file Selected"
@@ -1998,16 +2024,16 @@ function bindFileUploadNew1(
           ) {
             if ("34" == uploadCategoryId) {
               hideMessageErrorNew("fileupload1Error");
-              showMessageErrorNew(false, "", "fileupload1Error");
+              showMessageTheme2ErrorNew(false, "", "fileupload1Error");
             } else if ("35" == uploadCategoryId) {
               hideMessageErrorNew("fileupload2Error");
-              showMessageErrorNew(false, "", "fileupload2Error");
+              showMessageTheme2ErrorNew(false, "", "fileupload2Error");
             } else if ("36" == uploadCategoryId) {
-              showMessageErrorNew(false, "", "fileupload3Error");
+              showMessageTheme2ErrorNew(false, "", "fileupload3Error");
             } else if ("37" == uploadCategoryId) {
-              showMessageErrorNew(false, "", "fileupload4Error");
+              showMessageTheme2ErrorNew(false, "", "fileupload4Error");
             } else if ("38" == uploadCategoryId) {
-              showMessageErrorNew(false, "", "fileupload5Error");
+              showMessageTheme2ErrorNew(false, "", "fileupload5Error");
             }
           }
         } else if (uploadMethodType == 3) {
@@ -2121,7 +2147,8 @@ function bindFileUploadNew1(
           ) {
             redirectLoginPage();
           }
-        } else {
+        } 
+        else {
           $.each(data.result.uploadFiles, function (index, file) {
             if (file.status == 1) {
               console.log("file: " + file);
@@ -2266,6 +2293,17 @@ function bindFileUploadNew1(
                       file.fileName +
                       '");'
                   );
+                  // $("#fileupload" + uploadIndex)
+                  //   .parent("span")
+                  //   .parent("p")
+                  //   .find("a.view")
+                  //   .next("a.remove")
+                  //   .attr("style", "display:block;");
+                  // $("#fileupload" + uploadIndex)
+                  //   .parent("span")
+                  //   .parent("p")
+                  //   .find("a.view")
+                  //   .attr("style", "display:block;");
                   setTimeout(function () {
                     $("#fileupload" + uploadIndex + "imgIcon").attr(
                       "src",
@@ -2334,46 +2372,49 @@ function bindFileUploadNew1(
                 "35" == uploadCategoryId ||
                 "36" == uploadCategoryId ||
                 "37" == uploadCategoryId ||
+                "33" == uploadCategoryId ||
                 "38" == uploadCategoryId
               ) {
                 setTimeout(function () {
                   if ("34" == uploadCategoryId) {
                     hideMessageErrorNew("fileupload1Error");
-                    showMessageErrorNew(
+                    showMessageTheme2ErrorNew(
                       false,
                       " Document uploaded successfully.",
                       "fileupload1Error"
                     );
                   } else if ("35" == uploadCategoryId) {
                     hideMessageErrorNew("fileupload2Error");
-                    showMessageErrorNew(
+                    showMessageTheme2ErrorNew(
                       false,
                       " Document uploaded successfully.",
                       "fileupload2Error"
                     );
                   } else if ("36" == uploadCategoryId) {
-                    showMessageErrorNew(
+                    showMessageTheme2ErrorNew(
                       false,
                       " Document uploaded successfully.",
                       "fileupload3Error"
                     );
                   } else if ("37" == uploadCategoryId) {
-                    showMessageErrorNew(
+                    showMessageTheme2ErrorNew(
                       false,
                       " Document uploaded successfully.",
                       "fileupload4Error"
                     );
                   } else if ("38" == uploadCategoryId) {
-                    showMessageErrorNew(
+                    showMessageTheme2ErrorNew(
                       false,
                       " Document uploaded successfully.",
                       "fileupload5Error"
                     );
+                  }else if ("33" == uploadCategoryId) {
+                    $("#fileupload1Span").text(file.fileName)
                   }
                 }, 500);
               } else {
                 if (tt == "theme1") {
-                  showMessage(1, " Document uploaded successfully.", "", true);
+                  showMessageTheme2(1, " Document uploaded successfully.", "", true);
                 } else {
                   showMessageTheme2(
                     1,
@@ -2458,17 +2499,503 @@ function bindFileUploadNew1(
             .attr("style", "display:none;");
         }
         if (tt == "theme2") {
-          showMessage(2, MAX_SIZE_LIMIT, "", false);
+          showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
         } else {
-          showMessageTheme2(2, MAX_SIZE_LIMIT, "", false);
+          showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
         }
-        showMessageTheme2(2, MAX_SIZE_LIMIT, "", false);
+        showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
       },
     })
     .prop("disabled", !$.support.fileInput)
     .parent()
     .addClass($.support.fileInput ? undefined : "disabled");
 }
+// function bindFileUploadNew1(
+//   uploadIndex,
+//   uploadCategoryId,
+//   uploadUserId,
+//   uploadMethodType,
+//   skipSession
+// ) {
+//   var data = {};
+//   data["uploadCategory"] = uploadCategoryId;
+//   data["uploadUserId"] = uploadUserId;
+//   data["skipSession"] = skipSession;
+//   $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
+//   $("#fileupload" + uploadIndex)
+//     .fileupload({
+//       formData: { payload: JSON.stringify(getFinalValue(data)) },
+//       url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/upload/" + UNIQUEUUID,
+//       dataType: "json",
+//       type: "POST",
+//       enctype: "multipart/form-data",
+//       global: false,
+//       add: function (e, data) {
+//         var uploadErrors = [];
+//         var acceptFileTypes = /^image\/(png|jpe?g)$/i;
+//         var acceptFileTypesPDF = /^application\/pdf$/i;
+//         var isError = false;
+//         if (
+//           data.originalFiles[0]["type"].length &&
+//           (acceptFileTypes.test(data.originalFiles[0]["type"]) ||
+//             acceptFileTypesPDF.test(data.originalFiles[0]["type"]))
+//         ) {
+//         } else {
+//           isError = true;
+//         }
+//         if (isError) {
+//           uploadErrors.push(
+//             "Please upload files in following formats (jpg, jpeg, pdf or png)."
+//           );
+//         }
+//         if (
+//           (USER_ROLE != "TEACHER" &&
+//             data.originalFiles.length &&
+//             data.originalFiles[0]["size"] > 5242880) ||
+//           (USER_ROLE == "TEACHER" &&
+//             data.originalFiles.length &&
+//             data.originalFiles[0]["size"] > 10485760)
+//         ) {
+//           if (USER_ROLE == "TEACHER") {
+//             uploadErrors.push(MAX_SIZE_LIMIT_FOR_TEACHER);
+//           } else {
+//             uploadErrors.push(MAX_SIZE_LIMIT);
+//           }
+//           isError = true;
+//         }
+//         if (uploadErrors.length > 0) {
+//           showMessage(true, uploadErrors.join("\n"));
+//           return false;
+//         }
+//         data.process().done(function () {
+//           data.submit();
+//         });
+//       },
+//       start: function (e) {
+//         customLoader(true);
+//         if (uploadMethodType == 1) {
+//           $("#fileupload" + uploadIndex + "Span").html("");
+//           $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
+//             "width",
+//             0 + "%"
+//           );
+//           $("#fileupload" + uploadIndex + "ProgressStatus")
+//             .removeClass("progress-bar-success")
+//             .removeClass("progress-bar-danger");
+//         } else if (uploadMethodType == 2) {
+//           $("#fileupload" + uploadIndex)
+//             .parents(".file-tab")
+//             .find("span.fileName")
+//             .text();
+//         } else if (uploadMethodType == 3) {
+//           $("#fileupload" + uploadIndex)
+//             .parents(".file-tab")
+//             .find("span.fileName")
+//             .text();
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .parent("div")
+//             .find("i")
+//             .removeClass("fa-check-circle-o");
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .parent("div")
+//             .find("i")
+//             .removeClass("fa-close");
+//         } else if (uploadMethodType == 4) {
+//         }
+//       },
+//       send: function (e, data) {
+//         if (uploadMethodType == 1) {
+//           $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
+//             "width",
+//             5 + "%"
+//           );
+//         } else if (uploadMethodType == 2) {
+//         } else if (uploadMethodType == 3) {
+//         } else if (uploadMethodType == 4) {
+//         }
+//       },
+//       done: function (e, data) {
+//         customLoader(false);
+//         if (data.result.status == 0 || data.result.status == 3) {
+//           if (uploadMethodType == 1) {
+//             $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
+//               "width",
+//               100 + "%"
+//             );
+//             $("#fileupload" + uploadIndex + "ProgressStatus")
+//               .removeClass("progress-bar-success")
+//               .addClass("progress-bar-danger");
+//           } 
+//           else if (uploadMethodType == 2) {
+//             $("#fileupload" + uploadIndex)
+//               .parents(".file-tab")
+//               .find("span.fileName")
+//               .text();
+//           } 
+//           else if (uploadMethodType == 3) {
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .parent("div")
+//               .find("i")
+//               .removeClass("fa-check-circle-o");
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .parent("div")
+//               .find("i")
+//               .removeClass("fa-close");
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .parent("div")
+//               .find("i")
+//               .addClass("fa fa-close");
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .parent("div")
+//               .find("h1")
+//               .attr("style", "color:red");
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .parent("div")
+//               .find("span.fileName")
+//               .html("");
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .find("a.view")
+//               .next("a.remove")
+//               .attr("style", "display:none;");
+//             $("#fileupload" + uploadIndex)
+//               .parent("span")
+//               .parent("p")
+//               .find("a.view")
+//               .attr("style", "display:none;");
+//           } 
+//           else if (uploadMethodType == 4) {
+//             $("#fileName" + uploadIndex).html("");
+//             $("#divdeleteDocument" + uploadIndex).attr(
+//               "style",
+//               "display:none;"
+//             );
+//             $("#divshowDocument" + uploadIndex).attr("style", "display:none;");
+//           }
+//           if (
+//             data.result.message.includes("Your session has been timed out") ||
+//             data.result.status == 3
+//           ) {
+//             redirectLoginPage();
+//           }
+//         } else {
+//           $.each(data.result.uploadFiles, function (index, file) {
+//             if (file.status == 1) {
+//               console.log("file: " + file);
+//               if (uploadMethodType == 1) {
+//                 var removeClassName = "";
+//                 if (uploadIndex == 1) {
+//                   removeClassName = "fa fa-user";
+//                 } else if (uploadIndex == 2) {
+//                   removeClassName = "fa fa-calendar";
+//                 } else if (uploadIndex == 3) {
+//                   removeClassName = "fa fa-home";
+//                 } else if (uploadIndex == 4) {
+//                   removeClassName = "fa fa-image";
+//                 } else if (uploadIndex == 5) {
+//                   removeClassName = "fa fa-graduation-cap";
+//                 }
+//                 $("#fileupload" + uploadIndex + "Response").removeClass(
+//                   removeClassName
+//                 );
+//                 $("#fileupload" + uploadIndex + "Response")
+//                   .removeClass("label-error")
+//                   .addClass("fa fa-check-circle green");
+//                 if ($("#fileupload" + uploadIndex + "Span").html() == "") {
+//                   $("#fileupload" + uploadIndex + "Span").html(file.fileName);
+//                 } else {
+//                   $("#fileupload" + uploadIndex + "Span").html(
+//                     $("#fileupload" + uploadIndex + "Span").html() +
+//                       "," +
+//                       file.fileName
+//                   );
+//                 }
+//                 if (uploadIndex == 1) {
+//                   $(".profile-pic").attr(
+//                     "src",
+//                     FILE_UPLOAD_PATH + file.fileName
+//                   );
+//                   if (data.originalFiles[0]["type"] == "application/pdf") {
+//                     showMessage(
+//                       true,
+//                       "Please upload files in following formats (jpg, jpeg or png)."
+//                     );
+//                     return false;
+//                   }
+//                 }
+//               } else if (uploadMethodType == 2) {
+//                 $("#fileupload" + uploadIndex)
+//                   .parents(".file-tab")
+//                   .find("span.fileName")
+//                   .text(file.fileName);
+//                 console.log(
+//                   $("#fileupload" + uploadIndex)
+//                     .parents(".file-tab")
+//                     .find("span.fileName")
+//                     .text(file.fileName)
+//                 );
+//                 if (data.originalFiles[0]["type"] == "application/pdf") {
+//                   $("#fileupload" + uploadIndex)
+//                     .parents(".file-tab")
+//                     .find("img")
+//                     .attr("src", PATH_FOLDER_IMAGE + "pdf.jpg");
+//                 }
+//                 if (uploadCategoryId == 34) {
+//                   hideMessageErrorNew("fileupload1Error", "fileupload1");
+//                 }
+//               } else if (uploadMethodType == 3) {
+//                 $("#fileupload" + uploadIndex)
+//                   .parent("span")
+//                   .parent("p")
+//                   .parent("div")
+//                   .find("i")
+//                   .addClass("fa fa-check-circle-o");
+//                 $("#fileupload" + uploadIndex)
+//                   .parent("span")
+//                   .parent("p")
+//                   .parent("div")
+//                   .find("h1")
+//                   .attr("style", "color:green");
+//                 $("#fileupload" + uploadIndex)
+//                   .parent("span")
+//                   .parent("p")
+//                   .parent("div")
+//                   .find("span.fileName")
+//                   .html(file.fileName);
+//                 $("#fileupload" + uploadIndex)
+//                   .parent("span")
+//                   .parent("p")
+//                   .find("a.view")
+//                   .next("a.remove")
+//                   .attr(
+//                     "href",
+//                     'javascript:removeDocument("' +
+//                       uploadIndex +
+//                       '","' +
+//                       uploadMethodType +
+//                       '");'
+//                   );
+                // $("#fileupload" + uploadIndex)
+                //   .parent("span")
+                //   .parent("p")
+                //   .find("a.view")
+                //   .next("a.remove")
+                //   .attr("style", "display:block;");
+                // $("#fileupload" + uploadIndex)
+                //   .parent("span")
+                //   .parent("p")
+                //   .find("a.view")
+                //   .attr("style", "display:block;");
+//                 if (data.originalFiles[0]["type"] == "application/pdf") {
+//                   $("#fileupload" + uploadIndex)
+//                     .parent("span")
+//                     .parent("p")
+//                     .find("a.view")
+//                     .attr("target", "_blank");
+//                   $("#fileupload" + uploadIndex)
+//                     .parent("span")
+//                     .parent("p")
+//                     .find("a.view")
+//                     .attr("href", FILE_UPLOAD_PATH + file.fileName);
+//                 } else {
+//                   $("#fileupload" + uploadIndex)
+//                     .parent("span")
+//                     .parent("p")
+//                     .find("a.view")
+//                     .attr("target", "_self");
+//                   $("#fileupload" + uploadIndex)
+//                     .parent("span")
+//                     .parent("p")
+//                     .find("a.view")
+//                     .attr(
+//                       "href",
+//                       'javascript:showDocument("' +
+//                         FILE_UPLOAD_PATH +
+//                         file.fileName +
+//                         '");'
+//                     );
+//                 }
+//               } else if (uploadMethodType == 4) {
+//                 $("#fileName" + uploadIndex).html(file.fileName);
+//                 $("#deleteDocument" + uploadIndex).attr(
+//                   "href",
+//                   'javascript:removeDocument("' +
+//                     uploadIndex +
+//                     '","' +
+//                     uploadMethodType +
+//                     '");'
+//                 );
+//                 //							$('#deleteDocument'+uploadIndex).attr('style','display:block;');
+//                 //							$('#showDocument'+uploadIndex).attr('style','display:block;');
+//                 $("#divdeleteDocument" + uploadIndex).attr(
+//                   "style",
+//                   "display:block;"
+//                 );
+//                 $("#divshowDocument" + uploadIndex).attr(
+//                   "style",
+//                   "display:block;"
+//                 );
+//                 if (data.originalFiles[0]["type"] == "application/pdf") {
+//                   $("#showDocument" + uploadIndex).attr("target", "_blank");
+//                   $("#showDocument" + uploadIndex).attr(
+//                     "href",
+//                     FILE_UPLOAD_PATH + file.fileName
+//                   );
+//                 } else {
+//                   $("#showDocument" + uploadIndex).attr("target", "_self");
+//                   $("#showDocument" + uploadIndex).attr(
+//                     "href",
+//                     'javascript:showDocument("' +
+//                       FILE_UPLOAD_PATH +
+//                       file.fileName +
+//                       '");'
+//                   );
+//                 }
+//               } else if (uploadMethodType == 5) {
+//                 $("#fileupload" + uploadIndex + "img").attr(
+//                   "fileName",
+//                   file.fileName
+//                 );
+//                 $("#fileupload" + uploadIndex + "img").attr(
+//                   "href",
+//                   'javascript:removeDocument("' +
+//                     uploadIndex +
+//                     '","' +
+//                     uploadMethodType +
+//                     '");'
+//                 );
+//                 if (data.originalFiles[0]["type"] == "application/pdf") {
+//                   $("#fileupload" + uploadIndex + "img").addClass("full mt-1");
+//                   $("#fileupload" + uploadIndex + "img").attr(
+//                     "target",
+//                     "_blank"
+//                   );
+//                   $("#fileupload" + uploadIndex + "img").attr(
+//                     "href",
+//                     FILE_UPLOAD_PATH + file.fileName
+//                   );
+//                   //								$('#fileupload'+uploadIndex+'imgIcon').attr('src',PATH_FOLDER_IMAGE+'pdf.jpg');
+//                   setTimeout(function () {
+//                     $("#fileupload" + uploadIndex + "imgIcon").attr(
+//                       "src",
+//                       PATH_FOLDER_IMAGE + "pdf.jpg"
+//                     );
+//                   }, 3000);
+//                 } else {
+//                   $("#fileupload" + uploadIndex + "img").addClass("full mt-1");
+//                   $("#fileupload" + uploadIndex + "img").attr(
+//                     "target",
+//                     "_self"
+//                   );
+//                   $("#fileupload" + uploadIndex + "img").attr(
+//                     "href",
+//                     'javascript:showDocument("' +
+//                       FILE_UPLOAD_PATH +
+//                       file.fileName +
+//                       '");'
+//                   );
+//                   setTimeout(function () {
+//                     $("#fileupload" + uploadIndex + "imgIcon").attr(
+//                       "src",
+//                       FILE_UPLOAD_PATH + file.fileName
+//                     );
+//                   }, 3000);
+//                 }
+//                 //$('#fileupload'+uploadIndex+'div').hide();
+//               } else if (uploadMethodType == 6) {
+//                 $("#fileupload" + uploadIndex + "Span").html(file.fileName);
+//               }
+//             }
+//           });
+//         }
+//       },
+//       progressall: function (e, data) {
+//         console.log("progressall");
+//         if (uploadMethodType == 1) {
+//           $("#fileupload" + uploadIndex + "ProgressStatus")
+//             .removeClass("label-error")
+//             .addClass("fa fa-check-circle green");
+//           //var progress = parseInt(data.loaded / data.total * 100, 10);
+//           $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
+//             "width",
+//             100 + "%"
+//           );
+//         } else if (uploadMethodType == 2) {
+//         } else if (uploadMethodType == 3) {
+//         } else if (uploadMethodType == 4) {
+//         }
+//       },
+//       fail: function (e, data) {
+//         console.log("fail");
+//         //			console.log(uploadIndex+' fail '+e+" = "+data);
+//         //			console.log(uploadIndex+' fail '+index+" = "+file+' == '+file.name);
+//         if (uploadMethodType == 1) {
+//           //$('#fileupload'+uploadIndex+'Progress .progress-bar').css('width', 100 + '%');
+//           $("#fileupload" + uploadIndex + "ProgressStatus").addClass(
+//             "label-error"
+//           );
+//           showMessage(true, MAX_SIZE_LIMIT);
+//         } else if (uploadMethodType == 2) {
+//           $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
+//             "width",
+//             100 + "%"
+//           );
+//           $("#fileupload" + uploadIndex + "ProgressStatus")
+//             .removeClass("progress-bar-success")
+//             .addClass("progress-bar-danger");
+//         } else if (uploadMethodType == 3) {
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .parent("div")
+//             .find("i")
+//             .addClass("fa fa-close");
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .parent("div")
+//             .find("h1")
+//             .attr("style", "color:red");
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .parent("div")
+//             .find("span.fileName")
+//             .html("");
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .find("a.view")
+//             .next("a.remove")
+//             .attr("style", "display:none;");
+//           $("#fileupload" + uploadIndex)
+//             .parent("span")
+//             .parent("p")
+//             .find("a.view")
+//             .attr("style", "display:none;");
+//         }
+//         showMessage(true, MAX_SIZE_LIMIT);
+//       },
+//     })
+//     .prop("disabled", !$.support.fileInput)
+//     .parent()
+//     .addClass($.support.fileInput ? undefined : "disabled");
+// }
 function bindFileUploadForCSV(uploadIndex, uploadStudentId, uploadStandardId) {
   var data = {};
   data["uploadStudentId"] = uploadStudentId;
@@ -2510,7 +3037,7 @@ function bindFileUploadForCSV(uploadIndex, uploadStudentId, uploadStandardId) {
           isError = true;
         }
         if (uploadErrors.length > 0) {
-          showMessage(1, uploadErrors.join("\n"));
+          showMessageTheme2(0, uploadErrors.join("\n"));
           return false;
         }
         data.process().done(function () {
@@ -2582,7 +3109,7 @@ function bindFileUploadForCSV(uploadIndex, uploadStudentId, uploadStandardId) {
         $("#fileupload" + uploadIndex + "ProgressStatus").addClass(
           "label-error"
         );
-        showMessage(1, MAX_SIZE_LIMIT);
+        showMessageTheme2(0, MAX_SIZE_LIMIT);
       },
     })
     .prop("disabled", !$.support.fileInput)
@@ -2624,7 +3151,7 @@ function bindFileUploadForPDF(uploadIndex, uploadUserId) {
         }
         if (uploadErrors.length > 0) {
           isError = true;
-          showMessage(1, uploadErrors.join("\n"));
+          showMessageTheme2(0, uploadErrors.join("\n"));
           return false;
         }
         data.process().done(function () {
@@ -2649,7 +3176,7 @@ function bindFileUploadForPDF(uploadIndex, uploadUserId) {
         );
       },
       done: function (e, data) {
-        customLoader(true);
+        customLoader(false);
         if (data.result.status == 0 || data.result.status == 3) {
           $("#fileupload" + uploadIndex + "ProgressStatus")
             .removeClass("progress-bar-success")
@@ -2702,7 +3229,7 @@ function bindFileUploadForPDF(uploadIndex, uploadUserId) {
         $("#fileupload" + uploadIndex + "ProgressStatus").addClass(
           "label-error"
         );
-        showMessage(1, MAX_SIZE_LIMIT);
+        showMessageTheme2(0, MAX_SIZE_LIMIT);
       },
     })
     .prop("disabled", !$.support.fileInput)
@@ -2894,7 +3421,7 @@ function callSubjectsByGradeId(
   //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -2912,7 +3439,7 @@ function callSubjectsByGradeId(
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["subject"],
@@ -2922,12 +3449,7 @@ function callSubjectsByGradeId(
         //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
       }
       //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
-    },
-    error: function (e) {
-      console.log(e);
-      //	showMessage(1, e.responseText);
-      //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -2951,7 +3473,7 @@ function callSubjectsByGradeId(
 //		async: false,
 //		success : function(data) {
 //			if (data['status'] == '0' || data['status'] == '2') {
-//				showMessage(1, data['message']);
+//				showMessageTheme2(1, data['message']);
 //			} else {
 //				buildDropdown(data['mastersData']['subject'], $("#"+formId+" #"+toElementId), 'Select course');
 //				$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
@@ -2959,7 +3481,7 @@ function callSubjectsByGradeId(
 //			$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
 //		},
 //		error : function(e) {
-//		//	showMessage(1, e.responseText);
+//		//	showMessageTheme2(1, e.responseText);
 //			$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
 //		}
 //	});
@@ -2987,7 +3509,7 @@ function callBothSubjectAndPlacementSubjectsByGrade(
   console.log("Placement Subject Id : " + requestExtra2);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -3004,7 +3526,7 @@ function callBothSubjectAndPlacementSubjectsByGrade(
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         console.log("Response Data  " + data);
         $("#" + formId + " #" + toElementId).html(
@@ -3022,11 +3544,7 @@ function callBothSubjectAndPlacementSubjectsByGrade(
           );
         });
       }
-    },
-    error: function (e) {
-      //	showMessage(1, e.responseText);
-      $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -3049,7 +3567,7 @@ function callTeacherSubjectsByGradeId(
   $("#" + formId + " #pastTaughtSubjectId").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -3065,7 +3583,7 @@ function callTeacherSubjectsByGradeId(
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["teacherSubject"],
@@ -3075,11 +3593,7 @@ function callTeacherSubjectsByGradeId(
         $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
       }
       $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-      $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 function callTeacherTaughtSubjects(formId, value, elementId, flag) {
@@ -3101,17 +3615,13 @@ function callTeacherTaughtSubjects(formId, value, elementId, flag) {
           stringMessage[0] == "EXCEPTION" ||
           stringMessage[0] == "SESSIONOUT"
         ) {
-          showMessage(1, stringMessage[1]);
+          showMessageTheme2(1, stringMessage[1]);
         } else {
           $("#teacherTaughtSubjectContent").html(htmlContent);
         }
         //return false;
       }
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-      return false;
-    },
+    }
   });
 }
 function callTeacherPreferredSubjects(formId, value, elementId, flag) {
@@ -3133,17 +3643,13 @@ function callTeacherPreferredSubjects(formId, value, elementId, flag) {
           stringMessage[0] == "EXCEPTION" ||
           stringMessage[0] == "SESSIONOUT"
         ) {
-          showMessage(1, stringMessage[1]);
+          showMessageTheme2(1, stringMessage[1]);
         } else {
           $("#teacherPreferredSubjectsContent").html(htmlContent);
         }
         //return false;
       }
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -3179,7 +3685,7 @@ function callTeacherEventSubjectsByGradeId(
   $("#" + formId + " #pastTaughtSubjectId").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -3195,7 +3701,7 @@ function callTeacherEventSubjectsByGradeId(
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(1, data["message"]);
+        showMessageTheme2(1, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["teacherEventSubject"],
@@ -3205,11 +3711,7 @@ function callTeacherEventSubjectsByGradeId(
         $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
       }
       $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-      $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -3276,12 +3778,12 @@ function customLoaderPreview(needToShow) {
   }
 }
 function showDocument(imagePath) {
-  customLoaderPreview(true);
+  customLoader(true);
   $("#documentPreview").attr("src", "");
   $("#documentPreview").attr("src", imagePath);
   $("#documentPreviewModal").modal("show");
   window.setTimeout(function () {
-    customLoaderPreview(false);
+    customLoader(false);
   }, 1000);
 }
 
@@ -3303,7 +3805,7 @@ function showSubjectCatalog(subjectId, courseType) {
         var stringMessage = [];
         stringMessage = htmlContent.split("|");
         if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION") {
-          showMessage(1, stringMessage[1]);
+          showMessageTheme2(1, stringMessage[1]);
         } else {
           //        			$('#subjectCatalogModalContent').html('');
           $("#subjectCatalogModalContent").html(htmlContent);
@@ -3311,10 +3813,7 @@ function showSubjectCatalog(subjectId, courseType) {
         }
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(1, e.responseText);
-    },
+    }
   });
 }
 function showWarningMessage(warningMessage, functionName) {
@@ -3480,7 +3979,7 @@ function showWarningMessageShow(warningMessage1, functionName1, bodyMsg) {
       $("#statusMessage-1").html(strText);
     } else {
       $("#statusMessage-1").html(
-        '<i class="fa fa-refresh fa-4x" style="color:#337ab7 !important;"></i>'
+        '<i class="fa fa-sync fa-4x" style="color:#337ab7 !important;"></i>'
       );
     }
     $("#resetDeleteErrorWarningYes1").attr("onclick", functionName1);
@@ -3536,7 +4035,7 @@ function getISDCodeByCityAndCountry(
   data["countryName"] = countryName;
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url:
       BASE_URL +
       CONTEXT_PATH +
@@ -3693,10 +4192,10 @@ $(document).ready(function () {
   //	}
 
   //  for header script
-  $(".mobile-toggle-header-nav").click(function () {
-    $(this).toggleClass("active");
-    $(".app-header__content").toggleClass("header-mobile-open");
-  });
+  // $(".mobile-toggle-header-nav").click(function () {
+  //   $(this).toggleClass("active");
+  //  // $(".app-header__content").toggleClass("header-mobile-open");
+  // });
   $(".mobile-toggle-nav").click(function () {
     if (!$(this).hasClass("is-active")) {
       $(".app-header__content").removeClass("header-mobile-open");
@@ -3730,15 +4229,46 @@ function copyToClipboardNew(originalValue) {
   document.execCommand("copy");
   $(copyText).attr("type", "hidden");
 }
-function copyToClipboard(elementId, showmsgEle) {
+
+function copyToClipboardNew(elementId, messageElementId) {
   $("#" + elementId).attr("disabled", false);
   var copyText = document.getElementById(elementId);
   copyText.select();
   copyText.setSelectionRange(0, 99999);
   document.execCommand("copy");
-  $(showmsgEle).text("Copied");
-  $(showmsgEle).removeClass("btn-primary");
-  $(showmsgEle).addClass("btn-success");
+
+  if (document.queryCommandSupported("copy")) {
+    var messageElement = $("#" + messageElementId);
+    messageElement.text("Copied!");
+    messageElement.css("display", "inline");
+    messageElement.fadeIn(300).delay(3000).fadeOut(300);
+  } else {
+    alert("Copying is not supported in your browser.");
+  }
+}
+// function copyToClipboard(elementId, showmsgEle) {
+//   $("#" + elementId).attr("disabled", false);
+//   var copyText = document.getElementById(elementId);
+//   copyText.select();
+//   copyText.setSelectionRange(0, 99999);
+//   document.execCommand("copy");
+//   $(showmsgEle).text("Copied");
+//   $(showmsgEle).removeClass("btn-primary");
+//   $(showmsgEle).addClass("btn-success");
+// }
+
+function copyToClipboard(elementId, showElement) {
+  $("#" + elementId).attr("disabled", false);
+  var copyText = document.getElementById(elementId);
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  if (document.queryCommandSupported("copy")) {
+    $("#" + showElement).show();
+    showMessageTheme2(1, "Copy Successfully");
+  } else {
+    alert("Copying is not supported in your browser.");
+  }
 }
 
 function copyURL(eleID, msgEle, msg) {
@@ -3966,7 +4496,7 @@ function callBatchesByMulltipleGradeId(
   hideMessage("");
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -3985,7 +4515,7 @@ function callBatchesByMulltipleGradeId(
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+        showMessageTheme2(true, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["subject"],
@@ -3995,12 +4525,7 @@ function callBatchesByMulltipleGradeId(
         //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
       }
       //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
-    },
-    error: function (e) {
-      console.log(e);
-      //	showMessage(true, e.responseText);
-      //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -4018,7 +4543,7 @@ function callStudentBatchesByGradeId(
   hideMessage("");
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -4038,19 +4563,31 @@ function callStudentBatchesByGradeId(
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+        showMessageTheme2(0, data["message"]);
       } else {
-        buildDropdown(
-          data["mastersData"]["studentList"],
-          $("#" + formId + " #" + toElementId),
-          "Select"
-        );
+        var studentList = data["mastersData"]["studentList"];
+        if (studentList.length > 0) {
+          if (formId == "extraActivityForm") {
+            if(requestExtra1=='teacher'){
+                showMessageTheme2(1, "Teacher list fetched successfully");
+            }else{
+                showMessageTheme2(1, "User list fetched successfully");
+            }
+            
+          }
+          buildDropdown(
+            data["mastersData"]["studentList"],
+            $("#" + formId + " #" + toElementId),
+            "Select"
+          );
+        } else {
+          if (formId == "extraActivityForm") {
+            showMessageTheme2(2, "User not found");
+          }
+        }
+        
       }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      $("#" + formId + " #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 function convertTZ(date, tzString) {
@@ -4188,9 +4725,12 @@ $(".show-password").on("click", function () {
 var i = 0;
 
 $(document).on("shown.bs.modal", ".modal", function (e) {
+  var modalShow; 
+  if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
   const modal = $(this);
   const backdrops = $(".modal-backdrop");
-  const modals = $(".modal.show").not(this);
+  
+  const modals = $(modalShow).not(this);
 
   // Calculate new z-index
   let baseZIndex = 1050;
@@ -4204,18 +4744,21 @@ $(document).on("shown.bs.modal", ".modal", function (e) {
       .css("z-index", zIndex - 10) // Ensure backdrop is behind modal
       .addClass("modal-stack");
   }, 10);
+  $('.tooltip.show').remove();
 });
 
 $(document).on("hidden.bs.modal", ".modal", function () {
+  var modalShow; 
+  if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
   // Check if there are still open modals
-  if ($(".modal.show").length === 0) {
+  if ($(modalShow).length === 0 && $(".modal.in").length === 0) {
     // Remove leftover backdrop(s)
     $(".modal-backdrop").remove();
     $("body").removeClass("modal-open");
   } else {
     // Adjust z-index of the last open modal and its backdrop
-    const topModal = $(".modal.show").last();
-    const newZIndex = 1050 + ($(".modal.show").length - 1) * 20;
+    const topModal = $(modalShow).last();
+    const newZIndex = 1050 + ($(modalShow).length - 1) * 20;
     topModal.css("z-index", newZIndex);
     $(".modal-backdrop")
       .last()
@@ -4247,7 +4790,7 @@ function disabledBackButton() {
 function checkCSCValidation(value, ele, fieldName) {
   if (value == "" || value == null || value == undefined) {
     validEndInvalidField(null, ele);
-    //showMessage(0, fieldName+' is required');
+    //showMessageTheme2(0, fieldName+' is required');
     return false;
   } else {
     validEndInvalidField(true, ele);
@@ -4257,7 +4800,7 @@ function checkCSCValidation(value, ele, fieldName) {
 function pCheckCSCValidation(value, ele, fieldName) {
   if (value == "" || value == null || value == undefined) {
     validEndInvalidField(null, ele);
-    //showMessage(0, fieldName+' is required');
+    //showMessageTheme2(0, fieldName+' is required');
     return false;
   } else {
     validEndInvalidField(true, ele);
@@ -4274,6 +4817,23 @@ function getVauleAsNumber(elementId) {
   }
   return value;
 }
+
+function validateSelectedDateWithMinandMaxDate(selectedDate,minMonthBeforeNumber,maxMonthAfterNumber) {
+  var sixMonthAgoDate = new Date();
+  var nextYearMaxDate = new Date();
+  var selectDate = selectedDate.split("-");
+  selectedDate = new Date(
+    selectDate[2] + "-" + selectDate[0] + "-" + selectDate[1]
+  );
+  sixMonthAgoDate.setMonth(sixMonthAgoDate.getMonth() - minMonthBeforeNumber);
+  nextYearMaxDate.setMonth(nextYearMaxDate.getMonth() + maxMonthAfterNumber);
+  if (selectedDate >= sixMonthAgoDate && selectedDate <= nextYearMaxDate) {
+    return true;
+  }
+  return false;
+}
+
+
 
 function getTrimmedValue(formId, elementId) {
   $("#" + formId + " " + "#" + elementId).val(
@@ -4614,30 +5174,28 @@ function getSettingRequest(schoolId) {
 // 			if (checkonlineOfflineStatus()) {
 // 				return;
 // 			}else{
-// 				showMessage(true, e.responseText);
+// 				showMessageTheme2(true, e.responseText);
 // 			}
 // 		}
 // 	});
 // 	return responseData;
 // }
 
-async function getSchoolSettingsTechnical(schoolId) {
-  try {
-    var responseData = await getDesiredObject("sst" + schoolId);
-    if (typeof responseData == "object") {
-      if (!responseData.ntc) {
-        return responseData;
-      }
-    }
-    responseData = await getDataBasedUrlAndPayload(
-      "technical",
-      getSettingRequest(schoolId)
-    );
-    localStorage.setItem("sst" + schoolId, JSON.stringify(responseData));
-    return responseData;
-  } catch (e) {
-    showMessage(true, e);
-  }
+async function getSchoolSettingsTechnical(schoolId){
+	try{
+		var responseData = await  getDesiredObject('sst'+schoolId);
+		if(typeof responseData =='object'){
+			if(!responseData.ntc){
+				return responseData;
+			}
+		}
+		responseData = await getDataBasedUrlAndPayload('technical', getSettingRequest(schoolId));
+		localStorage.setItem('sst'+schoolId,JSON.stringify(responseData));
+		return responseData;
+	}catch(e){
+		showMessageTheme2(true, e);
+
+	}
 }
 
 // function getSchoolSettingsLinks(schoolId){
@@ -4657,72 +5215,60 @@ async function getSchoolSettingsTechnical(schoolId) {
 // 			if (checkonlineOfflineStatus()) {
 // 				return;
 // 			}else{
-// 				showMessage(true, e.responseText);
+// 				showMessageTheme2(true, e.responseText);
 // 			}
 // 		}
 // 	});
 // 	return responseData;
 // }
 
-async function getSchoolSettingsLinks(schoolId) {
-  try {
-    var responseData = await getDesiredObject("sslink" + schoolId);
-    if (typeof responseData == "object") {
-      if (!responseData.ntc) {
-        return responseData;
-      }
-    }
-    responseData = await getDataBasedUrlAndPayload(
-      "links",
-      getSettingRequest(schoolId)
-    );
-    localStorage.setItem("sslink" + schoolId, JSON.stringify(responseData));
-    return responseData;
-  } catch (e) {
-    showMessage(true, e);
-  }
+async function getSchoolSettingsLinks(schoolId){
+	try{
+		var responseData = await  getDesiredObject('sslink'+schoolId);
+		if(typeof responseData =='object'){
+			if(!responseData.ntc){
+				return responseData;
+			}
+		}
+		responseData = await getDataBasedUrlAndPayload('links', getSettingRequest(schoolId));
+		localStorage.setItem('sslink'+schoolId,JSON.stringify(responseData));
+		return responseData;
+	}catch(e){
+		showMessageTheme2(true, e)
+	}
 }
 
-async function getSchoolSettingsOffice(schoolId) {
-  try {
-    var responseData = await getDesiredObject("ssoffice" + schoolId);
-    if (typeof responseData == "object") {
-      if (!responseData.ntc) {
-        return responseData;
-      }
-    }
-    responseData = await getDataBasedUrlAndPayload(
-      "office",
-      getSettingRequest(schoolId)
-    );
-    localStorage.setItem("ssoffice" + schoolId, JSON.stringify(responseData));
-    return responseData;
-  } catch (e) {
-    showMessage(true, e);
-  }
+async function getSchoolSettingsOffice(schoolId){
+	try{
+		var responseData = await  getDesiredObject('ssoffice'+schoolId);
+		if(typeof responseData =='object'){
+			if(!responseData.ntc){
+				return responseData;
+			}
+		}
+		responseData = await getDataBasedUrlAndPayload('office', getSettingRequest(schoolId));
+		localStorage.setItem('ssoffice'+schoolId,JSON.stringify(responseData));
+		return responseData;
+	}catch(e){
+		showMessageTheme2(true, e)
+	}
 }
-async function getCommonCustomScript(userId, schoolId) {
-  try {
-    var responseData = await getDesiredObject("commonscript" + schoolId);
-    if (typeof responseData == "object") {
-      if (!responseData.ntc) {
-        return responseData;
-      }
-    }
-    var data = {};
-    data["userId"] = userId;
-    responseData = await getDataBasedUrlAndPayload(
-      "common-script-variables",
-      data
-    );
-    localStorage.setItem(
-      "commonscript" + schoolId,
-      JSON.stringify(responseData)
-    );
-    return responseData;
-  } catch (e) {
-    showMessage(true, e);
-  }
+async function getCommonCustomScript(userId,schoolId){
+	try{
+		var responseData = await  getDesiredObject('commonscript'+schoolId);
+		if(typeof responseData =='object'){
+			if(!responseData.ntc){
+				return responseData;
+			}
+		}
+		var data={};
+		data['userId']=userId;
+		responseData = await getDataBasedUrlAndPayload('common-script-variables', data);
+		localStorage.setItem('commonscript'+schoolId,JSON.stringify(responseData));
+		return responseData;
+	}catch(e){
+		showMessageTheme2(true, e)
+	}
 }
 function getSettingsByTypeAndKey(type, key) {
   var responseData = {};
@@ -4733,14 +5279,11 @@ function getSettingsByTypeAndKey(type, key) {
       SCHOOL_UUID +
       `/api/v1/get-setting?metaType=${type}&metaKey=${key}`,
     method: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     async: false,
     success: function (response) {
       responseData = response;
-    },
-    error: function (error) {
-      console.error("Error fetching settings");
-    },
+    }
   });
   return responseData;
 }
@@ -4807,7 +5350,7 @@ function getSession() {
       if (checkonlineOfflineStatus()) {
         return;
       } else {
-        showMessage(true, e.responseText);
+        showMessageTheme2(true, e.responseText);
       }
     },
   });
@@ -4940,17 +5483,12 @@ function detectBrave() {
   }
 }
 
-function getDashboardDataBasedUrlAndPayload(
-  globalflag,
-  showMessage,
-  url,
-  payload
-) {
+function getDashboardDataBasedUrlAndPayload(globalflag,showMessageTheme2,url,payload) {
   customLoader(true);
   return new Promise(function (resolve, reject) {
     $.ajax({
       type: "POST",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLForHTML("dashboard", url),
       data: JSON.stringify(payload),
       dataType: "json",
@@ -4960,12 +5498,8 @@ function getDashboardDataBasedUrlAndPayload(
           if (data.status == "3") {
             redirectLoginPage();
           } else {
-            if (showMessage) {
-              if (tt == "theme1") {
-                showMessage(false, data.message);
-              } else {
-                showMessageTheme2(0, data.message, "", true);
-              }
+            if (showMessageTheme2) {
+              showMessageTheme2(0, data.message, "", true);
             }
           }
         } else {
@@ -4973,12 +5507,8 @@ function getDashboardDataBasedUrlAndPayload(
         }
       },
       error: function (xhr, status, e) {
-        if (showMessage) {
-          if (tt == "theme1") {
-            showMessage(false, e.responseText);
-          } else {
-            showMessageTheme2(0, e.responseText, "", true);
-          }
+        if (showMessageTheme2) {
+          showMessageTheme2(0, e.responseText, "", true);
         }
         reject(e);
       },
@@ -4986,67 +5516,61 @@ function getDashboardDataBasedUrlAndPayload(
   });
 }
 
-function getDashboardDataBasedUrlAndPayloadWithParentUrl(
-  globalflag,
-  showMessage,
-  url,
-  payload,
-  parentUrl
-) {
+function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessageTheme2, url, payload, parentUrl){
   return new Promise(function (resolve, reject) {
-    $.ajax({
-      type: "POST",
-      contentType: "application/json",
-      url: getURLForHTML(parentUrl, url),
-      data: JSON.stringify(payload),
-      dataType: "json",
-      global: globalflag,
-      success: function (data) {
-        if (data.status == "0" || data.status == "2" || data.status == "3") {
-          if (data.status == "3") {
-            redirectLoginPage();
-          } else {
-            if (showMessage) {
-              if (tt == "theme1") {
-                showMessage(false, data.message);
+      $.ajax({
+          type : "POST",
+          contentType : APPLICATION_JSON_VALUE,
+          url: getURLForHTML(parentUrl, url),
+          data : JSON.stringify(payload),
+          dataType : 'json',
+          global : globalflag,
+          success : function(data) {
+              if (data.status == '0' || data.status == '2' || data.status == '3') {
+                  if(data.status == '3'){
+                      redirectLoginPage();
+                  }else{
+                      if(showMessageTheme2){
+                          if(tt=='theme1'){
+                              showMessageTheme2(false, data.message);
+                          }else{
+                              showMessageTheme2(0, data.message,'',true);
+                          }
+                      }
+                  }
               } else {
-                showMessageTheme2(0, data.message, "", true);
+                  resolve(data);
               }
-            }
+          },
+          error: function (xhr, status, e) {
+              if(showMessageTheme2){
+                  if(tt=='theme1'){
+                      showMessageTheme2(false, e.responseText);
+                  }else{
+                      showMessageTheme2(0, e.responseText,'',true);
+                  }
+              }
+              reject(e);
           }
-        } else {
-          resolve(data);
-        }
-      },
-      error: function (xhr, status, e) {
-        if (showMessage) {
-          if (tt == "theme1") {
-            showMessage(false, e.responseText);
-          } else {
-            showMessageTheme2(0, e.responseText, "", true);
-          }
-        }
-        reject(e);
-      },
-    });
+      });
   });
 }
-function getActualData() {
-  var responseData = {};
-  if (LOCATION_SERVICE_BYPASS == "true") {
-    responseData = JSON.parse(DEFAULT_LOCATION);
-  } else {
-    $.ajax({
-      global: false,
-      type: "GET",
-      url: PRO_IP_API_URL,
-      async: false,
-      success: function (data) {
-        responseData = data;
-      },
-    });
-  }
-  return responseData;
+function getActualData(){
+	var responseData={};
+	if(LOCATION_SERVICE_BYPASS=='true'){
+		responseData=JSON.parse(DEFAULT_LOCATION);
+	}else{
+		$.ajax({
+			global: false,
+			type : "GET",
+			url : PRO_IP_API_URL,
+			async : false,
+			success : function(data) {
+				responseData=data;
+			}
+		});
+	}
+	return responseData;
 }
 function getCurrentTimeFromDateAsString(date) {
   return getCurrentTimeFromDate(new Date(date));
@@ -5074,7 +5598,7 @@ function getDataBasedUrlAndPayload(url, payload) {
   return new Promise(function (resolve, reject) {
     $.ajax({
       type: "POST",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLFor(url, ""),
       data: JSON.stringify(payload),
       dataType: "json",
@@ -5180,7 +5704,7 @@ function generateTinyUrls() {
   fetch("https://www.issg.co/api/create-short-urls", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": APPLICATION_JSON_VALUE,
     },
     body: JSON.stringify({ urls }),
   })
@@ -5205,19 +5729,75 @@ function generateTinyUrls() {
     });
 }
 
-function checkValueValidation(value, defaultValue) {
-  if (value == null || value == undefined || value == "") {
-    return defaultValue;
-  } else {
-    return value;
-  }
+
+function showDropdownCustomView(tableID){
+  $('.dropdown-toggle.btn-sm').off('click');
+  $('.dropdown-toggle.btn-sm').on('click', function (e) {
+      var drodownFlag = false;
+      tableID = $(this).closest("table").attr("id");
+      if($('.dropdown-toggle').closest("table").parent().hasClass("table-responsive")){
+        $(".table-responsive table tbody tr td .dropdown-menu").each(function(i,v){
+          if($(this).height()>$("#"+tableID).parent().height()){
+            drodownFlag=true;
+          }
+        });
+        if(drodownFlag){
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Remove any previously appended dropdown
+          $('.external-dropdown-menu').remove();
+
+          const $btn = $(this);
+          const $menu = $btn.next('.dropdown-menu');
+          // Clone the dropdown menu
+          const $clonedMenu = $menu.clone().addClass('show external-dropdown-menu');
+          
+          // Position it relative to the button
+          const offset = $btn.offset();
+          const height = $btn.outerHeight();
+          const tdWidth = $menu.outerWidth();
+          var btnWidth = $btn.outerWidth();
+          var zIndex = 1030;
+          if($(".modal.show").length>0){
+            $(".modal.show").each(function(){
+              zIndex= parseInt($(this).css('z-index'))+1;
+            });
+          }
+          $clonedMenu.css({
+            position: 'absolute',
+            top: offset.top + height,
+            left: offset.left - (tdWidth),
+            zIndex: zIndex,
+          });
+          $('body').append($clonedMenu);
+          // Close dropdown on outside click
+          $(document).on('click.externalDropdown', function (event) {
+            if (!$(event.target).closest('.external-dropdown-menu, .action-btn').length) {
+              $('.external-dropdown-menu').remove();
+              $(document).off('click.externalDropdown');
+              drodownFlag=false;
+            }
+          });
+        }else{
+          $('.external-dropdown-menu').remove();
+        }
+      }
+  });
+}
+function checkValueValidation(value, defaultValue){
+	if(value == null || value == undefined || value == ""){
+		return defaultValue;
+	}else{
+		return value;
+	}
 }
 
 function getTimezoneIdByTimeName(timeZoneName) {
   var responseData = {};
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getTimezoneIdByTimeNameRequest("GET_TIMEZONE_ID", timeZoneName)
@@ -5234,6 +5814,49 @@ function getTimezoneIdByTimeName(timeZoneName) {
     },
   });
   return responseData;
+}
+
+function getTimezoneIdByTimeNameRequest(key, value){
+	var request = {};
+	var requestData = {};
+	var authentication = {};
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	requestData['requestKey'] = key;
+	requestData['requestValue'] = value;
+	request['requestData'] = requestData;
+	request['authentication'] = authentication;
+	return request;
+}
+
+
+function showMessageErrorNew(isWarnig, message, id) {
+  if (!isWarnig) {
+    $("#" + id).addClass("success-msg");
+  }
+  $("#" + id).addClass("show-errow-msg");
+  $("#" + id).html(message);
+}
+function hideMessageErrorNew(id) {
+  $("#" + id).removeClass("success-msg");
+  $("#" + id).removeClass("show-errow-msg");
+  $("#" + id).html("");
+}
+
+function getLoaderContent(){
+    var html=
+    '<div id="commonloaderIdNewLoader" class="loader-wrapper unique-loader d-flex justify-content-center align-items-center loader-style hide-loader">'
+        if(SCHOOL_ID==1){
+          html+=`<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024"/>`
+        }else{
+          html+=
+          `<div class="ball-rotate">
+            <div style="background-color: rgb(247, 185, 36);"></div>
+          </div>
+          <p>Loading ...</p>`
+        }
+        html+=`</div>`;
+      return html;
 }
 
 function getTimezoneIdByTimeNameRequest(key, value) {

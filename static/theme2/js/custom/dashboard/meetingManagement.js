@@ -195,7 +195,7 @@ async function fetchUserIdToShowAllMeeting() {
       getHostListForFilter(hostDetails, isUserAllowed);
       $("#filterHostUserId").select2({
         placeholder: "Select Host",
-        allowClear: true,
+        theme:"bootstrap4",
       });
       getAllTimeZone(USER_TIMEZONE);
       $("#host").attr("disabled", true);
@@ -210,6 +210,7 @@ async function fetchUserIdToShowAllMeeting() {
     } else {
       $("#filterHostUserId").select2({
         placeholder: "Select Hosts",
+        theme:"bootstrap4",
         allowClear: true,
         multiple: true
       });
@@ -319,7 +320,6 @@ function renderMeetingManagementContent() {
 
     .tabs {
       display: flex;
-      gap: 30px;
       margin-bottom: 10px;
       position: relative;
       border-bottom: 2px solid #e3e3e3;
@@ -364,12 +364,7 @@ function renderMeetingManagementContent() {
       border-radius: 6px !important;
       border: 1px solid #027FFF !important;
     }
-    .select2-container--default .select2-selection--multiple .select2-selection__rendered li {
-      margin-top: 5px !important;
-    }
-    .select2-container .select2-search--inline .select2-search__field {
-      margin-top: 5px !important;
-    }
+    
   `)
   .appendTo("head");
   setDateToToday('#filterMeetingStartDate, #filterMeetingEndDate');
@@ -480,7 +475,7 @@ function goToPage(page) {
 
 function renderPagination(currentPage, totalPages) {
   let paginationHtml = `
-    <nav aria-label="Page navigation">
+    <nav aria-label="Page navigation" class="mt-3 full">
       <ul class="pagination justify-content-center">
         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
           <button class="page-link" onclick="goToPage(${currentPage - 1})"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
@@ -551,7 +546,7 @@ async function fetchMeetings(filterHostUserId) {
     url: BASE_URL + CONTEXT_PATH + "api/v1/get-all-meetings",
     method: "POST",
     data: JSON.stringify(body),
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     success: function (response) {
       const res = JSON.parse(response);
 
@@ -568,17 +563,19 @@ async function fetchMeetings(filterHostUserId) {
         : renderPagination(currentPageRecurring, totalPageRecurring);
 
       const responseHtml = `
-        <div class="tabs" style="position: relative;">
-          <button class="tab-button" id="oneDayTab" onclick="showTab('oneDayMeetings')">One Day Meetings</button>
-          <button class="tab-button" id="recurringTab" onclick="showTab('recurringMeetings')">Recurring Meetings</button>
-          <div class="active-line"></div>
-          <button onclick="showMeetingForm()" class="btn my-3 ml-auto rounded scheduleAButtonRight" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold; cursor: pointer;" id="scheduleMeetingBtn">Schedule a New Meeting</button>
+        <div class="tabs position-relative flex-wrap">
+          <div class="order-sm-0 order-1 col-sm-auto col-12 p-0">
+            <button class="tab-button p-2" id="oneDayTab" onclick="showTab('oneDayMeetings')">One Day Meetings</button>
+            <button class="tab-button p-2" id="recurringTab" onclick="showTab('recurringMeetings')">Recurring Meetings</button>
+            <div class="active-line"></div>
+          </div>
+          <button onclick="showMeetingForm()" class="btn btn-primary btn-lg  scheduleAButtonRight ml-auto mb-2 order-sm-1 order-0" id="scheduleMeetingBtn">Schedule a New Meeting</button>
         </div>
         ${res.data.meetingsTotalPages == 0 && res.data.recurringMeetingsTotalPages == 0 ?
           `
             <div class="d-flex flex-column justify-content-center align-items-center" style="height: 250px;">
               <h1 style="font-weight: bold;">Welcome To IS Meetings!</h1>
-              <button onclick="showMeetingForm()" class="btn my-3 rounded" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold; cursor: pointer;" id="scheduleMeetingBtn">Schedule a New Meeting</button>
+              <button onclick="showMeetingForm()" class="btn btn-primary btn-lg " id="scheduleMeetingBtn">Schedule a New Meeting</button>
             </div>
           `
           :
@@ -710,8 +707,8 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
    
   let title = isRecurring ? "Recurring Meetings" : "One Day Meetings";
   let meetingsHtml = `
-    <div class="meeting-list">
-      <table id="mainTable" class="w-100">
+    <div class="meeting-list table-responsive">
+      <table id="mainTable" class="w-100" style="min-width:1100px">
         <thead style="background-color: #EEEEEE;">
           ${title == "Recurring Meetings" ?
             `
@@ -786,11 +783,11 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
             ${meeting.hostName}
           </td>
           <td class=''>
-            <button onclick="startLensUrl('${meeting.meetingId}', '${meetingTitle}', '${meetingStartDate}', '${meetingStartTime}')" class="btn rounded btnRecur tdBtns" style="padding: 6px 14px; font-size: 16px; background-color: #027FFF; font-weight: bold; text-transform: capitalize;">Start</button>
-            <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')" style="border: 0; background: transparent; color: #FF0000 !important; padding: 5px; box-shadow: 0px 0px transparent;" class="btn btn-sm btnRecur tdBtns"><i class="fa fa-trash" style="font-size: 20px;"></i></button>
-            <button onclick="copyJoinUrl('${meeting.meetingId}')" style="border: 0; background: transparent; color: #3E3E3E !important; padding: 5px; box-shadow: 0px 0px transparent;" class="btn btn-sm btnRecur tdBtns" title="Copy invite"><i style="font-size: 20px;" class="fa fa-clone"></i></button>
+            <button onclick="startLensUrl('${meeting.meetingId}', '${meetingTitle}', '${meetingStartDate}', '${meetingStartTime}')" class="btn btn-primary  btnRecur tdBtns">Start</button>
+            <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')" class="btn btn-sm btnRecur tdBtns text-danger"><i class="fa fa-trash fa-2x"></i></button>
+            <button onclick="copyJoinUrl('${meeting.meetingId}')" class="btn btn-sm btnRecur tdBtns text-dark" title="Copy invite"><i class="fa fa-clone fa-2x"></i></button>
             ${meeting.recordingsCount > 0 ?
-            `<button onclick="showRecurringMeetingRecordings('${meeting.meetingId}','${meeting.title}','${meeting.hostName}')" style="border: 0; background: transparent; color: #027FFF !important; padding: 5px; box-shadow: 0px 0px transparent;" class="btn btn-sm" title="Play Recording"><i class="fa fa-video-camera" style="font-size: 20px;"></i></button>`
+            `<button onclick="showRecurringMeetingRecordings('${meeting.meetingId}','${meeting.title}','${meeting.hostName}')" class="btn btn-sm btn-outline-primary " title="Play Recording"><i class="fa fa-video"></i></button>`
             :
             ``
             }
@@ -826,9 +823,9 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
             ${meeting.timezoneName}
           </td>
           <td>
-            <button onclick="startLensUrl('${meeting.meetingId}', '${meetingTitle}', '${meetingStartDate}', '${meetingStartTime}')" class="btn rounded" style="padding: 6px 14px; font-size: 16px; background-color: #027FFF; font-weight: bold; text-transform: capitalize;" ${disableButtonsOnEndTime ? "disabled" : ""}>Start</button>
-            <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')" style="border: 0; background: transparent; color: #FF0000 !important; padding: 5px; box-shadow: 0px 0px transparent;" class="btn btn-sm" ${disableButtonsOnEndTime ? "disabled" : ""}><i class="fa fa-trash" style="font-size: 20px;"></i></button>
-            <button onclick="copyJoinUrl('${meeting.meetingId}')" style="border: 0; background: transparent; color: #3E3E3E !important; padding: 5px; box-shadow: 0px 0px transparent;" class="btn btn-sm" title="Copy invite" ${disableButtonsOnEndTime ? "disabled" : ""}><i style="font-size: 20px;" class="fa fa-clone"></i></button>
+            <button onclick="startLensUrl('${meeting.meetingId}', '${meetingTitle}', '${meetingStartDate}', '${meetingStartTime}')" class="btn btn-primary "  ${disableButtonsOnEndTime ? "disabled" : ""}>Start</button>
+            <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')"  class="btn btn-sm text-danger" ${disableButtonsOnEndTime ? "disabled" : ""}><i class="fa fa-trash fa-2x"></i></button>
+            <button onclick="copyJoinUrl('${meeting.meetingId}')" class="btn btn-sm text-dark" title="Copy invite" ${disableButtonsOnEndTime ? "disabled" : ""}><i class="fa fa-clone fa-2x"></i></button>
             ${
               (isUserAllowedRecordings && meeting.recordingsCount > 0) || 
               (!isUserAllowedRecordings && meeting.recordingsCount > 0 && new Date(meetingStartDate).setHours(0,0,0,0) >= new Date(pastDateLimit).setHours(0,0,0,0)) 
@@ -870,7 +867,7 @@ function showMeetingForm() {
   }).on('changeDate', updateAvailableTimes);
   $('#hour').select2({
     placeholder: "Select Time",
-    allowClear: true
+    theme:"bootstrap4"
   });
 
   getMeetingType();
@@ -993,7 +990,7 @@ function submitMeetingForm(formData) {
     $.ajax({
       url: BASE_URL+CONTEXT_PATH+'api/v1/save-councellor-meeting',
       method: 'POST',
-      contentType: 'application/json',
+      contentType: APPLICATION_JSON_VALUE,
       data: JSON.stringify(formData),
       success: function(response) {
         const res = JSON.parse(response);
@@ -1021,9 +1018,6 @@ function submitMeetingForm(formData) {
         }
         const allAttendees = res.data.allAttendees;
         savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, allAttendees);
-      },
-      error: function() {
-        showMessageTheme2(0, 'Failed to save the meeting.');
       }
     });
   }
@@ -1037,17 +1031,13 @@ function deleteMeeting(meetingId) {
   $.ajax({
     url: BASE_URL+CONTEXT_PATH+'api/v1/update-councellor-meeting',
     method: 'POST',
-    contentType: 'application/json',
+    contentType: APPLICATION_JSON_VALUE,
     data: JSON.stringify(formData),
     success: function() {
       customLoader(false);
       showMessageTheme2(1, "Meeting Deleted Successfully");
       $("#meetingRow"+meetingId).remove();
       backToList();
-    },
-    error: function() {
-      customLoader(false);
-      showMessageTheme2(0 ,"Failed to delete the meeting.");
     }
   });
 }
@@ -1056,7 +1046,7 @@ function showMeetingDetails(meetingId) {
   $.ajax({
     url: BASE_URL+CONTEXT_PATH+`api/v1/get-meeting-details?meetingId=${meetingId}&userId=${USER_ID}`,
     method: 'GET',
-    contentType: 'application/json',
+    contentType: APPLICATION_JSON_VALUE,
     success: function(response) {
       try {
         if (response) {
@@ -1117,13 +1107,13 @@ function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, 
       let icon;
       switch (a.attendee.emailSent) {
         case 'Y':
-          icon = '<span data-toggle="tooltip" data-placement="top" data-original-title="Email Sent"><i class="fa fa-check-circle" style="color: #228B22; font-size:16px;" aria-hidden="true"></i></span>';
+          icon = '<span data-toggle="tooltip" data-placement="top" data-original-title="Email Sent"><i class="fa fa-info-circle" style="color: #228B22; font-size:16px;" aria-hidden="true"></i></span>';
           break;
         case 'N':
-          icon = '<span data-toggle="tooltip" data-placement="top" data-original-title="Email Not Sent"><i class="fa fa-times-circle" style="color: #D22B2B; font-size:16px;" aria-hidden="true"></i></span>';
+          icon = '<span data-toggle="tooltip" data-placement="top" data-original-title="Email Not Sent"><i class="fa fa-info-circle" style="color: #D22B2B; font-size:16px;" aria-hidden="true"></i></span>';
           break;
         case 'U':
-          icon = '<span data-toggle="tooltip" data-placement="top" data-original-title="Unverified"><i class="fa fa-minus-circle" style="color: #E5741A; font-size:16px;" aria-hidden="true"></i></span>';
+          icon = '<span data-toggle="tooltip" data-placement="top" data-original-title="Unverified"><i class="fa fa-info-circle" style="color: #E5741A; font-size:16px;" aria-hidden="true"></i></span>';
           break;
         default:
           icon = '';
@@ -1141,19 +1131,30 @@ function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, 
   $("#meetingTypeName").text(meetingTypeName);
   if(formData.meetingType == "1"){
     $("#meetingTypeDiv").html(
-      `<div style="display: flex; align-items: center; padding: 12px;">
-        <div style="font-size: 14px; color: #666; width: 40%;"><strong>Attendees</strong></div>
-        <div id="attendeesSaved" style="font-size: 14px; width: 80%;">${attendeesList}</div>
+      `<div class="form-row mb-3">
+        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+          <div><strong>Attendees</strong></div>
+        </div>
+        <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+          <div id="attendeesSaved" class="font-weight-semi-bold">${attendeesList}</div>
+        </div>
       </div>
-      
-      <div id="saveWhenContainer" style="display: flex; align-items: center; padding: 12px;">
-        <div style="font-size: 14px; color: #666; width: 40%;"><strong>When</strong></div>
-        <div id="formattedDateAndFormDataStartTime" style="font-size: 14px; width: 80%;">${formattedDate} ${(moment(formData.startTime,'h:mm a').format('h:mm a'))}</div>
+      <div class="form-row mb-3" id="saveWhenContainer">
+        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+          <div><strong>When</strong></div>
+        </div>
+        <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+          <div id="formattedDateAndFormDataStartTime" class="font-weight-semi-bold">${formattedDate} ${(moment(formData.startTime,'h:mm a').format('h:mm a'))}</div>
+        </div>
       </div>
 
-      <div id="saveDurationContainer" style="display: flex; align-items: center; padding: 12px;">
-        <div style="font-size: 14px; color: #666; width: 40%;"><strong>Duration</strong></div>
-        <div id="hourAndMin" style="font-size: 14px; width: 80%;">${hour} Hour(s) ${minute} Minute(s)</div>
+      <div class="form-row mb-3" id="saveDurationContainer">
+        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+          <div><strong>Duration</strong></div>
+        </div>
+        <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+          <div id="hourAndMin" class="font-weight-semi-bold">${hour} Hour(s) ${minute} Minute(s)</div>
+        </div>
       </div>`
     )
   }else{
@@ -1187,7 +1188,7 @@ function getHostsOnly() {
   var responseData={};
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon('masters'),
     data: JSON.stringify(getRequestForHostList('GET-ALL-HOST-LIST')),
     dataType: 'json',
@@ -1196,9 +1197,6 @@ function getHostsOnly() {
     async : false,
     success: function(response) {
     responseData=response;
-    },
-    error: function(e) {
-      console.log(e);
     }
   });
   return responseData;
@@ -1223,7 +1221,7 @@ function getHostList(hostDetails) {
 
   hostEmailSelect.select2({
     placeholder: "Select Host",
-    allowClear: true
+    theme:"bootstrap4"
   });
 
   selectedHostKey = hostDetails ? hostDetails.key : null;
@@ -1293,7 +1291,7 @@ function getHostListForFilter(hostDetails, isUserAllowed) {
 function getAllTimeZone(timezoneDetails) {
     $.ajax({
       type: "POST",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLForCommon('masters'),
       data: JSON.stringify(getRequestForMaster('', 'TIMEZONE-LIST', '')),
       dataType: 'json',
@@ -1323,11 +1321,8 @@ function getAllTimeZone(timezoneDetails) {
 
         timezoneSelect.select2({
           placeholder: "Select Timezone",
-          allowClear: true,
+          theme:"bootstrap4"
         });
-      },
-      error: function(e) {
-        console.error(e);
       }
     });
 }
@@ -1336,7 +1331,7 @@ function getAllTimeZone(timezoneDetails) {
 function startLensResponse(baseUrl, meetingName, meetingDate, meetingStartTime){
   $.ajax({
     type : "GET",
-    contentType : "application/json",
+    contentType : APPLICATION_JSON_VALUE,
     url : baseUrl,
     dataType : 'json',
     success : function(response) {
@@ -1410,77 +1405,77 @@ function getDayId() {
 }
 
 // schedule list start
-function getScheduleList() {
-  const dayId = getDayId();
-  const teacherUserId = selectedHostKey;
-  const date = new Date($("#when").val());
-  const reqDate = changeDateFormat(date, "yyyy-mm-dd")
-  const now = new Date();
-  const systemTime = now.toTimeString().split(' ')[0];
-  const startDate = `${reqDate} ${systemTime}`;
-  const formattedDate = date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric"
-  });
+// function getScheduleList() {
+//   const dayId = getDayId();
+//   const teacherUserId = selectedHostKey;
+//   const date = new Date($("#when").val());
+//   const reqDate = changeDateFormat(date, "yyyy-mm-dd")
+//   const now = new Date();
+//   const systemTime = now.toTimeString().split(' ')[0];
+//   const startDate = `${reqDate} ${systemTime}`;
+//   const formattedDate = date.toLocaleDateString("en-US", {
+//     month: "short",
+//     day: "2-digit",
+//     year: "numeric"
+//   });
 
-  const body = {
-    teacherUserId: +teacherUserId,
-    dayId: dayId,
-    startDate: startDate,
-    userId: +USER_ID
-  }
+//   const body = {
+//     teacherUserId: +teacherUserId,
+//     dayId: dayId,
+//     startDate: startDate,
+//     userId: +USER_ID
+//   }
 
-  if (!teacherUserId || !dayId) return;
+//   if (!teacherUserId || !dayId) return;
 
-  $.ajax({
-    url: BASE_URL+CONTEXT_PATH+UNIQUEUUID+`/api/v1/dashboard/get-schedule`,
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify(body),
-    success: function(response) {
-      try {
-        const res = JSON.parse(response);
-        const schedule = res.data.schedule;
-        if (schedule && schedule.length > 0) {
-          $('#scheduleAndMeetingContainer').css("display", "flex");
-          $('#scheduleSection').show();
-          $('#scheduleContent').html(`
-            <h3 class="mb-4 mt-0 text-center text-white rounded mx-3 py-2 px-3" style="font-weight: bold !important; background-color: #027FFF;">Teacher's Schedule for ${formattedDate}.</h3>
-            ${schedule
-              .map(item => `<p class="px-4 py-2 mx-5" style="background-color: #FFE6E2; border: 1px solid #F23B22; color: #F23B22; border-radius: 16px;">${item.timeRange}</p>`)
-              .join('')}
-            <p class="mb-4 mx-3 text-center" style="font-weight: bold !important; color: #F23B22;">
-              Do not schedule meetings within these time ranges.
-            </p>
-          `);
-        } else {
-          $('#scheduleAndMeetingContainer').css("display", "flex");
-          $('#scheduleSection').show();
-          $('#scheduleContent').html(`
-            <h3 class="mb-4 mt-0 text-center text-white rounded mx-3 py-2 px-3" style="font-weight: bold !important; background-color: #027FFF;">Teacher's Schedule for ${formattedDate}.</h3>
-            <p class="text-center" style="font-size: 16px !important; font-weight: bold !important; color: #03BB17;">No meetings for now</p>
-          `)
-        }
-      } catch (error) {
-        console.error("Failed to fetch schedule:", error);
-        $('#scheduleContent').html('<p>Error loading schedule.</p>');
-      }
-    }
-  })
-}
+//   $.ajax({
+//     url: BASE_URL+CONTEXT_PATH+UNIQUEUUID+`/api/v1/dashboard/get-schedule`,
+//     method: 'POST',
+//     contentType: APPLICATION_JSON_VALUE,
+//     data: JSON.stringify(body),
+//     success: function(response) {
+//       try {
+//         const res = JSON.parse(response);
+//         const schedule = res.data.schedule;
+//         if (schedule && schedule.length > 0) {
+//           $('#scheduleAndMeetingContainer').css("display", "flex");
+//           $('#scheduleSection').show();
+//           $('#scheduleContent').html(`
+//             <h5 class="mb-4 mt-0 text-center text-white rounded mx-3 py-2 px-3 bg-primary">Teacher's Schedule for ${formattedDate}.</h5>
+//             ${schedule
+//               .map(item => `<p class="px-4 py-2 mx-5" style="background-color: #FFE6E2; border: 1px solid #F23B22; color: #F23B22; border-radius: 16px;">${item.timeRange}</p>`)
+//               .join('')}
+//             <p class="mb-4 mx-3 text-center" style="font-weight: bold !important; color: #F23B22;">
+//               Do not schedule meetings within these time ranges.
+//             </p>
+//           `);
+//         } else {
+//           $('#scheduleAndMeetingContainer').css("display", "flex");
+//           $('#scheduleSection').show();
+//           $('#scheduleContent').html(`
+//             <h3 class="mb-4 mt-0 text-center text-white rounded mx-3 py-2 px-3" style="font-weight: bold !important; background-color: #027FFF;">Teacher's Schedule for ${formattedDate}.</h3>
+//             <p class="text-center" style="font-size: 16px !important; font-weight: bold !important; color: #03BB17;">No meetings for now</p>
+//           `)
+//         }
+//       } catch (error) {
+//         console.error("Failed to fetch schedule:", error);
+//         $('#scheduleContent').html('<p>Error loading schedule.</p>');
+//       }
+//     }
+//   })
+// }
 
-function checkAndFetchSchedule() {
-  const date = $('#when').val();
-  selectedHostKey = $('#host').val();
+// function checkAndFetchSchedule() {
+//   const date = $('#when').val();
+//   selectedHostKey = $('#host').val();
 
-  if (date && selectedHostKey && selectedRole == "TEACHER" && selectedHostKey !== "0") {
-    getScheduleList();
-  } else {
-    $('#scheduleAndMeetingContainer').css("display", "none");
-    $('#scheduleSection').hide();
-  }
-}
+//   if (date && selectedHostKey && selectedRole == "TEACHER" && selectedHostKey !== "0") {
+//     getScheduleList();
+//   } else {
+//     $('#scheduleAndMeetingContainer').css("display", "none");
+//     $('#scheduleSection').hide();
+//   }
+// }
 // schedule list end
 
 
@@ -1531,7 +1526,7 @@ function getMeetingList() {
   $.ajax({
     url: BASE_URL+CONTEXT_PATH+`api/v1/get-scheduled-meetings`,
     method: 'POST',
-    contentType: 'application/json',
+    contentType: APPLICATION_JSON_VALUE,
     data: JSON.stringify(formData),
     success: function(response) {
       isFetching = false;
@@ -1542,23 +1537,27 @@ function getMeetingList() {
           $('#scheduleAndMeetingContainer').css("display", "flex");
           $('#meetingSection').show();
           $('#meetingContent').html(`
-            <h3 class="mb-4 mt-0 text-center text-white rounded mx-3 py-2 px-3" style="font-weight: bold !important; background-color: #027FFF;">Existing meetings on ${formattedDate}.</h3>
+            <h5 class="px-1 py-2 bg-primary text-white rounded mb-2 font-14 text-center font-weight-semi-bold">Existing meetings on ${formattedDate}.</h5>
             <div style="max-height:80vh; overflow-y:auto;">
               ${meetings
-                .map(item => `<p class="px-4 py-2 mx-5 meeting-item relative"
-                  data-details="Type: ${item.eventName}\nWhen: ${item.timeRange}\nInvitee Name: ${item.inviteeName}\nDuration: ${item.duration}\nTimezone: ${item.timezone}"
-                  style="background-color: #FFE6E2; border: 1px solid #F23B22; color: #F23B22; border-radius: 16px;">${item.timeRange}</p>`)
+                .map(item => `<p class="p-2 mx-2 meeting-item relative bg-light-danger border border-danger rounded-15 text-danger text-center" data-toggle="tooltip" 
+                  title='
+                    <h6 class="full text-left font-14 font-weight-bold">Meeting Details</h6>
+                    <span class="full mb-1 text-left font-12">Type: ${item.eventName}</span>
+                    <span class="full mb-1 text-left font-12">When: ${item.timeRange}</span>
+                    <span class="full mb-1 text-left font-12">Invitee Name: ${item.inviteeName}</span>
+                    <span class="full mb-1 text-left font-12">Duration: ${item.duration}</span>
+                    <span class="full mb-1 text-left font-12">Timezone: ${item.timezone}</span>'
+                  >${item.timeRange}</p>`)
                 .join('')}
             </div>
-            <p class="mb-4 mx-3 text-center" style="font-weight: bold !important; color: #F23B22;">
-              Do not schedule meetings within these time ranges.
-            </p>
+            <p class="mb-4 mx-x text-center text-danger font-weight-bold">Do not schedule meetings within these time ranges.</p>
           `);
         } else {
           $('#scheduleAndMeetingContainer').css("display", "flex");
           $('#meetingSection').show();
           $('#meetingContent').html(`
-            <h3 class="mb-4 mt-0 text-center text-white rounded mx-3 py-2 px-3" style="font-weight: bold !important; background-color: #027FFF;">Existing meetings on ${formattedDate}.</h3>
+            <h5 class="px-1 py-2 bg-primary text-white rounded mb-2 font-14 text-center font-weight-semi-bold">Existing meetings on ${formattedDate}.</h5>
             <p class="text-center" style="font-size: 16px !important; font-weight: bold !important; color: #03BB17;">No meetings for now</p>
           `);
         }
@@ -1566,6 +1565,9 @@ function getMeetingList() {
         console.error("Failed to fetch meetings:", error);
         $('#meetingContent').html('<p>Error loading meetings.</p>');
       }
+      $('[data-toggle="tooltip"]').tooltip({
+				html: true
+			});
     }
   })
 }
@@ -1612,7 +1614,7 @@ function openRecordingModal(entityId, entityType, meetingStartDate, title, start
     type: "POST",
     url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-event-recordings",
     data: JSON.stringify(body),
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     success: function (response) {
       const res = JSON.parse(response);
       if (res.statusCode === 0 && res.status === "success") {
@@ -1625,9 +1627,6 @@ function openRecordingModal(entityId, entityType, meetingStartDate, title, start
       } else {
         showMessageTheme2(0, `Error: ${res.message}`, '', true);
       }
-    },
-    error: function (e) {
-      console.error("Error Fetching the data:", e.message);
     }
   });
 }
@@ -1636,7 +1635,7 @@ function playRecording(videoUrl, title) {
   var videoModal = $("#videoModal");
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     dataType: 'json',
     url: getURLForSignVideo(videoUrl),
     success: function (responseData) {
@@ -1673,11 +1672,6 @@ function playRecording(videoUrl, title) {
         showMessageTheme2(0, responseData.message || "Failed to fetch video URL", '', true);
       }
 
-      customLoader(false);
-    },
-    error: function (e) {
-      console.error("Error fetching signed video URL:", e.message);
-      showMessageTheme2(0, "Error fetching video.", '', true);
       customLoader(false);
     }
   });
@@ -1757,16 +1751,12 @@ function showVTTFile(url, title) {
   const vttFile = convertToVTT(url);
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     dataType: 'json',
     url: getURLForTranscriptContent(vttFile),
     success: function(responseData) {
       customLoader(false);
       displayVTT(responseData.content, title);
-    },
-    error: function() {
-      customLoader(false);
-      showMessageTheme2(0, "Failed to load transcript.", '', true);
     }
   });
 }
@@ -1823,7 +1813,7 @@ function getAttendeesList() {
     $.ajax({
       url: BASE_URL + CONTEXT_PATH + `api/v1/get-all-user-list?searchKeyWords=${inputVal}`,
       method: 'GET',
-      contentType: 'application/json',
+      contentType: APPLICATION_JSON_VALUE,
       async: true,
       global: false,
       success: function (response) {
@@ -1897,7 +1887,7 @@ function renderSelectedAttendees() {
         <button data-user="${att.userId}" class="btn-close" 
           style="background: red; color: white; border: none; padding: 1px 5px; 
           border-radius: 50%; cursor: pointer; font-size: 17px;">
-          &times;
+          <i class="fa fa-times" aria-hidden="true"></i>
         </button>
       </span>`
     );
@@ -1937,7 +1927,7 @@ function showRecurringMeetingRecordings(entityId, meetingTitle, hostName) {
     url: BASE_URL + CONTEXT_PATH + "api/v1/get-recurring-recordings-list",
     type: "POST",
     data: JSON.stringify(body),
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     success: function (response) {
       var res = JSON.parse(response)
       try {
@@ -1984,7 +1974,7 @@ function applyRecurringRecordingFilters(entityId) {
     url: BASE_URL + CONTEXT_PATH + "api/v1/get-recurring-recordings-list",
     type: "POST",
     data: JSON.stringify(body),
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     success: function (response) {
       var res = JSON.parse(response);
       try {
@@ -2005,29 +1995,23 @@ function applyRecurringRecordingFilters(entityId) {
 function getGeneralMeetingTypeList(id){
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     dataType: 'json',
     url: BASE_URL + CONTEXT_PATH + "api/v1/get-meeting-types",
     success: function (response) {
       var list = response.data.meetingTypes;
       var dropdown = $(id);
       dropdown.empty();
-
       dropdown.append('<option value="">Select General Meeting Type</option>');
-
       if (list && list.length > 0) {
         list.forEach(function(type) {
           dropdown.append(`<option value="${type.id}">${type.type}</option>`);
         });
       }
-
       $(dropdown).select2({
         placeholder: "Select General Meeting Type",
-        allowClear: true,
+        theme:"bootstrap4"
       });
-    },
-    error: function () {
-      console.error("Failed to load meeting types.");
     }
   });
 }

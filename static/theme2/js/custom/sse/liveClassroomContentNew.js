@@ -34,7 +34,6 @@ function liveClassConentPage(){
             +liveClassConentPageBody()
           +'</div>'
           +liveClassConentPageFooter()
-          +customLoaderContent()
           +attendanceModelContent()
         return html;
 }
@@ -402,18 +401,6 @@ function getHoursAndMins(ends, duration){
   }
   return html;
 }
-function customLoaderContent(){
-	var html = 
-		'<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
-			// +'<div class="loader primary-border-top-color">'
-			// 	+'<div class="full">'
-			// 		+'<img src="'+PATH_FOLDER_IMAGE2+'is_loader.gif" alt="'+SCHOOL_NAME+' Loader"/>'
-			// 	+'</div>'
-			// +'</div>'
-      +'<img src="'+PATH_FOLDER_IMAGE2+'loader-new.gif" alt="'+SCHOOL_NAME+' Loader" class="new-loader-2024" />'
-		+'</div>';
-	return html;
-}
 
 function attendanceModelContent(){
 	var html =
@@ -431,7 +418,7 @@ function attendanceModelContent(){
               +'</table>'
             +'</div>'
             +'<div class="modal-footer">'
-                +'<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+                +'<button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>'
             +'</div>'
         +'</div>'
     +'</div>'

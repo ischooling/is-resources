@@ -13,7 +13,7 @@ function callUserActivity(formId, userId, showActivityLog, showLoginHistoryLog,r
 	data['themetype']='theme2';
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','user-activity'),
 		data : JSON.stringify(data),
 		dataType : 'html',
@@ -30,11 +30,6 @@ function callUserActivity(formId, userId, showActivityLog, showLoginHistoryLog,r
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			console.log(e)
-		//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }

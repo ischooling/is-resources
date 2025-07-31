@@ -14,17 +14,6 @@ async function permissionForLmsSmsContent(){
             html+=await footerContent();
         html+=`</div>`;
         html+=sessionOutPermissionContent(commonProfileDTO);
-        html+=`<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">`
-            if(SCHOOL_ID == 1){
-                html+=`<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />`;
-            }else{
-                html+=
-                `<div class="ball-rotate">
-                    <div style="background-color: rgb(247, 185, 36);"></div>
-                </div>
-                <p>Loading ...</p>`;
-            }
-        html+=` </div>`;
     return html;
 }
 
@@ -51,7 +40,7 @@ async function topHeaderContent(data){
                             // }
                         html+=`</div>
                         <div style="align-items: center;display: flex; margin-left: auto;padding-right:20px;">
-                            <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill btn-shadow btn-shine btn btn-primary">
+                            <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill  btn-shine btn btn-primary">
                                 Log out
                             </a>
                         </div>
@@ -93,7 +82,7 @@ async function cardContent(data){
                                         <div class="full">
                                             <h2 class="full text-center text-primary-gradient font-weight-bold">SMS</h2>
                                         </div>
-                                        <a href="javascript:void(0)" onclick="windowRedirectToDashboard('${data.dashboardUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-primary-gradient text-white p-4 br-3">
+                                        <a href="javascript:void(0)" onclick="windowRedirectToDashboard('${data.dashboardUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-primary -gradient text-white p-4 br-3">
                                             <div class="d-flex flex-wrap justify-content-center">
                                                 <h6 class="mt-2 mb-0"><i class="fa fa-user" style="font-size:22px"> </i> <b>School Management System (SMS)</b></h6>
                                             </div>
@@ -117,7 +106,7 @@ async function cardContent(data){
                                                             <h6 class="mb-0"><i class="fa fa-book" style="font-size:18px"> </i> <b> ${sso.lmsProviderName}</b></h6>
                                                         </a>`
                                                     }else{
-                                                        html+=`<a href="javascript:void(0)" onclick="callWithSession('${sso.lmsProviderSSOUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-success-gradient text-white br-3 p-2">
+                                                        html+=`<a href="javascript:void(0)" onclick="callWithSession('${sso.lmsProviderSSOUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-success -gradient text-white br-3 p-2">
                                                             <h6 class="mb-0"><i class="fa fa-book" style="font-size:18px"> </i> <b>${sso.lmsProviderName}</b></h6>
                                                         </a>`
                                                     }

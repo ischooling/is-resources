@@ -136,20 +136,20 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 		if(meetingType!="CUSTOM"){
 			if(userNameOrEmail==undefined  || userNameOrEmail==null || userNameOrEmail==0 || userNameOrEmail==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "StudentId is required");
+				showMessageTheme2(0, "Student Email is required");
 				return false;
 	
 			}
 			var sName = $('#recurringClass #studentName').val();
 			if(sName==undefined  || sName==null || sName==0 || sName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Student Name is required");
+				showMessageTheme2(0, "Student Name is required");
 				return false;
 			}
 			var cName = $('#recurringClass #subjectIds').val();
 			if(cName==undefined || cName==null ||  cName==0 || cName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Course Name required");
+				showMessageTheme2(0, "Course Name required");
 				return false;
 			}
 		}else{
@@ -158,20 +158,20 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 				teacherId = $("#" + formId + " #teacherId").val();
 			}
 			if(teacherId == undefined || teacherId == null ||  teacherId == 0 || teacherId == ''){
-				showMessage(true, "Please select teacher to create custom class.");
+				showMessageTheme2(0, "Please select teacher to create custom class.");
 				return false;
 			}
 		}
 		// if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
-		// 	showMessage(true, "Class Type is required.");
+		// 	showMessageTheme2(0, "Class Type is required.");
 		// 	return false;
 		// }
 		if(meetingVendor==undefined  || meetingVendor==null || meetingVendor==0 || meetingVendor==''){
-			showMessage(true, "Meeting Vendor is required.");
+			showMessageTheme2(0, "Meeting Vendor is required.");
 			return false;
-		}classDuration
+		}
 		if(classDuration==undefined  || classDuration==null || classDuration==0 || classDuration==''){
-			showMessage(true, "Classroom Duration is required.");
+			showMessageTheme2(0, "Classroom Duration is required.");
 			return false;
 		}
 
@@ -195,21 +195,13 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 			}
 			if(sName==undefined  || sName==null || sName==0 || sName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				if(USER_ROLE == 'TEACHER'){
-					showMessageTheme2(0, "Student Name required")
-				}else{
-					showMessage(true, "Student Name required");
-				}
+				showMessageTheme2(0, "Student Name required")
 				return false;
 			}
 			if($('#classroomSessionFilter #meetingFor').val()!='PTM'){
 				if(cName==undefined || cName==null ||  cName==0 || cName==''){
 					$(".meetingSlotAdd").prop("disabled", false);
-					if(USER_ROLE == 'TEACHER'){
-						showMessageTheme2(0, "Course Name required");
-					}else{
-						showMessage(true, "Course Name required");
-					}
+					showMessageTheme2(0, "Course Name required");
 					return false;
 				}
 			}else{
@@ -224,53 +216,38 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 		// }
 		if(duration==undefined || duration==null || duration==0 || duration==''){
 			$(".meetingSlotAdd").prop("disabled", false);
-			showMessage(true, "Duration field is required");
+			showMessageTheme2(0, "Duration field is required");
 			return false;
 		}
 	}
 	if(meetingFor=="CUSTOM"){
-		if($("#" + formId + " #customTitle").val()==undefined || $("#" + formId + " #customTitle").val()==''){
-			if(USER_ROLE != 'TEACHER'){
-				showMessage(true, "Class Title is required");
-			}else{
-				showMessageTheme2(0, "Class Title is required");
-			}
+		var customTitleVal = $("#" + formId + " #customTitle").val();
+		if(customTitleVal==undefined || customTitleVal==''){
+			showMessageTheme2(0, "Class Title is required");
 			return false;
 		}
 	}
 	if(mDate==undefined || mDate==null || mDate==0 || mDate==''){
 		$(".meetingSlotAdd").prop("disabled", false);
-		if(USER_ROLE == 'TEACHER'){
-			showMessageTheme2(0, "Meeting Date field is required");
-		}else{
-			showMessage(true, "Meeting Date field is required");
-		}
+		showMessageTheme2(0, "Meeting Date field is required");
 		return false;
 	}
 	if(sTimeHours==undefined || sTimeHours==null || sTimeHours==''){
 		$(".meetingSlotAdd").prop("disabled", false);
-		if(USER_ROLE == 'TEACHER'){
-			showMessageTheme2(0, "Start Time field is required");
-		}else{
-			showMessage(true, "Start Time field is required");
-		}
+		showMessageTheme2(0, "Start Time field is required");
 		return false;
 	}
 	if(sTimeMins==undefined || sTimeMins==null || sTimeMins=='' ){
 		$(".meetingSlotAdd").prop("disabled", false);
-		if(USER_ROLE == 'TEACHER'){
-			showMessageTheme2(0, "Start Time field is required");
-		}else{
-			showMessage(true, "Start Time field is required");
-		}
+		showMessageTheme2(0, "Start Time field is required");
 		return false;
 	}
 	$(".meetingSlotAdd").prop("disabled", true);
-	hideMessage('');
+	hideMessageTheme2('');
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('dashboard','validate-meetingslots-new-submit-by-teacher'),
 		data : JSON.stringify(getRequestForSubmitMeetingForStudentSessionSlotsNew(formId, moduleId,controllType, meetingType)),
 		dataType : 'json',
@@ -278,21 +255,16 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 			if (data['status'] == '0' || data['status'] == '2') {
 				customLoader(false);
 				$(".meetingSlotAdd").prop("disabled", false);
-				if(USER_ROLE == 'TEACHER'){
-					showMessageTheme2(0, data['message']);
-				}else{
-					showMessage(true, data['message']);
-				}
+				showMessageTheme2(0, data['message']);
 			} else {
 				$('.meetingSlotAdd').show();
 				customLoader(false);
-				if(tt == "theme2"){
-					var meetingTypeValue = $("#meetingFor").val();
-				}else{
-					var meetingTypeValue = $("#meetingType").val();
+				var meetingTypeValue = $("#meetingType").val();
+				if(meetingTypeValue==null || meetingTypeValue==undefined || meetingTypeValue==''){
+					meetingTypeValue =meetingType;
 				}
 				var recurringclassForAA = data['recurringClassListForAvailability'];
-				if(meetingTypeValue != "RM" && tt != "theme2"){
+				if(meetingTypeValue != "RM" && USER_ROLE != 'TEACHER'){
 					$("#recurringClassShowModel").modal("hide");
 					$("#recurringClassShowModelValidation").modal("show");
 					if(recurringclassForAA.length > 0){
@@ -461,33 +433,30 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 		if(meetingType!="CUSTOM"){
 			if(userNameOrEmail==undefined  || userNameOrEmail==null || userNameOrEmail==0 || userNameOrEmail==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "StudentID is required");
+				showMessageTheme2(0, "Student Email is required");
 				return false;
-	
 			}
 			var sName = $('#recurringClass #studentName').val();
 			if(sName==undefined  || sName==null || sName==0 || sName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Student Name is required");
+				showMessageTheme2(0, "Student Name is required");
 				return false;
 			}
 			var cName = $('#recurringClass #subjectIds').val();
 			if(cName==undefined || cName==null ||  cName==0 || cName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Course Name required");
+				showMessageTheme2(0, "Course Name required");
 				return false;
 			}
 		}else{
 			if(userNameOrEmail==undefined  || userNameOrEmail==null || userNameOrEmail==0 || userNameOrEmail==''){
 				if($("#" + formId + " #customTeacherId").val()==undefined || $("#" + formId + " #customTeacherId").val()==''){
-					showMessage(true, "Please Select teacher to create custom class");
+					showMessageTheme2(0, "Please Select teacher to create custom class");
 					return false;
 				}
-	
 			}
 		}
-		// if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
-		// 	showMessage(true, "Class Type is required.");
+		// 	showMessageTheme2(0, "Class Type is required.");
 		// 	return false;
 		// }
 
@@ -504,40 +473,40 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 			var stndard = $('#classroomSessionFilter #standardId').val();
 			if(stndard=='' || stndard==0){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Grade field is required");
+				showMessageTheme2(0, "Grade field is required");
 				return false;
 			}
 			if(sName==undefined  || sName==null || sName==0 || sName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Student Name required");
+				showMessageTheme2(0, "Student Name required");
 				return false;
 			}
 			if(cName==undefined || cName==null ||  cName==0 || cName==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessage(true, "Course Name required");
+				showMessageTheme2(0, "Course Name required");
 				return false;
 			}
 		}
 		
 		if(duration==undefined || duration==null || duration==0 || duration==''){
 			$(".meetingSlotAdd").prop("disabled", false);
-			showMessage(true, "Duration field is required");
+			showMessageTheme2(0, "Duration field is required");
 			return false;
 		}
 	}
 	if(mDate==undefined || mDate==null || mDate==0 || mDate==''){
 		$(".meetingSlotAdd").prop("disabled", false);
-		showMessage(true, "Meeting Date field is required");
+		showMessageTheme2(0, "Meeting Date field is required");
 		return false;
 	}
 	if(sTimeHours==undefined || sTimeHours==null || sTimeHours==''){
 		$(".meetingSlotAdd").prop("disabled", false);
-		showMessage(true, "Start Time field is required");
+		showMessageTheme2(0, "Start Time field is required");
 		return false;
 	}
 	if(sTimeMins==undefined || sTimeMins==null || sTimeMins=='' ){
 		$(".meetingSlotAdd").prop("disabled", false);
-		showMessage(true, "Start Time field is required");
+		showMessageTheme2(0, "Start Time field is required");
 		return false;
 	}
 	$(".meetingSlotAdd").prop("disabled", true);
@@ -545,7 +514,7 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('dashboard','meetingslots-new-submit-by-teacher'),
 		data : JSON.stringify(getRequestForSubmitMeetingForStudentSessionSlotsNew(formId, moduleId,controllType, meetingType)),
 		dataType : 'json',
@@ -554,22 +523,14 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 			if (data['status'] == '0' || data['status'] == '2') {
 				customLoader(false);
 				$(".meetingSlotAdd").prop("disabled", false);
-				if(tt=="theme2"){
-					showMessageTheme2(0, data['message']);
-				}else{
-					showMessage(true, data['message']);
-				}
+				showMessageTheme2(0, data['message']);
 			} else {
 				customLoader(false);
 				$(".meetingSlotAdd").prop("disabled", false);
-				if(USER_ROLE=='TEACHER'){
-					if(data['message']=='MEETING SAVED SUCCESSFULLY'){
-						showMessageTheme2(1, data['message']);
-					}else{
-						showMessageTheme2(0, data['message']);
-					}
+				if(data['message']=='MEETING SAVED SUCCESSFULLY'){
+					showMessageTheme2(1, data['message']);
 				}else{
-					showMessage(false, data['message']);
+					showMessageTheme2(0, data['message']);
 				}
 				if(controllType=='ADD'){
 					$('#'+formId)[0].reset();
@@ -581,7 +542,6 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 					$('#studentId').val('');
 					meetingDataByType('STUDENT_DOUBT_SESSION');
 					$("#recurringClassShowModel").modal('hide');
-					//$('#'+formId+" #meetingType").val(meetingType).trigger("change");
 					if(meetingType=="CUSTOM"){
 						$("#meetingLinkInput").val(data.extra);
 						if(!$("#copyMeetingLinkModal").hasClass("show")){
@@ -590,10 +550,8 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 							$(".meeting-link-copy-btn").addClass("btn-primary");
 						}
 						$("#copyMeetingLinkModal").modal("show");
-						
 					}
 					$("#customTitleDiv").hide();
-					// setTimeout(function(){ callDashboardPageSchool(moduleId,'schedule-a-session',''); }, 1000);
 				}
 				$(".classRecodsTumbs").hide();
 			}
@@ -776,7 +734,7 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 						+'</div>';	
 					html+='<div class="col-md-12 col-sm-12 col-12 mt-2 text-right" id="showMeetingModalDiv">'
 							+'<button class="btn btn-primary mr-1 validationBtn" onclick="return meetingSlotModalForValidateScheduleClass(\'classroomSessionFilter\','+roleAndModule.moduleId+');">Validate Class</button>'
-							+'<button class="btn btn-info" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+roleAndModule.moduleId+')">Reset</button>'
+							+'<button class="btn btn-danger" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+roleAndModule.moduleId+')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
 						+'</div>'
 			+'</div>'
 		+'</form>'
@@ -842,8 +800,8 @@ function getRecurringClassContent(moduleId){
 				+'<div class="row hide-on-odm col-12 row" id="timeSlotSession" style="display:none"></div>'
 				+'<div class="col-md-12 text-right hide-on-odm" style="display: none;">'
 					+'<button class="btn btn-primary mr-1" type="button" onclick="callRecurringShow(\'classroomSessionFilter\')">Check Class Availability</button>'
-					+'<button class="btn btn-success mr-1" type="button" onclick="booksclassOutsideAvailabilityConfirmationModal(\'hide-on-odm\',\'classroomSessionFilter\','+moduleId+');" style="display: none;"> <i class="fa fa-check"></i> Save</button>'
-					+'<button class="btn btn-info" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+moduleId+')">Reset</button>'
+					+'<button class="btn btn-success proceedRecurringClassbtn mr-1" type="submit" onclick="booksclassOutsideAvailabilityConfirmationModal(\'hide-on-odm\',\'classroomSessionFilter\','+moduleId+');" style="display: none;"> <i class="fa fa-check"></i> Save</button>'
+					+'<button class="btn btn-danger" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+moduleId+')">Reset</button>'
 				+'</div>'
 			return html;
 }
@@ -906,7 +864,7 @@ function booksclassOutsideAvailabilityConfirmationModalContent(){
 function getScheduleSessionContentTeacher(title, roleAndModule, schoolId, userId, role){
 	var html=
 		//'<style>.sticky-header{z-index:9}</style>'
-		'<div class="app-page-title">'
+		'<div class="app-page-title mb-3 py-2">'
 			+'<div class="page-title-wrapper">'
 				+'<div class="page-title-heading">'
 					+'<div class="page-title-icon"><i class="pe-7s-notebook text-primary"></i></div>'
@@ -948,9 +906,9 @@ function getUpdateMeetingResultModal(roleAndModule, role){
 					+'<input type="hidden" class="form-control" id="userId" name="userId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingId" name="meetingId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingCurStatus" name="meetingCurStatus" value="">'
-					+'<div class="modal-header p-2 bg-primary text-white">'
-						+'<h4 class="modal-title" id="myLargeModalLabel">Update Class Status</h4>'
-						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">x</button>'
+					+'<div class="modal-header py-2 bg-primary text-white">'
+						+'<h5 class="modal-title" id="myLargeModalLabel">Update Class Status</h5>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>'
 					+'</div>'
 					+'<div class="modal-body">'
 						+'<div class="col-md-12 col-sm-12 col-12">'
@@ -965,7 +923,7 @@ function getUpdateMeetingResultModal(roleAndModule, role){
 						if(roleAndModule.updated=='Y'){
 							html+='<button type="button" class="send btn btn-primary  text-left meetingSaveResult" onClick="updateClassroomSession(\''+roleAndModule.moduleId+'\',\''+role+'\', \'updateMeetingResultForm\');"><i class="fa fa-envelope-o"></i> Save</button>';
 						}
-						html+='<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">Close</button>'
+						html+='<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">Close</button>'
 					+'</div>'
 				+'</div>'
 			+'</form>'
@@ -983,9 +941,9 @@ function getMeetingUrlModal(roleAndModule, role){
 					+'<input type="hidden" class="form-control" id="userId" name="userId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingId" name="meetingId" value="">'
 					+'<input type="hidden" class="form-control" id="mailSendStatus" name="mailSendStatus" value="">'
-					+'<div class="modal-header text-center">'
-						+'<h4 class="modal-title" id="myLargeModalLabel">Class Link</h4>'
-						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">x</button>'
+					+'<div class="modal-header py-2 bg-primary text-center">'
+						+'<h5 class="modal-title" id="myLargeModalLabel">Class Link</h5>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>'
 					+' </div>'
 					+'<div class="modal-body">'
 						+'<div class="col-md-12 col-sm-12 col-12">'
@@ -1006,9 +964,9 @@ function getMeetingUrlModal(roleAndModule, role){
 				+'</div>'
 				   +'<div class="modal-footer">';
 						if(roleAndModule.added=='Y'){
-							html+='<button type="button" id="saveMeetingUrl" class="send btn btn-primary  text-left meetingUrl" onClick="saveClassroomSessionMeetingUrl(\''+roleAndModule.moduleId+'\',\''+role+'\');"><i class="fa fa-envelope-o"></i> Save</button>';
+							html+='<button type="button" id="saveMeetingUrl" class="send btn btn-success text-left meetingUrl" onClick="saveClassroomSessionMeetingUrl(\''+roleAndModule.moduleId+'\',\''+role+'\');"><i class="fa fa-envelope-o"></i> Save</button>';
 						}
-						html+='<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">Close</button>'
+						html+='<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">Close</button>'
 					+'</div>'
 				+'</div>'
 			+'</form>'
@@ -1025,9 +983,9 @@ function getSendMailModal(roleAndModule, role){
 				+'<div class="modal-content" style="border: none; border-radius: 1px">'
 					+'<input type="hidden" class="form-control" id="userId" name="userId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingId" name="meetingId" value="">'
-					+'<div class="modal-header text-center">'
-						+'<h4 class="modal-title" id="myLargeModalLabel">Send Mail</h4>'
-						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">x</button>'
+					+'<div class="modal-header py-2 bg-primary text-center">'
+						+'<h5 class="modal-title" id="myLargeModalLabel">Send Mail</h5>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>'
 					+'</div>'
 					+'<div style="text-align:center;">'
 						+'<p>Are you sure you want to send this mail?</p>'
@@ -1036,7 +994,7 @@ function getSendMailModal(roleAndModule, role){
 						if(roleAndModule.added=='Y'){
 							html+='<button type="button" class="send btn btn-primary  text-left sendMail" onClick="sendClassroomSessionMail(\''+roleAndModule.moduleId+'\',\''+role+'\');"><i class="fa fa-envelope-o"></i> Yes</button>';
 						}
-						html+='<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">No</button>'
+						html+='<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</form>'
@@ -1054,9 +1012,9 @@ function getPublicRecordModal(roleAndModule, role){
 					+'<input type="hidden" class="form-control" id="userId" name="userId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingId" name="meetingId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingStrId" name="meetingStrId" value="">'
-					+'<div class="modal-header text-center">'
-						+'<h4 class="modal-title" id="myLargeModalLabel"><span id="publishHeadId"></span> Recording</h4>'
-						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">x</button>'
+					+'<div class="modal-header py-2 bg-primary text-center">'
+						+'<h5 class="modal-title" id="myLargeModalLabel"><span id="publishHeadId"></span> Recording</h5>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>'
 					+'</div>'
 					+'<div style="text-align:center;">'
 						+'<p>Are you sure you want to <span id="publishId"></span> Recording?</p>'
@@ -1065,7 +1023,7 @@ function getPublicRecordModal(roleAndModule, role){
 						if(roleAndModule.added=='Y'){
 							html+='<button type="button" class="send btn btn-primary  text-left publishRecord" onClick="publishClassroomSession(\''+roleAndModule.moduleId+'\',\''+role+'\');"><i class="fa fa-envelope-o"></i> Yes</button>';
 						}
-						html+='<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">No</button>'
+						html+='<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</form>'
@@ -1083,9 +1041,9 @@ function getRevokeModal(roleAndModule, role){
 					+'<input type="hidden" class="form-control" id="userId" name="userId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingId" name="meetingId" value="">'
 					+'<input type="hidden" class="form-control" id="meetingStrId" name="meetingStrId" value="">'
-					+'<div class="modal-header text-center">'
-						+'<h4 class="modal-title" id="myLargeModalLabel"><span id="publishHeadId"></span> Revoke</h4>'
-						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">x</button>'
+					+'<div class="modal-header py-2 bg-primary text-center">'
+						+'<h5 class="modal-title" id="myLargeModalLabel"><span id="publishHeadId"></span> Revoke</h5>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>'
 					+'</div>'
 					+'<div style="text-align:center;">'
 						+'<p>Are you sure you want to Revoke?</p>'
@@ -1094,7 +1052,7 @@ function getRevokeModal(roleAndModule, role){
 						if(roleAndModule.added=='Y'){
 							html+='<button type="button" class="send btn btn-primary  text-left meetingRevoke" onClick="revokeClassroomSession(\''+roleAndModule.moduleId+'\',\''+role+'\');"><i class="fa fa-envelope-o"></i> Yes</button>';
 						}
-						html+='<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">No</button>'
+						html+='<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</form>'
@@ -1144,6 +1102,7 @@ function validateOneDayMeetingByTeacherModal(moduleId){
 		
 }
 
+
 function copyMeetingLink(){
 	var html = 
 			'<div class="modal fade" id="copyMeetingLinkModal"  role="dialog">'
@@ -1170,5 +1129,6 @@ function copyMeetingLink(){
 }
 
 function createClassButtonHide(){
-	$(".meetingSlotAdd").hide()
+	console.log('hide');
+	$(".meetingSlotAdd").hide();
 }

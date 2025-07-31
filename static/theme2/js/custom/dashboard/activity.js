@@ -9,7 +9,7 @@ async function renderActitify(userId) {
 		responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'get-acivity-details', payload);
 		if (responseData.status == 1) { //console.log("ACT DATA :: " + JSON.stringify(responseData));
 			$('#activityDiv').html(await getActivityContent(responseData));
-			$("#main-nav1").metisMenu({
+			$("#activity-nav").metisMenu({
 				toggle: false // disable the auto collapse. Default: true.
 			});
 			getHomePageActivityCounter();

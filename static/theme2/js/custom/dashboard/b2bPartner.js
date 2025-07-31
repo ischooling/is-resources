@@ -6,7 +6,7 @@ function callStudentListByPartner(formId) {
 	
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'get-student-enrolled-partner'),
 			data : JSON.stringify(getRequestForPartnerEnrolledList(formId)),
 			dataType : 'json',
@@ -38,10 +38,7 @@ function callStudentListByPartner(formId) {
 						// $("#campaignlist").html(html);
 						// $('#tblCampaignList').dataTable();
 				}
-			},
-		   error : function(e) {
-			   console.log(e);
-		   }
+			}
 	   });
    }
 
@@ -94,7 +91,7 @@ function callPartnerCountries(formId, value, elementId, preSelected) {
 	$("#" + formId + " #" + elementId).html('<option value="">Select country</option>');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'COUNTRIES-LIST', value)),
 		dataType: 'json',
@@ -136,7 +133,7 @@ function getPartnerCommissionRate(formId, elementId ,userId) {
 	return new Promise(function(resolve, reject){
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-partner-commission-rate',
 			data : JSON.stringify(getRequestForPartnerCommissionRate(formId, userId)),
 			dataType : 'json',
@@ -151,12 +148,6 @@ function getPartnerCommissionRate(formId, elementId ,userId) {
 					resolve(data)
 	
 				}
-			},error: function(xhr, status, error) {
-				if (checkonlineOfflineStatus()) {
-					return;
-				}
-				console.error('Error: ' + error);
-				reject(error);
 			}
 		});
 	});
@@ -208,7 +199,7 @@ function callPartnerListBy(formId, elementId) {
 	$("#" + formId + " #" + elementId).html('<option dail-referral-code="" value="">Select Partner</option>');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-partner-list'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -225,9 +216,6 @@ function callPartnerListBy(formId, elementId) {
 					$("#" + formId + " #" + elementId).append('<option dail-referral-code="'+v.extra+'" value="'+v.key+'">'+v.value+'</option>');
 				});
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -275,7 +263,7 @@ function updateStudentPartnerCommissionRate(studentStandardId, updateStatus, amo
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-transfer-payment',
 		data : JSON.stringify(requestData),
 		dataType : 'json',
@@ -360,7 +348,7 @@ function getPartnerDashboardDetails(userId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/partner-content',
 		data : JSON.stringify(getRequestForPartnerDetails(userId)),
 		dataType : 'json',
@@ -388,7 +376,7 @@ function getPartnerDashboardDetailsData(userId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/partner-learning-program-content',
 		data : JSON.stringify(getRequestForPartnerDetails(userId)),
 		dataType : 'json',
@@ -506,7 +494,7 @@ function getReferralCodeAndLinksDetails(userId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/referral-and-links',
 		data : JSON.stringify(getRequestForReferralCodeAndLink(userId)),
 		dataType : 'json',
@@ -597,7 +585,7 @@ function getPartnerStudentGrade(formId, elementId ,userId, learningProgramCode,e
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-partner-student-list-gradewise',
 		data : JSON.stringify(getRequestForPartnerCommissionRate(formId, userId, learningProgramCode, enrollmentFor)),
 		dataType : 'json',
@@ -816,7 +804,7 @@ function applyDiscountMsgShow(discountEleID){
 function callB2BDashboardLead(moduleId,leadType) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'b2b-dashboard-lead'),
 			data : JSON.stringify(getRequestForB2bDashboard(moduleId,leadType)),
 			dataType : 'json',
@@ -844,10 +832,7 @@ function callB2BDashboardLead(moduleId,leadType) {
 					
 					
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    

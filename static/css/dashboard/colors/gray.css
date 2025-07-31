@@ -67,7 +67,7 @@ body {
 }
 
 .navbar-header {
-	background: #007fff;
+	background: var(--pc);
 }
 
 .navbar-top-links>li>a {

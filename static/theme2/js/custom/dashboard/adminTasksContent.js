@@ -107,40 +107,40 @@ function getAdminTasksFilter(roleAndModule, schoolId, userId, role){
 	return html;
 }
 
-function callChangePasswordModal(userId){
-	var data={};
-	data['userId']=userId;
-	data['moduleId']=14;
-	data['sessionUserId']=USER_ID;
-	$.ajax({
-		type : "POST",
-		contentType: "application/json",
-		url : getURLForHTML('dashboard','student-view-lms-content'),
-		data : JSON.stringify(data),
-		dataType : 'html',
-		success : function(htmlContent) {
-			if(htmlContent!=""){
-            	var stringMessage = [];
-            	stringMessage = htmlContent.split("|");
-        		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-        			if(stringMessage[0] == "SESSIONOUT"){
-        				redirectLoginPage();
-        			}else{
-        				showMessage(true, stringMessage[1]);
-        			}
-        		} else {
-        			$('#viewStudentLmsContent').html(htmlContent)
-        		}
-			}
-		}
-	});
-	$('#lmsUserForm #userId1').val(userId);
-}
+// function callChangePasswordModal(userId){
+// 	var data={};
+// 	data['userId']=userId;
+// 	data['moduleId']=14;
+// 	data['sessionUserId']=USER_ID;
+// 	$.ajax({
+// 		type : "POST",
+// 		contentType: "application/json",
+// 		url : getURLForHTML('dashboard','student-view-lms-content'),
+// 		data : JSON.stringify(data),
+// 		dataType : 'html',
+// 		success : function(htmlContent) {
+// 			if(htmlContent!=""){
+//             	var stringMessage = [];
+//             	stringMessage = htmlContent.split("|");
+//         		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
+//         			if(stringMessage[0] == "SESSIONOUT"){
+//         				redirectLoginPage();
+//         			}else{
+//         				showMessage(true, stringMessage[1]);
+//         			}
+//         		} else {
+//         			$('#viewStudentLmsContent').html(htmlContent)
+//         		}
+// 			}
+// 		}
+// 	});
+// 	$('#lmsUserForm #userId1').val(userId);
+//}
 
 function getAdminTaskContent(title, roleAndModule, schoolId, userId, role){
 	var html='';
 		if(tt != "theme1"){
-			html+='<div class="app-page-title">'
+			html+='<div class="app-page-title mb-3 py-2">'
 					+'<div class="page-title-wrapper">'
 						+'<div class="page-title-heading">'
 							+'<div class="page-title-icon">'
@@ -205,7 +205,7 @@ function startTaskModal(reason){
 					+'<div class="modal-header text-white theme-bg py-2">'
 						+'<h5 class="modal-title" id="myLargeModalLabel">Start Admin Task</h5>'
 						+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-							+'<span aria-hidden="true">×</span>'
+							+'<span aria-hidden="true">&times;</span>'
 						+'</button>'
 					+'</div>'
 					+'<div class="modal-body">'

@@ -239,16 +239,16 @@ function deleteWarning(warningMessage, callbackFunction) {
 		'<div class="modal fade fade-scale mt-3" id="remarksresetDelete2" tabindex="-1" aria-hidden="true" >'
 			+'<div class="modal-dialog modal-sm" role="document">'
 				+'<div class="modal-content shadow-lg">'
-					+'<div class="modal-header pt-2 pb-2 bg-info justify-content-center">'
+					+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-center">'
 						+'<h5 class="heading text-white text-center" id="warningMessage2">' + warningMessage + '</h5>'
 					+'</div>'
 					+'<div id="statusMessage-2" class="modal-body delete-modal text-center">'
-						+'<i class="fas fa-sync fa-4x text-info"></i>'
+						+'<i class="fas fa-sync fa-4x text-primary"></i>'
 					+'</div>'
 					+'<div class="modal-footer">'
 						+'<div class="m-auto">'
-							+'<button id="resetDeleteErrorWarningYes2" type="button" class="btn btn-outline-info mr-2" onclick="' + callbackFunction + '">Yes</button>'
-							+'<button id="resetDeleteErrorWarningNo2" type="button" class="btn btn-info mr-1" data-dismiss="modal">No</button>'
+							+'<button id="resetDeleteErrorWarningYes2" type="button" class="btn btn-outline-primary mr-2" onclick="' + callbackFunction + '">Yes</button>'
+							+'<button id="resetDeleteErrorWarningNo2" type="button" class="btn btn-primary mr-1" data-dismiss="modal">No</button>'
 							+'<button id="resetDeleteErrorWarningCancel2" type="button" class="btn btn-success mr-1" data-dismiss="modal" style="display: none;">Close</button>'
 						+'</div>'
 					+'</div>'
@@ -267,7 +267,7 @@ function cropModal(){
 					+'<h5 class="modal-title" id="modalLabel">Crop the image</h5>'
 					// +'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 					+'<div class="ml-auto">'
-						+'<button type="button" class="btn btn-secondary mr-1" data-dismiss="modal">Cancel</button>'
+						+'<button type="button" class="btn btn-secondary  mr-1" data-dismiss="modal">Cancel</button>'
 						+'<button type="button" class="btn btn-primary mr-1" id="crop" onclick="cropImageFinal()">Crop</button>'
 						+'<button type="button" class="btn btn-primary" onclick="rotateImage()">Rotate</button>'
 					+'</div>'
@@ -279,7 +279,7 @@ function cropModal(){
 					+'</div>'
 				+'</div>'
 				// +'<div class="modal-footer">'
-				// 	+'<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>'
+				// 	+'<button type="button" class="btn btn-secondary " data-dismiss="modal">Cancel</button>'
 				// 	+'<button type="button" class="btn btn-primary" id="crop" onclick="cropImageFinal()">Crop</button>'
 				// 	+'<button type="button" class="btn btn-primary" onclick="rotateImage()">Rotate</button>'
 				// +'</div>'
@@ -295,7 +295,7 @@ function pdfPreview(){
 			+'<div class="modal-content">'
 				+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-between flex-wrap">'
 					+'<h6 class="heading text-white">Preview File</h6>'
-					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body m-0 py-2" style="margin-top:0 !important">'
 					+'<div id="pre_upload_image_div" class="full text-center upload_img d-none">'
@@ -336,9 +336,9 @@ function leadChatDocumentsContent(discardPermission, userId, leadId){
 	'<div id="updateChatSupportDocs" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
 		+'<div class="modal-dialog modal-xl">'
 			+'<div class="modal-content border-0">'
-				+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
-					+'<h5 class="modal-title" id="exampleModalLabel">Update and View Document</h5>'
-					+'<button type="button" class="close text-white" onClick="resetLeadChat(\'new-leads\')" aria-label="Close"><span aria-hidden="true">×</span></button>'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title" >Update and View Document</h5>'
+					+'<button type="button" class="close text-white" onClick="resetLeadChat(\'new-leads\')" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body">'
 					+'<div class="row">'
@@ -370,7 +370,7 @@ function leadChatDocumentsContent(discardPermission, userId, leadId){
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
 							+'<label class="m-0 full">&nbsp;</label>'
-							+'<button type="button" class="btn btn-success btn-shadow pr-4 pl-4" id="saveChatBtn" onclick="saveChatLogs(\''+discardPermission+'\', '+userId+','+leadId+',\'CHAT_SUPPORT\', \'chatDate\', \'OD3div\')">Save</button>'
+							+'<button type="button" class="btn btn-success  pr-4 pl-4" id="saveChatBtn" onclick="saveChatLogs(\''+discardPermission+'\', '+userId+','+leadId+',\'CHAT_SUPPORT\', \'chatDate\', \'OD3div\')">Save</button>'
 						+'</div>'
 						+'<div class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2 table-responsive uploadedChatLogs">'
 							
@@ -388,7 +388,7 @@ function uploadedChatLogs(discardPermission, userId, leadId){
 	'<table class="table table-bordered table-striped" style="font-size:11px;">'
 		+'<thead>'
 			+'<tr>'
-				+'<th>Sr. No.</th>'
+				+'<th>S. No.</th>'
 				+'<th>Chat From</th>'
 				+'<th>Chat date</th>'
 				+'<th>View</th>'
@@ -437,7 +437,7 @@ function getChatImageCropContent(){
 					+'<h5 class="modal-title" id="modalLabel">Crop the image</h5>'
 					// +'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 					+'<div class="ml-auto">'
-						+'<button type="button" class="btn btn-secondary mr-1" data-dismiss="modal">Cancel</button>'
+						+'<button type="button" class="btn btn-secondary  mr-1" data-dismiss="modal">Cancel</button>'
 						+'<button type="button" class="btn btn-primary mr-1" id="cropChatSupportDoc" onclick="cropImgfun()">Crop</button>'
 						+'<button type="button" class="btn btn-primary" onclick="rotateImage()">Rotate</button>'
 					+'</div>'
@@ -448,7 +448,7 @@ function getChatImageCropContent(){
 					+'</div>'
 				+'</div>'
 				// +'<div class="modal-footer">'
-				// 	+'<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>'
+				// 	+'<button type="button" class="btn btn-secondary " data-dismiss="modal">Cancel</button>'
 				// 	+'<button type="button" class="btn btn-primary" id="cropChatSupportDoc" onclick="cropImgfun()">Crop</button>'
 				// 	+'<button type="button" class="btn btn-primary" onclick="rotateImage()">Rotate</button>'
 				// +'</div>'
@@ -640,7 +640,7 @@ function whatsappChatUI(responseData) {
                         <div class="modal-header py-1 bg-primary text-white">
                             <h5 class="modal-title font-weight-bold">Wati Logs</h5>
                             <button type="button" class="close text-white" onclick="selfModalHide('watiLogsContent')">
-                                <span aria-hidden="true">×</span>
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body pt-1">
@@ -750,7 +750,7 @@ function watiLogsDataModal(mdata){
 							<div class="modal-header py-1 bg-primary text-white">
 								<h5 class="modal-title font-weight-bold">Wati Logs</h5>
 								<button type="button" class="close text-white" onclick="selfModalHide('watiLogsContent')">
-									<span aria-hidden="true">×</span>
+									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
 							<div class="modal-body pt-1">
@@ -820,7 +820,7 @@ function swatiBroadcastContentModal(data){
 								<div class="flex-grow-1">
 									<div class="text-right full">
 										<button type="button" class="close text-dark" onclick="selfModalHide('swatiBroadcastContent')">
-											<span aria-hidden="true">×</span>
+											<span aria-hidden="true">&times;</span>
 										</button>
 									</div>
 									<form class="full" action="javascript:void(0);">
@@ -828,7 +828,7 @@ function swatiBroadcastContentModal(data){
 											<table class="table" id="watiBroadcastTable" style="font-size:14px;min-width:450px">
 												<thead>
 													<tr class="bg-primary">
-														<th class="border text-white rounded-top-left-5">Sr. No.</th>
+														<th class="border text-white rounded-top-left-5">S. No.</th>
 														<th class="border text-white">Name</th>
 														<th class="border text-white text-center">View</th>
 														<th class="border text-white text-center rounded-top-right-5">Send Broadcast</th>
@@ -959,7 +959,7 @@ function swatiBroadcastSendMobileModal(data){
 											</svg>
 											<span>Back</span>
 										</button>
-										<button id="mswatiBroadcastSendThroughMobileClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('mswatiBroadcastSendThroughMobile'); closeModalAndFlushData();">&times;</button>
+										<button id="mswatiBroadcastSendThroughMobileClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger " onclick="selfModalHide('mswatiBroadcastSendThroughMobile'); closeModalAndFlushData();">&times;</button>
 									</div>
 							</div>
 							<div class="modal-body pt-1">
@@ -974,7 +974,7 @@ function swatiBroadcastSendMobileModal(data){
 															<label class="custom-control-label bold" for="allchecked">All</label> 
 														</span>
 													</th>
-													<th style='width:70px;' class="text-primary">Sr. No.</th>
+													<th style='width:70px;' class="text-primary">S. No.</th>
 													<th class="px-1 text-primary">Name</th>
 													<th class="rounded-top-right-5 text-primary">Phone Number</th>
 												</tr>
@@ -1124,7 +1124,7 @@ function customWatiTemplatesList(tdata){
 								<p class="fsize-1 mb-0 font-weight-bold">Wati Broadcast</p>
 							</div>
 							<button type="button" class="close text-white" onclick="selfModalHide('mcustomWatiTemplatesList'); closeModalAndFlushData();">
-								<span aria-hidden="true">×</span>
+								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body pt-1" style='max-height: 500px;overflow-y: auto;'>
@@ -1134,7 +1134,7 @@ function customWatiTemplatesList(tdata){
 										<table class="table" id="mwatiBroadcastTable" style="font-size:14px;min-width:450px">
 											<thead>
 												<tr style='background-color:#E7F3FF;'>
-													<th style="width: 15%;color:#007EFF !important;" class="border text-white rounded-top-left-5">Sr. No.</th>
+													<th style="width: 15%;color:#007EFF !important;" class="border text-white rounded-top-left-5">S. No.</th>
 													<th style="width: 40%;color:#007EFF !important;" class="border text-white">Template Name</th>
 													<th style="color:#007EFF !important;" class="border text-white text-center">View</th>
 													<th style="color:#007EFF !important;" class="border text-white text-center rounded-top-right-5">Send Broadcast</th>
@@ -1255,7 +1255,7 @@ function successFailedWatiMessagesModal(allData) {
 	if(allData!=null && allData!=undefined){
 		//console.log('having data');
 		allData.forEach(leadElement => {
-			$("#wati_logs_link_"+leadElement.leadID).show();
+			// $("#wati_logs_link_"+leadElement.leadID).show();
 			if(leadElement.status=='success'){
 				sDataObj={};
 				//console.log("leadElement at successFailedWatiMessagesModal :: " + leadElement);
@@ -1310,7 +1310,7 @@ function successFailedWatiMessagesModal(allData) {
 											</svg>
 											<span>Back</span>
 										</button>
-										<button id="successFailedWatiMessagesModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('successFailedWatiMessagesModal'); closeModalAndFlushData();">&times;</button>
+										<button id="successFailedWatiMessagesModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger " onclick="selfModalHide('successFailedWatiMessagesModal'); closeModalAndFlushData();">&times;</button>
 									</div>
 								</div>
 
@@ -1329,7 +1329,7 @@ function successFailedWatiMessagesModal(allData) {
 												<table id="successWatiTable" class="table mt-1 mb-0" style="font-size:14px;min-width:450px;">
 													<thead>
 														<tr style='background-color:#E7F3FF'>
-															<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">Sr. No.</th>
+															<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">S. No.</th>
 															<th class="px-1 text-primary">Name</th>
 															<th class="rounded-top-right-5 text-primary">Phone Number</th>
 														</tr>
@@ -1379,7 +1379,7 @@ function successFailedWatiMessagesModal(allData) {
 																		<label class="custom-control-label bold" for="allcheckedFailed">All</label> 
 																	</span>
 																</th>
-																<th style='width:50px;' class="text-primary">Sr. No.</th>
+																<th style='width:50px;' class="text-primary">S. No.</th>
 																<th class="px-1 text-primary">Name</th>
 																<th class="rounded-top-right-5 text-primary">Phone Number</th>
 															</tr>
@@ -1498,7 +1498,7 @@ function zadarmaLogsDataModal(data) {
 						<div class="modal-header py-1 bg-primary text-white">
 							<h5 class="modal-title font-weight-bold">Zadarma Logs</h5>
 							<button type="button" class="close text-white" onclick="selfModalHide('zadarmaLogsContent')">
-								<span aria-hidden="true">×</span>
+								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body pt-1">
@@ -1568,15 +1568,13 @@ function customEmailTemplatesList(tdata) {
 			}
 		</style>
 		<div id="customEmailTemplatesList" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" data-backdrop="static" aria-hidden="true">
-			<div class="modal-dialog" style="width:40%">
+			<div class="modal-dialog">
 				<div class="d-flex flex-wrap email-wrapper">
 					<div class="modal-content border-0 emailBroadcastTableDiv">
-						<div class="modal-header py-1 bg-primary text-white">
-							<div class="">
-								<p class="fsize-1 mb-0 font-weight-bold">Email Broadcast</p>
-							</div>
+						<div class="modal-header py-2 theme-bg text-white">
+							<h5 class="modal-title">Email Broadcast</h5>
 							<button type="button" class="close text-white" onclick="selfModalHide('customEmailTemplatesList'); closeModalAndFlushData();">
-								<span aria-hidden="true">×</span>
+								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body pt-1" style='max-height: 500px;overflow-y: auto;'>
@@ -1586,7 +1584,7 @@ function customEmailTemplatesList(tdata) {
 										<table class="table" id="emailBroadcastTable" style="font-size:14px;min-width:450px">
 											<thead>
 												<tr style='background-color:#E7F3FF;'>
-													<th style="width: 15%;color:#007EFF !important;" class="border text-white rounded-top-left-5">Sr. No.</th>
+													<th style="width: 15%;color:#007EFF !important;" class="border text-white rounded-top-left-5">S. No.</th>
 													<th style="width: 40%;color:#007EFF !important;" class="border text-white">Template Name</th>
 													<th style="color:#007EFF !important;" class="border text-white text-center">View</th>
 													<th style="color:#007EFF !important;" class="border text-white text-center rounded-top-right-5">Send Broadcast</th>
@@ -1710,9 +1708,9 @@ function emailBroadcastSendModal(data){
 									<span class="" id="viewMethodCallingEmail"></span>
 								</div>
 								<div class="d-flex align-items-center">
-									<button id="emailBroadcastSendModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('emailBroadcastSendModal'); closeModalAndFlushData();">&times;</button>
+									<button id="emailBroadcastSendModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger " onclick="selfModalHide('emailBroadcastSendModal'); closeModalAndFlushData();">&times;</button>
 								</div>
-								</div>
+							</div>
 							<div class="modal-body pt-1">
 								<form id="sendEmailBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
 									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
@@ -1725,7 +1723,7 @@ function emailBroadcastSendModal(data){
 															<label class="custom-control-label bold" for="allCheckedEmail">All</label> 
 														</span>
 													</th>
-													<th style='width:70px;' class="text-primary">Sr. No.</th>
+													<th style='width:70px;' class="text-primary">S. No.</th>
 													<th class="px-1 text-primary">Name</th>
 													<th class="rounded-top-right-5 text-primary">Email</th>
 												</tr>
@@ -1862,7 +1860,7 @@ function successFailedEmailMessagesModal(allData) {
 							<span class="" id="viewMethodCallingEmailSF"></span>
 						</div>
 						<div class="d-flex align-items-center">
-							<button id="successFailedEmailMessagesModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger" onclick="selfModalHide('successFailedEmailMessagesModal'); closeModalAndFlushData();">&times;</button>
+							<button id="successFailedEmailMessagesModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger " onclick="selfModalHide('successFailedEmailMessagesModal'); closeModalAndFlushData();">&times;</button>
 						</div>
 					</div>
 
@@ -1871,7 +1869,7 @@ function successFailedEmailMessagesModal(allData) {
 							<table id="preSuccessFailedTable" class="table mt-1 mb-0" style="font-size:14px;min-width:450px;">
 								<thead>
 									<tr style='background-color:#E7F3FF'>
-										<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">Sr. No.</th>
+										<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">S. No.</th>
 										<th class="px-1 text-primary">Name</th>
 										<th class="rounded-top-right-5 text-primary">Email</th>
 									</tr>
@@ -1997,7 +1995,7 @@ function successEmailTableContent(){
 		`<table id="successEmailTable" class="table mt-1 mb-0" style="font-size:14px;min-width:450px;">
 			<thead>
 				<tr style='background-color:#E7F3FF'>
-					<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">Sr. No.</th>
+					<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">S. No.</th>
 					<th class="px-1 text-primary">Name</th>
 					<th class="rounded-top-right-5 text-primary">Email</th>
 				</tr>
@@ -2035,7 +2033,7 @@ function failedEmailTableContent(){
 							<label class="custom-control-label bold" for="allCheckedFailedEmail">All</label> 
 						</span>
 					</th>
-					<th style='width:70px;' class="text-primary">Sr. No.</th>
+					<th style='width:70px;' class="text-primary">S. No.</th>
 					<th class="px-1 text-primary">Name</th>
 					<th class="rounded-top-right-5 text-primary">Email</th>
 				</tr>
@@ -2091,7 +2089,7 @@ function emailBroadcastLogsModal(data, name, email) {
 						<div class="modal-header py-1 bg-primary text-white">
 							<h5 class="modal-title">Email Broadcast Logs </h5>
 							<button type="button" class="close text-white" onclick="selfModalHide('emailBroadcastLogsModal')">
-								<span aria-hidden="true">×</span>
+								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body pt-1">

@@ -1,4 +1,4 @@
-    var cropper;
+    var cropperChatSupporDocs;
     var currentInputId;
     var currentThumbId;
     var base64URLElementID;
@@ -124,14 +124,14 @@
       
     // }
     $(document).on('shown.bs.modal','#cropModalChatSuport', function () {
-      cropper = new Cropper($('#cropModalImgChatSuport')[0], {
+      cropperChatSupporDocs = new Cropper($('#cropModalImgChatSuport')[0], {
         aspectRatio: NaN,
       // viewMode: 3,
       });
     }).on('hidden.bs.modal','#cropModalChatSuport', function() {
-      if(cropper!=null){
-        cropper.destroy();
-        cropper=null;
+      if(cropperChatSupporDocs!=null){
+        cropperChatSupporDocs.destroy();
+        cropperChatSupporDocs=null;
       }
     });
 
@@ -139,8 +139,8 @@
       customLoader(true);
       var initialAvatarURL;
       
-      if (cropper){
-        canvas = cropper.getCroppedCanvas({
+      if (cropperChatSupporDocs){
+        canvas = cropperChatSupporDocs.getCroppedCanvas({
          // width: 160,
           //height: 160,
         });
@@ -175,10 +175,10 @@
     }
     // Rotate Image Function
     function rotateImage() {
-      if (!cropper) {
+      if (!cropperChatSupporDocs) {
         return;
       }
-      cropper.rotate(90);
+      cropperChatSupporDocs.rotate(90);
     }
 
 function viewAttachmentChatSupport(src, modalId, attachmentType, uploadFileAttr){

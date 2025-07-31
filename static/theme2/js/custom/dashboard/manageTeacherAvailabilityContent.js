@@ -468,8 +468,8 @@ async function teacherTimeAvailabilityContent(title){
 		 	+await dashboardHeader()
 		 	+'<div class="app-main pb-4">'
 			  +'<div class="col p-0">'
-				   +'<div class="app-main__inner pt-2">'
-						+'<div class="app-page-title">'
+				   +'<div class="app-main__inner">'
+						+'<div class="app-page-title mb-3 py-2">'
 							 +'<div class="page-title-wrapper">'
 								  +'<div class="page-title-heading">'
 									   +'<div class="page-title-icon"><i class="fas fa-user-cog text-primary"></i></div>'
@@ -567,9 +567,9 @@ async function teacherTimeAvailabilityContent(title){
 											+'<div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 mb-2">'
 												+'<div class="w-100 text-right">'
 													+'<label class="full text-primary m-0">&nbsp;</label>'
-													+'<a href="javascript:void(0)" id="teacherTimeSearchReset" class="btn btn-success">Reset</a>'
+													+'<a href="javascript:void(0)" id="teacherTimeSearchReset" class="btn btn-danger "><i class="fa fa-undo"></i>&nbsp;Reset</a>'
 													+'&nbsp;&nbsp;'
-													+'<a href="javascript:void(0)" id="teacherTimeSearch" class="btn btn-primary">Apply</a>'
+													+'<a href="javascript:void(0)" id="teacherTimeSearch" class="btn btn-success "><i class="fa fa-search"></i>&nbsp;Search</a>'
 												+'</div>'
 											+'</div>'
 										+'</div>'      
@@ -658,7 +658,6 @@ async function teacherTimeAvailabilityContent(title){
    +getStudentListPopup()
    +await dashboardFooter()
    +warningModelContent()
-   +loaderContent()
    +recommendedTeacherlistModal()
    return html;
 }
@@ -708,7 +707,7 @@ function warningModelContent(){
 			   +'<div class="modal-footer">'
 				   +'<div class="m-auto">'
 					   +'<button id="resetDeleteErrorWarningYes" type="button" class="btn btn-outline-danger">Yes</button>'
-					   +'<button id="resetDeleteErrorWarningNo" type="button" class="btn btn-danger" onclick="selfCloseModal(this, \'remarksresetDelete\');" >No</button>'
+					   +'<button id="resetDeleteErrorWarningNo" type="button" class="btn btn-danger " onclick="selfCloseModal(this, \'remarksresetDelete\');" >No</button>'
 					   +'<button id="resetDeleteErrorWarningCancel" type="button" class="btn btn-success" data-dismiss="modal" style="">Close</button>'
 				   +'</div>'
 			   +'</div>'
@@ -716,21 +715,6 @@ function warningModelContent(){
 	   +'</div>'
    +'</div>';
 	return html;
-}
-
-function loaderContent(){
-   var html='<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
-			   if(SCHOOL_ID == 1){
-				   html+='<img src="'+PATH_FOLDER_IMAGE2+'loader-new.gif" alt="'+SCHOOL_NAME+' Loader" class="new-loader-2024" />'
-			   }else{
-				   html+='<div class="ball-rotate">'
-						   +'<div style="background-color: rgb(247, 185, 36);"></div>'
-					   +'</div>'
-					   +'<p>Loading ...</p>';
-			   }
-		   html+=
-	   '</div>';
-   return html;
 }
 
 function teacherTimeAvailabilityValidClassPopup(){
@@ -766,7 +750,7 @@ function teacherTimeAvailabilityValidClassPopup(){
 				   +'</div>'
 				 +'</div>'
 			   //   +'<div class="modal-footer">'
-			   //     +'<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+			   //     +'<button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>'
 			   //     +'<button type="button" class="btn btn-primary">Save changes</button>'
 			   //   +'</div>'
 			   +'</div>'
@@ -910,7 +894,7 @@ function teacherTimeAvailabilityAddPopup(){
 					   +'</div>'
 				   +'</div>'
 				   +'<div class="modal-footer">'
-					   +'<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+					   +'<button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>'
 					   +'<button type="button" class="btn btn-primary">Save changes</button>'
 				   +'</div>'
 			   +'</div>'
@@ -948,7 +932,7 @@ function TeacherTimeAvailabilityPopup(){
 				   +'</div>'
 			   +'</div>'
 			   // +'<div class="modal-footer">'
-			   // 	+'<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+			   // 	+'<button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>'
 			   // 	+'<button type="button" class="btn btn-primary">Save changes</button>'
 			   // +'</div>'
 		   +'</div>'
@@ -996,12 +980,12 @@ function recommendedTeacherlistModal(){
 						+'</div>'
 						+'<div class="col-12 text-right mt-2 bulkUpdateBtnWrapper">'
 				   			+'<a href="javascript:void(0)" class="btn btn-primary p-1 mr-1 disabled" onclick="saveAutoAssignTeacherRequest(\'recommendedTeacherlistForm\',0,0,0,\'true\')" >Update</a>'
-							// +'<a href="javascript:void(0)" class="btn btn-danger p-1 disabled" onclick="resetAll()" >Remove</a>'
+							// +'<a href="javascript:void(0)" class="btn btn-danger  p-1 disabled" onclick="resetAll()" >Remove</a>'
 						+'</div>'
 				   +'</div>'
 			   +'</div>'
 			   // +'<div class="modal-footer">'
-			   // 	+'<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+			   // 	+'<button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>'
 			   // 	+'<button type="button" class="btn btn-primary">Save changes</button>'
 			   // +'</div>'
 		   +'</div>'
@@ -1242,7 +1226,7 @@ function recommendedTeacherlistFilterForm(){
 					+'<div class="d-inline-block" id="timePreferenceSlotWrapper"><span id="notSlotAdd" class="d-inline-block position-relative font-weight-bold" style="top:30px">No Time Preference Added.</span></div>'
 					+'<span class="d-block ml-auto pr-3">'
 						+'<label class="m-0 full">&nbsp;</label>'
-						+'<a href="javascript:void(0)" class="btn btn-success mr-1" onclick="recommendedTeachersResetForm();">Reset</a>'
+						+'<a href="javascript:void(0)" class="btn btn-danger mr-1" onclick="recommendedTeachersResetForm();"><i class="fa fa-undo"></i>&nbsp;Reset</a>'
 						+'<a href="javascript:void(0)" class="btn btn-primary" onclick="getAllRecommendedTeacher(\'recommendedTeacherlistForm\');">Get Available Teachers</a>'
 					+'</span>'
 				+'</div>';  
@@ -1298,7 +1282,7 @@ function recommendedTeacherAvailabilityModalBody(data){
 									var dayName = date[0]
 									html+='<td class="px-1 py-2 border-0 position-sticky" style="top:0;left:0;z-index:1; background:#f3f3f3">'
 										+'<div class="font-weight-bold text-center font-12" style="line-height:1">'+dateText+'</div>'
-										+'<div class="text-center font-12" style="line-height:1">'+dayName+'</div>'
+										+'<div class="text-center font-12 text-uppercase" style="line-height:1">'+dayName+'</div>'
 									+'</td>'
 								});
 								i++;
@@ -2060,10 +2044,10 @@ function getStudentListPopup(){
 	html=html+'<div id="studentListAvailablePopup" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">';
 	html=html+'<div class="modal-dialog modal-dialog-centered modal-lg mt-4" style="height: 90vh;">';
 	html=html+'<div class="modal-content border-0">';
-	html=html+'<div class="modal-header pt-2 pb-2 theme-bg text-white">';
+	html=html+'<div class="modal-header py-2 bg-primary text-white">';
 	html=html+'<h5 class="modal-title" id="teacherAssignName"></h5>';
 	html=html+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">';
-	html=html+'<span aria-hidden="true">×</span>';
+	html=html+'<span aria-hidden="true">&times;</span>';
 	html=html+'</button>';
 	html=html+'</div>';
 	html=html+'<div class="modal-body" style="overflow-y: auto;">';

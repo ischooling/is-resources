@@ -2,6 +2,90 @@ $(document).ready(function () {
 	getWaringContent1();
 });
 
+function renderManageClassContent(title, roleAndModule, schoolId, userId, role){
+	
+	var html=`<div class="app-page-title mb-3 py-2">
+	<div class="page-title-wrapper">
+		<div class="page-title-heading">
+			<div class="page-title-icon"> <i class="fa fa-user-plus text-primary"> </i> </div>
+			<div>${title}</div>
+		</div>
+	</div>
+</div>
+
+<div class="main-card mt-3 mb-3 card body-tabs-shadow">
+	<div class="card-body ">
+			<div class="row">
+				<div class="col-lg-12 col-md-12">
+					<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
+						<input type="text" name="extraDetailSearch" id="extraDetailSearch" class="width:fit-content" />
+					</div>
+					<table class="table table-bordered table-striped responsive nowrap" id="extraClassListTbl" style="width:100%">
+					<thead>
+						<tr class="bg-primary text-white">
+						<th>S.No</th>
+						<th>Student Name</th>
+						<th>Student ID</th>
+						<th>Email</th>
+						<th>Grade</th>
+						<th>Transaction Reference no</th>
+						<th>Payment Date</th>
+						<th>Total Amount</th>
+						<th>Course PlanDetails</th>
+					</tr>
+					</thead>
+					<tbody class="extraSessionDetails"></tbody>
+				</table>
+			</div>
+		</div>
+		<div class="extraPaging"></div>
+	</div>
+</div>`;
+html+=getClassMeetingUrlModal();
+
+
+return html;
+}
+
+function extraCourseView(extraCourse){
+		$('#meetingUrlModal').modal('show');
+		$('#meetingUrlForm #extraCourse').html(extraCourse);
+		$('#meetingUrlForm #extraCourse > table').addClass('table table-bordered responsive');
+	}
+
+function getClassMeetingUrlModal(){
+	var html=`<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" id="meetingUrlModal">
+	<div class="modal-dialog modal-xl">
+		<form name="meetingUrlForm" id="meetingUrlForm">
+			<div class="modal-content">
+				<div class="modal-header py-2 bg-primary text-white">
+					<h5 class="modal-title" id="myLargeModalLabel">Extra Class Details</h5>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<style>
+						table, th, td {
+							border: 1px solid black;
+							border-collapse: collapse;
+						}
+						</style>
+						<div class="form-group">
+							<div id="extraCourse" name="extraCourse"></div>
+						</div>
+					</div>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>`;
+return html;
+}	
+
 function advanceClassroomSearch(formId, moduleId, userId, userRole) {
 	checkTextBox(formId);
 	if ($('#' + formId + ' #classStartDate').val() == '' && $('#' + formId + ' #classEndDate').val() != '') {
@@ -20,17 +104,43 @@ function advanceClassroomSearch(formId, moduleId, userId, userRole) {
 		return false;
 	}
 	var argument = '?moduleId=' + moduleId + '&schoolId=' + SCHOOL_ID + '&' +decodeURIComponent($('#'+formId).serialize());
-	classroomSessionsData('classroomSessionsList', argument, userId, userRole);
+	classroomSessionsData(formId, 'classroomSessionsList', moduleId, argument, userId, userRole);
 }
-
-function classroomSessionsData(elementId, argument, userId, role) {
+function getRequestForClassroomSessionsData(formId, moduleId){
+	var data={}
+	data["schoolId"]=SCHOOL_ID;
+	data["moduleId"]=moduleId;
+	data["classCreateFor"]=$('#'+formId+' #classCreateFor').val();
+	data["enrollmentType"]=$('#'+formId+' #enrollmentType').val();
+	data["standardId"]=$('#'+formId+' #standardId').val();
+	data["courseProviderId"]=$('#'+formId+' #courseProviderId').val();
+	data["studentName"]=$('#'+formId+' #studentName').val();
+	data["studentId"]=$('#'+formId+' #studentId').val();
+	data["applicationNo"]=$('#'+formId+' #applicationNo').val();
+	data["studentEmail"]=$('#'+formId+' #studentEmail').val();
+	data["teacherName"]=$('#'+formId+' #teacherName').val();
+	data["teacherEmail"]=$('#'+formId+' #teacherEmail').val();
+	data["classStatus"]=$('#'+formId+' #classStatus').val();
+	data["markStatus"]=$('#'+formId+' #markStatus').val();
+	data["classStartDate"]=$('#'+formId+' #classStartDate').val();
+	data["classEndDate"]=$('#'+formId+' #classEndDate').val();
+	data["classStartTime"]=$('#'+formId+' #classStartTime').val();
+	data["classEndTime"]=$('#'+formId+' #classEndTime').val();
+	data["sessionId"]=$('#'+formId+' #sessionId').val();
+	data["searchBy"]=$('#'+formId+' #searchBy').val();
+	data["sortBy"]=$('#'+formId+' #sortBy').val();
+	data["pageSize"]=$('#'+formId+' #pageSize').val();
+return data;
+	
+}
+function classroomSessionsData(formId, elementId, moduleId, argument, userId, role) {
 	customLoader(true);
-	var data = parseUrlToJson(argument);
+	//var data = parseUrlToJson(argument);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/student-teacher-sessions-report-data/" + UNIQUEUUID,
-		data: JSON.stringify(data),
+		data: JSON.stringify(getRequestForClassroomSessionsData(formId, moduleId)),
 		dataType: 'json',
 		global: false,
 		success: function (data) {
@@ -127,59 +237,91 @@ function classroomSessionsForOther(elementId, argument) {
 	bindHover();
 }
 
-function extraSessionDetails(elementId, argument) {
-	var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
-	if (isDataTable) {
-		$('#' + elementId).dataTable().fnDestroy();
-	}
-	$('#' + elementId).DataTable({
-		"stateSave": true,
-		"searching": true,
-		"processing": true,
-		"serverSide": true,
-		"pagingType": "full",
-		"searching": true,
-		"pageLength": 10,
-		"stateLoadParams": function (settings, data) {
-			if (!DEFAULT_SEARCH_STATE) {
-				return false;
-			}
-		},
-		"ajax": {
-			"url": CONTEXT_PATH + UNIQUEUUID + "/dashboard/extra-session-details-data" + argument,
-			"data": function (data) {
-				console.log('data ' + data)
-			}
-		},
-		"fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-			$(nRow).find('td:eq(3)').css('text-align', 'left');
-			$(nRow).find('td:eq(4)').css('text-align', 'left');
-			$(nRow).find('td:eq(5)').css('text-align', 'left');
-			//$('tr').addClass('success');
-		},
-		"columns": [
-			{ "data": "sno", "name": "sno", "title": "S. No" },
-			{ "data": "studentName", "name": "studentName", "title": "Student Name" },
-			{ "data": "studentStringId", "name": "studentStringId", "title": "Student ID" },
-			{ "data": "email", "name": "email", "title": "Email" },
-			{ "data": "grade", "name": "grade", "title": "Grade" },
-			{ "data": "referenceNo", "name": "referenceNo", "title": "Transaction Reference no" },
-			{ "data": "paymentDate", "name": "paymentDate", "title": "Payment Date" },
-			{ "data": "totalAmount", "name": "totalAmount", "title": "Total Amount" },
-			{ "data": "courseDetails", "name": "courseDetails", "title": "Course PlanDetails" },
-			//       	 { "data": "attendeeStatus", "name" : "attendeeStatus", "title" : "Link Generation Status"},
-			//       	 { "data": "sessionLink", "name" : "sessionLink", "title" : "Session Link"},
-			//       	 { "data": "sendMail", "name" : "sendMail", "title" : "Send Mail"},
-			//       	 { "data": "markSession", "name" : "markSession", "title" : "Mark Session"},
-			//       	 { "data": "status", "name" : "status", "title" : "Session Status"},
-			//       	 { "data": "createdDate", "name" : "createdDate", "title" : "Created Date / Booked Date"},//bookedDate
-			//       	 { "data": "recordingPublished", "name" : "recordingPublished", "title" : "Action"},
-			//       	 { "data": "endMeeting", "name" : "endMeeting", "title" : "End meeting"},
 
-		],
+
+
+function getExtraSessionDetails(elementId, startLimit,  moduleId) {
+	var data={};
+	data['moduleId']=moduleId;
+	data['userId']=USER_ID;
+	data['currentPage']=startLimit;
+	data['classSearch']=$("#extraDetailSearch").val();
+	$.ajax({
+		type : "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard','get-extra-session-details-data'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		success : function(data) {
+			console.log(data);
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, data['message'],'',true);
+				}
+			} else {
+				var html =getExtraClassTblHtml(data);
+        		$('.'+elementId).html(html);
+				var htmlpage=dataExtraPagging(data, moduleId);
+                $(".extraPaging").html(htmlpage);
+
+				
+			}
+		}
 	});
-	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
-	bindHover();
+	// var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
+	// if (isDataTable) {
+	// 	$('#' + elementId).dataTable().fnDestroy();
+	// }
+	// $('#' + elementId).DataTable({
+	// 	"stateSave": true,
+	// 	"searching": true,
+	// 	"processing": true,
+	// 	"serverSide": true,
+	// 	"pagingType": "full",
+	// 	"searching": true,
+	// 	"pageLength": 10,
+	// 	"stateLoadParams": function (settings, data) {
+	// 		if (!DEFAULT_SEARCH_STATE) {
+	// 			return false;
+	// 		}
+	// 	},
+	// 	"ajax": {
+	// 		"url": CONTEXT_PATH + UNIQUEUUID + "/dashboard/extra-session-details-data" + argument,
+	// 		"data": function (data) {
+	// 			console.log('data ' + data)
+	// 		}
+	// 	},
+	// 	"fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+	// 		$(nRow).find('td:eq(3)').css('text-align', 'left');
+	// 		$(nRow).find('td:eq(4)').css('text-align', 'left');
+	// 		$(nRow).find('td:eq(5)').css('text-align', 'left');
+	// 		//$('tr').addClass('success');
+	// 	},
+	// 	"columns": [
+	// 		{ "data": "sno", "name": "sno", "title": "S. No" },
+	// 		{ "data": "studentName", "name": "studentName", "title": "Student Name" },
+	// 		{ "data": "studentStringId", "name": "studentStringId", "title": "Student ID" },
+	// 		{ "data": "email", "name": "email", "title": "Email" },
+	// 		{ "data": "grade", "name": "grade", "title": "Grade" },
+	// 		{ "data": "referenceNo", "name": "referenceNo", "title": "Transaction Reference no" },
+	// 		{ "data": "paymentDate", "name": "paymentDate", "title": "Payment Date" },
+	// 		{ "data": "totalAmount", "name": "totalAmount", "title": "Total Amount" },
+	// 		{ "data": "courseDetails", "name": "courseDetails", "title": "Course PlanDetails" },
+	// 		//       	 { "data": "attendeeStatus", "name" : "attendeeStatus", "title" : "Link Generation Status"},
+	// 		//       	 { "data": "sessionLink", "name" : "sessionLink", "title" : "Session Link"},
+	// 		//       	 { "data": "sendMail", "name" : "sendMail", "title" : "Send Mail"},
+	// 		//       	 { "data": "markSession", "name" : "markSession", "title" : "Mark Session"},
+	// 		//       	 { "data": "status", "name" : "status", "title" : "Session Status"},
+	// 		//       	 { "data": "createdDate", "name" : "createdDate", "title" : "Created Date / Booked Date"},//bookedDate
+	// 		//       	 { "data": "recordingPublished", "name" : "recordingPublished", "title" : "Action"},
+	// 		//       	 { "data": "endMeeting", "name" : "endMeeting", "title" : "End meeting"},
+
+	// 	],
+	// });
+	// $('#' + elementId).dataTable().fnSetFilteringEnterPress();
+	// bindHover();
 }
 
 function toggleFilter(elementID) {
@@ -205,46 +347,6 @@ function updateClassroomSession(moduleId, role) {
 	}
 }
 function validateRequestForSubmitMeetingForStudentSessionSlots(formId, moduleId, controllType) {
-	//	if(controllType=='ADD'){
-	//		if($('#standardId').val()==0 || $('#standardId').val()==undefined){
-	//			showMessage(true, 'Grade is required');
-	//			return false;
-	//		}
-	//		if($('#subjectId').val()==0 || $('#subjectId').val()==undefined){
-	//			showMessage(true, 'Course is required');
-	//			return false;
-	//		}
-	//		if($('#countryTimezoneId').val()==0 || $('#countryTimezoneId').val()==undefined){
-	//			showMessage(true, 'Time-Zone is required');
-	//			return false;
-	//		}
-	//		if($('#weekPickerId').val()==0 || $('#weekPickerId').val()==undefined){
-	//			showMessage(true, 'Meeting week is required');
-	//			return false;
-	//		}
-	//		if($('#meetingDate').val()=='' || $('#meetingDate').val()==undefined){
-	//			showMessage(true, 'Meeting Date is required');
-	//			return false;
-	//		}
-	//		if($('#startTime').val()=='' || $('#startTime').val()==undefined){
-	//			showMessage(true, 'Start Time is required');
-	//			return false;
-	//		}
-	//		if($('#timeInterval').val()==0 || $('#timeInterval').val()==undefined){
-	//			showMessage(true, 'Time Interval is required');
-	//			return false;
-	//		}
-	////		var selDate=$('#meetingDate').val().split('-');
-	////	    var selTime = $('#startTime').val().split(':');
-	////	    var selectedDate = new Date(selDate[2],selDate[0]-1,selDate[1], selTime[0],selTime[1]);
-	////	    var currentDate=new Date();
-	////	    //var currentDate = new Date(curDate.getFullYear(), curDate.getMonth(), curDate.getDate())
-	////	    console.log('selectedDate=>'+selectedDate.getTime()+' currentDate=>'+currentDate.getTime())
-	////	    if(selectedDate.getTime()<=currentDate.getTime()){
-	////	    	showMessage(true, 'Please create future meeting slots');
-	////	    	return false;
-	////	    }
-	//	}else
 	if (controllType == 'UPDATE') {
 		if ($('#meetingResult').val() == '' || $('#meetingResult').val() == undefined) {
 			if (tt == 'theme1') {
@@ -269,18 +371,14 @@ function validateRequestForSubmitMeetingForStudentSessionSlots(formId, moduleId,
 function submitMeetingForStudentSessionSlots(formId, moduleId, controllType, roleModuleId, requestType, role) {
 
 	$(".meetingSave").prop("disabled", true);
-	if (tt == 'theme1') {
-		hideMessage('');
-	} else {
-		hideMessageTheme2('');
-	}
+	hideMessageTheme2('');
 	if (!validateRequestForSubmitMeetingForStudentSessionSlots(formId, moduleId, controllType)) {
 		$(".meetingSave").prop("disabled", true);
 		return true;
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'meetingslots-new-submit'),
 		data: JSON.stringify(getRequestForSubmitMeetingForStudentSessionSlots(formId, moduleId, controllType, requestType)),
 		dataType: 'json',
@@ -616,7 +714,7 @@ function submitRequestDemoMeetingSlots(formId, moduleId, controllType, meetingId
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'meetingslots-submit'),
 		data: JSON.stringify(getRequestForSubmitRequestDemoMeetingSlots(formId, moduleId, controllType, meetingId, requestType, userId)),
 		dataType: 'json',
@@ -682,10 +780,6 @@ function submitRequestDemoMeetingSlots(formId, moduleId, controllType, meetingId
 					}
 				}
 			}
-			return false;
-		},
-		error: function (e) {
-			showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -772,7 +866,7 @@ function saveUpdateAggregatorUser(callFrom, moduleId) {
 	if (gotoMeetingId == '' || gotoMeetingId == '0') {
 		$.ajax({
 			type: "POST",
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			url: getURLForHTML('gotomeeting', 'createUser'),
 			data: JSON.stringify(data),
 			dataType: 'json',
@@ -800,7 +894,7 @@ function saveUpdateAggregatorUser(callFrom, moduleId) {
 	} else {
 		$.ajax({
 			type: "POST",
-			contentType : 'application/json',
+			contentType : APPLICATION_JSON_VALUE,
 			url: getURLForHTML('gotomeeting', 'update-goto-meeting-user'),
 			data: JSON.stringify({"gotoMeetingUserId" : aggregatorId}),
 			dataType: 'json',

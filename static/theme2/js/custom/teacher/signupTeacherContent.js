@@ -5,7 +5,7 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
     schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
     schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
-    $("body").append(generateTeacherEnrollmentContent(moduleName) + loaderContent());
+    $("body").append(generateTeacherEnrollmentContent(moduleName));
     createStepsImage();
     getFormsValidation();
     if(signupPage >= 5 && signupPage <=6){
@@ -80,7 +80,7 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
 function generateTeacherEnrollmentContent(moduleName){
     var html=
         `<div class="wrapper-style">
-            <a class="tab-and-mobile-logout-btn primary-bg white-txt-color" style="background: #027FFF;" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
+            <a class="tab-and-mobile-logout-btn primary-bg white-txt-color" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
                 <i class="zmdi zmdi-power"></i>
                 Log out
             </a>`;
@@ -124,12 +124,53 @@ function generateTeacherEnrollmentContent(moduleName){
             <div id="formSteps">
                 <div class="steps clearfix">
                     <ul role="tablist">
-                        <li role="tab" aria-disabled="false" class="first current" aria-selected="true"><a></a></li>
-                        <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
-                        <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
-                        <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
-                        <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
-                        <li role="tab" aria-disabled="false" class="" aria-selected="true"><a></a></li>
+                        <li role="tab" aria-disabled="false" class="first current" aria-selected="true" id="step1_li">
+                            <a>
+                                <span class="step-order" style="text-transform: capitalize !important;">Step 1</span>
+                                <div class="icon-circle"></div>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Personal Details</span>
+                                <span class="step-arrow-teacher step1"></span>
+                            </a>
+                        </li>
+                        <li role="tab" aria-disabled="false" class="" aria-selected="true" id="step2_li">
+                            <a>
+                                <span class="step-order" style="text-transform: capitalize !important;">Step 2</span>
+                                <div class="icon-circle"></div>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Professional Details</span>
+                                <span class="step-arrow-teacher step2"></span>
+                            </a>
+                        </li>
+                        <li role="tab" aria-disabled="false" class="" aria-selected="true" id="step3_li">
+                            <a>
+                                <span class="step-order" style="text-transform: capitalize !important;">Step 3</span>
+                                <div class="icon-circle"></div>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Application Under Review</span>
+                                <span class="step-arrow-teacher step3"></span>    
+                            </a>
+                        </li>
+                        <li role="tab" aria-disabled="false" class="" aria-selected="true" id="step4_li">
+                            <a>
+                                <span class="step-order" style="text-transform: capitalize !important;">Step 4</span>
+                                <div class="icon-circle"></div>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Verification</span>
+                                <span class="step-arrow-teacher step4"></span>    
+                            </a>
+                        </li>
+                        <li role="tab" aria-disabled="false" class="" aria-selected="true" id="step5_li">
+                            <a>
+                                <span class="step-order" style="text-transform: capitalize !important;">Step 5</span>
+                                <div class="icon-circle"></div>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Contract Details</span>
+                                <span class="step-arrow-teacher step5"></span>    
+                            </a>
+                        </li>
+                        <li role="tab" aria-disabled="false" class="" aria-selected="true" id="step6_li">
+                            <a>
+                                <span class="step-order" style="text-transform: capitalize !important;">Step 6</span>
+                                <div class="icon-circle"></div>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Bank Details</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="content">
@@ -316,7 +357,7 @@ function vedioInstructionModalContent(){
                     <div class="modal-header primary-bg white-txt-color">
                         <button type="button" class="close secondary-bg white-txt-color" data-dismiss="modal"
                             aria-label="Close">
-                            <span aria-hidden="true">×</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                         <h4 class="modal-title" id="myModalLabel">Teachers Demo Video Instructions </h4>
                     </div>
@@ -365,7 +406,7 @@ function videoInstructionModalContent() {
     var html = `
         <div id="videoInstructionBackdrop" class="video-instruction-backdrop" onclick="closeVideoInstructionModal();"></div>
         <div id="videoInstructionModal" class="video-instruction-modal">
-            <div style="background-color:#027FFF; position: relative;padding:8px;">
+            <div style="background-color:var(--pc); position: relative;padding:8px;">
                 <h5 class="mb-0" style="color: white; font-size: 18px; font-weight: 700;">
                     Teachers Demo Video Instructions
                 </h5>
@@ -380,33 +421,33 @@ function videoInstructionModalContent() {
                     <a class="primary-txt-color" href="https://internationalschooling.org/course-catalog/" target="_blank">Course Catalog</a></b></h5>
                     <h6 style="margin:5px 0px;"><b>Following are the general guidelines which can help to make the video:</b></h6>
                     <ul>
-                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>First and foremost you must find a quiet and well-lit place, free from any kind of distractions.</li>
-                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>You need to have a stable internet connection.</li>
-                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>You will need to check whether your computer’s audio and webcam are working fine.</li>
-                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>You need to dress professionally and have the right posture and body language.</li>
-                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>The medium of instruction must be in English.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>First and foremost you must find a quiet and well-lit place, free from any kind of distractions.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>You need to have a stable internet connection.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>You will need to check whether your computer’s audio and webcam are working fine.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>You need to dress professionally and have the right posture and body language.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>The medium of instruction must be in English.</li>
                     </ul><br>
 
                     <h5><b>2. Please remember that you have to record the video with a mindset that you are in front of a student, so you have to first introduce yourself and then proceed with the demo of the particular course you are applying for.</b></p>
 
-                    <h6 style="color:#027FFF;margin:5px 0px;"><b>Your demo video will be judged on the following criteria by our panel:</b></h6>
+                    <h6 style="color:var(--pc);margin:5px 0px;"><b>Your demo video will be judged on the following criteria by our panel:</b></h6>
                     <ul>
                         <li style="font-size:13px;">
-                            <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Content Knowledge 
-                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Voice Modulation     
-                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Presentation & Confidence
-                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Engagement Strategies
-                            | <i class="fa fa-check-circle-o" style="margin:2px;color:#027FFF;font-size:20px;" aria-hidden="true"></i>Technical Efficiency
+                            <i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>Content Knowledge 
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>Voice Modulation     
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>Presentation & Confidence
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>Engagement Strategies
+                            | <i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>Technical Efficiency
                         </li>
                     </ul>
-                    <p style="color:#027FFF;margin:10px 0px;"><b>You are free to be as creative and innovative in your demo video as you like.</b></p>
+                    <p style="color:var(--pc);margin:10px 0px;"><b>You are free to be as creative and innovative in your demo video as you like.</b></p>
                     <h5><b>3. You will have two attempts to record your demo class, but only one final recording may be submitted. You can choose which recording to submit for approval.</b></p>
                 </div>
                 <div id="recordingSection"></div>
                 <h5 id="recordingWaitingText" style="font-weight: bold; color: #FFC008; margin-top: 12px; display: none;"></h5>
                 <div class="d-flex text-right" style="justify-content:space-between; align-items:center;">
                     <a id="recordYourDemoInsideBtn" href="javascript:void(0);" class="btn btn-primary" style="border-radius: 6px;font-weight: bold;margin-top: 3%;">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Record your Demo<span>
                     </a>
                     <button id="approveDemoBtn" onclick="approvedDemoRecording();" class="btn btn-primary rounded mt-3" style="display: none;">Approve</button>
@@ -632,7 +673,7 @@ function getTeacherProfessionalDetailsContent(stup){
                 </div>
             </div>
         </div>
-        <div style="border: rgb(117, 186, 255) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px; ">
+        <div style="border: 2px solid;boder-color:var(--pc); border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px; ">
             <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
             <div class="form-row">
                 <div class="form-holder">
@@ -717,17 +758,17 @@ function getTeacherProfessionalDetailsContent(stup){
                 entityIds = stup.sessionEntityIdList;
                 if(entityIds.length == 2){
                     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Select Recording(s)</span>
                     <a>`;
                 }else if(entityIds.length == 1){
                     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Record your Demo (2nd Attempt)</span>
                     <a>`;
                 }else{
                     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color: #027fff;padding: 5px;" aria-hidden="true"></i>
+                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Record your Demo</span>
                     <a>`;
                 }
@@ -1975,20 +2016,6 @@ function showSkeleton (isShow, skeletonType){
     }
 }
 
-function loaderContent(){
-    var html=`
-        <div id="commonloaderId" class="unique-loader loader-bg" style="display:none;">`
-        if(SCHOOL_ID==1){
-            html+=`<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />`;
-        }else{
-            html+=
-            `<div id="commonloaderBody" class="loader" style="display:none">
-            Please Wait... <span></span>
-            </div>`
-        } 
-        html+=`</div>`;
-    return html;
-}
 
 function populateRecordingModal(recordings, title) {
     const titles = {
@@ -2007,7 +2034,7 @@ function populateRecordingModal(recordings, title) {
         <div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
             <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%; margin: auto; margin-top:50px;">
                 <div class="">
-                    <div style="padding: 15px 10px; background: #027FFF; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="padding: 15px 10px; background: var(--pc); display: flex; justify-content: space-between; align-items: center;">
                         <h5 style="font-size: 18px; font-weight: bold; color: #FFF; margin-bottom: 0px;">Available Recordings | ${title}</h5>
                         <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
                     </div>
@@ -2030,7 +2057,7 @@ function populateRecordingModal(recordings, title) {
             modalContent += `
                 <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
                     <h4>${index + 1}. ${label}</h4>
-                    <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${urlObj.url}', '${label}')">Play</button>
+                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="playRecording('${urlObj.url}', '${label}')">Play</button>
                 </div>
             `;
         });
@@ -2039,7 +2066,7 @@ function populateRecordingModal(recordings, title) {
             modalContent += `
                 <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
                     <h4>${recordings.length + 1}. Transcript</h4>
-                    <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
                 </div>`;
         }
     

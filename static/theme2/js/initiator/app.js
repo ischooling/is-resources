@@ -11,7 +11,9 @@ $(document).ready(() => {
     // Sidebar Menu
 
     setTimeout(function () {
-        $(".vertical-nav-menu").metisMenu();
+        if($(".vertical-nav-menu").length>0){
+            $(".vertical-nav-menu").metisMenu();
+        }
     }, 100);
 
     // Search wrapper trigger
@@ -141,10 +143,10 @@ $(document).ready(() => {
         $('.app-container').toggleClass('sidebar-mobile-open');
     });
 */
-    $('.mobile-toggle-header-nav').click(function () {
-        $(this).toggleClass('active');
-        $('.app-header__content').toggleClass('header-mobile-open');
-    });
+    // $('.mobile-toggle-header-nav').click(function () {
+    //     $(this).toggleClass('active');
+    //     $('.app-header__content').toggleClass('header-mobile-open');
+    // });
 
     $('.mobile-app-menu-btn').click(function () {
         $('.hamburger', this).toggleClass('is-active');

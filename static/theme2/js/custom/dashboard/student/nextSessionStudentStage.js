@@ -204,7 +204,7 @@ function getAllCourseDetails(isGradeChange, courseId) {
 	//customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH +SCHOOL_UUID+ '/student/migration/course-details-by-standard-id',
 		data: JSON.stringify(getRequestForCourseSelection(courseId)),
 		dataType: 'json',
@@ -609,7 +609,7 @@ function callForPaymentModeSelection(formId, callFrom) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/get-payment-details',
 		data : JSON.stringify(getRequestForPaymentModeSelection(formId,callFrom)),
 		dataType : 'json',
@@ -675,7 +675,7 @@ function choosePaymentOption() {
 	if(flag){
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/choose-payment-plan',
 			data : JSON.stringify(getRequestForChoosePaymentOption()),
 			dataType : 'json',
@@ -736,7 +736,7 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/get-student-review-details',
 		data : JSON.stringify(getRequestForReviewAndPaymentSelection(reloadRequired)),
 		dataType : 'json',
@@ -878,7 +878,7 @@ function recommendedCourse() {
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/recommended-courses',
 		data : JSON.stringify(getRequestForReviewAndPaymentSelection('')),
 		dataType : 'json',
@@ -926,7 +926,7 @@ function callForProgressionToDashboard() {
 	hideModalMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/proceed-to-dashboard',
 		data : JSON.stringify(getRequestForProgressionToDashboard()),
 		dataType : 'json',
@@ -965,7 +965,7 @@ function callForApplicationSubmit() {
 	hideModalMessage('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/migration/submit-application',
 		data: JSON.stringify(getRequestForApplicationSubmit()),
 		dataType: 'json',

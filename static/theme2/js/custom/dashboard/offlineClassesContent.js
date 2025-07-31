@@ -12,7 +12,7 @@ function getOfflineClassTableBody(result, userId, role){
 			action=v.status;
 		}else{
 			action='<div class="btn-group">'
-						+'<button type="button" class="btn btn-info dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Action">'
+						+'<button type="button" class="btn btn-primary dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Action">'
 							+'<i class="fa fa-ellipsis-v"></i>'
 						+'</button>'
 						+'<div class="dropdown-menu p-0">'
@@ -102,7 +102,7 @@ function getOfflineClassFilter(roleAndModule, schoolId, userId, role){
 
 function getOfflineClassContent(title, roleAndModule, schoolId, userId, role){
 	var html=
-	'<div class="app-page-title">'
+	'<div class="app-page-title mb-3 py-2">'
 	+'<div class="page-title-wrapper">'
 		+'<div class="page-title-heading">'
 		+'<div class="page-title-icon"><i class="fas fa-user-cog text-primary"></i></div>'
@@ -111,7 +111,7 @@ function getOfflineClassContent(title, roleAndModule, schoolId, userId, role){
 		if(roleAndModule.added=='Y'){
 			html+='<div class="page-title-actions">';
 			html+='<div class="d-inline-block dropdown"> ';
-			html+='<a href="javascript:void(0);" onClick="showOfflineClassModel(\'offlineClassAdd\', \'offlineClassesModal\')" class="btn btn-primary fa-pull-right meetingSlotAdd ml-1">Add Links</a>';
+			html+='<a href="javascript:void(0);" onClick="showOfflineClassModel(\'offlineClassAdd\', \'offlineClassesModal\')" class="btn btn-primary meetingSlotAdd ml-1">Add Links</a>';
 			html+='</div>';
 			html+='</div>';
 		}

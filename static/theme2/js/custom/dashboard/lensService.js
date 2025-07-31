@@ -13,7 +13,7 @@ function getClassDetailsByUser(elementId, userId, date){
 	}
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/'+UNIQUEUUID+'/class-details-by-user-date/'+userId+'/'+date,
 		dataType : 'json',
 		success : function(data) {
@@ -38,7 +38,7 @@ function getClassDetailsBySession(classId,sessionId){
 	customLoader(true);
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/'+UNIQUEUUID+'/class-details-by-session/'+USER_ID+ '/' + classId+'/'+sessionId,
 		dataType : 'json',
 		success : function(data) {

@@ -6,7 +6,7 @@ function callStudentBatchAttendance(formId, userId,bindElementDayWise ) {
 	console.log("callStudentBatchAttendance", userId);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'student-batch-attendance-list'),
 		data : JSON.stringify(getRequestForStudentBatchAttendance(formId, userId)),
 		dataType : 'html',
@@ -77,9 +77,6 @@ function callStudentBatchAttendance(formId, userId,bindElementDayWise ) {
 				attendPer.push(attendl);
 				getAttendPercentWise(attendPer, "chartPer");
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -202,7 +199,7 @@ function getLinChartAttendance(month, present, apsent, leave, chartId){
 function callStudentBatchAttendanceDateWise(formId, bindElementDayWise ,todaydate, userId, userRole, subjectId) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'student-batch-attendance-daywise'),
 			data : JSON.stringify(getRequestForAttendanceFilterDate(formId,todaydate, userId, userRole, subjectId)),
 			dataType : 'json',
@@ -260,10 +257,7 @@ function callStudentBatchAttendanceDateWise(formId, bindElementDayWise ,todaydat
 					
 					$("#"+bindElementDayWise).html(attendTable);
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
 }
 
@@ -304,7 +298,7 @@ function callBatchAttendanceFilter(formId, bindElementid, userId, selectDate, at
 	$.ajax({
 			type : "POST",
 			global:false,
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'batch-attendance-by-filter'),
 			data : JSON.stringify(getRequestForBatchAttendanceFilter(formId, userId, selectDate, attendaceFor, dateType, callfrom, lmode)),
 			dataType : 'json',
@@ -569,7 +563,7 @@ function callSubjectNameMultipleList(formId, value, userId,courseProviderId ,use
 	console.log("Building Subject dropdown", value);
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForCommon('masters'),
 			data : JSON.stringify(getRequestForMaster('formId','SUBJECT-NAME-LIST-BASED-ON-BATCHES',userId,courseProviderId,userRole,dataType, value)),
 			dataType : 'json',
@@ -589,10 +583,7 @@ function callSubjectNameMultipleList(formId, value, userId,courseProviderId ,use
 								+ v.value + ' </option>');
 					});
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
 }
 
@@ -600,7 +591,7 @@ function callSubjectNameMultipleList(formId, value, userId,courseProviderId ,use
 function courseProviderList(formId, elementId) {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','ALL-COURSE-PROVIDER-LIST', 'courseProList')),
 		dataType : 'json',
@@ -647,7 +638,7 @@ function callTeacherAttendance(formId, bindElementid, startDate, slotType,userId
 	$.ajax({
 			type : "POST",
 			global:false,
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'teacher-attendance-list'),
 			data : JSON.stringify({startDate:startDate, slotType:slotType, userId:userId}),
 			dataType : 'json',

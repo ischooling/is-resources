@@ -29,7 +29,7 @@ function loadGraduationCeremonyAttendees(){
                             tbodyHtml+=`N/A`;
                         }else if(paymentLink != "N/A"){
                             tbodyHtml+=`<input type="text" value="${paymentLink}" id="graduationPaymentLink${index}" class="position-absolute" style="top:0;left:0;opacity:0;"/>
-                            <button onclick="copyURL('graduationPaymentLink${index}','copy-msg-${index}');" class="btn btn-sm copy-link-btn rounded border-0" style="background-color:#027FFF;">Copy Payment Link</button>
+                            <button onclick="copyURL('graduationPaymentLink${index}','copy-msg-${index}');" class="btn btn-sm btn-primary  copy-link-btn">Copy Payment Link</button>
                             <b class="copy-msg-${index}"></b>`;
                         }else{
                             tbodyHtml+=`N/A`;
@@ -44,10 +44,6 @@ function loadGraduationCeremonyAttendees(){
                 $('#attendeesTable').DataTable().destroy();
             }
             $('#attendeesTable').DataTable();
-        },
-        error: function(err) {
-            console.error("Failed to fetch attendee data", err);
-            $('#attendeesTableBody').html('<tr><td colspan="8" class="text-center text-danger">No data available</td></tr>');
         }
     });
 }
@@ -56,13 +52,13 @@ function sendGraduationCeremonyMailToEligibleStudents(){
     $.ajax({
         type: "POST",
         url: `${APP_BASE_URL}${SCHOOL_UUID}/send-graduation-ceremony-mail`,
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         dataType: 'json',
         success: function (response) {
             if(response.status == "SUCCESS"){
-                showMessage(false, response.message);
+                showMessageTheme2(1, response.message);
             }else{
-                showMessage(false, response.message);
+                showMessageTheme2(0, response.message);
             }
         }
     });

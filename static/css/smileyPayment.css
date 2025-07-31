@@ -1,4 +1,4 @@
-.no-notify{color:#007fff;text-align:center;font-weight:bold;margin-top:30px;}
+.no-notify{color:var(--pc);text-align:center;font-weight:bold;margin-top:30px;}
 .no-notify p{margin-top:10px;font-size: 20px;}
 .no-notify i{font-size: 40px;color: #999999;}
 *{margin:0;padding:0;}

@@ -4,7 +4,6 @@ $(document).on("click","#signupStage4 #chkval", function(){
 	}else{
 		$("#payTabData").attr("disabled", true);
 	}
-	
 });
 $(document).on("click","#signupStage4 #chkvalBook", function(){
 	if($("#chkvalBook").is(":checked")){

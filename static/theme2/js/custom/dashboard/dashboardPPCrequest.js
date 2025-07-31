@@ -24,7 +24,7 @@ function callForPPCComments(formId, controllType, ppcRequestId) {
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'ppc-comments-by-ppc-request-id'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'html',
 		cache: false,
@@ -40,11 +40,6 @@ function callForPPCComments(formId, controllType, ppcRequestId) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -66,7 +61,7 @@ function savePPCComments(formId) {
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'save-ppc-comments-content'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(getRequestForSavePPCComments(formId, moduleId)),
 		dataType: 'html',
 		cache: false,
@@ -83,11 +78,6 @@ function savePPCComments(formId) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }

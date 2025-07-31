@@ -41,7 +41,7 @@ body.modal-open .navbar-toggler{opacity:0;visibility: hidden;}
 	.desktopSlideMenu .navbar-toggler	{
 	  	position: absolute;
 	    right: -36px;
-	    background: #0081ff;
+	    background: var(--sc);
 	    padding: 7px 5px;
 	    outline:none;
 	}

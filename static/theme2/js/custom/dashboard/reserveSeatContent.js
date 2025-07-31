@@ -100,7 +100,7 @@ function getReserveSeatModal(data){
 	'<div class="modal fade" id="reserveSeatModal" tabindex="-1">'
 		+'<div class="modal-dialog modal-lg" role="document">'
 			+'<div class="modal-content text-center">'
-				+'<div class="modal-header pt-2 pb-2 theme-bg text-white ">'
+				+'<div class="modal-header py-2 bg-primary text-white ">'
 				+'<h5 class="modal-title">';
 				if(details.eligibleFor=='ADV'){
 					if(details.monthName != null && details.monthName != undefined && details.monthName != ''){
@@ -113,7 +113,7 @@ function getReserveSeatModal(data){
 				}
 				html+='</h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">×</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div class="modal-body">'

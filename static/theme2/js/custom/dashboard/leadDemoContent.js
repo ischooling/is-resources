@@ -1,17 +1,40 @@
-function renderLeadDemoDashboardSchool(title, roleAndModule, schoolId, userId, role){
+
+
+async function renderMeetingTimeDashboard(title, roleAndModule, SCHOOL_ID,USER_ID,USER_ROLE){
+	//var urlLead = "lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
+	ROLE_MODULE=roleAndModule;
+    var html=leadDemoDashboardContent(title, roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
+    $('#dashboardContentInHTML').html(html);
+	getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar","","Week", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+
+	$("#timeDemoPreCalMonth").unbind('click').bind("click",  function(){
+		var firstDatePreMonth=$("#timeDemoFirstDatePreMonth").val();
+		getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar",""+firstDatePreMonth+"","Week",'', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+		});
+		$("#timeDemoNextCalMonth").unbind('click').bind("click",  function(){
+		var firstDateNextMonth=$("#timeDemoFirstDateNextMonth").val();
+		getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar",""+firstDateNextMonth+"","Week",'', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+		
+	});
+
+}
+
+
+
+
+async function renderLeadDemoDashboardSchool(title, roleAndModule, schoolId, userId, role){
 	var html =
 		'<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">'
-			+dashboardHeaderContent()
+			+ await dashboardHeaderContent()
 			+'<div class="app-main">'
 				+'<div class="col p-0">'
-					+'<div class="app-main__inner pt-2">'
+					+'<div class="app-main__inner">'
 						+leadDemoDashboardContent(title, roleAndModule, schoolId, userId, role)
 					+'</div>'
 				+'</div>'
 			+'</div>'
-			+dashboardFooterContent()
-		+'</div>'
-		+loaderContent();
+			+await dashboardFooterContent()
+		+'</div>';
 		$('body').html(html);
 
 		getCalendarDemoAvailability('timeAvailabilityPopup',userId,"time-demo-calendar","","Week", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
@@ -29,7 +52,7 @@ function renderLeadDemoDashboardSchool(title, roleAndModule, schoolId, userId, r
 
 function leadDemoDashboardContent(title, roleAndModule, schoolId, userId, role){
 	var html = 
-		'<div class="app-page-title mb-0 pb-4">'
+		'<div class="app-page-title mb-3 py-2">'
 			+'<div class="page-title-wrapper">'
 				+'<div class="page-title-heading">'
 					+'<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>'
@@ -41,9 +64,9 @@ function leadDemoDashboardContent(title, roleAndModule, schoolId, userId, role){
 			+'</div>'
 		+'</div>'
 		+'<div class="main-card mb-3 card">'
-			+'<div class="card-body py-1">'
-			+'<div class="d-flex align-items-center check-top-header-touch flex-wrap">'
-			+'<span type="button" class="badge btn-info mr-1" style="font-size-12px">Booked Slots</span>'
+			+'<div class="card-body">'
+			+'<div class="d-flex align-items-center mt-3 check-top-header-touch flex-wrap">'
+			+'<span type="button" class="badge btn-primary mr-1" style="font-size-12px">Booked Slots</span>'
 			+'<span type="button" class="badge  btn-warning mr-1" style="font-size-12px">Available Slots</span>'
 			+'<div role="group" class="ml-auto mr-auto btn-group-lg btn-group btn-group-toggle" data-toggle="buttons">'
 				+'<h3 class="d-flex align-items-center mb-0 position-relative">'
@@ -96,7 +119,7 @@ async function dashboardFooterContent(){
 		+'<div class="app-footer">'
 			+'<div class="app-footer__inner">'
 				+'<div class="col">'
-					+'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
+					+ `<p style="margin: 0">Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>`
 				+'</div>'
 			+'</div>'
 		+'</div>'
@@ -107,27 +130,6 @@ async function dashboardFooterContent(){
 	return html;
 }
 
-function loaderContent(){
-	var html=
-	'<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
-		// +'<div class="loader primary-border-top-color">'
-		if(SCHOOL_ID==1){
-			
-			html+=`
-				<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024" />
-			`
-		}else{
-			html+=
-			'<div class="ball-rotate">'
-				+'<div style="background-color: rgb(247, 185, 36);"></div>'
-			+'</div>'
-			+'<p>Loading ...</p>'
-		}
-		html+=
-		// '</div>'
-	+'</div>';
-	return html;
-}
 function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotType, prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit) {
 	var response=true;
 	 customLoader(true);
@@ -136,7 +138,7 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 	 $.ajax({
 		 type: "POST",
 		 url: getURLFor('timeavailability', 'get-calendar-meeting-availability'),
-		 contentType: "application/json",
+		 contentType: APPLICATION_JSON_VALUE,
 		 data: JSON.stringify(request),
 		 dataType: 'json',
 		 cache: false,
@@ -170,7 +172,7 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
  }
  
  function getCalendarDemoAvailabilityTable(formId, userId, data){
-	 console.log(data);
+	 //console.log(data);
 	 
 	 var dayOfWeekVal = data.dayOfWeekVal;
 	 var startDate=dayOfWeekVal;
@@ -270,7 +272,7 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 					if(tdSlotId>=tdTiemSlotId && tdSlotId<=tdTiemSlotId){
 						let firstCharName = demotime.assignName.charAt(0).toUpperCase();
 						htmlCal=htmlCal+'<div class="dropdown float-left btn-'+datess.slotDateId+''+time24h+'"> ';
-						htmlCal=htmlCal+'<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn-info mr-1 cname-booking" style="font-size-11px">'+firstCharName+'</button>';
+						htmlCal=htmlCal+'<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn-primary mr-1 cname-booking" style="font-size-11px">'+firstCharName+'</button>';
 						htmlCal=htmlCal+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">';
 						htmlCal=htmlCal+'<div class="popover-body">'
 						htmlCal=htmlCal+'<div class="dropdown-menu-header">';
@@ -312,17 +314,17 @@ function callFreeSlotsForCounselor(countryTimezone, visitDate, dayId, eventId, u
 	data['dayId'] = dayId;
 	data['eventId']=eventId;
 	data['userId']=userId;
-	console.log(data);
+	//console.log(data);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('timeavailability', 'get-slots-to-book-event'),
 		data: JSON.stringify(data),
 		dataType: 'json',
 		global:false,
 		async:true,
 		success: function (data) {
-			console.log(data);
+			//console.log(data);
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if(data['status'] == '3'){
 					redirectLoginPage();

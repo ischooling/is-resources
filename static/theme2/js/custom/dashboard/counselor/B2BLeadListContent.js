@@ -4,20 +4,20 @@
 function getB2BListHeaderContent(roleAndModule, objRights){
 	var html='<div class="full text-right">'
 		if(roleAndModule.added=='Y'){
-			html+='<button class="btn-shadow btn btn-warning text-white mt-lg-1 btn-full-mobile mb-1" id="addLead">Add New Lead</button>';
+			html+='<button class="btn btn-warning  text-white mb-2 mr-2" id="addLead">Add New Lead</button>';
 		}
 		//if(USER_ROLE=='DIRECTOR' || objRights.feedbackPermission==false){
 		if(roleAndModule.updated=='Y'){	
-			html+='<button class="btn-shadow btn btn-danger text-white mt-lg-1 btn-full-mobile mb-1" id="moveNewLead">Move Lead</button> ';
+			html+='<button class="btn btn-danger  mb-2 mr-2" id="moveNewLead">Move Lead</button> ';
 		}
 		//}
 		// if(objRights.feedbackPermission==true){
 			if(roleAndModule.updated=='Y'){
-				html+='<button class="btn-shadow btn btn-dark text-white mt-lg-1 btn-full-mobile mb-1" id="mergeB2BLead">Merge Lead</button>  ';
+				html+='<button class="btn btn-dark  mb-2" id="mergeB2BLead">Merge Lead</button>  ';
 			}
 		// }
 		html+='</div>';
-		html+='<div class="row mt-2 px-2" id="b2b-total-head"></div>';
+		html+='<div class="form-row mt-2" id="b2b-total-head"></div>';
 		html+='<div class="full overflow-x-auto" id="b2b-lead-list"></div>';
 		
 	return html;
@@ -29,10 +29,10 @@ function getLeadFollowupFormB2BPopup(objRights){
 	html+='<div id="leadFollowupB2BForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">';
     html+='<div class="modal-dialog modal-xl">';
     html+='<div class="modal-content border-0">';
-    html+='<div class="modal-header pt-2 pb-2 theme-bg text-white">';
-	html+='<h5 class="modal-title" id="exampleModalLabel">Follow up Form</h5>';
+    html+='<div class="modal-header py-2 bg-primary text-white">';
+	html+='<h5 class="modal-title" >Follow up Form</h5>';
 	html+='<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">';
-	html+='<span aria-hidden="true">×</span>';
+	html+='<span aria-hidden="true">&times;</span>';
 	html+='</button>';
 	html+='</div>';
 	html+='<div class="modal-body">';
@@ -116,8 +116,8 @@ function getLeadFollowupFormB2BPopup(objRights){
 	html+='</form>';
 	html+='</div>';
 	html+='<div class="modal-footer">';
-	html+='<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>';
-	html+='<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="saveB2BFollowup">Save Status</button>';
+	html+='<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>';
+	html+='<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveB2BFollowup">Save Status</button>';
 	html+='</div>';
 			
     html+=' </div>';
@@ -133,10 +133,10 @@ function getLeadFormB2BPopup(objectRights){
 	html+='<div id="leadPopupB2BForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
 		+'<div class="modal-dialog modal-xl">'
 			+'<div class="modal-content border-0">'
-				+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
-					+'<h5 class="modal-title" id="exampleModalLabel">Update Lead Details - <span id="leadNoText"></span></h5>'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title" >Update Lead Details - <span id="leadNoText"></span></h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">×</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div class="modal-body">'
@@ -236,8 +236,8 @@ function getLeadFormB2BPopup(objectRights){
 					+'</form>'
 				+'</div>'
 				+'<div class="modal-footer">'
-					+'<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-					+'<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="saveB2BLead">Save</button>'
+					+'<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+					+'<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveB2BLead">Save</button>'
 				+'</div>'
 			+'</div>'
 		+'</div>'
@@ -250,10 +250,10 @@ function getLeadAdvanceSearchB2BPopup(objectRights){
 	html+='<div id="leadAdvanceSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
-    +'        <div class="modal-header pt-2 pb-2 theme-bg text-white">'
-    +'            <h5 class="modal-title" id="exampleModalLabel">Advance Search</h5>'
+    +'        <div class="modal-header py-2 bg-primary text-white">'
+    +'            <h5 class="modal-title" >Advance Search</h5>'
     +'            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-    +'                <span aria-hidden="true">×</span>'
+    +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
     +'        </div>'
     +'        <div class="modal-body">'
@@ -380,9 +380,9 @@ function getLeadAdvanceSearchB2BPopup(objectRights){
 	+'			</form>'
     +'        </div>'
     +'        <div class="modal-footer">'
-    +'            <button type="button" class="btn btn-danger btn-shadow float-right pr-4 pl-4 ml-2" onclick="advanceLeadSearchStudentReset(\'advanceLeadNewSearchForm\',\''+objectRights.leadType+'\')">Reset</button>'
-	+'			<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-	+'			<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="btnNewClickLeadSearch">Search</button>'
+    +'            <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" onclick="advanceLeadSearchStudentReset(\'advanceLeadNewSearchForm\',\''+objectRights.leadType+'\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
+	+'			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+	+'			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnNewClickLeadSearch"><i class="fa fa-search"></i>&nbsp;Search</button>'
     +'        </div>'
     +'    </div>'
     +'</div>'
@@ -396,10 +396,10 @@ function getLeadMergeB2BFormPopup(objRights){
 	html+='<div id="leadMergeB2BPopup" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
-    +'        <div class="modal-header pt-2 pb-2 theme-bg text-white">'
+    +'        <div class="modal-header py-2 bg-primary text-white">'
     +'            <h5 class="modal-title" id="leadFormText">Merge Lead Form</h5>'
     +'            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-    +'                <span aria-hidden="true">×</span>'
+    +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
     +'        </div>'
     +'       <div class="modal-body">'
@@ -495,8 +495,8 @@ function getLeadMergeB2BFormPopup(objRights){
 	+'		</div>	'
     +'        </div>'
     +'        <div class="modal-footer">'
-	+'			<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-	+'			<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="saveMergeB2BLead">Save</button>'
+	+'			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+	+'			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveMergeB2BLead">Save</button>'
     +'        </div>'
     +'    </div>'
     +'</div>'
@@ -514,7 +514,7 @@ function getTotalB2BLeads(data){
 function getB2BLeadCount(leadTotalData){
 	var html='';
 	
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 bg-light-primary border border-primary rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm">';
 	html+='<span class="line-left bg-primary d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Total</b></p>';
@@ -528,13 +528,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 bg-white border border-secondary rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
 	html+='<span class="line-left bg-secondary d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Today\'s Fresh Requests</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.freshLead>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'freshLead\');">'+leadTotalData.freshLead+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'freshLead\',\'\');">'+leadTotalData.freshLead+'</a>';
 	}else{
 		html+='-';
 	}
@@ -542,13 +542,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</p>';
 	html+='</div>';
 	html+='</div>';
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1 ">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 bg-light border border-secondary rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
 	html+='<span class="line-left bg-secondary d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Basic Details not Filled</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.followupLead1>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'leadbasicdetail\');">'+leadTotalData.followupLead1+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'leadbasicdetail\',\'\');">'+leadTotalData.followupLead1+'</a>';
 	}else{
 		html+='-';
 	}
@@ -556,13 +556,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 	
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 b2b-bg-review-white border b2b-border-review-dark rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm">';
 	html+='<span class="line-left b2b-bg-review-dark d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Request Under Review</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.followupLead2>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'leadrequestreview\');">'+leadTotalData.followupLead2+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'leadrequestreview\',\'\');">'+leadTotalData.followupLead2+'</a>';
 	}else{
 		html+='-';
 	}
@@ -570,13 +570,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 b2b-bg-callCompleted-white border b2b-border-callCompleted-dark rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm">';
 	html+='<span class="line-left b2b-bg-callCompleted-dark d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Call Completed</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.totalCallComplete>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'callb2bcomplete\');">'+leadTotalData.totalCallComplete+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'callb2bcomplete\',\'\');">'+leadTotalData.totalCallComplete+'</a>';
 	}else{
 		html+='-';
 	}
@@ -584,13 +584,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 b2b-bg-interview-white border b2b-border-interview-dark rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
 	html+='<span class="line-left b2b-bg-interview-dark d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Interested to Interview</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.meetingResult>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'leadInterestedInterview\');">'+leadTotalData.meetingResult+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'leadInterestedInterview\',\'\');">'+leadTotalData.meetingResult+'</a>';
 	}else{
 		html+='-';
 	}
@@ -598,19 +598,19 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 b2b-bg-totinterview-white border b2b-border-totinterview-dark rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
 	html+='<span class="line-left b2b-bg-totinterview-dark d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Total Interview</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.demoLead>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'leadInterviewBooked\');">'+leadTotalData.demoLead+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'leadInterviewBooked\',\'\');">'+leadTotalData.demoLead+'</a>';
 	}else{
 		html+='-';
 	}
 	html+='</b> | <b>';
 	if(leadTotalData.followupLead3>0){	
-		html+='<a href="javascript:void(0)" class="text-dark"  onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',  \'btwinterviewdone\');">'+leadTotalData.followupLead3+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark"  onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',  \'btwinterviewdone\',\'\');">'+leadTotalData.followupLead3+'</a>';
 	}else{
 		html+='-';
 	}
@@ -619,13 +619,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 b2b-bg-moveinterview-white border b2b-border-moveinterview-dark rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
 	html+='<span class="line-left b2b-bg-moveinterview-dark d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Moving for the Next meeting</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.totalReserved>0){	
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'movingtonextinterview\');">'+leadTotalData.totalReserved+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'movingtonextinterview\',\'\');">'+leadTotalData.totalReserved+'</a>';
 	}else{
 		html+='-';
 	}
@@ -633,19 +633,19 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 	
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full  p-2 bg-light-success border border-success rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm">';
 	html+='<span class="line-left bg-success d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Converted | Partner </b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.totalConverted>0){	
-				html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'totalonboarding\');">'+leadTotalData.totalConverted+'</a>';
+				html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'totalonboarding\',\'\');">'+leadTotalData.totalConverted+'</a>';
 	}else{
 		html+='-';
 	} 
 	html+='|';
 	if(leadTotalData.totalPartner>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',  \'totalonpartner\');">'+leadTotalData.totalPartner+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',  \'totalonpartner\',\'\');">'+leadTotalData.totalPartner+'</a>';
 	}else{
 		html+='-';
 	}		
@@ -653,13 +653,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 bg-light-alternate border border-alternate rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm ">';
 	html+='<span class="line-left bg-alternate d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Move Lead</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.movedLead>0){
-			html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'btmovdLead\');">'+leadTotalData.movedLead+'</a>';
+			html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\',\'btmovdLead\',\'\');">'+leadTotalData.movedLead+'</a>';
 	}else{
 		html+='-';
 	}
@@ -668,13 +668,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 bg-light-danger border border-danger rounded-10 position-relative mb-2 shadow-sm">';
 	html+='<span class="line-left bg-danger d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Scrape</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.scrapeLead>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'scrapeLead\');">'+leadTotalData.scrapeLead+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'scrapeLead\',\'\');">'+leadTotalData.scrapeLead+'</a>';
 	}else{
 		html+='-';
 	}
@@ -683,13 +683,13 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 
-	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 px-1">';
+	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
 	html+='<div class="full p-2 b2b-bg-rejected-white border b2b-border-rejected-dark rounded-10 position-relative mb-2 shadow-sm">';
 	html+='<span class="line-left b2b-bg-rejected-dark d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Rejected</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.totalArchive>0){
-		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'totalArchive\');">'+leadTotalData.totalArchive+'</a>';
+		html+='<a href="javascript:void(0)" class="text-dark" onclick="return clickTotalLeads(\''+leadTotalData.clickFrom+"-"+leadTotalData.clickUserid+'\', \'0\', \'totalArchive\',\'\');">'+leadTotalData.totalArchive+'</a>';
 	}else{
 		html+='-';
 	}
@@ -723,7 +723,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
 		html+='<div class="lead-table-wrapper">'
-		+'<table class="table table-bordered font-12 border-radius-table" style="min-width:1380px;width:100%" id="leadDataList">'
+		+'<table class="table table-bordered font-12 border-radius-table" style="min-width:1450px;width:100%" id="leadDataList">'
 			+'<thead class="bg-primary">'
 			+'<tr>'
 					+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important">'
@@ -1078,7 +1078,7 @@ function b2bleadsPagging(leaddata, objRights){
 		html+='<div><ul class="pagination">';
 				if(currentPage != 1){
 					html+='<li class="page-item">'
-					+'<a class="page-link" href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\', \''+(currentPage-1)+'\',\''+clickByLead+'\',\''+leadType+'\');">Previous</a>'
+					+'<a class="page-link" href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\', \''+(currentPage-1)+'\',\''+clickByLead+'\',\'\');">Previous</a>'
 					 +'</li>';
 				 }
 			 for (let p = 1; p <= noOfPages; p++) {
@@ -1087,7 +1087,7 @@ function b2bleadsPagging(leaddata, objRights){
 						html+='...';
 					}
 					html+='<li class="page-item">'
-					+'<a class="page-link"  href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\' ,\''+p+'\',\''+clickByLead+'\',\''+leadType+'\');" style="'+(p==currentPage?'background-color: #cdeedd !important;':'')+'">'+p+'</a>'
+					+'<a href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\' ,\''+p+'\',\''+clickByLead+'\',\'\');" class="page-link '+(p==currentPage?'page-link-active':'')+'">'+p+'</a>'
 					+'</li>';
 				}else{
 	
@@ -1095,7 +1095,7 @@ function b2bleadsPagging(leaddata, objRights){
 			 }
 			 if(currentPage<noOfPages){
 				html+='<li class="page-item">'
-				+'<a class="page-link" href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\', \''+currentPage+1+'\',\''+clickByLead+'\',\''+leadType+'\');">Next</a>'
+				+'<a class="page-link" href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\', \''+currentPage+1+'\',\''+clickByLead+'\',\'\');">Next</a>'
 				+'</li>';
 			 }
 			

@@ -14,10 +14,10 @@ function calendarMeetingLinkValidate(){
 									</div>`;
 						}else{
 							html+=`<div class="d-flex justify-content-between align-items-center w-100">
-										<h4 class="modal-title text-white d-flex align-items-center" style="gap:5px;">
+										<h5 class="modal-title text-white d-flex align-items-center" style="gap:5px;">
 											<i class="fa fa-info-circle" aria-hidden="true"></i>
 											Information
-										</h4>
+										</h5>
 										<button type="button" class="btn btn-sm bg-transparent" data-dismiss="modal" style="box-shadow: 0px 0px; padding: 8px; font-weight: bold;"><i class="fa fa-times" style="font-size: 18px; color: #FFF;" aria-hidden="true"></i></button>
 									</div>`;
 						}
@@ -57,7 +57,7 @@ function classDetailsOnModalActivity(url){
 	customLoader(true);
 	$.ajax({
 		type : "GET",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		dataType: 'json',
 		url : url,
 		success : function(responseData) {

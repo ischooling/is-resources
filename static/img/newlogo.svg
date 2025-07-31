@@ -10,9 +10,9 @@ viewBox="0 0 10160 3418"
     .str0 {stroke:#9D9E9E;stroke-width:17.64}
     .fil4 {fill:none}
     .fil2 {fill:#5B5B5B}
-    .fil0 {fill:#007FFF}
+    .fil0 {fill:var(--pc)}
     .fil3 {fill:#5B5B5B;fill-rule:nonzero}
-    .fil1 {fill:#007FFF;fill-rule:nonzero}
+    .fil1 {fill:var(--pc);fill-rule:nonzero}
    ]]>
   </style>
  </defs>

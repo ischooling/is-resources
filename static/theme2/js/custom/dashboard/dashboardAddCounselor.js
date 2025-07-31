@@ -1,11 +1,11 @@
 function callForDashboardAddCounselor(formId, moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateRequestForAddCounselor(formId, moduleId)) {
 		return false;
 	}
 	$.ajax({
 		type: "POST",
-		contentType: 'application/json',
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'save-counseler-content'),
 		data: JSON.stringify(getRequestForAddCounselor(formId, moduleId)),
 		dataType: 'html',
@@ -19,10 +19,10 @@ function callForDashboardAddCounselor(formId, moduleId) {
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 					}
 				} else {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 					//$('#'+formId)[0].reset();
 					$("#counselId").val('');
 					$("#firstName").val('');
@@ -44,11 +44,6 @@ function callForDashboardAddCounselor(formId, moduleId) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			showMessage(true, e.responseText);
-			$("#saveCounselor").prop("disabled", false);
-			return false;
 		}
 	});
 
@@ -82,64 +77,64 @@ function getRequestForAddCounselor(formId, moduleId) {
 function validateRequestForAddCounselor(formId, moduleId) {
 
 	if ($("#" + formId + " #firstName").val() == "") {
-		showMessage(true, 'First Name is required');
+		showMessageTheme2(0, 'First Name is required');
 		return false
 	}
 	if ($("#" + formId + " #lastName").val() == "") {
-		showMessage(true, 'Last name is required');
+		showMessageTheme2(0, 'Last name is required');
 		return false
 	}
 
 	if ($("#" + formId + " #gender").val() == "") {
-		showMessage(true, 'Gender is required');
+		showMessageTheme2(0, 'Gender is required');
 		return false
 	}
 	if ($("#" + formId + " #email").val() == "") {
-		showMessage(true, 'Email is either empty or invalid');
+		showMessageTheme2(0, 'Email is either empty or invalid');
 		return false
 	}
 
 	if ($("#" + formId + " #email").val() != "") {
 		if (!validateEmail($("#email").val())) {
-			showMessage(true, 'Email is either empty or invalid');
+			showMessageTheme2(0, 'Email is either empty or invalid');
 			return false
 		}
 	}
 	if ($("#altEmailId").val() != '') {
 		if (!validateEmail($("#altEmailId").val())) {
-			showMessage(true, 'Alternate Email is invalid');
+			showMessageTheme2(0, 'Alternate Email is invalid');
 			return false
 		}
 	}
 
 	if ($("#" + formId + " #countryId").val() == "" || $("#" + formId + " #countryId").val() == 0) {
-		showMessage(true, 'Country is required');
+		showMessageTheme2(0, 'Country is required');
 		return false
 	}
 	if ($("#" + formId + " #stateId").val() == "" || $("#" + formId + " #stateId").val() == 0) {
-		showMessage(true, 'State is required');
+		showMessageTheme2(0, 'State is required');
 		return false
 	}
 	if ($("#" + formId + " #cityId").val() == "" || $("#" + formId + " #cityId").val() == 0) {
-		showMessage(true, 'City is required');
+		showMessageTheme2(0, 'City is required');
 		return false
 	}
 	if ($("#" + formId + " #isdCode").val() == "" || $("#" + formId + " #isdCode").val() == 0) {
-		showMessage(true, 'ISD Code is required');
+		showMessageTheme2(0, 'ISD Code is required');
 		return false
 	}
 	if ($("#" + formId + " #phoneNo").val() == "") {
-		showMessage(true, 'Phone No. is required');
+		showMessageTheme2(0, 'Phone No. is required');
 		return false
 	}
 	if ($("#" + formId + " #altPhoneNo").val() != "") {
 		if ($("#" + formId + " #altIsdCode").val() == "" || $("#" + formId + " #altIsdCode").val() == 0) {
-			showMessage(true, 'Alt ISD Code is required');
+			showMessageTheme2(0, 'Alt ISD Code is required');
 			return false
 		}
 	}
 	if ($("#" + formId + " #selectStatus").val() == "") {
-		showMessage(true, 'Please select Status');
+		showMessageTheme2(0, 'Please select Status');
 		return false
 	}
 
@@ -147,15 +142,15 @@ function validateRequestForAddCounselor(formId, moduleId) {
 }
 
 function callEmailCounselorCheck(formId, moduleId, email) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateEmail($("#" + formId + " #" + email).val())) {
-		showMessage(true, 'Email is either empty or invalid');
+		showMessageTheme2(0, 'Email is either empty or invalid');
 		return false
 	}
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('is-user-available'),
 		data: JSON.stringify(getRequestForEmailCounselorCheck(formId, moduleId, email)),
 		dataType: 'json',
@@ -163,13 +158,9 @@ function callEmailCounselorCheck(formId, moduleId, email) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, 'This email is already in use with International Schooling');
+				showMessageTheme2(0, 'This email is already in use with International Schooling');
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -188,13 +179,13 @@ function getRequestForEmailCounselorCheck(formId, moduleId, email) {
 }
 
 function sendCodeToUser(formId, moduleId, isForSpecificUser, roleModuleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateRequestForUserReferral(formId, moduleId)) {
 		return false;
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'send-referralcode-to-user'),
 		data: JSON.stringify(getRequestForUserReferral(formId, moduleId, isForSpecificUser)),
 		dataType: 'json',
@@ -202,18 +193,14 @@ function sendCodeToUser(formId, moduleId, isForSpecificUser, roleModuleId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 				$('#sendReferralModal').modal('hide');
 				setTimeout(function () {
 					callDashboardPageSchool(roleModuleId, 'COUNS1b', '', '?roleModuleId=' + roleModuleId + '&requestFrom=counselor&userId=0');
 				}, 1000);
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -227,7 +214,7 @@ function validateRequestForUserReferral(formId, moduleId) {
 		}
 	});
 	if (intEmailError > 0) {
-		showMessage(true, 'Email is either empty or invalid');
+		showMessageTheme2(0, 'Email is either empty or invalid');
 		return false;
 	}
 	return true;

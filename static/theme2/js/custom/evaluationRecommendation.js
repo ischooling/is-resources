@@ -1,5 +1,5 @@
 
-
+var APPLICATION_JSON_VALUE = "application/json";
 function addRecommendation(evaluationId) {
 	customLoader(false)
 	var data = {};
@@ -20,7 +20,7 @@ function getCTIDetails(userId, evaluationId) {
 	payload=encode(payload);
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID+'/dashboard/cti-recommendation-details/'+UNIQUEUUID+'?payload='+payload,
 		dataType : 'json',
 		async : false,
@@ -60,7 +60,7 @@ function confirmCTIRecommendation(userId, evaluationId) {
 	payload=encode(payload);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID+'/dashboard/cti-recommendation-save/'+UNIQUEUUID+'?payload='+payload,
 		data : JSON.stringify(getRequestForConfirmCTIRecommendation(evaluationId)),
 		dataType : 'json',
@@ -100,7 +100,7 @@ function publishCtiRecommendationLetter(publishUrl){
 	$('#publishCtiRL').attr('disabled',true);
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : publishUrl,
 		dataType : 'json',
 		success : function(data) {
@@ -115,11 +115,6 @@ function publishCtiRecommendationLetter(publishUrl){
 				$('#publishCtiRL').hide();
 			}
 			return false;
-		},
-		error : function(e) {
-			$('#sendSWPR').removeAttr('disabled','disabled');
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -133,7 +128,7 @@ function resendCtiInvitaionMail(evaluationId){
 	urlSend = BASE_URL + CONTEXT_PATH + SCHOOL_UUID+'/dashboard/cti-invitaion-mail-resend/'+UNIQUEUUID+'?payload='+payload;
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : urlSend,
 		dataType : 'json',
 		success : function(data) {
@@ -142,11 +137,6 @@ function resendCtiInvitaionMail(evaluationId){
 			} else {
 				showMessageTheme2(true,data['message']);
 			}
-			return false;
-		},
-		error : function(e) {
-			$('#sendSWPR').removeAttr('disabled','disabled');
-			//showMessage(true, TECHNICAL_GLITCH);
 			return false;
 		}
 	});

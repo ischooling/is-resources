@@ -31,7 +31,7 @@ function getDetailsForStudentBookaClass(studentStandardId) {
     data["bookingDate"] = $("#bookingDate").val();
     $.ajax({
       type: "POST",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLForHTML(
         "dashboard",
         "student-book-a-class-details?payload=" + encode(JSON.stringify(data))
@@ -161,7 +161,7 @@ function bookingSlotModalForElementry(
   data["studentStandardId"] = studentStandardId;
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML(
       "dashboard",
       "student-subject-session-booking-elementry?payload=" +
@@ -265,7 +265,7 @@ async function bookingSlotModalNew(
   try {
     const response = await $.ajax({
       type: "GET",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLForHTML(
         "dashboard",
         "student-subject-session-booking-new?payload=" +
@@ -371,7 +371,7 @@ function bookedCalssCotentFun(
   // data['roleModuleId'] = roleModuleId;
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML(
       "dashboard",
       "student-booked-classes-details?payload=" + encode(JSON.stringify(data))
@@ -489,7 +489,7 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
   hideMessage("");
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "student-book-session-slots-submit-new"),
     data: JSON.stringify(getRequestForStudentBookClassSlots(formId, moduleId)),
     dataType: "json",

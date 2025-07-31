@@ -1,37 +1,33 @@
 
 //ADD PROVIDERID 01-06-2020 BY VIPIN
-function addSemesterMarks(formId, userId, studentId, semesterType,standardId,studentStandardId,studentSessionId, providerId) {
-	hideMessage('');
-	var postData = "userId="+userId+"&studentId="+studentId+"&semesterType="+semesterType+"&standardId="+standardId+"&studentStandardId="+studentStandardId+"&studentSessionId="+studentSessionId+"&providerId="+providerId;
-	$.ajax({
-		type : "GET",
-		url : getURLForHTML('dashboard','get-semester-marks'),
-		data : postData,
-		dataType : 'html',
-		cache : false,
-		timeout : 600000,
-		success : function(htmlContent) {
-			if(htmlContent!=""){
-            	var stringMessage = [];
-            	stringMessage = htmlContent.split("|");
-        		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT" ){
-        			if(stringMessage[0] == "SESSIONOUT"){
-        				redirectLoginPage();
-        			}else {
-        				showMessage(true, stringMessage[1]);
-        			}
-        		} else {
-        			$('#semesterMarksUploadContents').html(htmlContent);
-        		}
-        		return false;
-			}
-		},
-		error : function(e) {
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
-		}
-	});
-}
+// function addSemesterMarks(formId, userId, studentId, semesterType,standardId,studentStandardId,studentSessionId, providerId) {
+// 	hideMessage('');
+// 	var postData = "userId="+userId+"&studentId="+studentId+"&semesterType="+semesterType+"&standardId="+standardId+"&studentStandardId="+studentStandardId+"&studentSessionId="+studentSessionId+"&providerId="+providerId;
+// 	$.ajax({
+// 		type : "GET",
+// 		url : getURLForHTML('dashboard','get-semester-marks'),
+// 		data : postData,
+// 		dataType : 'html',
+// 		cache : false,
+// 		timeout : 600000,
+// 		success : function(htmlContent) {
+// 			if(htmlContent!=""){
+//             	var stringMessage = [];
+//             	stringMessage = htmlContent.split("|");
+//         		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT" ){
+//         			if(stringMessage[0] == "SESSIONOUT"){
+//         				redirectLoginPage();
+//         			}else {
+//         				showMessage(true, stringMessage[1]);
+//         			}
+//         		} else {
+//         			$('#semesterMarksUploadContents').html(htmlContent);
+//         		}
+//         		return false;
+// 			}
+// 		}
+// 	});
+// }
 
 function requestForSaveSemesterData(formId, submitType, courseProviderId, semSubjectStatus){
 	var request = {};
@@ -175,7 +171,7 @@ function saveSemesterMarks(formId, submitType, semSubjectStatus,roleModuleId,rou
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','save-semester-marks'),
 		data : JSON.stringify(requestForSaveSemesterData(formId, submitType, courseProviderId, semSubjectStatus)),
 		dataType : 'json',
@@ -195,10 +191,6 @@ function saveSemesterMarks(formId, submitType, semSubjectStatus,roleModuleId,rou
 				setTimeout(function(){hideMessage('');}, 3100);
 
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -823,6 +815,7 @@ function getCumulativeGrade(){
 }
 function publishSemesterMarks(studentId, standardId, studentStandardId){
 	$('#publishSemestermarks').attr('disabled','disabled');
+	var showTranscriptToStudent = $('#showTranscriptToStudent').val();
 	var data={};
 	data['studentId']=studentId;
 	data['standardId']=standardId;
@@ -831,7 +824,7 @@ function publishSemesterMarks(studentId, standardId, studentStandardId){
 	data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','publish-student-semester-transcript'),
 		data : JSON.stringify(data),
 		dataType : 'html',
@@ -840,11 +833,6 @@ function publishSemesterMarks(studentId, standardId, studentStandardId){
 		success : function(htmlContent) {
 			alert("Student Transcript has been published on student dashboard");
 			$('#publishSemestermarks').hide();
-		},
-		error : function(e) {
-			$('#sendSWPR').removeAttr('disabled','disabled');
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -902,7 +890,7 @@ function submitPreSemesterMark(formId,moduleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','pre-grade-submit'),
 		data : JSON.stringify(getRequestForPreSemesterMark(formId, moduleId)),
 		dataType : 'json',
@@ -916,10 +904,6 @@ function submitPreSemesterMark(formId,moduleId) {
 				$('#'+formId)[0].reset();
 				location.reload();
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -974,7 +958,7 @@ function removePreGrade(preGradeId){
 		}
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard','remove-pre-grade-marks'),
 			data : JSON.stringify(getRequestForRemovePreGrade(preGradeId)),
 			dataType : 'json',
@@ -988,9 +972,6 @@ function removePreGrade(preGradeId){
 						location.reload();
 					}
 					return false;
-			},
-			error : function(e) {
-				//showMessage(true, e.responseText);
 			}
 		});
 	}
@@ -1023,7 +1004,7 @@ function removePreGrade(preGradeId){
 		type : "POST",
 		url : getURLForHTML('dashboard','go-backstage-transcript'),
 		data : JSON.stringify(data),
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		dataType : 'html',
 			success : function(htmlContent) {
 				if (htmlContent != "") {
@@ -1043,9 +1024,51 @@ function removePreGrade(preGradeId){
 					}
 					return false;
 				}
-			},
-			error : function(e) {
-				console.log(true, e.responseText);
 			}
 		});
 	}
+
+
+function saveShowTranscriptToStudent(studentId, standardId, studentStandardId, saveType){
+	var showTranscriptToStudent = $('#showTranscriptToStudent').val();
+	var progressionGrade = $('#progressionGrade').val();
+	var data={};
+	data['studentId']=studentId;
+	data['standardId']=standardId;
+	data['studentStandardId']=studentStandardId;
+	data['showTranscriptToStudent']=showTranscriptToStudent;
+	data['progressionGrade']=progressionGrade;
+	data['saveType']=saveType;
+	data['userId']=USER_ID;
+	$.ajax({
+		type : "POST",
+		contentType:APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard','save-show-student-transcript'),
+		data : JSON.stringify(data),
+		dataType : 'html',
+		cache : false,
+		timeout : 600000,
+		success : function(htmlContent) {
+			if(saveType==3) {
+				$('#showTranscriptUploadMessage').show();
+				setTimeout(function(){
+					$('#showTranscriptUploadMessage').hide();
+					//callDashboardPageSchool(roleModuleId,'student-transcript')
+				}, 3000);
+			}else {
+
+				$('#showTranscriptToStudentMessage').show();
+				setTimeout(function(){
+					$('#showTranscriptToStudentMessage').hide();
+					//callDashboardPageSchool(roleModuleId,'student-transcript')
+				}, 3000);
+			}
+
+		},
+		error : function(e) {
+			$('#sendSWPR').removeAttr('disabled','disabled');
+			//showMessage(true, TECHNICAL_GLITCH);
+			return false;
+		}
+	});
+}

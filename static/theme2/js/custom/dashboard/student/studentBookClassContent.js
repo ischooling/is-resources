@@ -1116,7 +1116,7 @@ function renderBuyAClassErrorContent(data) {
                         Navigate to the <span class="font-weight-bold">'Buy Extra Classes'</span> menu to get started.
                         </h4>
                     <div class="full mt-2 mb-2 p-2 text-center">
-                        <a class="btn btn-lg btn-primary btn-shadow" href="javascript:void(0)" onclick="return callDashboardPageSchool(89,'student-addon');"> Browse Plans </a>
+                        <a class="btn btn-lg btn-primary " href="javascript:void(0)" onclick="return callDashboardPageSchool(89,'student-addon');"> Browse Plans </a>
                     </div>`;
   }
   html += `</div>

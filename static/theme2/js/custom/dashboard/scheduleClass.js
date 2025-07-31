@@ -257,7 +257,7 @@ function submitRequestDemoMeetingSlots(formId,moduleId,controllType, meetingId,r
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('dashboard','meetingslots-submit'),
 		data : JSON.stringify(getRequestForSubmitRequestDemoMeetingSlots(formId, moduleId,controllType, meetingId,requestType,userId)),
 		dataType : 'json',
@@ -323,10 +323,6 @@ function submitRequestDemoMeetingSlots(formId,moduleId,controllType, meetingId,r
 					}
 				}
 			}
-			return false;
-		},
-		error : function(e) {
-			showMessage(true, e.responseText);
 			return false;
 		}
 	});

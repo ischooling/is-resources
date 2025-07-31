@@ -15,7 +15,7 @@ function getPaymentDetails() {
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'custom-fee-calculation-process/'),
 		data: JSON.stringify(getRequestForPaymentDetails()),
 		dataType: 'json',
@@ -145,11 +145,11 @@ function getPaymentDetails() {
 				if (customPlan['status'] != 'C') {
 					var confirmFunction = "showWarningMessageShow('Are you sure you want to save the payment details? Please note you will not be able to edit them once saved.','saveCustomPaymentPlan(\\\'C\\\')',false)";
 					//<button class="btn btn-success btn-sm mr-1" onClick="saveCustomPaymentPlan(\'S\')">Save</button>
-					$('#saveNConfirm').html('<button class="btn btn-outline-success btn-sm" onClick="' + confirmFunction + '">Save & Confirm</button>')
+					$('#saveNConfirm').html('<button class="btn btn-success btn-sm" onClick="' + confirmFunction + '">Save & Confirm</button>')
 				} else {
 					$('.card-body *').prop('disabled', true);
 					var confirmFunction = "showWarningMessageShow('Are you sure you want to delete the custom payment details?','saveCustomPaymentPlan(\\\'D\\\')',false)";
-					$('#saveNConfirm').html('<button class="btn btn-danger btn-sm" onClick="' + confirmFunction + '">Delete custom payment</button>')
+					$('#saveNConfirm').html('<button class="btn btn-danger  btn-sm" onClick="' + confirmFunction + '">Delete custom payment</button>')
 				}
 			}
 		},
@@ -511,7 +511,7 @@ function saveCustomPaymentPlan(status) {
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'custom-fee-calculation-save/'),
 		data: JSON.stringify(getRequestForSaveCustomPaymentPlan(status)),
 		dataType: 'json',
@@ -707,7 +707,7 @@ function getGradeFeeDetails() {
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'standard-fee/'),
 		data: JSON.stringify(getRequestForGradeFees()),
 		dataType: 'json',
@@ -756,7 +756,7 @@ function getAdvancePaymentDetails(studentStandardId) {
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'advance-fee-calculation-process/'),
 		data: JSON.stringify(getRequestForAdvancePaymentDetails(studentStandardId)),
 		dataType: 'json',
@@ -1004,7 +1004,7 @@ function saveAdvanceFeeDetails(status) {
 			customLoader(true);
 			$.ajax({
 				type: "POST",
-				contentType: "application/json",
+				contentType: APPLICATION_JSON_VALUE,
 				url: getURLForHTML('dashboard', 'advance-fee-calculation-save/'),
 				data: JSON.stringify(getRequestForSaveAdvanceFeeDetails(status)),
 				dataType: 'json',

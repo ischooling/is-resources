@@ -25,10 +25,13 @@ function showManageProfileParentContentListingWithQueries(elementId, argument){
             }
         },
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+			$("#manageProfileParentContent thead tr th").addClass('font-weight-normal border-bottom-0 vertical-align-middle');
+			$("#manageProfileParentContent thead tr th:first-child").addClass('rounded-top-left-10');
+			$("#manageProfileParentContent thead tr th:last-child").addClass('rounded-top-right-10');
         	$(nRow).find('td:eq(3)').css('text-align','left');
         	$(nRow).find('td:eq(4)').css('text-align','left');
         	$(nRow).find('td:eq(5)').css('text-align','left');
-        	$('tr').addClass('success');
+        	$('tr').addClass('bg-primary text-white');
         },
         "columns": [
 	         { "data": "sno", "name" : "sno", "title" : "S.No"  },
@@ -129,12 +132,12 @@ function showManageProfileStudentContentListingWithQueries(elementId, argument){
         	if (aData['paymentTypeApplicationFee'] || aData['parentProfile'] || aData['viewProfile']){
         		$('td', nRow).css('text-align','left');
         	}
-        		if(aData['referralCode'].indexOf("N/A") != -1){}
-        		else{
-        			$(nRow).addClass('rowForCounselor');
-        		}
-        	$('#'+elementId+' tr:first').addClass('success');
-        },
+			if(aData['referralCode'].indexOf("N/A") != -1){}
+			else{
+				$(nRow).addClass('rowForCounselor');
+			}
+			$('#'+elementId+' thead tr:first').addClass('bg-primary text-white');
+		},
         "columns": [
 	         { "data": "sno", "name" : "sno", "title" : "S.No"  },
 	         { "data": "name", "name" : "name" , "title" : "Student Name"},
@@ -292,7 +295,7 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 	hideMessage("");
 	$.ajax({
 	  type: "POST",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  url: getURLForHTML("dashboard", "advance-student-search"),
 	  data: JSON.stringify(
 		getCallRequestForadvanceStudentSearch(formId, moduleId, themetype)
@@ -331,7 +334,7 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 	hideMessage("");
 	$.ajax({
 	  type: "POST",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  url: getURLForHTML("dashboard", url),
 	  data: JSON.stringify(
 		getCallRequestForadvanceTeacherSearch(formId, moduleId)
@@ -406,7 +409,7 @@ function advanceStudentSearch(formId, moduleId, themetype) {
   
 				+'<td>'
 				  +'<div class="btn-group">'
-					+'<button type="button" class="btn btn-danger dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Action" style="background-color:#007fff !important;border-color:#007fff; box-shadow:none;"><i class="fa fa-ellipsis-v"></i></button>'
+					+'<button type="button" class="btn btn-primary  dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Action"><i class="fa fa-ellipsis-v"></i></button>'
 					+'<div class="dropdown-menu" x-placement="bottom-start">'
   
 					  +'<a href="'+value.profileView+'" target="_blank" class="dropdown-item">'
@@ -431,7 +434,7 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 						+'<i class="fa fa-eye"></i>&nbsp;Teacher Logs'
 					  +'</a>'
 					  +'<a href="'+value.spoofLink+'" class="dropdown-item">'
-						+'<i class="bi bi-fingerprint"></i>View as Teacher'
+						+'<i class="fa fa-eye"></i>View as Teacher'
 					  +'</a>'
 					+'</div>'
 				  +'</div>'
@@ -605,3 +608,40 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 	  .val("")
 	  .trigger("change");
   }
+
+
+
+function studentStatusUpdateWithdrawn(userId,status,rolemoduleId){
+	console.log('studentStatusUpdate 1')
+	var data={};
+	data['userId']=userId;
+	data['status']=status;
+	data['sessionUserId']=USER_ID;
+	$.ajax({
+		type : "POST",
+		contentType:APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard','student-withdrown-join'),
+		data:JSON.stringify(data),
+		dataType : 'html',
+		cache : false,
+		timeout : 600000,
+		async:false,
+		success : function(htmlContent) {
+			if(htmlContent!=""){
+            	var stringMessage = [];
+            	stringMessage = htmlContent.split("|");
+        		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
+        			if(stringMessage[0] == "SESSIONOUT"){
+        				redirectLoginPage();
+        			}else {
+        				showMessageTheme2(0, stringMessage[1]);
+        			}
+        		}else if(stringMessage[0] == "SUCCESS"){
+        			showMessageTheme2(1, stringMessage[1]);
+        			//setTimeout(function(){ callDashboardPageSchool(rolemoduleId,'manage-user-list','','&schoolId='+SCHOOL_ID+'&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2'); }, 1000);
+        		}
+        		return false;
+			}
+		}
+	});
+}

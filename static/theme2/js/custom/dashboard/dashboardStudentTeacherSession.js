@@ -50,46 +50,6 @@ function meetingSlotModalBack() {
 	$('#back').hide();
 }
 
-function bookingSlotModal(subjectId, roleModuleId, themeType) {
-	if (themeType == 'theme2') {
-		var data = {};
-		data['userId'] = USER_ID;
-		data['subjectId'] = subjectId;
-		data['roleModuleId'] = roleModuleId;
-		$.ajax({
-			type: "POST",
-			contentType: "application/json",
-			url: getURLForHTML('dashboard', 'student-subject-session-booking'),
-			data: JSON.stringify(data),
-			dataType: 'html',
-			success: function (htmlContent) {
-				if (htmlContent != "") {
-					var stringMessage = [];
-					stringMessage = htmlContent.split("|");
-					if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-						if (stringMessage[0] == "SESSIONOUT") {
-							redirectLoginPage();
-						} else {
-							showMessageTheme2(0, stringMessage[1], '', false);
-						}
-					} else {
-						$('#bookASession').html(htmlContent);
-						$("#studentBookingSlotsModal  #course").show();
-						$('#studentBookingSlotsModal').modal('show');
-					}
-				}
-			},
-			error: function (e) {
-				//showMessage(true, TECHNICAL_GLITCH);
-			}
-		});
-	} else {
-		$("#course").show();
-		$('#studentBookingSlotsModal').modal('show');
-	}
-
-}
-
 function meetingUrlModalAdmin(meetingId, userId, meetingUrl, mailSendStatus, urlRemarks) {
 	$('#meetingUrlForm #meetingUrl').attr('disabled', false);
 	$('#meetingUrlForm #remarks').attr('disabled', false);
@@ -164,7 +124,7 @@ function callStudentFreeSlots(formId, data) {
 	//	hideMessage('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'get-student-free-slots'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -182,9 +142,6 @@ function callStudentFreeSlots(formId, data) {
 				return false;
 			}
 			return false;
-		},
-		error: function (e) {
-			showMessage(true, e.responseText);
 		}
 	});
 }
@@ -207,6 +164,7 @@ function validateRequestForStudentBookSessionSlots(formId, moduleId) {
 function callForStudentBookSessionSlots(formId, moduleId, roleModuleId) {
 	if(!getSession()){
 		redirectLoginPage();
+		return false;
 	}
 	hideMessage('');
 	if (!validateRequestForStudentBookSessionSlots(formId)) {
@@ -214,7 +172,7 @@ function callForStudentBookSessionSlots(formId, moduleId, roleModuleId) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'student-book-session-slots-submit'),
 		data: JSON.stringify(getRequestForStudentBookSessionSlots(formId, moduleId)),
 		dataType: 'json',
@@ -229,9 +187,6 @@ function callForStudentBookSessionSlots(formId, moduleId, roleModuleId) {
 				$('#' + formId)[0].reset();
 				setTimeout(function () { callSchoolInneraction('subjectsession', data['subjectId'], '', roleModuleId); }, 1000);
 			}
-			return false;
-		},
-		error: function (e) {
 			return false;
 		}
 	});
@@ -260,7 +215,7 @@ function getRequestForStudentBookSessionSlots(formId, moduleId) {
 
 	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
-	authentication['userId'] = $("#userId").val().trim();
+	authentication['userId'] = $("#userId").val();
 	request['authentication'] = authentication;
 	request['meetingSlotDTO'] = meetingSlotDTO;
 	return request;
@@ -278,7 +233,7 @@ function callSubjectByGradeAndTeacherId(formId, standardId, elementId, toElement
 	hideMessage('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'SUBJECT-LIST-BY-GRADE-TEACHER-ID', standardId, teacherId, callfrom, lmsPlatform)),
 		dataType: 'json',
@@ -292,11 +247,6 @@ function callSubjectByGradeAndTeacherId(formId, standardId, elementId, toElement
 				console.log("Response Data  " + data)
 				buildDropdown(data['mastersData']['subject'], $("#" + formId + " #" + toElementId), 'Select course');
 			}
-		},
-		error: function (e) {
-			console.log(e);
-			//	showMessage(true, e.responseText);
-			//$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
 		}
 	});
 }
@@ -414,10 +364,6 @@ function calendarRequestMeetingSlots(formId, moduleId, controlType, replaceId, r
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -472,7 +418,7 @@ function callAssignStudentTeacher(formId, studentId, viewAssignStudentTeacher, a
 	data['userId'] = USER_ID;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'assign-student-teacher'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -489,11 +435,6 @@ function callAssignStudentTeacher(formId, studentId, viewAssignStudentTeacher, a
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -503,7 +444,7 @@ function calendarDateMeeting(replaceId, startDate, slotType) {
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'meeting-dates'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'html',
 		cache: false,
@@ -525,40 +466,23 @@ function calendarDateMeeting(replaceId, startDate, slotType) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
-function callAssignStudentTeacherContent(callFor) {
+function callAssignStudentTeacherContent(tabIndex, callFor) {
 	var studentId = $('#studentTeacherMappingModalLabel #studentId').html();
 	var studentName = $('#studentTeacherMappingModalLabel #studentName').html();
 	var standardId = $('#studentTeacherMappingModalLabel #standardId').html();
-	$('#viewStudentTeacherTab').removeClass('active');
-	$('#viewStudentTeacherTab').removeClass('inactive-tab');
-	$('#assignStudentTeacherTab').removeClass('active');
-	$('#assignStudentTeacherTab').removeClass('inactive-tab');
-	$('#viewPastStudentTeacherTab').removeClass('active');
-	$('#viewPastStudentTeacherTab').removeClass('inactive-tab');
+	$(".mappingTab").removeClass("active");
+	$(".mappingTab"+tabIndex).addClass("active");
 	if (callFor == 'view-assignStudentTeacher') {
 		var controllType = "new";
-		$('#viewStudentTeacherTab').addClass('active');
-		$('#assignStudentTeacherTab').addClass('inactive-tab');
-		$('#viewPastStudentTeacherTab').addClass('inactive-tab');
 		callForDashboardData('formIdIfAny', 'student-teacher-linking-content?studentId=' + studentId + "&callFor=" + callFor + "&standardId=" + standardId + "&controllType=" + controllType, 'studentTeacherLinkingContent');
 	} else if (callFor == 'assignStudentTeacher') {
 		var controllType = "new";
-		$('#viewStudentTeacherTab').addClass('inactive-tab');
-		$('#assignStudentTeacherTab').addClass('active');
-		$('#viewPastStudentTeacherTab').addClass('inactive-tab');
 		callForDashboardData('formIdIfAny', 'student-teacher-linking-content?studentId=' + studentId + "&callFor=" + callFor + "&standardId=" + standardId + "&controllType=" + controllType, 'studentTeacherLinkingContent');
 	} else if (callFor == 'view-assignPastStudentTeacher') {
 		var controllType = "old";
-		$('#viewStudentTeacherTab').addClass('inactive-tab');
-		$('#assignStudentTeacherTab').addClass('inactive-tab');
-		$('#viewPastStudentTeacherTab').addClass('active');
 		callForDashboardData('formIdIfAny', 'student-teacher-linking-content?studentId=' + studentId + "&callFor=" + callFor + "&standardId=" + standardId + "&controllType=" + controllType, 'studentTeacherLinkingContent');
 	}
 }
@@ -571,7 +495,7 @@ function viewStudentTeacherMappingsLogs(studentId, subjectId, studentTeacherMapp
 	data['userId'] = USER_ID;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'student-teacher-mapping-log-content'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -588,19 +512,77 @@ function viewStudentTeacherMappingsLogs(studentId, subjectId, studentTeacherMapp
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
-function submitStudentTeacherAssign(formId, moduleId) {
+
+
+// function submitStudentTeacherAssign(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType, showWarning) {
+// 	if (showWarning) {
+// 		if ($("#reasonEnrollEnd" + subjectId).val() == 'Teacher Replaced' || $("#reasonEnrollEnd" + subjectId).val() == 'Teacher Withdrawn' || $("#reasonEnrollEnd" + subjectId).val() == 'Student Withdrawn') {
+// 			var teacherName = $("#teacherId" + subjectId + ' option:selected').text().split("(")[0];
+// 			var studentName = $("#studentNameWarning").val();
+// 			var subjectName = $("#subjectName" + subjectId).text().split("- ")[1].split("(")[0];
+// 			showWarningMessageShow('You are about to end mapping between ' + studentName + ' and ' + teacherName + ' for ' + subjectName + '. Please note that any recurring class created for this mapping will be deactivated after the enrollment end date. If for any reason the class is not deactivated, kindly do the same from the Recurring Class menu', 'submitStudentTeacherAssign(\'teacherForm\',\'' + moduleId + '\',' + subjectId + ',' + standardId + ',' + studentId + ',' + oldTeacherId + ',\'' + courseType + '\',false)', false);
+// 			return false;
+// 		}
+// 	}
+// 	hideMessage('');
+// 	if (!validateRequestStudentTeacherAssign(formId, moduleId, subjectId)) {
+// 		$('#modalMessage').click(function () {
+// 			setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
+// 		});
+// 		return false;
+// 	}
+// 	var me = $(this);
+// 	if (me.data('requestRunning')) {
+// 		return false;
+// 	}
+// 	me.data('requestRunning', true);
+// 	$.ajax({
+// 		type: "POST",
+// 		contentType: APPLICATION_JSON_VALUE,
+// 		url: getURLFor('dashboard', 'student-teacher-assign-submit'),
+// 		data: JSON.stringify(getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType)),
+// 		dataType: 'json',
+// 		cache: false,
+// 		timeout: 600000,
+// 		success: function (data) {
+// 			me.data('requestRunning', false)
+// 			if (data['status'] == '0' || data['status'] == '2') {
+// 				showMessageTheme2(0, data['message']);
+// 			} else {
+// 				//showMessage(false, data['message']);
+// 				//				callAssignStudentTeacherContent('view-assignStudentTeacher');
+// 				//				setTimeout(function(){callAssignStudentTeacherContent('assignStudentTeacher');},1000);
+// 				showMessageTheme2(1, "Student-teacher enrollment updated successfully.");
+// 				//				$('body').addClass('modal-open');
+// 			}
+// 			return false;
+// 		},
+// 		error: function (e) {
+// 			me.data('requestRunning', false)
+// 			return false;
+// 		}
+// 	});
+// }
+function submitStudentTeacherAssign(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType, showWarning) {
+	if (showWarning) {
+		if ($("#reasonEnrollEnd" + subjectId).val().trim() == 'Teacher Replaced' || $("#reasonEnrollEnd" + subjectId).val().trim() == 'Teacher Withdrawn' || $("#reasonEnrollEnd" + subjectId).val().trim() == 'Student Withdrawn') {
+			var teacherName = $("#teacherId" + subjectId + ' option:selected').text().trim().split("(")[0];
+			var studentName = $("#studentNameWarning").val().trim();
+			var subjectName = $("#subjectName" + subjectId).text().trim().split("- ")[1].split("(")[0];
+			showWarningMessageShow('You are about to end mapping between ' + studentName + ' and ' + teacherName + ' for ' + subjectName + '. Please note that any recurring class created for this mapping will be deactivated after the enrollment end date. If for any reason the class is not deactivated, kindly do the same from the Recurring Class menu', 'submitStudentTeacherAssign(\'teacherForm\',\'' + moduleId + '\',' + subjectId + ',' + standardId + ',' + studentId + ',' + oldTeacherId + ',\'' + courseType + '\',false)', false);
+			return false;
+		}
+	}
 	hideMessage('');
-	//	if(!validateRequestStudentTeacherAssign(formId,moduleId)){
-	//		return false;
-	//	}
+	if (!validateRequestStudentTeacherAssign(formId, moduleId, subjectId)) {
+		$('#modalMessage').click(function () {
+			setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
+		});
+		return false;
+	}
 	var me = $(this);
 	if (me.data('requestRunning')) {
 		return false;
@@ -610,7 +592,7 @@ function submitStudentTeacherAssign(formId, moduleId) {
 		type: "POST",
 		contentType: "application/json",
 		url: getURLFor('dashboard', 'student-teacher-assign-submit'),
-		data: JSON.stringify(getRequestForStudentTeacherAssign(formId, moduleId)),
+		data: JSON.stringify(getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType)),
 		dataType: 'json',
 		cache: false,
 		timeout: 600000,
@@ -620,7 +602,10 @@ function submitStudentTeacherAssign(formId, moduleId) {
 				showMessage(true, data['message']);
 			} else {
 				//showMessage(false, data['message']);
-				callAssignStudentTeacherContent('view-assignStudentTeacher');
+				//				callAssignStudentTeacherContent('view-assignStudentTeacher');
+				//				setTimeout(function(){callAssignStudentTeacherContent('assignStudentTeacher');},1000);
+				showMessage(true, "Student-teacher enrollment updated successfully.");
+				//				$('body').addClass('modal-open');
 			}
 			return false;
 		},
@@ -638,7 +623,7 @@ function getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standard
 	var studentTeacherSavedMappingDTO = {};
 	//		var subjectId= $(this).find("td.subjectIdcls").attr("data-subjectId");
 	//		var standardId= $(this).find("td.subjectIdcls").attr("data-standardId");
-	var teacherId = $("#teacherId" + subjectId).val().trim();
+	var teacherId = $("#teacherId" + subjectId).val();
 	studentTeacherSavedMappingDTO['subjectId'] = subjectId;
 	studentTeacherSavedMappingDTO['teacherId'] = teacherId;
 	studentTeacherSavedMappingDTO['standardId'] = standardId;
@@ -651,18 +636,18 @@ function getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standard
 	} else {
 		studentTeacherSavedMappingDTO['amount'] = $("#steachAmount" + subjectId).val();
 	}
-	if ($("#steachEnrollEndDate" + subjectId).val().trim() != '') {
-		if ($("#reasonEnrollEnd" + subjectId).val().trim() == '') {
-			showMessage(true, 'Reason for ending enrollment is required.');
+	if ($("#steachEnrollEndDate" + subjectId).val() != '') {
+		if ($("#reasonEnrollEnd" + subjectId).val() == '') {
+			showMessageTheme2(0, 'Reason for ending enrollment is required.');
 			return false;
 		}
 		studentTeacherSavedMappingDTO['reasonEnrollEnd'] = $("#reasonEnrollEnd" + subjectId).val();
-		if ($("#reasonEnrollEnd" + subjectId).val().trim() == 'Other') {
-			if ($("#otherReason" + subjectId).val().trim() == '') {
-				showMessage(true, 'Reason for ending enrollment is required');
+		if ($("#reasonEnrollEnd" + subjectId).val() == 'Other') {
+			if ($("#otherReason" + subjectId).val() == '') {
+				showMessageTheme2(0, 'Reason for ending enrollment is required');
 				return false;
 			}
-			studentTeacherSavedMappingDTO['otherReason'] = $("#otherReason" + subjectId).val().trim();
+			studentTeacherSavedMappingDTO['otherReason'] = $("#otherReason" + subjectId).val();
 		}
 	}
 
@@ -680,37 +665,214 @@ function getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standard
 	return request;
 }
 
+// function validateRequestStudentTeacherAssign(formId, moduleId, subjectId) {
+// 	var errorInt = 0;
+// 	//		$("#assigTeacherLink tbody tr").each(function(){
+// 	var studentTeacherSavedMappingDTO = {};
+// 	//		var subjectId= $(this).find("td.subjectIdcls").attr("data-subjectId");
+// 	var teacherId = $("#teacherId" + subjectId).val();
+// 	if (teacherId != 0) {
+// 		if ($("#stdEnrollDate" + subjectId).val() == '') {
+// 			errorInt = 1;
+// 		}
+// 		if ($("#steachEnrollStartDate" + subjectId).val() == '') {
+// 			errorInt = 2;
+// 		}
+// 		if ($("#steachEnrollEndDate" + subjectId).val() != '') {
+// 			if ($("#reasonEnrollEnd" + subjectId).val() == '') {
+// 				errorInt = 3;
+// 			}
+// 			if ($("#reasonEnrollEnd" + subjectId).val() == 'Other') {
+// 				if ($("#otherReason" + subjectId).val() == '') {
+// 					errorInt = 4;
+// 				}
+// 			}
+// 		}
+// 		if ($("#steachEnrollStartDate" + subjectId).val() != '' && $("#steachEnrollEndDate" + subjectId).val() != '') {
+// 			var stDate = $("#steachEnrollStartDate" + subjectId).val().split('-');
+// 			var edDate = $("#steachEnrollEndDate" + subjectId).val().split('-');
+// 			var startTime = new Date(stDate[2], stDate[0] - 1, stDate[1]).getTime();
+// 			var endTime = new Date(edDate[2], edDate[0] - 1, edDate[1]).getTime();
+
+// 			if (startTime > endTime) {
+// 				errorInt = 5;
+// 			}
+// 		} else if ($("#steachEnrollEndDate" + subjectId).val() == '') {
+// 			if ($("#reasonEnrollEnd" + subjectId).val() != '') {
+// 				errorInt = 6;
+// 			}
+// 		}
+// 	}
+
+// 	//	});
+
+// 	if (errorInt == 1) {
+// 		showMessageTheme2(0, 'Student enroll date is required');
+// 		return false;
+// 	}
+// 	if (errorInt == 2) {
+// 		showMessageTheme2(0, 'Student-Teacher enroll start date is required');
+// 		return false;
+// 	}
+// 	if (errorInt == 3) {
+// 		showMessageTheme2(0, 'Reason for ending enrollment is required.');
+// 		return false;
+// 	}
+// 	if (errorInt == 4) {
+// 		showMessageTheme2(0, 'Reason for ending enrollment is required.');
+// 		return false;
+// 	}
+// 	if (errorInt == 5) {
+// 		showMessageTheme2(0, 'Student-Teacher enrollment start date must be less than Student-Teacher enrollment end date.');
+// 		return false;
+// 	}
+// 	if (errorInt == 6) {
+// 		showMessageTheme2(0, 'Student-Teacher enrollment end date is required.');
+// 		return false;
+// 	}
+// 	return true;
+// }
+
+function validateRequestStudentTeacherAssign(formId, moduleId, subjectId) {
+	var errorInt = 0;
+	//		$("#assigTeacherLink tbody tr").each(function(){
+	var studentTeacherSavedMappingDTO = {};
+	//		var subjectId= $(this).find("td.subjectIdcls").attr("data-subjectId");
+	var teacherId = $("#teacherId" + subjectId).val().trim();
+	if (teacherId != 0) {
+		if ($("#stdEnrollDate" + subjectId).val().trim() == '') {
+			errorInt = 1;
+		}
+		if ($("#steachEnrollStartDate" + subjectId).val().trim() == '') {
+			errorInt = 2;
+		}
+		if ($("#steachEnrollEndDate" + subjectId).val().trim() != '') {
+			if ($("#reasonEnrollEnd" + subjectId).val().trim() == '') {
+				errorInt = 3;
+			}
+			if ($("#reasonEnrollEnd" + subjectId).val().trim() == 'Other') {
+				if ($("#otherReason" + subjectId).val().trim() == '') {
+					errorInt = 4;
+				}
+			}
+		}
+		if ($("#steachEnrollStartDate" + subjectId).val().trim() != '' && $("#steachEnrollEndDate" + subjectId).val().trim() != '') {
+			var stDate = $("#steachEnrollStartDate" + subjectId).val().trim().split('-');
+			var edDate = $("#steachEnrollEndDate" + subjectId).val().trim().split('-');
+			var startTime = new Date(stDate[2], stDate[0] - 1, stDate[1]).getTime();
+			var endTime = new Date(edDate[2], edDate[0] - 1, edDate[1]).getTime();
+
+			if (startTime > endTime) {
+				errorInt = 5;
+			}
+		} else if ($("#steachEnrollEndDate" + subjectId).val().trim() == '') {
+			if ($("#reasonEnrollEnd" + subjectId).val().trim() != '') {
+				errorInt = 6;
+			}
+		}
+	}
+
+	//	});
+
+	if (errorInt == 1) {
+		showMessage(true, 'Student enroll date is required');
+		return false;
+	}
+	if (errorInt == 2) {
+		showMessage(true, 'Student-Teacher enroll start date is required');
+		return false;
+	}
+	if (errorInt == 3) {
+		showMessage(true, 'Reason for ending enrollment is required.');
+		return false;
+	}
+	if (errorInt == 4) {
+		showMessage(true, 'Reason for ending enrollment is required.');
+		return false;
+	}
+	if (errorInt == 5) {
+		showMessage(true, 'Student-Teacher enrollment start date must be less than Student-Teacher enrollment end date.');
+		return false;
+	}
+	if (errorInt == 6) {
+		showMessage(true, 'Student-Teacher enrollment end date is required.');
+		return false;
+	}
+	return true;
+}
+
+
+function viewStudentTeacherMappingsSendMail(studentTeacherMappingId) {
+	hideMessage('');
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('dashboard', 'student-teacher-assign-send-mail'),
+		data: JSON.stringify(getRequestForStudentTeacherMailSend(studentTeacherMappingId)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				callAssignStudentTeacherContent('view-assignStudentTeacher');
+				$('#modalMessage').click(function () {
+					setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
+				});
+			}
+			return false;
+		},
+		error: function (e) {
+			//	showMessage(true, e.responseText);
+			return false;
+		}
+	});
+}
+function getRequestForStudentTeacherMailSend(studentTeacherMappingId) {
+	var request = {};
+	var authentication = {};
+
+	request['studentTeacherMappingId'] = studentTeacherMappingId;
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'STUDENT';
+	authentication['userId'] = USER_ID;
+	request['authentication'] = authentication;
+	return request;
+}
+
 function validateRequestForSubmitMeetingSlots(formId, moduleId, controllType) {
 	if (controllType == 'ADD') {
 
 		if ($('#countryTimezoneId').val() == 0 || $('#countryTimezoneId').val() == undefined) {
-			showMessage(true, 'Time-Zone is required');
+			showMessageTheme2(0, 'Time-Zone is required');
 			return false;
 		}
 		if ($('#weekPickerId').val() == 0 || $('#weekPickerId').val() == undefined) {
-			showMessage(true, 'Meeting week is required');
+			showMessageTheme2(0, 'Meeting week is required');
 			return false;
 		}
 		if ($('#meetingDate').val() == '' || $('#meetingDate').val() == undefined) {
-			showMessage(true, 'Meeting Date is required');
+			showMessageTheme2(0, 'Meeting Date is required');
 			return false;
 		}
 		if ($('#startTime').val() == '' || $('#startTime').val() == undefined) {
-			showMessage(true, 'Start Time is required');
+			showMessageTheme2(0, 'Start Time is required');
 			return false;
 		}
 		if ($('#timeInterval').val() == 0 || $('#timeInterval').val() == undefined) {
-			showMessage(true, 'Time Interval is required');
+			showMessageTheme2(0, 'Time Interval is required');
 			return false;
 		}
 	} else if (controllType == 'UPDATE') {
 		if ($('#meetingResult').val() == '' || $('#meetingResult').val() == undefined) {
-			showMessage(true, 'Meeting Result is required');
+			showMessageTheme2(0, 'Meeting Result is required');
 			return false;
 		}
 	} else if (controllType == 'ADDURL') {
 		if ($('#meetingUrl').val() == '' || $('#meetingUrl').val() == undefined) {
-			showMessage(true, 'Meeting Link is required');
+			showMessageTheme2(0, 'Meeting Link is required');
 			return false;
 		}
 	}
@@ -724,7 +886,7 @@ function submitMeetingForSlots(formId, moduleId, controllType) {
 	data['userId'] = USER_ID;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'student-teacher-mapping-log-content'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -735,17 +897,12 @@ function submitMeetingForSlots(formId, moduleId, controllType) {
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					$('#studentTeacherMappingLogContent').html(htmlContent);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -872,11 +1029,7 @@ function validateRequestForRemoveMeetingsForStudentSessionSlots(formId) {
 		});
 	});
 	if (meetingIds.length == 0) {
-		if (tt == 'theme1') {
-			showMessage(true, 'No slots available for delete.');
-		} else {
-			showMessageTheme2(0, 'No slots available for delete.', '', true);
-		}
+		showMessageTheme2(0, 'No slots available for delete.', '', true);
 		return false
 	}
 	return true;
@@ -885,36 +1038,23 @@ function validateRequestForRemoveMeetingsForStudentSessionSlots(formId) {
 function removeMeetingsForStudentSessionSlots(formId, moduleId, roleModuleId) {
 	$(".confirmDeleteSlots").prop("disabled", true);
 
-	if (tt == 'theme1') {
-		hideMessage('');
-	} else {
-		hideMessageTheme2('');
-	}
+	hideMessageTheme2('');
 	if (!validateRequestForRemoveMeetingsForStudentSessionSlots(formId)) {
 		$(".confirmDeleteSlots").prop("disabled", true);
 		return true;
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLFor('dashboard', 'meetingslots-remove-submit'),
 		data: JSON.stringify(getRemoveMeetingsForStudentSessionSlots(formId, moduleId)),
 		dataType: 'json',
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				$(".meetingSave").prop("disabled", false);
-				if (tt == 'theme1') {
-					showMessage(true, data['message']);
-				} else {
-					showMessageTheme2(0, data['message'], '', true);
-				}
+				showMessageTheme2(0, data['message'], '', true);
 			} else {
-
-				if (tt == 'theme1') {
-					showMessage(false, data['message']);
-				} else {
-					showMessageTheme2(1, data['message'], '', true);
-				}
+				showMessageTheme2(1, data['message'], '', true);
 				$('#deleteTeacherMeetingSlotsModal').modal('toggle');
 				setTimeout(function () { callDashboardPageSchool(roleModuleId, 'create-manage-sessions'); }, 1000);
 				$('body').removeClass('modal-open');
@@ -944,7 +1084,7 @@ function getRemoveMeetingsForStudentSessionSlots(formId, moduleId) {
 function courseProviderList(formId, elementId) {
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster('formId', 'ALL-COURSE-PROVIDER-LIST', 'courseProList')),
 		dataType: 'json',
@@ -953,7 +1093,7 @@ function courseProviderList(formId, elementId) {
 		async: true,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				var result = data['mastersData']['courseList'];
 				var dropdown = $('#' + formId + ' #' + elementId);
@@ -1013,13 +1153,13 @@ function getRequestForTeacherAssign(callfrom, subjectid) {
 	}
 
 	if (name != '' && name != undefined) {
-		teacherAssignRequest['teacherName'] = name.trim();
+		teacherAssignRequest['teacherName'] = name;
 	}
 	if (applicationNo != '' && applicationNo != undefined) {
-		teacherAssignRequest['applicationNo'] = applicationNo.trim();
+		teacherAssignRequest['applicationNo'] = applicationNo;
 	}
 	if (email != '' && email != undefined) {
-		teacherAssignRequest['officialEmail'] = email.trim();
+		teacherAssignRequest['officialEmail'] = email;
 	}
 	teacherAssignRequest['callFrom'] = callfrom;
 	teacherAssignRequest['courseProviderId'] =  $("#teacherAssignForm #lmsPlatform").val();
@@ -1034,7 +1174,7 @@ function getTeacherAssignList(callfrom, tbodyid, subjectid) {
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'teacher-assign-form-content'),
 		data: JSON.stringify(getRequestForTeacherAssign(callfrom, subjectid)),
 		dataType: 'json',
@@ -1087,13 +1227,6 @@ function getTeacherAssignList(callfrom, tbodyid, subjectid) {
 				// 	$(this).parent().find(".dropdown-menu").addClass("show");
 				// });
 
-			}
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} else if (tt == 'theme1') {
-				showMessage(true, TECHNICAL_GLITCH);
 			}
 		}
 	});
@@ -1397,7 +1530,7 @@ function getTeacherAssignStudentList(title, reporttype, spanid, teacherId, worki
 	customLoader(false);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'teacher-assign-student-content'),
 		data: JSON.stringify(getRequestForTeacherAssignStd(title, reporttype, teacherId, workingHrs)),
 		dataType: 'json',
@@ -1430,13 +1563,6 @@ function getTeacherAssignStudentList(title, reporttype, spanid, teacherId, worki
 					$("#teacherAssignName").text(teachname);
 					$("#studentAssignListPopup").modal('show');
 				}
-			}
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} else if (tt == 'theme1') {
-				showMessage(true, TECHNICAL_GLITCH);
 			}
 		}
 	});
@@ -1499,7 +1625,7 @@ function getStuddentCountTr(studentCount, reporttype, spanid, teacherid, changeS
 	if (reporttype == "STANDARD") {
 		$("#ass_student_" + teacherid).text(assStudent);
 		var studentClick = "getTeacherAssignStudentList('','','studentTeachAssignList','" + teacherid + "', '');";
-		var studentTot = '<a style="min-width:30px;" class="d-inline-block text-center bg-info text-white p-1 font-weight-bold" href="javascript:void(0)" onclick="' + studentClick + '">' + totStudent + '</a>';
+		var studentTot = '<a style="min-width:30px;" class="d-inline-block text-center bg-primary text-white p-1 font-weight-bold" href="javascript:void(0)" onclick="' + studentClick + '">' + totStudent + '</a>';
 		$("#total_student_" + teacherid).html(studentTot);
 		$("#pl_student_" + teacherid).html(totPlStudent);
 		$("#gl_student_" + teacherid).html(totGlStudent);
@@ -1535,7 +1661,7 @@ function saveInactiveAssignTeacher(userId, checkedVal, activated, orderBy, assig
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'inactive-assign-teacher'),
 		data: JSON.stringify(getRequestForInactiveAssignTeacher(userId, checkedVal, activated, orderBy, assignSuject)),
 		dataType: 'json',
@@ -1563,10 +1689,6 @@ function saveInactiveAssignTeacher(userId, checkedVal, activated, orderBy, assig
 				}, 1500);
 
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -1600,7 +1722,7 @@ function saveTeacherAssignToStudent(userId, tblId, callFrom, newTheme) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'save-assign-teacher-tostudent'),
 		data: JSON.stringify(getRequestForTeacherAssignStudent(userId, tblId, callFrom)),
 		dataType: 'json',
@@ -1630,10 +1752,6 @@ function saveTeacherAssignToStudent(userId, tblId, callFrom, newTheme) {
 
 
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -2525,7 +2643,7 @@ function callStudentTimePreference(callfrom, studentStandardId) {
 	$("#mandatoryVideoModal").modal("hide");
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-time-preference'),
 		data: JSON.stringify(getRequestForStudentTimePreference(callfrom, studentStandardId)),
 		dataType: 'json',
@@ -2573,13 +2691,6 @@ function callStudentTimePreference(callfrom, studentStandardId) {
 					}
 				}
 			}else {
-			}
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} else if (tt == 'theme1') {
-				showMessage(true, TECHNICAL_GLITCH);
 			}
 		}
 	});
@@ -2659,7 +2770,7 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'save-time-preference'),
 		data: JSON.stringify(getRequestForTeacherTimePreference(callFrom, timeTeacherUserId, modalID)),
 		dataType: 'json',
@@ -2711,7 +2822,7 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 										showMessageTheme2(1, data['message'], '', true);
 										// location.reload(true);
 										$("#orientAndSemesterChangeSpanHeading").text("School System Training");
-										msgHtml+="<div class='p-2 border rounded-10' style='border-color: #007fff !important;'> <p class='mb-3 text-primary font-weight-semi-bold' style='font-size:18px'>Your School System Training is on "+data['orientationdateTimeInStudentTimeZone']+".</p><p class='mt-3 mb-1'><a href='"+data.joinOrientationUrl+"' class='btn btn-success font-size-lg py-1 px-5' target='_blank'>Join</a></p></div>";
+										msgHtml+="<div class='p-2 border rounded-10' style='border-color: var(--pc) !important;'> <p class='mb-3 text-primary font-weight-semi-bold' style='font-size:18px'>Your School System Training is on "+data['orientationdateTimeInStudentTimeZone']+".</p><p class='mt-3 mb-1'><a href='"+data.joinOrientationUrl+"' class='btn btn-success font-size-lg py-1 px-5' target='_blank'>Join</a></p></div>";
 										msgHtml+="<p class='mb-0 mt-2 text-primary font-weight-semi-bold' style='font-size:16px'>If you wish to reschedule, please <a href='"+data.rescheduleOrientationUrl+"' class='text-primary' style='text-decoration:underline' target='_blank'>click here</a></p>";
 										$("#thankyouClassesMsg").html(msgHtml);
 										$("#thankyouClassesMsg").show();
@@ -2785,10 +2896,6 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 					showMessage(true, data['message']);
 				}
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -2966,7 +3073,7 @@ function callTeacherTimePreference(callfrom, teacherId, teacherUserId, userRole,
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-teacher-time-preference'),
 		data: JSON.stringify(getRequestForTeacherTime(callfrom, teacherUserId, userRole, autoForwordStatus)),
 		dataType: 'json',
@@ -3029,13 +3136,6 @@ function callTeacherTimePreference(callfrom, teacherId, teacherUserId, userRole,
 				$("#" + modalID).modal("show");
 			}
 			customLoader(false);
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} else if (tt == 'theme1') {
-				showMessage(true, TECHNICAL_GLITCH);
-			}
 		}
 	});
 }
@@ -3355,7 +3455,7 @@ function getRequestForTeacherTimeByDate(callfrom, teacherUserId, userRole, start
 function callTimePreferenceByDate(callfrom, teacherid, teacherUserId, userRole, startdate, modalID, controlType, slotId) {
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'get-time-preference-by-date'),
 		data: JSON.stringify(getRequestForTeacherTimeByDate(callfrom, teacherUserId, userRole, startdate, controlType, slotId)),
 		dataType: 'json',
@@ -3398,13 +3498,6 @@ function callTimePreferenceByDate(callfrom, teacherid, teacherUserId, userRole, 
 					$("#" + modalID + " .added-availability").html(htmlL);
 				}
 
-			}
-		},
-		error: function (e) {
-			if (tt == 'theme2') {
-				showMessageTheme2(2, TECHNICAL_GLITCH, '', true);
-			} else if (tt == 'theme1') {
-				showMessage(true, TECHNICAL_GLITCH);
 			}
 		}
 	});
@@ -3485,7 +3578,7 @@ function callOrientationtime(){
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('orientation','get-orientation-time'),
 		data : JSON.stringify(getRequestForOrientationTime()),
 		dataType : 'json',
@@ -3513,13 +3606,6 @@ function callOrientationtime(){
 				});
 			}
 			customLoader(false);
-		},
-		error : function(e) {
-			if(tt=='theme2'){
-				showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-			}else if(tt=='theme1'){
-				showMessage(true, TECHNICAL_GLITCH);
-			}
 		}
 	});
   }
@@ -3574,7 +3660,7 @@ function callTeacherClassesToUpdateStatus() {
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'get-all-class-for-status-update'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -3652,7 +3738,7 @@ function updateBulkClassStatus() {
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard','update-bulk-meeting-status-by-teacher'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',

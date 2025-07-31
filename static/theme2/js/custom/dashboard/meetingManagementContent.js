@@ -2,18 +2,7 @@ function getMeetingManagementContent() {
   $("<style>")
     .prop("type", "text/css")
     .html(`
-      .select2-selection.select2-selection--single {
-        border: 1px solid #a1a1a1 !important;
-        border-radius: 5px !important;
-      }
-      .select2-container--default.select2-container--focus .select2-selection--multiple, .select2-container--default .select2-selection--multiple {
-        border: 1px solid #a1a1a1 !important;
-        border-radius: 5px !important;
-      }
-      input[disabled] {
-        background-color: #d6d6d6 !important;
-        cursor: not-allowed !important;
-      }
+      
     `)
     .appendTo("head");
 
@@ -41,7 +30,7 @@ function getMeetingManagementContent() {
             <div class="modal-footer text-center rounded">
               <div class="text-center" style="margin: 0 auto;">
               <button id='resetDeleteErrorWarningYes' type="button" class="rounded btn" style="color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;font-weight: 700;">Yes</button>
-              <button id='resetDeleteErrorWarningNo' type="button" class="rounded btn btn-danger " data-dismiss="modal" style="font-weight: 700;" >No</button>
+              <button id='resetDeleteErrorWarningNo' type="button" class="rounded btn btn-danger  " data-dismiss="modal" style="font-weight: 700;" >No</button>
               <button id='resetDeleteErrorWarningCancel' type="button" class="rounded btn btn-default" data-dismiss="modal" style="font-weight: 700;">Close</button>
             </div>
           </div>
@@ -53,22 +42,9 @@ function getMeetingManagementContent() {
     <div class="server-message">
       <span class="msg" id="msgTheme2"></span>
     </div>
-
-    <!-- Loader -->
-    <div id="commonloaderId" class="unique-loader loader-bg" style="display:none;">`
-      if(SCHOOL_ID==1){
-        htmlContent+=`<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />`;
-      }else{
-        htmlContent+=
-        `<div id="commonloaderBody" class="loader" style="display:none">
-          Please Wait... <span></span>
-        </div>`
-      } 
-    htmlContent+=`</div>
-
     <div class="main-card mb-3">
       <div class="card mt-4" style="box-shadow: 0px 0px;">
-        <div id="card-body" class="card-body px-4 mx-5">`
+        <div id="card-body" class="card-body mx-md-5 mx-0">`
           +filterFormAndList()
           +getMeetingFormHtml()
           +savedMeetingLinkHtml()
@@ -81,53 +57,97 @@ function getMeetingManagementContent() {
 function filterFormAndList(){
   var html=
   `<div id="filterFormAndList" class="full">
-    <h2 class="mb-0" style="color: #6e6e6e; font-size: 24px; font-weight: bold;">Meetings</h2>
-    <form id="filterMeeting" class="justify-content-between align-items-center mb-3" style="display: flex;" autocomplete="off">
-      <div class="d-flex w-100 align-items-center my-4" style="gap: 8px;">
+    <h2 class="mb-2 font-weight-bold font-24">Meetings</h2>
+    <form id="filterMeeting" class="mb-3" autocomplete="off">
+      <div class="form-row w-100">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 mb-xl-0 mb-2">
+          <div id="filterHostUserIdDiv">
+            <select id="filterHostUserId" name="filterHostUserId" class="form-control">
+              <!-- Dynamically loaded -->
+            </select>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 mb-xl-0 mb-2">
+          <div id="filterGeneralMeetingTypeDiv">
+            <select id="filterGeneralMeetingType" name="filterGeneralMeetingType" class="form-control">
+              <!-- Dynamically loaded -->
+            </select>
+          </div>
+        </div>
+        <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 pr-0">
+          <div class="form-row">
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-12 ms-0 mb-2">
+              <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14" >
+                <option value="Today" selected>Today</option>  
+                <option value="Week">Week</option>
+                <option value="Month">Month</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+            <div class="col-xl-5 col-lg-6 col-md-6 col-sm-8 col-12 ms-0 mb-2">
+              <div class="form-row">
+                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 ms-0 mb-2">
+                      <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingStartDate" class="form-control" placeholder="Start Date" autocomplete="off" />
+                  </div>
+                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingEndDate" class="form-control" placeholder="End Date" autocomplete="off" />
+                  </div>
+              </div>
+            </div>
+            <div class="ml-auto">
+              <button id="filterSearchButton" type="submit" onclick="applyFilters();" class="btn btn-lg btn-success  ml-auto"><i class="fa fa-search"></i>&nbsp;Search</button>
+              <button id="filterResetButton" type="button" onclick="resetFilter();" class="btn btn-lg btn-danger  ml-auto"><i class="fa fa-undo"></i>&nbsp;Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      ${/*
+        <div class="d-flex w-100 align-items-center my-4" style="gap: 8px;">
+          <div class="d-none hidden">
+            <label class="text-dark" for="filterTitle">Title</label>
+            <input type="text" id="filterTitle" class="" placeholder="Enter meeting title" />
+          </div>
+
+          <div id="filterHostUserIdDiv" style="width: 20%;">
+            <select id="filterHostUserId" name="filterHostUserId" class="form-control">
+              <!-- Dynamically loaded -->
+            </select>
+          </div>
+
+          <div id="filterGeneralMeetingTypeDiv" style="width: 20%;">
+            <select id="filterGeneralMeetingType" name="filterGeneralMeetingType" class="form-control">
+              <!-- Dynamically loaded -->
+            </select>
+          </div>
+
+          <div class="" style="width: 10%">
+            <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px; appearance: auto; -webkit-appearance: auto; -moz-appearance: auto;">
+              <option value="Today" selected>Today</option>  
+              <option value="Week">Week</option>
+              <option value="Month">Month</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+
+          <div class="">
+            <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingStartDate" class="form-control" placeholder="Select Start Date" autocomplete="off" />
+          </div>
+          <div class="">
+            <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingEndDate" class="form-control" placeholder="Select End Date" autocomplete="off" />
+          </div>
+
+          <div class="d-none hidden">
+            <label class="text-dark" for="limit">Limit</label>
+            <input type="number" min="1" id="limit" class="" value="" placeholder="Enter Limit" />
+          </div>
+        </div>  
+
+        <div class="text-right d-flex" style="gap: 6px;">
+          <button id="filterSearchButton" type="submit" onclick="applyFilters();" class="btn btn-primary  ml-auto">Search</button>
+          <button id="filterResetButton" type="button" onclick="resetFilter();" class="btn btn-danger  ml-auto">Reset</button>
+        </div>
+      */''}
       
-        <div class="d-none hidden">
-          <label class="text-dark" for="filterTitle">Title</label>
-          <input type="text" id="filterTitle" class="" placeholder="Enter meeting title" />
-        </div>
-
-        <div id="filterHostUserIdDiv" style="width: 20%;">
-          <select id="filterHostUserId" name="filterHostUserId" class="p-3 border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px;">
-            <!-- Dynamically loaded -->
-          </select>
-        </div>
-
-        <div id="filterGeneralMeetingTypeDiv" style="width: 20%;">
-          <select id="filterGeneralMeetingType" name="filterGeneralMeetingType" class="p-3 border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px;">
-            <!-- Dynamically loaded -->
-          </select>
-        </div>
-
-        <div class="" style="width: 10%">
-          <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px; appearance: auto; -webkit-appearance: auto; -moz-appearance: auto;">
-            <option value="Today" selected>Today</option>  
-            <option value="Week">Week</option>
-            <option value="Month">Month</option>
-            <option value="Custom">Custom</option>
-          </select>
-        </div>
-
-        <div class="">
-          <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingStartDate" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px;" placeholder="Select Start Date" autocomplete="off" />
-        </div>
-        <div class="">
-          <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingEndDate" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px;" placeholder="Select End Date" autocomplete="off" />
-        </div>
-
-        <div class="d-none hidden">
-          <label class="text-dark" for="limit">Limit</label>
-          <input type="number" min="1" id="limit" class="" value="" placeholder="Enter Limit" />
-        </div>
-
-      </div>
-      <div class="text-right d-flex" style="gap: 6px;">
-        <button id="filterSearchButton" type="submit" onclick="applyFilters();" class="btn ml-auto rounded" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold;">Search</button>
-        <button id="filterResetButton" type="button" onclick="resetFilter();" class="btn ml-auto rounded" style="width: max-content; background-color: #FFF; padding: 10px 20px; font-weight: bold; color: #027FFF;; border: 1px solid #027FFF;">Reset</button>
-      </div>
     </form>
     <div id="meetingTableContainer">
     </div>
@@ -149,178 +169,193 @@ function getMeetingFormHtml() {
 
   return `
     <div id="meetingFormDiv" class="full" style="display: none;">
-      <div class="d-flex w-100">
+      <div class="d-flex w-100 flex-wrap">
       <!-- Main meeting form on the left -->
-        <div class="main-card mb-3" style="width: 70%">
+        <div class="main-card mb-3 col-xl-9 col-lg-11 col-md-12 col-sm-12 col-12 p-0">
           <div class="card" style="box-shadow: 0px 0px;">
-            <div class="card-body mx-5">
-              <button id="backFromForm" class="bg-transparent mb-4 border-0" style="font-size: 16px; color: #393185;">
-                <i class="fa fa-chevron-left" style="margin-right: 4px; font-size: 14px"></i> Back to Meeting
+            <div class="card-body mx-md-5 mx-0 p-0">
+              <button id="backFromForm" class="bg-transparent mb-4 border-0 text-primary cursor">
+                <i class="fa fa-chevron-left mr-2"></i> Back to Meeting
               </button>
-              <h2 class="mb-5" style="font-weight: bold;">Schedule Meeting</h2>
+              <h2 class="mb-3 font-weight-bold">Schedule Meeting</h2>
               <form id="meetingForm" autocomplete="off">
-                <div class="mb-5 d-flex align-items-center" style="gap: 50px;">
-                  <label for="generalMeetingType" style="color: #2E2E2E; font-size: 16px; width: 25%;">Meeting Type</label>
-                  <select id="generalMeetingType" name="generalMeetingType" class="p-3 border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; right: 0; left: 0; margin: auto;" required autocomplete="off">
-                    <!-- Dynamically loaded -->
-                  </select>
-                </div>
-
-                <div class="mb-5 d-flex align-items-center" style="gap: 50px;">
-                  <label for="topic" style="color: #2E2E2E; font-size: 16px; width: 25%;">Topic</label>
-                  <input type="text" id="topic" class="p-3 border rounded" style="border-color: #a1a1a1 !important; width: 100%; font-size: 14px;" placeholder="Enter topic" autocomplete="off" required />
-                </div>
-
-                <div id="meetingTypeContainer" class="mb-5 align-items-center" style="gap: 50px;" style="display: none;">
-                  <label for="meetingType" style="color: #2E2E2E; font-size: 16px; width: 19%;">Type of Meeting</label>
-                  <div class="d-flex" style="gap: 16px;">
-                    <label class="rounded" style="display: flex;align-items: center;gap: 5px;border: 1px solid #a1a1a1;border-radius: 3px;font-size: 16px;padding: 5px;color: #2e2e2e;">
-                      One day meeting
-                      <input
-                        class="m-0 ml-3"
-                        type="radio"
-                        name="meetingType"
-                        value="1"
-                        checked
-                        required
-                        onchange="getMeetingType()"
-                        autocomplete="off"
-                      >
-                    </label>
-                    <label class="rounded" style="display: flex;align-items: center;gap: 5px;border: 1px solid #a1a1a1;border-radius: 3px;font-size: 16px;padding: 5px;color: #2e2e2e;">
-                      Recurring meeting
-                      <input
-                        class="m-0 ml-3"
-                        type="radio"
-                        name="meetingType"
-                        value="2"
-                        onchange="getMeetingType()"
-                        autocomplete="off"
-                      >
-                    </label>
+                <div class="form-row mb-3">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="generalMeetingType" class="font-16">Meeting Type</label>
                   </div>
-                </div>
-
-                <div class="mb-5 d-flex align-items-center" style="gap: 50px;">
-                  <label for="host" class="" style="color: #2E2E2E; font-size: 16px; width: 25%;">Host</label>
-                  <select onchange="onChangeHost(this);checkAndFetchMeetings();updateNewDateInCalender();" id="host" name="host" class="p-3 border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; right: 0; left: 0; margin: auto;" required autocomplete="off">
-                    <!-- Dynamically loaded -->
-                  </select>
-                </div>
-
-                <div id="attendeesContainer" class="mb-5 align-items-center" style="gap: 50px;display: none;">
-                  <label for="attendees" style="color: #2E2E2E; font-size: 16px; width: 25%;">Attendees</label>
-                  <div class="d-flex flex-column w-100">
-                    <div class="d-flex flex-column w-100 position-relative" style="gap:2px;">
-                      <input id="attendees" class="p-3 border rounded w-100" style="border-color: #a1a1a1 !important; font-size: 14px;" type="text" placeholder="Search by name & email" oninput="getAttendeesList();">
-                      <ul id="dynamic-attendees-list" class="rounded m-0 px-2 position-absolute" style="background-color: #eee; list-style: none; max-height: 150px;z-index: 1;overflow-y: auto;width: 100%;top: 42px; display: none;"></ul>
-                    </div>
-                    <!-- List of selected attendees -->
-                    <div id="selected-attendees-list" class="mt-2 d-flex flex-wrap rounded" style="background-color: #EDF6FF;"></div>
-                  </div>
-                </div>
-              
-                <div id="whenContainer" class="mb-5 align-items-center w-100" style="gap: 50px; display: none;">
-                  <label for="when" class="form-label" style="color: #2E2E2E; font-size: 16px; width: 25%;">When</label>
-                  <div class="d-flex w-100" style="gap: 16px;">
-                    <input
-                      onchange="checkAndFetchMeetings();getDatepickerChangeVal(this);"
-                      type="text"
-                      id="when"
-                      name="when"
-                      placeholder="Select Date"
-                      class="p-3 border rounded datepicker"
-                      style="border-color: #a1a1a1 !important; font-size: 14px; width: 100%;"
-                      autocomplete="off"
-                      required
-                    >
-                    <select
-                      onchange="checkAndFetchMeetings();"
-                      id="hour"
-                      name="hour"
-                      class="p-3 border rounded"
-                      style="border-color: #a1a1a1 !important; font-size: 14px; width: 100%;"
-                      required
-                      autocomplete="off"
-                    >
-                      <option value="" disabled selected>HH:MM</option>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <select id="generalMeetingType" name="generalMeetingType" class="form-control" required autocomplete="off">
+                      <!-- Dynamically loaded -->
                     </select>
                   </div>
                 </div>
-
-                <div id="durationContainer" class="mb-5 align-items-center" style="gap: 50px; display: none;">
-                  <label for="durationHour" class="form-label" style="color: #2E2E2E; font-size: 16px; width: 25%;">Duration</label>
-                  <div class="d-flex w-100" style="gap: 16px;">
-                    <div class="d-flex align-items-center w-25" style="gap: 6px;">
-                      <select
-                        id="durationHour"
-                        name="durationHour"
-                        class="p-3 border rounded w-100"
-                        style="border-color: #a1a1a1 !important; font-size: 14px;"
-                        required
-                        autocomplete="off"
-                      >
-                        <option value="00">00</option>
-                        <option value="01">01</option>
-                        <option value="02">02</option>
-                        <option value="03">03</option>
-                        <option value="04">04</option>
-                        <option value="05">05</option>
-                        <option value="06">06</option>
-                        <option value="07">07</option>
-                      </select>
-                      <p class="m-0">Hr</p>
-                    </div>
-
-                    <div class="d-flex align-items-center w-25" style="gap: 6px;">
-                      <select
-                        id="durationMinute"
-                        name="durationMinute"
-                        class="p-3 border rounded w-100"
-                        style="border-color: #a1a1a1 !important; font-size: 14px;"
-                        required
-                        autocomplete="off"
-                      >
-                        <option value="00">00</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
-                        <option value="40">40</option>
-                        <option value="50">50</option>
-                      </select>
-                      <p class="m-0">Min</p>
+                <div class="form-row mb-3">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="topic" class="font-16">Topic</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <input type="text" id="topic" class="form-control" placeholder="Enter topic" autocomplete="off" required />
+                  </div>
+                </div>
+                <div class="form-row mb-3" id="meetingTypeContainer">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="meetingType" class="font-16">Type of Meeting</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <div class="d-flex" style="gap: 16px;">
+                      <label class="rounded" style="display: flex;align-items: center;gap: 5px;border: 1px solid #a1a1a1;border-radius: 3px;font-size: 16px;padding: 5px;color: #2e2e2e;">
+                        One day meeting
+                        <input
+                          class="m-0 ml-3"
+                          type="radio"
+                          name="meetingType"
+                          value="1"
+                          checked
+                          required
+                          onchange="getMeetingType()"
+                          autocomplete="off"
+                        >
+                      </label>
+                      <label class="rounded" style="display: flex;align-items: center;gap: 5px;border: 1px solid #a1a1a1;border-radius: 3px;font-size: 16px;padding: 5px;color: #2e2e2e;">
+                        Recurring meeting
+                        <input
+                          class="m-0 ml-3"
+                          type="radio"
+                          name="meetingType"
+                          value="2"
+                          onchange="getMeetingType()"
+                          autocomplete="off"
+                        >
+                      </label>
                     </div>
                   </div>
                 </div>
-
-                <div class="mb-5 d-flex align-items-center" style="gap: 50px;">
-                  <label for="timezone" style="color: #2E2E2E; font-size: 16px; width: 25%;">Time Zone</label>
-                  <select id="timezone" name="timezone" class="p-3 border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; right: 0; left: 0; margin: auto;" disabled required autocomplete="off">
-                    <!-- Add more timezones as needed -->
-                  </select>
+                <div class="form-row mb-3">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="host" class="font-16">Host</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <select onchange="onChangeHost(this);checkAndFetchMeetings();updateNewDateInCalender();" id="host" name="host" class="form-control" required autocomplete="off">
+                      <!-- Dynamically loaded -->
+                    </select>
+                  </div>
                 </div>
+                <div class="form-row mb-3" id="attendeesContainer" style="display: none;">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="attendees" class="font-16">Attendees</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <div class="d-flex flex-column w-100">
+                      <div class="d-flex flex-column w-100 position-relative" style="gap:2px;">
+                        <input id="attendees" class="form-control" placeholder="Search by name & email" oninput="getAttendeesList();">
+                        <ul id="dynamic-attendees-list" class="rounded m-0 px-2 position-absolute" style="background-color: #eee; list-style: none; max-height: 150px;z-index: 10;overflow-y: auto;width: 100%;top: 42px; display: none;"></ul>
+                      </div>
+                      <!-- List of selected attendees -->
+                      <div id="selected-attendees-list" class="mt-2 d-flex flex-wrap rounded" style="background-color: #EDF6FF;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row mb-3" id="whenContainer" style="display: none;">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="when" class="form-label font-16">When</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <div class="d-flex w-100" style="gap: 16px;">
+                      <input
+                        onchange="checkAndFetchMeetings();getDatepickerChangeVal(this);"
+                        type="text"
+                        id="when"
+                        name="when"
+                        placeholder="Select Date"
+                        class="form-control datepicker"
+                        autocomplete="off"
+                        required
+                        readonly
+                      >
+                      <select
+                        onchange="checkAndFetchMeetings();"
+                        id="hour"
+                        name="hour"
+                        class="form-control"
+                        required
+                        autocomplete="off"
+                      >
+                        <option value="" disabled selected>HH:MM</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row mb-3" id="durationContainer" style="display: none;">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="durationHour" class="form-label font-16">Duration</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <div class="form-row w-100">
+                      <div class="d-flex align-items-center col-xl-3 col-lg-3 col-md-5 col-sm-4 col-6">
+                        <select
+                          id="durationHour"
+                          name="durationHour"
+                          class="form-control"
+                          style="border-color: #a1a1a1 !important; font-size: 14px;"
+                          required
+                          autocomplete="off"
+                        >
+                          <option value="00">00</option>
+                          <option value="01">01</option>
+                          <option value="02">02</option>
+                          <option value="03">03</option>
+                          <option value="04">04</option>
+                          <option value="05">05</option>
+                          <option value="06">06</option>
+                          <option value="07">07</option>
+                        </select>
+                        <p class="m-0 ml-1">Hr</p>
+                      </div>
 
-                <div class="d-flex w-100 pt-2" style="gap: 16px;">
-                  <button type="submit" class="btn rounded" style="background-color: #027FFF !important;">Save</button>
-                  <button type="button" class="btn rounded btn-secondary border" onclick="resetRequiredFormData('#host');">Reset</button>
+                      <div class="d-flex align-items-center col-xl-3 col-lg-3 col-md-5 col-sm-4 col-6">
+                        <select
+                          id="durationMinute"
+                          name="durationMinute"
+                          class="form-control"
+                          style="border-color: #a1a1a1 !important; font-size: 14px;"
+                          required
+                          autocomplete="off"
+                        >
+                          <option value="00">00</option>
+                          <option value="10">10</option>
+                          <option value="20">20</option>
+                          <option value="30">30</option>
+                          <option value="40">40</option>
+                          <option value="50">50</option>
+                        </select>
+                        <p class="m-0 ml-1">Min</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row mb-3">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                    <label for="timezone" class="font-16">Time Zone</label>
+                  </div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                    <select id="timezone" name="timezone" class="form-control" disabled required autocomplete="off">
+                      <!-- Add more timezones as needed -->
+                    </select>
+                  </div>
+                </div>
+                <div class="full pt-2 text-right">
+                  <button type="button" class="btn btn-danger " onclick="resetRequiredFormData('#host');"><i class="fa fa-undo"></i>&nbsp;Reset</button>
+                  <button type="submit" class="btn btn-success ">Save</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
         <!-- Schedule section on the right -->
-        <div id="scheduleAndMeetingContainer" class="flex-column mx-auto" style="gap: 8px; display: none; padding-left: 15px;margin-top: 50px; border-left: 2px solid #DBDBDB;">
-          <div id="scheduleSection" class="main-card mb-3" style="display: none; border-bottom: 1px solid #DBDBDB;"">
-            <div class="card mb-2" style="box-shadow: 0px 0px;">
-              <div class="card-body">
-                <div id="scheduleContent">Loading schedule...</div>
-              </div>
-            </div>
-          </div>
-
-          <div id="meetingSection" class="main-card mb-3" style="display: none;">
+        <div id="scheduleAndMeetingContainer" class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 p-0 border-left" style="display: none;">
+          <div id="meetingSection" class="main-card w-100 mb-3" style="display: none;">
             <div class="card mt-2 mb-0" style="box-shadow: 0px 0px;">
-              <div class="card-body">
+              <div class="card-body ">
                 <div id="meetingContent">Loading meetings...</div>
               </div>
             </div>
@@ -332,59 +367,79 @@ function getMeetingFormHtml() {
 
 function savedMeetingLinkHtml() {
   return `
-    <div id="savedMeetingLinkHtml" class="meeting-container" style="padding-top: 30px; padding-left: 6rem; display: none;">
-      <div class="d-flex align-items-center" style="gap: 10px;">
-        <button id="backFromSaved" class="bg-transparent mb-0 border-0" style="font-size: 16px; color: #393185;">
-          Back to Meeting
-        </button>
-        <i class="fa fa-chevron-right" style="margin-right: 4px; font-size: 14px"></i>
-        <p id="formDataTitle" class="m-0" style="font-size: 16px;"></p>
-      </div>
-     
-      <div class="meeting-detail" style="padding-top: 10px;">
-        <h3 style="font-size: 26px; color: #333; margin-bottom: 40px; margin-left: 10px; font-weight: bold;">Meeting Details</h3>
-       
-        <div class="" style="width: 75%;">
-          <div style="display: flex; align-items: center; padding: 12px;">
-            <div style="font-size: 14px; color: #666; width: 40%;"><strong>General Meeting Type</strong></div>
-            <div id="generalMeetingTypeTitle" style="font-size: 14px; width: 80%;"></div>
-          </div>
-
-          <div style="display: flex; align-items: center; padding: 12px;">
-            <div style="font-size: 14px; color: #666; width: 40%;"><strong>Topic</strong></div>
-            <div id="formDataTitle1" style="font-size: 14px; width: 80%;"></div>
-          </div>
-
-          <div style="display: flex; align-items: center; padding: 12px;">
-            <div style="font-size: 14px; color: #666; width: 40%;"><strong>Host Details</strong></div>
-            <div id="hostDetailsExtra" style="font-size: 14px; width: 80%;"></div>
-          </div>
-
-          
-          <div id="meetingTypeDiv"></div>
-          
-          <div style="display: flex; align-items: center; padding: 12px;">
-            <div style="font-size: 14px; color: #666; width: 40%;"><strong>Type of Meeting</strong></div>
-            <div id="meetingTypeName" style="font-size: 14px; width: 80%;"></div>
-          </div>
-
-          <div style="display: flex; align-items: center; padding: 12px;">
-            <div style="font-size: 14px; color: #666; width: 40%;"><strong>Time Zone</strong></div>
-            <div id="timezoneDetailsExtraAndTimezoneDetailsValue" style="font-size: 14px; width: 80%;"></div>
-          </div>
-
-          <div style="display: flex; align-items: center; padding: 12px;">
-            <div style="font-size: 14px; color: #666; width: 40%;"><strong>Invite Link</strong></div>
-            <div id="joinUrl" style="font-size: 14px; width: 80%; color: #027FFF;;"></div>
-          </div>
-
-          <div class="action-buttons" style="display: flex; justify-content: flex-start; gap: 12px; margin-top: 50px;">
-            <button id="startLensUrlBtn" class="btn rounded" style="padding: 10px 20px; font-size: 16px; background-color: #027FFF; font-weight: bold;" >Start</button>
-            <button id="copyJoinUrlBtn" class="btn rounded" style="padding: 10px 20px; font-size: 16px; border: 1px solid #ddd; background-color: #FFF; color: #000;font-weight: bold;">
-              <i class="fa fa-clone" style="font-size: 16px; margin-right: 6px;"></i>
-              Copy Invitation
-            </button>
-            <button id="deleteMeetingBtn" class="btn rounded" style="padding: 10px 20px; font-size: 16px; background-color: #EB2314; color: #FFF; font-weight: bold;">Delete</button>
+    <div class="w-100" id="savedMeetingLinkHtml" style="display: none;">  
+      <div class="d-flex w-100">
+        <div class="main-card mb-3 col-xl-9 col-lg-11 col-md-12 col-sm-12 col-12 p-0">
+          <div class="card" style="box-shadow: 0px 0px;">
+            <div class="card-body mx-md-5 mx-0 p-0">
+              <div class="d-flex align-items-center mb-4" style="gap: 10px;">
+                <button id="backFromSaved" class="bg-transparent border-0 font-16 text-primary">
+                  Back to Meeting
+                </button>
+                <i class="fa fa-chevron-right mr-1"></i>
+                <p id="formDataTitle" class="m-0 font-16"></p>
+              </div>
+              <div  class="meeting-container">
+                  <h2 class="mb-3 font-weight-bold">Meeting Details</h2>
+                  <div class="form-row mb-3">
+                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                      <div><strong>General Meeting Type</strong></div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                      <div id="generalMeetingTypeTitle" class="font-weight-semi-bold"></div>
+                    </div>
+                  </div>
+                  <div class="form-row mb-3">
+                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                      <div><strong>Topic</strong></div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                      <div id="formDataTitle1" class="font-weight-semi-bold"></div>
+                    </div>
+                  </div>
+                  <div class="form-row mb-3">
+                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                      <div><strong>Host Details</strong></div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                      <div id="hostDetailsExtra" class="font-weight-semi-bold"></div>
+                    </div>
+                  </div>
+                  <div class="w-100" id="meetingTypeDiv"></div>
+                  <div class="form-row mb-3">
+                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                      <div><strong>Type of Meeting</strong></div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                      <div id="meetingTypeName" class="font-weight-semi-bold"></div>
+                    </div>
+                  </div>
+                  <div class="form-row mb-3">
+                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                      <div><strong>Time Zone</strong></div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                      <div id="timezoneDetailsExtraAndTimezoneDetailsValue" class="font-weight-semi-bold"></div>
+                    </div>
+                  </div>
+                  <div class="form-row mb-3">
+                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                      <div><strong>Invite Link</strong></div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                      <div id="joinUrl" class="font-weight-semi-bold text-primary"></div>
+                    </div>
+                  </div>
+                  <div class="action-buttons full text-right">
+                    <button id="startLensUrlBtn" class="btn btn-primary ">Start</button>
+                    <button id="copyJoinUrlBtn" class="btn btn-success ">
+                      <i class="fa fa-clone mr-2"></i>
+                      Copy Invitation
+                    </button>
+                    <button id="deleteMeetingBtn" class="btn btn-danger ">Delete</button>
+                  </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -714,8 +769,8 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
           </select>
 
           <div class="d-flex align-items-center my-4" style="gap:10px;">
-            <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingStartDate" value="${startOfWeek}" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px;" placeholder="Select start date">
-            <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingEndDate" value="${endOfWeek}" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px;" placeholder="Select end date">
+            <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingStartDate" value="${startOfWeek}" class="form-control"  placeholder="Select start date">
+            <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingEndDate" value="${endOfWeek}" class="form-control" placeholder="Select end date">
           </div>
 
           <button id="filterRecurringSearchButton" type="submit" onclick="applyRecurringRecordingFilters('${entityId}');" class="btn ml-auto rounded" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold;">Search</button>

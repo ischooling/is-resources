@@ -271,7 +271,7 @@ function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacher/signup','save-Teacher-Declaration'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -298,9 +298,6 @@ function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType
 				showMessageTheme2(1, 'Teacher Agreement details updated successfully.',"", true);
 				flag=true;
 			}
-		},
-		error : function(e) {
-			$("#nextStep").prop("disabled", false);
 		}
 	});
 	return flag;
@@ -393,7 +390,7 @@ function callForSignupTeacherAccountAndContact(formId) {
 
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('teacher/signup', '/save-teacher-bank-details'),
             data: JSON.stringify(getRequestForTeacherAccountAndContact(formId)),
             dataType: 'json',
@@ -413,10 +410,6 @@ function callForSignupTeacherAccountAndContact(formId) {
                     flag = true;
                     return resolve(flag);
                 }
-            },
-            error: function () {
-                $("#nextStep").prop("disabled", false);
-                return reject(flag);
             }
         });
     });

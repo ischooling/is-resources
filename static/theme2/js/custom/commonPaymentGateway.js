@@ -3,7 +3,7 @@ function callCommonInitPayment(formId, moduleId, eligiblePaymentGateway) {
 	//$('#callPaymentModal').modal('show');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('common','payment-initiated'),
 		data : JSON.stringify(getRequestForInitPayment(formId, moduleId, eligiblePaymentGateway)),
 		dataType : 'json',
@@ -92,7 +92,7 @@ function callCommonPaymentGateway(formId, module, args, callCommonPaymentGateway
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('common','call-payment-gateway'),
 		data : JSON.stringify(getRequestForCommonPayment(formId, module, args, callCommonPaymentGateway)),
 		dataType : 'json',
@@ -379,7 +379,7 @@ function callStudentWireTransferPayment(formId, paymentOption, userId, moduleId,
 	$.ajax({
 		type : "POST",
 		url : getURLForHTML('common','call-for-wire-transfer-payment'),
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		data : JSON.stringify(getRequestForStudentWireTransferPayment(formId, paymentOption, userId, moduleId, callingFrom,paymentByUserId,gatewayName)),
 		dataType : 'html',
 		cache : false,
@@ -439,7 +439,7 @@ function callClientCommonPaymentGatewayOffline(formId, moduleId,userId,userPayme
 	$.ajax({
 		type : "POST",
 		url : getURLForHTML('common','call-for-client-common-payment-method-offline'),
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		data : JSON.stringify(getRequestForClientPayment(formId, moduleId,userId,userPaymentDetailsId, termCondi,paymentByUserId)),
 		dataType : 'html',
 		cache : false,
@@ -469,11 +469,7 @@ function callClientCommonPaymentGatewayOffline(formId, moduleId,userId,userPayme
 				}
 				setTimeout(function(){$('body').addClass("modal-open");},1000);
 				}
-			},
-		error : function(e) {
-			customLoader(false);
-			showMessageTheme2(0, TECHNICAL_GLITCH,'',true);
-		}
+			}
 	});
 }
 
@@ -483,7 +479,7 @@ async function callClientCommonPaymentGateway(formId, moduleId,userId,userPaymen
 	$.ajax({
 		type : "POST",
 		url : getURLForHTML('common','call-for-client-common-payment-method'),
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		data : JSON.stringify(getRequestForClientPayment(formId, moduleId,userId,userPaymentDetailsId, termCondi,paymentByUserId)),
 		dataType : 'html',
 		global : false,

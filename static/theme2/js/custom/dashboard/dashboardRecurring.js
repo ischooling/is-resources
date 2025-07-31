@@ -3,31 +3,31 @@ function validateRequestForRecurringClass(formId){
 	if(formId!='classroomSessionFilter'){
 		if(meetingType!="CUSTOM"){
 			if($("#" + formId + " #studentId").val()==undefined || $("#" + formId + " #studentId").val()==''){
-				showMessage(true, "Search student using StudentId");
+				showMessageTheme2(0, "Search student using StudentId");
 				return false;
 			}
 			if($("#" + formId + " #subjectIds").val()==undefined || $("#" + formId + " #subjectIds").val()==''){
-				showMessage(true, "Course is required.");
+				showMessageTheme2(0, "Course is required.");
 				return false;
 			}
 			if($("#" + formId + " #teacherId").val()==undefined || $("#" + formId + " #teacherId").val()==''){
-				showMessage(true, "Teacher is required.");
+				showMessageTheme2(0, "Teacher is required.");
 				return false;
 			}
 		
 			// if($("#" + formId + " #recurringType").val()==undefined || $("#" + formId + " #recurringType").val()==''){
-			// 	showMessage(true, "CLass Type is required.");
+			// 	showMessageTheme2(0, "CLass Type is required.");
 			// 	return false;
 			// }
 		}
 
 		if($("#" + formId + " #meetingVendor").val()==undefined || $("#" + formId + " #meetingVendor").val()==''){
-			showMessage(true, "Meeting Vendor is required.");
+			showMessageTheme2(0, "Meeting Vendor is required.");
 			return false;
 		}
 		if($("#" + formId + " #meetingVendor").val()=='External'){
 			if($("#" + formId + " #joiningLink").val()==undefined || $("#" + formId + " #joiningLink").val()==''){
-				showMessage(true, "Joining Link is required.");
+				showMessageTheme2(0, "Joining Link is required.");
 				return false;
 			}
 		}
@@ -64,7 +64,7 @@ function validateRequestForRecurringClass(formId){
 	}
 	if($("#" + formId + " #countryTimezoneFromId").val()==undefined || $("#" + formId + " #countryTimezoneFromId").val()==''){
 		if(USER_ROLE!='TEACHER'){
-			showMessage(true, "TimeZone is required.");
+			showMessageTheme2(0, "TimeZone is required.");
 		}else{
 			showMessageTheme2(0, "TimeZone is required.");
 		}
@@ -72,7 +72,7 @@ function validateRequestForRecurringClass(formId){
 	}
 	if($("#" + formId + " #classDuration").val()==undefined || $("#" + formId + " #classDuration").val()=='00'){
 		if(USER_ROLE!='TEACHER'){
-			showMessage(true, "Classroom Duration is required.");
+			showMessageTheme2(0, "Classroom Duration is required.");
 		}else{
 			showMessageTheme2(0, "Classroom Duration is required.");
 		}
@@ -81,7 +81,7 @@ function validateRequestForRecurringClass(formId){
 	}
 	if($("#" + formId + " #bufferTime").val()==undefined || $("#" + formId + " #bufferTime").val()=='00'){
 		if(USER_ROLE!='TEACHER'){
-			showMessage(true, "Buffer Time Duration is required.");
+			showMessageTheme2(0, "Buffer Time Duration is required.");
 		}else{
 			showMessageTheme2(0, "Buffer Time Duration is required.");
 		}
@@ -90,7 +90,7 @@ function validateRequestForRecurringClass(formId){
 	}
 	if($("#" + formId + " #classStartDate").val()==undefined || $("#" + formId + " #classStartDate").val()==''){
 		if(USER_ROLE!='TEACHER'){
-			showMessage(true, "Start Date is required.");
+			showMessageTheme2(0, "Start Date is required.");
 		}else{
 			showMessageTheme2(0, "Start Date is required.");
 		}
@@ -99,7 +99,7 @@ function validateRequestForRecurringClass(formId){
 	}
 	if($("#" + formId + " #classEndDate").val()==undefined || $("#" + formId + " #classEndDate").val()==''){
 		if(USER_ROLE!='TEACHER'){
-			showMessage(true, "End Date is required.");
+			showMessageTheme2(0, "End Date is required.");
 		}else{
 			showMessageTheme2(0, "End Date is required.");
 		}
@@ -128,7 +128,7 @@ function validateRequestForRecurringClass(formId){
 	});
 	if(!validTimeSlot || uncheckCount==7){
 		if(USER_ROLE!='TEACHER'){
-			showMessage(true, "Please select both day and time.");
+			showMessageTheme2(0, "Please select both day and time.");
 		}else{
 			showMessageTheme2(0, "Please select both day and time.");
 		}
@@ -216,14 +216,14 @@ function submitRecurringClassWarning(formId,moduleId){
 }
 
 function submitRecurringClass(formId,moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if(!validateRequestForRecurringClass(formId)){
 		return false;
 	}
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'recurring-class-submit'),
 		data : JSON.stringify(getRequestForRecurringClass(formId)),
 		dataType : 'json',
@@ -232,7 +232,7 @@ function submitRecurringClass(formId,moduleId) {
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				if(USER_ROLE!='TEACHER'){
-					showMessage(true, data['message']);
+					showMessageTheme2(0, data['message']);
 				}else{
 					showMessageTheme2(0, data['message']);
 				}
@@ -240,14 +240,14 @@ function submitRecurringClass(formId,moduleId) {
 				$('#'+formId+ ' #studentId').val('').trigger("change");
 				$('#'+formId)[0].reset();
 				if(USER_ROLE!='TEACHER'){
-					showMessage(false, data['message']);
+					showMessageTheme2(1, data['message']);
 				}else{
 					showMessageTheme2(1, data['message']);
 				}
 				if(formId=='classroomSessionFilter'){
 					window.setTimeout(function(){callDashboardPageSchool(155,'schedule-a-session');},1000)
 				}else{
-
+					$("#recurringClassShowModelValidation").modal("hide");
 					window.setTimeout(function(){callDashboardPageSchool(moduleId,'recurring-class-list')},1000)
 				}
 				$(".classRecodsTumbs").hide();
@@ -340,16 +340,16 @@ function callSubjectNameByStudent(formId, value) {
 		return false;
 	}
 	// if($("#" + formId + " #classDuration").val()==undefined || $("#" + formId + " #classDuration").val()=='00'){
-	// 	showMessage(true, "Classroom Duration is required.");
+	// 	showMessageTheme2(0, "Classroom Duration is required.");
 	// 	return false;
 	// }
 	// if($("#" + formId + " #bufferTime").val()==undefined || $("#" + formId + " #bufferTime").val()=='00'){
-	// 	showMessage(true, "Buffer Time Duration is required.");
+	// 	showMessageTheme2(0, "Buffer Time Duration is required.");
 	// 	return false;
 	// }
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','SUBJECT-BY-STUDENT',value)),
 		dataType : 'json',
@@ -358,7 +358,7 @@ function callSubjectNameByStudent(formId, value) {
 		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				$("#"+formId+" #teacherId").empty();
 				var result = data['mastersData']['courseList'];
@@ -381,7 +381,7 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster(formId,'TEACHER-BY-SUBJECT',value, studentId)),
 		dataType : 'json',
@@ -390,7 +390,7 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				
 				var result = data['mastersData']['data'];
@@ -433,7 +433,7 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 				console.log('coursesEndDate '+coursesEndDate);
 				if(coursesEndDate==''){
 					coursesEndDate = new Date();
-					startDate.setMonth(startDate.getMonth() + 10);
+					coursesEndDate.setMonth(coursesEndDate.getMonth() + 10);
 				}else{
 					coursesEndDate = new Date(coursesEndDate);
 				}
@@ -569,7 +569,7 @@ function callTimeSlotByStartTime(formId, startTime,endTime, intervalTime, buffer
 	}
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForCommon('masters'),
 			data : JSON.stringify(getRequestForMaster(formId,'SPLIT-TIMESLOT-BY-STARTTIME',startTime,endTime, intervalTime, bufferTime, startFromTime,endDate, teacherTimezoneId)),
 			dataType : 'json',
@@ -578,7 +578,7 @@ function callTimeSlotByStartTime(formId, startTime,endTime, intervalTime, buffer
 			async : false,
 			success : function(data) {
 				if (data['status'] == '0' || data['status'] == '2') {
-					showMessage(true, data['message']);
+					showMessageTheme2(0, data['message']);
 				} else {
 					var result = data['mastersData']['timeTableList'];
 					var htmlTime="";
@@ -639,17 +639,17 @@ function dropdownTeachertimeSlot(formId, dropdownId){
 
 	var startDate = $("#"+formId+" #classStartDate").val();
 	if(startDate==''){
-		showMessage(false, "Please select start date");
+		showMessageTheme2(1, "Please select start date");
 		return false;
 	}
 	var endDate = $("#"+formId+" #classEndDate").val();
 	if(endDate==''){
-		showMessage(false, "Please select end date");
+		showMessageTheme2(1, "Please select end date");
 		return false;
 	}
 	var teacherId = $("#"+formId+" #teacherId").val();
 	if(teacherId==''){
-		showMessage(false, "Please select teacher");
+		showMessageTheme2(1, "Please select teacher");
 		return false;
 	}
 
@@ -663,19 +663,19 @@ function checkTimeSlotByTeacher(formId, value, startDate, endDate, timeSlot, dro
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster(formId,'AVAILABLE-TEACHER-TIME-SLOT',value,startDate, endDate, timeSlot)),
 		dataType : 'json',
 		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 				return false;
 			} else {
 				var result = data['mastersData']['teacherTimeAvaile'];
 				if(result===false){
-					showMessage(true, "your time already book");
+					showMessageTheme2(0, "your time already book");
 					$("#scheduleTime"+dropdownId).val('');
 					return false;
 				}
@@ -698,7 +698,7 @@ function sendRecurringWarning(message, functionName){
 }
 
 function updateRecurring(userId,recurringClassId,controllType,moduleId,rowID) {
-	hideMessage('');
+	hideMessageTheme2('');
 	var data={};
 	data['controllType']=controllType;
 	data['recurringClassId']=recurringClassId;
@@ -706,15 +706,15 @@ function updateRecurring(userId,recurringClassId,controllType,moduleId,rowID) {
 	data['userId']=userId;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','recurring-update'),
 		data : JSON.stringify(data),
 		dataType : 'json',
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				
 				var table = $('#recurringClasses').DataTable();
                 table.row($("#"+rowID)).remove().draw();
@@ -744,7 +744,7 @@ function callRecurringShow(formId) {
 	if(meetingTypeValue==null || meetingTypeValue==undefined){
 		meetingTypeValue=$("#meetingType").val()
 	}
-	hideMessage('');
+	hideMessageTheme2('');
 	if(!validateRequestForRecurringClass(formId)){
 		return false;
 	}
@@ -765,7 +765,7 @@ function callRecurringShow(formId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','recurring-show-class'),
 		data : JSON.stringify(getRequestForRecurringClass(formId)),
 		dataType : 'json',
@@ -775,12 +775,12 @@ function callRecurringShow(formId) {
 			
 			if (data['status'] == '0' || data['status'] == '2') {
 				if(data['message'] != null){
-					showMessage(true, data['message']);
+					showMessageTheme2(0, data['message']);
 				}else{
-					showMessage(true, "Recurring class range does not match the date(s) selected.");
+					showMessageTheme2(0, "Recurring class range does not match the date(s) selected.");
 				}
 			}else {
-				//showMessage(false, data['message']);
+				//showMessageTheme2(1, data['message']);
 				var saveForcefully= data['extra'];
 				var dateSpecificDays = data['dateSpecificDays'];
 				var saveForcefullyIfClassCountExceeds = data['saveForcefullyIfClassCountExceeds'];
@@ -896,7 +896,7 @@ function callRecurringShow(formId) {
 						htmlRecu = htmlRecu +"<tr>";
 						availableClassCount++;
 					}
-					htmlRecu = htmlRecu +" <td>"+(inc++)+"</td>";
+					htmlRecu = htmlRecu +" <td class='text-center'>"+(inc++)+"</td>";
 					// htmlRecu = htmlRecu +" <td>"+recurringclass[i]['studentName']+"</td>";
 					// htmlRecu = htmlRecu +" <td>"+recurringclass[i]['subjects']+"</td>";
 					// htmlRecu = htmlRecu +" <td>"+recurringclass[i]['teachName']+"</td>";
@@ -990,7 +990,7 @@ function getStudentDetails(formId,moduleId) {
 	hideMessage('');
 	var rollNo='';
 	if($('#'+formId+ ' #meetingType').val() == null || $('#'+formId+ ' #meetingType').val() == undefined || $('#'+formId+ ' #meetingType').val() == ''){
-		showMessage(true, 'Meeting Type Required');
+		showMessageTheme2(0, 'Meeting Type Required');
 		return false;
 	}
 	if(formId=='classroomSessionFilter'){
@@ -1006,7 +1006,7 @@ function getStudentDetails(formId,moduleId) {
           data['schoolId']=SCHOOL_ID;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-student-for-recurring'),
 		dataType : 'json',
 		data : JSON.stringify(data),
@@ -1022,7 +1022,7 @@ function getStudentDetails(formId,moduleId) {
 				if(formId=='classroomSessionFilter' && tt=='theme2'){
 					showMessageTheme2(0, data['message']);
 				}else{
-					showMessage(true, data['message']);
+					showMessageTheme2(0, data['message']);
 				}
 				customLoader(false);
 			} else {
@@ -1052,7 +1052,7 @@ function getStudentDetails(formId,moduleId) {
 				}
 				$("#selectTeacher").show();
 				$("#customTeacherDropDown").hide();
-				//showMessage(false, data['message']);
+				//showMessageTheme2(1, data['message']);
 			}
 			return false;
 		}
@@ -1061,7 +1061,7 @@ function getStudentDetails(formId,moduleId) {
 
 function getTeacherList(formId){
 	var meetingType = $("#"+formId+" #meetingType").val();
-	var studentEmail = $("#"+formId+" #userNameOrEmail").val();
+	var studentEmail = $("#"+formId+" #rollNo").val();
 	var studentId= $("#"+formId+" #studentId").val();
 	if(formId=='classroomSessionFilter'){
 		studentId=$('#'+formId+ ' #studentName option:selected').attr('data-studentid');
@@ -1142,7 +1142,7 @@ function getSplitTime(formId){
 
 		var startFromTime = $("#"+formId+" #startFromTime").val();
 		// if(startFromTime=='00'){
-		// 	showMessage(false, "Please select start from Time");
+		// 	showMessageTheme2(1, "Please select start from Time");
 		// 	return false;
 		// }
 
@@ -1170,12 +1170,12 @@ function getSplitTime(formId){
 	}else{
 		var classDuration = $("#"+formId+" #classDuration").val();
 		if(classDuration=='00'){
-			showMessage(false, "Please select class Duration");
+			showMessageTheme2(0, "Please select class Duration");
 			return false;
 		}
 		var bufferTime = $("#"+formId+" #bufferTime").val();
 		if(bufferTime=='00'){
-			showMessage(false, "Please select buffer Time");
+			showMessageTheme2(0, "Please select buffer Time");
 			return false;
 		}
 
@@ -1187,18 +1187,18 @@ function getSplitTime(formId){
 
 		var startDate = $("#"+formId+"  #classStartDate").val();
 		if(startDate==''){
-			showMessage(false, "Please select start date");
+			showMessageTheme2(0, "Please select start date");
 			return false;
 		}
 		var endDate = $("#"+formId+" #classEndDate").val();
 		if(endDate==''){
-			showMessage(false, "Please select end date");
+			showMessageTheme2(0, "Please select end date");
 			return false;
 		}
 		var checkStartDate = new Date(startDate).getTime();
 		var checkEndDate = new Date(endDate).getTime();
 		if(checkStartDate > checkEndDate){
-			showMessage(false, "End Date Should be Greater than Start Date");
+			showMessageTheme2(0, "End Date Should be Greater than Start Date");
 			return false;
 		}
 		var teacherTimezone= $("#"+formId+" #countryTimezoneFromId option:selected").text().trim();
@@ -1229,17 +1229,17 @@ function updateRecurringClassProceed(formId,userId,recurringClassId,controllType
 
 function validateRequestForUpdateRecurringClassUrl(formId){
 	if($("#" + formId + " #meetingVendor").val()==undefined || $("#" + formId + " #meetingVendor").val()==''){
-		showMessage(true, "Meeting Vendor is required.");
+		showMessageTheme2(0, "Meeting Vendor is required.");
 		return false;
 	}
 	if($("#" + formId + " #meetingVendor").val()=='External'){
 		if($("#" + formId + " #joiningLink").val()==undefined || $("#" + formId + " #joiningLink").val()==''){
-			showMessage(true, "Joining Link is required.");
+			showMessageTheme2(0, "Joining Link is required.");
 			return false;
 		}
 	}
 	if($('#'+formId+' #currentMeetingVendor').val()==$("#" + formId + " #meetingVendor").val()){
-		showMessage(true, "Existing and opted meeting vendor cann't same.");
+		showMessageTheme2(0, "Existing and opted meeting vendor cann't same.");
 		return false;
 	}
 	return true;
@@ -1250,14 +1250,14 @@ function updateRecurringClassVendorWarning(formId,moduleId){
 }
 
 function updateRecurringClasses(formId,moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if(!validateRequestForUpdateRecurringClassUrl(formId)){
 		return false;
 	}
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'recurring-class-update'),
 		data : JSON.stringify(getRequestForUpdateRecurringClassUrl(formId, moduleId)),
 		dataType : 'json',
@@ -1265,9 +1265,9 @@ function updateRecurringClasses(formId,moduleId) {
 		timeout : 600000,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				//window.setTimeout(function(){callDashboardPageSchool(moduleId,'recurring-class-list')},3100)
 				var recurringId=$('#'+formId+' #recurringClassId').val();
 				var meetingVendor=$("#" + formId + " #meetingVendor").val();
@@ -1304,7 +1304,7 @@ function getRequestForUpdateRecurringClassUrl(formId, moduleId) {
 	authentication['schoolId'] = SCHOOL_ID;
 	authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
-	authentication['userId']=$('#userId').val();
+	authentication['userId']=USER_ID;
 
 	recurringClassRequest['authentication'] = authentication;
 	recurringClassRequest['recurringClassDTO'] = recurringClassDTO;
@@ -1385,7 +1385,7 @@ function bookedCalssCotentFun(subjectId, studentStandardId,startDate,endDate) {
 	// data['roleModuleId'] = roleModuleId;
 	$.ajax({
 		type: "GET",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'student-booked-classes-details?payload='+encode(JSON.stringify(data))),
 		dataType: 'json',
 		cache: false,
@@ -1434,36 +1434,36 @@ function getClassRecodsContent(data){
 	var html=
 		`<div class="d-flex flex-wrap course-detials justify-content-center mb-3">
 			<span class="d-inline-flex px-2 border border-primary rounded bg-light-primary flex-column text-center mr-1 mb-1" style="flex-grow: 1;color:#007fff;">
-				<div class="bold font-10">Total</div>
-				<div class="bold font-10" id="totalClass">${data.total}</div>
+				<div class="bold font-14">Total</div>
+				<div class="bold font-14" id="totalClass">${data.total}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-success text-success rounded bg-light-success flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Booked</div>
-				<div class="bold font-10" id="totalBookedClass">${data.booked}</div>
+				<div class="bold font-14">Booked</div>
+				<div class="bold font-14" id="totalBookedClass">${data.booked}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-warning text-warning rounded bg-light-warning flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Left</div>
-				<div class="bold font-10" id="totalLeftClass">${data.left}</div>
+				<div class="bold font-14">Left</div>
+				<div class="bold font-14" id="totalLeftClass">${data.left}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-danger text-danger rounded bg-light-danger flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Expired</div>
-				<div class="bold font-10">${data.expired}</div>
+				<div class="bold font-14">Expired</div>
+				<div class="bold font-14">${data.expired}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-dark text-dark rounded bg-light flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Missed by Student</div>
-				<div class="bold font-10">${data.missedByYou}</div>
+				<div class="bold font-14">Missed by Student</div>
+				<div class="bold font-14">${data.missedByYou}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-orange text-orange rounded bg-light-orange flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Rescheduled</div>
-				<div class="bold font-10" id="totalReschedule">${data.rescheduled}</div>
+				<div class="bold font-14">Rescheduled</div>
+				<div class="bold font-14" id="totalReschedule">${data.rescheduled}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-alternate text-alternate rounded bg-light-alternate flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Completed</div>
-				<div class="bold font-10" id="totalCompleted">${data.completed}</div>
+				<div class="bold font-14">Completed</div>
+				<div class="bold font-14" id="totalCompleted">${data.completed}</div>
 			</span>
 			<span class="d-inline-flex px-1 border border-pink text-pink rounded bg-light-pink flex-column text-center mr-1 mb-1" style="flex-grow: 1;">
-				<div class="bold font-10">Class Missed by Teacher</div>
-				<div class="bold font-10">${data.missedByTeacher}</div>
+				<div class="bold font-14">Class Missed by Teacher</div>
+				<div class="bold font-14">${data.missedByTeacher}</div>
 			</span>
 		</div>`;
 	return html;

@@ -73,7 +73,6 @@ async function loginContent(userName, fromSpoof){
             +forgotPasswordContent()
             +commonEmailAllreadyExistContent()
             +emailLimitContent()
-            +commonLoaderContent()
             +getCookiesConsentContent();
     return html;
 }
@@ -153,7 +152,7 @@ function marqueeContent(){
     var html =``;
     if(MAINTENANCEDOWNTIME != ''){
             html+=`<div class="marquee">
-                <marquee id="marqueeDiv" direction="left" style="font-size: 15px; font-weight: normal; line-height: 26px; margin-top: 0px; position:relative; z-index:9" width="100%" height="26px;">
+                <marquee id="marqueeDiv" direction="left" style="font-size: 15px; font-weight: normal; line-height: 26px; margin-top: 0px;position:relative;z-index:9" width="100%" height="26px;">
                     ${MAINTENANCEDOWNTIME}
                 </marquee>
             </div>`;
@@ -275,9 +274,9 @@ function forgotPasswordContent(){
                 <div class="modal-content">
                     <div class="modal-header primary-bg white-txt-color">
                         <button type="button" class="close" data-dismiss="modal" style="margin-top:3px;color:#fff;opacity:1">&times;</button>
-                        <h4 class="modal-title" style="color: white; text-align: center;">
+                        <h5 class="modal-title" style="color: white; text-align: center;">
                             <strong>Forgot Password?</strong>
-                        </h4>
+                        </h5>
                     </div>
                     <form name="forgetForm" id="forgetForm"  method="post" autocomplete="off">
                         <div class="modal-body text-center input-with-icon">
@@ -320,9 +319,9 @@ function commonEmailAllreadyExistContent(){
                 <div class="modal-content modal-md">
                     <div class="modal-header primary-bg white-txt-color">
                         <button type="button" class="close white-txt-color" data-dismiss="modal" style="margin-top:3px;color:#fff;opacity:1">&times;</button>
-                        <h4 class="modal-title" style="color: white; text-align: center;">
+                        <h5 class="modal-title" style="color: white; text-align: center;">
                             <strong>Error!</strong>
-                        </h4>
+                        </h5>
                     </div>
                     <input type="hidden" id="userId" value=""/>
                     <div class="modal-body">
@@ -404,22 +403,6 @@ function footerContent(){
             </div>
         </div>
     `
-    return html;
-}
-
-function commonLoaderContent(){
-    var html=`
-        <div id="commonloaderId" class="hide unique-loader">`;
-            if(SCHOOL_ID == '1'){
-                html+=`<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" loding="lazy"/>`;
-            }else{
-                html+=
-                    `<div class="ball-rotate">
-                        <div style="background-color: rgb(247, 185, 36);"></div>
-                    </div>
-                    <p>Loading ...</p>`;
-            }
-        html+=`</div>`;
     return html;
 }
 

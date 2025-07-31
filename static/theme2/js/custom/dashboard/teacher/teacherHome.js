@@ -48,7 +48,7 @@ function getRequestForTeacherLastclass(formId, userId, startdate, enddate) {
 }
 
 function slideMenu(val){
-	$("#main-nav1").metisMenu({
+	$("#activity-nav").metisMenu({
 		toggle: false // disable the auto collapse. Default: true.
 	});
 }

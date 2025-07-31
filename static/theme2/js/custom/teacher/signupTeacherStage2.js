@@ -277,7 +277,7 @@ function callForSignupTeacherUpdateProfile(formId, elementary_subjects,middleSch
 		type : "POST",
 		url : getURLForHTML('teacher/signup','save-academic-professional-details'),
 		data : JSON.stringify(getRequestForTeacherUpdateProfile(formId,elementary_subjects,middleSchool_subjects,highSchool_subjects)),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		cache : false,
 		async:true,
 		timeout : 600000,
@@ -338,7 +338,7 @@ function getFromMonths(formId, value, elementId) {
 		var lastJobFromYear=$('#'+formId+' #lastJobFromYYYY').val();
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForCommon('masters'),
 			data : JSON.stringify(getRequestForMaster(formId, 'LAST-JOB-FROM-MONTHS', lastJobFromYear)),
 			dataType : 'json',
@@ -358,7 +358,7 @@ function getFromMonths(formId, value, elementId) {
 		});
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForCommon('masters'),
 			data : JSON.stringify(getRequestForMaster(formId, 'LAST-JOB-TO-YEARS', lastJobFromYear)),
 			dataType : 'json',
@@ -390,7 +390,7 @@ function getToMonths(formId, value, elementId) {
 		var lastJobToYear=$('#lastJobToYYYY').val();
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForCommon('masters'),
 			data : JSON.stringify(getRequestForMaster(formId, 'LAST-JOB-TO-MONTHS', lastJobToYear)),
 			dataType : 'json',
@@ -751,7 +751,7 @@ async function startDemoRecordingFun(attempt){
 		$.ajax({
 			type: "GET",
 			url: `${APP_BASE_URL}${SCHOOL_UUID}/teacher/signup/start-teacher-registration-demo-meeting${queryParams}`,
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			dataType: "json",
 			success: function (response) { 
 				if(response.status == 1){
@@ -799,7 +799,7 @@ async function getDemoRecordings(meetingId) {
         entityName: "GENERAL_MEETINGS"
     };
 
-    const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-demo-recordings', payload, '/teacher/signup');
+    const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-teacher-demo-recordings', payload, '/teacher/signup');
 	recordingIntervalCount++;
 	if (recordingIntervalCount >= 240) {
 		clearInterval(recordingPollingInterval);
@@ -1011,7 +1011,7 @@ function playRecording(videoUrl, title) {
 	var videoModal = $("#videoModal");
 	$.ajax({
 	  type: "GET",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  dataType: 'json',
 	  url: getURLForSignVideo(videoUrl),
 	  success: function (responseData) {
@@ -1147,7 +1147,7 @@ function showVTTFile(url, title) {
 	const vttFile = convertToVTT(url);
 	$.ajax({
 		type: "GET",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		dataType: 'json',
 		url: getURLForTranscriptContent(vttFile),
 		success: function(responseData) {

@@ -24,7 +24,7 @@ function getReserveASeatForNextGrade(userId){
 	postData['userId'] = userId;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'eligible-for-ras-for-next-grade'),
 		data: JSON.stringify(postData),
 		dataType: 'json',
@@ -78,7 +78,7 @@ function acceptReserveASeatForNextGrade(userId){
 	postData['userId'] = userId;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'accept-ras-for-next-grade'),
 		data: JSON.stringify(postData),
 		dataType: 'json',

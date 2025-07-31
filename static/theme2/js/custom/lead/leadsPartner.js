@@ -91,7 +91,7 @@ function saveDiscountRate(formId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-discount-rate',
 		data : JSON.stringify(getRequestForSaveDiscountRate(formId)),
 		dataType : 'json',
@@ -132,7 +132,7 @@ function fetchDiscountRate(formId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/filter-discount-rate',
 		data : JSON.stringify(getRequestForFilterDiscountRate(formId)),
 		dataType : 'json',
@@ -220,7 +220,7 @@ function saveCommissionRate(formId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-commission-rate',
 		data : JSON.stringify(getRequestForSaveCommissionRate(formId)),
 		dataType : 'json',
@@ -305,7 +305,7 @@ function updateCommissionRate(formId, id) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/update-commission-rate',
 		data : JSON.stringify(getRequestForUpdateCommissionRate(formId, id)),
 		dataType : 'json',
@@ -397,7 +397,7 @@ function fetchCommissionRate(formId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/filter-commission-rate',
 		data : JSON.stringify(getRequestForFilterCommissionRate(formId)),
 		dataType : 'json',
@@ -443,7 +443,7 @@ function commissionRateLogs(parentId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/commission-rate-logs',
 		data : JSON.stringify(getRequestForCommissionRateLogs(parentId)),
 		dataType : 'json',
@@ -500,7 +500,7 @@ function getAllTimeZoneForPartner(fromTimeId) {
 	$("#"+fromTimeId).append('<option  value="">Select Timezone</option>');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('', 'TIMEZONE-LIST', '')),
 		dataType : 'json',

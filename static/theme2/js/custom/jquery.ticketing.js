@@ -29,7 +29,7 @@ function callForTicketPageCategory(pageType, elementId, lidiv) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url	:(TICKET_BASE_URL+'api/auth/pageCategoryByVendorId?vendorId='+VERNDOR_ID_FOR_TICKET+'&uuid='+SCHOOL_UUID),
 		dataType : 'json',
 		cache : false,
@@ -83,7 +83,7 @@ function callForTicketList(elementId) {
 	hideMessage('');
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url	:(TICKET_BASE_URL+'api/auth/ticketListing?userId='+USER_ID_FOR_TICKET+'&vendorId='+VERNDOR_ID_FOR_TICKET+'&uuId='+SCHOOL_UUID),
 		dataType : 'json',
 		cache : false,
@@ -117,10 +117,6 @@ function callForTicketList(elementId) {
 				/*$('.dt-responsive tbody tr td:first-child').addClass('dtr-control');*/
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, SERVICE_UNAVAILABLE);
-			return false;
 		}
 	});
 }
@@ -133,7 +129,7 @@ function callForTicketViewDetails(ticketId, elementId) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url	:TICKET_BASE_URL+'api/auth/ticketUserListInfo',
 		data : JSON.stringify(getRequestForTicketDetailsRequest(ticketId)),
 		dataType : 'json',
@@ -205,10 +201,6 @@ function callForTicketViewDetails(ticketId, elementId) {
 				$('#ticketRaiseLogDetails').DataTable();
 				$('#ticketStatusModel').modal('show');
 			}
-			return false;
-		},
-		error : function(e) {
-		    //showMessage(true, e.responseText);
 			return false;
 		}
 	});

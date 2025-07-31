@@ -40,7 +40,7 @@ function callForOTP(formId, moduleId, otpType, messageChannel, entityType, entit
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('otp-process'),
 		data : JSON.stringify(getRequestForOTP(formId, moduleId, otpType, messageChannel, entityType, entityId, via)),
 		dataType : 'json',

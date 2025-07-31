@@ -2,7 +2,7 @@ function callAllStandardList(formId, elementId) {
 	resetDropdown($('#'+formId+' #'+elementId), 'Select Grade');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId', 'ALL-STANDARD-LIST', 'gradeList')),
 		dataType : 'json',
@@ -29,7 +29,7 @@ function callCourseProviderList(formId, elementId) {
 	resetDropdown($('#studentFilter #lmsPlatform'), 'Select LMS Platform');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','ALL-COURSE-PROVIDER-LIST', 'courseProList')),
 		dataType : 'json',
@@ -67,7 +67,7 @@ function callCategoryNameList(formId, value,elementId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId', 'ALL-CATEGORY-NAME-LIST', value, requestExtra)),
 		dataType : 'json',
@@ -121,7 +121,7 @@ function advanceCourseSearchFilter(formId) {
 	$
 	.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'filter-copy-course-content'),
 		data : JSON
 				.stringify(getCallRequestForAdvanceCourseSearchFilter(formId)),
@@ -166,7 +166,7 @@ function advanceCourseSearchFilter(formId) {
 								+ '"/>'
 								+ subject.syncedStatus
 								+ '</td>' + '<td class="text-center">'
-								+ '<button class="btn btn-sm btn-primary" onclick="saveCourseLmsId('+subject.subjectId+');">Save</button>'
+								+ '<button class="btn btn-sm btn-success" onclick="saveCourseLmsId('+subject.subjectId+');">Save</button>'
 								+ '</td>' + '</tr >';
 						// console.log(v.entityId)
 						$('#copyCourseTable tbody').append(copyCourseTableTr);
@@ -303,7 +303,7 @@ function copySelectedCourse(formId, tableId, controlType) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'copy-course'),
 		data : JSON.stringify(getRequestForCopyCourse(formId, controlType)),
 		dataType : 'json',
@@ -331,10 +331,6 @@ function copySelectedCourse(formId, tableId, controlType) {
 				}
 			}
 			return false;
-		},
-		error : function(e) {
-			// showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 	$('#type').val("");
@@ -400,7 +396,7 @@ function saveCourseLmsId(subjectId){
 	var lmsCourseId = $('#courseIdFromLms'+subjectId).val();
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'save-copy-course-lms-id'),
 		data : "subjectId="+subjectId+"&lmsCourseId="+lmsCourseId,
 		dataType : 'json',
@@ -415,10 +411,6 @@ function saveCourseLmsId(subjectId){
 				$('#courseIdFromLmsError'+subjectId).text('Lms Course Id saved successfully.');
 			}
 			return false;
-		},
-		error : function(e) {
-			// showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -465,7 +457,7 @@ function duplicateSelectedCourse(formId, tableId, controlType) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'duplicate-course'),
 		data : JSON.stringify(getRequestForDuplicateCourse(formId, controlType)),
 		dataType : 'json',
@@ -492,10 +484,6 @@ function duplicateSelectedCourse(formId, tableId, controlType) {
 				$('#' + formId)[0].reset();
 			}
 			return false;
-		},
-		error : function(e) {
-			// showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }

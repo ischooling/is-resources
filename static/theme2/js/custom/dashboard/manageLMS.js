@@ -9,7 +9,7 @@ function advanceLMSUSerSearch(formId,moduleId, userId, role){
 	elementId='manageLMSUserList';
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : CONTEXT_PATH+UNIQUEUUID+"/dashboard/show-student-lms-list-1"+argument,
 		dataType : 'json',
 		success : function(data) {
@@ -43,7 +43,7 @@ function advanceLMSUSerSearchPost(formId,moduleId, userId, role){
 	elementId='manageLMSUserList';
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : CONTEXT_PATH+UNIQUEUUID+"/dashboard/show-student-lms-list-post",
 		data : JSON.stringify(bodyCreate(formId, moduleId, SCHOOL_ID)),
 		dataType : 'json',
@@ -103,7 +103,6 @@ function bodyCreate(formId,moduleId, schoolId, UNIQUEUUID){
 function callLMSContentByUserId(parentId, parentUserId, parentLmsId,moduleId){
 	console.log('callLMSContentByUserId ManagerUserList page')
 	var data={}
-	var data={};
 	data['parentId']=parentId;
 	data['parentUserId']=parentUserId;
 	data['parentLmsId']=parentLmsId;
@@ -111,24 +110,35 @@ function callLMSContentByUserId(parentId, parentUserId, parentLmsId,moduleId){
 	data['sessionUserId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','parent-view-lms-content'),
 		data : JSON.stringify(data),
-		dataType : 'html',
-		success : function(htmlContent) {
-			if(htmlContent!=""){
-            	var stringMessage = [];
-            	stringMessage = htmlContent.split("|");
-        		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-        			if(stringMessage[0] == "SESSIONOUT"){
-        				redirectLoginPage();
-        			}else{
-        				showMessage(true, stringMessage[1]);
-        			}
-        		} else {
-        			$('#viewStudentLmsContent').html(htmlContent)
-        		}
+		dataType : 'json',
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, data['message'],'',true);
+				}
+			} else {
+				var html =getViewLmsCredaintial(data);
+        		$('#viewStudentLmsContent').html(html);
+				$("#studentViewLmsEntryModel").modal("show")
 			}
+			// if(htmlContent!=""){
+            // 	var stringMessage = [];
+            // 	stringMessage = htmlContent.split("|");
+        	// 	if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
+        	// 		if(stringMessage[0] == "SESSIONOUT"){
+        	// 			redirectLoginPage();
+        	// 		}else{
+        	// 			showMessage(true, stringMessage[1]);
+        	// 		}
+        	// 	} else {
+        	// 		$('#viewStudentLmsContent').html(htmlContent)
+        	// 	}
+			// }
 		}
 	});
 	$('#lmsUserForm #userId1').val(userId);
@@ -149,7 +159,7 @@ function studentListLmsCreatedContent(elementId, argument, userRole){
         },
          "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
         	//$('tr').addClass(' success:' );
-        	$('th').css('color','#464646' );
+        	$('th').css('color','var(--pc)' );
         },
         "columns": [
 	         { "data": "sno", "name" : "sno", "title" : "S.No" },
@@ -171,3 +181,35 @@ function studentListLmsCreatedContent(elementId, argument, userRole){
 	}
 	$('#'+elementId).dataTable().fnSetFilteringEnterPress();
 }
+
+
+
+function callChangePasswordModal(userId){
+	var data={};
+	data['userId']=userId;
+	data['moduleId']=14;
+	data['sessionUserId']=USER_ID;
+	$.ajax({
+		type : "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard','student-view-lms-content'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		success : function(data) {
+			console.log(data);
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, data['message'],'',true);
+				}
+			} else {
+				var html =getViewLmsCredaintial(data);
+        		$('#viewStudentLmsContent').html(html);
+				$("#studentViewLmsEntryModel").modal("show")
+			}
+		}
+	});
+	$('#lmsUserForm #userId1').val(userId);
+}
+

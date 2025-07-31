@@ -49,8 +49,8 @@ function getRecurringClassesFilter(roleAndModule, schoolId, userId, role){
                             +'<input type="text" name="pageSize" id="pageSize" class="form-control" value="25"/>'
                         +'</div>'
                         +'<div class="col-md-12 col-sm-12 col-xs-12 mt-2 text-right">'
-                            +'<button class="btn btn-sm btn-success mr-2" onclick="getRecurringClassesData(\'recurringClassFilter\',\'recurringClassesTable\');"><i class="fa fa-check"></i>&nbsp;Search</button>'
-                            +'<button class="btn btn-sm btn-primary" onclick="getActiveSessionReset(\'recurringClassFilter\')"><i class="fa fa-check"></i>&nbsp;Reset</button>'
+                            +'<button class="btn btn-sm btn-success mr-2" onclick="getRecurringClassesData(\'recurringClassFilter\',\'recurringClassesTable\');"><i class="fa fa-search"></i>&nbsp;Search</button>'
+                            +'<button class="btn btn-sm btn-danger" onclick="getActiveSessionReset(\'recurringClassFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
                         +'</div>'
                     +'</div>'
 				+'</form>'
@@ -62,7 +62,7 @@ function getRecurringClassesFilter(roleAndModule, schoolId, userId, role){
 
 function getRecurringClassesContentTeacher(titlle, roleAndModule, schoolId, userId, role){
 	var html=
-	'<div class="app-page-title">'
+	'<div class="app-page-title mb-3 py-2">'
 	+'<div class="page-title-wrapper">'
 		+'<div class="page-title-heading">'
 		+'<div class="page-title-icon"><i class="fas fa-user-cog text-primary"></i></div>'
@@ -86,8 +86,29 @@ function getRecurringClassesContentTeacher(titlle, roleAndModule, schoolId, user
                 +'</div>'
             +'</div>'
         +'</div>'
-			
-	return html;
+	$('#dashboardContentInHTML').html(html);		
+    getSessionMasterList('recurringClassFilter','activeSession', false)
+    getTeacherAssignedGrade('recurringClassFilter', USER_ID)
+    $("#activeSession").val('0').trigger('change');
+    $(".filterDates").datepicker("destroy");
+    $('.filterDates').datepicker({
+        autoclose: true,
+        format: 'yyyy-mm-dd',
+
+    });
+    $("#classStatus").select2({
+        theme:"bootstrap4",
+        minimumResultsForSearch:Infinity
+
+    });
+    $("#markStatus").select2({
+        theme:"bootstrap4",
+    });
+    $("#sortBy").select2({
+        theme:"bootstrap4",
+        minimumResultsForSearch:Infinity
+
+    });
 }
 
 
@@ -143,10 +164,9 @@ function getRecurringClassesBodyData(dataList){
                 +'<td>';
                 if(v.active == 'Active'){
                 html+='<div class="btn-group">'
-                        +'<button type="button" class="btn btn-danger dropdown-toggle  btn-sm"'
+                        +'<button type="button" class="btn btn-primary  dropdown-toggle  btn-sm"'
                             +'data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"'
                             +'data-toggle="tooltip" title="Action"'
-                            +'style="background-color:#001173 !important;border-color:#001173;box-shadow:none;">'
                             +'<i class="fa fa-ellipsis-v"></i>'
                         +'</button>'
                         +'<div class="dropdown-menu">';

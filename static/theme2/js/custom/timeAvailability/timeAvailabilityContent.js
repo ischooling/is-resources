@@ -6,7 +6,7 @@ var schoolSettingsLinks;
 
 
 function renderCounselorCotent(data){
-	$("#timeAvailabilityUIContent").html(getCounselorCotent(data)+customLoaderContent()+serverMessageContent());
+	$("#timeAvailabilityUIContent").html(getCounselorCotent(data)+serverMessageContent());
 	callLocationDetails('meetingBookSlotForm');
 	$('.time-slot-radio').change(function() {
 		$('.custom-btn').hide();
@@ -597,15 +597,6 @@ var html =
 		+'<ul class="p-0 m-0 slot-rapper-scroll scrollbar-container"></ul>'
 	+'</div>';
 return html;
-}
-
-function customLoaderContent(){
-	var html = 
-	`
-	<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">
-		<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024" />
-	</div>`;
-	return html;
 }
 function serverMessageContent(){
 	var html=

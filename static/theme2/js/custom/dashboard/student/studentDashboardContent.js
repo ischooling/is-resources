@@ -162,7 +162,7 @@ function slideMenu(val){
 
 function dashboardContent(data) {
     let html = `
-    <div class="app-page-title pt-1 pb-1 mb-2">
+    <div class="app-page-title mb-3 py-2">
         <div class="page-title-wrapper">
             <div class="page-title-heading w-100">
                 <!-- Optional code can go here, like the user dashboard observation -->
@@ -288,24 +288,24 @@ function dashboardSchoolCalendar(data) {
 }
 
 
-function holidayOne() {
-    var html = `
-    <div class="modal fade calendarbox" id="holiday1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header pt-2 pb-2 theme-bg text-white">
-                    <h5 class="modal-title" id="calendarbox_title"></h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">X</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="activity_type"><b><span class="activity"></span></b></p>
-                </div>
-            </div>
-        </div>
-    </div>`;
-    return html;
+function holidayOne(){
+	var html=
+	'<div class="modal fade calendarbox" id="holiday1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'
+		+'<div class="modal-dialog" role="document">'
+			+'<div class="modal-content">'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title" id="calendarbox_title"></h5>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
+						+'<span aria-hidden="true">X</span>'
+					+'</button>'
+				+'</div>'
+				+'<div class="modal-body">'
+					+'<p class="activity_type"><b><span class="activity"></span></b></p>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>'
+	return html;
 }
 
 function batchImpAnnouncementModal(){
@@ -334,7 +334,7 @@ function batchImpAnnouncementModal(){
                             </h6>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="button" class="btn bg-primary text-white btn-shadow float-right px-4 b-4" onclick="updateAnnouncementAcknowledgeStatus();">Acknowledge & Close</button>
+                            <button type="button" class="btn bg-primary text-white  float-right px-4 b-4" onclick="updateAnnouncementAcknowledgeStatus();">Acknowledge & Close</button>
                         </div>
                     </div>
                 </div>
@@ -439,7 +439,7 @@ function onPlayerStateChange(event) {
         data['schoolId'] = SCHOOL_ID;
         $.ajax({
             type : "POST",
-            contentType : "application/json",
+            contentType : APPLICATION_JSON_VALUE,
             url : getURLForHTML('dashboard','update-vedio-watched-status'),
             data : JSON.stringify(data),
             dataType : 'json',
@@ -455,10 +455,6 @@ function onPlayerStateChange(event) {
                 // showMessageTheme2(1, data['message'],'',true);
                 customLoader(false);
             }
-            },
-            error:function(e){
-            // console.log(e);
-                customLoader(false);
             }
         });
         

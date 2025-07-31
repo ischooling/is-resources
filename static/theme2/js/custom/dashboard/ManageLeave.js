@@ -4,7 +4,7 @@ function getUserLeaveData(id, userId) {
     }
     $.ajax({
         type: "GET",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'get-user-leave-list?teacherId=' + id + "&userId=" + userId),
         data: "",
         dataType: 'json',
@@ -39,7 +39,7 @@ function saveLeaveForm(userId) {
         url: getURLForHTML('dashboard', 'leave-form-save'),
         data: JSON.stringify(setUserLeaveData(userId)),
         dataType: 'json',
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         async: false,
         success: function (data) {
             if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
@@ -183,7 +183,7 @@ function updateLeaveStatus(userId,actionId,) {
         url: getURLForHTML('dashboard', 'leave-form-update-status'),
         data: JSON.stringify(setLeaveStatusData(userId,actionId)),
         dataType: 'json',
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         async: false,
         success: function (data) {
             if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {

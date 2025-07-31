@@ -106,13 +106,13 @@
 	
     function updateRemarks(){
     	if (!validateCharacters($('#remarks').val())) {
-    		showMessage(false, 'Please use the English Keyboard while providing information');
+    		showMessageTheme2(0, 'Please use the English Keyboard while providing information');
     		return false
     		}
 
         
     	if($('#remarksStatus').val()==undefined || $('#remarks').val()=='' || $('#userId').val()==''){
-    		showMessage(false, 'Remarks is required.');      
+    		showMessageTheme2(0, 'Remarks is required.');      
     		return false;
 		   }
 		   var remarks=escapeCharacters($('#remarks').val());

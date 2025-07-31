@@ -20,7 +20,7 @@ function changeRemark(){
 }
 function redirectToBankDetailsOnProfileRequest(){
 	if($('#profileApprovalId #remarksStatus').val()=="3"){
-		$('#profileApproval').addClass('modal-lg');
+		$('#profileApproval').addClass('modal-xl');
 		$('#profileApprovalId #pendingRemark').hide();
 		$('#profileApprovalId #techerAgreementShow').show();
 		$('#showAgreement1').show();
@@ -34,13 +34,16 @@ function redirectToBankDetailsOnProfileRequest(){
 		$('#teacherDesignation').val('');
 		$('#teacherDepartment').val('');
 		initEditor(1, 'techerAgreementTinymce','Please provide teacher agreement, if any', true);
+		$('#employeeSpecialization').select2({
+			theme:"bootstrap4",
+			dropdownParent:".employeeSpecializationWrapper"
+		});
 	}else{
-		$('#profileApproval').removeClass('modal-lg');
+		$('#profileApproval').removeClass('modal-xl');
 		$('#profileApprovalId #pendingRemark').show();
 		$('#showAgreement1').hide();
 		$('#showRemark1').show();
 		$('#profileApprovalId #techerAgreementShow').hide();
-	
 	}
 }
 function callRemarksModel(userId){
@@ -50,12 +53,12 @@ function callRemarksModel(userId){
 
 function updateSchoolRemarks(){
 	if (!validateCharacters($('#schoolRemarks').val())) {
-		showMessage(false, 'Please use the English Keyboard while providing information');
+		showMessageTheme2(false, 'Please use the English Keyboard while providing information');
 		return false
 	}
     
 	if( $('#schoolRemarks').val()=='' || $('#userId').val()=='' || $('#schoolRemarksStatus').val()==undefined ){
-		showMessage(false, 'Remarks is required.');      
+		showMessageTheme2(false, 'Remarks is required.');      
 		return false;
 	}
 	var remarks=escapeCharacters($('#schoolRemarks').val());
@@ -67,4 +70,69 @@ function updateSchoolRemarks(){
 	}
 	$('#schoolApprovalModal').modal('hide');
 	setTimeout(function(){ callDashboardPageSchool('6b'); }, 1000);
+}
+
+
+function submitWithDrawnRequestRemark(
+  formId,
+  moduleId,
+  requestId,
+  status,
+  userId
+) {
+  hideMessageTheme2("");
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML("dashboard", "withdrawn-request-submit"),
+    data: JSON.stringify(
+      getRequestForSubmitWithDrawnRemark(
+        formId,
+        moduleId,
+        requestId,
+        status,
+        userId
+      )
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+        showMessageTheme2(true, data["message"]);
+      } else {
+        showMessageTheme2(false, data["message"]);
+        $("#withdrawnAppovelModal").hide();
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open");
+        callDashboardPageSchool(114, "withdrawn-request-list");
+      }
+      return false;
+    }
+  });
+}
+
+function getRequestForSubmitWithDrawnRemark(
+  formId,
+  moduleId,
+  requestId,
+  status,
+  userId
+) {
+  var request = {};
+  var authentication = {};
+  var withdrawnRequestDTO = {};
+  withdrawnRequestDTO["requestId"] = requestId;
+  withdrawnRequestDTO["status"] = status;
+  withdrawnRequestDTO["userId"] = userId;
+  if ($("#remarks").val() != undefined) {
+    withdrawnRequestDTO["remarks"] = $("#remarks").val();
+  }
+
+  request["withdrawnRequestDTO"] = withdrawnRequestDTO;
+  authentication["hash"] = getHash();
+  authentication["userType"] = moduleId;
+  authentication["userId"] = USER_ID;
+  request["authentication"] = authentication;
+  return request;
 }

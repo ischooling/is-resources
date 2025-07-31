@@ -83,7 +83,7 @@ function announcementModalContent(data){
                     `<div class="modal-header bg-primary text-white pt-2 pb-2">
                         <h5 class="modal-title">`+decodeURIComponent(data.announcement.announceTitle)+`</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
@@ -99,14 +99,14 @@ function announcementModalContent(data){
                                 </thead>
                                 <tbody>
                                         <tr>
-                                            <td>`+convertDatetimeWithFormat(data.announcement.createdDate,BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_ONLY)+`</td>
+                                            <td class="text-center vertical-align-top">`+convertDatetimeWithFormat(data.announcement.createdDate,BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_ONLY)+`</td>
                                             <td>`+decodeURIComponent(data.announcement.teacherRemark)+`</td>
                                             <td class="text-center vertical-align-top">`;
                                                 if(data.announcement.fileType =='' || data.announcement.attachment == ''){
                                                     html+=`NA`;
                                                 }else if(data.announcement.fileType == 'IMAGE'){
                                                     html+=
-                                                    `<a href="javascript:void(0)" onclick="showDocument('${data.announcement.attachment}');">View</a>
+                                                    `<a href="javascript:void(0)" onclick="showDocument('${FILE_UPLOAD_PATH + data.announcement.attachment}');">View</a>
                                                     ${/*
                                                     <%-- <img  src="${announcement.attachment}" alt="" onclick="showDocument('${announcement.attachment}');" title=""  style="width: 50px; height: 50px; max-width: 100%;padding: 5px 3px 5px 3px" /> --%>
                                                     */''}`;

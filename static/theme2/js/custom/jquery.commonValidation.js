@@ -1,3 +1,4 @@
+var APPLICATION_JSON_VALUE = "application/json";
 function validateEmail(email) {
 	var expr = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
 	return expr.test(email);

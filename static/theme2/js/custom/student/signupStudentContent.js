@@ -204,143 +204,140 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	$('.dt-responsive tbody tr td:first-child').addClass('dtr-control');
  }
 
-async function generateEnrollmentContent(courseProviderId,UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME){
-	// var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
-	var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
-	var html=
-	'<div class="wrapper-style">'
-		+'<a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()"><i class="zmdi zmdi-power"></i> Log out</a>'
-		+'<section class="full">'
-			+'<div class="full mb-2">'
-				+'<div class="logo">'
-					+'<a href="'+schoolSettingsLinks.schoolWebsite+'" target="blank">'
-						+'<img src="'+schoolSettingsLinks.logoUrl+SCRIPT_VERSION+'" alt="'+schoolSettingsLinks.schoolWebsite+'" target="blank">'
-					+'</a>'
-				+'</div>'
-			+'</div>'
-			+'<section class="full text-center">'
-				+'<h1 class="form-heading white-txt-color alternate-bg page-heading" id="learingProgramHeader" val="'+learningProgram+'" >';
-					if(moduleId == 'STUDENT'){
-						html+=programLabel;
-					} else {
-						html+=moduleName;
-					}
-				html+='</h1>'
-			+'</section>'
-			+'<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>'
-		+'</section>'
-		+'<input type="hidden" id="courseProviderId" value="'+courseProviderId+'" />'
-		+'<div class="fixed-button one-btn">'
-			+'<a class="primary-bg white-txt-color" href="'+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'" class="tab-and-mobile-logout-btn primary-bg"><i class="zmdi zmdi-power"></i> Log out</i></a>'
-		+'</div>';
-		if(MAINTENANCEDOWNTIME !=''){
-			html+='<div class="full">'
-					+'<marquee id="marqueeDiv" direction="left" style="color: red" width="100%">'+MAINTENANCEDOWNTIME+'</marquee>'
-				+'</div>';
-		}
-		html+='<div id="messageDiv" class="server-error-message">'
-			+'<span id="messageDiv1" class="msg error"><i class="fa fa-times"></i> Error Message </span>'
-		+'</div>'
-		+'<div id="formSteps">'
-			+'<div class="steps clearfix">'
-				+'<ul role="tablist">'
-					+'<li role="tab" aria-disabled="false" class="first current" aria-selected="true">'
-						+'<a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">'
-							+'<span class="current-info audible">current step: </span>'
-							+'<span class="number">1.</span>'
-							+'<img src="'+PATH_FOLDER_IMAGE2+'step-1.png" alt="">'
-							+'<span class="step-order">Step 1</span>'
-						+'</a>'
-						+'<span class="step-arrow step1"></span>'
-					+'</li>'
-					+'<li role="tab" aria-disabled="false">'
-						+'<a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">'
-							+'<span class="number">2.</span>';
-							if(courseProviderId == 39){
-								html+='<img src="'+PATH_FOLDER_IMAGE2+'talking-deactive.png" alt="">';
-							}else{
-								html+='<img src="'+PATH_FOLDER_IMAGE2+'step-2-deactive.png" alt="">';
-							}
-							
-							html+='<span class="step-order">Step 2</span>'
-						+'</a>'
-						+'<span class="step-arrow step2"></span>'
-					+'</li>'
-					+'<li role="tab" aria-disabled="false">'
-						+'<a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">'
-							+'<span class="number">3.</span>'
-							+'<img src="'+PATH_FOLDER_IMAGE2+'step-4-deactive.png" alt="">'
-							+'<span class="step-order">Step 3</span>'
-						+'</a>'
-						+'<span class="step-arrow step3"></span>'
-					+'</li>'
-					+'<li role="tab" aria-disabled="false" class="last">'
-						+'<a id="steps-uid-0-t-3" href="#steps-uid-0-h-3" aria-controls="steps-uid-0-p-3">'
-							+'<span class="number">4.</span>'
-							+'<img src="'+PATH_FOLDER_IMAGE2+'step-5-deactive.png" alt="">'
-							+'<span class="step-order">Step 4</span>'
-						+'</a>'
-					+'</li>'
-				+'</ul>'
-			+'</div>'
-			+'<div class="content">'
-				+'<section id="step-1" class="step active-step">'
-					+'<div class="full step-1-skeleton skeleton-wrapper"></div>'
-					+'<form id="signupStage1" name="signupStage1" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">'
-						+'<div id="signupStage1Content" style="display:inline-block;width: 100%;"></div>'
-					+'</form>'
-				+'</section>'
-				
-				+'<section id="step-2" class="step">'
-					+'<div class="full step-2-skeleton skeleton-wrapper"></div>'
-					+'<form id="signupStage2" name="signupStage2" method="post" autocomplete="off" action="javascript:void(0);">'
-						+'<div id="signupStage2Content" style="display: inline-block;width: 100%;"></div>'
-					+'</form>'
-				+'</section>'
-				
-				+'<section id="step-3" class="step">'
-					+'<div class="full step-3-skeleton skeleton-wrapper"></div>'
-					+'<form id="signupStage3" name="signupStage3" method="post" autocomplete="off" action="javascript:void(0);">'
-						+'<div id="signupStage3Content" style="display: inline-block;width: 100%;"></div>'
-					+'</form>'
-				+'</section>'
-				
-				+'<section id="step-4" class="step">'
-					+'<div class="full step-4-skeleton skeleton-wrapper"></div>'
-					+'<div id="signupStage4Content" style="display: inline-block;width: 100%;"></div>'
-				+'</section>'
-				
-			+'</div>'
-			+'<div class="actions clearfix">'
-				+'<ul role="menu" aria-label="Pagination">'
-					+'<li class="prev-btn"  style="opacity:0;visibility: hidden;">'
-						+'<a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep(\'prev\')" >Back</a>'
-					+'</li>'
-					+'<li class="next-btn">'
-						+'<a href="javascript:void(0)"class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt"role="menuitem" onclick="moveStep(\'next\')">Next</a>'
-					+'</li>'
-					+'<li class="finish-btn" style="display: none;">'
-						+'<a href="javascript:void(0)"class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt"role="menuitem" onclick="moveStep(\'finish\');showPaymentTermCondMode();">'+(SHOW_PAYMENT_OPTION=='Y'?'Pay':'Submit Application')+'</a>'
-					+'</li>'
-				+'</ul>'
-			+'</div>'
-		+'</div>'
-	+'</div>';
-	 if(SCHOOL_ID==1){
-		html+='<div id="commonloaderId" class="unique-loader loader-bg" style="display:none;">'
-			+'<img src="'+PATH_FOLDER_IMAGE2+'loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />'
-		+'</div>';
-	 }else{
-		html+='<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
-			+'<div class="ball-rotate">'
-				+'<div style="background-color: rgb(247, 185, 36);"></div>'
-			+'</div>'
-			+'<p>Loading ...</p>'
-		+'</div>';
-	 }
-	
-	html+=logOutModalContent()
-	return html;
+async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME) {
+    const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
+    
+    var html = `
+        <div class="wrapper-style">
+            <a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()">
+                <i class="zmdi zmdi-power"></i> Log out
+            </a>
+            <section class="full">
+                <div class="full mb-2">
+                    <div class="logo">
+                        <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                            <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                        </a>
+                    </div>
+                </div>
+                <section class="full text-center">
+                    <h1 class="form-heading white-txt-color secondary-bg page-heading" id="learingProgramHeader" val="${learningProgram}">`;
+						if (moduleId == 'STUDENT') {
+							html += programLabel;
+						} else {
+							html += moduleName;
+						}
+    				html += `</h1>
+                </section>
+                <div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>
+            </section>
+            <input type="hidden" id="courseProviderId" value="${courseProviderId}" />
+            <div class="fixed-button one-btn">
+                <a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn primary-bg">
+                    <i class="zmdi zmdi-power"></i> Log out</i>
+                </a>
+            </div>`;
+			if (MAINTENANCEDOWNTIME != '') {
+				html += `
+					<div class="full">
+						<marquee id="marqueeDiv" direction="left" style="color: red" width="100%">${MAINTENANCEDOWNTIME}</marquee>
+					</div>`;
+			}
+    		html += `
+            <div id="messageDiv" class="server-error-message">
+                <span id="messageDiv1" class="msg error"><i class="fa fa-times"></i> Error Message </span>
+            </div>
+            <div id="formSteps">
+                <div class="steps clearfix">
+                    <ul role="tablist">
+                        <li role="tab" aria-disabled="false" class="first current" aria-selected="true">
+                            <a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">
+                                <span class="current-info audible">current step: </span>
+                                <span class="number">1.</span>
+                                <img src="${PATH_FOLDER_IMAGE2}step-1.png" alt="">
+                                <span class="step-order">Step 1</span>
+                            </a>
+                            <span class="step-arrow step1"></span>
+                        </li>
+                        <li role="tab" aria-disabled="false">
+                            <a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">
+                                <span class="number">2.</span>`;
+								if (courseProviderId == 39) {
+									html += `<img src="${PATH_FOLDER_IMAGE2}talking-deactive.png" alt="">`;
+								} else {
+									html += `<img src="${PATH_FOLDER_IMAGE2}step-2-deactive.png" alt="">`;
+								}
+    							html += `<span class="step-order">Step 2</span>
+                            </a>
+                            <span class="step-arrow step2"></span>
+                        </li>
+                        <li role="tab" aria-disabled="false">
+                            <a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">
+                                <span class="number">3.</span>
+                                <img src="${PATH_FOLDER_IMAGE2}step-4-deactive.png" alt="">
+                                <span class="step-order">Step 3</span>
+                            </a>
+                            <span class="step-arrow step3"></span>
+                        </li>
+                        <li role="tab" aria-disabled="false" class="last">
+                            <a id="steps-uid-0-t-3" href="#steps-uid-0-h-3" aria-controls="steps-uid-0-p-3">
+                                <span class="number">4.</span>
+                                <img src="${PATH_FOLDER_IMAGE2}step-5-deactive.png" alt="">
+                                <span class="step-order">Step 4</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="content">
+                    <section id="step-1" class="step active-step">
+                        <div class="full step-1-skeleton skeleton-wrapper"></div>
+                        <form id="signupStage1" name="signupStage1" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+                            <div id="signupStage1Content" style="display:inline-block;width: 100%;"></div>
+                        </form>
+                    </section>
+                    
+                    <section id="step-2" class="step">
+                        <div class="full step-2-skeleton skeleton-wrapper"></div>
+                        <form id="signupStage2" name="signupStage2" method="post" autocomplete="off" action="javascript:void(0);">
+                            <div id="signupStage2Content" style="display: inline-block;width: 100%;"></div>
+                        </form>
+                    </section>
+                    
+                    <section id="step-3" class="step">
+                        <div class="full step-3-skeleton skeleton-wrapper"></div>
+                        <form id="signupStage3" name="signupStage3" method="post" autocomplete="off" action="javascript:void(0);">
+                            <div id="signupStage3Content" style="display: inline-block;width: 100%;"></div>
+                        </form>
+                    </section>
+                    
+                    <section id="step-4" class="step">
+                        <div class="full step-4-skeleton skeleton-wrapper"></div>
+                        <div id="signupStage4Content" style="display: inline-block;width: 100%;"></div>
+                    </section>
+                </div>
+                <div class="actions clearfix">
+                    <ul role="menu" aria-label="Pagination">
+                        <li class="prev-btn" style="opacity:0;visibility: hidden;">
+                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('prev')">Back</a>
+                        </li>
+                        <li class="next-btn">
+                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('next')">Next</a>
+                        </li>
+                        <li class="finish-btn" style="display: none;">
+                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('finish');showPaymentTermCondMode();">`;
+								if (SHOW_PAYMENT_OPTION == 'Y') {
+									html += 'Pay';
+								} else {
+									html += 'Submit Application';
+								}
+    						html += `</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>`;
+		html += logOutModalContent();
+    return html;
 }
 
 function renderStudentDetails(data){
@@ -639,128 +636,150 @@ function renderStudentDetails(data){
 	});
 }
 
-function getStudentDetailsContent(data){
-	var tabindex=0;
-	var signupStudent = data.signupStudent;
-	var html =
-	'<h3 class="alternate-txt-color">Student Details</h3>'
-			+'<input type="hidden" id="userId" value="'+data.userId+'" />'
-			+'<input type="hidden" id="countryDailCode" value="'+signupStudent.countryIsdCode+'" />'
-			+'<input type="hidden" id="countryIsd" value="'+signupStudent.countryCode+'" />'
-			+'<input type="hidden" name="location" id="location" value="" />'
-			+'<div class="form-row">'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-account"></i>'
-					+'<input type="text" name="firstName" style="text-transform:capitalize" id="firstName" class="form-control-field" value="'+signupStudent.firstName+'" maxlength="40" '+(data.paymentStatus=='SUCCESS'?'disabled':'')+' onkeydown="return M.isChars(event);" placeholder="First Name*" tabindex="'+(++tabindex)+'">'
-				+'</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-account"></i>'
-					+'<input type="text" name="middleName" style="text-transform:capitalize" id="middleName" class="form-control-field" value="'+signupStudent.middleName+'" maxlength="40" '+(data.paymentStatus=='SUCCESS'?'disabled':'')+' onkeydown="return M.isChars(event);" placeholder="Middle Name" tabindex="'+(++tabindex)+'">'
-				+'</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-account"></i>'
-					+'<input type="text" name="lastName" style="text-transform:capitalize" id="lastName" class="form-control-field" value="'+signupStudent.lastName+'" maxlength="40" '+(data.paymentStatus=='SUCCESS'?'disabled':'')+' onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="'+(++tabindex)+'">'
-				+'</div>'
-			+'</div>'
-			+'<div class="form-row">'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-book"></i>';
-					if(data.signupStudent.courseProviderId==39){
-						html+='<select name="learningLabel" id="learningLabel" tabindex="'+(++tabindex)+'" onchange="calculateGradeLabel()">'
-						+getLearningLabel()
-						+'</select>'
-						+'<select name="applyStandardId" id="applyStandardId" tabindex="'+(++tabindex)+'" style="display:none;">'
-						+getOptions(data.signupStudent.grades, data.signupStudent.standardId)
-						+'</select>';
-					}else{
-						html+='<select name="applyStandardId" id="applyStandardId" tabindex="'+(++tabindex)+'">'
-						+'<option value="">Select Grade</option>'
-						+getOptions(data.signupStudent.grades, data.signupStudent.standardId)
-						+'</select>';
-					}
-				html+='</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-account-calendar"></i>'
-					+'<input type="text" name="dob" id="dob" class="form-control-field" value="'+signupStudent.dob+'" placeholder="Date of Birth* (MMM dd, yyyy)" onkeydown="return false" tabindex="'+(++tabindex)+'" readonly>'
-				+'</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-male-female"></i>'
-					+'<select name="gender" id="gender" required tabindex="'+(++tabindex)+'" '+(data.paymentStatus=='SUCCESS'?'disabled':'')+'>'
-						+getGenderContent()
-					+'</select>'
-				+'</div>'
-			+'</div>'
-			+'<div class="form-row">'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-email"></i>'
-					+'<input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field" value="'+signupStudent.communicationEmail+'" disabled placeholder="Email*" tabindex="'+(++tabindex)+'">'
-				+'</div>'
-				+'<div class="form-holder password valid-field">'
-					+'<i class="zmdi zmdi-smartphone-android"></i>'
-					+'<input type="tel" name="contactNumber" id="contactNumber"  class="form-control-field" maxlength="15" value="'+signupStudent.contactNumber+'" onkeydown="return M.digit(event);" placeholder="Phone Number*" tabindex="'+(++tabindex)+'">'
-				+'</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-pin"></i>'
-					+'<select name="nationality" id="nationality" required tabindex="'+(++tabindex)+'">'
-						+'<option value="">Select Nationality*</option>'
-						+getNationalityOption(signupStudent.countries, signupStudent.nationality)
-					+'</select>'
-					+'<span style="color:#444;position:absolute;top:100%;left:0">You must have a valid ID of your nationality<span>'
-				+'</div>'
-			+'</div>'
-			+'<div class="form-row mb-4">'
-				+'<strong>Student\'s Current Location</strong>'
-			+'</div>'
-			+'<div class="form-row">'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-pin"></i>'
-					+'<select name="countryId" id="countryId" required  tabindex="'+(++tabindex)+'" '+(data.schoolId==5?'disabled':'')+'>'
-						+'<option value="">Select Country*</option>'
-						+getCountriesOption(signupStudent.countries, signupStudent.countryId)
-					+'</select>'
-				+'</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-pin"></i>'
-					+'<select name="stateId" id="stateId" required  tabindex="'+(++tabindex)+'">'
-						+'<option value="">Select State/Province*</option>'
-						+getStatesOption(signupStudent.states, signupStudent.stateId)
-					+'</select>'
-				+'</div>'
-				+'<div class="form-holder valid-field">'
-					+'<i class="zmdi zmdi-pin"></i>'
-					+'<select name="cityId" id="cityId" required tabindex="'+(++tabindex)+'">'
-						+'<option value="">Select City*</option>'
-						+getCitiesOption(signupStudent.cities, signupStudent.cityId)
-					+'</select>'
-				+'</div>'
-			+'</div>';
-			if($('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA'){
-				html+=
-				'<div class="form-row mb-2">'
-					+'<strong>Current School Details</strong>'
-				+'</div>'
-				+'<div class="form-row">'
-					+'<div class="form-holder valid-field">'
-						+'<i class="zmdi zmdi-graduation-cap"></i>'
-						+'<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field" value="'+signupStudent.studyingSchoolName+'" placeholder="Student\'s School Name*" tabindex="'+(++tabindex)+'">'
-					+'</div>'
-					+'<div class="form-holder valid-field">'
-						+'<i class="zmdi zmdi zmdi-book"></i>'
-						+'<select name="studyingGradeId" id="studyingGradeId" tabindex="'+(++tabindex)+'">'
-							+'<option value="0">Student Current Grade*</option>'
-							+getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)
-						+'</select>'
-					+'</div>'
-					+'<div class="form-holder valid-field">'
-						+'<i class="zmdi zmdi-pin"></i>'
-						+'<select name="countryIdOfSchool" id="countryIdOfSchool" required tabindex="'+(++tabindex)+'">'
-							+'<option value="">Select Country of School*</option>'
-							+getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)
-						+'</select>'
-					+'</div>'
-				+'</div>';
-			}
-		return html;
+function getStudentDetailsContent(data) {
+    var tabindex = 0;
+    var signupStudent = data.signupStudent;
+    var html = `
+        <h3 class="alternate-txt-color">Student Details</h3>
+        <input type="hidden" id="userId" value="${data.userId}" />
+        <input type="hidden" id="countryDailCode" value="${signupStudent.countryIsdCode}" />
+        <input type="hidden" id="countryIsd" value="${signupStudent.countryCode}" />
+        <input type="hidden" name="location" id="location" value="" />
+        <div class="form-row">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" name="firstName" style="text-transform:capitalize" id="firstName" class="form-control-field" 
+                    value="${signupStudent.firstName}" maxlength="40" 
+                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''} 
+                    onkeydown="return M.isChars(event);" placeholder="First Name*" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" name="middleName" style="text-transform:capitalize" id="middleName" class="form-control-field" 
+                    value="${signupStudent.middleName}" maxlength="40" 
+                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''} 
+                    onkeydown="return M.isChars(event);" placeholder="Middle Name" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" name="lastName" style="text-transform:capitalize" id="lastName" class="form-control-field" 
+                    value="${signupStudent.lastName}" maxlength="40" 
+                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''} 
+                    onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="${++tabindex}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-book"></i>`;
+				if (data.signupStudent.courseProviderId === 39) {
+					html += `
+					<select name="learningLabel" id="learningLabel" tabindex="${++tabindex}" onchange="calculateGradeLabel()">
+						${getLearningLabel()}
+					</select>
+					<select name="applyStandardId" id="applyStandardId" tabindex="${++tabindex}" style="display:none;">
+						${getOptions(data.signupStudent.grades, data.signupStudent.standardId)}
+					</select>`;
+				} else {
+					html += `
+					<select name="applyStandardId" id="applyStandardId" tabindex="${++tabindex}">
+						<option value="">Select Grade</option>
+						${getOptions(data.signupStudent.grades, data.signupStudent.standardId)}
+					</select>`;
+				}
+    		html += `</div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account-calendar"></i>
+                <input type="text" name="dob" id="dob" class="form-control-field" 
+                    value="${signupStudent.dob}" 
+                    placeholder="Date of Birth* (MMM dd, yyyy)" 
+                    onkeydown="return false" tabindex="${++tabindex}" readonly>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-male-female"></i>
+                <select name="gender" id="gender" required tabindex="${++tabindex}" 
+                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}>
+                    ${getGenderContent()}
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-email"></i>
+                <input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field" 
+                    value="${signupStudent.communicationEmail}" disabled 
+                    placeholder="Email*" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder password valid-field">
+                <i class="zmdi zmdi-smartphone-android"></i>
+                <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field" 
+                    maxlength="15" value="${signupStudent.contactNumber}" 
+                    onkeydown="return M.digit(event);" placeholder="Phone Number*" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="nationality" id="nationality" required tabindex="${++tabindex}">
+                    <option value="">Select Nationality*</option>
+                    ${getNationalityOption(signupStudent.countries, signupStudent.nationality)}
+                </select>
+                <span style="color:#444;position:absolute;top:100%;left:0">You must have a valid ID of your nationality<span>
+            </div>
+        </div>
+        <div class="form-row mb-2">
+            <strong>Student's Current Location</strong>
+        </div>
+        <div class="form-row">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="countryId" id="countryId" required tabindex="${++tabindex}" 
+                    ${data.schoolId === 5 ? 'disabled' : ''}>
+                    <option value="">Select Country*</option>
+                    ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
+                </select>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="stateId" id="stateId" required tabindex="${++tabindex}">
+                    <option value="">Select State/Province*</option>
+                    ${getStatesOption(signupStudent.states, signupStudent.stateId)}
+                </select>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="cityId" id="cityId" required tabindex="${++tabindex}">
+                    <option value="">Select City*</option>
+                    ${getCitiesOption(signupStudent.cities, signupStudent.cityId)}
+                </select>
+            </div>
+        </div>`;
+		if ($('#learingProgramHeader').attr('val') === 'DUAL_DIPLOMA') {
+			html += `
+			<div class="form-row mb-2">
+				<strong>Current School Details</strong>
+			</div>
+			<div class="form-row">
+				<div class="form-holder valid-field">
+					<i class="zmdi zmdi-graduation-cap"></i>
+					<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field" 
+						value="${signupStudent.studyingSchoolName}" 
+						placeholder="Student's School Name*" tabindex="${++tabindex}">
+				</div>
+				<div class="form-holder valid-field">
+					<i class="zmdi zmdi zmdi-book"></i>
+					<select name="studyingGradeId" id="studyingGradeId" tabindex="${++tabindex}">
+						<option value="0">Student Current Grade*</option>
+						${getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)}
+					</select>
+				</div>
+				<div class="form-holder valid-field">
+					<i class="zmdi zmdi-pin"></i>
+					<select name="countryIdOfSchool" id="countryIdOfSchool" required tabindex="${++tabindex}">
+						<option value="">Select Country of School*</option>
+						${getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)}
+					</select>
+				</div>
+			</div>`;
+		}
+    return html;
 }
 
 function renderParentDetails(data){
@@ -1025,150 +1044,163 @@ function autoSelectDropDownParentDetails(signupParent){
 	}
 }
 
-function getParentDetailsContent(data){
-	var tabindex=30;
-	var signupParent = data.signupParent;
-	var courseProviderId=$('#courseProviderId').val();
-	var hideClass='';
-	if(courseProviderId==39){
-		hideClass='hide';
-	}
-	var html ='';
-	var parentHeaderLabel='';
-	if(courseProviderId==39){
-		parentHeaderLabel='Communication Details';
-	}else{
-		if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX'){
-			parentHeaderLabel='Academic & Communication Details';
-		}else{
-			parentHeaderLabel='Parent / Guardian Details';
-		}
-	}
-	html+='<h3 class="alternate-txt-color">'+parentHeaderLabel+'</h3>'
-	+'<input type="hidden" id="studentId" value="'+data.studentId+'">';
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
-		html+=
-		'<div class="form-row">'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-account"></i>'
-				+'<select name="workingProfession" id="workingProfession" class="form-control-field" required  tabindex="'+(++tabindex)+'">'
-					+'<option value="" disabled selected>Are you a student or a working professional?*</option>'
-					+'<option value="SS">School Student</option>'
-					+'<option value="CS">College Student</option>'
-					+'<option value="WP">Working Professional</option>'
-				+'</select>'
-			+'</div>'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-account"></i>'
-				+'<input type="text" name="institutionName" id="institutionName" class="form-control-field" value="'+signupParent.institutionName	+'" placeholder="Name of the School/College/Organization*" tabindex="'+(++tabindex)+'">'
-			+'</div>'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-pin"></i>'
-				+'<select name="institutionCountryId" id="institutionCountryId" class="form-control-field" required  tabindex="'+(++tabindex)+'">'
-					+'<option value="0" disabled selected>Country of the School/College/Organization*</option>' 
-					+getCountriesOption(signupParent.countries, signupParent.countryId)
-				+'</select>'
-			+'</div>'
-			+'</div>';
-	}else{
-		html+=
-		'<input type="hidden" id="parentCountryIsd" value="'+signupParent.countryIsdCode2+'">'
-		+'<input type="hidden" id="parentCountryDailCode" value="'+signupParent.countryCode+'">'
-		+'<div class="form-row '+hideClass+'">'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-account"></i>'
-				+'<input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName"  value="'+signupParent.firstName+'" maxlength="40"  onkeydown="return M.isChars(event);" placeholder="First Name*" tabindex="'+(++tabindex)+'">'
-			+'</div>'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-account"></i>'
-				+'<input type="text" class="form-control-field" style="text-transform:capitalize" name="parentMiddletName" id="parentMiddletName"  name="parentMiddletName" value="'+signupParent.middleName+'" maxlength="40"  onkeydown="return M.isChars(event);" placeholder="Middle Name" tabindex="'+(++tabindex)+'">'
-			+'</div>'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-account"></i>'
-				+'<input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName" name="parentlastName" value="'+signupParent.lastName+'" maxlength="40"  onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="'+(++tabindex)+'">'
-			+'</div>'
-		+'</div>'
-		+'<div class="form-row '+hideClass+'">'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-map"></i>'
-				+'<select name="relation" id="relation" required tabindex="15">'
-					+getRelationshipContent()
-				+'</select>'
-			+'</div>'
-			+'<div class="form-holder valid-field bottom-error-message">'
-				+'<i class="zmdi zmdi-email"></i>'
-				+'<i class="zmdi zmdi-check-circle verified-mail-id"></i>'
-				+'<input type="email" class="form-control-field parent-email" id="parentEmailId" name="parentEmailId" placeholder="Parent Email (Optional)" value="'+signupParent.email+'" autocomplete="off" tabindex="'+(++tabindex)+'" >'
-				+'<a href="javascript:void(0)" class="input-over-btn send-mail-btn primary-bg white-txt-color" onclick="resendOtp();">Verify Mail</a>'
-			+'</div>'
-			+'<div class="form-holder valid-field bottom-error-message">'
-				+'<i class="zmdi zmdi-smartphone-android"></i>'
-				+'<input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber" maxlength="15" placeholder="Parent Phone Number (Optional)" value="'+signupParent.contactNumber+'" autocomplete="off" onkeydown="return M.digit(event);" tabindex="'+(++tabindex)+'">'
-			+'</div>'
-		+'</div>'
-		+'<div class="form-row m-0 '+hideClass+'">'
-			+'<strong>Parent\'s Current Location</strong>'
-		+'</div>'
-		+'<div class="form-row mb-2 '+hideClass+'">'
-			+'<label for="sameAsStudentLocation" class="f-13">'
-				+'<input id="sameAsStudentLocation" class="m-0" tabindex="'+(++tabindex)+'" type="checkbox" onclick="addressSameAs()" />'
-				+' Same as student location'
-			+'</label>'
-		+'</div>'
-		+'<div class="form-row '+hideClass+'">'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-pin"></i>'
-				+'<select name="pCountryId" id="pCountryId" tabindex="'+(++tabindex)+'">'
-					+'<option value="">Select Country*</option>'
-					+getCountriesOption(signupParent.countries, signupParent.countryId)
-				+'</select>'
-			+'</div>'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-pin"></i>'
-				+'<select name="pStateId" id="pStateId"   tabindex="'+(++tabindex)+'">'
-					+'<option value="">Select State/Province*</option>'
-					+getStatesOption(signupParent.states, signupParent.stateId)
-				+'</select>'
-			+'</div>'
-			+'<div class="form-holder valid-field">'
-				+'<i class="zmdi zmdi-pin"></i>'
-				+'<select name="pCityId" id="pCityId"  tabindex="'+(++tabindex)+'">'
-					+'<option value="">Select City*</option>'
-					+getCitiesOption(signupParent.cities, signupParent.cityId)
-				+'</select>'
-			+'</div>'
-		+'</div>';
-	}
-	html+=	
-	'<div class="form-row m-0 justify-content-center">';
-		if(courseProviderId!=39){
-			// html+='<div class="form-holder valid-field '+hideClass+'">'
-			// 	+'<input type="text" class="form-control-field" name="referralCode" id="referralCode" placeholder="Referral Code (Optional)" value="'+signupParent.referralCode+'" tabindex="'+(++tabindex)+'">'
-			// +'</div>'
-			// +'<div class="form-holder mb-0" style="height: 0px;">&nbsp;</div>';
-		}
-		html+='<div class="form-holder text-center" style="width:100%">'
-			+'<strong>Your Preferred Communication&nbsp;</strong>'
-			+'<b>(You may choose more than one)</b>'
-			+'<div>'
-				+'<label class="cursor communication-mode text-dark valid-field" for="pcModeWhatsapp">'
-					+'<input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp" '+(signupParent.communicationWhatsApp=='Y'?'checked':'')+' tabindex="'+(++tabindex)+'">'
-					+'<span>WhatsApp</span> '
-					+'<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />'
-				+'</label>'
-				+'<label class="cursor communication-mode text-dark" for="pcModeCall">'
-					+'<input id="pcModeCall" name="pcModeCall" type="checkbox" value="call" '+(signupParent.communicationCall=='Y'?'checked':'')+' tabindex="'+(++tabindex)+'">'
-					+'<span>Call</span><i class="fa fa-phone"></i>'
-				+'</label>'
-				+'<label class="cursor communication-mode text-dark" for="pcModeEmail">'
-					+'<input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email" '+(signupParent.communicationEmail=='Y'?'checked':'')+' tabindex="'+(++tabindex)+'">'
-					+'<span>Email</span><i class="fa fa-envelope"></i>'
-				+'</label>'
-			+'</div>'
-		+'</div>'
-	+'</div>';
-	return html;
-		
+function getParentDetailsContent(data) {
+    var tabindex = 30;
+    var signupParent = data.signupParent;
+    var courseProviderId = $('#courseProviderId').val();
+    var hideClass = '';
+    if (courseProviderId == 39) {
+        hideClass = 'hide';
+    }
+    var html = '';
+    var parentHeaderLabel = '';
+    if (courseProviderId == 39) {
+        parentHeaderLabel = 'Communication Details';
+    } else {
+        if ($('#learingProgramHeader').attr('val') == 'ONE_TO_ONE_FLEX') {
+            parentHeaderLabel = 'Academic & Communication Details';
+        } else {
+            parentHeaderLabel = 'Parent / Guardian Details';
+        }
+    }
+
+    html += `
+        <h3 class="alternate-txt-color">${parentHeaderLabel}</h3>
+        <input type="hidden" id="studentId" value="${data.studentId}">`;
+
+    if ($('#learingProgramHeader').attr('val') == 'ONE_TO_ONE_FLEX') {
+        html += `
+        <div class="form-row">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <select name="workingProfession" id="workingProfession" class="form-control-field" required tabindex="${++tabindex}">
+                    <option value="" disabled selected>Are you a student or a working professional?*</option>
+                    <option value="SS">School Student</option>
+                    <option value="CS">College Student</option>
+                    <option value="WP">Working Professional</option>
+                </select>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" name="institutionName" id="institutionName" class="form-control-field" 
+                    value="${signupParent.institutionName}" 
+                    placeholder="Name of the School/College/Organization*" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="institutionCountryId" id="institutionCountryId" class="form-control-field" required tabindex="${++tabindex}">
+                    <option value="0" disabled selected>Country of the School/College/Organization*</option>
+                    ${getCountriesOption(signupParent.countries, signupParent.countryId)}
+                </select>
+            </div>
+        </div>`;
+    } else {
+        html += `
+        <input type="hidden" id="parentCountryIsd" value="${signupParent.countryIsdCode2}">
+        <input type="hidden" id="parentCountryDailCode" value="${signupParent.countryCode}">
+        <div class="form-row ${hideClass}">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName" 
+                    value="${signupParent.firstName}" maxlength="40" onkeydown="return M.isChars(event);" 
+                    placeholder="First Name*" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentMiddletName" id="parentMiddletName" 
+                    name="parentMiddletName" value="${signupParent.middleName}" maxlength="40" 
+                    onkeydown="return M.isChars(event);" placeholder="Middle Name" tabindex="${++tabindex}">
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName" 
+                    name="parentlastName" value="${signupParent.lastName}" maxlength="40" 
+                    onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="${++tabindex}">
+            </div>
+        </div>
+        <div class="form-row ${hideClass}">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-map"></i>
+                <select name="relation" id="relation" required tabindex="15">
+                    ${getRelationshipContent()}
+                </select>
+            </div>
+            <div class="form-holder valid-field bottom-error-message">
+                <i class="zmdi zmdi-email"></i>
+                <i class="zmdi zmdi-check-circle verified-mail-id"></i>
+                <input type="email" class="form-control-field parent-email" id="parentEmailId" name="parentEmailId" 
+                    placeholder="Parent Email (Optional)" value="${signupParent.email}" 
+                    autocomplete="off" tabindex="${++tabindex}">
+                <a href="javascript:void(0)" class="input-over-btn send-mail-btn primary-bg white-txt-color" onclick="resendOtp();">Verify Mail</a>
+            </div>
+            <div class="form-holder valid-field bottom-error-message">
+                <i class="zmdi zmdi-smartphone-android"></i>
+                <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber" 
+                    maxlength="15" placeholder="Parent Phone Number (Optional)" value="${signupParent.contactNumber}" 
+                    autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
+            </div>
+        </div>
+        <div class="form-row m-0 ${hideClass}">
+            <strong>Parent's Current Location</strong>
+        </div>
+        <div class="form-row mb-2 ${hideClass}">
+            <label for="sameAsStudentLocation" class="f-13">
+                <input id="sameAsStudentLocation" class="m-0" tabindex="${++tabindex}" type="checkbox" onclick="addressSameAs()" />
+                Same as student location
+            </label>
+        </div>
+        <div class="form-row ${hideClass}">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="pCountryId" id="pCountryId" tabindex="${++tabindex}">
+                    <option value="">Select Country*</option>
+                    ${getCountriesOption(signupParent.countries, signupParent.countryId)}
+                </select>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="pStateId" id="pStateId" tabindex="${++tabindex}">
+                    <option value="">Select State/Province*</option>
+                    ${getStatesOption(signupParent.states, signupParent.stateId)}
+                </select>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-pin"></i>
+                <select name="pCityId" id="pCityId" tabindex="${++tabindex}">
+                    <option value="">Select City*</option>
+                    ${getCitiesOption(signupParent.cities, signupParent.cityId)}
+                </select>
+            </div>
+        </div>`;
+    }
+
+    html += `
+    <div class="form-row m-0 justify-content-center">
+        <div class="form-holder text-center" style="width:100%">
+            <strong>Your Preferred Communication&nbsp;</strong>
+            <b>(You may choose more than one)</b>
+            <div>
+                <label class="cursor communication-mode text-dark valid-field" for="pcModeWhatsapp">
+                    <input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp" 
+                        ${signupParent.communicationWhatsApp == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
+                    <span>WhatsApp</span>
+                    <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" />
+                </label>
+                <label class="cursor communication-mode text-dark" for="pcModeCall">
+                    <input id="pcModeCall" name="pcModeCall" type="checkbox" value="call" 
+                        ${signupParent.communicationCall == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
+                    <span>Call</span><i class="fa fa-phone"></i>
+                </label>
+                <label class="cursor communication-mode text-dark" for="pcModeEmail">
+                    <input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email" 
+                        ${signupParent.communicationEmail == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
+                    <span>Email</span><i class="fa fa-envelope"></i>
+                </label>
+            </div>
+        </div>
+    </div>`;
+
+    return html;
 }
 
 function renderCourseSelectionContent(csr){
@@ -1439,9 +1471,9 @@ function getCourseSelectionContent(csr){
 																			html+=
 																			'</span>';
 																			if(upgradeCourse.courseType == "ADV"){
-																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
 																			}else if(upgradeCourse.courseType == "HON"){
-																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
 																			};
 																		});
 																	}
@@ -1576,9 +1608,9 @@ function getCourseSelectionContent(csr){
 																			html+=
 																			'</span>';
 																			if(upgradeCourse.courseType == "ADV"){
-																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
 																			}else if(upgradeCourse.courseType == "HON"){
-																				html+='<span class="alternate-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
 																			};
 																		});
 																	}
@@ -1818,7 +1850,7 @@ function signupModals(){
 				+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:15px;">'
 					+'<div class="text-center" style="margin: 0 auto;">'
 						+'<button id="noTeacherAssistanceAvailableYes" type="button" class="btn" style="color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;">I understand and agree</button>'
-						+'<button id="noTeacherAssistanceAvailableNo" type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+						+'<button id="noTeacherAssistanceAvailableNo" type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -1834,14 +1866,14 @@ function signupModals(){
 				+'<div id="statusMessage-2" class="modal-body delete-modal">'
 					+'<p class="heading" style="color: #f44336;font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;" id="apCourseSelectionWarningMessage">'
 						+SCHOOL_NAME+' is approved by College Board to offer AP courses. Kindly '
-						+'<a target="_blank" href="https://about.collegeboard.org/contact-us" style="color: #007fff !important;">contact</a>'
+						+'<a target="_blank" href="https://about.collegeboard.org/contact-us" style="color: var(--pc) !important;">contact</a>'
 						+' an authorized test centre for AP exams. AP courses are college level and approved by the College Board.'
 					+'</p>'
 				+'</div>'
 				+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:15px;">'
 					+'<div class="text-center" style="margin: 0 auto;">'
 						+'<button id="apCourseSelectionWarningClose" type="button" class="btn" style="color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;" data-dismiss="modal">I understand and agree</button>'
-						+'<button id="apCourseSelectionWarningNo" type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+						+'<button id="apCourseSelectionWarningNo" type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -1859,7 +1891,7 @@ function signupModals(){
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
 							+'<button type="button" class="btn" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="removeAllCourse()">Yes</button>'
-							+'<button type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+							+'<button type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 						+'</div>'
 					+'</div>'
 			+'</div>'
@@ -1877,7 +1909,7 @@ function signupModals(){
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
 							+'<button type="button" id="addCourseLimitBtn" data-dismiss="modal" class="btn" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="updateCourseLimit()">I UNDERSTAND AND AGREE</button>'
-							+'<button type="button" class="btn btn-danger" data-dismiss="modal">CLOSE</button>'
+							+'<button type="button" class="btn btn-danger " data-dismiss="modal">CLOSE</button>'
 						+'</div>'
 					+'</div>'
 			+'</div>'
@@ -1888,13 +1920,13 @@ function signupModals(){
 			+'<div class="modal-content text-center">'
 				+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
 					+'<div class="modal-body delete-modal">'
-						+'<i class="fa fa-info" style="color: #fff !important; background: #001b47; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
-						+'<p class="heading" style="color: #001b47; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;" id="creditsLimitsOverModalMessage"></p>'
+						+'<i class="fa fa-info" style="color: #fff !important; background: var(--pc); border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
+						+'<p class="heading" style="color: var(--pc); font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;" id="creditsLimitsOverModalMessage"></p>'
 					+'</div>'
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
-							+'<button type="button" id="addCourseOverLimitBtn" class="btn" style="color: #001b47 !important; border: 1px solid #001b47 !important; background: transparent !important;">Confirm & Add</button>'
-							+'<button type="button" class="btn" style="background:#001b47" data-dismiss="modal">CLOSE</button>'
+							+'<button type="button" id="addCourseOverLimitBtn" class="btn" style="color: var(--pc) !important; border: 1px solid var(--pc) !important; background: transparent !important;">Confirm & Add</button>'
+							+'<button type="button" class="btn" style="background:var(--pc)" data-dismiss="modal">CLOSE</button>'
 						+'</div>'
 					+'</div>'
 			+'</div>'
@@ -1910,8 +1942,8 @@ function signupModals(){
 				+'</div>'
 				+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 					+'<div class="text-center" style="margin: 0 auto;">'
-						+'<button type="button" class="btn alternate-txt-color" style="border: 1px solid #001b47 !important; background: transparent !important;" onclick="proceedToChangeGrade()">Yes</button>'
-						+'<button type="button" class="btn" data-dismiss="modal" style="background:#001b47;">No</button>'
+						+'<button type="button" class="btn alternate-txt-color" style="border: 1px solid var(--sc) !important; background: transparent !important;" onclick="proceedToChangeGrade()">Yes</button>'
+						+'<button type="button" class="btn" data-dismiss="modal" style="background:var(--sc);">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -1923,13 +1955,13 @@ function signupModals(){
 			+'<div class="modal-content text-center">'
 				+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
 				+'<div class="modal-body delete-modal">'
-					+'<i class="fa fa-check alternate-bg" style="color: #fff !important; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
-					+'<p class="heading alternate-txt-color" id="upgradeCorusesMessage" style="color: green; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;"></p>'
+					+'<i class="fa fa-check primary-bg" style="color: #fff !important; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
+					+'<p class="heading primary-txt-color" id="upgradeCorusesMessage" style="color: green; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;"></p>'
 				+'</div>'
 				+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 					+'<div class="text-center" style="margin: 0 auto;">'
-						+'<button id="changeCourseYes" type="button" class="btn alternate-txt-color" style="border: 1px solid #001b47 !important; background: transparent !important;">Upgrade</button>'
-						+'<button id="changeCourseNo" type="button" class="btn white-txt-primary" style=" border: 1px solid #001b47 !important; background: #001b47 !important;" data-dismiss="modal">No</button>'
+						+'<button id="changeCourseYes" type="button" class="btn primary-txt-color" style="border: 1px solid var(--pc) !important; background: transparent !important;">Upgrade</button>'
+						+'<button id="changeCourseNo" type="button" class="btn white-txt-primary" style=" border: 1px solid var(--pc) !important; background: var(--pc) !important;" data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -1946,7 +1978,7 @@ function signupModals(){
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
 							+'<button type="button" class="btn" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="callForApplicationSubmit()">Yes</button>'
-							+'<button type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+							+'<button type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 						+'</div>'
 					+'</div>'
 			+'</div>'
@@ -3145,8 +3177,8 @@ function callPaymentStudentModal(data){
 										if(data.pgsAlternate!=null){
 											html+=
 											'<li class="tab-item primary-border-color'+(data.pgs==null && data.pgswu==null?"active":"")+' primary-bg-active">'
-												// +'<a href="#alternate-payment" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">Pay via '+toTitleCase(data.pgsAlternate.gatewayName)+'</a>'
-												+'<a href="#alternate-payment" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">Option 2: Pay via '+toTitleCase(data.pgsAlternate.gatewayName)+'</a>'
+												// +'<a href="#primary-payment" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">Pay via '+toTitleCase(data.pgsAlternate.gatewayName)+'</a>'
+												+'<a href="#primary-payment" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">Option 2: Pay via '+toTitleCase(data.pgsAlternate.gatewayName)+'</a>'
 											+'</li>';
 										}
 										if(data.pgsCash!=null){
@@ -3479,8 +3511,8 @@ function callPaymentStudentModal(data){
 									}
 									if(data.pgsAlternate!=null){
 										html+=
-										'<div role="tabpanel" id="alternate-payment" class="tab-pane '+(data.pgs==null && data.pgswu ==null?'active':'')+' alternate-payment flex-item primary-border-color">'
-											+'<div id="alternate-pg">'
+										'<div role="tabpanel" id="primary-payment" class="tab-pane '+(data.pgs==null && data.pgswu ==null?'active':'')+' primary-payment flex-item primary-border-color">'
+											+'<div id="primary-pg">'
 												+'<div class="payment-icon lg">';
 													if(data.pgsAlternate.gatewayName=='Stripe'){
 														html+='<img src="'+PATH_FOLDER_IMAGE+'STRIPE.png">';
@@ -3644,8 +3676,8 @@ function referenceNumberModal(data){
 							+'<h4 class="modal-title fw-600">Are you sure you want to submit this reference number? Once submitted, you won’t be able to change this number again.</h4>'
 							+'<hr/>'
 							+'<div class="full text-right">'
-								+'<button type="button" class="btn bg-primary text-white" id="proceedStudentPayment" data-dismiss="modal" style="background: #5cb85c !important">Yes</button>'
-								+'<button type="button" class="btn bg-primary text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
+								+'<button type="button" class="btn bg-primary  text-white" id="proceedStudentPayment" data-dismiss="modal" style="background: #5cb85c !important">Yes</button>'
+								+'<button type="button" class="btn bg-primary  text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
 							+'</div>'
 						+'</div>'
 					+'</div>'
@@ -3681,7 +3713,7 @@ function logoutModalLogout(data){
 							+'</h4>'
 							+'<br/>'
 							+'<p class="text-center">'
-								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
+								+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
 							+'</p>'
 						+'</div>'
 					+'</div>'
@@ -3719,7 +3751,7 @@ function logoutModalLogout(data){
 // 							+'If you would like to choose another payment method, kindly <a href="javascript:void(0);" onclick="$(\'#wu_payment_warning\').modal(\'hide\');callSigninStudentPay(this,\'signup\');" class="anchor-color">click here</a>'
 // 							+'<br/>'
 // 							+'<p class="text-center">'
-// 								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
+// 								+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
 // 							+'</p>'
 // 						+'</div>'
 // 					+'</div>'
@@ -3756,7 +3788,7 @@ function logoutModalLogout(data){
 // 									+'You can contact us at <u>'+data.contactEmail+'</u> for more information regarding elementary enrollment.'
 // 								+'</span>'
 // 								+'<p class="text-center">'
-// 									+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
+// 									+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
 // 								+'</p>'
 // 							+'</div>'
 // 						+'</form>'
@@ -4061,7 +4093,7 @@ function recommendedCourseModalContent(data){
 				+'<div class="modal-header primary-bg white-txt-color" style="display:flex;justify-content:space-between;border-top-left-radius:6px;border-top-right-radius:6px">'
 					+'<h5 class="modal-title">Recommended Courses</h5>'
 					+'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">×</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div  class="modal-body" courses="">'
@@ -4122,7 +4154,7 @@ function logOutModalContent(){
 	// 			// +'</div>'
 	// 			+'<div class="modal-body text-center" style="display:inline-block;width:100%;">'
 	// 				+'<br/>'
-	// 				+'<h3 class="form-heading alternate-txt-color"></h3>'
+	// 				+'<h3 class="form-heading primary-txt-color"></h3>'
 	// 				+'<a href="javascript:void(0)" class="btn primary-bg white-txt-color btn-sm">Yes</a>'
 	// 				+'<a href="javascript:void(0)" class="btn primary-bg white-txt-color btn-sm" onclick="logoutConfimation(false)">No</a>'
 	// 			+'</div>'
@@ -4134,13 +4166,13 @@ function logOutModalContent(){
 			+'<div class="modal-content text-center">'
 				+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
 					+'<div class="modal-body delete-modal">'
-						+'<i class="zmdi zmdi-power alternate-bg" style="color: #fff !important; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
-						+'<p class="heading alternate-txt-color" style=" font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to logout?</p>'
+						+'<i class="zmdi zmdi-power primary-bg" style="color: #fff !important; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
+						+'<p class="heading primary-txt-color" style=" font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to logout?</p>'
 					+'</div>'
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
-							+'<button type="button" data-dismiss="modal" class="btn alternate-txt-color" style="border: 1px solid #001b47 !important; background: transparent !important;"  onclick="logoutConfimation(true, \''+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'\')">Yes</button>'
-							+'<button type="button" class="btn" data-dismiss="modal" style="background:#001b47;">No</button>'
+							+'<button type="button" data-dismiss="modal" class="btn primary-txt-color" style="border: 1px solid var(--pc) !important; background: transparent !important;"  onclick="logoutConfimation(true, \''+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'\')">Yes</button>'
+							+'<button type="button" class="btn" data-dismiss="modal" style="background:var(--pc);">No</button>'
 						+'</div>'
 					+'</div>'
 			+'</div>'
@@ -4156,13 +4188,13 @@ function switchFlexyGradeWarningModal(){
 			<div class="modal-content text-center">
 				<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>
 				<div class="modal-body delete-modal">
-					<i aria-hidden="true" class="fa fa-exchange alternate-bg white-txt-color" style="border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>
-					<p class="heading alternate-txt-color" id="gradeChangeWarningMessage"></p>
+					<i aria-hidden="true" class="fa fa-exchange primary-bg white-txt-color" style="border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>
+					<p class="heading primary-txt-color" id="gradeChangeWarningMessage"></p>
 				</div>
 				<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">
 					<div class="text-center" style="margin: 0 auto;">
-						<button type="button" id="gradeChangeWarningYes" class="btn alternate-txt-color" style="border: 1px solid #001b47 !important; background: transparent !important;">Yes</button>
-						<button type="button" id="gradeChangeWarningNo" class="btn" data-dismiss="modal" style="background:#001b47;color:white">No</button>
+						<button type="button" id="gradeChangeWarningYes" class="btn primary-txt-color" style="border: 1px solid var(--pc) !important; background: transparent !important;">Yes</button>
+						<button type="button" id="gradeChangeWarningNo" class="btn" data-dismiss="modal" style="background:var(--pc);color:white">No</button>
 					</div>
 				</div>
 			</div>

@@ -372,7 +372,7 @@ function callLocationAndSelectTimeZoneFill(formId, data){
 		});
 	}
 	if(data!=undefined && data !=''){
-		console.log('callLocationAndSelectTimeZoneFill data :'+JSON.stringify(data))
+		//console.log('callLocationAndSelectTimeZoneFill data :'+JSON.stringify(data))
 		$("#"+formId+" #countryTimezoneId").val(data.timezone).trigger('change')
 		$("#"+formId+" #location").val(JSON.stringify(data));
 	}

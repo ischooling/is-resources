@@ -1776,7 +1776,7 @@ overflow-y:scroll; -webkit-overflow-y:scroll; -moz-overflow-y:scroll; -o-overflo
 	.mobile-view{text-align:left}
 }
 .common-btn{float: left;width: auto;margin-top: 15px}
-.common-btn a{float:left;padding: 10px 20px;color:#fff;background:#007fff;border-radius: 5px;font-size: 16px}
+.common-btn a{float:left;padding: 10px 20px;color:#fff;background:var(--pc);border-radius: 5px;font-size: 16px}
 
 .password-sugession{max-width: 255px;box-shadow: 1px 2px 6px #999;background: #fff; padding: 4px;border-radius: 4px;position: absolute;right:5px;bottom:inherit !important;top:inherit !important;z-index: 999999;display: none;}
 .password-sugession span{position: relative !important;left:inherit !important;right: inherit !important;top:inherit !important;bottom: inherit !important;}

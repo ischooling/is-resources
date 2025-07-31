@@ -2,7 +2,7 @@ function getRecurringClassesData(formId, elementId) {
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/teacher-recurring-class-content/",
 		data: JSON.stringify(getRecurringBody(formId)),
 		dataType: 'json',
@@ -82,7 +82,7 @@ function recurringMail(recurringClassId,moduleId) {
 	data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','recurring-mail-admin-student'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -93,9 +93,6 @@ function recurringMail(recurringClassId,moduleId) {
 				showMessage(false, data['message']);
 				setTimeout(function (){callDashboardPageSchool(moduleId,'teacher-recurring-class-content');},1000);
 			}
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});

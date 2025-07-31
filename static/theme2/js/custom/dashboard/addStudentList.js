@@ -124,11 +124,6 @@ function callForAddStudentDetails(formId) {
     			return false;
 			}
 			customLoader(false);
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			//customLoader(false);
-			return false;
 		}
 	});
 	
@@ -322,7 +317,7 @@ function callMandSubjects(formId, value, elementId) {
 	$("#"+formId+" #currentsubject11").prop("disabled", true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId', 'COMP-SUBJECT-LIST-BY-GRADE', value,$('#schoolId').val())),
 		dataType : 'json',
@@ -343,10 +338,6 @@ function callMandSubjects(formId, value, elementId) {
 			}
 			$("#currentsubject11").prop("disabled", false);
 			//return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			$("#currentsubject11").prop("disabled", false);
 		}
 	});
 }
@@ -361,7 +352,7 @@ function callOptSubjects(formId, value, elementId) {
 	$("#"+formId+" #currentsubject11").prop("disabled", true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId', 'OPTIONAL-SUBJECT-LIST-BY-GRADE', value,$('#schoolId').val())),
 		dataType : 'json',
@@ -382,10 +373,6 @@ function callOptSubjects(formId, value, elementId) {
 			}
 			$("#currentsubject11").prop("disabled", false);
 			//return false;
-		},
-		error : function(e) {
-			showMessage(true, e.responseText);
-			$("#currentsubject11").prop("disabled", false);
 		}
 	});
 }
@@ -400,7 +387,7 @@ function callSubjectsByGrade(formId, value, elementId) {
 	$("#"+formId+" #prevSubject").prop("disabled", true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster(formId, 'PREVSUBJECT-LIST', value)),
 		dataType : 'json',
@@ -413,10 +400,6 @@ function callSubjectsByGrade(formId, value, elementId) {
 				buildDropdown(data['mastersData']['prevSub'], $('#prevSubject'), 'Select course');
 				$("#"+formId+" #prevSubject").prop("disabled", false);
 			}
-			$("#"+formId+" #prevSubject").prop("disabled", false);
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			$("#"+formId+" #prevSubject").prop("disabled", false);
 		}
 	});
@@ -926,7 +909,7 @@ function getCurrentSubjectMarks(formId, value, elementId) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId', 'GET_CURRENT_SUBJECT_MARKS_BY_SUBJECT_ID', value,$('#schoolId').val())),
 		dataType : 'json',
@@ -948,9 +931,6 @@ function getCurrentSubjectMarks(formId, value, elementId) {
 					}
 				});
 			}
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }

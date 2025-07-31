@@ -33,7 +33,7 @@ function cartDetailContent(data, userId){
                     There are no plans added to your cart.
                 </h4>
                 <div class="full mt-2 mb-2 p-2 text-center">
-                    <a class="btn btn-lg btn-primary btn-shadow" href="javascript:void(0)" onclick="return callDashboardPageSchool(89,'student-addon');"> Browse Plans </a>
+                    <a class="btn btn-lg btn-primary " href="javascript:void(0)" onclick="return callDashboardPageSchool(89,'student-addon');"> Browse Plans </a>
                 </div>`
             }else{
                 html+=
@@ -62,10 +62,10 @@ function cartDetailContent(data, userId){
                                                 <label class="label mr-2">Plan Fee:</label>
                                                 <span class="font-weight-bold">${schoolSettingsTechnical.currencySymbol} `+(parseFloat(item.planAmount).toFixed(2))+`</span>
                                                 <div class="ml-auto">
-                                                    <a href="javascript:void(0)" class="btn btn-danger btn-shadow" onclick="updateCartDetails(${userId},'remove',${item.cartId});">
+                                                    <a href="javascript:void(0)" class="btn btn-danger " onclick="updateCartDetails(${userId},'remove',${item.cartId});">
                                                         <i class="fa fa-trash"></i>
                                                     </a>
-                                                    <a href="javascript:void(0)" class="btn btn-primary btn-shadow" onclick="renderBuyExtraClasses(${userId}, ${item.subjectId});">
+                                                    <a href="javascript:void(0)" class="btn btn-primary " onclick="renderBuyExtraClasses(${userId}, ${item.subjectId});">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
                                                 </div>

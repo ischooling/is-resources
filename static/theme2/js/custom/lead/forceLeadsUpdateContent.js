@@ -45,20 +45,20 @@ function forceDemoUpdateModalContent(data){
 	`<div class="modal fade" id="demoDetailsModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog `+(newThemeflag?'modal-xl':'modal-lg')+`" role="document">
 			<div class="modal-content">
-				<div class="modal-header `+(newThemeflag?'modal-header bg-primary py-2':'')+`">`;
+				<div class="modal-header `+(newThemeflag?'modal-header py-2 bg-primary':'')+`">`;
 					if(newThemeflag){
 						html+=
 						`<h5 class="modal-title text-white">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(!data.details.showUpdateDemoPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>`;
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
-						`<h4 class="modal-title" style="color:#fff;">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h4>`;
+						`<h5 class="modal-title" style="color:#fff;">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(!data.details.showUpdateDemoPopupStatus){
-							html+=`<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true" style="color:#fff;">&times;</span>
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}
 					}

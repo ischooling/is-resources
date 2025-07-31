@@ -14,7 +14,7 @@ function manageSessionData(elementId, argument, userId, role){
 	var url="/dashboard/student-manage-session-content"+argument;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : CONTEXT_PATH+UNIQUEUUID+url.split('?')[0],
 		data : JSON.stringify(parseUrlToJson(url)),
 		dataType : 'json',

@@ -14,7 +14,7 @@ function searchPaymentHistory(formId, entityId, entityName){
 	callForPaymentHistory(false, formId, 'add', entityId, entityName, paymentDate, paymentMode)
 }
 function callForPaymentHistory(showModal, formId, controllType, entityId, entityName, paymentDate, paymentMode) {
-	hideMessage('');
+	hideMessageTheme2('');
 	var data = {
 		'controllType' : controllType,
 		'entityId' : entityId,
@@ -24,16 +24,18 @@ function callForPaymentHistory(showModal, formId, controllType, entityId, entity
 	}
 	$.ajax({
 		type : "POST",
-		contentType : 'application/json',
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','payments-by-entity-id'),
 		data : JSON.stringify(data),
 		dataType : 'html',
+		cache : false,
+		timeout : 600000,
 		success : function(htmlContent) {
 			if(htmlContent!=""){
             	var stringMessage = [];
             	stringMessage = htmlContent.split("|");
         		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT" ){
-        			showMessage(true, stringMessage[1]);
+        			showMessageTheme2(0, stringMessage[1]);
         		} else {
         			$('#commonPaymentModelContents').html(htmlContent);
         			$('#entityIdSearch').val(entityId);
@@ -44,59 +46,56 @@ function callForPaymentHistory(showModal, formId, controllType, entityId, entity
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			console.log(e)
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
 function showAddPaymentForm(formId, controllType, entityId, entityName, userName){
+	$("#addPaymentHistory").trigger('reset');
 	$('#commonAddPaymentModel').modal('show');
 	$('#entityId').val(entityId);
 	$('#entityName').val(entityName);
 	$('#userName').val(userName);
+	removeDocument('1','4')
 	hideModalMessage('');
 }
 function savePaymentHistory(formId, controllType, entityId, entityName, userName) {
 	if ($("#"+formId+" #entityId").val()=='') {
-		showModalMessage(true, 'Entity Id is required');
+		showMessageTheme2(0, 'Entity Id is required');
 		return false
 	}
 	if ($("#"+formId+" #entityName").val()=='') {
-		showModalMessage(true, 'Entity name is required');
+		showMessageTheme2(0, 'Entity name is required');
 		return false
 	}
 	if ($("#"+formId+" #paymentDate").val()=='') {
-		showModalMessage(true, 'Payment date is required');
+		showMessageTheme2(0, 'Payment date is required');
 		return false
 	}
 	if ($("#"+formId+" #paymentMode").val()=='' || $("#"+formId+" #paymentMode").val()==null) {
-		showModalMessage(true, 'Payment mode is required');
+		showMessageTheme2(0, 'Payment mode is required');
 		return false
 	}
 	if ($("#"+formId+" #paymentCurrency").val()=='' || $("#"+formId+" #paymentCurrency").val()==null) {
-		showModalMessage(true, 'Payment currency is required');
+		showMessageTheme2(0, 'Payment currency is required');
 		return false
 	}
 	if ($("#"+formId+" #paymentAmount").val()=='') {
-		showModalMessage(true, 'Payment amount is required');
+		showMessageTheme2(0, 'Payment amount is required');
 		return false
 	}
 	if ($("#"+formId+" #remarks").val()=='') {
-		showModalMessage(true, 'Remarks is required');
+		showMessageTheme2(0, 'Remarks is required');
 		return false
 	}
-	var imageName =$('#fileupload1').parent('span').parent('p').parent('div').find('span.fileName').html();
-	if(imageName==''){
-		showModalMessage(true, 'Attachment is required');
+	var imageName = $('#fileupload1').parent().find('span.fileName').html();;
+	if(imageName == null || imageName == undefined || imageName==''){
+		showMessageTheme2(0, 'Attachment is required');
 		return false
 	}
 	$.ajax({
 		type : "POST",
 		url : getURLForHTML('dashboard','save-payment-history'),
-		contentType : 'application/json',
+		contentType : APPLICATION_JSON_VALUE,
 		data : JSON.stringify(getRequestForSavePaymentHistory(formId, moduleId)),
 		dataType : 'html',
 		cache : false,
@@ -106,17 +105,14 @@ function savePaymentHistory(formId, controllType, entityId, entityName, userName
             	var stringMessage = [];
             	stringMessage = htmlContent.split("|");
         		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT" ){
-        			showModalMessage(true, stringMessage[1]);
+        			showMessageTheme2(0, stringMessage[1]);
         		} else {
-        			showModalMessage(false, stringMessage[1]);
+        			showMessageTheme2(1, stringMessage[1]);
         			resetPaymentHistoryForm(formId)
+					$('#commonAddPaymentModel').modal('hide');
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -134,7 +130,7 @@ function getRequestForSavePaymentHistory(formId, moduleId){
 	commonPaymentHistoryDTO['paymentCurrency']=$("#"+formId+" #paymentCurrency").val();
 	commonPaymentHistoryDTO['paymentAmount']=$("#"+formId+" #paymentAmount").val();
 	commonPaymentHistoryDTO['remarks']=escapeCharacters($("#"+formId+" #remarks").val());
-	var imageName =$('#fileupload1').parent('span').parent('p').parent('div').find('span.fileName').html();
+	var imageName =$('#fileupload1').parent().find('span.fileName').html();
 	if(imageName!='' && imageName!=undefined){
 		if ($.inArray($.trim(imageName.split('.').pop().toLowerCase()), ['gif','png','jpg','jpeg','pdf']) == -1){
 	
@@ -157,69 +153,138 @@ function resetPaymentHistoryForm(formId){
 	$("#"+formId+" #paymentCurrency").val('');
 	$("#"+formId+" #paymentAmount").val('');
 	$("#"+formId+" #remarks").val('');
-	removeDocument('1','3');
+	removeDocument('1','4');
 }
 function validateRequestForSaveTeacherOfficialMail(formId,moduleId,controllType){
 	if(controllType=='ADD'){
 		if (!validateEmail($("#"+formId+" #officialEmailId").val())) {
-			showMessage(true, 'Email is invalid');
+			showMessageTheme2(0, 'Email is invalid');
 			return false;
 		}
 		if (!validateEmail($("#"+formId+" #confirmOfficialEmailId").val())) {
-			showMessage(true, 'Confirm Email is invalid');
+			showMessageTheme2(0, 'Confirm Email is invalid');
 			return false;
 		}
 		if($("#"+formId+" #officialEmailId").val().trim()!= $("#"+formId+" #confirmOfficialEmailId").val().trim()){
-			showMessage(true, 'Email and Confirm Email are not same');
+			showMessageTheme2(0, 'Email and Confirm Email are not same');
 			return false;
 		}
 		
 		if ($('#teamUserCheck').is(":checked")== true ) {
 			if ($("#"+formId+" #teamPassword").val()=='') {
-				showMessage(true, 'Password is invalid');
+				showMessageTheme2(0, 'Password is invalid');
 				return false;
 			}
 			if ($("#"+formId+" #confirmTeamPassword").val()=='') {
-				showMessage(true, 'Confirm Password is invalid');
+				showMessageTheme2(0, 'Confirm Password is invalid');
 				return false;
 			}
 			if($("#"+formId+" #teamPassword").val().trim()!= $("#"+formId+" #confirmTeamPassword").val().trim()){
-				showMessage(true, 'Password and Confirm Password are not same');
+				showMessageTheme2(0, 'Password and Confirm Password are not same');
 				return false;
 			}
 		}
 	}
 	return true;
 }
+function saveTeacherBufferHoursToAddAvailability(formId,roleModuleId) {
+	hideMessageTheme2('');
+	if($('#'+formId+' #bufferHours').val()==undefined || $('#'+formId+' #bufferHours').val()==''){
+		showMessageTheme2(0, 'Either buffer hours are empty or invalid');
+		return false;
+	}
+	var data={};
+	data['userId']=$('#'+formId+' #userId').val();
+	data['teacherId']=$('#'+formId+' #teacherId').val();
+	data['bufferHours']=$('#'+formId+' #bufferHours').val();
+	data['sessionUserId']=USER_ID;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLFor('dashboard','save-teacher-buffer-hours-for-availability'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				$('#teacherAddBufferAvailaibilityModel').modal('hide');
+				setTimeout(function(){ 
+					//callDashboardPageSchool(roleModuleId,'approved-teachers'); 
+					getApprovedTeacherList(roleModuleId, USER_ID, SCHOOL_ID, '0', '0,1', 0) ;
+				}, 1000);
+			}
+			return false;
+		}
+	});
+}
 function saveTeacherOfficialMail(formId,moduleId,controllType,teacherId, roleModuleId, fromUrl) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if(!validateRequestForSaveTeacherOfficialMail(formId,moduleId,controllType,teacherId)){
 		return false;
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('dashboard','save-teacher-official-email'),
 		data : JSON.stringify(getRequestForSaveTeacherOfficialMail(formId, moduleId,controllType,teacherId, roleModuleId)),
 		dataType : 'json',
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(false, data['message']);
+				showMessageTheme2(1, data['message']);
 				
 				if(fromUrl=='withdraw'){
 					setTimeout(function(){ callDashboardPageSchool(roleModuleId,'withdraw-teachers'); }, 1000);
 				}else{
 					if(controllType=='ADD'){
 						$('#teacherOfficialModel').modal('hide');
-						setTimeout(function(){ callDashboardPageSchool(roleModuleId,'approved-teachers'); }, 1000);
+						setTimeout(function(){ 
+							//callDashboardPageSchool(roleModuleId,'approved-teachers'); 
+							getApprovedTeacherList(roleModuleId, USER_ID, SCHOOL_ID, '0', '0,1', 0) ;
+						}, 1000);
 					}else if(controllType=='REFRESH_TOKEN'){
 					}else{
-						setTimeout(function(){ callDashboardPageSchool(roleModuleId,'approved-teachers'); }, 1000);
+						setTimeout(function(){ 
+							//callDashboardPageSchool(roleModuleId,'approved-teachers'); 
+							getApprovedTeacherList(roleModuleId, USER_ID, SCHOOL_ID, '0', '0,1', 0) ;
+						}, 1000);
 						
 					}
 				}
+			}
+			return false;
+		}
+	});
+}
+
+function activateInactiveBookaClassForPtmAndCustom(formId,moduleId,controllType,teacherId, roleModuleId, showOption) {
+	hideMessageTheme2('');
+	var data = {};
+	data['schoolId'] = SCHOOL_ID;
+	data['moduleId'] = moduleId;
+	data['roleModuleId'] = roleModuleId;
+	data['userId'] = USER_ID;
+	data['teacherId'] = teacherId;
+	data['showOption']=showOption;
+	data['controllType']=controllType
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLFor('dashboard','active-inactive-teacher-book-class-options'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				setTimeout(function(){ 
+					//callDashboardPageSchool(roleModuleId,'approved-teachers'); 
+					getApprovedTeacherList(roleModuleId, USER_ID, SCHOOL_ID, '0', '0,1', 0) ;
+				}, 1000);	
 			}
 			return false;
 		}
@@ -249,16 +314,16 @@ function getRequestForSaveTeacherOfficialMail(formId,moduleId,controllType,teach
 		teacherRequestDTO['teacherId'] = teacherId;
 	}
 	
-	requestData['teacherRequestDTO'] = teacherRequestDTO;
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
-	authentication['userId'] = $("#userId").val();
+	authentication['userId'] = USER_ID;
 	request['authentication'] = authentication;
 	request['teacherRequestDTO'] = teacherRequestDTO;
 	return request;
 }
 
-function callTeacherOfficialEmailModal(teacherId, userId, officialEmailId,gotoMeetingIdT,gotoMeetingPasswordT,zoomPassword,teamStatus){
+function callTeacherOfficialEmailModal(teacherId, userId, officialEmailId,gotoMeetingIdT,gotoMeetingPasswordT, zoomPassword,teamStatus){
+	
 	$('#teacherOfficialModel').modal('show');
 	$('#teacherOfficialMailForm #teamPassword').val('');
 	$('#teacherOfficialMailForm #confirmTeamPassword').val('');
@@ -282,8 +347,16 @@ function callTeacherOfficialEmailModal(teacherId, userId, officialEmailId,gotoMe
 		$('.paswrd').css("display","block");
 		$('#teacherOfficialMailForm #teamPassword').val(gotoMeetingPasswordT);
 		$('#teacherOfficialMailForm #confirmTeamPassword').val(gotoMeetingPasswordT);
+		
 	}
 	if(teamStatus!='Active' && teamStatus!='Inactive'){
 		$('#teamUserCreationDiv').hide(); 
 	}
+}
+
+function callTeacherAddBufferAvailaibilitylModal(teacherId, userId,bufferHoursToAddAvailability){
+	$('#teacherAddBufferAvailaibilityModel').modal('show');
+	$('#teacherAddBufferAvailabilityForm #teacherId').val(teacherId);
+	$('#teacherAddBufferAvailabilityForm #userId').val(userId);
+	$('#teacherAddBufferAvailabilityForm #bufferHours').val(bufferHoursToAddAvailability);
 }

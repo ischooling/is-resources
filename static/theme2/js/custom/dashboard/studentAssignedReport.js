@@ -31,7 +31,7 @@ function studentAssginedReportSearch(formId,moduleId, userId, userRole){
 function studentAssginedReportSearchData(formId, elementId, argument, userId, role){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('report','get-assigned-teacher-report'),
 		dataType : 'json',
 		data : JSON.stringify(getStudentAssignedRequest(formId)),
@@ -147,7 +147,7 @@ function getStudentAssignedReportWithFilterSubmit(callingFrom,teacherId,learning
 	$('#studentAssignWithFilterBtn').attr('onClick','getStudentAssignedReportWithFilterSubmit(\'TSF\','+teacherId+',\'\')');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('report', 'get-assigned-teacher-report-with-filter'),
 		dataType : 'json',
 		data : JSON.stringify(getStudentAssignedRequestWithFilter(formId,callingFromActual)),
@@ -252,7 +252,7 @@ function getStudenLastActivityDetails(studentUserId,lmsUserId,entityId) {
 	data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','get-student-progress-report-detail'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -321,7 +321,7 @@ function getStudentAssignedReportFromChart(callingFrom,teacherId,learningProgram
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('report', 'get-assigned-teacher-report-with-filter'),
 		dataType : 'json',
 		data : JSON.stringify(getStudentAssignedRequestFromChart(formId,callingFromActual, activeStatus, teacherId, standardId)),
@@ -401,7 +401,7 @@ function getStudentAssignedRequestFromChart(formId,callingFrom, activeStatus, te
 function getTeacherPerformance(formId, elementId, callfrom, smonth, syear){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','teacher-class-management-content'),
 		dataType : 'json',
 		data : JSON.stringify(getRequestForTeacherPerformance(formId, callfrom, smonth, syear)),
@@ -477,7 +477,7 @@ function getHtmlTeacherPerformance(teacherReports){
 
 	$(".projectHoursPercent").text(teacherReports.projectHoursPercent+"%");
 
-	var progressDiv ="<div class=\"progress-bar bg-info\" role=\"progressbar\" aria-valuenow=\""+teacherReports.projectHoursPercent+"\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: "+teacherReports.projectHoursPercent+"%;\"></div>" ;
+	var progressDiv ="<div class=\"progress-bar bg-primary\" role=\"progressbar\" aria-valuenow=\""+teacherReports.projectHoursPercent+"\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: "+teacherReports.projectHoursPercent+"%;\"></div>" ;
 	$(".progressbar").html(progressDiv);
 
 	var completeDiv="";
@@ -675,7 +675,7 @@ function getHtmlTeacherSalary(teacherReports){
 	salCalHtml+="<div class=\"p-2 text-white\">Salary Calculation : <b>"+startMonthDate+"</b></div>";
 	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-1 bg-white\">";
 	salCalHtml+="<tbody>"
-	salCalHtml+="<tr><td>Salary Agreed</td><td class=\"bold\" style=\"width:120px;color:#3f6feb\">"+teacherReports.payout.agreedPayout+"</td></tr>";
+	salCalHtml+="<tr><td>Salary Agreed</td><td class=\"bold\" style=\"width:120px;color:var(--pc)\">"+teacherReports.payout.agreedPayout+"</td></tr>";
 	salCalHtml+="</tbody></table>";
 	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-0 bg-white\">";
 	salCalHtml+="<tbody>";
@@ -691,7 +691,7 @@ var class_hrsHtml="";
 class_hrsHtml+="<div class=\"p-2 text-white\">Classes & Hours Calculation: <b>"+startMonthDate+"</b></div>"
 class_hrsHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-1 bg-white\">"
 class_hrsHtml+="<tbody>";
-class_hrsHtml+="<tr style=\"background:#cbe0f6;\">";
+class_hrsHtml+="<tr style=\"background:var(--slc)\">";
 class_hrsHtml+="<td></td>";
 class_hrsHtml+="<td><b>Working Hours<br/>Submitted</b></td>";
 class_hrsHtml+="<td><b>Working Hours<br/>Deducted after review</b></td>";
@@ -777,13 +777,13 @@ if(teacherReports.attendanceList.length>0){
 	$("#teacher_attendance").html(attandHtml);
 }
 var attandHtmlFoot="";
-		attandHtmlFoot+="<tr>"
-		attandHtmlFoot+="<th></th><th></th><th></th><th>Submitted Hours</th><th>Deducted Hours</th><th>Accepted Hours</th><th></th><th></th></tr>";
+		attandHtmlFoot+="<tr class=\'bg-primary text-white\'>"
+		attandHtmlFoot+="<th class=\'border-primary\'></th><th></th><th></th><th>Submitted Hours</th><th>Deducted Hours</th><th>Accepted Hours</th><th class=\'border-primary\'></th></tr>";
 		attandHtmlFoot+="<tr><td></td><td></td><td></td>";
 		attandHtmlFoot+="<td>"+teacherReports.total_review_hours+"</td>";
 		attandHtmlFoot+="<td>"+teacherReports.total_minus_hours+"</td>";
 		attandHtmlFoot+="<td><b>"+teacherReports.total_accept_hours+"</td>";
-		attandHtmlFoot+="<td></td><td></td></tr>";
+		attandHtmlFoot+="<td></td></tr>";
 	$("#teacher_attendance_footer").html(attandHtmlFoot);
 
 }

@@ -20,7 +20,7 @@ function getCommunicationLogData(elementId,userId,role){
 	data['role']=role;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : CONTEXT_PATH+UNIQUEUUID+"/api/v1/dashboard/get-user-communication-log",
 		data: JSON.stringify(data),
 		dataType : 'json',
@@ -103,7 +103,7 @@ function saveCommunicationLog(formId) {
 	}
     $.ajax({
         type : "POST",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : getURLFor('dashboard','save-user-communication-log'),
         data : JSON.stringify(getRequestForCommunicationLog(formId)),
         dataType : 'json',
@@ -131,11 +131,6 @@ function saveCommunicationLog(formId) {
 			}
             
             return false;
-        },
-        error : function(e) {
-            //showMessage(true, e.responseText);
-            console.log("ERROR : ", e);
-            $("#lmsUserForm").prop("disabled", false);
         }
     });
 }

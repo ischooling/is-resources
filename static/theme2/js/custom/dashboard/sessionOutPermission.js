@@ -12,3 +12,18 @@ async function getUserShortProfile(userId){
 	return responseData;
 }
 window.getUserShortProfile = getUserShortProfile;
+
+async function getOfflineSchoolList(userId){
+	// var responseData = await  getDesiredObject('profile'+userId);
+	// if(typeof responseData =='object'){
+	// 	if(!responseData.ntc){
+	// 		return responseData;
+	// 	}
+	// }
+	var data={};
+	data['userId']=userId;
+	var responseData = await getDataBasedUrlAndPayload('school-list', data);
+	//localStorage.setItem('profile'+userId,JSON.stringify(responseData));
+	return responseData;
+}
+window.getOfflineSchoolList = getOfflineSchoolList;

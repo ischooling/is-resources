@@ -1,6 +1,7 @@
 var max_age = "";
 
 $(document).ready(function() {
+	
 	$("#signupParent").submit(function(event) {
 		event.preventDefault();
 	});
@@ -29,7 +30,7 @@ function callForSignUpParents() {
 	showSkeleton(true, "step3");
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/save-parent-details',
 		data : JSON.stringify(getRequestForSignupParent()),
 		dataType : 'json',
@@ -223,7 +224,7 @@ function emailCheckForParent(parentEmail, module, userId, studentId, parentName)
 		}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('is-user-available-for-parent'),
 		data : JSON.stringify(getCallRequestForEmailCheckForParent(parentEmail, module, userId, studentId)),
 		dataType : 'json',
@@ -275,7 +276,7 @@ function emailCheckForParentUser(parentEmail, module, userId, studentId, parentN
 		}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('send-otp-for-parent-verification'),
 		data : JSON.stringify(getCallRequestForEmailCheckForParentUser(parentEmail, module, userId, studentId)),
 		dataType : 'json',
@@ -326,7 +327,7 @@ function mapParentAndAlreadyExistStudent(){
 		url : getURLFor('student','signup/stage-3-mapping-parent-student'),
 		data : JSON.stringify(getRequestForSignupParentMapping()),
 		dataType : 'json',
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(0, data['message']);
@@ -413,7 +414,7 @@ function sendOtpForParentUser(parentEmail, parentName, userId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('send-otp-for-parent-verification'),
 		data : JSON.stringify(getDataForParentOTPVerification(parentEmail,parentName, userId)),
 		dataType : 'json',
@@ -455,7 +456,7 @@ function verifyOtp(){
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('verify-otp'),
 		data : JSON.stringify(getDataForOtpVerification()),
 		dataType : 'json',
@@ -524,7 +525,7 @@ function getRequestForParentSelection(){
 function callForParentSelection() {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/get-parent-details',
 		data : JSON.stringify(getRequestForParentSelection()),
 		dataType : 'json',

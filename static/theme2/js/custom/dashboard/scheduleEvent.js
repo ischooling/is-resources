@@ -30,7 +30,7 @@ function getDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondi
     }
 	$.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','get-data-for-scheduled-events'),
 		 data : JSON.stringify(getCallRequestForAdvanceSearchOfEvents(formId, clickFrom,currentPageNo,boxSearchCondition)),
 		 dataType : 'json',
@@ -159,7 +159,7 @@ function sendMailToInviteeForDemo(meetingId) {
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','send-demo-mail-to-invitee'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',
@@ -176,10 +176,6 @@ function sendMailToInviteeForDemo(meetingId) {
 				showMessageTheme2(1, data['message'],'',true);
 				customLoader(false);
 			}
-		 },
-		 error:function(e){
-			// console.log(e);
-			 customLoader(false);
 		 }
 	 });
 }
@@ -212,7 +208,7 @@ function updateMeetingStatus(meetingId, leadId) {
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('timeavailability','update-meeting-status'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',
@@ -232,10 +228,6 @@ function updateMeetingStatus(meetingId, leadId) {
 				showMessageTheme2(1, data['message'],'',true);
 				customLoader(false);
 			}
-		 },
-		 error:function(e){
-			// console.log(e);
-			 customLoader(false);
 		 }
 	 });
 }
@@ -272,7 +264,7 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
         type: "POST",
         url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-event-recordings",
         data: JSON.stringify(body),
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         success: function (response) {
             const res = JSON.parse(response);
             if (res.statusCode === 0 && res.status === "success") {
@@ -285,9 +277,6 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
             } else {
                 showMessageTheme2(0, `Error: ${res.message}`, '', true);
             }
-        },
-        error: function (e) {
-            console.error("Error Fetching the data:", e.message);
         }
     });
 }
@@ -345,7 +334,7 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                             ? `
                             <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
                                 <h6>${sessionUrls.length + 1}. Transcript</h6>
-                                <button class="btn btn-secondary" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                                <button class="btn btn-secondary " onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
                             </div>`
                             : ""
                     }
@@ -374,7 +363,7 @@ function playRecording(videoUrl, title) {
     let videoModal = $("#videoModal");
     $.ajax({
         type: "GET",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         dataType: 'json',
         url: getURLForSignVideo(videoUrl),
         success: function (responseData) {
@@ -412,11 +401,6 @@ function playRecording(videoUrl, title) {
                 showMessageTheme2(0, responseData.message || "Failed to fetch video URL", '', true);
             }
 
-            customLoader(false);
-        },
-        error: function (e) {
-            console.error("Error fetching signed video URL:", e.message);
-            showMessageTheme2(0, "Error fetching video.", '', true);
             customLoader(false);
         }
     });
@@ -495,16 +479,12 @@ function showVTTFile(url, title) {
 	const vttFile = convertToVTT(url);
     $.ajax({
         type: "GET",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         dataType: 'json',
         url: getURLForTranscriptContent(vttFile),
         success: function(responseData) {
             customLoader(false); 
             displayVTT(responseData.content, title);
-        },
-        error: function() {
-            customLoader(false);
-            showMessageTheme2(0, "Failed to load transcript.", '', true);
         }
     });
 }

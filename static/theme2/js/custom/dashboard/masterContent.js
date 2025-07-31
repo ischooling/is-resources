@@ -220,7 +220,7 @@ function getLearningProgramContent(schoolId){
 	var html='';
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForLearningProgramList('LEARNING_PROGRAM_LIST', schoolId)),
 		dataType: "json",
@@ -233,9 +233,6 @@ function getLearningProgramContent(schoolId){
 			} else {
 				html = getOptions(data.mastersData.learningPrograms, "")
 			}
-		},
-		error: function(error) {
-			console.log("Error:", error);
 		}
 	});
 	return html;
@@ -245,7 +242,7 @@ function getAllScholarschipUsersContent(schoolId){
 	var html='';
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForLearningProgramList('ALL_SCHOLARSHIP_USER', schoolId)),
 		dataType: "json",
@@ -258,9 +255,6 @@ function getAllScholarschipUsersContent(schoolId){
 			} else {
 				html = getOptions(data.mastersData.data, "")
 			}
-		},
-		error: function(error) {
-			console.log("Error:", error);
 		}
 	});
 	return html;
@@ -320,7 +314,7 @@ function getLmsPlatformContent(schoolId) {
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster1('LMS-PLATFORM-LIST', schoolId)),
 		dataType: 'json',
@@ -378,7 +372,7 @@ function getClassesContent(schoolId){
 function getTimeZonesList(formId, elementId, elementIdCheck,offsetForDate){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TIMEZONE-LIST')),
 		dataType : 'json',
@@ -416,7 +410,7 @@ function getTimeZonesList(formId, elementId, elementIdCheck,offsetForDate){
 function getTimeZones(formId,elementId,elementIdCheck){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TIMEZONE-LIST')),
 		dataType : 'json',
@@ -437,9 +431,6 @@ function getTimeZones(formId,elementId,elementIdCheck){
 					}
 				});
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -466,7 +457,7 @@ function getTeacherAssignedStudent(standardId, userId){
 	$('.meetingSlotAdd').hide();
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TEACHER_ASSIGNED_STUDENT_LIST', userId, standardId)),
 		dataType : 'json',
@@ -487,9 +478,6 @@ function getTeacherAssignedStudent(standardId, userId){
 					});
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -501,7 +489,7 @@ function callCoursesAssignedToteacher(studentStandardId, teacherUserId){
 	$('#classroomSessionFilter #subjectIds').html('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TEACHER_ASSIGNED_SUBJECT_OF_STUDENT_LIST', studentStandardId, teacherUserId)),
 		dataType : 'json',
@@ -523,28 +511,25 @@ function callCoursesAssignedToteacher(studentStandardId, teacherUserId){
 					// getStudentDetails('classroomSessionFilter',161);
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
 
 function getWaringContent1Theme1(){
 	html=
-	'<div class="modal fade bhagat" id="remarksresetDelete1" tabindex="-1">'
+	'<div class="modal fade" id="remarksresetDelete1" tabindex="-1">'
 		+'<div class="modal-dialog modal-md modal-notify modal-info" role="document">'
 			+'<div class="modal-content text-center">'
-				+'<div class="modal-header bg-info justify-content-center" style="top: 0 !important;width:100% !important;padding: 15px 10px;">'
-					+'<p class="heading" style="color: #fff;" id="warningMessage1">Are you sure?</p>'
+				+'<div class="modal-header justify-content-center" style="top: 0 !important;width:100% !important;padding: 15px 10px;">'
+					+'<p class="heading text-white" id="warningMessage1">Are you sure?</p>'
 				+'</div>'
 				+'<div id="statusMessage-1" class="modal-body delete-modal withdraw" style="padding-top:12px">'
-					+'<i class="fa fa-refresh fa-4x" style="color:#337ab7 !important;"></i>'
+					+'<i class="fa fa-sync fa-4x text-primary" ></i>'
 				+'</div>'
 				+'<div class="modal-footer text-center">'
 					+'<div class="text-center" style="margin: 0 auto;">'
-						+'<button id="resetDeleteErrorWarningYes1" type="button" class="btn" style="color:#59b2ff !important;border:1px solid #337ab7 !important;background:transparent !important">Yes</button>'
-						+'<button id="resetDeleteErrorWarningNo1" type="button" class="btn" data-dismiss="modal" style="color:#59b2ff !important;border:1px solid #337ab7 !important;background:transparent !important">No</button>'
+						+'<button id="resetDeleteErrorWarningYes1" type="button" class="btn" style="color:var(--pc) !important;border:1px solid var(--pc) !important;background:transparent !important">Yes</button>'
+						+'<button id="resetDeleteErrorWarningNo1" type="button" class="btn" data-dismiss="modal" style="color:var(--pc) !important;border:1px solid var(--pc) !important;background:transparent !important">No</button>'
 						+'<button id="resetDeleteErrorWarningCancel1" type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
 					+'</div>'
 				+'</div>'
@@ -559,16 +544,16 @@ function getWaringContent1Theme2(){
 	'<div class="modal fade fade-scale" id="remarksresetDelete1" tabindex="-1">'
 		+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none" role="document">'
 			+'<div class="modal-content">'
-				+'<div class="modal-header pt-2 pb-2 bg-info justify-content-center">'
+				+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-center">'
 					+'<h5 class="heading text-white text-center" id="warningMessage1">Are you sure?</h5>'
 				+'</div>'
 				+'<div id="statusMessage-1" class="modal-body delete-modal text-center">'
-					+'<i class="fas fa-sync fa-4x text-info"></i>'
+					+'<i class="fas fa-sync fa-4x text-primary"></i>'
 				+'</div>'
 				+'<div class="modal-footer">'
 					+'<div class="m-auto">'
-						+'<button id="resetDeleteErrorWarningYes1" type="button" class="btn btn-outline-info mr-1">Yes</button>'
-						+'<button id="resetDeleteErrorWarningNo1" type="button" class="btn btn-info mr-1" data-dismiss="modal">No</button>'
+						+'<button id="resetDeleteErrorWarningYes1" type="button" class="btn btn-outline-primary mr-1">Yes</button>'
+						+'<button id="resetDeleteErrorWarningNo1" type="button" class="btn btn-primary mr-1" data-dismiss="modal">No</button>'
 						+'<button id="resetDeleteErrorWarningCancel1" type="button" class="btn btn-success mr-1" data-dismiss="modal">Close</button>'
 					+'</div>'
 				+'</div>'
@@ -581,7 +566,7 @@ function getWaringContent1Theme2(){
 function getMeetingVendorUserStatus(schoolId,userId,meetingVendor){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TEACHER_LENS_USER_STATUS',schoolId,userId, meetingVendor)),
 		dataType : 'json',
@@ -608,7 +593,7 @@ function getTeacherDetails(formId, elementId, elementIdAlternet, schoolId){
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -834,7 +819,7 @@ function getPaymentGateway(schoolId){
 		$.ajax({
 			type : "GET",
 			url : BASE_URL+CONTEXT_PATH+schoolId+'/api/v1/common/pg-getway-master',
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			dataType: 'json',
 			async : false,
 			success : function(data) {
@@ -961,7 +946,7 @@ function getUserBasedOnCriteria(key, value, extra, extra1){
 	var html = '';
 	$.ajax({
 	   type : "POST",
-	   contentType : "application/json",
+	   contentType : APPLICATION_JSON_VALUE,
 	   url : getURLForCommon('masters'),
 	   data : JSON.stringify(getRequestForMaster('formId', key, value, extra, extra1)),
 	   dataType : 'json',
@@ -1029,7 +1014,7 @@ function getTeacherAssignedGrade(formId,userId){
 	$('.meetingSlotAdd').hide();
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TEACHER_ASSIGNED_GRADE_LIST', userId)),
 		dataType : 'json',
@@ -1064,9 +1049,6 @@ function getTeacherAssignedGrade(formId,userId){
 					}
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -1075,7 +1057,7 @@ function getTeacherAssignedGrade(formId,userId){
 function getSessionMasterList(formId, elementId, allStatus){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','SESSIONS-LIST')),
 		dataType : 'json',
@@ -1088,11 +1070,13 @@ function getSessionMasterList(formId, elementId, allStatus){
 			} else {
 				var result = data['mastersData']['data'];
 				var html = getSessionMasterContent(result, allStatus);
-				$('#'+formId+' #'+elementId).html(html);
+				if(formId!=''){
+					$('#'+formId+' #'+elementId).html(html);
+				}else{
+					$('#'+elementId).html(html);
+				}
+				
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -1122,7 +1106,7 @@ function getGradesByLearningProgram(formId,learningProgram,standardId, parentEle
 function getAllCountryList(formId,elementId){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','COUNTRIES-LIST')),
 		dataType : 'json',
@@ -1143,9 +1127,6 @@ function getAllCountryList(formId,elementId){
 					});
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -1153,7 +1134,7 @@ function getAllCountryList(formId,elementId){
 function getAllTimezoneList(formId,elementId){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TIMEZONE-LIST')),
 		dataType : 'json',
@@ -1174,9 +1155,6 @@ function getAllTimezoneList(formId,elementId){
 					});
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -1203,7 +1181,7 @@ function getAllCounselorList(formId,elementId){
 	var forAll = getValidatedUser(USER_ID)
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','COUNSELOR-LIST')),
 		dataType : 'json',
@@ -1233,9 +1211,6 @@ function getAllCounselorList(formId,elementId){
 					});
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -1243,7 +1218,7 @@ function getAllCounselorList(formId,elementId){
 function getAllEventList(formId,elementId){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','EVENTS-LIST',USER_ROLE)),
 		dataType : 'json',
@@ -1264,9 +1239,6 @@ function getAllEventList(formId,elementId){
 					});
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 
@@ -1280,7 +1252,7 @@ function getAllEventList(formId,elementId){
           data['moduleId']=moduleId;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('module',''),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -1308,7 +1280,7 @@ function callAllStudentList(formId, value, toElementId) {
 	data["schoolId"] = SCHOOL_ID;
 	$.ajax({
 	  type: "GET",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  url: getURLForHTML("dashboard", "get-all-student-list?payload="+encode(JSON.stringify(data))),
 	  dataType: "json",
 	  cache: false,
@@ -1318,9 +1290,6 @@ function callAllStudentList(formId, value, toElementId) {
 				showMessage(true, data['message']);
 			} else {
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -1332,7 +1301,7 @@ function callSlotList(formId, toElementId) {
 	data["schoolId"] = SCHOOL_ID;
 	$.ajax({
 	  type: "GET",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  url: getURLForHTML("dashboard", "get-time-preference-slot-list?payload="+encode(JSON.stringify(data))),
 	  dataType: "json",
 	  cache: false,
@@ -1345,9 +1314,6 @@ function callSlotList(formId, toElementId) {
 					$("#"+formId+" #"+toElementId).append('<option value="'+v+'">'+v+'</option>')
 				});
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -1360,7 +1326,7 @@ function callStudentSavedTimePreference(formId, toElementId,studentUserId) {
 	data["schoolId"] = SCHOOL_ID;
 	$.ajax({
 	  type: "GET",
-	  contentType: "application/json",
+	  contentType: APPLICATION_JSON_VALUE,
 	  url: getURLForHTML("dashboard", "get-student-saved-time-preference?payload="+encode(JSON.stringify(data))),
 	  dataType: "json",
 	  cache: false,
@@ -1378,9 +1344,6 @@ function callStudentSavedTimePreference(formId, toElementId,studentUserId) {
 				$("#"+formId+" #enrollDetails").text(data.learningProgram+" | "+data.lmsPlatform);	
 				$("#"+formId+" .gradeAndLearningProgram").css({"display":"inline-flex"});
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -1388,7 +1351,7 @@ function callStudentSavedTimePreference(formId, toElementId,studentUserId) {
 function getLeadSourceList(formId,elementId){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','LEAD-SOURCE-LIST')),
 		dataType : 'json',
@@ -1409,9 +1372,6 @@ function getLeadSourceList(formId,elementId){
 					});
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -1536,7 +1496,7 @@ function updateLearningPrograms(formId, elementId){
 function getTggingMasterList(formId, elementId){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('masters'),
 		data : JSON.stringify(getRequestForMaster('formId','TAGGING-LIST')),
 		dataType : 'json',
@@ -1555,9 +1515,6 @@ function getTggingMasterList(formId, elementId){
 				});
 				$('#'+formId+' #'+elementId).html(html);
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }

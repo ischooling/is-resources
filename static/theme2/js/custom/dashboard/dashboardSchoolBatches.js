@@ -8,7 +8,7 @@ function createBatchByStudent(formId, moduleId, roleModuleId) {
 	console.log("callFrom : " + callFrom);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'create-batch-student'),
 		data: JSON.stringify(getRequestForCreateBatchByStudent(formId, moduleId)),
 		dataType: 'json',
@@ -16,9 +16,9 @@ function createBatchByStudent(formId, moduleId, roleModuleId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessageTheme2(false, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessageTheme2(true, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#' + formId)[0].reset();
 				$('#addBatchModal').modal('hide');
 				if (callFrom == 'ManageBatch') {
@@ -28,10 +28,6 @@ function createBatchByStudent(formId, moduleId, roleModuleId) {
 				}
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -77,7 +73,7 @@ function getRequestForCreateBatchByStudent(formId, moduleId) {
 function saveAcceleratedModeSignupContent(formId, moduleId) {
 	hideMessageTheme2('');
 	if ($('#' + formId + ' #studentEmail').val() == '' || $('#' + formId + ' #studentEmail').val() == undefined) {
-		showMessageTheme2(false, "Student Email is required to send link");
+		showMessageTheme2(0, "Student Email is required to send link");
 		return false;
 	}
 	var emailId = $('#' + formId + ' #studentEmail').val();
@@ -85,7 +81,7 @@ function saveAcceleratedModeSignupContent(formId, moduleId) {
 	$.ajax({
 		type: "POST",
 		url: getURLForHTML('dashboard', 'accelerated-mode-signup-student-content'),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(data),
 		dataType: 'html',
 		cache: false,
@@ -96,20 +92,15 @@ function saveAcceleratedModeSignupContent(formId, moduleId) {
 				stringMessage = htmlContent.split("|");
 				console.log('stringMessage: ' + stringMessage);
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessageTheme2(false, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 					$('#accModeStudentContentModal').modal('show');
 				} else {
-					showMessageTheme2(true, stringMessage[1]);
+					showMessageTheme2(1, stringMessage[1]);
 					$('#accModeStudentContentModal').modal('hide');
 					setTimeout(function () { callDashboardPageSchool(moduleId, 'accelerated-mode'); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			$("#nextStep").prop("disabled", false);
-			tabActiveStatus(1);
 		}
 	});
 
@@ -120,7 +111,7 @@ function sendAcceleratedModeSignupLinkContent(accModeId, moduleId) {
 	var data = { accModeId: accModeId }
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'accelerated-mode-signup-mail'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -132,22 +123,19 @@ function sendAcceleratedModeSignupLinkContent(accModeId, moduleId) {
 				stringMessage = htmlContent.split("|");
 				console.log('stringMessage: ' + stringMessage);
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessageTheme2(false, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
-					showMessageTheme2(true, stringMessage[1]);
+					showMessageTheme2(1, stringMessage[1]);
 					setTimeout(function () { callDashboardPageSchool(moduleId, 'accelerated-mode'); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
 
 function callBatchSubjectAndTeacherMapping(formId, batchId, batchName, standardId, controllType, moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	var data = {};
 	data['batchId'] = batchId;
 	data['standardId'] = standardId;
@@ -157,7 +145,7 @@ function callBatchSubjectAndTeacherMapping(formId, batchId, batchName, standardI
 	data['userId'] = USER_ID;
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'batch-subject-and-teacher-mapping'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -168,17 +156,12 @@ function callBatchSubjectAndTeacherMapping(formId, batchId, batchName, standardI
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					$('#batchSubjectTeacherSupportContent').html(htmlContent);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -224,9 +207,9 @@ function submitBatchSubjectTeacherAssign(formId, moduleId) {
 	var courseType = $("#subjectIds option:selected").attr('data-courseType');
 	var subjectPId = $("#subjectIds option:selected").attr('data-subjectPId');
 
-	hideMessage('');
+	hideMessageTheme2('');
 	if (subjectId == 'Select Subject') {
-		showMessage(true, "Please select subject to update.");
+		showMessageTheme2(0, "Please select subject to update.");
 		$('#modalMessage').click(function () {
 			setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
 		});
@@ -240,7 +223,7 @@ function submitBatchSubjectTeacherAssign(formId, moduleId) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'batch-teacher-assign-submit'),
 		data: JSON.stringify(getRequestForBatchTeacherAssign(formId, moduleId, subjectId, standardId, batchId, oldTeacherId, courseType, subjectPId)),
 		dataType: 'json',
@@ -248,13 +231,12 @@ function submitBatchSubjectTeacherAssign(formId, moduleId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, "Batch Subject-teacher updated successfully.");
+				showMessageTheme2(1, "Batch Subject-teacher updated successfully.");
+				$("#subjectIds").val(0);
+				$("#teacherId").val(0);
 			}
-			return false;
-		},
-		error: function (e) {
 			return false;
 		}
 	});
@@ -285,17 +267,17 @@ function getRequestForBatchTeacherAssign(formId, moduleId, subjectId, standardId
 function validateRequestBatchSubjectTeacherAssign(formId, moduleId, subjectId) {
 	var teacherId = $("#teacherId option:selected").val();
 	if (teacherId == 0 || teacherId == undefined) {
-		showMessage(true, 'Please Select a teacher to update.');
+		showMessageTheme2(0, 'Please Select a teacher to update.');
 		return false;
 	}
 	return true;
 }
 
 function advanceBatchStudentSearch(formId, moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'assigned-batch-student-search-content'),
 		data: JSON.stringify(getCallRequestForBatchStudentSearch(formId, moduleId)),
 		dataType: 'html',
@@ -308,7 +290,7 @@ function advanceBatchStudentSearch(formId, moduleId) {
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 					}
 				} else {
 					$('#advBatchStudentSearch').modal('hide');
@@ -361,7 +343,7 @@ function validateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teac
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'validate-teacher-batch-time-schedule'),
 		data: JSON.stringify(getRequestForBatchTeacherTime(batchTeacherMappingId, subjectId, teacherId, elementId, subjectPId, batchId)),
 		dataType: 'json',
@@ -369,7 +351,7 @@ function validateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teac
 		//timeout : 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 				$("#viewBatch-" + subjectId + " .proceedClassbtn").show();
 			} else {
 				$(".teacher-mapping-set-time-" + subjectId + " .teacher-mapping-set-time-item").each(function (key) {
@@ -392,22 +374,23 @@ function validateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teac
 					for(var k=0; k < recurringclassForAA.length; k++){
 						html+=`<tr class='text-danger'>
 								<td>`+recurringclassForAA[k]['meetingDate']+`</td>
+								<td>`+recurringclassForAA[k]['teacherTime']+`</td>
 								<td>`+recurringclassForAA[k]['slotAvailableReason']+`</td>
 							</tr>`;
 					}
 					$("#teacherAvailabilityTable #teacherAvailabilityTbody").html(html);
 					$("#viewBatch-" + subjectId + " .proceedClassbtn").hide();
+					$("#recurringClassShowModel").modal('show');
 				}else{
+					$("#recurringClassShowModel").modal('hide');
 					$("#teacherAvailabilityTable").hide();
 					$("#needToAddTimePreferrence").val(false);
+					$("#recurringClassShowModelValidation").modal('show');
 				}
-				
 				if(saveForcefully=='Y'){
 					$("#viewBatch-" + subjectId + " .proceedClassbtn").show();
 				}
 				$("#saveForcefully").val(saveForcefully);
-				
-				
 				var recurringclass = data['recurringClassList'];
 				var htmlRecu = "";
 				var inc = 1;
@@ -439,19 +422,15 @@ function validateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teac
 						validateClass = false;
 					}
 				}
-				if (validateClass) {
+				if (validateClass && $("#needToAddTimePreferrence").val() != "true") {
 					$("#viewBatch-" + subjectId + " .proceedClassbtn").show();
 				} else {
 					$("#viewBatch-" + subjectId + " .proceedClassbtn").hide();
 				}
 				$("#trRecurring").html(htmlRecu);
-				$("#recurringClassShowModel").modal('show');
 				flag_Change_Batch_Start_And_EndDate=false;				
 			}
 
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -487,7 +466,7 @@ function checkUpdatesBatch(src, subjectId) {
 
 function validateBatchOutsideAvailabilityConfirmationModal(batchTeacherMappingId, subjectId, teacherId, elementId, subjectPId, batchId, standardId, batchName, roleModuleId, subjectName){
 	$(".subjectTeacherTimeError").text('');
-	hideMessage('');
+	hideMessageTheme2('');
 	if (!validateRequestBatchSubjectTeacherTime(subjectId, elementId)) {
 		return false;
 	}
@@ -515,7 +494,7 @@ function validateBatchOutsideAvailabilityConfirmationModal(batchTeacherMappingId
 function updateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teacherId, elementId, subjectPId, batchId, standardId, batchName, roleModuleId) {
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'update-teacher-batch-time-schedule'),
 		data: JSON.stringify(getRequestForBatchTeacherTime(batchTeacherMappingId, subjectId, teacherId, elementId, subjectPId)),
 		dataType: 'json',
@@ -523,9 +502,9 @@ function updateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teache
 		//timeout : 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, "Teacher time updated successfully.");
+				showMessageTheme2(1, "Teacher time updated successfully.");
 				$("#booksclassOutsideAvailabilityConfirmationModal").modal("hide");
 				$('#batchSubjectTeacherMappingModel').modal('hide');
 				setTimeout(function () { callBatchSubjectAndTeacherMapping('formId', batchId, batchName, standardId, 'View', roleModuleId); }, 1000);
@@ -533,9 +512,6 @@ function updateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teache
 				flag_Change_Batch_Start_And_EndDate=true;
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -543,20 +519,20 @@ function updateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teache
 function validateRequestBatchSubjectTeacherTime(subjectId, elementId) {
 	console.log('stdate');
 	if ($("#startDate" + elementId).val() == undefined || $("#startDate" + elementId).val() == '') {
-		//showMessage(true, 'Please enter start date.');
-		showMessage(true, 'Please enter start date.');
+		//showMessageTheme2(0, 'Please enter start date.');
+		showMessageTheme2(0, 'Please enter start date.');
 		return false;
 	}
 	if ($("#endDate" + elementId).val() == undefined || $("#endDate" + elementId).val() == '') {
-		//showMessage(true, 'Please enter end date.');
-		showMessage(true, 'Please enter end date.');
+		//showMessageTheme2(0, 'Please enter end date.');
+		showMessageTheme2(0, 'Please enter end date.');
 		return false;
 	}
 
 	var stDate = $("#startDate" + elementId).val();
 	var edDate = $("#endDate" + elementId).val();
 	if (new Date(stDate) > new Date(edDate)) {
-		showMessage(true, 'End date should be greater than start date.');
+		showMessageTheme2(0, 'End date should be greater than start date.');
 		return false;
 	}
 
@@ -564,12 +540,12 @@ function validateRequestBatchSubjectTeacherTime(subjectId, elementId) {
 	var i = 0;
 	$("input:checkbox[name=teachDays" + elementId + "]:checked").each(function () {
 		if ($(this).val() == '') {
-			showMessage(true, 'Please choose day.');
+			showMessageTheme2(0, 'Please choose day.');
 			i = 1;
 		}
 		if ($("#timeInterval" + subjectId + "" + $(this).val()).val() == '') {
-			//showMessage(true, 'Please choose time schedule.');
-			showMessage(true, 'Please choose time schedule.');
+			//showMessageTheme2(0, 'Please choose time schedule.');
+			showMessageTheme2(0, 'Please choose time schedule.');
 			i = 1;
 		}
 
@@ -583,11 +559,11 @@ function validateRequestBatchSubjectTeacherTime(subjectId, elementId) {
 		timeDays.push($("#timeInterval" + subjectId + "" + $(this).val()).val());
 	});
 	if (i > 0) {
-		showMessage(true, 'Please choose time schedule.');
+		showMessageTheme2(0, 'Please choose time schedule.');
 		return false;
 	}
 	if (timeDays.length === 0) {
-		showMessage(true, 'Please choose time schedule.');
+		showMessageTheme2(0, 'Please choose time schedule.');
 		return false;
 	}
 	return true;
@@ -642,7 +618,7 @@ function changeTeacherTime(id, teacherId, elementId) {
 }
 
 function callStudentBatchTransfer(formId, batchId, batchName, standardId, controllType, moduleId, userId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	var data = {};
 	data['batchId'] = batchId;
 	data['standardId'] = standardId;
@@ -650,9 +626,10 @@ function callStudentBatchTransfer(formId, batchId, batchName, standardId, contro
 	data['batchName'] = batchName;
 	data['moduleId'] = moduleId;
 	data['userId'] = USER_ID;
+	data['themeType'] = "theme2";
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'move-student-batch'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -664,28 +641,23 @@ function callStudentBatchTransfer(formId, batchId, batchName, standardId, contro
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					if (controllType == 'Delete') {
 						setTimeout(function () { callDashboardPageSchool(moduleId, 'manage-batch-student'); }, 1000);
-						showMessage(true, 'Batch deleted successfully.');
+						showMessageTheme2(1, 'Batch deleted successfully.');
 					} else {
 						$('#batchSubjectTeacherSupportContent').html(htmlContent);
 					}
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
 
 function callBatchExaminationSheetModule(formId, batchId, batchName, standardId, controllType, moduleId, userId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	var data = {};
 	data['batchId'] = batchId;
 	data['standardId'] = standardId;
@@ -693,9 +665,10 @@ function callBatchExaminationSheetModule(formId, batchId, batchName, standardId,
 	data['batchName'] = batchName;
 	data['moduleId'] = moduleId;
 	data['userId'] = USER_ID;
+	data['themeType'] = "theme2";
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'batch-exam-sheet'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -706,17 +679,12 @@ function callBatchExaminationSheetModule(formId, batchId, batchName, standardId,
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					$('#batchSubjectTeacherSupportContent').html(htmlContent);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -725,7 +693,7 @@ function saveBatchExaminationSheet(formId, batchId, roleModuleId) {
 
 	/*var labelName = $("#" + formId + " #labelName").val().trim();
 	if (labelName == "" || labelName == undefined) {
-		showMessage(true, 'Module Name is Required.');
+		showMessageTheme2(0, 'Module Name is Required.');
 		return false
 	}*/
 
@@ -739,7 +707,7 @@ function saveBatchExaminationSheet(formId, batchId, roleModuleId) {
 	var userId = $("#" + formId + " #userId").val();
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'save-batch-exam-sheet'),
 		data: JSON.stringify(getRequestForSaveBatchExamSheet(formId)),
 		dataType: 'json',
@@ -759,10 +727,6 @@ function saveBatchExaminationSheet(formId, batchId, roleModuleId) {
 				setTimeout(function () { $(".modal-backdrop").removeClass('show'); $(".modal-backdrop").addClass('modal'); $(".modal-backdrop").removeClass('modal-backdrop'); callBatchExaminationSheetModule('', batchId, '', '', '', roleModuleId, userId); }, 3000);
 
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -803,7 +767,7 @@ function callForChangeStatus(formId, examSheetId, controllType, roleModuleId, ba
 	var userId = $("#" + formId + " #userId").val();
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'update-batch-exam-sheet'),
 		data: JSON.stringify(request),
 		dataType: 'json',
@@ -821,10 +785,6 @@ function callForChangeStatus(formId, examSheetId, controllType, roleModuleId, ba
 				$('#modalMessageNew').html(data['message'])
 				setTimeout(function () { $(".modal-backdrop").removeClass('show'); $(".modal-backdrop").addClass('modal'); $(".modal-backdrop").removeClass('modal-backdrop'); callBatchExaminationSheetModule('', batchId, '', '', '', roleModuleId, userId); }, 3000);
 			}
-			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -857,7 +817,7 @@ function getRequestForMoveBatchByStudent(formId, moduleId, controllType) {
 function transferStudent(formId, moduleId, roleModuleId, controllType) {
 	if (controllType != 'Add') {
 		if ($('#tansferBatch option:selected').val() == 0) {
-			showMessage(true, "Please select batch to move student.");
+			showMessageTheme2(0, "Please select batch to move student.");
 			return;
 		}
 	}
@@ -868,7 +828,7 @@ function transferStudent(formId, moduleId, roleModuleId, controllType) {
 		}
 	});
 	if (studentIds == "") {
-		showMessage(true, "Please select atleast one student");
+		showMessageTheme2(0, "Please select atleast one student");
 		return;
 	} else {
 		$("#selectStudentIds").val(studentIds.substring(0, studentIds.length - 1));
@@ -877,7 +837,7 @@ function transferStudent(formId, moduleId, roleModuleId, controllType) {
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'move-batch-student'),
 		data: JSON.stringify(getRequestForMoveBatchByStudent(formId, moduleId, controllType)),
 		dataType: 'json',
@@ -885,24 +845,20 @@ function transferStudent(formId, moduleId, roleModuleId, controllType) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#batchStudentTransferModel').modal('hide');
 				setTimeout(function () { callDashboardPageSchool(roleModuleId, 'manage-batch-student'); }, 1000);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
 
 
 function callTeacherTimeScheduleBatch(batchId, subjectId, teacherId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if(flag_Change_Batch_Start_And_EndDate){
 		var newStartDate = new Date($("#endDate" + subjectId).val());
 		newStartDate.setDate(newStartDate.getDate() + 1);
@@ -924,7 +880,7 @@ function callTeacherTimeScheduleBatch(batchId, subjectId, teacherId) {
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
 					$("#batch-schedule" + subjectId + "").html(htmlContent).promise().done(function () {
 						$("#viewBatch-" + subjectId + " .proceedClassbtn").hide();
@@ -948,18 +904,13 @@ function callTeacherTimeScheduleBatch(batchId, subjectId, teacherId) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			//	showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
 
 function teacherTimeCheck(scheduleTime, elementId, dayid, batchId) {
 	var result = false;
-	hideMessage('');
+	hideMessageTheme2('');
 	$(".subjectTeacherTimeError").text('');
 	var teacherId = $("#assignTeacherId" + elementId).val();
 	var startDate = $("#startDate" + elementId).val();
@@ -967,7 +918,7 @@ function teacherTimeCheck(scheduleTime, elementId, dayid, batchId) {
 	checkUpdatesBatch("", elementId)
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'teacher-time-available'),
 		data: JSON.stringify(getCallRequestForTeacherTime(teacherId, scheduleTime, dayid, startDate)),
 		dataType: 'json',
@@ -984,10 +935,6 @@ function teacherTimeCheck(scheduleTime, elementId, dayid, batchId) {
 				// $("#timeInterval"+elementId+dayid).val('');
 				// result=false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 	return result;
@@ -1013,10 +960,10 @@ function getCallRequestForTeacherTime(teacherId, scheduleTime, dayid, startDate)
 
 function batchTimeCheck(scheduleTime, elementId, dayid, batchId) {
 	var result = false;
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'student-subject-time-available'),
 		data: JSON.stringify(getCallRequestForBatchTime(batchId, scheduleTime, dayid)),
 		dataType: 'json',
@@ -1032,10 +979,6 @@ function batchTimeCheck(scheduleTime, elementId, dayid, batchId) {
 				$("#timeInterval" + elementId + dayid).val('');
 				result = false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 	return result;
@@ -1071,7 +1014,7 @@ function calendarDates(replaceId, startDate, slotType, userId, batchId) {
 		type: "POST",
 		url: getURLForHTML('dashboard', 'calendar-dates'),
 		data: JSON.stringify(data),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		dataType: 'html',
 		cache: false,
 		// async: false,
@@ -1084,7 +1027,7 @@ function calendarDates(replaceId, startDate, slotType, userId, batchId) {
 					if (stringMessage[0] == "SESSIONOUT") {
 						redirectLoginPage();
 					} else {
-						showMessage(true, stringMessage[1]);
+						showMessageTheme2(0, stringMessage[1]);
 					}
 				} else {
 					$('#monthYear').html('');
@@ -1093,19 +1036,15 @@ function calendarDates(replaceId, startDate, slotType, userId, batchId) {
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
 
 function editBatchDetails(formId, moduleId, roleModuleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'edit-batch-details'),
 		data: JSON.stringify(getRequestForEditBatchDetails(formId, moduleId)),
 		dataType: 'json',
@@ -1113,18 +1052,14 @@ function editBatchDetails(formId, moduleId, roleModuleId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				$('#' + formId)[0].reset();
-				showModalMessage(false, data['message']);
+				showModalMessage(1, data['message']);
 				setTimeout(function () { $('#batchStudentTransferModel').modal('hide'); }, 2500);
 				//setTimeout(function(){ callDashboardPageSchool(roleModuleId,'manage-batch-student'); },1000);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -1160,14 +1095,14 @@ function getRequestForEditBatchDetails(formId, moduleId) {
 }
 
 function removeTeacherTimeTable(batchId, subjectId, teacherId, startDate, batchEndDate, batchName, standardId, roleModuleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if (teacherId == '') {
 		return false;
 	}
 	customLoader(true);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'remove-teacher-time-table'),
 		data: JSON.stringify(getRequestForRemoveTeacherTimeTable(batchId, subjectId, teacherId, startDate, batchEndDate)),
 		dataType: 'json',
@@ -1175,9 +1110,9 @@ function removeTeacherTimeTable(batchId, subjectId, teacherId, startDate, batchE
 		//timeout : 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, "Teacher time remove successfully.");
+				showMessageTheme2(1, "Teacher time remove successfully.");
 				$('#batchSubjectTeacherMappingModel').modal('hide');
 				setTimeout(function () {
 					callBatchSubjectAndTeacherMapping('formId', batchId, batchName, standardId, 'View', roleModuleId);
@@ -1186,9 +1121,6 @@ function removeTeacherTimeTable(batchId, subjectId, teacherId, startDate, batchE
 				//setTimeout(function(){$('#batchSubjectTeacherMappingModel').modal('hide'); },1000);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -1212,7 +1144,7 @@ function getRequestForRemoveTeacherTimeTable(batchId, subjectId, teacherId, star
 	return request;
 }
 function updateClassLink(formId, moduleId, roleModuleId, userId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$(".error-message-link").text('');
 	if ($("#" + formId + " #classLink").val() == '') {
 		$(".error-message-link").text('Please fill classroom link');
@@ -1228,7 +1160,7 @@ function updateClassLink(formId, moduleId, roleModuleId, userId) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'create-teacher-class-link'),
 		data: JSON.stringify(getRequestForUpdateClassLink(formId, moduleId)),
 		dataType: 'json',
@@ -1236,17 +1168,13 @@ function updateClassLink(formId, moduleId, roleModuleId, userId) {
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#batchCreateTime').modal('hide');
 				setTimeout(function () { callDashboardPageSchool(roleModuleId, 'batch-schedule', '', userId); }, 1000);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -1275,10 +1203,10 @@ function getRequestForUpdateClassLink(formId, moduleId) {
 	return request;
 }
 function sendMailStudentMoveBatch(formId, moduleId, batchId, studentId, mailType) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'send-mail-student-move-batch'),
 		data: JSON.stringify(getRequestForStudentMoveBatch(formId, moduleId, batchId, studentId, mailType)),
 		dataType: 'json',
@@ -1286,15 +1214,11 @@ function sendMailStudentMoveBatch(formId, moduleId, batchId, studentId, mailType
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(1, data['message']);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -1318,10 +1242,10 @@ function getRequestForStudentMoveBatch(formId, moduleId, batchId, studentId, mai
 }
 
 function sendMailTeacherMoveBatch(formId, moduleId, batchId, teacherId, userId, mailType) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'send-mail-teacher-move-batch'),
 		data: JSON.stringify(getRequestForTeacherMoveBatch(formId, moduleId, batchId, teacherId, userId, mailType)),
 		dataType: 'json',
@@ -1329,15 +1253,11 @@ function sendMailTeacherMoveBatch(formId, moduleId, batchId, teacherId, userId, 
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(1, data['message']);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -1363,14 +1283,14 @@ function getRequestForTeacherMoveBatch(formId, moduleId, batchId, teacherId, use
 }
 
 function inactiveTeacherTimeTableSchedule(batchId, subjectId, batchName, standardId, moduleId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	var data={};
 	data['batchId']=batchId;
 	data['subjectId']=subjectId;
 	data['userId']=USER_ID;
 	$.ajax({
 		type: "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'inactive-batch-subject'),
 		data: JSON.stringify(data),
 		dataType: 'html',
@@ -1381,27 +1301,23 @@ function inactiveTeacherTimeTableSchedule(batchId, subjectId, batchName, standar
 				var stringMessage = [];
 				stringMessage = htmlContent.split("|");
 				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessage(true, stringMessage[1]);
+					showMessageTheme2(0, stringMessage[1]);
 				} else {
-					showMessage(true, "Batch Subject deleted successfully.");
+					showMessageTheme2(1, "Batch Subject deleted successfully.");
 					$('#batchSubjectTeacherMappingModel').modal('hide');
 					setTimeout(function () { callBatchSubjectAndTeacherMapping('formId', batchId, batchName, standardId, 'View', moduleId); }, 1000);
 				}
 				return false;
 			}
-		},
-		error: function (e) {
-			console.log(e)
-			return false;
 		}
 	});
 }
 
 function studentRemoveFromBatch(formId, moduleId, batchId, studentId, batchName, standardId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'remove-student-from-batch'),
 		data: JSON.stringify(getRequestForStudentRemoveFromBatch(formId, moduleId, batchId, studentId)),
 		dataType: 'json',
@@ -1409,17 +1325,13 @@ function studentRemoveFromBatch(formId, moduleId, batchId, studentId, batchName,
 		timeout: 600000,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-				showMessage(true, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#batchStudentTransferModel').modal('hide');
 				setTimeout(function () { callStudentBatchTransfer('formId', batchId, batchName, standardId, 'Edit', moduleId); }, 1000);
 			}
 			return false;
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -1447,7 +1359,7 @@ function sendMailCancelClass(status, batchTeacherMappingId, classDate){
 	data.classCancelDate = classDate
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard','class-cancel-and-reschedule'),
 		data: JSON.stringify(data),
 		dataType: 'json',

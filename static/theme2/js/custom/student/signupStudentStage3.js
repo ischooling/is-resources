@@ -220,7 +220,7 @@ async function getAirwallexMethods(){
 }
 
 function getAllCourseDetails(isGradeChange, courseId) {
-	$("#commonloaderId").show();
+	$("#commonloaderId, #commonloaderBody").show();
 	var standardId = $("#standardId").val();
 	if (isGradeChange == 'Y') {
 		$('#selectedSubjects').val('');
@@ -232,7 +232,7 @@ function getAllCourseDetails(isGradeChange, courseId) {
 	//$("#addAndRemoveLoader").css({ "display": "block" });
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/course-details-by-standard-id',
 		data: JSON.stringify(getRequestForCourseSelection(courseId)),
 		dataType: 'json',
@@ -293,7 +293,9 @@ function updateCourseLimit(){
 		$("#oneTimeModal").val(false);
 	}
 	$('#creditsLimitsModal').modal('hide');
-	$('#creditsLimitsOverModal').modal('show');
+	setTimeout(function(){
+		$('#creditsLimitsOverModal').modal('show');
+	},500)
 }
 
 function getRequestForCourseSelection(courseId) {
@@ -401,7 +403,7 @@ function choosePaymentOption() {
 	if(flag){
 		$.ajax({
 			type: "POST",
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/choose-payment-plan',
 			data: JSON.stringify(getRequestForChoosePaymentOption()),
 			dataType: 'json',
@@ -557,7 +559,7 @@ function callForProgressionToDashboard() {
 	hideModalMessage('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/proceed-to-dashboard',
 		data: JSON.stringify(getRequestForProgressionToDashboard()),
 		dataType: 'json',
@@ -700,7 +702,7 @@ function callForPaymentModeSelection(formId, callFrom) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/get-payment-details',
 		data: JSON.stringify(getRequestForPaymentModeSelection(formId, callFrom)),
 		dataType: 'json',
@@ -789,7 +791,7 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 	$(".prev-btn, .next-btn, .finish-btn").addClass("disabled");
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/get-student-review-details',
 		data: JSON.stringify(getRequestForReviewAndPaymentSelection(reloadRequired)),
 		dataType: 'json',
@@ -837,7 +839,7 @@ function getSignupStatusFinal() {
 	try {
 		$.ajax({
 			type: "GET",
-			contentType: "application/json",
+			contentType: APPLICATION_JSON_VALUE,
 			url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment-stage-status?uniqueId=' + UNIQUEUUID,
 			dataType: 'json',
 			global: false,
@@ -978,7 +980,7 @@ function recommendedCourse() {
 	$("#commonloaderId, #commonloaderBody").show();
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/recommended-courses',
 		data: JSON.stringify(getRequestForReviewAndPaymentSelection('')),
 		dataType: 'json',
@@ -1063,17 +1065,14 @@ function openCourseDetailModal(courseDescriptionUrl, subjectName) {
     $.ajax({
         url: BASE_URL+CONTEXT_PATH+SCHOOL_UUID+"/dashboard/get-course-summary",
         method: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         data: JSON.stringify(requestBody),
         success: function (response) {
             const data = JSON.parse(response);
             modalContent.html(`
                 <p>${data.data.OVERVIEW || "No overview available."}</p>
             `);
-        },
-        error: function (error) {
-            console.error("Error fetching course details:", error);
-        },
+        }
     });
 	return false;
 }
@@ -1087,7 +1086,7 @@ function callForApplicationSubmit() {
 	hideModalMessage('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/submit-application',
 		data: JSON.stringify(getRequestForApplicationSubmit()),
 		dataType: 'json',
@@ -1119,6 +1118,7 @@ function applicationSubmittedModal(contactEmail){
 	$('#goToDashboardWarningMessage').modal({ backdrop: 'static', keyboard: false })
 	$('#submitApplicationWarning').modal("hide");
 }
+
 
 
 function switchGrade(){

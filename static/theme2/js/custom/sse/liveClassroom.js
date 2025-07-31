@@ -8,7 +8,7 @@ function getLiveClassroom(){
     var dayId = dateForLiveAttendance.getDay()+1;
     $.ajax({
         type : "GET",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : getURLForHTML('dashboard','live-classroom-details'+'/'+SCHOOL_ID+'/'+dayId+'/'+standardId),
         dataType : 'json',
         success : function(data) {
@@ -27,13 +27,6 @@ function getLiveClassroom(){
                 var html=getLiveClassrommTime(data);
                 $('#liveClassroomsDiv').html(html);
             }
-        },
-        error : function(e) {
-            if(tt=='theme2'){
-                showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-            }else if(tt=='theme1'){
-                showMessage(true, TECHNICAL_GLITCH);
-            }
         }
     });
 }
@@ -41,7 +34,7 @@ function getLiveClassroom(){
 function getLiveClassroomAttendance(schoolId,entityType,entityId,dayId){
     $.ajax({
         type : "GET",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : getURLForHTML('dashboard','live-classroom-attendance'+"/"+schoolId+'/'+entityType+'/'+entityId+'/'+dayId),
         dataType : 'json',
         success : function(data) {
@@ -60,13 +53,6 @@ function getLiveClassroomAttendance(schoolId,entityType,entityId,dayId){
                 var html=attendanceBody(data);
                 $('#attendanceBody').html(html);
             }
-        },
-        error : function(e) {
-            if(tt=='theme2'){
-                showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-            }else if(tt=='theme1'){
-                showMessage(true, TECHNICAL_GLITCH);
-            }
         }
     });
 }
@@ -74,7 +60,7 @@ function getLiveClassroomAttendance(schoolId,entityType,entityId,dayId){
 const showAttendanceDetailsModal = (hostEmail,hostName,entityType,entityId) => {
     $.ajax({
         type : "GET",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : getURLForHTML('dashboard','live-classroom-attendance'+'?hostEmail='+hostEmail+'&hostName='+hostName+'&entityType='+entityType+'&entityId='+entityId),
         dataType : 'json',
         success : function(data) {
@@ -93,13 +79,6 @@ const showAttendanceDetailsModal = (hostEmail,hostName,entityType,entityId) => {
                 $('#attendanceBody').html(liveClassroomAttendanceContent(data))
                 $("#attendanceModal").modal({backdrop: 'static', keyboard: false});
                
-            }
-        },
-        error : function(e) {
-            if(tt=='theme2'){
-                showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-            }else if(tt=='theme1'){
-                showMessage(true, TECHNICAL_GLITCH);
             }
         }
     });
@@ -149,7 +128,7 @@ function copyLinkUrl(link) {
 function getLiveClass(){
     $.ajax({
         type : "GET",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : getURLForHTML('dashboard','today-class/'+"/"+SCHOOL_ID),
         dataType : 'json',
         success : function(data) {
@@ -165,13 +144,6 @@ function getLiveClass(){
                 }
             }else {
                 getLiveClassChart(data);
-            }
-        },
-        error : function(e) {
-            if(tt=='theme2'){
-                showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-            }else if(tt=='theme1'){
-                showMessage(true, TECHNICAL_GLITCH);
             }
         }
     });
@@ -284,7 +256,7 @@ function getLiveClassChart(data){
 function getClassOfflineMeeting(meetingId, meetingStatus){
     $.ajax({
         type : "GET",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : getURLForHTML('dashboard','offline-meeting-class'+"/"+SCHOOL_ID+"/"+meetingId+"/"+meetingStatus),
         dataType : 'json',
         success : function(data) {
@@ -305,13 +277,6 @@ function getClassOfflineMeeting(meetingId, meetingStatus){
                     setTimeout(getColleps(), 5000);
                 
             }
-        },
-        error : function(e) {
-            if(tt=='theme2'){
-                showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-            }else if(tt=='theme1'){
-                showMessage(true, TECHNICAL_GLITCH);
-            }
         }
     });
 }
@@ -319,7 +284,7 @@ function getClassOfflineMeeting(meetingId, meetingStatus){
 function getClassMeetingRunning(meetingId){
   $.ajax({
       type : "GET",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : getURLForHTML('dashboard','live-class-with-meeting'+"/"+SCHOOL_ID+"/"+meetingId),
       dataType : 'json',
       success : function(data) {
@@ -338,13 +303,6 @@ function getClassMeetingRunning(meetingId){
                   $('#live-class-now-meetingid').append(liveTbl);
                   setTimeout(getColleps(), 5000);
               
-          }
-      },
-      error : function(e) {
-          if(tt=='theme2'){
-              showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-          }else if(tt=='theme1'){
-              showMessage(true, TECHNICAL_GLITCH);
           }
       }
   });
@@ -461,7 +419,7 @@ function getNowRunClassChart(data){
 function getCurrentClassLive(){
   $.ajax({
       type : "GET",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : getURLForHTML('dashboard','live-class'+"/"+SCHOOL_ID),
       dataType : 'json',
       success : function(data) {
@@ -481,13 +439,6 @@ function getCurrentClassLive(){
               var liveTbl= liveClassTable(data.liveClassrooms);
               $('#live-class-now').html(liveTbl);
               setTimeout(getColleps(), 5000);
-          }
-      },
-      error : function(e) {
-          if(tt=='theme2'){
-              showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-          }else if(tt=='theme1'){
-              showMessage(true, TECHNICAL_GLITCH);
           }
       }
   });
@@ -593,7 +544,7 @@ function getTeacherClassReview(formid, startDate, enddate){
   console.log("getTeacherClassReview");
   $.ajax({
       type : "POST",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : getURLForHTML('dashboard','teacher-class-review-content'),
       data : JSON.stringify({'startDate': startDate, 'endDate' : enddate, 'schoolId' : SCHOOL_ID}),
       dataType : 'json',
@@ -618,13 +569,6 @@ function getTeacherClassReview(formid, startDate, enddate){
                 "pageLength": 100
               });
             
-          }
-      },
-      error : function(e) {
-          if(tt=='theme2'){
-              showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-          }else if(tt=='theme1'){
-              showMessage(true, TECHNICAL_GLITCH);
           }
       }
   });
@@ -689,7 +633,7 @@ function getTeacherClassReviewById(userid, meetingid, callFrom, startDate, endDa
 
   $.ajax({
       type : "POST",
-      contentType : "application/json",
+      contentType : APPLICATION_JSON_VALUE,
       url : getURLForHTML('dashboard','teacher-class-review-content-byid'),
       data : JSON.stringify(data),
       dataType : 'json',
@@ -721,13 +665,6 @@ function getTeacherClassReviewById(userid, meetingid, callFrom, startDate, endDa
               }
               
           }
-      },
-      error : function(e) {
-          if(tt=='theme2'){
-              showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-          }else if(tt=='theme1'){
-              showMessage(true, TECHNICAL_GLITCH);
-          }
       }
   });
 }
@@ -757,8 +694,8 @@ function classReviewByidTable(rclasses){
 		htmlTbl+="<input type=\"text\" class=\"attendMinuts\" id=\"attendMinuts"+rclasses[md]['attendId']+"\" name=\"attendMinuts"+rclasses[md]['attendId']+"\" value=\""+spelTim[1]+"\" placeholder=\"MM\"  maxlength=\"2\" style=\"font-size:11px;width:50px\"/>";
     htmlTbl+="<input type=\"text\" class=\"attendSecond\" id=\"attendSecond"+rclasses[md]['attendId']+"\" name=\"attendSecond"+rclasses[md]['attendId']+"\" value=\""+spelTim[2]+"\" placeholder=\"SS\"  maxlength=\"2\" style=\"font-size:11px;width:50px\"/>";
     
-    htmlTbl+="<input type=\"text\" class=\"attendRemark form-control\" id=\"attendRemark" + rclasses[md]['attendId'] + "\" name=\"attendRemark" + rclasses[md]['attendId'] + "\" placeholder=\"Enter Comments, word limit 250\" maxlength=\"250\" />";
-    htmlTbl+="<div><button class=\"mb-2 mr-2 btn-pill btn btn-info\" id=\"saveRecordAttend\" onclick=\"saveAttend('"+rclasses[md]['attendId']+"', '"+rclasses[md]['attendanceJoinTime']+"', 'edit');\">Save</button><button class=\"mb-2 mr-2 btn-pill btn btn-info\" id=\"publishRecordAttend\" onclick=\"saveAttend('"+rclasses[md]['attendId']+"', '"+rclasses[md]['attendanceJoinTime']+"', 'publish');\">Publish</button></div>";
+    htmlTbl+="<input type=\"text\" class=\"attendRemark form-control\" id=\"attendRemark"+rclasses[md]['attendId']+"\" name=\"attendRemark"+rclasses[md]['attendId']+"\" placeholder=\"Enter Comments, word limit 250\" maxlength=\"250\"/>";
+    htmlTbl+="<div><button class=\"mb-2 mr-2 btn-pill btn btn-success\" id=\"saveRecordAttend\" onclick=\"saveAttend('"+rclasses[md]['attendId']+"', '"+rclasses[md]['attendanceJoinTime']+"', 'edit');\">Save</button><button class=\"mb-2 mr-2 btn-pill btn btn-primary\" id=\"publishRecordAttend\" onclick=\"saveAttend('"+rclasses[md]['attendId']+"', '"+rclasses[md]['attendanceJoinTime']+"', 'publish');\">Publish</button></div>";
     htmlTbl+="</td>";
     htmlTbl+="<td class='vertical-align-top'><b>Meeting Topic:</b> "+rclasses[md]['meetingtopic']+"<br/><b>Subject Name:</b> "+subjectName;
     if(rclasses[md]['timezone']!=''){
@@ -922,7 +859,7 @@ function getTotalAttendanceDetail(data){
 					}else if(value.lensParticipants>1 && entityType=='Admin Task'){
 						html+="<span class='float-left d-inline-block p-2 mt-1' style='border:2px dashed #ff0000; border-radius:4px;color:#ff0000'><b>Meeting Participants:</b> "+value.lensParticipants+"</span>";
 					}else{
-						html+="<span class='float-left d-inline-block p-2 mt-1' style='border:2px dashed #007fff; border-radius:4px;color:#007fff'><b>Meeting Participants:</b> "+value.lensParticipants+"</span>";
+						html+="<span class='float-left d-inline-block p-2 mt-1' style='border:2px dashed var(--pc); border-radius:4px;color:var(--pc)'><b>Meeting Participants:</b> "+value.lensParticipants+"</span>";
 					}
 					html+="</td>";
 				}

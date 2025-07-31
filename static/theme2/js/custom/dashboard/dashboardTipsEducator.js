@@ -23,7 +23,7 @@ function saveTipsForEducator(formId,moduleId, roleModuleId) {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'tips-educator-submit'),
 		data : JSON.stringify(getRequestForEducatorMapp(formId)),
 		dataType : 'json',
@@ -39,10 +39,6 @@ function saveTipsForEducator(formId,moduleId, roleModuleId) {
 				$('#' + formId)[0].reset();
 				setTimeout(function(){ callDashboardPageSchool(roleModuleId,'tips-educators'); }, 1000);
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -94,7 +90,7 @@ function callForChangeStatus(formId, titleId, flag,roleModuleId) {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'update_educator_tips_status'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -111,10 +107,6 @@ function callForChangeStatus(formId, titleId, flag,roleModuleId) {
 
 				}, 1000);
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -134,7 +126,7 @@ function sendNotificationsForAddTips(titleId){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'tips_for_educator_send_Mail'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -151,10 +143,6 @@ function sendNotificationsForAddTips(titleId){
 
 				}, 1000);
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});

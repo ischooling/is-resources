@@ -16,7 +16,7 @@ function getScholarfilter(formId) {
     customLoader(true);
   $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'get-scholarship-code'),
         data: JSON.stringify(getScholarFilterBody(formId)),
         dataType: 'html',
@@ -29,7 +29,7 @@ function getScholarfilter(formId) {
                     if (stringMessage[0] == "SESSIONOUT") {
                         redirectLoginPage();
                     } else {
-                        showMessage(true, stringMessage[1]);
+                        showMessageTheme2(0, stringMessage[1]);
                     }
                 } else {
                     $('#scholarList').html(htmlContent);

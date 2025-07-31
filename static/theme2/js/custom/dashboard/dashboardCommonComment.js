@@ -14,7 +14,7 @@ function callForCommonComments(formId, controllType, entityId, entityName, title
 	data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','common-comments-by-entity-id'),
 		data : JSON.stringify(data),
 		dataType : 'html',
@@ -31,11 +31,6 @@ function callForCommonComments(formId, controllType, entityId, entityName, title
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			console.log(e)
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }
@@ -56,7 +51,7 @@ function saveCommonComments(formId, controllType, entityId, entityName, title) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','save-common-comments-content'),
 		data : JSON.stringify(getRequestForSaveCommonComments(formId, moduleId)),
 		dataType : 'html',
@@ -74,11 +69,6 @@ function saveCommonComments(formId, controllType, entityId, entityName, title) {
         		}
         		return false;
 			}
-		},
-		error : function(e) {
-			console.log(e)
-			//showMessage(true, TECHNICAL_GLITCH);
-			return false;
 		}
 	});
 }

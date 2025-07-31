@@ -287,7 +287,7 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
  }
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','save-leads-form-data'),
 	 data : JSON.stringify(getRequestForLeadSave(formId, leadFrom, leadType)),
 	 dataType : 'json',
@@ -363,10 +363,6 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
 			 $("#leadNoMove").val('');
 			 $("#leadDataList .checkLead").prop('checked', false);
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -787,7 +783,7 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
  
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','save-leads-followup'),
 	 data : JSON.stringify(getRequestForLeadFollowupSave(formId)),
 	 dataType : 'json',
@@ -844,10 +840,6 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 			 }, 300);
 			 
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -1120,7 +1112,7 @@ function demoRequestAccept(requestDemoId, roleModuleId, userId, controlType, dem
  hideMessage('');
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','demo-request-accepted'),
 	 data : JSON.stringify(getRequestForDemoRequestAcceptSave(requestDemoId, userId, controlType)),
 	 dataType : 'json',
@@ -1138,10 +1130,6 @@ function demoRequestAccept(requestDemoId, roleModuleId, userId, controlType, dem
 			 }
 			 //$(".modal-backdrop").remove();
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -1193,7 +1181,7 @@ function showLeadFreeSlotList(formId,roleModuleId) {
  
  $.ajax({
 	 type : "POST",
-	 contentType : 'application/json',
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLForHTML('dashboard','lead-free-slot-list'),
 	 data : JSON.stringify({moduleId:roleModuleId,date:meetingDate,countryTimezoneId:countryTimezoneId,lat:lat,lon:lon,requestType:requestType,book:book}),
 	 dataType : 'html',
@@ -1210,9 +1198,6 @@ function showLeadFreeSlotList(formId,roleModuleId) {
 			 return false;
 		 }
 		 return false;
-	 },
-	 error : function(e) {
-		 showMessage(true, e.responseText);
 	 }
  });
 }
@@ -1221,7 +1206,7 @@ function discardRawDemoData(leadsource, leadRawId, roleModuleId, userId) {
  hideMessage('');
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','lead-raw-list-discard-request'),
 	 data : JSON.stringify(getRequestForDiscardRawDemoData(leadsource, leadRawId,userId)),
 	 dataType : 'json',
@@ -1237,10 +1222,6 @@ function discardRawDemoData(leadsource, leadRawId, roleModuleId, userId) {
 			 }, 3000);
 			 //$(".modal-backdrop").remove();
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -1275,7 +1256,7 @@ function discardLeadsData(leadId, roleModuleId, leadFrom, leadSourceFrom, userId
  
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','lead-discard-request'),
 	 data : JSON.stringify(getRequestForDiscardLeadsData(leadId, leadFrom, leadSourceFrom, userId)),
 	 dataType : 'json',
@@ -1306,10 +1287,6 @@ function discardLeadsData(leadId, roleModuleId, leadFrom, leadSourceFrom, userId
 			 }
 		 }
 		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
-		 return false;
 	 }
  });
 }
@@ -1339,7 +1316,7 @@ function feedbackLeadsData(leadStatus, leadId, remarks, remarkBy, userId) {
  hideMessage('');
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','lead-update-remarks'),
 	 data : JSON.stringify(getRequestForRemarkLeadsData(leadStatus, leadId, remarks, remarkBy, userId)),
 	 dataType : 'json',
@@ -1354,10 +1331,6 @@ function feedbackLeadsData(leadStatus, leadId, remarks, remarkBy, userId) {
 //					callForDashboardData('formIdIfAny','lead-list?moduleId='+roleModuleId+'&leadFrom='+leadFrom);
 //				}, 3000);
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -1383,7 +1356,7 @@ function getRequestForRemarkLeadsData(leadStatus, leadId, remarks, remarkBy, use
 function getPendingNotCall(){
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','send-lead-notcall-cron'),
 	 dataType : 'json',
 	 cache : false,
@@ -1441,7 +1414,7 @@ $('#leadAdvanceSearch').modal('hide');
 customLoader(true);
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLForHTML('dashboard','advance-lead-search-content'),
 	 data : JSON.stringify(getCallRequestForAdvanceLeadSearchStudent(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType,'Y')),
 	 dataType : 'html',
@@ -1455,26 +1428,17 @@ customLoader(true);
 				 if(stringMessage[0] == "SESSIONOUT"){
 					 redirectLoginPage();
 				 }else{
-					 if(newTheme){
-						 showMessageTheme2(1, data['message'],'',false);
-					 }else{
-						 showMessage(true, stringMessage[1]);
-					 }
+					 showMessageTheme2(1, data['message'],'',false);
 					 $('#leadAdvanceSearch').modal('show');
 				 }
 			 } else {
 				 //$('#'+formId)[0].reset();
-				 if(newTheme){
-					 $('#leadAdvanceSearch').modal('hide');
-					 $('#leadSourceList').html(htmlContent);
-				 }else{
-					 $('#advLeadSerch').modal('hide');
-					 $('#leadSourceList').html(htmlContent);
-				 }
+				  $('#leadAdvanceSearch').modal('hide');
+				  $('#leadSourceList').html(htmlContent);
 				
 				 $("#leadDataList .checkLead").prop('checked', false);
-				
 				 callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType,'Y', leadsFollowCount,''); 
+				
 			 }
 			 return false;
 		 }
@@ -1585,7 +1549,11 @@ leadModifyDetailDTO['acadmicYear'] = $("#"+formId+" #leadAcadmicYear").val()!=un
 leadModifyDetailDTO['priority'] = $("#"+formId+" #leadPrioritySearch").val()!=undefined?$("#"+formId+" #leadPrioritySearch").val():'';
 leadModifyDetailDTO['utmSource'] = $("#"+formId+" #utmSourceSearch").val()!=undefined?$("#"+formId+" #utmSourceSearch").val():'';
 //leadModifyDetailDTO['utmCampaign'] = $("#"+formId+" #leadSearchCampaign").val();
-leadModifyDetailDTO['utmCampaigns'] = $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val():[];
+if($("#"+formId+" #campaignName").val()!=undefined && $("#campaignName").val()!=''){
+	leadModifyDetailDTO['utmCampaigns'] = [$("#"+formId+" #campaignName").val()];
+}else{
+	leadModifyDetailDTO['utmCampaigns'] = $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val():[];
+}
 leadModifyDetailDTO['leadTemplate'] = $("#"+formId+" #leadSearchTemplate").val()!=undefined?$("#"+formId+" #leadSearchTemplate").val():[];
 leadModifyDetailDTO['deliveredStatus'] = $("#"+formId+" #leadSearchDeliveredStatus").val()!=undefined?$("#"+formId+" #leadSearchDeliveredStatus").val():'';
 
@@ -1714,7 +1682,7 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
  }
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','lead-move'),
 	 data : JSON.stringify(getRequestForMoveLeadsData(userId)),
 	 dataType : 'json',
@@ -1750,10 +1718,6 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
 			}
 			 
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -1927,7 +1891,7 @@ data['userId']=USER_ID;
 $.ajax({
 	 global: false,
 	 type : "POST",
-	 contentType:"application/json",
+	 contentType:APPLICATION_JSON_VALUE,
 	 url : getURLForHTML('dashboard',url),
 	 data :JSON.stringify(data),
 	 dataType : 'html',
@@ -1966,16 +1930,12 @@ $.ajax({
 }
 
 
-function saveLeadAssignToCounselor(userId, tblId, callFrom, forUse, newTheme) {
+function saveLeadAssignToCounselor(userId, tblId, callFrom, forUse) {
 customLoader(true);
- if(newTheme){
-	 hideMessageTheme2('');
- }else{
-	 hideMessage('');
- }
+ hideMessageTheme2('');
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','save-assign-lead-tocounselor'),
 	 data : JSON.stringify(getRequestForLeadAssignToCounselor(userId, tblId, callFrom, forUse)),
 	 dataType : 'json',
@@ -1983,30 +1943,17 @@ customLoader(true);
 	 timeout : 600000,
 	 success : function(data) {
 		 if (data['status'] == '0' || data['status'] == '2') {
-			 if(newTheme){
-				 showMessageTheme2(0, data['message'],'',true);
-			 }else{
-				 showMessage(true, data['message']);
-			 }
+			 showMessageTheme2(0, data['message'],'',true);
 		 } else {
-						 
-			 if(newTheme){
-				 showMessageTheme2(1, data['message'],'',true);
-				 setTimeout(function(){
-					 location.reload();
-				 }, 1500);
-			 }else{
-				 showMessage(true, data['message']);
-			 }
-						 
+			showMessageTheme2(1, data['message'],'',true);
+			if(forUse=='ORIENT'){
+			getOrientaionAssignUser();
+			}else{
+				getLeadAssignUser(OBJECT_RIGHTS);
+			}
 			 
 		 }
 		 customLoader(false);
-		 return false;
-	 },
-	 error : function(e) {
-		customLoader(false);
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -2127,7 +2074,7 @@ function saveInactiveAssignCounselor(userId, checkedVal, orderBy, forUse , newTh
  
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','inactive-assign-counselor'),
 	 data : JSON.stringify(getRequestForInactiveAssignCounselor(userId, checkedVal, orderBy, forUse)),
 	 dataType : 'json',
@@ -2146,15 +2093,9 @@ function saveInactiveAssignCounselor(userId, checkedVal, orderBy, forUse , newTh
 			 }else{
 				 showMessage(true, data['message']);
 			 }
-			 setTimeout(function(){
-				 location.reload();
-			 }, 1500);
+			 getLeadAssignUser(OBJECT_RIGHTS);
 			 
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -2190,7 +2131,7 @@ function leadsDataLogDelete(leadId, userId) {
  hideMessage('');
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','leadlog-delete'),
 	 data : JSON.stringify(getRequestForDeleteLeadsLogData(leadId, userId)),
 	 dataType : 'json',
@@ -2206,10 +2147,6 @@ function leadsDataLogDelete(leadId, userId) {
 			 }, 1500);
 			 
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -2234,7 +2171,7 @@ function callStudentSignupStage(formId, userId) {
  hideMessageTheme2('');
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard', 'student-enroll-stage'),
 		 data : JSON.stringify(getRequestForStudentSignupStage(formId, userId)),
 		 dataType : 'json',
@@ -2265,15 +2202,12 @@ function callStudentSignupStage(formId, userId) {
 					 tblehtml = tblehtml + " <td class=\"text-center\" style=\"width: 200px;\"></td> ";
 					 tblehtml = tblehtml + " <td class=\"text-center\"> ";
 					 tblehtml = tblehtml + " <div role=\"group\" class=\"btn-group-sm btn-group\"> ";
-					 tblehtml = tblehtml + " <button class=\"btn-shadow btn btn-primary\">View</button></div></td> ";
+					 tblehtml = tblehtml + " <button class=\" btn btn-primary\">View</button></div></td> ";
 					 tblehtml = tblehtml + " </tr> ";
 				 }
 				 $('#todyEnrollStatusTbody').html(tblehtml);
 			 }
-		 },
-			 error : function(e) {
-				 console.log(e);
-			 }
+		 }
 		 });
 }
 function getRequestForStudentSignupStage(formId, userId) {
@@ -2290,7 +2224,7 @@ function getRequestForStudentSignupStage(formId, userId) {
 function callDemoCountDetails(formId, userId, newTheme) {
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard', 'get-demo-count-report'),
 		 data : JSON.stringify(getRequestForDemoCountDetails(formId, userId)),
 		 dataType : 'json',
@@ -2319,10 +2253,7 @@ function callDemoCountDetails(formId, userId, newTheme) {
 				 
 				 
 			 }
-		 },
-			 error : function(e) {
-				 console.log(e);
-			 }
+		 }
 		 });
 }
 function getRequestForDemoCountDetails(formId, userId) {
@@ -2339,7 +2270,7 @@ function getRequestForDemoCountDetails(formId, userId) {
 function callLeadCountDetails(formId, userId) {
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard', 'get-lead-count-report'),
 		 data : JSON.stringify(getRequestForLeadCountDetails(formId, userId)),
 		 dataType : 'json',
@@ -2374,10 +2305,7 @@ function callLeadCountDetails(formId, userId) {
 				 
 				 
 			 }
-		 },
-			 error : function(e) {
-				 console.log(e);
-			 }
+		 }
 		 });
 }
 function getRequestForLeadCountDetails(formId, userId) {
@@ -2395,7 +2323,7 @@ var	itiAltPhoneNumber;
 var	itiPhoneNumber;
 function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType, columnPermission) {
 	//console.log("callLeadsByLeadId",columnPermission);
-	if(columnPermission=='true'){
+	if(columnPermission==true){
 		$(".b2cLeadsource").show();
 		$(".b2bLeadsource").show();
 		$(".b2bLeadstatus").show();
@@ -2422,7 +2350,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 	}
  	$.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('/api/v1/leads', 'get-lead-data-byid'),
 		 data : JSON.stringify(getRequestForLeadsByLeadId(formId, leadId, userId,splitLeadType, controlType)),
 		 dataType : 'json',
@@ -2612,10 +2540,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 					$.each($('.upload-docs-wrapper[style*="display: none"]'), function(){showAddMoreBtnArray.push(parseInt($(this).attr("index")))});
 				}
 			 }
-		 },
-		error : function(e) {
-			console.log(e);
-		}
+		 }
 	});
 }
 
@@ -2647,7 +2572,7 @@ function getRequestForLeadsByLeadId(formId, leadId, userId, leadType, controlTyp
 function callLeadCountGradeWiseDetails(formId, userId) {
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard', 'get-lead-count-gradewise-report'),
 		 data : JSON.stringify(getRequestForLeadCountGradeWiseDetails(formId, userId)),
 		 dataType : 'json',
@@ -2680,10 +2605,7 @@ function callLeadCountGradeWiseDetails(formId, userId) {
 				 }
 				 $("#dashboardGradeAssign").html(htmlGradeWise);
 			 }
-		 },
-			 error : function(e) {
-				 console.log(e);
-			 }
+		 }
 		 });
 }
 function getRequestForLeadCountGradeWiseDetails(formId, userId) {
@@ -2725,7 +2647,7 @@ function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, m
 
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('/api/v1/leads', 'get-lead-data-byid'),
 		 data : JSON.stringify(getRequestForGetOpenFollowup(formId, leadId, userId, leadType, epdetailUpdateStatus)),
 		 dataType : 'json',
@@ -2809,10 +2731,7 @@ function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, m
 
 					});
 			 }
-		 },
-			 error : function(e) {
-				 console.log(e);
-			 }
+		 }
 		 });
 }
 
@@ -2850,7 +2769,7 @@ function openPopupAssignToCounselor(leadId, assignTo, userId, statusPing ,newThe
  
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','popup-opento-counselor'),
 	 data : JSON.stringify(getRequestForOpenPopupAssignToCounselor(leadId, assignTo, userId, statusPing, newTheme, leadType)),
 	 dataType : 'json',
@@ -2878,10 +2797,6 @@ function openPopupAssignToCounselor(leadId, assignTo, userId, statusPing ,newThe
 			 }
 			 
 		 }
-		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
 		 return false;
 	 }
  });
@@ -2920,7 +2835,7 @@ leadCommonDTO['leadCountDetailDTO']=leadCountDetailDTO;
 function callLeadDemoCountDetails(formId, userId,newTheme) {
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard', 'get-lead-demo-count'),
 		 data : JSON.stringify(getRequestForLeadDemoCountDetails(formId, userId)),
 		 dataType : 'json',
@@ -2948,10 +2863,7 @@ function callLeadDemoCountDetails(formId, userId,newTheme) {
 				 
 				 
 			 }
-		 },
-			 error : function(e) {
-				 console.log(e);
-			 }
+		 }
 		 });
 }
 function getRequestForLeadDemoCountDetails(formId, userId) {
@@ -2971,7 +2883,7 @@ function getPingPopupScheduleCall(assignTo){
  //"assignTo="+assignTo,
  $.ajax({
 	 type : "POST",
-	 contentType : 'application/json',
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLForHTML('dashboard','counselor-ping-lead-schedule'),
 	 data : JSON.stringify({"assignTo":assignTo}),
 	 dataType : 'html',
@@ -3021,7 +2933,7 @@ function callforLeadCalculate(formId, dataType ,newTheme) {
 
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'calculate-tolead'),
 			data : JSON.stringify(getRequestForLeadCalculate(formId, dataType)),
 			dataType : 'json',
@@ -3040,10 +2952,7 @@ function callforLeadCalculate(formId, dataType ,newTheme) {
 					}, 800);
 					
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    function getRequestForLeadCalculate(formId) {
@@ -3354,7 +3263,7 @@ function callforLeadCalculate(formId, dataType ,newTheme) {
 function callLeadtimecountry(modeSearch, startDate, endDate) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'times-countries'),
 			data : JSON.stringify(getRequestForLeadtimecountry(modeSearch,startDate, endDate)),
 			dataType : 'json',
@@ -3367,17 +3276,14 @@ function callLeadtimecountry(modeSearch, startDate, endDate) {
 					var httmls = getLeadTimeCountryHtml(data);
 					$("#timescountry").html(httmls);
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
 
    function callLeadAndEnrollmentWithCountry(modeSearch, startDate, endDate) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'get-enrolled-list-with-country'),
 			data : JSON.stringify(getRequestForLeadtimecountry(modeSearch,startDate, endDate)),
 			dataType : 'json',
@@ -3390,10 +3296,7 @@ function callLeadtimecountry(modeSearch, startDate, endDate) {
 					var httmlTop = getLeadTopCountryHtml(data);
 					$("#topcompany").html(httmlTop);
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    function getRequestForLeadtimecountry(modeSearch,startDate, endDate) {
@@ -3470,7 +3373,7 @@ function getLeadTopCountryHtml(data){
 function callLeadTotalStatuscountry(modeSearch, chartId, startDate, endDate) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'total-lead-countries'),
 			data : JSON.stringify(getRequestForLeadTotalcountry(modeSearch, startDate, endDate)),
 			dataType : 'json',
@@ -3482,10 +3385,7 @@ function callLeadTotalStatuscountry(modeSearch, chartId, startDate, endDate) {
 				} else {
 					var htChart = getTotalLeadsChart(data.leadTotalLeadCount, chartId);
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    
@@ -3631,7 +3531,7 @@ function getTotalLeadsChart(data, chartId){
 	function callDaywiseLead(modeSearch, chartId, startDate, endDate) {
 		$.ajax({
 				type : "POST",
-				contentType : "application/json",
+				contentType : APPLICATION_JSON_VALUE,
 				url : getURLForHTML('dashboard', 'daywise-lead'),
 				data : JSON.stringify(getRequestForDayWiseLead(modeSearch, startDate, endDate)),
 				dataType : 'json',
@@ -3643,10 +3543,7 @@ function getTotalLeadsChart(data, chartId){
 					} else {
 						var htChart = getDaywiseLeadsChart(data.leadDaywiseWise, chartId);
 					}
-				},
-					error : function(e) {
-						console.log(e);
-					}
+				}
 				});
 	   }
 	   
@@ -3731,7 +3628,7 @@ function getTotalLeadsChart(data, chartId){
 
 		$.ajax({
 				type : "POST",
-				contentType : "application/json",
+				contentType : APPLICATION_JSON_VALUE,
 				url : getURLForHTML('dashboard', 'campain-lead'),
 				data : JSON.stringify(getRequestForCampainWise(modeSearch, searchType,startDate,endDate)),
 				dataType : 'json',
@@ -3747,10 +3644,7 @@ function getTotalLeadsChart(data, chartId){
 							var htChart = getLeadSourceWiseChart(data.leadDaywiseWise, chartId);
 						}
 					}
-				},
-					error : function(e) {
-						console.log(e);
-					}
+				}
 				});
 	   }
 	   
@@ -3972,7 +3866,7 @@ function getTotalLeadsChart(data, chartId){
 function callLeadEnrolled(formId, modeSearch, startDate, endDate) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'enrolled-lead-list'),
 			data : JSON.stringify(getRequestForLeadEnrolled(formId, modeSearch,startDate, endDate)),
 			dataType : 'json',
@@ -3989,10 +3883,7 @@ function callLeadEnrolled(formId, modeSearch, startDate, endDate) {
 					$("#enrolled-student").dataTable();
 					
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    
@@ -4086,7 +3977,7 @@ function getLeadEnrolledHtml(data){
 function callCampainWiseExpenses(modeSearch, searchType, startDate, endDate) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('fb', 'insights'),
 			data : JSON.stringify(getRequestForCampainWiseExpenses(modeSearch, searchType, startDate,endDate)),
 			dataType : 'json',
@@ -4103,10 +3994,7 @@ function callCampainWiseExpenses(modeSearch, searchType, startDate, endDate) {
 						$("#campExpList").dataTable();
 					}
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    
@@ -4146,7 +4034,7 @@ function getLeadExpensesListHtml(data){
 function callB2BDashboardLead(moduleId,leadType) {
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'b2b-dashboard-lead'),
 			data : JSON.stringify(getRequestForB2bDashboard(moduleId,leadType)),
 			dataType : 'json',
@@ -4174,10 +4062,7 @@ function callB2BDashboardLead(moduleId,leadType) {
 					
 					
 				}
-			},
-				error : function(e) {
-					console.log(e);
-				}
+			}
 			});
    }
    
@@ -4215,10 +4100,10 @@ function showBasicDetailsMailWarning(b2bLeadId) {
 		+'<div class="modal-dialog modal-md modal-notify modal-danger" role="document" style="max-width:500px;">'
 			+'<div class="modal-content">'
 				+'<div class="modal-body text-center">'
-					+'<h5 class="modal-title py-4" id="exampleModalLabel">Are you sure you want to send basic details mail?</h5>'
+					+'<h5 class="modal-title py-4" >Are you sure you want to send basic details mail?</h5>'
 					+'<div style="full text-center">'
 						+'<button type="button" class="btn btn-primary mr-2" id="discardSendBasicDetailsWarningYes" onclick="sendBasicDetailsMail(' + b2bLeadId + ');">Yes</button>'
-						+'<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">No</button>'
+						+'<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -4234,7 +4119,7 @@ function sendBasicDetailsMail(b2bleadId){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/send-b2b-basic-details',
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -4267,10 +4152,10 @@ function showResendB2BWelcomeMailWarning(b2bLeadId) {
 		+'<div class="modal-dialog modal-md modal-notify modal-danger" role="document" style="max-width:500px">'
 			+'<div class="modal-content">'
 				+'<div class="modal-body text-center">'
-					+'<h5 class="modal-title py-4" id="exampleModalLabel">Are you sure you want to resend login details mail?</h5>'
+					+'<h5 class="modal-title py-4" >Are you sure you want to resend login details mail?</h5>'
 					+'<div style="full text-center">'
 						+'<button type="button" class="btn btn-primary mr-2" id="discardSendBasicDetailsWarningYes" onclick="resendB2BWelcomeMail(' + b2bLeadId + ');">Yes</button>'
-						+'<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">No</button>'
+						+'<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -4286,7 +4171,7 @@ function resendB2BWelcomeMail(b2bleadId){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/resend-b2b-welcome-mail',
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -4316,7 +4201,7 @@ function callLeadStatusList(formId, value, elementId, keyStatus) {
 	hideMessageTheme2('');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-STATUS-LIST', value)),
 		dataType: 'json',
@@ -4340,10 +4225,6 @@ function callLeadStatusList(formId, value, elementId, keyStatus) {
 				});
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log(e);
 		}
 	});
 }
@@ -4357,7 +4238,7 @@ function saveCampaignLead(leadid, elementId, leadFrom ) {
 		}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','lead-campainname-update'),
 		data : JSON.stringify(getRequestForCampaignLead(leadid, elementId)),
 		dataType : 'json',
@@ -4374,10 +4255,6 @@ function saveCampaignLead(leadid, elementId, leadFrom ) {
 					window.location.reload();
 				}
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -4421,7 +4298,7 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 	//console.log("callLeadMergeData");
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('/api/v1/leads', 'get-lead-marge'),
 		 data : JSON.stringify(getRequestForMergeLeadIds(formId, leadId, userId, leadType)),
 		 dataType : 'json',
@@ -4439,7 +4316,7 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 					if(openstatus==0){
 						$("#"+modalId).modal('show');
 					}
-					 
+					
 					if(data['leadDashboardCommon']!=null){
 						if(data['leadDashboardCommon']['leadCommonDTO']!=null){
 						   var leadDemo = data['leadDashboardCommon']['leadCommonDTO'][0];
@@ -4455,7 +4332,7 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 								$("#"+formId+" #relationType").val(leadDemo.leadStudentDetailDTO.relationType);
 							}
 							
-							$("#"+formId+" #leadSource").val(leadDemo.leadModifyDTO.leadSource);
+							$("#"+formId+" #leadSource").val(leadDemo.leadModifyDTO.leadSource).trigger('change');
 							$("#"+formId+" #leadGrade").val(leadDemo.leadStudentDetailDTO.standard);
 							$("#"+formId+" #leadDOB").val(leadDemo.leadStudentDetailDTO.stdDob);
 							$("#"+formId+" #leadGender").val(leadDemo.leadStudentDetailDTO.gender);
@@ -4537,13 +4414,16 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 							$("#"+formId+" #leadAdd").val(leadDemo.leadStudentDetailDTO.address);
 						   
 							
-							if(leadType=='B2B'){
-								$("#"+formId+" #leadAssignTo").val(leadDemo.leadModifyDTO.assignTo).trigger('change');
-								//$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus);
-							}else{
-							   $("#"+formId+" #leadAssignTo").val(leadDemo.leadModifyDTO.assignTo)
-							   $("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus);
-							}
+							// if(leadType=='B2B'){
+							// 	$("#"+formId+" #leadAssignTo").val(leadDemo.leadModifyDTO.assignTo).trigger('change');
+							// 	//$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus);
+							// }else{
+							//    $("#"+formId+" #leadAssignTo").val(leadDemo.leadModifyDTO.assignTo)
+							//    $("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus);
+							// }
+							$("#"+formId+" #leadAssignTo").val(leadDemo.leadModifyDTO.assignTo).trigger('change');
+							$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus).trigger('change');
+
 							$("#"+formId+" #leadSupportTo").val(leadDemo.leadStudentDetailDTO.relationType);
 							$("#"+formId+" #countrolType").val(controlType);
 							var leadMergeList =  data['leadDashboardCommon']['leadCommonDTO'];
@@ -4558,10 +4438,7 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 					}
 				}
 			 }
-		 },
-		error : function(e) {
-			console.log(e);
-		}
+		 }
 	});
 }
 
@@ -4592,7 +4469,7 @@ function getRequestForMergeLeadIds(formId, leadId, userId, leadType) {
 function getLeadMergeDataHtml(mergeLeadList, lid){
 	var htmlLead="";
 	htmlLead=htmlLead+'<table class="table table-bordered table-striped" style="font-size:11px;">';
-	htmlLead=htmlLead+'<thead><tr><th>Sr. No.</th><th>Lead No<br/>Lead Source</th><th>Lead Status<br/>Lead Assign</th><th>Child Name<br/>Grade<br/>City | Country</th><th>Contact Info</th></tr></thead>';
+	htmlLead=htmlLead+'<thead><tr><th>S. No.</th><th>Lead No<br/>Lead Source</th><th>Lead Status<br/>Lead Assign</th><th>Child Name<br/>Grade<br/>City | Country</th><th>Contact Info</th></tr></thead>';
 	htmlLead=htmlLead+'<tbody>';
 	if(mergeLeadList!=null && mergeLeadList.length>0){
 		var mindex=1;
@@ -4649,7 +4526,7 @@ function saveCampaignMaster(formId, campid, activeInactive ) {
 	hideMessageTheme2('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','save-campaign-data'),
 		data : JSON.stringify(getRequestForCampaignMaster(formId, campid, activeInactive)),
 		dataType : 'json',
@@ -4667,10 +4544,6 @@ function saveCampaignMaster(formId, campid, activeInactive ) {
 				callCampainList(true,'selectcampain');
 				//window.location.reload();
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -4691,12 +4564,12 @@ function getRequestForCampaignMaster(formId, campid, activeInactive){
 }
 
 function callCampainList(dropdownStatus, elementIdid) {
+	console.log("callCampainList")
 	data={};
 	data['schoolId']=SCHOOL_ID;
-	
 	$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('/api/v1/leads', 'get-campaign-list'),
 			data : JSON.stringify(data),
 			dataType : 'json',
@@ -4704,7 +4577,7 @@ function callCampainList(dropdownStatus, elementIdid) {
 			timeout : 600000,
 			success : function(data) {//console.log('get-campaign-list data :: ' + data);
 				if (data['status'] == '0' || data['status'] == '2') {
-					showMessage(true, data['message']);
+					showMessageTheme2(0, data['message']);
 				} else {
 					if(dropdownStatus){
 						var campList = data.campainNameList;
@@ -4727,10 +4600,7 @@ function callCampainList(dropdownStatus, elementIdid) {
 						$('#tblCampaignList').dataTable();
 					}
 				}
-			},
-		   error : function(e) {
-			   console.log(e);
-		   }
+			}
 	   });
    }
 
@@ -4765,7 +4635,7 @@ function inactiveCampaignMaster( campid, activeInactive ) {
 	hideMessageTheme2('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','inactive-campaign'),
 		data : JSON.stringify(getRequestForInactiveCampaignMaster(campid, activeInactive)),
 		dataType : 'json',
@@ -4778,10 +4648,6 @@ function inactiveCampaignMaster( campid, activeInactive ) {
 				showMessageTheme2(1, data['message'],'',false);
 				callCampainList(false,'');
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -4805,7 +4671,7 @@ function getRequestForInactiveCampaignMaster(campid, activeInactive){
 function getPartnerLeadById(formId, leadId, modalId) {
  $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('/api/v1/leads', 'get-lead-data-byid'),
 		 data : JSON.stringify(getRequestForPartnerByLeadId(formId, leadId)),
 		 dataType : 'json',
@@ -4878,10 +4744,7 @@ function getPartnerLeadById(formId, leadId, modalId) {
 				   }
 				}
 			 }
-		 },
-		error : function(e) {
-			console.log(e);
-		}
+		 }
 	});
 }
 
@@ -4945,7 +4808,7 @@ function savePatnerWithReferralCode(formId, elementId) {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'save-referralcode-partner'),
 		data : JSON.stringify(getRequestForPartnerWithReferral(formId)),
 		dataType : 'json',
@@ -4969,9 +4832,6 @@ function savePatnerWithReferralCode(formId, elementId) {
 				}
 				showMessageTheme2(true, data['message']);
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
    }
@@ -5010,7 +4870,7 @@ function callPCountries(formId, value, elementId, preSelected) {
 	$("#" + formId + " #" + elementId).html('<option value="">Select country*</option>');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'COUNTRIES-LIST', value)),
 		dataType: 'json',
@@ -5033,7 +4893,7 @@ function getPartnerTypeList(formId, value,elementId, preSelected) {
 	$("#" + formId + " #" + elementId).html('<option value="">Select Partner type*</option>');
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId,'PARTNER-TYPE-LIST', value)),
 		dataType: 'json',
@@ -5049,10 +4909,6 @@ function getPartnerTypeList(formId, value,elementId, preSelected) {
 				});
 
 			}
-		},
-		error: function (e) {
-			customLoader(false);
-			showMessageRequestDemoPage(true, e.responseText, 'serverError', '');
 		}
 	});
 }
@@ -5097,7 +4953,7 @@ function getLeadDocuments(userId, leadId, documentsFor) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/api/v1/leads/lead-documents',
 		data : JSON.stringify(getRequestForLeadsDocuments(userId, leadId, documentsFor)),
 		dataType : 'json',
@@ -5136,7 +4992,7 @@ function saveChatLogs(discardPermission, userId, leadId, documentsFor, dataInput
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/api/v1/leads/save-chat-log',
 		data : JSON.stringify(getRequestForSaveChatLog(userId, leadId, documentsFor)),
 		dataType : 'json',
@@ -5177,7 +5033,7 @@ function getLeadChatDetails(userId, leadId, documentsFor) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/api/v1/leads/lead-chat-details',
 		data : JSON.stringify(getRequestForChatDetails(userId, leadId, documentsFor)),
 		dataType : 'json',
@@ -5222,7 +5078,7 @@ function saveCategoryLead(leadid, elementId ) {
 	}
 $.ajax({
 	type : "POST",
-	contentType : "application/json",
+	contentType : APPLICATION_JSON_VALUE,
 	url : getURLFor('leads','lead-category-update'),
 	data : JSON.stringify(getRequestForLeadCategory(leadid, elementId)),
 	dataType : 'json',
@@ -5235,10 +5091,6 @@ $.ajax({
 			showMessageTheme2(1, data['message'],'',false);
 			//window.location.reload();
 		}
-		return false;
-	},
-	error : function(e) {
-		//showMessage(true, e.responseText);
 		return false;
 	}
 });
@@ -5297,7 +5149,7 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','save-leads-followup'),
 		data : JSON.stringify(getRequestForFollowupSaveFromLeadList(formId,leadId,leadStatus,remark, leadType)),
 		dataType : 'json',
@@ -5341,10 +5193,6 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				//advanceLeadSearchStudent('advanceLeadNewSearchForm',roleModuleId, 'advance-search','list' ,data['extra'],'new', true,'', leadType);
 				getLeadStatusLog(data['leadno'], callFrom, discardPermission);
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -5515,10 +5363,6 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -5537,7 +5381,7 @@ function callTemplateList(dropdownStatus, elementIdid, selectedUserId) { //conso
 	$("#leadSearchDeliveredStatus").val('ALL').trigger('change');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','get-template-list'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -5592,9 +5436,6 @@ function callTemplateList(dropdownStatus, elementIdid, selectedUserId) { //conso
 
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e);
 		}
 	});
 }
@@ -5617,7 +5458,7 @@ function getWatiLogs(lid){
 	//console.log("leadSearchDeliveredStatus :: " + leadSearchDeliveredStatus + " leadSearchTemplate :: " + leadSearchTemplate + " leadAssignTo :: " + leadAssignTo + " leadStartDateSearch:: " + leadStartDateSearch + " leadEndDateSearch:: "+ leadEndDateSearch);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','get-wati-log'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -5640,9 +5481,6 @@ function getWatiLogs(lid){
 					$("#watiLogsContent").modal("show");
 				}
 			}
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});
@@ -5678,7 +5516,7 @@ function getWatiTemplates() {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','get-wati-templates'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -5729,9 +5567,6 @@ function getWatiTemplates() {
 				//return false;
 			}
 
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});
@@ -5858,7 +5693,7 @@ function sendWatiNotificationToUser(indexNo,templateName,leadID, d_status) {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','set-wati-message'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -5890,9 +5725,6 @@ function sendWatiNotificationToUser(indexNo,templateName,leadID, d_status) {
 				$("#successFailedWatiMessagesModal").modal("show");
 			}
 
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});
@@ -5974,7 +5806,7 @@ function selfModalHide(modalID){
 function callLeadDemoList(modeSearch, startDate, endDate) {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'school-demo-list'),
 		data : JSON.stringify(getRequestForLeadDemo(modeSearch,startDate, endDate)),
 		dataType : 'json',
@@ -5990,10 +5822,7 @@ function callLeadDemoList(modeSearch, startDate, endDate) {
 				$("#schoolDemoListTbody").html(httmlTop);
 				//$("#school-demo-list").dataTable();
 			}
-		},
-			error : function(e) {
-				console.log(e);
-			}
+		}
 		});
 }
    
@@ -6059,7 +5888,7 @@ function getLeadDemoHtml(data){
 function callEnrollmentListDaywise(reportType, modeSearch, startDate, endDate) {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-enrolled-list-daywise'),
 		data : JSON.stringify(getRequestForEnrollDaywise(reportType, modeSearch,startDate, endDate)),
 		dataType : 'json',
@@ -6076,10 +5905,7 @@ function callEnrollmentListDaywise(reportType, modeSearch, startDate, endDate) {
 				//$(".enrolledListTbody").html(httmlTop);
 				//$("#school-demo-list").dataTable();
 			}
-		},
-			error : function(e) {
-				console.log(e);
-			}
+		}
 		});
 }
 
@@ -6300,7 +6126,7 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid) {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-lead-list-campaign'),
 		data : JSON.stringify(getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName)),
 		dataType : 'json',
@@ -6308,9 +6134,11 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 		timeout : 600000,
 		success : function(data) {
 			//console.log(data);
+			
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);
 			} else {
+				
 				var leadListCampaign=data.leadListCampaign;
 				if(leadListCampaign.length>0){
 					//$('#lead-campaign-list').dataTable().fnDestroy();
@@ -6337,7 +6165,7 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 				//    });
 
 				   
-				   $(".child_name").each(function () {
+				$(".child_name").each(function () {
 					var text = $(this).text();
 					if(text!=''){
 						text=text.trim();
@@ -6379,12 +6207,10 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
                     // }
 					var httmlTop = getLeadCampaignWiseHtml(data);
 					$("#leadCampaignListTbody").html(httmlTop);
+
 				}
 			}
-		},
-			error : function(e) {
-				console.log(e);
-			}
+		}
 		});
 }
    
@@ -6624,7 +6450,7 @@ function callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage,
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-total-lead'),
 		data : JSON.stringify(getCallRequestForAdvanceLeadSearchStudent(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType,activeLead)),
 		dataType : 'json',
@@ -6664,11 +6490,7 @@ function callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage,
 					$("#b2bLeadCount").html(htmlt);
 				}
 			}
-		},
-			error : function(e) {
-				console.log(e);
-				customLoader(false);
-			}
+		}
 		});
 }
    
@@ -7190,7 +7012,7 @@ function getLeadStatusLog(leadno, callFrom, adminStatus){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','lead-status-log'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -7280,9 +7102,6 @@ function getLeadStatusLog(leadno, callFrom, adminStatus){
 
 			}
 			return false;
-		},
-		error : function(e) {
-			return false; 
 		}
 	});
 }
@@ -7291,7 +7110,7 @@ function getLeadStatusLog(leadno, callFrom, adminStatus){
 function callB2CDashboardLead(moduleId,leadType) {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'b2c-dashboard-lead'),
 		data : JSON.stringify(getRequestForB2cDashboard(moduleId,leadType)),
 		dataType : 'json',
@@ -7319,10 +7138,7 @@ function callB2CDashboardLead(moduleId,leadType) {
 				// }
 				
 			}
-		},
-			error : function(e) {
-				console.log(e);
-			}
+		}
 		});
    }
    
@@ -7360,7 +7176,7 @@ function callLeadSourceList(formId, value, elementId, keyStatus) {
 	customLoader(false);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-SOURCE-LIST', value)),
 		dataType: 'json',
@@ -7384,10 +7200,6 @@ function callLeadSourceList(formId, value, elementId, keyStatus) {
 				});
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log(e);
 		}
 	});
 }
@@ -7397,7 +7209,7 @@ function callUTMSourceList(formId, value, elementId, keyStatus) {
 	customLoader(false);
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'UTM-SOURCE-LIST', value)),
 		dataType: 'json',
@@ -7421,10 +7233,6 @@ function callUTMSourceList(formId, value, elementId, keyStatus) {
 				});
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
-		},
-		error: function (e) {
-			//showMessage(true, e.responseText);
-			console.log(e);
 		}
 	});
 }
@@ -7459,7 +7267,7 @@ function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPerm
     return new Promise(function(resolve, reject) {
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForCommon('masters'),
             data: JSON.stringify(requestData),
             dataType: 'json',
@@ -7478,11 +7286,11 @@ function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPerm
             showMessageTheme2(true, data['message']);
             return null;  // Indicate error or early exit
         }
-		const result = data['mastersData']['data'];
+        const result = data['mastersData']['data'];
         const dropdown = $("#" + formId + " #" + elementId);
         dropdown.html('');
         dropdown.append('<option value="0">Select Assign</option>');
-		$.each(result, function(k, v) {
+        $.each(result, function(k, v) {
             if (keyStatus) {
                 if (discardPermission) {
                     dropdown.append('<option value="' + v.key + '">' + v.value + ' - (' + v.extra + ')</option>');
@@ -7497,7 +7305,7 @@ function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPerm
                 dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
             }
         });
-		return result;
+        return result;
     }).catch(function(error) {
         console.error('Error occurred:', error);
         throw error;
@@ -7513,7 +7321,7 @@ function callLeadCounselorsList(formId, modeSearch, startDate, endDate, elementI
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-lead-list-counselor'),
 		data : JSON.stringify(getRequestForCounselorLead(formId, modeSearch,startDate, endDate, sublistStatus, countryId, campaignId)),
 		dataType : 'json',
@@ -7585,10 +7393,7 @@ function callLeadCounselorsList(formId, modeSearch, startDate, endDate, elementI
 
 				}
 			}
-		},
-			error : function(e) {
-				console.log(e);
-			}
+		}
 		});
 }
    
@@ -7969,7 +7774,7 @@ function getLeadWatsAppchat(leadId){
 	request['leadId']=leadId;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','get-watsApp-chat'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -7984,9 +7789,6 @@ function getLeadWatsAppchat(leadId){
 				var html = watsAppchatBoxHtml(data);
 				$(".chatmessage").html(html)
 			}
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});
@@ -8178,9 +7980,6 @@ function getZadarmaLogs(number){
 			}else{
 				showMessageTheme2(0, response.message)
 			}
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching logs:", error);
         }
     });
 }
@@ -8242,7 +8041,7 @@ function showZadarmaDetails(zadarmaIds) {
 		url: BASE_URL + CONTEXT_PATH + "zadarma/v1/get-logs-by-ids",
 		type: "POST",
 		data: JSON.stringify(body),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		success: function (response) {
 		try {
 			if(response.statusCode === 0){
@@ -8282,7 +8081,7 @@ function showZadarmaSortDetails() {
 		url: BASE_URL + CONTEXT_PATH + "zadarma/v1/get-logs-by-ids",
 		type: "POST",
 		data: JSON.stringify(body),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		success: function (response) {
 			try {
 				if(response.statusCode === 0){
@@ -8315,7 +8114,7 @@ function showMailBrodcastDetails(mailIds) {
 		url: getURLFor('leads', 'get-broadcast-mail-Log'),
 		type: "POST",
 		data: JSON.stringify(body),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		success: function (response) {
 		try {
 			if(response.statusCode === 0){
@@ -8354,7 +8153,7 @@ function showWatiDetails(watiIds){
 		url: BASE_URL + CONTEXT_PATH + "wati/api/get-wati-Log",
 		type: "POST",
 		data: JSON.stringify(body),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		success: function (response) {
 		try {
 			if(response.statusCode === 0){
@@ -8401,7 +8200,7 @@ function showWhatsappDetails(whatsappIds){
 		url: BASE_URL + CONTEXT_PATH + "/international-schooling/api/v1/leads/get-watsApp-chat-by-lead-ids",
 		type: "POST",
 		data: JSON.stringify(body),
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		success: function (response) {
 		try {
 			if(response.statusCode === 0){
@@ -9462,7 +9261,7 @@ function whatsappChatUI(responseData) {
                         <div class="modal-header py-1 bg-primary text-white">
                             <h5 class="modal-title font-weight-bold">Wati Logs</h5>
                             <button type="button" class="close text-white" onclick="selfModalHide('watiLogsContent')">
-                                <span aria-hidden="true">×</span>
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body pt-1">
@@ -9727,7 +9526,7 @@ function whatsAppChat(responseData) {
                         <div class="modal-header py-1 bg-primary text-white">
                             <h5 class="modal-title font-weight-bold">Whatsapp Messages</h5>
                             <button type="button" class="close text-white" onclick="selfModalHide('watiLogsContent')">
-                                <span aria-hidden="true">×</span>
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body pt-1">
@@ -10105,7 +9904,7 @@ function syncZadarmaCall(){
 	$.ajax({
 		url: BASE_URL + CONTEXT_PATH + "zadarma/v1/sync?syncDate="+syncDate,
 		type: "GET",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		dataType: "json",
 		async: true,
 		global: false,
@@ -10117,10 +9916,6 @@ function syncZadarmaCall(){
 				$("#callSyncRotate").removeClass("rotate");
 				showMessageTheme2(0, response.message)
 			}
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching logs:", error);
-			$("#callSyncRotate").removeClass("rotate");
         }
 	});
 }
@@ -10168,7 +9963,7 @@ function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, ne
 	
 	 $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('/api/v1/leads', 'get-lead-data'),
 		 data : JSON.stringify(getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType,'Y')),
 		 dataType : 'json',
@@ -10186,6 +9981,9 @@ function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, ne
 					$("#b2c-lead-list").html(html);
 				}
 			} else {
+				 if($("#advanceLeadNewSearchForm #campaignName" ).val()!=undefined && $("#advanceLeadNewSearchForm #campaignName" ).val()!=''){
+					 $("#advanceLeadNewSearchForm #leadSearchCampaign" ).val($("#advanceLeadNewSearchForm #campaignName" ).val()).trigger('change');
+				 }
 				if(objRights.leadType=='B2B'){
 					var html = getB2bLeadList(data, objRights, roleModule);
 					$("#b2b-lead-list").html(html);
@@ -10364,7 +10162,7 @@ function getEmailTemplates() {
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','get-broadcast-lead-mail-template'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -10409,9 +10207,6 @@ function getEmailTemplates() {
 				$("#emailBroadcastSendModal").modal("hide");
 				return false;
 			}
-			return false;
-		},
-		error : function(e) {
 			return false;
 		}
 	});
@@ -10598,7 +10393,7 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 	request['templateSubject']=subject;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('leads','send-broadcast-lead-mail'),
 		data : JSON.stringify(request),
 		dataType : 'json',
@@ -10683,9 +10478,6 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 				// 	getStatusOfSentEmails(data.actionId);
 				// }, 10000);
 			}
-		},
-		error : function(e) {
-			return false;
 		}
 	});
 }
@@ -10835,7 +10627,7 @@ function getStatusOfSentEmails(actionId) {
 	}
 	$.ajax({
 		type: "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: getURLFor('leads', 'get-broadcast-lead-mail-status'),
 		data: JSON.stringify(body),
 		dataType : 'json',
@@ -10915,7 +10707,7 @@ function getEmailBroadcastLogs(email, name, leadId){
 	}
 	$.ajax({
 		type: "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: getURLFor('leads', 'get-broadcast-lead-mail-log'),
 		data: JSON.stringify(body),
 		dataType : 'json',
@@ -10945,7 +10737,7 @@ function getEmailBroadcastLogsTemplate2(actionId,userEmail){
 	}
 	$.ajax({
 		type: "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: getURLFor('leads', 'get-broadcast-mail-statistics'),
 		data: JSON.stringify(body),
 		dataType : 'json',
@@ -10976,7 +10768,7 @@ function getEmailBroadcastLogsTemplate(actionId,userEmail){
 	}
 	$.ajax({
 		type: "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url: getURLFor('leads', 'get-broadcast-mail-statistics'),
 		data: JSON.stringify(body),
 		dataType : 'json',

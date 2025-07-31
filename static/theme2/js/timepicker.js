@@ -48,7 +48,7 @@ var UNIT_LENGTHS = { hour: 24, minute: 60, second: 60, meridiem: 2 };
  *
  * @var {string}
  */
-var ACTIVE_CLASS = 'active btn-info';
+var ACTIVE_CLASS = 'active btn-primary';
 
 /**
  *
@@ -373,7 +373,7 @@ function updatePicker($input)
 			var meridiem_class = (position % 3 > 0) ? ' text-light' : '';
 			var meridiem_text = (position % 6 > 0) ? ((position < 6) ? 'PM' : 'AM') : '&nbsp;';
 			return '<button type="button" class="btn px-1 '
-				+ ((viewHour % 12 == position % 12) ? 'active btn-info' : 'btn-outline-dark border-white')
+				+ ((viewHour % 12 == position % 12) ? 'active btn-primary' : 'btn-outline-dark border-white')
 				+ ' pos-' + position + '" '
 				+ (pos_hour in validSteps.hour ? '' : ' disabled="disabled"')
 				+ '><span class="hour">' + position + '</span><span class="minute second">' + (pos_minute > 9 ? '' : '0') + pos_minute + '</span><span class="meridiem' + meridiem_class + '">' + meridiem_text
@@ -398,7 +398,7 @@ function updatePicker($input)
 		+ '</tr></table></div>'
 		+ '<div class="d-flex justify-content-between">'
 		+ '<div class="invisible"><button type="button" class="btn btn-link input-toggle-btn' + (clock_enabled ? ' d-none' : '') + '" data-input="clock"><i class="far fa-clock fa-fw"></i></button><button type="button" class="btn btn-link input-toggle-btn' + (clock_enabled ? '' : ' d-none') + '" data-input="keyboard"><i class="far fa-keyboard fa-fw"></i></button></div>'
-		+ '<div><button type="button" class="btn btn-secondary mx-1 cancel-btn" data-dismiss="popover">Cancel</button><button type="button" class="btn btn-primary mx-1 submit-btn">OK</button></div>'
+		+ '<div><button type="button" class="btn btn-secondary  mx-1 cancel-btn" data-dismiss="popover">Cancel</button><button type="button" class="btn btn-primary mx-1 submit-btn">OK</button></div>'
 		+ '</div>';
 	var $content = jQuery('#' + input_id + '-picker-content');
 	var $table = $content.html(html).find('.clock-input-table');
@@ -879,7 +879,7 @@ jQuery.fn.timepicker = function (options) {
 			placement: 'bottom',
 			sanitize: false,
 			title: '<button class="close mt-n1" data-dismiss="popover">&times;</button>' + (($label.length > 0) ? $label.html() : 'Time (24 Hours)'),
-			template: '<div id="' + input_id + '-picker-popover" class="popover timepicker-popover bs-popover-bottom" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div id="' + input_id + '-popover-body" class="popover-body border-bottom"></div><div class="popover-footer bg-light text-right px-3 py-2 rounded-lg" hidden="hidden"><button type="button" class="btn btn-secondary btn-sm" title="Close the picker" data-dismiss="popover"><i class="fas fa-times"></i> Close</button></div></div>',
+			template: '<div id="' + input_id + '-picker-popover" class="popover timepicker-popover bs-popover-bottom" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div id="' + input_id + '-popover-body" class="popover-body border-bottom"></div><div class="popover-footer bg-light text-right px-3 py-2 rounded-lg" hidden="hidden"><button type="button" class="btn btn-secondary  btn-sm" title="Close the picker" data-dismiss="popover"><i class="fas fa-times"></i> Close</button></div></div>',
 			trigger: (($toggles.length > 0) ? 'manual' : 'click'),
 			popperConfig: {
 /*

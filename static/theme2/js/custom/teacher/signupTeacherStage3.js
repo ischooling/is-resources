@@ -132,7 +132,7 @@ function submitSignupTeacherReviewAndApproval(){
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacher','signup/profile-confirmation'),
 		data : JSON.stringify(getRequestForPendingApproval()),
 		dataType : 'json',

@@ -13,17 +13,6 @@ async function newDashboardParentContent(){
             html+=await footerContent();
         html+=`</div>`;
         html+=sessionOutPermissionContent(commonProfileDTO);
-        html+=`<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">`
-            if(SCHOOL_ID == 1){
-                html+=`<img src="${PATH_FOLDER_IMAGE2}loader-new.gif" alt="${SCHOOL_NAME} Loader" class="new-loader-2024" />`;
-            }else{
-                html+=
-                `<div class="ball-rotate">
-                    <div style="background-color: rgb(247, 185, 36);"></div>
-                </div>
-                <p>Loading ...</p>`;
-            }
-        html+=`</div>`;
     return html;
 }
 
@@ -50,7 +39,7 @@ async function topHeaderContent(data){
                             }
                         html+=`</div>
                         <div style="align-items: center;display: flex; margin-left: auto;padding-right:20px;">
-                            <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill btn-shadow btn-shine btn btn-primary">
+                            <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill  btn-shine btn btn-primary">
                                 Log out
                             </a>
                         </div>

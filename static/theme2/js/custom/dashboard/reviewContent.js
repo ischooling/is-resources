@@ -1,5 +1,5 @@
 function getReviewContent(){
-    var html = '<div class="app-page-title">'+
+    var html = '<div class="app-page-title mb-3 py-2">'+
 '	<div class="page-title-wrapper">'+
 '		<div class="page-title-heading">'+
 '			<div class="page-title-icon"> <i class="fa fa-calendar-plus text-primary"> </i> </div>'+
@@ -31,10 +31,10 @@ function getReviewContent(){
 '<div class="modal fade fade-scale" id="leaveFromModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">'+
 '	<div class="modal-dialog modal-md" role="document">'+
 '		<div class="modal-content">'+
-'			<div class="modal-header pt-2 pb-2 theme-bg text-white">'+
+'			<div class="modal-header py-2 bg-primary text-white">'+
 '				<h5 class="modal-title text-white" id="feedback_title">Leave From</h5>'+
 '				<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'+
-'					<span aria-hidden="true">×</span>'+
+'					<span aria-hidden="true">&times;</span>'+
 '				</button>'+
 '			</div>'+
 '			<div class="modal-body">'+

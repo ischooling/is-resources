@@ -33,8 +33,8 @@ function renderTimzoneConverter(){
 					+'<div class="w-100 search-country-wrapper position-relative" style="'+(tt=="theme1"?"float:left":"")+'">'
 						+'<div class="d-flex flex-wrap">'
 							+'<span class="w-100 d-flex flex-sm-nowrap flex-wrap justify-content-end align-items-center" style="gap:10px">'
-								+'<input type="text" class="form-control" id="sarchByValue" name="sarchByValue" style="width: 100%;" placeholder="Search for a city...">'
-								+'<a href="javascript:void(0)" class="btn btn-primary '+(tt=="theme1"?"btn-sm":"btn-lg")+'" onclick="renderSearchData()">Search</a>'
+								+'<input type="text" class="form-control" id="sarchByValue" name="sarchByValue" style="width: 85%;" placeholder="Search for a city...">'
+								+'<a href="javascript:void(0)" class="btn btn-success '+(tt=="theme1"?"btn-sm":"btn-lg")+'" onclick="renderSearchData()"><i class="fa fa-search"></i>&nbsp;Search</a>'
 							+'</span>'
 						+'</div>'
 						+'<div class="w-100 position-relative">'
@@ -413,7 +413,7 @@ function getCountriesStatesCities(text){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('country-state-city',''),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -434,7 +434,7 @@ function getTimezoneByLatLon(lng, lat){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('timezone-by-lat-lon',''),
 		data : JSON.stringify(data),
 		dataType : 'json',

@@ -16,7 +16,7 @@ function getLearningPlanName(schoolId, learningPlan) {
     };
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url : getURLForCommon('masters'),
         data: JSON.stringify(plan),
         dataType: 'json',
@@ -83,7 +83,7 @@ function getStandardGrade(schoolId, learningPlan, standardFeePlanName, standardI
 
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'standardFee-plan'),
         data: JSON.stringify(grade),
         dataType: 'json',
@@ -191,7 +191,7 @@ function getStandardGrade(schoolId, learningPlan, standardFeePlanName, standardI
                         + '<td>'
                         + '<a href="javascript:void(0)" type="button" class="btn bnt-sm btn-primary edit-button" id="editButton">Edit</a>'
                         + '<a href="javascript:void(0)" class="btn btn-sm btn-success save-button d-none" onclick="editPlanData(\'schoolSettingForm\',' + value.id +')">Save</a>'
-                        + '<a href="javascript:void(0)" class="cancel-button btn btn-danger d-none">Cancel</a>'
+                        + '<a href="javascript:void(0)" class="cancel-button btn btn-danger  d-none">Cancel</a>'
                         + '</td>'
                         + '</tr>'
                 });
@@ -211,7 +211,7 @@ function getSavePlanData(formId) {
     var standardFeesDTO = savaPlan(formId);
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'save-school-setting-standard-fee-data'),
         data: JSON.stringify(standardFeesDTO),
         dataType: 'json',
@@ -229,9 +229,6 @@ function getSavePlanData(formId) {
                 $("#standardFeeAddDiv").addClass("d-none");
             }
            
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
 }
@@ -277,7 +274,7 @@ function editPlanData(formId, rowUniqueID) {
     var standardFeesDTO = savaRowPlanData(formId, rowUniqueID);
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'save-school-setting-standard-fee-data'),
         data: JSON.stringify(standardFeesDTO),
         dataType: 'json',
@@ -295,9 +292,6 @@ function editPlanData(formId, rowUniqueID) {
                 showMessageTheme2(0,"Not Save", '',false)
                 $('#'+formId)[0].reset();
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
 }
@@ -339,7 +333,7 @@ function getActiveFeeData(tableID, showContent) {
     if (schoolId != null) {
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-setting-grade-plan'),
             dataType: 'json',
             data : JSON.stringify(data),
@@ -357,19 +351,23 @@ function getActiveFeeData(tableID, showContent) {
                         }
                     }
                 } else {
-                    $("#" + tableID + " tbody").html('');
-                    var html = '';
-                    var sn = 0;
-                    $.each(data, function (key, value) {
-                        html += '<tr>'
-                            + '<td>' + value.id + '</td>'
-                            + '<td>' + value.personalizePlan + '<br/>' + value.pdate + '</td>'
-                            + '<td>' + value.collaborativePlan + '<br/>' + value.cdate + '</td>'
-                            + '<td>' + value.acceleratedPlan + '<br/>' + value.adate + '</td>'
-                            + '<td>' + value.flexyPlan + '<br/>' + value.fdate + '</td>'
-                            + '</tr>'
-                    });
-                    $("#" + tableID + " tbody").append(html);
+                    if(data.planList != null && data.planList != undefined && data.planList != []){
+                        $("#" + tableID + " tbody").html('');
+                        var html = '';
+                        var sn = 0;
+                        $.each(data.planList, function (key, value) {
+                            html += '<tr>'
+                                + '<td>' + value.id + '</td>'
+                                + '<td>' + value.personalizePlan + '<br/>' + value.pdate + '</td>'
+                                + '<td>' + value.collaborativePlan + '<br/>' + value.cdate + '</td>'
+                                + '<td>' + value.acceleratedPlan + '<br/>' + value.adate + '</td>'
+                                + '<td>' + value.flexyPlan + '<br/>' + value.fdate + '</td>'
+                                + '</tr>'
+                        });
+                        $("#" + tableID + " tbody").append(html);
+                    }else{
+                        showMessageTheme2(0, data['message'], '', true); 
+                    }
                     //$("."+tableWrapper).removeClass("d-none")
                 }
 
@@ -387,7 +385,7 @@ function saveApplyPlan() {
     
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-grade-plan-apply'),
         data: JSON.stringify(request),
         dataType: 'json',
@@ -399,9 +397,6 @@ function saveApplyPlan() {
                 showMessageTheme2(0,"Not Save", '',false)
                 
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
 }
@@ -414,7 +409,7 @@ function getSettingDataList(tableID) {
     if (schoolId != null) {
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-setting-setting-data'),
             data : JSON.stringify(data),
             dataType: 'json',
@@ -455,7 +450,7 @@ function getSettingDataList(tableID) {
                                 + '<td>'
                                 + '<a href="javascript:void(0)" type="button" class="btn bnt-sm btn-primary edit-button" id="editButton"><i class="fas fa-edit"></i></a>'
                                 + '<a href="javascript:void(0)" class="btn btn-sm btn-success save-button d-none" onclick="editSettingData(\'schoolSettingForm\',' + value.id + ',\'settingTable\')"><i class="fas fa-check"></i></a>'
-                                + '<a href="javascript:void(0)" class="cancel-button btn btn-danger d-none"><i class="fas fa-times"></i></a>'
+                                + '<a href="javascript:void(0)" class="cancel-button btn btn-danger  d-none"><i class="fas fa-times"></i></a>'
                                 + '</td>'
                             + '</tr>'
                     });
@@ -474,7 +469,7 @@ function saveSetting(formId) {
     var setting = savaSettingData(formId);
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-setting-addData'),
         data: JSON.stringify(setting),
         dataType: 'json',
@@ -487,9 +482,6 @@ function saveSetting(formId) {
                 showMessageTheme2(0,"Not Save", '',false)
                 $('#'+formId)[0].reset();
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
 
@@ -513,7 +505,7 @@ function editSettingData(formId, rowUniqueID,tableID) {
     var setting = saveEditData(formId, rowUniqueID);
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-setting-addData'),
         data: JSON.stringify(setting),
         dataType: 'json',
@@ -526,9 +518,6 @@ function editSettingData(formId, rowUniqueID,tableID) {
                 showMessageTheme2(0,"Not Save", '',false)
                 $('#'+formId)[0].reset();
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
 }
@@ -610,7 +599,7 @@ function getTemplateForList() {
 
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-template-typeFor'),
         data: JSON.stringify(template),
         dataType: 'json',
@@ -648,7 +637,7 @@ function getTemplateTypeContent(){
      };
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-template-typeFor'),
         data: JSON.stringify(template),
         dataType: 'json',
@@ -698,7 +687,7 @@ function updateTemplate(formId) {
     template['templateType'] =$('#templateType').val();
      $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-template-addData'),
         data: JSON.stringify(template),
         dataType: 'json',
@@ -711,9 +700,6 @@ function updateTemplate(formId) {
                 showMessageTheme2(0,"Not Save", '',false)
                 $('#'+formId)[0].reset();
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
    
@@ -723,7 +709,7 @@ function updateTemplate(formId) {
 function getSessionMaster(tableID, istrue, sessionEleID) {
     $.ajax({
             type: "GET",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-setting-session-getList'),
             dataType: 'json',
             success: function (data) {
@@ -782,7 +768,7 @@ function getSessionMaster(tableID, istrue, sessionEleID) {
                                 + '<td>'
                                 + '<a href="javascript:void(0)" type="button" class="btn bnt-sm btn-primary edit-button"><i class="fas fa-edit"></i></a>'
                                 + '<a href="javascript:void(0)" class="btn btn-sm btn-success save-button d-none" onclick="updateSession(\'schoolSettingForm\',' + value.sessionId +')"><i class="fas fa-check"></i></a>'
-                                + '<a href="javascript:void(0)" class="cancel-button btn btn-danger d-none"><i class="fas fa-times"></i></a>'
+                                + '<a href="javascript:void(0)" class="cancel-button btn btn-danger  d-none"><i class="fas fa-times"></i></a>'
                                 + '</td>'
                                 + '</tr>'
 
@@ -801,7 +787,7 @@ function getSessionMaster(tableID, istrue, sessionEleID) {
         
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-setting-session-addList'),
             data: JSON.stringify(session),
             dataType: 'json',
@@ -813,9 +799,6 @@ function getSessionMaster(tableID, istrue, sessionEleID) {
                     showMessageTheme2(0,"Not Save", '',false)
                     $('#'+formId)[0].reset();
                 }
-            },
-            error: function (xhr, status, error) {
-                console.error("AJAX request failed with status: " + status + " and error: " + error);
             }
         });
         //$('.addSetting').prop('required',true);
@@ -843,7 +826,7 @@ function updateSession(formId,rowUniqueID) {
     
     $.ajax({
         type: "POST",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'school-setting-session-addList'),
         data: JSON.stringify(session),
         dataType: 'json',
@@ -856,9 +839,6 @@ function updateSession(formId,rowUniqueID) {
                 showMessageTheme2(0,"Not Save", '',false);
                 $('#'+formId)[0].reset();
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX request failed with status: " + status + " and error: " + error);
         }
     });
 }
@@ -880,7 +860,7 @@ function getTechnicalList(tableID) {
     if (schoolId != null) {
         $.ajax({
             type: "POST",
-            contentType: "application/json",
+            contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-setting-technical-getList'),
             data : JSON.stringify(data),
             dataType: 'json',
@@ -1159,7 +1139,7 @@ function getTechnicalList(tableID) {
 
                                 + '<a href="javascript:void(0)" type="button" class="btn bnt-sm btn-primary edit-button" id="editButton"><i class="fas fa-edit"></i></a>'
                                 + '<a href="javascript:void(0)" class="btn btn-sm btn-success save-button d-none" onclick="editSettingData(\'schoolSettingForm\',' + value.id + ',\'settingTable\')"><i class="fas fa-check"></i></a>'
-                                + '<a href="javascript:void(0)" class="cancel-button btn btn-danger d-none"><i class="fas fa-times"></i></a>'
+                                + '<a href="javascript:void(0)" class="cancel-button btn btn-danger  d-none"><i class="fas fa-times"></i></a>'
                                 + '</td>'
                             
                     });

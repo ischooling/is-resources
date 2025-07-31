@@ -4,7 +4,7 @@ function getAllDemoForUpdateStatus(userId) {
 	data['userId']=userId;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-all-demo-for-status-update'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -87,7 +87,7 @@ function updateBulkDemoStatus() {
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
-		 contentType : "application/json",
+		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('dashboard','update-bulk-meeting-status'),
 		 data : JSON.stringify(data),
 		 dataType : 'json',
@@ -129,10 +129,6 @@ function updateBulkDemoStatus() {
 				},3000);
 				customLoader(false);
 			}
-		 },
-		 error:function(e){
-			// console.log(e);
-			 customLoader(false);
 		 }
 	 });
 }

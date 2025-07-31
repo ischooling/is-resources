@@ -14,7 +14,7 @@
 .main-banner .banner-cnt h3{ font:normal 30px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:0 0; line-height:34px;}
 .main-banner .banner-cnt p{ font:normal 15px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:0 0; line-height:15px;}
 
-.main-banner .main-form{ width:100%; background:#007fff; padding:0px; text-align:center; border-bottom:solid 2px #fff;}
+.main-banner .main-form{ width:100%; background:var(--pc); padding:0px; text-align:center; border-bottom:solid 2px #fff;}
 .main-banner .main-form .logo{ background:#fff; width:100%; padding:20px; text-align:center;}
 .main-banner .main-form .logo img{ width:50%; margin:0 auto; max-width:100%;}
 
@@ -25,7 +25,7 @@
 /*================== About us =================================*/
 
 .about-us{ padding:50px 0;}
-.about-us h2{ font:bold 26px Arial, Helvetica, sans-serif; color:#007fff;}
+.about-us h2{ font:bold 26px Arial, Helvetica, sans-serif; color:var(--pc);}
 .about-us p{ font:normal 14px Verdana, Geneva, sans-serif; color:#464646; text-align:justify; line-height:22px;}
 .about-us ol{ margin-left:40px; font:normal 13px Verdana, Geneva, sans-serif; line-height:22px;}
 
@@ -70,7 +70,7 @@
 
 /*================== footer =================================*/
 
-.footer{ width:100%; padding:20px; text-align:center; background:#007fff;}
+.footer{ width:100%; padding:20px; text-align:center; background:var(--pc);}
 .footer p{ font:normal 12px Arial, Helvetica, sans-serif; color:#fff; margin:0 auto; padding:0 0;}
 
 

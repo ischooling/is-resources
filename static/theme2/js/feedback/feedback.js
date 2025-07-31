@@ -16,7 +16,7 @@ function getFeedbackQuestion(eventid, questiontype, parentId, start, end, feedba
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('review','get-question'),
 		data : JSON.stringify(getRequestForFeedbackQuestion(eventid, questiontype, parentId, start, end, feedbackid, userId, callfrom)),
 		dataType : 'json',
@@ -97,10 +97,6 @@ function getFeedbackQuestion(eventid, questiontype, parentId, start, end, feedba
 				
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
 }
@@ -135,7 +131,7 @@ function selectRate(ratingid){
 function saveFeedbackQuestion() {
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('review','submit-answers'),
 		data : JSON.stringify(getRequestForSaveFeedback()),
 		dataType : 'json',
@@ -152,10 +148,6 @@ function saveFeedbackQuestion() {
                   window.setTimeout(function(){$("#feedback_review").modal('hide');},1000);
                 }
             }
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -232,17 +224,13 @@ function updateFeedback(userid, key, value) {
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('review','update-feedback'),
 		data : JSON.stringify(getRequestForUpdateFeedback(userid, key, value)),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});

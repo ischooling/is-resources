@@ -10,7 +10,7 @@ function validateRequestForBookOrientation(formId, newTheme, leadFrom){
 		if(newTheme){
 				showMessageTheme2(0, "Please select Lead Source",'',true);
 			}else{
-				showMessage(true, "Please select Lead Source");
+				showMessageTheme2(0, "Please select Lead Source");
 			}
 		return false;
 	}
@@ -19,7 +19,7 @@ function validateRequestForBookOrientation(formId, newTheme, leadFrom){
 			if(newTheme){
 				showMessageTheme2(0, "Please choose Demo Assigned to",'',true);
 			}else{
-				showMessage(true, "Please choose Demo Assigned to");
+				showMessageTheme2(0, "Please choose Demo Assigned to");
 			}
 			return false;
 		}
@@ -39,7 +39,7 @@ function submitBookOrientation(formId, roleModuleId, leadsFrom, newTheme, leadFr
  }
  $.ajax({
 	 type : "POST",
-	 contentType : "application/json",
+	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('orientation','save-book-orientation'),
 	 data : JSON.stringify(getRequestForBookOrientation(formId, leadFrom)),
 	 dataType : 'json',
@@ -50,7 +50,7 @@ function submitBookOrientation(formId, roleModuleId, leadsFrom, newTheme, leadFr
 			 if(newTheme){
 				 showMessageTheme2(0, data['message'],'',true);
 			 }else{
-				 showMessage(true, data['message']);
+				 showMessageTheme2(0, data['message']);
 			 }
 		 } else {
 				showMessageTheme2(1, data['message'],'',true);
@@ -58,30 +58,26 @@ function submitBookOrientation(formId, roleModuleId, leadsFrom, newTheme, leadFr
 			 
 		 }
 		 return false;
-	 },
-	 error : function(e) {
-		 //showMessage(true, e.responseText);
-		 return false;
 	 }
  });
 }
 function getRequestForBookOrientation(formId, leadFrom){
- var studentOrientAssignReqest = {};
- studentOrientAssignReqest['bookDate'] = false;
- studentOrientAssignReqest['bookStartTime'] = false;
- studentOrientAssignReqest['bookEndTime'] = false;
- studentOrientAssignReqest['controlType'] = false;
- 
- studentOrientAssignReqest['schoolId'] = SCHOOL_ID;
- studentOrientAssignReqest['userId'] = USER_ID;
- return studentOrientAssignReqest;
+	var studentOrientAssignReqest = {};
+	studentOrientAssignReqest['bookDate'] = false;
+	studentOrientAssignReqest['bookStartTime'] = false;
+	studentOrientAssignReqest['bookEndTime'] = false;
+	studentOrientAssignReqest['controlType'] = false;
+	
+	studentOrientAssignReqest['schoolId'] = SCHOOL_ID;
+	studentOrientAssignReqest['userId'] = USER_ID;
+	return studentOrientAssignReqest;
 }
 
 function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, currentPage, userWiseStatus, newTheme ) {
 	customLoader(true);
  	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('orientation','get-orientation-student'),
 		data : JSON.stringify(getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, currentPage, userWiseStatus, newTheme)),
 		dataType : 'json',
@@ -94,7 +90,7 @@ function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, curre
 				if(newTheme){
 					showMessageTheme2(0, data['message'],'',true);
 				}else{
-					showMessage(true, data['message']);
+					showMessageTheme2(0, data['message']);
 				}
 			} else {
 				// showMessageTheme2(1, data['message'],'',true);
@@ -116,10 +112,6 @@ function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, curre
 					}
 					$("#orientationSearch").modal("hide");   
 			}
-		},
-		error : function(e) {
-			console.log(e);
-			customLoader(false);
 		}
  	});
 }
@@ -127,15 +119,31 @@ function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, curre
 function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchType, clickFrom, currentPage, userWiseStatus, newTheme ){
 	$(".orientationErrorText").html('');
 	var studentOrientAssignReqest = {};
-	studentOrientAssignReqest['searchType']=searchType;
+	var searchTypeData=searchType;
+	if($("#"+formId+" #stdfnameSearch").val()==''
+		&& $("#"+formId+" #parentfnameSearch").val()==''
+		&& $("#"+formId+" #countryId option:selected").val()==""
+		&& $("#"+formId+" #stateId option:selected").val()=="0"
+		&& $("#"+formId+" #cityId option:selected").val()=="0"
+		&& $("#"+formId+" #gradeSearch option:selected").val()=="0"
+		&& $("#"+formId+" #emailIdSearch").val()==""
+		&& $("#"+formId+" #phoneNoSearch").val()==""
+		&& $("#"+formId+" #startDateSearch").val()==""
+		&& $("#"+formId+" #endDateSearch").val()==""
+		&& $("#"+formId+" #statusSearch").val()==""
+		&& $("#"+formId+" #assignToSearch").val()==undefined 
+		){
+			searchTypeData="full-search";
+		}
+	studentOrientAssignReqest['searchType']=searchTypeData;
 	studentOrientAssignReqest['userWiseStatus']=userWiseStatus;
-	studentOrientAssignReqest['studentName'] = $("#"+formId+" #stdfnameSearch").val();
-	studentOrientAssignReqest['parentName'] = $("#"+formId+" #parentfnameSearch").val();
+	studentOrientAssignReqest['studentName'] = $("#"+formId+" #stdfnameSearch").val().trim();
+	studentOrientAssignReqest['parentName'] = $("#"+formId+" #parentfnameSearch").val().trim();
 	studentOrientAssignReqest['country'] = $("#"+formId+" #countryId option:selected").val();
 	studentOrientAssignReqest['state'] = $("#"+formId+" #stateId option:selected").val();
 	studentOrientAssignReqest['city'] = $("#"+formId+" #cityId option:selected").val();
 	studentOrientAssignReqest['standardId'] = $("#"+formId+" #gradeSearch option:selected").val();
-	studentOrientAssignReqest['email'] = $("#"+formId+" #emailIdSearch").val();
+	studentOrientAssignReqest['email'] = $("#"+formId+" #emailIdSearch").val().trim();
 	studentOrientAssignReqest['phoneNo'] = $("#"+formId+" #phoneNoSearch").val();
 	studentOrientAssignReqest['bookStartDate'] = $("#"+formId+" #startDateSearch").val();
 	studentOrientAssignReqest['bookEndDate'] = $("#"+formId+" #endDateSearch").val();
@@ -151,6 +159,7 @@ function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchTyp
 	studentOrientAssignReqest['recordsPerPage']=10;
 	studentOrientAssignReqest['userId']=USER_ID;
 	studentOrientAssignReqest['schoolId']=SCHOOL_ID;
+	//console.log(studentOrientAssignReqest);
 	return studentOrientAssignReqest;
 }
 
@@ -179,28 +188,31 @@ function getOrientList(data){
 			html=html+"<td>"+dlist.bookDate+" ("+dlist.teacherTimeZone+")</td>";
 			html=html+"<td>"+dlist.bookStudentDate+" ("+dlist.studentTimeZone+")</td>";
 			html=html+"<td>"+dlist.assignName+"</td>";
-			html=html+"<td class='position-relative'>"+dlist.status;
-			html += "<a href=\"" + dlist.startUrl + "\" target=\"_blank\" class='text-decoration-none full'" 
+			html=html+"<td class='position-relative'>";
+			html=html+"<div>";
+			html=html+dlist.status;
+			html=html+"</div>";
+			html += "<div><a href=\"" + dlist.startUrl + "\" target=\"_blank\" class='text-decoration-none full'" 
 				+ (dlist.meetingId == null ? " style='pointer-events: none; color: grey; text-decoration: none; cursor: default;' onclick='return false;'" : "") 
-				+ ">Start System Training</a>"
-			html += "<a href=\"" + dlist.rescheduleUrl + "\" target=\"_blank\" class='text-decoration-none full'" 
+				+ ">Start System Training</a></div>"
+			html += "<div><a href=\"" + dlist.rescheduleUrl + "\" target=\"_blank\" class='text-decoration-none full'" 
 				+ (dlist.meetingId == null ? " style='pointer-events: none; color: grey; text-decoration: none; cursor: default;' onclick='return false;'" : "") 
-				+ ">Reschedule System Training</a>"
-			html += "<a href=\"javascript:void(0);\" class='text-decoration-none full'" 
+				+ ">Reschedule System Training</a></div>"
+			html += "<div><a href=\"javascript:void(0);\" class='text-decoration-none full'" 
 				+ (dlist.meetingId == null ? " style='pointer-events: none; color: grey; text-decoration: none; cursor: default;'" : " onclick=\"" + onclick + "\"") 
-				+ ">Update</a>"
-			html=html+"<b class=\"copy-msg-"+i+" text-success\"></b></br>"
+				+ ">Update</a></div>"
+			html=html+"<b class=\"copy-msg-"+i+" text-success\" style=\""+(dlist.status=="RESCHEDULE"?"color:#fff !important":"")+"\"></b></br>"
 			html=html+"<div class='position-absolute' style='top:0;left:0;'><input type='text' id='copyUrl"+i+"' value=\""+dlist.joinUrl+"\" style='opacity:0;height:0px'></div>"
-			html += "<button class='text-decoration-none btn btn-sm btn-primary' " + (dlist.meetingId == null ? "disabled " : "") + "onclick='copyURL(\"copyUrl" + i + "\",\"copy-msg-" + i + "\");'></i>Copy joining link</button>";
+			html += "<button class='text-decoration-none btn btn-sm btn-success ' " + (dlist.meetingId == null ? "disabled " : "") + "onclick='copyURL(\"copyUrl" + i + "\",\"copy-msg-" + i + "\");'></i>Copy joining link <i class='pe-7s-copy-file'></i></button>";
 			html=html+"</td>";
 			if(dlist.sendMailStatus == 'Y'){
 				html=html+"<td>Mail sent</td>";
 			}else{
 				html=html+"<td>"
 				html=html+"<p class='m-0'></p>"
-				html=html+"<a href=\"javascript:void(0);\" onclick=\""+sendMail+"\" class='text-decoration-none full font-weight-semi-bold' style='margin-bottom:5px;'>Send Mail</a>";
+				html=html+"<div><a href=\"javascript:void(0);\" onclick=\""+sendMail+"\" class='btn btn-sm btn-warning mb-1 '>Send Mail <i class='pe-7s-paper-plane'></i></a></div>";
 				if(dlist.recordingsCount != 0 && (USER_ROLE == "DIRECTOR" || showRecordingButton)){
-					html=html+'<a href=\"javascript:void(0);\" class="text-primary font-weight-semi-bold" style="display: inline-block;width: max-content;" onclick="openRecordingModal(\''+dlist.meetingId+'\',\'MEETINGS\',\''+dlist.studentName+'\',\'System Training\',\''+bookDate[0]+'\',\''+bookTime[0]+'\',\''+dlist.assignName+'\',\''+dlist.bookStartDateTimeSingapore+'\')">View Recording <i class="fa fa-eye mt-2"><i/></a>'
+					html=html+'<div><a href=\"javascript:void(0);\" class="btn btn-sm btn-primary " onclick="openRecordingModal(\''+dlist.meetingId+'\',\'MEETINGS\',\''+dlist.studentName+'\',\'System Training\',\''+bookDate[0]+'\',\''+bookTime[0]+'\',\''+dlist.assignName+'\',\''+dlist.bookStartDateTimeSingapore+'\')">View Recording <i class="pe-7s-video"></i></a></div>'
 				}
 				html=html+"</td>";
 			}
@@ -276,7 +288,7 @@ function createOrientMeeting(formId, orientId, popType) {
 	data['schoolId']=SCHOOL_ID;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('orientation','create-orientation-meeting'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -289,10 +301,6 @@ function createOrientMeeting(formId, orientId, popType) {
 				showMessageTheme2(1, data['message'],'',false);
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			return false;
 		}
 	});
    }
@@ -303,7 +311,7 @@ function createOrientMeeting(formId, orientId, popType) {
 	data['schoolId']=SCHOOL_ID;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('orientation','send-orientation-mail'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -315,10 +323,6 @@ function createOrientMeeting(formId, orientId, popType) {
 			} else {
 				showMessageTheme2(1, data['message'],'',false);
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -352,7 +356,7 @@ function saveOrientStatus(formId, roleModuleId) {
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('orientation','update-orientation-status'),
 		data : JSON.stringify(getRequestForOrientStatus(formId)),
 		dataType : 'json',
@@ -366,14 +370,9 @@ function saveOrientStatus(formId, roleModuleId) {
 				showMessageTheme2(1, data['message'],'',false);
 				$('#'+formId)[0].reset();
 				$("#orientStatusUpdate").modal('hide');
-				advanceSearchStudentOrient('orientationSearchForm', roleModuleId, 'advance-search', '', 0, false, true); 
+				advanceSearchStudentOrient('orientationSearchForm', roleModuleId, 'advance-search', '', 0, OBJECT_RIGHTS.userWiseStatus, true); 
 			}
 			customLoader(false);
-			return false;
-		},
-		error : function(e) {
-			customLoader(false);
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -408,7 +407,7 @@ function moveOrientationData(userId, roleModuleId, callFrom, currentPage, newThe
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('orientation','move-orientation'),
 		data : JSON.stringify(getRequestForMoveOrientationsData(userId)),
 		dataType : 'json',
@@ -421,30 +420,18 @@ function moveOrientationData(userId, roleModuleId, callFrom, currentPage, newThe
 					showMessageTheme2(0, data['message'],'',true);
 					$("#orientationAssignMove").val('0')
 				}else{
-					showMessage(true, data['message']);
-					$("#leadNoMove").val('')
+					showMessageTheme2(0, data['message']);
+					$("#leadNoMove").val('');
+					$("#moveOrientations").modal('hide');
 				}
 				
 			} else {
-			   if(newTheme){
-				   showMessageTheme2(1, data['message'],'',false);
-				   $("#leadNoMove").val('')
-				   setTimeout(function(){
-					   location.reload();
-				   }, 1500);
-			   }else{
-				   showMessage(true, data['message']);
-				   $('#moveLeads').modal('hide');
-				   setTimeout(function(){
-					   callForDashboardData('formIdIfAny','lead-list?moduleId='+roleModuleId+'&leadFrom='+leadFrom+'&clickFrom=list&currentPage='+currentPage);
-				   }, 1500);
-			   }
+			   showMessageTheme2(1, data['message'],'',false);
+				$("#leadNoMove").val('')
+				$("#moveOrientations").modal('hide');
+				advanceSearchStudentOrient('orientationSearchForm', ROLE_MODULE.moduleId, 'advance-search', '', 0,  OBJECT_RIGHTS.userWiseStatus, true ); 
 				
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -498,7 +485,7 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
         type: "POST",
         url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-event-recordings",
         data: JSON.stringify(body),
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         success: function (response) {
             const res = JSON.parse(response);
             if (res.statusCode === 0 && res.status === "success") {
@@ -511,9 +498,6 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
             } else {
                 showMessageTheme2(0, `Error: ${res.message}`, '', true);
             }
-        },
-        error: function (e) {
-            console.error("Error Fetching the data:", e.message);
         }
     });
 }
@@ -571,7 +555,7 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                             ? `
                             <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
                                 <h6>${sessionUrls.length + 1}. Transcript</h6>
-                                <button class="btn btn-secondary" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                                <button class="btn btn-secondary " onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
                             </div>`
                             : ""
                     }
@@ -599,7 +583,7 @@ function playRecording(videoUrl, title) {
     let videoModal = $("#videoModal");
     $.ajax({
         type: "GET",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         dataType: 'json',
         url: getURLForSignVideo(videoUrl),
         success: function (responseData) {
@@ -637,11 +621,6 @@ function playRecording(videoUrl, title) {
                 showMessageTheme2(0, responseData.message || "Failed to fetch video URL", '', true);
             }
 
-            customLoader(false);
-        },
-        error: function (e) {
-            console.error("Error fetching signed video URL:", e.message);
-            showMessageTheme2(0, "Error fetching video.", '', true);
             customLoader(false);
         }
     });
@@ -720,16 +699,12 @@ function showVTTFile(url, title) {
 	const vttFile = convertToVTT(url);
     $.ajax({
         type: "GET",
-        contentType: "application/json",
+        contentType: APPLICATION_JSON_VALUE,
         dataType: 'json',
         url: getURLForTranscriptContent(vttFile),
         success: function(responseData) {
             customLoader(false); 
             displayVTT(responseData.content, title);
-        },
-        error: function() {
-            customLoader(false);
-            showMessageTheme2(0, "Failed to load transcript.", '', true);
         }
     });
 }
@@ -773,4 +748,162 @@ function formatDateToYYYYMMDDHH(dateStr) {
 	const hours = String(date.getHours()).padStart(2, '0');
 	const finalDate = year + '-' + month + '-' + day + " " + hours;
 	return finalDate;
+}
+
+function getRequestForStudentOrientReports(moduleId , userId){
+	if(userId=='' || userId==undefined){
+		userId=USER_ID;
+	}
+	var data={};
+	data['userId']=userId;
+	data['moduleId'] = moduleId;
+	return data;
+}
+
+function getStudentOrientData(moduleId, userId) {
+	if(!getSession()){
+		redirectLoginPage();
+		return false;
+	}
+	//"lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
+	return new Promise(function(resolve, reject){
+		$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/student-orientaion-data',
+			data : JSON.stringify(getRequestForStudentOrientReports(moduleId, userId)),
+			dataType : 'json',
+			async:true,
+			global : true,
+			success : function(data) {
+				console.log(data);
+				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+					if (data['status'] == '3') {
+						redirectLoginPage();
+					} 
+					return reject()
+				}else{
+					resolve(data)
+	
+				}
+			}
+		});
+	});
+}
+
+function getOrientaionAssignUser() {
+	data={};
+	data['schoolId']=SCHOOL_ID;
+	data['userId']=USER_ID;
+	data['todayDate']=$("#formdate").val();
+	$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : getURLForHTML('dashboard', 'orientaion-assign-user-list'),
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			timeout : 600000,
+			success : function(data) {
+                console.log(data);
+				var assignUserList= data.assignUserList!=""?JSON.parse(data.assignUserList):"";
+              
+                if (data['status'] == '0' || data['status'] == '2') {
+                    showMessageTheme2(0, data['message']);
+                } else {
+                    var html =getAssignUserTableHtml(assignUserList);
+                    $("#orientAssignUser").html(html); 
+                
+                    
+                }
+                
+			}
+	   });
+   }
+
+
+   function getAssignUserTableHtml(assignUserList){
+    var html='';
+    var ti=0;
+	if(assignUserList!=""){
+		var inc=1;
+		for (let m = 0; m < assignUserList.length; m++) {
+			const assignUser = assignUserList[m];
+			var autoInc=assignUser.orderBy!=''?assignUser.orderBy:inc
+			html+=`<tr class="assignItem">	
+				 <td>${inc}</td>
+				 <td class="text-left"><input type="hidden" class="assignto"  value="${assignUser.assignTo}">
+				<b>${assignUser.assignName}</b><br/>
+				${assignUser.cityName } | ${assignUser.countryName } | ${assignUser.countryTimezone }</td>
+				 <td><input type="text" name="orderBy" class="rowindex" value="${autoInc}" size="5"  maxlength="5" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/></td>
+				 <td><input type="text" name="totalAssignLead" class="totalAssignLead" value="${assignUser.totalAssignLeads}" size="5"  maxlength="5"  ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/></td>
+				 <td>
+				 <label class="switch" >
+						<input class="switch-input assignActiveCouns" id="counselorCheckbox${assignUser.assignTo}"  type="checkbox" ${assignUser.counselorActivate == 'Y' ? 'checked':''}  value="${assignUser.counselorActivate}" 
+						onclick="activeOrientCounselor(this.value, '${assignUser.assignTo}', '${autoInc}')" data-size="mini"/>
+						<span class="switch-label" data-on="Yes" data-off="No"></span> <span class="switch-handle"></span> 
+					</label>
+				 </td>
+				 <td>${assignUser.totalAutoAssignLeads}/${assignUser.totalLeads}</td>
+				 <td><a href="javascript:void(0);" class="btn btn-sm btn-primary mr-1" onclick="getAvailability('${assignUser.assignTo}');" >Add | Edit Availablity</a></td>
+			 </tr>`;
+			//getSelectGrade('grades'+assignUser.assignTo+','assignUser.grades');
+			//getSelectCountries('leadCountry'+assignUser.assignTo+','assignUser.countries');
+			 inc=inc+1;
+		}
+	}else{
+
+	}
+        return html;
+  }
+
+
+
+function saveInactiveAssignCounselorOrient(userId, checkedVal, orderBy, forUse) {
+ hideMessageTheme2('');
+ 
+ $.ajax({
+	 type : "POST",
+	 contentType : APPLICATION_JSON_VALUE,
+	 url : getURLFor('leads','inactive-assign-counselor'),
+	 data : JSON.stringify(getRequestForInactiveAssignCounselorOrient(userId, checkedVal, orderBy, forUse)),
+	 dataType : 'json',
+	 cache : false,
+	 timeout : 600000,
+	 success : function(data) {
+		 if (data['status'] == '0' || data['status'] == '2') {
+			 showMessageTheme2(0, data['message'],'',true);
+		 } else {
+			showMessageTheme2(1, data['message'],'',true);
+			getOrientaionAssignUser();
+		 }
+		 return false;
+	 }
+ });
+}
+function getRequestForInactiveAssignCounselorOrient(userId, checkedVal, orderBy, forUse){
+	var leadAddFormRequestDTO = {};
+	var authentication = {};
+	var leadCommonDTO = {};
+	var leadDemoInfo={};
+	var leadCallFollowupDTO={};
+	var leadModifyDTO={};
+
+	leadDemoInfo['orderBy']=orderBy;
+	leadDemoInfo['counselorActivate']=checkedVal;
+	leadModifyDTO['assignTo']=userId;
+	leadCallFollowupDTO['assignUserType']=forUse;
+
+	leadCommonDTO['leadDemoInfo']=leadDemoInfo;
+	leadCommonDTO['leadModifyDTO']=leadModifyDTO;
+	leadCommonDTO['leadCallFollowupDTO']=leadCallFollowupDTO;
+
+	authentication['hash'] = getHash();
+	authentication['schoolId'] = SCHOOL_ID;
+	authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userId'] = userId;
+	authentication['userType'] = 'COMMON';
+	leadAddFormRequestDTO['authentication'] = authentication;
+	leadAddFormRequestDTO['leadCommonDTO'] = leadCommonDTO;
+	return leadAddFormRequestDTO;
 }

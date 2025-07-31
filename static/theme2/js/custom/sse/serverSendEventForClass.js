@@ -88,7 +88,7 @@ function triggerReloadExternalClass(type,userId,entityId,entityType,startDateTim
 function proceedForExternalClass(type,userId,entityId,entityType,timezone,hostId,meetingType){
     $.ajax({
         type : "POST",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/external-class-status',
         data : JSON.stringify(prepareClassJoinRequest(type,userId,entityId,entityType,timezone,hostId,meetingType)),
         dataType : 'json',
@@ -102,11 +102,7 @@ function proceedForExternalClass(type,userId,entityId,entityType,timezone,hostId
                 stopEvensforClass();
                 window.location.href=data['redirectUrl'];
             }
-        },
-		error : function(e) {
-			console.log('error ',e)
-			return false;
-		}
+        }
     });
 }
 
@@ -137,7 +133,7 @@ function checkClassStatus(userIdTeacher,entityType,entityId){
     customLoader(true);
     $.ajax({
         type : "GET",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/'+UNIQUEUUID+'/check-class-status/'+userIdTeacher+'/'+entityType+'/'+entityId,
         dataType : 'json',
         async : true,
@@ -197,7 +193,7 @@ function triggerReloadOrientation(type,userId,entityId,entityType,startDateTime,
 function proceedForOrientation(showMessage,type,userId,entityId,entityType,startDateTime,timezone,hostId,subject){
     $.ajax({
         type : "POST",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/orientation-class-status',
         data : JSON.stringify(prepareClassJoinRequest(type,userId,entityId,entityType,timezone,hostId,subject)),
         dataType : 'json',
@@ -275,7 +271,7 @@ function registerExternalClass(checkValidation,type,userId,entityId,entityType,s
     }
     $.ajax({
         type : "POST",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
         url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/register-external-class',
         data : JSON.stringify(registerExternalClassRequest(type,userId,entityId,entityType,hostId,timezone,subject)),
         dataType : 'json',
@@ -295,11 +291,7 @@ function registerExternalClass(checkValidation,type,userId,entityId,entityType,s
                     $('#server-message').html(data['message']);
                 }
             }
-        },
-		error : function(e) {
-			console.log('error ',e)
-			return false;
-		}
+        }
     });
 }
 

@@ -136,7 +136,7 @@ dothatopcheck {  0% {
 }
 
 .subject-main{ width:100%; margin:0 auto; overflow:hidden; margin-bottom:10px;}
-.subject-main input{ width:97%; height:30px; padding:5px; border-radius:2px; border:solid 1px #cfcfcf;background:#007fff; color:#fff;}
+.subject-main input{ width:97%; height:30px; padding:5px; border-radius:2px; border:solid 1px #cfcfcf;background:var(--pc); color:#fff;}
 
 
 .subject-main .select-sub{ list-style:none; font:normal 18px Arial, Helvetica, sans-serif; display:none;width:95%; 
@@ -155,6 +155,6 @@ background:#fff; position:absolute; padding:0 0; margin:0 auto; left:15px; max-h
 min-height:40px; padding:3px 5px; border:solid 1px #cfcfcf; BORDER-RADIUS:2PX;}
 .content.sub-box p{ font:normal 12px Arial, Helvetica, sans-serif; color:#000; padding:5px 10px; background:#eaeaea;
 display:inline-block; margin:5px 5px ;}
-.error{ font-size:11px; color:#007fff;margin:0 auto;padding-right:1px;}
+.error{ font-size:11px; color:var(--pc);margin:0 auto;padding-right:1px;}
 
 .click-to-catalog{float: right;font-size: 12px;margin-top:5px;}

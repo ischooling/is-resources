@@ -48,7 +48,7 @@ function generateTeacherRequest(formId, moduleId, eligiblePaymentGateway) {
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('student','teacher-request'),
 		data : JSON.stringify(getRequestForTeacherRequest(formId, moduleId, eligiblePaymentGateway)),
 		dataType : 'json',
@@ -63,9 +63,6 @@ function generateTeacherRequest(formId, moduleId, eligiblePaymentGateway) {
 				
 			}
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 		}
 	});
 }

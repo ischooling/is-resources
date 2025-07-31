@@ -2,216 +2,151 @@
 
 
 function getB2CListHeaderContent(roleAndModule, objRights){
-	var html='<div class="row px-3 pt-3 pb-1">';
-	html+='<div class="col-lg-12 col-md-12 col-sm-12 col-12 order-lg-6 mb-3 text-right">';
-	html+='<button class="btn-shadow btn btn-secondary text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
-	html+='<button class="btn-shadow btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates()" >Email Broadcast</button>';
-			
-			html+='<div class="">';
-				if(objRights.discardPermission){
-					if(roleAndModule.added=='Y'){
-						html+='<form id="leadUploadId" name="leadUploadId" action="javascript:void(0);"  >';
-						html+='<input type="hidden" name="userId" id="userId" value="${USER_ID}">';
-						html+='<div class="row align-items-center" id="leadUploadId">';
-						html+='<div class="ml-4">';
-						html+='<div class="file-upload">';
-						html+='<div class="file-select">';
-						html+='<div class="file-select-button" id="fileupload1Label">Choose File</div>';
-						html+='<div class="file-select-name" id="fileupload1ChoosenFile">No file chosen...</div>';
-						html+='<input type="file" name="fileupload1" id="fileupload1">';
-						html+='</div>';
-						html+='</div>	';
-						html+='</div>';
-						html+='<div class="ml-3 text-left">';
-						html+='<button type="submit" class="btn btn-primary" id="uploadLeadCSV" onclick="return uploadLeads(\'leadUploadId\');">Upload Leads</button>	';
-						html+='</div>';
-						html+='</div>';
-						html+='</form>	';
-					}
+	var html='<div class="row">';
+		html+='<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 order-md-2 text-right">';
+			html+='<button class=" btn btn-primary  text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
+			html+='<button class=" btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates()" >Email Broadcast</button>';
+		html+='</div>'
+		html+='<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">';
+			if(objRights.discardPermission){
+				if(roleAndModule.added=='Y'){
+					html+='<form id="leadUploadId" name="leadUploadId" action="javascript:void(0);"  >';
+					html+='<input type="hidden" name="userId" id="userId" value="${USER_ID}">';
+					html+='<div class="row align-items-center" id="leadUploadId">';
+					html+='<div class="ml-3">';
+					html+='<div class="file-upload">';
+					html+='<div class="file-select">';
+					html+='<div class="file-select-button" id="fileupload1Label">Choose File</div>';
+					html+='<div class="file-select-name" id="fileupload1ChoosenFile">No file chosen...</div>';
+					html+='<input type="file" name="fileupload1" id="fileupload1">';
+					html+='</div>';
+					html+='</div>	';
+					html+='</div>';
+					html+='<div class="ml-3 text-left">';
+					html+='<button type="submit" class="btn btn-primary" id="uploadLeadCSV" onclick="return uploadLeads(\'leadUploadId\');">Upload Leads</button>	';
+					html+='</div>';
+					html+='</div>';
+					html+='</form>	';
+				}
+			}	
+		html+='</div>'
+		html+='<div class="col-lg-12 col-md-12 col-sm-12 col-12 order-lg-6 mb-3 text-right">';
+			html+='<div class="d-flex justify-content-end align-items-center" style="gap:6px;">';
+				if(roleAndModule.added=='Y'){
+					html+='<b class="schoolDemoUrlAutoCounselor text-success"></b>';
+					html+='<input type="hidden" id="school-demo-auto-counselor-url" value="'+objRights.schoolDemoUrlAutoCounselor+'" style="opacity:0;height:0px">';
+					html+='<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'school-demo-auto-counselor-url\', \'schoolDemoUrlAutoCounselor\')"  id="schoolDemoUrl">New Demo with auto counselor</button>';
+				}
+				if(roleAndModule.added=='Y'){
+					html+='<b class="schoolDemoUrl text-success d-none"></b>';
+					html+='<input type="hidden" id="common-school-demo-url" value="'+objRights.schoolDemoUrl+'" style="opacity:0;height:0px">';
+					html+='<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'common-school-demo-url\', \'schoolDemoUrl\')"  id="schoolDemoUrl">Add New Demo</button>';
+				}
+				if(roleAndModule.added=='Y'){
+					html+='<button class=" btn btn-primary  text-white  btn-full-mobile mb-1"  id="addNewCampaign">Campaign List</button>';
+				}
+				if(roleAndModule.added=='Y'){
+					html+='<button class=" btn btn-warning  text-white  btn-full-mobile mb-1"  id="addLead">Add New Leads</button>';
+				}
+				//if(USER_ROLE == 'DIRECTOR' || USER_ROLE == 'LEAD_MANAGER' || USER_ROLE == 'LEAD_MANAGER_PAYMENT' || objRights.feedbackPermission==false || objRights.defaultUserId==USER_ID){
+					html+='<button class=" btn btn-danger  text-white btn-full-mobile mb-1" id="moveNewLead">Move Lead</button> ';
+				//}
+				if(roleAndModule.updated=='Y'){
+					html+='<button class=" btn btn-focus text-white btn-full-mobile mb-1" id="mergeLead">Merge Lead</button> ';
 				}	
-				html+='<div class="d-flex justify-content-end align-items-center" style="gap:6px;">';
-					if(roleAndModule.added=='Y'){
-						html+='<b class="schoolDemoUrlAutoCounselor text-success"></b>';
-						html+='<input type="hidden" id="school-demo-auto-counselor-url" value="'+objRights.schoolDemoUrlAutoCounselor+'" style="opacity:0;height:0px">';
-						html+='<button class="btn-shadow btn btn-secondary text-white  btn-full-mobile mb-1" onclick="copyURL(\'school-demo-auto-counselor-url\', \'schoolDemoUrlAutoCounselor\')"  id="schoolDemoUrl">New Demo with auto counselor</button>';
-					}
-					if(roleAndModule.added=='Y'){
-						html+='<b class="schoolDemoUrl text-success d-none"></b>';
-						html+='<input type="hidden" id="common-school-demo-url" value="'+objRights.schoolDemoUrl+'" style="opacity:0;height:0px">';
-						html+='<button class="btn-shadow btn btn-secondary text-white  btn-full-mobile mb-1" onclick="copyURL(\'common-school-demo-url\', \'schoolDemoUrl\')"  id="schoolDemoUrl">Add New Demo</button>';
-					}
-					if(roleAndModule.added=='Y'){
-						html+='<button class="btn-shadow btn btn-secondary text-white  btn-full-mobile mb-1"  id="addNewCampaign">Campaign List</button>';
-					}
-					if(roleAndModule.added=='Y'){
-						html+='<button class="btn-shadow btn btn-warning text-white  btn-full-mobile mb-1"  id="addLead">Add New Leads</button>';
-					}
-					//if(USER_ROLE == 'DIRECTOR' || USER_ROLE == 'LEAD_MANAGER' || USER_ROLE == 'LEAD_MANAGER_PAYMENT' || objRights.feedbackPermission==false || objRights.defaultUserId==USER_ID){
-						html+='<button class="btn-shadow btn btn-danger text-white btn-full-mobile mb-1" id="moveNewLead">Move Lead</button> ';
-					//}
-					if(roleAndModule.updated=='Y'){
-						html+='<button class="btn-shadow btn btn-focus text-white btn-full-mobile mb-1" id="mergeLead">Merge Lead</button> ';
-					}	
-					if(USER_ROLE == 'DIRECTOR'){
-						html+='<button class="btn-shadow btn btn-success text-white mt-lg-1 btn-full-mobile mb-1" id="exportLead">Excel Export</button> ';
-					}
-				html+='</div>';
+				if(USER_ROLE == 'DIRECTOR'){
+					html+='<button class=" btn btn-success text-white mt-lg-1 btn-full-mobile mb-1" id="exportLead">Excel Export</button> ';
+				}
 			html+='</div>';
+		html+='</div>';
 	html+='</div>';
-html+='</div>';
-html+='<div class="row mt-2 mb-3 px-2 mx-3 rounded-10 flex-column" style="background-color: #eee;box-shadow: inset 0px 4px 8px rgba(0, 0, 0, 0.2);" id="b2c-total-head">';
-	html+='<div class="mt-3 d-flex" style="font-size:11px;gap:6px;">';
-		html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #C6E2FF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #027FFF">
-			<p class="mb-0">Total Lead | Today\'s Lead</p>
-			<p id="totalTodayLeads" class="mb-0 text-white bg-primary px-2 rounded">- | -</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
-			<p class="mb-0">Facebook Total Lead | Today\'s Lead</p>
-			<p id="fbTotalTodayLeads" class="mb-0 text-dark px-2 rounded" style="background-color:#F3F39E;">- | -</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF5DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
-			<p class="mb-0">Today\'s Follow-ups</p>
-			<p id="todayFollowup" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #D5E3FC;;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #4267B2">
-			<p class="mb-0">Today\'s School Demo</p>
-			<p id="todaySchoolDemo" class="mb-0 px-2 rounded text-white" style="background-color:#4267B2;">-</p>
-		</div>`;
-		if(objRights.discardPermission){
+	html+='<div class="full px-2 mt-2 mb-3 rounded-10 flex-column" style="background-color: #eee;box-shadow: inset 0px 4px 8px rgba(0, 0, 0, 0.2);" id="b2c-total-head">';
+		html+='<div class="mt-3 d-flex" style="font-size:11px;gap:6px;">';
+			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #C6E2FF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #027FFF">
+				<p class="mb-0">Total Lead | Today\'s Lead</p>
+				<p id="totalTodayLeads" class="mb-0 text-white bg-primary px-2 rounded">- | -</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+				<p class="mb-0">Facebook Total Lead | Today\'s Lead</p>
+				<p id="fbTotalTodayLeads" class="mb-0 text-dark px-2 rounded" style="background-color:#F3F39E;">- | -</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF5DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+				<p class="mb-0">Today\'s Follow-ups</p>
+				<p id="todayFollowup" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #D5E3FC;;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #4267B2">
+				<p class="mb-0">Today\'s School Demo</p>
+				<p id="todaySchoolDemo" class="mb-0 px-2 rounded text-white" style="background-color:#4267B2;">-</p>
+			</div>`;
+			if(objRights.discardPermission){
+				html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #DADADA;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #898989">
+					<p class="mb-0">Unassigned Lead</p>
+					<p id="unassignedLeads" class="mb-0 text-white px-2 rounded" style="background-color:#898989;">-</p>
+				</div>`
+			}
+			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF6DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #EFD597">
+				<p class="mb-0">Followup Lead</p>
+				<p id="followupLeadsCount" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
+			</div>`;
+		html+='</div>';
+		html+='<div class="mt-2 d-flex" style="font-size:11px;gap:6px;">';
 			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #DADADA;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #898989">
-				<p class="mb-0">Unassigned Lead</p>
-				<p id="unassignedLeads" class="mb-0 text-white px-2 rounded" style="background-color:#898989;">-</p>
+				<p class="mb-0">Unattended Lead</p>
+				<p id="unattendedLeads" class="mb-0 text-white px-2 rounded" style="background-color:#898989;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #D5E3FC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #4267B2">
+				<p class="mb-0">Total School Demo</p>
+				<p id="totalSchoolDemo" class="mb-0 px-2 rounded text-white" style="background-color:#4267B2;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+				<p class="mb-0">School Demo Complete</p>
+				<p id="completeLeads" class="mb-0 px-2 rounded text-dark" style="background-color:#F3F39E;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #E0FFBF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #96E640">
+				<p class="mb-0">Positive To Enrollment</p>
+				<p id="positiveToEnrollment" class="mb-0 px-2 rounded text-dark" style="background-color:#96E640;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #ffe5c5;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #e65e12">
+				<p class="mb-0">Move Lead</p>
+				<p id="moveLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#e65e12;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFE3E2;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #FF0005">
+				<p class="mb-0">Scrape</p>
+				<p id="scrapeLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#FF0005;">-</p>
 			</div>`
-		}
-		html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF6DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #EFD597">
-			<p class="mb-0">Followup Lead</p>
-			<p id="followupLeadsCount" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
-		</div>`;
-	html+='</div>';
-	html+='<div class="mt-2 d-flex" style="font-size:11px;gap:6px;">';
-		html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #DADADA;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #898989">
-			<p class="mb-0">Unattended Lead</p>
-			<p id="unattendedLeads" class="mb-0 text-white px-2 rounded" style="background-color:#898989;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #D5E3FC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #4267B2">
-			<p class="mb-0">Total School Demo</p>
-			<p id="totalSchoolDemo" class="mb-0 px-2 rounded text-white" style="background-color:#4267B2;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
-			<p class="mb-0">School Demo Complete</p>
-			<p id="completeLeads" class="mb-0 px-2 rounded text-dark" style="background-color:#F3F39E;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #E0FFBF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #96E640">
-			<p class="mb-0">Positive To Enrollment</p>
-			<p id="positiveToEnrollment" class="mb-0 px-2 rounded text-dark" style="background-color:#96E640;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #ffe5c5;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #e65e12">
-			<p class="mb-0">Move Lead</p>
-			<p id="moveLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#e65e12;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFE3E2;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #FF0005">
-			<p class="mb-0">Scrape</p>
-			<p id="scrapeLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#FF0005;">-</p>
-		</div>`
+		html+='</div>';
+
+		html+='<hr class="w-100">';
+		html+='<div class="d-flex align mb-3" style="font-size:11px;gap:20px;">';
+			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #1EC749;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#1EC749">Hot</p>
+				<p id="hotLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#1EC749;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #F8B824;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#F8B824">Warm</p>
+				<p id="warmLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#F8B824;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0279FD;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#0279FD">Cold</p>
+				<p id="coldLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#0279FD;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #7000FF;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#7000FF">Demo By Website</p>
+				<p id="demoByWebsiteCount" class="mb-0 text-white px-2 rounded" style="background-color:#7000FF;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0051FF;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#0051FF">Demo By Link</p>
+				<p id="demoByLinkCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
+				<p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
+			</div>`;
+		html+='</div>';
 	html+='</div>';
 
-	// html+='<table class="table table-bordered table-striped mobile-responsivei-table" style="font-size:11px">';
-	// html+='<thead>';
-	// html+='<tr>';
-	// html+='<th>Total</th>';
-	// html+='<th>Facebook<br/>Total Lead | Today\'s Lead</th>';
-	// html+='<th style="background-color:#bdd7f1 !important">Today\'s Lead</th>';
-	// html+='<th style="background-color:#bdd7f1 !important">Today\'s Follow-ups</th>';
-	// html+='<th style="background-color:#bdd7f1 !important">Today\'s School Demo</th>';
-	// if(objRights.discardPermission){
-	// 	html+='<th>Unassigned Lead</th>';
-	// }
-	// html+='<th>Followup Lead</th>';
-	// html+='<th>Unattended Lead</th>';
-	// html+='<th>Total School Demo | complete</th>';
-	// html+='<th>Positive to enrollment</th>';
-	// html+='<th>Move Lead</th>';
-	// html+='<th>Scrape</th>';
-	// html+='</tr>';
-	// html+='</thead>';
-	// html+='<tbody>';
-	// html+='<tr id="total-lead-active-tr">';
-	// html+='<td style="background-color:#3f6ad8 !important;color:#fff">-</td>';
-	// html+='<td style="background-color:#6c757d !important;color:#fff">-</td>';
-	// html+='<td style="background-color:#6c757d !important;color:#fff">-</td>';
-	// html+='<td style="background-color:#efd597 !important;color:#343a40">-</td>';
-	// html+='<td style="background-color:#f3f39e !important;color:#343a40">-</td>';
-	// if(objRights.discardPermission){
-	// 	html+='<td style="background-color:#6c757d !important;color:#fff">-</td>';
-	// }
-	// html+='<td style="">-</td>';
-	// html+='<td style="">-</td>';
-	// html+='<td style="background-color:#f3f39e !important;color:#343a40">-</td>';
-	// html+='<td style="background-color:#efd597 !important;color:#343a40">-</td>';
-	// html+='<td style="background-color:#f3d1e7 !important;color:#343a40">-</td>';
-	// html+='<td style="background-color:#efb3aa !important;color:#343a40">-</td>';
-	// html+='</tr>';
-	// html+='</tbody>';
-	// html+='</table>';
-
-	html+='<hr class="w-100">';
-	html+='<div class="d-flex align mb-3" style="font-size:11px;gap:20px;">';
-		html+=`<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #1EC749;padding: 5px 10px;font-weight: bold;">
-			<p class="mb-0" style="color:#1EC749">Hot</p>
-			<p id="hotLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#1EC749;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #F8B824;padding: 5px 10px;font-weight: bold;">
-			<p class="mb-0" style="color:#F8B824">Warm</p>
-			<p id="warmLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#F8B824;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0279FD;padding: 5px 10px;font-weight: bold;">
-			<p class="mb-0" style="color:#0279FD">Cold</p>
-			<p id="coldLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#0279FD;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #7000FF;padding: 5px 10px;font-weight: bold;">
-			<p class="mb-0" style="color:#7000FF">Demo By Website</p>
-			<p id="demoByWebsiteCount" class="mb-0 text-white px-2 rounded" style="background-color:#7000FF;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0051FF;padding: 5px 10px;font-weight: bold;">
-			<p class="mb-0" style="color:#0051FF">Demo By Link</p>
-			<p id="demoByLinkCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
-		</div>
-		<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
-			<p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
-			<p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
-		</div>`;
-	html+='</div>';
-html+='</div>';
-
-	// html+='<table class="table table-bordered table-striped mobile-responsivei-table" style="font-size:11px">';
-	// 	html+='<thead>';
-	// 	html+='<tr>';
-	// 	html+='<th class="text-center ">Hot</th>';
-	// 	html+='<th class="text-center ">Cold</th>';
-	// 	html+='<th class="text-center ">Warm</th>';
-
-	// 	html+='<th class="text-center ">Demo by Website</th>';
-	// 	html+='<th class="text-center ">Demo by Link</th>';
-	// 	html+='<th class="text-center ">Assigned to lead manager</th>';
-	// 	html+='</tr>';
-	// 	html+='</thead>';
-	// 	html+='<tbody>';
-	// 	html+='<tr id="total-active-hotlead">';
-	// 	html+='<td>-</td>';
-	// 	html+='<td>-</td>';
-	// 	html+='<td>-</td>';
-
-	// 	html+='<td>-</td>';
-	// 	html+='<td>-</td>';
-	// 	html+='<td>-</td>';
-	// 	html+='</tr>';
-	// 	html+='<tr id="total-inactive-hotlead">	';
-
-	// 	html+='<tr>';
-	// 	html+='</tbody>';
-	// 	html+='</table>	';
 	
-	html+='<div class="full overflow-x-auto px-3" id="b2c-lead-list"></div>';
+	html+='<div class="full overflow-x-auto" id="b2c-lead-list"></div>';
 	html+='<div id="supportHtmlChats"></div>';
 	return html;
 }
@@ -221,10 +156,10 @@ function getLeadFormPopup(objRights){
 	html+='<div id="leadPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
-    +'        <div class="modal-header pt-2 pb-2 theme-bg text-white">'
+    +'        <div class="modal-header py-2 bg-primary text-white">'
     +'            <h5 class="modal-title" id="leadFormText">Update Lead</h5>'
     +'            <button type="button" class="close text-white" onClick="resetLeadUpdate()" aria-label="Close">'
-    +'                <span aria-hidden="true">×</span>'
+    +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
     +'        </div>'
     +'        <div class="modal-body">'
@@ -336,8 +271,8 @@ function getLeadFormPopup(objRights){
 	+'			</form>'
     +'        </div>'
     +'        <div class="modal-footer">'
-	+'			<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" onClick="resetLeadUpdate()">Close</button>'
-	+'			<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="saveLead">Save</button>'
+	+'			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" onClick="resetLeadUpdate()">Close</button>'
+	+'			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveLead">Save</button>'
     +'        </div>'
     +'    </div>'
     +'</div>'
@@ -351,10 +286,10 @@ function getLeadFollowupFormPopup(objRights){
 	html+='<div id="leadFollowupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
-    +'        <div class="modal-header pt-2 pb-2 theme-bg text-white">'
-    +'            <h5 class="modal-title" id="exampleModalLabel">Follow up Form</h5>'
+    +'        <div class="modal-header py-2 bg-primary text-white">'
+    +'            <h5 class="modal-title" >Follow up Form</h5>'
     +'            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-    +'                <span aria-hidden="true">×</span>'
+    +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
     +'        </div>'
     +'        <div class="modal-body">'
@@ -476,14 +411,14 @@ function getLeadFollowupFormPopup(objRights){
 	+'		</form>'
     +'        </div>'
     +'        <div class="modal-footer">'
-	+'			<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-	+'			<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="saveFollowup">Save Status</button>'
+	+'			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+	+'			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveFollowup">Save Status</button>'
     +'        </div>'
 	+'		<div class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2 table-responsive">'
 	+'			<table class="table table-bordered table-striped" style="font-size:11px;">'
 	+'				<thead>'
 	+'					<tr>'
-	+'						<th>Sr. No.</th>'
+	+'						<th>S. No.</th>'
 	+'						<th>Connected Through | Last Call at Date & Time</th>'
 	+'						<th>Next Followup at Date & Time</th>'
 	+'						<th>Connected With | Lead Followup Status</th>'
@@ -504,10 +439,10 @@ function getLeadAdvanceSearchPopup(objRights){
 	var html='<div id="leadAdvanceSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
-    +'        <div class="modal-header pt-2 pb-2 theme-bg text-white">'
-    +'            <h5 class="modal-title" id="exampleModalLabel">Advance Search</h5>'
+    +'        <div class="modal-header py-2 bg-primary text-white">'
+    +'            <h5 class="modal-title" >Advance Search</h5>'
     +'            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-    +'                <span aria-hidden="true">×</span>'
+    +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
     +'        </div>'
     +'        <div class="modal-body">'
@@ -520,25 +455,25 @@ function getLeadAdvanceSearchPopup(objRights){
 	+'			<input type="hidden" name="leadFromSearchModuleId" id="leadFromSearchModuleId" value="'+objRights.moduleId+'">'
 	+'			<input type="hidden" name="leadType" id="leadType" value="'+objRights.leadType+'">'
 	+'			<input type="hidden" name="userId" id="userId" value="'+USER_ID+'">'
+	+'			<input type="hidden" name="campaignName" id="campaignName" value="">'
 	+'<div class="row">'
 	+'<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">'
 	+'	<div class="leadErrorText"></div>'
 	+'</div>'
 	+'</div>'
-	+'<div class="row text-center">'
+	+'<div class="row">'
 		+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-12 mb-1 mt-1">'
 		+'	<label class="m-0">Academic Year</label>'
 		+'	<select	name="leadAcadmicYear" id="leadAcadmicYear" class="form-control" >'
 		+'	</select>'
 		+'</div>'
-		+'<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 mb-1 mt-1">'
+		+'<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">'
 		+'	<label class="m-0">Search with any text</label>'
 		+'	<input type="text" name="leadFullSearch" id="leadFullSearch"  class="form-control"/> '
 		+'</div>'
-		
 		+'<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadTag">'
 			+'<label class="m-0">Lead Tagging</label>'
-			+'<select	name="leadTagSearch" id="leadTagSearch" class="form-control" multiple ></select>'
+			+'<select name="leadTagSearch" id="leadTagSearch" class="form-control" multiple ></select>'
 		+'</div>'
 	+'</div>'
 	
@@ -618,7 +553,7 @@ function getLeadAdvanceSearchPopup(objRights){
 	+'</div>'
 	+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign">'
 	+'	<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;'
-		+'<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead'
+		+'<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead&nbsp;'
 		+'<input type="checkbox" id="checkByLeadDemo" name="checkByLeadDemo" /> Lead With Demo';
 		if(objRights.leadHideRights){
 			html+='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple disabled></select>';
@@ -644,24 +579,25 @@ function getLeadAdvanceSearchPopup(objRights){
 	+'		<option value="">Select UTM Source</option>'
 	+'	</select>'
 	+'</div>'
+	
 	+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">'
 	+'	<label class="m-0">Start Date</label>'
-	+'	<input type="text" name="leadStartDateSearch" id="leadStartDateSearch"  class="form-control datepicker">'
+	+'	<input type="text" name="leadStartDateSearch" id="leadStartDateSearch" value="'+objRights.startDate+'" class="form-control datepicker">'
 	+'</div>'
 	+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">'
 	+'	<label class="m-0">To Date</label>'
-	+'	<input type="text" name="leadEndDateSearch" id="leadEndDateSearch"  class="form-control datepicker">'
+	+'	<input type="text" name="leadEndDateSearch" id="leadEndDateSearch" value="'+objRights.endDate+'" class="form-control datepicker">'
 	+'</div>'
 	+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">'
 	+'	<label class="m-0">Date Type</label>'
 	+'	<select name="searchDateType" id="searchDateType" class="form-control"  >'
 	+'		<option value="">Select Date Type</option>'
-	+'		<option value="create-lead" >Created Lead</option>'
-	+'		<option value="modify-lead" >Modify Lead</option>'
-	+'		<option value="demo-Book" >Demo Book</option>'
-	+'		<option value="demo-lead" >Demo Schedule</option>'
-	+'		<option value="callschedule-lead" >Call Schedule </option>'
-	+'		<option value="call-done" >Call Done</option>'
+	+'		<option value="create-lead" '+(objRights.searchType=='create-lead'?'selected':'')+' >Created Lead</option>'
+	+'		<option value="modify-lead" '+(objRights.searchType=='modify-lead'?'selected':'')+'>Modify Lead</option>'
+	+'		<option value="demo-Book" '+(objRights.searchType=='demo-Book'?'selected':'')+'>Demo Book</option>'
+	+'		<option value="demo-lead" '+(objRights.searchType=='demo-lead'?'selected':'')+'>Demo Schedule</option>'
+	+'		<option value="callschedule-lead" '+(objRights.searchType=='callschedule-lead'?'selected':'')+'>Call Schedule </option>'
+	+'		<option value="call-done" '+(objRights.searchType=='call-done'?'selected':'')+'>Call Done</option>'
 	+'	</select>'
 	+'</div>'
 	+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">'
@@ -726,9 +662,9 @@ function getLeadAdvanceSearchPopup(objRights){
 	+'			</form>'
     +'        </div>'
     +'        <div class="modal-footer">'
-    +'            <button type="button" class="btn btn-danger btn-shadow float-right pr-4 pl-4 ml-2" onclick="advanceLeadSearchStudentReset(\'advanceLeadNewSearchForm\',\''+objRights.leadType+'\')">Reset</button>'
-	+'			<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-	+'			<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="btnNewClickLeadSearch">Search</button>'
+    +'            <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" onclick="advanceLeadSearchStudentReset(\'advanceLeadNewSearchForm\',\''+objRights.leadType+'\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
+	+'			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+	+'			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnNewClickLeadSearch"><i class="fa fa-search"></i>&nbsp;Search</button>'
     +'        </div>'
     +'    </div>'
     +'</div>'
@@ -741,10 +677,10 @@ function getLeadMergeFormPopup(objRights){
 	html+='<div id="leadMergePopup" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
-    +'        <div class="modal-header pt-2 pb-2 theme-bg text-white">'
+    +'        <div class="modal-header py-2 bg-primary text-white">'
     +'            <h5 class="modal-title" id="leadFormText">Merge Lead Form</h5>'
     +'            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-    +'                <span aria-hidden="true">×</span>'
+    +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
     +'        </div>'
     +'       <div class="modal-body">'
@@ -840,8 +776,8 @@ function getLeadMergeFormPopup(objRights){
 	+'		</div>	'
     +'        </div>'
     +'        <div class="modal-footer">'
-	+'			<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-	+'			<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="saveMergeLead">Save</button>'
+	+'			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+	+'			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveMergeLead">Save</button>'
     +'        </div>'
     +'    </div>'
     +'</div>'
@@ -853,10 +789,10 @@ function getLeadCampaignListPopup(){
 	var html='<div id="leadCampaignPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
      +'<div class="modal-dialog modal-lg">'
         +'<div class="modal-content border-0">'
-            +'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
+            +'<div class="modal-header py-2 bg-primary text-white">'
                +' <h5 class="modal-title" id="leadFormText">Campaign List</h5>'
                 +'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-                    +'<span aria-hidden="true">×</span>'
+                    +'<span aria-hidden="true">&times;</span>'
                 +'</button>'
            +' </div>'
            +' <div class="modal-body">'
@@ -872,7 +808,7 @@ function getLeadCampaignListPopup(){
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">'
 							+'<label class="m-0">&nbsp;</label><br/>'
-							+'<button type="button" class="btn btn-success btn-shadow" id="btnAddCampaign">Save</button>'
+							+'<button type="button" class="btn btn-success " id="btnAddCampaign">Save</button>'
 						+'</div>'
 				  +' </div>'
 				  +' <hr/>'
@@ -881,7 +817,7 @@ function getLeadCampaignListPopup(){
 							+'<table class="table table-bordered table-striped mobile-responsivei-table" id="tblCampaignList" style="font-size:11px">'
 								+'<thead>'
 									+'<tr>'
-										+'<th>Sr. No.</th>'
+										+'<th>S. No.</th>'
 										+'<th>Campaign Name</th>'
 										+'<th>Start Date</th>'
 										+'<th>End Date</th>'
@@ -905,7 +841,7 @@ return html;
 function getB2cLeadHeaderList(leaddata, objRights, roleModule){
 	var html='';
 		html+='<div class="lead-table-wrapper">'
-		+'<table class="table table-bordered font-12 border-radius-table" style="min-width:1380px;width:100%" id="leadDataList">'
+		+'<table class="table table-bordered font-12 border-radius-table" style="min-width:1450px;width:100%" id="leadDataList">'
 			+'<thead class="bg-primary">'
 			+'<tr>'
 				+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important">Lead info (IST +5:30)</th>'
@@ -956,37 +892,37 @@ function getLeadB2CTotalCountList(leadTotalData){
 	? `<a href="javascript:void(0);" class="text-white" onclick="getTotalLead('B2C')">${leadTotalData.totalLeads}</a>`
 	: "-";
 	var todayLeadsHTML = leadTotalData.freshLead > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'freshLead')">${leadTotalData.freshLead}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'freshLead','${leadTotalData.leadFrom}')">${leadTotalData.freshLead}</a>`
 	: "-";
 	$("#totalTodayLeads").html(`${totalLeadsHTML} | ${todayLeadsHTML}`);
 
 	var fbTotalLeadsHTML = leadTotalData.totalFbLead > 0
-	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'facebooklead')">${leadTotalData.totalFbLead}</a>`
+	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'facebooklead','${leadTotalData.leadFrom}')">${leadTotalData.totalFbLead}</a>`
 	: "-";
 	var fbTodayLeadsHTML = leadTotalData.todayFbLead > 0
-	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'fbtdlead')">${leadTotalData.todayFbLead}</a>`
+	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'fbtdlead','${leadTotalData.leadFrom}')">${leadTotalData.todayFbLead}</a>`
 	: "-";
 	$("#fbTotalTodayLeads").html(`${fbTotalLeadsHTML} | ${fbTodayLeadsHTML}`);
 
 	var todayFollowupHTML = leadTotalData.todayScheduleCall > 0
-	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'todayScheduleCall')">${leadTotalData.todayScheduleCall}</a>`
+	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'todayScheduleCall','${leadTotalData.leadFrom}')">${leadTotalData.todayScheduleCall}</a>`
 	: "-";
 	$("#todayFollowup").html(`${todayFollowupHTML}`);
 
 	var todaySchoolDemoHTML = leadTotalData.todayDemo > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'tdyDemo')">${leadTotalData.todayDemo}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'tdyDemo','${leadTotalData.leadFrom}')">${leadTotalData.todayDemo}</a>`
 	: "-";
 	$("#todaySchoolDemo").html(`${todaySchoolDemoHTML}`);
 
 	if(leadTotalData.discardPermission){
 		var unassignedLeadsHTML = leadTotalData.followupLead2 > 0
-		? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'leadnotassign')">${leadTotalData.followupLead2}</a>`
+		? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'leadnotassign','${leadTotalData.leadFrom}')">${leadTotalData.followupLead2}</a>`
 		: "-";
 		$("#unassignedLeads").html(`${unassignedLeadsHTML}`);
 	}
 
 	let followupSelectHTML = `
-	<select name="leadsFollowCount" id="leadsFollowCount" style="background-color: #EFD597;border: 0;" onfocus="this.style.outline='none';"  onchange="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'folwcount')">
+	<select name="leadsFollowCount" id="leadsFollowCount" style="background-color: #EFD597;border: 0;" onfocus="this.style.outline='none';"  onchange="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'folwcount','${leadTotalData.leadFrom}')">
 		<option value="0" ${leadTotalData.totalfollowup == 0 ? 'selected' : ''}>0</option>
 		<option value="1" ${leadTotalData.totalfollowup == 1 ? 'selected' : ''}>1</option>
 		<option value="2" ${leadTotalData.totalfollowup == 2 ? 'selected' : ''}>2</option>
@@ -998,32 +934,32 @@ function getLeadB2CTotalCountList(leadTotalData){
 	$("#followupLeadsCount").html(followupSelectHTML);
 
 	var unattendedLeadsHTML = leadTotalData.unattendedLead > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'unattendedLead')">${leadTotalData.unattendedLead}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'unattendedLead','${leadTotalData.leadFrom}')">${leadTotalData.unattendedLead}</a>`
 	: "-";
 	$("#unattendedLeads").html(`${unattendedLeadsHTML}`);
 
 	var totalSchoolDemoHTML = leadTotalData.demoLead > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'demoLead')">${leadTotalData.demoLead}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'demoLead','${leadTotalData.leadFrom}')">${leadTotalData.demoLead}</a>`
 	: "-";
 	$("#totalSchoolDemo").html(`${totalSchoolDemoHTML}`);
 
 	var completeLeadsHTML = leadTotalData.followupLead3 > 0
-	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'demodone')">${leadTotalData.followupLead3}</a>`
+	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'demodone','${leadTotalData.leadFrom}')">${leadTotalData.followupLead3}</a>`
 	: "-";
 	$("#completeLeads").html(`${completeLeadsHTML}`);
 
 	var positiveToEnrollmentHTML = leadTotalData.followupLead1 > 0
-	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'followupLead1')">${leadTotalData.followupLead1}</a>`
+	? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'followupLead1','${leadTotalData.leadFrom}')">${leadTotalData.followupLead1}</a>`
 	: "-";
 	$("#positiveToEnrollment").html(`${positiveToEnrollmentHTML}`);
 
 	var moveLeadsCountHTML = leadTotalData.movedLead > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'movedLead')">${leadTotalData.movedLead}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'movedLead','${leadTotalData.leadFrom}')">${leadTotalData.movedLead}</a>`
 	: "-";
 	$("#moveLeadsCount").html(`${moveLeadsCountHTML}`);
 
 	var scrapeLeadsCountHTML = leadTotalData.scrapeLead > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'scrapeLead')">${leadTotalData.scrapeLead}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'scrapeLead','${leadTotalData.leadFrom}')">${leadTotalData.scrapeLead}</a>`
 	: "-";
 	$("#scrapeLeadsCount").html(`${scrapeLeadsCountHTML}`);
 }
@@ -1031,32 +967,32 @@ function getLeadB2CTotalCountList(leadTotalData){
 
 function getLeadB2CTotalHotCountList(leadTotalData){
 	var hotLeadsCountHTML = leadTotalData.totalHot > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'hottotal')">${leadTotalData.totalHot}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'hottotal','${leadTotalData.leadFrom}')">${leadTotalData.totalHot}</a>`
 	: "-";
 	$("#hotLeadsCount").html(`${hotLeadsCountHTML}`);
 
 	var warmLeadsCountHTML = leadTotalData.totalWarm > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'warmtotal')">${leadTotalData.totalWarm}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'warmtotal','${leadTotalData.leadFrom}')">${leadTotalData.totalWarm}</a>`
 	: "-";
 	$("#warmLeadsCount").html(`${warmLeadsCountHTML}`);
 
 	var coldLeadsCountHTML = leadTotalData.totalCold > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'coldtotal')">${leadTotalData.totalCold}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'coldtotal','${leadTotalData.leadFrom}')">${leadTotalData.totalCold}</a>`
 	: "-";
 	$("#coldLeadsCount").html(`${coldLeadsCountHTML}`);
 
 	var demoByWebsiteCountHTML = leadTotalData.totalWebsiteDemo > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalWebsiteDemo')">${leadTotalData.totalWebsiteDemo}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalWebsiteDemo','${leadTotalData.leadFrom}')">${leadTotalData.totalWebsiteDemo}</a>`
 	: "-";
 	$("#demoByWebsiteCount").html(`${demoByWebsiteCountHTML}`);
 
 	var demoByLinkCountHTML = leadTotalData.totalCopyUrlDemo > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalCopyUrlDemo')">${leadTotalData.totalCopyUrlDemo}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalCopyUrlDemo','${leadTotalData.leadFrom}')">${leadTotalData.totalCopyUrlDemo}</a>`
 	: "-";
 	$("#demoByLinkCount").html(`${demoByLinkCountHTML}`);
 
 	var assignedToLeadManagerCountHTML = leadTotalData.totalDemoSupport > 0
-	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDemoSupport')">${leadTotalData.totalDemoSupport}</a>`
+	? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDemoSupport','${leadTotalData.leadFrom}')">${leadTotalData.totalDemoSupport}</a>`
 	: "-";
 	$("#assignedToLeadManagerCount").html(`${assignedToLeadManagerCountHTML}`);
 }
@@ -1102,11 +1038,11 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 		
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
-		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1380px;width:100%" id="leadDataList">'
+		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1450px;width:100%" id="leadDataList">'
 			+'<thead class="bg-primary">'
 			+'<tr>'
 				+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important;width:230px;">';
-				if(objRights.discardPermission || USER_ID==leads.assignTo){
+				if(objectRights.discardPermission || USER_ID==leads.assignTo || USER_ID==leads.demoAssignTo){
 					html+='<input type="hidden" value="'+leads.assignTo+'-'+leads.demoAssignTo+'" id="checkDemoMoved-'+leads.leadId+'"/>';
 					html+='<input type="checkbox" class="checkLead" id="lead-'+leads.leadId+'" name="lead-move-another" value="'+leads.leadId+'" /> ';
 				}else {
@@ -1172,35 +1108,37 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 											+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">';
 												if(leads.leadSourceId==4){
 													html+='<table class="w-100"><tbody>'
-															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Source:</th>'
-																+'<td class="border-0 p-0 font-12">'+(leads.utmSource!=''?leads.utmSource:'N/A')+'</td>'
+															+'<tr class="border-bottom">'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Source:</th>'
+																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmSource!=''?leads.utmSource:'N/A')+'</td>'
 															+'</tr>'
-															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Ad:</th>'
-																+'<td class="border-0 p-0 font-12">'+(leads.utmMedium!=''?leads.utmMedium:'N/A')+'</td>'
+															+'<tr class="border-bottom">'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Ad:</th>'
+																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmMedium!=''?leads.utmMedium:'N/A')+'</td>'
 															+'</tr>'
-															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Ad Set:</th>'
-																+'<td class="border-0 p-0 font-12">'+(leads.utmDescription!=''?leads.utmDescription:'N/A')+'</td>'
+															+'<tr class="border-bottom">'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Ad Set:</th>'
+																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmDescription!=''?leads.utmDescription:'N/A')+'</td>'
 															+'</tr>'
-															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Compaign</th>'
-																+'<td class="border-0 p-0 font-12 utmCampaign-'+leads.leadId+'">'+(leads.utmCampaign!=''?leads.utmCampaign:'N/A')+'</td>'
+															+'<tr class="border-bottom">'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Compaign</th>'
+																+'<td class="border-0 p-0 font-12 vertical-align-top utmCampaign-'+leads.leadId+'">'+(leads.utmCampaign!=''?leads.utmCampaign:'N/A')+'</td>'
 															+'</tr>'
-															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Is_Organic</th>'
-																+'<td class="border-0 p-0 font-12">'+(leads.utmTerm!=''?leads.utmTerm:'N/A')+'</td>'
+															+'<tr class="border-bottom">'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Is_Organic</th>'
+																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmTerm!=''?leads.utmTerm:'N/A')+'</td>'
 															+'</tr>';
 													if(leads.leadPlatform!=''){
-														html+='<tr>'
-															+'<th class="border-0 p-0 font-12">Platform</th>'
-															+'<td class="border-0 p-0 font-12"><img class="report-icon" src="'+PATH_FOLDER_IMAGE2+leads.leadPlatform+'.png'+SCRIPT_VERSION+'" width=\"16\" height=\"16\"></td>';
+														html+='<tr class="border-bottom">'
+															+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Platform</th>'
+															+'<td class="border-0 p-0 font-12 vertical-align-top"><img class="report-icon" src="'+PATH_FOLDER_IMAGE2+leads.leadPlatform+'.png'+SCRIPT_VERSION+'" width=\"16\" height=\"16\"></td>';
 														+'</tr>';
 													}
 													if(leads.fbImageUrl!=''){
 														html+='<tr>'
-															+'<th colspan="2"><a href="'+leads.fbImageUrl+'" target="_blank">View Form Image</a></td>';
+															+'<th colspan="2" class="border-0">'
+																+'<a href="'+leads.fbImageUrl+'" class="btn btn-primary btn-sm" target="_blank">View Form Image</a>'
+															+'</td>';
 														+'</tr>';
 													}
 
@@ -1654,7 +1592,7 @@ function b2cleadsPagging(leaddata, objRights){
 		html+='<div><ul class="pagination">';
 			if(currentPage != 1){
 				html+='<li class="page-item">'
-				+'<a class="page-link" href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\', \''+(currentPage-1)+'\',\''+objRights.clickByLead+'\',\''+leadType+'\');">Previous</a>'
+				+'<a class="page-link" href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\', \''+(currentPage-1)+'\',\''+objRights.clickByLead+'\',\''+objRights.leadFrom+'\');">Previous</a>'
 			 	+'</li>';
 			 }
 			for (let p = 1; p <= noOfPages; p++) {
@@ -1663,7 +1601,7 @@ function b2cleadsPagging(leaddata, objRights){
 						html+='...';
 					}
 					html+='<li class="page-item">'
-					+'<a class="page-link"  href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\' ,\''+p+'\',\''+objRights.clickByLead+'\',\''+leadType+'\');" style="'+(p==currentPage?'background-color: #cdeedd !important;':'')+'">'+p+'</a>'
+					+'<a href="javascript:void(0);" onclick="clickTotalLeads(\''+objRights.clickFrom+'-'+objRights.clickUserid+'\' ,\''+p+'\',\''+objRights.clickByLead+'\',\''+objRights.leadFrom+'\');" class="page-link '+(p==currentPage?'page-link-active':'')+'">'+p+'</a>'
 					+'</li>';
 				}else{
 

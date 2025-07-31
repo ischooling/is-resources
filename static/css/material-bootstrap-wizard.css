@@ -37,7 +37,7 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4 {
 }
 
 a {
-  color: #007fff;
+  color: var(--pc);
 }
 a:hover, a:focus {
   color: #89229b;
@@ -225,7 +225,7 @@ h2.title {
 }
 
 .text-primary {
-  color: #007fff;
+  color: var(--pc);
 }
 
 .text-danger {
@@ -254,9 +254,9 @@ h2.title {
  /* box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);*/
 }
 
-.wizard-card h2{ margin:0 auto; color:#007fff; font-size:28px; padding:0 0;}
-.wizard-card h3{ margin:0 auto; color:#007fff;}
-.wizard-card h4{ margin:0 auto; color:#007fff;}
+.wizard-card h2{ margin:0 auto; color:var(--pc); font-size:28px; padding:0 0;}
+.wizard-card h3{ margin:0 auto; color:var(--pc);}
+.wizard-card h4{ margin:0 auto; color:var(--pc);}
 
 .wizard-card .picture-container {
   position: relative;
@@ -297,14 +297,14 @@ h2.title {
   box-shadow: 0 6px 16px -1px rgba(104, 191, 204, 0.56), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(156, 39, 176, 0.2);
 }
 .wizard-card[data-color="purple"] .picture:hover {
-  border-color: #007fff;
+  border-color: var(--pc);
 }
 .wizard-card[data-color="purple"] .choice:hover .icon, .wizard-card[data-color="purple"] .choice.active .icon {
-  border-color: #007fff;
+  border-color: var(--pc);
   color: #fff;
 }
 .wizard-card[data-color="purple"] .form-group .form-control {
-  background-image: linear-gradient(#007fff, #007fff), linear-gradient(#D2D2D2, #D2D2D2);
+  background-image: linear-gradient(var(--pc), var(--pc)), linear-gradient(#D2D2D2, #D2D2D2);
 }
 .wizard-card[data-color="purple"] .checkbox input[type=checkbox]:checked + .checkbox-material .check {
   background-color: #9c27b0;
@@ -684,7 +684,7 @@ output {
 /* .form-control, */
 .form-group .form-control {
   border: 0;
-  background-image: linear-gradient(#007fff, #007fff), linear-gradient(#D2D2D2, #D2D2D2);
+  background-image: linear-gradient(var(--pc), var(--pc)), linear-gradient(#D2D2D2, #D2D2D2);
   background-size: 0 2px, 100% 1px;
   background-repeat: no-repeat;
   background-position: center bottom, center calc(100% - 1px);
@@ -759,13 +759,13 @@ output {
 }
 .form-group.is-focused .form-control {
   outline: none;
-  background-image: linear-gradient(#007fff, #007fff), linear-gradient(#D2D2D2, #D2D2D2);
+  background-image: linear-gradient(var(--pc), var(--pc)), linear-gradient(#D2D2D2, #D2D2D2);
   background-size: 100% 2px, 100% 1px;
   box-shadow: none;
   transition-duration: 0.3s;
 }
 .form-group.is-focused .form-control .material-input:after {
-  background-color: #007fff;
+  background-color: var(--pc);
 }
 .form-group.is-focused.form-info .form-control {
   background-image: linear-gradient(#00bcd4, #00bcd4), linear-gradient(#D2D2D2, #D2D2D2);
@@ -948,7 +948,7 @@ label.control-label {
   left: 0;
   font-size: 11px;
   line-height: 1.07143;
-  color:#007fff;	
+  color:var(--pc);	
   font-weight:bold;
   clear:both;
 }
@@ -1192,7 +1192,7 @@ width:100%;;}
   box-shadow: 0 2px 2px 0 rgba(0, 159, 255, 0.14), 0 3px 1px -2px rgba(0, 159, 255, 0.2), 0 1px 5px 0 rgba(0, 159, 255, 0.12);
 }
 .btn.btn-primary, .btn.btn-primary:hover, .btn.btn-primary:focus, .btn.btn-primary:active, .btn.btn-primary.active, .btn.btn-primary:active:focus, .btn.btn-primary:active:hover, .btn.btn-primary.active:focus, .btn.btn-primary.active:hover, .open > .btn.btn-primary.dropdown-toggle, .open > .btn.btn-primary.dropdown-toggle:focus, .open > .btn.btn-primary.dropdown-toggle:hover {
-  background-color: #007fff;
+  background-color: var(--pc);
   color: #FFFFFF;
 }
 .btn.btn-primary:focus, .btn.btn-primary:active, .btn.btn-primary:hover {
@@ -1489,7 +1489,7 @@ width:100%;;}
 
 }
 .footer a {
-  color: #007fff;
+  color: var(--pc);
 }
 .footer .heart {
   color: #FF3B30;
@@ -1540,7 +1540,7 @@ width:100%;;}
 }
 
 
-.radio{ background:#007fff; color:#fff; padding:10px 0; vertical-align:text-top; box-shadow:1px 2px 3px #999; transition:all 0.2s; z-index:0;border-bottom:solid 1px;}
+.radio{ background:var(--pc); color:#fff; padding:10px 0; vertical-align:text-top; box-shadow:1px 2px 3px #999; transition:all 0.2s; z-index:0;border-bottom:solid 1px;}
 .radio:hover{ box-shadow:2px 3px 6px #999; background:#34adfe; cursor:pointer; }
 
 .radio label {
@@ -1579,7 +1579,7 @@ fieldset[disabled] .form-group.is-focused .radio label {
   height: 25px;
   width: 25px;
   border-radius: 100%;
-  background-color: #007fff;
+  background-color: var(--pc);
   transform: scale3d(0, 0, 0);
 }
 .radio label .check:after {
@@ -1613,10 +1613,10 @@ fieldset[disabled] .form-group.is-focused .radio label {
   opacity: 1;
 }
 .radio input[type=radio]:checked ~ .check {
-  background-color: #007fff;
+  background-color: var(--pc);
 }
 .radio input[type=radio]:checked ~ .circle {
-  border-color: #007fff;
+  border-color: var(--pc);
 }
 .radio input[type=radio]:checked ~ .check {
   transform: scale3d(0.65, 0.65, 1);
@@ -1728,7 +1728,7 @@ fieldset[disabled] .form-group.is-focused .checkbox label {
   opacity: 0.2;
 }
 .checkbox input[type=checkbox]:checked + .checkbox-material .check {
-  background: #007fff;
+  background: var(--pc);
 }
 .checkbox input[type=checkbox]:checked + .checkbox-material .check:before {
   color: #FFFFFF;

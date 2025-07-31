@@ -1,27 +1,69 @@
 function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
+  if(!getSession()){
+      redirectLoginPage();
+      return false;
+  }
   //customLoader(true);
   if (pageNo == "home") {
-    callForDashboardData(
-      "formIdIfAny",
-      "school-admin-content?moduleId=" + moduleId
-    );
+   
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "school-admin-content?moduleId=" + moduleId + "&schoolId=" + SCHOOL_ID
+    // );
+    if(SCHOOL_ID>1){
+      callForDashboardData(
+        "formIdIfAny",
+        "dashboard-content?moduleId=" + moduleId,
+        replaceDiv
+      );
+    }else{
+      getContent(1,'home','','');
+    }
   } else if (pageNo == "dashboard") {
+    if (SCHOOL_TYPE == "WLP") {
+      var urlSend = "/dashboard/admin-partner-dashboard?moduleId=" + moduleId;
+      getAsPost(urlSend);
+      customLoader(false);
+      //partner-dashboard
+      //$('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
+    } else {
+      callForDashboardData(
+        "formIdIfAny",
+        "dashboard-content?moduleId=" + moduleId,
+        replaceDiv
+      );
+    }
+  } else if (pageNo == "dashboard-white-school") {
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "dashboard-content?moduleId=" + moduleId,
+    //   replaceDiv
+    // );
+    getContent(1,'dashboard-white-school','','');
+  } else if (pageNo == "create-school") {
     callForDashboardData(
       "formIdIfAny",
-      "dashboard-content?moduleId=" + moduleId,
+      "create-school-content?moduleId=" + moduleId,
+      replaceDiv
+    );
+  } else if (pageNo == "created-school-list") {
+    callForDashboardData(
+      "formIdIfAny",
+      "created-school-list?moduleId=" + moduleId,
       replaceDiv
     );
   } else if (pageNo == "create-user") {
     callForDashboardData(
       "formIdIfAny",
-      "create-user-content?moduleId=" + moduleId,
+      "create-user-content?moduleId=" + moduleId+'&themeType=theme2',
       replaceDiv
     );
   } else if (pageNo == "user-list") {
-    callForDashboardData(
-      "formIdIfAny",
-      "user-list?moduleId=" + moduleId + "&profileFor=common"
-    );
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "user-list?moduleId=" + moduleId + "&profileFor=common&themeType=theme2"
+    // );
+     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "student-list") {
     callForDashboardData(
       "form",
@@ -108,33 +150,37 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       $("#flexStudentTab").css("display", "block");
     }, 100);
   } else if (pageNo == "online-user") {
-    callForDashboardData(
-      "formIdIfAny",
-      "online-users-request-content?moduleId=" + moduleId
-    );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "online-users-request-content?moduleId=" + moduleId+"&themeType=theme2"
+    // );
   } else if (pageNo == "5a") {
     callForDashboardData("formIdIfAny", "teacher-salary-content");
   } else if (pageNo == "teacher-profile") {
-    callForDashboardData(
-      "formIdIfAny",
-      "teacher-profile-request-content?moduleId=" +
-        moduleId +
-        "&ids=13&types=0,1"
-    );
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "teacher-profile-request-content?moduleId=" +
+    //     moduleId +
+    //     "&ids=13&types=0,1"
+    // );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "pending-interview-remarks") {
-    callForDashboardData(
-      "formIdIfAny",
-      "teacher-profile-request-interview-content?moduleId=" +
-        moduleId +
-        "&ids=19,20,22,23&types=0,1"
-    );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "teacher-profile-request-interview-content?moduleId=" +
+    //     moduleId +
+    //     "&ids=19,20,22,23&types=0,1"
+    // );
   } else if (pageNo == "pending-training-remarks") {
-    callForDashboardData(
-      "formIdIfAny",
-      "teacher-profile-request-content?moduleId=" +
-        moduleId +
-        "&ids=16&types=0,1"
-    );
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "teacher-profile-request-content?moduleId=" +
+    //     moduleId +
+    //     "&ids=16&types=0,1"
+    // );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "5e") {
     callForDashboardData(
       "formIdIfAny",
@@ -143,19 +189,29 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
         "&ids=0,14,16,17,19,20&types=0,1"
     );
   } else if (pageNo == "approved-teachers") {
-    callForDashboardData(
-      "formIdIfAny",
-      "teacher-profile-approved-request-content?moduleId=" +
-        moduleId +
-        "&ids=0&types=0,1"
-    );
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "teacher-profile-approved-request-content?moduleId=" +
+    //     moduleId +
+    //     "&ids=0&types=0,1"
+    // );
+    getContent(moduleId, pageNo, replaceDiv, extraParam );
+  }else if (pageNo == "withdraw-teachers") {
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "teacher-profile-withdraw-request-content?moduleId=" +
+    //     moduleId +
+    //     "&ids=1&types=0,1"
+    // );
+    getContent(moduleId, pageNo, replaceDiv, extraParam );
   } else if (pageNo == "rejected-teachers") {
-    callForDashboardData(
-      "formIdIfAny",
-      "teacher-profile-request-content?moduleId=" +
-        moduleId +
-        "&ids=15,18,21&types=2"
-    );
+    getContent(moduleId, pageNo, replaceDiv, extraParam );
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "teacher-profile-request-content?moduleId=" +
+    //     moduleId +
+    //     "&ids=15,18,21&types=2"
+    // );
   } else if (pageNo == "6a") {
     callForDashboardData(
       "formIdIfAny",
@@ -190,7 +246,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "school-evaluation-form-content?moduleId=" + moduleId
     );
-  } else if (pageNo == "student-transcript") {
+  }else if (pageNo == "student-transcript") {
     callForDashboardData("formIdIfAny", "student-list?moduleId=" + moduleId);
   } else if (pageNo == "add-view-syllabus") {
     callForDashboardData(
@@ -245,11 +301,14 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     // $('#userPaymentHistoryDetails').hide();
     // callForDashboardData('formIdIfAny','payment-history-content?moduleId='+moduleId+'&userId=');
     getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "graduation-ceremony-attendees") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "conflicted-user-list") {
-    callForDashboardData(
-      "formIdIfAny",
-      "conflicted-user-content?moduleId=" + moduleId
-    );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "conflicted-user-content?moduleId=" + moduleId+"&themeType=theme2"
+    // );
   } else if (pageNo == "manage-slots") {
     callForDashboardData(
       "formIdIfAny",
@@ -263,14 +322,16 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "school-enabled-date-submit-content?moduleId=" + moduleId
     );
   } else if (pageNo == "delete-user") {
-    callForDashboardData(
-      "formIdIfAny",
-      "delete-user-content?moduleId=" + moduleId + "&username="
-    );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "delete-user-content?moduleId=" + moduleId + "&username=&themeType=theme2"
+    // );
   } else if (pageNo == "maintenance-down-message") {
+    
     callForDashboardData(
       "formIdIfAny",
-      "maintenance-down-message?moduleId=" + moduleId
+      "maintenance-down-message?moduleId=" + moduleId+ "&username=&themeType=theme2"
     );
   } else if (pageNo == "20") {
     callForDashboardData("formIdIfAny", "lms-user-content");
@@ -279,6 +340,8 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "manage-subjects-content?moduleId=" + moduleId
     );
+  }else if (pageNo == "manage-batch-student") {
+    callForDashboardData("formIdIfAny", "manage-batch-student?moduleId=" + moduleId+"&themeType=theme2");
   } else if (pageNo == "manage-students") {
     callForDashboardData(
       "formIdIfAny",
@@ -348,6 +411,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "manage-course-provider-content?moduleId=" + moduleId
     );
+    
   } else if (pageNo == "manage-categories") {
     callForDashboardData(
       "formIdIfAny",
@@ -390,7 +454,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "raise-demo-request-content?moduleId=" +
         moduleId +
-        "&requestRaisedBy=school&clickFrom=list"
+        "&requestRaisedBy=school&demotype=&clickFrom=list"
     );
   } else if (pageNo == "student-meet-slot") {
     callForDashboardData(
@@ -471,13 +535,15 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
   } else if (pageNo == "notifications" || pageNo == "parent-notifications") {
     callForDashboardData("formIdIfAny", "notifications" + extraParam);
   } else if (pageNo == "module") {
-    callForDashboardData("formIdIfAny", "get-modules?moduleId=" + moduleId);
+    //callForDashboardData("formIdIfAny", "get-modules?moduleId=" + moduleId);
+     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "modulerole") {
-    callForDashboardData("formIdIfAny", "get-roles?moduleId=" + moduleId);
+    //callForDashboardData("formIdIfAny", "get-roles?moduleId=" + moduleId);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "rolerights") {
     callForDashboardData(
       "formIdIfAny",
-      "get-module-rights?moduleId=" + moduleId
+      "get-module-rights?moduleId=" + moduleId+"&themeType=theme2"
     );
   } else if (pageNo == "manage-user-list") {
     console.log(pageNo);
@@ -537,16 +603,24 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     // var urlSend = CONTEXT_PATH+UNIQUEUUID+'/dashboard/school-data-reports?moduleId='+moduleId
     // window.open(urlSend, '_blank');
     // customLoader(false)
-    var urlSend =
-      "/dashboard/school-data-reports?moduleId=" +
-      moduleId +
-      "&schoolId=" +
-      SCHOOL_ID +
-      "&year=";
+    var urlSend ="/dashboard/school-data-reports?moduleId=" +moduleId +"&schoolId=" + SCHOOL_ID + "&year=";
+    getAsPost(urlSend);
+    customLoader(false);
+    //getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "flex-billing-report") {
+    urlSend = "/dashboard/get-lmsbuzz-billing?moduleId=" + moduleId;
     getAsPost(urlSend);
     customLoader(false);
   } else if (pageNo == "addons-academic-year") {
     callForDashboardData( "formIdIfAny", "addons-academic-year?moduleId=" + moduleId );
+  }else if (pageNo == "critical-students") {
+    urlSend = "/dashboard/get-critical-students?moduleId=" + moduleId;
+    getAsPost(urlSend);
+    customLoader(false);
+  }else if (pageNo == "nongrading-students") {
+    urlSend = "/dashboard/get-nongrading-students?moduleId=" + moduleId;
+    getAsPost(urlSend);
+    customLoader(false);
   } else if (pageNo == "lead-list") {
     //callForDashboardData('formIdIfAny','lead-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom=list&currentPage=0');
     // var leadType = "B2C";//|| USER_ROLE=="B2B_PARTNER"
@@ -575,22 +649,23 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     
   } else if (pageNo == "lead-assign-form") {
     //callForDashboardData('formIdIfAny','lead-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom=list&currentPage=0');
-    var urlSend =
-      "/dashboard/lead-assign-form?moduleId=" + moduleId + "&todayDate=";
-    getAsPost(urlSend);
-    customLoader(false);
+    // var urlSend =
+    //   "/dashboard/lead-assign-form?moduleId=" + moduleId + "&todayDate=";
+    // getAsPost(urlSend);
+    // customLoader(false);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "lead-report-list") {
     //var urlSend = CONTEXT_PATH+UNIQUEUUID+'/dashboard/lead-data-reports?moduleId='+moduleId+'&euid='+ENCRYPTED_USER_ID
     //window.open(urlSend, '_blank');
     //customLoader(false)
-    var urlSend =
-      "/dashboard/lead-data-reports?moduleId=" +
-      moduleId +
-      "&euid=" +
-      ENCRYPTED_USER_ID;
-    getAsPost(urlSend);
-    customLoader(false);
-    //getContent(moduleId, pageNo, replaceDiv, extraParam);
+    // var urlSend =
+    //   "/dashboard/lead-data-reports?moduleId=" +
+    //   moduleId +
+    //   "&euid=" +
+    //   ENCRYPTED_USER_ID;
+    // getAsPost(urlSend);
+    // customLoader(false);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
 
   } else if (pageNo == "school-announce") {
     callForDashboardData(
@@ -659,15 +734,20 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     customLoader(false);
   } else if (pageNo == "teacher-assign-form") {
     //callForDashboardData('formIdIfAny','lead-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom=list&currentPage=0');
-    var urlSend =
-      CONTEXT_PATH +
-      UNIQUEUUID +
-      "/report/teacher-assign-form?moduleId=" +
-      moduleId;
-    window.open(urlSend, "_blank");
+   var urlSend = "/report/teacher-assign-form?moduleId=" + moduleId;
+    getAsPost(urlSend);
     customLoader(false);
   } else if (pageNo == "teacher-time-availability") {
     var urlSend = "/report/teacher-time-availability?moduleId=" + moduleId;
+    getAsPost(urlSend);
+    customLoader(false);
+  }else if (pageNo == "lead-calculation-chart") {
+    //callForDashboardData('formIdIfAny','lead-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom=list&currentPage=0');
+    var urlSend =
+      "/dashboard/lead-calculation-chart?moduleId=" +
+      moduleId +
+      "&euid=" +
+      ENCRYPTED_USER_ID;
     getAsPost(urlSend);
     customLoader(false);
   } else if (pageNo == "assign-orientation") {
@@ -676,22 +756,24 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     // window.open(urlSend, '_blank');
     // customLoader(false)
 
-    var urlSend =
-      "/dashboard/orientation-assign-form?moduleId=" +
-      moduleId +
-      "&schoolId=" +
-      SCHOOL_ID +
-      "&todayDate=";
-    getAsPost(urlSend);
-    customLoader(false);
+    // var urlSend =
+    //   "/dashboard/orientation-assign-form?moduleId=" +
+    //   moduleId +
+    //   "&schoolId=" +
+    //   SCHOOL_ID +
+    //   "&todayDate=";
+    // getAsPost(urlSend);
+    // customLoader(false);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "student-orientation-list") {
     // var urlSend = CONTEXT_PATH+UNIQUEUUID+'/dashboard/student-orientation-list?moduleId='+moduleId;
     // window.open(urlSend, '_blank');
     // customLoader(false)
 
-    var urlSend = "/dashboard/student-orientation-list?moduleId=" + moduleId;
-    getAsPost(urlSend);
-    customLoader(false);
+    // var urlSend = "/dashboard/student-orientation-list?moduleId=" + moduleId;
+    // getAsPost(urlSend);
+    // customLoader(false);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   }
   // else if (pageNo == "teacher-manage-slot") {
   //   callForDashboardData(
@@ -723,10 +805,23 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     customLoader(false);
   }else if (pageNo == "lead-demo-list") {
     
-    var urlSend = "/dashboard/lead-demo-list?moduleId=" + moduleId;
-    getAsPost(urlSend);
-    customLoader(false);
+    // var urlSend = "/dashboard/lead-demo-list?moduleId=" + moduleId;
+    // getAsPost(urlSend);
+    // customLoader(false);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "academic-year-date-settings") {
+    callForDashboardData(
+      "formIdIfAny",
+      "academic-year-date-settings?moduleId=" + moduleId
+    );
+  }else if (pageNo == "extra-session-details") {
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "extra-session-details?moduleId=" + moduleId
+    // );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   }
+
 
   //Student - left-side
   else if (pageNo == "student-home") {
@@ -790,10 +885,11 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       );
     }
   } else if (pageNo == "auto-progress-report") {
-    callForDashboardData(
-      "formIdIfAny",
-      "auto-weekly-progress-report?moduleId=" + moduleId
-    );
+    // callForDashboardData(
+    //   "formIdIfAny",
+    //   "auto-weekly-progress-report?moduleId=" + moduleId
+    // );
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "progress-detail") {
     callForDashboardData(
       "formIdIfAny",
@@ -862,6 +958,11 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "student-attendance-list?moduleId=" + moduleId
     );
+  }else if (pageNo == "set-teacher-comp") {
+    callForDashboardData(
+      "formIdIfAny",
+      "set-teacher-compensation?moduleId=" + moduleId
+    );
   } else if (pageNo == "student-assigned-report") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "class-management") {
@@ -908,6 +1009,18 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo === "meeting-management") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "email-logs") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "email-status") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  } else if (pageNo == "wati-numbers") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "withdrawn-request-list") {
+    callForDashboardData(
+      "formIdIfAny",
+      "withdrawn-request-list?moduleId=" + moduleId + "&currentPage=0",
+      replaceDiv
+    );
   }
 
   //Parent
@@ -1026,7 +1139,7 @@ function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId) {
       "userPaymentHistoryDetails"
     );
   } else if (actionType == "19a") {
-    callForDashboardData("formIdIfAny", "delete-user-content?username=" + arg0);
+    //callForDashboardData("formIdIfAny", "delete-user-content?username=" + arg0+"&themeType=theme2");
     setTimeout(function () {
       callDashboardPageSchool(roleModuleId, "delete-user");
     }, 1000);
@@ -1184,14 +1297,8 @@ function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId) {
   } else if (actionType == "12b") {
     callCommonPaymentGateway("paymentForm", "student", arg0);
   } else if (actionType == "1a") {
-    callForDashboardData(
-      "formIdIfAny",
-      "profile-view-content?userId=" +
-        arg0 +
-        "&actionType=" +
-        actionType +
-        "&moduleId=" +
-        roleModuleId
+    callForDashboardData("formIdIfAny",
+      "profile-view-content?userId=" + arg0 + "&actionType=" + actionType + "&moduleId=" +roleModuleId+"&themeType=theme2"
     );
   } else if (actionType == "attendance") {
     callForDashboardData("formIdIfAny", "attendance-content" + arg0);
@@ -1247,13 +1354,13 @@ function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId) {
 }
 
 function submitTask(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitTask(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "task-submit"),
     data: JSON.stringify(getRequestForSubmitTask(formId, moduleId)),
     dataType: "json",
@@ -1261,18 +1368,14 @@ function submitTask(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#" + formId)[0].reset();
         $("#" + formId + " #schoolId option:selected").val(1);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -1308,13 +1411,13 @@ function validateRequestForSubmitTask(formId, moduleId) {
 }
 
 function submitTeacherQuestion(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitSet(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "question-set-submit"),
     data: JSON.stringify(getRequestForSubmitSet(formId, moduleId)),
     dataType: "json",
@@ -1322,9 +1425,9 @@ function submitTeacherQuestion(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#teacherQuestionModal").modal("hide");
         $("#" + formId)[0].reset();
         setTimeout(function () {
@@ -1332,11 +1435,7 @@ function submitTeacherQuestion(formId, moduleId) {
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -1376,11 +1475,11 @@ function validateRequestForSubmitSet(formId, moduleId) {
     $("#setName").val() == "" ||
     $("#setName").val() == 0
   ) {
-    showMessage(true, "Set Name is required.");
+   showMessageTheme2(0, "Set Name is required.");
     return false;
   }
   if ($("#setTitle").val() == undefined || $("#setTitle").val().trim() == "") {
-    showMessage(true, "Set Title is required.");
+   showMessageTheme2(0, "Set Title is required.");
     return false;
   }
   if (
@@ -1388,7 +1487,7 @@ function validateRequestForSubmitSet(formId, moduleId) {
     $("#standardId").val() == "" ||
     $("#standardId").val() == 0
   ) {
-    showMessage(true, "Standard is required.");
+   showMessageTheme2(0, "Standard is required.");
     return false;
   }
   if (
@@ -1396,20 +1495,20 @@ function validateRequestForSubmitSet(formId, moduleId) {
     $("#subjectId").val() == "" ||
     $("#subjectId").val() == 0
   ) {
-    showMessage(true, "Course Name is required.");
+   showMessageTheme2(0, "Course Name is required.");
     return false;
   }
   return true;
 }
 
 function submitQuestionAnswer(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitQuestion(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "question-answer-submit"),
     data: JSON.stringify(getRequestForSubmitQuestion(formId, moduleId)),
     dataType: "json",
@@ -1417,10 +1516,10 @@ function submitQuestionAnswer(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         $("#questionAnsModel").modal("hide");
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         //	$('#'+formId)[0].reset();
         setTimeout(function () {
           //var params = $("#setName1").val()+','+$("#setId").val();
@@ -1428,11 +1527,7 @@ function submitQuestionAnswer(formId, moduleId) {
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -1470,29 +1565,29 @@ function getRequestForSubmitQuestion(formId, moduleId) {
 function validateRequestForSubmitQuestion(formId, moduleId) {
   if (editor1 != undefined) {
     if (editor1.getData() == null) {
-      showMessage(true, "please add question");
+     showMessageTheme2(0, "please add question");
       return false;
     }
   }
 
   if ($("#option1").val() == null || $("#option1").val().trim() == "") {
-    showMessage(true, "option 1 is required.");
+   showMessageTheme2(0, "option 1 is required.");
     return false;
   }
   if ($("#option2").val() == null || $("#option2").val() == "") {
-    showMessage(true, "option 2 is required.");
+   showMessageTheme2(0, "option 2 is required.");
     return false;
   }
   if ($("#option3").val() == null || $("#option3").val() == "") {
-    showMessage(true, "option 3 is required.");
+   showMessageTheme2(0, "option 3 is required.");
     return false;
   }
   if ($("#option4").val() == null || $("#option4").val() == "") {
-    showMessage(true, "option 4 is required.");
+   showMessageTheme2(0, "option 4 is required.");
     return false;
   }
   if ($("#correctAns").val() == 0 || $("#correctAns").val() == "") {
-    showMessage(true, "correct answer is required.");
+   showMessageTheme2(0, "correct answer is required.");
     return false;
   }
   return true;
@@ -1515,7 +1610,7 @@ function submitScholarship(
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "scholar-submit"),
     data: JSON.stringify(
       getRequestForSubmitScholarship(
@@ -1531,9 +1626,9 @@ function submitScholarship(
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(false, data["message"]);
+        showMessageTheme2(0, data["message"]);
       } else {
-        showMessageTheme2(true, data["message"]);
+        showMessageTheme2(1, data["message"]);
         if ("add" == controlType) {
           $("#" + formId)[0].reset();
           $("#" + modalId).modal("toggle");
@@ -1545,7 +1640,7 @@ function submitScholarship(
       return false;
     },
     error: function (e) {
-      //showMessage(true, e.responseText);
+      //showMessageTheme2(true, e.responseText);
       return false;
     },
   });
@@ -1597,42 +1692,42 @@ function validateRequestForSubmitScholarship(formId, moduleId, modalId) {
     $("#" + formId + " #scholarCode").val() == 0 ||
     $("#" + formId + " #scholarCode").val() == null
   ) {
-    showMessageTheme2(false, "Discount Code Name is required");
+   showMessageTheme2(0, "Discount Code Name is required");
     return false;
   }
   if (
     $("#" + formId + " #scholarMadeFor").val() == undefined ||
     $("#" + formId + " #scholarMadeFor").val() == ""
   ) {
-    showMessageTheme2(false, "Please fill Discount Code for");
+   showMessageTheme2(0, "Please fill Discount Code for");
     return false;
   }
   if (
     $("#" + formId + " #learningPlan").val() == undefined ||
     $("#" + formId + " #learningPlan").val() == ""
   ) {
-    showMessageTheme2(false, "Learning Plan is required");
+   showMessageTheme2(0, "Learning Plan is required");
     return false;
   }
   if (
     $("#" + formId + " #scholarApplicableFor").val() == undefined ||
     $("#" + formId + " #scholarApplicableFor").val() == ""
   ) {
-    showMessageTheme2(false, "Applicability of Discount Code Name is required.");
+   showMessageTheme2(0, "Applicability of Discount Code Name is required.");
     return false;
   }
   if (
     $("#" + formId + " #scholarStartDate").val() == "" ||
     $("#" + formId + " #scholarStartDate").val() == null
   ) {
-    showMessageTheme2(false, "Discount Start Date is required");
+   showMessageTheme2(0, "Discount Start Date is required");
     return false;
   }
   if (
     $("#" + formId + " #scholarEndDate").val() == "" ||
     $("#" + formId + " #scholarEndDate").val() == null
   ) {
-    showMessageTheme2(false, "Discount End Date is required");
+   showMessageTheme2(0, "Discount End Date is required");
     return false;
   }
   var date = $("#scholarStartDate").val();
@@ -1644,24 +1739,21 @@ function validateRequestForSubmitScholarship(formId, moduleId, modalId) {
   var endDate = new Date(newDate1[2] + "-" + newDate1[0] + "-" + newDate1[1]);
 
   if (endDate < startDate) {
-    showMessageTheme2(
-      false,
-      "Discount End Date should be greater than Discount Start Date."
-    );
+    showMessageTheme2( 0,"Discount End Date should be greater than Discount Start Date.");
     return false;
   }
   if (
     $("#" + formId + " #scholarType").val() == 0 ||
     $("#" + formId + " #scholarType").val() == null
   ) {
-    showMessageTheme2(false, "Discount type is required");
+   showMessageTheme2(0, "Discount type is required");
     return false;
   }
   if (
     $("#" + formId + " #scholarPercent").val() == 0 ||
     $("#" + formId + " #scholarPercent").val() == null
   ) {
-    showMessageTheme2(false, "Please enter Discount amount");
+   showMessageTheme2(0, "Please enter Discount amount");
     return false;
   }
   return true;
@@ -1669,18 +1761,18 @@ function validateRequestForSubmitScholarship(formId, moduleId, modalId) {
 
 function sendToSpecificUser(formId, moduleId, isForSpecificUser, roleModuleId) {
   if ($("#" + formId + " #userEmailId").val() == "") {
-    showMessageTheme2(false, "Please enter student email");
+   showMessageTheme2(0, "Please enter student email");
     return false;
   }
   if ($("#" + formId + " #scholarshipApplicableFor").val() == "") {
-    showMessageTheme2(false, "Please select applicable for option");
+   showMessageTheme2(0, "Please select applicable for option");
     return false;
   }
 
   hideMessageTheme2("");
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "send-scholarshipCode-to-user"),
     data: JSON.stringify(
       getRequestForSpecificUserScholarship(formId, moduleId, isForSpecificUser)
@@ -1690,19 +1782,16 @@ function sendToSpecificUser(formId, moduleId, isForSpecificUser, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(false, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessageTheme2(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#addSpecificModal").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "scholarship");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      return false;
-    },
+    }
   });
 }
 
@@ -1746,21 +1835,21 @@ function validateRequestForSubmitMeetingTeacherSlots(formId, moduleId) {
     $("#" + formId + " #meetingDate").val() == null ||
     $("#" + formId + " #meetingDate").val() == ""
   ) {
-    showMessage(true, "Please select Meeting Date");
+   showMessageTheme2(0, "Please select Meeting Date");
     return false;
   }
   if (
     $("#" + formId + " #startTime").val() == null ||
     $("#" + formId + " #startTime").val() == ""
   ) {
-    showMessage(true, "Please select Start Time");
+   showMessageTheme2(0, "Please select Start Time");
     return false;
   }
   if (
     $("#" + formId + " #timeInterval").val() == null ||
     $("#" + formId + " #timeInterval").val() == 0
   ) {
-    showMessage(true, "Please select Time Interval");
+   showMessageTheme2(0, "Please select Time Interval");
     return false;
   }
   return true;
@@ -1815,21 +1904,21 @@ function validateRequestDemoMeetingSlots(
       $("#" + formId + " #meetingDate").val() == null ||
       $("#" + formId + " #meetingDate").val() == ""
     ) {
-      showMessage(true, "Please select Meeting Date");
+     showMessageTheme2(0, "Please select Meeting Date");
       return false;
     }
     if (
       $("#" + formId + " #startTime").val() == null ||
       $("#" + formId + " #startTime").val() == ""
     ) {
-      showMessage(true, "Please select Start Time");
+     showMessageTheme2(0, "Please select Start Time");
       return false;
     }
     if (
       $("#" + formId + " #timeInterval").val() == null ||
       $("#" + formId + " #timeInterval").val() == 0
     ) {
-      showMessage(true, "Please select Time Interval");
+     showMessageTheme2(0, "Please select Time Interval");
       return false;
     }
   }
@@ -1837,13 +1926,13 @@ function validateRequestDemoMeetingSlots(
 }
 
 function submitMeetingSlots(formId, moduleId, roleModuleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitMeetingTeacherSlots(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "meetingslots-submit"),
     data: JSON.stringify(
       getRequestForSubmitMeetingTeacherSlots(formId, moduleId)
@@ -1853,9 +1942,9 @@ function submitMeetingSlots(formId, moduleId, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#meetingSlotsModal").modal("toggle");
         $("#" + formId)[0].reset();
         $("body").removeClass("modal-open");
@@ -1864,23 +1953,19 @@ function submitMeetingSlots(formId, moduleId, roleModuleId) {
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
 
 function submitSyllabus(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitSyllabus(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "syllabus-submit"),
     data: JSON.stringify(getRequestForSubmitSyllabus(formId, moduleId)),
     dataType: "json",
@@ -1888,18 +1973,14 @@ function submitSyllabus(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#" + formId)[0].reset();
         $("#currentSyllabus").find("a").trigger("click");
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -1908,7 +1989,7 @@ function getRequestForSubmitSyllabus(formId, moduleId) {
   var authentication = {};
   var requestData = {};
   var syllabusDTO = {};
-  syllabusDTO["standardId"] = $("#" + formId + " #gradId").val();
+  syllabusDTO["standardId"] = $("#" + formId + " #currentGradId").val();
   syllabusDTO["subjectId"] = $("#" + formId + " #subjectId").val();
   syllabusDTO["courseProviderId"] = $(
     "#" + formId + " #courseProviderId"
@@ -1923,7 +2004,7 @@ function getRequestForSubmitSyllabus(formId, moduleId) {
   authentication["schoolId"] = SCHOOL_ID;
   authentication["schoolUUID"] = SCHOOL_UUID;
   authentication["userType"] = moduleId;
-  authentication["userId"] = $("#" + formId + " #userId").val();
+  authentication["userId"] = USER_ID;//$("#" + formId + " #userId").val();
   request["authentication"] = authentication;
   request["requestData"] = requestData;
   return request;
@@ -1933,44 +2014,44 @@ function getRequestForSubmitSyllabus(formId, moduleId) {
 //   if (roleModuleId == "" || roleModuleId == undefined) {
 //     roleModuleId = $("#userId").val();
 //   }
-//   hideMessage("");
+//   hideMessageTheme2("");
 //   if ($("#" + formId + " #agreementRefNumber").val() == "") {
-//     showMessage(true, "Reference number is required");
+//    showMessageTheme2(0, "Reference number is required");
 //     return false;
 //   }
 //   if ($("#" + formId + " #agreementDate").val() == "") {
-//     showMessage(true, "Agreement date is required");
+//    showMessageTheme2(0, "Agreement date is required");
 //     return false;
 //   }
 
 //   if ($("#" + formId + " #employeeType").val() == "") {
-//     showMessage(true, "Employment Type is required");
+//    showMessageTheme2(0, "Employment Type is required");
 //     return false;
 //   }
 //   if ($("#" + formId + " #typeOfTeacher").val() == "") {
-//     showMessage(true, "Type of Teacher is required");
+//    showMessageTheme2(0, "Type of Teacher is required");
 //     return false;
 //   }
 //   if ($("#" + formId + " #teacherDesignation").val() == "") {
-//     showMessage(true, "Teacher Designation is required");
+//    showMessageTheme2(0, "Teacher Designation is required");
 //     return false;
 //   }
 //   if ($("#" + formId + " #teacherDepartment").val() == "") {
-//     showMessage(true, "Teacher Department is required");
+//    showMessageTheme2(0, "Teacher Department is required");
 //     return false;
 //   }
 //   if ($("#" + formId + " #employeeType").val() == "Full-Time") {
 //     if ($("#" + formId + " #workingHours").val() == "") {
-//       showMessage(true, "Working Hours per Week is required");
+//      showMessageTheme2(0, "Working Hours per Week is required");
 //       return false;
 //     }
 //     if ($("#" + formId + " #payOut").val() == "") {
-//       showMessage(true, "Pay Out is required");
+//      showMessageTheme2(0, "Pay Out is required");
 //       return false;
 //     }
 //   }
 //   if (editor1.getData() == "") {
-//     showMessage(true, "Agreement content is required");
+//    showMessageTheme2(0, "Agreement content is required");
 //     return false;
 //   }
 //   var actualURL = "";
@@ -1991,9 +2072,9 @@ function getRequestForSubmitSyllabus(formId, moduleId) {
 //     timeout: 600000,
 //     success: function (data) {
 //       if (data["status"] == "0" || data["status"] == "2") {
-//         showMessage(true, data["message"]);
+//        showMessageTheme2(0, data["message"]);
 //       } else {
-//         showMessage(false, data["message"]);
+//        showMessageTheme2(1, data["message"]);
 //         if (
 //           formId == "interviewApprovalId" ||
 //           formId == "teacherEditAgreement"
@@ -2013,7 +2094,7 @@ function getRequestForSubmitSyllabus(formId, moduleId) {
 //       return false;
 //     },
 //     error: function (e) {
-//       //showMessage(true, e.responseText);
+//       //showMessageTheme2(true, e.responseText);
 //       return false;
 //     },
 //   });
@@ -2022,13 +2103,13 @@ function getRequestForSubmitSyllabus(formId, moduleId) {
 
 
 function submitSlot(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitSlot(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "slot-submit"),
     data: JSON.stringify(getRequestForSubmitSlot(formId, moduleId)),
     dataType: "json",
@@ -2036,9 +2117,9 @@ function submitSlot(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#" + formId)[0].reset();
         $("#enabledDateModal").modal("toggle");
         setTimeout(function () {
@@ -2046,11 +2127,7 @@ function submitSlot(formId, moduleId) {
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -2085,13 +2162,13 @@ function validateRequestForSubmitSlot(formId, moduleId) {
 }
 
 function submitTrvlSlot(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForSubmitTrvlSlot(formId, moduleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "travel-Visit-detail-submit"),
     data: JSON.stringify(getRequestForSubmitTrvlSlot(formId, moduleId)),
     dataType: "json",
@@ -2099,18 +2176,14 @@ function submitTrvlSlot(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#" + formId)[0].reset();
         callSchoolInneraction("6f", "2");
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -2141,7 +2214,7 @@ function validateRequestForSubmitTrvlSlot(formId, moduleId) {
 function getAllEmailsForStudentRole() {
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(getRequestForMaster("formId", "EMAIL_LIST", "asda")),
     dataType: "json",
@@ -2150,7 +2223,7 @@ function getAllEmailsForStudentRole() {
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         var data = data["mastersData"]["emailList"];
         $.each(data, function (key, val) {
@@ -2158,58 +2231,56 @@ function getAllEmailsForStudentRole() {
         });
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-    },
+    }
   });
 }
+ 
 function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
   if (roleModuleId == "" || roleModuleId == undefined) {
     roleModuleId = $("#userId").val();
   }
-  hideMessage("");
+  hideMessageTheme2("");
   if ($("#" + formId + " #agreementRefNumber").val() == "") {
-    showMessage(true, "Reference number is required");
+   showMessageTheme2(0, "Reference number is required");
     return false;
   }
   if ($("#" + formId + " #agreementDate").val() == "") {
-    showMessage(true, "Agreement date is required");
+   showMessageTheme2(0, "Agreement date is required");
     return false;
   }
 
   if ($("#" + formId + " #employeeType").val() == "") {
-    showMessage(true, "Employment Type is required");
+   showMessageTheme2(0, "Employment Type is required");
     return false;
   }
   if ($("#" + formId + " #typeOfTeacher").val() == "") {
-    showMessage(true, "Type of Teacher is required");
+   showMessageTheme2(0, "Type of Teacher is required");
     return false;
   }
   if ($("#" + formId + " #teacherDesignation").val() == "") {
-    showMessage(true, "Teacher Designation is required");
+   showMessageTheme2(0, "Teacher Designation is required");
     return false;
   }
   if ($("#" + formId + " #teacherDepartment").val() == "") {
-    showMessage(true, "Teacher Department is required");
+   showMessageTheme2(0, "Teacher Department is required");
     return false;
   }
   if ($("#" + formId + " #employeeType").val() == "Full-Time") {
     if ($("#" + formId + " #workingHours").val() == "") {
-      showMessage(true, "Working Hours per month is required");
+     showMessageTheme2(0, "Working Hours per month is required");
       return false;
     }
     if ($("#" + formId + " #adminTaskHours").val() == "") {
-      showMessage(true, "Admin Task Hours is required");
+     showMessageTheme2(0, "Admin Task Hours is required");
       return false;
     }
     if ($("#" + formId + " #payOut").val() == "") {
-      showMessage(true, "Pay Out is required");
+     showMessageTheme2(0, "Pay Out is required");
       return false;
     }
   }
   if (editor1.getData() == "") {
-    showMessage(true, "Agreement content is required");
+   showMessageTheme2(0, "Agreement content is required");
     return false;
   }
   var actualURL = "";
@@ -2220,7 +2291,7 @@ function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
   // }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: actualURL,
     data: JSON.stringify(
       getRequestForSubmitTeacherAgreement(formId, moduleId, saveType)
@@ -2230,9 +2301,9 @@ function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(false, data["message"]);
+       showMessageTheme2(1, data["message"]);
         if (
           formId == "interviewApprovalId" ||
           formId == "teacherEditAgreement"
@@ -2250,11 +2321,7 @@ function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
         $("#profileId_" + userId).remove();
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 function getRequestForSubmitTeacherAgreement(formId, moduleId, saveType) {
@@ -2309,11 +2376,11 @@ function validateRequestForSubmitSyllabus(formId, moduleId) {
   return true;
 }
 function callForLMSUserSignUp(formId, moduleId, roleModuleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   $("#lmsUserForm").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForSignup("create-lms-user", moduleId),
     data: JSON.stringify(getRequestForLMSUserSignup(formId, moduleId)),
     dataType: "json",
@@ -2321,9 +2388,9 @@ function callForLMSUserSignUp(formId, moduleId, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
         $("#lmsUserModal1").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "manage-lms-user");
@@ -2331,20 +2398,15 @@ function callForLMSUserSignUp(formId, moduleId, roleModuleId) {
       }
       $("#lmsUserForm").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-      $("#lmsUserForm").prop("disabled", false);
-    },
+    }
   });
 }
 function changeLmsUserPassword(formId, moduleId, roleModuleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   $("#lmsUserForm").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForSignup("change-lms-user-password", moduleId),
     data: JSON.stringify(getRequestForLMSPasswordChange(formId, moduleId)),
     dataType: "json",
@@ -2352,9 +2414,9 @@ function changeLmsUserPassword(formId, moduleId, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
         $("#lmsChangePasswordModal1").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "manage-lms-user");
@@ -2362,12 +2424,7 @@ function changeLmsUserPassword(formId, moduleId, roleModuleId) {
       }
       $("#lmsUserForm").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-      $("#lmsUserForm").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -2422,7 +2479,7 @@ function callAllAcademicYear(formId) {
   resetDropdown($("#" + formId + " #academicYear"), "Select Academic Year");
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster("formId", "ALL-ACADEMIC-YEAR-LIST", "academicYear")
@@ -2433,7 +2490,7 @@ function callAllAcademicYear(formId) {
     async: false,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         var result = data["mastersData"]["standards"];
         var dropdown = $("#" + formId + " #academicYear");
@@ -2451,12 +2508,7 @@ function callAllAcademicYear(formId) {
           );
         });
       }
-    },
-    error: function (e) {
-      console.log(e);
-      // showMessage(true, e.responseText);
-      // $("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
-    },
+    }
   });
 }
 function resetBulkTranscriptSearchFilter(formId) {
@@ -2483,7 +2535,7 @@ function printStudentCertificates(formId, moduleId) {
     $("#" + formId + " #certificateType").val() == 0 ||
     $("#" + formId + " #certificateType").val() == undefined
   ) {
-    showMessage(true, "Please choose certificate type");
+   showMessageTheme2(0, "Please choose certificate type");
     return false;
   }
   if ($("#" + formId + " #certificateType").val() == "AV") {
@@ -2491,7 +2543,7 @@ function printStudentCertificates(formId, moduleId) {
       $("#" + formId + " #showSealSignature").val() == 0 ||
       $("#" + formId + " #showSealSignature").val() == undefined
     ) {
-      showMessage(true, "Please choose option from show Seal and Signature.");
+     showMessageTheme2(0, "Please choose option from show Seal and Signature.");
       return false;
     }
   }
@@ -2542,10 +2594,10 @@ function printStudentCertificates(formId, moduleId) {
 }
 
 function approveSubject(formId, moduleId, isApproved, subjectId) {
-  hideMessage("");
+  hideMessageTheme2("");
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "approve-subjects"),
     data: JSON.stringify(
       getRequestForApproveSubject(formId, moduleId, isApproved, subjectId)
@@ -2555,21 +2607,17 @@ function approveSubject(formId, moduleId, isApproved, subjectId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
         callSchoolInneraction("22a", $("#schoolId").val());
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 function callForSubjectApproval(formId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForApprovalSubject(formId)) {
     return false;
   }
@@ -2595,29 +2643,25 @@ function callForSubjectApproval(formId) {
           stringMessage[0] == "SESSIONOUT"
         ) {
           //redirectLoginPage();
-          showMessage(true, stringMessage[1]);
+         showMessageTheme2(0, stringMessage[1]);
         } else {
-          showMessage(true, stringMessage[1]);
+         showMessageTheme2(0, stringMessage[1]);
           $("#travelDataModal").modal("hide");
           //callSchoolInneraction('6f',$('#sortById').val());
         }
         return false;
       }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
 function validateRequestForApprovalSubject() {
   if ($("#status").val() == "0" || $("#status").val() == null) {
-    showMessage(false, "please select status");
+   showMessageTheme2(1, "please select status");
     return false;
   }
   if ($("#remarks").val() == "" || $("#remarks").val() == null) {
-    showMessage(false, "Remarks is required");
+   showMessageTheme2(1, "Remarks is required");
     return false;
   }
   return true;
@@ -2644,13 +2688,13 @@ function getRequestForApproveSubject(formId, moduleId, isApproved, subjectId) {
 }
 
 function saveCourse(formId, moduleId, courseId, controlType, roleModuleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForAddCourse(formId, controlType)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "save-course-details"),
     data: JSON.stringify(
       getRequestForSaveCourse(formId, moduleId, courseId, controlType)
@@ -2660,20 +2704,16 @@ function saveCourse(formId, moduleId, courseId, controlType, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#courseInfoModal").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "manage-categories");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 function getRequestForSaveCourse(formId, moduleId, courseId, controlType) {
@@ -2718,7 +2758,7 @@ function validateRequestForAddCourse(formId, controlType) {
     controlType != "edit" &&
     controlType != "delete"
   ) {
-    showMessage(true, "Invalid control type.");
+   showMessageTheme2(0, "Invalid control type.");
     return false;
   }
   if (controlType == "delete") {
@@ -2727,35 +2767,35 @@ function validateRequestForAddCourse(formId, controlType) {
       $("#" + formId + " #standardId").val() == 0 &&
       controlType != "delete"
     ) {
-      showMessage(true, "Please choose grade.");
+     showMessageTheme2(0, "Please choose grade.");
       return false;
     }
     if (
       $("#" + formId + " #courseName").val() == "" &&
       controlType != "delete"
     ) {
-      showMessage(true, "Please enter category name.");
+     showMessageTheme2(0, "Please enter category name.");
       return false;
     }
     if ($("#" + formId + " #orderId").val() == "" && controlType != "delete") {
-      showMessage(true, "Please set order.");
+     showMessageTheme2(0, "Please set order.");
       return false;
     }
     if ($("#" + formId + " #creditId").val() == "0.0") {
-      showMessage(true, "Please set credit limit.");
+     showMessageTheme2(0, "Please set credit limit.");
       return false;
     }
   }
   return true;
 }
 function savePlacementCourse(formId, moduleId, courseId, isForDelete) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForAddPlacementCourse(formId, isForDelete)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "placement-save-course-details"),
     data: JSON.stringify(
       getRequestForSavePlacementCourse(formId, moduleId, courseId, isForDelete)
@@ -2765,20 +2805,16 @@ function savePlacementCourse(formId, moduleId, courseId, isForDelete) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
         $("#courseInfoModal").modal("hide");
         setTimeout(function () {
           return callDashboardPageSchool("30");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -2820,19 +2856,19 @@ function validateRequestForAddPlacementCourse(formId, isForDelete) {
     $("#" + formId + " #standardId").val() == 0 ||
     ($("#" + formId + " #standardId").val() == undefined && isForDelete != "Y")
   ) {
-    showMessage(true, "Please choose grade.");
+   showMessageTheme2(0, "Please choose grade.");
     return false;
   }
   if ($("#" + formId + " #courseName").val() == "" && isForDelete != "Y") {
-    showMessage(true, "Please enter category name.");
+   showMessageTheme2(0, "Please enter category name.");
     return false;
   }
   if ($("#" + formId + " #orderId").val() == "" && isForDelete != "Y") {
-    showMessage(true, "Please set order.");
+   showMessageTheme2(0, "Please set order.");
     return false;
   }
   if ($("#" + formId + " #creditId").val() == "0.0" && isForDelete != "Y") {
-    showMessage(true, "Please set credit limit.");
+   showMessageTheme2(0, "Please set credit limit.");
     return false;
   }
   return true;
@@ -2844,13 +2880,13 @@ function saveSubjectB2C(
   isForDelete,
   roleModuleId
 ) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForAddSubjectB2C(formId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "save-subejctB2C-details"),
     data: JSON.stringify(
       getRequestForSaveSubjectB2C(formId, moduleId, subjectId, isForDelete)
@@ -2860,20 +2896,16 @@ function saveSubjectB2C(
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#subjectInfoModal").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "manage-courses");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -2956,13 +2988,13 @@ function getRequestForSaveSubjectB2C(formId, moduleId, subjectId, isForDelete) {
   return request;
 }
 function savePlacementSubjectB2C(formId, moduleId, subjectId, isForDelete) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForAddSubjectB2C(formId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "placement-save-subejctB2C-details"),
     data: JSON.stringify(
       getRequestForPlacementSaveSubjectB2C(
@@ -2977,20 +3009,16 @@ function savePlacementSubjectB2C(formId, moduleId, subjectId, isForDelete) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
         $("#placementSubjectInfoModal").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool("31");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -3100,7 +3128,7 @@ function callCourseListBySubjectId(
   requestExtra,
   requestExtra1
 ) {
-  hideMessage("");
+  hideMessageTheme2("");
   resetDropdown($("#" + formId + " #" + toElementId), "Select course");
   if (!validateRequestForMasterGrade(formId, elementId)) {
     $("#" + formId + " #" + elementId).val(0);
@@ -3110,7 +3138,7 @@ function callCourseListBySubjectId(
   //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -3126,7 +3154,7 @@ function callCourseListBySubjectId(
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         //buildDropdown(data['mastersData']['courseList'], $("#"+formId+" #"+toElementId), 'Select course');
         var result = data["mastersData"]["courseList"];
@@ -3147,11 +3175,7 @@ function callCourseListBySubjectId(
 
         $("#" + formId + " #courseId").prop("disabled", false);
       }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      $("#" + formId + " #courseId").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -3162,7 +3186,7 @@ function callPlacementCourseListByStandardId(
   toElementId,
   requestExtra
 ) {
-  hideMessage("");
+  hideMessageTheme2("");
   resetDropdown($("#" + formId + " #" + toElementId), "Select Category");
   if (!validateRequestForMasterGrade(formId, elementId)) {
     $("#" + formId + " #" + elementId).val(0);
@@ -3172,7 +3196,7 @@ function callPlacementCourseListByStandardId(
   //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForCommon("masters"),
     data: JSON.stringify(
       getRequestForMaster(
@@ -3187,7 +3211,7 @@ function callPlacementCourseListByStandardId(
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         buildDropdown(
           data["mastersData"]["courseList"],
@@ -3196,11 +3220,7 @@ function callPlacementCourseListByStandardId(
         );
         $("#" + formId + " #courseId").prop("disabled", false);
       }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      $("#" + formId + " #courseId").prop("disabled", false);
-    },
+    }
   });
 }
 
@@ -3208,7 +3228,7 @@ function sendEmailForCommon(userId, controlType) {
   hideMessageTheme2('');
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("common", "send-mail-content"),
     data: JSON.stringify(getRequestForSendEmailForCommon(userId, controlType)),
     dataType: "json",
@@ -3216,15 +3236,12 @@ function sendEmailForCommon(userId, controlType) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(false, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessageTheme2(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-    },
+    }
   });
 }
 
@@ -3250,7 +3267,7 @@ function sendMailRequestDemo(formId, moduleId, roleModuleId) {
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "send-demo-request-mail"),
     data: JSON.stringify(getRequestForRaiseDemoRequest(formId, moduleId)),
     dataType: "json",
@@ -3258,9 +3275,9 @@ function sendMailRequestDemo(formId, moduleId, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(false, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessageTheme2(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#requestContentModal").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(
@@ -3273,16 +3290,12 @@ function sendMailRequestDemo(formId, moduleId, roleModuleId) {
       }
       $("#requestContentModal").prop("disabled", false);
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-    },
+    }
   });
 }
 function validateRequestForRaiseRequestDemo() {
   if ($("#email").val() == "" || $("#email").val() == null) {
-    showMessageTheme2(false, "Email is required");
+   showMessageTheme2(0, "Email is required");
     return false;
   }
   return true;
@@ -3306,13 +3319,13 @@ function getRequestForRaiseDemoRequest(formId, moduleId) {
 }
 
 function callForLMSStudentPerformance(formId, moduleId, roleModuleId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestForLMSStudentPerformance(formId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForSignup("save-lmsStudent-Performance", moduleId),
     data: JSON.stringify(getRequestForLMSStudentPerformance(formId, moduleId)),
     dataType: "json",
@@ -3320,46 +3333,41 @@ function callForLMSStudentPerformance(formId, moduleId, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(false, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessageTheme2(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#lmsStudentContentModal").modal("hide");
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "lms-student-performance");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-      $("#lmsUserForm").prop("disabled", false);
-    },
+    }
   });
 }
 function validateRequestForLMSStudentPerformance() {
   if ($("#studentName").val() == "" || $("#studentName").val() == null) {
-    showMessage(false, "Student Name  is required");
+   showMessageTheme2(0, "Student Name  is required");
     return false;
   }
   if ($("#studentEmail").val() == "" || $("#studentEmail").val() == null) {
-    showMessage(false, "Student Email is required");
+   showMessageTheme2(0, "Student Email is required");
     return false;
   }
   if ($("#teacherName").val() == "" || $("#teacherName").val() == null) {
-    showMessage(false, "Teacher Name is required");
+   showMessageTheme2(0, "Teacher Name is required");
     return false;
   }
   if ($("#teacherEmail").val() == "" || $("#teacherEmail").val() == null) {
-    showMessage(false, "Teacher Email is required");
+   showMessageTheme2(0, "Teacher Email is required");
     return false;
   }
   if ($("#courseProvider").val() == "0" || $("#courseProvider").val() == null) {
-    showMessage(false, "Please select LMS Platform");
+   showMessageTheme2(0, "Please select LMS Platform");
     return false;
   }
   if ($("#subjectEventId").val() == "0" || $("#subjectEventId").val() == null) {
-    showMessage(false, "Please select course type");
+   showMessageTheme2(0, "Please select course type");
     return false;
   }
   if (
@@ -3367,11 +3375,11 @@ function validateRequestForLMSStudentPerformance() {
     $("#subjectEventId").val() == "FT"
   ) {
     if ($("#standardId").val() == "0" || $("#standardId").val() == null) {
-      showMessage(false, "Grade is required");
+     showMessageTheme2(0, "Grade is required");
       return false;
     }
     if ($("#subjectId").val() == "0" || $("#subjectId").val() == null) {
-      showMessage(false, "Course is required");
+     showMessageTheme2(0, "Course is required");
       return false;
     }
   }
@@ -3380,19 +3388,19 @@ function validateRequestForLMSStudentPerformance() {
       $("#placementStandardId").val() == "0" ||
       $("#placementStandardId").val() == null
     ) {
-      showMessage(false, "Grade is required");
+     showMessageTheme2(0, "Grade is required");
       return false;
     }
     if (
       $("#placementSubjectId").val() == "0" ||
       $("#placementSubjectId").val() == null
     ) {
-      showMessage(false, "Course is required");
+     showMessageTheme2(0, "Course is required");
       return false;
     }
   }
   if ($("#status").val() == "0" || $("#status").val() == null) {
-    showMessage(false, "Please select status");
+   showMessageTheme2(0, "Please select status");
     return false;
   }
   return true;
@@ -3460,7 +3468,7 @@ function callScholarshipAssignedUserList(scholarId, scholarCode) {
   $.ajax({
     type: "POST",
     url: getURLForHTML("dashboard", "scholarship-assigned-user-list"),
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     data: JSON.stringify(data),
     dataType: "html",
     cache: false,
@@ -3474,29 +3482,24 @@ function callScholarshipAssignedUserList(scholarId, scholarCode) {
           stringMessage[0] == "EXCEPTION" ||
           stringMessage[0] == "SESSIONOUT"
         ) {
-          showMessage(true, stringMessage[1]);
+         showMessageTheme2(0, stringMessage[1]);
         } else {
           $("#scholarshipAssignedList").html(htmlContent);
           $("#viewAvailedScholarshipModal").modal("show");
         }
         return false;
       }
-    },
-    error: function (e) {
-      console.log(e);
-      //showMessage(true, TECHNICAL_GLITCH);
-      return false;
-    },
+    }
   });
 }
 
 function getCourseByGradeAndCourseId(formId) {
-  hideMessage("");
+  hideMessageTheme2("");
   gradeId = $("#" + formId + " #standardId").val();
   courseId = $("#" + formId + " #courseId option:selected").attr("parentid");
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor(
       "school",
       "get-course-by-grade-and-course-id/" + gradeId + "/" + courseId
@@ -3506,7 +3509,7 @@ function getCourseByGradeAndCourseId(formId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         $("#" + formId + " #parentId").html("");
         $("#" + formId + " #selfPid").html("");
@@ -3539,25 +3542,22 @@ function getCourseByGradeAndCourseId(formId) {
         });
       }
       return false;
-    },
-    error: function (e) {
-      return false;
-    },
+    }
   });
 }
 function getCourseForPlacement(formId) {
-  hideMessage("");
+  hideMessageTheme2("");
   courseId = $("#" + formId + " #courseId").val();
   $.ajax({
     type: "GET",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "get-course-for-placement/" + courseId),
     dataType: "json",
     cache: false,
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         $("#" + formId + " #parentId").html("");
         $("#" + formId + " #selfPid").html("");
@@ -3590,10 +3590,7 @@ function getCourseForPlacement(formId) {
         });
       }
       return false;
-    },
-    error: function (e) {
-      return false;
-    },
+    }
   });
 }
 
@@ -3619,7 +3616,7 @@ function sendMailForMeetCounselor(formId, roleModuleId) {
     $("#" + formId + " #meetingResult").val() == undefined ||
     $("#" + formId + " #meetingResult").val() == ""
   ) {
-    showMessage(true, "Please select meeting status.");
+   showMessageTheme2(0, "Please select meeting status.");
     return false;
   }
 
@@ -3627,12 +3624,12 @@ function sendMailForMeetCounselor(formId, roleModuleId) {
     $("#" + formId + " #comment").val() == undefined ||
     $("#" + formId + " #comment").val() == ""
   ) {
-    showMessage(true, "Comment is required");
+   showMessageTheme2(0, "Comment is required");
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("dashboard", "send-mail-for-meet-counselor"),
     data: JSON.stringify(getRequestForsendMailForMeetCounselor(formId)),
     dataType: "json",
@@ -3640,9 +3637,9 @@ function sendMailForMeetCounselor(formId, roleModuleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         $("#addComentsModal").modal("hide");
         $("#" + formId)[0].reset();
         setTimeout(function () {
@@ -3650,10 +3647,7 @@ function sendMailForMeetCounselor(formId, roleModuleId) {
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      console.log("ERROR : ", e);
-    },
+    }
   });
 }
 function getRequestForsendMailForMeetCounselor(formId) {
@@ -3691,7 +3685,7 @@ function saveCourseProvider(
 ) {
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLFor("school", "save-courseProvider-details"),
     data: JSON.stringify(
       getRequestForSaveCourseProvider(formId, controllType, providerId, status)
@@ -3701,18 +3695,15 @@ function saveCourseProvider(
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         setTimeout(function () {
           callDashboardPageSchool(roleModuleId, "manage-course-provider");
         }, 1000);
       }
       return false;
-    },
-    error: function (e) {
-      console.log("ERROR : ", e);
-    },
+    }
   });
 }
 function getRequestForSaveCourseProvider(
@@ -3741,313 +3732,20 @@ function getRequestForSaveCourseProvider(
   return request;
 }
 
-function callModuleCreate(formId, moduleId, roleModuleId) {
-  hideMessage("");
-  if (!validateRequestForNewModule(formId, moduleId)) {
-    return false;
-  }
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLForHTML("dashboard", "submit-module"),
-    data: JSON.stringify(getRequestForNewModule(formId, moduleId)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
-      } else {
-        showMessage(false, data["message"]);
-        $("#" + formId)[0].reset();
-        $("#moduleFormModal").modal("hide");
-        $(".modal-backdrop").remove();
-        $("body").removeClass("modal-open");
-        setTimeout(function () {
-          callDashboardPageSchool(roleModuleId, "module");
-        }, 1000);
-      }
-      return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
-  });
-}
 
-function getRequestForNewModule(formId, moduleId) {
-  var request = {};
-  var authentication = {};
-  var requestData = {};
-  var modulesRequest = {};
-  modulesRequest["moduleId"] = $("#" + formId + " #moduleId").val();
-  modulesRequest["moduleName"] = $("#" + formId + " #moduleName").val();
-  modulesRequest["pageLink"] = $("#" + formId + " #pageLink").val();
-  modulesRequest["moduleIcon"] = $("#" + formId + " #moduleIcon").val();
-  modulesRequest["moduleType"] = $("#" + formId + " #moduleType").val();
-  modulesRequest["parentId"] = $("#" + formId + " #parentModule").val();
-  modulesRequest["orderSet"] = $("#" + formId + " #orderSet").val();
-  modulesRequest["activated"] = $("#" + formId + " #moduleActive").val();
 
-  request["modulesRequest"] = modulesRequest;
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = moduleId;
-  authentication["userId"] = USER_ID;
-  request["authentication"] = authentication;
-  return request;
-}
 
-function validateRequestForNewModule(formId, moduleId) {
-  if (
-    $("#" + formId + " #moduleName").val() == 0 ||
-    $("#" + formId + " #moduleName").val() == ""
-  ) {
-    showMessage(true, "Module name is required.");
-    return false;
-  }
 
-  if ($("#" + formId + " #pageLink").val() == "") {
-    showMessage(true, "Page link is required.");
-    return false;
-  }
-  if (
-    $("#" + formId + " #moduleType").val() == 0 ||
-    $("#" + formId + " #moduleType").val() == ""
-  ) {
-    showMessage(true, "Module type is required.");
-    return false;
-  }
 
-  if ($("#" + formId + " #moduleType").val() == "M") {
-    if (
-      $("#" + formId + " #moduleIcon").val() == 0 ||
-      $("#" + formId + " #moduleIcon").val() == ""
-    ) {
-      showMessage(true, "Module icon is required.");
-      return false;
-    }
-  }
-
-  if ($("#" + formId + " #parentModule").val() == "") {
-    showMessage(true, "Module parent is required.");
-    return false;
-  }
-
-  //	if($('#'+formId+' #orderSet').val()==0 || $('#'+formId+' #orderSet').val()==''){
-  //		showMessage(true, 'Module order is required.');
-  //		return false;
-  //	}
-
-  if (
-    $("#" + formId + " #moduleActive").val() == undefined ||
-    $("#" + formId + " #moduleActive") == ""
-  ) {
-    showMessage(true, " Module active is required.");
-    return false;
-  }
-  return true;
-}
-
-function callModuleEdit(formId, moduleId) {
-  var result = "";
-  hideMessage("");
-
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLForHTML("dashboard", "module-edit"),
-    data: JSON.stringify(getCallRequestForModuleEdit(formId, moduleId)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    async: false,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        result = true;
-      } else {
-        getFormFillModule(formId, data.modulesDTO);
-        $("#moduleFormModal").modal("show");
-
-        //showMessage(true, "Email doesn't exist");
-        //result=false;
-      }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-    },
-  });
-  return result;
-}
-
-function getCallRequestForModuleEdit(formId, moduleId) {
-  var request = {};
-  var authentication = {};
-  request["requestKey"] = "MODULE-EDIT";
-  request["requestValue"] = moduleId;
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = "SCHOOL";
-  authentication["userId"] = USER_ID;
-  request["authentication"] = authentication;
-  return request;
-}
-
-function getFormFillModule(formId, modulesDTO) {
-  $("#" + formId + " #moduleId").val(modulesDTO.moduleId);
-  $("#" + formId + " #moduleName").val(modulesDTO.moduleName);
-  $("#" + formId + " #pageLink").val(modulesDTO.pageLink);
-  $("#" + formId + " #moduleIcon").val(modulesDTO.moduleIcon);
-  $("#" + formId + " #moduleType").val(modulesDTO.moduleType);
-  $("#" + formId + " #parentModule").val(modulesDTO.parentId);
-  $("#" + formId + " #orderSet").val(modulesDTO.orderSet);
-  $("#" + formId + " #moduleActive").val(modulesDTO.activated);
-}
-
-function callRoleCreate(formId, moduleId, roleModuleId) {
-  hideMessage("");
-  if (!validateRequestForNewRole(formId, moduleId)) {
-    return false;
-  }
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLForHTML("dashboard", "submit-role"),
-    data: JSON.stringify(getRequestForNewRole(formId, moduleId)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
-      } else {
-        showMessage(false, data["message"]);
-        $("#" + formId)[0].reset();
-        $("#roleFormModal").modal("hide");
-        $(".modal-backdrop").remove();
-        $("body").removeClass("modal-open");
-        callDashboardPageSchool(roleModuleId, "modulerole");
-      }
-      return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
-  });
-}
-
-function getRequestForNewRole(formId, moduleId) {
-  var request = {};
-  var authentication = {};
-  var roleDTO = {};
-  roleDTO["roleId"] = $("#" + formId + " #roleId").val();
-  roleDTO["roleName"] = $("#" + formId + " #roleName").val();
-  roleDTO["parentId"] = $("#" + formId + " #parentRole").val();
-  roleDTO["activated"] = $("#" + formId + " #roleActive").val();
-  roleDTO["schoolId"] = $("#" + formId + " #schoolId").val();
-
-  request["roleDTO"] = roleDTO;
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = moduleId;
-  authentication["userId"] = USER_ID;
-  request["authentication"] = authentication;
-  return request;
-}
-
-function validateRequestForNewRole(formId, moduleId) {
-  if (
-    $("#" + formId + " #roleName").val() == 0 ||
-    $("#" + formId + " #roleName").val() == ""
-  ) {
-    showMessage(true, "Role type is required.");
-    return false;
-  }
-
-  //	if($('#'+formId+' #parentRole').val()==''){
-  //		showMessage(true, 'Role parent is required.');
-  //		return false;
-  //	}
-
-  if (
-    $("#" + formId + " #roleActive").val() == undefined ||
-    $("#" + formId + " #roleActive") == ""
-  ) {
-    showMessage(true, " Role active is required.");
-    return false;
-  }
-  return true;
-}
-
-function callRoleEdit(formId, moduleId) {
-  var result = "";
-  hideMessage("");
-
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLForHTML("dashboard", "role-edit"),
-    data: JSON.stringify(getCallRequestForRoleEdit(formId, moduleId)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    async: false,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        result = true;
-      } else {
-        getFormFillRole(formId, data.roleDTO);
-        $("#roleFormModal").modal("show");
-
-        //showMessage(true, "Email doesn't exist");
-        //result=false;
-      }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-    },
-  });
-  return result;
-}
-
-function getCallRequestForRoleEdit(formId, roleId) {
-  var request = {};
-  var authentication = {};
-  var requestData = {};
-  request["requestKey"] = "ROLE-EDIT";
-  request["requestValue"] = roleId;
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = "SCHOOL";
-  authentication["userId"] = USER_ID;
-  request["authentication"] = authentication;
-  return request;
-}
-
-function getFormFillRole(formId, roleDTO) {
-  $("#" + formId + " #roleId").val(roleDTO.roleId);
-  $("#" + formId + " #schoolId").val(roleDTO.schoolId);
-  $("#" + formId + " #roleName").val(roleDTO.roleName);
-  $("#" + formId + " #parentRole").val(roleDTO.parentId);
-  $("#" + formId + " #roleActive").val(roleDTO.activated);
-}
 
 function callModuleRights(formId, roleId, divId) {
-  hideMessage("");
+  hideMessageTheme2("");
   if (!validateRequestModuleRights(formId, roleId)) {
     return false;
   }
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "get-module-byrole"),
     data: JSON.stringify(getRequestForModuleRights(formId, roleId)),
     dataType: "html",
@@ -4055,16 +3753,12 @@ function callModuleRights(formId, roleId, divId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
+       showMessageTheme2(0, data["message"]);
       } else {
         $("#" + divId).html(data);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      return false;
-    },
+    }
   });
 }
 
@@ -4093,11 +3787,11 @@ function validateRequestModuleRights(formId, moduleId) {
 
 function callRoleSubmitAssign(formId) {
   var result = "";
-  hideMessage("");
+  hideMessageTheme2("");
 
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "submit-rolerights-assign"),
     data: JSON.stringify(getCallRequestForRoleAssign(formId)),
     dataType: "json",
@@ -4108,14 +3802,10 @@ function callRoleSubmitAssign(formId) {
       if (data["status"] == "0" || data["status"] == "2") {
         result = true;
       } else {
-        showMessage(true, data["message"]);
+       showMessageTheme2(1, data["message"]);
         //result=false;
       }
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-    },
+    }
   });
   return result;
 }
@@ -4208,233 +3898,11 @@ function getCallRequestForRoleAssign(formId) {
   return request;
 }
 
-function callForNewUser(formId, moduleId) {
-  hideMessage("");
-  if (!validateRequestForNewUser(formId)) {
-    //refreshCaptcha('captchaImage');
-    return false;
-  }
-  $.ajax({
-    type: "POST",
-    contentType: "application/json",
-    url: getURLForHTML("dashboard", "create-new-user"),
-    data: JSON.stringify(getRequestForNewUser(formId)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        showMessage(true, data["message"]);
-      } else {
-        showMessage(true, data["message"]);
-        if (data["status"] == "1") {
-          resetCreateUserForm(formId);
-          setTimeout(function () {
-            callDashboardPageSchool(moduleId, "user-list");
-          }, 1000);
-        }
-      }
-      return false;
-    },
-    error: function (e) {
-      //showMessage(true, e.responseText);
-      console.log("ERROR : ", e);
-    },
-  });
-}
-
-function resetCreateUserForm(formId) {
-  $("#" + formId + " #firstName").val("");
-  $("#" + formId + " #middleName").val("");
-  $("#" + formId + " #lastName").val("");
-  $("#" + formId + " #dob").val("");
-  $("#" + formId + " #gender").val("0");
-  $("#" + formId + " #roleUser").val("0");
-  $("#" + formId + " #countryId").val("0");
-  $("#" + formId + " #stateId").val("0");
-  $("#" + formId + " #cityId").val("0");
-  $("#" + formId + " #emailId").val("");
-  $("#" + formId + " #password").val("");
-}
-function validateRequestForNewUser(formId) {
-  if (!validateFormAscii(formId)) {
-    showMessage(
-      false,
-      "Please use the English Keyboard while providing information"
-    );
-    return false;
-  }
-  if ($("#" + formId + " #firstName").val() == "") {
-    showMessage(true, "First Name is required");
-    return false;
-  }
-
-  if (
-    $("#" + formId + " #roleUser").val() == 0 ||
-    $("#" + formId + " #roleUser").val() == null
-  ) {
-    showMessage(true, "Role is required");
-    return false;
-  }
-
-  // if ($("#" + formId + " #lastName").val() == "") {
-  // 	showMessage(true, 'Last Name is required');
-  // 	return false
-  // }
-
-  //	if ($("#"+formId+" #countryId").val()==0 || $("#"+formId+" #countryId").val()==null) {
-  //		showMessage(true, 'Country is required');
-  //		return false
-  //	}
-  //	if ($("#"+formId+" #stateId").val()==0 || $("#"+formId+" #stateId").val()==null) {
-  //		showMessage(true, 'State is required');
-  //		return false
-  //	}
-  //	if ($("#"+formId+" #cityId").val()==0 || $("#"+formId+" #cityId").val()==null) {
-  //		showMessage(true, 'City is required');
-  //		return false
-  //	}
-
-  //	if ($("#"+formId+" #dob").val()=="") {
-  //		showMessage(true, 'Date of Birth is required');
-  //		return false
-  //	}
-  //	if ($("#"+formId+" #gender").val()==0  || $("#"+formId+" #gender").val()==null) {
-  //		showMessage(true, 'Gender is required');
-  //		return false
-  //	}
-  if (
-    $("#" + formId + " #roleUser").val() == 0 ||
-    $("#" + formId + " #roleUser").val() == null
-  ) {
-    showMessage(true, "Role is required");
-    return false;
-  }
-  if ($("#" + formId + " #userActive").val() == "") {
-    showMessage(true, "Status is required");
-    return false;
-  }
-  if (!validateEmail($("#" + formId + " #emailId").val())) {
-    showMessage(false, "Email is either empty or invalid");
-    return false;
-  }
-  // if ($("#" + formId + " #password").length) {
-  //   if (!validPassword($("#" + formId + " #password").val())) {
-  //     showMessage(false, "Either password is empty or invalid");
-  //     return false;
-  //   }
-  //   var pass = $("#" + formId + " #password").val();
-  //   if (pass != undefined) {
-  //     if (!pattern.test(pass)) {
-  //       showMessage(false, "Passwords must match all requirements.");
-  //       return false;
-  //     }
-  //   }
-  // }
-  // if ($("#" + formId + " #confirmPassword").length) {
-  //   if (!validPassword($("#" + formId + " #confirmPassword").val())) {
-  //     showMessage(false, "Either confirm password is empty or invalid");
-  //     return false;
-  //   }
-  //   if (
-  //     $("#" + formId + " #password").val() !=
-  //     $("#" + formId + " #confirmPassword").val()
-  //   ) {
-  //     showMessage(false, "Password and Confirm Password do not match");
-  //     return false;
-  //   }
-  //   var pass = $("#" + formId + " #password").val();
-  //   if (pass != undefined) {
-  //     if (!pattern.test(pass)) {
-  //       showMessage(false, "Passwords must match all requirements.");
-  //       return false;
-  //     }
-  //   }
-  // }
-  // if (
-  //   $("#" + formId + " #reset").length > 0 &&
-  //   $("#" + formId + " #reset").val() != ""
-  // ) {
-  //   if (!validPassword($("#" + formId + " #reset").val())) {
-  //     showMessage(false, "Reset Passwords is empty or invalid");
-  //     return false;
-  //   }
-  //   var pass = $("#" + formId + " #reset").val();
-  //   if (pass != undefined) {
-  //     if (!pattern.test(pass)) {
-  //       showMessage(false, "Reset Passwords must match all requirements.");
-  //       return false;
-  //     }
-  //   }
-  // }
-
-  return true;
-}
-
-function getRequestForNewUser(formId) {
-  var request = {};
-  var authentication = {};
-  var signupStudentDTO = {};
-  var url = window.location.href;
-  signupStudentDTO["userId"] = $("#" + formId + " #userId").val();
-  signupStudentDTO["firstName"] = $("#" + formId + " #firstName").val();
-  signupStudentDTO["middleName"] = $("#" + formId + " #middleName").val();
-  signupStudentDTO["lastName"] = $("#" + formId + " #lastName").val();
-  signupStudentDTO["gender"] = $("#" + formId + " #gender").val();
-  signupStudentDTO["roleUserId"] = $("#" + formId + " #roleUser").val();
-  signupStudentDTO["roleUser"] = $(
-    "#" + formId + " #roleUser option:selected"
-  ).text();
-  signupStudentDTO["countryId"] = $("#" + formId + " #countryId").val();
-  signupStudentDTO["stateId"] = $("#" + formId + " #stateId").val();
-  signupStudentDTO["cityId"] = $("#" + formId + " #cityId").val();
-  signupStudentDTO["referralCode"] = $(
-    "#" + formId + " #referralCodeCheckbox"
-  ).prop("checked");
-  signupStudentDTO["referralCodeText"] = $(
-    "#" + formId + " #updateReferralCode"
-  ).val();
-  signupStudentDTO["communicationEmail"] = $("#" + formId + " #emailId").val();
-  signupStudentDTO["whatsappNumber"] = $(
-    "#" + formId + " #whatsappNumber"
-  ).val();
-  signupStudentDTO["position"] = $("#" + formId + " #position").val();
-  signupStudentDTO["countryIsdCode"] = $("#" + formId + " #isdCode")
-    .val()
-    .trim();
-  // if ($("#" + formId + " #password").length) {
-  //   signupStudentDTO["password"] = encode($("#" + formId + " #password").val());
-  // }
-  // if ($("#" + formId + " #confirmPassword").length) {
-  //   signupStudentDTO["confirmPassword"] = encode(
-  //     $("#" + formId + " #confirmPassword").val()
-  //   );
-  // }
-  // if (
-  //   $("#" + formId + " #reset").length > 0 &&
-  //   $("#" + formId + " #reset").val() != ""
-  // ) {
-  //   signupStudentDTO["reset"] = encode($("#" + formId + " #reset").val());
-  // }
-  signupStudentDTO["dob"] = $("#" + formId + " #dob").val();
-  signupStudentDTO["userActive"] = $("#" + formId + " #userActive").val();
-  signupStudentDTO["signupType"] = "Offline";
-  signupStudentDTO["userType"] = "SCHOOL";
-
-  request["signupStudentDTO"] = signupStudentDTO;
-  authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
-  authentication["schoolUUID"] = SCHOOL_UUID;
-  authentication["userType"] = "SCHOOL";
-  authentication["userId"] = USER_ID;
-  request["authentication"] = authentication;
-  return request;
-}
 
 function saveUpdateGotomeetingUser(callFrom, moduleId) {
   var userId = $("#userIdforGoto").val();
   var gotoMeetingId = $("#gotoId").val();
-  var meetingVendor = $("#meetingvendor").val();
+  var meetingVendor = "LENS";
   var data = {};
   data["meetingVendor"] = meetingVendor;
   data["userId"] = userId;
@@ -4442,51 +3910,56 @@ function saveUpdateGotomeetingUser(callFrom, moduleId) {
   if (gotoMeetingId == "" || gotoMeetingId == "0") {
     $.ajax({
       type: "POST",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLForHTML("gotomeeting", "createUser"),
       data: JSON.stringify(data),
       dataType: "json",
       success: function (data) {
-        showMessage(true, data["message"]);
-        if ("teacherPage" == callFrom) {
-          setTimeout(function () {
-            callDashboardPageSchool(moduleId, "approved-teachers");
-          }, 1000);
-        } else {
-          setTimeout(function () {
-            callDashboardPageSchool(moduleId, "user-list");
-          }, 1000);
-        }
-      },
-      error: function (e) {
-        //showMessage(true, TECHNICAL_GLITCH);
-      },
+         if (data["status"] == "0" || data["status"] == "2") {
+            showMessageTheme2(0, data["message"]);
+         }else{
+            showMessageTheme2(1, data["message"]);
+            if ("teacherPage" == callFrom) {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "approved-teachers");
+              }, 1000);
+            } else {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "user-list");
+              }, 1000);
+            }
+         }
+        
+      }
     });
   } else {
     $.ajax({
       type: "POST",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       url: getURLForHTML("gotomeeting", "update-goto-meeting-user"),
       data: JSON.stringify({ gotoMeetingUserId: gotoMeetingId }),
       dataType: "json",
       success: function (data) {
-        showMessage(true, data["message"]);
-        if ("teacherPage" == callFrom) {
-          setTimeout(function () {
-            callDashboardPageSchool(moduleId, "approved-teachers");
-          }, 1000);
-        } else {
-          setTimeout(function () {
-            callDashboardPageSchool(moduleId, "user-list");
-          }, 1000);
-        }
-      },
-      error: function (e) {
-        //showMessage(true, TECHNICAL_GLITCH);
-      },
+
+        if (data["status"] == "0" || data["status"] == "2") {
+            showMessageTheme2(0, data["message"]);
+         }else{
+            showMessageTheme2(1, data["message"]);
+            if ("teacherPage" == callFrom) {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "approved-teachers");
+              }, 1000);
+            } else {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "user-list");
+              }, 1000);
+            }
+          }
+      }
     });
   }
 }
+
 
 function showTeacherStatusPopup(
   message,
@@ -4539,17 +4012,17 @@ function getSchoolTourData(formId) {
   var reportStartDate = $("#startDate").val();
   var reportEndDate = $("#endDate").val();
   if (reportStartDate == "") {
-    showMessage(false, "Report start date required");
+   showMessageTheme2(0, "Report start date required");
     return false;
   }
   if (reportEndDate == "") {
-    showMessage(false, "Report end date required");
+   showMessageTheme2(0, "Report end date required");
     return false;
   }
 
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "/report/live-online-school-tour"),
     data: JSON.stringify({
       reportStartDate: reportStartDate,
@@ -4607,7 +4080,7 @@ function dashboardRequestDemo() {
   $.ajax({
     global: false,
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "get-request-demo-user"),
     data: JSON.stringify(data),
     dataType: "html",
@@ -4658,7 +4131,7 @@ function dashboardRequestDemoDateWise(strDate) {
   $.ajax({
     global: false,
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "get-request-demo-datewise"),
     data: JSON.stringify(data),
     dataType: "html",
@@ -4696,11 +4169,11 @@ function dashboardRequestDemoDateWise(strDate) {
 }
 
 function advanceRequestDemoSearch(formId, moduleId) {
-  hideMessage("");
+  hideMessageTheme2("");
 
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "advance-request-demo-search"),
     data: JSON.stringify(
       getCallRequestForadvanceRequestDemoSearch(formId, moduleId)
@@ -4836,7 +4309,7 @@ function advanceStudentSearchReset(formId) {
 }
 
 function sendGotoMettingLinkForAcceptingDemo(meetingLogsId, requestDemoId) {
-  hideMessage("");
+  hideMessageTheme2("");
   $.ajax({
     type: "GET",
     url: getURLForHTML(
@@ -4858,11 +4331,7 @@ function sendGotoMettingLinkForAcceptingDemo(meetingLogsId, requestDemoId) {
         showMessageTheme2(1, data["message"], "", false);
       }
       return false;
-    },
-    error: function (e) {
-      //showMessageTheme2(0,e.responseText,'',false);
-      return false;
-    },
+    }
   });
 }
 
@@ -4911,7 +4380,7 @@ function saveDaysCountOfAcademicYearStart(formId) {
   data["schoolId"] = SCHOOL_ID;
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "save-academic-year-date-settings"),
     data: JSON.stringify(data),
     dataType: "json",
@@ -4927,20 +4396,16 @@ function saveDaysCountOfAcademicYearStart(formId) {
       } else {
         showMessageTheme2(1, data["message"], "", false);
       }
-    },
-    error: function (e) {
-      //showMessageTheme2(0,e.responseText,'',false);
-      return false;
-    },
+    }
   });
 }
 
 function getStateWiseData(moduleId, schoolId, countryName, year) {
-  hideMessage("");
+  hideMessageTheme2("");
 
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML(
       "dashboard",
       "statewise-data-reports?moduleId=" +
@@ -4986,7 +4451,7 @@ function callEvaluationFormDocs(evaluationId) {
   data['themetype']='theme2';
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url:
       BASE_URL +
       CONTEXT_PATH +
@@ -5003,7 +4468,7 @@ function callEvaluationFormDocs(evaluationId) {
           stringMessage[0] == "EXCEPTION" ||
           stringMessage[0] == "SESSIONOUT"
         ) {
-          showMessageTheme2(true, stringMessage[1]);
+         showMessageTheme2(0, stringMessage[1]);
         } else {
           $("#evaluationImageContent").html(htmlContent);
         }
@@ -5012,7 +4477,7 @@ function callEvaluationFormDocs(evaluationId) {
     },
     error: function (e) {
       console.log(e);
-      //	showMessage(true, TECHNICAL_GLITCH);
+      //	showMessageTheme2(true, TECHNICAL_GLITCH);
       return false;
     },
   });
@@ -5042,7 +4507,7 @@ function getChat(email, role) {
   payload["userId"] = USER_ID;
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/chat",
     data: JSON.stringify(payload),
     dataType: "json",
@@ -5053,10 +4518,7 @@ function getChat(email, role) {
         $(".UNSEEN").html(data["sumUnseen"]);
         sumUnseen = data["sumUnseen"];
       }
-    },
-    error: function (e) {
-      console.log("ERROR : ", e);
-    },
+    }
   });
 }
 
@@ -5075,7 +4537,7 @@ function callUserReferralUpdate(formId, studentStandardId, roleModuleId) {
   $("#updateReferralCodeModal").modal("show");
 }
 function saveNewReferralCode() {
-  hideMessage("");
+  hideMessageTheme2("");
   var refCode = $("#newReferralCode").val();
   if (
     refCode == null ||
@@ -5083,7 +4545,7 @@ function saveNewReferralCode() {
     refCode == undefined ||
     refCode == 0
   ) {
-    showMessage(true, "Invalid referral code");
+   showMessageTheme2(0, "Invalid referral code");
     return false;
   }
   var studentStandardId = $("#studentStandardId").val();
@@ -5093,7 +4555,7 @@ function saveNewReferralCode() {
   data["referralCode"] = refCode;
   $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "update-referral-code"),
     data: JSON.stringify(data),
     dataType: "html",
@@ -5108,19 +4570,14 @@ function saveNewReferralCode() {
           stringMessage[0] == "EXCEPTION" ||
           stringMessage[0] == "SESSIONOUT"
         ) {
-          showMessage(true, stringMessage[1]);
+         showMessageTheme2(0, stringMessage[1]);
         } else {
-          showMessage(true, stringMessage[1]);
+         showMessageTheme2(1, stringMessage[1]);
           $("#updateReferralCodeModal").modal("hide");
         }
         return false;
       }
-    },
-    error: function (e) {
-      console.log(e);
-      //	showMessage(true, TECHNICAL_GLITCH);
-      return false;
-    },
+    }
   });
 }
 
@@ -5140,11 +4597,7 @@ function proceedwithControll(url, response){
                 if('Too many attempts. Please try after some time'==message){
                     message='Please click on the class again'
                 }
-                if(tt == 'theme2'){
-                    showMessageTheme2(false, message);
-                }else{
-                    showMessage(false, message);
-                }
+               showMessageTheme2(1, message);
             }else{
                 if(response['dateStatus']=='past' || response['dateStatus']=='future'){
                     $('#classJoinInSameWindowModal').modal({backdrop: 'static', keyboard: false});
@@ -5174,16 +4627,12 @@ function getActualURL(baseUrl) {
   return new Promise(function(resolve, reject) {
     $.ajax({
       type: "GET",
-      contentType: "application/json",
+      contentType: APPLICATION_JSON_VALUE,
       dataType: 'json',
       url: baseUrl,
       async: true,
       success: function(data) {
         resolve(data);
-      },
-      error: function(xhr, status, error) {
-        console.error('Error: ' + error);
-        reject(error);
       }
     });
   });
@@ -5380,3 +4829,5 @@ function calendarMeetingLinkValidateTeacher(url, response) {
 	</div>`;
 	return html;
  }
+
+

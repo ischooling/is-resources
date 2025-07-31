@@ -356,7 +356,7 @@ main > .header {
           transform: translate(-50%, -50%);
   width: 400%;
   height: 400%;
-  background-image: radial-gradient(#ffffff, #001173 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #001173 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#001173, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #ff8600 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #001173 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #001173 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #ff8600 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#001173, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #ff8600 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#001173, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #001173 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%);
+  background-image: radial-gradient(#ffffff, var(--pc) 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, var(--pc) 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(var(--pc), #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #ff8600 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, var(--pc) 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, var(--pc) 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #ff8600 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(var(--pc), #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, #ff8600 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(var(--pc), #ffffff 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ffffff, var(--pc) 70%, rgba(0, 0, 0, 0) 71%), radial-gradient(#ff8600, #ffffff 70%, rgba(0, 0, 0, 0) 71%);
   background-size: 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em, 0.25em 0.25em;
   background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%;
   background-repeat: no-repeat;
@@ -428,19 +428,19 @@ main > .header {
   display: none;
 }
 .rating__fx--2 [type='radio']:nth-of-type(5):checked ~ .rating__label .rating__label__icon {
-  fill: #001173;
+  fill: var(--pc);
 }
 .rating__fx--2 [type='radio']:nth-of-type(4):checked ~ .rating__label .rating__label__icon {
-  fill: #001173;
+  fill: var(--pc);
 }
 .rating__fx--2 [type='radio']:nth-of-type(3):checked ~ .rating__label .rating__label__icon {
-  fill: #001173;
+  fill: var(--pc);
 }
 .rating__fx--2 [type='radio']:nth-of-type(2):checked ~ .rating__label .rating__label__icon {
-  fill: #001173;
+  fill: var(--pc);
 }
 .rating__fx--2 [type='radio']:nth-of-type(1):checked ~ .rating__label .rating__label__icon {
-  fill: #001173;
+  fill: var(--pc);
 }
 .rating__fx--2 [type='radio']:first-of-type:checked + .rating__label:before {
   background-size: 6% 6%, 2% 2%, 2% 2%, 6% 6%, 6% 6%, 2% 2%, 2% 2%, 2% 2%, 4% 4%, 2% 2%, 6% 6%, 6% 6%, 4% 4%, 6% 6%, 4% 4%, 4% 4%;
@@ -458,7 +458,7 @@ main > .header {
 .form-section{width:100% !important;}
 .svg-form{width: 100%;max-width: 650px;}
 .dashboard_feedback_review .svg-form{max-width: 100%;}
-.main-heading{margin-bottom: 19px;color:#001173;}
+.main-heading{margin-bottom: 19px;color:var(--pc);}
 .p{margin: 20px 0 10px;font-family: arial;color: #383838;font-weight: bold;}
 .logo img{width: 100%;max-width: 150px;}
 /*Category*/
@@ -532,7 +532,7 @@ main > .header {
   content: '★ ';
 }
 .rate > input:checked ~ label {
-  color: #007fff;    
+  color: var(--pc);    
 }
 .rate:not(:checked) > label:hover,
 .rate:not(:checked) > label:hover ~ label {

@@ -101,7 +101,7 @@ label.star.active, input.star.active{ color:#F62}
 }
 
 .cookies p a {
-	background: #007fff;
+	background: var(--pc);
 	padding: 10px;
 	transition: all 0.3s;
 	border: solid 1px #fff;
@@ -113,7 +113,7 @@ label.star.active, input.star.active{ color:#F62}
 .cookies p a:hover {
 	background: #fff;
 	padding: 10px;
-	color: #007fff;
+	color: var(--pc);
 	border: solid 1px #077fff
 }
 
@@ -142,9 +142,9 @@ label.star.active, input.star.active{ color:#F62}
 /* LOADER */
 .loader-bg{ background:rgba(0,0,0,0.5); width:100%; height:100%; min-height:100%; z-index: 9999; left: 0; top: 0; position: fixed;}
 .loader{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%); width: 150px;height: 150px;background: transparent;border: 3px solid #fff;border-radius: 50%;text-align: center;line-height: 150px;font-family: sans-serif;font-size: 20px;color: #fff;letter-spacing:4px;text-transform: uppercase;box-shadow: 0 0 10px rgba(0,159,255,0.3);}
-.loader:before {content: '';position: absolute;top: -3px;left: -3px;width: 100%;height: 100%;border: 3px solid transparent;border-top: 3px solid #009fff;border-right: 3px solid #009fff;border-radius: 50%;animation: animateCircle 2s linear infinite;}
+.loader:before {content: '';position: absolute;top: -3px;left: -3px;width: 100%;height: 100%;border: 3px solid transparent;border-top: 3px solid var(--sc);border-right: 3px solid var(--sc);border-radius: 50%;animation: animateCircle 2s linear infinite;}
 .loader span {display: block;position: absolute;top: calc(50% - 2px);left: 50%;width: 50%;height: 4px;background: transparent;transform-origin:left;animation: animate 2s linear infinite;}
-.loader span:before {content:'';position: absolute;width: 16px;height: 16px;border-radius: 50%;background-color: #009fff;top: -6px;right: -8px;box-shadow: 0 0 20px #009fff;}
+.loader span:before {content:'';position: absolute;width: 16px;height: 16px;border-radius: 50%;background-color: var(--sc);top: -6px;right: -8px;box-shadow: 0 0 20px var(--sc);}
 
 @keyframes animateCircle
 {
@@ -170,7 +170,7 @@ label.star.active, input.star.active{ color:#F62}
 }
 
 
-.stu-upload{position:relative; background:#007fff; padding:5px 6px; color:#fff; border-radius:20px; overflow:hidden;float:left;margin-right:5px;width:30px;}
+.stu-upload{position:relative; background:var(--pc); padding:5px 6px; color:#fff; border-radius:20px; overflow:hidden;float:left;margin-right:5px;width:30px;}
 .stu-upload input{opacity:0; background:none; width:15px; z-index:1; position:absolute; overflow:hidden;}
 .stu-view{background:green;padding:5px 6px;color:#fff;border-radius:25px;width:30px;float:left;margin-right:5px;padding:4px;}
 .stu-delete{background:red;padding:5px 6px;color:#fff;border-radius:20px;float:left;width:30px;padding:4px;}

@@ -142,6 +142,16 @@ function getRequestForStudentReport(reportTitle,stanardId, reporttype, callfrom)
 		adminStudentReportRequest['acSessionId'] = $("#acSessionId").val();
 		adminStudentReportRequest['standardId'] = stanardId;
 		adminStudentReportRequest['schoolId'] = SCHOOL_ID;
+		if(reportTitle=='monthwise' && stanardId!=''){
+			var stdDate = stanardId.split("-")[1]+"-"+stanardId.split("-")[2]+"-01";;
+			adminStudentReportRequest['startDate']=stdDate;
+			var enDate = stanardId.split("-")[1]+"-"+stanardId.split("-")[2]+"-30";
+			if(parseInt(stanardId.split("-")[2])==2){
+				enDate = stanardId.split("-")[1]+"-"+stanardId.split("-")[2]+"-28";
+			}
+			adminStudentReportRequest['endDate']=enDate;
+		}
+
 	}
 	if(reportTitle=='countrywise'){
 		var stnd = stanardId.split("-");
@@ -174,7 +184,7 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','report-enrolled-student'),
 		data : JSON.stringify(getRequestForStudentReport(reportTitle,stanardId, reporttype, callfrom)),
 		dataType : 'json',
@@ -233,10 +243,12 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 						$("#reportEndSemesterTable").DataTable();
 						$("#studentReportAdvanceSearch").modal('hide');
 					}else{
+						$('#stdReportList').dataTable().fnClearTable();
+						$('#stdReportList').dataTable().fnDestroy();
 						$('#filterStudentList').html('');
 						$('#filterStudentList').html(stdFilter);
 						$("#studentReportListPopup").modal('show');
-						$('#stdReportList').dataTable().fnDestroy();
+						// $('#stdReportList').dataTable().fnDestroy();
 						$("#stdReportList").DataTable({
 							'columnDefs': [ {
 								'targets': [0], // column index (start from 0)
@@ -249,13 +261,6 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 					}
 					
 				}
-			}
-		},
-		error : function(e) {
-			if(tt=='theme2'){
-				showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-			}else if(tt=='theme1'){
-				showMessage(true, TECHNICAL_GLITCH);
 			}
 		}
 	});
@@ -333,31 +338,31 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 
   function reportStudentGradeList(adminStudentReport){
 	console.log(adminStudentReport);
-	$("#gradeStudentTitle").html(adminStudentReport.reportTitle);
-	var studentList = adminStudentReport.adminStudentGradeReport;
 	var htmlTbl ='';
-	var a=1;
-	//+(a++)+
-	var enrollType='';
-	if(studentList.length>0){
-		for(md=0;md<studentList.length;md++){
-			var checkBoxs="<input type=\"checkbox\" class=\"checkUserid\" value=\""+studentList[md]['userid']+"\"/>";
-			if(studentList[md]['leadStatus']=='Y'){
-				checkBoxs = "";
+	if(adminStudentReport!=null){
+		$("#gradeStudentTitle").html(adminStudentReport.reportTitle);
+		var studentList = adminStudentReport.adminStudentGradeReport;
+		var enrollType='';
+		if(studentList.length>0){
+			for(md=0;md<studentList.length;md++){
+				var checkBoxs="<input type=\"checkbox\" class=\"checkUserid\" value=\""+studentList[md]['userid']+"\"/>";
+				if(studentList[md]['leadStatus']=='Y'){
+					checkBoxs = "";
+				}
+				if(studentList[md]['enrollType']=='REGISTRATION_FRESH'||studentList[md]['enrollType']=='REGISTRATION_REGISTER'||studentList[md]['enrollType']=='REGISTRATION_FLEX_COURSE'){
+					enrollType='Fresh';
+				}else{
+					enrollType='Progression';
+				}
+				htmlTbl+='<tr>';
+				htmlTbl+='<td class="text-center">&nbsp;&nbsp;'+checkBoxs+'</td>';
+				htmlTbl+='<td class="text-left">'+studentList[md]['stdName']+'</td>';
+				htmlTbl+='<td class="text-left">'+studentList[md]['email']+'</td>';
+				htmlTbl+='<td class="text-left">'+studentList[md]['grade']+'</td>';
+				htmlTbl+='<td class="text-left">'+studentList[md]['registername']+'</td>';
+				htmlTbl+='<td class="text-left">'+enrollType+'</td>';
+				htmlTbl+='</tr>';
 			}
-			if(studentList[md]['enrollType']=='REGISTRATION_FRESH'||studentList[md]['enrollType']=='REGISTRATION_REGISTER'||studentList[md]['enrollType']=='REGISTRATION_FLEX_COURSE'){
-				enrollType='Fresh';
-			}else{
-				enrollType='Progression';
-			}
-			htmlTbl+='<tr>';
-			htmlTbl+='<td class="text-center">&nbsp;&nbsp;'+checkBoxs+'</td>';
-			htmlTbl+='<td class="text-left">'+studentList[md]['stdName']+'</td>';
-			htmlTbl+='<td class="text-left">'+studentList[md]['email']+'</td>';
-			htmlTbl+='<td class="text-left">'+studentList[md]['grade']+'</td>';
-			htmlTbl+='<td class="text-left">'+studentList[md]['registername']+'</td>';
-			htmlTbl+='<td class="text-left">'+enrollType+'</td>';
-			htmlTbl+='</tr>';
 		}
 	}
 	return htmlTbl;
@@ -371,6 +376,15 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 	if(studentList.length>0){
 		for(md=0;md<studentList.length;md++){
 			var stdList=studentList[md];
+			// var data = {};
+			// data["userId", stdList.userid];
+			// data["moduleId", moduleId];
+			// data["actionType", "1a"];
+			// data["studentStandardId", stdList.stuStandardId];
+			
+			//var url = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + + "/dashboard/profile-view-content?payload="+ aesUtil.encode(profileViewUrlJson.toString());
+			var viewProfile = "<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId="+stdList.userid+"&moduleId="+moduleId+"&studentStandardId="+stdList.stuStandardId+"&actionType=1a\")' class='dropdown-item bold'><i class='fa fa-eye'></i>&nbsp;View Profile</a>";
+
 			// var checkBoxs="<input type=\"checkbox\" class=\"checkUserid\" value=\""+studentList[md]['userid']+"\"/>";
 			// if(studentList[md]['leadStatus']=='Y'){
 			// 	checkBoxs = "";
@@ -390,7 +404,9 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 			htmlTbl+='<td class="text-left">'+stdList.stdEmail+'<br/>+'+stdList.stdPhoneNo+'<br/>'+stdList.cityName+' | '+stdList.countryName+'</td>';
 			htmlTbl+='<td class="text-left">'+stdList.standardName+' | '+stdList.registerType+'</td>';
 			// htmlTbl+='<td class="text-left">'+stdList.parentName+'<br/>'+stdList.parentEmail+'<br/>+'+stdList.parentPhoneNo+'</td>';
-			htmlTbl+='<td><span class="text-left">'+stdList.enrollStart+' - '+stdList.enrollEnd+'</span> '+(stdList.dueDays<0?'<br/>overdue by':'')+' <span style="font-size:14px;" class="float-right bold '+(stdList.dueDays>0?'text-success':'text-danger')+'">'+stdList.dueDays+'</span></td>';
+			htmlTbl+='<td><span class="text-left">'+stdList.enrollStart+' - '+stdList.enrollEnd+'</span> '+(stdList.dueDays<0?'<br/>overdue by':'')+' <span style="font-size:14px;" class="float-right bold '+(stdList.dueDays>0?'text-success':'text-danger')+'">'+stdList.dueDays+'</span>'
+			+'<span>'+viewProfile+'</span>'
+			+'</td>';
 			htmlTbl+='</tr>';
 			a=a+1;
 		}
@@ -442,7 +458,7 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 	}
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','student-move-tolead'),
 		data : JSON.stringify(getRequestForMoveStudentData()),
 		dataType : 'json',
@@ -468,10 +484,6 @@ function getReportStudentCount(reportTitle, stanardId, reporttype, callfrom){
 				}
 				
 			}
-			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
 			return false;
 		}
 	});
@@ -512,7 +524,7 @@ function getUserLogHistory(hitoryType, userId, reporttype, callfrom){
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','user-logs-history'),
 		data : JSON.stringify(getRequestForUserLogHistory(hitoryType,userId, reporttype, callfrom)),
 		dataType : 'json',
@@ -536,13 +548,6 @@ function getUserLogHistory(hitoryType, userId, reporttype, callfrom){
 				$('.'+hitoryType).append(logList);
 				$('#'+hitoryType).dataTable().fnDestroy();
 				$('#'+hitoryType).DataTable();
-			}
-		},
-		error : function(e) {
-			if(tt=='theme2'){
-				showMessageTheme2(2, TECHNICAL_GLITCH,'',true);
-			}else if(tt=='theme1'){
-				showMessage(true, TECHNICAL_GLITCH);
 			}
 		}
 	});

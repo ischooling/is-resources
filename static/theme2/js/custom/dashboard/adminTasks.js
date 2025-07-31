@@ -6,7 +6,7 @@ function validateAndStartTeachersAdminTask(formId,moduleId, userId, role){
           data['userId']=USER_ID;
 	$.ajax({
 		type : "POST",
-        contentType : "application/json",
+        contentType : APPLICATION_JSON_VALUE,
 		//url : CONTEXT_PATH+UNIQUEUUID+"/dashboard/start-admin-task"+argument,
 		url : getURLForHTML('dashboard','start-admin-task'),
 		dataType : 'json',
@@ -41,7 +41,7 @@ function proceedForStartAdminTask(meetingVendor){
 	var requestUrl=BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/dashboard/proceed-to-admin-task/'+UNIQUEUUID+'/'+meetingVendor;
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : requestUrl,
 		dataType : 'json',
 		async : true,
@@ -95,7 +95,7 @@ function advanceTeacherAdminTasksSearch(formId,moduleId, userId, role){
 
 		$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		//url : CONTEXT_PATH+UNIQUEUUID+"/dashboard/show-admin-task-list"+argument,
 		url : getURLForHTML('dashboard','show-admin-task-list'),
 		data : JSON.stringify(data),
@@ -127,7 +127,7 @@ function advanceTeacherAdminTasksSearch(formId,moduleId, userId, role){
 	bindHover();
 }
 
-function callLMSContentByUserId(parentId, parentUserId, parentLmsId,moduleId){
+function callAdminLMSContentByUserId(parentId, parentUserId, parentLmsId,moduleId){
 	console.log('callLMSContentByUserId ManagerUserList page')
 	var data={};
 	data['parentId']=parentId;
@@ -137,7 +137,7 @@ function callLMSContentByUserId(parentId, parentUserId, parentLmsId,moduleId){
 	data['sessionUserId']=USER_ID;
 	$.ajax({
 		type : "POST",
-		contentType:"application/json",
+		contentType:APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','parent-view-lms-content'),
 		data : JSON.stringify(data),
 		dataType : 'html',
@@ -175,7 +175,7 @@ function studentListLmsCreatedContent(elementId, argument, userRole){
         },
          "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
         	//$('tr').addClass(' success:' );
-        	$('th').css('color','#464646' );
+        	$('th').css('color','var(--pc)' );
         },
         "columns": [
 	         { "data": "sno", "name" : "sno", "title" : "S.No" },

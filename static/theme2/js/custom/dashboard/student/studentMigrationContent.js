@@ -92,7 +92,7 @@ function migrationDetailsOptionContent(data) {
 	var studentCredit=data.studentCredit;
 	var disabledAdmission=data.disabledAdmission;
 	var html =
-	'<div class="app-page-title">'
+	'<div class="app-page-title mb-3 py-2">'
 		+'<div class="page-title-wrapper">'
 			+'<div class="page-title-heading">'
 				+'<div class="page-title-icon">'
@@ -213,7 +213,7 @@ function migrationDetailsOptionContent(data) {
 						}
 						html+='<div class="progression-button-wrapper">'
 							+'<div class="col text-center">'
-								+'<a class="design-btn bg-primary" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');"> IMPROVE PAST GRADES</a>'
+								+'<a class="design-btn bg-primary " href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');"> IMPROVE PAST GRADES</a>'
 								// +'<h6 class="mt-1 font-weight-semi-bold">Improve your grade in past enrollments</h6>'
 							+'</div>';
 							if(parseFloat(studentCredit.totalCredit) < studentCredit.minmumCreditLimit  && (studentCredit.withDrawSubject != 0 || studentCredit.incomplteSubject !=0)){
@@ -224,7 +224,7 @@ function migrationDetailsOptionContent(data) {
 									}else if(studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<=17){
 										html+='<a class="design-btn" href="javascript:void(0);" onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\''+studentCredit.currentGrade+'\',\'REGISTRATION_REPEAT_GRADE\',\'ONE_TO_ONE\');"> COMPLETE YOUR CREDITS </a>';
 									}else{
-										html+='<a class="design-btn bg-primary" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'complete\');">COMPLETE YOUR CREDITS </a>';
+										html+='<a class="design-btn bg-primary " href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'complete\');">COMPLETE YOUR CREDITS </a>';
 									}
 									html+='<h6 class="mt-1 font-weight-semi-bold">Re-take a withdrawn/incomplete course or study another course</h6>'
 								+'</div>';
@@ -233,7 +233,7 @@ function migrationDetailsOptionContent(data) {
 								if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
 									html+=
 										'<div class="col text-center">'
-											+'<a class="design-btn bg-success" href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN HIGHER GRADE</a>'
+											+'<a class="design-btn bg-success " href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN HIGHER GRADE</a>'
 										+'</div>';
 								}else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit && studentCredit.currentGradeId<=6){
 									if(studentCredit.currentGradeId<3 
@@ -243,7 +243,7 @@ function migrationDetailsOptionContent(data) {
 											if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
 												html+=
 												'<div class="col text-center">'
-													+'<a class="design-btn bg-success" href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN HIGHER GRADE</a>'
+													+'<a class="design-btn bg-success " href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN HIGHER GRADE</a>'
 												+'</div>';
 											}
 									}
@@ -271,9 +271,9 @@ function migrationDetailsOptionContent(data) {
 	html+='<div class="modal fade fade-scale" tabindex="-1" role="dialog" id="choiceForStudentModel">'
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
 			+'<div class="modal-content">'
-				+'<div class="modal-header pt-2 pb-2 bg-info text-center text-white">'
+				+'<div class="modal-header pt-2 pb-2 bg-primary text-center text-white">'
 					+'<h5 class="modal-title" id="myLargeModalLabel">Learning Programs &nbsp;|&nbsp; Enroll In Higher Grade</h5>'
-					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body">'
 					+'<div class="d-flex flex-wrap justify-content-center">';
@@ -291,7 +291,7 @@ function migrationDetailsOptionContent(data) {
 							if (displayFlag) {
 								html +=
 									'<div class="mb-2 text-center">'
-										+ '<button type="button" class="send btn btn-info mb-2 btn-lg text-uppercase text-center mr-2" id="choiceBatch" data-dismiss="modal" '
+										+ '<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choiceBatch" data-dismiss="modal" '
 											+ (migrationOption.learningProgram == 'BATCH' && data.matchSubjectCount > 0 ? 'disabled ' : '')
 											+ 'onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'' + migrationOption.nextGradeName + '\',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');">'
 											+ migrationOption.learningProgramLabel
@@ -307,7 +307,7 @@ function migrationDetailsOptionContent(data) {
 					'</div>'
 					+'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
 				+'</div>'
-				+'<div class="modal-footer"><button type="button" class="btn btn-danger btn-shadow pr-4 pl-4" data-dismiss="modal">Close</button></div>'
+				+'<div class="modal-footer"><button type="button" class="btn btn-danger  pr-4 pl-4" data-dismiss="modal">Close</button></div>'
 				+'<div style="clear: both"></div>'
 			+'</div>'
 		+'</div>'
@@ -316,9 +316,9 @@ function migrationDetailsOptionContent(data) {
 	+'<div class="modal fade fade-scale" tabindex="-1" role="dialog" id="choiceForStudentModelRepeatersPAndC">'
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
 			+'<div class="modal-content">'
-				+'<div class="modal-header pt-2 pb-2 bg-info text-center text-white">'
+				+'<div class="modal-header pt-2 pb-2 bg-primary text-center text-white">'
 					+'<h5 class="modal-title" id="myLargeModalLabel">Learning Programs &nbsp;|&nbsp; Repeat The Entire Grade</h5>'
-					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body">'
 					+'<div class="row">'
@@ -338,7 +338,7 @@ function migrationDetailsOptionContent(data) {
 									if(displayFlag){
 										html+=
 										'<div class="mb-2 text-center">'
-											+'<button type="button" class="send btn btn-info mb-2 btn-lg text-uppercase text-center mr-2" id="choice'+migrationOption.learningProgram+'" data-dismiss="modal" '
+											+'<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choice'+migrationOption.learningProgram+'" data-dismiss="modal" '
 											+' onclick="callForStudentNextSession('+migrationOption.currentGradeId+',\''+migrationOption.currentGradeName	+'\',\'REGISTRATION_REPEAT_GRADE\',\''+migrationOption.learningProgram+'\');">'
 												+migrationOption.learningProgramLabel
 											+'</button>';
@@ -355,7 +355,7 @@ function migrationDetailsOptionContent(data) {
 					+'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
 				+'</div>'
 				+'<div class="modal-footer">'
-					+'<button type="button" class="btn btn-danger btn-shadow pr-4 pl-4" onclick="callChoiceForStudentModelRepeatersPAndCBack(\'improve\');">Back</button>'
+					+'<button type="button" class="btn btn-danger  pr-4 pl-4" onclick="callChoiceForStudentModelRepeatersPAndCBack(\'improve\');">Back</button>'
 				+'</div>'
 				+'<div style="clear: both"></div>'
 			+'</div>'
@@ -365,9 +365,9 @@ function migrationDetailsOptionContent(data) {
 	+'<div class="modal fade fade-scale" tabindex="-1" role="dialog" id="choiceForStudentModelRepeaters">'
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
 			+'<div class="modal-content">'
-				+'<div class="modal-header pt-2 pb-2 bg-info text-center text-white">'
+				+'<div class="modal-header pt-2 pb-2 bg-primary text-center text-white">'
 					+'<h5 class="modal-title" id="myLargeModalLabel">Learning Programs &nbsp;|&nbsp; Improve Past Grades</h5>'
-					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body">'
 					+'<div class="row">'
@@ -375,13 +375,13 @@ function migrationDetailsOptionContent(data) {
 							+'<div class="d-flex justify-content-center flex-wrap">';
 								if(studentCredit.takeIndividualButton == 'Y'){
 									html+=
-									'<button type="button" class="send btn btn-info  btn-lg text-uppercase text-center mr-2" id="choiceIndividualCourseImprove" data-dismiss="modal" '
+									'<button type="button" class="send btn btn-primary  btn-lg text-uppercase text-center mr-2" id="choiceIndividualCourseImprove" data-dismiss="modal" '
 										+'onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\''+studentCredit.currentGrade+'\',\'REGISTRATION_IMPORVE_GRADES\',\''+data.registrationType+'\');">'
 										+'Take an individual course'
 									+'</button>';
 								}
 								html+=
-								'<button type="button" class="send btn btn-info ml-1  btn-lg text-uppercase text-center mr-2" id="choiceRepeatEntire" data-dismiss="modal" onclick="callChoiceForStudentModelRepeatersPAndC();">'
+								'<button type="button" class="send btn btn-primary ml-1  btn-lg text-uppercase text-center mr-2" id="choiceRepeatEntire" data-dismiss="modal" onclick="callChoiceForStudentModelRepeatersPAndC();">'
 									+'Repeat the entire grade'
 								+'</button>'
 							+'</div>'
@@ -389,7 +389,7 @@ function migrationDetailsOptionContent(data) {
 					+'</div>'
 					+'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
 				+'</div>'
-				+'<div class="modal-footer"><button type="button" class="btn btn-danger btn-shadow pr-4 pl-4" data-dismiss="modal">Close</button></div>'
+				+'<div class="modal-footer"><button type="button" class="btn btn-danger  pr-4 pl-4" data-dismiss="modal">Close</button></div>'
 				+'<div style="clear: both"></div>'
 			+'</div>'
 		+'</div>'
@@ -408,7 +408,7 @@ function getStudentMigrationHeader(csr){
 	+'<input type="hidden" id="payMode" name="payMode" value="'+csr.paymentMode+'" data-paymode="'+csr.paymentMode+'">'
 	+'<input type="hidden" id="controlType" name="controlType" value="">'
 	+'<input type="hidden" id="totalCreditInput" name="totalCreditInput" value="'+csr.totalCredit+'">'
-    +'<div class="app-page-title m-0 pl-0">'
+    +'<div class="app-page-title mb-3 py-2 pl-0">'
         +'<div class="page-title-wrapper">'
             +'<div class="page-title-heading w-100">'
                 +'<div class="page-title-icon">'
@@ -587,7 +587,7 @@ function getCourseSelectionContent(csr){
 														$.each(csr.selectedSubjects, function(k, courseDetails) {
 															html+=
 															'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-																+'<div class="bhagat">'
+																+'<div class="flex">'
 																	+'<span class="count">'+(k+1)+'.&nbsp;</span>'
 																	+'<div class="course-name-wrapper">'
 																		+'<h4 class="course-name">'
@@ -678,7 +678,7 @@ function getCourseSelectionContent(csr){
 						+'<div class="form-row m-0" style="justify-content: space-between;">'
 							+'<div class="form-holder selected-course-view">'
 								+'<div class="fixed-item full">'
-									+'<div class="full selected-course primary-bg primary-border-color head bg-info">'
+									+'<div class="full selected-course primary-bg primary-border-color head bg-primary">'
 									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
 										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 											if(csr.registrationType=='BATCH'){
@@ -718,7 +718,7 @@ function getCourseSelectionContent(csr){
 														$.each(csr.selectedSubjects, function(k, courseDetails) {
 															html+=
 															'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-																+'<div class="bhagat">'
+																+'<div class="flex">'
 																	+'<span class="count">'+(k+1)+'.&nbsp;</span>'
 																	+'<div class="course-name-wrapper">'
 																		+'<h4 class="course-name">'
@@ -929,13 +929,13 @@ function getCourseSelectionContent(csr){
 																								subject.subjectCredit+' Credit&nbsp;'
 																							+'</label>';
 																							if(subject.courseDescriptionUrl!=null && subject.courseDescriptionUrl!=''){
-																								html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="view-course-details theme-text" style="font-size:11px; color:#007fff !important;">Course Summary</a>`;
+																								html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="view-course-details theme-text" style="font-size:11px; color:var(--pc) !important;">Course Summary</a>`;
 																								// html+='<a href="'+subject.courseDescriptionUrl+'" target="_blank" class="view-course-details theme-text">View Course Details</a>'
 																							}
 																						html+=
 																						'</div>'
 																						+'<div>'
-																							+'<label for="course_id_'+subject.subjectId+'" class="m-0 add-course-button primary-bg secondary-hov-bg white-txt-color bg-info text-white cursor">'
+																							+'<label for="course_id_'+subject.subjectId+'" class="m-0 add-course-button primary-bg secondary-hov-bg white-txt-color bg-primary text-white cursor">'
 																								+'<input class="add-course-checkbox" id="course_id_'+subject.subjectId+'"'
 																								+' value="'+subject.subjectId+'" onclick="assignEvent('+(loop1+1)+','+subject.subjectId+','+courseDetails.courseId+',\'ft_courses\','+courseDetails.userReachedMaxLimit+','+courseDetails.courseCreditLimit+','+courseDetails.courseSelectedCredit+','+subject.subjectCredit+','+(csr.registrationType=='SCHOLARSHIP' ? 1 : subject.remarks)+',\''+subject.courseType+'\',\'add\','+csr.standardId+','+csr.totalCredit+',\''+subject.courseFeeString+'\')" type="radio" name="course_id_'+courseDetails.courseId+'">'
 																								+'<p><i class="fa fa-plus white-txt-color" title="add Course"></i></p>'
@@ -965,7 +965,7 @@ function getCourseSelectionContent(csr){
 				
 				+'<div class="full mt-2">'
 					+'<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(1);">Back</button>'
-					+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:#007fff !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse();">'
+					+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:var(--pc) !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse();">'
 				+'</div>'
 				+noTeacherAssistanceAvailableModal(csr)
 				+apCourseSelectionWarningModal()
@@ -1021,7 +1021,7 @@ function migrationCourseSelection(csr){
 					+'<div class="form-row m-0" style="justify-content: space-between;">'
 						+'<div class="form-holder selected-course-view">'
 							+'<div class="fixed-item full">'
-								+'<div class="full selected-course primary-bg primary-border-color head bg-info">'
+								+'<div class="full selected-course primary-bg primary-border-color head bg-primary">'
 								+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
 									if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 										if(csr.registrationType=='BATCH'){
@@ -1061,7 +1061,7 @@ function migrationCourseSelection(csr){
 													$.each(csr.selectedSubjects, function(k, courseDetails) {
 														html+=
 														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-															+'<div class="bhagat">'
+															+'<div class="flex">'
 																+'<span class="count">'+(k+1)+'.&nbsp;</span>'
 																+'<div class="course-name-wrapper">'
 																	+'<h4 class="course-name">'
@@ -1220,8 +1220,8 @@ function switchFlexyGradeWarningModal(){
 						<h6 id="gradeChangeWarningMessage" class="text-center"></h6>
 					</div>
 					<div class="modal-footer justify-content-center">
-						<button type="button" id="gradeChangeWarningYes" class="btn btn-success btn-shadow pr-4 pl-4">Yes</button>
-						<button type="button" id="gradeChangeWarningNo" class="btn btn-primary btn-shadow pr-4 pl-4">No</button>
+						<button type="button" id="gradeChangeWarningYes" class="btn btn-success  pr-4 pl-4">Yes</button>
+						<button type="button" id="gradeChangeWarningNo" class="btn btn-primary  pr-4 pl-4">No</button>
 					</div>
 				</div>
 			</div>
@@ -1250,7 +1250,7 @@ function noTeacherAssistanceAvailableModal(csr){
 					+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
 							+'<button id="noTeacherAssistanceAvailableYes" type="button" class="btn mr-1" style="color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;">I understand and agree</button>'
-							+'<button id="noTeacherAssistanceAvailableNo" type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+							+'<button id="noTeacherAssistanceAvailableNo" type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 						+'</div>'
 					+'</div>'
 				+'</div>'
@@ -1277,7 +1277,7 @@ function apCourseSelectionWarningModal(){
 					+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
 							+'<button id="apCourseSelectionWarningClose" type="button" class="btn btn-outline-danger mr-1" data-dismiss="modal">I understand and agree</button>'
-							+'<button id="apCourseSelectionWarningNo" type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+							+'<button id="apCourseSelectionWarningNo" type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 						+'</div>'
 					+'</div>'
 				+'</div>'
@@ -1298,7 +1298,7 @@ function removeAllCorusesModal(){
 						+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 							+'<div class="text-center" style="margin: 0 auto;">'
 								+'<button type="button" class="btn mr-1" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="removeAllCourse()">Yes</button>'
-								+'<button type="button" class="btn btn-danger" data-dismiss="modal">No</button>'
+								+'<button type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 							+'</div>'
 						+'</div>'
 				+'</div>'
@@ -2705,8 +2705,8 @@ function advanceFeeShchedule(cdrDTO){
 // 							+'<h4 class="modal-title fw-600">Are you sure you want to submit this reference number? Once submitted, you won’t be able to change this number again.</h4>'
 // 							+'<hr/>'
 // 							+'<div class="full text-right">'
-// 								+'<button type="button" class="btn bg-primary text-white" id="proceedStudentPayment" data-dismiss="modal" style="background: #5cb85c !important">Yes</button>'
-// 								+'<button type="button" class="btn bg-primary text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
+// 								+'<button type="button" class="btn bg-primary  text-white" id="proceedStudentPayment" data-dismiss="modal" style="background: #5cb85c !important">Yes</button>'
+// 								+'<button type="button" class="btn bg-primary  text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
 // 							+'</div>'
 // 						+'</div>'
 // 					+'</div>'
@@ -2742,7 +2742,7 @@ function advanceFeeShchedule(cdrDTO){
 // 							+'</h4>'
 // 							+'<br/>'
 // 							+'<p class="text-center">'
-// 								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
+// 								+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
 // 							+'</p>'
 // 						+'</div>'
 // 					+'</div>'
@@ -2759,7 +2759,7 @@ function wuPaymentWarningModal(data){
 		html='<div class="modal fade fade-scale" id="wu_payment_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
 			+'<div class="modal-dialog modal-lg  modal-dialog-centered box-shadow-none" role="document">'
 				+'<div class="modal-content">'
-					+'<div class="modal-header pt-2 pb-2 theme-bg text-white">'
+					+'<div class="modal-header py-2 bg-primary text-white">'
 						+'<h5 class="modal-title">Payment Under Verification</h5>'
 					+'</div>'
 					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
@@ -2780,7 +2780,7 @@ function wuPaymentWarningModal(data){
 							+'If you would like to choose another payment method, kindly <a href="javascript:void(0);" onclick="$(\'#wu_payment_warning\').modal(\'hide\');callSigninStudentPay(this,\'signup\');" class="anchor-color">click here</a>'
 							+'<br/>'
 							+'<p class="text-center">'
-								+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
+								+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
 							+'</p>'
 						+'</div>'
 					+'</div>'
@@ -2963,7 +2963,7 @@ function recommendedCourseModalContent(data){
 				+'<div class="modal-header primary-bg white-txt-color py-2" style="display:flex;justify-content:space-between;border-top-left-radius:6px;border-top-right-radius:6px">'
 					+'<h5 class="modal-title">Recommended Courses</h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">×</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div  class="modal-body" courses="">'
@@ -3036,7 +3036,7 @@ function recommendedCourseModalContent(data){
 // 									+'You can contact us at <u>'+data.contactEmail+'</u> for more information regarding elementary enrollment.'
 // 								+'</span>'
 // 								+'<p class="text-center">'
-// 									+'<button type="button" class="btn bg-primary text-white" onclick="logout();">Log out</button>'
+// 									+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
 // 								+'</p>'
 // 							+'</div>'
 // 						+'</form>'
@@ -3060,11 +3060,11 @@ function goToDashboardWarningMessageModal(data){
 				+'</div>'
 				+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
 					+'<div class="full form">'
-						+'<h4 class="modal-title fw-600" id="submitApplicationMsg"></h4>'
+						+'<h5 class="modal-title fw-600" id="submitApplicationMsg"></h5>'
 						+'<hr />'
 						+'<div class="full text-right">'
-							+'<button type="button" class="btn bg-primary text-white" id="proceedStudentPayment" style="background: #5cb85c !important" onclick="callForSignupToDashboard();" >Yes</button>'
-							+'<button type="button" class="btn bg-primary text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
+							+'<button type="button" class="btn bg-primary  text-white" id="proceedStudentPayment" style="background: #5cb85c !important" onclick="callForSignupToDashboard();" >Yes</button>'
+							+'<button type="button" class="btn bg-primary  text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
 						+'</div>'
 					+'</div>'
 				+'</div>'

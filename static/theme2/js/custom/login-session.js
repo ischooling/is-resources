@@ -60,7 +60,7 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('common','save-user-new-timezone'),
 		data : JSON.stringify(getRequestForProceedToChangeTimezoneForCommon(currentTimezoneId,userId)),
 		dataType : 'json',
@@ -80,9 +80,6 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 				goAhead(redirectUrl, $("#hash").val());
 				$("#proceed").prop("disabled", false);
 			}
-		},
-		error : function(e) {
-			$("#proceed").prop("disabled", false);
 		}
 	});
 }
@@ -108,7 +105,7 @@ function callUserLoginFun(formId, moduleId, loginType) {
 	$("#"+formId+" #login").prop("disabled", true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('login'),
 		data : JSON.stringify(getRequestForLogin(formId, moduleId, loginType)),
 		dataType : 'json',
@@ -177,10 +174,6 @@ function callUserLoginFun(formId, moduleId, loginType) {
 			}
 			$("#"+formId+" #login").prop("disabled", false);
 			return false;
-		},
-		error : function(e) {
-			//showMessage(true, e.responseText);
-			$("#"+formId+" #login").prop("disabled", false);
 		}
 	});
 }

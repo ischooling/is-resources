@@ -259,7 +259,7 @@ function callForUserSignUp(formId, moduleId) {
 	$("#signup").prop("disabled", true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForSignup('enrollment/stage-1'),
 		data : JSON.stringify(getRequestForSignup(formId, moduleId)),
 		dataType : 'json',
@@ -292,9 +292,6 @@ function callForUserSignUp(formId, moduleId) {
 			}
 			$("#signup").prop("disabled", false);
 			return false;
-		},
-		error : function(e) {
-			$("#signup").prop("disabled", false);
 		}
 	});
 }
@@ -433,7 +430,7 @@ function callReferralCodeCounselorCheck(formId, moduleId) {
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('verify-referral'),
 		data : JSON.stringify(getRequestForReferralCodeCheck(formId,moduleId)),
 		dataType : 'json',
@@ -442,10 +439,6 @@ function callReferralCodeCounselorCheck(formId, moduleId) {
 				showServerMessage(true, 'This referral code is not available, please try again.');
 			}
 			return false;
-		},
-		error : function(e) {
-			//showServerMessage(true, e.responseText);
-			console.log("ERROR : ", e);
 		}
 	});
 }
@@ -488,7 +481,7 @@ function checkRequestIsEligibleForEnrollment(formId, moduleId, learningProgram, 
 	hideMessage('');
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('eligible-for-enrollment'),
 		data : JSON.stringify(checkRequestIsEligibleForEnrollmentPayload(formId, moduleId, learningProgram, schoolId, timeZone, countryName, email)),
 		dataType : 'json',
@@ -569,7 +562,7 @@ function getLearningProgram(learningProgram){
 
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLFor('learning-program',''),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -579,6 +572,9 @@ function getLearningProgram(learningProgram){
 			responseData=data
 		},
 		error : function(e) {
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
 			showMessage(true, e.responseText);
 		}
 	});

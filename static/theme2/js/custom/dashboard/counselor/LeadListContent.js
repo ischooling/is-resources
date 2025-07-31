@@ -9,21 +9,23 @@ async function getLeadByType(leadType){
 }
 async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY){
 	//var urlLead = "lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
-
 	var objRight= await getLeadListData(roleAndModule.moduleId, 'LEAD','list','','','0','','0', USER_ID, LEAD_CATEGORY);
 
 	ROLE_MODULE=roleAndModule;
 	var objRights = objRight.objectRights;
 	OBJECT_RIGHTS=objRights;
 	LEAD_CATEGORY=objRights.leadType;
-	var html= getLeadListMasterContent(roleAndModule, objRights);
+    var html=await getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
 	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	getB2CLeadPopjs(objRights, roleAndModule);
-	
+	var clickfrom='list';
+	if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
+		clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
+	}
 	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-	getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', objRights, roleAndModule);
-	
+	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+
 	$("#btnClickLeadMove").on('click',function() {
 		moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
 	});
@@ -70,16 +72,14 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	$("#btnNewClickLeadSearch").unbind().bind('click',function() {
 		//localStorage.setItem("needToPaging", false);
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
-		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-   });
-
-   $("#moveNewLead").on('click',function() {
+		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+    });
+	$("#moveNewLead").on('click',function() {
 		var moveleadNo = $("#leadNoMove").val();
 		if(moveleadNo==''){
 			showMessageTheme2(0, 'Please check any one lead','',false);
 			return false;
 		}
-		
 		$('#moveLeads').modal('show');
 		callLeadAssignUserList('moveLeadNewForm',''+objRights.leadType+'','leadDemoAssignMove', true, objRights.discardPermission, USER_ID, false);
 		$("#moveLeadNewForm #leadDemoAssignMove").select2({
@@ -235,6 +235,18 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			theme:"bootstrap4",
 			dropdownParent:"#leadMergeDataPopupForm"
 		});
+		$("#leadMergeDataPopupForm #leadSource").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadMergeDataPopupForm"
+		});
+		$("#leadMergeDataPopupForm #leadStatus").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadMergeDataPopupForm"
+		});
+		$("#leadMergeDataPopupForm #leadAssignTo").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadMergeDataPopupForm"
+		});
 
 		$("#leadMergeDataPopupForm #countryId").on("change",function(){
 			callStates('leadMergeDataPopupForm', this.value, 'countryId');
@@ -243,6 +255,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		$("#leadMergeDataPopupForm #stateId").on("change",function(){
 			 callCities('leadMergeDataPopupForm', this.value, 'stateId');
 		});
+
+		callLeadSourceList('leadMergeDataPopupForm',OBJECT_RIGHTS.leadType,'leadSource', true);
+		callLeadStatusList('leadMergeDataPopupForm',''+OBJECT_RIGHTS.leadType+'','leadStatus', false);
+		callLeadAssignUserList('leadMergeDataPopupForm',''+OBJECT_RIGHTS.leadType+'','leadAssignTo', true, OBJECT_RIGHTS.discardPermission, USER_ID);
 	});
 
 	$("#mergeB2BLead").unbind().bind('click',function() {
@@ -277,9 +293,9 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		$("#leadMergeDataPopupB2BForm #stateId").on("change",function(){
 			 callCities('leadMergeDataPopupB2BForm', this.value, 'stateId');
 		});
-		callLeadSourceList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadSource', true);
-		callLeadStatusList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadStatus', false);
-		callLeadAssignUserList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID, false);
+		callLeadSourceList('leadMergeDataPopupB2BForm',''+OBJECT_RIGHTS.leadType+'','leadSource', true);
+		callLeadStatusList('leadMergeDataPopupB2BForm',''+OBJECT_RIGHTS.leadType+'','leadStatus', false);
+		callLeadAssignUserList('leadMergeDataPopupB2BForm',''+OBJECT_RIGHTS.leadType+'','leadAssignTo', true, OBJECT_RIGHTS.discardPermission, USER_ID);
 	});
 
 	$('.checkRadioLead').on('click',function() {
@@ -324,9 +340,384 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	setTimeout(function() {
 		curentTimeStamp(objRights.timeZoneOffset);
 	}, 800);
+
 }
 
 
+
+async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId, userId, role, jsobjectRights){
+	//var objRight= await getLeadListData(roleAndModule.moduleId, 'LEAD','list','','','0','','0', USER_ID, LEAD_CATEGORY);
+	ROLE_MODULE=roleAndModule;
+	var objRights = JSON.parse(jsobjectRights); //objRight.objectRights;
+	//console.log(objRights);
+	OBJECT_RIGHTS=objRights;
+	var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
+		html += await dashboardHeaderContent();
+		html +='<div class="app-main  pb-4">'
+				+'<div class="col p-0">'
+					+'<div class="app-main__inner">';
+						html +=await getLeadListMasterContent(roleAndModule, objRights);
+					html +='</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>';
+		html +=await dashboardFooterContent();
+		$('body').html(html);
+		if($('#logData').length<1){
+			$("body").append(getWatiTemplatesHtml());
+		}
+		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
+		getB2CLeadPopjs(objRights, roleAndModule);
+		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
+		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
+		var clickfrom='list';
+		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
+			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
+		}
+		$("#advanceLeadNewSearchForm #leadAssignToSearch" ).val(OBJECT_RIGHTS.clickUserid).trigger('change');
+		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+		
+		
+		$("#btnClickLeadMove").on('click',function() {
+			moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
+		});
+
+		$("#btnClickLeadUpdate").on('click', function(){
+			submitLeads('updateLeadForm', ''+objRights.moduleId +'', 'new-lead-list', true, 'leadlist','updateNewLeadModal','B2C', objRights, roleAndModule);
+			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		});
+
+		$("#saveFollowup").unbind().bind("click", function(){
+			submitLeadFollowupSave('followupSaveForm',''+objRights.moduleId +'', 'new-lead-list', true, 'leadFollowupForm', objRights, roleAndModule);
+			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		});
+
+		$("#saveB2BFollowup").unbind().bind("click", function(){
+			submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule);
+			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		});
+
+		$("#btnAddCampaign").on('click', function(){
+			var leadCampaignName= $("#leadCampaignName").val();
+			var campaignStartDate= $("#campaignStartDate").val();
+			if(leadCampaignName==''){
+				showMessageTheme2(0, 'Please fill Campaign Name','',true);
+				return false;
+			}
+			if(campaignStartDate==''){
+				showMessageTheme2(0, 'Please fill Start Date','',true);
+				return false;
+			}
+
+			saveCampaignMaster('leadCampaignForm', '0', 'Y');
+		});
+		
+
+		$("#saveB2BLead").on('click', function(){
+			submitLeads('leadDataPopupB2BForm', ''+objRights.moduleId+'', ''+objRights.leadFrom+'', true, 'new-leadlistPopup','leadPopupB2BForm','B2B', objRights, roleAndModule);
+		});
+
+		$("#saveLead").on('click', function(){
+			submitLeads('leadDataPopupForm', ''+roleAndModule.moduleId+'', ''+objRights.leadFrom+'', true, 'new-leadlistPopup','leadPopupForm','B2C', objRights, roleAndModule);
+		});
+
+		$("#btnNewClickLeadSearch").unbind().bind('click',function() {
+			//localStorage.setItem("needToPaging", false);
+			getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
+			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+	});
+
+	$("#moveNewLead").on('click',function() {
+		var moveleadNo = $("#leadNoMove").val();
+		if(moveleadNo==''){
+			showMessageTheme2(0, 'Please check any one lead','',false);
+			return false;
+		}
+		
+		$('#moveLeads').modal('show');
+		callLeadAssignUserList('moveLeadNewForm',''+objRights.leadType+'','leadDemoAssignMove', true, objRights.discardPermission, USER_ID);
+		$("#moveLeadNewForm #leadDemoAssignMove").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#moveLeadNewForm"
+		});
+		
+	});
+
+	$('#mcustomWatiTemplatesListClose').click(function(e) { 
+		$("input#selectLeadAll").prop('checked','');
+		$('input[name="lead-move-another"]').prop('checked','');
+		$("#leadNoMove").val("");
+	});
+
+	$("#addNewCampaign").unbind().bind('click',function() {
+			$("#leadCampaignPopupForm").modal('show');
+			callCampainList(false,'');
+		});
+
+		$("#addLead").unbind().bind('click',function() {
+			var formId='';
+			var modelForm='';
+			if(LEAD_CATEGORY=='B2B'){
+				formId='leadDataPopupB2BForm';
+				modelForm='leadPopupB2BForm';
+			}else{
+				formId='leadDataPopupForm';
+				modelForm='leadPopupForm';
+			}
+			$('#'+formId)[0].reset()
+			$("#"+formId+" #leadId").val('')
+			$("#"+formId+" #leadNo").val('')
+			$("#"+formId+" #rawLeadId").val('')
+			$("#"+formId+" #countrolType").val('add')
+			
+			$(".b2cLeadsource").show();
+			$(".b2bLeadsource").show();
+			$(".b2bLeadstatus").show();
+			$(".b2cLeadstatus").show();
+			$("#"+modelForm).modal('show');
+			$("#leadFormText").text("Add new lead");
+			$('#documentDiv').html('');
+
+			$('#leadDOB').datepicker({
+				autoclose: true,
+				format: 'mm-dd-yyyy',
+				container: '#leadPopupForm',
+			});
+
+			$("#"+formId+" #leadSource").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+			
+			$("#"+formId+" #leadStatus").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+			$("#"+formId+" #leadAssignTo").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+
+			$("#"+formId+" #countryId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+
+			$("#"+formId+" #stateId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+
+			$("#"+formId+" #cityId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+			$("#"+formId+" #leadTagging").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
+
+			callLeadSourceList(''+formId+'',objRights.leadType,'leadSource', true);
+			callPCountries(''+formId+'', 0, 'countryId');
+			callLeadStatusList(''+formId+'',objRights.leadType,'leadStatus', false);
+
+			$("#"+formId+" #countryId").on("change",function(){
+				callStates(''+formId+'', this.value, 'countryId');
+			});
+				
+			$("#"+formId+" #stateId").on("change",function(){
+				callCities(''+formId+'', this.value, 'stateId');
+			});
+
+			callLeadAssignUserList(''+formId+'',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID);
+			
+
+			setTimeout(function() {
+				$("#"+formId+" #leadAssignTo").val(USER_ID).trigger('change');
+			}, 600);
+
+			if (itiPhoneNumber && typeof itiPhoneNumber.destroy === 'function') {
+				itiPhoneNumber.destroy();
+			}
+			var phoneNumber = document.querySelector("#"+formId+" #phoneNo");
+			itiPhoneNumber = window.intlTelInput(phoneNumber, {
+				//separateDialCode: true,
+			});
+			phoneNumber.addEventListener('countrychange', function(e) {
+				$('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
+				$('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
+			});
+
+			if (itiAltPhoneNumber && typeof itiAltPhoneNumber.destroy === 'function') {
+				itiAltPhoneNumber.destroy();
+			}
+			var altPhoneNumber = document.querySelector("#"+formId+" #phoneNoAlter");
+			itiAltPhoneNumber= window.intlTelInput(altPhoneNumber, {
+				//separateDialCode: true,
+			});
+			altPhoneNumber.addEventListener('countrychange', function(e) {
+				console.log("itiPhone=>", itiAltPhoneNumber.getSelectedCountryData());
+				$('#'+formId+' #pCountryCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().iso2);
+				$('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
+			});
+			getTggingMasterList(''+formId+'', 'leadTagging');
+			
+
+		});
+
+		$("#mergeLead").unbind().bind('click',function() {
+			var moveleadNo = $("#leadNoMove").val();
+			if(moveleadNo==''){
+				showMessageTheme2(0, 'Please check any one lead','',false);
+				return false;
+			}
+			var leadId =moveleadNo.substring(1,moveleadNo.lenght);
+			callLeadMergeData('leadMergeDataPopupForm', leadId, ''+USER_ID+'', 'edit', 'leadMergePopup','B2C', 0);
+			callPCountries('leadMergeDataPopupForm', 0, 'countryId');
+
+			$("#leadMergeDataPopupForm #countryId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#leadMergeDataPopupForm"
+			});
+
+			$("#leadMergeDataPopupForm #stateId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#leadMergeDataPopupForm"
+			});
+
+			$("#leadMergeDataPopupForm #cityId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#leadMergeDataPopupForm"
+			});
+
+			$("#leadMergeDataPopupForm #countryId").on("change",function(){
+				callStates('leadMergeDataPopupForm', this.value, 'countryId');
+			});
+				
+			$("#leadMergeDataPopupForm #stateId").on("change",function(){
+				callCities('leadMergeDataPopupForm', this.value, 'stateId');
+			});
+		});
+
+		$("#mergeB2BLead").unbind().bind('click',function() {
+			var moveleadNo = $("#leadNoMove").val();
+			if(moveleadNo==''){
+				showMessageTheme2(0, 'Please check any one lead','',false);
+				return false;
+			}
+			var leadId =moveleadNo.substring(1,moveleadNo.lenght);
+			callLeadMergeData('leadMergeDataPopupB2BForm', leadId, ''+USER_ID+'', 'edit', 'leadMergeB2BPopup','B2B', 0);
+			callPCountries('leadMergeDataPopupB2BForm', 0, 'countryId');
+
+			$("#leadMergeDataPopupB2BForm #countryId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#leadMergeDataPopupB2BForm"
+			});
+
+			$("#leadMergeDataPopupB2BForm #stateId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#leadMergeDataPopupB2BForm"
+			});
+
+			$("#leadMergeDataPopupB2BForm #cityId").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#leadMergeDataPopupB2BForm"
+			});
+
+			$("#leadMergeDataPopupB2BForm #countryId").on("change",function(){
+				callStates('leadMergeDataPopupB2BForm', this.value, 'countryId');
+			});
+				
+			$("#leadMergeDataPopupB2BForm #stateId").on("change",function(){
+				callCities('leadMergeDataPopupB2BForm', this.value, 'stateId');
+			});
+			callLeadSourceList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadSource', true);
+			callLeadStatusList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadStatus', false);
+			callLeadAssignUserList('leadMergeDataPopupB2BForm',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID);
+		});
+
+		$('.checkRadioLead').on('click',function() {
+			var leadCheckId='';	
+			var leadNotCheckId='';
+			var leadNewIds='';
+			$.each($("input[name='lead-merge-another']"), function(){
+					if ($(this).is(":checked")) {
+						leadCheckId=leadCheckId+','+$(this).val();
+					}else{
+						leadNotCheckId=leadNotCheckId+','+$(this).val();
+					}
+					
+			});
+			leadnew = leadCheckId + leadNotCheckId;
+			var leadId =leadnew.substring(1,leadnew.lenght);
+				var urlSend = '/dashboard/lead-merge-data?moduleId=${moduleId}&leadId='+leadId+'&leadFrom=MERGE&currentPage=${currentPage}&isSearch=false&countrolType=edit&leadType=B2C';
+				getAsPost(urlSend,'self');
+				//callLeadMergeData('leadMergeDataPopupForm', leadId, '${USER_ID}', 'edit', 'leadMergePopup','B2C',1)
+		});
+		
+		$('INPUT[type="file"]').change(function () {
+			var ext = $('#fileupload1').val().split('.').pop().toLowerCase();
+			if($.inArray(ext, ['csv','tsv']) == -1) {
+				showMessageTheme2(0, 'invalid extension!','',true);
+				return false;
+			}
+			var file =$("#leadUploadId #fileupload1").get(0).files[0];
+			$("#leadUploadId #fileupload1ChoosenFile").text(file.name)
+		});
+
+
+		$("#saveMergeLead").on('click', function(){
+			//submitLeads('leadMergeDataPopupForm', '${moduleId}', '${leadFrom}', true,'','new-leadMergePopup','B2C','','');
+			submitLeads('leadMergeDataPopupForm', ''+roleAndModule.moduleId+'', ''+objRights.leadFrom+'', true, 'new-leadMergePopup','leadMergePopup','B2C', objRights, roleAndModule);
+		});
+
+		$("#saveMergeB2BLead").on('click', function(){
+			submitLeads('leadMergeDataPopupB2BForm', ''+roleAndModule.moduleId+'', ''+objRights.leadFrom+'', true,'new-leadMergePopup','leadMergeB2BPopup','B2B', objRights, roleAndModule);
+		});
+
+		setTimeout(function() {
+			curentTimeStamp(objRights.timeZoneOffset);
+		}, 800);
+
+		
+
+		
+}
+
+
+async function dashboardHeaderContent(){
+	var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
+	//console.log(schoolSettingsLinks);
+	var html=
+		'<div class="sticky-header">'
+			+'<div class="app-header header-shadow">'
+				+'<div class="app-header__logo">'
+					+'<a href="'+schoolSettingsLinks.schoolWebsite+'" target="blank" class="logo-src" style="background:url('+schoolSettingsLinks.logoUrl+SCRIPT_VERSION+');"></a>'
+				+'</div>'
+				+'<div class="app-header__logo"></div>'
+			+'</div>'
+		+'</div>';
+	return html;
+}
+
+async function dashboardFooterContent(){
+	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var html=
+	'<div class="app-wrapper-footer">'
+		+'<div class="app-footer">'
+			+'<div class="app-footer__inner">'
+				+'<div class="col">'
+					+'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+		+'<div class="server-message">'
+			+'<span class="msg" id="msgTheme2"></span>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
 
 function getLeadListMasterContent(roleAndModule, objRights){
 
@@ -344,7 +735,7 @@ function getLeadListMasterContent(roleAndModule, objRights){
 	}else{
 		b2bnone='d-none';
 	}
-	var html='<div class="app-page-title">'
+	var html='<div class="app-page-title mb-3 py-2">'
 	+'<div class="page-title-wrapper">'
 	+'		<div class="page-title-heading">'
 	+'			<div class="page-title-icon">'
@@ -358,9 +749,9 @@ function getLeadListMasterContent(roleAndModule, objRights){
 	+'		</div>';
 	html+='	<div class="page-title-actions">';
 	html+='	<div class="btn-actions-pane-right text-capitalize d-flex flex-wrap justify-content-center" style="gap:10px">'
-		// +'	<button class="btn-shadow btn btn-primary" onclick="window.close();"><i class="fa fa-arrow-left"></i>&nbsp;Back</button>'
-		+'	<button class="btn-shadow btn btn-info" onclick="openPopup(\'leadAdvanceSearch\',\''+objRights.leadType+'\');"><i class="fa fa-search"></i>&nbsp;Advance Search</button>'
-		+'	<button class="btn-shadow btn btn-info" onclick="renderTimzoneConverter()"><i class="fa fa-clock"></i>&nbsp;Time Zone Converter</button>'
+		// +'	<button class=" btn btn-primary" onclick="window.close();"><i class="fa fa-arrow-left"></i>&nbsp;Back</button>'
+		+'	<button class=" btn btn-primary" onclick="openPopup(\'leadAdvanceSearch\',\''+objRights.leadType+'\');"><i class="fa fa-search"></i>&nbsp;Advance Search</button>'
+		+'	<button class=" btn btn-primary" onclick="renderTimzoneConverter()"><i class="fa fa-clock"></i>&nbsp;Time Zone Converter</button>'
 		+'</div>';
 	html+='</div>'
 	+'	</div>'
@@ -372,8 +763,7 @@ function getLeadListMasterContent(roleAndModule, objRights){
 		html+=getLeadFormB2BPopup(objRights);
 		html+=getLeadMergeB2BFormPopup(objRights);
 		html+='<div id="LeadPartnerUserFormB2BPopup"></div>';
-		//callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-		//getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', objRights, roleAndModule);
+		
 		
 	}else{
 		html+=getLeadAdvanceSearchPopup(objRights);
@@ -383,7 +773,6 @@ function getLeadListMasterContent(roleAndModule, objRights){
 		html+=getLeadMergeFormPopup(objRights);
 		html+=getLeadCampaignListPopup();
 		html+=getLeadWatsApp();
-		
 		
 	}
 	html+=getMoveLeadsPopup(objRights);
@@ -411,16 +800,16 @@ function getWatiTemplatesHtml(){
 
 
 function getCounselorListHeaderContent(leadType, roleAndModule, objRights){
-	var html='<div class="card-body" id="leadSourceList">'
-	+'<div class="main-card mb-3 card">';
-	if(leadType=='B2B'){
-		html+=getB2BListHeaderContent(roleAndModule, objRights);
-	}else{
-		html+=getB2CListHeaderContent(roleAndModule, objRights);
-	}
-		
+	var html=
+		`<div class="main-card mb-3 card">
+			<div class="card-body">`;
+				if(leadType=='B2B'){
+					html+=getB2BListHeaderContent(roleAndModule, objRights);
+				}else{
+					html+=getB2CListHeaderContent(roleAndModule, objRights);
+				}
+			html+=`</div>`	
 	html+='</div>'
-	+'</div>';
 	return html;
 }
 
@@ -466,8 +855,8 @@ function getMoveLeadsPopup(objRights){
 						+'</div>'
 		+'</div>'
 		+'				<div class="full mt-1">'
-		+'					<button type="button" class="btn btn-success btn-shadow float-right pr-4 pl-4" id="btnClickLeadMove">Move</button>'
-		+'					<button type="button" class="btn btn-info btn-shadow float-right pr-4 pl-4 mr-2" data-dismiss="modal">Close</button>'
+		+'					<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnClickLeadMove">Move</button>'
+		+'					<button type="button" class="btn btn-info  float-right pr-4 pl-4 mr-2" data-dismiss="modal">Close</button>'
 		+'				</div>'
 		+'			</div>'
 		+'		</form>'
@@ -626,13 +1015,17 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadCreatedBy', true, objectRights.discardPermission,USER_ID, false);
 	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadDemoAssignSearch', true, objectRights.discardPermission, USER_ID, false);
 	//callTemplateList(true, 'leadSearchTemplate', $("#leadAssignToSearch").val());
-	
-	callCampainList(true,'leadSearchCampaign');
-	// setTimeout(function() {
-	// 	if(objectRights.discardPermission){}else{
-	// 		$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
-	// 	}
-	// }, 1000);
+	//callCampainList(true,'advanceLeadNewSearchForm');
+	callMasterCampainList('advanceLeadNewSearchForm','','leadSearchCampaign');
+	setTimeout(function() {
+		if(objectRights.discardPermission){
+			if(objectRights.clickUserid>0){
+				$("#advanceLeadNewSearchForm #leadAssignToSearch").val(objectRights.clickUserid).trigger('change');
+			}
+		}else{
+			$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
+		}
+	}, 1000);
 
 	
 
@@ -810,35 +1203,19 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 		getAsPost(urlSend);
 	});
 
-	if($.inArray(USER_ROLE, ['STUDENT','TEACHER','PARENT','DIRECTOR']) == -1) {
-		var data = getAllDemoForUpdateStatus(USER_ID);
-		if(data.status==1){
-			var demoDetails=data.details.demoDetails.demoDetails;
-
-			if(demoDetails!=undefined){
-				if(demoDetails.length>0){
-					if($("#demoDetailsModal").length>0){
-						$("#demoDetailsModal").remove();
-					}
-					$('body').append(forceDemoUpdateModalContent(data));
-					$("#demoDetailsModal").modal("show");
-				}
-			}
-		}
-	}
 
 }
 function getTotalLead(leadType){
 	// var urlSend = '/dashboard/lead-data-list?moduleId=${moduleId}&leadFrom=LEAD&clickFrom=list&currentPage=0&euid=${ENCRYPTED_USER_ID}&leadType='+leadType;
 	// getAsPost(urlSend,"_self");
 	// customLoader(false)
-	advanceLeadSearchStudentReset('advanceLeadNewSearchForm',''+leadType+'');
-	if(OBJECT_RIGHTS.discardPermission){}
-	else{
-		$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
-	}
+	// advanceLeadSearchStudentReset('advanceLeadNewSearchForm',''+leadType+'');
+	// if(OBJECT_RIGHTS.discardPermission){}
+	// else{
+	// 	$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
+	// }
 	
-	callTotalCountLeads('advanceLeadNewSearchForm',''+ROLE_MODULE.moduleId+'', 'LEAD','list', '0', 'new', true,'',''+OBJECT_RIGHTS.leadType+'', 'Y','0','new-lead');
+	//callTotalCountLeads('advanceLeadNewSearchForm',''+ROLE_MODULE.moduleId+'', 'LEAD','list', '0', 'new', true,'',''+OBJECT_RIGHTS.leadType+'', 'Y','0','new-lead');
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', OBJECT_RIGHTS, ROLE_MODULE);
 }
 function nextPage(currentPage){
@@ -851,8 +1228,10 @@ function nextPage(currentPage){
 	}
 }
 
-function clickTotalLeads(clickFrom, currentPage, callbadge, leadType){
-	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickFrom, currentPage, 'new', true, callbadge, OBJECT_RIGHTS, ROLE_MODULE);
+function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
+	leadfrom=leadfrom==undefined?'advance-search':leadfrom;
+	//console.log(leadfrom);
+	getLeadDataList('advanceLeadNewSearchForm',leadfrom, clickFrom, currentPage, 'new', true, callbadge, OBJECT_RIGHTS, ROLE_MODULE);
 }
 
 
@@ -861,8 +1240,8 @@ function getDiscardLeadModel() {
 	html+=`<div class="modal fade" id="discardLeadModel">
 		<div class="modal-dialog modal-md modal-notify modal-danger" role="document">
 			<div class="modal-content">
-				<div class="modal-header pt-2 pb-2 theme-bg text-white">
-					<h5 class="modal-title" id="exampleModalLabel">Are you sure you want to discard this Lead?</h5>
+				<div class="modal-header py-2 bg-primary text-white">
+					<h5 class="modal-title" >Are you sure you want to discard this Lead?</h5>
 				</div>
 				<div id="statusMessage-2" class="modal-body delete-modal" style="padding-top:12px">
 					<p><b>You are discarding the following Lead:</b></p>
@@ -876,7 +1255,7 @@ function getDiscardLeadModel() {
 				<div class="modal-footer text-center">
 					<div style="width:100%;float:left; text-align:right">	
 						<button type="button" class="btn btn-primary" id='discardLeadWarningYes'>Yes</button>
-						<button type="button" class="btn btn-danger waves-effect text-right" data-dismiss="modal">No</button>
+						<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>
 					</div>
 				</div>
 			</div>
@@ -885,15 +1264,7 @@ function getDiscardLeadModel() {
 	return html;
 }
 
-function showNewDiscardLeadModelFunction(
-	functionName,
-	leadSource,
-	studentName,
-	studentEmail,
-	studentPhoneNo,
-	createdDate,
-	leadNo
-  ) {
+function showNewDiscardLeadModelFunction(functionName,leadSource,studentName,studentEmail,studentPhoneNo,createdDate,leadNo) {
 	functionName = "$('#discardLeadModel').modal('hide');" + functionName + ";";
 	$("#discardLeadWarningYes").attr("onclick", functionName);
 	$("#leadDisplayNo").html(leadNo);
@@ -903,6 +1274,4 @@ function showNewDiscardLeadModelFunction(
 	$("#studentPhoneNo").html(studentPhoneNo);
 	$("#createdDate").html(createdDate);
 	$("#discardLeadModel").modal("show");
-  }
-
-
+}

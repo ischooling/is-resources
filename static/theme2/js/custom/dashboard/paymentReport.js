@@ -8,7 +8,7 @@ function getPaymentReportData(formId, forCountOnly, type){
     customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : url,
 		data : JSON.stringify(getRequestForPaymentReport(formId, type, 'N')),
 		dataType : 'json',
@@ -170,7 +170,7 @@ function downloadStudentPaymentReport(formId, forCountOnly, type){
 	customLoader(true);
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url :  CONTEXT_PATH+UNIQUEUUID+'/dashboard/student-payment-report-download',
 		data : JSON.stringify(getRequestForPaymentReport(formId, type, 'Y')),
 		xhrFields: {
@@ -187,10 +187,6 @@ function downloadStudentPaymentReport(formId, forCountOnly, type){
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
-			customLoader(false);
-		},
-		error : function(e) {
-			console.log(e);
 			customLoader(false);
 		}
 	});

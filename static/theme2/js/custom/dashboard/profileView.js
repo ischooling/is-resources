@@ -304,7 +304,7 @@ function verifyUser(status,userId,roleModuleId,moduleId){
 	data['userId']=userId;
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','verify-unverify-user-profile'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -375,7 +375,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 	}
 	  $.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard','update-user-profile-content'),
 			data : JSON.stringify(getRequestForUpdateProfile(src, keyId, userId, studentStandardId,moduleId)),
 			dataType : 'json',
@@ -943,7 +943,7 @@ $(".select_dropdown").select2({
 function getCompulsorySubjectByUserId(userId){
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-compulsory-subjects'+'?userId='+userId),
 		dataType : 'json',
 		success : function(data) {
@@ -961,7 +961,7 @@ function getCompulsorySubjectByUserId(userId){
 function getBankDetailsByUserId(userId, onlyEdit){
 	$.ajax({
 		type : "GET",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'bank-details/'+userId),
 		dataType : 'json',
 		success : function(data) {
@@ -1113,7 +1113,7 @@ function updateBankDetails(formId,userId) {
 		url : getURLForHTML('dashboard', 'save-bank-details'),
 		data : JSON.stringify(getRequestForBankDetails(formId, userId)),
 		dataType : 'json',
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
@@ -1181,7 +1181,7 @@ function getRequestForBankDetails(formId, userId){
 function saveDocs(userId, studentStandardId, docType){
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','save-docs'),
 		data : JSON.stringify(getAllDataAndRecords(userId, studentStandardId)),
 		dataType : 'json',
@@ -1238,9 +1238,6 @@ function saveDocs(userId, studentStandardId, docType){
 					setTimeout(function(){customLoader(true); window.location.reload();},2000);
 				}
 			}
-		},
-		error : function(e) {
-			console.log(e)
 		}
 	});
 
@@ -1254,7 +1251,7 @@ function removeUploadImage(src, inputId, thumbId, type, studentStandardId){
 		data['type']=type;
 		$.ajax({
 			type : "POST",
-			contentType : "application/json",
+			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard','delete-uploaded-docs'),
 			data : JSON.stringify(data),
 			dataType : 'json',
@@ -1274,9 +1271,6 @@ function removeUploadImage(src, inputId, thumbId, type, studentStandardId){
 					// Do here 
 					showMessageTheme2(1, 'Document(s) removed','',true);
 				}
-			},
-			error : function(e) {
-				console.log(e)
 			}
 		});
 	}
@@ -1606,7 +1600,7 @@ function changeLearingProgramGradePlatform(src, studentStandardId){
 	
 	$.ajax({
 		type : "POST",
-		contentType : "application/json",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','delete-uploaded-docs'),
 		data : JSON.stringify(data),
 		dataType : 'json',
@@ -1624,9 +1618,6 @@ function changeLearingProgramGradePlatform(src, studentStandardId){
 			} else {
 				showMessageTheme2(1, 'Document(s) removed','',true);
 			}
-		},
-		error : function(e) {
-			console.log(e)
 		}
 	});
 }
@@ -1661,7 +1652,7 @@ function changeLearningProgamGradePlatformModal(studentStandardId, currentLearni
 
 	$.ajax({
 		type: "POST",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'change-learning-program-grade-platform'),
 		data: JSON.stringify(data),
 		dataType: 'json',
@@ -1836,7 +1827,7 @@ function saveReference(id) {
 		url: `${APP_BASE_URL}${SCHOOL_UUID}/teacher/signup/update-teacher-employee-reference-details`,
 		data: JSON.stringify(ref),
 		dataType: "json",
-		contentType: "application/json",
+		contentType: APPLICATION_JSON_VALUE,
 		success: function(res) {
 			if(res.status == 1){
 				showMessageTheme2(1, 'Reference saved successfully');
