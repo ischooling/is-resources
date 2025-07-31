@@ -16,7 +16,7 @@ function advanceTranscriptSearchStudent(formId, moduleId) {
         			if(stringMessage[0] == "SESSIONOUT"){
         				redirectLoginPage();
         			}else{
-        				showMessageTheme2(true, stringMessage[1]);
+        				showMessageTheme2(0, stringMessage[1]);
 						customLoader(false);
         			}
         		} else {
