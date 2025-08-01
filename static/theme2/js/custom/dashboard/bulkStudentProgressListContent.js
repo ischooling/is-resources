@@ -282,11 +282,11 @@ function getAutoViewModule(){
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
 							<label class="bmd-label-floating">Report Start Date:</label> 
-							<input type="text" class="form-control" id="startReportDate" name="startReportDate" autocomplete="off" />
+							<input type="text" class="form-control" id="startReportDate" name="startReportDate" autocomplete="off" readonly />
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
 							<label class="bmd-label-floating">Report End Date:</label> 
-							<input type="text" class="form-control" id="endReportDate" name="endReportDate" autocomplete="off"  />
+							<input type="text" class="form-control" id="endReportDate" name="endReportDate" autocomplete="off" readonly />
 						</div>
 						<div class="col-lg-3 col-md-3 col-sm-3 col-12">
 							<button class="btn btn-success sendMailbtn" type="submit"  onclick="return showWarningMessageForGenerate('Are you sure you want to generate the report?','callAutoWeeklyStudentSendMail(\\\'autoStudentSendForm\\\',\\\'${USER_ID}\\\',\\\'${UNIQUEUUID}\\\',\\\'${moduleId}\\\')')" > Generate Report</button>

@@ -313,7 +313,7 @@ function getAddFormContent(){
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
 							+'<label class="m-0">Applicable From</label>'
-							+'<input type="text" name="startDate" id="startDate" class="datepicker form-control">'
+							+'<input type="text" name="startDate" id="startDate" class="datepicker form-control" readonly>'
 						+'</div>'
 						// +'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
 						// 	+'<label class="m-0">Applicable Till</label>'

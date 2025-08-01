@@ -353,7 +353,7 @@ function leadChatDocumentsContent(discardPermission, userId, leadId){
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
 							+'<label class="m-0">Select chat date</label>'
-							+'<input type="text" name="chatDate" id="chatDate" class="form-control">'
+							+'<input type="text" name="chatDate" id="chatDate" class="form-control" readonly>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
 							+'<label class="m-0 full">&nbsp;</label>'

@@ -172,7 +172,7 @@ function renderSingleContent(elementId, deleteButtonRequired){
 	'<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 text-left mb-1">'
 		+'<div class="singleDateAndTime d-flex align-items-center h-100 flex-md-nowrap flex-wrap justify-content-end" style="gap:10px">'
 			+'<span class="country-date w-100">'
-				+'<input name="date" id="date" type="text" class="date date-picker form-control font-weight-semi-bold text-primary" value="" onchange="updateTime(this)">'
+				+'<input name="date" id="date" type="text" class="date date-picker form-control font-weight-semi-bold text-primary" value="" onchange="updateTime(this)" readonly>'
 			+'</span>'
 			+'<span class="country-time d-flex col-sm-6 p-0" style="min-width: 140px; gap:10px">'
 				+'<select name="hour" id="hour" class="hoursc form-control" onchange="updateTime(this)">'

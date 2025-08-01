@@ -11,7 +11,7 @@ function liveClassroomContent(){
                             +'<span>Live Classes&nbsp;</span>'
                         +'</div>'
                         +'<span class="d-inline-block datepicker-parent">'
-                                +'<input type="text" id="dateForLiveAttendance" class="form-control w-auto mx-1 mb-2 mb-md-0 d-inline-block" name="dateForLiveAttendance">'
+                                +'<input type="text" id="dateForLiveAttendance" class="form-control w-auto mx-1 mb-2 mb-md-0 d-inline-block" name="dateForLiveAttendance" readonly>'
                                 +'<select id="standardId" name="standardId" onchange="return getLiveClassroom();">'
                                     +'<option value="" disabled>Select Grade*</option>'
                                     +getStandardContent(SCHOOL_ID,false, false)

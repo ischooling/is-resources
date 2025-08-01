@@ -702,7 +702,7 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 					}
 					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 mb-3 meetingDateWrapper"  id="">'
 								+'<label>Meeting Date</label>'
-								+'<input type="text" name="meetingDate" id="meetingDate" class="form-control" value="" onchange="createClassButtonHide()">'
+								+'<input type="text" name="meetingDate" id="meetingDate" class="form-control" value="" onchange="createClassButtonHide()" readonly>'
 							+'</div>';
 					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 mb-3 startTimeHoursWrapper"  id="">'
 								+'<label>Start Time</label>'
@@ -788,10 +788,10 @@ function getRecurringClassContent(moduleId){
 						+'<label>Set Time<sup class="text-danger sup">*</sup></label>'
 						+'<div style="display:flex;align-items:center">'
 							+'<span style="padding:0 5px">'
-								+'<input type="text" class="teachStartDate form-control" name="classStartDate" placeholder="Select Start Date" id="classStartDate" value="" autocomplete="off" />'
+								+'<input type="text" class="teachStartDate form-control" name="classStartDate" placeholder="Select Start Date" id="classStartDate" value="" autocomplete="off" readonly />'
 							+'</span>'
 							+'<span style="padding:0 5px">'
-								+'<input type="text" class="teachEndDate form-control " name="classEndDate" placeholder="Select End Date" id="classEndDate" value="" autocomplete="off"/>'
+								+'<input type="text" class="teachEndDate form-control " name="classEndDate" placeholder="Select End Date" id="classEndDate" value="" autocomplete="off" readonly/>'
 							+'</span>'
 							+'<a href="javascript:void(0);" class="btn btn-sm bg-primary text-white" onclick="getSplitTime(\'classroomSessionFilter\');"> <i class="pe-7s-refresh-2"></i></a>  '
 						+'</div>'

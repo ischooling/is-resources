@@ -288,7 +288,7 @@ function getCommonPaymentModel(){
 								<label>Date</label>
 								<input type="hidden" class="form-control" id="entityIdSearch" value="">
 								<input type="hidden" class="form-control" id="entityNameSearch" value="">
-								<input type="text" class="form-control" id="paymentDateSearch" placeholder="Payment Date">
+								<input type="text" class="form-control" id="paymentDateSearch" placeholder="Payment Date" readonly>
 							</div>
 						</div>
 						<div class="col-lg-5 col-md-5 col-sm-4 col-12">
@@ -348,7 +348,7 @@ function getCommonAddPaymentModel(){
 						<div class="col-md-6">
 							<div class="form-group">
 								<label>Payment Date</label>
-								<input type="text" id="paymentDate" class="form-control" name="paymentDate" value="">
+								<input type="text" id="paymentDate" class="form-control" name="paymentDate" value="" readonly>
 							</div>
 						</div>
 						<div class="col-md-6">

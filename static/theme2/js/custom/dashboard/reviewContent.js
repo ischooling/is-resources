@@ -49,7 +49,7 @@ function getReviewContent(){
 '						<div class="col-12">'+
 '							<div class="position-relative form-group">'+
 '								<label for="">Leave Date</label>'+
-'								<input type="text" name="leaveDates" id="leaveDates" class="form-control" placeholder="Select Date"/>'+
+'								<input type="text" name="leaveDates" id="leaveDates" class="form-control" placeholder="Select Date" readonly/>'+
 '							</div>'+
 '						</div>'+
 '						<div class="col-12">'+

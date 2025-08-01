@@ -802,7 +802,7 @@ function validateRequestStudentTeacherAssign(formId, moduleId, subjectId) {
 }
 
 
-function viewStudentTeacherMappingsSendMail(studentTeacherMappingId) {
+function viewStudentTeacherMappingsSendMail(studentTeacherMappingId, src) {
 	hideMessage('');
 	$.ajax({
 		type: "POST",
@@ -818,6 +818,9 @@ function viewStudentTeacherMappingsSendMail(studentTeacherMappingId) {
 			} else {
 				showMessageTheme2(1, data['message']);
 				callAssignStudentTeacherContent('view-assignStudentTeacher');
+				if ($(src).find('i').length) {
+					$(src).html('Re-send');
+				}
 				$('#modalMessage').click(function () {
 					setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
 				});

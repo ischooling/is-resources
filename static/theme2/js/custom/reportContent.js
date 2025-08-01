@@ -175,14 +175,14 @@ function getReportsTab(objRight){
 				</select>
 			</div>
 			<div class="col-md-6 col-lg-3 hidden" id="zadarmaCallSync"> 
-				<input type="text" name="syncZadarmaDate" id="syncZadarmaDate" class="hidden" style="width:90px; margin-right: 12px;" />
+				<input type="text" name="syncZadarmaDate" id="syncZadarmaDate" class="hidden" style="width:90px; margin-right: 12px;" readonly />
 				<button class=" btn btn-info " onclick="syncZadarmaCall()"><i class="fas fa-sync " id="callSyncRotate"></i></button>
 			</div>
 			<div class="col-md-6 col-lg-5"> 
 				<div class="row" style="align-items: center;">
 					<div class="col-md-12 col-lg-6 hidecounselorLead text-center">
-						<input type="text" name="counselorStartDate" id="counselorStartDate" style="width:90px; margin-right: 6px;" /> To 
-						<input type="text" name="counselorEndDate" id="counselorEndDate" style="width:90px; margin-left: 6px;"  />
+						<input type="text" name="counselorStartDate" id="counselorStartDate" style="width:90px; margin-right: 6px;" readonly /> To 
+						<input type="text" name="counselorEndDate" id="counselorEndDate" style="width:90px; margin-left: 6px;" readonly  />
 					</div>
 					<div class="col-md-12 col-lg-6 hidecounselorLead">
 						<button class="btn btn-primary" id="btnLeadCounselorWiseSubmit">Submit</button>
@@ -334,9 +334,9 @@ function getLeadReportChart(objRights){
 				<div class="hideChartdate">
 					<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
 						<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-							<input type="text" name="dataChartStartDate" class="form-control form-control-sm" id="dataChartStartDate" placeholder="Start Date" style="width:100px" />
+							<input type="text" name="dataChartStartDate" class="form-control form-control-sm" id="dataChartStartDate" placeholder="Start Date" style="width:100px" readonly />
 							<div class="mx-1">To</div>
-							<input type="text" name="dataChartEndDate" class="form-control form-control-sm" id="dataChartEndDate" placeholder="End Date" style="width:100px"  />
+							<input type="text" name="dataChartEndDate" class="form-control form-control-sm" id="dataChartEndDate" placeholder="End Date" style="width:100px" readonly />
 						</div>
 						<button class="btn btn-primary" id="btnChartWiseSubmit">Submit</button>
 					</div>
@@ -380,9 +380,9 @@ function getLeadCountryTime(objRights){
             <div class="hidetimeCountrydate">
                 <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                     <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataStartDate" id="dataStartDate" class="form-control form-control-sm" placeholder="Start Date" style="width:100px" />
+                        <input type="text" name="dataStartDate" id="dataStartDate" class="form-control form-control-sm" placeholder="Start Date" style="width:100px" readonly />
                         <div class="mx-1">To</div> 
-                        <input type="text" name="dataEndDate" id="dataEndDate" class="form-control form-control-sm" placeholder="End Date" style="width:100px"  />
+                        <input type="text" name="dataEndDate" id="dataEndDate" class="form-control form-control-sm" placeholder="End Date" style="width:100px" readonly />
                     </div>
                     <button class="btn btn-primary" id="btnTimeCountrySubmit">Submit</button>
                 </div>
@@ -420,9 +420,9 @@ function getLeadEnrollmentList(objRights){
             <div class="hidestudentdate">
                 <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                     <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataStudentStartDate" class="form-control form-control-sm" id="dataStudentStartDate" placeholder="Start Date" style="width:100px" /> 
+                        <input type="text" name="dataStudentStartDate" class="form-control form-control-sm" id="dataStudentStartDate" placeholder="Start Date" style="width:100px" readonly /> 
                         <div class="mx-1">To</div> 
-                        <input type="text" name="dataStudentEndDate" class="form-control form-control-sm mr-1" id="dataStudentEndDate" placeholder="End Date" style="width:100px"  />
+                        <input type="text" name="dataStudentEndDate" class="form-control form-control-sm mr-1" id="dataStudentEndDate" placeholder="End Date" style="width:100px" readonly />
                     </div>
                     <button class="btn btn-primary" id="btnStudentWiseSubmit">Submit</button>
                 </div>
@@ -469,9 +469,9 @@ function getLeadSchoolDemoList(objRights){
             <div class="hideschooldemo">
                 <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                     <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataSchoolDemoStartDate" class="form-control form-control-sm" id="dataSchoolDemoStartDate" placeholder="Start Date" style="width:100px" />
+                        <input type="text" name="dataSchoolDemoStartDate" class="form-control form-control-sm" id="dataSchoolDemoStartDate" placeholder="Start Date" style="width:100px" readonly />
                         <div class="mx-1">To</div>
-                        <input type="text" name="dataSchoolDemoEndDate" class="form-control form-control-sm" id="dataSchoolDemoEndDate" placeholder="End Date" style="width:100px"  />
+                        <input type="text" name="dataSchoolDemoEndDate" class="form-control form-control-sm" id="dataSchoolDemoEndDate" placeholder="End Date" style="width:100px" readonly />
                     </div>
                     <button class="btn btn-primary" id="btnSchoolDemoWiseSubmit">Submit</button>
                 </div>
@@ -525,8 +525,8 @@ function getLeadEnrollmentYearWise(objRights){
         <div class="col-md-6 col-lg-5"> 
             <div class="row">
                 <div class="col-md-12 col-lg-6 hidedaywise text-center">
-                    <input type="text" name="daywiseStartDate" id="daywiseStartDate" style="width:90px" /> To 
-                    <input type="text" name="daywiseEndDate" id="daywiseEndDate" style="width:90px"  />
+                    <input type="text" name="daywiseStartDate" id="daywiseStartDate" style="width:90px" readonly /> To 
+                    <input type="text" name="daywiseEndDate" id="daywiseEndDate" style="width:90px" readonly />
                 </div>
                 <div class="col-md-12 col-lg-6 hidedaywise">
                     <button class="btn btn-primary" id="btnDayWiseSubmit">Submit</button>
@@ -569,9 +569,9 @@ function getLeadCampaignPriceList(objRights){
                     <div class="hidecampaignLead">
                         <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                             <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                                <input type="text" name="dataLeadCampaignStartDate" class="form-control" placeholder="Start Date" id="dataLeadCampaignStartDate" style="width:100px" />
+                                <input type="text" name="dataLeadCampaignStartDate" class="form-control" placeholder="Start Date" id="dataLeadCampaignStartDate" style="width:100px" readonly />
                                 <div class="mx-1">To</div>
-                                <input type="text" name="dataLeadCampaignEndDate" class="form-control" placeholder="End Date" id="dataLeadCampaignEndDate" style="width:100px"  />
+                                <input type="text" name="dataLeadCampaignEndDate" class="form-control" placeholder="End Date" id="dataLeadCampaignEndDate" style="width:100px" readonly />
                             </div>
                             <button class="btn btn-primary" id="btnLeadCampaignWiseSubmit">Submit</button>
                         </div>

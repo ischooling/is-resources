@@ -163,7 +163,7 @@ function getProfilePageContent(data, callFrom){
                                         <label class="m-0">Added Date</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark addedDateLabel">Added Date</div> 
                                         <div class="field-input w-100">
-                                            <input type="text" id="addedDate" name="addedDate" class="form-control field-input" value="${data.addedDate}"/>
+                                            <input type="text" id="addedDate" name="addedDate" class="form-control field-input" value="${data.addedDate}" readonly/>
                                         </div>  
                                     </div>  
                                 </div>

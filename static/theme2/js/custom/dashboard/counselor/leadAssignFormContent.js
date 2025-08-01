@@ -125,7 +125,7 @@ function getLeadAssignDataList(objectRights){
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:15% !important">Campaigns<div class="dropdown d-inline-block" style="font-size:11px !important" id="activeCampaign">`+getActiveCampaign(campaignList)+`</div></th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:15% !important">SGT(+08:00)
 										<br/>
-										<input type="text" class="form-control form-control-sm" name="formdate" id="formdate">
+										<input type="text" class="form-control form-control-sm" name="formdate" id="formdate" readonly>
 										<br/>Auto + User + Other = (Lead + Demo = Total) / Today
 									</th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10" style="width:15% !important">Availability | Commission</th>				
@@ -316,7 +316,7 @@ function getCounselorSetCommitionPopup(){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
 											<label class="m-0">Applicable From</label>
-											<input type="text" name="startDate" id="startDate" class="datepicker form-control">
+											<input type="text" name="startDate" id="startDate" class="datepicker form-control" readonly>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">
 											<label class="m-0 full">&nbsp;</label>

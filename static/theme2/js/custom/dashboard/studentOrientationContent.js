@@ -337,11 +337,11 @@ function getStudentOrientAdvanceSearchPopup(){
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker">
+							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker">
+							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly>
 						</div>	
 					</div>
 				</form>
@@ -419,7 +419,7 @@ function getStudentOrientAdvanceSearchPopup(){
 								<option value="0">Select state</option>
 							</select>
 						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 city">
 							<label class="m-0">City</label>
 							<select name="cityId" id="cityId" class="form-control" >
 								<option value="0">Select city</option>
@@ -427,11 +427,11 @@ function getStudentOrientAdvanceSearchPopup(){
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker">
+							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker">
+							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly>
 						</div>	
 					</div>
 				</form>

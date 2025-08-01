@@ -670,7 +670,7 @@ function getOnetimeFeeContent(responseData) {
 								html+=
 								`<tr>
 									<td class="text-center">1.</td>
-									<td><input type="text" id="installment1" class="form-control dataPicker schedulePayDate" value=""/></td>
+									<td><input type="text" id="installment1" class="form-control dataPicker schedulePayDate" value="" readonly/></td>
 									<td class="paymentTitle">${gradeName} - One Time Payment - Advance</td>
 									<td class="text-right installment1 scheduleFeeInput d-flex align-items-center">${currency}<input type="text" class="installmentValue ml-1" id="ad_installment1" value="${installment1}" readonly ></td>
 									<td class="text-right scheduleFee ad_installment1">${currency}${installment1}</td>
@@ -766,7 +766,7 @@ function getIntallmentFeeContent(responseData) {
 							html+= 
 							`<tr>
 								<td class="text-center">1.</td>
-								<td><input type="text" id="installment1" class="form-control dataPicker schedulePayDate" value=""/></td>
+								<td><input type="text" id="installment1" class="form-control dataPicker schedulePayDate" value="" readonly/></td>
 								<td class="paymentTitle">${gradeName} - 1<sup>st</sup> of 3 Months Installment - Advance</td>
 								<td class="text-right installment1 scheduleFeeInput d-flex align-items-center">${currency}<input type="text" class="installmentValue ml-1" id="ad_installment1" value="${installment1}" onblur="totalInstallmentAmount('paymentScheduleTableInstallment', 'installmentFinalPaybleFee')" /></td>
 								<td class="text-right installment1 scheduleFee ad_installment1">${currency}${installment1}</td>
@@ -774,7 +774,7 @@ function getIntallmentFeeContent(responseData) {
 							</tr>
 							<tr>
 								<td class="text-center">2.</td>
-								<td><input type="text" id="installment2" class="form-control dataPicker schedulePayDate" value=""/></td>
+								<td><input type="text" id="installment2" class="form-control dataPicker schedulePayDate" value="" readonly/></td>
 								<td class="paymentTitle">${gradeName} - 2<sup>nd</sup> of 3 Months Installment - Advance</td>
 								<td class="text-right installment2 scheduleFeeInput d-flex align-items-center">${currency}<input type="text" class="installmentValue ml-1" id="ad_installment2" value="${installment2}" onblur="totalInstallmentAmount('paymentScheduleTableInstallment', 'installmentFinalPaybleFee')" /></td>
 								<td>&nbsp;</td>
@@ -782,7 +782,7 @@ function getIntallmentFeeContent(responseData) {
 							</tr>
 							<tr>
 								<td class="text-center">3.</td>
-								<td><input type="text" id="installment3" class="form-control dataPicker schedulePayDate" value=""/></td>
+								<td><input type="text" id="installment3" class="form-control dataPicker schedulePayDate" value="" readonly/></td>
 								<td class="paymentTitle">${gradeName} - 3<sup>rd</sup> of 3 Months Installment - Advance</td>
 								<td class="text-right installment3 scheduleFeeInput d-flex align-items-center">${currency}<input type="text" class="installmentValue ml-1" id="ad_installment3" value="${installment3}" onblur="totalInstallmentAmount('paymentScheduleTableInstallment', 'installmentFinalPaybleFee')" /></td>
 								<td>&nbsp;</td>
