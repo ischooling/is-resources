@@ -646,7 +646,7 @@ function editStudentPayment(formId, moduleId) {
                     }
                 }
             } else {
-                showMessageTheme2(0, data['message']);
+                showMessageTheme2(1, data['message']);
                 $('#editPaymentModal').modal('hide');
                 window.setTimeout(function () {
                     hideMessageTheme2('')
@@ -754,6 +754,22 @@ function showPaymentPopup(id,controlType) {
                         $('#installmentNumber2').val(paymentName2[1].split(' of ')[0].split('<sup>')[0]);
                         $('#numberOfMonth2').val(paymentName2[1].split(' of ')[1].split(' ')[0]);
                         $('#paymentName2').val('');
+                    }
+                } else if (null != paymentName2 && paymentName2.search(/ - \d+<sup>.*?<\/sup> of \d+ /i) > -1) {
+                    let gradeAndRest = paymentName2.split(' - ');
+
+                    if (gradeAndRest.length === 2) {
+                        let grade = gradeAndRest[0].trim();
+                        let emiInfo = gradeAndRest[1];
+
+                        let instPart = emiInfo.split(' of ')[0];
+                        let instNumber = instPart.split('<sup>')[0].trim();
+                        let supText = instPart.includes('<sup>') ? instPart.match(/<sup>(.*?)<\/sup>/i)?.[1] || '' : '';
+                        let totalMonths = emiInfo.split(' of ')[1].split(' ')[0].trim();
+
+                        $('#installmentNumber2').val(instNumber);
+                        $('#numberOfMonth2').val(totalMonths);
+                        $('#paymentName2').val(`${grade} - ${instNumber}${supText} of ${totalMonths} Months Installment`);
                     }
                 }
             }

@@ -35,6 +35,9 @@ function getAddPaymentSearchResult(data) {
 }
 
 function getAdvancePaymentSearchResult(formId, data) {
+    const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_EDIT_CUSTOM_PAYMENTS');
+    var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
+    const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
 	const roleAndModule = getUserRights(SCHOOL_ID, USER_ROLE_ID, USER_ID, moduleId);
 	let html = '';
 	$.each(data.advancePaymentSearchResponseDTO, function (k, apsrSingle) {
@@ -161,10 +164,11 @@ function getAdvancePaymentSearchResult(formId, data) {
 			if(apsrSingle.paymentTitle=='CUSTOMIZED_REGISTRATION_SUBJECT_FEE' 
 				|| apsrSingle.paymentTitle=='CUSTOMIZED_SUBJECT_FEE'
 				){
-				if(apsrSingle.standardStatus==1){
+				var eligibleForEdit=false;	
+				if(apsrSingle.standardStatus==1 || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'This is a customized payment plan. Would you like to make changes?\',\'getAsPost(\\\'/dashboard/fee-calculation/?type=C&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Edit Custom Payment</span>';
+                    html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 				}else if(apsrSingle.standardStatus==0){
-					var eligibleForEdit=false;
 					if (apsrSingle.paymentStatus != 'SUCCESS') {
 						eligibleForEdit=true;
 					}else{
@@ -172,7 +176,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 							eligibleForEdit=true;
 						}
 					}
-					if(eligibleForEdit){
+					if(eligibleForEdit || isUserAllowed){
 						html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 					}
 				}
@@ -180,7 +184,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 				|| apsrSingle.paymentTitle=='SUBJECT_FEE_ADV'
 				){
 				var eligibleForEdit=false;
-				if(apsrSingle.standardStatus==3){
+				if(apsrSingle.standardStatus==3 || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'This is a advanced payment plan. Would you like to make changes?\',\'getAsPost(\\\'/dashboard/fee-calculation/?type=A&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Edit Advance Payment</span>';
 				}else if(apsrSingle.standardStatus==0){
 					if (apsrSingle.paymentStatus != 'SUCCESS') {
@@ -191,7 +195,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 						}
 					}
 				}
-				if(eligibleForEdit){
+				if(eligibleForEdit || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 				}
 			}else if(apsrSingle.paymentTitle=='REGISTRATION_SUBJECT_FEE' 
@@ -209,7 +213,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 				}else{
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'Once you create a custom payment, it can not be changed. If you need to make changes, you will have to create a new one. Would you like to continue?\',\'getAsPost(\\\'/dashboard/fee-calculation/?type=C&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Create Custom Payment</span>';
 				}
-				if(eligibleForEdit){
+				if(eligibleForEdit || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 				}
 			}else{
@@ -221,7 +225,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 						eligibleForEdit=true;
 					}
 				}
-				if(eligibleForEdit){
+				if(eligibleForEdit || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 				}
 			}
@@ -975,7 +979,7 @@ function editPaymentContent(moduleId, userPayment, controlType, standardName) {
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
                                     <div class="form-group mb-2 p-0">
                                         <label class="mb-0">Transaction No.</label>
-                                        <input id="transactionNumber2" name="transactionNumber2" type="text" class="form-control" value="${userPayment.transactionId}">
+                                        <input id="transactionNumber2" name="transactionNumber2" type="text" class="form-control" value="${userPayment.transactionId != null ? userPayment.transactionId : ''}">
                                     </div>
                                 </div>
 
