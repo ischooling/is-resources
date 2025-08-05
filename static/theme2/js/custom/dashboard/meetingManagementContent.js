@@ -271,6 +271,7 @@ function getMeetingFormHtml() {
                         autocomplete="off"
                         required
                         readonly
+                        onkeydown="return false"
                       >
                       <select
                         onchange="checkAndFetchMeetings();"

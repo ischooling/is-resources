@@ -193,6 +193,18 @@ $(document).ready(function () {
     $("head").append(`<style>.loader-style.hide-loader{display: none !important;}</style>`)
   }
   //$('[data-toggle="tooltip"]').tooltip();
+  $('.daterange').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    });
+
+    $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+    });
+
+    // Block all manual input methods
+    $('.daterange').on('keydown paste drop cut', function(e) {
+      e.preventDefault();
+    });
 });
 function setPagePosition(position) {
   signupPage = position;

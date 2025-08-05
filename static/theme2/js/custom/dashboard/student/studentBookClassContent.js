@@ -877,10 +877,10 @@ function bookClassFilterFormContent(
                             </select>    
                         </div>
                         <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2 datepickerStartWrapper">
-                            <input class="form-control datepicker" name="startDate" value="" id="startDate" placeholder="Start Date" disabled readonly/>    
+                            <input class="form-control datepicker" name="startDate" value="" id="startDate" placeholder="Start Date" disabled readonly onkeydown="return false"/>    
                         </div> 
                         <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2 datepickerEndWrapper">
-                            <input class="form-control datepicker" name="endDate" value="Mar 25, 2025" id="endDate" placeholder="End Date" disabled readonly/>    
+                            <input class="form-control datepicker" name="endDate" value="Mar 25, 2025" id="endDate" placeholder="End Date" disabled readonly onkeydown="return false"/>    
                         </div>
                         <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2">
                             <select class="form-control" name="classStatus" id="classStatus">

@@ -55,7 +55,7 @@ function getManageLeaveByAdminContent(title, roleAndModule, schoolId, userId, ro
 +'						<div class="col-12">'
 +'							<div class="position-relative form-group">'
 +'								<label for="">Leave Date</label>'
-+'								<input type="text" name="leaveDates" id="leaveDates" class="form-control" placeholder="Select Date" readonly/>'
++'								<input type="text" name="leaveDates" id="leaveDates" class="form-control" placeholder="Select Date" readonly onkeydown="return false"/>'
 +'							</div>'
 +'						</div>'
 +'						<div class="col-12">'

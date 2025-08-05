@@ -194,7 +194,7 @@ function customiseYourPlanModal(data, subjectId, userId){
                             <div class="mx-3">
                                 <p class="font-16 font-weight-semi-bold mb-2">Amount</p>
                                 <span class="d-inline-block mx-auto" style="width:80px;">
-                                    <input type="text" class="form-control text-primary font-weight-bold bg-white" id="planAmount" readonly data-singleclassfee="${customPlan.singleClassFee}" value="${schoolSettingsTechnical.currencySymbol}${customPlan.amount}" />
+                                    <input type="text" class="form-control text-primary font-weight-bold bg-white" id="planAmount" readonly onkeydown="return false" data-singleclassfee="${customPlan.singleClassFee}" value="${schoolSettingsTechnical.currencySymbol}${customPlan.amount}" />
                                 </span>
                             </div>
                             <div class="noOfWeeks-wrapper">

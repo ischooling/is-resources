@@ -213,14 +213,14 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	}else if(pageNo=='user-leave'){
 	$('#dashboardContentInHTML').html(getManageLeaveContent('Leave Detail',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, true));
 	$("#teacherLeaveTable").dataTable();
-		$("#leaveDates").datepicker({
-			//autoclose: true,//
-			startDate:new Date(),
-			multidate:true,
-			format: 'M dd, yyyy',
-			container:'#leaveFromModal .modal-body'
-		});
-		getUserLeaveData(USER_ID, USER_ID);
+	$("#leaveDates").datepicker({
+		//autoclose: true,//
+		startDate:new Date(),
+		multidate:true,
+		format: 'M dd, yyyy',
+		container:'#leaveFromModal .modal-body'
+	});
+	getUserLeaveData(USER_ID, USER_ID);
 	}else if(pageNo=='manage-leave'){
 		$('#dashboardContentInHTML').html(getManageLeaveContent('Manage Leave',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, true));
 		$("#teacherLeaveTable").dataTable();

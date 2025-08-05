@@ -125,7 +125,7 @@ function getLeadAssignDataList(objectRights){
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:15% !important">Campaigns<div class="dropdown d-inline-block" style="font-size:11px !important" id="activeCampaign">`+getActiveCampaign(campaignList)+`</div></th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:15% !important">SGT(+08:00)
 										<br/>
-										<input type="text" class="form-control form-control-sm" name="formdate" id="formdate" readonly>
+										<input type="text" class="form-control form-control-sm" name="formdate" id="formdate" readonly onkeydown="return false">
 										<br/>Auto + User + Other = (Lead + Demo = Total) / Today
 									</th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10" style="width:15% !important">Availability | Commission</th>				

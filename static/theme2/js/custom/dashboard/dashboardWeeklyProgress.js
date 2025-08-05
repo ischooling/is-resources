@@ -244,16 +244,25 @@ function callDateWiseGradebokSummery(lmsUserId,lmsProId,stuserId) {
 
 function callOpenStudentWeeklyReportPopup(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType, startLimit){
 	if(reportType === 'view'){
-		$("#autoMailStudent").modal('hide');
+		if(startLimit==0 && !$("#autoMailStudent").hasClass('show')){	
+			$("#autoMailStudent").modal('hide');
+		}
 		$("#isCron").val(isCron);
 	}else{
 		$("#autoFailedMailStudent").modal('hide');
 	}
 	getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType,'', startLimit);
+	$("#weeklyReportSearch").on('keyup', function (e) {
+		if($("#weeklyReportSearch").val().length>=3){
+			getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType ,'', startLimit);
+		}else if($("#weeklyReportSearch").val().length==0){
+			getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType ,'', startLimit);
+		}
+	});
 }
 function callFilterdStudentWeeklyReport(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType, startLimit){
 	weeklyReportId = $("#reportID").val();
-	isCron = $("#isCron").val();
+	isCron = $("#isCron").val()!=undefined?$("#isCron").val():false;
 	var isFilter = $("#reportFilter").val();
 	getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType ,isFilter, startLimit);
 }
@@ -280,37 +289,41 @@ function getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId
 					//$("#autoWeeklyMailStudent").dataTable().fnDestroy();
 					$("#studentReportSendMail").html("");
 					var weeklyStudent = data['studentWeeklyList'];
-					//console.log(weeklyStudent);
-					var htmlTable = "";
-					var inc=1;
-					for(var i=0;i<weeklyStudent.length;i++){
-						htmlTable  = htmlTable + "<tr>";
-						htmlTable  = htmlTable + "<td> "+weeklyStudent[i]['srNo']+"</td>";
-						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['courseProviderName']+"</td>";
-						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentName']+"</td>";
-						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentStringId']+"</td>";
-						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['grade']+"</td>";
-						htmlTable  = htmlTable + "<td><a href="+weeklyStudent[i]['playloadUrl']+" target=\"_blank\" data-toggle=\"tooltip\" title=\"View and Send Report\"><i class=\"fa fa-eye\"></i></a></td>";
-						if(weeklyStudent[i]['mailStatus']=='Y'){
-							htmlTable  = htmlTable + "<td><i class=\"fa fa-check\"></i></td>";
-						}else{
-							htmlTable  = htmlTable + "<td><i class=\"fa fa-times\"></i></td>";
+					if(weeklyStudent!=undefined){
+						//console.log(weeklyStudent);
+						var htmlTable = "";
+						var inc=1;
+						for(var i=0;i<weeklyStudent.length;i++){
+							htmlTable  = htmlTable + "<tr>";
+							htmlTable  = htmlTable + "<td> "+weeklyStudent[i]['srNo']+"</td>";
+							htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['courseProviderName']+"</td>";
+							htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentName']+"</td>";
+							htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentStringId']+"</td>";
+							htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['grade']+"</td>";
+							htmlTable  = htmlTable + "<td><a href="+weeklyStudent[i]['playloadUrl']+" target=\"_blank\" data-toggle=\"tooltip\" title=\"View and Send Report\"><i class=\"fa fa-eye\"></i></a></td>";
+							if(weeklyStudent[i]['mailStatus']=='Y'){
+								htmlTable  = htmlTable + "<td><i class=\"fa fa-check\"></i></td>";
+							}else{
+								htmlTable  = htmlTable + "<td><i class=\"fa fa-times\"></i></td>";
+							}
+							if(weeklyStudent[i]['mailStatus']=='B' || weeklyStudent[i]['mailStatus']=='N'){
+								htmlTable  = htmlTable + "<td>Yes</td>";
+							}else{
+								htmlTable  = htmlTable + "<td>No</td>";
+							}
+							htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['createdDate']+"</td>";
+							htmlTable  = htmlTable + "</tr>";
+							inc = inc +1;
 						}
-						if(weeklyStudent[i]['mailStatus']=='B' || weeklyStudent[i]['mailStatus']=='N'){
-							htmlTable  = htmlTable + "<td>Yes</td>";
-						}else{
-							htmlTable  = htmlTable + "<td>No</td>";
+						$("#studentReportSendMail").html(htmlTable);
+						$(".studentProgressListpaging").html(dataStudentProgressPagging(data, isCron, reportType, weeklyReportId));
+						//$("#autoWeeklyMailStudent").DataTable();
+						if(!$("#autoMailStudent").hasClass('show')){
+							$("#autoMailStudent").modal('show');
 						}
-						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['createdDate']+"</td>";
-						htmlTable  = htmlTable + "</tr>";
-						inc = inc +1;
 					}
-					$("#studentReportSendMail").html(htmlTable);
-					$(".studentProgressListpaging").html(dataStudentProgressPagging(data, isCron, reportType, weeklyReportId));
-					//$("#autoWeeklyMailStudent").DataTable();
-					$("#autoMailStudent").modal('show');
 				}else{
-					//$("#autoFailedWeeklyMailStudent").dataTable().fnDestroy();
+					$("#autoFailedWeeklyMailStudent").dataTable().fnDestroy();
 					$("#studentFailedReportSendMail").html("");
 					var weeklyStudent = data['studentWeeklyList'];
 					//console.log(weeklyStudent);
@@ -333,11 +346,13 @@ function getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId
 					$("#sendAllMail").attr('onclick',"return showWarningMessageForGenerate('Are you sure you want to generate the report?','againSendAllFailedMail("+weeklyReportId+")')")
 					$("#studentFailedReportSendMail").html(htmlTable);
 					$(".studentFaildProgressListpaging").html(dataStudentProgressPagging(data, isCron, reportType, weeklyReportId));
-					//$("#autoFailedWeeklyMailStudent").DataTable();
+					$("#autoFailedWeeklyMailStudent").DataTable();
 					$("#autoFailedMailStudent").modal('show');
 				}
 				$("#reportID").val(weeklyReportId);
 			}
+
+			
 			
 		}
 	});
@@ -356,6 +371,7 @@ function getRequestForWeeklyReportStudent(weeklyReportId, userId, uniueId, cours
 	studentWeeklyDTO['cron'] = isCron;
 	studentWeeklyDTO['isFilter'] = isFilter;
 	studentWeeklyDTO['currentPage'] = startLimit;
+	studentWeeklyDTO['weeklyReportSearch']=$("#weeklyReportSearch").val();
 	request['studentWeeklyDTO'] =studentWeeklyDTO;
     return request;
 }
@@ -411,19 +427,21 @@ function callAutoWeeklyStudent(formId, userId) {
 				$("#generateReportTable, #generateReport").show();
 				//showMessageTheme2(false, data['message']);
 				var weeklyStudent = data['studentWeeklyDTOList'];
-				console.log(weeklyStudent);
-				var htmlTable = "";
-				var inc=1;
-				for(var i=0;i<weeklyStudent.length;i++){
-					htmlTable  = htmlTable + "<tr>";
-					htmlTable  = htmlTable + "<td>"+(i+1)+"</td>";
-					htmlTable  = htmlTable + "<td><input type=\"checkbox\" class=\"checkAllStd\" name=\"studentWeek"+weeklyStudent[i]['studentId']+"[]\" id=\"studentWeek"+weeklyStudent[i]['studentId']+"\"  value="+weeklyStudent[i]['studentId']+" /> </td>";
-					htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['courseProviderName']+"</td>";
-					htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentName']+"</td>";
-					htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['grade']+"</td>";
-					htmlTable  = htmlTable + "</tr>";
+				if(weeklyStudent!=null){
+					console.log(weeklyStudent);
+					var htmlTable = "";
+					var inc=1;
+					for(var i=0;i<weeklyStudent.length;i++){
+						htmlTable  = htmlTable + "<tr>";
+						htmlTable  = htmlTable + "<td>"+(i+1)+"</td>";
+						htmlTable  = htmlTable + "<td><input type=\"checkbox\" class=\"checkAllStd\" name=\"studentWeek"+weeklyStudent[i]['studentId']+"[]\" id=\"studentWeek"+weeklyStudent[i]['studentId']+"\"  value="+weeklyStudent[i]['studentId']+" /> </td>";
+						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['courseProviderName']+"</td>";
+						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentName']+"</td>";
+						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['grade']+"</td>";
+						htmlTable  = htmlTable + "</tr>";
+					}
+					$("#autoStudentReportLog").html(htmlTable);
 				}
-				$("#autoStudentReportLog").html(htmlTable);
 				
 			}
 		}

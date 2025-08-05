@@ -92,7 +92,7 @@ function getRequestForCommunicationLog(formId){
 }
 
 function saveCommunicationLog(formId) {
-    hideMessage('');
+    hideMessageTheme2('');
     if(editor1.getData()==null || editor1.getData()=='' || editor1.getData()=='undefined'){
         showMessageTheme2(0,"Comments mandatory",'',true);
 		return false;

@@ -119,7 +119,7 @@ function getFilterForm(){
 					</div>
 					<div class="col-md-4 col-sm-4 col-xs-12">
 						<label>Added date</label>
-						<input type="text" name="addedDate" class="form-control" id="addedDate" readonly>
+						<input type="text" name="addedDate" class="form-control" id="addedDate" readonly onkeydown="return false">
 					</div>
 					<div class="col-md-4 col-sm-6 col-xs-12">
 						<label>Status</label>

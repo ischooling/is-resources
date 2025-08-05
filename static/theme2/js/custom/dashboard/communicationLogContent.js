@@ -51,6 +51,7 @@ function getAddCommunicationLogTableHeader(){
 		+'<tr>'	
 			+'<td>S.No.</td>'
 			+'<td>Title</td>'
+			+'<td>Status</td>'
 			+'<td>Comments</td>'
 			+'<td>Attachment</td>'
 			+'<td>Added by/Added At</td>'
@@ -65,6 +66,7 @@ function getAddCommunicationLogTablebody(result){
 				'<tr id="commLog'+v.commentId+'">'
 					+'<td>'+(k+1)+'</td>'
 					+'<td>'+v.title+'</td>'
+					+'<td>'+v.status+'</td>'
 					+'<td>'+v.comments+'</td>'
 					+'<td class="text-center">';
 						if(v.uploadFile != '' && v.uploadFile != 'No file chosen...'){

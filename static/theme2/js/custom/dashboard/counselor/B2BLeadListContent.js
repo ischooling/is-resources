@@ -74,7 +74,7 @@ function getLeadFollowupFormB2BPopup(objRights){
 	html+='<div class="row">';
 	html+='<div class="mr-0 mr-sm-2 flex-grow-1 nextCustomDate" style="display:none">';
 	html+='<label class="m-0">Date</label>';
-	html+='<input type="text" name="notSureCallscheduleDate" id="notSureCallscheduleDate" class="form-control dropdownFontSize datepicker" maxlength="50" autocomplete="off" readonly>';
+	html+='<input type="text" name="notSureCallscheduleDate" id="notSureCallscheduleDate" class="form-control dropdownFontSize datepicker" maxlength="50" autocomplete="off" readonly onkeydown="return false">';
 	html+='</div>';
 	html+='<div class="mr-0 mr-sm-2 flex-grow-1">';
 	html+='<label class="m-0">&nbsp;HH</label>';
@@ -361,11 +361,11 @@ function getLeadAdvanceSearchB2BPopup(objectRights){
 	+'					</div>'
 	+'					<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">'
 	+'						<label class="m-0">Start Date</label>'
-	+'						<input type="text" name="leadStartDateSearch" id="leadStartDateSearch"  class="form-control datepicker" readonly>'
+	+'						<input type="text" name="leadStartDateSearch" id="leadStartDateSearch"  class="form-control datepicker" readonly onkeydown="return false">'
 	+'					</div>'
 	+'					<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">'
 	+'						<label class="m-0">To Date</label>'
-	+'						<input type="text" name="leadEndDateSearch" id="leadEndDateSearch"  class="form-control datepicker" readonly>'
+	+'						<input type="text" name="leadEndDateSearch" id="leadEndDateSearch"  class="form-control datepicker" readonly onkeydown="return false">'
 	+'					</div>'
 	+'					<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">'
 	+'						<label class="m-0">Date Type</label>'

@@ -1479,7 +1479,6 @@
     $(function () {
         $(autoInitSelector).datepicker();
     })
-
 })();
 
 ;(function () {

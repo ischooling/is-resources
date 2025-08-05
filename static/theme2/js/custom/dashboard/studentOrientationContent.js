@@ -337,11 +337,11 @@ function getStudentOrientAdvanceSearchPopup(){
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly>
+							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly>
+							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
 						</div>	
 					</div>
 				</form>
@@ -427,11 +427,11 @@ function getStudentOrientAdvanceSearchPopup(){
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly>
+							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly>
+							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
 						</div>	
 					</div>
 				</form>

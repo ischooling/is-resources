@@ -48,7 +48,7 @@ async function renderApprovedTeacherDashboard(title, roleAndModule, SCHOOL_ID, U
 			format : 'mm-dd-yyyy',
 			startDate : startDate,
 			endDate : endDate
-		})
+		});
 		startDate = new Date();
 		startDate.setYear(startDate.getYear() - 1);
 
@@ -58,8 +58,7 @@ async function renderApprovedTeacherDashboard(title, roleAndModule, SCHOOL_ID, U
 			format : 'mm-dd-yyyy',
 			startDate : startDate,
 			endDate : endDate
-		})
-
+		});
 		bindFileUploadNew1('1', '2','${userId}',4);
 		var startDate = new Date();
 		startDate.setMonth(startDate.getMonth() - 3);
@@ -288,7 +287,7 @@ function getCommonPaymentModel(){
 								<label>Date</label>
 								<input type="hidden" class="form-control" id="entityIdSearch" value="">
 								<input type="hidden" class="form-control" id="entityNameSearch" value="">
-								<input type="text" class="form-control" id="paymentDateSearch" placeholder="Payment Date" readonly>
+								<input type="text" class="form-control" id="paymentDateSearch" placeholder="Payment Date" readonly onkeydown="return false">
 							</div>
 						</div>
 						<div class="col-lg-5 col-md-5 col-sm-4 col-12">
@@ -348,7 +347,7 @@ function getCommonAddPaymentModel(){
 						<div class="col-md-6">
 							<div class="form-group">
 								<label>Payment Date</label>
-								<input type="text" id="paymentDate" class="form-control" name="paymentDate" value="" readonly>
+								<input type="text" id="paymentDate" class="form-control" name="paymentDate" value="" readonly onkeydown="return false">
 							</div>
 						</div>
 						<div class="col-md-6">

@@ -109,6 +109,8 @@ $(".checkAllStd").unbind().bind('click',function () {
         //$("#studentWeek"+$(this).val()).val(0);
     }
 });
+
+	
 	// $("#btmSearchUsers").on("click", function(){
 	// 	getAdminUserList('adminFilter',ROLE_MODULE.moduleId, 0);
 	// });
@@ -282,11 +284,11 @@ function getAutoViewModule(){
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
 							<label class="bmd-label-floating">Report Start Date:</label> 
-							<input type="text" class="form-control" id="startReportDate" name="startReportDate" autocomplete="off" readonly />
+							<input type="text" class="form-control" id="startReportDate" name="startReportDate" autocomplete="off" readonly onkeydown="return false" />
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
 							<label class="bmd-label-floating">Report End Date:</label> 
-							<input type="text" class="form-control" id="endReportDate" name="endReportDate" autocomplete="off" readonly />
+							<input type="text" class="form-control" id="endReportDate" name="endReportDate" autocomplete="off" readonly onkeydown="return false" />
 						</div>
 						<div class="col-lg-3 col-md-3 col-sm-3 col-12">
 							<button class="btn btn-success sendMailbtn" type="submit"  onclick="return showWarningMessageForGenerate('Are you sure you want to generate the report?','callAutoWeeklyStudentSendMail(\\\'autoStudentSendForm\\\',\\\'${USER_ID}\\\',\\\'${UNIQUEUUID}\\\',\\\'${moduleId}\\\')')" > Generate Report</button>
@@ -339,6 +341,9 @@ function getAutoMailStudent(){
 						</select>
 					</div>
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12 mb-2">
+					<div class="d-flex align-items-center flex-wrap justify-content-end mb-2" style="gap:0.5rem">
+						<input type="text" name="weeklyReportSearch" id="weeklyReportSearch" class="w-fit-content form-control form-control-sm" placeholder="Search" />
+					</div>
 						<table class="table table-bordered responsive nowrap" id="autoWeeklyMailStudent" style="width:100%;">
 						<thead>
 							<tr>

@@ -1657,7 +1657,7 @@ if(leadType=='B2B'){}else{
 	$("#"+formId+" #clsrmBkedLastDateSearch").val('');
 	$("#"+formId+" #leadSearchTemplate").val('').trigger('change');
 	$("#"+formId+" #leadSearchDeliveredStatus").val('ALL').trigger('change');
-	$("#"+formId+" #leadSearchCampaign").val('').trigger('change');
+	$("#"+formId+" #leadSearchCampaign").val(0).trigger('change');
 
 }
 

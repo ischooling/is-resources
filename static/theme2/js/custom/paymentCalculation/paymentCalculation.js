@@ -430,7 +430,7 @@ function singleIntallment(id, index, scheduleDate, paymentTitle, scheduleFee, pa
 		+ '<td class="text-center" id="updid' + id + '">' + index + '</td>';
 	if (islastRow) {
 		tr += '<td class="text-center schedulePayDate" style="max-width:96px">'
-			+ '<input type="text" placeholder="Please select schedule date" class="paymentScheduleDate" value="' + scheduleDate + '" style="max-width:96px" readonly/>'
+			+ '<input type="text" placeholder="Please select schedule date" class="paymentScheduleDate" value="' + scheduleDate + '" style="max-width:96px" readonly onkeydown="return false"/>'
 			+ '</td>';
 	} else {
 		tr += '<td class="text-center schedulePayDate">&nbsp;</td>';
@@ -1273,7 +1273,7 @@ function singleIntallmentAdv(id, index, scheduleDate, paymentTitle, scheduleFee,
 		'<tr id="updid' + id + '">'
 		+ '<td class="text-center">' + index + '</td>';
 	if (scheduleDate != '') {
-		tr += '<td class="text-center"><input class="form-control dataPicker schedulePayDate" text="text" id="dataPicker' + index + '" readonly/></td>';
+		tr += '<td class="text-center"><input class="form-control dataPicker schedulePayDate" text="text" id="dataPicker' + index + '" readonly onkeydown="return false"/></td>';
 	} else {
 		tr += '<td class="text-center"></td>';
 	}

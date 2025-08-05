@@ -366,7 +366,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 				}
 				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
 					+'<label>Class Start Date</label>'
-					+'<input type="text" name="classStartDate" id="classStartDate" class="form-control filterDates" value="" maxlength="10" readonly/>'
+					+'<input type="text" name="classStartDate" id="classStartDate" class="form-control filterDates" value="" maxlength="10" readonly onkeydown="return false"/>'
 				+'</div>'
 				// +'<div class="col-md-3 col-sm-6 col-12 mb-2">'
 				// 	+'<label>Class Start Time</label>'
@@ -377,7 +377,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 				// +'</div>'
 				+'<div class="col-md-3 col-sm-6 col-12 mb-2">'
 					+'<label>Class End Date</label>'
-					+'<input type="text" name="classEndDate" id="classEndDate" class="form-control filterDates" value="" maxlength="10" readonly/>'
+					+'<input type="text" name="classEndDate" id="classEndDate" class="form-control filterDates" value="" maxlength="10" readonly onkeydown="return false"/>'
 				+'</div>'
 				// +'<div class="col-md-3 col-sm-6 col-12 mb-2">'
 				// 	+'<label>Class End Time</label>'

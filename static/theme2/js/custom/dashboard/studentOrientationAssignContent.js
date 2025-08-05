@@ -111,7 +111,7 @@ function getStudentOrientationAssignDataList(){
 		<div class="row">
 			<div class="col-lg-12 col-md-12">
 				<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-					<input type="text" name="formdate" id="formdate" class="width:fit-content" readonly />
+					<input type="text" name="formdate" id="formdate" class="width:fit-content" readonly onkeydown="return false" />
 				</div>
 				<form class="form-horizontal w-100" method="post" action="javascript:void(0);" id="studentAssignCounselorDataForm">
 					<input type="hidden" name="leadId" id="leadId" value="0" />

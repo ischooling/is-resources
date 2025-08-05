@@ -268,7 +268,7 @@ function callLocationAndSelectCountryNew1Fill(formId, type, data,flag,countryCod
 		
 		if($("#"+formId+" #chooseDate").length){
 			$("#"+formId+" #chooseDate").datepicker().datepicker("setDate", new Date());
-			freeslotsList(formId,true,type)
+			freeslotsList(formId,true,type);
 		}
 		$("#"+formId+" #location").val(JSON.stringify(data));
 		if($("#"+formId+"Alternet #location").length){

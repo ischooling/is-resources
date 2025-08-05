@@ -36,7 +36,7 @@ function saveConfirmationGenerationDate(){
                 }
                 
                 $("#generationDate").datepicker("setDate", new Date(responce['date']))
-                $("#textDate").html('Date : '+responce['date'])
+                $("#textDate").html('Date : '+responce['date']);
             }
         }
     });

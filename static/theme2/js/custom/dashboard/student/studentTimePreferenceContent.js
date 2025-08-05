@@ -50,10 +50,10 @@ function getStudentTimePreferencePopupContent(details){
 											<div class="col-lg-6 col-md-12 col-sm-12 col-12 m-auto mb-1">
 												<input type="hidden" name="timeStuStandardId" id="timeStuStandardId" />
 												<span class="d-inline-block" id='chooseDateToStartSemster-wrapper'>
-													<input id="chooseDateToStartSemster" name="chooseDateToStartSemster" placeholder="Select date" required readonly="" type='text' class="bg-white form-control datepicker" />
+													<input id="chooseDateToStartSemster" name="chooseDateToStartSemster" placeholder="Select date" required readonly onkeydown="return false" type='text' class="bg-white form-control datepicker" />
 												</span>
 												<span class="d-none" id='chooseDateSystemTrainingDate-wrapper'>
-													<input id="chooseDateSystemTrainingDate" name="chooseDateSystemTrainingDate" placeholder="Select date" required readonly="" type='text' class="bg-white form-control datepicker" />
+													<input id="chooseDateSystemTrainingDate" name="chooseDateSystemTrainingDate" placeholder="Select date" required readonly onkeydown="return false" type='text' class="bg-white form-control datepicker" />
 												</span>
 											</div>
 										</div>

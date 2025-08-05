@@ -539,7 +539,7 @@ function getTeacherBasicInfoContent(signupTeacher){
                     <div class="form-group">
                         <div class="icon-field valid-field">
                             <i class="zmdi zmdi-account-calendar"></i> <input type="text"
-                                class="form-control-field" name="teacherDob" id="teacherDob" readonly
+                                class="form-control-field" name="teacherDob" id="teacherDob" readonly onkeydown="return false"
                                 placeholder="Date of Birth*"
                                 value="">
                         </div>

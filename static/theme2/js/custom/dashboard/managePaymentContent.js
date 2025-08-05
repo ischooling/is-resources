@@ -570,7 +570,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                     <div class="col-md-12">
                                         <div class="d-flex flex-wrap align-items-center">
                                             <div style="flex:1;width:1080" id="viewPaymentUrlElementWrapper" style="display:none">
-                                                <input class="full border-0" id="viewPaymentUrlElement" readonly="readonly" style="outline:none">
+                                                <input class="full border-0" id="viewPaymentUrlElement" readonly style="outline:none">
                                             </div>
                                             <div style="margin-left:auto;min-width:fit-content">
                                                 <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal" id="closePaymentModal">Close</button>
