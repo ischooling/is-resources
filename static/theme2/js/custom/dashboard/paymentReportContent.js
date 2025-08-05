@@ -467,7 +467,7 @@ function filterStudentPaymentReportForm(){
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Over Due By (Days in Numbers)</label>'
-							+'<input type="text" id="overDueBy" class="form-control" placeholder="Enter days count" value="45">'
+							+'<input type="text" id="overDueBy" class="form-control" placeholder="Enter days count" value="">'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Enrolled By</label>'

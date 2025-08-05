@@ -164,9 +164,9 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #learningProgram").val("").trigger("change");
 	$('#'+formID+" #gradeId").val("").trigger("change");
 	$('#'+formID+" #enrollStatus").val("0").trigger("change");
-	$('#'+formID+" #paymentStatus").val(["ODUE","DUE"]).trigger("change");
+	$('#'+formID+" #paymentStatus").val('').trigger("change");
 	$('#'+formID+" #userId").val("").trigger("change");
-	$('#'+formID+" #overDueBy").val("45");
+	$('#'+formID+" #overDueBy").val("");
 	$('#'+formID+" #pageSize").val("10").trigger("change");
 	getPaymentReportData('',false,1);
 	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');

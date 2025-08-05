@@ -23,11 +23,11 @@ function getDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondi
 			noRecordFlag=false;
 		}
 	}
-    if($("#counselorName").val() == ''){
-        showMessageTheme2(0, "Please select a counselor")
-        customLoader(false);
-        return false;
-    }
+    // if($("#counselorName").val() == ''){
+    //     showMessageTheme2(0, "Please select a counselor")
+    //     customLoader(false);
+    //     return false;
+    // }
 	$.ajax({
 		 type : "POST",
 		 contentType : APPLICATION_JSON_VALUE,
