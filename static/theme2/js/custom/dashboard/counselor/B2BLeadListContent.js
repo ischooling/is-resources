@@ -720,6 +720,12 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 	}
 	console.log(data);
 	var html='';
+	html+='<select name="leadsPagging" id="leadsPagging" class="ml-1 my-2 rounded">'
+		+'<option value="10" '+(leaddata.recordsPerPage=='10'?'selected':'')+'>10</option>'
+		+'<option value="25" '+(leaddata.recordsPerPage=='25'?'selected':'')+'>25</option>'
+		+'<option value="50" '+(leaddata.recordsPerPage=='50'?'selected':'')+'>50</option>'
+		+'<option value="100" '+(leaddata.recordsPerPage=='100'?'selected':'')+'>100</option>'
+	+'</select>';
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
 		html+='<div class="lead-table-wrapper">'

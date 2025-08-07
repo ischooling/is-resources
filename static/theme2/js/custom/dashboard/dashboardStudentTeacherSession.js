@@ -3790,3 +3790,96 @@ function updateBulkClassStatus() {
 		 }
 	 });
 }
+
+function lmsLockUnlockMail(index, stmlId, callFor) {
+	hideMessage('');
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLFor('dashboard', 'student-teacher-lms-lock-unlock-mail'),
+		data: JSON.stringify(getRequestForLmsLockUnlockMail(stmlId, callFor)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				if (callFor == 'stop') {
+					$(".sendLockLmsMail" + index).html('Resend Mail');
+				} else {
+					$(".sendUnlockLmsMail" + index).html('Resend Mail');
+				}
+				$('#modalMessage').click(function () {
+					setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
+				});
+			}
+			return false;
+		},
+		error: function (e) {
+			//	showMessage(true, e.responseText);
+			return false;
+		}
+	});
+}
+function enrollmentShuffleSendMail(teacherName, teacherEmail, subjectName, studentName, standardName, schoolId, index, stmlId) {
+	hideMessage('');
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLFor('dashboard', 'student-teacher-enrollment-shuffle-mail'),
+		data: JSON.stringify(getRequestForStudentTeacherEnrollmentShuffleMailSend(teacherName, teacherEmail, subjectName, studentName, standardName, schoolId, stmlId)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				$(".sendMail" + index).html('Resend Mail');
+				$('#modalMessage').click(function () {
+					setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
+				});
+			}
+			return false;
+		},
+		error: function (e) {
+			//	showMessage(true, e.responseText);
+			return false;
+		}
+	});
+}
+function getRequestForLmsLockUnlockMail(stmlId, callFor) {
+	var request = {};
+	var authentication = {};
+	var studentTeacherMappingDTO = {};
+	studentTeacherMappingDTO['studentMappingLogId'] = stmlId;
+	studentTeacherMappingDTO['callFor'] = callFor;
+	request['studentTeacherMappingDTO'] = studentTeacherMappingDTO;
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'STUDENT';
+	authentication['userId'] = USER_ID;
+	request['authentication'] = authentication;
+	return request;
+}
+
+function getRequestForStudentTeacherEnrollmentShuffleMailSend(teacherName, teacherEmail, subjectName, studentName, standardName, teacherSchoolId, stmlId) {
+	var request = {};
+	var authentication = {};
+	var batchTeacherMappingDTO = {};
+	batchTeacherMappingDTO['emailId'] = teacherEmail;
+	batchTeacherMappingDTO['studentName'] = studentName;
+	batchTeacherMappingDTO['teacherName'] = teacherName;
+	batchTeacherMappingDTO['subjectName'] = subjectName;
+	batchTeacherMappingDTO['gradeName'] = standardName;
+	batchTeacherMappingDTO['teacherSchoolId'] = teacherSchoolId;
+	batchTeacherMappingDTO['stmlId'] = stmlId;
+	request['batchTeacherMapping'] = batchTeacherMappingDTO;
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'STUDENT';
+	authentication['userId'] = USER_ID;
+	request['authentication'] = authentication;
+	return request;
+}
