@@ -3,6 +3,8 @@ highSchoolGrade.push(4);
 highSchoolGrade.push(5);
 highSchoolGrade.push(6);
 highSchoolGrade.push(7);
+const discountTimeLimitSettings = getSettingsByTypeAndKey('CONFIGURATION','DISCOUNT_TIME_LIMIT');
+var discountTimeLimitDays = JSON.parse(discountTimeLimitSettings).data.metaValue
 function showSkeleton (isShow, skeletonType){
 	if(isShow && skeletonType == "step1"){
 		$(".step-1-skeleton").html(skeletonStudent());
@@ -96,7 +98,7 @@ function migrationDetailsOptionContent(data) {
 		+'<div class="page-title-wrapper">'
 			+'<div class="page-title-heading">'
 				+'<div class="page-title-icon">'
-					+'<i class="pe-7s-users icon-gradient bg-ripe-malin"></i>'
+					+'<i class="fa fa-user text-primary font-20"></i>'
 				+'</div>';
 				if(data.isParent){
                     html += '<div> You are observing '+data.name+'\'s dashboard </div>';
@@ -106,62 +108,41 @@ function migrationDetailsOptionContent(data) {
 			html+= '</div>'
 		+'</div>'
 	+'</div>'
-	+'<div class="main-card mb-3 card mx-auto" style="max-width:650px;width:100%">'
+	+'<div class="main-card mb-3 card mx-auto" style="max-width:800px;width:100%">'
 		+'<div class="col-md-12 col-sm-12 col-xs-12">'
 			+'<div class="row">'
 				+'<div class="card-body student-report">'
 					+'<div class="row">'
 						+'<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 report-head">'
-							+'<h4 class="student-name">Hi '+data.name+'!</h4>'
-							+'<span class="report-message">'
-								+'You have earned '+studentCredit.totalStringCredit+' credits in <b>'+studentCredit.currentGrade+'</b>'
-							+'</span>'
-						+'</div>'
-						+'<div class="col-md-6 col-sm-12 col-12 row-in-br mb-3">'
-							+'<div class="col-in row justify-content-center">'
-								+'<div class="d-inline-block pX-4 pt-4 pb-0 bg-light-success border border-success rounded text-center" style="min-width:220px">'
-									+'<span class="circle-border">'
-										+'<img class="report-icon" src="'+PATH_FOLDER_IMAGE2+'exam.png">'
-									+'</span>'
-									+'<span class="d-inline-block px-2 mt-3  bg-success text-white text-center" style="border-top-left-radius:4px;border-top-right-radius:4px">'
-										+'<label class="w-100 d-inline-block font-12 m-0 font-weight-semi-bold">PASSED</label>'
-										+'<label class="w-100 d-inline-block m-0 font-weight-semi-bold">'+studentCredit.passSubject+' COURSES</label>'
-									+'</span>'
-								+'</div>'
-							+'</div>'
-						+'</div>'
-						+'<div class="col-md-6 col-sm-12 col-12 row-in-br mb-3">'
-							+'<div class="col-in row justify-content-center">'
-								+'<div class="d-inline-block pX-4 pt-4 pb-0 bg-light-danger border border-danger rounded text-center" style="min-width:220px">'
-									+'<span class="circle-border">'
-										+'<img class="report-icon" src="'+PATH_FOLDER_IMAGE2+'failed.png">'
-									+'</span>'
-									+'<span class="d-inline-block px-2 mt-3  bg-danger text-white text-center" style="border-top-left-radius:4px;border-top-right-radius:4px">'
-										+'<label class="w-100 d-inline-block font-12 m-0 font-weight-semi-bold">FAILED</label>'
-										+'<label class="w-100 d-inline-block m-0 font-weight-semi-bold">'+studentCredit.failSubject+' COURSES</label>'
-									+'</span>'
-								+'</div>'
-							+'</div>'
-						+'</div>';
-						// +'<div class="col-md-4 col-sm-12 col-xs-12 row-in-br mb-3">'
-						// 	+'<div class="col-in row justify-content-center">'
-						// 		+'<div class="d-inline-block pX-4 pt-4 pb-0 bg-light-warning border border-warning rounded text-center" style="min-width:220px">'
-						// 			+'<span class="circle-border">'
-						// 				+'<img class="report-icon" src="'+PATH_FOLDER_IMAGE2+'withdrawn-course.png">'
-						// 			+'</span>'
-						// 			+'<span class="d-inline-block px-2 mt-3  bg-warning text-white text-center" style="border-top-left-radius:4px;border-top-right-radius:4px">'
-						// 				+'<label class="w-100 d-inline-block font-12 m-0 font-weight-semi-bold">Withdrawn</label>'
-						// 				+'<label class="w-100 d-inline-block m-0 font-weight-semi-bold">'+studentCredit.withDrawSubject+' COURSES</label>'
-						// 			+'</span>'
-						// 		+'</div>'
-						// 	+'</div>'
-						// +'</div>'
+							if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+								html+='<h2 class="text-primary font-weight-bold text-center">Congratulations!</h2>'
+								setTimeout(fireConfetti, 1000);
+								setTimeout(fireConfetti, 3000);
+							}
+							html+='<h4 class="text-center font-weight-semi-bold mb-3">'+data.name+'!</h4>'
+							if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+								html+='<p class="mb-0 font-18 text-center">'
+									+'You have successfully completed <b>'+studentCredit.currentGrade+'</b> with <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b>'
+								+'</p>'
+							}else{
+								html+='<p class="mb-0 font-18 text-center">'
+									+'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+'</b> in <b>'+studentCredit.currentGrade+'</b>'
+								+'</p>'
+							}
+						html+='</div>'
+						+'<div class="mx-auto mb-3">'
+						if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+							html+='<img class="p-3 bg-light-success border border-success" src="'+PATH_FOLDER_IMAGE2+'passed-badge.png" alt="passed_badge" style="width: 130px; height: 130px; object-fit: contain; border-radius: 100px;" />'
+						}else{
+							html+='<img class="p-3 bg-light-danger border border-danger" src="'+PATH_FOLDER_IMAGE2+'failed-badge.png" alt="failed_badge" style="width: 130px; height: 130px; object-fit: contain; border-radius: 100px;" />'
+						}
+						html+='</div>'
 						if(data.registrationType!="ONE_TO_ONE_FLEX"){
 							if(studentCredit.currentGradeId != 7){
 								html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
-									+'<span class="required-credits-message">';
+									+'<h5 class="text-center">';
 										if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-											html+='Number of credits required to enroll in <b>'+studentCredit.nextGrade+'</b> = '+studentCredit.balanceCredit+' Credits';
+											html+='You have been <b>Promoted</b> to the Next <b>'+studentCredit.nextGrade+'</b>';
 										}
 										// var checkCondtion=studentCredit.minmumCreditLimit;
 										// if(studentCredit.currentGradeId<11){
@@ -207,15 +188,11 @@ function migrationDetailsOptionContent(data) {
 										// }
 										// html+=' Credits';
 									html+=
-									'</span>'
+									'</h5>'
 								+'</div>';
 							}
 						}
 						html+='<div class="progression-button-wrapper">'
-							+'<div class="col text-center">'
-								+'<a class="design-btn bg-primary " href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');"> IMPROVE PAST GRADES</a>'
-								// +'<h6 class="mt-1 font-weight-semi-bold">Improve your grade in past enrollments</h6>'
-							+'</div>';
 							if(parseFloat(studentCredit.totalCredit) < studentCredit.minmumCreditLimit  && (studentCredit.withDrawSubject != 0 || studentCredit.incomplteSubject !=0)){
 								html+=
 								'<div class="col text-center">';
@@ -229,13 +206,19 @@ function migrationDetailsOptionContent(data) {
 									html+='<h6 class="mt-1 font-weight-semi-bold">Re-take a withdrawn/incomplete course or study another course</h6>'
 								+'</div>';
 							}
-							// if(studentCredit.currentGradeId != studentCredit.nextGradeId){
+							if(data.forcefulRepeatOrImprove == "Y"){
+								html+='<div class="d-flex mx-auto flex-column flex-md-row">'
+									+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 mr-md-3 mr-0 mb-2 mb-md-0" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
+									+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
+								+'</div>'
+							}else {
 								if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
 									html+=
 										'<div class="col text-center">'
-											+'<a class="design-btn bg-success " href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN HIGHER GRADE</a>'
+											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
 										+'</div>';
-								}else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit && studentCredit.currentGradeId<=6){
+								// }else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit && studentCredit.currentGradeId<=6){
+								}else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit){
 									if(studentCredit.currentGradeId<3 
 										|| (studentCredit.currentGradeId==3 && data.cgpaRule == 'Dont Apply') 
 										|| (studentCredit.currentGradeId==3 && studentCredit.avgCumulativeGpa > 2.0 && data.cgpaRule == 'Apply')
@@ -243,7 +226,11 @@ function migrationDetailsOptionContent(data) {
 											if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
 												html+=
 												'<div class="col text-center">'
-													+'<a class="design-btn bg-success " href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN HIGHER GRADE</a>'
+													+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
+												+'</div>';
+											}else{
+												html+='<div class="col text-center mt-3">'
+													+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
 												+'</div>';
 											}
 									}
@@ -255,19 +242,33 @@ function migrationDetailsOptionContent(data) {
 									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
 										html+=
 											'<div class="col text-center">'
-												+'<a class="design-btn" href="javascript:void(0);" onclick="callChoiceForStudentModel();">ENROLL IN NEXT GRADE</a>'
+												+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
 											+'</div>';
 									}
+									}else{
+										html+='<div class="col text-center mt-3">'
+											+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
+										+'</div>';
 									}
+								}else{
+									html+=+'<div class="col text-center mt-3">'
+										+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
+									+'</div>';
 								}
-							// }
+							}
 							html+=
 						'</div>'
-					+'</div>'
-				+'</div>'
+					+'</div>';
+					if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+						html+='<p class="mt-1 mb-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Progression Discount available for a limited time! Only '+ discountTimeLimitDays +' days left!</p>';
+					}
+				html+='</div>'
 			+'</div>'
 		+'</div>'
 	+'</div>';
+	html+='<div>'
+		// +'<p class="my-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Progression Discount available for a limited time!</p>'
+	+'</div>'
 	html+='<div class="modal fade fade-scale" tabindex="-1" role="dialog" id="choiceForStudentModel">'
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
 			+'<div class="modal-content">'

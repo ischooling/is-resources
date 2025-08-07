@@ -303,6 +303,17 @@ function closeCourseDetailModal(){
 	$("#courseDetailModal").modal('hide');
 }
 
-
-
-
+function fireConfetti() {
+	confetti({
+		particleCount: 200,
+		angle: 120,
+		spread: 55,
+		origin: { x: 0.3, y: 0.75 }
+	});
+	confetti({
+		particleCount: 200,
+		angle: 60,
+		spread: 55,
+		origin: { x: 0.75, y: 0.75 }
+	});
+}

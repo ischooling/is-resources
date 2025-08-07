@@ -31944,7 +31944,7 @@ to { background-color: rgb(6, 145, 6); }
 /* STUDENT PROGRESS REPORT CSS START HERE */
 .bold{font-weight: 700}
 .student-report .row .row-in-br:nth-child(4){border-right:0;}
-.student-report .report-head{margin: 30px 0;}
+.student-report .report-head{margin:10px 0 30px 0;}
 .student-name{font-size: 34px;color:var(--pc);font-weight: 700;text-align: center;margin-bottom: 10px;}
 .student-report .report-message{font-size: 20px;font-style: italic;text-align: center;width: 100%;display: inline-block;}
 .student-report .report-message b{color:var(--pc);}
@@ -32893,10 +32893,10 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 .reserve-seat{max-width:350px;width:100%;display:flex;}
 .reserve-seat-wrapper.slide-in{transform:translateX(0px);-webkit-transform:translateX(0px);-moz-transform:translateX(0px);-ms-transform:translateX(0px);}
 .reserve-seat-graphics img{max-width:100px;}
-.reserve-seat-content-wrapper{background:var(--pgc);color:white;max-width:250px;border-radius:10px;}
-.reserve-seat-content-wrapper:after{content: "";position: absolute;right: -28px;bottom: 46px;width: 65px;height: 65px;background-color: transparent;border-radius: 47%;box-shadow: 17px 10px 0px 0px var(--fc);transform: rotate(74deg);z-index: -1;}
+.reserve-seat-content-wrapper{color:white;max-width:250px;border-radius:10px;}
+.reserve-seat-content-wrapper:after{content: "";position: absolute;right: -24px;bottom: 30px;width: 45px;height: 45px;background-color: transparent;border-radius: 47%;box-shadow: 17px 10px 0px 0px var(--sc); transform: rotate(74deg);z-index: -1;}
 .need-help-slide-wrapper .reserve-seat-content-wrapper:after{right: -21px; bottom: 25px; width: 40px; height: 40px; transform: rotate(90deg);}
-.reserve-seat-btn{position: absolute;bottom: 50px;right:0; z-index: 9;transform:translateX(-400px);-webkit-transform:translateX(-400px);-moz-transform:translateX(-400px);-ms-transform:translateX(-400px);transition:0.5s ease-in-out;-webkit-transition:0.5s ease-in-out;-moz-transition:0.5s ease-in-out;-ms-transition:0.5s ease-in-out;}
+.reserve-seat-btn{position: absolute;right:0; z-index: 9;transform:translateX(-400px);-webkit-transform:translateX(-400px);-moz-transform:translateX(-400px);-ms-transform:translateX(-400px);transition:0.5s ease-in-out;-webkit-transition:0.5s ease-in-out;-moz-transition:0.5s ease-in-out;-ms-transition:0.5s ease-in-out;}
 .reserve-seat-btn.slide-out-btn{transform: translateX(400px);-webkit-transform: translateX(400px);-moz-transform:translateX(400px);-ms-transform:translateX(400px);} 
 /* Reserve Seat CSS End Here*/
 

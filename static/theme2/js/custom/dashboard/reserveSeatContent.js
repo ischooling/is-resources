@@ -15,7 +15,7 @@ function getReserveSeatSlideContent(data){
 	var html = 
 		'<div id="reserve-seat-wrapper" class="reserve-seat-wrapper reserve-seat-slide-wrapper">'
 			+'<div class="reserve-seat-btn reserve-btn">'	
-				+'<a href="javascript:void(0)" class="btn btn-primary border-white mr-1" onclick="showReserveSeatContent()">';
+				+'<a href="javascript:void(0)" class="btn bg-secondary text-white border-white mr-1" onclick="showReserveSeatContent()">';
 				if(details.eligibleFor=='ADV'){
 					if(details.monthName != null && details.monthName != undefined && details.monthName != ''){
 						html+='Enroll for '+details.activeSessionYear+' Group Learning';
@@ -29,26 +29,23 @@ function getReserveSeatSlideContent(data){
 				'</a>'
 			+'</div>'
 			+'<div class="reserve-seat">'
-				+'<div class="reserve-seat-content-wrapper position-relative p-3">';
+				+'<div class="reserve-seat-content-wrapper position-relative p-3 bg-secondary" style="height:100px;">';
 					if(details.eligibleFor=='ADV'){
 						if(details.monthName != null && details.monthName != undefined && details.monthName != ''){
-							html+='<h6 style="font-size:14px"><b>Enroll for '+details.activeSessionYear+' Group Learning!</b></h6>'
-							+'<P>Click on "Enroll Now" to enroll for the '+details.activeSessionYear+' Group Learning!</P>';
+							html+='<h6 style="font-size:14px" class="mb-3 text-white"><b>Enroll for '+details.activeSessionYear+' Group Learning!</b></h6>';
 						}else{
-							html+='<h6 style="font-size:14px"><b>Enroll for the next grade!</b></h6>'
-							+'<P>Click on "Enroll Now" to enroll for the next grade!</P>';
+							html+='<h6 style="font-size:14px" class="mb-3 text-white"><b>Enroll now for the Next Grade!</b></h6>';
 						}
 					}else if(details.eligibleFor=='BAE'){
-						html+='<h6 style="font-size:14px">Reserve a seat for next grade</h6>'
-						+'<P>Kindly Click on "Reserve" to reserve a seat for the next grade.</P>';
+						html+='<h6 style="font-size:14px" class="mb-3 text-white">Reserve a seat for next grade</h6>';
 					}
 					html+=
 					'<div class="full text-center">'
-						+'<a href="javascript:void(0)" class="btn btn-outline-white mr-1" onclick="hideReserveSeatContent()">Later</a>';
+						+'<a href="javascript:void(0)" class="btn border border-white text-white mr-1" onclick="hideReserveSeatContent()">Later</a>';
 						if(details.eligibleFor=='ADV'){
-							html+='<a href="javascript:void(0)" class="btn btn-white ml-1" onclick="acceptReserveASeatForNextGrade('+details.userId+');">Enroll Now</a>';
+							html+='<a href="javascript:void(0)" class="btn ml-1 text-secondary bg-white font-weight-semi-bold" onclick="acceptReserveASeatForNextGrade('+details.userId+');">Enroll Now</a>';
 						}else if(details.eligibleFor=='BAE'){
-							html+='<a href="javascript:void(0)" class="btn btn-white ml-1" onclick="acceptReserveASeatForNextGrade('+details.userId+');">Reserve</a>';
+							html+='<a href="javascript:void(0)" class="btn ml-1 text-secondary bg-white font-weight-semi-bold" onclick="acceptReserveASeatForNextGrade('+details.userId+');">Reserve</a>';
 						}
 						html+=
 					'</div>'

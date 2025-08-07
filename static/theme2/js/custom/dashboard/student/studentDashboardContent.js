@@ -74,7 +74,8 @@ function rendereDashboardContent(isParent){
         if (isParent!=="false") {
             dashboardData ['isParent'] = true;
         }
-		renderMigrationDetailsOptionContent(data)
+		renderMigrationDetailsOptionContent(data);
+        $("head").append(`<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js">`);
 	}
     if (isParent!=="true") {
         if(!data.lastPassUpdatedDate){

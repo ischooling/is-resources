@@ -116,6 +116,8 @@ function getRequestForUpdateProfile(src,keyId,userId,studentStandardId,moduleId)
 		requestProfileData['fieldValue1']= $('#studID option:selected ').attr('attrStudentEmail').trim();
 		requestProfileData['studUserId']=$('#studID').val();
 		requestProfileData['parentId']=$('#swipeParentId').attr("attrparentid");
+	}else if(keyId=="forcefulRepeatOrImprove"){
+		requestProfileData['forcefulRepeatOrImprove']=$("#forcefulRepeatOrImprove").val().trim();
 	}else if(keyId=='preferredcommunication'){
 		var pcWhatsapp=$('#pcWhatsapp').is(':checked')?'Y':'N';
 		var pcCall=$('#pcCall').is(':checked')?'Y':'N';
@@ -342,7 +344,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 		|| keyId=='designation' || keyId=='departmentId' || keyId=='acPersonName' || keyId=='bankName'
 		|| keyId=='bankBranchName' || keyId=='bankBranchAddress' || keyId=='otherBankDetails' || keyId=='otherProfessionalCourse'
 		|| keyId=='otherSpecialization' || keyId=='anyOtherLanguages' || keyId=='references1' || keyId=='references2'
-		|| keyId=='specialization' || keyId=='postGraduationSubjects' || keyId=='graduationSubjects' || keyId=='educationSpecialization'){
+		|| keyId=='specialization' || keyId=='postGraduationSubjects' || keyId=='graduationSubjects' || keyId=='educationSpecialization' || keyId == 'forcefulRepeatOrImprove'){
 			/*fieldValue = toTitleCase(fieldValue);*/
 	}else if(keyId=='describeYourself' || keyId=='lastOrgJobDiscription'){
 		fieldValue = fieldValue;
