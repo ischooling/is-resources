@@ -341,6 +341,10 @@ function validateTeacherTimeTableSchedule(batchTeacherMappingId, subjectId, teac
 	if (!validateRequestBatchSubjectTeacherTime(subjectId, elementId)) {
 		return false;
 	}
+	if (batchId == null || batchId == 0 || batchId === '') {
+		showMessageTheme2(0, 'Invalid batch. Please select a valid batch.');
+		return false;
+	}
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,

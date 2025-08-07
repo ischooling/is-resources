@@ -9,6 +9,10 @@ function communicationLog(){
 			$("#fileuploadLog6Span").text(attachment);
 		});
         loadContentFlag=1;
+		callProfileEnrollStatusList('communicationLogForm','RE-EN','reLeadStatus', false);
+		// $('#communicationLogForm #reLeadStatus').select2({
+		// 	theme:'bootstrap4',
+		// })
     }
     getCommunicationLogData('communicationLogTable',USER_ID,USER_ROLE);
 }
@@ -70,6 +74,7 @@ function getRequestForCommunicationLog(formId){
 		commonCommentsDTO['entityName']='STUDENT';
 	}
 	commonCommentsDTO['title']=$("#"+formId+" #logTitle").val();
+	commonCommentsDTO['status']=$("#"+formId+" #reLeadStatus").val();
 	
 	if($("#" + formId + " #fileuploadLog6Span").text()=='No file chosen...'){
 		commonCommentsDTO['uploadFile'] = '';
@@ -135,4 +140,36 @@ function saveCommunicationLog(formId) {
     });
 }
 function validateRequestForLMSStudentPerformance(){
+}
+
+
+function callProfileEnrollStatusList(formId, value, elementId, keyStatus) {
+	hideMessageTheme2('');
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-STATUS-LIST', value)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(true, data['message']);
+			} else {
+				//console.log(data['mastersData']['data']);
+				result = data['mastersData']['data'];
+				dropdown = $("#"+formId+" #"+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="0">Select Status</option>');
+				$.each(result, function (k, v) {
+					if(keyStatus){
+						dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
+					}else{
+						dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
+					}
+				});
+			}
+		}
+	});
 }

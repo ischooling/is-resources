@@ -1,11 +1,21 @@
 var scriptRun = false;
-function getPaymentReportData(formId, forCountOnly, type){
+function getPaymentReportData(formId, forCountOnly, type, callFrom){
+	if($('#paymentStatus').val()!=''){
+		if($('#startDate').val()=='' && $('#endDate').val()==''){
+			showMessageTheme2(0, 'Please choose Start Date and End Date','',true);
+			return false;
+		}
+	}
 	if(forCountOnly){
 		url=CONTEXT_PATH+UNIQUEUUID+"/dashboard/student-payment-report-count";
 	}else{
 		url=CONTEXT_PATH+UNIQUEUUID+"/dashboard/student-payment-report";
 	}
-	
+	if(callFrom=='search'){
+		$(".filterStudentPaymentReportForm").css({"display": "none"});
+	}else{
+		$(".filterStudentPaymentReportForm").css({"display": "block"});
+	}
     customLoader(true);
 	$.ajax({
 		type : "POST",
@@ -100,10 +110,30 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	}
 	if($('#sessionId').val()!=''){
 		PaymentReportRequestDTO['sessionId'] = $('#sessionId').val();
+		
 	}
 	if($('#reLeadStatus').val()!=''){
 		PaymentReportRequestDTO['status'] =$('#reLeadStatus').select2('val');
 	}
+	if($('#reEnrollStatus').val()!=''){
+		PaymentReportRequestDTO['reEnrollStatus'] = $('#reEnrollStatus').val();
+	}
+	if($('#remainingDueBy').val()!=''){
+		PaymentReportRequestDTO['remainingDueBy'] = $('#remainingDueBy').val();
+	}
+	if($('#lmsStatus').val()!=''){
+		PaymentReportRequestDTO['lmsStatus'] = $('#lmsStatus').val();
+	}
+	if($('#academicYearStatus').val()!=''){
+		PaymentReportRequestDTO['academicYearStatus'] = $('#academicYearStatus').val();
+	}
+	if($('#systemTrainStatus').val()!=''){
+		PaymentReportRequestDTO['systemTrainStatus'] = $('#systemTrainStatus').val();
+	}
+	if($('#teacherMapStaus').val()!=''){
+		PaymentReportRequestDTO['teacherMapStaus'] = $('#teacherMapStaus').val();
+	}
+	
 	if(type==1){
 		$('#pageNumber').val(1)
 	}
@@ -151,24 +181,31 @@ function pageCount (records){
 
 function resetStudentPaymentForm(formID){
 	// Get the current date
-	var currentDate = new Date();
-	var firstDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-	firstDate = changeDateFormat(firstDate, "MMM-dd-yyyy")
-	var lastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-	lastDate = changeDateFormat(lastDate, "MMM-dd-yyyy") 
+	// var currentDate = new Date();
+	// var firstDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+	// firstDate = changeDateFormat(firstDate, "MMM-dd-yyyy")
+	// var lastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+	// lastDate = changeDateFormat(lastDate, "MMM-dd-yyyy") 
 	//$('#'+formID)[0].reset();
 	$('#studentName').val('');
-	$('#'+formID+" #startDate").val(firstDate).datepicker("update");
-	$('#'+formID+" #endDate").val(lastDate).datepicker("update");
+	$('#'+formID+" #startDate").val('');
+	$('#'+formID+" #endDate").val('');
 	$('#'+formID+" #learningPlatform").val("").trigger("change");
 	$('#'+formID+" #learningProgram").val("").trigger("change");
 	$('#'+formID+" #gradeId").val("").trigger("change");
-	$('#'+formID+" #enrollStatus").val("0").trigger("change");
-	$('#'+formID+" #paymentStatus").val('').trigger("change");
+	$('#'+formID+" #paymentStatus").val('').trigger("change");//["ODUE","DUE"]
 	$('#'+formID+" #userId").val("").trigger("change");
-	$('#'+formID+" #overDueBy").val("");
+	$('#'+formID+" #overDueBy").val("0");
+	$('#'+formID+" #reLeadStatus").val("").trigger("change");
+	$('#'+formID+" #reEnrollStatus").val("").trigger("change");
+	$('#'+formID+" #remainingDueBy").val('');
+	$('#'+formID+" #lmsStatus").val('');
+	$('#'+formID+" #academicYearStatus").val('');
+	$('#'+formID+" #teacherMapStaus").val('');
+	$('#'+formID+" #systemTrainStatus").val('');
+
 	$('#'+formID+" #pageSize").val("10").trigger("change");
-	getPaymentReportData('',false,1);
+	//getPaymentReportData('',false,1);
 	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');
 	// $('#'+formID+' #pageSize').val($('#'+formID+' #pageSize option:first-child').val()).trigger('change');
 
@@ -350,4 +387,54 @@ function callReEnrollStatusList(formId, value, elementId, keyStatus) {
 			}
 		}
 	});
+}
+
+function callUserReferralUpdatePaymentWindow(formId, studentStandardId, roleModuleId) {
+  $("#studentStandardId").val(studentStandardId);
+  $("#updateReferralCodeModal").modal("show");
+}
+
+function saveReferralCodeFromPaymentWindow() {
+  hideMessageTheme2("");
+  var refCode = $("#newReferralCode").val();
+  if (
+    refCode == null ||
+    refCode == "" ||
+    refCode == undefined ||
+    refCode == 0
+  ) {
+   showMessageTheme2(0, "Invalid referral code");
+    return false;
+  }
+  var studentStandardId = $("#studentStandardId").val();
+  var data = {};
+  data["studentStandardId"] = studentStandardId;
+  data["sessionUserId"] = USER_ID;
+  data["referralCode"] = refCode;
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML("dashboard", "update-referral-code"),
+    data: JSON.stringify(data),
+    dataType: "html",
+    cache: false,
+    timeout: 600000,
+    success: function (htmlContent) {
+      if (htmlContent != "") {
+        var stringMessage = [];
+        stringMessage = htmlContent.split("|");
+        if (
+          stringMessage[0] == "FAILED" ||
+          stringMessage[0] == "EXCEPTION" ||
+          stringMessage[0] == "SESSIONOUT"
+        ) {
+         showMessageTheme2(0, stringMessage[1]);
+        } else {
+         showMessageTheme2(1, stringMessage[1]);
+          $("#updateReferralCodeModal").modal("hide");
+        }
+        return false;
+      }
+    }
+  });
 }

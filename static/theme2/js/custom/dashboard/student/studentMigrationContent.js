@@ -126,7 +126,7 @@ function migrationDetailsOptionContent(data) {
 								+'</p>'
 							}else{
 								html+='<p class="mb-0 font-18 text-center">'
-									+'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+'</b> in <b>'+studentCredit.currentGrade+'</b>'
+									+'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b> in <b>'+studentCredit.currentGrade+'</b>'
 								+'</p>'
 							}
 						html+='</div>'

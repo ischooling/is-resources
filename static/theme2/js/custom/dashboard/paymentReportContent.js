@@ -6,10 +6,10 @@ function paymentReport(){
 				+'<h5 class="text-primary font-weight-semi-bold">STUDENT LIST</h5>'
 				+'<div class="d-flex border-bottom full pb-2 border-primary">'
 					+'<div class="search full mr-auto" style="max-width:450px">'
-						+'<input type="text" id="studentName"  placeholder="Search by Student Name, Country/City or Enrollment No." class="form-control border-0 text-primary" style="background: #f0f9ff;"/>'
+						+'<input type="text" id="studentName"  placeholder="Search by Student Name, Email, Country/ City or Student-Id" class="form-control border-0 text-primary" style="background: #f0f9ff;"/>'
 					+'</div>'
 					+'<div class="filter-btn ml-2 d-inline-flex align-items-center">'
-						+'<a href="javascript:void(0)" class="btn btn-outline-primary mr-1 showFilterForm">'
+						+'<a href="javascript:void(0)" class="btn btn-outline-primary mr-1 showFilterForm" >'
 							+'<i class="fa fa-filter"></i>'
 						+'</a>'
 						// +'<a href="javascript:void(0)" class="btn btn-outline-primary" onclick="downloadStudentPaymentReport(\'\',false,1)">'
@@ -22,6 +22,7 @@ function paymentReport(){
 			+'<div class="row m-0" id="consolidate">'
 				
 			+'</div>'
+			+updateRefferelCode()
 			+'<div class="full mt-2" id="studentPaymentReport">'
 				+'<table id="studentPaymentReportTable" class="table table-hover table-striped table-bordered">'
 					// +'<thead>'
@@ -49,34 +50,117 @@ function cardDetails(data){
 	//(l==0?'fa-angle-up':'fa-angle-down')
 	var html = '';
 	$.each(data.reports, function(key, item) {
-	
+		
+		var sprogress =0;
+		sprogress=item.progressReport=='N/A'?0.0:item.progressReport.replace("%","");
 		html+=`<tr>
 				<td class="p-0">
 					<div class="mb-3 card">
 						<div class="card-header-tab card-header">
 							<div class="card-header-title">
-								<span class="mr-2">${key + 1}.</span>
-								<img id="topProfileImage" name="topProfileImage" width="42" class="rounded-circle user-header-img" src="https://cdn.jsdelivr.net/gh/ischooling/is-resources@v1.0.42/static/img/male-profile.png" alt="">
-								<div class="px-2 mb-0 w-100 rounded" style="background:#f0f9ff">
+								<span class="mr-2">${key + 1}.</span>`;
+								if(item.updateProfileStudentDTO.profileImage=='' || item.updateProfileStudentDTO.profileImage==null){
+									html+=`<img  id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE}profile-picture.jpg${SCRIPT_VERSION}" alt="image"  thumbType=""/>`;
+								}else{
+									html+=`<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${item.updateProfileStudentDTO.profileImage}" alt="image" title="Profile Image" thumbType=""/>`;
+								}
+								
+								html+=`<div class="px-2 mb-0 w-100 rounded" style="background:#f0f9ff">
 									<h6 class="full">
-										<span class="text-uppercase font-weight-semi-bold d-inline-block" style="font-size:12px">
+										<span class="text-uppercase font-weight-semi-bold d-inline-block" style="font-size:11px">
 											${item.rollNumber} | ${item.enrolledStatus} | ${item.gradeName} | ${item.learningPlan} | ${item.lmsPlatform}
 										</span>
 									</h6>
-									<h5 class="mb-1"><span class="font-weight-bold text-primary">${item.studentName}</span></h5></div>
+									<h5 class="mb-1"><span class="font-weight-bold text-primary">${item.studentName}&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' class=''><i class='fa fa-eye'></i>&nbsp;</a></span></h5></div>
 							</div>
 							<ul class="nav">
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-0${item.studentStandardId}" class="nav-link show active">Basic Detail</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-1${item.studentStandardId}" class="nav-link show">Parent Detail</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-2${item.studentStandardId}" class="nav-link show">Contact Info</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-3${item.studentStandardId}" class="nav-link show">Academic Detail</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-4${item.studentStandardId}" class="nav-link show">Payment</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-5${item.studentStandardId}" class="nav-link show ">Communication Log</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-0${item.studentStandardId}" class="nav-link show active">Summery</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-1${item.studentStandardId}" class="nav-link show">Basic Detail</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-2${item.studentStandardId}" class="nav-link show">Parent Detail</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-3${item.studentStandardId}" class="nav-link show">Contact Info</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-4${item.studentStandardId}" class="nav-link show">Academic Detail</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-5${item.studentStandardId}" class="nav-link show">Payment</a></li>
+								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-6${item.studentStandardId}" class="nav-link show ">Communication Log</a></li>
 							</ul>
 						</div>
 						<div class="card-body">
 							<div class="tab-content">
-								<div class="tab-pane p-2 show active" id="tab-eg5-0${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
+							<div class="tab-pane p-2 show active" id="tab-eg5-0${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Gender:</label>
+											<span class="field-value trans5s">${item.updateProfileStudentDTO.gender}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">LMS Status:</label>
+											<span class="field-value trans5s  ${item.updateProfileStudentDTO.lmsUserStatus==1?'text-success':'text-danger'}">${item.updateProfileStudentDTO.lmsUserStatus==1?'Enabled': (item.updateProfileStudentDTO.lmsUserId!=null)?'Disabled':'Not Created'}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Enrollment Date:</label>
+											<span class="field-value trans5s">${item.semesterStartDate}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Enrolled Status:</label>
+											<span class="field-value trans5s ${item.enrolledStatus=='Withdrawn'?'text-danger':'text-success'}">${item.enrolledStatus}</span>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Nationality:</label>
+											<span class="field-value trans5s ">${item.updateProfileStudentDTO.nationality}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Lms UserId | User Name | Password:</label>
+											<span class="field-value trans5s "><br/>${item.updateProfileStudentDTO.lmsUserId==null?'N/A':item.updateProfileStudentDTO.lmsUserId} |  ${item.updateProfileStudentDTO.lmsUserName} |  ${item.updateProfileStudentDTO.lmsUserPassword}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Academic Start - End Dates:</label>
+											<span class="field-value trans5s "><br/>${item.enrollmentStartDate=='N/A'?'N/A':(item.enrollmentStartDate+' - '+item.enrollmentEndDate)}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Payment Plan:</label>
+											<span class="field-value trans5s ">${item.paymentPlanName}</span>
+										</div>
+									</div>	
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Enrollment | Recommended By:</label>`
+											if(item.counselorName!='N/A'){
+												html+=`<span class="field-value trans5s ">${item.counselorName}</span>`;
+											}else{
+												html+=`<a href="javascript:void(0);" class="btn btn-primary" onclick="return callUserReferralUpdatePaymentWindow('formId','${item.studentStandardId}','8');"><i class="fa fa-cogs"></i>&nbsp;Update Referral Code</a>`;
+											}
+											
+										html+=`</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Overall Progress Report:</label>
+											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Remaining Days:</label>
+											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays=='N/A'?'No Started':item.remainingDays}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Fee Details:</label>
+											<span class="field-value trans5s "><span class="font-weight-semi-bold  d-inline-block float-right font-size-md ${(item.overDue <0? 'text-danger':'text-success')} ">${(item.overDue <0? 'Overdue by ':'Scheduled in ')+item.overDue} days</span></span>
+										</div>
+									</div>	
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">System Orientation:</label>
+											<span class="field-value trans5s ">${item.systemOrientStatus}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Teacher Mapping:</label>
+											<span class="field-value trans5s ">${item.teacherMapStaus>0?'Completed':'Pending'}`;
+											// if(item.teacherMapStaus==0){
+											// 	html+=`&nbsp;&nbsp;<a href="javascript:void(0);" class="" onclick="return callAssignStudentTeacher('formId','${item.studentId}','true','true','true','${item.updateProfileStudentDTO.standardId}');"><i class="fa fa-eye"></i></a>`;
+											// }
+											html+=`</span>
+											</div>
+									</div>	
+								</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-1${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Gender:</label>
@@ -113,25 +197,80 @@ function cardDetails(data){
 											<label class="label bold">City | Country:</label>
 											<span class="field-value trans5s ">${item.updateProfileStudentDTO.city} | ${item.updateProfileStudentDTO.country}</span>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Enrollment | Recommended By:</label>
-											<span class="field-value trans5s ">${item.counselorName}</span>
-										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Overall Progress Report:</label>
-											<span class="field-value trans5s ">${item.progressReport}</span>
-										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Remaining Days:</label>
-											<span class="field-value trans5s ${item.remainingDays=='Academic Year End.'?'text-danger':'text-success'} ">${item.remainingDays}</span>
-										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Fee Details:</label>
-											<span class="field-value trans5s "><span class="font-weight-semi-bold  d-inline-block float-right font-size-md ${(item.overDue <0? 'text-danger':'text-success')} ">${(item.overDue <0? 'Overdue by ':'Scheduled in ')+item.overDue} days</span></span>
-										</div>
-									</div>	
-								</div>
-								<div class="tab-pane p-2 show" id="tab-eg5-1${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
+									</div>	`;
+										// <div class="row">
+										// 	<div class="col-md-3 col-sm-6 col-xs-12 text-center proof-flex-item mb-3 mb-sm-0">
+										// 		<label class="label bold">Age Proof :</label>`
+										// 		if(item.updateProfileStudentDTO.ageProofDocs=='' || item.updateProfileStudentDTO.ageProofDocs==null){
+										// 			html+=`<a id="fileupload2img" href="javascript:void('0');" class="full mt-1 1 border" onclick="viewAttachment(this, 'uploadFile','I')">
+										// 					<img  id="fileupload2imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}no-image.jpg${SCRIPT_VERSION}" alt=""  thumbType=""/>
+										// 				</a>`;
+										// 		}else if(item.updateProfileStudentDTO.ageProofDocs.indexOf(".pdf")!=-1){
+										// 			html+=`<a id="fileupload2img" href="javascript:void(0);" data-PDFURL="${item.updateProfileStudentDTO.ageProofDocs}" class="full mt-1 2 border" onclick="viewAttachment(this, 'uploadFile','P')" >
+										// 					<img id="fileupload2imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}pdf.jpg${SCRIPT_VERSION}" alt="" title="" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 				</a>`;
+										// 		}else{
+										// 			html+=`<a id="fileupload2img" href="javascript:void(0);" class="full mt-1 3 border" onclick="viewAttachment(this, 'uploadFile','I')" >
+										// 				<img id="fileupload2imgIcon" width="100" class="crop-uplod-img" src="${item.updateProfileStudentDTO.ageProofDocs}" alt="" title="Birth Certificate" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 			</a>`;
+										// 		}
+												
+										// 	html+=`</div>
+										// 	<div class="col-md-3 col-sm-6 col-xs-12 text-center proof-flex-item mb-3 mb-sm-0">
+										// 		<label class="label bold">Address Proof:</label>`;
+										// 			if(item.updateProfileStudentDTO.addressProofDocs=='' || item.updateProfileStudentDTO.addressProofDocs==null){
+										// 				html+=`<a id="fileupload3img" href="javascript:void('0');" class="full mt-1 1 border" onclick="viewAttachment(this, 'uploadFile','I')">
+										// 						<img  id="fileupload3imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}no-image.jpg${SCRIPT_VERSION}" alt=""  thumbType=""/>
+										// 					</a>`;
+										// 			}else if(item.updateProfileStudentDTO.addressProofDocs.indexOf(".pdf")!=-1){
+										// 				html+=`<a id="fileupload3img" href="javascript:void(0);" data-PDFURL="${item.updateProfileStudentDTO.addressProofDocs}" class="full mt-1 2 border" onclick="viewAttachment(this, 'uploadFile','P')" >
+										// 						<img id="fileupload3imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}pdf.jpg${SCRIPT_VERSION}" alt="" title="" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 					</a>`;
+										// 			}else{
+										// 				html+=`<a id="fileupload3img" href="javascript:void(0);" class="full mt-1 3 border" onclick="viewAttachment(this, 'uploadFile','I')" >
+										// 					<img id="fileupload3imgIcon" width="100" class="crop-uplod-img" src="${item.updateProfileStudentDTO.addressProofDocs}" alt="" title="Birth Certificate" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 				</a>`;
+										// 			}
+										// 		html+=`</div>
+										// 		<div class="col-md-3 col-sm-6 col-xs-12 text-center proof-flex-item mb-3 mb-sm-0">
+										// 			<label class="label bold">Parent Passport:</label>`;
+										// 			if(item.updateProfileStudentDTO.signatureDocs=='' || item.updateProfileStudentDTO.signatureDocs==null){
+										// 				html+=`<a id="fileupload4img" href="javascript:void('0');" class="full mt-1 1 border" onclick="viewAttachment(this, 'uploadFile','I')">
+										// 						<img  id="fileupload4imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}no-image.jpg${SCRIPT_VERSION}" alt=""  thumbType=""/>
+										// 					</a>`;
+										// 			}else if(item.updateProfileStudentDTO.signatureDocs.indexOf(".pdf")!=-1){
+										// 				html+=`<a id="fileupload4img" href="javascript:void(0);" data-PDFURL="${item.updateProfileStudentDTO.signatureDocs}" class="full mt-1 2 border" onclick="viewAttachment(this, 'uploadFile','P')" >
+										// 						<img id="fileupload4imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}pdf.jpg${SCRIPT_VERSION}" alt="" title="" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 					</a>`;
+										// 			}else{
+										// 				html+=`<a id="fileupload4img" href="javascript:void(0);" class="full mt-1 3 border" onclick="viewAttachment(this, 'uploadFile','I')" >
+										// 					<img id="fileupload4imgIcon" width="100" class="crop-uplod-img" src="${item.updateProfileStudentDTO.signatureDocs}" alt="" title="Birth Certificate" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 				</a>`;
+										// 			}
+
+										// 	html+=`</div>
+										// 	<div class="col-md-3 col-sm-6 col-xs-12 text-center proof-flex-item mb-3 mb-sm-0">
+										// 		<label class="label bold">Last Academic Proof:</label>`;
+										// 			if(item.updateProfileStudentDTO.lastAcadmeicProofDocs=='' || item.updateProfileStudentDTO.lastAcadmeicProofDocs==null){
+										// 				html+=`<a id="fileupload5img" href="javascript:void('0');" class="full mt-1 1 border" onclick="viewAttachment(this, 'uploadFile','I')">
+										// 						<img  id="fileupload5imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}no-image.jpg${SCRIPT_VERSION}" alt=""  thumbType=""/>
+										// 					</a>`;
+										// 			}else if(item.updateProfileStudentDTO.lastAcadmeicProofDocs.indexOf(".pdf")!=-1){
+										// 				html+=`<a id="fileupload5img" href="javascript:void(0);" data-PDFURL="${item.updateProfileStudentDTO.lastAcadmeicProofDocs}" class="full mt-1 2 border" onclick="viewAttachment(this, 'uploadFile','P')" >
+										// 						<img id="fileupload5imgIcon" width="100" class="crop-uplod-img" src="${PATH_FOLDER_IMAGE2}pdf.jpg${SCRIPT_VERSION}" alt="" title="" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 					</a>`;
+										// 			}else{
+										// 				html+=`<a id="fileupload5img" href="javascript:void(0);" class="full mt-1 3 border" onclick="viewAttachment(this, 'uploadFile','I')" >
+										// 					<img id="fileupload5imgIcon" width="100" class="crop-uplod-img" src="${item.updateProfileStudentDTO.lastAcadmeicProofDocs}" alt="" title="Birth Certificate" style="height: 125px;object-fit: contain;" thumbType=""/>
+										// 				</a>`;
+										// 			}
+												
+										// 	html+=`</div>
+										// 	<p id="allDocsUploaded" style="${(item.updateProfileStudentDTO.lastAcadmeicProofDocs!='' && item.updateProfileStudentDTO.lastAcadmeicProofDocs != null && item.updateProfileStudentDTO.signatureDocs!='' && item.updateProfileStudentDTO.signatureDocs != null && item.updateProfileStudentDTO.addressProofDocs!='' && item.updateProfileStudentDTO.addressProofDocs != null && item.updateProfileStudentDTO.ageProofDocs!='' && item.updateProfileStudentDTO.ageProofDocs != null)? 'display:block':'display:none'}" class="col-md-12 col-sm-12 col-xs-12 text-success text-center my-2">All documents uploaded.</p>
+										// 	<p id="allDocsNotUploaded" style="${(item.updateProfileStudentDTO.lastAcadmeicProofDocs=='' || item.updateProfileStudentDTO.lastAcadmeicProofDocs == null ||  item.updateProfileStudentDTO.signatureDocs=='' || item.updateProfileStudentDTO.signatureDocs == null ||  item.updateProfileStudentDTO.addressProofDocs=='' || item.updateProfileStudentDTO.addressProofDocs == null || item.updateProfileStudentDTO.ageProofDocs=='' || item.updateProfileStudentDTO.ageProofDocs == null)? 'display:block':'display:none'}" class="col-md-12 col-sm-12 col-xs-12 text-primary text-center my-2">Please upload files in following formats (<b>jpg, jpeg, pdf or png</b>) with max size <b>5 MB</b> </p>
+										// </div>
+								html+=`</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-2${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Parent/Guardian Name:</label>
@@ -165,7 +304,7 @@ function cardDetails(data){
 										</div>
 									</div>	
 								</div>
-								<div class="tab-pane p-2 show" id="tab-eg5-2${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
+								<div class="tab-pane p-2 show" id="tab-eg5-3${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Parent Email:</label>
@@ -213,7 +352,7 @@ function cardDetails(data){
 										</div>
 									</div>
 								</div>
-								<div class="tab-pane p-2 show" id="tab-eg5-3${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
+								<div class="tab-pane p-2 show" id="tab-eg5-4${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Enrollment Date:</label>
@@ -225,7 +364,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
-											<span class="field-value trans5s ">${item.remainingDays}</span>
+											<span class="field-value trans5s  ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays=='N/A'?'No Started':item.remainingDays}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Weekly Report Frequency:</label>
@@ -268,7 +407,7 @@ function cardDetails(data){
 									
 									</div>
 								</div>
-								<div class="tab-pane show" id="tab-eg5-4${item.studentStandardId}" role="tabpanel">
+								<div class="tab-pane show" id="tab-eg5-5${item.studentStandardId}" role="tabpanel">
 									<div class="row">
 										<div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
 											<div class="p-2 mb-2" style="background:#f0f9ff">
@@ -364,7 +503,7 @@ function cardDetails(data){
 									</div>	
 									
 								</div>
-								<div class="tab-pane show " id="tab-eg5-5${item.studentStandardId}" role="tabpanel">
+								<div class="tab-pane show " id="tab-eg5-6${item.studentStandardId}" role="tabpanel">
 									<div class="row">
 										<div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
 											<ul class="follow-up-accordian m-0 p-0 overflow-auto followup-remark-${item.studentStandardId}" style="max-height: 325px;"></ul>
@@ -405,7 +544,7 @@ function cardDetails(data){
 
 function filterStudentPaymentReportForm(){
 	var html = 
-	'<div class="filterStudentPaymentReportForm" style="display:none">'
+	'<div class="filterStudentPaymentReportForm" style="display:block">'
 		+'<div class="card">'
 			+'<div class="card-body">'
 				+'<form id="studentPaymentForm">'
@@ -416,17 +555,45 @@ function filterStudentPaymentReportForm(){
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Start Date</label>'
+							+'<label>Payment Start Date</label>'
 							+'<input type="text" id="startDate" class="form-control" placeholder="Select Start Date" readonly onkeydown="return false" >'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>End Date</label>'
+							+'<label>Payment End Date</label>'
 							+'<input type="text" id="endDate" class="form-control" placeholder="Select End Date" readonly onkeydown="return false" >'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Payment Status</label>'
+							+'<select id="paymentStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
+								+'<option value="SUCCESS">Success</option>'
+								+'<option value="ODUE">Overdue</option>'
+								+'<option value="DUE">Upcoming</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Over Due By (Days in Numbers)</label>'
+							+'<input type="text" id="overDueBy" class="form-control" placeholder="Enter days count" value="">'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Select LMS Platform</label>'
 							+'<select id="learningPlatform" class="form-control selectReset multiple-select-option" multiple="multiple">'
 								+getLmsPlatformContent(SCHOOL_ID)
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>System Training</label>'
+							+'<select name="systemTrainStatus" id="systemTrainStatus" class="form-control">'
+								+'<option value="">Select System Training</option>'
+								+'<option value="COMPLETED">Completed</option>'
+								+'<option value="PENDING">Pending</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Teacher Mapping</label>'
+							+'<select name="teacherMapStaus" id="teacherMapStaus" class="form-control">'
+								+'<option value="">Select Teacher Mapping</option>'
+								+'<option value="1">Completed</option>'
+								+'<option value="0">Pending</option>'
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
@@ -452,11 +619,38 @@ function filterStudentPaymentReportForm(){
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Payment Status</label>'
-							+'<select id="paymentStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								+'<option value="SUCCESS">Success</option>'
-								+'<option value="ODUE">Overdue</option>'
-								+'<option value="DUE">Upcoming</option>'
+							+'<label>Academic Year Selected</label>'
+							+'<select name="academicYearStatus" id="academicYearStatus" class="form-control">'
+								+'<option value="">Select Academic Year Selected Status</option>'
+								+'<option value="Y">Yes</option>'
+								+'<option value="N">No</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Re-Enroll</label>'
+							+'<select id="reEnrollStatus" class="form-control selectReset multiple-select-option">'
+								+'<option value="">Select Re-Enroll Status</option>'
+								+'<option value="YEAREND">Academic Year End</option>'
+								+'<option value="ONGOING">Ongoing</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Re-Enroll Remaining (Days in Numbers)</label>'
+							+'<input type="text" id="remainingDueBy" class="form-control" placeholder="Enter days count" value="">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>LMS Status</label>'
+							+'<select name="lmsStatus" id="lmsStatus" class="form-control">'
+								+'<option value="">Select LMS Status</option>'
+								+'<option value="1">Active</option>'
+								+'<option value="0">Inactive</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Enrolled By</label>'
+							+'<select id="userId" class="form-control selectReset multiple-select-option">'
+								+'<option value="">ALL</option>'
+								+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, 'STUDENT_COUNSELOR', '')
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
@@ -465,17 +659,9 @@ function filterStudentPaymentReportForm(){
 								
 							+'</select>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Over Due By (Days in Numbers)</label>'
-							+'<input type="text" id="overDueBy" class="form-control" placeholder="Enter days count" value="">'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Enrolled By</label>'
-							+'<select id="userId" class="form-control selectReset">'
-								+'<option value="">ALL</option>'
-								+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, 'STUDENT_COUNSELOR', '')
-							+'</select>'
-						+'</div>'
+						
+						
+						
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 d-none">'
 							+'<label>Page Number</label>'
 							+'<input type="text" id="pageNumber" value="0" class="form-control" placeholder="Page Number">'
@@ -495,7 +681,7 @@ function filterStudentPaymentReportForm(){
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 text-right ml-auto">'
 							+'<label class="full">&nbsp;</label>'
 							+'<a href="javascript:void(0)" class="btn btn-danger mr-1 resetStudentPaymentRecord" onClick="resetStudentPaymentForm(\'studentPaymentForm\');" ><i class="fa fa-undo"></i>&nbsp;Reset</a>'
-							+'<a href="javascript:void(0)" class="btn btn-success searchStudentPaymentRecord" onClick="getPaymentReportData(\'\',false,1);" ><i class="fa fa-search"></i>&nbsp;Search</a>'
+							+'<a href="javascript:void(0)" class="btn btn-success searchStudentPaymentRecord" onClick="getPaymentReportData(\'studentPaymentForm\',false,1, \'search\');" ><i class="fa fa-search"></i>&nbsp;Search</a>'
 						+'</div>'
 					+'</div>'
 				+'</form>'
@@ -541,18 +727,44 @@ function consolidateContent(data, count){
 				+'<h5 class="font-weight-semi-bold">Self Study Plus</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.sspCount+'</div>'
 			+'</div>'
-		+'</div>'
-		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
-			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Already Paid</h5>'
-				+'<div class="opacity-7 font-size-sm">'+data.paidFee+'</div>'
-			+'</div>'
-		+'</div>'
-		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
-			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Overdue/Upcoming</h5>'
-				+'<div class="opacity-7 font-size-sm">'+data.dueOrUpcomingFee+'</div>'
-			+'</div>'
 		+'</div>';
+		// +'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
+		// 	+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
+		// 		+'<h5 class="font-weight-semi-bold">Already Paid</h5>'
+		// 		+'<div class="opacity-7 font-size-sm">'+data.paidFee+'</div>'
+		// 	+'</div>'
+		// +'</div>'
+		// +'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
+		// 	+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
+		// 		+'<h5 class="font-weight-semi-bold">Overdue/Upcoming</h5>'
+		// 		+'<div class="opacity-7 font-size-sm">'+data.dueOrUpcomingFee+'</div>'
+		// 	+'</div>'
+		// +'</div>';
 	return html;
 }
+
+function updateRefferelCode(){
+	var html=`<div class="modal fade bd-example-modal-lg fade-scale" id="updateReferralCodeModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-md" role="document">
+			<div class="modal-content">
+				
+				<div class="modal-header py-2 bg-primary text-white">
+					<h5 class="modal-title">Update Referral Code</h5>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<div class="full">
+						<input type="hidden" name="studentStandardId" id="studentStandardId"/>
+						<input class="form-control" type="text" name="newReferralCode" id="newReferralCode"/>
+					</div>
+					<div class="full text-right">
+						<a href="javascript:void(0)" class="btn btn-primary" onclick="saveReferralCodeFromPaymentWindow();">Update</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html
+}
+
+
