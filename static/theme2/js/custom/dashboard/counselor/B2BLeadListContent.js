@@ -376,6 +376,23 @@ function getLeadAdvanceSearchB2BPopup(objectRights){
 	+'							<option value="demo-lead" >Interview Book</option>'
 	+'						</select>'
 	+'					</div>'
+	+'					<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">'
+	+'						<label class="m-0">Sort by</label>'
+	+'						<select name="leadsShortBy" id="leadsShortBy" class="form-control">'
+	+'							<option value="modifydate" '+(objectRights.shortBy=='modifydate'?'selected':'')+'>Modified Date</option>'
+	+'							<option value="createdate" '+(objectRights.shortBy=='createdate'?'selected':'')+'>Created Date</option>'
+	+'							<option value="childname" '+(objectRights.shortBy=='childname'?'selected':'')+'>Child Name</option>'
+	+'							<option value="grade" '+(objectRights.shortBy=='grade'?'selected':'')+'>Grade</option>'
+	+'							<option value="country" '+(objectRights.shortBy=='country'?'selected':'')+'>Country</option>'
+	+'						</select>'
+	+'					</div>'		
+	+'					<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">'
+	+'						<label class="m-0">Ascending/ Descending</label>'
+	+'						<select name="leadsShortType" id="leadsShortType" class="form-control">'
+	+'							<option value="DESC" '+(objectRights.shortType=='DESC'?'selected':'')+'>Descending</option>'
+	+'							<option value="ASC" '+(objectRights.shortType=='ASC'?'selected':'')+'>Ascending</option>'
+	+'						</select>'
+	+'					</div>'
 	+'				</div>'
 	+'			</form>'
     +'        </div>'
@@ -720,7 +737,8 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 	}
 	console.log(data);
 	var html='';
-	html+='<select name="leadsPagging" id="leadsPagging" class="ml-1 my-2 rounded">'
+	html+='<input type="checkbox" id="selectLeadAll" class="ml-2" />&nbsp;All'
+	+'<select name="leadsPagging" id="leadsPagging" class="ml-1 my-2 rounded">'
 		+'<option value="10" '+(leaddata.recordsPerPage=='10'?'selected':'')+'>10</option>'
 		+'<option value="25" '+(leaddata.recordsPerPage=='25'?'selected':'')+'>25</option>'
 		+'<option value="50" '+(leaddata.recordsPerPage=='50'?'selected':'')+'>50</option>'
@@ -729,7 +747,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
 		html+='<div class="lead-table-wrapper">'
-		+'<table class="table table-bordered font-12 border-radius-table" style="min-width:1450px;width:100%" id="leadDataList">'
+		+'<table class="table table-bordered font-12 border-radius-table leadDataList" style="min-width:1450px;width:100%" id="leadDataList">'
 			+'<thead class="bg-primary">'
 			+'<tr>'
 					+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important">'

@@ -148,7 +148,7 @@ function cardDetails(data){
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">System Orientation:</label>
-											<span class="field-value trans5s ">${item.systemOrientStatus}</span>
+											<span class="field-value trans5s ${item.systemOrientStatus!='COMPLETED'?'text-danger':'text-success'}"><br/>${item.systemOrientStatus} - ${item.systemOrientDate==''?'No seleted':item.systemOrientDate}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Teacher Mapping:</label>
@@ -157,7 +157,15 @@ function cardDetails(data){
 											// 	html+=`&nbsp;&nbsp;<a href="javascript:void(0);" class="" onclick="return callAssignStudentTeacher('formId','${item.studentId}','true','true','true','${item.updateProfileStudentDTO.standardId}');"><i class="fa fa-eye"></i></a>`;
 											// }
 											html+=`</span>
-											</div>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Marksheet Publish:</label>
+											<span class="field-value trans5s ${item.systemOrientStatus!='Y'?'text-danger':'text-success'}">${item.marksheetStatus=='Y'?'Yes':'No'}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Last Follows:</label>
+											<span class="field-value trans5s ">${item.lastFollowby==null?'No Followup': item.lastFollowby +' - '+item.lastFollowDate}</span>
+										</div>
 									</div>	
 								</div>
 								<div class="tab-pane p-2 show" id="tab-eg5-1${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
@@ -726,6 +734,12 @@ function consolidateContent(data, count){
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
 				+'<h5 class="font-weight-semi-bold">Self Study Plus</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.sspCount+'</div>'
+			+'</div>'
+		+'</div>'
+		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
+			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
+				+'<h5 class="font-weight-semi-bold">Total Call | Today Call</h5>'
+				+'<div class="opacity-7 font-size-sm">'+data.totalCall+' | '+data.todayCall+'</div>'
 			+'</div>'
 		+'</div>';
 		// +'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'

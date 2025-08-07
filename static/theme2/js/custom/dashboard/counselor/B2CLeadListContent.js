@@ -641,7 +641,7 @@ function getLeadAdvanceSearchPopup(objRights){
 	html+='</div>'
 	+'<div class="row">'
 		+'<div class="col-xl-2 col-lg-2 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">'
-		+'<label class="m-0">Short by</label>'
+		+'<label class="m-0">Sort by</label>'
 		+'<select name="leadsShortBy" id="leadsShortBy" class="form-control">'
 		+'<option value="modifydate" '+(objRights.shortBy=='modifydate'?'selected':'')+'>Modified Date</option>'
 		+'<option value="createdate" '+(objRights.shortBy=='createdate'?'selected':'')+'>Created Date</option>'

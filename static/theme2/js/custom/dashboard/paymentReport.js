@@ -155,7 +155,7 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	return request;
 }
 
-function pageCount (records){
+function pageCount(records){
 	var pageNo = records / parseInt($("#pageSize").val())
 	var checkDecimalValue = Number.isInteger(pageNo)
 	if(!checkDecimalValue){
@@ -169,8 +169,11 @@ function pageCount (records){
 		next: "Next",  
 		prev: "Prev",  
 		onPageClick: function (event, page) {
+			console.log(page);
 			$("#pageNumber").val(page);
-			getPaymentReportData('',false,2)
+			if(page>1){
+				getPaymentReportData('',false,2,'')
+			}
 			//$(".getPaymentReportData")[0].onclick();
 			//fetch content and render here
 			//$("#page-content").text ("Page? + page) + ?content here";
@@ -205,7 +208,7 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #systemTrainStatus").val('');
 
 	$('#'+formID+" #pageSize").val("10").trigger("change");
-	//getPaymentReportData('',false,1);
+	//getPaymentReportData('',false,1,'');
 	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');
 	// $('#'+formID+' #pageSize').val($('#'+formID+' #pageSize option:first-child').val()).trigger('change');
 
@@ -328,6 +331,14 @@ function getCommunicationLogList(studentStandardId, userId){
 											+'<tr>'
 												+'<th class="p-1 border-0">Remarks:</th>'
 												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.comments!=''?leadCall.comments:'N/A')+'</td>'
+											+'</tr>'
+											+'<tr>'
+												+'<th class="p-1 border-0">Follow by:</th>'
+												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.addedByName!=''?leadCall.addedByName:'N/A')+'</td>'
+											+'</tr>'
+											+'<tr>'
+												+'<th class="p-1 border-0">Follow Date:</th>'
+												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.createdAt!=''?leadCall.createdAt:'N/A')+'</td>'
 											+'</tr>'
 										+'</table>'
 									+'</div>'
