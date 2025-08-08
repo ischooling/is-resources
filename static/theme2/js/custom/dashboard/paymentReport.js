@@ -47,6 +47,11 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 					$("#studentPaymentReport #studentPaymentReportTable tbody").html(cardDetails(data)).promise().done(function(){
 						$.each(data.reports, function(key, item) {
 							getCommunicationLogList(item.studentStandardId, item.userId);
+							
+						});
+
+						$(".re-leadstatus").select2({
+							theme:'bootstrap4',
 						});
 						
 						// if(lRStatus!=""){
@@ -104,7 +109,7 @@ function getRequestForPaymentReport(formId, type, forDownload){
 		PaymentReportRequestDTO['paymentStatus'] = $('#paymentStatus').select2('val');
 	}
 	if($('#userId').val()!=''){
-		PaymentReportRequestDTO['userId'] = [$('#userId').val()];
+		PaymentReportRequestDTO['refferalCode'] = [$('#userId option:selected').attr('data-reffcode')];
 	}else{
 		PaymentReportRequestDTO['userId'] = [];
 	}
@@ -407,7 +412,7 @@ function callUserReferralUpdatePaymentWindow(formId, studentStandardId, roleModu
 
 function saveReferralCodeFromPaymentWindow() {
   hideMessageTheme2("");
-  var refCode = $("#newReferralCode").val();
+  var refCode = $("#newReferralCode option:selected").attr('data-reffcode');
   if (
     refCode == null ||
     refCode == "" ||

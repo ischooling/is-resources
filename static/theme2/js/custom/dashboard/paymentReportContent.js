@@ -138,7 +138,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
-											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays=='N/A'?'No Started':item.remainingDays}</span>
+											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Fee Details:</label>
@@ -159,8 +159,8 @@ function cardDetails(data){
 											html+=`</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Marksheet Publish:</label>
-											<span class="field-value trans5s ${item.systemOrientStatus!='Y'?'text-danger':'text-success'}">${item.marksheetStatus=='Y'?'Yes':'No'}</span>
+											<label class="label bold">Transcript Publish:</label>
+											<span class="field-value trans5s ${item.marksheetStatus!='Y'?'text-danger':'text-success'}">${item.marksheetStatus=='Y'?'Yes':'No'}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Last Follows:</label>
@@ -372,7 +372,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
-											<span class="field-value trans5s  ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays=='N/A'?'No Started':item.remainingDays}</span>
+											<span class="field-value trans5s  ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Weekly Report Frequency:</label>
@@ -521,7 +521,7 @@ function cardDetails(data){
 													<div class="col-lg-12 col-md-6 col-sm-12 col-12">
 														<div class="position-relative form-group">
 															<label for="title" class="">Status</label>
-																<select name="leadStatus-${item.studentStandardId}" id="leadStatus-${item.studentStandardId}" class="form-control" style="width:200px !important;">
+																<select name="leadStatus-${item.studentStandardId}" id="leadStatus-${item.studentStandardId}" class="form-control re-leadstatus" style="width:200px !important;">
 																	<option value="">Select Status</option>`;
 																for (let s = 0; s < item.leadStatusList.length; s++) {
 																	const statusL = item.leadStatusList[s];
@@ -658,7 +658,7 @@ function filterStudentPaymentReportForm(){
 							+'<label>Enrolled By</label>'
 							+'<select id="userId" class="form-control selectReset multiple-select-option">'
 								+'<option value="">ALL</option>'
-								+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, 'STUDENT_COUNSELOR', '')
+								+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '')
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
@@ -769,7 +769,10 @@ function updateRefferelCode(){
 				<div class="modal-body">
 					<div class="full">
 						<input type="hidden" name="studentStandardId" id="studentStandardId"/>
-						<input class="form-control" type="text" name="newReferralCode" id="newReferralCode"/>
+						<select id="newReferralCode" name="newReferralCode" class="form-control selectReset multiple-select-option">
+								<option value="">ALL</option>`;
+								html+=getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '');
+							html+=`</select>
 					</div>
 					<div class="full text-right">
 						<a href="javascript:void(0)" class="btn btn-primary" onclick="saveReferralCodeFromPaymentWindow();">Update</a>

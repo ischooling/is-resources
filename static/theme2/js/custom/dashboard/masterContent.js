@@ -956,7 +956,7 @@ function getUserBasedOnCriteria(key, value, extra, extra1){
 			   showMessage(true, data['message']);
 		   } else {
 				$.each(data['mastersData']['data'], function(k, v) {
-					html+='<option value="'+v.key+'">'+v.value+'</option>';
+					html+='<option value="'+v.key+'" data-reffcode="'+v.extra+'">'+v.value+'</option>';
 				});
 			}
 	   }
