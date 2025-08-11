@@ -178,7 +178,7 @@ function finalRemarks(recommendation){
 				+'<div class="full mb-2">'
 					+'<label for="recommendedGradeId" class="m-0">Recommended Grade</label>'
 					+'<select id="recommendedGradeId" class="form-control">'
-						+ getStandardContent(SCHOOL_ID,'Y')
+						+ getStandardContent(SCHOOL_ID,false,true,'cti')
 					+'</select>'
 				+'</div>'
 				+'<div class="full mb-2">'

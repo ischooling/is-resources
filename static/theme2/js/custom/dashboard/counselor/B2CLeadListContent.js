@@ -1184,7 +1184,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										// +'<th class="border-0 p-1">Campaign:</th>'
 											+'<td class="border-0 p-1" colspan="2">'
 											+'<div class="d-flex align-items-center selectcampain-wrapper" style="width: 250px;">'
-												+'<select class="selectcampain" name="campainName" id="campainName_'+leads.leadId+'">';
+												+'<select class="selectcampain" name="campainName" id="campainName_'+leads.leadId+'">'
+												+'<option value="" data-campain="">--Select Campaign--</option>';
 												for (let c = 0; c < campaignList.length; c++) {
 													const campaign = campaignList[c];
 													//console.log("value=>"+campaign.value);

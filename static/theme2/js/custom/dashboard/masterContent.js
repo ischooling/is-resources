@@ -292,7 +292,7 @@ function getStandardContentByCourseProviderId(schoolId, courseProviderId){
 	return getGrades(getGradesData(actualGrades));
 }
  
-function getStandardContent(schoolId,fullGrade, selectOption){
+function getStandardContent(schoolId,fullGrade,selectOption,gradeFor){
 	if(selectOption==undefined){
 		selectOption=false;
 	}
@@ -301,7 +301,11 @@ function getStandardContent(schoolId,fullGrade, selectOption){
 		if(fullGrade){
 			actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','19', '20', '21', '22', '23'];
 		}else{
-			actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+			if(gradeFor=='cti'){
+				actualGrades=['KG','1','2','3','4','5','6','7','8','9','10'];
+			}else{
+				actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+			}
 		}
 	}else{
 		actualGrades=['1','2','3','4','5','6','7','8','9','10','11','12'];

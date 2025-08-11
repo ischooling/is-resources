@@ -101,8 +101,14 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Enrolled Status:</label>
-											<span class="field-value trans5s ${item.enrolledStatus=='Withdrawn'?'text-danger':'text-success'}">${item.enrolledStatus}</span>
-										</div>
+											<span class="field-value trans5s ${item.enrolledStatus=='Withdrawn'?'text-danger':'text-success'}">${item.enrolledStatus}</span>`;
+											if(item.advBookSeat==1){
+												html+=`<br/><span class="field-value trans5s ${item.advBookSeat==1?'text-success':''}">${item.advBookSeat==1?'Reserve a Seat for Next Grade':''}</span>`;
+											}
+											if(item.advPayment==1){
+												html+=`<br/><span class="field-value trans5s ${item.advPayment==1?'text-success':''}">${item.advPayment==1?'Advance payment for Next Grade':''}</span>`;
+											}
+										html+=`</div>
 									</div>
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
@@ -134,7 +140,7 @@ function cardDetails(data){
 										html+=`</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Overall Progress Report:</label>
-											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}</span>
+											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/student-progress-report?moduleId=18&linkType=externalLink-${item.userId}\")' class=''><i class='fa fa-eye'></i>&nbsp;</a></span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
