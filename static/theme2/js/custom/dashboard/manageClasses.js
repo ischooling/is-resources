@@ -158,6 +158,7 @@ function classroomSessionsData(formId, elementId, moduleId, argument, userId, ro
 			} else {
 				$('#manageSessionContentDiv').html(manageClassroomTable(elementId, role));
 				$('#' + elementId + ' > tbody').append(getClassroomBody(data.sessions, userId, role, data.resetMeetingRights, data.showClassCancelOption));
+				generateTinyUrls();
 				var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
 				if (isDataTable) {
 					$('#' + elementId).dataTable().fnDestroy();

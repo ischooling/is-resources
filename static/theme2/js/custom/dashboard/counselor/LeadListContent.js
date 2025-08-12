@@ -17,6 +17,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	LEAD_CATEGORY=objRights.leadType;
     var html=await getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
+	generateTinyUrls();
 	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	getB2CLeadPopjs(objRights, roleAndModule);
 	var clickfrom='list';

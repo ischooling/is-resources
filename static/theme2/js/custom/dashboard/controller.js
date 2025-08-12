@@ -181,7 +181,7 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	else if(pageNo=='schedule-a-session'){
 		customLoader(true);
 		$('#dashboardContentInHTML').html(getScheduleSessionContentTeacher('Book a Class',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-		
+		generateTinyUrls();
 		$("#meetingDate").datepicker("destroy");
 		$("#meetingDate").datepicker({
 			autoclose: true,

@@ -551,6 +551,7 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 						}
 						$("#copyMeetingLinkModal").modal("show");
 					}
+					generateTinyUrls();
 					$("#customTitleDiv").hide();
 				}
 				$(".classRecodsTumbs").hide();
@@ -1116,7 +1117,7 @@ function copyMeetingLink(){
 						+'</div>'
 						+'<div class="modal-body">'
 							+'<div class="col-lg-12 col-md-12 col-sm-12 col-12 p-0 text-center position-relative">'
-								+'<input type="text" value="" id="meetingLinkInput" class="position-absolute" style="top:0;left:0;opacity:0;"/>'
+								+'<input class="tinyUrl" type="text" value="" id="meetingLinkInput" class="position-absolute" style="top:0;left:0;opacity:0;"/>'
 								+'<div class="full text-center my-4">'
 								+'<a href="javascript:void(0)" class="btn btn-primary meeting-link-copy-btn" onclick="copyToClipboard(\'meetingLinkInput\',this, true)">Copy Link<i class="fa fa-copy ml-2"></i></a>'			
 								+'</div>'

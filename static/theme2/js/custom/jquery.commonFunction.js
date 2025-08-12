@@ -5704,7 +5704,7 @@ function generateTinyUrls() {
   const uniqueUrls = {};
   $urlInputs.each(function () {
     const url = $(this).val().trim();
-    if (url) {
+    if (getTinyUrlService()) {
       uniqueUrls[url] = true;
     }
   });
@@ -5884,4 +5884,10 @@ function getTimezoneIdByTimeNameRequest(key, value) {
   request["requestData"] = requestData;
   request["authentication"] = authentication;
   return request;
+}
+
+function getTinyUrlService() {
+  const tinyUrlService = getSettingsByTypeAndKey('CONFIGURATION', 'TINY_URL_SERVICE');
+  const metaValue = JSON.parse(tinyUrlService)?.data?.metaValue;
+  return String(metaValue).toLowerCase() === 'true';
 }

@@ -3159,7 +3159,7 @@ function getEventList(eventList, userId,prestartTime, preendTime, userRoleId, mi
 												// html+'=<a href='+events.meetingBookUrl+' target="_blank" class="cursor btn btn-sm btn-success">Copy Link</a>';
 											html+='</span>'
 											+'<div style="top:18px;left:0;position:absolute;">'
-												+'<input type="text" id="copyLink-'+e+'" value="'+events.meetingBookUrl+'" style="opacity:0;height:0px">'
+												+'<input class="tinyUrl" type="text" id="copyLink-'+e+'" value="'+events.meetingBookUrl+'" style="opacity:0;height:0px">'
 											+'</div>'
 										+'</div>';
 									}
@@ -3260,6 +3260,7 @@ function getEventDropdownList(eventDrpList, dropdownElementId){
 	html+='</div>';
 	html+='</div>';
 	$("."+dropdownElementId).html(html);
+	generateTinyUrls();
 	//$(".eventTotal").text(totalEvent);
 	if(eventDrpList.length>0){
 		var totalEvent=0;
@@ -4802,7 +4803,7 @@ function bindClassData(meetingList){
 			const bookdata = meetingList[ind];
 			var hiddenValue = bookdata.meetingType.replaceAll(" ","_")+"|"+bookdata.timeId+"|"+bookdata.adminClassDate
 			htmlCal=htmlCal+'<tr>';
-			htmlCal=htmlCal+'<td style="vertical-align:top"><input type="hidden" class="timeId" value='+hiddenValue+'></input>'+bookdata.meetingType+'<br/>'+bookdata.recurringClassStart+'</td>';
+			htmlCal=htmlCal+'<td style="vertical-align:top"><input class="tinyUrl" type="hidden" class="timeId" value='+hiddenValue+'></input>'+bookdata.meetingType+'<br/>'+bookdata.recurringClassStart+'</td>';
 			htmlCal=htmlCal+'<td style="vertical-align:top">'+bookdata.studentName+'</td>';
 			htmlCal=htmlCal+'<td style="vertical-align:top">'+bookdata.teacherName+'</td>';
 			htmlCal=htmlCal+'<td style="vertical-align:top">';

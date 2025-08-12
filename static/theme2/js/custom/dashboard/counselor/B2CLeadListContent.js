@@ -34,12 +34,12 @@ function getB2CListHeaderContent(roleAndModule, objRights){
 			html+='<div class="d-flex justify-content-end align-items-center" style="gap:6px;">';
 				if(roleAndModule.added=='Y'){
 					html+='<b class="schoolDemoUrlAutoCounselor text-success"></b>';
-					html+='<input type="hidden" id="school-demo-auto-counselor-url" value="'+objRights.schoolDemoUrlAutoCounselor+'" style="opacity:0;height:0px">';
+					html+='<input class="tinyUrl" type="hidden" id="school-demo-auto-counselor-url" value="'+objRights.schoolDemoUrlAutoCounselor+'" style="opacity:0;height:0px">';
 					html+='<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'school-demo-auto-counselor-url\', \'schoolDemoUrlAutoCounselor\')"  id="schoolDemoUrl">New Demo with auto counselor</button>';
 				}
 				if(roleAndModule.added=='Y'){
 					html+='<b class="schoolDemoUrl text-success d-none"></b>';
-					html+='<input type="hidden" id="common-school-demo-url" value="'+objRights.schoolDemoUrl+'" style="opacity:0;height:0px">';
+					html+='<input class="tinyUrl" type="hidden" id="common-school-demo-url" value="'+objRights.schoolDemoUrl+'" style="opacity:0;height:0px">';
 					html+='<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'common-school-demo-url\', \'schoolDemoUrl\')"  id="schoolDemoUrl">Add New Demo</button>';
 				}
 				if(roleAndModule.added=='Y'){

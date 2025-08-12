@@ -103,6 +103,7 @@ function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, curre
 					$("#studentOrientList").html(rhtml).promise().done(function(){
 						customLoader(false);
 					});
+					generateTinyUrls();
 					$('#orientTbl').DataTable();
 					var orientTable = $('#orientTbl').DataTable();
 					if (!orientTable.data().any()){
@@ -202,7 +203,7 @@ function getOrientList(data){
 				+ (dlist.meetingId == null ? " style='pointer-events: none; color: grey; text-decoration: none; cursor: default;'" : " onclick=\"" + onclick + "\"") 
 				+ ">Update</a></div>"
 			html=html+"<b class=\"copy-msg-"+i+" text-success\" style=\""+(dlist.status=="RESCHEDULE"?"color:#fff !important":"")+"\"></b></br>"
-			html=html+"<div class='position-absolute' style='top:0;left:0;'><input type='text' id='copyUrl"+i+"' value=\""+dlist.joinUrl+"\" style='opacity:0;height:0px'></div>"
+			html=html+"<div class='position-absolute' style='top:0;left:0;'><input class='tinyUrl' type='text' id='copyUrl"+i+"' value=\""+dlist.joinUrl+"\" style='opacity:0;height:0px'></div>"
 			html += "<button class='text-decoration-none btn btn-sm btn-success ' " + (dlist.meetingId == null ? "disabled " : "") + "onclick='copyURL(\"copyUrl" + i + "\",\"copy-msg-" + i + "\");'></i>Copy joining link <i class='pe-7s-copy-file'></i></button>";
 			html=html+"</td>";
 			if(dlist.sendMailStatus == 'Y'){

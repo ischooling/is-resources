@@ -71,7 +71,7 @@ function getDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondi
 				$("#scheduleEventsSearchForm").slideUp(700);
 				customLoader(false);
 				// renderStudentEnrollmentRecord(data, moduleId, clickFrom, currentPage);
-				
+				generateTinyUrls();
 			}
 		 },
 		 error:function(e){

@@ -411,7 +411,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 										}
 										if(item.meetingStatus != 'Cancelled' && item.meetingStatus != 'Reschedule'){
 											html+='<br/>'
-											+'<input class="d-none" type="text" id="copyURL'+key+'" value="'+item.copyLinkUrl+'">'
+											+'<input class="tinyUrl" style="display: none;" type="text" id="copyURL'+key+'" value="'+item.copyLinkUrl+'">'
 											+'<b class="copy-msg-'+key+'"></b>'
 											+'<button id="copyURL'+key+'" onclick="copyURL(\'copyURL'+key+'\',\'copy-msg-'+key+'\')" class="btn btn-primary btn-sm mt-2">User joining link</a>'
 										}
@@ -432,7 +432,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 					if(!showPagination){
 						html+=pagination(clickFrom, boxSearchCondition, countType);
 					}
-				}
+									}
 				else{
 					html+='<table class="table table-bordered font-12 border-radius-table" style="min-width:1380px;width:100%">'
 							+'<thead>'
