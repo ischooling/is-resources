@@ -46,7 +46,7 @@ function cartDetailContent(data, userId){
                                     html+=
                                     `<li class="item vertical-timeline-element-content ml-0 bounce-in">
                                         <span class="item-img">
-                                            <img src="${item.imgURl}" alt="course-img" />
+                                            <img src="${item.imgURl}" alt="course-img" style="aspect-ratio: 1; object-fit: cover;" />
                                         </span>
                                         <div class="item-info">
                                             <h4 class="item-name font-20 font-weight-bold mb-1">${item.subjectName}</h4>

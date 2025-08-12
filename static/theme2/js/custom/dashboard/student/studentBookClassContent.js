@@ -30,7 +30,7 @@ async function renderBookClassContent(
       responseData.details.studentStandardId
     );
     if (!renderingflag) {
-      $("#classesThumbCotentListWrapper").html(classesThumbCotentList(data));
+      $("#classesThumbCotentListWrapper").html(classesThumbCotentListNew(data));
       $("#bookClassContentThumbList").html(
         classThumbItemListContent(data.subjectList, moduleId)
       );
@@ -43,7 +43,7 @@ async function renderBookClassContent(
             responseData.details.classPlanCount
           )
       );
-      $("#pageTitle").html(pageTitleContent(data, moduleId, false));
+     // $("#pageTitle").html(pageTitleContent(data, moduleId, false));
     }
     if ($('[data-toggle="tooltip"]').length > 0) {
       $('[data-toggle="tooltip"]').tooltip();
@@ -125,15 +125,74 @@ function getBookClassContent(
           if (showAcademicYearValidation == "Y") {
             html += `<h4 class="my-3 font-weight-semi-bold text-center text-primary">Your academic year has not started yet. You will be able to book your classes once your academic year starts</h4>`;
           } else {
-            html += `<div id="totalClassSectionWrapper">` + classesThumbsContent(data);
+            html += `<div id="totalClassSectionWrapper">` + classesThumbsContentNew(data);
             html +=
               `</div>` +
-              classesThumbsButtletPointContent(classPlanCount, data.registerType) +
+              classesThumbsButtletPointContent(classPlanCount, data.registerType, data.classData) +
               classThumbItemContent(data.subjectList, moduleId);
           }
         html+=`</div>
       </div>
     </div>`;
+  return html;
+}
+
+function classesThumbsContentNew(data) {
+  var classYearCount = data.classData.year[0];
+  var classWeekCount = data.classData.week[0];
+  var html =
+    `<div class="d-flex flex-md-row flex-column justify-content-center align-items-center text-center">`;
+      if(classYearCount.comp>0){
+        html+=`<p class="bg-primary text-white p-2 col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 rounded mr-md-3 mr-0">You have ${classYearCount.comp} complimentary classes for the 42 weeks</p>`;
+      }
+       if(classWeekCount.comp>0){
+        html+=`<p class="bg-primary text-white p-2 col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 rounded">You have ${classWeekCount.comp} complimentary classes per week</p>`;
+       }
+    html+=`</div>
+    <div id="classesThumbCotentListWrapper">` + classesThumbCotentListNew(data);
+    html+=`</div>`;
+  return html;
+}
+
+function classesThumbCotentListNew(data){
+  var html=`<div class="form-row">`;
+    $.each(data.subjectList, function(index, item) {
+      html+=`
+        <div class="mb-2 col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+          <div class="p-2 rounded-10 border border-primary bg-light-primary">
+            <p class="font-weight-semi-bold mb-1 font-12">${item.name}</p>
+            <div class="form-row">`;
+              if(item.complimentaryTotal>0){
+                html+=`<div class="mb-1 col-xl-3 col-lg-3 col-md-6 col-sm-6 col-6">
+                        <div class="px-1 rounded border border-primary bg-white text-primary d-flex justify-content-between align-items-center flex-column">
+                          <p class="mb-0 font-weight-semi-bold font-11">Complimentary</p>
+                          <p class="mb-0 font-weight-bold font-12">${item.complimentaryTotal}</p>
+                        </div>
+                      </div>`;
+              }
+              html+=`<div class="mb-1 ${item.complimentaryTotal>0 ? 'col-xl-3 col-lg-3' : 'col-xl-4 col-lg-4'} col-md-6 col-sm-6 col-6">
+                <div class="px-1 rounded border border-primary bg-white text-primary d-flex justify-content-between align-items-center flex-column">
+                  <p class="mb-0 font-weight-semi-bold font-11">Paid</p>
+                  <p class="mb-0 font-weight-bold font-12">${item.extraClassTotal}</p>
+                </div>
+              </div>
+              <div class="mb-1 ${item.complimentaryTotal>0 ? 'col-xl-3 col-lg-3' : 'col-xl-4 col-lg-4'} col-md-6 col-sm-6 col-6">
+                <div class="px-1 rounded border border-primary bg-white text-primary d-flex justify-content-between align-items-center flex-column">
+                  <p class="mb-0 font-weight-semi-bold font-11">Booked</p>
+                  <p class="mb-0 font-weight-bold font-12">${item.booked}</p>
+                </div>
+              </div>
+              <div class="mb-1 ${item.complimentaryTotal>0 ? 'col-xl-3 col-lg-3 col-md-6 col-sm-6 col-6' : 'col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12'}">
+                <div class="px-1 rounded border border-primary bg-white text-primary d-flex justify-content-between align-items-center flex-column">
+                  <p class="mb-0 font-weight-semi-bold font-11">Expired</p>
+                  <p class="mb-0 font-weight-bold font-12">${item.expired}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    html+=`</div>`;
   return html;
 }
 
@@ -302,18 +361,32 @@ function classesThumbCotentList(data) {
   return html;
 }
 
-function classesThumbsButtletPointContent(classPlanCount, registerType) {
-  var html = `<div class="d-flex flex-wrap bg-light rounded-20 px-2 pt-2 pb-1 mt-3 mb-4">
-            <span class="p-1 font-12 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-1 mb-1"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">International Schooling follows a Sunday-to-Saturday week.</p></span>
-            <span class="p-1 font-12 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-1 mb-1"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Your classes will be booked and counted based on this weekly structure.</p></span>`;
-  if (registerType == "ONE_TO_ONE" || registerType == "SSP") {
-    html += `<span class="p-1 font-12 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-1 mb-1"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">You can book ${
-      classPlanCount == "1" ? "one" : "three"
-    } complimentary ${
-      classPlanCount == "1" ? "class" : "classes"
-    } per week.</p></span>`;
+function classesThumbsButtletPointContent(classPlanCount, registerType, classData) {
+  var classWeekCount = classData.week[0];
+  debugger;
+  var html=
+    `<h5 class="font-weight-bold mb-0 mt-3">Class Booking Instructions</h5>
+    <div class="d-flex flex-wrap bg-light rounded-10 px-2 pt-2 pb-1 mt-3 mb-4">
+      <span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Week Structure: Sunday to Saturday.</p></span>`;
+      if(classWeekCount.comp>0){
+        html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Free Classes: Available only from Monday to Friday.</p></span>`;
+      }
+      html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Booking & Counting: Classes are booked and counted on a weekly basis.</p></span>`;
+        if (registerType == "ONE_TO_ONE" || registerType == "SSP") {
+          html += `<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Free Class Limit: You can book ${
+            classPlanCount == "1" ? "one" : "three"
+          } free ${
+            classPlanCount == "1" ? "class" : "classes"
+          } per week ${classPlanCount == "3" || registerType == "SSP" ? "" : "per course."}</p></span>`;
+        }
+  html += `<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Maximum Classes: Up to ` ;
+  if(classWeekCount.comp>0){
+    html += classWeekCount.comp;
+  }else{
+    html += classWeekCount.extra;
   }
-  html += ` </div>`;
+  html+=` classes can be booked per week.</p></span>`;
+     html+=`</div>`;
   return html;
 }
 
@@ -328,7 +401,7 @@ function classThumbItemContent(subjectList, moduleId) {
     DISPLAY_DATE_ONLY
   );
   html +=
-    weekStartAndEndDage.startDatetime + " - " + weekStartAndEndDage.endDatetime;
+    weekStartAndEndDage.startDatetime + " to " + weekStartAndEndDage.endDatetime;
   html += `</span>`;
   if (DEPLOYMENT_MODE != "PROD") {
     html += `<span class="d-inline-block ml-1">
@@ -349,13 +422,13 @@ function classThumbItemListContent(subjectList, moduleId) {
   var html = ``;
   $.each(subjectList, function (i, v) {
     html += `<div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="d-flex flex-column h-100">
+            <div class="d-flex flex-column h-100 border border-primary rounded-10">
                 <div class="full course-img-wrapper">
                     <img src="${
                       v.img
-                    }" class="rounded-top-left-10 rounded-top-right-10"/>    
+                    }" class="rounded-top-left-10 rounded-top-right-10 border-bottom border-primary h-sm" style="object-fit: cover;" />    
                 </div>
-                <div class="w-100 d-flex flex-column justify-content-between h-100 course-detials-wrapper p-2 border-left border-right border-bottom border-primary rounded-bottom-left-10 rounded-bottom-right-10">
+                <div class="w-100 d-flex flex-column justify-content-between h-100 course-detials-wrapper p-2">
                     <div class="full mt-1">
                         <h6 class="font-weight-semi-bold text-dark">${
                           v.name
@@ -756,7 +829,7 @@ function renderBookedClassContent(
 ) {
   var moduleId = $("#bookClassContent").attr("data-moduleId");
   $("#bookClassContent").html(
-    pageTitleContent(data, moduleId, true) +
+    //pageTitleContent(data, moduleId, true) +
       getBookedClassCardContent(
         data,
         moduleId,
