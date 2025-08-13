@@ -774,12 +774,6 @@ function B2CStudentListfilterForm(referralCode){
 					+'<label class="full text-primary">Payment Date To</label>'
 					+'<input type="text" class="form-control" name="paymentDateTo" id="paymentDateTo" readonly onkeydown="return false"/>'
 				+'</div>'
-				// +'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-				// 	+'<label class="full text-primary">Payment Title</label>'
-				// 	+'<select class="form-control" name="paymentTitle" id="paymentTitle">'
-				// 	+ getPaymentTitle(SCHOOL_ID)
-				// 	+'</select>'
-				// +'</div>'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
 					+'<label class="full text-primary">Payment Status</label>'
 					+'<select class="form-control" name="paymentStatus" id="paymentStatus">'

@@ -1,3 +1,8 @@
+var grades_KG_12=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+var grades_1_12=['1','2','3','4','5','6','7','8','9','10','11','12'];
+var grades_all=['KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','19', '20', '21', '22', '23'];
+var grades_KG_10 = ['KG','1','2','3','4','5','6','7','8','9','10'];
+var requiredGrades = ['N','KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'];
 
 function getGradesData(requiredGrades){
 	var grades=[]
@@ -188,14 +193,10 @@ function getGrades(grades, selectOption){
 	return html;
 }
 
-
- 
 function getAllGrade(schoolId, selectOption){
-    var requiredGrades = ['N','KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'];
     var gradeAll= getGradesData(requiredGrades);
     var gradeOption = getGrades(gradeAll, selectOption);
     $('#gradeId').append(gradeOption);
-    
 }
 
 function getGenderContent(){
@@ -282,12 +283,12 @@ function getStandardContentByCourseProviderId(schoolId, courseProviderId){
 	var actualGrades='';
 	if(schoolId==1 || schoolId==6){
 		if(courseProviderId==40){
-			actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+			actualGrades=grades_KG_12;
 		}else{
-			actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+			actualGrades=grades_KG_12;
 		}
 	}else{
-		actualGrades=['1','2','3','4','5','6','7','8','9','10','11','12'];
+		actualGrades=grades_1_12
 	}
 	return getGrades(getGradesData(actualGrades));
 }
@@ -299,16 +300,16 @@ function getStandardContent(schoolId,fullGrade,selectOption,gradeFor){
 	var actualGrades='';
 	if(schoolId==1 || schoolId==6){
 		if(fullGrade){
-			actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','19', '20', '21', '22', '23'];
+			actualGrades=grades_1_12;
 		}else{
 			if(gradeFor=='cti'){
-				actualGrades=['KG','1','2','3','4','5','6','7','8','9','10'];
+				actualGrades=grades_1_12;
 			}else{
-				actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+				actualGrades=grades_KG_12;
 			}
 		}
 	}else{
-		actualGrades=['1','2','3','4','5','6','7','8','9','10','11','12'];
+		actualGrades=grades_1_12
 	}
 	return getGrades(getGradesData(actualGrades), selectOption);
 }
@@ -710,7 +711,7 @@ function getSchoolContent(schoolId){
 	return html;
 }
 
-function getPaymentTitle(control,schoolId,optionFor, paymentType,eligibleForAdvance){
+function getPaymentTitle(formId, control,schoolId,optionFor, paymentType,eligibleForAdvance){
 	var html='';
 	if(optionFor=='REGISTRATION_FEE'){
 		html+='<option value="REGISTRATION_FEE">Reserve an Enrollment Seat</option>';
@@ -719,7 +720,7 @@ function getPaymentTitle(control,schoolId,optionFor, paymentType,eligibleForAdva
 			html+='<option value="SUBJECT_FEE">Student Installment Fee</option>'
 				+'<option value="BOOKSESSION_FEE">Teacher Assistance</option>';
 				if(eligibleForAdvance=='Y'){
-					html+='<option value="REGISTRATION_FEE_ADV">Reserve a Seat for Next Grade</option>';
+					html+='<option value="REGISTRATION_FEE_ADV">Reserve a Seat for '+getNextGrade(formId, "standardId1")+'</option>';
 				}else{
 					html+='<option value="REGISTRATION_FEE">Reserve an Enrollment Seat</option>';
 				}
@@ -738,7 +739,7 @@ function getPaymentTitle(control,schoolId,optionFor, paymentType,eligibleForAdva
 				html+=
 				'<option value="CUSTOMIZED_REGISTRATION_SUBJECT_FEE">Customised Student Enrollment and Course Fee</option>'
 				+'<option value="CUSTOMIZED_SUBJECT_FEE">Customised Student Installment Fee</option>'
-				+'<option value="REGISTRATION_FEE_ADV">Reserve a Seat for Next Grade</option>'
+				+'<option value="REGISTRATION_FEE_ADV">Reserve a Seat for '+getNextGrade(formId, "standardId1")+'</option>'
 				+'<option value="REGISTRATION_FEE">Reserve an Enrollment Seat</option>'
 				+'<option value="REGISTRATION_SUBJECT_FEE">Student Enrollment and Course Fee - One Time Payment Plan</option>'
 				+'<option value="SUBJECT_FEE">Student Installment Fee</option>'
@@ -755,7 +756,7 @@ function getPaymentTitle(control,schoolId,optionFor, paymentType,eligibleForAdva
 				+'<option value="REGISTRATION_SUBJECT_FEE">Student Enrollment and Course Fee - Annually</option>'
 				+'<option value="SUBJECT_FEE">Student Installment Fee</option>'
 				+'<option value="BOOKSESSION_FEE">Teacher Assistance</option>'
-				+'<option value="REGISTRATION_FEE_ADV">Reserve a Seat for Next Grade</option>'
+				+'<option value="REGISTRATION_FEE_ADV">Reserve a Seat for '+getNextGrade(formId, "standardId1")+'</option>'
 				+'<option value="REGISTRATION_FEE">Reserve an Enrollment Seat</option>'
 				+'<option value="EVALUATION_TEST">Connect to Impact Program Fee</option>'
 				+'<option value="RECURRING_SESSION_FEE">Recurring Session Fee</option>'
@@ -1091,9 +1092,9 @@ function getGradesByLearningProgram(formId,learningProgram,standardId, parentEle
 	if(learningProgramValue=='ONE_TO_ONE_FLEX'){
 		actualGrades=['13','14','15','16','17'];
 	}else if(learningProgramValue=='BATCH'){
-		actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+		actualGrades=grades_KG_12;
 	}else{
-		actualGrades=['KG','1','2','3','4','5','6','7','8','9','10','11','12'];
+		actualGrades=grades_KG_12;
 	}
 	var html='<option value="A" >ALL Grade</option>';
 	html+=getGrades(getGradesData(actualGrades));
@@ -1248,7 +1249,7 @@ function getAllEventList(formId,elementId){
 
 }	
 
-	function getUserRights(schoolId, roleId, userId, moduleId){
+function getUserRights(schoolId, roleId, userId, moduleId){
 	var data={};
           data['schoolId']=schoolId;
           data['roleId']=roleId;
@@ -1523,9 +1524,6 @@ function getTggingMasterList(formId, elementId){
 	});
 }
 
-
-
-
 async function getChatEligibility(userId,schoolId){
 	var responseData = await  getDesiredObject('chatavailability'+userId);
 	if(typeof responseData =='object'){
@@ -1539,4 +1537,14 @@ async function getChatEligibility(userId,schoolId){
 	responseData = await getDataBasedUrlAndPayload('get-chat-eligibility', data);
 	localStorage.setItem('chatavailability'+userId,JSON.stringify(responseData));
 	return responseData;
+}
+
+function getNextGrade(formId, elementId){
+	var selectedOption = $('#'+formId+' #'+elementId+' option:selected');
+	var nextOption = selectedOption.next('option');
+	if (nextOption.length > 0) {
+		return nextOption.text();
+	} else {
+		return selectedOption.text();
+	}
 }

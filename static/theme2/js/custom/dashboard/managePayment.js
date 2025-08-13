@@ -259,7 +259,7 @@ function addExternalPayment(formId) {
     $('#' + formId + ' #status1').val('0').trigger('change');
     $('#' + formId + ' #scheduleDate1').val('').datepicker("update");
     $('#' + formId + ' #paymentDate1').val('').datepicker("update");
-    $('#' + formId + ' #paymentType1').html(getPaymentTitle('AE',$('#allSchoolId').val(), 'REGISTRATION_FEE'));
+    $('#' + formId + ' #paymentType1').html(getPaymentTitle(formId, 'AE',$('#allSchoolId').val(), 'REGISTRATION_FEE'));
     $('#' + formId + ' #paymentName1').val('Reserve an Enrollment Seat');
     $('#' + formId + ' #paymentName1').prop('disabled',true);
     $('#addStudentPaymentbtn').show();
@@ -283,33 +283,22 @@ function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, pay
     $('#' + formId + ' #studentEmail1').prop('disabled', true);
     $('#' + formId + ' #studentName1').prop('disabled', true);
     $('#' + formId + ' #learningProgram1').prop('disabled', true);
-    // if($('#' + formId + ' #learningProgram1 option[value=\'ONE_TO_ONE_FLEX\']').length < 1){
-    //     $('#' + formId + ' #learningProgram1').append('<option value="ONE_TO_ONE_FLEX">Flexy Learning Program</option>');
-    //     $("#addPaymentModal #learningProgram1").select2("destroy").select2({
-    //         placeholder: "Select an option",
-	// 		dropdownParent:"#addPaymentModal .modal-body",
-	// 		minimumResultsForSearch:Infinity
-    //     });
-    // }
-    
     $('#' + formId + ' #standardId1').prop('disabled', true);
     $('#' + formId + ' #payableAmount').val('');
     $('#' + formId + ' #status1').val('0').trigger('change');
     $('#' + formId + ' #scheduleDate1').val('').datepicker("update");
     $('#' + formId + ' #paymentDate1').val('').datepicker("update");
-    $('#' + formId + ' #paymentType1').html(getPaymentTitle('A',$('#allSchoolId').val(),'', paymentType, marksPublished), '');
+    
     if(paymentNameFlag){
         $('#' + formId + ' #paymentName1').val('');
         $('#' + formId + ' #paymentName1').prop('disabled',false);
     }
     $('#addStudentPaymentbtn').show();
-    // $('#studentEmail1').prop('onblur','getStudentDetailsForPayment(\'addStudentPaymentForm\',\'true\')');
-    
     getStudentDetailsForPayment(formId, false);
     if ($("#descriptionDiv").next().length < 1) {
         initEditor(1, 'descriptionDiv', 'Put description if any', false);
     }
-
+    $('#' + formId + ' #paymentType1').html(getPaymentTitle(formId, 'A',$('#allSchoolId').val(),'', paymentType, marksPublished), '');
 }
 function getStudentDetailsForPayment(formId, needToShowMessage) {
     hideMessageTheme2('');

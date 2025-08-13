@@ -630,7 +630,6 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                   <div class="form-group mb-2 p-0 paymentType">
                     <label class="mb-0">Payment Title</label>
                     <select id="paymentType" name="paymentType" multiple="multiple" class="multiselect-dropdown form-control">
-                      <!-- Call to getPaymentTitle(schoolId) function has been removed -->
                     </select>
                   </div>
                 </div>
@@ -867,7 +866,7 @@ function editPaymentContent(moduleId, userPayment, controlType, standardName) {
                                     <div class="form-group mb-2 p-0">
                                         <label class="mb-0">Fee Title</label>
                                         <select id="paymentType2" name="paymentType" class="multiselect-dropdown form-control" disabled>
-                                            ${getPaymentTitle(userPayment.schoolId)}
+                                            ${getPaymentTitle('addStudentPaymentForm',userPayment.schoolId)}
                                         </select>
                                     </div>
                                 </div>
@@ -876,11 +875,7 @@ function editPaymentContent(moduleId, userPayment, controlType, standardName) {
                                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                     <div class="form-group mb-2 p-0">
                                         <label class="mb-0">Payment Name</label>
-                                        <input id="paymentName2" name="paymentName2" type="text" value="${
-                                            userPayment.paymentName === 'Reserve an Enrollment Seat - Advance' || userPayment.paymentName === 'Reserve a Seat for Next Grade'
-                                                ? 'Reserve a Seat for Next Grade'
-                                                : userPayment.paymentName
-                                        }" class="form-control" ${userPayment.paymentName.includes('Reserve an Enrollment Seat') ? 'disabled' : ''}>
+                                        <input id="paymentName2" name="paymentName2" type="text" value="${userPayment.paymentName}" class="form-control" ${userPayment.paymentName.includes('Reserve an Enrollment Seat') ? 'disabled' : ''}>
                                     </div>
                                 </div>
 

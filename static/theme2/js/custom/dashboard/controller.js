@@ -344,9 +344,7 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
     });
     $("#paymentType1").on("change", function () {
       if ($(this).val() == "REGISTRATION_FEE_ADV") {
-        $("#addStudentPaymentForm #paymentName1").val(
-          "Reserve a Seat for Next Grade"
-        );
+        $("#addStudentPaymentForm #paymentName1").val("Reserve a Seat for "+getNextGrade('addStudentPaymentForm', 'standardId1'));
         $("#addStudentPaymentForm #paymentName1").prop("disabled", true);
       } else {
         $("#addStudentPaymentForm #paymentName1").val("");

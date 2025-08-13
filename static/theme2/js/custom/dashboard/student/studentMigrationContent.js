@@ -114,7 +114,7 @@ function migrationDetailsOptionContent(data) {
 				+'<div class="card-body student-report">'
 					+'<div class="row">'
 						+'<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 report-head">'
-							if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+							if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0 && data.pageNumberToDisplay == 1){
 								html+='<h2 class="text-primary font-weight-bold text-center">Congratulations!</h2>'
 								setTimeout(fireConfetti, 1000);
 								setTimeout(fireConfetti, 3000);
