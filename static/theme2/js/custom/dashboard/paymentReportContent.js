@@ -130,7 +130,7 @@ function cardDetails(data){
 									</div>	
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Enrollment | Recommended By:</label>`
+											<label class="label bold">Enrollment | Recommended By:</label>`;
 											if(item.counselorName!='N/A'){
 												html+=`<span class="field-value trans5s ">${item.counselorName}</span>`;
 											}else{
@@ -140,8 +140,11 @@ function cardDetails(data){
 										html+=`</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Overall Progress Report:</label>
-											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/student-progress-report?moduleId=18&linkType=externalLink-${item.userId}\")' class=''><i class='fa fa-eye'></i>&nbsp;</a></span>
-										</div>
+											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}`;
+											if(item.updateProfileStudentDTO.lmsUserStatus==1){
+												html+=`&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/student-progress-report?moduleId=18&linkType=externalLink-${item.userId}\")' class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
+											}
+										html+=`</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
 											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays}</span>
@@ -625,7 +628,6 @@ function filterStudentPaymentReportForm(){
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Enroll Status</label>'
 							+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								// +'<option value="">ALL</option>'
 								+'<option value="0">Completed</option>'
 								+'<option value="1">Withdrawn</option>'
 								+'<option value="2">Partial entry - New enrollment</option>'
@@ -658,6 +660,14 @@ function filterStudentPaymentReportForm(){
 								+'<option value="">Select LMS Status</option>'
 								+'<option value="1">Active</option>'
 								+'<option value="0">Inactive</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Transcript Status</label>'
+							+'<select name="transcriptStatus" id="transcriptStatus" class="form-control">'
+								+'<option value="">Select Status</option>'
+								+'<option value="Y">Published</option>'
+								+'<option value="N">Not Published</option>'
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'

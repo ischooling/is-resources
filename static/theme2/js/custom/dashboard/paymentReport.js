@@ -138,6 +138,10 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	if($('#teacherMapStaus').val()!=''){
 		PaymentReportRequestDTO['teacherMapStaus'] = $('#teacherMapStaus').val();
 	}
+	if($('#transcriptStatus').val()!=''){
+		PaymentReportRequestDTO['transcriptStatus'] = $('#transcriptStatus').val();
+	}
+	
 	
 	if(type==1){
 		$('#pageNumber').val(1)
