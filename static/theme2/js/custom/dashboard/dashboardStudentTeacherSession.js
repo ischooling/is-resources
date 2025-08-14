@@ -2956,8 +2956,8 @@ $(function () {
 			teacherAssign['saveType'] =$("#saveType").val();
 			var studentRegistrationType= $("#regstrationType").val();
 			if(studentRegistrationType!='BATCH'){
-				var startDate=changeDateFormat(new Date($('#chooseDateToStartSemster').val()),"mm-dd-yyyy");
-				teacherAssignTime['startDate']=$('#chooseDateToStartSemster').val();
+				var startDate=changeDateFormat(new Date($('#chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
+				teacherAssignTime['startDate']=$('#chooseDateSystemTrainingDate').val();
 				teacherAssign['semesterStartDate']=startDate;
 				
 			}

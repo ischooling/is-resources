@@ -363,7 +363,6 @@ function classesThumbCotentList(data) {
 
 function classesThumbsButtletPointContent(classPlanCount, registerType, classData) {
   var classWeekCount = classData.week[0];
-  debugger;
   var html=
     `<h5 class="font-weight-bold mb-0 mt-3">Class Booking Instructions</h5>
     <div class="d-flex flex-wrap bg-light rounded-10 px-2 pt-2 pb-1 mt-3 mb-4">
@@ -386,6 +385,7 @@ function classesThumbsButtletPointContent(classPlanCount, registerType, classDat
     html += classWeekCount.extra;
   }
   html+=` classes can be booked per week.</p></span>`;
+  html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Your classes will begin within 7 days of your system training date.</p></span>`;
      html+=`</div>`;
   return html;
 }

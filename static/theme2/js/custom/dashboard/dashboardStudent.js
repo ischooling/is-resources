@@ -1132,7 +1132,7 @@ function saveTeacherTimePreferenceStudent(stepFlag) {
 					showMessageTheme2(1, data['message'], '', true);
 				}
 				if((enrollmentType =='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE')){
-					showContentByStep(academicYearSelectedType, systemTrainingSelectedType, startSemsterStartDate, stdt)
+					showContentByStep(academicYearSelectedType, systemTrainingSelectedType, startSemsterStartDate == "" ? $("#chooseDateSystemTrainingDate").val() : startSemsterStartDate, stdt)
 				}else{
 					// window.location.href=redirectUrl;
 					showContentByStep(academicYearSelectedType, "Skipped", startSemsterStartDate, '')
@@ -1157,16 +1157,20 @@ function getRequestForStudentTimePreference(){
 	teacherAssign['studentStandardId']=$("#studentStandardId").val();
 	teacherAssign['userRole'] = 'STUDENT';
 	teacherAssign['saveType'] =$("#saveType").val();
-	
-	var startDate=changeDateFormat(new Date($('#chooseDateToStartSemster').val()),"mm-dd-yyyy");
-	teacherAssignTime['startDate']=$('#chooseDateToStartSemster').val();
+	var startDate=changeDateFormat(new Date($('#chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
+	teacherAssignTime['startDate']=$('#chooseDateSystemTrainingDate').val();
+	var enrollmentType = $("#enrollmentType").val();
+	if(enrollmentType !='REGISTRATION_FRESH' && enrollmentType !='REGISTRATION_FLEX_COURSE'){
+		startDate=changeDateFormat(new Date($('#chooseDateToStartSemster').val()),"mm-dd-yyyy");
+		teacherAssignTime['startDate']=$('#chooseDateToStartSemster').val();
+	}
 	teacherAssign['semesterStartDate']=startDate;
-	if($("#saveType").val()=='SKIP'){
+	if($("#saveType").val()=='ORIENT'){
 		teacherAssignTime['startTime']="09:00:00";
 		teacherAssignTime['endTime']="09:00:00";
 		teacherTimeList.push(teacherAssignTime);
 	}
-	var enrollmentType = $("#enrollmentType").val();
+	
 	if(enrollmentType=='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE'){
 		if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
 			var userbookDate = $('#chooseDateSystemTrainingDate').val();
@@ -1203,9 +1207,16 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 		$("#pageHeading").text("an important reminder");
 	}else{
 		if(academicYearSelectedType == "N"){
-			$("#saveType").val("SKIP")
-			$(".academic-step").show()
-			$(".school-system-training-step, .moveToDashboard-step").hide();
+			$("#saveType").val("ORIENT");
+			if(($('#enrollmentType').val() !='REGISTRATION_FRESH' && $('#enrollmentType').val() !='REGISTRATION_FLEX_COURSE')){
+				$("#saveType").val("SKIP");
+				$(".academic-step").show();
+				$(".school-system-training-step, .moveToDashboard-step").hide();
+			}else{
+				$(".school-system-training-step").show();
+				$(".academic-step, .moveToDashboard-step").hide();
+			}
+			
 			$("#pageHeading").text("let's set up your dashboard");
 			var academicYearBlockDate = $('#academicYearBlockDate').val();
 			var daysCount = $('#daysCount').val();
@@ -1218,28 +1229,63 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			startDate.setDate(startDate.getDate()+parseInt(daysCount));
 			endDate.setDate(endDate.getDate()+parseInt(daysCountMax));
 			$('#chooseDateToStartSemster').datepicker('destroy').datepicker({
-					autoclose: true,
-					container: '#datepickerModalView',
-					format: 'M dd, yyyy',
-					startDate: startDate,
-					endDate:endDate,
-					beforeShowDay: function (currentDate) {
-						var dayNr = currentDate.getDay();
-						var dateNr = moment(currentDate.getDate()).format("YYYY-MM-DD");
-						if (datesForDisable.length > 0 && datesForDisable !="") {
-							for (var i = 0; i < datesForDisable.length; i++) {
-								if (moment(currentDate).unix()==moment(datesForDisable[i],'YYYY-MM-DD').unix()){
-									return false;
-								}
+				autoclose: true,
+				container: '#datepickerModalView',
+				format: 'M dd, yyyy',
+				startDate: startDate,
+				endDate:endDate,
+				beforeShowDay: function (currentDate) {
+					var dayNr = currentDate.getDay();
+					var dateNr = moment(currentDate.getDate()).format("YYYY-MM-DD");
+					if (datesForDisable.length > 0 && datesForDisable !="") {
+						for (var i = 0; i < datesForDisable.length; i++) {
+							if (moment(currentDate).unix()==moment(datesForDisable[i],'YYYY-MM-DD').unix()){
+								return false;
 							}
 						}
-						return true;
-						}
+					}
+					return true;
+				}
 			}).on("change", function(){
 				$("#datepickerModal").modal("hide");
 				$("#chooseAcademicDateBtnToCountinue").removeClass("disabled btn-light");
 				$("#chooseAcademicDateBtnToCountinue").addClass("btn-success");
 				$("#chooseAcademicDateBtnToCountinue").text("Confirm");
+			});
+			if(startSemsterStartDate == ""){
+				var semesterStartDate = changeDateFormat(new Date(),"mm-dd-yyyy");
+			}else{
+				var semesterStartDate = changeDateFormat(new Date(startSemsterStartDate),"mm-dd-yyyy");
+			}
+			var activeNumberOfDaysForSystemTraining = $("#activeNumberOfDaysForSystemTraining").val();
+			var semesterStartDate = semesterStartDate.split("-");
+			var systrainingStartDate = new Date(parseInt(semesterStartDate[2]), parseInt(semesterStartDate[0])-1, parseInt(semesterStartDate[1]));
+			var systrainingEndDate = new Date(parseInt(semesterStartDate[2]), parseInt(semesterStartDate[0])-1, parseInt(semesterStartDate[1]));
+			systrainingEndDate.setDate(systrainingEndDate.getDate()+(activeNumberOfDaysForSystemTraining-1));
+			$("#chooseDateSystemTrainingDate").datepicker({
+				autoclose:true,
+				format: 'M dd, yyyy',
+				container: 'div#datepickerModalView',
+				// startDate: systrainingStartDate,
+				//endDate:systrainingEndDate,
+				startDate: startDate,
+				endDate:endDate,
+				beforeShowDay: function (currentDate) {
+					var dayNr = currentDate.getDay();
+					var dateNr = moment(currentDate.getDate()).format("YYYY-MM-DD");
+					if (datesForDisable.length > 0 && datesForDisable !="") {
+						for (var i = 0; i < datesForDisable.length; i++) {
+							if (moment(currentDate).unix()==moment(datesForDisable[i],'YYYY-MM-DD').unix()){
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+			}).on("change", function(){
+				$("#datepickerModal").modal("hide");
+				$("#moveToDashboardProcess").text("Choose Slot");
+				callOrientationtime();
 			});
 		}
 		else if(academicYearSelectedType == "Y" && (systemTrainingSelectedType == 'Y' || systemTrainingSelectedType == 'Skipped')){
