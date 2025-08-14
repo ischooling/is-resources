@@ -146,14 +146,16 @@ $(document).ready(function () {
       $(".same-as").css({ opacity: "0.5" });
     }
   });
-  callCountries("requestDemo", 0, "countryId");
-  getAllCountryTimezone("requestDemo", 0, "countryTimezoneId");
-  getGrades("requestDemo", "grade", getGradesData(actualGrades));
-  getDefaultDateListForDemo("requestDemo", "chooseDate", 7);
-  callLocationAndSelectCountryNew("requestDemo");
-  callCampain("requestDemo", 0, "campainid"); //fillBrowserDetail('requestDemo');
+  initiateMasters('requestDemo');
 });
-
+function initiateMasters(formId){
+    callCountries(formId, 0, "countryId");
+    getAllCountryTimezone(formId, 0, "countryTimezoneId");
+    getGrades(formId, "grade", getGradesData(actualGrades));
+    getDefaultDateListForDemo(formId, "chooseDate", 7);
+    callLocationAndSelectCountryNew(formId);
+    callCampain(formId, 0, "campainid"); //fillBrowserDetail('requestDemo');
+}
 function getDefaultDateListForDemo(formId, elementId, limit) {
   var currentDate = new Date();
   $("#" + formId + " #" + elementId).append(
@@ -273,10 +275,13 @@ function getRequestForMasterNew(
   requestExtra1,
   requestExtra2
 ) {
-  var MasterRequestDTO = {};
-  MasterRequestDTO["requestKey"] = key;
-  MasterRequestDTO["requestValue"] = value;
-  return MasterRequestDTO;
+ var payload = {
+    requestData : {
+      requestKey : key,
+      requestValue : value
+    }
+  };
+  return payload;
 }
 
 function getGradesData(requiredGrades) {
@@ -563,63 +568,37 @@ function callForPPCRequestForm(formId, moduleId, folderName, domainName) {
         //$('#'+formId+' #serverError').html(data['elementId']);
         showServerError(true, formId, "serverError", data["message"]);
       } else {
-        var url = "";
-        if (ENVIRONMENT == "uat") {
-          url =
-            "https://www.internationalschooling.org/" +
-            folderName +
-            "/thank-you.html";
-        } else if (ENVIRONMENT == "uat2") {
-          url =
-            "https://www.internationalschooling.org/" +
-            folderName +
-            "/thank-you.html";
-        } else if (ENVIRONMENT == "dev") {
-          url =
-            "https://www.internationalschooling.org/" +
-            folderName +
-            "/thank-you.html";
+        if (domainName == undefined) {
+          domainName = "https://enroll.internationalschooling.org";
         }
-        if (ENVIRONMENT == "staging") {
-          url = "http://164.52.198.42:8070/istest/common/ppc-request-thank-you";
-          url =
-            "https://www.internationalschooling.org/" +
-            folderName +
-            "/thank-you.html";
+        var payload = "";
+
+        if (data.name) {
+          var name = base64Encode(data.name);
+          payload = "?dn=" + name;
+        }
+
+        if (data.email) {
+          var email = base64Encode(data.email);
+          payload = payload + "&de=" + email;
+        }
+
+        if (data.country) {
+          var country = base64Encode(data.country);
+          payload = payload + "&dc=" + country;
+        }
+
+        if (data.type) {
+          var type = base64Encode(data.type);
+          payload = payload + "&t=" + type;
         } else {
-          if (domainName == undefined) {
-            domainName = "https://enroll.internationalschooling.org";
-          }
-          var payload = "";
-
-          if (data.name) {
-            var name = base64Encode(data.name);
-            payload = "?dn=" + name;
-          }
-
-          if (data.email) {
-            var email = base64Encode(data.email);
-            payload = payload + "&de=" + email;
-          }
-
-          if (data.country) {
-            var country = base64Encode(data.country);
-            payload = payload + "&dc=" + country;
-          }
-
-          if (data.type) {
-            var type = base64Encode(data.type);
-            payload = payload + "&t=" + type;
-          } else {
-            var p = base64Encode("P");
-            payload = payload + "&t=" + p;
-          }
-
-          url = ORIGIN_URL + "/is-thankyou" + payload;
+          var p = base64Encode("P");
+          payload = payload + "&t=" + p;
+        }
+        var url = ORIGIN_URL + "/is-thankyou" + payload;
           if (folderName == "brochure") {
             url = ORIGIN_URL + "/brochure-thankyou/" + payload;
           }
-        }
         goAhead(url, "");
       }
     },

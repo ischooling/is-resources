@@ -5700,11 +5700,16 @@ function getWelcomeMessage() {
 }
 
 function generateTinyUrls() {
+  const isTinyUrlEnabled = getTinyUrlService();
+  if (!isTinyUrlEnabled) {
+    console.log("Tiny URL service is disabled in configuration");
+    return;
+  }
   const $urlInputs = $(".tinyUrl");
   const uniqueUrls = {};
   $urlInputs.each(function () {
     const url = $(this).val().trim();
-    if (getTinyUrlService()) {
+    if (url) {
       uniqueUrls[url] = true;
     }
   });

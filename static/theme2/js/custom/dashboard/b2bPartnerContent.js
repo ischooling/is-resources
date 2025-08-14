@@ -324,7 +324,7 @@ function getEnrollmentLinksContent(data){
 			<h5 class="font-weight-semi-bold text-dark">Enrollments & Seats Reservation Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">
-					<div class="d-flex mb-3 rounded-pill bg-light border overflow-hidden" style="width: fit-content; position: relative; z-index: 10;">
+					<div class="d-flex mb-3 rounded-pill bg-light border overflow-hidden" style="width: fit-content; position: relative; z-index: 9;">
 						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-white bg-primary border-0" id="enrollmentTabBtn" onclick="toggleLinkTab('enrollment')">Your Enrollment Links</button>
 						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-dark bg-transparent border-0" id="seatTabBtn" onclick="toggleLinkTab('seat')">Seat Reservation Links</button>
 					</div>

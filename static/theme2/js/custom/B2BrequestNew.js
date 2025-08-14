@@ -170,13 +170,8 @@ $(document).ready(function () {
       $("#sameWhatsapp").attr("disabled", true);
       $(".same-as").css({ opacity: "0.5" });
     }
+    initiateMasters('b2bRequest');
   });
-  callCountries("b2bRequest", 0, "countryId");
-  getAllCountryTimezone("b2bRequest", 0, "countryTimezoneId");
-  getGrades("b2bRequest", "grade", getGradesData(actualGrades));
-  getDefaultDateListForDemo("b2bRequest", "chooseDate", MAX_LIMIT);
-  callLocationAndSelectCountryNew("b2bRequest");
-
   $("#wtspNumber").on("keyup", function () {
     var e = $("#wtspNumber").val().length;
     if (e > 5 && e < 11) {
@@ -265,7 +260,13 @@ $(document).ready(function () {
     }
   });
 });
-
+function initiateMasters(formId){
+  callCountries(formId, 0, "countryId");
+  getAllCountryTimezone(formId, 0, "countryTimezoneId");
+  getGrades(formId, "grade", getGradesData(actualGrades));
+  getDefaultDateListForDemo(formId, "chooseDate", MAX_LIMIT);
+  callLocationAndSelectCountryNew(formId);
+}
 function resendOTP(usinfBy) {
   if (usinfBy == "email") {
     hideMessageRequestDemoPage("emailError", "email");
@@ -521,13 +522,13 @@ function validateRequestForMaster(formId, elementId) {
   return true;
 }
 function getRequestForMasterNew(key, value) {
-  var MasterRequestDTO = {};
-  MasterRequestDTO["requestKey"] = key;
-  MasterRequestDTO["requestValue"] = value;
-
-  // var payload = {};
-  // payload['payload'] = encode(JSON.stringify(MasterRequestDTO));
-  return MasterRequestDTO;
+  var payload = {
+    requestData : {
+      requestKey : key,
+      requestValue : value
+    }
+  };
+  return payload;
 }
 function encode(payload) {
   return window.btoa(encodeURI(payload));

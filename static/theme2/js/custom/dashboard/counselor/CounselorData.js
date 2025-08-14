@@ -458,69 +458,64 @@ function getRequestForCounselorStudentGrade(formId, userId){
 	return filterRequest;
 }
 
-function getCounselorStudentGrade(formId, elementId ,userId, learningProgramCode,enrollmentFor) {
-	var responseData={};
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-counselor-student-list-gradewise',
-		data : JSON.stringify(getRequestForCounselorCommissionRate(formId, userId, learningProgramCode, enrollmentFor)),
-		dataType : 'json',
-		async : false,
-		global : false,
-		success : function(data) {
-			//console.log(data);
-			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-				if (data['status'] == '3') {
-					redirectLoginPage();
-				} 
-			}else{
-				
-				if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='enrollment'){
-					var one_to_one=getCounselorRegisterDataByGrade(data,'one_to_one');
-					getCounselorEnrollmentChart(elementId, one_to_one.lable, one_to_one.series);
-				}else if(learningProgramCode=='ONE_TO_ONE_FLEX' && enrollmentFor=='enrollment'){
-					var fOnetoOne=getCounselorRegisterDataByGrade(data,'f_one_to_one');
-					getCounselorEnrollmentChart(elementId, fOnetoOne.lable, fOnetoOne.series);
-				}else if(learningProgramCode=='BATCH' && enrollmentFor=='enrollment'){
-					var group=getCounselorRegisterDataByGrade(data,'group');
-					getCounselorEnrollmentChart(elementId, group.lable, group.series);
-				}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='enrollment'){
-					var self=getCounselorRegisterDataByGrade(data,'self');
-					getCounselorEnrollmentChart(elementId, self.lable, self.series);
-				}else if(learningProgramCode=='SSP' && enrollmentFor=='enrollment'){
-					var ssp=getCounselorRegisterDataByGrade(data,'ssp');
-					getCounselorEnrollmentChart(elementId, ssp.lable, ssp.series);
-				}else if(learningProgramCode=='SSP' && enrollmentFor=='exact-path-enrollment'){
-					var el_ssp=getCounselorRegisterDataByGrade(data,'elpss');
-					getCounselorEnrollmentChart(elementId, el_ssp.lable, el_ssp.series);
-				}if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='exact-path-enrollment'){
-					var el_one_to_one=getCounselorRegisterDataByGrade(data,'el_one_to_one');
-					getCounselorEnrollmentChart(elementId, el_one_to_one.lable, el_one_to_one.series);
-				}else if(learningProgramCode=='BATCH' && enrollmentFor=='exact-path-enrollment'){
-					var el_group=getCounselorRegisterDataByGrade(data,'el_group');
-					getCounselorEnrollmentChart(elementId, el_group.lable, el_group.series);
-				}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='exact-path-enrollment'){
-					var el_self=getCounselorRegisterDataByGrade(data,'el_self');
-					getCounselorEnrollmentChart(elementId, el_self.lable, el_self.series);
-				}else if(learningProgramCode=='DUAL_DIPLOMA' && enrollmentFor=='enrollment'){
-					var dual=getCounselorRegisterDataByGrade(data,'dual');
-					getCounselorEnrollmentChart(elementId, dual.lable, dual.series);
-				}
-				// else if(elementId=='chart-pie-enroll-elpss'){
-				// 	var self=getRegisterDataByGrade(data,'elpss');
-				// 	getEnrollmentChart(elementId, self.lable, self.series);
-				// }
-				
-			}
-		},
-		error: function(e){
-			if (checkonlineOfflineStatus()) {
-				return;
-			}
-		}
-	});
-	return true;
+async function getCounselorStudentGrade(formId, elementId, userId, learningProgramCode, enrollmentFor) {
+    try {
+        var payload = getRequestForCounselorCommissionRate(formId, userId, learningProgramCode, enrollmentFor);
+        var data = await getDashboardDataBasedUrlAndPayload( true, true, 'get-counselor-student-list-gradewise', payload);
+        if (data && data.status !== undefined) {
+            if (data.status === '0' || data.status === '2' || data.status === '3') {
+                if (data.status === '3') {
+                    redirectLoginPage();
+                }
+                return true;
+            }
+            if (learningProgramCode === 'ONE_TO_ONE' && enrollmentFor === 'enrollment') {
+                let one_to_one = getCounselorRegisterDataByGrade(data, 'one_to_one');
+                getCounselorEnrollmentChart(elementId, one_to_one.lable, one_to_one.series);
+
+            } else if (learningProgramCode === 'ONE_TO_ONE_FLEX' && enrollmentFor === 'enrollment') {
+                let fOnetoOne = getCounselorRegisterDataByGrade(data, 'f_one_to_one');
+                getCounselorEnrollmentChart(elementId, fOnetoOne.lable, fOnetoOne.series);
+
+            } else if (learningProgramCode === 'BATCH' && enrollmentFor === 'enrollment') {
+                let group = getCounselorRegisterDataByGrade(data, 'group');
+                getCounselorEnrollmentChart(elementId, group.lable, group.series);
+
+            } else if (learningProgramCode === 'SCHOLARSHIP' && enrollmentFor === 'enrollment') {
+                let self = getCounselorRegisterDataByGrade(data, 'self');
+                getCounselorEnrollmentChart(elementId, self.lable, self.series);
+
+            } else if (learningProgramCode === 'SSP' && enrollmentFor === 'enrollment') {
+                let ssp = getCounselorRegisterDataByGrade(data, 'ssp');
+                getCounselorEnrollmentChart(elementId, ssp.lable, ssp.series);
+
+            } else if (learningProgramCode === 'SSP' && enrollmentFor === 'exact-path-enrollment') {
+                let el_ssp = getCounselorRegisterDataByGrade(data, 'elpss');
+                getCounselorEnrollmentChart(elementId, el_ssp.lable, el_ssp.series);
+
+            } else if (learningProgramCode === 'ONE_TO_ONE' && enrollmentFor === 'exact-path-enrollment') {
+                let el_one_to_one = getCounselorRegisterDataByGrade(data, 'el_one_to_one');
+                getCounselorEnrollmentChart(elementId, el_one_to_one.lable, el_one_to_one.series);
+
+            } else if (learningProgramCode === 'BATCH' && enrollmentFor === 'exact-path-enrollment') {
+                let el_group = getCounselorRegisterDataByGrade(data, 'el_group');
+                getCounselorEnrollmentChart(elementId, el_group.lable, el_group.series);
+
+            } else if (learningProgramCode === 'SCHOLARSHIP' && enrollmentFor === 'exact-path-enrollment') {
+                let el_self = getCounselorRegisterDataByGrade(data, 'el_self');
+                getCounselorEnrollmentChart(elementId, el_self.lable, el_self.series);
+
+            } else if (learningProgramCode === 'DUAL_DIPLOMA' && enrollmentFor === 'enrollment') {
+                let dual = getCounselorRegisterDataByGrade(data, 'dual');
+                getCounselorEnrollmentChart(elementId, dual.lable, dual.series);
+            }
+        }
+    } catch (error) {
+        if (checkonlineOfflineStatus()) {
+            return;
+        }
+    }
+    return true;
 }
 
 function getCounselorEnrollmentChart(eventid, lable, series){

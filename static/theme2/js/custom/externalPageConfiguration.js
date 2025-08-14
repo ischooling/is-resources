@@ -15,22 +15,10 @@ var API_VERSION = CONTEXT_PATH + UNIQUEUUID + "/" + "api/v1/";
 var TECHNICAL_GLITCH =
   "Sorry for inconvenience, system has encountered technical glitch.";
 var SERVICE_UNAVAILABLE = "Temporarily Ticket Service is not available!";
-var BASE_URL = "";
-
-if (ENVIRONMENT == "uat") {
-  BASE_URL = "http://164.52.198.42:8070/";
-} else if (ENVIRONMENT == "uat2") {
-  BASE_URL = "http://164.52.216.248:8080/";
-} else if (ENVIRONMENT == "dev") {
-  BASE_URL = "http://localhost:9090/";
-} else if (ENVIRONMENT == "staging2") {
-  BASE_URL = "https://sm.internationalschooling.org/";
-} else {
-  BASE_URL = "https://sm.internationalschooling.org/";
-}
-
+var BASE_URL = '';
 function getURLForCommon(suffixUrl) {
-  return BASE_URL + API_VERSION + "common" + "/" + suffixUrl;
+  BASE_URL = $("#originUrl").val();
+  return BASE_URL + "common" + "/" + suffixUrl;
 }
 function goAhead(url, hash) {
   var form = $(
@@ -495,22 +483,13 @@ function buildDropdown(result, dropdown, emptyMessage) {
   }
 }
 function getRequestForMaster(formId, key, value, requestExtra, requestExtra1) {
-  var request = {};
-  var authentication = {};
-  var MasterRequestDTO = {};
-  MasterRequestDTO["requestKey"] = key;
-  MasterRequestDTO["requestValue"] = value;
-  // if (requestExtra != undefined) {
-  // 	requestData['requestExtra'] = requestExtra;
-  // }
-  // if (requestExtra1 != undefined) {
-  // 	requestData['requestExtra1'] = requestExtra1;
-  // }
-  // authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-  // authentication['userType'] = 'COMMON';
-  // request['authentication'] = authentication;
-  // request['requestData'] = requestData;
-  return MasterRequestDTO;
+  var payload = {
+    requestData : {
+      requestKey : key,
+      requestValue : value
+    }
+  };
+  return payload;
 }
 function resetDropdown(dropdown, emptyMessage) {
   dropdown.html("");
