@@ -4737,6 +4737,7 @@ function getSepcificDateTime(){
 }
 
 function getTeacherMeetingStatus(availableType, weekDayId, userId, daySlotId, divid, selectDate) {
+	debugger;
 	customLoader(true);
 	var response=true;
 	data={};
@@ -4803,7 +4804,7 @@ function bindClassData(meetingList){
 			const bookdata = meetingList[ind];
 			var hiddenValue = bookdata.meetingType.replaceAll(" ","_")+"|"+bookdata.timeId+"|"+bookdata.adminClassDate
 			htmlCal=htmlCal+'<tr>';
-			htmlCal=htmlCal+'<td style="vertical-align:top"><input class="tinyUrl" type="hidden" class="timeId" value='+hiddenValue+'></input>'+bookdata.meetingType+'<br/>'+bookdata.recurringClassStart+'</td>';
+			htmlCal=htmlCal+'<td style="vertical-align:top"><input type="hidden" class="timeId tinyUrl" value='+hiddenValue+'></input>'+bookdata.meetingType+'<br/>'+bookdata.recurringClassStart+'</td>';
 			htmlCal=htmlCal+'<td style="vertical-align:top">'+bookdata.studentName+'</td>';
 			htmlCal=htmlCal+'<td style="vertical-align:top">'+bookdata.teacherName+'</td>';
 			htmlCal=htmlCal+'<td style="vertical-align:top">';
@@ -5194,6 +5195,7 @@ function markAsRescheduleRequest(){
 }
 
 function markAsReschedule(){
+	debugger;
 	var data = {
 		"allMeetingTypeAndIds" : markAsRescheduleRequest()
 	}

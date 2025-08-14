@@ -300,10 +300,10 @@ function getStandardContent(schoolId,fullGrade,selectOption,gradeFor){
 	var actualGrades='';
 	if(schoolId==1 || schoolId==6){
 		if(fullGrade){
-			actualGrades=grades_1_12;
+			actualGrades=grades_all;
 		}else{
 			if(gradeFor=='cti'){
-				actualGrades=grades_1_12;
+				actualGrades=grades_KG_10;
 			}else{
 				actualGrades=grades_KG_12;
 			}
