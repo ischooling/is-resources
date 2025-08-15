@@ -72,6 +72,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 
 	$("#btnNewClickLeadSearch").unbind().bind('click',function() {
 		//localStorage.setItem("needToPaging", false);
+		$("#b2c-lead-list").html('');
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
     });

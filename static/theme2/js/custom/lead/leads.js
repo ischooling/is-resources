@@ -6457,7 +6457,7 @@ function callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage,
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			console.log(data);
+			//console.log(data);
 			customLoader(false);
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);

@@ -405,16 +405,44 @@ function cardDetails(data){
 													if(item.updateProfileStudentDTO.standardId == 9 || item.updateProfileStudentDTO.standardId == 10 ){
 														html+=`<p class="m-0"><b>${item.updateProfileStudentDTO.standardName}</b></p>`;
 													}
-													html+=`<div class="scroll-course-list scrollbar-container ps--active-y ps">
-														<ol class="ml-0">`;
-															if(item.creditDetails){
-																for (let index = 0; index < item.creditDetails.length; index++) {
-																	const element = item.creditDetails[index];
-																	html+=`<li>${element.subjectName} (${element.progress}%) </li>`;
-																}
-															}
+													html+=`<div class="scroll-course-list scrollbar-container ps--active-y ps">`;
+														// <ol class="ml-0">`;
+														// 	if(item.creditDetails){
+														// 		for (let index = 0; index < item.creditDetails.length; index++) {
+														// 			const element = item.creditDetails[index];
+														// 			html+=`<li>${element.subjectName} (${element.progress}%) </li>`;
+														// 		}
+														// 	}
 															
-														html+=`</ol>
+														// html+=`</ol>
+														html+=`
+															<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap">
+																<thead>
+																	<tr>
+																		<th>Course Name</th>
+																		<th>Teacher</th>
+																		<th>Start Date</th>
+																		<th>End Date</th>
+																		<th>Progress</th>
+																		<th>Credit</th>
+																	</tr>
+																</thead>	
+																<tbody>	`;
+																if(item.creditDetails){
+																	for (let index = 0; index < item.creditDetails.length; index++) {
+																		const element = item.creditDetails[index];
+																		html+=`<tr>
+																			<td>${element.subjectName}</td>
+																			<td>${element.teacherName}</td>
+																			<td>${item.enrollmentStartDate}</td>
+																			<td>${item.enrollmentEndDate=='Dec 31,2999'?'On Going':item.enrollmentEndDate}</td>
+																			<td class="text-center">${element.progress}%</td>
+																			<td class="text-center">${element.credits}</td>
+																		</tr>`;
+																	}
+																}
+																html+=`</tbody>	
+															</table>
 													</div>
 												</div>
 												
