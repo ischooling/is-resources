@@ -7003,107 +7003,91 @@ function closeModalAndFlushData(){
 	$(".modal-backdrop").remove();
 }
 
-function getLeadStatusLog(leadno, callFrom, adminStatus){
-	//console.log(adminStatus);
-	var request={};
-	request['leadno']=leadno;
-	request['adminStatus']=adminStatus;
-	request['leadsFollowCount']=$("#leadsFollowCount").val();
+async function getLeadStatusLog(leadno, callFrom, adminStatus) {
+    try {
+        var request = {
+            leadno: leadno,
+            adminStatus: adminStatus,
+            leadsFollowCount: $("#leadsFollowCount").val()
+        };
+        var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'lead-status-log', request, 'api/v1/leads');
 
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('leads','lead-status-log'),
-		data : JSON.stringify(request),
-		dataType : 'json',
-		cache : false,
-		timeout : 600000,
-		success : function(data) { 
-			//console.log(data);
-			var leadTagging="<b>"+data.leadTagging+"</b>";
-			$(".leadtagstatus_"+leadno).html(leadTagging);
-			if (data['status'] == '0' || data['status'] == '2') {
-				//showMessageTheme2(0, data['message'],'',true);
-			}
-			else {
-				var html='';
-				if(callFrom=='new-lead'){
-					var incS=1;
-					for(var l=0;l<data.data.length;l++){
-						var leadCall = data.data[l];
+        if (!data) return;
 
-						html+='<li class=" '+(l==0?'follow-up-accordian-active':'')+'">'
-							+'<span class="cursor follow-up-no text-primary p-2 text-center border-primary full bold"><label class="float-left">'+(incS++)+'</label> '+(leadCall.leadStatus)+'<br/><span style="font-size:10px">'+(leadCall.statusDate)+'</span> <i class="fa '+(l==0?'fa-angle-up':'fa-angle-down')+' float-right" style="line-height: 20px;"></i></span>'
-							+'<div class="follow-up-content text-center" style="'+(l==0?'display: block':'')+'">'
-								+'<div class="dropdown d-inline-block text-center my-2" style="position: inherit;">'
-									+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Follow Up</button>'
-									+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);font-size:11px;">'
-										+'<table class="w-100">'
-											+'<tr>'
-												+'<th class="p-1 border-0">Last Followup Date:</th>'
-												+'<td class="p-1 border-0" id="connectedTh">'+(leadCall.statusDate)+'</td>'
-											+'</tr>'
-											+'<tr>'
-												+'<th class="p-1 border-0">Connected Through:</th>'
-												+'<td class="p-1 border-0" id="connectedTh">'+(leadCall.leadFollowup)+'</td>'
-											+'</tr>'
-											+'<tr>'
-												+'<th class="p-1 border-0">Connected With:</th>'
-												+'<td class="p-1 border-0" id="connectWith">'+(leadCall.tocall)+'</td>'
-											+'</tr>'
-											+'<tr>'
-												+'<th class="p-1 border-0">Next Follow-up:</th>'
-												+'<td class="p-1 border-0" id="nextFollowStatus">'
-												+(leadCall.callStatus!=''?leadCall.callStatus:'')
-												+(leadCall.nextCallDate!=''?leadCall.nextCallDate:'')
-												+'</td>'
-											+'</tr>'
-											+'<tr>'
-												+'<th class="p-1 border-0">Remarks:</th>'
-												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.remarks!=''?leadCall.remarks:'N/A')+'</td>'
-											+'</tr>'
-										+'</table>'
-									+'</div>'
-								+'</div>'
-							+'</div>'
-						+'</li>';
-					}
-					$(".followup-remark-"+leadno).html(html);
+        var leadTagging = "<b>" + data.leadTagging + "</b>";
+        $(".leadtagstatus_" + leadno).html(leadTagging);
 
-					$(".follow-up-no").click(function(){
-						$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
-						$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
-						$(this).parent().find(".follow-up-content").slideDown();
-						$(this).parent().siblings().find(".follow-up-content").slideUp();
-						$(this).parent().addClass("follow-up-accordian-active");
-						$(this).parent().siblings().removeClass("follow-up-accordian-active");
-					});
+        if (data.status === '0' || data.status === '2') {
+            // showMessageTheme2(0, data.message, '', true);
+            return;
+        }
 
+        var html = '';
 
-				}else{
-					var brtg=1;
-					html+='<div style="height:100px;overflow-y:auto">'
-					for(var i=0;i<data.data.length;i++){
-						if(brtg>3){
-							html+='<br/>';
-							brtg=1;
-						}
-						html+='<span style="font-size:12px; " data-toggle="tooltip" data-placement="top">'
-							+'<div class="d-inline-block">'
-								+'<p class="m-0 text-dark"><i class="fa fa-check-circle" style="color:green;"></i><b>'+data.data[i].leadStatus+'</b></p>'
-								+'<p class="m-0 text-dark" style="padding-left:12px">'+data.data[i].statusDate+'</p>'	
-							+'</div>'
-						+'</span>&nbsp;&nbsp;';		
-						brtg=brtg+1;
-					}
-					html+='</div>'
-					$(".leadstatus_"+leadno).html(html);
-				}
+        if (callFrom === 'new-lead') {
+            var incS = 1;
+            for (var l = 0; l < data.data.length; l++) {
+                var leadCall = data.data[l];
 
-			}
-			return false;
-		}
-	});
+                html += '<li class="' + (l === 0 ? 'follow-up-accordian-active' : '') + '">'
+                    + '<span class="cursor follow-up-no text-primary p-2 text-center border-primary full bold">'
+                    + '<label class="float-left">' + (incS++) + '</label> ' + (leadCall.leadStatus)
+                    + '<br/><span style="font-size:10px">' + (leadCall.statusDate) + '</span>'
+                    + ' <i class="fa ' + (l === 0 ? 'fa-angle-up' : 'fa-angle-down') + ' float-right" style="line-height: 20px;"></i></span>'
+                    + '<div class="follow-up-content text-center" style="' + (l === 0 ? 'display: block' : '') + '">'
+                        + '<div class="dropdown d-inline-block text-center my-2" style="position: inherit;">'
+                            + '<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Follow Up</button>'
+                            + '<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 32px, 0px); font-size:11px;">'
+                                + '<table class="w-100">'
+                                    + '<tr><th class="p-1 border-0">Last Followup Date:</th><td class="p-1 border-0" id="connectedTh">' + (leadCall.statusDate) + '</td></tr>'
+                                    + '<tr><th class="p-1 border-0">Connected Through:</th><td class="p-1 border-0" id="connectedTh">' + (leadCall.leadFollowup) + '</td></tr>'
+                                    + '<tr><th class="p-1 border-0">Connected With:</th><td class="p-1 border-0" id="connectWith">' + (leadCall.tocall) + '</td></tr>'
+                                    + '<tr><th class="p-1 border-0">Next Follow-up:</th><td class="p-1 border-0" id="nextFollowStatus">'
+                                        + (leadCall.callStatus !== '' ? leadCall.callStatus : '')
+                                        + (leadCall.nextCallDate !== '' ? leadCall.nextCallDate : '')
+                                    + '</td></tr>'
+                                    + '<tr><th class="p-1 border-0">Remarks:</th><td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'
+                                        + (leadCall.remarks !== '' ? leadCall.remarks : 'N/A') + '</td></tr>'
+                                + '</table>'
+                            + '</div>'
+                        + '</div>'
+                    + '</div>'
+                + '</li>';
+            }
+
+            $(".followup-remark-" + leadno).html(html);
+
+            $(".follow-up-no").off("click").on("click", function () {
+                $(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
+                $(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
+                $(this).parent().find(".follow-up-content").slideDown();
+                $(this).parent().siblings().find(".follow-up-content").slideUp();
+                $(this).parent().addClass("follow-up-accordian-active");
+                $(this).parent().siblings().removeClass("follow-up-accordian-active");
+            });
+
+        } else {
+            var brtg = 1;
+            html += '<div style="height:100px;overflow-y:auto">';
+            for (var i = 0; i < data.data.length; i++) {
+                if (brtg > 3) {
+                    html += '<br/>';
+                    brtg = 1;
+                }
+                html += '<span style="font-size:12px;" data-toggle="tooltip" data-placement="top">'
+                    + '<div class="d-inline-block">'
+                        + '<p class="m-0 text-dark"><i class="fa fa-check-circle" style="color:green;"></i><b>' + data.data[i].leadStatus + '</b></p>'
+                        + '<p class="m-0 text-dark" style="padding-left:12px">' + data.data[i].statusDate + '</p>'
+                    + '</div>'
+                + '</span>&nbsp;&nbsp;';
+                brtg++;
+            }
+            html += '</div>';
+            $(".leadstatus_" + leadno).html(html);
+        }
+    } catch (error) {
+        console.error("Error in getLeadStatusLog:", error);
+    }
 }
 
 
@@ -9940,207 +9924,190 @@ function curentTimeStamp(timeZoneOffset){
 	
 }
 
-function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights, roleModule ) {
-	customLoader(true);
-	checkTextBox(formId);
-	if($("#"+formId+" #leadStartDateSearch").val()!='' && $("#"+formId+" #leadEndDateSearch").val()!=''){
-		if($("#"+formId+" #searchDateType option:selected").val()=='' ){
-			//$(".leadErrorText").html('Please select type for date');
-			showMessageTheme2(0, 'Please select type for date');
-			return false;
+async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights, roleModule) {
+	try {
+	  customLoader(true);
+	  checkTextBox(formId);
+
+	  if ($("#" + formId + " #leadStartDateSearch").val() !== '' && $("#" + formId + " #leadEndDateSearch").val() !== '') {
+		if ($("#" + formId + " #searchDateType option:selected").val() === '') {
+		  showMessageTheme2(0, 'Please select type for date');
+		  return false;
 		}
-	}
-	if(moduleId==''){
-		moduleId=$("#"+formId+" #leadFromSearchModuleId").val();
-	}
-	if(clickFrom==''){
-		clickFrom=$("#"+formId+" #clickFromSearch").val();
-	}
-	if(currentPage==''){
-		currentPage=$("#"+formId+" #currentPageSearch").val();
-	}
-	$('#leadAdvanceSearch').modal('hide');
-	
-	 $.ajax({
-		 type : "POST",
-		 contentType : APPLICATION_JSON_VALUE,
-		 url : getURLForHTML('/api/v1/leads', 'get-lead-data'),
-		 data : JSON.stringify(getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType,'Y')),
-		 dataType : 'json',
-		 global : false,
-		 success : function(data) {
-			 customLoader(false);
-			// console.log(data);
-			 if (data['status'] == '0' || data['status'] == '2') {
-				//showMessage(true, data['message']);
-				showMessageTheme2(0, data['message'],'',true);
-				if(objRights.leadType=='B2B'){
-					$("#b2b-lead-list").html("");
+	  }
+  
+	  if (moduleId === '') {
+		moduleId = $("#" + formId + " #leadFromSearchModuleId").val();
+	  }
+	  if (clickFrom === '') {
+		clickFrom = $("#" + formId + " #clickFromSearch").val();
+	  }
+	  if (currentPage === '') {
+		currentPage = $("#" + formId + " #currentPageSearch").val();
+	  }
+  
+	  $('#leadAdvanceSearch').modal('hide');
+	  console.log("start time :" + new Date());
+  
+	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType, 'Y');
+  
+	  const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', payload, 'api/v1/leads');
+  
+	  console.log("start success time :" + new Date());
+	  customLoader(false);
+  
+	  if (data['status'] == '0' || data['status'] == '2') {
+		showMessageTheme2(0, data['message'], '', true);
+  
+		if (objRights.leadType == 'B2B') {
+		  $("#b2b-lead-list").html("");
+		} else {
+		  const html = getB2cLeadHeaderList(data, objRights, roleModule);
+		  $("#b2c-lead-list").html(html);
+		}
+	  } else {
+		if ($("#advanceLeadNewSearchForm #campaignName").val()) {
+		  $("#advanceLeadNewSearchForm #leadSearchCampaign")
+			.val($("#advanceLeadNewSearchForm #campaignName").val())
+			.trigger('change');
+		}
+  
+		if (objRights.leadType == 'B2B') {
+		  const html = getB2bLeadList(data, objRights, roleModule);
+		  $("#b2b-lead-list").html(html);
+		} else {
+		  const html = getB2cLeadList(data, objRights, roleModule);
+		  $("#b2c-lead-list").html(html);
+		  $('[data-toggle="tooltip"]').tooltip();
+  
+		  const leaddata = data.data || [];
+		  for(var i=0;i<leaddata.length;i++){
+			var leadsd = leaddata[i];
+			getLeadStatusLog(leadsd.leadNo, 'new-lead', objRights.adminStatus);
+		  }
+		  curentTimeStamp(objRights.timeZoneOffset);
+		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
+		  $(".leadSearchCampaign").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
+		  $(".leadSearchTemplate").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
+		  $(".leadSearchDeliveredStatus").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
+		}
+  
+		$('#b2c-lead-list').off('click', '.follow-up-no').on('click', '.follow-up-no', function () {
+		  $(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
+		  $(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
+		  $(this).parent().find(".follow-up-content").slideDown();
+		  $(this).parent().siblings().find(".follow-up-content").slideUp();
+		  $(this).parent().addClass("follow-up-accordian-active");
+		  $(this).parent().siblings().removeClass("follow-up-accordian-active");
+		});
+  
+		let leadCheckednew = $("#leadNoMove").val() || "";
+		let leadCheckedArr = String(leadCheckednew).split(',');
+		for (let lead of leadCheckedArr) {
+		  $("#lead-" + lead).prop("checked", true);
+		}
+  
+		$("#selectLeadAll").off('click').on('click', function () {
+			var leadnew = $("#leadNoMove").val();
+			var chkAll = this;
+			
+			var chkRows = $(".leadDataList").find(".checkLead");
+			chkRows.each(function () {
+				$(this)[0].checked = chkAll.checked;
+			});
+			var leadNo='';
+			$.each($("input[name='lead-move-another']:checked"), function(){
+				if(leadnew.indexOf($(this).val()) != -1){
 				}else{
-					var html=getB2cLeadHeaderList(data, objRights, roleModule);
-					$("#b2c-lead-list").html(html);
-				}
-			} else {
-				 if($("#advanceLeadNewSearchForm #campaignName" ).val()!=undefined && $("#advanceLeadNewSearchForm #campaignName" ).val()!=''){
-					 $("#advanceLeadNewSearchForm #leadSearchCampaign" ).val($("#advanceLeadNewSearchForm #campaignName" ).val()).trigger('change');
-				 }
-				if(objRights.leadType=='B2B'){
-					var html = getB2bLeadList(data, objRights, roleModule);
-					$("#b2b-lead-list").html(html);
-				}else{
-					var html = getB2cLeadList(data, objRights, roleModule);
-					$("#b2c-lead-list").html(html);
-					$('[data-toggle="tooltip"]').tooltip();
-					var leaddata=data.data;
-					for(var i=0;i<leaddata.length;i++){
-						var leadsd = leaddata[i];
-						//if(leadsd.leadNo=='220525018389'){
-							getLeadStatusLog(leadsd.leadNo, 'new-lead', objRights.adminStatus);
-						//}
+					leadNo = leadNo+','+$(this).val();
+					var checkDemoMoved = $("#checkDemoMoved-"+$(this).val()).val();
+					var leadUserId = checkDemoMoved.split('-')[0];
+					var demoUserId = checkDemoMoved.split('-')[1];
+					if(demoUserId != 0 && leadUserId != demoUserId){
+						demoMovedTrue += "moved"
+					}else{
+						if(demoUserId == 0){
+							blankDemo += "blank"; 
+						}
 					}
-					curentTimeStamp(objRights.timeZoneOffset);
-
-					$(".selectcampain").select2({
-						theme:"bootstrap4",
-						dropdownParent:"#b2c-lead-list"
-					});
-
-					$(".leadSearchCampaign").select2({
-						theme:"bootstrap4",
-						dropdownParent:"#advanceLeadNewSearchForm"
-					});
-					$(".leadSearchTemplate").select2({
-						theme:"bootstrap4",
-						dropdownParent:"#advanceLeadNewSearchForm"
-					});
-					$(".leadSearchDeliveredStatus").select2({
-						theme:"bootstrap4",
-						dropdownParent:"#advanceLeadNewSearchForm"
-					});
-					
 				}
-				
-
-				$(".follow-up-no").click(function(){
-					$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
-					$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
-					$(this).parent().find(".follow-up-content").slideDown();
-					$(this).parent().siblings().find(".follow-up-content").slideUp();
-					$(this).parent().addClass("follow-up-accordian-active");
-					$(this).parent().siblings().removeClass("follow-up-accordian-active");
-				});
-
-				var leadCheckednew="";
-				var leadCheckednew1="";
-				leadCheckednew = $("#leadNoMove").val();
-				leadCheckednew1  = String(leadCheckednew).split(',');
-				for (let i = 0; i < leadCheckednew1.length; i++) {
-					$("#lead-"+leadCheckednew1[i]).prop("checked",true);
-				}
-
-				var demoMovedTrue = '';
-				var blankDemo = '';
-				$("#selectLeadAll").click(function () {
-					var leadnew = $("#leadNoMove").val();
-					var chkAll = this;
-					
-					var chkRows = $(".leadDataList").find(".checkLead");
-					chkRows.each(function () {
-						$(this)[0].checked = chkAll.checked;
-					});
-					var leadNo='';
-					$.each($("input[name='lead-move-another']:checked"), function(){
-						if(leadnew.indexOf($(this).val()) != -1){
+			});
+			
+			leadnew = leadnew + leadNo;
+			$("#leadNoMove").val(leadnew);
+			if($("#selectLeadAll").is(":checked")){}
+			else{
+				demoMovedTrue = '';
+				blankDemo = '';
+				$("#leadNoMove").val('');
+			}
+			$("#demoMovedTrue").val(demoMovedTrue)
+			$("#blankDemo").val(blankDemo)
+		});
+  
+		$(".checkLead").off('click').on('click', function () {
+			var leadnew = $("#leadNoMove").val();
+			var chkAll = $("#selectLeadAll");
+			chkAll.attr("checked", "checked");
+			var chkRows = $("#leadDataList").find(".checkLead");
+			$("#leadDataList .checkLead").each(function () {
+				if (!$(this).is(":checked")) {
+					chkAll.prop('checked', false);
+					chkAll.removeAttr("checked", "checked");
+					if(leadnew.indexOf($(this).val()) != -1){
+						leadnew = leadnew.replace(","+$(this).val(), '')
+						var checkDemoMoved = $("#checkDemoMoved-"+$(this).val()).val();
+						var leadUserId = checkDemoMoved.split('-')[0];
+						var demoUserId = checkDemoMoved.split('-')[1];
+						if(demoUserId != 0 && leadUserId != demoUserId){
+							demoMovedTrue = demoMovedTrue.replace("moved", "");
 						}else{
-							leadNo = leadNo+','+$(this).val();
-							var checkDemoMoved = $("#checkDemoMoved-"+$(this).val()).val();
-							var leadUserId = checkDemoMoved.split('-')[0];
-							var demoUserId = checkDemoMoved.split('-')[1];
-							if(demoUserId != 0 && leadUserId != demoUserId){
-								demoMovedTrue += "moved"
-							}else{
-								if(demoUserId == 0){
-									blankDemo += "blank"; 
-								}
+							if(demoUserId == 0){
+								blankDemo = blankDemo.replace("blank", "");
 							}
 						}
-					});
-					
-					leadnew = leadnew + leadNo;
-					$("#leadNoMove").val(leadnew);
-					if($("#selectLeadAll").is(":checked")){}
-					else{
-						demoMovedTrue = '';
-						blankDemo = '';
-						$("#leadNoMove").val('');
 					}
-					$("#demoMovedTrue").val(demoMovedTrue)
-					$("#blankDemo").val(blankDemo)
-				});
-
-				$(".checkLead").click(function () {
-					var leadnew = $("#leadNoMove").val();
-					var chkAll = $("#selectLeadAll");
-					chkAll.attr("checked", "checked");
-					var chkRows = $("#leadDataList").find(".checkLead");
-					$("#leadDataList .checkLead").each(function () {
-						if (!$(this).is(":checked")) {
-							chkAll.prop('checked', false);
-							chkAll.removeAttr("checked", "checked");
-							if(leadnew.indexOf($(this).val()) != -1){
-								leadnew = leadnew.replace(","+$(this).val(), '')
-								var checkDemoMoved = $("#checkDemoMoved-"+$(this).val()).val();
-								var leadUserId = checkDemoMoved.split('-')[0];
-								var demoUserId = checkDemoMoved.split('-')[1];
-								if(demoUserId != 0 && leadUserId != demoUserId){
-									demoMovedTrue = demoMovedTrue.replace("moved", "");
-								}else{
-									if(demoUserId == 0){
-										blankDemo = blankDemo.replace("blank", "");
-									}
-								}
-							}
-							return;
+					return;
+				}
+			});
+			var leadNo='';
+			$.each($("input[name='lead-move-another']:checked"), function(){
+				if(leadnew.indexOf($(this).val()) != -1){
+				}else{
+					var checkDemoMoved = $("#checkDemoMoved-"+$(this).val()).val();
+					var leadUserId = checkDemoMoved.split('-')[0];
+					var demoUserId = checkDemoMoved.split('-')[1];
+					if(demoUserId != 0 && leadUserId != demoUserId && USER_ID != leadUserId){
+						demoMovedTrue += "moved"
+					}else{
+						if(demoUserId == 0){
+							blankDemo += "blank"; 
 						}
-					});
-					var leadNo='';
-					$.each($("input[name='lead-move-another']:checked"), function(){
-						if(leadnew.indexOf($(this).val()) != -1){
-						}else{
-							var checkDemoMoved = $("#checkDemoMoved-"+$(this).val()).val();
-							var leadUserId = checkDemoMoved.split('-')[0];
-							var demoUserId = checkDemoMoved.split('-')[1];
-							if(demoUserId != 0 && leadUserId != demoUserId && USER_ID != leadUserId){
-								demoMovedTrue += "moved"
-							}else{
-								if(demoUserId == 0){
-									blankDemo += "blank"; 
-								}
-							}
-							leadNo = leadNo+','+$(this).val();
-						}  
-					});
-					leadnew = leadnew + leadNo;
-					$("#leadNoMove").val(leadnew);
-					$("#demoMovedTrue").val(demoMovedTrue)
-					$("#blankDemo").val(blankDemo)
-				});
-
-				$("#leadsPagging").on('change',function() {
-					getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleModule);
-				});
-			}
-			 return false;
-		 },
-		error : function(e) {
-			if (checkonlineOfflineStatus()) {
-				return;
-			}
-			//console.log(e);
-			customLoader(false);
-		}
-	 });
-}
+					}
+					leadNo = leadNo+','+$(this).val();
+				}  
+			});
+			leadnew = leadnew + leadNo;
+			$("#leadNoMove").val(leadnew);
+			$("#demoMovedTrue").val(demoMovedTrue)
+			$("#blankDemo").val(blankDemo)
+		});
+  
+		$("#leadsPagging").off('change').on('change', function () {
+		  getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true, '', objRights, roleModule);
+		});
+	  }
+  
+	  console.log("data success bind time :" + new Date());
+	  return false;
+  
+	} catch (e) {
+	  if (checkonlineOfflineStatus()) return;
+	  console.error(e);
+	  customLoader(false);
+	}
+  }
+  
 
 function getEmailTemplates() {	
 	var moveleadNo = $("#leadNoMove").val();

@@ -5707,6 +5707,8 @@ function generateTinyUrls() {
   }
   const $urlInputs = $(".tinyUrl");
   const uniqueUrls = {};
+  const $copyElements = $("a[onclick*='copyURL'], a[onclick*='copyToClipboard'], button[onclick*='copyURL'], button[onclick*='copyToClipboard']");
+  $copyElements.prop("disabled", true).css({ pointerEvents: "none", opacity: 0.6 });
   $urlInputs.each(function () {
     const url = $(this).val().trim();
     if (url) {
@@ -5716,6 +5718,7 @@ function generateTinyUrls() {
   const urls = Object.keys(uniqueUrls);
   if (!urls.length) {
     console.log("No URLs found to shorten");
+    $copyElements.prop("disabled", false).css({ pointerEvents: "", opacity: "" });
     return;
   }
   fetch("https://www.issg.co/api/create-short-urls", {
@@ -5743,6 +5746,9 @@ function generateTinyUrls() {
     })
     .catch((error) => {
       console.error("Fetch error:", error);
+    })
+    .finally(() => {
+      $copyElements.prop("disabled", false).css({ pointerEvents: "", opacity: "" });
     });
 }
 
