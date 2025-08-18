@@ -17,16 +17,15 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	LEAD_CATEGORY=objRights.leadType;
     var html=await getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
-	generateTinyUrls();
-	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
-	getB2CLeadPopjs(objRights, roleAndModule);
 	var clickfrom='list';
 	if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 		clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 	}
+	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
-
+	getB2CLeadPopjs(objRights, roleAndModule);
+	generateTinyUrls();
 	$("#btnClickLeadMove").on('click',function() {
 		moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
 	});
@@ -369,7 +368,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($('#logData').length<1){
 			$("body").append(getWatiTemplatesHtml());
 		}
-		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
+		// var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 		getB2CLeadPopjs(objRights, roleAndModule);
 		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
 		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);

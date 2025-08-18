@@ -4874,7 +4874,6 @@ function callPCountries(formId, value, elementId, preSelected) {
 		url: getURLForCommon('masters'),
 		data: JSON.stringify(getRequestForMaster(formId, 'COUNTRIES-LIST', value)),
 		dataType: 'json',
-		async: false,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(1, data['message']);
@@ -7189,8 +7188,6 @@ function callLeadSourceList(formId, value, elementId, keyStatus) {
 }
 
 function callUTMSourceList(formId, value, elementId, keyStatus) {
-	hideMessageTheme2('');
-	customLoader(false);
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
@@ -7242,58 +7239,46 @@ function getRequestForLeadAssign(formId, key, value,  discardPermission,  reques
   return request;
 }
 
-function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPermission, userId, selectStatus) {
+async function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPermission, userId, selectStatus) {
     hideMessageTheme2('');
     customLoader(false);
 
-    const requestData = getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission, userId);
+    const payload = getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission, userId);
 
-    return new Promise(function(resolve, reject) {
-        $.ajax({
-            type: "POST",
-            contentType: APPLICATION_JSON_VALUE,
-            url: getURLForCommon('masters'),
-            data: JSON.stringify(requestData),
-            dataType: 'json',
-            cache: false,
-            async: true,
-            timeout: 600000,
-            success: function(data) {
-                resolve(data);
-            },
-            error: function(err) {
-                reject(err);
-            }
-        });
-    }).then(function(data) {
-        if (data['status'] === '0' || data['status'] === '2') {
-            showMessageTheme2(true, data['message']);
-            return null;  // Indicate error or early exit
+    try {
+        const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'masters', payload, 'api/v1/common');
+
+        if (data.status === '0' || data.status === '2') {
+            showMessageTheme2(true, data.message);
+            return null;
         }
-        const result = data['mastersData']['data'];
-        const dropdown = $("#" + formId + " #" + elementId);
-        dropdown.html('');
-        dropdown.append('<option value="0">Select Assign</option>');
+
+        const result = data.mastersData.data;
+        const $dropdown = $("#" + formId + " #" + elementId);
+        $dropdown.html('');
+        $dropdown.append('<option value="0">Select Assign</option>');
+
         $.each(result, function(k, v) {
             if (keyStatus) {
                 if (discardPermission) {
-                    dropdown.append('<option value="' + v.key + '">' + v.value + ' - (' + v.extra + ')</option>');
+                    $dropdown.append(`<option value="${v.key}">${v.value} - (${v.extra})</option>`);
                 } else {
                     if (selectStatus) {
-                        dropdown.append('<option value="' + v.key + '" ' + (v.key == userId ? 'selected' : '') + '>' + v.value + ' - (' + v.extra + ')</option>');
+                        $dropdown.append(`<option value="${v.key}" ${v.key == userId ? 'selected' : ''}>${v.value} - (${v.extra})</option>`);
                     } else {
-                        dropdown.append('<option value="' + v.key + '">' + v.value + ' - (' + v.extra + ')</option>');
+                        $dropdown.append(`<option value="${v.key}">${v.value} - (${v.extra})</option>`);
                     }
                 }
             } else {
-                dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
+                $dropdown.append(`<option value="${v.value}">${v.value}</option>`);
             }
         });
+
         return result;
-    }).catch(function(error) {
-        console.error('Error occurred:', error);
-        throw error;
-    });
+    } catch (err) {
+        console.error("Error occurred:", err);
+        throw err;
+    }
 }
 
 

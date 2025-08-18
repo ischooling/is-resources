@@ -1068,7 +1068,6 @@ function getSessionMasterList(formId, elementId, allStatus){
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
-		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);
@@ -1507,7 +1506,6 @@ function getTggingMasterList(formId, elementId){
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
-		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);
