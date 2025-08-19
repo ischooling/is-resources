@@ -74,6 +74,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		//localStorage.setItem("needToPaging", false);
 		$("#b2c-lead-list").html('');
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
+		console.log("after getLeadDataList");
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
     });
 	$("#moveNewLead").on('click',function() {
@@ -428,6 +429,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			$("#b2c-lead-list").html("");
 			//localStorage.setItem("needToPaging", false);
 			getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
+			console.log("after getLeadDataList");
 			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	});
 

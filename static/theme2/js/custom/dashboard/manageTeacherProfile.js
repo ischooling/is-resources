@@ -645,7 +645,7 @@ function checkLinkValid(e, src){
 				recordings.forEach((urlObj, index) => {
 					let label = "Recording";
 					for (const key in titles) {
-					if (urlObj.url.includes(key)) {
+					if (urlObj.urls.includes(key)) {
 						label = titles[key];
 						break;
 					}

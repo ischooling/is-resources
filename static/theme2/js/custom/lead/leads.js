@@ -6436,61 +6436,59 @@ function getLeadListCampaignWiseHtml(data){
 }
 
 
-function callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType, activeLead, totalfollowup, callFrom) {
-	if(moduleId==''){
-		moduleId=$("#"+formId+" #leadFromSearchModuleId").val();
-	}
-	if(clickFrom==''){
-		clickFrom=$("#"+formId+" #clickFromSearch").val();
-	}
-	if(currentPage==''){
-		currentPage=$("#"+formId+" #currentPageSearch").val();
-	}
-	
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('dashboard', 'get-total-lead'),
-		data : JSON.stringify(getCallRequestForAdvanceLeadSearchStudent(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType,activeLead)),
-		dataType : 'json',
-		cache : false,
-		timeout : 600000,
-		success : function(data) {
-			// console.log(data);
-			customLoader(false);
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
-			} else {
-				if(leadType=='B2B'){
-					if(callFrom=='new-lead'){
-						getTotalB2BLeads(data);
-					}else{
-						var htmlt=getB2BLeadTotalCount(data, moduleId);
-						$("#b2b-total-head").html(htmlt);
-						$("#b2bLeadCount").html(htmlt);
-					}
-					//$("#total-active-hotlead").html(htmhot);
-				}else if(leadType=='B2C'){
-					if(callFrom=='new-lead'){
-						getTotalB2CLeads(data);
-					}else{
-						var htmlt=getLeadTotalCountList(data, moduleId, totalfollowup, callFrom);
-						var htmhot = getLeadTotalHotCountList(data, moduleId, callFrom);
-						if(activeLead=='Y'){
-							$("#total-lead-active-tr").html(htmlt);
-							$("#total-active-hotlead").html(htmhot);
-						}else{
-							$("#total-lead-inactive-tr").html(htmlt);
-							$("#total-inactive-hotlead").html(htmhot);
-						}
-					}
-				}else{
-					var htmlt=getB2BLeadTotalCount(data, moduleId);
-					$("#b2bLeadCount").html(htmlt);
-				}
-			}
-		}
-		});
+async function callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType, activeLead, totalfollowup, callFrom) {
+    if (moduleId == '') {
+        moduleId = $("#" + formId + " #leadFromSearchModuleId").val();
+    }
+    if (clickFrom == '') {
+        clickFrom = $("#" + formId + " #clickFromSearch").val();
+    }
+    if (currentPage == '') {
+        currentPage = $("#" + formId + " #currentPageSearch").val();
+    }
+
+    const payload = getCallRequestForAdvanceLeadSearchStudent(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType, activeLead);
+
+    try {
+        const data = await getDashboardDataBasedUrlAndPayload(false, false, 'get-total-lead', payload);
+
+        customLoader(false);
+
+        if (data.status === '0' || data.status === '2') {
+            showMessage(true, data.message);
+        } else {
+            if (leadType === 'B2B') {
+                if (callFrom === 'new-lead') {
+                    getTotalB2BLeads(data);
+                } else {
+                    const htmlt = getB2BLeadTotalCount(data, moduleId);
+                    $("#b2b-total-head").html(htmlt);
+                    $("#b2bLeadCount").html(htmlt);
+                }
+            } else if (leadType === 'B2C') {
+                if (callFrom === 'new-lead') {
+                    getTotalB2CLeads(data);
+                } else {
+                    const htmlt = getLeadTotalCountList(data, moduleId, totalfollowup, callFrom);
+                    const htmhot = getLeadTotalHotCountList(data, moduleId, callFrom);
+
+                    if (activeLead === 'Y') {
+                        $("#total-lead-active-tr").html(htmlt);
+                        $("#total-active-hotlead").html(htmhot);
+                    } else {
+                        $("#total-lead-inactive-tr").html(htmlt);
+                        $("#total-inactive-hotlead").html(htmhot);
+                    }
+                }
+            } else {
+                const htmlt = getB2BLeadTotalCount(data, moduleId);
+                $("#b2bLeadCount").html(htmlt);
+            }
+        }
+    } catch (err) {
+        console.error("Error in callTotalCountLeads:", err);
+        showMessage(true, "Something went wrong while fetching lead counts.");
+    }
 }
    
 

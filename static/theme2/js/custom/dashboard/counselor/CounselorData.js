@@ -1341,30 +1341,21 @@ function getRequestForLeadList(moduleId ,leadFrom, clickFrom, startDate, endDate
 	return data;
 }
 
-function getLeadListData(moduleId ,leadFrom, clickFrom, startDate, endDate, country, campaign, currentPage, userId, leadType) {
-	//"lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
-	return new Promise(function(resolve, reject){
-		$.ajax({
-			type : "POST",
-			contentType : APPLICATION_JSON_VALUE,
-			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/lead-list',
-			data : JSON.stringify(getRequestForLeadList(moduleId ,leadFrom, clickFrom, startDate, endDate, country, campaign, currentPage, userId, leadType)),
-			dataType : 'json',
-			async:true,
-			global : true,
-			success : function(data) {
-				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-					if (data['status'] == '3') {
-						redirectLoginPage();
-					} 
-					return reject()
-				}else{
-					resolve(data)
-	
-				}
-			}
-		});
-	});
+async function getLeadListData(moduleId, leadFrom, clickFrom, startDate, endDate, country, campaign, currentPage, userId, leadType) {
+    try {
+        var payload = getRequestForLeadList(moduleId,leadFrom,clickFrom,startDate,endDate,country,campaign,currentPage,userId,leadType);
+        const data = await getDashboardDataBasedUrlAndPayload(true, true, 'lead-list', payload);
+        if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+            if (data['status'] == '3') {
+                redirectLoginPage();
+            }
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error("Error in getLeadListData:", error);
+        throw error;
+    }
 }
 
 function getRequestForLeadReports(moduleId , userId){
