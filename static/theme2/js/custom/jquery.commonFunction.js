@@ -5495,7 +5495,7 @@ function detectBrave() {
   }
 }
 
-function getDashboardDataBasedUrlAndPayload(globalflag,showMessageTheme2,url,payload) {
+function getDashboardDataBasedUrlAndPayload(globalflag,showMessage,url,payload) {
   customLoader(true);
   return new Promise(function (resolve, reject) {
     $.ajax({
@@ -5510,7 +5510,7 @@ function getDashboardDataBasedUrlAndPayload(globalflag,showMessageTheme2,url,pay
           if (data.status == "3") {
             redirectLoginPage();
           } else {
-            if (showMessageTheme2) {
+            if (showMessage) {
               showMessageTheme2(0, data.message, "", true);
             }
           }
@@ -5519,7 +5519,7 @@ function getDashboardDataBasedUrlAndPayload(globalflag,showMessageTheme2,url,pay
         }
       },
       error: function (xhr, status, e) {
-        if (showMessageTheme2) {
+        if (showMessage) {
           showMessageTheme2(0, e.responseText, "", true);
         }
         reject(e);
@@ -5528,7 +5528,7 @@ function getDashboardDataBasedUrlAndPayload(globalflag,showMessageTheme2,url,pay
   });
 }
 
-function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessageTheme2, url, payload, parentUrl){
+function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage, url, payload, parentUrl){
   return new Promise(function (resolve, reject) {
       $.ajax({
           type : "POST",
@@ -5542,12 +5542,8 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage
                   if(data.status == '3'){
                       redirectLoginPage();
                   }else{
-                      if(showMessageTheme2){
-                          if(tt=='theme1'){
-                              showMessageTheme2(false, data.message);
-                          }else{
-                              showMessageTheme2(0, data.message,'',true);
-                          }
+                      if(showMessage){
+                        showMessageTheme2(0, data.message,'',true);
                       }
                   }
               } else {
@@ -5555,12 +5551,8 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage
               }
           },
           error: function (xhr, status, e) {
-              if(showMessageTheme2){
-                  if(tt=='theme1'){
-                      showMessageTheme2(false, e.responseText);
-                  }else{
-                      showMessageTheme2(0, e.responseText,'',true);
-                  }
+              if(showMessage){
+                showMessageTheme2(0, e.responseText,'',true);
               }
               reject(e);
           }
