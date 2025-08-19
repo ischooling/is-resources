@@ -915,9 +915,9 @@ function getLeadEnrollmentYearWise(objRights){
         </div>
     </div>
 <hr/>
-<div class="col-sm-12 col-md-12 col-lg-12">
+<div class="col-sm-12 col-md-12 col-lg-12 px-0">
     <div class="mb-3 card">
-        <div class="pt-0 card-body">
+        <div class="pt-0 px-0 card-body">
             <div id="chart-enroll-yearwise"></div>
         </div>
     </div>	

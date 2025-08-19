@@ -6077,36 +6077,43 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 						}else if(colType=='Leads'){
 							data.push(totalLead);
 						}
-						attrMonth.push(enrollMonth.meetingDate);
+						if(ind==(enrollList.length-1)){
+							attrMonth.push(enrollMonth.meetingDate);
+						}
 					}else{
-						var enrollDaywise = enrollMonth.enrollDayList;
-						if(enrollDaywise.length>0){
-							for (let t = 0; t < enrollDaywise.length; t++) {
-								var studentEnroll = enrollDaywise[t];
-								if(colType=='Enrollment'){
-									data.push(studentEnroll.enrollDaywise);
-									var mdate = studentEnroll.meetingDate.replace(", "+yearName, "");
-									//studentEnroll.weekday
-									if(modeSearch=='DAY'){
-										attrMonth.push(mdate);
-									}else if(modeSearch=='WEEK'){
-										attrMonth.push(mdate);
-									}else{
-										attrMonth.push(mdate);
-									}
-								}else if(colType=='Leads'){
-									data.push(studentEnroll.leadDaywise);
-									var mdate = studentEnroll.meetingDate.replace(", "+yearName, "");
-									if(modeSearch=='DAY'){
-										attrMonth.push(mdate);
-									}else if(modeSearch=='WEEK'){
-										attrMonth.push(mdate);
-									}else{
-										attrMonth.push(mdate);
+							var enrollDaywise = enrollMonth.enrollDayList;
+							if(enrollDaywise.length>0){
+								for (let t = 0; t < enrollDaywise.length; t++) {
+									var studentEnroll = enrollDaywise[t];
+									if(colType=='Enrollment'){
+										data.push(studentEnroll.enrollDaywise);
+										if(ind==(enrollList.length-1)){
+											var mdate = studentEnroll.meetingDate.replace(", "+yearName, "");
+											//studentEnroll.weekday
+											if(modeSearch=='DAY'){
+												attrMonth.push(mdate);
+											}else if(modeSearch=='WEEK'){
+												attrMonth.push(mdate);
+											}else{
+												attrMonth.push(mdate);
+											}
+										}
+									}else if(colType=='Leads'){
+										data.push(studentEnroll.leadDaywise);
+										if(ind==(enrollList.length-1)){
+											var mdate = studentEnroll.meetingDate.replace(", "+yearName, "");
+											if(modeSearch=='DAY'){
+												attrMonth.push(mdate);
+											}else if(modeSearch=='WEEK'){
+												attrMonth.push(mdate);
+											}else{
+												attrMonth.push(mdate);
+											}
+										}
 									}
 								}
-							}
-						}	
+							}	
+						
 
 					}
 

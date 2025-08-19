@@ -604,14 +604,14 @@ function checkLinkValid(e, src){
 				async : false,
 				success : function(response) {
 					if (response.recordingArray[0].urls && response.recordingArray[0].urls.length > 0) {
-						populateRecordingModal(response.recordingArray[0].urls);
+						populateTeacherRecordingModal(response.recordingArray[0].urls);
 					} else {
 						showMessage(false, "No recordings available.");
 					}
 				}
 			})
 		}
-		function populateRecordingModal(recordings) {
+		function populateTeacherRecordingModal(recordings) {
 			const titles = {
 				"shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
 				"active_speaker.mp4": "Active Speaker",
@@ -645,7 +645,7 @@ function checkLinkValid(e, src){
 				recordings.forEach((urlObj, index) => {
 					let label = "Recording";
 					for (const key in titles) {
-					if (urlObj.urls.includes(key)) {
+					if (urlObj.url.includes(key)) {
 						label = titles[key];
 						break;
 					}
