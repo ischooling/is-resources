@@ -560,7 +560,7 @@ $(document).ajaxStop(function () {
 
 $(document).ajaxSend(function () {
   ++AJAXREQUESTCOUNT;
-  console.log("AJAX call started, active count:", AJAXREQUESTCOUNT);
+  //console.log("AJAX call started, active count:", AJAXREQUESTCOUNT);
   customLoader(true);
 });
 
@@ -1561,7 +1561,7 @@ function getRequestForContact(formId, moduleId) {
   authentication["userType"] = moduleId;
   request["authentication"] = authentication;
   request["requestData"] = requestData;
-  console.log("request " + request);
+  // console.log("request " + request);
   return request;
 }
 
@@ -1622,7 +1622,7 @@ function getFinalValue(data) {
   var payload = {};
   // payload['payload']=AesUtil.prototype.encrypt(KEUS.SALT, KEUS.IV, KEUS.PASSPHRASE, data);
   payload["payload"] = encode(JSON.stringify(data));
-  console.log("getFinalValue 2" + JSON.stringify(payload));
+  // console.log("getFinalValue 2" + JSON.stringify(payload));
   return payload;
 }
 function bindFileUpload(uploadIndex, uploadCategoryId, uploadUserId) {
@@ -1837,7 +1837,7 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
           .text();
       },
       send: function (e, data) {
-        console.log("send");
+        // console.log("send");
       },
       done: function (e, data) {
         if (signupPage != 0) {
@@ -1845,7 +1845,7 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
         } else {
           customLoader(false);
         }
-        console.log("done");
+        // console.log("done");
         if (data.result.status == 0 || data.result.status == 3) {
           //$("#"+uploadIndex).parents(".file-tab").find("span.fileName").text();
           if (
@@ -1857,18 +1857,18 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
         } else {
           $.each(data.result.uploadFiles, function (index, file) {
             if (file.status == 1) {
-              console.log("aya");
+              // console.log("aya");
               console.log("file: " + file);
               $("#" + uploadIndex)
                 .parents(".file-tab")
                 .find("span.fileName")
                 .text(file.fileName);
-              console.log(
-                $("#" + uploadIndex)
-                  .parents(".file-tab")
-                  .find("span.fileName")
-                  .text(file.fileName)
-              );
+              // console.log(
+              //   $("#" + uploadIndex)
+              //     .parents(".file-tab")
+              //     .find("span.fileName")
+              //     .text(file.fileName)
+              // );
               //console.log('type'+data.originalFiles[0]['type']);
               if (data.originalFiles[0]["type"] == "application/pdf") {
                 $("#" + uploadIndex)
@@ -1881,7 +1881,7 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
         }
       },
       progressall: function (e, data) {
-        console.log("progressall");
+        // console.log("progressall");
       },
       fail: function (e, data) {
         console.log("fail");
@@ -2069,7 +2069,7 @@ function bindFileUploadNew1(
         }
       },
       send: function (e, data) {
-        console.log("send");
+        // console.log("send");
         if (uploadMethodType == 1) {
           $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
             "width",
@@ -2087,7 +2087,7 @@ function bindFileUploadNew1(
         } else {
           customLoader(false);
         }
-        console.log("done");
+        // console.log("done");
         if (data.result.status == 0 || data.result.status == 3) {
           if (uploadMethodType == 1) {
             $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
@@ -2163,7 +2163,7 @@ function bindFileUploadNew1(
         else {
           $.each(data.result.uploadFiles, function (index, file) {
             if (file.status == 1) {
-              console.log("file: " + file);
+              // console.log("file: " + file);
               if (uploadMethodType == 1) {
                 var removeClassName = "";
                 if (uploadIndex == 1) {
@@ -2208,12 +2208,12 @@ function bindFileUploadNew1(
                 }
               } else if (uploadMethodType == 2) {
                 hideMessageErrorNew("evaluationDocsError");
-                console.log(
-                  $("#fileupload" + uploadIndex)
-                    .parents(".file-tab")
-                    .find("span.fileName")
-                    .text(file.fileName)
-                );
+                // console.log(
+                //   $("#fileupload" + uploadIndex)
+                //     .parents(".file-tab")
+                //     .find("span.fileName")
+                //     .text(file.fileName)
+                // );
                 $("#evluationATTachement" + uploadIndex).val(file.fileName);
                 if (data.originalFiles[0]["type"] == "application/pdf") {
                   $("#fileupload" + uploadIndex)
@@ -2291,7 +2291,7 @@ function bindFileUploadNew1(
                       PATH_FOLDER_IMAGE2 + "pdf.jpg"
                     );
                   }, 3000);
-                  console.log("PATH_FOLDER_IMAGE2 : " + PATH_FOLDER_IMAGE2);
+                  // console.log("PATH_FOLDER_IMAGE2 : " + PATH_FOLDER_IMAGE2);
                 } else {
                   $("#fileupload" + uploadIndex + "img").addClass("full mt-1");
                   $("#fileupload" + uploadIndex + "img").attr(
@@ -2441,7 +2441,7 @@ function bindFileUploadNew1(
         }
       },
       progressall: function (e, data) {
-        console.log("progressall");
+        // console.log("progressall");
         if (uploadMethodType == 1) {
           $("#fileupload" + uploadIndex + "ProgressStatus")
             .removeClass("label-error")
@@ -2457,7 +2457,7 @@ function bindFileUploadNew1(
         }
       },
       fail: function (e, data) {
-        console.log("fail");
+        // console.log("fail");
         if (signupPage != 0) {
           $("#commonloaderId, #commonloaderBody").hide();
         } else {
@@ -3027,9 +3027,9 @@ function bindFileUploadForCSV(uploadIndex, uploadStudentId, uploadStandardId) {
         var acceptFileTypesApplication = /^application\/vnd.ms-excel$/i;
         var acceptFileTypesText = /^text\/csv$/i;
         var isError = false;
-        console.log(
-          "bindFileUploadForCSV type: " + data.originalFiles[0]["type"]
-        );
+        // console.log(
+        //   "bindFileUploadForCSV type: " + data.originalFiles[0]["type"]
+        // );
         if (
           data.originalFiles[0]["type"].length &&
           (acceptFileTypesApplication.test(data.originalFiles[0]["type"]) ||
@@ -3153,7 +3153,7 @@ function bindFileUploadForPDF(uploadIndex, uploadUserId) {
         if (isError) {
           uploadErrors.push("Please upload files in pdf format.");
         }
-        console.log("originalFiles size" + data.originalFiles[0]["size"]);
+        // console.log("originalFiles size" + data.originalFiles[0]["size"]);
         if (
           data.originalFiles.length &&
           data.originalFiles[0]["size"] > 5242880
@@ -3250,7 +3250,7 @@ function bindFileUploadForPDF(uploadIndex, uploadUserId) {
 }
 
 function removeDocument(uploadIndex, uploadMethodType) {
-  console.log(uploadIndex);
+  // console.log(uploadIndex);
   if (uploadMethodType == 1) {
   } else if (uploadMethodType == 2) {
     $("#fileupload" + uploadIndex)
@@ -3287,14 +3287,14 @@ function removeDocument(uploadIndex, uploadMethodType) {
       .find("a.view")
       .attr("href", "javascript:void(0)");
     $("#fileupload" + uploadIndex).addClass("w100");
-    console.log(
-      "delete docs" +
-        $("#fileupload" + uploadIndex)
-          .parent("span")
-          .parent("div")
-          .find("a.view")
-          .attr("href", "javascript:void(0)")
-    );
+    // console.log(
+    //   "delete docs" +
+    //     $("#fileupload" + uploadIndex)
+    //       .parent("span")
+    //       .parent("div")
+    //       .find("a.view")
+    //       .attr("href", "javascript:void(0)")
+    // );
   } else if (uploadMethodType == 3) {
     $("#fileupload" + uploadIndex)
       .parent("span")
@@ -3343,15 +3343,15 @@ function removeDocument(uploadIndex, uploadMethodType) {
       .parent("div")
       .find("a.remove")
       .attr("href", "");
-    console.log(
-      "delete docs" +
-        $("#fileupload" + uploadIndex)
-          .parent("span")
-          .parent("p")
-          .parent("div")
-          .find("a.remove")
-          .attr("href", "")
-    );
+    // console.log(
+    //   "delete docs" +
+    //     $("#fileupload" + uploadIndex)
+    //       .parent("span")
+    //       .parent("p")
+    //       .parent("div")
+    //       .find("a.remove")
+    //       .attr("href", "")
+    // );
   } else if (uploadMethodType == 4) {
     $("#fileName" + uploadIndex).html("");
     $("#divdeleteDocument" + uploadIndex).attr("style", "display:none;");
@@ -3364,7 +3364,7 @@ function getJSONRequest(formId, isMulitSelect) {
     $(this).removeAttr("disabled");
   });
   var serializedString = $("#" + formId).serialize();
-  console.log("serializedString " + serializedString);
+  // console.log("serializedString " + serializedString);
   $(".disabledFields").each(function () {
     $(this).attr("disabled", "disabled");
   });
@@ -3376,9 +3376,9 @@ function getJSONRequest(formId, isMulitSelect) {
     if (nameValue[1] != "") {
       var name = nameValue[0];
       var value = escapeCharacters(nameValue[1]);
-      console.log("name " + name);
-      console.log(" value " + value);
-      console.log("original Value " + nameValue[1]);
+      // console.log("name " + name);
+      // console.log(" value " + value);
+      // console.log("original Value " + nameValue[1]);
       requestObj[name] = value;
     }
   });
@@ -3413,7 +3413,7 @@ function getJSONRequest(formId, isMulitSelect) {
     }
     requestObj[name1] = value1;
   }
-  console.log("requestObj " + requestObj);
+  // console.log("requestObj " + requestObj);
   return requestObj;
 }
 function callSubjectsByGradeId(
@@ -3517,8 +3517,8 @@ function callBothSubjectAndPlacementSubjectsByGrade(
     return false;
   }
 
-  console.log("Subject Id : " + requestExtra1);
-  console.log("Placement Subject Id : " + requestExtra2);
+  // console.log("Subject Id : " + requestExtra1);
+  // console.log("Placement Subject Id : " + requestExtra2);
   $.ajax({
     type: "POST",
     contentType: APPLICATION_JSON_VALUE,
@@ -3540,7 +3540,7 @@ function callBothSubjectAndPlacementSubjectsByGrade(
       if (data["status"] == "0" || data["status"] == "2") {
         showMessageTheme2(1, data["message"]);
       } else {
-        console.log("Response Data  " + data);
+        // console.log("Response Data  " + data);
         $("#" + formId + " #" + toElementId).html(
           '<option value="">Select Course</option>'
         );
@@ -3666,12 +3666,12 @@ function callTeacherPreferredSubjects(formId, value, elementId, flag) {
 }
 
 function validateRequestForMasterGrade(formId, elementId, toElementId) {
-  console.log(
-    "element=>" +
-      $("#" + formId + " #" + elementId)
-        .val()
-        .trim()
-  );
+  // console.log(
+  //   "element=>" +
+  //     $("#" + formId + " #" + elementId)
+  //       .val()
+  //       .trim()
+  // );
   if (
     $("#" + formId + " #" + elementId).val() == null ||
     $("#" + formId + " #" + elementId)
@@ -3829,7 +3829,7 @@ function showSubjectCatalog(subjectId, courseType) {
   });
 }
 function showWarningMessage(warningMessage, functionName) {
-  console.log(warningMessage);
+  // console.log(warningMessage);
   if (functionName == "") {
     $("#resetDeleteErrorWarningYes").hide();
     $("#resetDeleteErrorWarningNo").hide();
@@ -4139,7 +4139,7 @@ function renderIsdCode(formId, elementId, defaultCountryISOCode) {
   } else {
     element = "#" + elementId;
   }
-  console.log("element " + element);
+  // console.log("element " + element);
   if (document.querySelector(element) != null) {
     var phoneNo = document.querySelector(element);
     iti = intlTelInput(phoneNo, {
@@ -4315,7 +4315,7 @@ function copyURL(eleID, msgEle, msg) {
 
 // Fallback copy method using document.execCommand
 function fallbackCopyText(text, msgEle) {
-  console.log("Using fallback copy method (execCommand).");
+  // console.log("Using fallback copy method (execCommand).");
 
   const tempInput = document.createElement("input");
   tempInput.type = "text";
@@ -4328,7 +4328,7 @@ function fallbackCopyText(text, msgEle) {
   try {
     const successful = document.execCommand("copy");
     if (successful) {
-      console.log("Copied successfully using execCommand.");
+      // console.log("Copied successfully using execCommand.");
       showCopyMessage(msgEle, "Copied!", true);
     } else {
       console.error("execCommand failed.");
@@ -5085,13 +5085,13 @@ function parseUrlToJson(params) {
 }
 
 function getAsPost(paramas, isSelf) {
-  console.log("getAsPost1 " + paramas);
+  // console.log("getAsPost1 " + paramas);
   // var KEUS = getSecreteKey();
   // AesUtil(KEUS.KEYSIZE, KEUS.ITERATIONS);
   var payload = JSON.stringify(parseUrlToJson(paramas));
   // payload=AesUtil.prototype.encrypt(KEUS.SALT, KEUS.IV, KEUS.PASSPHRASE, payload);
   payload = encode(payload);
-  console.log("getAsPost2 " + paramas);
+  // console.log("getAsPost2 " + paramas);
   var urlSend =
     BASE_URL +
     CONTEXT_PATH +
@@ -5123,13 +5123,13 @@ function getAsPostWithoutUniqueID(paramas) {
 }
 
 function getAsPostWithoutUUID(paramas, isSelf) {
-  console.log("getAsPost1 " + paramas);
+  // console.log("getAsPost1 " + paramas);
   // var KEUS = getSecreteKey();
   // AesUtil(KEUS.KEYSIZE, KEUS.ITERATIONS);
   var payload = JSON.stringify(parseUrlToJson(paramas));
   // payload=AesUtil.prototype.encrypt(KEUS.SALT, KEUS.IV, KEUS.PASSPHRASE, payload);
   payload = encode(payload);
-  console.log("getAsPost2 " + paramas);
+  // console.log("getAsPost2 " + paramas);
   var urlSend =
     BASE_URL +
     CONTEXT_PATH +
@@ -5694,7 +5694,7 @@ function getWelcomeMessage() {
 function generateTinyUrls() {
   const isTinyUrlEnabled = getTinyUrlService();
   if (!isTinyUrlEnabled) {
-    console.log("Tiny URL service is disabled in configuration");
+    //console.log("Tiny URL service is disabled in configuration");
     return;
   }
   const $urlInputs = $(".tinyUrl");
@@ -5709,7 +5709,7 @@ function generateTinyUrls() {
   });
   const urls = Object.keys(uniqueUrls);
   if (!urls.length) {
-    console.log("No URLs found to shorten");
+    // console.log("No URLs found to shorten");
     $copyElements.prop("disabled", false).css({ pointerEvents: "", opacity: "" });
     return;
   }

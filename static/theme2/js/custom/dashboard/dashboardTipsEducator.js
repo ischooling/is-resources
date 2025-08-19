@@ -1,5 +1,5 @@
 $(document).ready(function() {
-	console.log('inside dashboardTipsEducator.js');
+	// console.log('inside dashboardTipsEducator.js');
 });
 function saveTipsForEducator(formId,moduleId, roleModuleId) {
 	hideMessage('');

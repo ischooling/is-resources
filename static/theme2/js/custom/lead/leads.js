@@ -1615,7 +1615,7 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  leadAddFormRequestDTO['recordsPerPage']=recordsPerPage;
  //console.log(JSON.stringify(leadAddFormRequestDTO));
  //console.log(JSON.stringify(leadModifyDetailDTO));
- console.log(leadAddFormRequestDTO);
+ //console.log(leadAddFormRequestDTO);
  return leadAddFormRequestDTO;
 }
 
@@ -4564,7 +4564,7 @@ function getRequestForCampaignMaster(formId, campid, activeInactive){
 }
 
 function callCampainList(dropdownStatus, elementIdid) {
-	console.log("callCampainList")
+	//console.log("callCampainList")
 	data={};
 	data['schoolId']=SCHOOL_ID;
 	$.ajax({
@@ -6456,7 +6456,7 @@ function callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage,
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			//console.log(data);
+			// console.log(data);
 			customLoader(false);
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);
