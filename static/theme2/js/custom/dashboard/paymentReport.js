@@ -1,9 +1,11 @@
 var scriptRun = false;
 function getPaymentReportData(formId, forCountOnly, type, callFrom){
 	if($('#paymentStatus').val()!=''){
-		if($('#startDate').val()=='' && $('#endDate').val()==''){
-			showMessageTheme2(0, 'Please choose Start Date and End Date','',true);
-			return false;
+		if($('#paymentStatus').val()!='ABS' && $('#paymentStatus').val()!='AP'){
+			if($('#startDate').val()=='' && $('#endDate').val()==''){
+				showMessageTheme2(0, 'Please choose Start Date and End Date','',true);
+				return false;
+			}
 		}
 	}
 	if(forCountOnly){

@@ -613,6 +613,8 @@ function filterStudentPaymentReportForm(){
 								+'<option value="SUCCESS">Success</option>'
 								+'<option value="ODUE">Overdue</option>'
 								+'<option value="DUE">Upcoming</option>'
+								+'<option value="AP">Advance Payment</option>'
+								+'<option value="ABS">Advance Book Seat </option>'
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'

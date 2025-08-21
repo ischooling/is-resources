@@ -299,7 +299,7 @@ function getViewLmsCredaintial(data){
 														if(lms.lmsUsrId!=''){
 															if(data.lmsRole == 'STUDENT'){
 																html+=
-																`<a href="javascript:void(0);" class="dropdown-item" onclick="return showWarningMessageShow('Are you sure you want to sync this data? Syncing this data will create a new user/update user details for the student in the LMS?',' callAgilixbuzzSyncUser(\\\',\\\'${data.lmsRole}\\\',\\\'UU\\\',\\\'${lms.lmsId}\\\',\\\'${lms.courseProviderId}\\\')')">
+																`<a href="javascript:void(0);" class="dropdown-item" onclick="return showWarningMessageShow('Are you sure you want to sync this data? Syncing this data will create a new user/update user details for the student in the LMS?',' callAgilixbuzzSyncUser(\\\'\\\',\\\'${data.lmsRole}\\\',\\\'UU\\\',\\\'${lms.lmsId}\\\',\\\'${lms.courseProviderId}\\\')')">
 																	<i class="pe-7s-refresh-2 bold"></i>&nbsp;Sync student user
 																</a>`;
 															}else if(data.lmsRole == 'PARENT'){
