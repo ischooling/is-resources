@@ -369,18 +369,26 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($('#logData').length<1){
 			$("body").append(getWatiTemplatesHtml());
 		}
-		// var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
-		getB2CLeadPopjs(objRights, roleAndModule);
-		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
-		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
 		var clickfrom='list';
 		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 		}
+		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
+		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
+		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 		$("#advanceLeadNewSearchForm #leadAssignToSearch" ).val(OBJECT_RIGHTS.clickUserid).trigger('change');
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+		getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+		getB2CLeadPopjs(objRights, roleAndModule);
+		generateTinyUrls();
 		
+		
+		
+		// callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		// getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+		
+
+
 		
 		$("#btnClickLeadMove").on('click',function() {
 			moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
