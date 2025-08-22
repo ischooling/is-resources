@@ -7058,7 +7058,6 @@ async function getLeadStatusLog(leadno, callFrom, adminStatus) {
                     + '</div>'
                 + '</li>';
             }
-
             $(".followup-remark-" + leadno).html(html);
 
             $(".follow-up-no").off("click").on("click", function () {
@@ -9939,7 +9938,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 	  $('#leadAdvanceSearch').modal('hide');
 	  console.log("start time :" + new Date());
   
-	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType, 'Y');
+	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, objRights.clickByLead, objRights.leadType, 'Y');
   
 	  const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', payload, 'api/v1/leads');
   
@@ -9965,6 +9964,14 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		if (objRights.leadType == 'B2B') {
 		  const html = getB2bLeadList(data, objRights, roleModule);
 		  $("#b2b-lead-list").html(html);
+		  $('#b2b-lead-list').off('click', '.follow-up-no').on('click', '.follow-up-no', function () {
+			$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
+			$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
+			$(this).parent().find(".follow-up-content").slideDown();
+			$(this).parent().siblings().find(".follow-up-content").slideUp();
+			$(this).parent().addClass("follow-up-accordian-active");
+			$(this).parent().siblings().removeClass("follow-up-accordian-active");
+		  });
 		} else {
 		  const html = getB2cLeadList(data, objRights, roleModule);
 		  $("#b2c-lead-list").html(html);
@@ -9996,7 +10003,8 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		for (let lead of leadCheckedArr) {
 		  $("#lead-" + lead).prop("checked", true);
 		}
-  
+  		var demoMovedTxtTrue='';
+		var blankDemoTxt='';
 		$("#selectLeadAll").off('click').on('click', function () {
 			var leadnew = $("#leadNoMove").val();
 			var chkAll = this;
@@ -10006,6 +10014,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 				$(this)[0].checked = chkAll.checked;
 			});
 			var leadNo='';
+			
 			$.each($("input[name='lead-move-another']:checked"), function(){
 				if(leadnew.indexOf($(this).val()) != -1){
 				}else{
@@ -10014,10 +10023,10 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 					var leadUserId = checkDemoMoved.split('-')[0];
 					var demoUserId = checkDemoMoved.split('-')[1];
 					if(demoUserId != 0 && leadUserId != demoUserId){
-						demoMovedTrue += "moved"
+						demoMovedTxtTrue += "moved"
 					}else{
 						if(demoUserId == 0){
-							blankDemo += "blank"; 
+							blankDemoTxt += "blank"; 
 						}
 					}
 				}
@@ -10027,12 +10036,12 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			$("#leadNoMove").val(leadnew);
 			if($("#selectLeadAll").is(":checked")){}
 			else{
-				demoMovedTrue = '';
-				blankDemo = '';
+				demoMovedTxtTrue = '';
+				blankDemoTxt = '';
 				$("#leadNoMove").val('');
 			}
-			$("#demoMovedTrue").val(demoMovedTrue)
-			$("#blankDemo").val(blankDemo)
+			$("#demoMovedTrue").val(demoMovedTxtTrue)
+			$("#blankDemo").val(blankDemoTxt)
 		});
   
 		$(".checkLead").off('click').on('click', function () {
@@ -10050,10 +10059,10 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 						var leadUserId = checkDemoMoved.split('-')[0];
 						var demoUserId = checkDemoMoved.split('-')[1];
 						if(demoUserId != 0 && leadUserId != demoUserId){
-							demoMovedTrue = demoMovedTrue.replace("moved", "");
+							demoMovedTxtTrue = demoMovedTxtTrue.replace("moved", "");
 						}else{
 							if(demoUserId == 0){
-								blankDemo = blankDemo.replace("blank", "");
+								blankDemoTxt = blankDemoTxt.replace("blank", "");
 							}
 						}
 					}
@@ -10068,10 +10077,10 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 					var leadUserId = checkDemoMoved.split('-')[0];
 					var demoUserId = checkDemoMoved.split('-')[1];
 					if(demoUserId != 0 && leadUserId != demoUserId && USER_ID != leadUserId){
-						demoMovedTrue += "moved"
+						demoMovedTxtTrue += "moved"
 					}else{
 						if(demoUserId == 0){
-							blankDemo += "blank"; 
+							blankDemoTxt += "blank"; 
 						}
 					}
 					leadNo = leadNo+','+$(this).val();
@@ -10079,8 +10088,8 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			});
 			leadnew = leadnew + leadNo;
 			$("#leadNoMove").val(leadnew);
-			$("#demoMovedTrue").val(demoMovedTrue)
-			$("#blankDemo").val(blankDemo)
+			$("#demoMovedTrue").val(demoMovedTxtTrue)
+			$("#blankDemo").val(blankDemoTxt)
 		});
   
 		$("#leadsPagging").off('change').on('change', function () {

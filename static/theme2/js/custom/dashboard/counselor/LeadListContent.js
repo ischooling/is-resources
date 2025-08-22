@@ -315,7 +315,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		 });
 		 leadnew = leadCheckId + leadNotCheckId;
 		 var leadId =leadnew.substring(1,leadnew.lenght);
-			var urlSend = '/dashboard/lead-merge-data?moduleId=${moduleId}&leadId='+leadId+'&leadFrom=MERGE&currentPage=${currentPage}&isSearch=false&countrolType=edit&leadType=B2C';
+			var urlSend = '/dashboard/lead-merge-data?moduleId='+OBJECT_RIGHTS.moduleId+'&leadId='+leadId+'&leadFrom=MERGE&currentPage='+OBJECT_RIGHTS.currentPage+'&isSearch=false&countrolType=edit&leadType=B2C';
 			getAsPost(urlSend,'self');
 			//callLeadMergeData('leadMergeDataPopupForm', leadId, '${USER_ID}', 'edit', 'leadMergePopup','B2C',1)
 	   });
@@ -378,7 +378,8 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 		$("#advanceLeadNewSearchForm #leadAssignToSearch" ).val(OBJECT_RIGHTS.clickUserid).trigger('change');
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-		getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+		//getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
+		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
 		getB2CLeadPopjs(objRights, roleAndModule);
 		generateTinyUrls();
 		
@@ -664,7 +665,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			});
 			leadnew = leadCheckId + leadNotCheckId;
 			var leadId =leadnew.substring(1,leadnew.lenght);
-				var urlSend = '/dashboard/lead-merge-data?moduleId=${moduleId}&leadId='+leadId+'&leadFrom=MERGE&currentPage=${currentPage}&isSearch=false&countrolType=edit&leadType=B2C';
+				var urlSend = '/dashboard/lead-merge-data?moduleId='+OBJECT_RIGHTS.moduleId+'&leadId='+leadId+'&leadFrom=MERGE&currentPage='+OBJECT_RIGHTS.currentPage+'&isSearch=false&countrolType=edit&leadType=B2C';
 				getAsPost(urlSend,'self');
 				//callLeadMergeData('leadMergeDataPopupForm', leadId, '${USER_ID}', 'edit', 'leadMergePopup','B2C',1)
 		});
@@ -1052,7 +1053,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 			$("#leadDemoAssignToOnlyDemo").prop('disabled', false);
 			$("#leadDemoAssignToWithOutDemo").prop('disabled', false);
 			$("#leadDemoAssignToOnlyDemo").prop('checked', true);
-			if('${discardPermission}' == 'false'){ //condition for counselor only
+			if(OBJECT_RIGHTS.discardPermission == false){ //condition for counselor only
 				if($("#demoMovedTrue").val().includes("moved")){ // demo not blank and moved 
 					$("#leadDemoAssignToWithDemo").prop('disabled', true)
 					$("#leadDemoAssignToWithOutDemo").prop('disabled', true);
@@ -1067,7 +1068,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 			$("#leadDemoAssignToOnlyDemo").prop('disabled', true);
 			$("#leadDemoAssignToWithOutDemo").prop('disabled', false);
 			$("#leadDemoAssignToWithOutDemo").prop('checked', true);
-			if('${discardPermission}' == 'false' && $("#demoMovedTrue").val().includes("moved")){ // both blank and moved demo
+			if(OBJECT_RIGHTS.discardPermission == false && $("#demoMovedTrue").val().includes("moved")){ // both blank and moved demo
 				$("#leadDemoAssignToWithDemo").prop('disabled', true)
 				$("#leadDemoAssignToWithOutDemo").prop('disabled', true);
 				$("#leadDemoAssignToWithOutDemo").prop('checked', false);
@@ -1104,9 +1105,9 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 		$("#errMsg").text('')
 		
 		var formId = 'advanceLeadNewSearchForm'; 
-		var moduleId='${moduleId}'; 
-		var leadFrom='${leadFrom}';
-		var clickFrom='${clickFrom}-${clickUserid}'; 
+		var moduleId=OBJECT_RIGHTS.moduleId; 
+		var leadFrom=OBJECT_RIGHTS.leadFrom;
+		var clickFrom=OBJECT_RIGHTS.clickFrom +'-'+OBJECT_RIGHTS.clickUserid; 
 		var currentPage=currentPage; 
 		var typeTheme='new'; 
 		var newTheme=true; 
@@ -1129,8 +1130,8 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 			callBadge='';
 		}
 		var clickBy = 'totalleads'; 
-		if('${clickByLead}'!=''){
-			clickBy='${clickByLead}';
+		if(OBJECT_RIGHTS.clickFrom!=''){
+			clickBy=OBJECT_RIGHTS.clickFrom;
 		}
 		var newTheme = typeTheme;
 		var leadFrom=leadFrom;
@@ -1232,10 +1233,10 @@ function getTotalLead(leadType){
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', OBJECT_RIGHTS, ROLE_MODULE);
 }
 function nextPage(currentPage){
-	if('${leadFrom}'=='advance-search'){
+	if(OBJECT_RIGHTS.leadFrom=='advance-search'){
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', ''+OBJECT_RIGHTS.clickFrom+'-'+OBJECT_RIGHTS.clickUserid+'', '0', 'new', true,'totalleads', OBJECT_RIGHTS, ROLE_MODULE);
 	}else{
-		var urlSend = '/dashboard/lead-data-list?moduleId=111&leadFrom=${leadFrom}&clickFrom=${clickFrom}&currentPage='+currentPage+'&euid='+encuid+'&leadType=B2B';
+		var urlSend = '/dashboard/lead-data-list?moduleId=111&leadFrom='+OBJECT_RIGHTS.leadFrom+'&clickFrom='+OBJECT_RIGHTS.clickFrom+'&currentPage='+currentPage+'&euid='+encuid+'&leadType=B2B';
 		getAsPost(urlSend);
 		customLoader(false)
 	}
