@@ -18,6 +18,7 @@
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+	
 }
 input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 
@@ -378,14 +379,22 @@ h3 {
 	position: relative;
 }
 
-.form-holder i:not(.payment-form .upload-btn-wrapper i, #step-4 i.fa-edit, #step-4 i.fa-plus, #step-4 i.fa-minus, #callPaymentStudentModal .fa-star){
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-	font-size: 16px;
-	z-index: 999;
-	width:auto;
-	right: 12px;
+.form-holder i:not(
+  .payment-form .upload-btn-wrapper i,
+  #step-4 i.fa-edit,
+  #step-4 i.fa-plus,
+  #step-4 i.fa-minus,
+  #callPaymentStudentModal .fa-star,
+  .fa-lock,
+  .fa-globe
+) {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  z-index: 999;
+  width: auto;
+  right: 12px;
 }
 .form-holder i.static-icon {
 	position: relative;

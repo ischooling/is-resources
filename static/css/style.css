@@ -41,7 +41,7 @@ a, a:hover, a:focus{text-decoration: none;color:#090909;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn {display: inline-block;width:auto;border:2px solid #2d63e2;border-radius:6px; padding: 3px;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn .btn{display: inline-block;padding:10px 30px;border-radius: 4px; color:#fff;background: #2d63e2;cursor: pointer; margin:0;}
 
-.payment-method-icon{min-width: 120px; padding: 5px 10px; margin:0px 10px 10px 0px; text-align: center;border: 1px solid rgb(229 229 229 / 50%);}
+.payment-method-icon{min-width: 120px; padding: 5px 10px; margin:0px 10px 10px 0px; text-align: center;border: 1px solid rgb(229 229 229 / 50%);box-shadow:0px 1px 6px 1px rgba(0, 0, 0, 0.1);border-radius:10px}
 .payment-method-icon img{border-radius: 3px;max-height: 31px;object-fit: contain;}
 .payment-method-icon p{margin: 0px;font-size: 12px;}
 .blink-bg-warning{background:rgb(255 239 192) !important;}

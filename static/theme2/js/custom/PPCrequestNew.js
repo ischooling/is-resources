@@ -353,6 +353,7 @@ function getGradesData(requiredGrades) {
   return grades;
 }
 function getGrades(formId, elementId, grades) {
+  $("#" + formId + " #" + elementId).html("")
   $.each(grades, function (k, v) {
     $("#" + formId + " #" + elementId).append(
       '<option grade_id="' +
@@ -568,6 +569,9 @@ function callForPPCRequestForm(formId, moduleId, folderName, domainName) {
         //$('#'+formId+' #serverError').html(data['elementId']);
         showServerError(true, formId, "serverError", data["message"]);
       } else {
+         $("#requestDemo").hide();
+         $("#leadApiUrl").hide();
+         $("#thankYou").show();
         if (domainName == undefined) {
           domainName = "https://enroll.internationalschooling.org";
         }
@@ -595,11 +599,11 @@ function callForPPCRequestForm(formId, moduleId, folderName, domainName) {
           var p = base64Encode("P");
           payload = payload + "&t=" + p;
         }
-        var url = ORIGIN_URL + "/is-thankyou" + payload;
-          if (folderName == "brochure") {
-            url = ORIGIN_URL + "/brochure-thankyou/" + payload;
-          }
-        goAhead(url, "");
+        // var url = ORIGIN_URL + "/is-thankyou" + payload;
+        //   if (folderName == "brochure") {
+        //     url = ORIGIN_URL + "/brochure-thankyou/" + payload;
+        //   }
+        // goAhead(url, "");
       }
     },
     complete: function () {
@@ -671,6 +675,8 @@ function getRequestForPPCRequest(formId, moduleId, folderName) {
     }
   }
   PPCRequestDTO["utmTerm"] = getCookie("ut");
+  debugger;
+  PPCRequestDTO["servingBaseUrl"] = getServingBaseUrl();
   return PPCRequestDTO;
 }
 
@@ -1185,6 +1191,7 @@ function getRequestForRequestDemo(formId, moduleId, folderName) {
       requestDemoDTO["counselorUserId"] = 0;
     }
   }
+  requestDemoDTO["servingBaseUrl"] = getServingBaseUrl()
   /* 
 		Not in common page
 		requestDemoDTO['encryptedRequestDemoId'] = $("#" + formId + " #encryptedRequestDemoId").val();

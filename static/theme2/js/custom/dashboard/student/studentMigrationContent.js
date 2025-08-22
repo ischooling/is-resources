@@ -1507,7 +1507,7 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'
 												+'<tr>'
-													+'<th style="width: 60%;">Description</th>'
+													+'<th style="width: 60%;">Fee Description</th>'
 													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
 													+'<th style="width: 20%; text-align:center">Total Fee</th>'
 												+'</tr>'
@@ -1523,7 +1523,7 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="annual-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th style="width: 60%;">Description</th>'
+													+'<th style="width: 60%;">Fee Description</th>'
 													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
 													+'<th style="width: 20%; text-align:center">Total Fee</th>'
 												+'</tr>'
@@ -1538,7 +1538,7 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="installment3-course-fee-details" class="installment3-course-fee-details table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th style="width: 60%;">Description</th>'
+													+'<th style="width: 60%;">Fee Description</th>'
 													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
 													+'<th style="width: 20%; text-align:center">Total Fee</th>'
 												+'</tr>'
@@ -1549,14 +1549,14 @@ function paymentModalContentWithData(cdrDTO){
 										+'</table>'
 										+'<div class="full installment3-course-fee-details" style="display: none;">'
 											+'<div>'
-												+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">FEE SCHEDULE</h3>'
+												+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">Fee Schedule</h3>'
 											+'</div>'
 											+'<table class="table table-bordered table-striped without_h_scroll">'
 												+'<thead class="theme-bg primary-bg white-txt-color">'
 													+'<tr>'
-														+'<th style="width: 60%;">DESCRIPTION</th>'
-														+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>TOTAL FEE</th>'
-														+'<th style="width: 20%; text-align:center">PAYING NOW</th>'
+														+'<th style="width: 60%;">Fee DESCRIPTION</th>'
+														+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>'
+														+'<th style="width: 20%; text-align:center">Paying Now</th>'
 													+'</tr>'
 												+'</thead>'
 												+'<tbody>'
@@ -1570,7 +1570,7 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="custom-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th style="width: 60%;">Description</th>'
+													+'<th style="width: 60%;">Fee Description</th>'
 													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
 													+'<th style="width: 20%; text-align:center">Total Fee</th>'
 												+'</tr>'
@@ -1822,7 +1822,7 @@ function feePaymentReview(data){
 			+'<table class="table-style">'
 				+'<thead>'
 					+'<tr>'
-						+'<th class="th" style="width:60%">Description</th>'
+						+'<th class="th" style="width:60%">Fee Description</th>'
 						+'<th class="th" style="text-align:center;width:20%">Fee ('+data.currencyIsoCode+')</th>'
 						+'<th class="th" style="text-align:center;width:20%">Total Fee</th>'
 					+'</tr>'
@@ -1855,17 +1855,17 @@ function feePaymentReview(data){
 				'<div class="full">'
 					+'<div class="full">'
 						+'<br/>'
-						+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">FEE SCHEDULE</h3>'
+						+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">Fee Schedule</h3>'
 					+'</div>'
 					+'<table class="table-style">'
 						+'<thead>'
 							+'<tr>'
-								+'<th style="width: 60%;">DESCRIPTION</th>'
-								+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>TOTAL FEE</th>';
+								+'<th style="width: 60%;">Fee Description</th>'
+								+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>';
 								if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
-									html+='<th style="width: 20%; text-align:center">STATUS</th>';
+									html+='<th style="width: 20%; text-align:center">Status</th>';
 								}else{
-									html+='<th style="width: 20%; text-align:center">PAYING NOW</th>';
+									html+='<th style="width: 20%; text-align:center">Paying Now</th>';
 								}
 								html+=
 							'</tr>'
@@ -2045,7 +2045,7 @@ function getAnnualPaymentTable(cdrDTO){
 						+'<table class="payment-table-inside-table">'
 							+'<tbody>'
 								+'<tr>'
-									+'<td>Fee Waiver & Discounts</td>';
+									+'<td>Fee Discounts</td>';
 								+'</tr>'		
 								$.each(cdrDTO.oneTimePayment.youSave.description, function(k, desc) {
 									html+='<tr><td class="pl-4">'+(parseInt(k)+1)+". "+desc+'</td></tr>';
@@ -2104,7 +2104,7 @@ function getMonthlyPaymentTable(cdrDTO){
 						+'<table class="payment-table-inside-table">'
 							+'<tbody>'
 								+'<tr>'
-									+'<td>Fee Waiver & Discounts</td>'
+									+'<td>Fee Discounts</td>'
 								+'</tr>'
 								$.each(cdrDTO.monthlyFeeDetails.youSave.description, function(k, desc) {
 									html+='<tr><td class="pl-4">'+(parseInt(k)+1)+". "+desc+'</td></tr>';
@@ -2235,7 +2235,7 @@ function getAdvancePaymentTable(cdrDTO){
 						+'<table class="payment-table-inside-table">'
 							+'<tbody>'
 								+'<tr>'
-									+'<td>Fee Waiver & Discounts</td>'
+									+'<td>Fee Discounts</td>'
 								+'</tr>'
 								$.each(cdrDTO.advanceFeeDetails.youSave.description, function(k, desc) {
 									html+='<tr><td class="pl-4">'+(parseInt(k)+1)+". "+desc+'</td></tr>';

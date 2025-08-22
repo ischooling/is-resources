@@ -5823,7 +5823,7 @@ border-top-right-radius:.3rem
 	margin:-1rem -1rem -1rem auto
 }
 .modal-header .close span{position: relative;z-index: 2;}
-.modal-header .close:after{
+.modal-header .close:not(.close-with-red-color):after{
 	content: '';
 	position: absolute;
 	width: 25px;

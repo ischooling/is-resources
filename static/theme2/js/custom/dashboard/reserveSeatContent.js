@@ -117,7 +117,7 @@ function getReserveSeatModal(data){
 					+'<div class="full">'
 						+'<table class="table table-bordered table-striped text-left m-0" style="width:100%">'
 							+'<thead>'
-								+'<th class="bg-primary text-white">Description</th>'
+								+'<th class="bg-primary text-white">Fee Description</th>'
 								+'<th class="bg-primary text-white">Fee (USD)</th>'
 								+'<th class="bg-primary text-white">Total Fee</th>'
 							+'</thead>'

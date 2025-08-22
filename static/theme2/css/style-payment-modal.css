@@ -30,7 +30,7 @@ a, a:hover, a:focus{text-decoration: none;}
 .payment-tabs .nav-tabs>li.active> a{background:var(--sc);color:#fff;margin: 0 !important;border:0 !important;}
 
 .payment-option-wrapper .payment-option{width: calc(100% - 200px);padding:0 !important}
-.payment-option-wrapper .payment-option .flex-item{border-right:1px solid rgba(233, 233, 233, 0.6);padding:30px;border:1px solid var(--pc);width: 100%;position:relative}
+.payment-option-wrapper .payment-option .flex-item{border-right:1px solid rgba(233, 233, 233, 0.6); padding:30px; border:1px solid var(--pc);width: 100%;position:relative}
 .title{font-weight: 700;color:#007ed7;margin-bottom: 15px;display: inline-block;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon{width: 100%;display: flex;flex-wrap: wrap;align-items: center; margin: 20px 0;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon h3{margin:0 !important}
@@ -40,7 +40,7 @@ a, a:hover, a:focus{text-decoration: none;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn {display: inline-block;width:auto;border:2px solid var(--pc);border-radius:6px; padding: 3px;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn .btn{display: inline-block;padding:10px 30px;border-radius: 4px; color:#fff;background: var(--pc);cursor: pointer; margin:0;}
 
-.payment-method-icon{min-width: 120px; padding: 5px 10px; margin:0px 10px 10px 0px; text-align: center;border: 1px solid rgb(229 229 229 / 50%);}
+.payment-method-icon{min-width: 120px; padding: 5px 10px; margin:0px 10px 10px 0px; text-align: center;border: 1px solid rgb(229 229 229 / 50%);box-shadow: 0px 1px 6px 1px rgba(0, 0, 0, 0.1);border-radius: 10px; ;}
 .payment-method-icon img{border-radius: 3px;max-height: 31px;object-fit: contain;}
 .payment-method-icon p{margin: 0px;font-size: 12px;}
 .blink-bg-warning{background:rgb(255 239 192) !important;}

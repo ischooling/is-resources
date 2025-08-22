@@ -194,12 +194,11 @@ async function getAirwallexMethods(){
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-			var onclickAttr = $("#airwallexPayButton").attr("onclick");
 			var html = '';
             if (response.methods && response.methods.length > 0) {
                 $.each(response.methods, function (index, method) {
                     html+=
-					`<a href="javascript:void(0);" onclick="${onclickAttr}">
+					`<a href="javascript:void(0);" onclick="commonPayment(\'airwallexPayButton\')">
 						<div class="payment-method-icon">`;
 							if(method.image == ""){
 								html+=`<p style="font-size: 14px;">${method.labelName}</p>`
@@ -218,6 +217,7 @@ async function getAirwallexMethods(){
 		}
 	})
 }
+
 
 function getAllCourseDetails(isGradeChange, courseId) {
 	$("#commonloaderId, #commonloaderBody").show();
