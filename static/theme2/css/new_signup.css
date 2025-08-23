@@ -1,6 +1,6 @@
 @charset "utf-8";
 body{margin:0; padding:0; width:100%;}
-*{text-transform: capitalize !important;}
+
 a, abbr, acronym, address, applet, article, aside, audio,b, blockquote, big, body,center, canvas, caption, cite, code, command,datalist, dd, del, details, dfn, dl, div, dt, em, embed,fieldset, figcaption, figure, font, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html,i, iframe, img, ins,kbd, keygen,label, legend, li, meter,nav,object,  output,p, pre, progress,q, s, samp, section, small, span, source, strike, strong, sub, sup,tble, tbody, tfoot, thead, th, tr, td , video, tt,u, ul, var, textarea { background:transparent;border:0 none; margin:0;padding:0;border:0;outline:0; vertical-align:top;}
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
@@ -90,7 +90,7 @@ body{font-family:opensans-regular !important}
 .left-section .head .logout img{display: inline-block;}
 .left-section .registration-img{width: 100%;display: inline-block;margin-top: 75px;text-align: center;}
 .new-year .left-section .registration-img{margin-top:0 !important}
-.left-section .registration-img .round-label{font-size: 30px; border-radius:35px;padding:4px 35px;display:inline-block;font-weight:600;font-family:opensans-bold;text-transform:uppercase}
+.left-section .registration-img .round-label{font-size: 30px; border-radius:35px;padding:4px 35px;display:inline-block;font-weight:600;font-family:opensans-bold;}
 .left-section .registration-img .learning-type{font-family:opensans-regular;font-weight:500;font-size:26px;margin-top: 20px;}
 .left-section .registration-title{width: 100%;display: inline-block;}
 .left-section .registration-title h3{font-family:opensans-regular;font-size: 20px;width: 100%;display: block;text-align: center; font-weight: 400;}
