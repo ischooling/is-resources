@@ -363,7 +363,9 @@ function updateWati(number, watiToken, watiUrl, status) {
         </div>
       </div>  
     </div>`;
-
+  if($("#updateWatiNumberModal").length == 1){
+    $("#updateWatiNumberModal").remove();
+  }
   $("body").append(html);
   $("#updateWatiNumberModal").modal("show");
 }

@@ -5,17 +5,74 @@ async function renderMeetingTimeDashboard(title, roleAndModule, SCHOOL_ID,USER_I
 	ROLE_MODULE=roleAndModule;
     var html=leadDemoDashboardContent(title, roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
     $('#dashboardContentInHTML').html(html);
-	getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar","","Week", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+	getCalendarDemoAvailability('timeAvailabilityPopup',0,"time-demo-calendar","","Day", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
 
 	$("#timeDemoPreCalMonth").unbind('click').bind("click",  function(){
 		var firstDatePreMonth=$("#timeDemoFirstDatePreMonth").val();
-		getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar",""+firstDatePreMonth+"","Week",'', '', USER_ROLE_ID, '0', '0', '0', '0','0');
-		});
-		$("#timeDemoNextCalMonth").unbind('click').bind("click",  function(){
+		var slectuserId=$("#assignToSearch").val();
+        var slottype=$("#searchDaywiseDemo").val();
+		getCalendarDemoAvailability('timeAvailabilityPopup',slectuserId,"time-demo-calendar",""+firstDatePreMonth+"",""+slottype+"",'', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+	});
+	$("#timeDemoNextCalMonth").unbind('click').bind("click",  function(){
 		var firstDateNextMonth=$("#timeDemoFirstDateNextMonth").val();
-		getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar",""+firstDateNextMonth+"","Week",'', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+		var slectuserId=$("#assignToSearch").val();
+        var slottype=$("#searchDaywiseDemo").val();
+		getCalendarDemoAvailability('timeAvailabilityPopup',slectuserId,"time-demo-calendar",""+firstDateNextMonth+"",""+slottype+"",'', '', USER_ROLE_ID, '0', '0', '0', '0','0');
 		
 	});
+	$("#assignToSearch").select2({
+        theme:"bootstrap4",
+        dropdownParent:"#demoSearchForm"
+    });
+	callLeadAssignUserList('demoSearchForm','B2C','assignToSearch', true, true, USER_ID);
+	$("#dataDemoStartDate").datepicker({
+            format : 'dd-mm-yyyy',
+            autoclose: true,
+    });
+	// $("#searchDaywiseDemo").on("change",  function(){
+	// 	var slottype=$("#searchDaywiseDemo").val();
+	// 	getCalendarDemoAvailability('timeAvailabilityPopup',USER_ID,"time-demo-calendar","",""+slottype+"", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+	// });
+
+	$("#searchDaywiseDemo").on("change", function(){
+		var slectuserId=$("#assignToSearch").val();
+        if($("#searchDaywiseDemo").val()=='CUSTOM'){
+            $(".hidestudentdate").css({"display":"block"});
+        }else{
+            $(".hidestudentdate").css({"display":"none"})
+            var slottype=$("#searchDaywiseDemo").val();
+			if(slottype!="CUSTOM"){
+				getCalendarDemoAvailability('timeAvailabilityPopup',slectuserId,"time-demo-calendar","",""+slottype+"", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+			}
+        }
+    });
+	$("#assignToSearch").on("change", function(){
+		var startDate='';
+		var slectuserId=$("#assignToSearch").val();
+        var slottype=$("#searchDaywiseDemo").val();
+		if($("#dataDemoStartDate").val()!='' && $("#dataDemoStartDate").val()!=undefined){
+			startDate = $("#dataDemoStartDate").val();
+			startDate=startDate.split("-")[2]+'-'+startDate.split("-")[1]+'-'+startDate.split("-")[0];
+			slottype="Day";
+		}
+		getCalendarDemoAvailability('timeAvailabilityPopup',slectuserId,"time-demo-calendar","",""+slottype+"", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+            
+    });
+
+	$("#btnDemoWiseSubmit").on("click",function(){
+		var startDate='';
+		var slectuserId=$("#assignToSearch").val();
+		var slottype=$("#searchDaywiseDemo").val();
+        if($("#dataDemoStartDate").val()=='' && $("#dataDemoStartDate").val()==undefined){
+            showMessageTheme2(1, 'Please choose  date','',true);
+                return false;
+        }else{
+			startDate = $("#dataDemoStartDate").val();
+			startDate=startDate.split("-")[2]+'-'+startDate.split("-")[1]+'-'+startDate.split("-")[0];
+		}
+		slottype="Day";
+		getCalendarDemoAvailability('timeAvailabilityPopup',slectuserId,"time-demo-calendar",startDate,""+slottype+"", '', '', USER_ROLE_ID, '0', '0', '0', '0','0');
+    });
 
 }
 
@@ -65,21 +122,46 @@ function leadDemoDashboardContent(title, roleAndModule, schoolId, userId, role){
 		+'</div>'
 		+'<div class="main-card mb-3 card">'
 			+'<div class="card-body">'
-			+'<div class="d-flex align-items-center mt-3 check-top-header-touch flex-wrap">'
-			+'<span type="button" class="badge btn-primary mr-1" style="font-size-12px">Booked Slots</span>'
-			+'<span type="button" class="badge  btn-warning mr-1" style="font-size-12px">Available Slots</span>'
-			+'<div role="group" class="ml-auto mr-auto btn-group-lg btn-group btn-group-toggle" data-toggle="buttons">'
-				+'<h3 class="d-flex align-items-center mb-0 position-relative">'
-					+'<button type="button" id="timeDemoPreCalMonth" class="btn-icon btn-pill btn calendar-tabs py-0">'
-					+'<i class="fa fa-angle-left" style="font-size:25px"></i> '
-					+'</button>'
-					+'<span id="timeDemoCalMonthYear" class="font-size-lg calendar-tabs "></span>'
-					+'<button type="button" id="timeDemoNextCalMonth" class="btn-icon btn-pill btn calendar-tabs">'
-						+'<i class="fa fa-angle-right" style="font-size:25px"></i> '
-					+'</button>'
-				+'</h3>'
+			+'<div class="row">'
+			+'<div class="col-12">'
+			+'<div class="w-100" style="gap:0.5rem">'
+				+' <form action="javascript:void(0);" class="d-flex align-items-center flex-wrap justify-content-end" id="demoSearchForm" name="demoSearchForm" autocomplete="off">'
+					+'<div class="w-fit-content mr-2" style="width:250px !important">'
+						+'<select name="assignToSearch" id="assignToSearch" class="form-control" style="width:fit-content"></select>	'	
+					+'</div>'
+					+'<div class="w-fit-content">'
+						+'<select class="form-control mr-1" id="searchDaywiseDemo" name="searchDaywiseDemo" style="width:fit-content">'
+							+'<option value="Day">Today</option>'
+							+'<option value="Week">Week</option>'
+							+'<option value="CUSTOM" >Custom</option>'
+						+'</select>'
+					+'</div>'
+					+'<div class="hidestudentdate">'
+						+'<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">'
+							+'<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">'
+								+'<input type="text" name="dataDemoStartDate" class="form-control form-control-sm" id="dataDemoStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" /> '
+							+'</div>'
+							+'<button class="btn btn-primary" id="btnDemoWiseSubmit">Submit</button>'
+						+'</div>'
+					+'</div>'
+				+'</form>'
 			+'</div>'
-		
+			+'</div>'
+			+'</div>'
+			+'<div class="d-flex align-items-center mt-3 check-top-header-touch flex-wrap">'
+				+'<span type="button" class="badge btn-primary mr-1" style="font-size-12px">Booked Slots</span>'
+				+'<span type="button" class="badge  btn-warning mr-1" style="font-size-12px">Available Slots</span>'
+				+'<div role="group" class="ml-auto mr-auto btn-group-lg btn-group btn-group-toggle" data-toggle="buttons">'
+					+'<h3 class="d-flex align-items-center mb-0 position-relative">'
+						+'<button type="button" id="timeDemoPreCalMonth" class="btn-icon btn-pill btn calendar-tabs py-0">'
+						+'<i class="fa fa-angle-left" style="font-size:25px"></i> '
+						+'</button>'
+						+'<span id="timeDemoCalMonthYear" class="font-size-lg calendar-tabs "></span>'
+						+'<button type="button" id="timeDemoNextCalMonth" class="btn-icon btn-pill btn calendar-tabs">'
+							+'<i class="fa fa-angle-right" style="font-size:25px"></i> '
+						+'</button>'
+					+'</h3>'
+				+'</div>'
 			+'</div>'
 			+'<div class="row">'
 				+'<input type="hidden" name="weekCount" id="weekCount" value="" />'
@@ -135,6 +217,9 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 	 customLoader(true);
 	 var slotDisplyType='calendar'
 	 var request = { userId:userId, lUserId:USER_ID, startDate: startDate, slotType: slotType, slotDisplyType:slotDisplyType, onlyCounts:'N'};
+		
+	 console.log(request);
+
 	 $.ajax({
 		 type: "POST",
 		 url: getURLFor('timeavailability', 'get-calendar-meeting-availability'),
@@ -151,7 +236,11 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 				 response=false;
 			 } else {
 				 $("#"+elementId).html('');
+				 var dayDate=data.today.split("-")[2];
 				 var monthyear = data.monthName+' - '+data.year;
+				 if(data.slotType=='Day'){
+					monthyear= dayDate+' - '+monthyear;
+				 }
 				 $("#timeDemoCalMonthYear").html(monthyear);
 				 $("#timeDemoToDayDate").val(data.startDate);
 				 $("#timeDEmoFirstDate").val(data.firstDate);
@@ -180,29 +269,52 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 	 var timeSlotList=data.timeSlotList;
 	 var htmlCal = "";
 	 htmlCal=htmlCal+'<table class="table table-bordered dt-responsive">';
-	 htmlCal=htmlCal+'<thead><tr class="text-uppercase ">'
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:5%" class="bold position-sticky bg-light"></th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light">Sun</th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Mon</th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Tue</th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Wed</th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Thu</th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Fri</th>';
-	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Sat</th>';
+	 htmlCal=htmlCal+'<thead><tr class="text-uppercase ">';
+	 htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:12%" class="bold position-sticky bg-light"></th>';
+	if(data.slotType=='Day'){
+		if(data.dayOfWeekVal==1){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light">Sun</th>';
+		}else if(data.dayOfWeekVal==2){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light ">Mon</th>';
+		}else if(data.dayOfWeekVal==3){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light ">Tue</th>';
+		}else if(data.dayOfWeekVal==4){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light ">Wed</th>';
+		}else if(data.dayOfWeekVal==5){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light ">Thu</th>';
+		}else if(data.dayOfWeekVal==6){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light ">Fri</th>';
+		}else if(data.dayOfWeekVal==7){
+			htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:88%" class="bold position-sticky bg-light ">Sat</th>';
+		}
+	}else{
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light">Sun</th>';
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Mon</th>';
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Tue</th>';
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Wed</th>';
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Thu</th>';
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Fri</th>';
+		htmlCal=htmlCal+'<th style="top:0;left:0;z-index:1; width:10%" class="bold position-sticky bg-light ">Sat</th>';
+	}
+
 	 htmlCal=htmlCal+'</tr>';
 	 htmlCal=htmlCal+'</thead>';
 	 htmlCal=htmlCal+'<tbody>';
 	 htmlCal=htmlCal+'<tr>';
-	 htmlCal=htmlCal+'<td style="top:0;left:0;z-index:1;" class="position-sticky">Time</td>';
-	 if(dayOfWeekVal!=7){
-		 startDate=dayOfWeekVal;
-		 for (let i = 1; i <= (dayOfWeekVal-1); i++) {
-			 htmlCal=htmlCal+'<td></td>';
+	 htmlCal=htmlCal+'<td style="top:0;left:0;z-index:1;" class="position-sticky">Time ('+data.timeZone.replace('/',' | ')+')</td>';
+	 if(data.slotType=='Day'){
+
+	 }else{
+		 if(dayOfWeekVal!=7){
+			 startDate=dayOfWeekVal;
+			 for (let i = 1; i <= (dayOfWeekVal-1); i++) {
+				 htmlCal=htmlCal+'<td></td>';
+			 }
 		 }
-	 }
-	 if(dayOfWeekVal==7){
-		 for (let i = 1; i <= (dayOfWeekVal-1); i++) {
-			 htmlCal=htmlCal+'<td></td>';
+		 if(dayOfWeekVal==7){
+			 for (let i = 1; i <= (dayOfWeekVal-1); i++) {
+				 htmlCal=htmlCal+'<td></td>';
+			 }
 		 }
 	 }
 	 for (let i = 0; i < enabledDateList.length; i++) {
@@ -211,8 +323,9 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 		 var countryTimezone=dates.toTimeZone;
 		var visitDate=dates.slotDate;
 		var weekDayId=dates.weekDayId;
+		var slUserId=$("#assignToSearch").val();
 		//if(i==0){
-			callFreeSlotsForCounselor(countryTimezone, visitDate, weekDayId, 5, "");
+			callFreeSlotsForCounselor(countryTimezone, visitDate, weekDayId, 5, slUserId);
 		//}
 		 //var bookingTime =dates.bookingDateList;
 		 //var availabilityTime =dates.availabilityDateList;
@@ -252,11 +365,12 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 	 htmlCal=htmlCal+'</tr>';
 	 for (let i = 0; i < timeSlotList.length; i++) {
 		var timedates = timeSlotList[i];
+		var timedates1 = (timeSlotList.length-1)!=i?timeSlotList[i+1]:'12:00 AM';
 		let time24h = convertTo24Hour(timedates);
 		time24h=time24h.replace(":","");
 
 		htmlCal=htmlCal+'<tr>';
-		htmlCal=htmlCal+'<td class="bold" style="font-size:12px;">'+timedates+'</td>';
+		htmlCal=htmlCal+'<td class="bold" style="font-size:12px;"><span class="p-1 mb-1 mr-1 text-center font-weight-semi-bold d-inline-block text-primary border border-primary rounded-5 font-12">'+timedates+' - '+timedates1+'</span></td>';
 		for (let d = 0; d < enabledDateList.length; d++) {
 			var datess = enabledDateList[d];
 			
@@ -270,7 +384,10 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 					
 					var tdTiemSlotId=parseInt(demotime.meetingdemoid);
 					if(tdSlotId>=tdTiemSlotId && tdSlotId<=tdTiemSlotId){
-						let firstCharName = demotime.assignName.charAt(0).toUpperCase();
+						let firstCharName = demotime.assignName.substring(0, 2).toUpperCase();
+						// if(data.slotType=='Day'){
+						// 	firstCharName = demotime.assignName;
+						// }
 						htmlCal=htmlCal+'<div class="dropdown float-left btn-'+datess.slotDateId+''+time24h+'"> ';
 						htmlCal=htmlCal+'<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn-primary mr-1 cname-booking" style="font-size-11px">'+firstCharName+'</button>';
 						htmlCal=htmlCal+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">';
@@ -352,7 +469,7 @@ function callFreeSlotsForCounselor(countryTimezone, visitDate, dayId, eventId, u
 								
 								//console.log(itemList);
 								var htmlCal='';
-								let firstCharName = itemList.counselorName.charAt(0).toUpperCase();
+								let firstCharName = itemList.counselorName.substring(0, 2).toUpperCase();
 								let result = cnameArr.filter(num => num === firstCharName);
 								 if(result.length==0){
 									 htmlCal=htmlCal+'<div class="dropdown float-left"> ';

@@ -34,8 +34,7 @@ function getDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondi
 		 url : getURLForHTML('timeavailability','get-data-for-scheduled-events'),
 		 data : JSON.stringify(getCallRequestForAdvanceSearchOfEvents(formId, clickFrom,currentPageNo,boxSearchCondition)),
 		 dataType : 'json',
-		 async:true,
-		 global:false,
+		 global:true,
 		 success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if(data['status'] == '3'){

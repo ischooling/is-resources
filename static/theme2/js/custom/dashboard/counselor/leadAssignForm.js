@@ -104,7 +104,7 @@ function getLeadAssignUser(objectRights) {
 						html+=`<div>${aRol}</div>`;
 					}
 				html+=`</td>
-				 <td><input type="text" class="form-control form-control-sm" name="orderBy" class="rowindex" value="${autoInc}" size="5"  maxlength="5" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/></td>
+				 <td><input type="text" class="form-control form-control-sm rowindex" name="orderBy" class="rowindex" value="${autoInc}" size="5"  maxlength="5" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/></td>
 				 <td>
 					<div class="d-flex align-items-center">
 						<span class="d-inline-flex">
