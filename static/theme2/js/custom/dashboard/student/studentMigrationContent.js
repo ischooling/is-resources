@@ -260,7 +260,9 @@ function migrationDetailsOptionContent(data) {
 						'</div>'
 					+'</div>';
 					if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-						html+='<p class="mt-1 mb-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Progression Discount available for a limited time! Only '+ discountTimeLimitDays +' days left!</p>';
+						if($.inArray(data.migrationOptionsForNextGrade[0].learningProgram, ['ONE_TO_ONE','BATCH'])>=0){
+							html+='<p class="mt-1 mb-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Progression Discount available for a limited time! Only '+ discountTimeLimitDays +' days left!</p>';
+						}
 					}
 				html+='</div>'
 			+'</div>'

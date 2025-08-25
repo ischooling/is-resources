@@ -1742,7 +1742,7 @@ function getCalendarAvailabilityTable(formId, userId, data, prestartTime, preend
 											if(USER_ROLE=='TEACHER' ){
 												htmlCal=htmlCal+'<span id="slotSelectDate'+dates.day1+'"  class="'+holidayClass+' d-inline-block float-right position-absolute font-size-md" style="right:8px;bottom:50px;font-size:20px" data-toggle="tooltip" data-placement="top" data-original-title="Date-specific"><i class="lnr-calendar-full float-right" style="color:#333"></i></span>';
 											}else{
-												htmlCal=htmlCal+'<a href="javascript:void(0);" id="slotSelectDate'+dates.day1+'" '+((discardPermission&&discardPermission==="false")?'class="'+holidayClass+' d-inline-block float-right position-absolute font-size-md disabled" onclick="return false;"':'class="'+holidayClass+' d-inline-block float-right position-absolute font-size-md" onclick="'+onSclick+'"')+' style="right:8px;bottom:50px;font-size:20px" data-toggle="tooltip" data-placement="top" data-original-title="Date-specific"><i class="lnr-calendar-full float-right text-primary"></i></a>';
+												htmlCal=htmlCal+'<a href="javascript:void(0);" id="slotSelectDate'+dates.day1+'" class="'+holidayClass+' d-inline-block float-right position-absolute font-size-md" onclick="'+onSclick+'" style="right:8px;bottom:50px;font-size:20px" data-toggle="tooltip" data-placement="top" data-original-title="Date-specific"><i class="lnr-calendar-full float-right text-primary"></i></a>';
 											}
 										}
 									}else{
@@ -2143,7 +2143,7 @@ function getUserAvailabilityHtml(data, userId, prestartTime, preendTime,userRole
 			}
 			htmlCal=htmlCal+'<th width="215px">';
 			if(hideSpecificBtn=='N'){
-				htmlCal = htmlCal + '<button class="my-1 mr-2 btn-icon btn btn-outline-primary p-1" id="btnTimeCalendar" data-toggle="tooltip" data-placement="top" title="Override your availability for specific dates when your hours differ from your regular weekly hours." ' + ((discardPermission && discardPermission==="false") ? 'style="pointer-events:none;cursor:not-allowed;opacity:0.6;"' : '') + '><i class="pe-7s-plus btn-icon-wrapper"> </i>Add date-specific hours</button>';
+				htmlCal = htmlCal + '<button class="my-1 mr-2 btn-icon btn btn-outline-primary p-1" id="btnTimeCalendar" data-toggle="tooltip" data-placement="top" title="Override your availability for specific dates when your hours differ from your regular weekly hours." ' + ((discardPermission && discardPermission==="false" && userRoleId != 3) ? 'style="pointer-events:none;cursor:not-allowed;opacity:0.6;"' : '') + '><i class="pe-7s-plus btn-icon-wrapper"> </i>Add date-specific hours</button>';
 			}
 			htmlCal=htmlCal+'</th>';
 		htmlCal=htmlCal+'</tr>'; 
@@ -2582,7 +2582,7 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 								}else if(days.dataType=='Y' && userRoleId==3){
 									disablclass="disabled";
 								}
-								htmlw=htmlw+'<input type="checkbox" id="day'+days.dayId+'" value="'+days.dayId+'" data-name="'+days.dayName+'" data-dayname="'+days.dayName+'-'+days.dayId+'" onChange="'+funChange+'" '+((discardPermission && discardPermission==="false")?'disabled style="pointer-events:none;opacity:0.5;"':disablclass)+' class="custom-control-input week-slot-available">';
+								htmlw=htmlw+'<input type="checkbox" id="day'+days.dayId+'" value="'+days.dayId+'" data-name="'+days.dayName+'" data-dayname="'+days.dayName+'-'+days.dayId+'" onChange="'+funChange+'" '+disablclass+' class="custom-control-input week-slot-available">';
 								htmlw=htmlw+'<label class="custom-control-label bold text-uppercase" for="day'+days.dayId+'">'+days.dayName+'</label>';
 							}
 								
@@ -2598,7 +2598,7 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 					htmlw=htmlw+'</div>';
 					htmlw=htmlw+'<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12 text-right mt-2 mt-sm-0 p-0">';
 						// htmlw=htmlw+'<h5 class="font-weight-semi-bold" style="font-size:14px">Action</h5>';
-						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );\" style='line-height:0;" + ((discardPermission && discardPermission === "false") ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
+						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );\" style='line-height:0;" + ((discardPermission && discardPermission === "false" && USER_ROLE != "TEACHER") ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
 						if(slotTypeId>0){}else{
 							
 							var ddclass="";
@@ -2609,7 +2609,7 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 								ddclass="d-none"
 							}
 							//ddclass="d-none";///change after discussion
-							htmlw = htmlw + '<button class="btn btn-lg btn-outline-success btn-sm dropdown-toggle ' + ddclass + '" id="copy-hours-' + days.dayId + '" data-bs-auto-close="outside" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ' + ((discardPermission && discardPermission === "false") ? "disabled" : "") + '><i class="fa fa-copy" style="font-size:18px;line-height:20px"></i><span class="d-md-none">&nbsp; Clone</span></button>';
+							htmlw = htmlw + '<button class="btn btn-lg btn-outline-success btn-sm dropdown-toggle ' + ddclass + '" id="copy-hours-' + days.dayId + '" data-bs-auto-close="outside" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ' + ((discardPermission && discardPermission === "false" && USER_ROLE != "TEACHER") ? "disabled" : "") + '><i class="fa fa-copy" style="font-size:18px;line-height:20px"></i><span class="d-md-none">&nbsp; Clone</span></button>';
 							//}
 						
 						}
@@ -2734,7 +2734,7 @@ function bindTimeAvailableDropdown(userTimeAvailable, timeDropdown, days, presta
 					htmlw=htmlw+'<div class="my-1 mx-0 row align-items-center justify-content-sm-start available-dropdown-Wrapper justify-content-around available-'+days.dayName+'-'+days.dayId+' '+days.dayName+'-'+days.dayId+' '+days.dayName+'-time-'+ttt+'" id="'+days.dayName+'-time-'+ttt+'"  style="gap: 5px;" >';
 					htmlw=htmlw+'<div class="flex-grow-1 flex-sm-grow-0" style="min-width:60px">';
 					var fromFunc="getFromTime(this,'"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"', '"+slotDateLimit+"', '"+slotDayLimit+"')";
-					htmlw=htmlw+'<select class="form-control font-12 fromTime" '+(discardPermission && discardPermission==="false" ? "disabled style='pointer-events:none;cursor:not-allowed;opacity:0.6;'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'"  id="'+days.dayName+'-start-time-dropdown-'+ttt+'" onchange="'+fromFunc+'" data-status="Y">';
+					htmlw=htmlw+'<select class="form-control font-12 fromTime" '+((discardPermission && discardPermission==="false" && userRoleId != 3) || USER_ROLE == "TEACHER" ? "disabled style='pointer-events:none;cursor:not-allowed;opacity:0.6;'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'"  id="'+days.dayName+'-start-time-dropdown-'+ttt+'" onchange="'+fromFunc+'" data-status="Y">';
 					if(timeDropdown.length>0){
 						htmlw=htmlw+'<option value="">Start Time</option>';
 						for (let t = 0; t < timeDropdown.length; t++) {
@@ -2748,7 +2748,7 @@ function bindTimeAvailableDropdown(userTimeAvailable, timeDropdown, days, presta
 					htmlw=htmlw+'<div>-</div>';
 					htmlw=htmlw+'<div class="flex-grow-1 flex-sm-grow-0" style="min-width:60px">';
 					var toFunc="getToTime(this,'"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"', '"+slotDateLimit+"', '"+slotDayLimit+"')";
-					htmlw=htmlw+'<select class="form-control font-12 toTime" '+(discardPermission && discardPermission==="false" ? "disabled style='pointer-events:none;cursor:not-allowed;opacity:0.6;'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'" id="'+days.dayName+'-end-time-dropdown-'+ttt+'" onchange="'+toFunc+'" data-status="Y">';
+					htmlw=htmlw+'<select class="form-control font-12 toTime" '+((discardPermission && discardPermission==="false" && userRoleId != 3) || USER_ROLE == "TEACHER" ? "disabled style=\'pointer-events:none;cursor:not-allowed;opacity:0.6;\'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'" id="'+days.dayName+'-end-time-dropdown-'+ttt+'" onchange="'+toFunc+'" data-status="Y">';
 					if(timeDropdown.length>0){
 						htmlw=htmlw+'<option value="">End Time</option>';
 						for (let t = 0; t < timeDropdown.length; t++) {
@@ -2762,7 +2762,7 @@ function bindTimeAvailableDropdown(userTimeAvailable, timeDropdown, days, presta
 					htmlw=htmlw+'<div class="min-hours">';
 					var ddclass="";
 					if(userTimeA.dataType=='Y' && USER_ROLE_ID==3){ ddclass="d-none"; }
-					htmlw=htmlw+"<a href=\"javascript:void(0)\" class=\"btn btn-lg btn-outline-danger remove-time-slot-btn btn-sm ml-2 mr-1 "+ddclass+" time-save-"+userTimeA.dataType+"\" onclick=\"removeTimeDiv('"+days.dayName+"-time-"+ttt+"','"+days.dayId+"','"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"','"+slotDateLimit+"','"+slotDayLimit+"','"+userTimeA.timeid+"')\" "+(discardPermission && discardPermission==="false" ? "style='pointer-events:none;cursor:not-allowed;opacity:0.6;line-height:5px;'" : "style='line-height:5px;'")+"><i class=\"ion-android-close d-inline-block\" style=\"font-size:14px;line-height:10px;height:14px;\"></i></a>";
+					htmlw=htmlw+"<a href=\"javascript:void(0)\" class=\"btn btn-lg btn-outline-danger remove-time-slot-btn btn-sm ml-2 mr-1 "+ddclass+" time-save-"+userTimeA.dataType+"\" onclick=\"removeTimeDiv('"+days.dayName+"-time-"+ttt+"','"+days.dayId+"','"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"','"+slotDateLimit+"','"+slotDayLimit+"','"+userTimeA.timeid+"')\" "+(discardPermission && discardPermission==="false" && userRoleId != 3 ? "style='pointer-events:none;cursor:not-allowed;opacity:0.6;line-height:5px;'" : "style='line-height:5px;'")+"><i class=\"ion-android-close d-inline-block\" style=\"font-size:14px;line-height:10px;height:14px;\"></i></a>";
 					htmlw=htmlw+"<span id='"+days.dayName+'-hour-'+ttt+"'>"+(totalsDuration>0?getTimeWithFormat(totalsDuration):'0h 0m')+"</span>";
 					htmlw=htmlw+'</div>';
 					htmlw=htmlw+'</div>';
@@ -2824,7 +2824,7 @@ function bindTimeAvailableDropdown(userTimeAvailable, timeDropdown, days, presta
 				htmlw=htmlw+'</select>';
 				htmlw=htmlw+'</div>';
 				htmlw=htmlw+'<div class="min-hours">'
-				htmlw=htmlw+"<a href=\"javascript:void(0)\" class=\"btn btn-lg btn-outline-danger remove-time-slot-btn btn-sm ml-2 mr-1 time-save-N\" onclick=\"removeTimeDiv('"+days.dayName+"-time-0','"+days.dayId+"','"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"','"+slotDateLimit+"' ,'"+slotDayLimit+"','0')\" style=\"line-height:5px;\"><i class=\"ion-android-close d-inline-block\" style=\"font-size:14px;line-height:10px;height:14px;\"></i></a>";
+				htmlw=htmlw+"<a href=\"javascript:void(0)\" class=\"btn btn-lg btn-outline-danger remove-time-slot-btn btn-sm ml-2 mr-1 time-save-N\" "+(discardPermission && discardPermission==="false" && userRoleId != 3 ? "style='line-height:5px;pointer-events:none;cursor:not-allowed;opacity:0.6;'" : "style='line-height:5px;' onclick=\"removeTimeDiv('"+days.dayName+"-time-0','"+days.dayId+"','"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"','"+slotDateLimit+"','"+slotDayLimit+"','0')\"")+"><i class=\"ion-android-close d-inline-block\" style=\"font-size:14px;line-height:10px;height:14px;\"></i></a>";
 				htmlw=htmlw+"<span id='"+days.dayName+"-hour-0'>&nbsp;"+(totalsDuration>0?getTimeWithFormat(totalsDuration):'0h 0m')+"</span>";
 				htmlw=htmlw+'</div>';
 				htmlw=htmlw+'</div>';
@@ -3097,7 +3097,7 @@ function getEventList(eventList, userId,prestartTime, preendTime, userRoleId, mi
 				var ci=1;
 				for (let e = 0; e < eventList.length; e++) {
 					const events = eventList[e];
-					var editFun="getEditEvents('"+events.slotId+"','edit','"+userId+"','"+prestartTime+"','"+preendTime+"','"+userRoleId+"', '"+min+"','"+max+"','"+slotBufferLimit+"', '"+slotDateLimit+"','"+slotDayLimit+"','"+discardPermission+"');"
+					var editFun="getEditEvents('"+events.slotId+"','edit','"+userId+"','"+prestartTime+"','"+preendTime+"','"+userRoleId+"', '"+min+"','"+max+"','"+slotBufferLimit+"', '"+slotDateLimit+"','"+slotDayLimit+"');"
 					if(userRoleId == 3){
 						var borderClass="bg-"+events.bgColor;
 					}else{
@@ -3227,7 +3227,7 @@ function getEventList(eventList, userId,prestartTime, preendTime, userRoleId, mi
 
 function getEventDropdownList(eventDrpList, dropdownElementId, discardPermission){
 	var html=''
-	html+='<a href="javascript:void(0)" class="dropdown-toggle text-decoration-none font-size-lg font-weight-semi-bold" data-bs-auto-close="outside" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" '+((discardPermission==="false")?'style="pointer-events:none;cursor:not-allowed;opacity:0.6;"':'')+'>';
+	html+='<a href="javascript:void(0)" class="dropdown-toggle text-decoration-none font-size-lg font-weight-semi-bold" data-bs-auto-close="outside" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" '+((discardPermission && discardPermission==="false" && userRoleId != 3)?'style="pointer-events:none;cursor:not-allowed;opacity:0.6;"':'')+'>';
 	html+='<span class="eventTotal">0</span> event type<i class="fa fa-angle-down ml-2"></i>';
 	html+='</a>';
 	html+='<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu">';
@@ -4073,7 +4073,7 @@ function checkendTimeVlidation(src){
 	}
 }
 
-function getEditEvents(eventId,controlType, userId,prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit, discardPermission){
+function getEditEvents(eventId,controlType, userId,prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit){
 	customLoader(true);
 	var data={};
 	data['eventId'] = eventId;

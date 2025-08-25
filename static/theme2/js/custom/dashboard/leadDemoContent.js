@@ -122,6 +122,8 @@ function leadDemoDashboardContent(title, roleAndModule, schoolId, userId, role){
 		+'</div>'
 		+'<div class="main-card mb-3 card">'
 			+'<div class="card-body">'
+			
+			
 			+'<div class="row">'
 			+'<div class="col-12">'
 			+'<div class="w-100" style="gap:0.5rem">'
@@ -145,6 +147,11 @@ function leadDemoDashboardContent(title, roleAndModule, schoolId, userId, role){
 						+'</div>'
 					+'</div>'
 				+'</form>'
+				+'<div class="row w-fit-content ml-1">'
+			+'<div class=" text-primary font-weight-bold bg-white px-3 py-2 border shadow rounded-10 mr-3" id="demoWebsite"></div>'
+			+'<div class="text-primary font-weight-bold bg-white px-3 py-2 border shadow rounded-10 mr-3" id="demoLinksite"></div>'
+			+'<div class="text-primary font-weight-bold bg-white px-3 py-2 border shadow rounded-10" id="demoInvalidsite"></div>'
+			+'</div>'
 			+'</div>'
 			+'</div>'
 			+'</div>'
@@ -267,6 +274,10 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 	 var startDate=dayOfWeekVal;
 	 var enabledDateList = data.calendarDateList;
 	 var timeSlotList=data.timeSlotList;
+	 $("#demoWebsite").html('<span style="color:#7000FF" >Demo By Website : '+data.webTotal+'</span>');
+	 $("#demoLinksite").html('<span style="color:#0051FF" >Demo By Link : '+data.copyTotal+'</span>');
+	 $("#demoInvalidsite").html('<span class="text-danger" >Invalid Demo : '+data.invalidTotal+'</span>');
+
 	 var htmlCal = "";
 	 htmlCal=htmlCal+'<table class="table table-bordered dt-responsive">';
 	 htmlCal=htmlCal+'<thead><tr class="text-uppercase ">';
@@ -389,7 +400,7 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 						// 	firstCharName = demotime.assignName;
 						// }
 						htmlCal=htmlCal+'<div class="dropdown float-left btn-'+datess.slotDateId+''+time24h+'"> ';
-						htmlCal=htmlCal+'<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn-primary mr-1 cname-booking" style="font-size-11px">'+firstCharName+'</button>';
+						htmlCal=htmlCal+'<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle  mr-1 cname-booking '+(demotime.invalidLead==1?'bg-danger':'btn-primary')+'" style="font-size-11px">'+firstCharName+'</button>';
 						htmlCal=htmlCal+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">';
 						htmlCal=htmlCal+'<div class="popover-body">'
 						htmlCal=htmlCal+'<div class="dropdown-menu-header">';

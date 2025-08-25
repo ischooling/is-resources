@@ -9937,8 +9937,11 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
   
 	  $('#leadAdvanceSearch').modal('hide');
 	  console.log("start time :" + new Date());
-  
-	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, objRights.clickByLead, objRights.leadType, 'Y');
+	  if(objRights.clickByLead!=undefined){
+		callbadge=objRights.clickByLead;
+	  }
+	  
+	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType, 'Y');
   
 	  const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', payload, 'api/v1/leads');
   
