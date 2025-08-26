@@ -1508,18 +1508,45 @@ function getTggingMasterList(formId, elementId){
 		timeout : 600000,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
 			} else {
 				var result = data['mastersData']['data'];
-				var html = '';
-				$.each(result, function(k, v) {
-					html+='<option value="'+v.value+'">'+v.value+'</option>';
-					
-				});
-				$('#'+formId+' #'+elementId).html(html);
+					var html = '';
+					$.each(result, function(k, v) {
+						html+='<option value="'+v.value+'">'+v.value+'</option>';
+						
+					});
+					$('#'+formId+' #'+elementId).html(html);
+				
 			}
 		}
 	});
+}
+
+function getTggingMasterListPromise(formId) {
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            type: "POST",
+            contentType: APPLICATION_JSON_VALUE,
+            url: getURLForCommon('masters'),
+            data: JSON.stringify(getRequestForMaster(formId, 'TAGGING-LIST')),
+            dataType: 'json',
+            cache: false,
+            timeout: 600000,
+            success: function(data) {
+                if (data['status'] == '0' || data['status'] == '2') {
+                    resolve(''); // no data case
+                } else {
+                    var result = data['mastersData']['data'];
+					console.log(result)
+                        resolve(result); // resolve with raw result
+                    
+                }
+            },
+            error: function(xhr, status, error) {
+                reject(error); // reject on error
+            }
+        });
+    });
 }
 
 async function getChatEligibility(userId,schoolId){

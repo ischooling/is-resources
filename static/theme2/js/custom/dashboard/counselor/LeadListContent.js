@@ -4,6 +4,7 @@ var	itiPhoneNumber;
 var itiAltPhoneNumber;
 var ROLE_MODULE="";
 var OBJECT_RIGHTS="";
+var HASHTAGLIST;
 async function getLeadByType(leadType){
 	renderCounselorLeadListDashboard("Lead List", ROLE_MODULE, SCHOOL_ID,USER_ID,USER_ROLE, leadType)
 }
@@ -15,6 +16,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	var objRights = objRight.objectRights;
 	OBJECT_RIGHTS=objRights;
 	LEAD_CATEGORY=objRights.leadType;
+	HASHTAGLIST = await getTggingMasterListPromise('');
     var html=await getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
 	var clickfrom='list';
@@ -26,6 +28,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
 	getB2CLeadPopjs(objRights, roleAndModule);
 	generateTinyUrls();
+	
 	$("#btnClickLeadMove").on('click',function() {
 		moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
 	});
@@ -211,6 +214,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		});
 		getTggingMasterList(''+formId+'', 'leadTagging');
 		
+		
 
 	});
 
@@ -262,6 +266,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		callLeadSourceList('leadMergeDataPopupForm',OBJECT_RIGHTS.leadType,'leadSource', true);
 		callLeadStatusList('leadMergeDataPopupForm',''+OBJECT_RIGHTS.leadType+'','leadStatus', false);
 		callLeadAssignUserList('leadMergeDataPopupForm',''+OBJECT_RIGHTS.leadType+'','leadAssignTo', true, OBJECT_RIGHTS.discardPermission, USER_ID);
+		
 	});
 
 	$("#mergeB2BLead").unbind().bind('click',function() {
@@ -343,6 +348,11 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	setTimeout(function() {
 		curentTimeStamp(objRights.timeZoneOffset);
 	}, 800);
+
+
+    
+
+
 
 }
 

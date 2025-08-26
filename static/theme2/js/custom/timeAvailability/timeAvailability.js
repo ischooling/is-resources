@@ -2598,7 +2598,7 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 					htmlw=htmlw+'</div>';
 					htmlw=htmlw+'<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12 text-right mt-2 mt-sm-0 p-0">';
 						// htmlw=htmlw+'<h5 class="font-weight-semi-bold" style="font-size:14px">Action</h5>';
-						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );\" style='line-height:0;" + ((discardPermission && discardPermission === "false" && USER_ROLE != "TEACHER") ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
+						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );\" style='line-height:0;" + ((discardPermission && discardPermission === "false" && userRoleId != 3) ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
 						if(slotTypeId>0){}else{
 							
 							var ddclass="";
@@ -2734,7 +2734,11 @@ function bindTimeAvailableDropdown(userTimeAvailable, timeDropdown, days, presta
 					htmlw=htmlw+'<div class="my-1 mx-0 row align-items-center justify-content-sm-start available-dropdown-Wrapper justify-content-around available-'+days.dayName+'-'+days.dayId+' '+days.dayName+'-'+days.dayId+' '+days.dayName+'-time-'+ttt+'" id="'+days.dayName+'-time-'+ttt+'"  style="gap: 5px;" >';
 					htmlw=htmlw+'<div class="flex-grow-1 flex-sm-grow-0" style="min-width:60px">';
 					var fromFunc="getFromTime(this,'"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"', '"+slotDateLimit+"', '"+slotDayLimit+"')";
-					htmlw=htmlw+'<select class="form-control font-12 fromTime" '+((discardPermission && discardPermission==="false" && userRoleId != 3) || USER_ROLE == "TEACHER" ? "disabled style='pointer-events:none;cursor:not-allowed;opacity:0.6;'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'"  id="'+days.dayName+'-start-time-dropdown-'+ttt+'" onchange="'+fromFunc+'" data-status="Y">';
+					if(userRoleId != 3){
+						htmlw=htmlw+'<select class="form-control font-12 fromTime" '+((discardPermission && discardPermission==="false") || USER_ROLE == "TEACHER" ? "disabled style='pointer-events:none;cursor:not-allowed;opacity:0.6;'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'"  id="'+days.dayName+'-start-time-dropdown-'+ttt+'" onchange="'+fromFunc+'" data-status="Y">';
+					}else{
+						htmlw=htmlw+'<select class="form-control font-12 fromTime" disabled data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'"  id="'+days.dayName+'-start-time-dropdown-'+ttt+'" onchange="'+fromFunc+'" data-status="Y">';
+					}
 					if(timeDropdown.length>0){
 						htmlw=htmlw+'<option value="">Start Time</option>';
 						for (let t = 0; t < timeDropdown.length; t++) {
@@ -2748,7 +2752,11 @@ function bindTimeAvailableDropdown(userTimeAvailable, timeDropdown, days, presta
 					htmlw=htmlw+'<div>-</div>';
 					htmlw=htmlw+'<div class="flex-grow-1 flex-sm-grow-0" style="min-width:60px">';
 					var toFunc="getToTime(this,'"+prestartTime+"','"+preendTime+"','"+userRoleId+"','"+min+"','"+max+"','"+slotBufferLimit+"', '"+slotDateLimit+"', '"+slotDayLimit+"')";
-					htmlw=htmlw+'<select class="form-control font-12 toTime" '+((discardPermission && discardPermission==="false" && userRoleId != 3) || USER_ROLE == "TEACHER" ? "disabled style=\'pointer-events:none;cursor:not-allowed;opacity:0.6;\'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'" id="'+days.dayName+'-end-time-dropdown-'+ttt+'" onchange="'+toFunc+'" data-status="Y">';
+					if(userRoleId != 3){
+						htmlw=htmlw+'<select class="form-control font-12 toTime" '+((discardPermission && discardPermission==="false") || USER_ROLE == "TEACHER" ? "disabled style=\'pointer-events:none;cursor:not-allowed;opacity:0.6;\'" : "")+' data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'" id="'+days.dayName+'-end-time-dropdown-'+ttt+'" onchange="'+toFunc+'" data-status="Y">';
+					}else{
+						htmlw=htmlw+'<select class="form-control font-12 toTime" disabled data-id="'+days.dayName+'-'+days.dayId+'" data-checkid="'+days.dayId+'" id="'+days.dayName+'-end-time-dropdown-'+ttt+'" onchange="'+toFunc+'" data-status="Y">';
+					}
 					if(timeDropdown.length>0){
 						htmlw=htmlw+'<option value="">End Time</option>';
 						for (let t = 0; t < timeDropdown.length; t++) {

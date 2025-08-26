@@ -2378,6 +2378,13 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 					dropdownParent:"#"+formId
 				});
 
+				$("#"+formId+" #leadSupportTo").select2({
+					theme:"bootstrap4",
+					dropdownParent:"#"+formId
+				});
+
+				
+
 			
 				if(data['leadDashboardCommon']!=null){
 					if(data['leadDashboardCommon']['leadCommonDTO']!=null){
@@ -2491,9 +2498,11 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						callCities(''+formId+'', this.value, 'stateId');
 					});
 					callLeadAssignUserList(''+formId+'',leadType,'leadAssignTo', true, columnPermission, USER_ID, false);
+					callLeadAssignUserList(''+formId+'',''+leadType+'','leadSupportTo', true, columnPermission, USER_ID, false);
 					setTimeout(function() {
 						$("#"+formId+" #leadAssignTo").val(data.leadDashboardCommon.leadCommonDTO[0].leadModifyDTO.assignTo).trigger('change');
 						$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus).trigger('change');
+						$("#"+formId+" #leadSupportTo").val(data.leadDashboardCommon.leadCommonDTO[0].leadModifyDTO.leadSupportTo).trigger('change');
 					}, 1000);
 					setTimeout(function () {
 						callStates(formId, leadDemo.leadStudentDetailDTO.country, 'countryId');
@@ -9990,7 +9999,63 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  $(".leadSearchCampaign").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
 		  $(".leadSearchTemplate").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
 		  $(".leadSearchDeliveredStatus").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
-		}
+
+		  $(".leadStatus-followup").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#b2c-lead-list"
+		 });
+
+	// var leadid=0;	 
+	// $(".followupRemarks-suggestion").on("keyup", function() {
+    //     let text = $(this).val();
+	// 	leadid=$(this).attr("data-leadid");
+    //     let cursorPos = this.selectionStart;
+    //     let beforeCursor = text.substring(0, cursorPos);
+
+    //     // Regex: detect if user is typing #word
+    //     let match = beforeCursor.match(/#(\w*)$/);
+
+    //     if (match) {
+    //         let query = match[1].toLowerCase();
+
+    //         // Filter hashtags
+    //         let results = HASHTAGLIST.filter(tag => tag.extra.toLowerCase().startsWith(query));
+
+    //         if (results.length > 0) {
+    //             let suggestionHtml = results.map(r => `<div class="item">#${r.extra}</div>`).join("");
+    //             let offset = $("#followupRemarks-"+leadid).position(); // to position dropdown near textarea
+    //             $("#suggestions-"+leadid).css({
+    //                 top: offset.top + $("#followupRemarks-"+leadid).outerHeight(),
+    //                 left: offset.left
+    //             }).html(suggestionHtml).show();
+    //         } else {
+    //             $("#suggestions-"+leadid).hide();
+    //         }
+    //     } else {
+    //         $("#suggestions-"+leadid).hide();
+    //     }
+
+
+	// 	$("#suggestions-"+leadid).on("click", function(){
+	// 		let chosen = $(this).text();
+	// 		let textarea = $("#followupRemarks-"+leadid)[0];
+	// 		let cursorPos = textarea.selectionStart;
+	// 		let text = $("#followupRemarks-"+leadid).val();
+
+	// 		let before = text.substring(0, cursorPos).replace(/#\w*$/, chosen);
+	// 		let after = text.substring(cursorPos);
+
+	// 		$("#followupRemarks-"+leadid).val(before + after);
+	// 		$("#suggestions-"+leadid).hide();
+	// 	});
+
+		
+    // });
+
+	
+
+
+}
   
 		$('#b2c-lead-list').off('click', '.follow-up-no').on('click', '.follow-up-no', function () {
 		  $(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
