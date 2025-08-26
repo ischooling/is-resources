@@ -1501,6 +1501,7 @@ var leadCountDetailDTO={};
  //leadModifyDTO['leadStatus'] = $("#"+formId+" #leadStatusSearch").val();
  leadModifyDTO['leadStatuses'] = $("#"+formId+" #leadStatusSearch").val();
  leadModifyDTO['leadAdderId'] = $("#"+formId+" #leadCreatedBy").val();
+ leadModifyDTO['leadSupportTo'] = $("#"+formId+" #leadSupportTo option:selected").val()!=undefined?$("#"+formId+" #leadSupportTo option:selected").val():'';
  if($("#"+formId+" #checkByLead").is(":checked")){
 	leadModifyDetailDTO['onlyLead'] = "Y";
  }else{
@@ -1538,6 +1539,12 @@ var leadCountDetailDTO={};
  leadCallFollowupDTO['followupBy'] =$("#"+formId+" #followMedSearch option:selected").val();
  leadCallFollowupDTO['toCall'] = $("#"+formId+" #callWithSearch").val();
  leadCallFollowupDTO['leadTagging'] = $("#"+formId+" #leadTagSearch").val();
+ let selectedValues = $("#"+formId+" #leadTagSearch option:selected").map(function() {
+  return $(this).attr('data-shorttag');
+}).get();
+ leadCallFollowupDTO['leadTaggingRemark'] = selectedValues 
+ //$("#"+formId+" #leadTagSearch option:selected").attr('data-shorttag');
+
  //  if($("#"+formId+" #leadStatusSearch").val()=='SCHOLARSHIP'){
 	 // 	 leadCommonDTO['sbsbStatus']="Y";
 	 //  }else if($("#"+formId+" #leadStatusSearch").val()=='Unassigned'){
@@ -1615,7 +1622,7 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  leadAddFormRequestDTO['recordsPerPage']=recordsPerPage;
  //console.log(JSON.stringify(leadAddFormRequestDTO));
  //console.log(JSON.stringify(leadModifyDetailDTO));
- //console.log(leadAddFormRequestDTO);
+ console.log(leadAddFormRequestDTO);
  return leadAddFormRequestDTO;
 }
 
@@ -2409,7 +2416,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						$("#"+formId+" #leadGender").val(leadDemo.leadStudentDetailDTO.gender);
 						$("#"+formId+" #leademailId").val(leadDemo.leadStudentDetailDTO.email);
 						$("#"+formId+" #phoneNo").val(leadDemo.leadStudentDetailDTO.phoneNo);
-						$("#"+formId+" #leadTagging").val(leadDemo.leadCallFollowupDTO.leadTagging).trigger('change');
+						
 						$("#"+formId+" #leademailAlternet").val(leadDemo.leadStudentDetailDTO.emailAlternet);
 						//$("#"+formId+" #leadType").val(leadType);
 						//if(leadType=='B2B'){
@@ -2503,6 +2510,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						$("#"+formId+" #leadAssignTo").val(data.leadDashboardCommon.leadCommonDTO[0].leadModifyDTO.assignTo).trigger('change');
 						$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus).trigger('change');
 						$("#"+formId+" #leadSupportTo").val(data.leadDashboardCommon.leadCommonDTO[0].leadModifyDTO.leadSupportTo).trigger('change');
+						$("#"+formId+" #leadTagging").val(leadDemo.leadCallFollowupDTO.leadTagging).trigger('change');
 					}, 1000);
 					setTimeout(function () {
 						callStates(formId, leadDemo.leadStudentDetailDTO.country, 'countryId');
@@ -7041,6 +7049,8 @@ async function getLeadStatusLog(leadno, callFrom, adminStatus) {
             var incS = 1;
             for (var l = 0; l < data.data.length; l++) {
                 var leadCall = data.data[l];
+				
+				//console.log(leadCall);
 
                 html += '<li class="' + (l === 0 ? 'follow-up-accordian-active' : '') + '">'
                     + '<span class="cursor follow-up-no text-primary p-2 text-center border-primary full bold">'
@@ -7059,6 +7069,7 @@ async function getLeadStatusLog(leadno, callFrom, adminStatus) {
                                         + (leadCall.callStatus !== '' ? leadCall.callStatus : '')
                                         + (leadCall.nextCallDate !== '' ? leadCall.nextCallDate : '')
                                     + '</td></tr>'
+									+ '<tr><th class="p-1 border-0">Follow by:</th><td class="p-1 border-0" id="rFollowby">' + (leadCall.followupByName) + '</td></tr>'
                                     + '<tr><th class="p-1 border-0">Remarks:</th><td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'
                                         + (leadCall.remarks !== '' ? leadCall.remarks : 'N/A') + '</td></tr>'
                                 + '</table>'
@@ -10005,52 +10016,53 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			dropdownParent:"#b2c-lead-list"
 		 });
 
-	// var leadid=0;	 
-	// $(".followupRemarks-suggestion").on("keyup", function() {
-    //     let text = $(this).val();
-	// 	leadid=$(this).attr("data-leadid");
-    //     let cursorPos = this.selectionStart;
-    //     let beforeCursor = text.substring(0, cursorPos);
+	var leadid=0;
+	$(".followupRemarks-suggestion").on("keyup", function() {
+        let text = $(this).val();
+		leadid=$(this).attr("data-leadid");
+        let cursorPos = this.selectionStart;
+        let beforeCursor = text.substring(0, cursorPos);
 
-    //     // Regex: detect if user is typing #word
-    //     let match = beforeCursor.match(/#(\w*)$/);
+        // Regex: detect if user is typing #word
+        let match = beforeCursor.match(/#(\w*)$/);
 
-    //     if (match) {
-    //         let query = match[1].toLowerCase();
+        if (match) {
+            let query = match[1].toLowerCase();
 
-    //         // Filter hashtags
-    //         let results = HASHTAGLIST.filter(tag => tag.extra.toLowerCase().startsWith(query));
+            // Filter hashtags
+            let results = HASHTAGLIST.filter(tag => tag.extra.toLowerCase().startsWith(query));
 
-    //         if (results.length > 0) {
-    //             let suggestionHtml = results.map(r => `<div class="item">#${r.extra}</div>`).join("");
-    //             let offset = $("#followupRemarks-"+leadid).position(); // to position dropdown near textarea
-    //             $("#suggestions-"+leadid).css({
-    //                 top: offset.top + $("#followupRemarks-"+leadid).outerHeight(),
-    //                 left: offset.left
-    //             }).html(suggestionHtml).show();
-    //         } else {
-    //             $("#suggestions-"+leadid).hide();
-    //         }
-    //     } else {
-    //         $("#suggestions-"+leadid).hide();
-    //     }
+            if (results.length > 0) {
+                let suggestionHtml = results.map(r => `<div class="item cursor my-1 text-primary-on-hover">#${r.extra}</div>`).join("");
+                let offset = $("#followupRemarks-"+leadid).position(); // to position dropdown near textarea
+                $("#suggestions-"+leadid).css({
+                    top: offset.top + $("#followupRemarks-"+leadid).outerHeight(),
+                    left: offset.left
+                }).html(suggestionHtml).show();
+            } else {
+                $("#suggestions-"+leadid).hide();
+            }
+        } else {
+            $("#suggestions-"+leadid).hide();
+        }
 
 
-	// 	$("#suggestions-"+leadid).on("click", function(){
-	// 		let chosen = $(this).text();
-	// 		let textarea = $("#followupRemarks-"+leadid)[0];
-	// 		let cursorPos = textarea.selectionStart;
-	// 		let text = $("#followupRemarks-"+leadid).val();
-
-	// 		let before = text.substring(0, cursorPos).replace(/#\w*$/, chosen);
-	// 		let after = text.substring(cursorPos);
-
-	// 		$("#followupRemarks-"+leadid).val(before + after);
-	// 		$("#suggestions-"+leadid).hide();
-	// 	});
+		$(document).on("click", ".suggestionslead .item", function() {
+			let chosen = $(this).text();
+			let leadid = $(this).closest(".suggestionslead").attr("id").split("-")[1];
+			let textarea = $("#followupRemarks-" + leadid)[0];
+			let cursorPos = textarea.selectionStart;
+			let text = $("#followupRemarks-" + leadid).val();
+		
+			let before = text.substring(0, cursorPos).replace(/#\w*$/, chosen);
+			let after = text.substring(cursorPos);
+		
+			$("#followupRemarks-" + leadid).val(before + after);
+			$("#suggestions-" + leadid).hide();
+		});
 
 		
-    // });
+    });
 
 	
 

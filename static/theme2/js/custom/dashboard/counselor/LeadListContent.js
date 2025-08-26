@@ -1025,6 +1025,13 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});
+
+	$("#advanceLeadNewSearchForm #leadSupportTo").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#advanceLeadNewSearchForm"
+	});
+
+	
 	
 
 	getSessionMasterList('advanceLeadNewSearchForm', 'leadAcadmicYear', true);
@@ -1038,6 +1045,9 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	
 	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadCreatedBy', true, objectRights.discardPermission,USER_ID, false);
 	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadDemoAssignSearch', true, objectRights.discardPermission, USER_ID, false);
+	callLeadAssignUserList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadSupportTo', true, objectRights.discardPermission, USER_ID, false);
+
+	
 	//callTemplateList(true, 'leadSearchTemplate', $("#leadAssignToSearch").val());
 	//callCampainList(true,'advanceLeadNewSearchForm');
 	callMasterCampainList('advanceLeadNewSearchForm','','leadSearchCampaign');

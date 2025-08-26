@@ -1512,7 +1512,7 @@ function getTggingMasterList(formId, elementId){
 				var result = data['mastersData']['data'];
 					var html = '';
 					$.each(result, function(k, v) {
-						html+='<option value="'+v.value+'">'+v.value+'</option>';
+						html+='<option value="'+v.value+'" data-shorttag="'+v.extra+'">'+v.value+'</option>';
 						
 					});
 					$('#'+formId+' #'+elementId).html(html);

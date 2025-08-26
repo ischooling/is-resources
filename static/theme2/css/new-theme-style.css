@@ -33457,3 +33457,6 @@ input:checked + .small-switch-slider:before {
 .int-inerview-leadno-bg{background-color:#F5EDF8;border:1px solid #7D19A4 !important}
 .move-inerview-leadno-bg{background-color:#FFEFDF; border:1px solid #FF7A00 !important}
 .inter-booked-leadno-bg{background-color:#FFFBEF;border:2px solid #FFB907 !important}
+.text-primary-on-hover:hover{
+	color: var(--pc);
+}
