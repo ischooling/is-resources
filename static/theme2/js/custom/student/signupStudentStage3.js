@@ -169,13 +169,15 @@ async function showPaymentTermCondMode() {
 			if ($('#bookAnEnrollmentTNC').length > 0) {
 				$('#courseFeeModalTNC').modal('hide');
 				$('#bookAnEnrollmentTNC').modal('show');
+				$("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
 			} else {
 				showMessage(0, 'No payment gateway enabled, please contact administrator!');
 			}
 		} else {
 			if ($('#callPaymentStudentModal').length > 0) {
 				await getAirwallexMethods();
-				$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false })
+				$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false });
+
 			} else {
 				showMessage(0, 'No payment gateway enabled, please contact administrator!');
 			}
@@ -426,11 +428,29 @@ function choosePaymentOption() {
 					}
 					setActiveStep(4);
 					callForReviewAndPaymentSelection('Y');
+					var windowWidth = $(window).width();
+					
 					if(SHOW_PAYMENT_OPTION=='Y'){
-						showMessage(1, 'Payment Mode Selected.');
+						if(windowWidth >580){
+							showMessage(1, ' Superb! Just one step left. (✓)', '', true);
+						}else{
+							$("#showMessageInPopup #msgText").text('Superb! Just one step left');
+							$("#showMessageInPopup").modal("show");
+							setTimeout(function(){
+								$("#showMessageInPopup").modal("hide");
+							},3000);
+						}
 						hideModalMessage();
 					}else{
-						showMessage(1, 'Course Selected.');
+						if(windowWidth >580){
+							showMessage(1, ' Superb! Just one step left. (✓)', '', true);
+						}else{
+							$("#showMessageInPopup #msgText").text('Superb! Just one step left');
+							$("#showMessageInPopup").modal("show");
+							setTimeout(function(){
+								$("#showMessageInPopup").modal("hide");
+							},3000);
+						}
 					}
 					
 				}

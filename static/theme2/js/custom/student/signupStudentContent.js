@@ -34,7 +34,7 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	    //<!-- End Facebook Pixel Code -->
 	}
 	var html = await generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, isFirstPayment, MAINTENANCEDOWNTIME)
-	$("body").append(html);
+	$("body").append(html+showMessageInPopup());
 	$("#formSteps").append(signupModals());
 	signupStage1Form = $('#signupStage1');
 	signupStage2Form = $('#signupStage2');
@@ -210,17 +210,35 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
     var html = `
         <div class="wrapper-style">
             <a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()">
-                <i class="zmdi zmdi-power"></i> Log out
+                <i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
             </a>
             <section class="full">
-                <div class="full mb-2">
+                <div class="full mb-2 ${SCHOOL_ID == 1 ? 'desktop-view':'other-school'}">
                     <div class="logo">
                         <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
                             <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
                         </a>
                     </div>
-                </div>
-                <section class="full text-center">
+                </div>`;
+				if(SCHOOL_ID == 1){
+					html+=
+					`<div class="mobile-view">
+                        <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                            <img src="${PATH_FOLDER_IMAGE2}is_fav_logo_200.png${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                        </a>
+						<section class="full text-center">
+							<h1 class="form-heading white-txt-color secondary-bg page-heading" id="learingProgramHeader" val="${learningProgram}">`;
+								if (moduleId == 'STUDENT') {
+									html += programLabel;
+								} else {
+									html += moduleName;
+								}
+							html += `</h1>
+						</section>
+						<div style="min-width:25px">&nbsp;</div>
+                    </div>`
+				}
+				html+=`<section class="full text-center desktop-view">
                     <h1 class="form-heading white-txt-color secondary-bg page-heading" id="learingProgramHeader" val="${learningProgram}">`;
 						if (moduleId == 'STUDENT') {
 							html += programLabel;
@@ -245,7 +263,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 			}
     		html += `
             <div id="messageDiv" class="server-error-message">
-                <span id="messageDiv1" class="msg error"><i class="fa fa-times"></i> Error Message </span>
+                <span id="messageDiv1" class="msg error"></span>
             </div>
             <div id="formSteps">
                 <div class="steps clearfix">
@@ -326,7 +344,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                         <li class="finish-btn" style="display: none;">
                             <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('finish');showPaymentTermCondMode();">`;
 								if (SHOW_PAYMENT_OPTION == 'Y') {
-									html += 'Pay';
+									html += 'Proceed';
 								} else {
 									html += 'Submit Application';
 								}
@@ -1318,7 +1336,7 @@ function getCourseSelectionContent(csr){
 		}
 		if(csr.courseProviderId == 39){
 			html+=
-			'<span class="change-grade primary-bg" data-toggle="tooltip" title="Change selected grade">';
+			'<span class="change-grade primary-bg" data-toggle="tooltip" title="Change selected grade" onclick="setActiveStep(1)">';
 				var learningLabel='Basic | Beginner';
 				if(csr.standardId>=1 && csr.standardId<=3){
 					learningLabel='Middle | Intermediate'
@@ -2020,7 +2038,7 @@ function paymentModalContentWithData(cdrDTO){
 						+'<label for="pay-registration" class="primary-border-color" onclick="displayScholorshipDetails(\'dtl-registration\');">'
 							+'<span class="circle primary-border-color"></span>'
 							+'<span class="check primary-bg-checked"></span>'
-							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px" id="payFive"> <b> Reserve an Enrollment Seat</b><br>'
+							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px" id="payFive"> <b> Reserve an enrollment Seat</b><br>'
 								+'('+cdrDTO.enrollmentFee.enrollmentFeeString+')'
 							+'</span>'
 						+'</label>'
@@ -2096,9 +2114,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'
 												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
+													+'<th>Fee Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
+													+'<th style="text-align:center">Total Fee</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2112,9 +2130,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="annual-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
+													+'<th>Fee Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
+													+'<th style="text-align:center">Total Fee</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2127,9 +2145,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="installment3-course-fee-details" class="installment3-course-fee-details table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
+													+'<th>Fee Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
+													+'<th style="ext-align:center">Total Fee</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2143,9 +2161,9 @@ function paymentModalContentWithData(cdrDTO){
 											+'<table class="table table-bordered table-striped without_h_scroll">'
 												+'<thead class="theme-bg primary-bg white-txt-color">'
 													+'<tr>'
-														+'<th style="width: 60%;">Fee Description</th>'
-														+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>'
-														+'<th style="width: 20%; text-align:center">Paying Now</th>'
+														+'<th>Fee Description</th>'
+														+'<th style="text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>'
+														+'<th style="text-align:center">Paying Now</th>'
 													+'</tr>'
 												+'</thead>'
 												+'<tbody>'
@@ -2159,9 +2177,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="custom-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
+													+'<th>Fee Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
+													+'<th style="text-align:center">Total Fee</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2175,7 +2193,7 @@ function paymentModalContentWithData(cdrDTO){
 							+'</div>'
 						+'</div>'
 						+'<div>'
-							+'<p><b>Thank you so much for trusting and choosing '+SCHOOL_NAME+'.</b></p>'
+							+'<p><b>You are making the right decision for your child\'s education.</b></p>'
 						+'</div>'
 					+'</div>'
 					+'<div class="col-md-12 col-sm-12 col-xs-12">'
@@ -2337,9 +2355,9 @@ function studentDetailsPreview(data){
 	'<div class="student-details-info">'
 		+'<div class="full">'
 			+'<h4 class="a-title">Student Details <i class="fa plus-icon fa-plus"></i></h4>'
-			+'<div class="h_scroll primary-bg">'
-				+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
-			+'</div>'
+			// +'<div class="h_scroll primary-bg">'
+			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
+			// +'</div>'
 		+'</div>'
 		+'<div class="a-content" style="display: none;">'
 			+'<div class="table-responsive">'
@@ -2432,9 +2450,9 @@ function parentDetailsPreview(data){
 			}
 			html+=
 			'<i class="fa plus-icon fa-plus"></i></h4>'
-			+'<div class="h_scroll primary-bg">'
-				+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
-			+'</div>'
+			// +'<div class="h_scroll primary-bg">'
+			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
+			// +'</div>'
 		+'</div>'
 		+'<div class="a-content" style="display: none;">'
 			+'<div class="table-responsive">'
@@ -2561,9 +2579,9 @@ function courseDetailsPreview(data){
 	'<div class="student-courses-info">'
 		+'<div class="full">'
 			+'<h4 class="a-title">Selected Courses <i class="fa fa-plus plus-icon"></i></h4>'
-			+'<div class="h_scroll primary-bg">'
-				+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
-			+'</div>'
+			// +'<div class="h_scroll primary-bg">'
+			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
+			// +'</div>'
 		+'</div>'
 		+'<div class="a-content" style="'+(SHOW_PAYMENT_OPTION == 'N'?"display:block":"")+'">'
 			+'<div class="table-responsive course-selection-wrapper" style="display:block;">'
@@ -2632,9 +2650,9 @@ function feePaymentReview(data){
 		+'<h3 style="margin-bottom:15px;" class="alternate-txt-color">'
 			+data.feeSetionTitile;
 			if(!data.customPaymentEnabled){
-				if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.monthlyFees.length>0){
-					html+='<span class="primary-bg change-grade" onclick="moveStep(\'prev\')">Change Plan <i class="fa fa-exchange"></i></span>';
-				}
+				// if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.monthlyFees.length>0){
+				// 	html+='<span class="primary-bg change-grade" onclick="moveStep(\'prev\')">Change Plan <i class="fa fa-exchange"></i></span>';
+				// }
 			}
 			
 		html+='</h3>'
@@ -2754,7 +2772,7 @@ function commonPaymentTable(cdrDTO, prefix){
 				}
 			html+=
 			'</td>'
-			+'<td>';
+			+'<td styled="vertical-align:bottom">';
 				if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
 					html+=
 					'<div id="'+prefix+'_extra_price">'
@@ -2828,7 +2846,7 @@ function commonPaymentTable(cdrDTO, prefix){
 				}
 			html+=
 			'</td>'
-			+'<td>';
+			+'<td style="vertical-align:bottom">';
 				if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
 					html+=
 					'<div id="'+prefix+'_feeAlreadyPaidDescPrice">'
@@ -2866,7 +2884,7 @@ function getAnnualPaymentTable(cdrDTO){
 						'</ol>'
 						+'<span>Total You Saved</span>'
 					+'</td>'
-					+'<td>'
+					+'<td style="vertical-align:bottom">'
 						+'<span>&nbsp;</span>'
 						+'<ul style="margin:0">';
 						$.each(cdrDTO.oneTimePayment.youSave.entityFees, function(k, fee) {
@@ -2921,7 +2939,7 @@ function getMonthlyPaymentTable(cdrDTO){
 						'</ol>'
 						+'<span>Total You Saved</span>'
 					+'</td>'
-					+'<td>'
+					+'<td style="vertical-align:bottom">'
 						+'<span>&nbsp;</span>'
 						+'<ul style="margin:0">';
 						$.each(cdrDTO.monthlyFeeDetails.youSave.entityFees, function(k, fee) {
@@ -3089,8 +3107,8 @@ function bookAnEnrollmentTNCModal(data){
 						+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;padding-right: 20px;"> Further to my successful completion of the ‘Reserve an Enrollment Seat’ process with '+SCHOOL_NAME+',  I agree to comply with the following as stated below, without any exceptions:</h4>'
 						+'<button type="button" class="close" data-dismiss="modal" style="color:#fff">×</button>'
 					+'</div>'
-					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-						+'<form id="signupStage4" name="signupCourse" method="post" autocomplete="off">'
+					+'<form id="signupStage4" name="signupCourse" method="post" autocomplete="off">'
+						+'<div class="modal-body" style="height:auto; max-height:40vh; overflow:auto;">'
 							+'<div class="agree">'
 								+'<ol>'
 									+'<li>I understand that by paying the ‘Reserve an Enrollment Seat’ Fee, I am only reserving my Enrollment Seat at '+SCHOOL_NAME+' and I will only get access to the learning platform once the Course Fee is paid in full.</li>'
@@ -3103,21 +3121,21 @@ function bookAnEnrollmentTNCModal(data){
 									+'<li>It is my responsibility, as a student (or parent/guardian), to regularly check the website for any upcoming notifications. I understand and agree that '+SCHOOL_NAME+' will not send me notifications or updates separately.</li>'
 									+'<li>'+SCHOOL_NAME+' reserves the right to amend, limit or revoke this offer at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>'
 								+'</ol>'
-								+'<div class="modal-footer" style="text-align: left;">'
-									// +'<div class="col-sm-2 col-xs-12" style="flex:1">'
-									// 	+'<img src="'+PATH_FOLDER_IMAGE2+data.pgName+'.png'+SCRIPT_VERSION+'" align="left">'
-									// +'</div>'
-									+'<div class="col-sm-12 col-xs-12" style="flex: 1; display: flex; align-items: center">'
-										+'<span class="col-sm-12 col-xs-12" style="flex: auto;">'
-										+'<input type="checkbox" id="chkvalBook" class="checkbox-lg" name="chkvalBook" style="text-align: left">'
-											+'<label for="chkvalBook" style="position:relative;top:-0.5px;color:#333;cursor:pointer"> I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions</label>'
-										+'</span>'
-										+'<button type="button" id="payTabData" class="btn btn-success"data-dismiss="modal" disabled="disabled"onclick="callSigninStudentPay(this,\'signup\');">Pay Now</button>'
-									+'</div>'
-								+'</div>'
 							+'</div>'
-						+'</form>'
-					+'</div>'
+						+'</div>'
+						+'<div class="modal-footer" style="text-align: left;">'
+							// +'<div class="col-sm-2 col-xs-12" style="flex:1">'
+							// 	+'<img src="'+PATH_FOLDER_IMAGE2+data.pgName+'.png'+SCRIPT_VERSION+'" align="left">'
+							// +'</div>'
+							+'<div class="col-sm-12 col-xs-12" style="flex: 1; display: flex; align-items: center">'
+								+'<span class="col-sm-12 col-xs-12" style="flex: auto;">'
+								+'<input type="checkbox" id="chkvalBook" class="checkbox-lg" name="chkvalBook" style="text-align: left">'
+									+'<label for="chkvalBook" style="position:relative;top:-0.5px;color:#333;cursor:pointer"> I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions</label>'
+								+'</span>'
+								+'<button type="button" id="payTabData" class="btn btn-success"data-dismiss="modal" disabled="disabled"onclick="callSigninStudentPay(this,\'signup\');">Pay Now</button>'
+							+'</div>'
+						+'</div>'
+					+'</form>'
 				+'</div>'
 			+'</div>'
 		+'</div>';
@@ -3227,7 +3245,7 @@ function callPaymentStudentModal(data){
 												html+=
 												'<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">'
 													+'<div class="smoov lg primary-bg white-txt-color" id="commonStripPayBtn" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=REGISTRATION_SUBJECT_FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \''+data.pgs.gatewayName+'\');">'
-														+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now</span>'
+														+'<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>'
 													+'</div>'
 												+'</div>';
 											}
@@ -3243,7 +3261,7 @@ function callPaymentStudentModal(data){
 												html+=
 												'<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">'
 													+'<div class="smoov lg primary-bg white-txt-color" id="commonStripPayBtn" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=REGISTRATION_SUBJECT_FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \''+data.pgs.gatewayName+'\');">'
-														+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now</span>'
+														+'<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>'
 													+'</div>'
 												+'</div>';
 											}else if(data.pgs != null && data.pgs.gatewayName=='Airwallex'){
@@ -3307,7 +3325,7 @@ function callPaymentStudentModal(data){
 											// +'</div>'
 											+'<div class="payment-icon" style="margin-top:0;margin-bottom:10px;justify-content:flex-end">'
 												+'<div class="smoov lg primary-bg white-txt-color" id="commonPgswuPayBtn" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=INSTALLMENT-FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \'CONVERA\');">'
-													+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;" >Pay Now</span>'
+													+'<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;" >Pay Now</span>'
 												+'</div>'
 											+'</div>'
 										+'</div>';
@@ -3566,7 +3584,7 @@ function callPaymentStudentModal(data){
 												html+=
 												'<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">'
 													+'<div id="airwallexPayButton" class="smoov lg primary-bg white-txt-color" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=REGISTRATION_SUBJECT_FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \''+data.pgsAlternate.gatewayName+'\');">'
-														+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now</span>'
+														+'<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>'
 													+'</div>'
 												+'</div>'
 											+'</div>'
@@ -3578,20 +3596,27 @@ function callPaymentStudentModal(data){
 						+'</section>'
 					+'</div>'
 					+'<div class="modal-footer">'
-						+'<div style="display:flex;flex-wrap:wrap;">'
-							+'<span style="display:inline-flex;align-items:center; margin-right:8px;font-weight:bold">'
-								+'<i class="fa fa-lock"></i> &nbsp; SSL Secured&nbsp;&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>' 
-							+'</span>'
-							+'<span style="display:inline-flex;align-items:center; margin-right:8px;position:relative;top:0px;font-weight:bold">'
-								+'<svg xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 64 64" stroke-width="3" stroke="#000" fill="none"><path d="M32.39,7.32,14,15a1,1,0,0,0-.61.92V32.23h0A22.87,22.87,0,0,0,24.58,51.9l8.17,4.86,8.06-4.84A22.89,22.89,0,0,0,51.9,32.31V15a1,1,0,0,0-.65-.94L33.12,7.3A1,1,0,0,0,32.39,7.32Z"/><path d="M32.83,17.92l3.64,7.37a.16.16,0,0,0,.1.08l8.14,1.18a.13.13,0,0,1,.07.23L38.9,32.51a.12.12,0,0,0,0,.12l1.39,8.1a.14.14,0,0,1-.2.15l-7.27-3.83a.15.15,0,0,0-.13,0l-7.27,3.83a.14.14,0,0,1-.2-.15l1.39-8.1a.15.15,0,0,0,0-.12l-5.88-5.73a.13.13,0,0,1,.07-.23l8.13-1.18a.15.15,0,0,0,.11-.08l3.63-7.37A.13.13,0,0,1,32.83,17.92Z" stroke-linecap="round"/></svg>&nbsp;PCI-DSS Certified&nbsp;&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>'
-							+'</span>'
-							+'<span style="display:inline-flex;align-items:center; margin-right:8px;font-weight:bold">'
-								+'<i class="fa fa-globe"></i> &nbsp; Global Gateways&nbsp;&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>'
-							+'</span>'
-							+'<span style="display:inline-flex;align-items:center; margin-right:8px;font-weight:bold">'
-								+'<i class="fa fa-globe"></i> &nbsp; We never store your card details&nbsp;&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>'
-							+'</span>'
-						+'</div>'
+						+`<div style="display:flex;flex-wrap:wrap;margin-right:auto;">
+							<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
+								<i class="fa fa-lock" style="position:relative;top:3px"></i>
+								<span style="display: inline-flex;padding: 0px 5px; text-align:left;">SSL Secured &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+								
+							</span>
+							<span style="display:inline-flex;align-items:self-start; margin-right:8px;position:relative;top:0px;font-weight:bold">
+								<svg xmlns="http://www.w3.org/2000/svg" style="position:relative;top:3px" width="15px" height="15px" viewBox="0 0 64 64" stroke-width="3" stroke="#000" fill="none"><path d="M32.39,7.32,14,15a1,1,0,0,0-.61.92V32.23h0A22.87,22.87,0,0,0,24.58,51.9l8.17,4.86,8.06-4.84A22.89,22.89,0,0,0,51.9,32.31V15a1,1,0,0,0-.65-.94L33.12,7.3A1,1,0,0,0,32.39,7.32Z"/><path d="M32.83,17.92l3.64,7.37a.16.16,0,0,0,.1.08l8.14,1.18a.13.13,0,0,1,.07.23L38.9,32.51a.12.12,0,0,0,0,.12l1.39,8.1a.14.14,0,0,1-.2.15l-7.27-3.83a.15.15,0,0,0-.13,0l-7.27,3.83a.14.14,0,0,1-.2-.15l1.39-8.1a.15.15,0,0,0,0-.12l-5.88-5.73a.13.13,0,0,1,.07-.23l8.13-1.18a.15.15,0,0,0,.11-.08l3.63-7.37A.13.13,0,0,1,32.83,17.92Z" stroke-linecap="round"/></svg>
+								<span style="display: inline-flex; text-align:left;">PCI-DSS Certified &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+								
+							</span>
+							<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
+								<i class="fa fa-globe" style="position:relative;top:3px"></i>
+								<span style="display: inline-flex;padding: 0px 5px; text-align:left;">Global Gateways &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+								
+							</span>
+							<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
+								<i class="fa fa-globe" style="position:relative;top:3px"></i>
+								<span style="display: inline-flex;padding: 0px 5px; text-align:left;">We never store your card details &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+							</span>
+						</div>`
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -3606,7 +3631,7 @@ function commonYocoCheckout(data){
 		html+=
 		'<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end" style="display:none;">'
 			+'<div id="yocopaymentbutton" class="smoov lg primary-bg white-txt-color">'
-				+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now</span>'
+				+'<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>'
 			+'</div>'
 		+'</div>';
 	}
@@ -3617,7 +3642,7 @@ function commonAirwallexCheckout(data){
 	var html = 
 	'<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">'
 		+'<div id="hpp" class="smoov lg primary-bg white-txt-color" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=REGISTRATION_SUBJECT_FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \''+data.pgsAlternate.gatewayName+'\');">'
-			+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now</span>'
+			+'<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>'
 		+'</div>'
 	+'</div>';
 	return html;
@@ -4165,4 +4190,32 @@ function switchFlexyGradeWarningModal(){
 		</div>
 	</div>`;
 	return html;
+}
+
+function showMessageInPopup(){
+	var html=
+	'<div class="modal fade" id="showMessageInPopup">'
+		+'<div class="modal-dialog modal-sm modal-dialog-centered" role="document" style="box-shadow: none; width: 450px; max-width: 100%;">'
+			+'<div class="modal-content text-center">'
+				+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
+					+'<div class="modal-body delete-modal">'
+						+'<div class="swal2-icon swal2-success swal2-animate-success-icon">'
+							+'<div class="swal2-success-circular-line-left" style="background-color: rgb(255, 255, 255);"></div>'
+							+'<span class="swal2-success-line-tip"></span>'
+							+'<span class="swal2-success-line-long"></span>'
+							+'<div class="swal2-success-ring"></div>'
+							+'<div class="swal2-success-fix" style="background-color: rgb(255, 255, 255);"></div>'
+							+'<div class="swal2-success-circular-line-right" style="background-color: rgb(255, 255, 255);"></div>'
+						+'</div>'
+						+'<h4 class="text-center" id="msgText" style="color: #007000; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;"><b></b></h4>'
+					+'</div>'
+					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
+						+'<div class="text-center" style="margin: 0 auto;">'
+							+'<button type="button" class="btn" style="background:#007000" data-dismiss="modal">CLOSE</button>'
+						+'</div>'
+					+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html
 }

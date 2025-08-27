@@ -19,10 +19,10 @@ function getAddPaymentSearchResult(data) {
 				if(v.fullName !== '' && v.standard != null) {
 					html += `<a id="addPaymentId" class="btn btn-primary btn-sm m-0 text-white mr-2" onClick="addPayment('addStudentPaymentForm','${v.email}',${v.studentStandardId},'${v.advanceOrCustom}', true, '${v.eligibleForAdvance}')">&nbsp;Add Payment</a>`;
 					if(v.advanceOrCustom == 'C') {
-						var url = `/dashboard/fee-calculation/?type=C&studentStandardId=${v.studentStandardId}`;
+						var url = `/dashboard/fee-calculation?type=C&studentStandardId=${v.studentStandardId}`;
 						html += `<a class="btn btn-primary btn-sm m-0 text-white mr-2" href="javascript:void(0)" onClick="getAsPost('${url}')">&nbsp;Custom Payment Details</a>`;
 					} else if (v.advanceOrCustom == 'A') {
-						var url = `/dashboard/fee-calculation/?type=A&studentStandardId=${v.studentStandardId}`;
+						var url = `/dashboard/fee-calculation?type=A&studentStandardId=${v.studentStandardId}`;
 						html += `<a class="btn btn-primary btn-sm m-0 text-white" href="javascript:void(0)" onClick="getAsPost('${url}')">&nbsp;Advance Payment Details</a>`;
 					}
 				} else {
@@ -166,7 +166,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 				){
 				var eligibleForEdit=false;	
 				if(apsrSingle.standardStatus==1 || isUserAllowed){
-					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'This is a customized payment plan. Would you like to make changes?\',\'getAsPost(\\\'/dashboard/fee-calculation/?type=C&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Edit Custom Payment</span>';
+					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'This is a customized payment plan. Would you like to make changes?\',\'getAsPost(\\\'/dashboard/fee-calculation?type=C&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Edit Custom Payment</span>';
                     html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 				}else if(apsrSingle.standardStatus==0){
 					if (apsrSingle.paymentStatus != 'SUCCESS') {
@@ -185,7 +185,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 				){
 				var eligibleForEdit=false;
 				if(apsrSingle.standardStatus==3 || isUserAllowed){
-					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'This is a advanced payment plan. Would you like to make changes?\',\'getAsPost(\\\'/dashboard/fee-calculation/?type=A&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Edit Advance Payment</span>';
+					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'This is a advanced payment plan. Would you like to make changes?\',\'getAsPost(\\\'/dashboard/fee-calculation?type=A&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Edit Advance Payment</span>';
 				}else if(apsrSingle.standardStatus==0){
 					if (apsrSingle.paymentStatus != 'SUCCESS') {
 						eligibleForEdit=true;
@@ -211,7 +211,7 @@ function getAdvancePaymentSearchResult(formId, data) {
 						}
 					}
 				}else{
-					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'Once you create a custom payment, it can not be changed. If you need to make changes, you will have to create a new one. Would you like to continue?\',\'getAsPost(\\\'/dashboard/fee-calculation/?type=C&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Create Custom Payment</span>';
+					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return showWarningMessage(\'Once you create a custom payment, it can not be changed. If you need to make changes, you will have to create a new one. Would you like to continue?\',\'getAsPost(\\\'/dashboard/fee-calculation?type=C&studentStandardId='+ apsrSingle.studentStandardId + '\\\')\'); ">Create Custom Payment</span>';
 				}
 				if(eligibleForEdit || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';

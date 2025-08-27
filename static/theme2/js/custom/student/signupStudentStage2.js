@@ -49,15 +49,29 @@ function callForSignUpParents() {
 					}
 				}
 			} else {
+				var windowWidth = $(window).width();
+				var msg = "";
 				getAllCourseDetails('N','');
 				if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX'){
-					showMessage(1, 'Academic & Communication Details Updated.', '', true);
-				}else if($('#learingProgramHeader').html()=='English Learning Program - One to One'){
-					showMessage(1, "Communication Details Updated", '', true);
-				}else if($('#learingProgramHeader').html()=='English Learning Program - Self Study'){
-					showMessage(1, "Communication Details Updated", '', true);
+					msg ="Wow! Academic & Communication Details Updated."
+				}else if($("#courseProviderId").val() == 39){
+					if($('#learingProgramHeader').html()=='English Learning Program - One to One'){
+						msg="Wow! Communication Details Updated"
+					}else if($('#learingProgramHeader').html()=='English Learning Program - Self Study'){
+						msg="Wow! Communication Details Updated"
+					}
+				}
+				else{
+					msg = windowWidth>580?" Wow! Parent details completed. (✓)":"Wow! Parent details completed"
+				}
+				if(windowWidth >580){
+					showMessage(1, msg, '', true);
 				}else{
-					showMessage(1, "Parent's Details Uploaded", '', true);
+					$("#showMessageInPopup #msgText").text(msg);
+					$("#showMessageInPopup").modal("show");
+					setTimeout(function(){
+						$("#showMessageInPopup").modal("hide");
+					},3000);
 				}
 			}
 		},

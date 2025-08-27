@@ -332,7 +332,8 @@ function showMessageTheme2(messageType, message, id, msgHide) {
     } else if (messageType == 1 || messageType == true) {
       $("#messageDiv1").addClass("success");
       $("#messageDiv1").html(
-        '<i class="fa fa-check-circle"></i>&nbsp;' + message
+        // '<i class="fa fa-check-circle"></i>&nbsp;' + 
+        message
       );
     } else if (messageType == 2) {
       $("#messageDiv1").addClass("notification");
@@ -371,7 +372,8 @@ function showMessage(messageType, message, id, msgHide) {
     } else if (messageType == 1 || messageType == true) {
       $("#messageDiv1").addClass("success");
       $("#messageDiv1").html(
-        '<i class="fa fa-check-circle"></i> ' + message
+        // '<i class="fa fa-check-circle"></i> ' + 
+        message
       );
     } else if (messageType == 2) {
       $("#messageDiv1").addClass("notification");

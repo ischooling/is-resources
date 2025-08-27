@@ -1112,8 +1112,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'<tr>'
 									+'<th class="border-0 p-1">Added By:</th>'
 									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')+'</td>'
-								+'</tr>'
-								+'<tr>'
+								+'</tr>';
+								if(leads.leadSupportToName!=''){
+									html+='<tr>'
+										+'<th class="border-0 p-1">Supported By:</th>'
+										+'<td class="border-0 p-1">'+(leads.leadSupportToName!=''?leads.leadSupportToName:'N/A')+'</td>'
+									+'</tr>';
+								}
+
+								html+='<tr>'
 									+'<th class="border-0 p-1">UTM:</th>'
 									+'<td class="border-0 p-1">'
 										+'<div class="dropdown d-inline-block">'
@@ -1428,7 +1435,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										// +'</div>'
 									+'</td>'
 								+'</tr>';
-								if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
+								if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo  || USER_ID == leads.leadSupportTo){
 									
 									html+='<tr>'
 									+'<td colspan="2" class="border-0 p-0 pr-1">'

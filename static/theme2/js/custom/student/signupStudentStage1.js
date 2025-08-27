@@ -180,7 +180,16 @@ function callForSignupStudentDetails() {
 					}
 				}
 			} else {
-				showMessage(1, 'Student Details Updated.', '', true);
+				var windowWidth = $(window).width();
+				if(windowWidth >580){
+					showMessage(1, ' Great! Student details completed (✓)', '', true);
+				}else{
+					$("#showMessageInPopup #msgText").text('Great! Student details completed');
+					$("#showMessageInPopup").modal("show");
+					setTimeout(function(){
+						$("#showMessageInPopup").modal("hide");
+					},3000);
+				}
 				callForParentSelection();
 			}
 		},
