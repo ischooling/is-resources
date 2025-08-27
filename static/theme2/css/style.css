@@ -1818,6 +1818,7 @@ input::placeholder {
 	display: inline-flex;
 	flex: 1;
 	flex-wrap: wrap;
+	justify-content: flex-end;
 }
  .selected-course-view .selected-course .selected-course-list .course-category .course-item.slide-animation{
 	-webkit-animation-duration: 1s;-webkit-animation-name: slidein; -moz-animation-duration: 1s;-moz-animation-name: slidein; -o-animation-duration: 1s;-o-animation-name: slidein;animation-duration: 1s; animation-name: slidein;
