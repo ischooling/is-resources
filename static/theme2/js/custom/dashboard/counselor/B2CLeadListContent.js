@@ -1125,10 +1125,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<td class="border-0 p-1">'
 										+'<div class="dropdown d-inline-block">'
 											+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View More Details</button>'
-											+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">';
+											+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">'
+											+'<table class="w-100"><tbody>';
 												if(leads.leadSourceId==4){
-													html+='<table class="w-100"><tbody>'
-															+'<tr class="border-bottom">'
+													html+='<tr class="border-bottom">'
 																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Source:</th>'
 																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmSource!=''?leads.utmSource:'N/A')+'</td>'
 															+'</tr>'
@@ -1141,11 +1141,11 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmDescription!=''?leads.utmDescription:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr class="border-bottom">'
-																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Compaign</th>'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Campaign:</th>'
 																+'<td class="border-0 p-0 font-12 vertical-align-top utmCampaign-'+leads.leadId+'">'+(leads.utmCampaign!=''?leads.utmCampaign:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr class="border-bottom">'
-																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Is_Organic</th>'
+																+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Is Organic:</th>'
 																+'<td class="border-0 p-0 font-12 vertical-align-top">'+(leads.utmTerm!=''?leads.utmTerm:'N/A')+'</td>'
 															+'</tr>';
 													if(leads.leadPlatform!=''){
@@ -1162,11 +1162,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 														+'</tr>';
 													}
 
-														html+='</tbody>'
-													+'</table>';
+														
 												}else{
-													html+='<table class="w-100"><tbody>'
-															+'<tr>'
+													html+='<tr>'
 																+'<th class="border-0 p-0 font-12">Source:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmSource!=''?leads.utmSource:'N/A')+'</td>'
 															+'</tr>'
@@ -1179,23 +1177,36 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 																+'<td class="border-0 p-0 font-12">'+(leads.utmDescription!=''?leads.utmDescription:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Compaign</th>'
+																+'<th class="border-0 p-0 font-12">Campaign:</th>'
 																+'<td class="border-0 p-0 font-12 utmCampaign-'+leads.leadId+'">'+(leads.utmCampaign!=''?leads.utmCampaign:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Is_Organic</th>'
+																+'<th class="border-0 p-0 font-12">Is Organic:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmTerm!=''?leads.utmTerm:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Gclid</th>'
+																+'<th class="border-0 p-0 font-12">Gclid:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.gclid!=''?leads.gclid:'N/A')+'</td>'
-															+'</tr>'
-														+'</tbody>'
-													+'</table>';
+															+'</tr>';
+														
 												}
-												
-											html+='</div>'
-										+'</div>'
+												html+='<tr>'
+															+'<th class="border-0 p-0 font-12">Landing URL:</th>'
+															+'<td class="border-0 p-0 font-12">'+(leads.leadLandingUrl)+'</td>'
+														+'</tr>'
+														+'<tr>'
+															+'<th class="border-0 p-0 font-12">IP:</th>'
+															+'<td class="border-0 p-0 font-12">'+(leads.ip)+'</td>'
+														+'</tr>'
+														+'<tr>'
+															+'<th class="border-0 p-0 font-12">OS:</th>'
+															+'<td class="border-0 p-0 font-12">'+(leads.os)+'</td>'
+														+'</tr>'
+														+'<tr>'
+															+'<th class="border-0 p-0 font-12">SOURCE:</th>'
+															+'<td class="border-0 p-0 font-12">'+(leads.sourceOriginal)+'</td>'
+														+'</tr>';
+											html+='</tbody></table></div>'
 									+'</td>'
 								+'</tr>';
 								
