@@ -780,7 +780,25 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
  if(!validateRequestForLeadFollowupSave(formId, newTheme, leadType)){
 	 return false;
  }
- 
+	let isRemarkMandatory = $("#" + formId + " #followupRemarks").attr("isRemarkMendatory") === "true";
+
+	if (isRemarkMandatory) {
+		let minRemarkCount = parseInt($("#" + formId + " #followupRemarks").attr("minlength"), 0) || 0;
+		let remarkValue = $("#" + formId + " #followupRemarks").val().trim();
+		if(remarkValue.length == 0){
+			showMessageTheme2(0, 'Please enter remark.','',true);
+			return false;
+		}
+		if (remarkValue.length < minRemarkCount) {
+			showMessageTheme2(0, 'Remarks must be at least ' + minRemarkCount + ' characters.', '', true);
+			return false;
+		} else {
+			let counterId = "#" + formId + " #followupRemarksCounter";
+			$(counterId).removeClass().addClass("text-muted");
+			$(counterId).html(remarkValue.length + ' / ' + minRemarkCount);
+		}
+	}
+	
  $.ajax({
 	 type : "POST",
 	 contentType : APPLICATION_JSON_VALUE,
@@ -834,6 +852,7 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 				 $('.errorLeadCls').addClass('success');
 				 $('#errorMessageLead').html(data['message']);
 			 }
+			 $("#followupRemarksCounter").hide()
 			 //getPendingNotCall();
 			 setTimeout(function(){ 
 				 $("#followupform").modal('hide');
@@ -2637,9 +2656,8 @@ function getRequestForLeadCountGradeWiseDetails(formId, userId) {
 }
 
 
-function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, modalId, leadType, epdetailUpdateStatus) {
+function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, modalId, leadType, epdetailUpdateStatus,remarkMendatory,minRemarkCount) {
 //console.log(leadId);
-
 
  $("#"+formId+" #epdetailStatus").val(epdetailUpdateStatus);
  $("#"+formId+" #leadId").val(leadId);
@@ -2657,10 +2675,23 @@ function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, m
  $("#Cold").prop('checked',false)
  $("#Wram").prop('checked',false)
  $(".leadTypeCategory").removeClass('active');
+ $(document).on("input", ".followupRemarks_"+leadId, function () {
+	let val = $(this).val();
+	let minlength = $(this).attr("minlength");
+	let counterId = "#followupRemarksCounter"
 
+	// update counter live
+	$(counterId).text(val.length + " / "+ minlength);
 
- 
-
+	// visual feedback
+	if (val.length < minlength) {
+		$(this).addClass("is-invalid");
+		$(counterId).attr("class", "text-red");
+	} else {
+		$(this).removeClass("is-invalid");
+		$(counterId).attr("class", "text-success");
+	}
+ });
 
  $.ajax({
 		 type : "POST",
@@ -2696,6 +2727,16 @@ function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, m
 						}else if(leadDemo.leadModifyDetailDTO.leadCategory=='Warm'){
 							$("#Warm").trigger('click')
 						}
+						let isremarkMendatory = (remarkMendatory && (minRemarkCount > 0))
+						if(isremarkMendatory){
+							
+							$("#"+formId+" #followupRemarksCounter").html('0 / '+ minRemarkCount)
+							$("#"+formId+" #followupRemarks").addClass('followupRemarks_'+leadId)
+							$("#"+formId+" #followupRemarks").attr("minlength", minRemarkCount).attr("required", true).attr("isRemarkMendatory", true);
+						}else{
+							$("#"+formId+" #followupRemarksCounter").hide()
+						}
+						
 					}
 					callLeadStatusList(''+formId+'',''+leadType+'','leadStatus', false);
 					$("#"+formId+" #leadStatus").select2({
@@ -5147,22 +5188,31 @@ return leadAddFormRequestDTO;
 
 
 
-function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId, callFrom) {
+function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId, callFrom,remarkMendatory,minRemarkCount) {
 	hideMessageTheme2('');
+	let isRemarkMendatory = (remarkMendatory && (minRemarkCount > 0))
 	if ($('#leadStatus-'+leadId).val()==undefined || $('#leadStatus-'+leadId).val()=='') {
 		showMessageTheme2(0, 'Please select lead Status','',true);
 		return false;
 	}
 	var leadStatus =$('#leadStatus-'+leadId).val();
 	var remark='';
-	if ($('#followupRemarks-'+leadId).val()==undefined || $('#followupRemarks-'+leadId).val()=='') {
-		showMessageTheme2(0, 'Please fill followup Remarks','',true);
-		return false;
+	if(isRemarkMendatory){
+		if ($('#followupRemarks-'+leadId).val()==undefined || $('#followupRemarks-'+leadId).val().trim()=='') {
+			showMessageTheme2(0, 'Please fill followup Remarks','',true);
+			return false;
+		}else if($('#followupRemarks-'+leadId).val().trim().length < minRemarkCount){
+			showMessageTheme2(0,'Remarks must be at least ' + minRemarkCount + ' characters.','',true);
+			return false;
+		}else{
+			let counterId = "#leadListRemarksCounter_" +leadId;
+			$(counterId).attr("class", "text-muted");
+			$(counterId).html('0 / '+ minRemarkCount);
+		}
 	}
 	if($('#followupRemarks-'+leadId).val()!=''){
 		remark=escapeCharacters($('#followupRemarks-'+leadId).val());
 	}
-	
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -10017,6 +10067,24 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		 });
 
 	var leadid=0;
+	$(document).on("input", ".lead_list_remarks", function () {
+		let val = $(this).val();
+		let minlength = $(this).attr("minlength");
+		let elementItems = $(this).attr("data-leadid");
+		let counterId = "#leadListRemarksCounter_" +elementItems;
+
+		// update counter live
+		$(counterId).text(val.length + " / "+ minlength);
+
+		// visual feedback
+		if (val.length < minlength) {
+			$(this).addClass("is-invalid");
+			$(counterId).attr("class", "text-red");
+		} else {
+			$(this).removeClass("is-invalid");
+			$(counterId).attr("class", "text-success");
+		}
+	});
 	$(".followupRemarks-suggestion").on("keyup", function() {
         let text = $(this).val();
 		leadid=$(this).attr("data-leadid");
