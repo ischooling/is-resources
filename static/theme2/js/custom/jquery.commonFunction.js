@@ -116,6 +116,17 @@ function getURLForHTML(apiType, suffixUrl) {
     BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl
   );
 }
+function getURLForHTMLWithPayload(apiType, suffixUrl) {
+  let url = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl;
+  const urlParams = new URLSearchParams(window.location.search);
+  let payload = urlParams.get("payload");
+
+  if (payload) {
+    url += "?payload=" + encodeURIComponent(payload);
+  }
+
+  return url;
+}
 function getURLFor(apiType, suffixUrl) {
   return BASE_URL + API_VERSION + apiType + "/" + suffixUrl;
 }

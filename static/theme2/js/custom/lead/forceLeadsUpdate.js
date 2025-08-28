@@ -5,7 +5,7 @@ function getAllDemoForUpdateStatus(userId) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('dashboard', 'get-all-demo-for-status-update'),
+		url : getURLForHTMLWithPayload('dashboard', 'get-all-demo-for-status-update'),
 		data : JSON.stringify(data),
 		dataType : 'json',
 		async : false,
@@ -36,7 +36,7 @@ function getAllLeadForUpdateRemark(userId) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('dashboard', 'get-all-lead-for-remark-update'),
+		url : getURLForHTMLWithPayload('dashboard', 'get-all-lead-for-remark-update'),
 		data : JSON.stringify(data),
 		dataType : 'json',
 		async : false,
@@ -67,7 +67,7 @@ function getAllDemosForUpdateRemark(userId) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('dashboard', 'get-all-demos-for-remark-update'),
+		url : getURLForHTMLWithPayload('dashboard', 'get-all-demos-for-remark-update'),
 		data : JSON.stringify(data),
 		dataType : 'json',
 		async : false,

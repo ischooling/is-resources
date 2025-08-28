@@ -7374,7 +7374,7 @@ function callLeadCounselorsList(formId, modeSearch, startDate, endDate, elementI
 			//console.log(data);
 			$("#leadReportSearch").modal('hide');
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				var counselorReportType = $("#searchLeadCounselorReportType").val();
 				var leadListCounselor=data.leadListCounselor;
@@ -7561,6 +7561,14 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 			var demoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 			var demoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 
+			var demoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			var demoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			var demoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			var demoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			var demoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			var demoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+
+
 			var positiveLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','positiveLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 			var hotLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','hottotal-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 			var warmLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','warmtotal-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
@@ -7588,6 +7596,13 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				unattendedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','unattendedLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 				demoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 				demoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+
+				demoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+				demoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+				demoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+				demoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+				demoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+				demoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 
 				positiveLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','positiveLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 				hotLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','hottotal-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
@@ -7636,8 +7651,23 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet +="<span class='d-inline-flex ml-auto'><a href=\"javascript:void(0);\"  onclick=\""+FbleadLink+"\">"+leadCounselor.fb_total +"</a> | <a href=\"javascript:void(0);\"  onclick=\""+igleadLink+"\">"+leadCounselor.ig_total+"</a></span>"
 				htmlRet +="</div></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+unattendedLink+"\">"+leadCounselor.unattended+"</a></td>";
-				htmlRet +="<td style=\"vertical-align: top !important;background-color:#f3f39e !important;color:#343a40;\" class=\"text-center\"><span class=\"badge font-12\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadLink+"\">"+leadCounselor.totalDemo+"</a></span> | <span class=\"badge font-12\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadDoneLink+"\">"+leadCounselor.totalDemoDone+"</a></span></td>";
-				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><span class=\"bg-success text-white text-center  badge font-12\"><a href=\"javascript:void(0);\" class=\"text-white\" onclick=\""+hotLink+"\">"+leadCounselor.totalHot+"</a></span> | <span class=\"bg-warning text-white text-center badge font-12\"><a href=\"javascript:void(0);\" class=\"text-white\" onclick=\""+warmLink+"\">"+leadCounselor.totalWarm+"</a></span> | <span class=\"bg-primary text-white text-center badge font-12\"><a href=\"javascript:void(0);\" class=\"text-white\" onclick=\""+coldLink+"\">"+leadCounselor.totalCold+"</a></span></td>";
+				htmlRet +="<td style=\"vertical-align: top !important;background-color:#f3f39e !important;color:#343a40;\" class=\"text-center\">";
+				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
+				htmlRet +="<tbody>"
+				htmlRet +="<tr>"
+				htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadLink+"\">"+leadCounselor.totalDemo+"</a></td> ";
+				htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadDoneLink+"\">"+leadCounselor.totalDemoDone+"</a></td> ";
+				htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadRescheduleLink+"\">"+leadCounselor.totalDemoReschedule+"</a></td> ";
+				htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadNotShowLink+"\">"+leadCounselor.totalDemoNotShow+"</a></td> ";
+				htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadCancelLink+"\">"+leadCounselor.totalDemoCancel+"</a></td> ";
+				htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadNotIntrestedLink+"\">"+leadCounselor.totalDemoNotInterested+"</a></td> ";
+				htmlRet +="<td style=\"width:14%;border:0;border-radius:0;\" class=\"badge font-10\"><a href=\"javascript:void(0);\" onclick=\""+demoLeadPendingLink+"\">"+leadCounselor.totalDemoPending+"</a></td> ";
+				htmlRet +="</tr>"
+				htmlRet +="</tbody>"
+				htmlRet +="</table>";
+				
+				htmlRet +="</td>";
+				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><span class=\"bg-success text-white text-center  badge font-10\"><a href=\"javascript:void(0);\" class=\"text-white\" onclick=\""+hotLink+"\">"+leadCounselor.totalHot+"</a></span> | <span class=\"bg-warning text-white text-center badge font-10\"><a href=\"javascript:void(0);\" class=\"text-white\" onclick=\""+warmLink+"\">"+leadCounselor.totalWarm+"</a></span> | <span class=\"bg-primary text-white text-center badge font-10\"><a href=\"javascript:void(0);\" class=\"text-white\" onclick=\""+coldLink+"\">"+leadCounselor.totalCold+"</a></span></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#efd597;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+positiveLink+"\">"+leadCounselor.positiveEnroll+"</a></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+bookseatLink+"\">"+leadCounselor.reserved+"</a></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#c4d38a;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+convertLink+"\">"+leadCounselor.enrollment+"</a></td>";
@@ -7670,6 +7700,14 @@ function getLeadCounselorFootHtml(data, fontSize){
 	var totalFbLeads=0;
 	var totalDemo=0;
 	var totalDemoDone=0;
+
+	var totalDemoPending=0;
+	var totalDemoCancel=0;
+	var totalDemoInterested=0;
+	var totalDemoNotInterested=0;
+	var totalDemoNotShow=0;
+	var totalDemoReschedule=0;
+
 	var totalHot=0;
 	var totalCold=0;
 	var totalWarm=0;
@@ -7691,6 +7729,14 @@ function getLeadCounselorFootHtml(data, fontSize){
 			totalFbLeads+=leadCounselor.totalFbLead;
 			totalDemo+=leadCounselor.totalDemo;
 			totalDemoDone+=leadCounselor.totalDemoDone;
+
+			totalDemoPending+=leadCounselor.totalDemoPending;
+			totalDemoCancel+=leadCounselor.totalDemoCancel;
+			totalDemoReschedule+=leadCounselor.totalDemoReschedule;
+			totalDemoInterested+=leadCounselor.totalDemoInterested;
+			totalDemoNotInterested+=leadCounselor.totalDemoNotInterested;
+			totalDemoNotShow+=leadCounselor.totalDemoNotShow;
+
 			totalHot+=leadCounselor.totalHot;
 			totalCold+=leadCounselor.totalCold;
 			totalWarm+=leadCounselor.totalWarm;
@@ -7716,7 +7762,21 @@ function getLeadCounselorFootHtml(data, fontSize){
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"\"><span class=\"text-left\">"+totalLeads+"</span>  <span class=\"float-right\">"+(uniqLead>0?uniqLead:0) +"  |  "+duplicateLeadCount+"</span></th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\"><span class=\"text-left\">"+totalFbLeads+"</span>  <span class=\"float-right\">"+fbtotal +"  |  "+igtotal+"</span></td>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+unattended+"</td>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalDemo+" | "+totalDemoDone+"</th>";
+	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">";
+	htmlRet +="<table class=\"table w-100 mb-0 bg-transparent\">";
+	htmlRet +="<tbody>";
+	htmlRet +="<tr>";
+	htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemo+"</td>";
+	htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemoDone+"</td>";
+	htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemoReschedule+"</td>";
+	htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemoNotShow+"</td>";
+	htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemoCancel+"</td>";
+	htmlRet +="<td style=\"width:14%;border:0;border-right: 1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemoNotInterested+"</td>";
+	htmlRet +="<td style=\"width:14%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">"+totalDemoPending+"</td>";
+	htmlRet +="</tr>";
+	htmlRet +="</tbody>";
+	htmlRet +="</table>";
+	htmlRet +="</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalHot+" | "+totalWarm+" | "+totalCold+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+positiveEnroll+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+reserved+"</th>";
@@ -7765,8 +7825,8 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	var html='';
 	html+='<div class="dropdown full">';
     html+='<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm full" style="width:100px;background-color:#3f6ad8 !important;color:#fff; padding:0px"><span class=\"float-left\"><a href=\"javascript:void(0)\" style=\"color:#fff !important\" class=\"not-underline\" onclick="'+totalLeadLink+'">'+totallead+'</a></span> <span class="float-right"><a href=\"javascript:void(0)\" style=\"color:#fff !important\" class=\"not-underline\" onclick="'+uniqueLeadLink+'">'+(totallead-duplicateLeadCount) +'</a>  |  <a href=\"javascript:void(0)\" style=\"color:#fff !important\" class=\"not-underline\" onclick="'+duplicateLeadLink+'">'+duplicateLeadCount+'</a><i class="fa fa-caret-down" ></i></span></button>';
-    html+='<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">';
-    html+='<table class="table table-bordered table-striped" id="sub-counselor-list-'+listId+'" style="font-size:11px !important; width:1050px;" >';
+    html+='<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: -60px; transform: translate3d(0px, 33px, 0px);">';
+    html+='<table class="table table-bordered table-striped" id="sub-counselor-list-'+listId+'" style="font-size:11px !important; width:1300px;" >';
     html+='<thead>';
 	html+='<tr>';
 	html+='<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>';
@@ -7774,7 +7834,7 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	html+='<th class="bg-primary text-white">Total Leads    U | D </th>';
 	html+='<th class="bg-primary text-white">Total    FB | IG </th>';
 	html+='<th class="text-center bg-primary text-white">Unattended</th>';
-	html+='<th class="text-center bg-primary text-white">Demo Booked | Demo Done</th>';
+	html+='<th class="text-center bg-primary text-white font-10">Demo Booked | Completed | Reschedule | No-Show | Cancelled | Not Interested | No Status</th>';
 	html+='<th class="text-center bg-primary text-white">Hot | Warm | Cold</th>';
 	html+='<th class="text-center bg-primary text-white">Positive Enrollment</th>';
 	html+='<th class="text-center bg-primary text-white">Reserved</th>';

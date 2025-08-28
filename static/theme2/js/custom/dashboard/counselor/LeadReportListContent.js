@@ -578,17 +578,17 @@ function getReportsTab(objRight){
 		</div>
 	<hr/>
 	<div class="row">
-		<div class="col-lg-12 col-md-12">
+		<div class="col-lg-12 col-md-12 p-0">
 			<table class="table table-bordered table-striped" id="counselor-list" style="font-size:11px !important" >
 				<thead id="listCounselorTfoot"></thead>
 				<thead id="listCounselorTheader">
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Counselor</span> Name</th>
+						<th class="text-center bg-primary text-white" style="width:110px;"><span class="changeHeadText">Counselor</span> Name</th>
 						<th class="bg-primary text-white"><span class="text-left">Total Leads</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white">Unattended</th>
-						<th class="text-center bg-primary text-white">Demo Booked | Demo Done</th>
+						<th class="text-center bg-primary text-white">Demo Booked | Completed | Reschedule | No-Show | Cancelled | Not Interested | No Status</th>
 						<th class="text-center bg-primary text-white">Hot | Warm | Cold</th>
 						<th class="text-center bg-primary text-white">Positive Enrollment</th>
 						<th class="text-center bg-primary text-white">Reserved</th>
@@ -598,7 +598,7 @@ function getReportsTab(objRight){
 				<thead id="listCounselorTheader_log" class="hidden" >
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Counselor</span> Name</th>
+						<th class="text-center bg-primary text-white"><span class="changeHeadText">Counselor</span> Name</th>
 						<th class="text-center bg-primary text-white">Call</th>
 						<th class="text-center bg-primary text-white">Wati</th>
 						<th class="text-center bg-primary text-white">Whatsapp</th>

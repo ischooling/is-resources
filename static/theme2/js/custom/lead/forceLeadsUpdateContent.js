@@ -207,6 +207,8 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 							<option value="NOTATTENDED">No Show</option>
 							<option value="CANCELLED">Cancelled</option>
 							<option value="RESCHEDULE">Reschedule</option>
+							<option value="INTERESTED">Interested</option>
+							<option value="NOTINTERESTED">Not Interested</option>
 						</select>
 					</div>
 				</td>

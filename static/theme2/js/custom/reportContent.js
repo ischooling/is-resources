@@ -209,7 +209,7 @@ function getReportsTab(objRight){
 						<th class="bg-primary text-white"><span class="text-left">Total Leads</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white">Unattended</th>
-						<th class="text-center bg-primary text-white">Demo Booked | Demo Done</th>
+						<th class="text-center bg-primary text-white">Demo Booked | Completed | Reschedule | No-Show | Cancelled | Not Interested | No Status</th>
 						<th class="text-center bg-primary text-white">Hot | Warm | Cold</th>
 						<th class="text-center bg-primary text-white">Positive Enrollment</th>
 						<th class="text-center bg-primary text-white">Reserved</th>

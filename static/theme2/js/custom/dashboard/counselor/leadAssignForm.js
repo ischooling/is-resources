@@ -170,7 +170,7 @@ function getLeadAssignUser(objectRights) {
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary mr-1" onclick="getAvailability('${assignUser.assignTo}');" ><i class='fa fa-calendar'></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary mr-1" onclick="getCommitionRatePopup('${assignUser.assignTo}');" ><i class="fa fa-edit"></i></a>`;
 					if(emailForWatiBrodCastRight){
-						html+=`<a href="javascript:void(0);" class="btn btn-sm btn-primary mr-1" onclick="getAsPost('/dashboard/lead-data-list?moduleId='+${ ROLE_MODULE.moduleId}+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=&leadType=B2C&counselorId=${assignUser.assignTo}');" ><i class='fa fa-list'></i></a>`;
+						html+=`<a href="javascript:void(0);" class="btn btn-sm btn-primary mr-1" onclick="getAsPost('/dashboard/lead-data-list?moduleId='+${ ROLE_MODULE.moduleId}+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=&leadType=B2C&counselorId=${assignUser.assignTo}&enterFrom=assignForm');" ><i class='fa fa-list'></i></a>`;
 					}
 				html+`</td>
 			 </tr>`;
