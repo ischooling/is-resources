@@ -94,39 +94,28 @@ function getAllDemosForUpdateRemark(userId) {
 function updateBulkDemoStatus(remarkMendatory,minRemarkCount) {
 	var demoSaveFlag = true;
 	var rowIndex = 0;
-	var statusNotSelectedLength = $('select.status').filter(function() {
-    	return $(this).find('option:first').is(':selected');
-	}).length;
-	if(statusNotSelectedLength == $("#demoDetailsModal #demoDetailsTable > tbody > tr").length){
-		$("#demoErrorTxt").text('Status field is required.');
-		$("#demoErrorTxt").show();
-		setTimeout(function(){
-			$("#demoErrorTxt").hide();
-		},2000);
-		return false;
-	}else{
-		var data=[];
-		$("#demoDetailsModal #demoDetailsTable > tbody > tr").each(function(i){
-			var demoStatus = $(this).find(".status").val();
-			var remarks = $(this).find(".remarks").val();
-			if(remarks != "" && remarks != undefined && remarks != null){
-				if(demoStatus == ""  || demoStatus == undefined || demoStatus == null){
-					demoSaveFlag = false;
-					rowIndex = i+1;
-				}
+	var data=[];
+	$("#demoDetailsModal #demoDetailsTable > tbody > tr").each(function(i){
+		var demoStatus = $(this).find(".status").val();
+		var remarks = $(this).find(".remarks").val();
+		if(remarks != "" && remarks != undefined && remarks != null){
+			if(demoStatus == ""  || demoStatus == undefined || demoStatus == null){
+				demoSaveFlag = false;
+				rowIndex = i+1;
 			}
-			if(demoStatus!=''){
-				var ddata={};
-				ddata['meetingId']=$(this).attr("data-meetingId");
-				ddata['leadId']=$(this).attr("data-leadId");
-				ddata['userId']=$(this).attr("data-userId");
-				ddata['schoolId']=SCHOOL_ID;
-				ddata['status']=demoStatus;
-				ddata['remarks']=remarks;
-				data.push(ddata);
-			}
-		});
-	}
+		}
+		if(demoStatus!=''){
+			var ddata={};
+			ddata['meetingId']=$(this).attr("data-meetingId");
+			ddata['leadId']=$(this).attr("data-leadId");
+			ddata['userId']=$(this).attr("data-userId");
+			ddata['schoolId']=SCHOOL_ID;
+			ddata['status']=demoStatus;
+			ddata['remarks']=remarks;
+			data.push(ddata);
+		}
+	});
+	
 	if(!demoSaveFlag){
 		$("#demoDetailsModal #demoDetailsTable > tbody > tr:nth-child("+rowIndex+")").css({"background-color":"#f6c85a"});
 		

@@ -260,7 +260,7 @@ function forceLeadUpdateModalContent(data){
 							<thead>
 								<tr>
 									<th style="width: 350px;">Assign Date | Time  (${data.details.userTimezone})</th>
-									<th>Lead Details</th>
+									<th>Parent's Details</th>
 									<th style="width:200px">Lead Status</th>
 									<th style="min-width: 450px;">Remarks</th>
 								</tr>
@@ -385,7 +385,7 @@ function forceDemo2UpdateModalContent(data){
 							<thead>
 								<tr>
 									<th style="width: 350px;">Assign Date | Time  (${data.details.userTimezone})</th>
-									<th>Lead Details</th>
+									<th>Parent's Details</th>
 									<th style="width:200px">Lead Status</th>
 									<th style="min-width: 450px;">Remarks</th>
 								</tr>
@@ -442,7 +442,10 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
 								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+`</td>
 							</tr>
-							
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Demo Schedule At:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.scheduleAt+`</td>
+							</tr>
 						</tbody>
 					</table>
 				</td>

@@ -209,7 +209,22 @@ function getReportsTab(objRight){
 						<th class="bg-primary text-white"><span class="text-left">Total Leads</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white">Unattended</th>
-						<th class="text-center bg-primary text-white">Demo Booked | Completed | Reschedule | No-Show | Cancelled | Not Interested | No Status</th>
+						<th class="text-center bg-primary text-white">
+							<table class="w-100 table mb-0 bg-transparent">
+								<tbody>
+									<tr>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Interested</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
+										<td class="font-10" style="width:12%;border:0;border-radius:0;">No Status</td>
+									</tr>
+								</tbody>
+							</table>
+						</th>
 						<th class="text-center bg-primary text-white">Hot | Warm | Cold</th>
 						<th class="text-center bg-primary text-white">Positive Enrollment</th>
 						<th class="text-center bg-primary text-white">Reserved</th>
