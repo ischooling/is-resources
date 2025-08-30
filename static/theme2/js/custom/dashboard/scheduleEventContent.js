@@ -481,6 +481,8 @@ function updateSystemTraningModal(meetingId, leadId){
 											+'<option value="NOTATTENDED">No Show</option>'
 											+'<option value="CANCELLED">Cancelled</option>'
 											+'<option value="RESCHEDULE">Reschedule</option>'
+											+'<option value="INTERESTED">Interested</option>'
+											+'<option value="NOTINTERESTED">Not Interested</option>'
 										+'</select>'
 									+'</div>'
 									+'<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">'
