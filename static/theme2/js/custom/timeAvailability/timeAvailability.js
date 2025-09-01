@@ -5191,7 +5191,9 @@ function markAsRescheduleRequest(){
 
 function markAsReschedule(){
 	var data = {
-		"allMeetingTypeAndIds" : markAsRescheduleRequest()
+		"allMeetingTypeAndIds" : markAsRescheduleRequest(),
+		"userId" : USER_ID,
+		"schoolId" :SCHOOL_ID
 	}
 	customLoader(true);
 	$.ajax({
