@@ -333,6 +333,10 @@ $("#subjectId").select2({
 		$("#teacherEmail").val('');
 		$("#teacherProfileStatus").val('').trigger('change');
 		$("#timeAvailableSearchtype").val('TODAY').trigger('change');
+		$("#categoryId").val('').trigger('change');
+		$("#standardId").val('').trigger('change');
+		$("#lmsPlatform").val('').trigger('change');
+		$("#subjectId").val('').trigger('change');
 
 	 });
 
@@ -431,8 +435,24 @@ $("#subjectId").select2({
 	$('#teacherTimeSearchReset').trigger('click');
 	// $('#teacherTimeSearch').trigger('click');
 	$("select#standardId").unbind('change').bind("change",function(){
-		var providerId = 37//$('#lmsPlatform').val();
-		callSubjectsByGradeId('teacherFilterTime', this.value, 'standardId','subjectId','','', providerId);
+		var providerId = 37;
+		if($('#lmsPlatform').val()!=undefined && $('#lmsPlatform').val()!='' && $('#lmsPlatform').val()!=0){
+			providerId=$('#lmsPlatform').val();
+		}
+		if(this.value!=undefined && this.value!=''){
+			callCourseCategoryByGradeId('teacherFilterTime', this.value, 'standardId','categoryId','','', providerId);
+			callSubjectsByGradeId('teacherFilterTime', this.value, 'standardId','subjectId','','', providerId);
+		}
+	});
+	$("select#categoryId").unbind('change').bind("change",function(){
+		var providerId = 37
+		if($('#lmsPlatform').val()!=undefined && $('#lmsPlatform').val()!='' && $('#lmsPlatform').val()!=0){
+			providerId=$('#lmsPlatform').val();
+		}
+		var standardId = $('#standardId').val()
+		if(this.value!=undefined && this.value!='' && standardId!=''){
+			callSubjectsByCategoryAndGradeId('teacherFilterTime', standardId, 'categoryId','subjectId','',this.value, providerId);
+		}
 	});
 }
 
@@ -500,14 +520,19 @@ async function teacherTimeAvailabilityContent(title){
 										+'<select name="lmsPlatform" id="lmsPlatform" class="form-control"></select>'
 									+'</div>'
 									+'<div class="col-md-2 col-sm-6 col-xs-12">'
-										+'<label>Select Grade</label>'
+										+'<label class="full text-primary m-0">Select Grade</label>'
 										+'<select name="standardId" id="standardId" class=" multiselect-dropdown form-control">'
 										+'<option value="">Select Grade</option>'
 											+getStandardContent(SCHOOL_ID,true)
 										+'</select>'
 									+'</div>'
 									+'<div class="col-md-2 col-sm-6 col-xs-12">'
-										+'<label>Select Course</label>'
+										+'<label class="full text-primary m-0">Select Course Category</label>'
+										+'<select name="categoryId" id="categoryId" class="form-control">'
+										+'</select>'
+									+'</div>'
+									+'<div class="col-md-2 col-sm-6 col-xs-12">'
+										+'<label class="full text-primary m-0">Select Course</label>'
 										+'<select name="subjectId" id="subjectId" class="form-control">'
 											
 										+'</select>'
@@ -528,7 +553,7 @@ async function teacherTimeAvailabilityContent(title){
 										+'<label class="full text-primary m-0">Time Zone To</label>'
 										+'<select class="form-control" name="timeZoneTo" id="timeZoneTo"></select>'
 									+'</div>'
-									+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-2"></div>'
+									// +'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-2"></div>'
 									+'<div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
 										+'<label class="full text-primary m-0">Select Date <span class="font-weight-bold text-dark ml-2 d-inline-block"style="font-size:10px">(UTC +8:00) - Singapore</span></label>'	
 										+'<select class="form-control" id="timeAvailableSearchtype" name="timeAvailableSearchtype">'

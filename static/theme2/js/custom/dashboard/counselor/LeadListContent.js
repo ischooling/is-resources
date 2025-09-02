@@ -349,8 +349,14 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		curentTimeStamp(objRights.timeZoneOffset);
 	}, 800);
 
-
-    
+	$("#leadFollowupForm #leadStatus").change(function(){
+		if($('#leadFollowupForm #leadStatus').val()=="Positive to enrollment"){
+			$('.tentative_date').css( "display", "block" );
+			$("#tentativeDate").val('');
+		}else{
+			$('.tentative_date').css( "display", "none" );
+		}
+	});
 
 
 

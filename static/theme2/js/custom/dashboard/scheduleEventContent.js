@@ -71,7 +71,15 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 		//console.log("saveB2BFollowup");
 		submitLeadFollowupSave('followupB2BSaveForm','0', 'time-available', true,'leadFollowupB2BForm','','');
 	});
+
+	
+	
+
+	$('.tentative_date').css( "display", "none" );
+	
+
 }
+
 
 function cardContent(data,clickFrom,currentPageNo,boxSearchCondition){
 	var html =
@@ -389,6 +397,12 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 														+'</tr>';
 													}
 												}
+												if(item.leadAssignName != ''){
+													html+='<tr>'
+														+'<th class="border-0 p-1 vertical-align-top" style="width:172px">Lead Owner Name:</th>'
+														+'<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">'+item.leadAssignName+'</td>'
+													+'</tr>';
+												}
 												
 												
 											html+='</tbody>'
@@ -481,11 +495,17 @@ function updateSystemTraningModal(meetingId, leadId){
 											+'<option value="NOTATTENDED">No Show</option>'
 											+'<option value="CANCELLED">Cancelled</option>'
 											+'<option value="RESCHEDULE">Reschedule</option>'
-											+'<option value="INTERESTED">Interested</option>'
-											+'<option value="NOTINTERESTED">Not Interested</option>'
+											+'<option value="Demo Confirmed">Demo Confirmed</option>'
+											+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
+											+'<option value="Not Interested">Not Interested</option>'
+											+'<option value="Positive to enrollment">Positive to enrollment</option>'
 										+'</select>'
 									+'</div>'
-									+'<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">'
+									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
+										+'<label class="mb-0">Tentative Date</label>'
+										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
+								+'	</div>'
+									+'<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">'
 										+'<label>Remarks</label>'
 										+'<input type="text" name="remarks" id="remarks" class="form-control">'
 									+'</div>'

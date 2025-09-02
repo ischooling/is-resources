@@ -105,6 +105,11 @@ $(document).ready(function(){
 			$(counterId).attr("class", "text-success");
 		}
 	});
+	$('.tentative_date').css( "display", "none" );
+	$('.rtentativeDate').datepicker({
+		autoclose: true,
+		format: 'mm-dd-yyyy',
+	});
 });
 
 function forceDemoUpdateModalContent(data){
@@ -165,6 +170,7 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 	var html=``;
 	if(data.length>0){
 		$.each(data, function(i,v){
+			var standard=v.standardname!=''?v.standardname.replace('Grade ',''):'';
 			html+=
 			`<tr data-leadId=`+v.leadId+` data-meetingId=`+v.meetingId+` data-userId=`+v.userId+`>
 				<td class="py-1" style="vertical-align: top;">
@@ -183,6 +189,11 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 								<td class="border-0 p-1" style="word-break:break-word">`+v.leadFollowStatus+`</td>
 							</tr>
 							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Grade:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+standard+`</td>
+							</tr>
+							
+							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Name:</th>
 								<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">`+v.inviteeName+`</td>
 							</tr>
@@ -194,6 +205,10 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
 								<td class="border-0 p-1" style="word-break:break-word">`+v.inviteePhone+`</td>
 							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Lead Owner Name:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.leadAssignName+`</td>
+							</tr>
 							
 						</tbody>
 					</table>
@@ -201,15 +216,21 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 				<td class="py-1" style="vertical-align: top;">
 					<div class="form-group">
 						<label class="mb-0">Update<sup>*</sup></label>
-						<select name="status_`+i+`" id="status_`+i+`" class="form-control status">
+						<select name="status_`+i+`" id="status_`+i+`" class="form-control status" onchange="getTantativDate(`+i+`);">
 							<option value="">Select Status</option>
 							<option value="COMPLETED">Completed</option>
 							<option value="NOTATTENDED">No Show</option>
 							<option value="CANCELLED">Cancelled</option>
 							<option value="RESCHEDULE">Reschedule</option>
-							<option value="INTERESTED">Interested</option>
-							<option value="NOTINTERESTED">Not Interested</option>
+							<option value="Demo Confirmed">Demo Confirmed</option>
+							<option value="Demo Not Confirmed">Demo Not Confirmed</option>
+							<option value="Not Interested">Not Interested</option>
+							<option value="Positive to enrollment">Positive to enrollment</option>
 						</select>
+					</div>
+					<div class="form-group tentative_date_`+i+`" style="display:none">
+						<label class="mb-0">Tentative Date</label>
+						<input type="text" name="rtentativeDate_`+i+`" id="rtentativeDate_`+i+`" value="" class="form-control rtentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />
 					</div>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
@@ -288,6 +309,7 @@ function leadDetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCo
 		const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;
 		const statusListHtml = statuslist.map(s => `<option value="${s.value}">${s.value}</option>`).join('');
 		$.each(data, function(i,v){
+			var standard=v.standardname!=''?v.standardname.replace('Grade ',''):'';
 			html+=
 			`<tr data-leadId=`+v.leadId+` data-userId=`+v.userId+`>
 				<td class="py-1" style="vertical-align: top;">
@@ -304,6 +326,10 @@ function leadDetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCo
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Last Lead Status:</th>
 								<td class="border-0 p-1" style="word-break:break-word">`+v.leadStatus+`</td>
+							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Grade:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+standard+`</td>
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Name:</th>
@@ -334,10 +360,7 @@ function leadDetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCo
 				<td class="py-1" style="vertical-align: top;">
 					<div class="form-group">
 						<label class="mb-0">Remarks</label>
-						<input type="text" 
-                                   name="remarks_${i}" 
-                                   id="remarks_${i}" 
-                                   class="form-control ${isRemarkMandatory ? 'lead_remarks' : ''}  remarks" 
+						<input type="text"  name="remarks_${i}"   id="remarks_${i}"  class="form-control ${isRemarkMandatory ? 'lead_remarks' : ''}  remarks" 
                                    ${isRemarkMandatory ? `minlength="${minRemarkCount}" required` : ''} />
                             ${isRemarkMandatory ? `<small id="leadRemarksCounter_${i}" class="text-muted">0 / ${minRemarkCount}</small>` : ''}
 					</div>
@@ -413,6 +436,7 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 		const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;
 		const statusListHtml = statuslist.map(s => `<option value="${s.value}">${s.value}</option>`).join('');
 		$.each(data, function(i,v){
+			var standard=v.standardname!=''?v.standardname.replace('Grade ',''):'';
 			html+=
 			`<tr data-leadId=`+v.leadId+` data-userId=`+v.userId+`>
 				<td class="py-1" style="vertical-align: top;">
@@ -431,6 +455,10 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 								<td class="border-0 p-1" style="word-break:break-word">`+v.leadStatus+`</td>
 							</tr>
 							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Grade:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+standard+`</td>
+							</tr>
+							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Name:</th>
 								<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">`+v.childName+`</td>
 							</tr>
@@ -446,6 +474,12 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Demo Schedule At:</th>
 								<td class="border-0 p-1" style="word-break:break-word">`+v.scheduleAt+`</td>
 							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Lead Owner Name:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.leadAssignName+`</td>
+							</tr>
+
+							
 						</tbody>
 					</table>
 				</td>

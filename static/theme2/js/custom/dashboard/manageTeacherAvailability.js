@@ -198,6 +198,8 @@ function getRequestForTeacherAvailability(formId, teacherUserId){
 	teacherTimeListFilterDTO['lmsPlatform']=$("#"+formId+" #lmsPlatform").val();
 	teacherTimeListFilterDTO['standarId']=$("#"+formId+" #standardId").val();
 	teacherTimeListFilterDTO['subjectId']=$("#"+formId+" #subjectId").val();
+	teacherTimeListFilterDTO['categoryId']=$("#"+formId+" #categoryId").val();
+	
 	data['teacherTimeListFilterDTO']=teacherTimeListFilterDTO;
 	//console.log(data);
 	return data;

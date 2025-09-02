@@ -183,6 +183,7 @@ function updateMeetingStatus(meetingId, leadId) {
 	
 	var status = $('#status').val();
 	var remarks = $('#remarks').val();
+    var tentativeDate = $('#tentativeDate').val();
 	if(status==undefined || status==null || status==0 || status==''){
 		showMessageTheme2(0, "Status field is required.",'',true);
 		return false;
@@ -204,6 +205,7 @@ function updateMeetingStatus(meetingId, leadId) {
 	data['schoolId']=SCHOOL_ID;
 	data['status']=status;
 	data['remarks']=remarks;
+    data['tentativeDate']=tentativeDate;
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
@@ -239,6 +241,18 @@ function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartT
 	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId));
 	$("#confirmeUpdateModalWrapper").html(confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry));
 	$('#updateSystemTraningModal').modal('show');
+    $('.tentativeDate').datepicker({
+		autoclose: true,
+		format: 'mm-dd-yyyy',
+	});
+    $("#scheduleEventMeetingStatus #status").on('change',function(){
+		if($('#scheduleEventMeetingStatus #status').val()=="Positive to enrollment"){
+			$('.tentative_date').css("display", "block" );
+			$('#tentativeDate').val('');
+		}else{
+			$('.tentative_date').css( "display", "none" );
+		}
+	})
 }
 
 function comfirmeupdateMeetingStatus(meetingId, leadId,status){

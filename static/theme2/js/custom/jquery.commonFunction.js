@@ -3478,6 +3478,106 @@ function callSubjectsByGradeId(
   });
 }
 
+function callSubjectsByCategoryAndGradeId(
+  formId,
+  value,
+  elementId,
+  toElementId,
+  requestExtra,
+  requestExtra1,
+  requestExtra2
+) {
+  hideMessage("");
+  //	if (!validateRequestForMasterGrade(formId, elementId)) {
+  //		$("#"+formId+" #"+elementId).val().trim(0);
+  //		return false;
+  //	}
+  //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(
+      getRequestForMaster(
+        formId,
+        "SUBJECT-LIST-BY-COURSE-CATEGORY-GRADE",
+        value,
+        requestExtra,
+        requestExtra1,
+        requestExtra2
+      )
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    async: false,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+        showMessageTheme2(1, data["message"]);
+      } else {
+        buildDropdown(
+          data["mastersData"]["subject"],
+          $("#" + formId + " #" + toElementId),
+          "Select course category"
+        );
+        //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
+      }
+      //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
+    }
+  });
+}
+
+
+function callCourseCategoryByGradeId(
+  formId,
+  value,
+  elementId,
+  toElementId,
+  requestExtra,
+  requestExtra1,
+  requestExtra2
+) {
+  hideMessage("");
+  //	if (!validateRequestForMasterGrade(formId, elementId)) {
+  //		$("#"+formId+" #"+elementId).val().trim(0);
+  //		return false;
+  //	}
+  //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(
+      getRequestForMaster(
+        formId,
+        "COURSE-CATEGORY-BY-GRADE",
+        value,
+        requestExtra,
+        requestExtra1,
+        requestExtra2
+      )
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    async: false,
+    success: function (data) {
+      debugger;
+      if (data["status"] == "0" || data["status"] == "2") {
+        showMessageTheme2(1, data["message"]);
+      } else {
+        buildDropdown(
+          data["mastersData"]["subject"],
+          $("#" + formId + " #" + toElementId),
+          "Select course category"
+        );
+        //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
+      }
+      //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", false);
+    }
+  });
+}
+
 //function callPlacementSubjectsByGradeId(formId, value, elementId, toElementId, requestExtra) {
 //	hideMessage('');
 //	resetDropdown($("#"+formId+" #"+toElementId), 'Select course');

@@ -1,3 +1,13 @@
+
+function getTantativDate(i){
+	if($('#status_'+i).val()=="Positive to enrollment"){
+		$('.tentative_date_'+i).css("display", "block" );
+		$('#rtentativeDate_'+i).val('');
+	}else{
+		$('.tentative_date_'+i).css( "display", "none" );
+	}
+}
+
 function getAllDemoForUpdateStatus(userId) {
 	var responseData={};
 	var data={};
@@ -98,6 +108,7 @@ function updateBulkDemoStatus(remarkMendatory,minRemarkCount) {
 	$("#demoDetailsModal #demoDetailsTable > tbody > tr").each(function(i){
 		var demoStatus = $(this).find(".status").val();
 		var remarks = $(this).find(".remarks").val();
+		var rtentativeDate = $(this).find(".rtentativeDate").val();
 		if(remarks != "" && remarks != undefined && remarks != null){
 			if(demoStatus == ""  || demoStatus == undefined || demoStatus == null){
 				demoSaveFlag = false;
@@ -112,6 +123,7 @@ function updateBulkDemoStatus(remarkMendatory,minRemarkCount) {
 			ddata['schoolId']=SCHOOL_ID;
 			ddata['status']=demoStatus;
 			ddata['remarks']=remarks;
+			ddata['rtentativeDate']=rtentativeDate;
 			data.push(ddata);
 		}
 	});
