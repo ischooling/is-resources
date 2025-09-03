@@ -816,6 +816,10 @@ async function getDemoRecordings(meetingId) {
 				$("#recordYourDemoInsideBtn span").text("Record Your Demo");
 				$('#recordYourDemoInsideBtn').show().attr('data-attempt', '1');
 				$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('1')`);
+			}else if(entityIds.length == 2){
+				$("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
+				$('#recordYourDemoInsideBtn').show().attr('data-attempt', '2');
+				$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('2')`);
 			}
 		}else if(responseData.meetingStatus == "start"){
 			$("#recordingWaitingText").html("The recording is not ended yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
