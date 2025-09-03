@@ -33,7 +33,6 @@ $(document).ready(function(){
 		var data = getAllDemoForUpdateStatus(USER_ID);
 		if(data.status==1){
 			var demoDetails=data.details.demoDetails.demoDetails;
-			debugger;
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demoDetailsModal").length>0){

@@ -5919,29 +5919,44 @@ function getLeadDemoHtml(data){
 		for (let ind = 0; ind < studentEnrolledList.length; ind++) {
 			const studentEnroll = studentEnrolledList[ind];
 			var meetingJoinTimeList = studentEnroll.meetingJoinTimeList;
+			var meetingStatus=studentEnroll.meetingStatus;
+			if(studentEnroll.meetingStatus=='PENDING'){
+				meetingStatus='No Status';
+			}else if(studentEnroll.meetingStatus=='NOTATTENDED'){
+				meetingStatus='No Show';
+			}else if(studentEnroll.meetingStatus=='COMPLETED'){
+				meetingStatus='Completed';
+			}else if(studentEnroll.meetingStatus=='CANCELLED'){
+				meetingStatus='Cancelled';
+			}else if(studentEnroll.meetingStatus=='RESCHEDULE'){
+				meetingStatus='Reschedule';
+			}
 			htmlRet +="<tr>";
 			htmlRet +="<td>"+(sr++)+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+studentEnroll.demoDate+"<br/>"+studentEnroll.demoStartTime+" - "+studentEnroll.demoEndTime+"<br/>"+studentEnroll.meetingFrom+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;\">"+studentEnroll.assignName+" | "+studentEnroll.meetingPersoneName+"</td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\"><b>"+studentEnroll.assignName+" | "+studentEnroll.meetingPersoneName+"</b><br/>"+studentEnroll.email+"</td>";
 			if(!studentEnroll.searchUser){
 				htmlRet +="<td style=\"vertical-align: top !important;\">";
 				if(meetingJoinTimeList.length>0){
-					htmlRet +="<table class=\"table table-bordered table-striped\">";
-					htmlRet +="<tr><th>Host</th><th>Attendee</th></tr>";
+					htmlRet +="<div style='max-height:220px; overflow-y:auto;'>";
+					htmlRet +="<table class=\"table table-bordered table-striped\" style=\"width:100%; border-collapse:collapse;\">";
+					htmlRet +="<thead style='position:sticky; top:0; background:#fff; z-index:2;'><tr><th style='position:sticky; top:0; background:#fff; width:170px;'>Host</th><th style='position:sticky; top:0; background:#fff; width:170px;'>Attendee</th></tr></thead>";
+					htmlRet +="<tbody>";
 					var bgcolor="";
 					for (let mi = 0; mi < meetingJoinTimeList.length; mi++) {
 						const meetingTime = meetingJoinTimeList[mi];
 						if(meetingTime.joinType=='host'){
-							htmlRet +="<tr><td class="+bgcolor+">"+meetingTime.clickTime+"<br/><span style=\"font-size:10px\">"+meetingTime.city+" | "+meetingTime.country+" | "+meetingTime.timeZone.replace("/","-")+"</span></td><td> - </td></tr>";
+							htmlRet +="<tr><td class='"+bgcolor+"'>"+meetingTime.clickTime+"<br/><span style=\"font-size:10px\">"+meetingTime.city+" | "+meetingTime.country+" | "+meetingTime.timeZone.replace('/','-')+"</span></td><td> - </td></tr>";
 						}else{
-							htmlRet +="<tr><td> - </td><td class="+bgcolor+">"+meetingTime.clickTime+"<br/><span style=\"font-size:9px\">"+meetingTime.city+" | "+meetingTime.country+" | "+meetingTime.timeZone.replace("/","-")+"</span></td></tr>";
+							htmlRet +="<tr><td> - </td><td class='"+bgcolor+"'>"+meetingTime.clickTime+"<br/><span style=\"font-size:9px\">"+meetingTime.city+" | "+meetingTime.country+" | "+meetingTime.timeZone.replace('/','-')+"</span></td></tr>";
 						}
 					}
-					htmlRet +="</table>";
+					htmlRet +="</tbody></table>";
+					htmlRet +="</div>";
 				}
 				htmlRet +="</td>";
 			}
-			htmlRet +="<td style=\"vertical-align: top !important;\">"+studentEnroll.meetingStatus+"</td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\">"+meetingStatus+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+studentEnroll.meetingRemark+"</td>";
 			htmlRet +="</tr>";
 
@@ -7842,7 +7857,7 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	html+='<tr>';
 	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>';
 	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Interested</td>';
+	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>';
 	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>';
 	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>';
 	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>';

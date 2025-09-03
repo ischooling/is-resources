@@ -594,7 +594,7 @@ function getReportsTab(objRight){
 									<tr>
 										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>
 										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Interested</td>
+										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
 										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
 										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
 										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
@@ -882,7 +882,7 @@ function getLeadSchoolDemoList(objRights){
                 <tr>
                     <th style="width:5%" class="text-center bg-primary text-white">Sr no.</th>
                     <th style="width:15%" class="text-center bg-primary text-white">Meeting Date & Time(+05:30)<br/>Meeting From</th>
-                    <th style="width:15%" class="text-center bg-primary text-white">Name<br/>Host | Attendee</th>`;
+                    <th style="width:15%" class="text-center bg-primary text-white">Name Host | Attendee<br/>Email</th>`;
                     if(objRights.permissioncolumn == 'Y'){
 						html+='<th style="width:30%" class="text-center bg-primary text-white">Join Time(+05:30)<br/>Host | Attendee</th>';
 					}
