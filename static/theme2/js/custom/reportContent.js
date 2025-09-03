@@ -213,14 +213,15 @@ function getReportsTab(objRight){
 							<table class="w-100 table mb-0 bg-transparent">
 								<tbody>
 									<tr>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
-										<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
-										<td class="font-10" style="width:12%;border:0;border-radius:0;">No Status</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
+										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
+										<td class="font-10" style="width:11%;border:0;border-radius:0;">No Status</td>
 									</tr>
 								</tbody>
 							</table>
