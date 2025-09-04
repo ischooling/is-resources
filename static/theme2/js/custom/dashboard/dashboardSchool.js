@@ -1,4 +1,7 @@
 function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
+  $("#dashboardContentInHTML").show();
+	$("#dashboardContentInHTMLAdditional").html();
+	$("#dashboardContentInHTMLAdditional").hide();
   if(!getSession()){
       redirectLoginPage();
       return false;

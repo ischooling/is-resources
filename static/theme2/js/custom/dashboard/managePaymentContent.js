@@ -159,7 +159,9 @@ function getAdvancePaymentSearchResult(formId, data) {
 						</span>
 					</span>
 				</td><td>`;
-		html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'V\');">View</span>';
+                if(apsrSingle.entityType != "INVOICE"){
+                    html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'V\');">View</span>';
+                }
 		if (roleAndModule.added == 'Y' || roleAndModule.updated == 'Y') {
 			if(apsrSingle.paymentTitle=='CUSTOMIZED_REGISTRATION_SUBJECT_FEE' 
 				|| apsrSingle.paymentTitle=='CUSTOMIZED_SUBJECT_FEE'
@@ -216,7 +218,12 @@ function getAdvancePaymentSearchResult(formId, data) {
 				if(eligibleForEdit || isUserAllowed){
 					html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentPopup(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
 				}
-			}else{
+			}
+            // for edit invoice
+            // else if(apsrSingle.entityType == "INVOICE"){
+            //     html += '<span class="btn btn-sm btn-primary  mr-1" onclick="(' + apsrSingle.userPaymentDetailsId + ',\'E\');">Edit</span>';
+            // }
+            else{
 				var eligibleForEdit=false;
 				if (apsrSingle.paymentStatus != 'SUCCESS') {
 					eligibleForEdit=true;
@@ -306,8 +313,8 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 				if (SCHOOL_ID == 1) {
 					if (roleAndModule.added == 'Y') {
 					html += `
-					<a href="javascript:void(0)" class="btn btn-primary  mr-1" onclick="addExternalPayment('addStudentPaymentForm')">
-						Add External/Unregistered Student Payment
+					<a href="javascript:void(0)" class="btn btn-primary  mr-1" onclick="addExternalPayment('addStudentPaymentForm','REGISTRATION_FEE')">
+						Add Unregistered Student Payment
 					</a>`;
 					}
 				}
@@ -315,6 +322,12 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 					html += `
 					<a href="javascript:void(0)" class="btn btn-primary " onclick="addCustomPayment()">
 						Add Payment/Custom Payment
+					</a>`;
+				}
+				if (roleAndModule.added == 'Y') {
+					html += `
+					<a href="javascript:void(0);" onclick="getContent('54', 'invoice', '', '');" class="btn btn-primary">
+						Add External Payment
 					</a>`;
 				}
 			html += `
@@ -438,7 +451,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Student Email<sup class="text-danger">*</sup></label>
-                                            <input id="studentEmail1" name="studentEmail1" type="text" class="form-control" style="padding-right:22px" onblur="getStudentDetailsForPayment('addStudentPaymentForm', 'true')">
+                                            <input id="studentEmail1" name="studentEmail1" type="text" class="form-control" style="padding-right:22px">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
@@ -447,7 +460,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             <input id="studentName1" name="studentName1" type="text" class="form-control">
                                         </div>
                                     </div>
-                                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div id="learningProgramWrapper" class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Learning Program<sup class="text-danger">*</sup></label>
                                             <select id="learningProgram1" name="learningProgram1" class="multiselect-dropdown form-control">
@@ -456,7 +469,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div id="gradeWrapper" class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Grade<sup class="text-danger hideWhenlearningProgramFlexy">*</sup></label>
                                             <select id="standardId1" name="standardId1" class="multiselect-dropdown form-control">
@@ -479,7 +492,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             <input id="paymentName1" name="paymentName1" type="text" class="form-control">
                                         </div>
                                     </div>
-                                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div id="alternatePaymentWrapper" class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Alternate Payment Name</label>
                                             <div class="d-flex align-items-center gap-10">
@@ -501,7 +514,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div id="userReferenceNoWrapper" class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">User Reference No.</label>
                                             <input id="userRefNumber1" name="userRefNumber" type="text" class="form-control">
@@ -513,7 +526,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             <input id="payableAmount" name="payableAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);">
                                         </div>
                                     </div>
-                                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div id="additionalFeeWrapper" class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Additional Fee</label>
                                             <input id="additionalAmount" name="additionalAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" disabled>
@@ -535,6 +548,26 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div id="countryWrapper" class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+                                        <label class="m-0">Country<sup class="text-danger">*</sup></label>
+                                        <select name="addCountryId" id="addCountryId" class="form-control" >
+                                            <option value="0">Select country</option>
+                                        </select>
+                                    </div>
+                                    <div id="stateWrapper" class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+                                        <label class="m-0">State<sup class="text-danger">*</sup></label>
+                                        <select name="addStateId" id="addStateId" class="form-control" >
+                                            <option value="0">Select state</option>
+                                        </select>
+                                    </div>
+                                    <div id="cityWrapper" class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+                                        <label class="m-0">City<sup class="text-danger">*</sup></label>
+                                        <select name="addCityId" id="addCityId" class="form-control" >
+                                            <option value="0">Select city</option>
+                                        </select>
+                                    </div>
+
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Status<sup class="text-danger">*</sup></label>
@@ -623,6 +656,7 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                     <select id="userRegistrationType" name="userRegistrationType" class="multiselect-dropdown form-control">
                       <option value="Registered">Registered</option>
                       <option value="Unregistered">Unregistered</option>
+                      <option value="INVOICE">Invoice</option>
                     </select>
                   </div>
                 </div>

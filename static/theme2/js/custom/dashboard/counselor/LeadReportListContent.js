@@ -570,7 +570,7 @@ function getReportsTab(objRight){
 				</div>         
 			</div>
 			<div class="col-md-6 col-lg-3" id="advanceSearchAndExport12"> 
-				<button class=" btn btn-info" onclick="openModal('leadReport')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>`;
+				<button class=" btn btn-info mr-2" onclick="openModal('leadReport')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>`;
 				if(USER_ROLE == 'DIRECTOR'){
 					html+=`<button class=" btn btn-success text-white mt-lg-1 mb-1" id="exportCounselorLead">Excel Export</button>`;
 				}
@@ -585,30 +585,32 @@ function getReportsTab(objRight){
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
 						<th class="text-center bg-primary text-white" style="width:110px;"><span class="changeHeadText">Counselor</span> Name</th>
-						<th class="bg-primary text-white"><span class="text-left">Total Leads</span>   <span class="float-right"> U | D</span> </th>
-						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
-						<th class="text-center bg-primary text-white">Unattended</th>
+						<th class="bg-primary text-white" style="width:80px;"><span class="text-left" style="width:80px;">Total Leads</span>   <span class="float-right"> U | D</span> </th>
+						<th class="bg-primary text-white" style="width:75px;"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
+						<th class="text-center bg-primary text-white" style="width:50px;">Unatt-ended</th>
 						<th class="text-center bg-primary text-white">
 							<table class="w-100 table mb-0 bg-transparent">
 								<tbody>
 									<tr>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0 ">Demo Booked</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
-										<td class="font-10" style="width:11%;border:0;border-radius:0;">No Status</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-radius:0;">No Status</td>
 									</tr>
 								</tbody>
 							</table>
 						</th>
-						<th class="text-center bg-primary text-white">Hot | Warm | Cold</th>
-						<th class="text-center bg-primary text-white">Positive Enrollment</th>
-						<th class="text-center bg-primary text-white">Reserved</th>
-						<th class="text-center bg-primary text-white">Converted</th>
+						<th class="text-center bg-primary text-white" style="width:75px;">Hot | Warm | Cold</th>
+						<th class="text-center bg-primary text-white" style="width:60px;">Positive</th>
+						<th class="text-center bg-primary text-white" style="width:60px;">Reserved</th>
+						<th class="text-center bg-primary text-white" style="width:60px;">Converted</th>
 					</tr>
 				</thead>
 				<thead id="listCounselorTheader_log" class="hidden" >

@@ -329,6 +329,7 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
     $("#dashboardContentInHTML").html(getGraduationCeremonyAttendeesContent( "Graduation Ceremony Attendees", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
     loadGraduationCeremonyAttendees();
   }else if (pageNo == "payment") {
+	isDiscountApplied=false;
     $("#dashboardContentInHTML").html(getManagePaymentContent( "Payment Details", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE ) );
     getSessionMasterList("advancePaymentSearchForm", "academicSession", false);
     callCountries("advancePaymentSearchForm", "", "countryId");
@@ -383,6 +384,30 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
       format: "mm-dd-yyyy",
       disableTouch: false,
     });
+	$("#addCountryId").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#addPaymentModal"
+	});	
+	$("#addStateId").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#addPaymentModal"
+	});
+	$("#addCityId").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#addPaymentModal"
+	});
+	getAllCountryList('addPaymentModal','addCountryId');
+	$("select#addCountryId").on("change",function(){
+		callStates('addPaymentModal', this.value, 'addCountryId', 'addStateId');
+	});
+		
+	$("select#addStateId").on("change",function(){
+		callCities('addPaymentModal', this.value, 'addStateId', 'addCityId');
+	});
+  }else if(pageNo == "invoice"){
+	$("#dashboardContentInHTML").hide();
+	$("#dashboardContentInHTMLAdditional").show();
+	renderInvoiceContent("Y", "Y", "", true);
   }else if (pageNo == "approved-teachers") {
     $("#dashboardContentInHTML").html(renderApprovedTeacherDashboard( "Approved Teachers", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, "0","0,1", "approved" ));
   }else if (pageNo == "withdraw-teachers") {

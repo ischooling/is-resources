@@ -412,7 +412,7 @@ function getRequestForSignup(formId, moduleId){
 	signupDTO['gclid'] = getCookie('gclid');
 	signupDTO['utmCampaign'] = getCookie('ucam');
 	signupDTO['utmTerm'] = getCookie('ut');
-
+	signupDTO['landingPage'] = getCookie('lu');
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;

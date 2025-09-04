@@ -254,7 +254,12 @@ function getAllScholarschipUsersContent(schoolId){
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageBAS('serverError', data['message']);
 			} else {
-				html = getOptions(data.mastersData.data, "")
+				if(USER_ROLE=='STUDENT_COUNSELOR'){
+					html='<option value="'+USER_ID+'" selected >'+USER_FULL_NAME+'</option>';
+				}else{
+					html+='<option value="" selected>Select</option>';
+					html+=getOptions(data.mastersData.data, "");
+				}
 			}
 		}
 	});
@@ -685,7 +690,13 @@ function getCitiesOption(cities, preSelected){
 function getOptions(otions, preSelected){
 	var html=''
 	$.each(otions, function(k, v) {
-		html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
+		if(USER_ROLE=='STUDENT_COUNSELOR'){
+			if(v.key==USER_ID){
+				html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
+			}
+		}else{
+			html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
+		}
 	});
 	return html;
 }
@@ -714,8 +725,10 @@ function getSchoolContent(schoolId){
 function getPaymentTitle(formId, control,schoolId,optionFor, paymentType,eligibleForAdvance){
 	var html='';
 	if(optionFor=='REGISTRATION_FEE'){
-		html+='<option value="REGISTRATION_FEE">Reserve an Enrollment Seat</option>';
-	}else{
+		html+=`<option value="${optionFor}">Reserve an Enrollment Seat</option>`;
+	}else if(optionFor=='EXTERNAL_PAYMENT') {
+		html+=`<option value="${optionFor}">External Payment</option>`;
+	} else{
 		if(control=='A' || control=='AE'){
 			html+='<option value="SUBJECT_FEE">Student Installment Fee</option>'
 				+'<option value="BOOKSESSION_FEE">Teacher Assistance</option>';

@@ -241,7 +241,7 @@ function searchStudentByNameAndEmail() {
     });
 }
 
-function addExternalPayment(formId) {
+function addExternalPayment(formId, paymentTitle) {
     hideMessageTheme2('');
     $('#addPaymentModal').modal('show');
     $('.hideWhenlearningProgramFlexy').show();
@@ -257,17 +257,50 @@ function addExternalPayment(formId) {
     $('#' + formId + ' #standardId1').val('').trigger('change');
     $('#' + formId + ' #payableAmount').val('');
     $('#' + formId + ' #status1').val('0').trigger('change');
+    $('#' + formId + ' #addCountryId').val('0').trigger('change');
+    $('#' + formId + ' #addStateId').val('0').trigger('change');
+    $('#' + formId + ' #addCityId').val('0').trigger('change');
     $('#' + formId + ' #scheduleDate1').val('').datepicker("update");
     $('#' + formId + ' #paymentDate1').val('').datepicker("update");
-    $('#' + formId + ' #paymentType1').html(getPaymentTitle(formId, 'AE',$('#allSchoolId').val(), 'REGISTRATION_FEE'));
-    $('#' + formId + ' #paymentName1').val('Reserve an Enrollment Seat');
-    $('#' + formId + ' #paymentName1').prop('disabled',true);
+    $('#' + formId + ' #paymentType1').html(getPaymentTitle(formId, 'AE',$('#allSchoolId').val(), paymentTitle));
+    if(paymentTitle == "REGISTRATION_FEE"){
+        $('#' + formId + ' #paymentName1').val('Reserve an Enrollment Seat');
+        $('#' + formId + ' #paymentName1').prop('disabled',true);
+    }else{
+        $('#' + formId + ' #paymentName1').val('');
+        $('#' + formId + ' #paymentName1').prop('disabled',false);
+    }
     $('#addStudentPaymentbtn').show();
     // $('#studentEmail1').prop('onblur','getStudentDetailsForPayment(\'addStudentPaymentForm\',\'true\')');
     if ($("#descriptionDiv").next().length < 1) {
         initEditor(1, 'descriptionDiv', 'Put description if any', false);
     }
-    editor1.setData('Reserve an Enrollment Seat');
+    if(paymentTitle == "REGISTRATION_FEE"){
+        editor1.setData('Reserve an Enrollment Seat');
+    }else{
+        editor1.setData('');
+    }
+    if(paymentTitle == "REGISTRATION_FEE"){
+        $("#learningProgramWrapper").show();
+        $("#gradeWrapper").show();
+        $("#alternatePaymentWrapper").show();
+        $("#additionalFeeWrapper").show();
+        $("#countryWrapper").hide();
+        $("#stateWrapper").hide();
+        $("#cityWrapper").hide();
+        $("#studentEmail1").attr("onblur", "getStudentDetailsForPayment('addStudentPaymentForm', 'true')");
+        $("#userReferenceNoWrapper").addClass("col-xl-2").removeClass("col-xl-3");
+    }else{
+        $("#learningProgramWrapper").hide();
+        $("#gradeWrapper").hide();
+        $("#alternatePaymentWrapper").hide();
+        $("#additionalFeeWrapper").hide();
+        $("#countryWrapper").show();
+        $("#stateWrapper").show();
+        $("#cityWrapper").show();
+        $("#studentEmail1").removeAttr("onblur");
+        $("#userReferenceNoWrapper").addClass("col-xl-3").removeClass("col-xl-2");
+    }
 }
 
 function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, paymentNameFlag, marksPublished) {
@@ -375,15 +408,33 @@ function addStudentPayment(formId, moduleId) {
         showMessageTheme2(0, "Student name is mandatory.");
         return false;
     }
-    var learningProgram = $("#" + formId + " #learningProgram1").val();
-    if (learningProgram == null || learningProgram == undefined || learningProgram == '') {
-        showMessageTheme2(0, "Learning Program is mandatory.");
-        return false;
-    }
-    if(learningProgram != "ONE_TO_ONE_FLEX"){
-        var grade = $("#" + formId + " #standardId1").val();
-        if (grade == null || grade == undefined || grade == '') {
-            showMessageTheme2(0, "Grade is mandatory.");
+    if($("#paymentType1").val() == "REGISTRATION_FEE"){
+        var learningProgram = $("#" + formId + " #learningProgram1").val();
+        if (learningProgram == null || learningProgram == undefined || learningProgram == '') {
+            showMessageTheme2(0, "Learning Program is mandatory.");
+            return false;
+        }
+        if(learningProgram != "ONE_TO_ONE_FLEX"){
+            var grade = $("#" + formId + " #standardId1").val();
+            if (grade == null || grade == undefined || grade == '') {
+                showMessageTheme2(0, "Grade is mandatory.");
+                return false;
+            }
+        }
+    }else{
+        var country = $("#" + formId + " #addCountryId").val();
+        if (country == null || country == undefined || country == '') {
+            showMessageTheme2(0, "Country is mandatory.");
+            return false;
+        }
+        var state = $("#" + formId + " #addStateId").val();
+        if (state == null || state == undefined || state == '') {
+            showMessageTheme2(0, "State is mandatory.");
+            return false;
+        }
+        var city = $("#" + formId + " #addCityId").val();
+        if (city == null || city == undefined || city == '') {
+            showMessageTheme2(0, "City is mandatory.");
             return false;
         }
     }
@@ -519,14 +570,18 @@ function getRequestDataForAddPaymentDetails(formId, moduleId) {
     if ($("#" + formId + " #studentStandardId").val() == '') {
         addPaymentDTO['studentEmail'] = $("#" + formId + " #studentEmail1").val();
         addPaymentDTO['studentName'] = $("#" + formId + " #studentName1").val();
-        addPaymentDTO['learningProgram'] = $("#" + formId + " #learningProgram1").select2('val');
-        addPaymentDTO['standardId'] = $("#" + formId + " #standardId1").select2('val');
+        if($("#paymentType1").val() == "REGISTRATION_FEE"){
+            addPaymentDTO['learningProgram'] = $("#" + formId + " #learningProgram1").select2('val');
+            addPaymentDTO['standardId'] = $("#" + formId + " #standardId1").select2('val');
+        }
     } else {
         addPaymentDTO['studentStandardId'] = $("#" + formId + " #studentStandardId").val().trim();
         addPaymentDTO['studentEmail'] = $("#" + formId + " #studentEmail1").val();
         addPaymentDTO['studentName'] = $("#" + formId + " #studentName1").val();
-        addPaymentDTO['learningProgram'] = $("#" + formId + " #learningProgram1").select2('val');
-        addPaymentDTO['standardId'] = $("#" + formId + " #standardId1").select2('val');
+        if($("#paymentType1").val() == "REGISTRATION_FEE"){
+            addPaymentDTO['learningProgram'] = $("#" + formId + " #learningProgram1").select2('val');
+            addPaymentDTO['standardId'] = $("#" + formId + " #standardId1").select2('val');
+        }
     }
     addPaymentDTO['paymentTitle'] = $("#" + formId + " #paymentType1").select2('val');
     addPaymentDTO['paymentName'] = $("#" + formId + " #paymentName1").val().trim();
@@ -544,6 +599,12 @@ function getRequestDataForAddPaymentDetails(formId, moduleId) {
     addPaymentDTO['scheduleDate'] = $("#" + formId + " #scheduleDate1").val().trim();
     addPaymentDTO['transactionNumber'] = $("#" + formId + " #transactionNumber").val().trim();
     addPaymentDTO['schoolId'] = SCHOOL_ID;
+    if($("#paymentType1").val() == "REGISTRATION_FEE"){  
+    }else{
+        addPaymentDTO['countryId'] = $("#" + formId + " #addCountryId").val();
+        addPaymentDTO['stateId'] = $("#" + formId + " #addStateId").val();
+        addPaymentDTO['cityId'] = $("#" + formId + " #addCityId").val();
+    }
     if (editor1 != undefined) {
         addPaymentDTO['description'] = escapeCharacters(editor1.getData());
     }
@@ -699,11 +760,7 @@ function showPaymentPopup(id,controlType) {
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
-                    if (tt == 'theme1') {
-                        showMessage(false, data['message']);
-                    } else {
-                        showMessageTheme2(0, data['message'], '', true);
-                    }
+                    showMessageTheme2(0, data['message'], '', true);
                 }
             } else {
                 $('#showEditPopupContainer').html(editPaymentContent(roleAndModule.moduleId, data.userPaymentDetails,controlType,data.standardName));
