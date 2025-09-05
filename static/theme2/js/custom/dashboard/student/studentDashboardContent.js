@@ -6,6 +6,13 @@ function rendereDashboardContent(isParent){
     customLoader(true);
     $("body").append(batchImpAnnouncementModal())
     var data = getStudentDashboardOrMigrationSection();
+    // console.log(data)
+    if(data.showBatchReEnrollmentPopUp == "Y"){
+        $("body").append(batchReEnrollmentModal());
+        $("#batchReEnrollmentModal").modal("show");
+    }else{
+        $("#batchReEnrollmentModal").remove();
+    }
     if(data.studentGraduate == 'N'){
 		//student dashboard content
         if(data.showBatchImpAnnouncementModal=='Y'){
@@ -83,6 +90,7 @@ function rendereDashboardContent(isParent){
         }
     }
     getChat(data.email, USER_ROLE);
+    
 }
 
 async function renderStudentDashboard(data){
@@ -493,6 +501,26 @@ function studentGraduationCeremontPopup(){
                                     Fill Form to Join →
                                 </a>
                             </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
+}
+
+function batchReEnrollmentModal(){
+    var html = 
+        `<div id="batchReEnrollmentModal" class="modal fade bd-example-modal-lg fade-scale" data-backdrop="static" data-keyboard="false" tabindex="" role="dialog">
+            <div class="modal-dialog modal-dialog-centered box-shadow-none" role="document" style="max-width: 715px;">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary">
+                        <h5 class="modal-title text-white text-left">Important Announcement</h5>
+                    </div>
+                    <div class="modal-body">
+                        <h6 class="font-weight-semi-bold text-justify text-primary" style="line-height: 26px;">The last date to re-enroll for Group Learning is 15th September 2025 | Classes starting from 23 September 2025.</h6>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn bg-primary text-white float-right px-4 b-4" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
