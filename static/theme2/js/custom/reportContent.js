@@ -213,15 +213,17 @@ function getReportsTab(objRight){
 							<table class="w-100 table mb-0 bg-transparent">
 								<tbody>
 									<tr>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
-										<td class="font-10" style="width:11%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
-										<td class="font-10" style="width:11%;border:0;border-radius:0;">No Status</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Book</br/>Schedule</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-radius:0;">No Status</td>
 									</tr>
 								</tbody>
 							</table>

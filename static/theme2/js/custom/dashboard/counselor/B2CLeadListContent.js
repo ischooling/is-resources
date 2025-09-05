@@ -1731,6 +1731,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							}	
 							if(leads.leadStatus!='Converted'){
 								if(objRights.discardPermission){
+									var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
+									var discardFun ="return showNewDiscardLeadModelFunction(\'"+disFun+"\','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
+									html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 									// html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Ping to counselor" onclick="return openPopupAssignToCounselor(\''+leads.leadId+'\', \''+leads.assignTo+'\',\''+USER_ID+'\',\'1\',true,\'B2C\'); ">'
 									// +'<i class="fa fa-trash text-danger"></i></a><br/>';
 								}

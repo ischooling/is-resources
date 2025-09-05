@@ -587,12 +587,12 @@ function getReportsTab(objRight){
 						<th class="text-center bg-primary text-white" style="width:110px;"><span class="changeHeadText">Counselor</span> Name</th>
 						<th class="bg-primary text-white" style="width:80px;"><span class="text-left" style="width:80px;">Total Leads</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white" style="width:75px;"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
-						<th class="text-center bg-primary text-white" style="width:50px;">Unatt-ended</th>
+						<th class="text-center bg-primary text-white" style="width:50px;">Un-attended</th>
 						<th class="text-center bg-primary text-white">
 							<table class="w-100 table mb-0 bg-transparent">
 								<tbody>
 									<tr>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Booked</br>Scheduled</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>

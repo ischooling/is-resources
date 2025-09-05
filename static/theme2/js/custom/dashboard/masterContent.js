@@ -239,13 +239,26 @@ function getLearningProgramContent(schoolId){
 	return html;
 }
 
-function getAllScholarschipUsersContent(schoolId){
+function getRequestForScholarschipUsers(key, userId){
+	var request = {};
+	var requestData = {};
+	var authentication = {};
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	requestData['requestKey'] = key;
+	requestData['requestValue'] = userId;
+	request['requestData'] = requestData;
+	request['authentication'] = authentication;
+	return request;
+}
+
+function getAllScholarschipUsersContent(userId){
 	var html='';
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForLearningProgramList('ALL_SCHOLARSHIP_USER', schoolId)),
+		data: JSON.stringify(getRequestForScholarschipUsers('ALL_SCHOLARSHIP_USER', userId)),
 		dataType: "json",
 		cache: false,
 		timeout: 600000,
@@ -254,12 +267,10 @@ function getAllScholarschipUsersContent(schoolId){
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageBAS('serverError', data['message']);
 			} else {
-				if(USER_ROLE=='STUDENT_COUNSELOR'){
-					html='<option value="'+USER_ID+'" selected >'+USER_FULL_NAME+'</option>';
-				}else{
-					html+='<option value="" selected>Select</option>';
-					html+=getOptions(data.mastersData.data, "");
+				if(data.mastersData.data.length>1){
+					html+='<option value="">Select User</option>';
 				}
+				html+=getOptions(data.mastersData.data, "");
 			}
 		}
 	});
@@ -690,13 +701,7 @@ function getCitiesOption(cities, preSelected){
 function getOptions(otions, preSelected){
 	var html=''
 	$.each(otions, function(k, v) {
-		if(USER_ROLE=='STUDENT_COUNSELOR'){
-			if(v.key==USER_ID){
-				html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
-			}
-		}else{
-			html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
-		}
+		html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
 	});
 	return html;
 }
@@ -1493,16 +1498,16 @@ function getToYears(lastJobFromYYYY) {
 }
 
 function getRequestForLearningProgramList(key, schoolId){
-var request = {};
-var requestData = {};
-var authentication = {};
-authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-authentication['userType'] = 'COMMON';
-requestData['requestKey'] = key;
-requestData['requestValue'] = schoolId;
-request['requestData'] = requestData;
-request['authentication'] = authentication;
-return request;
+	var request = {};
+	var requestData = {};
+	var authentication = {};
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	requestData['requestKey'] = key;
+	requestData['requestValue'] = schoolId;
+	request['requestData'] = requestData;
+	request['authentication'] = authentication;
+	return request;
 }
 
 function updateLearningPrograms(formId, elementId){

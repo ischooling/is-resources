@@ -7573,16 +7573,30 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 			var igleadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','iglead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 
 			var unattendedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','unattendedLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			
+			var demoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadNotConfirm="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotConfirm-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadWebsiteLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalWebsiteDemo-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+			var demoLeadCopyLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalCopyUrlDemo-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
 
-			var demoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-			var demoLeadNotConfirm="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotConfirm-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadNotConfirm="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotConfirm-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadWebsiteLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalWebsiteDemo-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+			var bookDemoLeadCopyLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalCopyUrlDemo-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
 
 
 			var positiveLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','positiveLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
@@ -7608,18 +7622,33 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				facebookleadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','facebooklead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 				FbleadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','fblead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 				igleadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','iglead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-
 				unattendedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','unattendedLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+				
+				demoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadNotConfirm="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotConfirm-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadWebsiteLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalWebsiteDemo-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
+				demoLeadCopyLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalCopyUrlDemo-"+assignTo+"-demo','"+countryId+"', '"+campaignId+"')";
 
-				demoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
-				demoLeadNotConfirm="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotConfirm-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
+
+				bookDemoLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoLead-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadDoneLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demodone-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadPendingLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoPending-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadCancelLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoCancel-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadInterestLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoInterested-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadNotIntrestedLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotInterested-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadRescheduleLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoReschedule-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadNotShowLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotShow-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadNotConfirm="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','demoNotConfirm-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadWebsiteLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalWebsiteDemo-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+				bookDemoLeadCopyLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','totalCopyUrlDemo-"+assignTo+"-book','"+countryId+"', '"+campaignId+"')";
+
 
 				positiveLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','positiveLead-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 				hotLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','hottotal-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
@@ -7674,37 +7703,37 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				// ---------- BK row ----------
 				htmlRet += "<tr style=\"border-bottom: 1px solid #000;\">";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<span class=\"mr-2\">B-</span><a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<span style=\"margin-right: 30px;\">B</span><a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadLink + "\">" + leadCounselor.totalBookDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadWebsiteLink + "\">" + leadCounselor.totalBookWebDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadCopyLink + "\">" + leadCounselor.totalBookLinkDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadDoneLink + "\">" + leadCounselor.totalDemoDone + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadDoneLink + "\">" + leadCounselor.totalBookDemoDone + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadInterestLink + "\">" + leadCounselor.totalDemoInterested + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadInterestLink + "\">" + leadCounselor.totalBookDemoInterested + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotConfirm + "\">" + leadCounselor.totalDemoNotConfirm + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotConfirm + "\">" + leadCounselor.totalBookDemoNotConfirm + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadRescheduleLink + "\">" + leadCounselor.totalDemoReschedule + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadRescheduleLink + "\">" + leadCounselor.totalBookDemoReschedule + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotShowLink + "\">" + leadCounselor.totalDemoNotShow + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotShowLink + "\">" + leadCounselor.totalBookDemoNotShow + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadCancelLink + "\">" + leadCounselor.totalDemoCancel + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadCancelLink + "\">" + leadCounselor.totalBookDemoCancel + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotIntrestedLink + "\">" + leadCounselor.totalDemoNotInterested + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotIntrestedLink + "\">" + leadCounselor.totalBookDemoNotInterested + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadPendingLink + "\">" + leadCounselor.totalDemoPending + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadPendingLink + "\">" + leadCounselor.totalBookDemoPending + "</a></td>";
 				htmlRet += "</tr>";
 
 				// ---------- SH row ----------
 				htmlRet += "<tr>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<span class=\"mr-2\">S-</span><a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<span style=\"margin-right: 30px;\">S</span><a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadWebsiteLink + "\">" + leadCounselor.totalWebDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadCopyLink + "\">" + leadCounselor.totalLinkDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
 				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadDoneLink + "\">" + leadCounselor.totalDemoDone + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
@@ -7757,9 +7786,11 @@ function getLeadCounselorFootHtml(data, fontSize){
 	var sr=1;
 	var totalLeads=0;
 	var totalFbLeads=0;
+
+	var totalWebDemo=0;
+	var totalLinkDemo=0;
 	var totalDemo=0;
 	var totalDemoDone=0;
-
 	var totalDemoPending=0;
 	var totalDemoCancel=0;
 	var totalDemoInterested=0;
@@ -7767,6 +7798,18 @@ function getLeadCounselorFootHtml(data, fontSize){
 	var totalDemoNotShow=0;
 	var totalDemoReschedule=0;
 	var totalDemoNotConfirm=0;
+
+	var totalBookWebDemo=0;
+	var totalBookLinkDemo=0;
+	var totalBookDemo=0;
+	var totalBookDemoDone=0;
+	var totalBookDemoPending=0;
+	var totalBookDemoCancel=0;
+	var totalBookDemoInterested=0;
+	var totalBookDemoNotInterested=0;
+	var totalBookDemoNotShow=0;
+	var totalBookDemoReschedule=0;
+	var totalBookDemoNotConfirm=0;
 
 	var totalHot=0;
 	var totalCold=0;
@@ -7787,9 +7830,11 @@ function getLeadCounselorFootHtml(data, fontSize){
 			totalLeads+=leadCounselor.totalLead;
 			duplicateLeadCount+=leadCounselor.duplicateLeadCount;
 			totalFbLeads+=leadCounselor.totalFbLead;
+
+			totalWebDemo+=leadCounselor.totalWebDemo;
+			totalLinkDemo+=leadCounselor.totalLinkDemo;
 			totalDemo+=leadCounselor.totalDemo;
 			totalDemoDone+=leadCounselor.totalDemoDone;
-
 			totalDemoPending+=leadCounselor.totalDemoPending;
 			totalDemoCancel+=leadCounselor.totalDemoCancel;
 			totalDemoReschedule+=leadCounselor.totalDemoReschedule;
@@ -7797,6 +7842,18 @@ function getLeadCounselorFootHtml(data, fontSize){
 			totalDemoNotInterested+=leadCounselor.totalDemoNotInterested;
 			totalDemoNotShow+=leadCounselor.totalDemoNotShow;
 			totalDemoNotConfirm+=leadCounselor.totalDemoNotConfirm;
+
+			totalBookWebDemo+=leadCounselor.totalBookWebDemo;
+			totalBookLinkDemo+=leadCounselor.totalBookLinkDemo;
+			totalBookDemo+=leadCounselor.totalBookDemo;
+			totalBookDemoDone+=leadCounselor.totalBookDemoDone;
+			totalBookDemoPending+=leadCounselor.totalBookDemoPending;
+			totalBookDemoCancel+=leadCounselor.totalBookDemoCancel;
+			totalBookDemoReschedule+=leadCounselor.totalBookDemoReschedule;
+			totalBookDemoInterested+=leadCounselor.totalBookDemoInterested;
+			totalBookDemoNotInterested+=leadCounselor.totalBookDemoNotInterested;
+			totalBookDemoNotShow+=leadCounselor.totalBookDemoNotShow;
+			totalBookDemoNotConfirm+=leadCounselor.totalBookDemoNotConfirm;
 
 			totalHot+=leadCounselor.totalHot;
 			totalCold+=leadCounselor.totalCold;
@@ -7829,24 +7886,24 @@ function getLeadCounselorFootHtml(data, fontSize){
 
 	// 🔹 Booked (Bk) Row
 	htmlRet += "<tr style=\"border-bottom: 1px solid #000\">";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span class=\"mr-2\">B-</span>" + totalDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoDone + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoInterested + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoNotConfirm + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoReschedule + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoNotShow + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoCancel + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoNotInterested + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoPending + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span style=\"margin-right: 30px;\">B</span>" + totalBookDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookWebDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookLinkDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoDone + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoInterested + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotConfirm + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoReschedule + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotShow + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoCancel + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotInterested + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoPending + "</td>";
 	htmlRet += "</tr>";
 
 	// 🔹 Scheduled (Sh) Row
 	htmlRet += "<tr>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span class=\"mr-2\">S-</span>" + totalDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span style=\"margin-right: 30px;\">S</span>" + totalDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalWebDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalLinkDemo + "</td>";
 	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoDone + "</td>";
 	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoInterested + "</td>";
 	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoNotConfirm + "</td>";
@@ -7920,14 +7977,17 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	html+='<table class="w-100 table mb-0 bg-transparent">';
 	html+='<tbody>';
 	html+='<tr>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Demo Booked</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>';
-	html+='<td class="font-10" style="width:12%;border:0;border-radius:0;">No Status</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Book</br/>Schedule</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-radius:0;">No Status</td>';
 	html+='</tr>';
 	html+='</tbody>';
 	html+='</table>';
