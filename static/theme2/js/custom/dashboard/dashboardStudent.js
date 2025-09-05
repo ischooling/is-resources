@@ -1096,7 +1096,7 @@ function saveTeacherTimePreferenceStudent(stepFlag) {
 			return false;
 		}
 	}
-	if((enrollmentType=='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE') && (saveType=='ORIENT' || saveType=='RESH')){
+	if((saveType=='ORIENT' || saveType=='RESH')){
 		if ($(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime") == null || $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime") == undefined || $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime") == '') {
 			showMessageTheme2(0, "Please choose your school system training time.", '', true);
 			return false;
@@ -1121,7 +1121,7 @@ function saveTeacherTimePreferenceStudent(stepFlag) {
 			}else{
 				if(stepFlag == "academicYear"){
 					var academicYearSelectedType = "Y";
-					var systemTrainingSelectedType = "N";
+					var systemTrainingSelectedType = "Skipped";
 					showMessageTheme2(1, data['message'], '', true,10000);
 				}else if(stepFlag == "systemtraining"){
 					var academicYearSelectedType = "Y";
@@ -1131,12 +1131,12 @@ function saveTeacherTimePreferenceStudent(stepFlag) {
 					var stdt = systemTrainingDate + " " + bookStTime;
 					showMessageTheme2(1, data['message'], '', true);
 				}
-				if((enrollmentType =='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE')){
+				// if((enrollmentType =='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE')){
 					showContentByStep(academicYearSelectedType, systemTrainingSelectedType, startSemsterStartDate == "" ? $("#chooseDateSystemTrainingDate").val() : startSemsterStartDate, stdt)
-				}else{
-					// window.location.href=redirectUrl;
-					showContentByStep(academicYearSelectedType, "Skipped", startSemsterStartDate, '')
-				}
+				// }else{
+				// 	// window.location.href=redirectUrl;
+				// 	showContentByStep(academicYearSelectedType, "Skipped", startSemsterStartDate == "" ? $("#chooseDateSystemTrainingDate").val() : startSemsterStartDate, '')
+				// }
 			}
 			return false;
 		}
@@ -1161,8 +1161,10 @@ function getRequestForStudentTimePreference(){
 	teacherAssignTime['startDate']=$('#chooseDateSystemTrainingDate').val();
 	var enrollmentType = $("#enrollmentType").val();
 	if(enrollmentType !='REGISTRATION_FRESH' && enrollmentType !='REGISTRATION_FLEX_COURSE'){
-		startDate=changeDateFormat(new Date($('#chooseDateToStartSemster').val()),"mm-dd-yyyy");
-		teacherAssignTime['startDate']=$('#chooseDateToStartSemster').val();
+		if($("#saveType").val()=='SKIP'){
+			startDate=changeDateFormat(new Date($('#chooseDateToStartSemster').val()),"mm-dd-yyyy");
+			teacherAssignTime['startDate']=$('#chooseDateToStartSemster').val();
+		}
 	}
 	teacherAssign['semesterStartDate']=startDate;
 	if($("#saveType").val()=='ORIENT'){
@@ -1171,25 +1173,24 @@ function getRequestForStudentTimePreference(){
 		teacherTimeList.push(teacherAssignTime);
 	}
 	
-	if(enrollmentType=='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE'){
-		if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
-			var userbookDate = $('#chooseDateSystemTrainingDate').val();
-			var bookStTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotsttime");
-			var bookEnTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime");
-			var duration = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotduration");
-			console.log(bookStTime)
-			console.log(bookEnTime)
-			teacherAssign['bookDate']=userbookDate;
-			teacherAssign['bookStartTime']=bookStTime;
-			bookStTime=bookStTime.split(':')
-			var fromT = new Date(1990, 1, 1, bookStTime[0], bookStTime[1], 0);
-			var timestamp = Date.parse(fromT);
-			var dateObject = new Date(timestamp);
-			var timeinter = getTimePlusInterval(dateObject,duration);
-			var bookEnTime = convertTo24Hour(timeinter);
-			teacherAssign['bookEndTime']=bookEnTime+':00';
-		}
+	if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
+		var userbookDate = $('#chooseDateSystemTrainingDate').val();
+		var bookStTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotsttime");
+		var bookEnTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime");
+		var duration = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotduration");
+		console.log(bookStTime)
+		console.log(bookEnTime)
+		teacherAssign['bookDate']=userbookDate;
+		teacherAssign['bookStartTime']=bookStTime;
+		bookStTime=bookStTime.split(':')
+		var fromT = new Date(1990, 1, 1, bookStTime[0], bookStTime[1], 0);
+		var timestamp = Date.parse(fromT);
+		var dateObject = new Date(timestamp);
+		var timeinter = getTimePlusInterval(dateObject,duration);
+		var bookEnTime = convertTo24Hour(timeinter);
+		teacherAssign['bookEndTime']=bookEnTime+':00';
 	}
+	
 	
 	//return false;
 	teacherAssign['teacherTimeList']=teacherTimeList;
@@ -1210,8 +1211,14 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			$("#saveType").val("ORIENT");
 			if(($('#enrollmentType').val() !='REGISTRATION_FRESH' && $('#enrollmentType').val() !='REGISTRATION_FLEX_COURSE')){
 				$("#saveType").val("SKIP");
-				$(".academic-step").show();
-				$(".school-system-training-step, .moveToDashboard-step").hide();
+				if(systemTrainingSelectedType=='N'){
+					$("#saveType").val("ORIENT");
+					$(".school-system-training-step").show();
+					$(".academic-step, .moveToDashboard-step").hide();
+				}else{
+					$(".academic-step").show();
+					$(".school-system-training-step, .moveToDashboard-step").hide();
+				}
 			}else{
 				$(".school-system-training-step").show();
 				$(".academic-step, .moveToDashboard-step").hide();
