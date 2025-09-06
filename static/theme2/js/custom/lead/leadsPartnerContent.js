@@ -192,7 +192,7 @@ function getCreatePartnerContent(buttonTitle){
 							+'<label class="m-0">Partner Type</label>'
 							+'<select name="originalPartnerType" id="originalPartnerType" class="form-control">'
 								+'<option value="">Select Partner Type</option>'
-								+'<option value="GP">General Partner</option>'
+								+'<option value="GP">Enrollment Partner</option>'
 								+'<option value="WLP">Self School or Academy</option>'
 							+'</select>'
 						+'</div>'

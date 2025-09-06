@@ -238,7 +238,7 @@ function getReportsTab(objRight){
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
 						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Counselor</span> Name</th>
-						<th class="text-center bg-primary text-white">Call</th>
+						<th class="text-center bg-primary text-white">Call | Call Hippo</th>
 						<th class="text-center bg-primary text-white">Wati</th>
 						<th class="text-center bg-primary text-white">Whatsapp</th>
 						<th class="text-center bg-primary text-white">Mail</th>
