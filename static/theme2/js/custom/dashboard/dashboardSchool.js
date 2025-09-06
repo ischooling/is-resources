@@ -1,7 +1,5 @@
 function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
-  $("#dashboardContentInHTML").show();
-	$("#dashboardContentInHTMLAdditional").html();
-	$("#dashboardContentInHTMLAdditional").hide();
+  showAndHideDashboardAndAdditionalContent("main");
   if(!getSession()){
       redirectLoginPage();
       return false;
@@ -929,6 +927,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     );
     //IF RETURN HTML NOT RETURN FROM JSP
   } else if (pageNo == "create-manage-sessions") {
+    showAndHideDashboardAndAdditionalContent("additional");
     callForDashboardData(
       "formIdIfAny",
       "teacher-create-session-content?moduleId=" + moduleId

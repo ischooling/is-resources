@@ -3562,7 +3562,6 @@ function callCourseCategoryByGradeId(
     timeout: 600000,
     async: false,
     success: function (data) {
-      debugger;
       if (data["status"] == "0" || data["status"] == "2") {
         showMessageTheme2(1, data["message"]);
       } else {
@@ -6042,4 +6041,16 @@ function safeUUID() {
     const v = c === "x" ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+function showAndHideDashboardAndAdditionalContent(type){
+  if(type == "main"){
+    $("#dashboardContentInHTML").show();
+    $("#dashboardContentInHTMLAdditional").html();
+    $("#dashboardContentInHTMLAdditional").hide();
+  }else if(type == "additional"){
+    $("#dashboardContentInHTML").hide();
+    $("#dashboardContentInHTMLAdditional").html();
+    $("#dashboardContentInHTMLAdditional").show();
+  }
 }
