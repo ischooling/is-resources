@@ -8266,8 +8266,6 @@ function getCallHippoLogs(number){
     });
 }
 
-DataModal
-
 function removeRecordingModel(modalId){
 	$(".modal-backdrop").remove();
 	$("#" + modalId).remove();
