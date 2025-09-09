@@ -492,6 +492,7 @@ function updateSystemTraningModal(meetingId, leadId){
 										+'<select name="status" id="status" class="form-control">'
 											+'<option value="">Select Status</option>'
 											+'<option value="COMPLETED">Completed</option>'
+											+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
 											+'<option value="NOTATTENDED">No Show</option>'
 											+'<option value="CANCELLED">Cancelled</option>'
 											+'<option value="RESCHEDULE">Reschedule</option>'

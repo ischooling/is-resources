@@ -5821,11 +5821,10 @@ function generateTinyUrls() {
   });
   const urls = Object.keys(uniqueUrls);
   if (!urls.length) {
-    // console.log("No URLs found to shorten");
     $copyElements.prop("disabled", false).css({ pointerEvents: "", opacity: "" });
     return;
   }
-  fetch("https://www.issg.co/api/create-short-urls", {
+  fetch("https://internationalschooling.org/api/create-short-urls", {
     method: "POST",
     headers: {
       "Content-Type": APPLICATION_JSON_VALUE,

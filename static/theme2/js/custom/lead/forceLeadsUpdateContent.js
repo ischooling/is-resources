@@ -218,6 +218,7 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 						<select name="status_`+i+`" id="status_`+i+`" class="form-control status" onchange="getTantativDate(`+i+`);">
 							<option value="">Select Status</option>
 							<option value="COMPLETED">Completed</option>
+							<option value="COMPLETED-ON-CALL">Completed on Call</option>'
 							<option value="NOTATTENDED">No Show</option>
 							<option value="CANCELLED">Cancelled</option>
 							<option value="RESCHEDULE">Reschedule</option>
@@ -437,7 +438,7 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 		$.each(data, function(i,v){
 			var standard=v.standardname!=''?v.standardname.replace('Grade ',''):'';
 			html+=
-			`<tr data-leadId=`+v.leadId+` data-userId=`+v.userId+`>
+			`<tr data-leadId=`+v.leadId+` data-meetingId=`+v.meetingId+`  data-userId=`+v.userId+`>
 				<td class="py-1" style="vertical-align: top;">
 					<span class="full">`+v.userFullName+`</span>
 					<span class="full">`+v.leadDateTime+`</span>
@@ -488,7 +489,14 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 
 						<select name="demo_status_`+i+`" id="demo_status_`+i+`" class="form-control status">
 							<option value="">Select Status</option>
-							${statusListHtml}
+							<option value="COMPLETED">Completed</option>
+							<option value="COMPLETED-ON-CALL">Completed on Call</option>'
+							<option value="NOTATTENDED">No Show</option>
+							<option value="CANCELLED">Cancelled</option>
+							<option value="RESCHEDULE">Reschedule</option>
+							<option value="Demo Confirmed">Demo Confirmed</option>
+							<option value="Demo Not Confirmed">Demo Not Confirmed</option>
+							<option value="Not Interested">Not Interested</option>
 						</select>
 					</div>
 				</td>

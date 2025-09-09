@@ -212,6 +212,8 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	callCampainWise("DAY", "lead-source","chart-lead-source",'','');
 
 	callDeviceCount("DAY","chart-pie-device",'','');
+	
+	
 
 	$("#searchtypeTotalLead").on("change", function(){
 		if($("#searchtypeTotalLead").val()=='CUSTOM'){
@@ -221,6 +223,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 			callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",'','');
 			callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",'','');
 			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",'','');
+			
 		}
 	});
 
@@ -766,11 +769,27 @@ function getLeadReportChart(objRights){
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-lg-6 col-md-12">
+		<div class="col-lg-4 col-md-12">
 			<div class="main-card mb-3 card">
 				<div class="card-body">
 				<h5 class="card-title">Device Wise</h5>
 					<div id="chart-pie-device"></div>
+				</div>  
+			</div>   
+		</div>
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Device Wise</h5>
+					<div id="chart-pie-device-type"></div>
+				</div>  
+			</div>   
+		</div>
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Browser Wise</h5>
+					<div id="chart-pie-browser"></div>
 				</div>  
 			</div>   
 		</div>

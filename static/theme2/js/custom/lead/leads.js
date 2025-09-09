@@ -11575,6 +11575,8 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 						showMessage(true, data['message']);
 					} else {
 						var htChart = getLeadsDeviceCountChart(data, chartId);
+						getLeadsBrowserCountChart(data);
+						getLeadsDeviceTypeCountChart(data);
 					}
 				}
 			});
@@ -11584,9 +11586,9 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 	
 	function getLeadsDeviceCountChart(data, chartId){
 	
-			var options = {
-				series: [data.webTotal, data.mobileTotal],
-				chart: {
+		var options = {
+			series: [data.webTotal, data.mobileTotal],
+			chart: {
 				width: '85%',
 				type: 'pie',
 			},
@@ -11619,6 +11621,80 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 	
 			
 		var chart = new ApexCharts(document.querySelector("#"+chartId), options);
+		chart.render();   
+		chart.update();
+	
+		
+	}
+
+
+	function getLeadsDeviceTypeCountChart(data){
+	
+		var options = {
+			series: [ data.winTotal, data.macTotal, data.androidTotal, data.iphoneTotal, data.ipodTotal],
+			chart: {
+				width: '85%',
+				type: 'pie',
+			},
+			labels: ["Window", "MacOs", "Android", "iPhone", "iPod" ],
+			theme: {
+				monochrome: {
+				enabled: true
+				}
+			},
+			plotOptions: {
+				pie: {
+				dataLabels: {
+						offset: -5
+					}
+				}
+			},
+			title: {
+				text: ""
+			},
+			dataLabels: {
+				formatter(val, opts) {
+					const name = opts.w.globals.labels[opts.seriesIndex]
+					return [name, val.toFixed(1) + '%']
+				}
+			},
+			legend: {
+				show: false
+			}
+		};
+	
+			
+		var chart = new ApexCharts(document.querySelector("#chart-pie-device-type"), options);
+		chart.render();   
+		chart.update();
+	
+		
+	}
+
+
+
+	
+	function getLeadsBrowserCountChart(data){
+	
+			var options = {
+				series: [data.chromeTotal, data.fireFoxTotal, data.safariTotal, data.edgeTotal, data.otherTotal],
+				labels: ['Chrome','FireFox','Safari','Edge','Other'],
+				chart: {
+					type: 'donut',
+					width: '85%',
+					height:360
+				},
+				responsive: [{
+					breakpoint: 480,
+					options: {
+						legend: {
+							position: 'bottom'
+						}
+					}
+					}]	
+        	};
+			
+		var chart = new ApexCharts(document.querySelector("#chart-pie-browser"), options);
 		chart.render();   
 		chart.update();
 	

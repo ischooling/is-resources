@@ -1524,7 +1524,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<td class="border-0 p-1">'+(leads.leadDemoIstDate!=''?leads.leadDemoIstDate:'N/A')+'</td>'
 								+'</tr>';
 								html+='<tr  class="" >'
-									+'<th class="border-0 p-1">Status:</th>'
+									+'<th class="border-0 p-1">Demo Status:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
 								+'</tr>'
 								+'<tr  class="" >'
@@ -1573,7 +1573,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									
 								}	
 								html+='<tr>'
-									+'<th class="border-0 p-1" style="width:165px">Remarks:</th>'
+									+'<th class="border-0 p-1" style="width:165px">Last Remarks:</th>'
 									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">'+(leads.followupRemark!=''?leads.followupRemark:'N/A')
 										// +'<div class="dropdown d-inline-block" style="position: inherit;">'
 										// 	+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remarks</button>'

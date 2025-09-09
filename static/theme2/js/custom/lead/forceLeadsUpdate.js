@@ -492,6 +492,7 @@ function updateBulkDemosStatus(remarkMendatory,minRemarkCount) {
 		// ✅ If status selected, push row data
 		if (demo2Status != '') {
 			var ddata = {};
+			ddata['meetingId']=$(this).attr("data-meetingId");
 			ddata['leadId'] = $(this).attr("data-leadId");
 			ddata['userId'] = $(this).attr("data-userId");
 			ddata['schoolId'] = SCHOOL_ID;
@@ -519,8 +520,8 @@ function updateBulkDemosStatus(remarkMendatory,minRemarkCount) {
 	 $.ajax({
 		 type : "POST",
 		 contentType : APPLICATION_JSON_VALUE,
-		 url : getURLForHTML('dashboard','update-bulk-lead-status'),
-		 data : JSON.stringify(getRequestForFollowupSaveFromLeadListForBulk(data)),
+		 url : getURLForHTML('dashboard','update-bulk-meeting-status'),
+		 data : JSON.stringify(data),
 		 dataType : 'json',
 		 async:true,
 		 success : function(data) {
