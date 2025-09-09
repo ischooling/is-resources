@@ -296,12 +296,11 @@ async function bookingSlotModalNew(
           currentDate = new Date($("#bookingDate").val());
         }
         var availabilityData = await getTeacherTimeToShowWeeklyCalendar(
-          subjectId,
           response["assignedTeacherUserId"],
           "STUDENT",
           "WEEK",
           response["studentStandardId"],
-          currentDate
+          currentDate, subjectId
         );
 
         if ($("#weeklyBookClassModal").length > 0) {

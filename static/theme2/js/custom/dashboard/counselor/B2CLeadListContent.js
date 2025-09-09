@@ -1523,21 +1523,6 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Date & Time:</th>'
 									+'<td class="border-0 p-1">'+(leads.leadDemoIstDate!=''?leads.leadDemoIstDate:'N/A')+'</td>'
 								+'</tr>';
-								if(leads.userConfirmation!=''){
-									var usrConfirm='';
-									var c_color='';
-									if(leads.userConfirmation=='Y'){
-										usrConfirm='Confirmed';
-										c_color='bg-success text-white';
-									}else if(leads.userConfirmation=='N'){
-										usrConfirm='Not Confirmed';
-										c_color='bg-warning';
-									}
-									html+='<tr>'
-										+'<th class="border-0 p-1">User Confirmation:</th>'
-										+'<td class="border-0 p-1 bold '+c_color+'" >'+usrConfirm+'</td>'
-									+'</tr>';
-								}
 								html+='<tr  class="" >'
 									+'<th class="border-0 p-1">Status:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
