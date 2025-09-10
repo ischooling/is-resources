@@ -667,6 +667,13 @@ input::placeholder {
 	
 }
 
+@media ( max-width: 580px) {
+	.actions ul {
+		justify-content:center;
+		gap: 10px;
+	}
+}
+
 
 /* custom style css */
 
