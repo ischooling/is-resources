@@ -57,7 +57,7 @@ hr{width: 100%;display: inline-block;border:1px solid rgba(255, 255, 255, 0.5) !
 .m-auto{margin: 0 auto}
 .mr-auto{margin-right:auto}
 .ml-auto{margin-left:auto}
-
+.mobile-view{display: none;}
 /* server message css */
 .server-message{width: 100%;text-align: center;position: fixed;top:0px;right:0px;z-index: 99999999;display: none;
 	transform: translateY(-100%);-webkit-transform: translateY(-100%);-ms-transform: translateY(-100%);
@@ -181,6 +181,7 @@ body{font-family:opensans-regular !important}
 @media(max-width: 580px){
 	.learning-type{color:var(--pc)}
 	.desktop-view{display: none !important;}
+	.mobile-view{display: flex;justify-content: center;}
 	.left-section.theme-bg{background: #fff !important;}
 	.left-section .head .mobile-view {display: flex;flex-wrap: wrap;align-items: flex-start;}
 	.left-section .head .mobile-view a{display: inline-block;padding: 2px 10px;background: #fff;border-radius: 5px;}
@@ -204,8 +205,11 @@ body{font-family:opensans-regular !important}
 	.right-section .form ul li .field-icon i{font-size: 14px;}
 	.right-section .form ul li .field-title{margin-left: 35px;}
 	
+
+
 	.right-section .form ul li .form-field{margin-bottom:8px;}
-	.signupButton{float: none; margin: 10px auto 0px auto; display: block !important; padding: 5px;}
+	.complete_process{font-size: 16px;}
+	#signupButton{float: none; margin: 10px auto 0px auto; display: block !important; padding: 5px 8px;}
 	.terms-policy{text-align: center;}
 	.terms-policy-wrapper{text-align: left;}
 	.error-msg{bottom:0;}
@@ -216,8 +220,10 @@ body{font-family:opensans-regular !important}
 	.emailValidatorModalBody{padding: 25px 10px;}
 	#checkTerms-error-message.error-msg{text-align: left !important;}
 
+
 }
 @media(max-width: 350px){
+	
 	#signupButton{margin-top:15px;}
 	.mobile-view .registration-img{position: inherit;right: inherit;}
 	.left-section .registration-img .round-label{font-size: 16px;}
