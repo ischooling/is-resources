@@ -1262,7 +1262,7 @@ function nextPage(currentPage){
 	if(OBJECT_RIGHTS.leadFrom=='advance-search'){
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', ''+OBJECT_RIGHTS.clickFrom+'-'+OBJECT_RIGHTS.clickUserid+'', '0', 'new', true,'totalleads', OBJECT_RIGHTS, ROLE_MODULE);
 	}else{
-		var urlSend = '/dashboard/lead-data-list?moduleId=111&leadFrom='+OBJECT_RIGHTS.leadFrom+'&clickFrom='+OBJECT_RIGHTS.clickFrom+'&currentPage='+currentPage+'&euid='+encuid+'&leadType=B2B';
+		var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId=0&leadFrom='+OBJECT_RIGHTS.leadFrom+'&clickFrom='+OBJECT_RIGHTS.clickFrom+'&currentPage='+currentPage+'&euid='+encuid+'&leadType=B2B';
 		getAsPost(urlSend);
 		customLoader(false)
 	}

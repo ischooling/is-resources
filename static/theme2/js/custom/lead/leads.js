@@ -340,7 +340,7 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
 					 if(leadFrom=='dashboard'){
 						 $("#addNewLeadModal").modal('hide');
 						 $(".modal-backdrop").remove();
-						 var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType='+leadType
+						 var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadId=0&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType='+leadType
 						 getAsPost(urlSend);
 						 customLoader(false)
 					 }else{
@@ -843,7 +843,7 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 					 }else{
 						 advanceLeadSearchStudent('advanceLeadNewSearchForm',roleModuleId, 'advance-search','list' ,data['extra'],'new', true,'', leadType);
 					 }
-					 // var urlSend = '/dashboard/lead-data-list?moduleId='+roleModuleId+'&leadFrom=LEAD&clickFrom=list&currentPage='+data['extra']+'&leadId=0&euid='+ENCRYPTED_USER_ID;
+					 // var urlSend = '/dashboard/lead-data-list?moduleId='+roleModuleId+'&leadId=0&leadFrom=LEAD&clickFrom=list&currentPage='+data['extra']+'&leadId=0&euid='+ENCRYPTED_USER_ID;
 					 // getAsPost(urlSend);
 					 customLoader(false)
 				 }, 300);
@@ -6378,8 +6378,14 @@ function getLeadCampaignWiseHtml(data){
 			htmlRet +="<td style=\"vertical-align: top !important;min-width:180px\" class=\"text-center\"><span class=\"badge badge-pill badge-dark font-10\">$"+leadCampaign.totalSpend+"</span><br/><span class=\"badge badge-pill badge-primary font-10\">$"+perLeadSmsSpent.toFixed(2)+"</span> | <span class=\"badge badge-pill badge-info font-10\">$"+perLeadFbSpent.toFixed(2)+"</span> </td>";
 			htmlRet +="<td class=\"rounded-bottom-right-10\">";
 			var sizeCounselor=(leadCampaign.assignNames.length);
+			// totalDemo=totalDemo+ parseInt(leadCampaign.totalDemoLead);
+			// totalDemoDone=totalDemoDone+ parseInt(leadCampaign.totalDemoDone);
+			// totalWebDemo=totalWebDemo+parseInt(leadCampaign.totalWebDemoLead);
+			// totalCopyDemo=totalCopyDemo+parseInt(leadCampaign.totalCopyDemoLead);
+			// totalConvert=totalConvert+ parseFloat(leadCampaign.totalConverted);
 			sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
-			htmlRet +="<span>"+sizeCounselor+"</span>";
+			htmlRet +="<span>"+sizeCounselor+" </span>";
+			htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Converted: <b>"+leadCampaign.totalConverted+"</b></span>";
 			htmlRet +="<div class=\"d-flex overflow-x-auto\" style=\"max-width:550px;\">";
 			if(leadCampaign.assignNames.length>0){
 				for (let s = 0; s < leadCampaign.assignNames.length; s++) {
@@ -6413,7 +6419,7 @@ function getLeadCampaignWiseHtml(data){
 			htmlRet +="<thead>";
 			htmlRet +="<tr>";
 			htmlRet +="<th style=\"5% !important\" class=\"text-center bg-primary text-white\">Sr no.</th>";
-            htmlRet +="<th class=\"text-center bg-primary text-white\">Student Name<br/>Grade</th>";
+            htmlRet +="<th class=\"text-center bg-primary text-white\">Lead No.<br/>Student Name<br/>Grade</th>";
             htmlRet +="<th class=\"text-center bg-primary text-white\">Email<br/>Country<br/>Create Date Time</th>";
             // htmlRet +="<th class=\"text-center bg-primary text-white\">Parent's Name<br/>Phone No.</th>";
             htmlRet +="<th class=\"text-center bg-primary text-white\">Ad_set<br/>Ad_Name</th>";
@@ -6451,6 +6457,13 @@ function getCampaignFooterTotal(data){
 	var totalInactiveLeads=0;
 	var totalFBLeads=0;
 	var totalFbSpend=0;
+
+	var totalDemo=0;
+	var totalDemoDone=0;
+	var totalWebDemo=0;
+	var totalCopyDemo=0;
+	var totalConvert=0;
+
 	if(leadListCampaign.length>0){
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
@@ -6459,6 +6472,12 @@ function getCampaignFooterTotal(data){
 			totalInactiveLeads=totalInactiveLeads+parseInt(leadCampaign.totalInactiveLead);
 			totalFBLeads=totalFBLeads+parseInt(leadCampaign.totalFbLead);
 			totalFbSpend=totalFbSpend+ parseFloat(leadCampaign.totalSpend);
+
+			totalDemo=totalDemo+ parseInt(leadCampaign.totalDemoLead);
+			totalDemoDone=totalDemoDone+ parseInt(leadCampaign.totalDemoDone);
+			totalWebDemo=totalWebDemo+parseInt(leadCampaign.totalWebDemoLead);
+			totalCopyDemo=totalCopyDemo+parseInt(leadCampaign.totalCopyDemoLead);
+			totalConvert=totalConvert+ parseFloat(leadCampaign.totalConverted);
 		}
 		var spent = totalFbSpend.toFixed(2);
 		var perLeadSmsSpent=spent/totalLeads;
@@ -6469,7 +6488,7 @@ function getCampaignFooterTotal(data){
 		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
 		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"</th>";
 		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">$"+totalFbSpend.toFixed(2)+"</td>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\"></td>";
+		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Demo Booked: <b>"+totalDemo+"</b> | By Website: <b>"+totalWebDemo+"</b> | By Link: <b>"+totalCopyDemo+"</b> | Demo Completed: <b>"+totalDemoDone+"</b> | Enrolled: <b>"+totalConvert+"</b></td>";
 		htmlRet +="</tr>";
 	}
 	return htmlRet;
@@ -6501,10 +6520,12 @@ function getLeadListCampaignWiseHtml(data){
 		
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
-
+			var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+leadCampaign.leadId+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
+			//var totalLeadLink="clickLeadsLink('"+urlClick+"','', '','list','', '')";
+//			<a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">
 			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+">";
 			htmlRet +="<td class=\"text-center\">"+(sr++)+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;\"><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.leadno+"<br/><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\"><span class=\"child_email\">"+leadCampaign.email+"</span><br/>"+leadCampaign.country+"<br/>"+leadCampaign.assignDate+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.fbAddSet+"<br/>"+leadCampaign.fbAdd+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.assignName+"<br/>"+leadCampaign.leadStatus+"</td>";
@@ -7505,7 +7526,7 @@ function getRequestForCounselorLead(formId, modeSearch,startDate, endDate,  subl
 	return leadCommonDTO;
 }
 function callLeadUrl(leadFrom){
-	var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom='+leadFrom+'&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID;
+	var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadId=0&leadFrom=LEAD&clickFrom='+leadFrom+'&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID;
 	getAsPost(urlSend);
 	customLoader(false)
 }
@@ -7561,7 +7582,6 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 			if(leadCounselor.assignName=='Partial entry (Unassigned)')	{
 				assignTo="00";
 			}
-			debugger;
 			if(leadCounselor.totalLead!=0){
 				var totalDivide=(leadCounselor.enrollment/leadCounselor.totalLead)*100;
 				totalDivide=totalDivide.toFixed(2);
@@ -7570,7 +7590,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 			}
 			
 
-			var urlClick="/dashboard/lead-data-list?moduleId=" + moduleId +"&leadFrom=LEAD&currentPage=0&euid=" +ENCRYPTED_USER_ID + "&leadType=B2C";
+			var urlClick="/dashboard/lead-data-list?moduleId=" + moduleId +"&leadId=0&leadFrom=LEAD&currentPage=0&euid=" +ENCRYPTED_USER_ID + "&leadType=B2C";
 			
 			var totalLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','list-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 			var uniqueLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','unique-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
@@ -7710,7 +7730,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 
 
 				// ---------- SH row ----------
-				htmlRet += "<tr>";
+				htmlRet += "<tr style=\"background-color: #e9d45a;\">";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
 				htmlRet += "<span style=\"margin-right: 30px;\">S</span><a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
@@ -8032,7 +8052,6 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 }
 
 function clickLeadsLink(ulrLink, startDate, endDate, leadClickFrom, country, campaighn){
-
 
 	var clickUrl=ulrLink+"&startDate="+startDate+"&endDate="+endDate+"&country="+country+"&campaign="+campaighn+"&clickFrom="+leadClickFrom
 	getAsPost(clickUrl);
