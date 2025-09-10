@@ -659,14 +659,10 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     //var urlSend = CONTEXT_PATH+UNIQUEUUID+'/dashboard/lead-data-reports?moduleId='+moduleId+'&euid='+ENCRYPTED_USER_ID
     //window.open(urlSend, '_blank');
     //customLoader(false)
-    // var urlSend =
-    //   "/dashboard/lead-data-reports?moduleId=" +
-    //   moduleId +
-    //   "&euid=" +
-    //   ENCRYPTED_USER_ID;
+    // var urlSend ="/dashboard/lead-data-reports?moduleId=" +moduleId +"&euid=" +ENCRYPTED_USER_ID;
     // getAsPost(urlSend);
     // customLoader(false);
-    getContent(moduleId, pageNo, replaceDiv, extraParam);
+   getContent(moduleId, pageNo, replaceDiv, extraParam);
 
   } else if (pageNo == "school-announce") {
     callForDashboardData(

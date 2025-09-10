@@ -7561,6 +7561,13 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 			if(leadCounselor.assignName=='Partial entry (Unassigned)')	{
 				assignTo="00";
 			}
+			debugger;
+			if(leadCounselor.totalLead!=0){
+				var totalDivide=(leadCounselor.enrollment/leadCounselor.totalLead)*100;
+				totalDivide=totalDivide.toFixed(2);
+			}else{
+				totalDivide=0;
+			}
 			
 
 			var urlClick="/dashboard/lead-data-list?moduleId=" + moduleId +"&leadFrom=LEAD&currentPage=0&euid=" +ENCRYPTED_USER_ID + "&leadType=B2C";
@@ -7700,31 +7707,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#f3f39e !important;color:#343a40;\" class=\"text-center\">";
 				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
 				htmlRet +="<tbody>";
-				// ---------- BK row ----------
-				htmlRet += "<tr style=\"border-bottom: 1px solid #000;\">";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<span style=\"margin-right: 30px;\">B</span><a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadLink + "\">" + leadCounselor.totalBookDemo + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadWebsiteLink + "\">" + leadCounselor.totalBookWebDemo + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadCopyLink + "\">" + leadCounselor.totalBookLinkDemo + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadDoneLink + "\">" + leadCounselor.totalBookDemoDone + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadInterestLink + "\">" + leadCounselor.totalBookDemoInterested + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotConfirm + "\">" + leadCounselor.totalBookDemoNotConfirm + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadRescheduleLink + "\">" + leadCounselor.totalBookDemoReschedule + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotShowLink + "\">" + leadCounselor.totalBookDemoNotShow + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadCancelLink + "\">" + leadCounselor.totalBookDemoCancel + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotIntrestedLink + "\">" + leadCounselor.totalBookDemoNotInterested + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadPendingLink + "\">" + leadCounselor.totalBookDemoPending + "</a></td>";
-				htmlRet += "</tr>";
+
 
 				// ---------- SH row ----------
 				htmlRet += "<tr>";
@@ -7751,6 +7734,34 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">";
 				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadPendingLink + "\">" + leadCounselor.totalDemoPending + "</a></td>";
 				htmlRet += "</tr>";
+
+				// ---------- BK row ----------
+				htmlRet += "<tr style=\"border-top: 1px solid #000;\">";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<span style=\"margin-right: 30px;\">B</span><a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadLink + "\">" + leadCounselor.totalBookDemo + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadWebsiteLink + "\">" + leadCounselor.totalBookWebDemo + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadCopyLink + "\">" + leadCounselor.totalBookLinkDemo + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadDoneLink + "\">" + leadCounselor.totalBookDemoDone + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadInterestLink + "\">" + leadCounselor.totalBookDemoInterested + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotConfirm + "\">" + leadCounselor.totalBookDemoNotConfirm + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadRescheduleLink + "\">" + leadCounselor.totalBookDemoReschedule + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotShowLink + "\">" + leadCounselor.totalBookDemoNotShow + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadCancelLink + "\">" + leadCounselor.totalBookDemoCancel + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadNotIntrestedLink + "\">" + leadCounselor.totalBookDemoNotInterested + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadPendingLink + "\">" + leadCounselor.totalBookDemoPending + "</a></td>";
+				htmlRet += "</tr>";
+
+				
 				
 				htmlRet +="</tbody>"
 				htmlRet +="</table>";
@@ -7759,6 +7770,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#efd597;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+positiveLink+"\">"+leadCounselor.positiveEnroll+"</a></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+bookseatLink+"\">"+leadCounselor.reserved+"</a></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#c4d38a;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+convertLink+"\">"+leadCounselor.enrollment+"</a></td>";
+				htmlRet +="<td style=\"vertical-align: top !important;background-color:#e7f1c2;\" class=\"text-center\">"+totalDivide+"%</td>";
 				htmlRet +="</tr>";
 				
 				var countryIds=0;
@@ -7828,6 +7840,7 @@ function getLeadCounselorFootHtml(data, fontSize){
 		for (let ind = 0; ind < leadListCounselor.length; ind++) {
 			const leadCounselor = leadListCounselor[ind];
 			totalLeads+=leadCounselor.totalLead;
+			
 			duplicateLeadCount+=leadCounselor.duplicateLeadCount;
 			totalFbLeads+=leadCounselor.totalFbLead;
 
@@ -7875,29 +7888,21 @@ function getLeadCounselorFootHtml(data, fontSize){
 		htmlRet +="<tr style=\"font-size:11px;background-color: #c9def3 !important;\">";
 	}
 	var uniqLead=(totalLeads-duplicateLeadCount);
+	var totalDivide=0;
+	if(totalLeads!=0){
+		var totalDivide=(enrollment/totalLeads)*100;
+		totalDivide=totalDivide.toFixed(2);
+	}else{
+		totalDivide=0;
+	}
 	htmlRet +="<th class=\"text-center\"></th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"\"><span class=\"text-left\">"+totalLeads+"</span>  <span class=\"float-right\">"+(uniqLead>0?uniqLead:0) +"  |  "+duplicateLeadCount+"</span></th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\"><span class=\"text-left\">"+totalFbLeads+"</span>  <span class=\"float-right\">"+fbtotal +"  |  "+igtotal+"</span></td>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+unattended+"</td>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">Total</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"\"><span class=\"text-left\">"+totalLeads+"</span>  <span class=\"float-right\">"+(uniqLead>0?uniqLead:0) +"  |  "+duplicateLeadCount+"</span></th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\"><span class=\"text-left\">"+totalFbLeads+"</span>  <span class=\"float-right\">"+fbtotal +"  |  "+igtotal+"</span></td>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+unattended+"</td>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">";
 	htmlRet +="<table class=\"table w-100 mb-0 bg-transparent\">";
 	htmlRet +="<tbody>";
-
-	// 🔹 Booked (Bk) Row
-	htmlRet += "<tr style=\"border-bottom: 1px solid #000\">";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span style=\"margin-right: 30px;\">B</span>" + totalBookDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookWebDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookLinkDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoDone + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoInterested + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotConfirm + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoReschedule + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotShow + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoCancel + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotInterested + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoPending + "</td>";
-	htmlRet += "</tr>";
 
 	// 🔹 Scheduled (Sh) Row
 	htmlRet += "<tr>";
@@ -7913,13 +7918,31 @@ function getLeadCounselorFootHtml(data, fontSize){
 	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoNotInterested + "</td>";
 	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoPending + "</td>";
 	htmlRet += "</tr>";
+
+	// 🔹 Booked (Bk) Row
+	htmlRet += "<tr style=\"border-top: 1px solid #000\">";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span style=\"margin-right: 30px;\">B</span>" + totalBookDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookWebDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookLinkDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoDone + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoInterested + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotConfirm + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoReschedule + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotShow + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoCancel + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotInterested + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoPending + "</td>";
+	htmlRet += "</tr>";
+
+	
 	htmlRet +="</tbody>";
 	htmlRet +="</table>";
 	htmlRet +="</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalHot+" | "+totalWarm+" | "+totalCold+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+positiveEnroll+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+reserved+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+enrollment+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+totalHot+" | "+totalWarm+" | "+totalCold+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+positiveEnroll+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+reserved+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+enrollment+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+totalDivide+"%</th>";
 	htmlRet +="</tr>";
 	return htmlRet;
 }
@@ -7972,14 +7995,14 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	html+='<tr>';
 	html+='<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>';
 	html+='<th class="text-center bg-primary text-white">Academic Counselor</th>';
-	html+='<th class="bg-primary text-white">Total Leads    U | D </th>';
+	html+='<th class="bg-primary text-white">Total    U | D </th>';
 	html+='<th class="bg-primary text-white">Total    FB | IG </th>';
 	html+='<th class="text-center bg-primary text-white">Unattended</th>';
 	html+='<th class="text-center bg-primary text-white">';
 	html+='<table class="w-100 table mb-0 bg-transparent">';
 	html+='<tbody>';
 	html+='<tr>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Book</br/>Schedule</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>';
 	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>';
 	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>';
 	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
@@ -11553,13 +11576,15 @@ function getEmailBroadcastLogsTemplate(actionId,userEmail){
 }
 
 
-function callDeviceCount(modeSearch, chartId, startDate, endDate) {
+function callDeviceCount(modeSearch, chartId, startDate, endDate, leadDemoStatus) {
 	data={};
 	data['modeSearch']=modeSearch;
 	data['startDate']=startDate;
 	data['endDate']=endDate;
+	data['leadDemoStatus']=leadDemoStatus;
 	data['userId']=USER_ID;
 	data['schoolId']=SCHOOL_ID;
+	
 
 		$.ajax({
 				type : "POST",
@@ -11574,9 +11599,15 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 					if (data['status'] == '0' || data['status'] == '2') {
 						showMessage(true, data['message']);
 					} else {
-						var htChart = getLeadsDeviceCountChart(data, chartId);
-						getLeadsBrowserCountChart(data);
-						getLeadsDeviceTypeCountChart(data);
+						if(leadDemoStatus=='Y'){
+							getLeadsDeviceCountChart(data, chartId);
+							getLeadsBrowserCountChart(data,'');
+							getLeadsDeviceTypeCountChart(data,'');
+						}else{
+							getLeadsDeviceCountChart(data, chartId);
+							getLeadsBrowserCountChart(data, '-demo');
+							getLeadsDeviceTypeCountChart(data, '-demo');
+						}
 					}
 				}
 			});
@@ -11617,7 +11648,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 			legend: {
 				show: false
 			}
-			};
+		};
 	
 			
 		var chart = new ApexCharts(document.querySelector("#"+chartId), options);
@@ -11628,7 +11659,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 	}
 
 
-	function getLeadsDeviceTypeCountChart(data){
+	function getLeadsDeviceTypeCountChart(data, chartIdSufix){
 	
 		var options = {
 			series: [ data.winTotal, data.macTotal, data.androidTotal, data.iphoneTotal, data.ipodTotal],
@@ -11636,7 +11667,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 				width: '85%',
 				type: 'pie',
 			},
-			labels: ["Window", "MacOs", "Android", "iPhone", "iPod" ],
+			labels: ["Windows", "MacOs", "Android", "iPhone", "iPod" ],
 			theme: {
 				monochrome: {
 				enabled: true
@@ -11664,7 +11695,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 		};
 	
 			
-		var chart = new ApexCharts(document.querySelector("#chart-pie-device-type"), options);
+		var chart = new ApexCharts(document.querySelector("#chart-pie-device-type"+chartIdSufix), options);
 		chart.render();   
 		chart.update();
 	
@@ -11674,7 +11705,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 
 
 	
-	function getLeadsBrowserCountChart(data){
+	function getLeadsBrowserCountChart(data,chartIdSufix){
 	
 			var options = {
 				series: [data.chromeTotal, data.fireFoxTotal, data.safariTotal, data.edgeTotal, data.otherTotal],
@@ -11694,7 +11725,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 					}]	
         	};
 			
-		var chart = new ApexCharts(document.querySelector("#chart-pie-browser"), options);
+		var chart = new ApexCharts(document.querySelector("#chart-pie-browser"+chartIdSufix), options);
 		chart.render();   
 		chart.update();
 	

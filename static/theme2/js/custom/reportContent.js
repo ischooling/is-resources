@@ -206,14 +206,14 @@ function getReportsTab(objRight){
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
 						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Counselor</span> Name</th>
-						<th class="bg-primary text-white"><span class="text-left">Total Leads</span>   <span class="float-right"> U | D</span> </th>
+						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white">Unattended</th>
 						<th class="text-center bg-primary text-white">
 							<table class="w-100 table mb-0 bg-transparent">
 								<tbody>
 									<tr>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Book</br/>Schedule</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>

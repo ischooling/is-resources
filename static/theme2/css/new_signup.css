@@ -93,7 +93,7 @@ body{font-family:opensans-regular !important}
 .left-section .registration-img{width: 100%;display: inline-block;margin-top: 75px;text-align: center;}
 .new-year .left-section .registration-img{margin-top:0 !important}
 .left-section .registration-img .round-label{font-size: 30px; border-radius:35px;padding:4px 35px;display:inline-block;font-weight:600;font-family:opensans-bold;}
-.left-section .registration-img .learning-type{font-family:opensans-regular;font-weight:500;font-size:26px;margin-top: 20px;}
+.left-section .registration-img .learning-type{font-family:opensans-regular;font-size:26px;margin-top: 20px;}
 .left-section .registration-title{width: 100%;display: inline-block;}
 .left-section .registration-title h3{font-family:opensans-regular;font-size: 20px;width: 100%;display: block;text-align: center; font-weight: 400;}
 .left-section .registration-title h3 span{font-size: 34px;font-family:opensans-bold;display: inline-block; }
@@ -122,7 +122,7 @@ body{font-family:opensans-regular !important}
 
 
 .right-section{width: 60%;padding:15px 50px;height: calc(100vh - 30px);overflow-y: auto;overflow-x: hidden;}
-.right-section .form, .right-section .form ul{width: 100%;float: left;overflow-y: hidden;margin-top:5px}
+.right-section .form, .right-section .form ul{width: 100%;float: left;margin-top:5px}
 .right-section .form .form-heading{width: 100%;float: left;font-size: 36px; line-height: 36px; color:#5117a5;margin-bottom: 15px;text-align: center;font-family:opensans-bold;}
 .right-section .form ul li, .right-section .form ul li .form-field{width: 100%;float: left;position: relative;margin-bottom: 10px;}
 .right-section .form ul li .valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;right: 30px;top: 12px;color: green;transform: scale(0); visibility: hidden;opacity: 1;font-size: 20px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
@@ -133,7 +133,7 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li .true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
 .right-section .form ul li .false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
 .right-section .form ul li:last-child{margin-bottom: 0}
-.right-section .form ul li .field-title{font-size: 14px;display: inline-block;width: 100%;margin-bottom: 4px;color:#737373;font-family:opensans-light;font-weight:300}
+.right-section .form ul li .field-title{font-size: 14px;display: inline-block;width: 100%;margin-bottom: 4px;color:#000;font-family:opensans-regular;margin-left: 45px;}
 .right-section .form ul li label.error{position: absolute;left: 0;top:100%;color:red;}
 .right-section .form ul li .field-icon{content: '';position: absolute;left: 0;top:0;width: 45px;height: 100%;border-top-left-radius: 50px;border-bottom-left-radius: 50px;font-size: 18px;display: flex;align-items: center;justify-content: center;}
 .right-section .form ul li input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), .right-section .form ul li textarea, .right-section .form ul li select{width: 100%;float: left;font-size: 14px;padding: 10px 12px 10px 50px;background:#f7f7f7;border:1px solid #eee2ff;border-radius: 50px;color:#737373;}
@@ -172,14 +172,17 @@ body{font-family:opensans-regular !important}
 	.left-section .footer .social-contact ul li{display: inline-flex;margin-right: 10px;}
 	.right-section{width: 100%;height: auto;}
 	.error-msg{font-size:11px;}
+	.right-section{padding-bottom: 85px !important;}
 }
 
 
 
 
 @media(max-width: 580px){
+	.learning-type{color:var(--pc)}
 	.desktop-view{display: none !important;}
-	.left-section .head .mobile-view {display: flex;flex-wrap: wrap;align-items: center;}
+	.left-section.theme-bg{background: #fff !important;}
+	.left-section .head .mobile-view {display: flex;flex-wrap: wrap;align-items: flex-start;}
 	.left-section .head .mobile-view a{display: inline-block;padding: 2px 10px;background: #fff;border-radius: 5px;}
 	.left-section .head .mobile-view a img{height: 35px;}
 	.mobile-view .registration-img{margin: 0 auto 0 auto !important;position: relative;}
@@ -189,17 +192,20 @@ body{font-family:opensans-regular !important}
 	.left-section .head .logo a{padding: 5px;}
 	.left-section .registration-img{margin-top: 10px;}
 	.left-section .registration-img .round-label{padding: 0px 5px;}
-	.left-section .registration-img .learning-type{margin-top: 5px;font-size: 20px;}
+	.left-section .registration-img .learning-type{margin-top: 5px;font-size: 22px;}
 	.registration-img img{display: none;}
 	.left-section .footer .contact-info .phone-number{margin-bottom: 0px;}
 	.left-section .footer .contact-info .phone-number span{font-size: 14px;}
 	.right-section h5{font-size: 13px;}
-	.right-section{padding:12px}
+	.right-section{padding:12px 12px 85px 12px}
 	.right-section .form{margin-top: 0px;}
 	.right-section .form .form-heading{font-size: 28px;}
+	.right-section .form ul li .field-icon{width: 35px;}
+	.right-section .form ul li .field-icon i{font-size: 14px;}
+	.right-section .form ul li .field-title{margin-left: 35px;}
 	.right-section .form ul li .form-field{margin-bottom:8px;}
-	.signupButton{float: right;}
-	.terms-policy{text-align: right;}
+	.signupButton{float: none; margin: 10px auto 0px auto; display: block !important; padding: 5px;}
+	.terms-policy{text-align: center;}
 	.terms-policy-wrapper{text-align: left;}
 	.error-msg{bottom:0;}
 	.terms-policy-wrapper{display: none;}
@@ -207,6 +213,7 @@ body{font-family:opensans-regular !important}
 	.custom-checkbox-policy{text-align: left;}
 	.confirmation-email-btn input[type="submit"]{margin-bottom: 10px;padding:6px 15px;font-size: 13px;}
 	.emailValidatorModalBody{padding: 25px 10px;}
+	#checkTerms-error-message.error-msg{text-align: left !important;}
 
 }
 @media(max-width: 350px){
