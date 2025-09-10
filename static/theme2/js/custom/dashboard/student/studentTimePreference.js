@@ -130,29 +130,19 @@ function studentSystemTrainingShowHide(data){
             return false;
         }
         if(data['enrollmentType']!='REGISTRATION_FRESH' && data['enrollmentType']!='REGISTRATION_FLEX_COURSE'){
-            $("#timePreferencePopup").modal("hide");
-            $("#timePreferencePopup").addClass("d-none");
-            return false;
+            if(data['showSystemTrainingSelectionModel']=='N'){
+                $("#timePreferencePopup").modal("hide");
+                $("#timePreferencePopup").addClass("d-none");
+                return false;
+            }
         }
         $("#closeButton").hide();
         $("#enrollmentType").val(data['enrollmentType']);
         $("#regstrationType").val(data['registrationType']);
-        if(data['enrollmentType']=='REGISTRATION_FRESH' || data['enrollmentType']=='REGISTRATION_FLEX_COURSE'){
+        if(data['systemTrainingStatus'] != "Skipped"){
             $('#orientAndSemesterChangeSpan').html('I want to schedule my school system training on');
             $('#orientAndSemesterChangeSpanHeading').html('CHOOSE YOUR SCHOOL SYSTEM TRAINING DATE');
-            if(data['orientationAcceptanceStatus']=='N' || data['orientationAcceptanceStatus']=='NA'){
-                $("#timePreferencePopup").removeClass("d-none");
-                $("#timePreferencePopup").modal("show");
-                $("#closeButton").hide();
-                $("#orientationSelectedTime").text(data['orientationdateTimeInStudentTimeZone']);
-                $("#odt").text(data['orientationdateTimeInStudentTimeZone']);
-                $("#orientationClassLink").attr("href",data['joinOrientationUrl']);
-                $("#orientationInputID").val(data['orientationId'])
-                $('#orientationAcceptanceStatusDiv').show();
-                $('#orientationDateWrapper').hide();
-                $('#orientationTimeWrapper').hide();
-                $("#studentTimeSave").text("Confirm");
-            }else if(data['orientationAcceptanceStatus']=='A'){
+            if(data['orientationAcceptanceStatus']=='A'){
                 var msgHtml ="";
                 if(data['orientStatus']!='COMPLETED'){
                     $("#timePreferencePopup").removeClass("d-none");
@@ -201,13 +191,6 @@ function studentSystemTrainingShowHide(data){
                 $('#orientationTimeWrapper').show();
                 $('#orientationAcceptanceStatusDiv').hide();
             }
-        }else{
-            $('#orientAndSemesterChangeSpan').html('I would like to start my academic year on');
-            $('#orientAndSemesterChangeSpanHeading').html('CHOOSE YOUR ACADEMIC YEAR START DATE');
-            studentTimeSkipNext('STUDENT','timePreferencePopup',true);
-            $("#studentTimeSkipPrev").hide();
-            $("#studentTimeSkipNext").hide();
-            $("#studentTimeSave").text("Confirm");
         }
         $('#academicYearBlockDate').val(data['academicYearBlockDate']);
         $('#daysCount').val(data['daysCount']);

@@ -34,10 +34,14 @@ function getAddPaymentSearchResult(data) {
     return html;
 }
 
-function getAdvancePaymentSearchResult(formId, data) {
+function getAdvancePaymentSearchResult(formId, data, moduleId) {
     const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_EDIT_CUSTOM_PAYMENTS');
     var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
     const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
+    const hidePaymentsAmount =  JSON.parse(getSettingsByTypeAndKey('CONFIGURATION','PAYMENT_AMOUNT_HIDE')).data.metaValue;
+    const paymentShowingUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_SHOWING_PAYMENTS_AMOUNT');
+    var paymentShowingUsersIds = JSON.parse(paymentShowingUsers).data.metaValue.split(",").map(id => id.trim());
+    const isUserAllowedToSeePayments = paymentShowingUsersIds.includes(USER_ID.toString());
 	const roleAndModule = getUserRights(SCHOOL_ID, USER_ROLE_ID, USER_ID, moduleId);
 	let html = '';
 	$.each(data.advancePaymentSearchResponseDTO, function (k, apsrSingle) {
@@ -99,18 +103,23 @@ function getAdvancePaymentSearchResult(formId, data) {
 				</td>
 				<td>
 					<span>
-						<strong>Payment Amount:</strong> ${apsrSingle.payAmount}<br>
-						<strong>Additional Amount:</strong> ${apsrSingle.additionalPayment}<br>
-						${apsrSingle.selectedCurrency ? `
-							<strong>Selected Currency:</strong> ${apsrSingle.selectedCurrency}-${apsrSingle.payCurrency} (${apsrSingle.conversionRation})<br>` : ''
-						}
-						<strong>Payment Via:</strong> ${apsrSingle.paymentTransferType}<br>
-						<strong>Payment Gateway Used:</strong> ${
-							apsrSingle.pgName.toUpperCase() === 'WIRETRANSFER' ? 'Bank Transfer' :
-							apsrSingle.pgName.toUpperCase() === 'CASH' ? 'Cash' :
-							apsrSingle.pgName
-						}
-					</span>
+                        ${hidePaymentsAmount === "true"
+                            ? (isUserAllowedToSeePayments
+                                ? `<strong>Payment Amount:</strong> ${apsrSingle.payAmount}<br>`
+                                : '')
+                            : `<strong>Payment Amount:</strong> ${apsrSingle.payAmount}<br>`
+                        }
+                        <strong>Additional Amount:</strong> ${apsrSingle.additionalPayment}<br>
+                        ${apsrSingle.selectedCurrency ? `
+                            <strong>Selected Currency:</strong> ${apsrSingle.selectedCurrency}-${apsrSingle.payCurrency} (${apsrSingle.conversionRation})<br>` : ''
+                        }
+                        <strong>Payment Via:</strong> ${apsrSingle.paymentTransferType}<br>
+                        <strong>Payment Gateway Used:</strong> ${
+                            apsrSingle.pgName.toUpperCase() === 'WIRETRANSFER' ? 'Bank Transfer' :
+                            apsrSingle.pgName.toUpperCase() === 'CASH' ? 'Cash' :
+                            apsrSingle.pgName
+                        }
+                    </span>
 				</td>
 				<td>
 					<span>

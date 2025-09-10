@@ -90,7 +90,7 @@ function advancePaymentSearchStudent(formId, moduleId) {
                         if (isDataTable) {
                             $('#' + elementId).dataTable().fnDestroy();
                         }
-                        $('#' + elementId + ' tbody').html(getAdvancePaymentSearchResult(formId, data));
+                        $('#' + elementId + ' tbody').html(getAdvancePaymentSearchResult(formId, data, moduleId));
                         var table = $('#' + elementId).DataTable();//{ "pagingType": "full" }
                         $("#autoWeeklyMailStudent").DataTable();
                         // table.on('page.dt', function () {

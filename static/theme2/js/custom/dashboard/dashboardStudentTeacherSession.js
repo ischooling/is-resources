@@ -2838,6 +2838,7 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 										$("#closeButton").show();
 										$("#studentTimeSave").text("Confirm");
 									}else{
+										
 										if(data['semesterStartDate'] != null){
 											var semesterStartDate = data['semesterStartDate'].split("-");
 											var systrainingStartDate = new Date(parseInt(semesterStartDate[2]), parseInt(semesterStartDate[0])-1, parseInt(semesterStartDate[1]));
@@ -3002,25 +3003,25 @@ $(function () {
 				teacherTimeList.push(teacherAssignTime);
 			}
 			var enrollmentType = $("#enrollmentType").val();
-			if(enrollmentType=='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE'){
-				if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
-					var userbookDate = $('#chooseDateSystemTrainingDate').val();
-					var bookStTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotsttime");
-					var bookEnTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime");
-					var duration = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotduration");
-					console.log(bookStTime)
-					console.log(bookEnTime)
-					teacherAssign['bookDate']=userbookDate;
-					teacherAssign['bookStartTime']=bookStTime;
-					bookStTime=bookStTime.split(':')
-					var fromT = new Date(1990, 1, 1, bookStTime[0], bookStTime[1], 0);
-					var timestamp = Date.parse(fromT);
-					var dateObject = new Date(timestamp);
-					var timeinter = getTimePlusInterval(dateObject,duration);
-					var bookEnTime = convertTo24Hour(timeinter);
-					teacherAssign['bookEndTime']=bookEnTime+':00';
-				}
+			
+			if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
+				var userbookDate = $('#chooseDateSystemTrainingDate').val();
+				var bookStTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotsttime");
+				var bookEnTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime");
+				var duration = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotduration");
+				console.log(bookStTime)
+				console.log(bookEnTime)
+				teacherAssign['bookDate']=userbookDate;
+				teacherAssign['bookStartTime']=bookStTime;
+				bookStTime=bookStTime.split(':')
+				var fromT = new Date(1990, 1, 1, bookStTime[0], bookStTime[1], 0);
+				var timestamp = Date.parse(fromT);
+				var dateObject = new Date(timestamp);
+				var timeinter = getTimePlusInterval(dateObject,duration);
+				var bookEnTime = convertTo24Hour(timeinter);
+				teacherAssign['bookEndTime']=bookEnTime+':00';
 			}
+		
 		}else{
 			if(callFrom!='TEACHER'){
 				teacherAssign['userRole'] = 'ADMIN';
