@@ -142,19 +142,7 @@ function studentSystemTrainingShowHide(data){
         if(data['systemTrainingStatus'] != "Skipped"){
             $('#orientAndSemesterChangeSpan').html('I want to schedule my school system training on');
             $('#orientAndSemesterChangeSpanHeading').html('CHOOSE YOUR SCHOOL SYSTEM TRAINING DATE');
-            if(data['orientationAcceptanceStatus']=='N' || data['orientationAcceptanceStatus']=='NA'){
-                $("#timePreferencePopup").removeClass("d-none");
-                $("#timePreferencePopup").modal("show");
-                $("#closeButton").hide();
-                $("#orientationSelectedTime").text(data['orientationdateTimeInStudentTimeZone']);
-                $("#odt").text(data['orientationdateTimeInStudentTimeZone']);
-                $("#orientationClassLink").attr("href",data['joinOrientationUrl']);
-                $("#orientationInputID").val(data['orientationId'])
-                $('#orientationAcceptanceStatusDiv').show();
-                $('#orientationDateWrapper').hide();
-                $('#orientationTimeWrapper').hide();
-                $("#studentTimeSave").text("Confirm");
-            }else if(data['orientationAcceptanceStatus']=='A'){
+            if(data['orientationAcceptanceStatus']=='A'){
                 var msgHtml ="";
                 if(data['orientStatus']!='COMPLETED'){
                     $("#timePreferencePopup").removeClass("d-none");

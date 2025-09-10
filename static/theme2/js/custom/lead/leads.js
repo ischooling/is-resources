@@ -7684,7 +7684,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				}
 			}
 			if(counselorReportType=='LOGS'){
-				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showZadarmaDetails('${leadCounselor.zadarma}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-success text-white text-center  badge font-12\">${leadCounselor.zadarmaCount}</button></td>`;
+				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showZadarmaDetails('${leadCounselor.zadarma}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-success text-white text-center  badge font-12\">${leadCounselor.zadarmaCount}</button>&nbsp;|&nbsp;<button onClick="showCallhippoDetails('${leadCounselor.callhippo}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-info text-white text-center  badge font-12\">${leadCounselor.callhippoCount}</button></td>`;
 				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showWatiDetails('${leadCounselor.wati}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-warning text-white text-center badge font-12\">${leadCounselor.watiCount}</button></td>`;
 				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showWhatsappDetails('${leadCounselor.whatsappIds}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-primary text-white text-center badge font-12\">${leadCounselor.whatsappCount}</button></td>`;
 				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showMailBrodcastDetails('${leadCounselor.mailIds}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-info text-white text-center badge font-12\">${leadCounselor.mailCount}</button></td>`;
@@ -7929,6 +7929,7 @@ function getLogsFootHtml(data, fontSize){
 	var htmlRet ="";
 	var sr=1;
 	var zadarmatotal=0;
+	var callhippototal=0;
 	var watitotal=0;
 	var whatsapptotal=0;
 	var mailtotal=0;
@@ -7937,6 +7938,7 @@ function getLogsFootHtml(data, fontSize){
 		for (let ind = 0; ind < leadListCounselor.length; ind++) {
 			const leadCounselor = leadListCounselor[ind];
 			zadarmatotal+=leadCounselor.zadarmaCount;
+			callhippototal+=leadCounselor.callhippoCount;
 			watitotal+=leadCounselor.watiCount;	
 			whatsapptotal+=leadCounselor.whatsappCount;
 			mailtotal+=leadCounselor.mailCount;
@@ -7951,7 +7953,7 @@ function getLogsFootHtml(data, fontSize){
 
 	htmlRet +="<th class=\"text-center\"></th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+zadarmatotal+"</th>";
+	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+zadarmatotal+" / "+callhippototal+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+watitotal+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+whatsapptotal+"</th>";
 	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+mailtotal+"</th>";
@@ -8244,6 +8246,26 @@ function getZadarmaLogs(number){
     });
 }
 
+function getCallHippoLogs(number){
+    $.ajax({
+        type: "GET",
+        url: BASE_URL + CONTEXT_PATH + `callhippo/v1/get-logs?number=${number}`,
+        dataType: "json",
+        success: function (response) {
+			if(response.status == 'success'){
+				let modalContent = callHippoLogsDataModal(response.logs);
+				if($("#callHippoLogsContent").length > 0){
+					$("#callHippoLogsContent").remove();
+				}
+				$("body").append(modalContent);
+				$("#callHippoLogsContent").modal("show");
+			}else{
+				showMessageTheme2(0, response.message)
+			}
+        }
+    });
+}
+
 function removeRecordingModel(modalId){
 	$(".modal-backdrop").remove();
 	$("#" + modalId).remove();
@@ -8290,6 +8312,7 @@ function getNum(src, maxNumValue, amountTypeId){
 var ZadarmaOrWati = null;
 var currentPageZadarma = 1;
 var currentZadarmaIds = null;
+var zadarmaData = [];
 function showZadarmaDetails(zadarmaIds) {
 	var body = {
 		ids: zadarmaIds,
@@ -8362,6 +8385,83 @@ function showZadarmaSortDetails() {
 	});
 }
 
+
+var currentPageCallhippo = 1;
+var currentCallhippoIds = null;
+var callhippoData = [];
+
+function showCallhippoDetails(callhippoIds) {
+	var body = {
+		ids: callhippoIds,
+		filterType: $('#sortcallhippologs').val(),
+		pageNo: currentPageCallhippo,
+		pageCount: $('#callhippoPagging').val(),
+	}
+	$.ajax({
+		url: BASE_URL + CONTEXT_PATH + "callhippo/v1/get-logs-by-ids",
+		type: "POST",
+		data: JSON.stringify(body),
+		contentType: APPLICATION_JSON_VALUE,
+		success: function (response) {
+		try {
+			if(response.statusCode === 0){
+				ZadarmaOrWati = "callhippo";
+				if(currentCallhippoIds != callhippoIds){
+					callhippoData = response.logs;
+					populateCallhippoRecords(response.logs,response.unMatchLogs,"CallHippo Logs", response.totalPages,response.totalCount);
+				}else{
+					callhippoData = response.logs;
+					renderCallhippoTable(response.logs);
+					renderUnMatchCallhippoTable(response.unMatchLogs);
+					$("#callhippoPagination").html(renderPagination(currentPageCallhippo, response.totalPages,response.totalCount,[...new Set(response.logs.map((elem,index) => elem.callId)),...new Set(response.unMatchLogs.map((elem,index) => elem.callId))].length));
+				}
+				
+				currentCallhippoIds = callhippoIds;
+			}else if(response.status === '3'){
+				redirectLoginPage();
+			}else{
+				showMessageTheme2(0, response.message);
+			}
+		} catch (error) {
+			console.log("Error Fetching Data:", error);
+			
+		}
+		}
+	});
+}
+
+function showCallhippoSortDetails() {
+	var body = {
+		ids: currentCallhippoIds,
+		filterType: $('#sortcallhippologs').val(),
+		pageNo: 1,
+		pageCount: $('#callhippoPagging').val(),
+	}
+	$.ajax({
+		url: BASE_URL + CONTEXT_PATH + "callhippo/v1/get-logs-by-ids",
+		type: "POST",
+		data: JSON.stringify(body),
+		contentType: APPLICATION_JSON_VALUE,
+		success: function (response) {
+			try {
+				if(response.statusCode === 0){
+					ZadarmaOrWati = "callhippo";
+					callhippoData = response.logs;
+					renderCallhippoTable(response.logs);
+					renderUnMatchCallhippoTable(response.unMatchLogs);
+					$("#callhippoPagination").html(renderPagination(currentPageCallhippo, response.totalPages,response.totalCount,[...new Set(response.logs.map((elem,index) => elem.id)),...new Set(response.unMatchLogs.map((elem,index) => elem.id))].length));
+				}else if(response.status === '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, response.message);
+				}
+			} catch (error) {
+				console.log("Error Fetching Data:", error);
+			}
+		}
+	});
+}
+
 var currentPageMail = 1;
 var currentMailIds = null;
 function showMailBrodcastDetails(mailIds) {
@@ -8403,6 +8503,7 @@ function showMailBrodcastDetails(mailIds) {
 
 var currentPageWati = 1;
 var currentWatiIds = null;
+var watiData = []
 function showWatiDetails(watiIds){
 	var body = {
 		ids: watiIds,
@@ -8497,7 +8598,22 @@ function getFilterLeadNo(searchValue) {
         }
     });
 }
-let zadarmaData = [];
+
+
+function getFilterLeadNo(searchValue) {
+    searchValue = searchValue.trim().toLowerCase();
+    
+    $("#callhippoLogModalTableBody tr").each(function () {
+        var leadNo = $(this).find("td:nth-child(2)").text().trim().toLowerCase(); // Get Lead No column
+        
+        if (searchValue === "" || leadNo.includes(searchValue)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+}
+
 
 function getFilterZadarmaLeadNo(searchValue, totalPages,totalCount) {
     searchValue = searchValue.trim().toLowerCase();
@@ -8511,6 +8627,36 @@ function getFilterZadarmaLeadNo(searchValue, totalPages,totalCount) {
 	}else{
 		$(".pagination").show();
 		$("#unMatchZadarmaTable").show();
+	}
+}
+
+
+function getFilterCallHippoLeadNo(searchValue) {
+    searchValue = searchValue.trim().toLowerCase();
+    
+    $("#callhippoLogModalTableBody tr").each(function () {
+        var leadNo = $(this).find("td:nth-child(2)").text().trim().toLowerCase(); // Get Lead No column
+        
+        if (searchValue === "" || leadNo.includes(searchValue)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+}
+
+function getFilterCallhippoLeadNo(searchValue, totalPages,totalCount) {
+    searchValue = searchValue.trim().toLowerCase();
+    const filteredData = callhippoData.filter(item => 
+        item.leadNo.toLowerCase().includes(searchValue)
+    );
+    renderCallhippoTable(filteredData, totalPages,totalCount);
+	if(searchValue != ""){
+		$(".pagination").hide();
+		$("#unMatchCallhippoTable").hide();
+	}else{
+		$(".pagination").show();
+		$("#unMatchCallhippoLogTable").show();
 	}
 }
 
@@ -8815,6 +8961,292 @@ function closeZadarmaModal() {
 }
 
 
+function populateCallhippoRecords(data, data2,meetingTitle, totalPages,totalCount){
+	$("<style>")
+	  .prop("type", "text/css")
+	  .html(`
+		.recurring-modal-backdrop {
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  background: rgba(0, 0, 0, 0.5);
+		  display: none;
+		  z-index: 999;
+		}
+  
+		.recurring-modal {
+		  position: fixed;
+		  top: 0;
+		  right: -90%;
+		  width: 90%;
+		  height: 100vh;
+		  background: white;
+		  box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2);
+		  transition: right 0.3s ease-in-out;
+		  z-index: 1000;
+		}
+  
+		.recurring-modal.open {
+		  right: 0;
+		}
+  
+		.modal-header {
+		  display: flex;
+		  justify-content: space-between;
+		  align-items: center;
+		  padding: 15px;
+		  background: #007bff;
+		  color: white;
+		}
+  
+		.modal-body {
+		  padding: 20px;
+		}
+  
+		.session-block {
+		  margin-bottom: 15px;
+		  border-bottom: 1px solid #ddd;
+		  padding-bottom: 10px;
+		}
+  
+		.close-btn {
+		  background: transparent;
+		  border: none;
+		  font-size: 24px;
+		  color: white;
+		  cursor: pointer;
+		}
+  
+		.play-btn {
+		  background: #007bff;
+		  color: white;
+		  border: none;
+		  padding: 5px 10px;
+		  cursor: pointer;
+		  border-radius: 5px;
+		}
+  
+		.play-btn:hover {
+		  background: #0056b3;
+		}
+  
+		.accordion-btn {
+		  background: #D7EBFF;
+		  padding: 5px 10px;
+		  width: 100%;
+		  text-align: left;
+		  cursor: pointer;
+		  font-weight: bold;
+		  border-radius: 5px;
+		  
+		}
+  
+		.accordion-btn:focus {
+		  outline: 0px !important;
+		}
+  
+		.recording-list {
+		  padding: 10px;
+		  background: #fff;
+		  border-radius: 5px;
+		}
+	  `)
+	.appendTo("head");
+	var modalContent = `
+	  <div id="callhippoLogBackdrop" class="recurring-modal-backdrop" onclick="closeZadarmaModal();"></div>
+	  <div id="callhippoLogModal" class="recurring-modal">
+		<div class="p-3" style="background-color:#027FFF;">
+		  <h5 class="mb-0" style="color: white;font-size:18px;font-weight: 700;">${meetingTitle}</h5>
+		   <button onclick="closeCallhippoModal();" type="button" class="p-2 cursor" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-30px;top:35px;background-color: white !important;border-radius: 5px 0px 0px 5px;font-size: 35px;border:0px;color:#000;">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="p-3 d-flex px-5" style="margin-left:auto; justify-content: space-between;">
+			<select name="callhippoPagging" id="callhippoPagging" class="mr-2 w-5 px-2 rounded-lg" onchange="showCallhippoSortDetails()">
+				<option value="10" selected="">10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+			</select>
+			<div class="d-flex" style="width:450px;">
+				<select class="form-control mr-2 w-50" id="sortcallhippologs" name="sortcallhippologs" onchange="showCallhippoSortDetails()">
+					<option value="ALL" selected="">All</option>
+					<option value="ATTENDED">Attended Call</option>
+					<option value="UNATTENDED">Un Attended Call</option>
+				</select>
+				<input placeholder="Search" type="text" class="w-50 px-2" onkeydown="getFilterCallhippoLeadNo(this.value, ${totalPages}, ${totalCount})" class="form-control">
+			</div>
+		</div>
+		<div style="background-color: #fff; height: 100vh;">
+		  <div class="px-5" style="height: 80vh;overflow-y:auto;">
+			<table id="recurring-recordings-table" class="w-100 table table-bordered border-radius-table">
+			  <thead style="position: sticky;top: 0;z-index: 1;">
+				<tr style="font-size: 14px;">
+					<th class="p-2 rounded-top-left-10 border-right-0 border-primary" style="background-color:rgb(200, 224, 247); font-weight: normal; color:rgb(38, 146, 253)">Lead No</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Caller</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Dailed No</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Type</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Call Start</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Duration</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Status</th>
+				  <th class="p-2 rounded-top-right-10 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Action</th>
+				</tr>
+			  </thead>
+			  <tbody id="callhippoLogModalTableBody"></tbody>
+			</table>
+			<div id="unMatchCallhippoTable"></div>
+			<div id="callhippoPagination"></div>
+		  </div>
+		</div>
+	  </div>
+	`;
+	$("body").append(modalContent);
+    renderCallhippoTable(data);
+	renderUnMatchCallhippoTable(data2)
+	$("#callhippoPagination").html(renderPagination(currentPageCallhippo, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.id)),...new Set(data2.map((elem,index) => elem.id))].length));
+	setTimeout(() => {
+	  $("#callhippoLogBackdrop").fadeIn(200);
+	  $("#callhippoLogModal").addClass("open");
+	  $("body").css("overflow", "hidden");
+	}, 50);
+}
+
+function renderCallhippoTable(data) {
+    const groupedData = data.reduce((acc, item) => {
+        const key = item.leadNo;
+        acc[key] = acc[key] || [];
+        acc[key].push(item);
+        return acc;
+    }, {});
+
+    let modalContent = ``;
+    $.each(Object.entries(groupedData), function(index,calls){
+		let dynamicIndex = (currentPageCallhippo - 1) * 10 + index + 1;
+		if(calls[1].length===1){
+			modalContent+=
+			`<tr id="row_id_${dynamicIndex}">
+				<td class="py-2 border-right-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].leadNo}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].caller}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].dialledNumber}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].type}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${changeDateFormat(convertTZ(new Date(calls[1][0].callStart), USER_TIMEZONE),'mm-dd-yyyy')} | ${changeDateFormat(convertTZ(new Date(calls[1][0].callStart), USER_TIMEZONE),'yyyy-mm-dd hh:mm:ss').slice(10,16)}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].seconds}</td>
+				<td class="py-2 border-right-0 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[1][0].status}</td>
+				<td class="py-2 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">
+					${calls[1][0].recordings === "" 
+					? "N/A"
+					: `<button onClick="viewCallRecording('${calls[1][0].recordings}')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px">Play Recording</button>`}
+				</td>
+			</tr>`;
+		}else{
+			modalContent+=
+			`<tr id="row_id_${dynamicIndex}" style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-bottom: 0; border-color: blue">
+				<td class="py-2 border-right-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">${calls[0]}</td>
+				<td colspan="7" class="py-2 pl-0 pr-2 border-left-0 border-primary border-top-0" style="font-weight: 500;background-color:#fff;">
+				<table class="w-100 table mb-0 border">
+					<thead style="background-color:#f2f2f2;">
+						<tr style="font-size:12px">
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Caller</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dailed No.</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Type</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Call Start</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Duration (in sec)</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Status</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0 cursor" onclick="toggleSelfTable(\'row_id_${dynamicIndex}\')">
+								Recordiing List 
+								<span class="d-inline-block float-right " >
+									<i id="row_id_${dynamicIndex}_icon" class="fa fa-angle-up"></i>
+								</span>
+							</th>
+						</tr>
+					</thead>
+					<tbody id="row_id_${dynamicIndex}_body">`;
+						$.each(calls[1], function(i, call){
+							modalContent+=
+							`<tr>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.caller}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.dialledNumber}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.type}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${changeDateFormat(convertTZ(new Date(call.callStart), USER_TIMEZONE),'mm-dd-yyyy')} | ${changeDateFormat(convertTZ(new Date(call.callStart), USER_TIMEZONE),'yyyy-mm-dd hh:mm:ss').slice(10,16)}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.seconds}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.status}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">
+									${call.recordings === "" 
+									? "N/A"
+									: `<button onClick="viewCallRecording('${call.recordings}')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px">Play Recording</button>`}
+								</td>
+							</tr>`;
+						});
+					modalContent+=`</tbody>
+				</table>
+			</tr>`;
+		}
+	});
+    $("#callhippoLogModalTableBody").html(modalContent);
+	if (!data || data.length === 0) {
+		$("#callhippoLogModalTableBody").html('<tr><td colspan="9" class="text-center py-5" style="font-size: 16px;font-weight: 700;">No recordings found</td></tr>');
+	}
+}
+
+function renderUnMatchCallhippoTable(data) {
+    let modalContent = ``;
+
+		if(data.length >0){
+			modalContent+= `<h1 style="color:#f79797; font-size:14px">No lead number found for these calls.</h1>`;
+			modalContent+=
+			`<table class="w-100 table mb-0 border border-color-#ff1414 mb-4">
+					<thead style="background-color:#f79797;">
+						<tr style="font-size:12px">
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Caller</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dailed No.</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Type</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Call Start</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Duration (in sec)</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Status</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0" >
+								Recording 
+							</th>
+						</tr>
+					</thead>
+					<tbody >`;
+						$.each(data, function(i, call){
+							modalContent+=
+							`<tr>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.caller}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.dialledNumber}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.type}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${changeDateFormat(convertTZ(new Date(call.callStart), USER_TIMEZONE),'mm-dd-yyyy')} | ${changeDateFormat(convertTZ(new Date(call.callStart), USER_TIMEZONE),'yyyy-mm-dd hh:mm:ss').slice(10,16)}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.seconds}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">${call.status}</td>
+								<td class="py-1 px-2 font-weight-light" style="font-size:13px;background-color:#fff; border-right: 0; border-left: 0px;">
+									${call.recordings === "" 
+									? "N/A"
+									: `<button onClick="viewCallRecording('${call.recordings}')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px">Play Recording</button>`}
+								</td>
+							</tr>`;
+						});
+					modalContent+=`</tbody>
+				</table>`;
+		}
+    $("#unMatchCallhippoTable").html(modalContent);
+}
+
+function closeCallhippoModal() {
+	$("#callhippoLogModal").removeClass("open");
+	$("#callhippoLogBackdrop").fadeOut(200);
+	
+	setTimeout(() => {
+	  $("#callhippoLogModal").remove();
+	  $("#callhippoLogBackdrop").remove()
+	  $("body").css("overflow", "auto");
+	}, 300);
+	currentPageCallhippo = 1;
+	currentCallhippoIds = '';
+}
+
+
 function populateMailRecords(data, data2,meetingTitle, totalPages,totalCount){
 	$("<style>")
 	  .prop("type", "text/css")
@@ -9095,9 +9527,6 @@ function closeMailModal() {
 	currentPageMail = 1;
 	currentMailIds = '';
 }
-
-
-let watiData = []
 
 function getFilterWatiLeadNo(searchValue, totalPages) {
     searchValue = searchValue.trim().toLowerCase();
@@ -10145,6 +10574,9 @@ function goToPage(page) {
 	if(ZadarmaOrWati == 'zadarma'){
 		currentPageZadarma = page;
 		showZadarmaDetails(currentZadarmaIds);
+	}else if(ZadarmaOrWati == 'callhippo'){
+		currentPageCallhippo = page;
+		showCallhippoDetails(currentCallhippoIds);
 	}else if(ZadarmaOrWati == 'wati'){
 		currentPageWati = page;
 		showWatiDetails(currentWatiIds);
@@ -11119,3 +11551,152 @@ function getEmailBroadcastLogsTemplate(actionId,userEmail){
 		}
 	});
 }
+
+
+function callDeviceCount(modeSearch, chartId, startDate, endDate) {
+	data={};
+	data['modeSearch']=modeSearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['userId']=USER_ID;
+	data['schoolId']=SCHOOL_ID;
+
+		$.ajax({
+				type : "POST",
+				contentType : APPLICATION_JSON_VALUE,
+				url : getURLForHTML('dashboard', 'lead-device-total'),
+				data : JSON.stringify(data),
+				dataType : 'json',
+				cache : false,
+				timeout : 600000,
+				success : function(data) {
+					console.log(data);
+					if (data['status'] == '0' || data['status'] == '2') {
+						showMessage(true, data['message']);
+					} else {
+						var htChart = getLeadsDeviceCountChart(data, chartId);
+						getLeadsBrowserCountChart(data);
+						getLeadsDeviceTypeCountChart(data);
+					}
+				}
+			});
+	   }
+	   
+	
+	
+	function getLeadsDeviceCountChart(data, chartId){
+	
+		var options = {
+			series: [data.webTotal, data.mobileTotal],
+			chart: {
+				width: '85%',
+				type: 'pie',
+			},
+			labels: ["Desktop", "Mobile"],
+			theme: {
+				monochrome: {
+				enabled: true
+				}
+			},
+			plotOptions: {
+				pie: {
+				dataLabels: {
+						offset: -5
+					}
+				}
+			},
+			title: {
+				text: ""
+			},
+			dataLabels: {
+				formatter(val, opts) {
+					const name = opts.w.globals.labels[opts.seriesIndex]
+					return [name, val.toFixed(1) + '%']
+				}
+			},
+			legend: {
+				show: false
+			}
+			};
+	
+			
+		var chart = new ApexCharts(document.querySelector("#"+chartId), options);
+		chart.render();   
+		chart.update();
+	
+		
+	}
+
+
+	function getLeadsDeviceTypeCountChart(data){
+	
+		var options = {
+			series: [ data.winTotal, data.macTotal, data.androidTotal, data.iphoneTotal, data.ipodTotal],
+			chart: {
+				width: '85%',
+				type: 'pie',
+			},
+			labels: ["Window", "MacOs", "Android", "iPhone", "iPod" ],
+			theme: {
+				monochrome: {
+				enabled: true
+				}
+			},
+			plotOptions: {
+				pie: {
+				dataLabels: {
+						offset: -5
+					}
+				}
+			},
+			title: {
+				text: ""
+			},
+			dataLabels: {
+				formatter(val, opts) {
+					const name = opts.w.globals.labels[opts.seriesIndex]
+					return [name, val.toFixed(1) + '%']
+				}
+			},
+			legend: {
+				show: false
+			}
+		};
+	
+			
+		var chart = new ApexCharts(document.querySelector("#chart-pie-device-type"), options);
+		chart.render();   
+		chart.update();
+	
+		
+	}
+
+
+
+	
+	function getLeadsBrowserCountChart(data){
+	
+			var options = {
+				series: [data.chromeTotal, data.fireFoxTotal, data.safariTotal, data.edgeTotal, data.otherTotal],
+				labels: ['Chrome','FireFox','Safari','Edge','Other'],
+				chart: {
+					type: 'donut',
+					width: '85%',
+					height:360
+				},
+				responsive: [{
+					breakpoint: 480,
+					options: {
+						legend: {
+							position: 'bottom'
+						}
+					}
+					}]	
+        	};
+			
+		var chart = new ApexCharts(document.querySelector("#chart-pie-browser"), options);
+		chart.render();   
+		chart.update();
+	
+		
+	}

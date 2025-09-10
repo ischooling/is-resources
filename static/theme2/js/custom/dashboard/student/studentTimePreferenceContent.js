@@ -6,6 +6,7 @@ function renderStudentTimepreferenceContent(details){
 }
 
 function getStudentTimePreferencePopupContent(details){
+    debugger;
     var html=
         `<div class="modal fade d-none" id="timePreferencePopup" data-backdrop="static">
             <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none" role="document" style="max-width:600px">

@@ -1523,23 +1523,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Date & Time:</th>'
 									+'<td class="border-0 p-1">'+(leads.leadDemoIstDate!=''?leads.leadDemoIstDate:'N/A')+'</td>'
 								+'</tr>';
-								if(leads.userConfirmation!=''){
-									var usrConfirm='';
-									var c_color='';
-									if(leads.userConfirmation=='Y'){
-										usrConfirm='Confirmed';
-										c_color='bg-success text-white';
-									}else if(leads.userConfirmation=='N'){
-										usrConfirm='Not Confirmed';
-										c_color='bg-warning';
-									}
-									html+='<tr>'
-										+'<th class="border-0 p-1">User Confirmation:</th>'
-										+'<td class="border-0 p-1 bold '+c_color+'" >'+usrConfirm+'</td>'
-									+'</tr>';
-								}
 								html+='<tr  class="" >'
-									+'<th class="border-0 p-1">Status:</th>'
+									+'<th class="border-0 p-1">Demo Status:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
 								+'</tr>'
 								+'<tr  class="" >'
@@ -1588,7 +1573,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									
 								}	
 								html+='<tr>'
-									+'<th class="border-0 p-1" style="width:165px">Remarks:</th>'
+									+'<th class="border-0 p-1" style="width:165px">Last Remarks:</th>'
 									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">'+(leads.followupRemark!=''?leads.followupRemark:'N/A')
 										// +'<div class="dropdown d-inline-block" style="position: inherit;">'
 										// 	+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remarks</button>'
@@ -1751,7 +1736,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Wati.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a>';
 							}
 							if(leads.zadarmaCount>0){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs" onclick="getZadarmaLogs(\''+leads.phoneIsd+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Zadarma.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs" onclick="getZadarmaLogs(\''+leads.phone+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Zadarma.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+							}
+              if(leads.callHippoCount>0){
+								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Call Hippo Logs" onclick="getCallHippoLogs(\''+leads.phone+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/CallHippo.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
 							}
 							if(leads.emailBroadcastCount>0){
 								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';

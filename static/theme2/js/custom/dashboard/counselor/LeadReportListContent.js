@@ -211,6 +211,10 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	callDaywiseLead("DAY","chart-pie-days",'','');
 	callCampainWise("DAY", "lead-source","chart-lead-source",'','');
 
+	callDeviceCount("DAY","chart-pie-device",'','');
+	
+	
+
 	$("#searchtypeTotalLead").on("change", function(){
 		if($("#searchtypeTotalLead").val()=='CUSTOM'){
 			$(".hideChartdate").css({"display":"block"});
@@ -218,6 +222,8 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 			$(".hideChartdate").css({"display":"none"})
 			callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",'','');
 			callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",'','');
+			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",'','');
+			
 		}
 	});
 
@@ -235,6 +241,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
         }
         callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",startDate,endDate);
         callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",startDate,endDate);
+		callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",startDate,endDate);
     });
 
 	
@@ -617,7 +624,7 @@ function getReportsTab(objRight){
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
 						<th class="text-center bg-primary text-white"><span class="changeHeadText">Counselor</span> Name</th>
-						<th class="text-center bg-primary text-white">Call</th>
+						<th class="text-center bg-primary text-white">Call | Call Hippo</th>
 						<th class="text-center bg-primary text-white">Wati</th>
 						<th class="text-center bg-primary text-white">Whatsapp</th>
 						<th class="text-center bg-primary text-white">Mail</th>
@@ -758,6 +765,32 @@ function getLeadReportChart(objRights){
 				<h5 class="card-title">Lead Source</h5>
 				<div id="chart-lead-source"></div>
 			</div>   
+			</div>   
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Device Wise</h5>
+					<div id="chart-pie-device"></div>
+				</div>  
+			</div>   
+		</div>
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Device Wise</h5>
+					<div id="chart-pie-device-type"></div>
+				</div>  
+			</div>   
+		</div>
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Browser Wise</h5>
+					<div id="chart-pie-browser"></div>
+				</div>  
 			</div>   
 		</div>
 	</div>`;
