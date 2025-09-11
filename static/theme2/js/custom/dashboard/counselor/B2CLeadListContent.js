@@ -1525,7 +1525,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tr>';
 								html+='<tr  class="" >'
 									+'<th class="border-0 p-1">Demo Status:</th>'
-									+'<td class="border-0 p-1">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
+									+'<td class="border-0 p-1 demo-status-row-'+leads.leadId+'">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
 								+'</tr>'
 								+'<tr  class="" >'
 									+'<th class="border-0 p-1">Assigned To:</th>'

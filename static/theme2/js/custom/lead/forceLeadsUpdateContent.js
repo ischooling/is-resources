@@ -497,6 +497,7 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 							<option value="Demo Confirmed">Demo Confirmed</option>
 							<option value="Demo Not Confirmed">Demo Not Confirmed</option>
 							<option value="Not Interested">Not Interested</option>
+							<option value="Positive to enrollment">Positive to enrollment</option>
 						</select>
 					</div>
 				</td>

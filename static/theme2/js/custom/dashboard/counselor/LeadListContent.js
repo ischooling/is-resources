@@ -23,10 +23,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 		clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 	}
+	getB2CLeadPopjs(objRights, roleAndModule);
 	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
-	getB2CLeadPopjs(objRights, roleAndModule);
 	generateTinyUrls();
 	
 	$("#btnClickLeadMove").on('click',function() {
@@ -389,6 +389,8 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 		}
+		
+		$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
 		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
 		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
 		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
@@ -681,7 +683,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			});
 			leadnew = leadCheckId + leadNotCheckId;
 			var leadId =leadnew.substring(1,leadnew.lenght);
-				var urlSend = '/dashboard/lead-merge-data?moduleId='+OBJECT_RIGHTS.moduleId+'&leadId='+leadId+'&leadFrom=MERGE&currentPage='+OBJECT_RIGHTS.currentPage+'&isSearch=false&countrolType=edit&leadType=B2C';
+				var urlSend = '/dashboard/lead-merge-data?moduleId='+OBJECT_RIGHTS.moduleId+'&leadId=0&leadFrom=MERGE&currentPage='+OBJECT_RIGHTS.currentPage+'&isSearch=false&countrolType=edit&leadType=B2C';
 				getAsPost(urlSend,'self');
 				//callLeadMergeData('leadMergeDataPopupForm', leadId, '${USER_ID}', 'edit', 'leadMergePopup','B2C',1)
 		});

@@ -1,3 +1,4 @@
+
 var watiTemplateContent;
 var emailTemplateContent;
 // var emailStatusInterval = null;
@@ -843,7 +844,7 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 					 }else{
 						 advanceLeadSearchStudent('advanceLeadNewSearchForm',roleModuleId, 'advance-search','list' ,data['extra'],'new', true,'', leadType);
 					 }
-					 // var urlSend = '/dashboard/lead-data-list?moduleId='+roleModuleId+'&leadId=0&leadFrom=LEAD&clickFrom=list&currentPage='+data['extra']+'&leadId=0&euid='+ENCRYPTED_USER_ID;
+					 // var urlSend = '/dashboard/lead-data-list?moduleId='+roleModuleId+'&leadFrom=LEAD&clickFrom=list&currentPage='+data['extra']+'&leadId=0&euid='+ENCRYPTED_USER_ID;
 					 // getAsPost(urlSend);
 					 customLoader(false)
 				 }, 300);
@@ -1504,7 +1505,9 @@ var leadCountDetailDTO={};
 	strText='';
  }
  leadModifyDTO['leadFullSearch'] = strText;  
- 
+ if(strText!=''){
+	leadFrom="advance-search";
+ }
  
  leadModifyDTO['showAllLeadsData'] = $("#"+formId+" #restrictedDataShow").val()!=undefined?$("#"+formId+" #restrictedDataShow").val():''; //'restricted';
  leadModifyDTO['leadNo'] = $("#"+formId+" #leadNoSearch").val()!=undefined?$("#"+formId+" #leadNoSearch").val():'';
@@ -5234,7 +5237,7 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				$(".nextFollow-"+leadId).html("<b>NO FOLLOWUP</b>");
 				$(".leadlist-status-"+leadId).html("<b>"+$('#leadStatus-'+leadId+' option:selected').text()+"</b>")
 				$(".leadlist-remark-"+leadId).html("<b>"+data['extra3']+"</b>");
-
+				$(".demo-status-row-"+leadId).html(data['extra4']);
 				var lType=leadType.toString().toLowerCase();
 				$(".nextSchedule-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
 				$(".nextFollow-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
@@ -6211,12 +6214,12 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 	return reponse;
 }
 
-function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid) {
+function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid, assignTo) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-lead-list-campaign'),
-		data : JSON.stringify(getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName)),
+		data : JSON.stringify(getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, assignTo)),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
@@ -6303,13 +6306,14 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 }
    
 
-function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName) {
+function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, assignTo) {
 	var authentication = {};
 	var leadReportRequest = {};
 	leadReportRequest['schoolId'] = SCHOOL_ID;
 	leadReportRequest['modeSearch'] = modeSearch;
 	leadReportRequest['startDate'] = startDate;
 	leadReportRequest['endDate'] = endDate;
+	leadReportRequest['assignTo'] = assignTo;
 	
 	if(campaignName!=undefined && campaignName!=""){
 		leadReportRequest['reportType']="LEAD-LIST";
@@ -6373,19 +6377,14 @@ function getLeadCampaignWiseHtml(data){
 
 			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+">";
 			htmlRet +="<td class=\"text-center\" style=\"max-width:70px !important;min-width:70px\">"+(sr)+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"');\">"+leadCampaign.campaignName+"</a></td>";
+			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></td>";
 			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" class=\"text-center\"><span class=\"bg-success text-white text-center  badge font-12\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-12\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-12\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-12\">"+leadCampaign.totalFbLead+"</span></td>";
 			htmlRet +="<td style=\"vertical-align: top !important;min-width:180px\" class=\"text-center\"><span class=\"badge badge-pill badge-dark font-10\">$"+leadCampaign.totalSpend+"</span><br/><span class=\"badge badge-pill badge-primary font-10\">$"+perLeadSmsSpent.toFixed(2)+"</span> | <span class=\"badge badge-pill badge-info font-10\">$"+perLeadFbSpent.toFixed(2)+"</span> </td>";
 			htmlRet +="<td class=\"rounded-bottom-right-10\">";
 			var sizeCounselor=(leadCampaign.assignNames.length);
-			// totalDemo=totalDemo+ parseInt(leadCampaign.totalDemoLead);
-			// totalDemoDone=totalDemoDone+ parseInt(leadCampaign.totalDemoDone);
-			// totalWebDemo=totalWebDemo+parseInt(leadCampaign.totalWebDemoLead);
-			// totalCopyDemo=totalCopyDemo+parseInt(leadCampaign.totalCopyDemoLead);
-			// totalConvert=totalConvert+ parseFloat(leadCampaign.totalConverted);
 			sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
 			htmlRet +="<span>"+sizeCounselor+" </span>";
-			htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Converted: <b>"+leadCampaign.totalConverted+"</b></span>";
+			htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Enrolled: <b>"+leadCampaign.totalConverted+"</b></span>";
 			htmlRet +="<div class=\"d-flex overflow-x-auto\" style=\"max-width:550px;\">";
 			if(leadCampaign.assignNames.length>0){
 				for (let s = 0; s < leadCampaign.assignNames.length; s++) {
@@ -6394,7 +6393,7 @@ function getLeadCampaignWiseHtml(data){
 					
 					htmlRet +="<div class=\"card-body d-flex px-2 pt-2 align-items-center pb-0\">";
 					htmlRet +="<span><img width=\"42\" class=\"avatar-icon\" src=\""+assignNameobj.profilePic+"\" alt=\"\" /></span>";
-					htmlRet +="<div class=\"pl-1\"><div class=\"teacher-name font-weight-semi-bold font-size-md\">"+assignNameobj.assignName+"</div>";
+					htmlRet +="<div class=\"pl-1\"><div class=\"teacher-name font-weight-semi-bold font-size-md\"><a href=\"javascript:void(0)\" onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','"+assignNameobj.assignTo+"');\">"+assignNameobj.assignName+"</a></div>";
 					htmlRet +="<div class=\"teacher-availability\">";
 					htmlRet +="<span class=\"total-hour text-primary\">"+assignNameobj.assignLead+" | </span><span class=\"total-hour text-success\">"+assignNameobj.assignActiveLead+" | </span><span class=\"total-hour text-danger\">"+assignNameobj.assignInactiveLead+"</span>";
 					htmlRet +="</div>";
@@ -6425,7 +6424,7 @@ function getLeadCampaignWiseHtml(data){
             htmlRet +="<th class=\"text-center bg-primary text-white\">Ad_set<br/>Ad_Name</th>";
             htmlRet +="<th class=\"text-center bg-primary text-white\">Counselor Name<br/>Lead Status</th>";
             // htmlRet +="<th class=\"text-center bg-primary text-white\">Demo Booked</th>";
-            htmlRet +="<th class=\"text-center bg-primary text-white\">Remarks</th>";
+            htmlRet +="<th class=\"text-center bg-primary text-white\">Last Remarks</th>";
 			htmlRet +="</tr>";
 			htmlRet +="</thead>";
 			htmlRet +="<tbody class=\"campaign-td-"+sr+"\"></tbody>";
@@ -6494,7 +6493,7 @@ function getCampaignFooterTotal(data){
 	return htmlRet;
 }
 
-function getListLeadCampaign(campaignName, eventid){
+function getListLeadCampaign(campaignName, eventid, assignTo){
 	var startDate = $("#dataLeadCampaignStartDate").val();
 	var endDate = $("#dataLeadCampaignEndDate").val();
 	var searchCountrytype = $("#searchLeadCampaignType").val();
@@ -6508,7 +6507,7 @@ function getListLeadCampaign(campaignName, eventid){
 		return false;
 	}
 	
-	callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,campaignName,eventid);
+	callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,campaignName,eventid, assignTo);
 }
 
 function getLeadListCampaignWiseHtml(data){
@@ -6520,12 +6519,12 @@ function getLeadListCampaignWiseHtml(data){
 		
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
-			var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+leadCampaign.leadId+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
+			var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+leadCampaign.leadno+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
 			//var totalLeadLink="clickLeadsLink('"+urlClick+"','', '','list','', '')";
 //			<a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">
 			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+">";
 			htmlRet +="<td class=\"text-center\">"+(sr++)+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.leadno+"<br/><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\"><a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">"+leadCampaign.leadno+"</a><br/><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\"><span class=\"child_email\">"+leadCampaign.email+"</span><br/>"+leadCampaign.country+"<br/>"+leadCampaign.assignDate+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.fbAddSet+"<br/>"+leadCampaign.fbAdd+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.assignName+"<br/>"+leadCampaign.leadStatus+"</td>";
