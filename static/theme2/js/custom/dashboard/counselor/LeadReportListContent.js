@@ -201,6 +201,11 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		placeholder:"Select Campaign"
         //dropdownParent:"#leadCounselorDataForm"
     });
+	$("#searchCountryType").select2({
+        theme:"bootstrap4",
+		placeholder:"Select Country"
+        //dropdownParent:"#leadCounselorDataForm"
+    });
     $("#dataLeadCampaignStartDate").datepicker({
         format : 'dd-mm-yyyy',
         autoclose: true,
@@ -215,6 +220,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	callLeadSourceList('reportLeadSearchForm','B2C','sourceSearch', true);
 	callLeadStatusList('reportLeadSearchForm','B2C','statusSearch', false);
 	callPCountries('reportLeadSearchForm', 0, 'countryId');
+	callPCountries('campaignForm', 0, 'searchCountryType');
 	callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','assignToSearch', true, OBJECT_RIGHTS.discardPermission, USER_ID);
 	callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','leadDemoAssign', true, OBJECT_RIGHTS.discardPermission, USER_ID);
 	callMasterCampainList('reportLeadSearchForm','','searchReportCampaign');
@@ -385,6 +391,19 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
         }
     });
     $("#searchCampaignType").on("change", function(){
+        var startDate = $("#dataLeadCampaignStartDate").val();
+        var endDate = $("#dataLeadCampaignEndDate").val();
+        
+        if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
+            startDate = $("#dataLeadCampaignStartDate").val();
+        }
+        if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
+            endDate = $("#dataLeadCampaignEndDate").val();
+        }
+        callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
+    });
+
+	$("#searchCountryType").on("change", function(){
         var startDate = $("#dataLeadCampaignStartDate").val();
         var endDate = $("#dataLeadCampaignEndDate").val();
         
@@ -778,7 +797,7 @@ function getLeadReportChart(objRights){
 	var html='';
 	html+=`<div class="row">
 		<div class="col-md-12 col-lg-12">
-			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
+			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
 				<select class="form-control form-control-sm mr-1" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
 					<option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
 					<option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
@@ -1057,8 +1076,13 @@ function getLeadCampaignPriceList(objRights){
 	var html='';
 	html+=`<div class="row">
         <div class="col-md-12 col-lg-12">
-            <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-                <div class="col-xl-4 col-lg-6 col-md-12 p-0">
+            <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" id="campaignForm">
+            	<div class="col-xl-3 col-lg-6 col-md-12 p-0">
+                    <select class="form-control  mr-1 searchCountryType" id="searchCountryType" name="searchCountryType" multiple="multiple">
+						<option></option>`
+                   html+=` </select>
+                </div>   
+				<div class="col-xl-4 col-lg-6 col-md-12 p-0">
                     <select class="form-control  mr-1 searchCampaignType" id="searchCampaignType" name="searchCampaignType" multiple="multiple">
 						<option></option>`
 						for(let u = 0; u < utmCampaignList.length; u++) {

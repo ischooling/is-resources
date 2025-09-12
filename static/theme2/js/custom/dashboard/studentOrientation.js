@@ -74,6 +74,7 @@ function getRequestForBookOrientation(formId, leadFrom){
 }
 
 function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, currentPage, userWiseStatus, newTheme ) {
+	debugger;
 	customLoader(true);
  	$.ajax({
 		type : "POST",
@@ -907,4 +908,97 @@ function getRequestForInactiveAssignCounselorOrient(userId, checkedVal, orderBy,
 	leadAddFormRequestDTO['authentication'] = authentication;
 	leadAddFormRequestDTO['leadCommonDTO'] = leadCommonDTO;
 	return leadAddFormRequestDTO;
+}
+
+function selectDateOnTypeChange(src) {
+  if ($(src).val() == "custom") {
+    $("#startDateSearch, #endDateSearch").datepicker("destroy"); // Remove previous datepickers
+    $("#startDateSearch")
+      .datepicker({
+        format: "mm-dd-yyyy",
+        container: "#orientationSearchForm .datepickerStartWrapper",
+        autoclose: true,
+        //startDate:new Date()
+      })
+      .on("change", function () {
+        // Get the startDate
+        var startDate = new Date($(this).val());
+        var endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 1); // Increment by 1 day
+
+        // Remove and reinitialize #endDate with updated startDate
+        $("#endDateSearch").datepicker("destroy");
+        $("#endDateSearch").datepicker({
+          format: "mm-dd-yyyy",
+          container: "#orientationSearchForm .datepickerEndWrapper",
+          autoclose: true,
+          startDate: endDate, // Set minimum date for #endDate
+        });
+      });
+
+    // Initialize #endDate initially without restrictions
+    $("#endDateSearch").datepicker({
+      format: "mm-dd-yyyy",
+      container: "#orientationSearchForm .datepickerEndWrapper",
+      autoclose: true,
+    });
+
+    // Enable and clear the fields
+    $("#startDateSearch, #endDateSearch").attr("disabled", false);
+    $("#startDateSearch, #endDateSearch").val("");
+  } else {
+    // Disable fields for non-custom types
+    $("#startDateSearch, #endDateSearch").attr("disabled", true);
+    // $("#startDate, #endDate").val("");
+  }
+
+  	if ($("#orientationSearchForm #selectedType").val() == "today") {
+		let today = new Date();
+		let month = today.getMonth() + 1; // Month is 0-indexed, so add 1
+		let day = today.getDate();
+		let year = today.getFullYear();
+		month = month < 10 ? '0' + month : month;
+		day = day < 10 ? '0' + day : day;
+		let formattedDate =`${month}-${day}-${year}`;
+		startDate = formattedDate;
+		endDate = startDate;
+		$("#orientationSearchForm #startDateSearch").val(startDate);
+		$("#orientationSearchForm #endDateSearch").val(endDate);
+	} else if ($("#orientationSearchForm #selectedType").val() == "week") {
+		let today = new Date();
+		let firstDay = new Date(today.setDate(today.getDate() - today.getDay())); // Start of the week (Sunday)
+		let lastDay = new Date(today.setDate(today.getDate() + 6)); // End of the week (Saturday)
+		let month = firstDay.getMonth() + 1; // Month is 0-indexed, so add 1
+		let day = firstDay.getDate();
+		let year = firstDay.getFullYear();
+		month = month < 10 ? '0' + month : month;
+		day = day < 10 ? '0' + day : day;
+		let startDate = `${month}-${day}-${year}`;
+		month = lastDay.getMonth() + 1; // Month is 0-indexed, so add 1
+		day = lastDay.getDate();
+		year = lastDay.getFullYear();
+		month = month < 10 ? '0' + month : month;
+		day = day < 10 ? '0' + day : day;
+		let endDate = `${month}-${day}-${year}`;
+		$("#orientationSearchForm #startDateSearch").val(startDate);
+		$("#orientationSearchForm #endDateSearch").val(endDate);
+	} else if ($("#orientationSearchForm #selectedType").val() == "month") {
+		let today = new Date();
+		let firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+		let lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+		let month = firstDay.getMonth() + 1; // Month is 0-indexed, so add 1
+		let day = firstDay.getDate();
+		let year = firstDay.getFullYear();
+		month = month < 10 ? '0' + month : month;
+		day = day < 10 ? '0' + day : day;
+		let startDate = `${month}-${day}-${year}`;
+		month = lastDay.getMonth() + 1; // Month is 0-indexed, so add 1
+		day = lastDay.getDate();
+		year = lastDay.getFullYear();
+		month = month < 10 ? '0' + month : month;
+		day = day < 10 ? '0' + day : day;
+		let endDate = `${month}-${day}-${year}`;
+		$("#orientationSearchForm #startDateSearch").val(startDate);
+		$("#orientationSearchForm #endDateSearch").val(endDate);
+	}
 }

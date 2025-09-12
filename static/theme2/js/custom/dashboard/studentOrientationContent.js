@@ -335,11 +335,20 @@ function getStudentOrientAdvanceSearchPopup(){
 								<option value="0">Select city</option>
 							</select>
 						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">
+							<label class="m-0">Select Date Type</label>
+							<select class="form-control" name="selectedType" id="selectedType" onchange="selectDateOnTypeChange(this)">
+								<option value="today">Today</option>    
+								<option value="week">Week</option>    
+								<option value="month">Month</option>    
+								<option value="custom" selected>Custom</option>    
+						 	</select>   
+						</div>
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 datepickerStartWrapper">
 							<label class="m-0">Start Date</label>
 							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
 						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 datepickerEndWrapper">
 							<label class="m-0">To Date</label>
 							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
 						</div>	
@@ -356,95 +365,95 @@ function getStudentOrientAdvanceSearchPopup(){
 		return html;
 }
 
-function getStudentOrientAdvanceSearchPopup(){
-	var html=''
-	html+=`<div id="orientationSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-backdrop="static">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content border-0">
-            <div class="modal-header py-2 bg-primary text-white">
-                <h5 class="modal-title" >Advance Search</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="javascript:void(0);" id="orientationSearchForm" name="orientationSearchForm" autocomplete='off'>
-				<input type="hidden" name="userId" id="userId" value="${USER_ID }">
-					<div class="row">
-						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">
-							<div class="orientationErrorText"></div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">
-							<label class="m-0">Status</label>
-							<select name="statusSearch" id="statusSearch" class="form-control">
-									<option value="">Select Status</option>
-									<option value="PENDING">Pending</option>
-									<option value="COMPLETED">Completed</option>
-									<option value="RESCHEDULE">Reschedule</option>
-							</select>
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Email</label>
-							<input type="email" name="emailIdSearch" id="emailIdSearch" class="form-control"  maxlength="100">
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Phone No.</label>
-							<input type="text" name="phoneNoSearch" id="phoneNoSearch" class="form-control" onkeydown="return M.digit(event);" maxlength="15"/>
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Student Name</label>
-							<input type="text" name="stdfnameSearch" id="stdfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Parent Name</label>
-							<input type="text" name="parentfnameSearch" id="parentfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">
-							<label class="m-0">Grade</label>
-							<select name="gradeSearch" id="gradeSearch" class="form-control" >
-								<option value="0">Select Grade</option>
-							</select>
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">
-							<label class="m-0">Country</label>
-							<select name="countryId" id="countryId" class="form-control" >
-								<option value="0">Select country</option>
-							</select>
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">
-							<label class="m-0">State</label>
-							<select name="stateId" id="stateId" class="form-control" >
-								<option value="0">Select state</option>
-							</select>
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 city">
-							<label class="m-0">City</label>
-							<select name="cityId" id="cityId" class="form-control" >
-								<option value="0">Select city</option>
-							</select>
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
-						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
-						</div>	
-					</div>
-				</form>
-            </div>
-            <div class="modal-footer">
-				<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnClickOrientSearch"><i class="fa fa-search"></i>&nbsp;Search</button>
-                <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" onclick="advanceOrientationSearchStudentReset('orientationSearch')"><i class="fa fa-undo"></i>&nbsp;Reset</button>
-            </div>
-        </div>
-    </div>
-</div>`;
-		return html;
-}
+// function getStudentOrientAdvanceSearchPopup(){
+// 	var html=''
+// 	html+=`<div id="orientationSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-backdrop="static">
+//     <div class="modal-dialog modal-xl">
+//         <div class="modal-content border-0">
+//             <div class="modal-header py-2 bg-primary text-white">
+//                 <h5 class="modal-title" >Advance Search</h5>
+//                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+//                     <span aria-hidden="true">&times;</span>
+//                 </button>
+//             </div>
+//             <div class="modal-body">
+//                 <form action="javascript:void(0);" id="orientationSearchForm" name="orientationSearchForm" autocomplete='off'>
+// 				<input type="hidden" name="userId" id="userId" value="${USER_ID }">
+// 					<div class="row">
+// 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">
+// 							<div class="orientationErrorText"></div>
+// 						</div>
+// 					</div>
+// 					<div class="row">
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">
+// 							<label class="m-0">Status</label>
+// 							<select name="statusSearch" id="statusSearch" class="form-control">
+// 									<option value="">Select Status</option>
+// 									<option value="PENDING">Pending</option>
+// 									<option value="COMPLETED">Completed</option>
+// 									<option value="RESCHEDULE">Reschedule</option>
+// 							</select>
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+// 							<label class="m-0">Email</label>
+// 							<input type="email" name="emailIdSearch" id="emailIdSearch" class="form-control"  maxlength="100">
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+// 							<label class="m-0">Phone No.</label>
+// 							<input type="text" name="phoneNoSearch" id="phoneNoSearch" class="form-control" onkeydown="return M.digit(event);" maxlength="15"/>
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+// 							<label class="m-0">Student Name</label>
+// 							<input type="text" name="stdfnameSearch" id="stdfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+// 							<label class="m-0">Parent Name</label>
+// 							<input type="text" name="parentfnameSearch" id="parentfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">
+// 							<label class="m-0">Grade</label>
+// 							<select name="gradeSearch" id="gradeSearch" class="form-control" >
+// 								<option value="0">Select Grade</option>
+// 							</select>
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">
+// 							<label class="m-0">Country</label>
+// 							<select name="countryId" id="countryId" class="form-control" >
+// 								<option value="0">Select country</option>
+// 							</select>
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">
+// 							<label class="m-0">State</label>
+// 							<select name="stateId" id="stateId" class="form-control" >
+// 								<option value="0">Select state</option>
+// 							</select>
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 city">
+// 							<label class="m-0">City</label>
+// 							<select name="cityId" id="cityId" class="form-control" >
+// 								<option value="0">Select city</option>
+// 							</select>
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+// 							<label class="m-0">Start Date</label>
+// 							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
+// 						</div>
+// 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+// 							<label class="m-0">To Date</label>
+// 							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
+// 						</div>	
+// 					</div>
+// 				</form>
+//             </div>
+//             <div class="modal-footer">
+// 				<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnClickOrientSearch"><i class="fa fa-search"></i>&nbsp;Search</button>
+//                 <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" onclick="advanceOrientationSearchStudentReset('orientationSearch')"><i class="fa fa-undo"></i>&nbsp;Reset</button>
+//             </div>
+//         </div>
+//     </div>
+// </div>`;
+// 		return html;
+// }
 
 function getOrientationUpdatePopup(){
 	var html='';

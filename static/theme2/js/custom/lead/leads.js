@@ -6325,8 +6325,14 @@ function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, 
 			utmCampaign=$("#searchCampaignType").val();
 		}
 		leadReportRequest['utmCampaign'] = utmCampaign;
+		
 		leadReportRequest['reportType']="CAMPAIGN-LIST";
 	}
+	var countryIds=[];
+		if($("#searchCountryType").val()!='' && $("#searchCountryType").val()!=undefined){
+			countryIds=$("#searchCountryType").val();
+		}
+		leadReportRequest['countryIds'] = countryIds;
 
    
 	authentication['hash'] = getHash();
