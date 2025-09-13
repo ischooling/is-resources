@@ -389,8 +389,9 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 		}
-		
-		$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
+		if(OBJECT_RIGHTS.leadId!="0"){
+			$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
+		}
 		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
 		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
 		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);

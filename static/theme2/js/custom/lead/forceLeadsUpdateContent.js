@@ -104,12 +104,36 @@ $(document).ready(function(){
 			$(counterId).attr("class", "text-success");
 		}
 	});
+
+	$(document).on("input", ".schedule_remarks", function () {
+		let val = $(this).val();
+		let id = $(this).attr("id");
+		let minlength = $(this).attr("minlength");
+		let counterId = "#scheduleRemarksCounter";
+
+		// update counter live
+		$(counterId).text(val.length + " / " + minlength);
+
+		// visual feedback
+		if (val.length < minlength) {
+			$(this).addClass("is-invalid");
+			$(counterId).attr("class", "text-red");
+		} else {
+			$(this).removeClass("is-invalid");
+			$(counterId).attr("class", "text-success");
+		}
+	});
 	$('.tentative_date').css( "display", "none" );
 	$('.rtentativeDate').datepicker({
 		autoclose: true,
 		format: 'mm-dd-yyyy',
 	});
 });
+function closeModal(modalId) {
+	 setTimeout(function () {
+		$("#"+modalId).modal('hide')
+	 }, 250); 
+}
 
 function forceDemoUpdateModalContent(data){
 	var newThemeflag = tt=="theme2"?true:false;
@@ -122,14 +146,14 @@ function forceDemoUpdateModalContent(data){
 						html+=
 						`<h5 class="modal-title text-white">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(!data.details.showUpdateDemoPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
+							html+=`<button type="button" class="close text-white" onclick="closeModal('demoDetailsModal')"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
 						`<h5 class="modal-title" style="color:#fff;">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(!data.details.showUpdateDemoPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							html+=`<button type="button" class="close text-white" onclick="closeModal('demoDetailsModal')" >
 								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}
@@ -258,14 +282,14 @@ function forceLeadUpdateModalContent(data){
 						html+=
 						`<h5 class="modal-title text-white">Update Lead Remark (<span class="leadTotalCount">${data.details.leadDetails.leadCount}</span>)</h5>`;
 						if(data.details.showLeadRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
+							html+=`<button type="button" class="close text-white" onclick="closeModal('leadDetailsModal')"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
 						`<h5 class="modal-title" style="color:#fff;">Update Lead Remark (<span class="leadTotalCount">${data.details.leadDetails.leadCount}</span>)</h5>`;
 						if(data.details.showLeadRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							html+=`<button type="button" class="close text-white" onclick="closeModal('leadDetailsModal')">
 								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}
@@ -385,14 +409,14 @@ function forceDemo2UpdateModalContent(data){
 						html+=
 						`<h5 class="modal-title text-white">Update Demo Remark (<span class="demo2TotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(data.details.showDemoRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
+							html+=`<button type="button" class="close text-white" onclick="closeModal('demo2DetailsModal')"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
 						`<h5 class="modal-title" style="color:#fff;">Update Demo Remark (<span class="demo2TotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(data.details.showDemoRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							html+=`<button type="button" class="close text-white" onclick="closeModal('demo2DetailsModal')">
 								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}

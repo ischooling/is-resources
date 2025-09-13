@@ -65,7 +65,7 @@ function getDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondi
 				}
 				console.log(data.eventDetails)
 				//getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondition);
-				$("#scheduleEventThumbAndTableDate").html(scheduleEventthumb(data)+scheduleEventListDetails(data.eventDetails,clickFrom,currentPage,boxSearchCondition, showPagination, countType)+moveEventModal())
+				$("#scheduleEventThumbAndTableDate").html(scheduleEventthumb(data)+scheduleEventListDetails(data.eventDetails,clickFrom,currentPage,boxSearchCondition, showPagination, countType,data.remarkMendatory,data.minRemarkCount)+moveEventModal())
 				//showMessageTheme2(1, data['message'],'',true);
 				$("#scheduleEventsSearchForm").slideUp(700);
 				customLoader(false);
@@ -189,6 +189,19 @@ function updateMeetingStatus(meetingId, leadId) {
 		return false;
 	}
 
+    let isRemarkMendatory =  $('.schedule_remarks').attr('isRemarkMendatory') === "true";
+    if(isRemarkMendatory){
+        let minMendatoryCount = parseInt($('.schedule_remarks').attr('minlength'))
+        if(remarks==undefined || remarks==null || remarks==''){
+            showMessageTheme2(0, "Remarks field is required.",'',true);
+            return false;
+        }
+        if(remarks.length < minMendatoryCount){
+             showMessageTheme2(0, "Minimum " + minMendatoryCount+ " character required.",'',true);
+            return false;
+        }
+    }
+
 	// if(remarks==undefined || remarks==null || remarks==0 || remarks==''){
 	// 	showMessageTheme2(0, "Remarks field is required.",'',true);
 	// 	return false;
@@ -236,9 +249,9 @@ function updateMeetingStatus(meetingId, leadId) {
 
 
 
-function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry){
+function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry,remarkMendatory,minRemarkCount){
 	confirmationFlag=true;
-	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId));
+	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount));
 	$("#confirmeUpdateModalWrapper").html(confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry));
 	$('#updateSystemTraningModal').modal('show');
     $('.tentativeDate').datepicker({

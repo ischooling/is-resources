@@ -1505,7 +1505,7 @@ var leadCountDetailDTO={};
 	strText='';
  }
  leadModifyDTO['leadFullSearch'] = strText;  
- if(strText!=''){
+ if(strText!='' && strText!='0'){
 	leadFrom="advance-search";
  }
  
