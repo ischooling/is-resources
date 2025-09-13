@@ -86,7 +86,7 @@ function validateRequestForSignupStudent(){
 		showMessage(0, 'Gender is required');
 		return false
 	}
-	if($('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA'){
+	if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 		if ($("#signupStage1 #studyingSchoolName").val()=="") {
 			showMessage(0, 'Student\'s School Name is required');
 			return false
@@ -190,6 +190,9 @@ function callForSignupStudentDetails() {
 						$("#showMessageInPopup").modal("hide");
 					},3000);
 				}
+				if($("#signupType").val() == "Offline"){
+					$("#learningProgramPartnerStudent").attr("disabled", true);
+				}
 				callForParentSelection();
 			}
 		},
@@ -222,7 +225,7 @@ function getRequestForStudent(){
 	signupStudentDTO['countryCode'] = $("#signupStage1 #countryDailCode").val();
 	signupStudentDTO['countryIsdCode'] = $("#signupStage1 #countryIsd").val();
 	signupStudentDTO['contactNumber'] = $("#signupStage1 #contactNumber").val();
-	if($('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA'){
+	if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 		signupStudentDTO['studyingSchoolName'] = $("#signupStage1 #studyingSchoolName").val();
 		signupStudentDTO['studyingGradeId'] = $("#signupStage1 #studyingGradeId").val();
 		signupStudentDTO['countryIdOfSchool'] = $("#signupStage1 #countryIdOfSchool").val();
@@ -236,6 +239,10 @@ function getRequestForStudent(){
 //	if($("#signupStage1 .iti__active").attr("data-country-code")==undefined){
 //		signupStudentDTO['countryIsdCode'] = $("#signupStage1 #countryIsd").val();
 //	}
+
+	signupStudentDTO['learningProgram'] = $("#learingProgramHeader").val();
+	signupStudentDTO['courseProviderId'] = $("#courseProviderId").val();
+	signupStudentDTO['enrollmentFor'] = $("#enrollmentFor").val();
 	signupStudentDTO['studyCenter'] = SCHOOL_ID;
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = 'STUDENT';
@@ -261,27 +268,27 @@ function calculateAge(){
 	return true;
 }
 
-function maxAge(standardId, enrollmentType){
-	if(standardId==''){
-		max_age=30;
-	}else{
-		if(enrollmentType=="ONE_TO_ONE" || enrollmentType=="BATCH"){
-			$.ajax({
-				type : "POST",
-				url : getURLForHTML('student',standardId+'/'+enrollmentType),
-				dataType : 'json',
-				contentType : "json",
-				async : false,
-				success : function(data) {
-					max_age= data.maxAge;
-					return true;
-				}
-			});
-		}else{
-			max_age=30;
-		}
-	}
-}
+// function maxAge(standardId, enrollmentType){
+// 	if(standardId==''){
+// 		max_age=30;
+// 	}else{
+// 		if(enrollmentType=="ONE_TO_ONE" || enrollmentType=="BATCH"){
+// 			$.ajax({
+// 				type : "POST",
+// 				url : getURLForHTML('student/age',standardId+'/'+enrollmentType),
+// 				dataType : 'json',
+// 				contentType : "json",
+// 				async : false,
+// 				success : function(data) {
+// 					max_age= data.maxAge;
+// 					return true;
+// 				}
+// 			});
+// 		}else{
+// 			max_age=30;
+// 		}
+// 	}
+// }
 
 function dobInitalize(schoolId, needToInitalize, courseProviderId){
 	// if(1==schoolId){
@@ -350,46 +357,35 @@ function getStepsMessage(step){
 	}
 }
 
-function getRequestForStudentSelection(){
+function getRequestForStudentSelection(signupType, studentUserId){
 	var studentRequestDTO = {};
+	studentRequestDTO['studentUserId'] = studentUserId;
 	studentRequestDTO['userId'] = USER_ID;
+	studentRequestDTO['signupType'] = signupType;
 	return studentRequestDTO;
 }
 
-function callForStudentSelection() {
+async function callForStudentSelection(signupType, studentUserId) {
 	showSkeleton(true, "step1");
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/get-student-details',
-		data : JSON.stringify(getRequestForStudentSelection()),
-		dataType : 'json',
-		async : true,
-		global : false,
-		success : function(data) {
-			if(data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-                if (data['status'] == '3') {
-                    redirectLoginPage();
-                } else {
-					if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
-						window.location.reload();
-					}else{
-						showMessage(false, data['message']);
-					}
-                }
-            }else{
-				renderStudentDetails(data);
-				$(".step-1-skeleton").hide();
-				$("#signupStage1").show();
-				// showMessage(1, 'Student Details Updated.', '', true);
-			}
-		},
-		error: function(e){
-			if (checkonlineOfflineStatus()) {
-				return;
+	var payload = getRequestForStudentSelection(signupType, studentUserId);
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-student-details',payload,'student/enrollment');
+	if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
+		if (responseData['status'] == '3') {
+			redirectLoginPage();
+		} else {
+			if (responseData['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || responseData['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
+				window.location.reload();
+			} else {
+				showMessage(false, responseData['message']);
 			}
 		}
-	});
+	} else {
+		renderStudentDetails(responseData, signupType);
+		callLocationForPayment("signupStage1");
+		$(".step-1-skeleton").hide();
+		$("#signupStage1").show();
+		// showMessage(1, 'Student Details Updated.', '', true);
+	}
 }
 
 function formValdate(formID, mandatory, nonMandatory){
@@ -514,7 +510,7 @@ function setActiveStep(step){
 		$(".finish-btn").hide(); 
 	}
 }
-function moveStep(moveType){
+async function moveStep(moveType){
 	var courseProviderId=$('#courseProviderId').val();
 	var sectionLength = $(".step").length;
 	var currentStep = $(".step.active-step").index()+1;
@@ -535,6 +531,9 @@ function moveStep(moveType){
 	}
 	if(moveType == "next"){
 		if(prevStep==1){
+			if($("#userId").val() == 0){
+				await callForUserSignUp('signupStage1', 'STUDENT');
+			}
 			var flag = callForSignupStudentDetails('signupStage1');
 			if (flag && signupStage1Form.valid()) {
 				callForSignupStudentDetails('signupStage1');
@@ -581,6 +580,7 @@ function moveStep(moveType){
 		}
 	}
 	if(prevStep==1){
+		$("#learningProgramPartnerStudent").attr("disabled", false);
 		if(currentStep != prevStep && currentStep > prevStep){
 			$('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'step-1.png');
 			if(courseProviderId == 39){
@@ -695,4 +695,15 @@ function calculateGradeLabel(){
 			$('#signupStage1 #applyStandardId').val(4);
 		}
 	}
+}
+
+async function getGradeByCriteria() {
+	var payload = {
+		"schoolId": SCHOOL_ID,
+		"enrollmentFor": $('#enrollmentFor').val(),
+		"learningProgram": $('#learingProgramHeader').val()
+	}
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-enrollments-grades',payload,'student/enrollment');
+	var standardId=$('#applyStandardId').val();
+	$('#signupStage1 #applyStandardId').html(getOptions(JSON.parse(responseData.grades), standardId ));
 }

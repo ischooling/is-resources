@@ -17903,7 +17903,8 @@ padding:.75rem 1.5rem
 	border-top:#e9ecef solid 1px
 }
 .app-wrapper-footer .app-footer .app-footer__inner {
-	border-left:#e9ecef solid 1px
+	border-left:#e9ecef solid 1px;
+	justify-content: center;
 }
 .chat-layout.app-inner-layout .app-inner-layout__sidebar {
 	width:360px;

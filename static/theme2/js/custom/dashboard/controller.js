@@ -254,12 +254,12 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	}else if(pageNo=='counselor-dashboard'){
 		renderCounselorDashboard('Counselor Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='partner-enrollment-list'){
-		renderPartnerList('Enrollment List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+		renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='counselor-enrollment-list'){
-		renderCounselorEnrollList('Enrollment List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+		renderCounselorEnrollList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='admin-partner-enrollment-list'){
 		//$('#dashboardContentInHTML').html(
-			renderPartnerList('Enrollment List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+			renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 		//);
 	}else if(pageNo=='lead-list'){
 		if (USER_ROLE == "B2B_LEAD") {

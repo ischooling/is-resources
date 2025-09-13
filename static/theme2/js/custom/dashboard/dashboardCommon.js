@@ -798,74 +798,74 @@ function getRequestForsendEmail(formId, moduleId, mailType) {
 function validateRequestForSendEmail(formId, moduleId) {
 	return true;
 }
-function callForUserSignUp(formId) {
-	hideMessageTheme2('');
-	if ($('#roleUser').val().trim() == '' || $('#roleUser').val().trim() == 0) {
-		showMessageTheme2(0, 'Role Type is required.');
-		return false;
-	}
-	if ($('#emailId').val().trim() == '') {
-		showMessageTheme2(0, 'Email is required.');
-		return false;
-	}
+// function callForUserSignUp(formId) {
+// 	hideMessageTheme2('');
+// 	if ($('#roleUser').val().trim() == '' || $('#roleUser').val().trim() == 0) {
+// 		showMessageTheme2(0, 'Role Type is required.');
+// 		return false;
+// 	}
+// 	if ($('#emailId').val().trim() == '') {
+// 		showMessageTheme2(0, 'Email is required.');
+// 		return false;
+// 	}
 
-	if ($('#roleUser').val().trim() == '3') {
-		moduleId = 'TEACHER';
-	} else {
-		moduleId = 'STUDENT';
-	}
+// 	if ($('#roleUser').val().trim() == '3') {
+// 		moduleId = 'TEACHER';
+// 	} else {
+// 		moduleId = 'STUDENT';
+// 	}
 
-	$("#signup").prop("disabled", true);
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForSignup('enrollment/stage-1', moduleId),
-		data: JSON.stringify(getRequestForSignup(formId, moduleId)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				if (data['statusCode'] == '0001') {
-					$('#allReadyEmail #emailVerify').show();
-				}
-				showMessageTheme2(0, data['message']);
-				showHideDiv(false, 'signupShortForm');
-				showHideDiv(true, 'accountConfirmation');
-			} else {
-				//showMessageTheme2(1, data['message']);
-				showHideDiv(true, 'signupShortForm');
-				showHideDiv(false, 'accountConfirmation');
-				$('#emailId').html($("#" + formId + " #email").val());
-				showMessageTheme2(0, data['message']);
-			}
-			$("#signup").prop("disabled", false);
-			return false;
-		}
-	});
-}
-function getRequestForSignup(formId, moduleId) {
-	var request = {};
-	var authentication = {};
-	var signupDTO = {};
-	signupDTO['email'] = $("#" + formId + " #emailId").val().trim();
-	signupDTO['confirmEmail'] = $("#" + formId + " #emailId").val().trim();
-	signupDTO['password'] = '1234567';
-	signupDTO['confirmPassword'] = '1234567';
+// 	$("#signup").prop("disabled", true);
+// 	$.ajax({
+// 		type: "POST",
+// 		contentType: APPLICATION_JSON_VALUE,
+// 		url: getURLForSignup('enrollment/stage-1', moduleId),
+// 		data: JSON.stringify(getRequestForSignup(formId, moduleId)),
+// 		dataType: 'json',
+// 		cache: false,
+// 		timeout: 600000,
+// 		success: function (data) {
+// 			if (data['status'] == '0' || data['status'] == '2') {
+// 				if (data['statusCode'] == '0001') {
+// 					$('#allReadyEmail #emailVerify').show();
+// 				}
+// 				showMessageTheme2(0, data['message']);
+// 				showHideDiv(false, 'signupShortForm');
+// 				showHideDiv(true, 'accountConfirmation');
+// 			} else {
+// 				//showMessageTheme2(1, data['message']);
+// 				showHideDiv(true, 'signupShortForm');
+// 				showHideDiv(false, 'accountConfirmation');
+// 				$('#emailId').html($("#" + formId + " #email").val());
+// 				showMessageTheme2(0, data['message']);
+// 			}
+// 			$("#signup").prop("disabled", false);
+// 			return false;
+// 		}
+// 	});
+// }
+// function getRequestForSignup(formId, moduleId) {
+// 	var request = {};
+// 	var authentication = {};
+// 	var signupDTO = {};
+// 	signupDTO['email'] = $("#" + formId + " #emailId").val().trim();
+// 	signupDTO['confirmEmail'] = $("#" + formId + " #emailId").val().trim();
+// 	signupDTO['password'] = '1234567';
+// 	signupDTO['confirmPassword'] = '1234567';
 
-	if ($("#" + formId + " #captcha").val().trim() != null) {
+// 	if ($("#" + formId + " #captcha").val().trim() != null) {
 
-		signupDTO['captcha'] = $("#" + formId + " #captcha").val().trim();
-	}
-	signupDTO['signupType'] = 'Offline';
-	signupDTO['isAdminCreateUser'] = 'AdminCreateUser';
-	signupDTO['userType'] = moduleId;
-	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = moduleId;
-	request['authentication'] = authentication;
-	request['data'] = signupDTO;
-	return request;
-}
+// 		signupDTO['captcha'] = $("#" + formId + " #captcha").val().trim();
+// 	}
+// 	signupDTO['signupType'] = 'Offline';
+// 	signupDTO['isAdminCreateUser'] = 'AdminCreateUser';
+// 	signupDTO['userType'] = moduleId;
+// 	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+// 	authentication['userType'] = moduleId;
+// 	request['authentication'] = authentication;
+// 	request['data'] = signupDTO;
+// 	return request;
+// }
 
 // function getTeacherList(formId, moduleId, newteacher) {
 

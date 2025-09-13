@@ -1,5 +1,11 @@
 var role;
 $(document).ready(function() {
+	if($("#signupType").val() == "Online"){
+		signupStudentOnLoad();
+	}
+});
+
+function signupStudentOnLoad(){
 	if(moduleId == "TEACHER"){
 		role = "";
 	}else if(moduleId == "STUDENT"){
@@ -247,53 +253,65 @@ $(document).ready(function() {
 		}
 		
 	});
-	
-});
+}
 
-function callForUserSignUp(formId, moduleId) {
+async function callForUserSignUp(formId, moduleId) {
 	$('.error-msg').html('');
-	if(!validateRequestForSignup(formId,moduleId)){
-		return false;
-	}
-	var learningProgram = $("#"+formId+" #learningProgram").val().trim();
-	$("#signup").prop("disabled", true);
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForSignup('enrollment/stage-1'),
-		data : JSON.stringify(getRequestForSignup(formId, moduleId)),
-		dataType : 'json',
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				if(learningProgram!='SCHOLARSHIP'){
-					showServerMessage(false, data['message']);
-				}
-				if(data['statusCode'] == '0001'){
-					hideStep1Div()
-					showWrapper(true)
-					$('#emailVerify').show();
-				}else if(data['statusCode']=='0041' || data['statusCode']=='0038'){
-					refreshCaptcha('captchaImage');
-				}else{
-					hideStep1Div()
-				}
-			} else {
-				if(data['emailVerified']){
-					goAhead(data['redirectUrl'], '');
-				}else{
-					showWrapper(true)
-					$('#emailNotVerify').hide();
-					$('#userDeclined').hide();
-					$('#emialLimit').hide();
-					$('#emailVerify').hide();
-					$('#accountConfirmation').show();
-					$('#emailId').html($("#"+formId+" #email").val());
-				}
-			}
-			$("#signup").prop("disabled", false);
+	if($("#signupType").val() != "Offline"){
+		if(!validateRequestForSignup(formId, moduleId)){
 			return false;
 		}
-	});
+	}else{
+		if($("#learningProgramPartnerStudent").val() == ""){
+			showMessageTheme2(0, "Please Select the learning program");
+			return false;
+		}
+	}
+	var learningProgram = $("#" + formId + " #learningProgram").val().trim();
+	$("#signup").prop("disabled", true);
+	var payload = getRequestForSignup(formId, moduleId);
+	var parentUrl = '';
+	if(moduleId == 'STUDENT'){
+		parentUrl='api/v1/student'
+	}else if(moduleId == 'TEACHER'){
+		parentUrl='api/v1/teacher'
+	}else if(moduleId == 'SCHOOL'){
+		parentUrl='api/v1/school'
+	}
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true, 'enrollment/stage-1', payload,parentUrl);
+
+	if (responseData['status'] == '0' || responseData['status'] == '2') {
+		if (learningProgram != 'SCHOLARSHIP') {
+			showServerMessage(false, responseData['message']);
+		}
+		if (responseData['statusCode'] == '0001') {
+			hideStep1Div();
+			showWrapper(true);
+			$('#emailVerify').show();
+		} else if (responseData['statusCode'] == '0041' || responseData['statusCode'] == '0038') {
+			refreshCaptcha('captchaImage');
+		} else {
+			hideStep1Div();
+		}
+	} else {
+		if (responseData['emailVerified']) {
+			if ($("#signupType").val() == "Offline") {
+				$("#signupStage1 #communicationEmail").attr('disabled', true);
+				$("#signupStage1 #userId").val(responseData.studentUserId);
+			} else {
+				goAhead(responseData['redirectUrl'], '');
+			}
+		} else {
+			showWrapper(true);
+			$('#emailNotVerify').hide();
+			$('#userDeclined').hide();
+			$('#emialLimit').hide();
+			$('#emailVerify').hide();
+			$('#accountConfirmation').show();
+			$('#emailId').html($("#" + formId + " #email").val());
+		}
+	}
+	return false;
 }
 
 function hideStep1Div(){
@@ -382,22 +400,25 @@ function getRequestForSignup(formId, moduleId){
 	var signupDTO = {};
 	var url=window.location.href;
 	var isDemoUser=url.split('?isDemoUser')[1];
+
 	signupDTO['location'] = $("#"+formId+" #location").val();
 	signupDTO['learningProgram'] = $("#"+formId+" #learningProgram").val().trim();
-	signupDTO['enrollmentFor'] = $("#"+formId+" #enrollmentFor").val().trim();
+	signupDTO['enrollmentFor'] = $("#enrollmentFor").val().trim();
 	signupDTO['unregisteredId'] = $("#"+formId+" #unregisteredId").val();
 	signupDTO['ras'] = $("#"+formId+" #ras").val();
-	signupDTO['email'] = $("#"+formId+" #email").val();
-	signupDTO['confirmEmail'] = $("#"+formId+" #confirmEmail").val();
-	signupDTO['password'] = encode($("#"+formId+" #password").val());
-	signupDTO['confirmPassword'] = encode($("#"+formId+" #confirmPassword").val());
-	signupDTO['captcha'] = $("#"+formId+" #captcha").val();
-	signupDTO['referralCode'] = $("#"+formId+" #referralCode").val();
-	signupDTO['discount'] = $("#"+formId+" #discount").val();
-	signupDTO['signupType'] = 'Online';
-	if($("#"+formId+" #learningProgram").val()=='ONE_TO_ONE_FLEX'){
-		signupDTO['signupType'] = 'Online-Flex';
+	if('Offline' == $("#"+formId+" #signupType").val()){
+		signupDTO['email'] = $("#"+formId+" #communicationEmail").val();
+		signupDTO['referralCode'] = localStorage.getItem('referralCode'+USER_ID);
+	}else{
+		signupDTO['email'] = $("#"+formId+" #email").val();
+		signupDTO['confirmEmail'] = $("#"+formId+" #confirmEmail").val();
+		signupDTO['password'] = encode($("#"+formId+" #password").val());
+		signupDTO['confirmPassword'] = encode($("#"+formId+" #confirmPassword").val());
+		signupDTO['captcha'] = $("#"+formId+" #captcha").val();	
+		signupDTO['referralCode'] = $("#"+formId+" #referralCode").val();
 	}
+	signupDTO['discount'] = $("#"+formId+" #discount").val();
+	signupDTO['signupType'] = $("#"+formId+" #signupType").val();
 	signupDTO['userType'] = moduleId;
 	signupDTO['schoolId'] = SCHOOL_ID;
 	signupDTO['schoolUUID'] = SCHOOL_UUID;

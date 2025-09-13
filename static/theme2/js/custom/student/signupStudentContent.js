@@ -1,3 +1,4 @@
+var PREVIOUS_LEARNING_PROGRAM_INDEX;
 function showSkeleton (isShow, skeletonType){
 	if(isShow && skeletonType == "step1"){
 		$(".step-1-skeleton").html(skeletonStudent());
@@ -20,21 +21,38 @@ function showSkeleton (isShow, skeletonType){
 		$("#signupStage4Content").hide();
 	}
 }
-
+signupStageStatusInitiated=false;
 var signupStage1Form = '';
 var signupStage2Form = '';
-async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, isFirstPayment, MAINTENANCEDOWNTIME) {
-	if (DEPLOYMENT_MODE == 'PROD') {
-	    //<!-- Google Tag Manager (noscript) -->
-	    $("body").html('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PGC67T7" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
+async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
+	if(signupType == "Online"){
+		if (DEPLOYMENT_MODE == 'PROD') {
+			//<!-- Google Tag Manager (noscript) -->
+			$("body").html('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PGC67T7" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
  
-	    //<!-- End Google Tag Manager (noscript) -->
-	    //<!-- Facebook Pixel Code -->
-	    $("body").append('<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2630519373836959&ev=PageView&noscript=1"/></noscript>')
-	    //<!-- End Facebook Pixel Code -->
+			//<!-- End Google Tag Manager (noscript) -->
+			//<!-- Facebook Pixel Code -->
+			$("body").append('<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2630519373836959&ev=PageView&noscript=1"/></noscript>')
+			//<!-- End Facebook Pixel Code -->
+		}
 	}
-	var html = await generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, isFirstPayment, MAINTENANCEDOWNTIME)
-	$("body").append(html+showMessageInPopup());
+	if(signupType == "Offline" && studentUserId != USER_ID){
+		signupStageStatusInitiated=false;
+	}
+	if(signupType == "Offline"){
+		SHOW_PAYMENT_OPTION='N';
+	}
+	var html = await generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId);
+	if(signupType == "Online"){
+		$("body").append(html+showMessageInPopup());
+	}else{
+		if(studentUserId == USER_ID){
+			$("body").append(html+showMessageInPopup());
+		}else{
+			showAndHideDashboardAndAdditionalContent("additional")
+			$("#dashboardContentInHTMLAdditional").append(html+showMessageInPopup());
+		}
+	}
 	$("#formSteps").append(signupModals());
 	signupStage1Form = $('#signupStage1');
 	signupStage2Form = $('#signupStage2');
@@ -183,10 +201,10 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	    }
 	});
 	if (signupPage >= 1) {
-	    callForStudentSelection();
+	    await callForStudentSelection(signupType, studentUserId);
 	}
 	if (signupPage >= 2) {
-	    callForParentSelection();
+	    callForParentSelection(studentUserId);
 	}
 	if (signupPage >= 3) {
 	    getAllCourseDetails('N', '');
@@ -204,57 +222,76 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	$('.dt-responsive tbody tr td:first-child').addClass('dtr-control');
  }
 
-async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME) {
+async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
     const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
     
     var html = `
-        <div class="wrapper-style">
-            <a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()">
-                <i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
-            </a>
-            <section class="full">
-                <div class="full mb-2 ${SCHOOL_ID == 1 ? 'desktop-view':'other-school'}">
-                    <div class="logo">
-                        <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                            <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                        </a>
-                    </div>
-                </div>`;
-				if(SCHOOL_ID == 1){
+        <div class="wrapper-style">`
+			if(signupType == "Online" || studentUserId == USER_ID){
+				html+=
+				`<a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()">
+					<i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
+				</a>`
+			}
+			if((signupType == "Offline") && studentUserId != USER_ID){
+				html+=`<a href="javascript:void(0);" onclick="backToMain();" class="btn btn-primary rounded float-right mb-2"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i> Back</a>`
+			}
+            html+=`<section class="full">`
+				if(signupType == "Online" || studentUserId == USER_ID){
 					html+=
-					`<div class="mobile-view">
-                        <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                            <img src="${PATH_FOLDER_IMAGE2}is_fav_logo_200.png${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                        </a>
-						<section class="full text-center">
-							<h1 class="form-heading white-txt-color secondary-bg page-heading" id="learingProgramHeader" val="${learningProgram}">`;
-								if (moduleId == 'STUDENT') {
-									html += programLabel;
-								} else {
-									html += moduleName;
-								}
-							html += `</h1>
-						</section>
-						<div style="min-width:25px">&nbsp;</div>
-                    </div>`
+					`<div class="full mb-2 ${SCHOOL_ID == 1 ? 'desktop-view':'other-school'}">
+						<div class="logo">
+							<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+								<img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+							</a>
+						</div>
+					</div>`;
+	
+					if(SCHOOL_ID == 1){
+						html+=
+						`<div class="mobile-view">
+							<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+								<img src="${PATH_FOLDER_IMAGE2}is_fav_logo_200.png${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+							</a>
+							<section class="full text-center">
+								<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
+									if(moduleId == 'STUDENT'){
+										html+=programLabel;
+									}else{
+										html+=moduleName;
+									}
+								html += `</h1>
+							</section>
+							<div style="min-width:25px">&nbsp;</div>
+						</div>`
+					}
+					html+=`<section class="full text-center desktop-view">
+						<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
+							if (moduleId == 'STUDENT') {
+								html += programLabel;
+							} else {
+								html += moduleName;
+							}
+						html+=`</h1>
+					</section>
+                	<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
+				}else {
+					html+=
+					`<label class="d-flex justify-content-center font-weight-bold">Choose Learning Program</label>
+					<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;">
+						<option value="">Select Learning Program</option>
+						${getAllLearningProgramContent(SCHOOL_ID)}
+					</select>
+					<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
 				}
-				html+=`<section class="full text-center desktop-view">
-                    <h1 class="form-heading white-txt-color secondary-bg page-heading" id="learingProgramHeader" val="${learningProgram}">`;
-						if (moduleId == 'STUDENT') {
-							html += programLabel;
-						} else {
-							html += moduleName;
-						}
-    				html += `</h1>
-                </section>
-                <div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>
-            </section>
-            <input type="hidden" id="courseProviderId" value="${courseProviderId}" />
-            <div class="fixed-button one-btn">
-                <a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn primary-bg">
-                    <i class="zmdi zmdi-power"></i> Log out</i>
-                </a>
-            </div>`;
+            html+=`</section>
+            	<input type="hidden" id="courseProviderId" value="${courseProviderId}" />
+			<input type="hidden" id="enrollmentFor" value="" />
+			<div class="fixed-button one-btn">
+				<a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn primary-bg">
+					<i class="zmdi zmdi-power"></i> Log out</i>
+				</a>
+			</div>`;
 			if (MAINTENANCEDOWNTIME != '') {
 				html += `
 					<div class="full">
@@ -343,11 +380,15 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                         </li>
                         <li class="finish-btn" style="display: none;">
                             <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('finish');showPaymentTermCondMode();">`;
+							if(signupType == 'Online' ){
 								if (SHOW_PAYMENT_OPTION == 'Y') {
 									html += 'Proceed';
 								} else {
 									html += 'Submit Application';
 								}
+							}else{
+								html += 'Submit Application';
+							}
     						html += `</a>
                         </li>
                     </ul>
@@ -358,15 +399,23 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
     return html;
 }
 
-function renderStudentDetails(data){
+function renderStudentDetails(data, signupType){
 	var signupStudent = data.signupStudent;
 	var scriptExecuted = false;
-	$('#signupStage1Content').html(getStudentDetailsContent(data));
+	$('#signupStage1Content').html(getStudentDetailsContent(data, signupType));
+	$('#referralCode').val(localStorage.getItem('referralCode'+USER_ID));
+	
 	if(signupStudent.gender != null && signupStudent.gender!=''){
 		$('#signupStage1 #gender').val(signupStudent.gender);
 	}
 	if(signupStudent.standardId != null && signupStudent.standardId>0){
 		$('#signupStage1 #applyStandardId').val(signupStudent.standardId);
+	}
+	$('#enrollmentFor').val(signupStudent.enrollmentFor);
+	if(signupStudent.learningProgram =='DUAL_DIPLOMA'){
+		$('.dual-diploma').show();
+	}else{
+		$('.dual-diploma').hide();
 	}
 	if(signupStudent.courseProviderId==39){
 		var learningLabel='';
@@ -390,9 +439,9 @@ function renderStudentDetails(data){
 	createSelect2Element('signupStage1', 'stateId')
 	createSelect2Element('signupStage1', 'cityId')
 	createSelect2Element('signupStage1', 'nationality')
-	if($('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA'){
+	if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 		$('#signupStage1 #studyingGradeId').val(signupStudent.studyingGradeId);
-		createSelect2Element('signupStage1', 'studyingGradeId')
+		createSelect2Element('signupStage1', 'studyingGradeId', 'Student Current Grade*');
 		createSelect2Element('signupStage1', 'countryIdOfSchool')
 	}
 	if(signupStudent.courseProviderId==39){
@@ -402,17 +451,19 @@ function renderStudentDetails(data){
 	}
 	if(!scriptExecuted){
 		inputContact = document.querySelector("#contactNumber");
-		itiContcat = window.intlTelInput(inputContact);
-		if(IGNORECOUNTRYARRAY.includes(signupStudent.countryCode) || signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null) {
-            itiContcat.setCountry('us');
-        }else{
-			itiContcat.setCountry(signupStudent.countryCode);
+		if(inputContact != null){
+			itiContcat = window.intlTelInput(inputContact);
+			if(IGNORECOUNTRYARRAY.includes(signupStudent.countryCode) || signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null) {
+			  itiContcat.setCountry('us');
+			   }else{
+				itiContcat.setCountry(signupStudent.countryCode);
+			}
+			inputContact.addEventListener('countrychange', function(e) {
+				$('#countryIsd').val(itiContcat.getSelectedCountryData().iso2);
+				$('#countryDailCode').val(itiContcat.getSelectedCountryData().dialCode);
+			});
+			scriptExecuted = true;
 		}
-		inputContact.addEventListener('countrychange', function(e) {
-			$('#countryIsd').val(itiContcat.getSelectedCountryData().iso2);
-			$('#countryDailCode').val(itiContcat.getSelectedCountryData().dialCode);
-		});
-		scriptExecuted = true;
 	}
 	$("#firstName").blur(function() {
 		if ($("#signupStage1 #firstName").val().trim()=="") {
@@ -615,8 +666,8 @@ function renderStudentDetails(data){
 	if(nonMandatoryFields.length>0){
 		formValdate('signupStage1', [], nonMandatoryFields);
 	}
-	$("#countryId").on("change",function(){
-		$('#countryId').valid();
+	$("#signupStage1 #countryId").on("change",function(){
+		$('#signupStage1 #countryId').valid();
 		var selectedCountry =  $('option:selected', this).attr("dail-country-code");
 		if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
 			selectedCountry	= "US";
@@ -627,7 +678,7 @@ function renderStudentDetails(data){
 		}else{
 			$("#stateId").html("<option value=''>Select State/Province*</option>");
 		}
-		$("#cityId").html("<option value=''>Select City*</option>");
+		$("#signupStage1 #cityId").html("<option value=''>Select City*</option>");
 		checkCSCValidation(selectedCountry, "countryId", "Country");
 		checkCSCValidation("", "stateId", "State/Province*");
 		checkCSCValidation("", "cityId", "City");
@@ -636,7 +687,7 @@ function renderStudentDetails(data){
 		$('#cityId').valid();
 	});
 	
-	$("#stateId").on("change",function(){
+	$("#signupStage1 #stateId").on("change",function(){
 		var selectedState =  $('option:selected', this).attr("value");
 		$('#stateId').valid();
 		checkCSCValidation($("#signupStage1 #stateId").val(), "stateId", "State/Province*");
@@ -648,19 +699,81 @@ function renderStudentDetails(data){
 		$('#cityId').valid();
 	
 	});
-	$("#cityId").on("change",function(){
+	$("#signupStage1 #cityId").on("change",function(){
 		checkCSCValidation($("#signupStage1 #cityId").val(), "cityId", "City");
 		$('#cityId').valid();
 	});
+	$("#learningProgramPartnerStudent").val(data.signupStudent.learningProgram).trigger('change');
+	$("#learningProgramPartnerStudent").attr("onchange", "changeLearningProgramOfPartnerInitiate('"+(data.signupStudent.studyingGradeId == undefined ? "":data.signupStudent.studyingGradeId)+"')");
+	$('#learningProgramPartnerStudent').on('focus', function () {
+		PREVIOUS_LEARNING_PROGRAM_INDEX = this.selectedIndex
+	});
+
 }
 
-function getStudentDetailsContent(data) {
+function changeLearningProgramOfPartnerInitiate(studyingGradeId) {
+	showWarningMessageShow('Are you sure you want to change Learning Program?','changeLearningProgramOfPartner()');
+	$('#remarksresetDelete1').on('hide.bs.modal', function (e) {
+		var trigger = document.activeElement;
+		if(trigger.id == "resetDeleteErrorWarningNo1"){
+			$('#learningProgramPartnerStudent')[0].selectedIndex  = PREVIOUS_LEARNING_PROGRAM_INDEX;
+		}
+	});
+
+}
+function changeLearningProgramOfPartner(studyingGradeId) {
+		$("#signupStage1 #learningProgram").val($("#learningProgramPartnerStudent").val());
+		$("#signupStage1 #learingProgramHeader").val($("#learningProgramPartnerStudent").val());
+		$("#enrollmentFor").val($("#learningProgramPartnerStudent option:selected").attr("enrollmentfor"));
+		$("#courseProviderId").val($("#learningProgramPartnerStudent option:selected").attr("courseProviderId"));
+		getGradeByCriteria();
+		if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
+			$('#signupStage1 #studyingGradeId').val(studyingGradeId);
+			$("#signupStage1 #studyingGradeId").show();
+			$("#signupStage1 #countryIdOfSchool").show();
+			createSelect2Element('signupStage1', 'studyingGradeId')
+			createSelect2Element('signupStage1', 'countryIdOfSchool')
+			$('.dual-diploma').show();
+			$("#signupStage1 #studyingSchoolName").val('');
+			createSelect2Element('signupStage1', 'studyingGradeId', 'Student Current Grade*');
+		}else{
+			destroySelect2Element('signupStage1', 'studyingGradeId');
+			destroySelect2Element('signupStage1', 'countryIdOfSchool');
+			$("#signupStage1 #studyingGradeId").hide();
+			$("#signupStage1 #countryIdOfSchool").hide();
+			$('.dual-diploma').hide();
+		}
+		if($("#courseProviderId").val() == 39){
+			destroySelect2Element('signupStage1', 'applyStandardId');
+			$("#signupStage1 #learningLabel").show();
+			$("#signupStage1 #applyStandardId").hide();
+			createSelect2Element('signupStage1', 'learningLabel');
+		}else{
+			destroySelect2Element('signupStage1', 'learningLabel');
+			$("#signupStage1 #applyStandardId").show();
+			$("#signupStage1 #learningLabel").hide();
+			createSelect2Element('signupStage1', 'applyStandardId');
+		}
+		$("#applyStandardId").val($('#applyStandardId option:nth-child(1)').val()).trigger('change');
+		$("#learningProgramPartnerStudent").attr("data-prevSelectedLearningProgram", $("#learningProgramPartnerStudent").val());
+	}
+function getStudentDetailsContent(data, signupType) {
     var tabindex = 0;
     var signupStudent = data.signupStudent;
     var html = `
-        <h3 class="alternate-txt-color">Student Details</h3>
-        <input type="hidden" id="userId" value="${data.userId}" />
-        <input type="hidden" id="countryDailCode" value="${signupStudent.countryIsdCode}" />
+		<h3 class="alternate-txt-color">Student Details</h3>
+		<input type="hidden" id="userId" value="${data.userId}" />
+		<input type="hidden" id="signupType" value="${signupType}" />
+		<input type="hidden" id="learingProgramHeader" value="${signupStudent.learningProgram}" />
+	   	<input type="hidden" name="referralCode" id="referralCode" maxlength="10" value="" >`
+		if(data.userId == 0){
+			html+=
+			`<input type="hidden" name="learningProgram" id="learningProgram" value="">
+			<input type="hidden" name="ras" id="ras" value="0">
+			<input type="hidden" name="unregisteredId" id="unregisteredId" value="">
+			<input type="hidden" name="discount" id="discount" value="">`
+		}
+        html+=`<input type="hidden" id="countryDailCode" value="${signupStudent.countryIsdCode}" />
         <input type="hidden" id="countryIsd" value="${signupStudent.countryCode}" />
         <input type="hidden" name="location" id="location" value="" />
         <div class="form-row">
@@ -686,45 +799,36 @@ function getStudentDetailsContent(data) {
                     onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="${++tabindex}">
             </div>
         </div>
-        <div class="form-row">
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-book"></i>`;
-				if (data.signupStudent.courseProviderId === 39) {
-					html += `
-					<select name="learningLabel" id="learningLabel" tabindex="${++tabindex}" onchange="calculateGradeLabel()">
+		<div class="form-row">
+			<div class="form-holder valid-field">
+				<i class="zmdi zmdi-book"></i>
+					<select name="learningLabel" id="learningLabel" tabindex="${++tabindex}" onchange="calculateGradeLabel()" style="display:${data.signupStudent.courseProviderId === 39 ? 'block' : 'none'};">
 						${getLearningLabel()}
 					</select>
-					<select name="applyStandardId" id="applyStandardId" tabindex="${++tabindex}" style="display:none;">
+					<select name="applyStandardId" id="applyStandardId" tabindex="${++tabindex}" style="display:${data.signupStudent.courseProviderId != 39 ? 'block' : 'none'};">
 						${getOptions(data.signupStudent.grades, data.signupStudent.standardId)}
-					</select>`;
-				} else {
-					html += `
-					<select name="applyStandardId" id="applyStandardId" tabindex="${++tabindex}">
-						<option value="">Select Grade</option>
-						${getOptions(data.signupStudent.grades, data.signupStudent.standardId)}
-					</select>`;
-				}
-    		html += `</div>
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-account-calendar"></i>
-                <input type="text" name="dob" id="dob" class="form-control-field" 
-                    value="${signupStudent.dob}" 
-                    placeholder="Date of Birth* (MMM dd, yyyy)" 
-                    onkeydown="return false" tabindex="${++tabindex}" readonly>
-            </div>
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-male-female"></i>
-                <select name="gender" id="gender" required tabindex="${++tabindex}" 
-                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}>
-                    ${getGenderContent()}
-                </select>
-            </div>
-        </div>
+					</select>
+			</div>
+			<div class="form-holder valid-field">
+				<i class="zmdi zmdi-account-calendar"></i>
+				<input type="text" name="dob" id="dob" class="form-control-field" 
+				value="${signupStudent.dob}" 
+				placeholder="Date of Birth* (MMM dd, yyyy)" 
+				onkeydown="return false" tabindex="${++tabindex}" readonly>
+			</div>
+			<div class="form-holder valid-field">
+				<i class="zmdi zmdi-male-female"></i>
+				<select name="gender" id="gender" required tabindex="${++tabindex}" 
+				${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}>
+				${getGenderContent()}
+				</select>
+			</div>
+		</div>
         <div class="form-row">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-email"></i>
                 <input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field" 
-                    value="${signupStudent.communicationEmail}" disabled 
+                    value="${signupStudent.communicationEmail}" ${signupStudent.communicationEmail == "" ? "" : "disabled"} 
                     placeholder="Email*" tabindex="${++tabindex}">
             </div>
             <div class="form-holder password valid-field">
@@ -768,35 +872,32 @@ function getStudentDetailsContent(data) {
                     ${getCitiesOption(signupStudent.cities, signupStudent.cityId)}
                 </select>
             </div>
-        </div>`;
-		if ($('#learingProgramHeader').attr('val') === 'DUAL_DIPLOMA') {
-			html += `
-			<div class="form-row mb-2">
-				<strong>Current School Details</strong>
+        </div>
+		<div class="dual-diploma form-row mb-2" style="display:none;">
+			<strong>Current School Details</strong>
+		</div>
+		<div class="dual-diploma form-row" style="display:none;">
+			<div class="form-holder valid-field">
+				<i class="zmdi zmdi-graduation-cap"></i>
+				<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field" 
+					value="${signupStudent.studyingSchoolName}" 
+					placeholder="Student's School Name*" tabindex="${++tabindex}">
 			</div>
-			<div class="form-row">
-				<div class="form-holder valid-field">
-					<i class="zmdi zmdi-graduation-cap"></i>
-					<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field" 
-						value="${signupStudent.studyingSchoolName}" 
-						placeholder="Student's School Name*" tabindex="${++tabindex}">
-				</div>
-				<div class="form-holder valid-field">
-					<i class="zmdi zmdi zmdi-book"></i>
-					<select name="studyingGradeId" id="studyingGradeId" tabindex="${++tabindex}">
-						<option value="0">Student Current Grade*</option>
-						${getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)}
-					</select>
-				</div>
-				<div class="form-holder valid-field">
-					<i class="zmdi zmdi-pin"></i>
-					<select name="countryIdOfSchool" id="countryIdOfSchool" required tabindex="${++tabindex}">
-						<option value="">Select Country of School*</option>
-						${getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)}
-					</select>
-				</div>
-			</div>`;
-		}
+			<div class="form-holder valid-field">
+				<i class="zmdi zmdi zmdi-book"></i>
+				<select name="studyingGradeId" id="studyingGradeId" tabindex="${++tabindex}">
+					<option value="0">Student Current Grade*</option>
+					${getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)}
+				</select>
+			</div>
+			<div class="form-holder valid-field">
+				<i class="zmdi zmdi-pin"></i>
+				<select name="countryIdOfSchool" id="countryIdOfSchool" required tabindex="${++tabindex}">
+					<option value="">Select Country of School*</option>
+					${getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)}
+				</select>
+			</div>
+		</div>`;
     return html;
 }
 
@@ -804,7 +905,7 @@ function renderParentDetails(data){
 	var signupParent = data.signupParent;
 	var scriptExecuted1 = false;
 	$('#signupStage2Content').html(getParentDetailsContent(data));
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		$('#signupStage2 #workingProfession').val(signupParent.workingProfession);
 		$('#signupStage2 #institutionCountryId').val(signupParent.institutionCountryId);
 		createSelect2Element('signupStage2','workingProfession');
@@ -822,22 +923,24 @@ function renderParentDetails(data){
 		createSelect2Element('signupStage2', 'parentGender');
 		if(!scriptExecuted1){
 			inputParentPhone = document.querySelector("#parentPhoneNumber");
-			itiParent = window.intlTelInput(inputParentPhone);
-			if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
-				if(IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2)) {
-					selectedCountry	= "US";
+			if(inputParentPhone!=null && inputParentPhone!=''){
+				itiParent = window.intlTelInput(inputParentPhone);
+				if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
+					if(IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2)) {
+						selectedCountry	= "US";
+					}else{
+						itiParent.setCountry(signupParent.countryIsdCode2);
+					}
+					
 				}else{
-					itiParent.setCountry(signupParent.countryIsdCode2);
+					//itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
 				}
-				
-			}else{
-				//itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
+				inputParentPhone.addEventListener('countrychange', function(e) {
+					$('#parentCountryIsd').val(itiParent.getSelectedCountryData().iso2);
+					$('#parentCountryDailCode').val(itiParent.getSelectedCountryData().dialCode);
+				});
+				scriptExecuted1 = true
 			}
-			inputParentPhone.addEventListener('countrychange', function(e) {
-				$('#parentCountryIsd').val(itiParent.getSelectedCountryData().iso2);
-				$('#parentCountryDailCode').val(itiParent.getSelectedCountryData().dialCode);
-			});
-			scriptExecuted1 = true
 		}
 		$("#parentFirstName").blur(function() {
 			if ($("#signupStage2 #parentFirstName").val().trim()=="") {
@@ -939,7 +1042,7 @@ function renderParentDetails(data){
 	
 	var pMandatoryFields=[];
 	var pNonMandatoryFields=[];
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		if(signupParent.workingProfession!=''){
 			pMandatoryFields.push('workingProfession');
 		}
@@ -997,7 +1100,7 @@ function renderParentDetails(data){
 	if(pNonMandatoryFields.length>0){
 		formValdate('signupStage2', [], pNonMandatoryFields);
 	}
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 
 	}else{
 		$("#pCountryId").on("change",function(){
@@ -1068,14 +1171,14 @@ function getParentDetailsContent(data) {
     var courseProviderId = $('#courseProviderId').val();
     var hideClass = '';
     if (courseProviderId == 39) {
-        hideClass = 'hide';
+        hideClass = 'display: none;';
     }
     var html = '';
     var parentHeaderLabel = '';
     if (courseProviderId == 39) {
         parentHeaderLabel = 'Communication Details';
     } else {
-        if ($('#learingProgramHeader').attr('val') == 'ONE_TO_ONE_FLEX') {
+        if ($('#learingProgramHeader').val() == 'ONE_TO_ONE_FLEX') {
             parentHeaderLabel = 'Academic & Communication Details';
         } else {
             parentHeaderLabel = 'Parent / Guardian Details';
@@ -1086,7 +1189,7 @@ function getParentDetailsContent(data) {
         <h3 class="alternate-txt-color">${parentHeaderLabel}</h3>
         <input type="hidden" id="studentId" value="${data.studentId}">`;
 
-    if ($('#learingProgramHeader').attr('val') == 'ONE_TO_ONE_FLEX') {
+    if ($('#learingProgramHeader').val() == 'ONE_TO_ONE_FLEX') {
         html += `
         <div class="form-row">
             <div class="form-holder valid-field">
@@ -1116,7 +1219,7 @@ function getParentDetailsContent(data) {
         html += `
         <input type="hidden" id="parentCountryIsd" value="${signupParent.countryIsdCode2}">
         <input type="hidden" id="parentCountryDailCode" value="${signupParent.countryCode}">
-        <div class="form-row ${hideClass}">
+        <div class="form-row " style="${hideClass}">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
                 <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName" 
@@ -1136,7 +1239,7 @@ function getParentDetailsContent(data) {
                     onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="${++tabindex}">
             </div>
         </div>
-        <div class="form-row ${hideClass}">
+        <div class="form-row " style="${hideClass}">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-map"></i>
                 <select name="relation" id="relation" required tabindex="15">
@@ -1158,16 +1261,16 @@ function getParentDetailsContent(data) {
                     autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
             </div>
         </div>
-        <div class="form-row m-0 ${hideClass}">
+        <div class="form-row m-0 " style="${hideClass}">
             <strong>Parent's Current Location</strong>
         </div>
-        <div class="form-row mb-2 ${hideClass}">
+        <div class="form-row mb-2 " style="${hideClass}">
             <label for="sameAsStudentLocation" class="f-13">
                 <input id="sameAsStudentLocation" class="m-0" tabindex="${++tabindex}" type="checkbox" onclick="addressSameAs()" />
                 Same as student location
             </label>
         </div>
-        <div class="form-row ${hideClass}">
+        <div class="form-row " style="${hideClass}">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
                 <select name="pCountryId" id="pCountryId" tabindex="${++tabindex}">
@@ -1226,8 +1329,8 @@ function renderCourseSelectionContent(csr){
 	if(csr.courseProviderId == '39' && csr.availableCourses[0].subjects.length<1){
 		$("#exactPath").css({'width':'100%'});
 	}
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
-		$('#gradeId').val(csr.standardId);
+	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
+		$('#signupStage3 #gradeId').val(csr.standardId);
 	}
 	$('[data-toggle="tooltip"]').tooltip({
 		html: true
@@ -1348,7 +1451,7 @@ function getCourseSelectionContent(csr){
 			html+= learningLabel
 			+'</span>';
 		}else{
-			if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 				html+=
 					'<div class="form-holder valid-field" style="margin-left:5px">'
 					+'<i class="zmdi zmdi-book"></i>'
@@ -1362,9 +1465,12 @@ function getCourseSelectionContent(csr){
 				grade = grade[1];
 				html+=
 				'<span class="alternate-txt-color">&nbsp;'+csr.standardName+'</span>'
-				+'<span class="change-grade primary-bg" onclick="changeSelectedGrade()">'
-					+'Change Grade <i class="fa fa-exchange" aria-hidden="true"></i>'
-				+'</span>';
+				if($("#signupType").val() == "Online" || $("#userId").val() == USER_ID){
+					html+=
+					'<span class="change-grade primary-bg" onclick="changeSelectedGrade()">'
+						+'Change Grade <i class="fa fa-exchange" aria-hidden="true"></i>'
+					+'</span>';
+				}
 			}
 		}	
 		html+=
@@ -1380,7 +1486,6 @@ function getCourseSelectionContent(csr){
 		+'<input type="hidden" id="enrollmentType" name="enrollmentType" value="'+csr.enrollmentType+'">'
 		+'<input type="hidden" id="registrationType" name="registrationType" value="'+csr.registrationType+'">'
 		// +'<input type="hidden" id="courseProviderId" name="courseProviderId" value="'+csr.courseProviderId+'">'
-		
 			// if(csr.standardId<11 || csr.standardId<9 || csr.standardId<10 || csr.standardId<19 || csr.standardId<20 || csr.standardId<21){
 				if(csr.courseProviderId==39){
 
@@ -1606,7 +1711,7 @@ function getCourseSelectionContent(csr){
 																		+'</span>'
 																	+'</h4>'
 																+'</div>'
-																+'<div class="add-course-btn">';
+																+'<div class="add-course-btn add-course-btn-partner">';
 																	// +'<span class="white-txt-color mr-1"><i class="fa fa-check"></i></span>';
 																	if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
 																		$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
@@ -1773,7 +1878,7 @@ function getCourseSelectionContent(csr){
 																								if(subject.materialFee >0 ){
 																									html+='<li style="float:none;">&#8226; '+subject.materialFeeString+' extra for External Materials.</li>';
 																								}
-																								if($('#learingProgramHeader').attr('val')!='ONE_TO_ONE_FLEX'){
+																								if($('#learingProgramHeader').val()!='ONE_TO_ONE_FLEX'){
 																									if(subject.additionalFee !=null && subject.additionalFee > 0){
 																										var creditsLimitsOver=creditLimitOver(csr.standardId, csr.totalCredit);
 																										if(creditsLimitsOver){
@@ -1867,7 +1972,7 @@ function signupModals(){
 				+'</div>'
 				+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:15px;">'
 					+'<div class="text-center" style="margin: 0 auto;">'
-						+'<button id="noTeacherAssistanceAvailableYes" type="button" class="btn" style="color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;">I understand and agree</button>'
+						+'<button id="noTeacherAssistanceAvailableYes" type="button" class="btn mr-2" style="color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;">I understand and agree</button>'
 						+'<button id="noTeacherAssistanceAvailableNo" type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 					+'</div>'
 				+'</div>'
@@ -1995,7 +2100,7 @@ function signupModals(){
 					+'</div>'
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
-							+'<button type="button" class="btn" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="callForApplicationSubmit()">Yes</button>'
+							+'<button type="button" class="btn mr-2" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="callForApplicationSubmit()">Yes</button>'
 							+'<button type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
 						+'</div>'
 					+'</div>'
@@ -2010,7 +2115,7 @@ function getPaymentModeContent(){
 	var html=
 	'<div class="modal fade theme-modal fade-scale max-size-modal" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">'
 		+'<div class="modal-dialog modal-lg" role="document">'
-			+'<div class="modal-content">'
+			+'<div class="modal-content mx-auto" style="max-width: 1000px;">'
 				+'<div class="modal-header primary-bg white-txt-color">'
 					+'<h4 class="modal-title " style=" margin-left: 10px;">Fee Details</h4>'
 					+'<button type="button" class="close close-with-red-color" aria-label="Close" data-dismiss="modal" style="margin-right: 5px;"><span style="color: #fff;">&times;</span></button>'
@@ -2302,7 +2407,7 @@ function getReviewAndPayContent(data){
 	'<h4></h4>'
 	+'<section>'
 		+'<h3 class="alternate-txt-color">Kindly Review your details</h3>'
-		+'<div class="form-row">'
+		+'<div class="form-row form-review-partner">'
 			+'<div class="form-holder w-100">'
 				+'<div class="full">'
 					+'<ul class="accordion mob-scroll">'
@@ -2401,7 +2506,7 @@ function studentDetailsPreview(data){
 							+'<th>Country | State | City</th>'
 							+'<td>'+signupStudent.countryName+ " | " +signupStudent.stateName+ " | " +signupStudent.cityName+'</td>'
 						+'</tr>'
-						if($('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA'){
+						if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 							html+=
 							'<tr>'
 								+'<th>Student\'s School Name</th>'
@@ -2439,7 +2544,7 @@ function parentDetailsPreview(data){
 	'<div class="student-parent-info">'
 		+'<div class="full">'
 			+'<h4 class="a-title">';
-			if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 				html+='Academic & Communication Details';
 			}else{
 				if(data.signupStudent.courseProviderId==39){
@@ -2458,7 +2563,7 @@ function parentDetailsPreview(data){
 			+'<div class="table-responsive">'
 				+'<table class="table-style">'
 					+'<tbody>';
-						if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+						if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 							html+=
 							'<tr>'
 								+'<th>Student or a working professional</th>'
@@ -2731,7 +2836,7 @@ function commonPaymentTable(cdrDTO, prefix){
 	// +'</tr>'+
 	'<tr>';
 		if(cdrDTO.enrollmentFee.enrollmentFee>0){
-			if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA' ){
+			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
 				html+='<td>Course Fee</td>';
 			}else{
 				html+='<td>Total Fee (Enrollment Fee + Course Fee)</td>';
@@ -2740,7 +2845,7 @@ function commonPaymentTable(cdrDTO, prefix){
 		}else{
 			html+='<td>Total Course Fee</td>';
 		}
-		if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA' ){
+		if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
 			var courseFeeActucal = parseFloat(cdrDTO.courseFee)-parseFloat(cdrDTO.enrollmentFee.enrollmentFee);
 			var courseFeeActucalWithCurrency=currency+' '+parseFloat(courseFeeActucal).toFixed(2);
 			html+=
@@ -2897,7 +3002,7 @@ function getAnnualPaymentTable(cdrDTO){
 				+'</tr>';
 			}
 		}
-		if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').attr('val')=='DUAL_DIPLOMA' ){
+		if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
 			if(cdrDTO.enrollmentFee.enrollmentFee>0){
 				html+=
 				'<tr>'
@@ -3130,7 +3235,7 @@ function bookAnEnrollmentTNCModal(data){
 							+'<div class="col-sm-12 col-xs-12" style="flex: 1; display: flex; align-items: center">'
 								+'<span class="col-sm-12 col-xs-12" style="flex: auto;">'
 								+'<input type="checkbox" id="chkvalBook" class="checkbox-lg" name="chkvalBook" style="text-align: left">'
-									+'<label for="chkvalBook" style="position:relative;top:-0.5px;color:#333;cursor:pointer"> I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions</label>'
+									+'<label for="chkvalBook" style="position:relative;top:-0.5px;color:#333;cursor:pointer;margin-left:3px"> I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions</label>'
 								+'</span>'
 								+'<button type="button" id="payTabData" class="btn btn-success"data-dismiss="modal" disabled="disabled"onclick="callSigninStudentPay(this,\'signup\');">Pay Now</button>'
 							+'</div>'
@@ -4077,7 +4182,7 @@ function recommendedCourseContent(data){
 function recommendedCourseModalContent(data){
 	var html=
 	'<div class="modal fade" id="recommendedCourseModal" tabindex="-1">'
-		+'<div class="modal-dialog modal-md modal-dialog-centered" role="document">'
+		+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none" role="document">'
 			+'<div class="modal-content">'
 				+'<div class="modal-header primary-bg white-txt-color" style="display:flex;justify-content:space-between;border-top-left-radius:6px;border-top-right-radius:6px">'
 					+'<h5 class="modal-title">Recommended Courses</h5>'

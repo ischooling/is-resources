@@ -17,7 +17,7 @@ function sessionOutPermissionContent(data){
                             <p id="messageDiv1"></p>
                             ${/*<p id="msgTheme2"></p>*/''}
                         </div>	
-                        <div class="form-row">
+                        <div class="form-row form-session-out">
                             <div class="col-md-12">
                                 <div class="position-relative form-group mb-1 themeTwo">
                                     <label class="text-white">Password <span style="color: red;">*</span></label> 
@@ -32,7 +32,7 @@ function sessionOutPermissionContent(data){
                                 <p class="error" id="passwordError" style="color:red;font-weight:600"></p>
                             </div>
                             <div class="col-md-12">
-                                <div class="position-relative form-group mb-1">
+                                <div class="position-relative form-group mb-1 captcha-stylecss">
                                     <label class="text-white">Captcha <span style="color: red;">*</span></label>
                                     <div class="captcha-field">
                                         <input type="text" name="captcha" id="captcha" class="form-control bg-white rounded" value="" pattern="^[_A-z0-9]{1,}$" minlength="6" maxlength="6"

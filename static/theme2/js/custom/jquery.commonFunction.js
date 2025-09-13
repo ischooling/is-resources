@@ -1224,6 +1224,7 @@ function callStatesNew(formId, value, elementId, bindElementId) {
 // }
 
 function callForResetPassword(formId, moduleId) {
+  console.trace()
   hideMessage("");
   if (
     $("#password").val().trim() == "" &&
@@ -4022,6 +4023,20 @@ function showWarningMessage(warningMessage, functionName) {
     $("#statusMessage-1").html(
       '<svg xmlns="http://www.w3.org/2000/svg" width="70px" fill="#d92550" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>'
     );
+  }else if(warningMessage == "Are you sure you want to send credentials email to student?"){
+    $("#remarksresetDelete .modal-header")
+      .removeClass("bg-danger")
+      .addClass("bg-info");
+    $("#statusMessage-1 i").removeClass("fa-times");
+    $("#statusMessage-1 i").removeClass("text-danger");
+    $("#statusMessage-1 i").addClass("fa-envelope");
+    $("#statusMessage-1 i").css({ color: "#57abff" });
+    $("#remarksresetDelete .modal-footer #resetDeleteErrorWarningYes")
+      .removeClass("btn-outline-danger")
+      .addClass("btn-outline-info");
+    $("#remarksresetDelete .modal-footer #resetDeleteErrorWarningNo")
+      .removeClass("btn-danger")
+      .addClass("btn-info");
   }
 
   functionName = "$('#remarksresetDelete').modal('hide');" + functionName + ";";
@@ -4281,13 +4296,24 @@ function renderIsdCode(formId, elementId, defaultCountryISOCode) {
   }
   return iti;
 }
-function createSelect2Element(formId, elementId) {
-  if (
-    $("#" + formId + " #" + elementId).hasClass("select2-hidden-accessible")
-  ) {
+function createSelect2Element(formId, elementId, placeholder) {
+  if ($("#" + formId + " #" + elementId).hasClass("select2-hidden-accessible") ) {
     $("#" + formId + " #" + elementId).select2("destroy");
   }
-  $("#" + formId + " #" + elementId).select2();
+  if(placeholder != undefined){
+    $("#" + formId + " #" + elementId).select2({
+      placeholder:placeholder,
+    });
+  }else{
+    $("#" + formId + " #" + elementId).select2();
+  }
+  
+}
+
+function destroySelect2Element(formId, elementId) {
+  if ($("#" + formId + " #" + elementId).hasClass("select2-hidden-accessible") ) {
+    $("#" + formId + " #" + elementId).select2("destroy");
+  }
 }
 
 $(document).ready(function () {
@@ -6045,11 +6071,11 @@ function safeUUID() {
 function showAndHideDashboardAndAdditionalContent(type){
   if(type == "main"){
     $("#dashboardContentInHTML").show();
-    $("#dashboardContentInHTMLAdditional").html();
+    $("#dashboardContentInHTMLAdditional").html("");
     $("#dashboardContentInHTMLAdditional").hide();
   }else if(type == "additional"){
     $("#dashboardContentInHTML").hide();
-    $("#dashboardContentInHTMLAdditional").html();
+    $("#dashboardContentInHTMLAdditional").html("");
     $("#dashboardContentInHTMLAdditional").show();
   }
 }
