@@ -1073,6 +1073,8 @@ return html;
 
 function getLeadCampaignPriceList(objRights){
 	var utmCampaignList = JSON.parse(objRights.utmCampaignList);	
+	// <th class="text-center bg-primary text-white">ACTIVE + IN-ACTIVE = Total Lead | FB API</th>
+    // <th class="text-center bg-primary text-white">Amount Spent<br/>Cost per Lead SMS | Cost per Lead FB</th>
 	var html='';
 	html+=`<div class="row">
         <div class="col-md-12 col-lg-12">
@@ -1125,8 +1127,10 @@ function getLeadCampaignPriceList(objRights){
                 <tr>
                     <th class="text-center bg-primary text-white" style="max-width:70px;min-width:70px">Sr no.</th>
                     <th class="text-center bg-primary text-white">Campaign Name</th>
-                    <th class="text-center bg-primary text-white">ACTIVE + IN-ACTIVE = Total Lead | FB API</th>
-                    <th class="text-center bg-primary text-white">Amount Spent<br/>Cost per Lead SMS | Cost per Lead FB</th>
+                    <th class="text-center bg-primary text-white" colspan="2">
+					<span class="float-left">Amount Spent</span>
+					<span class="float-right">ACTIVE + IN-ACTIVE = Total Lead | FB API</span>
+					</th>
                     <th class="text-center bg-primary text-white" style="max-width:590px !important;width:590px">Counselor Name<br/>Lead | Active | In-active</th>
                 </tr>
             </thead>

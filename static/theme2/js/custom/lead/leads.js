@@ -6374,6 +6374,10 @@ function getLeadCampaignWiseHtml(data){
 			
 
 			var spent = parseFloat(leadCampaign.totalSpend);
+			var cpc = parseFloat(leadCampaign.cpc);
+			var ctr = parseFloat(leadCampaign.ctr);
+			var reach = parseInt(leadCampaign.reach);
+			var frequency = parseFloat(leadCampaign.frequency);
 			var perLeadSmsSpent=spent/parseInt(leadCampaign.totalLead);
 			var perLeadFbSpent=0;
 			if(leadCampaign.totalFbLead!=''){
@@ -6381,11 +6385,67 @@ function getLeadCampaignWiseHtml(data){
 			}
 
 
-			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+">";
-			htmlRet +="<td class=\"text-center\" style=\"max-width:70px !important;min-width:70px\">"+(sr)+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" class=\"text-center\"><span class=\"bg-success text-white text-center  badge font-12\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-12\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-12\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-12\">"+leadCampaign.totalFbLead+"</span></td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:180px\" class=\"text-center\"><span class=\"badge badge-pill badge-dark font-10\">$"+leadCampaign.totalSpend+"</span><br/><span class=\"badge badge-pill badge-primary font-10\">$"+perLeadSmsSpent.toFixed(2)+"</span> | <span class=\"badge badge-pill badge-info font-10\">$"+perLeadFbSpent.toFixed(2)+"</span> </td>";
+			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+" style=\"border-bottom:1px solid;border-radius:0;\">";
+			htmlRet +="<td class=\"text-center\" style=\"vertical-align: top !important;max-width:70px !important;min-width:70px\">"+(sr)+"</td>";
+			// htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></td>";
+			
+			// htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" class=\"text-center\">";
+			// htmlRet +="<span class=\"bg-success text-white text-center  badge font-12\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-12\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-12\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-12\">"+leadCampaign.totalFbLead+"</span></td>";
+			// htmlRet +="<td style=\"vertical-align: top !important;min-width:180px\" class=\"text-center\">";
+			// htmlRet +="<span class=\"badge badge-pill badge-dark font-10\">$"+leadCampaign.totalSpend+"</span><br/>";
+			// htmlRet +="<span class=\"badge badge-pill badge-primary font-10\">$"+perLeadSmsSpent.toFixed(2)+"</span> | ";
+			// htmlRet +="<span class=\"badge badge-pill badge-info font-10\">$"+perLeadFbSpent.toFixed(2)+"</span> ";
+			// htmlRet +="</td>";
+			htmlRet +="<td colspan=\"3\"  style=\"vertical-align: top !important\">";
+				htmlRet +="<span class=\"font-14\"><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></span>";
+				htmlRet +="<span class=\"float-right\"><span class=\"bg-success text-white text-center  badge font-10\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-10\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-10\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-10\">"+leadCampaign.totalFbLead+"</span></span>";
+				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
+				htmlRet +="<tbody>";
+				htmlRet += "<tr style=\"background-color:#d3d1d1 !important\">";
+				
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Reach";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Impressions";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Frequency";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPR";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Spent";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Results";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPC";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0\">CTR";
+				htmlRet +="</td>";
+
+				htmlRet +="</tr>";
+				htmlRet += "<tr>";
+				
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+reach+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+frequency.toFixed(2)+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+perLeadFbSpent.toFixed(2)+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+cpc.toFixed(2)+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0\">"+ctr.toFixed(2)+"%";
+				htmlRet +="</td>";
+
+				htmlRet +="</tr>";
+				htmlRet +="</tbody>";
+				htmlRet +="</table>";
+			
+			htmlRet +="</td>";
+			
 			htmlRet +="<td class=\"rounded-bottom-right-10\">";
 			var sizeCounselor=(leadCampaign.assignNames.length);
 			sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
@@ -6463,6 +6523,9 @@ function getCampaignFooterTotal(data){
 	var totalFBLeads=0;
 	var totalFbSpend=0;
 
+	var totalCpc = 0;
+	var totalCtr = 0;
+
 	var totalDemo=0;
 	var totalDemoDone=0;
 	var totalWebDemo=0;
@@ -6477,6 +6540,8 @@ function getCampaignFooterTotal(data){
 			totalInactiveLeads=totalInactiveLeads+parseInt(leadCampaign.totalInactiveLead);
 			totalFBLeads=totalFBLeads+parseInt(leadCampaign.totalFbLead);
 			totalFbSpend=totalFbSpend+ parseFloat(leadCampaign.totalSpend);
+			totalCpc=totalCpc+ parseFloat(leadCampaign.cpc);
+			totalCtr=totalCtr+ parseFloat(leadCampaign.ctr);
 
 			totalDemo=totalDemo+ parseInt(leadCampaign.totalDemoLead);
 			totalDemoDone=totalDemoDone+ parseInt(leadCampaign.totalDemoDone);
@@ -6485,14 +6550,19 @@ function getCampaignFooterTotal(data){
 			totalConvert=totalConvert+ parseFloat(leadCampaign.totalConverted);
 		}
 		var spent = totalFbSpend.toFixed(2);
+		var cpc = totalCpc.toFixed(2);
+		var ctr = totalCtr.toFixed(2);
 		var perLeadSmsSpent=spent/totalLeads;
 		var perLeadFbSpent=spent/totalFBLeads;
 
 		htmlRet +="<tr style=\"font-size:14px;background-color: #c9def3 !important;\">";
 		htmlRet +="<th class=\"text-center\"></th>";
 		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"</th>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">$"+totalFbSpend.toFixed(2)+"</td>";
+		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">$"+totalFbSpend.toFixed(2)+"</th>";//"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"
+		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">";
+		// htmlRet +="<span>$"+cpc+"</span> | <span>"+ctr+"%</span>"
+		htmlRet+="<span class=\"float-right\">"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"</span>"
+		htmlRet +="</th>";
 		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Demo Booked: <b>"+totalDemo+"</b> | By Website: <b>"+totalWebDemo+"</b> | By Link: <b>"+totalCopyDemo+"</b> | Demo Completed: <b>"+totalDemoDone+"</b> | Enrolled: <b>"+totalConvert+"</b></td>";
 		htmlRet +="</tr>";
 	}
