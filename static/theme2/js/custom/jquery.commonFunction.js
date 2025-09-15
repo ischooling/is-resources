@@ -6037,12 +6037,6 @@ function getIsoFromIsd(isdCode) {
   return country ? country.iso2 : "us";
 }
 
-
-function backToMain(){
-  $("#dashboardContentInHTML").show();
-  $("#dashboardContentInHTMLAdditional").hide();
-}
-
 function safeUUID() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();

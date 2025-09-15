@@ -234,7 +234,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 				</a>`
 			}
 			if((signupType == "Offline") && studentUserId != USER_ID){
-				html+=`<a href="javascript:void(0);" onclick="backToMain();" class="btn btn-primary rounded float-right mb-2"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i> Back</a>`
+				html+=`<a href="javascript:void(0);" onclick="backToDedicatedModule('partner-enrollment-list');" class="btn btn-primary rounded float-right mb-2"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i> Back to Student Enrollments</a>`
 			}
             html+=`<section class="full">`
 				if(signupType == "Online" || studentUserId == USER_ID){
@@ -768,7 +768,7 @@ function getStudentDetailsContent(data, signupType) {
 	   	<input type="hidden" name="referralCode" id="referralCode" maxlength="10" value="" >`
 		if(data.userId == 0){
 			html+=
-			`<input type="hidden" name="learningProgram" id="learningProgram" value="">
+			`<input type="hidden" name="learningProgram" id="learningProgram" value="${signupStudent.learningProgram}" />
 			<input type="hidden" name="ras" id="ras" value="0">
 			<input type="hidden" name="unregisteredId" id="unregisteredId" value="">
 			<input type="hidden" name="discount" id="discount" value="">`

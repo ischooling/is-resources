@@ -1060,7 +1060,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
   }
 
   //B2B Partner
-  else if (pageNo == "partner-dashboard" || pageNo == "partner-enrollment-list" || pageNo == "counselor-enrollment-list") {
+  else if (pageNo == "partner-dashboard" || pageNo == "partner-enrollment-list" || pageNo == "counselor-enrollment-list" || pageNo == "add-student-enrollment") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "admin-partner-enrollment-list") {
     // var urlSend =

@@ -100,6 +100,12 @@ function validateRequestForSignupStudent(){
 			return false
 		}
 	}else{
+		if($('#courseProviderId').val()==39){
+			if ($("#signupStage1 #learningLabel").val()==0 || $("#signupStage1 #learningLabel").val()=='') {
+				showMessage(0, 'Learning Label is required');
+				return false
+			}
+		}
 		if ($("#signupStage1 #communicationEmail").val()=="") {
 			showMessage(0, 'Email is required');
 			return false
@@ -240,7 +246,7 @@ function getRequestForStudent(){
 //		signupStudentDTO['countryIsdCode'] = $("#signupStage1 #countryIsd").val();
 //	}
 
-	signupStudentDTO['learningProgram'] = $("#learingProgramHeader").val();
+	signupStudentDTO['learningProgram'] = $('#learingProgramHeader').val();
 	signupStudentDTO['courseProviderId'] = $("#courseProviderId").val();
 	signupStudentDTO['enrollmentFor'] = $("#enrollmentFor").val();
 	signupStudentDTO['studyCenter'] = SCHOOL_ID;

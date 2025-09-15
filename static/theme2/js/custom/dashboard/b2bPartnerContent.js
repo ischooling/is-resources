@@ -585,7 +585,6 @@ function pageTitleEnrolledContent(title, originalPartnerType){
 					<h4>${title}</h4>
 				</div>
 				<div class="page-title-actions">
-					<button onclick="enrollmentPartnerStudent(0);" class="btn btn-sm btn-outline-primary mr-2" style="display:${(originalPartnerType=='RP' || originalPartnerType=='WLP')?'inline-block':'none'};"><i class="fa fa-plus"></i>&nbsp;Add Student</button>
 					<button onclick="toggleB2BPartnerFilterForm();" class="btn btn-sm btn-primary"><i class="fa fa-filter"></i>&nbsp;Filter</button>
 				</div>
 			</div>

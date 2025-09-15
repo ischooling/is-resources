@@ -255,6 +255,8 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		renderCounselorDashboard('Counselor Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='partner-enrollment-list'){
 		renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+	}else if(pageNo=='add-student-enrollment'){
+		enrollmentPartnerStudent(0);
 	}else if(pageNo=='counselor-enrollment-list'){
 		renderCounselorEnrollList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='admin-partner-enrollment-list'){
@@ -486,4 +488,15 @@ function getModuleDetails(schoolId, roleId, userId, parentId, moduleType, module
 		}
 	});
 	return roleAndModule;
+}
+
+
+function backToDedicatedModule(moduleUrl){
+  if(moduleUrl=='partner-enrollment-list'){
+    callDashboardPageSchool('176','partner-enrollment-list');
+  }
+}
+function backToMain(){
+  $("#dashboardContentInHTML").show();
+  $("#dashboardContentInHTMLAdditional").hide();
 }
