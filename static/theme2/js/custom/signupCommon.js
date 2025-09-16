@@ -280,7 +280,7 @@ async function callForUserSignUp(formId, moduleId) {
 	} else if (moduleId == 'SCHOOL') {
 		parentUrl = 'api/v1/school'
 	}
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'enrollment/stage-1', payload, parentUrl);
+	var responseData = await callSingupCommon(true, true, 'enrollment/stage-1', payload, parentUrl);
 
 	if (responseData['status'] == '0' || responseData['status'] == '2') {
 		if (moduleId == 'STUDENT') {
@@ -612,4 +612,37 @@ function getLearningProgram(learningProgram) {
 		}
 	});
 	return responseData;
+}
+
+function callSingupCommon(globalflag, showMessage, url, payload, parentUrl){
+  return new Promise(function (resolve, reject) {
+      $.ajax({
+          type : "POST",
+          contentType : APPLICATION_JSON_VALUE,
+          url: getURLForHTML(parentUrl, url),
+          data : JSON.stringify(payload),
+          dataType : 'json',
+          global : globalflag,
+          success : function(data) {
+              if (data.status == '0' || data.status == '2' || data.status == '3') {
+                  if(data.status == '3'){
+                      redirectLoginPage();
+                  }else{
+                      if(showMessage){
+                        showMessageTheme2(0, data.message,'',true);
+                      }
+                  }
+                  resolve(data);
+              } else {
+                  resolve(data);
+              }
+          },
+          error: function (xhr, status, e) {
+              if(showMessage){
+                showMessageTheme2(0, e.responseText,'',true);
+              }
+              reject(e);
+          }
+      });
+  });
 }
