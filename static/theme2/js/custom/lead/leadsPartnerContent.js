@@ -227,7 +227,7 @@ function getCreatePartnerContent(buttonTitle){
 						+'<div class="col-12 text-right">'
 							+'<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="createUserB2B">'+buttonTitle+'</button>'
 						+'</div>'
-					+'</div>    '
+					+'</div>'
 				+'</form>'
 			+'</div>'
 		+'</div>'

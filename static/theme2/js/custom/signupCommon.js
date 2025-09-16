@@ -291,7 +291,7 @@ async function callForUserSignUp(formId, moduleId) {
 		}
 		if (responseData['statusCode'] == '0001') {
 			hideStep1Div();
-			showWrapper(true);
+			showWrapper(true, responseData["fr"], responseData["extra1"]);
 			$('#emailVerify').show();
 		} else if (responseData['statusCode'] == '0041' || responseData['statusCode'] == '0038') {
 			refreshCaptcha('captchaImage');
@@ -307,7 +307,7 @@ async function callForUserSignUp(formId, moduleId) {
 				goAhead(responseData['redirectUrl'], '');
 			}
 		} else {
-			showWrapper(true);
+			showWrapper(true, responseData["fr"], responseData["extra1"]);
 			$('#emailNotVerify').hide();
 			$('#userDeclined').hide();
 			$('#emialLimit').hide();

@@ -1595,3 +1595,26 @@ function getNextGrade(formId, elementId){
 		return selectedOption.text();
 	}
 }
+
+
+function getTimeForDropdownContent(formId, elemntid, intervalValue){
+   var $select = $('#'+elemntid);
+   var start = 0; // Start time in minutes (0 minutes past midnight)
+   var end = 1440; // End time in minutes (1440 minutes in a day)
+   var interval = 30;
+   if(intervalValue != null && intervalValue != undefined){
+	interval = intervalValue;
+   }
+    // Interval in minutes
+	for (var hour = 0; hour < 24; hour++) {
+	   for (var minutes = 0; minutes < 60; minutes += interval) {
+		   var ampm = hour < 12 ? 'AM' : 'PM';
+		   var displayHour = hour % 12;
+		   displayHour = displayHour ? displayHour : '00'; // the hour '0' should be '12'
+		   var displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+		   var timeString = displayHour + ':' + displayMinutes + ' ' + ampm;
+		   $select.append($('<option></option>').val(timeString).html(timeString));
+	   }
+   }
+   $select.append('<option value="11:59 PM">11:59 PM</option>');
+}

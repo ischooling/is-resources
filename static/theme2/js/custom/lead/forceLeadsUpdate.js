@@ -196,7 +196,6 @@ function updateBulkDemoStatus(remarkMendatory,minRemarkCount) {
 }
 
 function getRequestForFollowupSaveFromLeadListForBulk(data){
-		debugger;
 	   var leadAddFormRequestDTO = {};
 	   var authentication = {};
 	   var leadCommonDTOList = [];

@@ -1071,7 +1071,13 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 									+'</td>'
 								+'</tr>';
 							}
-							html+='</tbody>'
+							html+='<tr>'
+									+'<td colspan="2" class="border-0 p-1">'
+										+'<a href="javascript:void(0)" onclick="getB2BContractDetails(\''+leads.rawLeadId+'\', \'add\', \'\')" class="text-dark py-1 '+(parseInt(leads.contractsCount) == 0 && leads.leadFollowStatus.trim() == "Converted & On Boarding | Hot" ? "d-inline-block":"d-none")+'"><i class="fa fa-plus-square text-primary"></i>&nbsp;Add Contract</a>'
+										+'<a href="javascript:void(0)" onclick="getB2BContractDetails(\''+leads.rawLeadId+'\', \'edit\', \''+(leads.publishedContractId || '')+'\')" class="text-dark py-1 '+(parseInt(leads.contractsCount) > 0 && leads.leadFollowStatus.trim() == "Converted & On Boarding | Hot" ? "d-inline-block":"d-none")+'"><i class="fa fa-edit text-primary"></i>&nbsp;Edit/View Contract</a>'
+									+'</td>'
+								+'</tr>'
+							+'</tbody>'
 						+'</table>'
 					+'</td>'
 				+'</tr>'
@@ -1129,8 +1135,165 @@ function b2bleadsPagging(leaddata, objRights){
 	return html;
 }
 
+function createB2BAddContractModal(data){
+	var html =
+		'<div id="b2bContractModal" class="modal right-slide-modal fade" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-backdrop="static">'
+			+'<div class="modal-dialog modal-xl">'
+				+'<div class="modal-content border-0">'
+					+'<div class="modal-header py-0 text-white card-header card-header-tabe">'
+						+'<ul class="nav" style="height: min-content;">'
+							+'<li class="nav-item"><a data-toggle="tab" href="#addContract" id="addContractTab" class="nav-link active">Add Contract</a></li>'
+							+'<li class="nav-item"><a data-toggle="tab" href="#emailLogs" id="emailLogsTab" class="nav-link">Email Logs</a></li>'
+						+'</ul>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
+							+'<span aria-hidden="true">&times;</span>'
+						+'</button>'
+					+'</div>'
+					+'<div class="modal-body p-0 overflow-auto">'
+						+'<div class="tab-content">'
+							+getAddContractTabContent(data)
+							+getEmailLogsTabContent(data)
+						+'</div>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>';
+	return html;
+}
+
+function getAddContractTabContent(data){
+	var html =
+		'<div class="tab-pane active p-4" id="addContract" role="tabpanel">'
+			+'<div class="p-1 bg-light-primary border border-primary rounded-10 card">'
+				+'<form class="col-12 mt-2 mb-2" method="post" id="addContractForm" action="javascript:void(0);">'
+					+'<input type="hidden" id="contractId" name="contractId" value=""/>'
+					+'<input type="hidden" id="b2bLeadId" name="b2bLeadId" value=""/>'
+					+'<div class="row">'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">Partner Type</label>'
+							+'<select name="contractPartnerType" id="contractPartnerType" class="form-control" data-partner-user-id="'+data.PUserId+'">'
+								+'<option value="">Select Partner Type</option>'
+								+'<option value="GP">Enrollment Partner</option>'
+								+'<option value="R">Reseller</option>'
+								+'<option value="WLP">White-lable Partner</option>'
+								// +'<option value="C">Custom</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">Partner Name</label>'
+							+'<input type="text" name="partnerName" id="partnerName" value="'+data.name+'" class="form-control" maxlength="100">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">Email</label>'
+							+'<input type="text" name="partnerEmail" id="partnerEmail" value="'+data.email+'" class="form-control" maxlength="100" onkeydown="return M.isEmail(event);">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">Country</label>'
+							+'<select name="partnerCountryId" id="partnerCountryId" class="form-control"></select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">State</label>'
+							+'<select name="partnerStateId" id="partnerStateId" class="form-control"></select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">City</label>'
+							+'<select name="partnerCityId" id="partnerCityId" class="form-control"></select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">Contract Duration</label>'
+							+'<input type="text" name="contractStartDate" id="contractStartDate" value="" class="form-control" placeholder="Start Date" readonly onkeydown="return false">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
+							+'<label class="m-0">&nbsp;</label>'
+							+'<input type="text" name="contractEndDate" id="contractEndDate" value="" class="form-control" placeholder="End Date" readonly onkeydown="return false">'
+						+'</div>'
+						
+						+'<div class="col-12 mb-2">'
+							+'<label class="m-0">Comment</label>'
+							+'<div id="contractComment"></div>'
+						+'</div>'
+						+'<hr/>'
+						+'<div class="col-12 mb-2">'
+							+'<label class="m-0 full">Set Validity</label>'
+							+'<div class="d-flex flex-wrap">'
+								+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">'
+									+'<div class="row">'
+										+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 bg-light py-3 rounded-top-left-5 rounded-bottom-left-5">'
+											+'<input type="text" name="validityStartDate" id="validityStartDate" value="" class="form-control" placeholder="Start Date" readonly onkeydown="return false">'
+										+'</div>'
+										+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 bg-light py-3">'
+											+'<input type="text" name="validityEndDate" id="validityEndDate" value="" class="form-control" placeholder="End Date" readonly onkeydown="return false">'
+										+'</div>'
+										// +'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 bg-light py-3">'
+										// 	+'<select name="validityStartTime" id="validityStartTime" class="form-control"></select>'
+										// +'</div>'
+									+'</div>'
+								+'</div>'
+								// +'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">'
+								// 	+'<div class="row">'
+								// 		+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 bg-light py-3">'
+								// 			+'<input type="text" name="validityEndDate" id="validityEndDate" value="" class="form-control" placeholder="End Date" readonly onkeydown="return false">'
+								// 		+'</div>'
+								// 		+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 bg-light py-3 rounded-top-right-5 rounded-bottom-right-5">'
+								// 			+'<select name="validityEndTime" id="validityEndTime" class="form-control"></select>'
+								// 		+'</div>'
+								// 	+'</div>'
+								// +'</div>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-12 text-right">'
+							+'<button type="button" class="btn btn-success pr-4 pl-4"  onclick="saveContractDetails(\'addContractForm\', \''+data.b2bLeadId+'\')">Save</button>'
+							+'<button type="button" class="btn btn-primary pr-4 pl-4 ml-2" id="publishContractDetailsBtn" data-contract-Id="" onclick="publishContractDetails()">Publish</button>'
+						+'</div>'
+					+'</div>'
+				+'</form>'
+			+'</div>'
+		+'</div>'
+	return html;
+}
+
+function getEmailLogsTabContent(){
+	var html = 
+		'<div class="tab-pane p-4" id="emailLogs" role="tabpanel">'
+			+'<div class="full">'
+				+'<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap" id="emailLogsTable" style="width:100%;">'
+					+'<thead class="bg-primary text-white">'
+						+'<tr>'
+							+'<th class="text-center">S. No.</th>'
+							+'<th class="text-center">View Contract</th>'
+							+'<th class="text-center">Last Publish Date</th>'
+							+'<th class="text-center">Validity</th>'
+							+'<th class="text-center">Added By</th>'
+							+'<th class="text-center">Accepted Date</th>'
+						+'</tr>'
+					+'</thead>'
+					+'<tbody id="emailLogsTableBody"></tbody>'
+				+'</table>'
+			+'</div>'
+		+'</div>';
+	return html;
+}
 
 
+function viewB2BContractModal(){
+	var html =
+		'<div id="viewB2BContractModal" class="modal right-slide-modal fade" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-backdrop="static">'
+			+'<div class="modal-dialog modal-xl">'
+				+'<div class="modal-content border-0 ml-auto" style="max-width: 794px">'
+					+'<div class="modal-header py-2 bg-primary text-white">'
+						+'<h5 class="modal-title">View Contract</h5>'
+						+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
+							+'<span aria-hidden="true">&times;</span>'
+						+'</button>'
+					+'</div>'
+					+'<div class="modal-body overflow-auto" >'
+						
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>';
+	return html;
+}
 
 
 

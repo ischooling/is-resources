@@ -315,6 +315,10 @@ function convertLocalToUTC(dateTime, datetimeFormat, timezone) {
 	return convertLocalToUTCAs(dateTime, datetimeFormat, timezone).format(DATETIME_FORMATTER);
 }
 
+function convertLocalToUTCWithRequiredFormat(dateTime, datetimeFormat, timezone, requiedFormat) {
+	return convertLocalToUTCAs(dateTime, datetimeFormat, timezone).format(requiedFormat);
+}
+
 function convertLocalToUTCWithFormat(dateTime, timezone, datetimeFormat) {
 	return convertLocalToUTCAs(dateTime, DATETIME_UTC_FORMATTER, timezone).format(datetimeFormat);
 }

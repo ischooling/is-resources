@@ -112,9 +112,16 @@ function refreshCaptcha(id) {
   }
 }
 function getURLForHTML(apiType, suffixUrl) {
-  return (
-    BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl
-  );
+  if(apiType == "" || apiType == undefined){
+    return (
+      BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + suffixUrl
+    );
+  }else{
+    return (
+      BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl
+    );
+  }
+  
 }
 function getURLForHTMLWithPayload(apiType, suffixUrl) {
   let url = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl;
@@ -768,11 +775,11 @@ function callEmailCheck(formId, moduleId) {
         // 	$('#allReadyEmailFooter').show();
         // } else
         if (data["statusCode"] == "0044" || data["statusCode"] == "0043") {
-          showWrapper(true);
+          showWrapper(true, data["fr"], data["extra1"]);
           hideStep1Div();
           $("#emailVerify").show();
         } else if (data["statusCode"] == "02") {
-          showWrapper(true);
+          showWrapper(true, data["fr"], data["extra1"]);
           hideStep1Div();
           $("#userDeclined").show();
         } else {
@@ -5697,6 +5704,71 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage
       });
   });
 }
+function getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(globalflag, showMessage, url, payload, parentUrl){
+  return new Promise(function (resolve, reject) {
+      $.ajax({
+          type : "POST",
+          contentType : APPLICATION_JSON_VALUE,
+          url: getURLForHTML(parentUrl, url),
+          data : JSON.stringify(payload),
+          dataType : 'json',
+          global : globalflag,
+          success : function(data) {
+              if (data.status == '0' || data.status == '2' || data.status == '3') {
+                  if(data.status == '3'){
+                      redirectLoginPage();
+                  }else{
+                      if(showMessage){
+                        showMessageTheme2(0, data.message,'',true);
+                      }
+                  }
+                  resolve(data);
+              } else {
+                  resolve(data);
+              }
+          },
+          error: function (xhr, status, e) {
+              if(showMessage){
+                showMessageTheme2(0, e.responseText,'',true);
+              }
+              reject(e);
+          }
+      });
+  });
+}
+
+function getDashboardDataBasedUrlAndPayloadWithParentUrlGET(globalflag, showMessage, url, parentUrl){
+  return new Promise(function (resolve, reject) {
+      $.ajax({
+          type : "GET",
+          contentType : APPLICATION_JSON_VALUE,
+          url: getURLForHTML(parentUrl, url),
+          dataType : 'json',
+          global : globalflag,
+          success : function(data) {
+              if (data.status == '0' || data.status == '2' || data.status == '3') {
+                  if(data.status == '3'){
+                      redirectLoginPage();
+                  }else{
+                      if(showMessage){
+                        showMessageTheme2(0, data.message,'',true);
+                      }
+                  }
+                  resolve(data);
+              } else {
+                  resolve(data);
+              }
+          },
+          error: function (xhr, status, e) {
+              if(showMessage){
+                showMessageTheme2(0, e.responseText,'',true);
+              }
+              reject(e);
+          }
+      });
+  });
+}
+
 function getActualData(){
 	var responseData={};
 	if(LOCATION_SERVICE_BYPASS=='true'){
@@ -6072,4 +6144,86 @@ function showAndHideDashboardAndAdditionalContent(type){
     $("#dashboardContentInHTMLAdditional").html("");
     $("#dashboardContentInHTMLAdditional").show();
   }
+}
+
+//Fill Browser data
+function fillBrowserDetail() {
+  var browserDetails = getBrowserDetail();
+  if (browserDetails != undefined && browserDetails != "") {
+    return JSON.stringify(browserDetails);
+  }
+  return "{}";
+}
+
+//Browser detail
+function getBrowserDetail() {
+  var nVer = navigator.appVersion;
+  var nAgt = navigator.userAgent;
+  var browserName = navigator.appName;
+  var fullVersion = "" + parseFloat(navigator.appVersion);
+  var majorVersion = parseInt(navigator.appVersion, 10);
+  var nameOffset, verOffset, ix;
+
+  // In Opera, the true version is after "Opera" or after "Version"
+
+  if ((verOffset = nAgt.indexOf("Opera")) != -1) {
+    browserName = "Opera";
+    fullVersion = nAgt.substring(verOffset + 6);
+    if ((verOffset = nAgt.indexOf("Version")) != -1)
+      fullVersion = nAgt.substring(verOffset + 8);
+  }
+  // In MSIE, the true version is after "MSIE" in userAgent
+  else if ((verOffset = nAgt.indexOf("MSIE")) != -1) {
+    browserName = "Microsoft Internet Explorer";
+    fullVersion = nAgt.substring(verOffset + 5);
+  }
+  // In Chrome, the true version is after "Chrome"
+  else if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
+    browserName = "Chrome";
+    fullVersion = nAgt.substring(verOffset + 7);
+  }
+  // In Safari, the true version is after "Safari" or after "Version"
+  else if ((verOffset = nAgt.indexOf("Safari")) != -1) {
+    browserName = "Safari";
+    fullVersion = nAgt.substring(verOffset + 7);
+    if ((verOffset = nAgt.indexOf("Version")) != -1)
+      fullVersion = nAgt.substring(verOffset + 8);
+  }
+  // In Firefox, the true version is after "Firefox"
+  else if ((verOffset = nAgt.indexOf("Firefox")) != -1) {
+    browserName = "Firefox";
+    fullVersion = nAgt.substring(verOffset + 8);
+  }
+  // In most other browsers, "name/version" is at the end of userAgent
+  else if (
+    (nameOffset = nAgt.lastIndexOf(" ") + 1) <
+    (verOffset = nAgt.lastIndexOf("/"))
+  ) {
+    browserName = nAgt.substring(nameOffset, verOffset);
+    fullVersion = nAgt.substring(verOffset + 1);
+    if (browserName.toLowerCase() == browserName.toUpperCase()) {
+      browserName = navigator.appName;
+    }
+  }
+
+  // trim the fullVersion string at semicolon/space if present
+
+  if ((ix = fullVersion.indexOf(";")) != -1)
+    fullVersion = fullVersion.substring(0, ix);
+  if ((ix = fullVersion.indexOf(" ")) != -1)
+    fullVersion = fullVersion.substring(0, ix);
+
+  majorVersion = parseInt("" + fullVersion, 10);
+  if (isNaN(majorVersion)) {
+    fullVersion = "" + parseFloat(navigator.appVersion);
+    majorVersion = parseInt(navigator.appVersion, 10);
+  }
+
+  return {
+    name: browserName,
+    fullVersion: fullVersion,
+    shortVersion: majorVersion,
+    navAppName: navigator.appName,
+    uAgentFull: navigator.userAgent,
+  };
 }

@@ -5,6 +5,7 @@ var emailTemplateContent;
 // var pendingEmails = [];
 var successfulEmails = [];
 var failedOrOtherEmails = [];
+var editor;
 $(function () {
 	// $('[data-toggle="tooltip"]').tooltip()
 });
@@ -11753,7 +11754,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate, leadDemoStatus
 	}
 
 
-	function getLeadsDeviceTypeCountChart(data, chartIdSufix){
+function getLeadsDeviceTypeCountChart(data, chartIdSufix){
 	
 		var options = {
 			series: [ data.winTotal, data.macTotal, data.androidTotal, data.iphoneTotal, data.ipodTotal],
@@ -11825,3 +11826,434 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate, leadDemoStatus
 	
 		
 	}
+
+async function getB2BContractDetails(b2bleadId, type, publishedContractId){
+    var payload = {};
+    payload['b2bleadId'] = parseInt(b2bleadId);
+    if(type == "edit" && parseInt(publishedContractId) > 0){
+        payload['contractId'] = parseInt(publishedContractId);
+        payload['actionType'] = "V";
+    }
+	payload = "?payload="+encode(JSON.stringify(payload))
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, true, 'partner-contract-details'+payload, '');
+	responseData = responseData.details;
+	console.log(responseData);
+	if($("#b2bContractModal").length==1){
+		$("#b2bContractModal").remove();
+	}
+	$("body").append(createB2BAddContractModal(responseData))
+	if(responseData.contractStatus == "" || responseData.contractStatus == "P"){
+		$("#publishContractDetailsBtn").hide();
+	}else{
+		$("#publishContractDetailsBtn").show();
+	}
+	if($("#viewB2BContractModal").length<1){
+		$("#viewB2BContractModal").remove();
+		$("body").append(viewB2BContractModal())
+	}else{
+		$("body").append(viewB2BContractModal())	
+	}
+	$("#editorData").html(responseData.commentData);
+	$("#b2bContractModal").modal("show");
+	$("#contractStartDate").datepicker({
+		autoclose:true,
+		format: 'M dd, yyyy',
+		startDate:new Date()
+	}).on("change", function(){
+		var selectedStartDate = $(this).val();
+		var nextDay = new Date(selectedStartDate);
+		nextDay.setDate(nextDay.getDate() + 1);
+
+		$('#contractEndDate').datepicker('destroy');
+		$('#contractEndDate').val('');
+		$("#contractEndDate").datepicker({
+			autoclose:true,
+			format: 'M dd, yyyy',
+			startDate:nextDay
+		});
+	});
+	$("#contractEndDate").datepicker({
+		autoclose:true,
+		format: 'M dd, yyyy',
+		startDate:new Date()
+	});
+	getAllCountryList('addContractForm','partnerCountryId');
+	$('#partnerCountryId').select2({
+        theme:"bootstrap4",
+    }).on("change", function(){
+        var selectedCountryID= $(this).val()
+        callStates('addContractForm',selectedCountryID, 'partnerCountryId', 'partnerStateId', 'partnerCityId')
+        if ($("#partnerStateId").hasClass("select2-hidden-accessible")) {
+            $("#partnerStateId").select2("destroy");
+        }
+        $("#partnerStateId").select2({
+            theme:"bootstrap4",
+        });
+        $("#partnerStateId").attr("disabled",false);
+    });
+    $("#partnerStateId").select2({
+        theme:"bootstrap4",
+    }).on("change", function(){
+        var selectedStateID= $(this).val()
+        callCities('addContractForm',selectedStateID, 'partnerStateId', 'partnerCityId')
+        if ($("#partnerCityId").hasClass("select2-hidden-accessible")) {
+            $("#partnerCityId").select2("destroy");
+        }
+        $("#partnerCityId").select2({
+            theme:"bootstrap4",
+        });
+        $("#partnerCityId").attr("disabled",false);
+    });
+    $("#partnerCityId").select2({
+        theme:"bootstrap4",
+    });
+
+	 editor = new Jodit('#contractComment', {
+		width: 794, // A4 width in pixels
+    	height: 400, 
+		toolbarSticky: true,
+		uploader: { insertImageAsBase64URI: true },
+		buttons: [
+			'source', '|',
+			'bold', 'italic', 'underline', '|',
+			'ul', 'ol', '|',
+			'outdent', 'indent', '|',
+			'font', 'fontsize', 'brush', 'paragraph', '|',
+			'image', 'table', 'link', '|',
+			'align', 'undo', 'redo', '|',
+			'hr', 'eraser', 'fullsize'
+		],
+		events: {
+			afterInit: function () {
+				const observer = new MutationObserver(() => {
+				const keepBtn = Array.from(document.querySelectorAll('.jodit-ui-button__text')).find(btn => btn.textContent.trim() === 'Keep');
+					if(keepBtn) {
+						console.log("✅ 'Keep' button detected");
+
+						keepBtn.addEventListener('click', function () {
+						setTimeout(() => {
+							tableCenter();
+
+						}, 1500);
+						}, { once: true });
+						observer.disconnect(); // Stop once Keep is found
+					}
+				});
+
+				// Start observing the document
+				observer.observe(document.body, {
+					childList: true,
+					subtree: true
+				});
+			}
+		}
+	});
+
+
+	
+	// await initEditor(1, 'contractComment', 'Enter comments', false);
+	$("#validityStartDate").datepicker({
+		autoclose:true,
+		format: 'M dd, yyyy',
+		startDate:new Date()
+	}).on("change", function(){
+		var selectedStartDate = $(this).val();
+		var nextDay = new Date(selectedStartDate);
+		nextDay.setDate(nextDay.getDate() + 1);
+		$('#validityEndDate').datepicker('destroy');
+		$('#validityEndDate').val('');
+		$("#validityEndDate").datepicker({
+			autoclose:true,
+			format: 'M dd, yyyy',
+			startDate:nextDay
+		});
+	});
+	$("#validityEndDate").datepicker({
+		autoclose:true,
+		format: 'M dd, yyyy',
+		startDate:new Date()
+	});
+	
+	getTimeForDropdownContent('addContractForm', 'validityStartTime', 15);
+	getTimeForDropdownContent('addContractForm', 'validityEndTime', 15);
+	$("#contractPartnerType").val(responseData.partnerType).trigger("change");
+	$("#partnerCountryId").val(responseData.countryId).trigger("change");
+	$("#partnerStateId").val(responseData.stateId).trigger("change");
+	$("#partnerCityId").val(responseData.cityId).trigger("change");
+	if(responseData.durationStart != ""){
+		$("#contractStartDate").val(convertU2L(responseData.durationStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	if(responseData.durationEnd != ""){
+		$("#contractEndDate").val(convertU2L(responseData.durationEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	// setTimeout(function(){
+	// 	editor.setData(responseData.commentData);
+	// }, 1000);
+	editor.setEditorValue(responseData.commentData);	
+	if(responseData.validityStart != ""){
+		$("#validityStartDate").val(convertU2L(responseData.validityStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	if(responseData.validityEnd != ""){
+		$("#validityEndDate").val(convertU2L(responseData.validityEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	$("#contractId").val(responseData.contractId);
+	$("#b2bLeadId").val(responseData.b2bLeadId);
+	
+	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		if ($(e.target).attr('href') === '#emailLogs') {
+			getEmailLogList("", "");
+		}
+	});
+
+}
+
+function tableCenter(){
+	$(".jodit-container table").each(function(){
+        const table = $(this);
+        const styleWidth = table.css('width') || this.attr('width') || '';
+        const isFullWidth = styleWidth.trim() === '100%' || (styleWidth.endsWith('%') && parseFloat(styleWidth) >= 100);
+        if (!isFullWidth) {
+            table.css({
+                'margin-left': 'auto',
+                'margin-right': 'auto',
+                'display': 'table'
+            });
+        }
+    });
+	setTimeout(function(){
+		$('.jodit-container *, #contractComment *').each(function() {
+			// Loop through all attributes
+			$.each(this.attributes, function() {
+				if (this.name === 'onmouseover' || this.name === 'onmouseout' || this.name == "onmouseout") {
+					$(this.ownerElement).removeAttr(this.name);
+				}
+			});
+			$(".MsoCommentReference, .msocomanchor").remove();
+		});
+		document.querySelectorAll('.jodit-container *, #contractComment *').forEach(el => {
+			if (el.hasAttribute('onmouseover')) {
+			el.removeAttribute('onmouseover');
+			}
+			if (el.hasAttribute('onmouseout')) {
+			el.removeAttribute('onmouseout');
+			}
+		});
+
+	});
+}
+
+function validateAddContractForm(formId){
+	if($("#"+formId+" #contractPartnerType").val() == null || $("#"+formId+" #contractPartnerType").val() == undefined || $("#"+formId+" #contractPartnerType").val() == ""){
+		showMessageTheme2(0, "Partner type required");
+		return false;
+	}
+	if($("#"+formId+" #partnerName").val() == null || $("#"+formId+" #partnerName").val() == undefined || $("#"+formId+" #partnerName").val() == ""){
+		showMessageTheme2(0, "Partner name type required");
+		return false;
+	}
+	if($("#"+formId+" #partnerEmail").val() == null || $("#"+formId+" #partnerEmail").val() == undefined || $("#"+formId+" #partnerEmail").val() == ""){
+		if (!validateEmail($("#partnerEmail").val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+	}
+	if($("#"+formId+" #partnerCountryId").val() == null || $("#"+formId+" #partnerCountryId").val() == undefined || $("#"+formId+" #partnerCountryId").val() == ""){
+		showMessageTheme2(0, "Country required");
+		return false;
+	}
+	if($("#"+formId+" #partnerStateId").val() == null || $("#"+formId+" #partnerStateId").val() == undefined || $("#"+formId+" #partnerStateId").val() == ""){
+		showMessageTheme2(0, "State required");
+		return false;
+	}
+	if($("#"+formId+" #partnerCityId").val() == null || $("#"+formId+" #partnerCityId").val() == undefined || $("#"+formId+" #partnerCityId").val() == ""){
+		showMessageTheme2(0, "City required");
+		return false;
+	}
+	if($("#"+formId+" #contractStartDate").val() == null || $("#"+formId+" #contractStartDate").val() == undefined || $("#"+formId+" #contractStartDate").val() == ""){
+		showMessageTheme2(0, "Contract duration start date required");
+		return false;
+	}
+	if($("#"+formId+" #contractEndDate").val() == null || $("#"+formId+" #contractEndDate").val() == undefined || $("#"+formId+" #contractEndDate").val() == ""){
+		showMessageTheme2(0, "Contract duration end date required");
+		return false;
+	}
+	if(editor.getEditorValue() == null || editor.getEditorValue() == undefined || editor.getEditorValue() == "" || editor.getEditorValue() == "<p><br></p>"){
+		showMessageTheme2(0, "Comment required");
+		return false;
+	}
+	if($("#"+formId+" #validityStartDate").val() == null || $("#"+formId+" #validityStartDate").val() == undefined || $("#"+formId+" #validityStartDate").val() == ""){
+		showMessageTheme2(0, "Validity start date required");
+		return false;
+	}
+	if($("#"+formId+" #validityEndDate").val() == null || $("#"+formId+" #validityEndDate").val() == undefined || $("#"+formId+" #validityEndDate").val() == ""){
+		showMessageTheme2(0, "Validity end date required");
+		return false;
+	}
+	return true;
+}
+
+function getAddContractPayload(formId, b2bLeadId) {
+    var requestData = {
+        partnerType: $("#" + formId + " #contractPartnerType").val(),
+        name: $("#" + formId + " #partnerName").val(),
+        email: $("#" + formId + " #partnerEmail").val(),
+        countryId: parseInt($("#" + formId + " #partnerCountryId").val()),
+        stateId: parseInt($("#" + formId + " #partnerStateId").val()),
+        cityId: parseInt($("#" + formId + " #partnerCityId").val()),
+        durationStart: convertLocalToUTCWithRequiredFormat($("#" + formId + " #contractStartDate").val() + ' 00:00 AM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+        durationEnd: convertLocalToUTCWithRequiredFormat($("#" + formId + " #contractEndDate").val() + ' 23:59 PM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+        commentData: editor.getEditorValue(),
+        validityStart: convertLocalToUTCWithRequiredFormat($("#" + formId + " #validityStartDate").val() + ' 00:00 AM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+        validityEnd: convertLocalToUTCWithRequiredFormat($("#" + formId + " #validityEndDate").val() + ' 23:59 PM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+        sessionUserId: parseInt(USER_ID),
+        actionType: "D",
+        b2bLeadId: parseInt(b2bLeadId),
+        pUserId: parseInt($("#" + formId + " #contractPartnerType").attr("data-partner-user-id")),
+        entityId: parseInt(b2bLeadId),
+        entityType: "B2B_REQUEST"
+    };
+
+    return requestData;
+}
+
+async function saveContractDetails(formId, b2bLeadId){
+	if(validateAddContractForm(formId)){
+		var payload = getAddContractPayload(formId, b2bLeadId);
+		console.log("payload", payload)
+		var data = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, "Contract save successfully","save-partner-contract-details", payload, "");
+		if (data.status == '0' || data.status == '2' || data.status == '3') {
+			showMessageTheme2(0, data.message);
+		}else{
+			showMessageTheme2(1, data.message);
+			$("#contractId").val(data.contractId);
+			$("#b2bLeadId").val(data.b2bLeadId);
+			if(data.status == "1"){
+				tableCenter();
+				$("#publishContractDetailsBtn").show();
+				showMessageTheme2(1, data.message);
+			}
+		}
+	}
+}
+
+async function publishContractDetails() {
+	if($("#contractId").val() == null || $("#contractId").val() == undefined || $("#contractId").val() == ""){
+		showMessageTheme2(0, "Contract ID required");
+		return false;
+	}
+	var payload ={
+		actionType:"P",
+		b2bLeadId:parseInt($("#b2bLeadId").val()),
+		contractId:parseInt($("#contractId").val()),
+		sessionUserId:USER_ID
+	}
+	var response =  await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true,"save-partner-contract-details", payload, "");
+	if (response.status == '0' || response.status == '2' || response.status == '3') {
+		showMessageTheme2(0, response.message);
+	}else{
+		showMessageTheme2(1, response.message);
+		$("#publishContractDetailsBtn").hide();
+	}
+}
+
+
+async function getEmailLogList(requestType, contractId){
+	var payload = {};
+	if(requestType == "V"){
+		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
+		payload['contractId'] = parseInt(contractId);
+		payload['actionType'] = "V";
+		payload = "?payload="+encode(JSON.stringify(payload));
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, true, 'partner-contract-details'+payload, '');
+		$("#viewB2BContractModal .modal-body").html(viewContractModalBody(responseData.details));
+		$("#viewB2BContractModal #editorData").html(responseData.details.commentData);
+		$("#viewB2BContractModal").modal("show");
+	}else{
+		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
+		payload = "?payload="+encode(JSON.stringify(payload));
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, false, 'get-all-partner-contracts'+payload, '');
+		if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+			showMessageTheme2(0, responseData.message);
+		}else{
+			var html=``;
+			if(responseData.details.length>0){
+				$.each(responseData.details, function(i,v){
+					html+=
+					`<tr>
+						<td class="text-center">${i+1}</td>
+						<td class="text-center">
+							<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="getEmailLogList(\'V\',\'${v.contractId}\')">
+								<i class="fa fa-eye"></i>&nbsp;View
+							</a>
+						</td>
+						<td class="text-center">${v.publishedDate == ""? "N/A":convertU2L(v.publishedDate, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</td>
+						<td class="text-center">
+							<span>${v.validityStart == ""? "N/A":convertU2L(v.validityStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)} To ${v.validityEnd == ""? "N/A":convertU2L(v.validityEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</span>
+						</td>
+						<td class="text-center">${v.createdByName}</td>
+						<td class="text-center">${v.acceptDate == ""? "N/A":convertU2L(v.acceptDate, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</td>
+					</tr>`;
+				});
+				$("#emailLogsTable #emailLogsTableBody").html(html);
+			}else{
+				html+=
+					`<tr>
+						<td class="text-center" colspan="6">No record found</td>
+					</tr>`
+				$("#emailLogsTable #emailLogsTableBody").html(html)
+			}
+		}
+	}
+	
+	console.log("email log", responseData);
+	
+	if(requestType != "V"){
+		
+	}
+}
+
+function viewContractModalBody(data){
+	var html=
+	`<div class="full">
+		<div class="full">
+			<img src="${schoolSettingsLinks.logoUrl+SCRIPT_VERSION}" style="max-width:300px;width:100%"/>
+		</div>
+		<div class="w-100 d-flex justify-content-between my-4">
+			<div>
+				<p class="m-0">${data.name}</p>
+				<p class="m-0">${data.countryName}</p>
+				<p class="m-0">${data.stateName}</p>
+				<p class="m-0">${data.cityName}</p>
+			</div>
+			<div calss="ml-auto">
+				<p class="m-0"><b>Date: </b>${data.createdAt == ""? "N/A":convertU2L(data.createdAt, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</p>`;
+				if(data.createdAt != ""){
+					var time = data.createdAt;
+					time=time.split(" ");
+					time = time[1].split(":");
+					html+=`<p class="m-0"><b>Time: </b>${data.createdAt == ""? "N/A":`${time[0]}:${time[1]}${time[0]>=12?"PM" : "AM"}`}</p>`;
+				}
+			html+=`</div>
+		</div>
+		<div id="editorData"></div>
+		<div class="full">
+			<div class="signuture py-3">
+				<img src="${PATH_FOLDER_IMAGE2}agreementAuthorizedSignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
+			</div>
+			<div class="signuture">
+				<p class="m-0">${data.createdByName}</p>
+				<p class="m-0">${data.schoolName}</p>
+				<p class="m-0">(Authorised Signatory for International Schooling)</p>
+			</div>
+		</div>
+		<div class="full mt-4">
+			<div class="d-flex">
+				<p class="m-0"><b>Address:</b>${data.schoolLocation}</p>
+				<p class="m-0 ml-auto">${data.name}</p>
+			</div>
+			
+			${data.publishedDate != ""? `<p class="m-0"><b>Date:</b>${data.publishedDate}</p>`:``}
+		</div>
+	</div>`;
+	return html;
+}
