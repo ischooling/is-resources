@@ -4603,6 +4603,26 @@ function changeDateFormat(date, dateFormat) {
       " " +
       ampm
     );
+  } else if ("MMM dd, yyyy hh:mm A" == dateFormat) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    return (
+      M.months[date.getMonth()] +
+      " " +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      ", " +
+      date.getFullYear() +
+      " " +
+      (hours > 9 ? hours : "0" + hours) +
+      ":" +
+      (minutes > 9 ? minutes : "0" + minutes) +
+      " " +
+      ampm
+    );
   } else if ("dd-mm-yyyy" == dateFormat) {
     return (
       (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +

@@ -11855,22 +11855,28 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 	}
 	$("#editorData").html(responseData.commentData);
 	$("#b2bContractModal").modal("show");
+	$("#contractDuration").val(responseData.durationYears);
+	$("#validityDuration").val(responseData.validityDays);
+	// $("#contractStartDate").datepicker({
+	// 	autoclose:true,
+	// 	format: 'M dd, yyyy',
+	// 	startDate:new Date()
+	// }).on("change", function(){
+	// 	var selectedStartDate = $(this).val();
+	// 	var nextDay = new Date(selectedStartDate);
+	// 	nextDay.setDate(nextDay.getDate() + 1);
+
+	// 	$('#contractEndDate').datepicker('destroy');
+	// 	$('#contractEndDate').val('');
+	// 	$("#contractEndDate").datepicker({
+	// 		autoclose:true,
+	// 		format: 'M dd, yyyy',
+	// 		startDate:nextDay
+	// 	});
+	// });
 	$("#contractStartDate").datepicker({
-		autoclose:true,
 		format: 'M dd, yyyy',
 		startDate:new Date()
-	}).on("change", function(){
-		var selectedStartDate = $(this).val();
-		var nextDay = new Date(selectedStartDate);
-		nextDay.setDate(nextDay.getDate() + 1);
-
-		$('#contractEndDate').datepicker('destroy');
-		$('#contractEndDate').val('');
-		$("#contractEndDate").datepicker({
-			autoclose:true,
-			format: 'M dd, yyyy',
-			startDate:nextDay
-		});
 	});
 	$("#contractEndDate").datepicker({
 		autoclose:true,
@@ -11952,28 +11958,32 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 
 	
 	// await initEditor(1, 'contractComment', 'Enter comments', false);
+	// $("#validityStartDate").datepicker({
+	// 	autoclose:true,
+	// 	format: 'M dd, yyyy',
+	// 	startDate:new Date()
+	// }).on("change", function(){
+	// 	var selectedStartDate = $(this).val();
+	// 	var nextDay = new Date(selectedStartDate);
+	// 	nextDay.setDate(nextDay.getDate() + 1);
+	// 	$('#validityEndDate').datepicker('destroy');
+	// 	$('#validityEndDate').val('');
+	// 	$("#validityEndDate").datepicker({
+	// 		autoclose:true,
+	// 		format: 'M dd, yyyy',
+	// 		startDate:nextDay
+	// 	});
+	// });
 	$("#validityStartDate").datepicker({
 		autoclose:true,
 		format: 'M dd, yyyy',
 		startDate:new Date()
-	}).on("change", function(){
-		var selectedStartDate = $(this).val();
-		var nextDay = new Date(selectedStartDate);
-		nextDay.setDate(nextDay.getDate() + 1);
-		$('#validityEndDate').datepicker('destroy');
-		$('#validityEndDate').val('');
-		$("#validityEndDate").datepicker({
-			autoclose:true,
-			format: 'M dd, yyyy',
-			startDate:nextDay
-		});
-	});
+	})
 	$("#validityEndDate").datepicker({
 		autoclose:true,
 		format: 'M dd, yyyy',
 		startDate:new Date()
 	});
-	
 	getTimeForDropdownContent('addContractForm', 'validityStartTime', 15);
 	getTimeForDropdownContent('addContractForm', 'validityEndTime', 15);
 	$("#contractPartnerType").val(responseData.partnerType).trigger("change");
@@ -12073,6 +12083,15 @@ function validateAddContractForm(formId){
 		showMessageTheme2(0, "Contract duration start date required");
 		return false;
 	}
+	if (
+		$("#"+formId+" #contractDuration").val() == null || 
+		$("#"+formId+" #contractDuration").val() == undefined || 
+		$("#"+formId+" #contractDuration").val() === "" || 
+		$("#"+formId+" #contractDuration").val() === "0"
+	) {
+		showMessageTheme2(0, "Contract duration start date required");
+		return false;
+	}
 	if($("#"+formId+" #contractEndDate").val() == null || $("#"+formId+" #contractEndDate").val() == undefined || $("#"+formId+" #contractEndDate").val() == ""){
 		showMessageTheme2(0, "Contract duration end date required");
 		return false;
@@ -12083,6 +12102,15 @@ function validateAddContractForm(formId){
 	}
 	if($("#"+formId+" #validityStartDate").val() == null || $("#"+formId+" #validityStartDate").val() == undefined || $("#"+formId+" #validityStartDate").val() == ""){
 		showMessageTheme2(0, "Validity start date required");
+		return false;
+	}
+	if (
+		$("#"+formId+" #validityDuration").val() == null || 
+		$("#"+formId+" #validityDuration").val() == undefined || 
+		$("#"+formId+" #validityDuration").val() === "" || 
+		$("#"+formId+" #validityDuration").val() === "0"
+	) {
+		showMessageTheme2(0, "Validity duration required");
 		return false;
 	}
 	if($("#"+formId+" #validityEndDate").val() == null || $("#"+formId+" #validityEndDate").val() == undefined || $("#"+formId+" #validityEndDate").val() == ""){
@@ -12102,9 +12130,11 @@ function getAddContractPayload(formId, b2bLeadId) {
         cityId: parseInt($("#" + formId + " #partnerCityId").val()),
         durationStart: convertLocalToUTCWithRequiredFormat($("#" + formId + " #contractStartDate").val() + ' 00:00 AM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
         durationEnd: convertLocalToUTCWithRequiredFormat($("#" + formId + " #contractEndDate").val() + ' 23:59 PM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+		durationYears: parseInt($("#contractDuration").val()),
         commentData: editor.getEditorValue(),
         validityStart: convertLocalToUTCWithRequiredFormat($("#" + formId + " #validityStartDate").val() + ' 00:00 AM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
         validityEnd: convertLocalToUTCWithRequiredFormat($("#" + formId + " #validityEndDate").val() + ' 23:59 PM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+		validityDays: parseInt($("#validityDuration").val()),
         sessionUserId: parseInt(USER_ID),
         actionType: "D",
         b2bLeadId: parseInt(b2bLeadId),
@@ -12152,7 +12182,8 @@ async function publishContractDetails() {
 		showMessageTheme2(0, response.message);
 	}else{
 		showMessageTheme2(1, response.message);
-		$("#publishContractDetailsBtn").hide();
+		$("#b2bContractModal").modal("hide");
+		// $("#publishContractDetailsBtn").hide();
 	}
 }
 
@@ -12238,7 +12269,7 @@ function viewContractModalBody(data){
 		<div id="editorData"></div>
 		<div class="full">
 			<div class="signuture py-3">
-				<img src="${PATH_FOLDER_IMAGE2}agreementAuthorizedSignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
+				<img src="${PATH_FOLDER_IMAGE2}paulsignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
 			</div>
 			<div class="signuture">
 				<p class="m-0">${data.createdByName}</p>
@@ -12248,12 +12279,41 @@ function viewContractModalBody(data){
 		</div>
 		<div class="full mt-4">
 			<div class="d-flex">
-				<p class="m-0"><b>Address:</b>${data.schoolLocation}</p>
-				<p class="m-0 ml-auto">${data.name}</p>
+				<p class="m-0"><b>Address:</b> ${data.schoolLocation}</p>
+				${/*<p class="m-0 ml-auto">${data.name}</p>*/''}
 			</div>
 			
-			${data.publishedDate != ""? `<p class="m-0"><b>Date:</b>${data.publishedDate}</p>`:``}
+			${data.publishedDate != ""? `<p class="m-0"><b>Date:</b> ${changeDateFormat(new Date(data.publishedDate), "MMM dd, yyyy hh:mm A")}</p>`:``}
 		</div>
 	</div>`;
 	return html;
+}
+
+function calculateContractEndDate() {
+    var startDate = $("#contractStartDate").val();
+    var duration = parseInt($("#contractDuration").val());
+    if (startDate && duration) {
+        var sDate = new Date(startDate);
+        var eDate = new Date(sDate);
+        eDate.setFullYear(sDate.getFullYear() + duration);
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var endDateFormatted = monthNames[eDate.getMonth()] + " " + (eDate.getDate() > 9 ? eDate.getDate() : "0" + eDate.getDate()) + ", " + eDate.getFullYear();
+        $("#contractEndDate").val(endDateFormatted);
+    } else {
+        $("#contractEndDate").val("");
+    }
+}
+function calculateValidityEndDate() {
+    var startDate = $("#validityStartDate").val();
+    var duration = parseInt($("#validityDuration").val());
+    if (startDate && duration) {
+        var sDate = new Date(startDate);
+        var eDate = new Date(sDate);
+        eDate.setDate(sDate.getDate() + duration);
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var endDateFormatted = monthNames[eDate.getMonth()] + " " + (eDate.getDate() > 9 ? eDate.getDate() : "0" + eDate.getDate()) + ", " + eDate.getFullYear();
+        $("#validityEndDate").val(endDateFormatted);
+    } else {
+        $("#validityEndDate").val("");
+    }
 }

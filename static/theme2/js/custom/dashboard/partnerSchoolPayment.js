@@ -45,6 +45,7 @@ function getPayStudentFeesDetais(callFrom) {
                 let totalPayableToIS = 0;
 
                 $.each(data.studentFeeDetails, function(index, item) {
+                    debugger;
                     html += `<tr>
                         <td>
                             <input type="checkbox" class="row-checkbox paymentCheck"  />

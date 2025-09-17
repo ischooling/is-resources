@@ -143,10 +143,10 @@ function viewB2BContractDetails(data){
             </div>
             <div class="full mt-4">
                 <div class="d-flex">
-                    <p class="m-0"><b>Address:</b>${data.schoolLocation}</p>
-                    <p class="m-0 ml-auto">${data.name}</p>
+                    <p class="m-0"><b>Address:</b> ${data.schoolLocation}</p>
+                    ${/*<p class="m-0 ml-auto">${data.name}</p>*/''}
                 </div>
-                ${data.publishedDate != ""? `<p class="m-0"><b>Date:</b>${data.publishedDate}</p>`:``}
+                ${data.publishedDate != ""? `<p class="m-0"><b>Date:</b> ${changeDateFormat(new Date(data.publishedDate), "MMM dd, yyyy hh:mm A")}</p>`:``}
             </div>
             <div class="full mt-5">
                 <p class="font-weight-bold mb-0">Acceptance of Offer</p>
