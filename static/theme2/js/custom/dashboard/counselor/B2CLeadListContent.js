@@ -1496,7 +1496,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 													if(USER_ROLE=='DIRECTOR'){
 														html+='<tr>'
 														+'<th class="border-0 p-1">Call status:</th>'
-														+'<td class="border-0 p-1">'+(leads.zadarmaCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCount+')</td>'
+														+'<td class="border-0 p-1">'+(leads.zadarmaCallCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCallCount+')</td>'
 														+'</tr>';
 													}
 

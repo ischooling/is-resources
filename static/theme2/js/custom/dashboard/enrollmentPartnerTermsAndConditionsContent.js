@@ -133,7 +133,7 @@ function viewB2BContractDetails(data){
             <div id="editorData"></div>
             <div class="full">
                 <div class="signuture py-3">
-                    <img src="${PATH_FOLDER_IMAGE2}agreementAuthorizedSignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
+                    <img src="${PATH_FOLDER_IMAGE2}paulsignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
                 </div>
                 <div class="signuture">
                     <p class="m-0">${data.createdByName}</p>
