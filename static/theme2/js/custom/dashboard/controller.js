@@ -421,7 +421,6 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
   }else if(pageNo == "delete-user"){
 	$('#dashboardContentInHTML').html(renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "teacher-profile"){
-	
 	$('#dashboardContentInHTML').html(renderReceivedTeachedProfileListDashboard('Received Teacher Profile', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "pending-training-remarks"){
 	$('#dashboardContentInHTML').html(renderPendingTeachedTrainingListDashboard('Pending Training Remarks', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
@@ -429,6 +428,10 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	$('#dashboardContentInHTML').html(renderPendingContractListDashboard('Pending Contract', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "rejected-teachers"){
 	$('#dashboardContentInHTML').html(renderRejectedTeacherListDashboard('Rejected Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+  }else if(pageNo == "teacher-profile-pending-verification"){
+	$('#dashboardContentInHTML').html(renderPendingVerificationTeachedProfileListDashboard('Pending Verification', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+  }else if(pageNo == "teacher-profile-pending-bank-details"){
+	$('#dashboardContentInHTML').html(renderBankDetailsTeacherProfleListDashboard('Pending Bank Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }
 //   else if(pageNo=='lead-report-list'){
 // 	$('#dashboardContentInHTML').html(renderSchoolReportDashboard('School Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));

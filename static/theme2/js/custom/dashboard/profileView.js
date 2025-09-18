@@ -1752,7 +1752,7 @@ function extractReference(refNum) {
 	const phoneInput = document.querySelector(`#reference${refNum}Phone`);
 	const designation = $(`#reference${refNum}Designation`).val().trim();
 	const primaryId = $(`#reference${refNum}PrimaryId`).val();
-
+	const userId = USER_ID;
 	const iti = window.intlTelInputGlobals.getInstance(phoneInput);
 	const countryData = iti.getSelectedCountryData();
 	const isdCode = countryData ? parseInt(countryData.dialCode) : null;
@@ -1768,7 +1768,8 @@ function extractReference(refNum) {
 			isdCode,
 			isoCode,
 			number: phone,
-			designation
+			designation,
+			userId
 		};
 	}
 	return null;

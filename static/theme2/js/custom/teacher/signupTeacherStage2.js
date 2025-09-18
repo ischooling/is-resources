@@ -258,6 +258,10 @@ function callForSignupTeacherUpdateProfile(formId, elementary_subjects,middleSch
 		showMessageTheme2(2, '  Please upload Passport/National ID');
 		return false;
 	}
+	if ($("#"+formId+" #fileupload11Span").html()=='' || $("#"+formId+" #fileupload11Span").html()=='Upload Internet Speed Test Screenshot*') {
+		showMessageTheme2(2, ' Please upload internet speed test screenshot');
+		return false;
+	}
 	var totalSelectedSubject = elementary_subjects.length + middleSchool_subjects.length + highSchool_subjects.length;
 	if (totalSelectedSubject < 1) {
 		showMessageTheme2(2, ' Select taught subjects');
@@ -265,7 +269,7 @@ function callForSignupTeacherUpdateProfile(formId, elementary_subjects,middleSch
 	}
 	if($("#demoVedioLink").length <= 0){
 		if (selectedDemoMeetingId == null || selectedDemoMeetingId == undefined || selectedDemoMeetingId == "") {
-			showMessageTheme2(2, 'Please give demo. If given, please select the any recording');
+			showMessageTheme2(2, 'Please give demo. If given, please select any recording');
 			return false;
 		}
 	}else if($("#demoVedioLink").val() == ""){
@@ -692,14 +696,6 @@ async function openModalForDemoVideo() {
 		for (const meetingId of entityIds) {
 			await getDemoRecordings(meetingId);
 		}
-		// if(entityIds.length == 1){
-		// 	$("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
-		// 	$('#recordYourDemoInsideBtn').show().attr('data-attempt', '2');
-		// 	$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('2')`);
-		// }
-		// if(entityIds.length == 2){
-		// 	$('#recordYourDemoInsideBtn').hide();
-		// }
 	}else{
 		$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('1')`);
 	}
@@ -756,30 +752,12 @@ async function startDemoRecordingFun(attempt){
 			success: function (response) { 
 				if(response.status == 1){
 					window.open(response.redirectUrl, '_blank');
-					// if(responseDataDemoRecording.data.meetingsExist == false){
-					// 	if(attempt == 1){
-					// 		// $("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
-					// 		// $('#recordYourDemoInsideBtn').show().attr('data-attempt', '2');
-					// 		// $('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('2')`);
-					// 	}else if(attempt == 2){
-					// 		$("#recordYourDemoInsideBtn").hide();
-					// 		$("#approveDemoBtn").css("margin-left", "auto");
-					// 	}
-					// }else{
-					// 	$("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
-					// 	$('#recordYourDemoInsideBtn').show().attr('data-attempt', '1');
-					// 	$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('1')`);
-					// }
 					clearInterval(recordingPollingInterval);
 					recordingPollingInterval = null;
-					// setTimeout(() => {
-						// if(recordingIntervalCount == 0){
-							getDemoRecordings(responseDataDemoRecording.data.meetingId);
-							recordingPollingInterval = setInterval(() => {
-								getDemoRecordings(responseDataDemoRecording.data.meetingId);
-							}, 10000);
-						// }
-					// }, 30000);
+					getDemoRecordings(responseDataDemoRecording.data.meetingId);
+					recordingPollingInterval = setInterval(() => {
+						getDemoRecordings(responseDataDemoRecording.data.meetingId);
+					}, 10000);
 					$("#recordingWaitingText").html("The recording is not started yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
 					$("#recordingWaitingText").show();
 					if(entityIds.length == 2){
@@ -805,13 +783,10 @@ async function getDemoRecordings(meetingId) {
 		clearInterval(recordingPollingInterval);
 		recordingPollingInterval = null;
 	}
-	// if(recordingPollingInterval){
-	// 	$("#recordingWaitingText").show();
-	// }
     if (responseData.statusCode === "SUCCESS") {
 		if(responseData.meetingStatus == "not start"){
-			$("#recordingWaitingText").html("The recording is not started yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
-			$("#recordingWaitingText").show();
+			// $("#recordingWaitingText").html("The recording is not started yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
+			// $("#recordingWaitingText").show();
 			if(entityIds.length == 1){
 				$("#recordYourDemoInsideBtn span").text("Record Your Demo");
 				$('#recordYourDemoInsideBtn').show().attr('data-attempt', '1');
@@ -822,14 +797,55 @@ async function getDemoRecordings(meetingId) {
 				$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('2')`);
 			}
 		}else if(responseData.meetingStatus == "start"){
-			$("#recordingWaitingText").html("The recording is not ended yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
-			$("#recordingWaitingText").show();
+			// $("#recordingWaitingText").html("The recording is not ended yet <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
+			// $("#recordingWaitingText").show();
+			$("#recordingWaitingText").hide();
 			$("#recordYourDemoInsideBtn span").text("Record Your Demo (2nd Attempt)");
 			$('#recordYourDemoInsideBtn').show().attr('data-attempt', '2');
 			$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('2')`);
 			$("#recordYourDemoInsideBtn").attr("disabled", true);
 			if(entityIds.length == 2){
 				$("#recordYourDemoInsideBtn").hide();
+			}
+			const $videoSection = $('#recordingSection');
+			if($("#mergedRecordingTable").length === 0){
+				let tableWrapper = `
+					<div class="mt-3 bg-white p-3 rounded shadow-sm" style="padding: 30px 0px 10px;">
+						<table id="mergedRecordingTable" class="table table-bordered">
+							<thead style="background-color: #027fff; color: white;">
+								<tr>
+									<th>Attempt</th>
+									<th>Start Time</th>
+									<th>End Time</th>
+									<th>Duration (HH:MM:SS)</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>`;
+				$videoSection.append(tableWrapper);
+			}
+			const $tableBody = $("#mergedRecordingTable tbody");
+			var startDateTime = responseData.startDateTime == null ? "N/A" : changeDateFormat(new Date(responseData.startDateTime), "MMM dd, yyyy hh:mm:ss A");
+			var attempt = (meetingId == entityIds[0]) ? 1 : 2;
+			var rowId = `attempt_${attempt}`;
+			var $existingRow = $tableBody.find(`#${rowId}`);
+			if ($existingRow.length) {
+				$existingRow.find("td:eq(1)").text(startDateTime);
+				$existingRow.find("td:eq(2)").html("<i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>");
+				$existingRow.find("td:eq(3)").html("<i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>");
+				$existingRow.find("td:eq(4)").html("<i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>");
+			} else {
+				$tableBody.append(`
+					<tr id="${rowId}">
+						<td>${attempt == 1 ? "1st Attempt" : "2nd Attempt"}</td>
+						<td>${startDateTime}</td>
+						<td><i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></td>
+						<td><i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></td>
+						<td><i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></td>
+					</tr>
+				`);
 			}
 		}else{
 			$("#recordYourDemoInsideBtn").attr("disabled", false);
@@ -843,8 +859,50 @@ async function getDemoRecordings(meetingId) {
 				$("#recordYourDemoInsideBtn").hide();
 			}
 			if(responseData.recordingArray.length == 0){
-				$("#recordingWaitingText").html("Please wait while we are processing your recording <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
-				$("#recordingWaitingText").show();
+				// $("#recordingWaitingText").html("Please wait while we are processing your recording <span><i class='fa fa-spinner fancytree-helper-spin' aria-hidden='true'></i></span>")
+				// $("#recordingWaitingText").show();
+				$("#recordingWaitingText").hide();
+				const $videoSection = $('#recordingSection');
+				if ($("#mergedRecordingTable").length === 0) {
+					let tableWrapper = `
+						<div class="mt-3 bg-white p-3 rounded shadow-sm" style="padding: 30px 0px 10px;">
+							<table id="mergedRecordingTable" class="table table-bordered">
+								<thead style="background-color: #027fff; color: white;">
+									<tr>
+										<th>Attempt</th>
+										<th>Start Time</th>
+										<th>End Time</th>
+										<th>Duration (HH:MM:SS)</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>`;
+					$videoSection.append(tableWrapper);
+				}
+				const $tableBody = $("#mergedRecordingTable tbody");
+				var startDateTime = responseData.startDateTime == null ? "N/A" : changeDateFormat(new Date(responseData.startDateTime), "MMM dd, yyyy hh:mm:ss A");
+				var endDateTime = responseData.endDateTime == null ? "N/A" : changeDateFormat(new Date(responseData.endDateTime), "MMM dd, yyyy hh:mm:ss A");
+				var attempt = (meetingId == entityIds[0]) ? 1 : 2;
+				var rowId = `attempt_${attempt}`;
+				var $existingRow = $tableBody.find(`#${rowId}`);
+				if ($existingRow.length) {
+					$existingRow.find("td:eq(1)").text(startDateTime);
+					$existingRow.find("td:eq(2)").text(endDateTime);
+					$existingRow.find("td:eq(3)").text(getDuration(responseData.startDateTime, responseData.endDateTime));
+					$existingRow.find("td:eq(4)").html("Recording in progress <i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>");
+				} else {
+					$tableBody.append(`
+						<tr id="${rowId}">
+							<td>${attempt == 1 ? "1st Attempt" : "2nd Attempt"}</td>
+							<td>${startDateTime}</td>
+							<td>${endDateTime}</td>
+							<td>${getDuration(responseData.startDateTime, responseData.endDateTime)}</td>
+							<td>Recording in progress <i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i></td>
+						</tr>
+					`);
+				}
 			} else {
 				$("#approveDemoBtn").show();
 				$("#approveDemoBtn").css("margin-left", "auto");
@@ -861,6 +919,7 @@ async function getDemoRecordings(meetingId) {
 										<th>Attempt</th>
 										<th>Start Time</th>
 										<th>End Time</th>
+										<th>Duration (HH:MM:SS)</th>
 										<th>Action</th>
 									</tr>
 								</thead>
@@ -873,6 +932,8 @@ async function getDemoRecordings(meetingId) {
 				const $tableBody = $("#mergedRecordingTable tbody");
 
 				recordings.forEach((rec, i) => {
+					var attempt = (meetingId == entityIds[0]) ? 1 : 2;
+					$tableBody.find(`#attempt_${attempt}`).remove();
 					const existingRow = $tableBody.find(`input[data-meetingid="${rec.meetingId}"]`);
 					if (existingRow.length === 0 && $tableBody.find('tr').length < 2) {
 						const rowId = `rec_${meetingId}_${i}`;
@@ -893,6 +954,7 @@ async function getDemoRecordings(meetingId) {
 								<td>${attempt == 1 ? "1st Attempt" : "2nd Attempt"}</td>
 								<td>${startDateTime}</td>
 								<td>${endDateTime}</td>
+								<td>${getDuration(rec.startDate, rec.endDate)}</td>
 								<td>
 									<a id="playBtn_${meetingId}_${i}" href="javascript:void(0);" onclick="openDemoRecordingModal(demoRecordingUrlMap['${rowKey}'], '${attempt == 1 ? "1st Attempt" : "2nd Attempt"}')" class="btn btn-sm btn-primary m-0">Recordings</a>
 									<input class="form-check-input ml-3" type="radio" name="selectedDemoRecording" id="${rowId}" value="${rec.meetingId}" data-meetingid="${rec.meetingId}" data-attempt="${attempt}" ${checked}>
@@ -952,7 +1014,11 @@ function approvedDemoRecording() {
 	selectedDemoMeetingAttempt = selectedRecording.data('attempt');
 	if(selectedDemoMeetingAttempt == 1){
 		selectedDemoMeetingAttempt = "1st Attempt"
-	}else if(selectedDemoMeetingAttempt == 2){
+	}
+	// else if(selectedDemoMeetingAttempt == 2){
+	// 	selectedDemoMeetingAttempt = "2nd Attempt"
+	// }
+	else{
 		selectedDemoMeetingAttempt = "2nd Attempt"
 	}
 	const selectedRowId = selectedRecording.attr('id').replace('rec_', '');
@@ -971,6 +1037,7 @@ function approvedDemoRecording() {
 						<th>Attempt</th>
 						<th>Start Time</th>
 						<th>End Time</th>
+						<th>Duration (HH:MM:SS)</th>
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -979,6 +1046,7 @@ function approvedDemoRecording() {
 						<td>${selectedDemoMeetingAttempt}</td>
 						<td>${startTime}</td>
 						<td>${endTime}</td>
+						<td>${getDuration(startTime, endTime)}</td>
 						<td>
 							<a href="javascript:void(0);" class="btn btn-sm btn-primary"
 							   onclick="openDemoRecordingModal(demoRecordingUrlMap['${selectedRowId}'], '${selectedDemoMeetingAttempt}')">
@@ -1172,9 +1240,9 @@ function loadApprovedDemoIfExists(recordingData) {
 
 	const selectedMeetingId = entry.meetingId;
 	selectedDemoMeetingAttempt = entry.attempt;
-	if(selectedDemoMeetingAttempt == 1){
+	if(selectedDemoMeetingAttempt % 2 != 0){
 		selectedDemoMeetingAttempt = "1st Attempt"
-	}else if(selectedDemoMeetingAttempt == 2){
+	}else{
 		selectedDemoMeetingAttempt = "2nd Attempt"
 	}
 	const startTime = entry.startDate == null ? "N/A" : changeDateFormat(new Date(entry.startDate), "MMM dd, yyyy hh:mm:ss A");
@@ -1193,6 +1261,7 @@ function loadApprovedDemoIfExists(recordingData) {
 						<th>Attempt</th>
 						<th>Start Time</th>
 						<th>End Time</th>
+						<th>Duration (HH:MM:SS)</th>
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -1201,6 +1270,7 @@ function loadApprovedDemoIfExists(recordingData) {
 						<td>${selectedDemoMeetingAttempt}</td>
 						<td>${startTime}</td>
 						<td>${endTime}</td>
+						<td>${getDuration(entry.startDate, entry.endDate)}</td>
 						<td>
 							<a href="javascript:void(0);" class="btn btn-sm btn-primary"
 							   onclick="openDemoRecordingModal(demoRecordingUrlMap['${rowKey}'], '${selectedDemoMeetingAttempt}')">

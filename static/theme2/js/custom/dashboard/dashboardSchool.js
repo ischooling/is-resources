@@ -213,6 +213,10 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     //     moduleId +
     //     "&ids=15,18,21&types=2"
     // );
+  } else if (pageNo == "teacher-profile-pending-bank-details") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "teacher-profile-pending-verification") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "6a") {
     callForDashboardData(
       "formIdIfAny",
@@ -2315,8 +2319,10 @@ function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
           $("#" + formId)[0].reset();
           //setTimeout(function(){ callDashboardPageSchool(roleModuleId, 'teacher-profile'); }, 1000);
         }
-        var userId = $("#profileApprovalId #userId").val();
-        $("#profileId_" + userId).remove();
+        if(formId != "teacherEditAgreement"){
+          var userId = $("#profileApprovalId #userId").val();
+          $("#profileId_" + userId).remove();
+        }
       }
       return false;
     }

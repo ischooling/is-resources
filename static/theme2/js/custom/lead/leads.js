@@ -11914,21 +11914,22 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
         theme:"bootstrap4",
     });
 
-	 editor = new Jodit('#contractComment', {
+	editor = new Jodit('#contractComment', {
 		width: 794, // A4 width in pixels
     	height: 400, 
 		toolbarSticky: true,
 		uploader: { insertImageAsBase64URI: true },
-		buttons: [
-			'source', '|',
-			'bold', 'italic', 'underline', '|',
-			'ul', 'ol', '|',
-			'outdent', 'indent', '|',
-			'font', 'fontsize', 'brush', 'paragraph', '|',
-			'image', 'table', 'link', '|',
-			'align', 'undo', 'redo', '|',
-			'hr', 'eraser', 'fullsize'
-		],
+		toolbarAdaptive: false,
+		// buttons: [
+		// 	'source', '|',
+		// 	'bold', 'italic', 'underline', '|',
+		// 	'ul', 'ol', '|',
+		// 	'outdent', 'indent', '|',
+		// 	'font', 'fontsize', 'brush', 'paragraph', '|',
+		// 	'image', 'table', 'link', '|',
+		// 	'align', 'undo', 'redo', '|',
+		// 	'hr', 'eraser', 'fullsize'
+		// ],
 		events: {
 			afterInit: function () {
 				const observer = new MutationObserver(() => {
@@ -12171,9 +12172,10 @@ async function publishContractDetails() {
 		showMessageTheme2(0, "Contract ID required");
 		return false;
 	}
+	var b2bLeadId = $("#b2bLeadId").val();
 	var payload ={
 		actionType:"P",
-		b2bLeadId:parseInt($("#b2bLeadId").val()),
+		b2bLeadId:parseInt(b2bLeadId),
 		contractId:parseInt($("#contractId").val()),
 		sessionUserId:USER_ID
 	}
@@ -12183,6 +12185,9 @@ async function publishContractDetails() {
 	}else{
 		showMessageTheme2(1, response.message);
 		$("#b2bContractModal").modal("hide");
+		$("#addContractB2b_" + b2bLeadId).addClass("d-none");
+		$("#addContractB2b_" + b2bLeadId).removeClass("d-inline-block");
+		$("#editContractB2b_" + b2bLeadId).removeClass("d-none");
 		// $("#publishContractDetailsBtn").hide();
 	}
 }

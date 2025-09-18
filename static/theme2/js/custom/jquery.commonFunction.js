@@ -2351,7 +2351,8 @@ function bindFileUploadNew1(
                   "14" == uploadCategoryId ||
                   "15" == uploadCategoryId ||
                   "16" == uploadCategoryId ||
-                  "17" == uploadCategoryId
+                  "17" == uploadCategoryId ||
+                  "75" == uploadCategoryId
                 ) {
                   if (
                     data.result.userRole == "" ||
@@ -4940,6 +4941,9 @@ $(document).on("hidden.bs.modal", ".modal", function () {
     $(".modal-backdrop")
       .last()
       .css("z-index", newZIndex - 10);
+    if(!$("body").hasClass("modal-open")){
+      $("body").addClass("modal-open");
+    }
   }
 });
 
@@ -6246,4 +6250,39 @@ function getBrowserDetail() {
     navAppName: navigator.appName,
     uAgentFull: navigator.userAgent,
   };
+}
+
+function getUploadInputBtn(inputId, uploadViewElementId, fileType, elem_id, btn_label_name, file_input_show_hide_flag, viewAttachmentModalId, is_attchementPDF, is_attchementUploaded, viewAttachmentFlag){
+  var html =
+  `<label class="label text-left full">${btn_label_name} :</label>
+    <div class="upload-btn-wrapper box-shadow-none text-left d-flex flex-wrap" style="align-items: center;">`;
+      if(file_input_show_hide_flag){
+        html+=
+        `<div id="policeVeriProfile" class="file-btn  text-left w-fit-content float-left position-relative">
+          <span id="fileName8" class="fileName" style="display: none;"></span> 
+          <input onchange="uploadDocsFun(this, 'verify', \'${uploadViewElementId}\', \'${viewAttachmentFlag}\');" class="file-input" type="file" name="${inputId}" id="${inputId}" fileType="${fileType}" elem-id="${elem_id}" value="Upload ${btn_label_name}"/> 
+          <span class="btn primary-bg white-txt-color mt-1">Upload Police Verification</span>
+        </div>`;
+      }
+      if(viewAttachmentFlag){
+        html+=`<a id="${uploadViewElementId}" href="javascript:void(0);" target="_self" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1" data-file-extension="${is_attchementPDF ? 'P':'I'}" data-attachment-url="${is_attchementUploaded != ""?is_attchementUploaded:''}" style="${is_attchementUploaded != '' ? '' : 'display:none'  }" onclick="viewAttachmentInModal(this, \'${viewAttachmentModalId}\')">
+          <i class="fa fa-eye"></i>
+        </a>`;
+      }
+    html+=`</div>`;
+  return html;
+}
+
+function getDuration(startDate, endDate) {
+  var diffMs = new Date(endDate).getTime() - new Date(startDate).getTime();
+  if (diffMs < 0) diffMs = -diffMs;
+  var totalSec = Math.floor(diffMs / 1000);
+  var hours = Math.floor(totalSec / 3600);
+  var minutes = Math.floor((totalSec % 3600) / 60);
+  var seconds = totalSec % 60;
+  return [
+    String(hours).padStart(2, '0'),
+    String(minutes).padStart(2, '0'),
+    String(seconds).padStart(2, '0')
+  ].join(':');
 }

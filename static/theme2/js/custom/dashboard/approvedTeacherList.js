@@ -341,7 +341,7 @@ function generateCourseSuffix(userId){
 				showMessageTheme2(0, data.message);
 				return;
 			}
-			showMessageTheme2(0, data.message);
+			showMessageTheme2(1, data.message);
 			const suffix = data.suffix;
 			const id = "#course-suffix-"+userId;
 			$(id).html(suffix)
