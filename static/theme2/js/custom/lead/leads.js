@@ -6356,7 +6356,8 @@ function getLeadCampaignWiseHtml(data){
 	var facebookInactivelead=0;
 
 	if(leadListCampaign.length>0){
-		
+		var ctrbgColor='';
+		var cprbgcolor='';
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
 			// if(leadCampaign.activeStatus=='Y'){
@@ -6384,6 +6385,23 @@ function getLeadCampaignWiseHtml(data){
 			if(leadCampaign.totalFbLead!=''){
 				perLeadFbSpent=spent/parseInt(leadCampaign.totalFbLead);
 			}
+
+			ctrbgColor='';
+			if(ctr>=1){
+				ctrbgColor='bg-success';
+			}else if(ctr>0.56 && ctr<0.99){
+				ctrbgColor='bg-warning';
+			}else if(ctr<0.56){
+				ctrbgColor='bg-orange';
+			}
+
+			cprbgcolor='';
+			if(perLeadFbSpent>=25){
+				cprbgcolor='bg-orange';
+			}else {
+				cprbgcolor='bg-success';
+			}
+
 
 
 			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+" style=\"border-bottom:1px solid;border-radius:0;\">";
@@ -6430,7 +6448,7 @@ function getLeadCampaignWiseHtml(data){
 				htmlRet +="</td>";
 				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+frequency.toFixed(2)+"";
 				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+perLeadFbSpent.toFixed(2)+"";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"";
 				htmlRet +="</td>";
 				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"";
 				htmlRet +="</td>";
@@ -6438,7 +6456,7 @@ function getLeadCampaignWiseHtml(data){
 				htmlRet +="</td>";
 				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+cpc.toFixed(2)+"";
 				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0\">"+ctr.toFixed(2)+"%";
+				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%";
 				htmlRet +="</td>";
 
 				htmlRet +="</tr>";

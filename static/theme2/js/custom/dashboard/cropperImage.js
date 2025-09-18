@@ -16,7 +16,6 @@
       });
     }
     function convertToBase64(inputId, type) {
-      debugger
       var file = document.querySelector('#'+inputId).files[0];
       var reader = new FileReader();
       reader.onload = function(event){
@@ -133,7 +132,6 @@
       
       $('#crop').on('click', function() {
         customLoader(true);
-        debugger
         var initialAvatarURL;
         $('#cropModal').modal('hide');
         if (cropper){

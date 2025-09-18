@@ -248,7 +248,7 @@ function loginFormContent(userName, fromSpoof){
 
             <div class="form-group text-center">
                 <input type="submit" class="btn primary-bg white-txt-color" id="loginButton" value="Log In">
-                <p> 
+                <p class="m-0"> 
                         
                     <span class="primary-txt-color">`;
                         if(schoolSettingsLinks.termasOfUserUrl != ''){
@@ -257,7 +257,8 @@ function loginFormContent(userName, fromSpoof){
                         if(schoolSettingsLinks.privacyPolicyUrl != ''){
                             html+=`| <a class="black-txt-color" href="${schoolSettingsLinks.privacyPolicyUrl}" target="blank">Privacy Policy</a>`;
                         }
-                        html+=`<br />© ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName}
+                        // html+=`<br />© ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName}
+                        html+=`<br />Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.
                     </span>
                 </p>
             </div>

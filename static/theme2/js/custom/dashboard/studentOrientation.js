@@ -74,7 +74,6 @@ function getRequestForBookOrientation(formId, leadFrom){
 }
 
 function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, currentPage, userWiseStatus, newTheme ) {
-	debugger;
 	customLoader(true);
  	$.ajax({
 		type : "POST",

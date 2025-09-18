@@ -195,6 +195,7 @@ function getCreatePartnerContent(buttonTitle){
 								+'<option value="GP">Enrollment Partner</option>'
 								+'<option value="WLP">Self School or Academy</option>'
 								+'<option value="RP">Reseller Partner</option>'
+								+'<option value="EPER">Enrollment Partner with Enrollment Rights</option>'
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'

@@ -152,6 +152,8 @@ function partnerDashboardLPContent(data){
 
 {/* <div class="page-title-subheading">${title}</div> */}
 function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, commissionRate){
+	const enrollmentMap= {GP:"Enrollment Partner",WLP:"Self School or Academy",RP:"Reseller Partner",EPER:"Enrollment Partner with Enrollment Rights"};
+
 	var data=getPartnerDashboardDetails(userId);
 	localStorage.setItem('convertYear',data.counselor.convertYear);
 	localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
@@ -163,9 +165,14 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
 					<div>
 						<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
-						
 					</div>
 				</div>
+				${
+					data.interestedFor == "B2B"?
+					`<div class="page-title-actions">
+						<h6 class="font-size-lg">Partner Type:&nbsp;<span class="text-primary">${enrollmentMap[data.originalPartnerType]||''}</span></h6>
+					</div>`:``
+				}
 			</div>
 		</div>
 
@@ -322,12 +329,13 @@ function getChartContent(commissionRate){
 function getEnrollmentLinksContent(data){
 	var html=
 		`<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2">
-			<h5 class="font-weight-semi-bold text-dark">Enrollments & Seats Reservation Links</h5>
+			<h5 class="font-weight-semi-bold text-dark">Enrollments ${data.interestedFor == "B2B"?'':'& Seats Reservation'} Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">
 					<div class="d-flex mb-3 rounded-pill bg-light border overflow-hidden" style="width: fit-content; position: relative; z-index: 9;">
 						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-white bg-primary border-0" id="enrollmentTabBtn" onclick="toggleLinkTab('enrollment')">Your Enrollment Links</button>
-						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-dark bg-transparent border-0" id="seatTabBtn" onclick="toggleLinkTab('seat')">Seat Reservation Links</button>
+						${data.interestedFor == "B2B"?``:`<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-dark bg-transparent border-0" id="seatTabBtn" onclick="toggleLinkTab('seat')">Seat Reservation Links</button>`}
+						
 					</div>
 					<div id="enrollmentLinksSection" class="d-flex flex-wrap" style="gap:5px;">`;
 						$.each(data.schoolServiceLinks.learningProgramLinks, function(k,learningProgram){
@@ -596,6 +604,7 @@ function mainCardEnrolled(referralCode){
 	var html= 
 	'<div class="main-card mb-3 card">'
 		+'<div class="card-body">'
+			+'<div class="form-row" id="B2BStudentEnrollmentCountThumb"></div>'
 			//+B2BStudentListfilterFormSkeleton()
 			+'<div class="row">'
 				+B2BStudentListfilterForm(referralCode)
@@ -607,6 +616,27 @@ function mainCardEnrolled(referralCode){
 		+'</div>'
 	+'</div>'
 	+B2BStudentListCommissionPopup();
+	return html;
+}
+
+function getB2BStudentEnrollmentCount(enrollmentList){
+	var html=``;
+	$.each(enrollmentList, function(i,v){
+		html+=
+		`<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">
+			<div class="full p-2  border rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm ${i==0?'border-primary bg-light-primary':i==1?'border-success bg-light-success':'border-warning bg-light-warning'}">
+				<span class="line-left d-inline-block position-absolute rounded-10 ${i==0?'bg-primary':i==1?'bg-success':'bg-warning'}"></span>
+				<p class="m-0 font-12"><b>${v.label}</b></p>
+				<p class="m-0">`;
+					if(1>0){
+						html+=`<b><a href="javascript:void(0)" class="text-dark" onclick="filterRequestData(\'partnerEnrollFilterForm\', \'${v.enrollmentValue}\')">${v.count}</a></b>`;
+					}else{
+						html+=`-`;
+					}
+				html+=`</p>
+			</div>
+		</div>`;
+	});
 	return html;
 }
 
