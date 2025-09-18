@@ -182,12 +182,20 @@ function sendMailToInviteeForDemo(meetingId) {
 function updateMeetingStatus(meetingId, leadId) {
 	
 	var status = $('#status').val();
+    var leadSource = $('#leadSource option:selected').text();
+    leadSource= (leadSource=='Select Source'?'':leadSource);
 	var remarks = $('#remarks').val();
     var tentativeDate = $('#tentativeDate').val();
 	if(status==undefined || status==null || status==0 || status==''){
 		showMessageTheme2(0, "Status field is required.",'',true);
 		return false;
 	}
+    if($("#meetingType").val()=='School Demo'){
+        if(leadSource==undefined || leadSource==null || leadSource==0 || leadSource==''){
+            showMessageTheme2(0, "Lead Source field is required.",'',true);
+            return false;
+        }
+    }
 
     let isRemarkMendatory =  $('.schedule_remarks').attr('isRemarkMendatory') === "true";
     if(isRemarkMendatory){
@@ -201,6 +209,7 @@ function updateMeetingStatus(meetingId, leadId) {
             return false;
         }
     }
+   
 
 	// if(remarks==undefined || remarks==null || remarks==0 || remarks==''){
 	// 	showMessageTheme2(0, "Remarks field is required.",'',true);
@@ -219,6 +228,7 @@ function updateMeetingStatus(meetingId, leadId) {
 	data['status']=status;
 	data['remarks']=remarks;
     data['tentativeDate']=tentativeDate;
+    data['leadSource']=leadSource;
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
@@ -265,7 +275,17 @@ function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartT
 		}else{
 			$('.tentative_date').css( "display", "none" );
 		}
-	})
+	});
+
+    $("#leadSource").select2({
+		theme:"bootstrap4"
+	});
+
+    $("#meetingType").val(eventName);
+    if($("#meetingType").val()!=='School Demo'){
+        $(".leadSourceHide").hide();
+    }
+    callScheduleLeadSourceList('scheduleEventMeetingStatus','B2C','leadSource', true);
 }
 
 function comfirmeupdateMeetingStatus(meetingId, leadId,status){
@@ -554,4 +574,39 @@ function formatDateToYYYYMMDDHH(dateStr) {
     const hours = String(date.getHours()).padStart(2, '0');
     const finalDate = year + '-' + month + '-' + day + " " + hours;
     return finalDate;
+}
+
+
+
+function callScheduleLeadSourceList(formId, value, elementId, keyStatus) {
+	hideMessageTheme2('');
+	customLoader(false);
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-SOURCE-LIST', value)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(true, data['message']);
+			} else {
+				//console.log(data['mastersData']['data']);
+				result = data['mastersData']['data'];
+				dropdown = $("#"+formId+" #"+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="0">Select Source</option>');
+				$.each(result, function (k, v) {
+					if(keyStatus){
+						dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
+					}else{
+						dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
+					}
+				});
+				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
+			}
+		}
+	});
 }

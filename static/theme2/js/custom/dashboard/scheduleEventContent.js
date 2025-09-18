@@ -12,6 +12,8 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 	getAllEventList('scheduleEventsSearchForm','eventType');
 	getAllEventList('scheduleEventsSearchForm','searchBy');
 	getAllCountryList('scheduleEventsSearchForm','countryId');
+	
+
 	getAllGrade(SCHOOL_ID, true);
 	$("#counselorName").select2({
 		theme:"bootstrap4"
@@ -72,10 +74,9 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 		submitLeadFollowupSave('followupB2BSaveForm','0', 'time-available', true,'leadFollowupB2BForm','','');
 	});
 
-	
-	
 
 	$('.tentative_date').css( "display", "none" );
+	
 	
 
 }
@@ -491,6 +492,7 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 						+'</div>'
 						+'<div class="modal-body">'
 							+'<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off">'
+							+'<input type="hidden" name="meetingType" id="meetingType" value=""  />'
 								+'<div class="row">'
 									+'<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">'
 										+'<label>Status</label>'
@@ -510,7 +512,11 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
 										+'<label class="mb-0">Tentative Date</label>'
 										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
-								+'	</div>'
+									+'	</div>'
+									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">'
+										+'<label class="mb-0">Source</label>'
+										+'<select	name="leadSource" id="leadSource" class="form-control" ><option value="">Select Source</option></select>'
+									+'	</div>'
 									+'<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">'
 										+'<label>Remarks</label>'
 										+`<input type="text" name="remarks" id="remarks"  class="form-control ${isRemarkMandatory ? 'schedule_remarks remarks' : ''}" ${isRemarkMandatory ? `isRemarkMendatory="true" minlength="${minRemarkCount}" required` : ''}>`
