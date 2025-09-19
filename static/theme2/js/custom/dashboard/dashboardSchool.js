@@ -22,11 +22,11 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     }
   } else if (pageNo == "dashboard") {
     if (SCHOOL_TYPE == "WLP") {
-      var urlSend = "/dashboard/admin-partner-dashboard?moduleId=" + moduleId;
-      getAsPost(urlSend);
-      customLoader(false);
+      // var urlSend = "/dashboard/admin-partner-dashboard?moduleId=" + moduleId;
+      // getAsPost(urlSend);
+      // customLoader(false);
       //partner-dashboard
-      //$('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
+      $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
     } else {
       callForDashboardData(
         "formIdIfAny",
