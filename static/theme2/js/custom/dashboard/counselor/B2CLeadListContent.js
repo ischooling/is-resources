@@ -1592,7 +1592,21 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								}	
 								html+='<tr>'
 									+'<th class="border-0 p-1" style="width:165px">Last Remarks:</th>'
-									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">'+(leads.followupRemark!=''?leads.followupRemark:'N/A')
+									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">';
+                  if (leads.followupRemark.includes("Lead already exists.")) {
+                      console.log("Contains jQuery!");
+                      var arrf = leads.followupRemark.split("-"); 
+                      var ldnoStr=arrf[0];
+                      var ldno=arrf[1];
+                      var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+ldno+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
+                          html+=ldnoStr+" - "; 
+                          html+="<a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">";
+                          html+=ldno;
+                          html+='</a>';
+                  }else{
+                    html+=(leads.followupRemark!=''?leads.followupRemark:'N/A');
+                  }
+                  
 										// +'<div class="dropdown d-inline-block" style="position: inherit;">'
 										// 	+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remarks</button>'
 										// 	+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px;">'

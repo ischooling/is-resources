@@ -389,17 +389,18 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 		}
-		if(OBJECT_RIGHTS.leadId!="0"){
-			$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
-		}
+		getB2CLeadPopjs(objRights, roleAndModule);
 		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
 		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
 		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 		$("#advanceLeadNewSearchForm #leadAssignToSearch" ).val(OBJECT_RIGHTS.clickUserid).trigger('change');
+		if(OBJECT_RIGHTS.leadId!="0"){
+			$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
+			$("#advanceLeadNewSearchForm #leadAcadmicYear" ).val("all");
+		}
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 		//getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
 		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
-		getB2CLeadPopjs(objRights, roleAndModule);
 		generateTinyUrls();
 		
 		

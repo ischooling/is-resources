@@ -38,12 +38,13 @@ function teacherTimepreferencePageOnLoadEvent(details){
     if(showTimePrefModal==undefined){
         showTimePrefModal=details.showTimePrefModal;
     }
-    if(showTimePrefModal=='true' && isAgreementUpdated == 'false'){
-        
-    	$("#timePreferencePopup").modal("show");
-    }else{
-        $("#timePreferencePopup").modal("hide");
-    }
+	if(showTimePrefModal=='true' && isAgreementUpdated == 'false'){
+		if(details.showAvailabilityPopUp == 'Y'){
+			$("#timePreferencePopup").modal("show");
+		}
+	}else{
+		$("#timePreferencePopup").modal("hide");
+	}
     if(details.changeNextSlot=='Y'){
         $("#warningMsgPopup").modal("show");
         $("#warningMsgPopup #monthName").text(details.monthName);

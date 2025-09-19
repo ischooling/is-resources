@@ -149,7 +149,108 @@ function getPartnerCommissionRate(formId, elementId ,userId) {
 					} 
 					return reject()
 				}else{
-					resolve(data)
+					if(SCHOOL_ID != 2){
+						resolve(data)
+					}else{
+						var resolveData = commissionRate={
+							commissionRates: [
+									{
+									byPartnerValue: "10.0",
+									bySchoolValue: "5.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "1",
+									max_range: "5",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "167",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "15.0",
+									bySchoolValue: "10.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "6",
+									max_range: "10",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "168",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "15.0",
+									bySchoolValue: "10.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "11",
+									max_range: "20",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "169",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "20.0",
+									bySchoolValue: "15.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "21",
+									max_range: "30",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "170",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "20.0",
+									bySchoolValue: "15.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "31",
+									max_range: "50",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "171",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "25.0",
+									bySchoolValue: "20.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "50",
+									max_range: "0",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "172",
+									startDate: "Mar 18, 2025"
+									}
+								],
+								message: "Filter data",
+								statusCode: "S001",
+								status: "1"
+							}
+						resolve(resolveData)
+					}
 	
 				}
 			}
@@ -390,7 +491,148 @@ function getPartnerDashboardDetailsData(userId) {
 					redirectLoginPage();
 				} 
 			}else{
-				responseData=data;
+				if(SCHOOL_ID != 2){
+					responseData=data;
+				}else{
+					responseData = {
+						schoolLPDetails: {
+							learningProgramDetails: [
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Group Learning",
+								revenue_d: "675.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "BATCH",
+								revenue_id: "190.0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "337.5",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Dual Diploma",
+								revenue_d: "0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "DUAL_DIPLOMA",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "One-To-One Learning",
+								revenue_d: "1059.5",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "ONE_TO_ONE",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Flexy Program",
+								revenue_d: "120.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "ONE_TO_ONE_FLEX",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Self Study",
+								revenue_d: "170.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "SCHOLARSHIP",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Self Study Plus",
+								revenue_d: "325.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "SSP",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "325.0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "English Learning Program - One to One",
+								revenue_d: "0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "ONE_TO_ONE",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "exact-path-enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "English Learning Program - Self Study",
+								revenue_d: "75.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "SCHOLARSHIP",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "exact-path-enrollment"
+							}
+							],
+							referralCode: "CN2405019"
+						},
+						message: "Partner Learning Program details",
+						status: "1",
+						statusCode: "S001"
+						}
+				}
 			}
 		},
 		error: function(e){
@@ -510,8 +752,12 @@ function getReferralCodeAndLinksDetails(userId) {
 
 
 function getEnrollmentChart(eventid, lable, series){
+	if(SCHOOL_ID == 2){
+		series = [44, 55, 41, 17];
+		lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];
+	}
 	var options = {
-		series: series,//[44, 55, 41, 17],
+		series: series, //[44, 55, 41, 17],
 		labels: lable,//['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'],
 		chart: {
 			type: 'donut',

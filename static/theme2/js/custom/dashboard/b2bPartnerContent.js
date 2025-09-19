@@ -1,6 +1,7 @@
 async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, role){
-	customLoader(true);
 	var commissionRate = await getPartnerCommissionRate('','partnerCommitionRate',userId);
+	customLoader(true);
+	
 	$("#dashboardContentInHTML").html(partnerDashboardContent(title, roleAndModule, schoolId, userId, role, commissionRate));
 	generateTinyUrls();
 	//console.log("render",commissionRate)
@@ -16,7 +17,6 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 		// }
 			
 	});
-	
 	var data = getPartnerDashboardDetailsData(userId);
 	//console.log(data);
 	$("#chartContentDiv").html(partnerDashboardLPContent(data));
@@ -28,7 +28,6 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 	var revenue_pending_id=0.0;
 	var schoolDicountSymbol="";
 	var partnerDicountSymbol="";
-
 	$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
 		//console.log(learningProgram);
 		schoolDicountSymbol=learningProgram.schoolDicountSymbol;
@@ -136,7 +135,7 @@ function partnerDashboardLPContent(data){
 									+'<span class="d-inline-block mb-1">'
 										+learningProgram.label
 									+'</span>'
-									+'<span class="pull-right text-primary mb-1">Revenue: $'+revenue+'</span>'
+									+'<span class="pull-right text-primary mb-1">Revenue: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
 								+'</div>'
 							+'</h5>'
 							+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'

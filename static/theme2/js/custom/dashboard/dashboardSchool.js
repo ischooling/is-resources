@@ -26,7 +26,11 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       // getAsPost(urlSend);
       // customLoader(false);
       //partner-dashboard
-      $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
+      if(SCHOOL_ID != 2){
+        $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
+      }else{
+       $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)); 
+      }
     } else {
       callForDashboardData(
         "formIdIfAny",
