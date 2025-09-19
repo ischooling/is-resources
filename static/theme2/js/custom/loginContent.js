@@ -257,7 +257,6 @@ function loginFormContent(userName, fromSpoof){
                         if(schoolSettingsLinks.privacyPolicyUrl != ''){
                             html+=`| <a class="black-txt-color" href="${schoolSettingsLinks.privacyPolicyUrl}" target="blank">Privacy Policy</a>`;
                         }
-                        // html+=`<br />© ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName}
                         html+=`<br />Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.
                     </span>
                 </p>

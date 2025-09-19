@@ -126,12 +126,29 @@ function viewB2BContractDetails(data){
                         var time = data.createdAt;
                         time=time.split(" ");
                         time = time[1].split(":");
-                        html+=`<p class="m-0"><b>Time: </b>${data.createdAt == ""? "N/A":`${time[0]}:${time[1]}${time[0]>=12?"PM" : "AM"}`}</p>`;
+                        html += `<p class="m-0"><b>Time: </b>${!data.createdAt?"N/A":(()=>{let [h,m]=data.createdAt.split(" ")[1].split(":");h=parseInt(h);return `${h%12||12}:${m} ${h>=12?"PM":"AM"}`})()}</p>`;
                     }
                 html+=`</div>
             </div>
             <div id="editorData"></div>
-            <div class="full">
+
+            <div class="full mt-4 mb-4">
+                <label class="font-weight-bold d-block mb-2">Upload Recipient Signature</label>
+                <div class="custom-file" style="max-width: 400px;">
+                    <input 
+                        type="file" 
+                        class="custom-file-input cursor" 
+                        id="recipientSignatureUpload" 
+                        accept="image/*" 
+                        onchange="handleRecipientSignatureUpload(this, 'rightSignatureBox'); updateFileName(this)"
+                    >
+                    <label class="custom-file-label text-truncate" for="recipientSignatureUpload">Choose file...</label>
+                </div>
+                <small class="form-text text-danger font-12 mt-1" style="max-width: 50%;">
+                    Please upload your signature image (PNG/JPG only, white/transparent background, max size: 300KB).
+                </small>
+            </div>
+            ${/*<div class="full">
                 <div class="signuture py-3">
                     <img src="${PATH_FOLDER_IMAGE2}paulsignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
                 </div>
@@ -140,7 +157,7 @@ function viewB2BContractDetails(data){
                     <p class="m-0">${data.schoolName}</p>
                     <p class="m-0">(Authorised Signatory for International Schooling)</p>
                 </div>
-            </div>
+            </div>*/''}
             <div class="full mt-4">
                 <div class="d-flex">
                     <p class="m-0"><b>Address:</b> ${data.schoolLocation}</p>
@@ -336,7 +353,8 @@ async function verifyOTPAndGetAgreementDetails(b2bLeadId, contractId){
     callLocationDetails("b2bAcceptanceTermsConditionForm");
     $("#contractId").val(responseData.details.contractId);
     $("#b2bLeadId").val(responseData.details.b2bLeadId);
-    $("#editorData").html(responseData.details.commentData);
+    var cleanedCommentData = cleanBase64Images(responseData.details.commentData);
+    $("#editorData").html(cleanedCommentData);
 }
 
 function acceptanceCheckbox(src){
@@ -348,13 +366,23 @@ function acceptanceCheckbox(src){
 }
 
 async function acceptb2bPartnerTermsCondition(){
+    if($("#rightSignatureBox").html().includes('<br>') && $("#recipientSignatureUpload").val() === ''){
+        showMessageTheme2(0, "Please upload your signature");
+        return;
+    }
+    if(!$("#b2bContractAcceptanceCheckbox").is(":checked")){
+        showMessageTheme2(0, "Please confirm that you have read and agree to the Terms.");
+        return;
+    }
+    var updatedCommentData = $("#editorData").html();
     var payload ={
 		contractId:parseInt($("#contractId").val()),
 		b2bLeadId:parseInt($("#b2bLeadId").val()),
         location:$("#b2bAcceptanceTermsConditionForm #location").val(),
         additionalDetails: fillBrowserDetail(),
 		actionType:"A",
-        sessionUserId:USER_ID
+        sessionUserId:USER_ID,
+        commentData: updatedCommentData
 	}
     var response =  await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true,"save-partner-contract-details", payload, "");
     if (response.status == '0' || response.status == '2' || response.status == '3') {
@@ -369,7 +397,7 @@ async function acceptb2bPartnerTermsCondition(){
 	// 	// $("#acceptb2bPartnerTermsConditionBtnWrapper").hide();
     //     // $("#b2bContractAcceptanceCheckbox").prop("disabled", true);
 	// }
-}   
+}
 
 function hideEmail(email) {
     let [username, domain] = email.split("@");

@@ -11868,41 +11868,24 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 	}else{
 		$("#publishContractDetailsBtn").show();
 	}
-	if($("#viewB2BContractModal").length<1){
+	if($("#viewB2BContractModal").length==1){
 		$("#viewB2BContractModal").remove();
-		$("body").append(viewB2BContractModal())
-	}else{
-		$("body").append(viewB2BContractModal())	
 	}
-	$("#editorData").html(responseData.commentData);
+	$("body").append(viewB2BContractModal())	
+	var cleanedCommentData = cleanBase64Images(responseData.commentData);
+	$("#editorData").html(cleanedCommentData);
 	$("#b2bContractModal").modal("show");
 	$("#contractDuration").val(responseData.durationYears);
 	$("#validityDuration").val(responseData.validityDays);
-	// $("#contractStartDate").datepicker({
-	// 	autoclose:true,
-	// 	format: 'M dd, yyyy',
-	// 	startDate:new Date()
-	// }).on("change", function(){
-	// 	var selectedStartDate = $(this).val();
-	// 	var nextDay = new Date(selectedStartDate);
-	// 	nextDay.setDate(nextDay.getDate() + 1);
-
-	// 	$('#contractEndDate').datepicker('destroy');
-	// 	$('#contractEndDate').val('');
-	// 	$("#contractEndDate").datepicker({
-	// 		autoclose:true,
-	// 		format: 'M dd, yyyy',
-	// 		startDate:nextDay
-	// 	});
-	// });
 	$("#contractStartDate").datepicker({
+		autoclose: true,
 		format: 'M dd, yyyy',
-		startDate:new Date()
+		startDate: new Date()
 	});
 	$("#contractEndDate").datepicker({
-		autoclose:true,
+		autoclose: true,
 		format: 'M dd, yyyy',
-		startDate:new Date()
+		startDate: new Date()
 	});
 	getAllCountryList('addContractForm','partnerCountryId');
 	$('#partnerCountryId').select2({
@@ -11964,11 +11947,9 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 
 						}, 1500);
 						}, { once: true });
-						observer.disconnect(); // Stop once Keep is found
+						observer.disconnect();
 					}
 				});
-
-				// Start observing the document
 				observer.observe(document.body, {
 					childList: true,
 					subtree: true
@@ -11977,34 +11958,87 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 		}
 	});
 
+	// commentData will be disabled when these field are empty
+	const requiredFields = [
+		"#firstPartnerName",
+		"#firstPartnerDesignation",
+		"#contractPartnerType",
+		"#partnerName",
+		"#partnerEmail",
+		"#partnerDesignation",
+		"#partnerCountryId",
+		"#partnerStateId",
+		"#partnerCityId"
+	];
+	function areAllFieldsFilled() {
+		return requiredFields.every(sel => {
+			let val = $(sel).val();
+			return val !== undefined && val !== null && val.toString().trim() !== "";
+		});
+	}
+	function toggleEditorState() {
+		if (areAllFieldsFilled()) {
+			editor.setReadOnly(false);
+		} else {
+			editor.setReadOnly(true);
+		}
+	}
+	requiredFields.forEach(sel => {
+		$(document).on("input change", sel, toggleEditorState);
+	});
+	toggleEditorState();
 
+	// signature upload when commentData is not empty
+	function isEditorEmpty(editor) {
+		const val = editor.value.trim();
+		return (
+			val === "" ||
+			val === "<p><br></p>" ||
+			val.replace(/<p>|<\/p>|&nbsp;|\s/g, "") === ""
+		);
+	}
+	function hasSignatureFile() {
+		const input = $("#recipientSignatureUpload")[0];
+		if (input && input.files && input.files.length > 0) {
+			return true;
+		}
+		const labelText = $("#recipientSignatureUpload")
+			.next(".custom-file-label")
+			.text()
+			.trim();
 	
-	// await initEditor(1, 'contractComment', 'Enter comments', false);
-	// $("#validityStartDate").datepicker({
-	// 	autoclose:true,
-	// 	format: 'M dd, yyyy',
-	// 	startDate:new Date()
-	// }).on("change", function(){
-	// 	var selectedStartDate = $(this).val();
-	// 	var nextDay = new Date(selectedStartDate);
-	// 	nextDay.setDate(nextDay.getDate() + 1);
-	// 	$('#validityEndDate').datepicker('destroy');
-	// 	$('#validityEndDate').val('');
-	// 	$("#validityEndDate").datepicker({
-	// 		autoclose:true,
-	// 		format: 'M dd, yyyy',
-	// 		startDate:nextDay
-	// 	});
-	// });
+		return labelText !== "" && labelText !== "Choose file...";
+	}
+	function toggleContractDependencies(editor) {
+		const emptyEditor = isEditorEmpty(editor);
+		const hasFile = hasSignatureFile();
+	
+		$("#recipientSignatureUpload")
+			.prop("disabled", emptyEditor)
+			.toggleClass("cursor", !emptyEditor);
+	
+		if (!emptyEditor && hasFile) {
+			$("#previewContractBtn").show();
+		} else {
+			$("#previewContractBtn").hide();
+		}
+	}
+	editor.events.on("change", function () {
+		toggleContractDependencies(editor);
+	});
+	$(document).on("change", "#recipientSignatureUpload", function () {
+		toggleContractDependencies(editor);
+	});
+
 	$("#validityStartDate").datepicker({
-		autoclose:true,
+		autoclose: true,
 		format: 'M dd, yyyy',
-		startDate:new Date()
+		startDate: new Date()
 	})
 	$("#validityEndDate").datepicker({
-		autoclose:true,
+		autoclose: true,
 		format: 'M dd, yyyy',
-		startDate:new Date()
+		startDate: new Date()
 	});
 	getTimeForDropdownContent('addContractForm', 'validityStartTime', 15);
 	getTimeForDropdownContent('addContractForm', 'validityEndTime', 15);
@@ -12018,10 +12052,15 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 	if(responseData.durationEnd != ""){
 		$("#contractEndDate").val(convertU2L(responseData.durationEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
 	}
-	// setTimeout(function(){
-	// 	editor.setData(responseData.commentData);
-	// }, 1000);
-	editor.setEditorValue(responseData.commentData);	
+	editor.setEditorValue(cleanedCommentData);	
+	setTimeout(function() {
+		var $editorContent = $(".jodit-workplace").length ? $(".jodit-workplace") : $("#editorData");
+		var $leftImg = $editorContent.find("#leftSignatureBox img");
+		if($leftImg.length && $leftImg.attr("data-name")){
+		  $("#recipientSignatureUpload").next(".custom-file-label").text($leftImg.attr("data-name"));
+		}
+		toggleContractDependencies(editor);
+	  }, 500);
 	if(responseData.validityStart != ""){
 		$("#validityStartDate").val(convertU2L(responseData.validityStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
 	}
@@ -12036,7 +12075,7 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 			getEmailLogList("", "");
 		}
 	});
-
+	bindContractFormEvents(responseData.partnerOrgType);
 }
 
 function tableCenter(){
@@ -12075,12 +12114,20 @@ function tableCenter(){
 }
 
 function validateAddContractForm(formId){
+	if($("#"+formId+" #firstPartnerName").val() == null || $("#"+formId+" #firstPartnerName").val() == undefined || $("#"+formId+" #firstPartnerName").val() == ""){
+		showMessageTheme2(0, "1st party representative name required");
+		return false;
+	}
+	if($("#"+formId+" #firstPartnerDesignation").val() == null || $("#"+formId+" #firstPartnerDesignation").val() == undefined || $("#"+formId+" #firstPartnerDesignation").val() == ""){
+		showMessageTheme2(0, "1st party representative designation required");
+		return false;
+	}
 	if($("#"+formId+" #contractPartnerType").val() == null || $("#"+formId+" #contractPartnerType").val() == undefined || $("#"+formId+" #contractPartnerType").val() == ""){
 		showMessageTheme2(0, "Partner type required");
 		return false;
 	}
 	if($("#"+formId+" #partnerName").val() == null || $("#"+formId+" #partnerName").val() == undefined || $("#"+formId+" #partnerName").val() == ""){
-		showMessageTheme2(0, "Partner name type required");
+		showMessageTheme2(0, "2nd partner representative name required");
 		return false;
 	}
 	if($("#"+formId+" #partnerEmail").val() == null || $("#"+formId+" #partnerEmail").val() == undefined || $("#"+formId+" #partnerEmail").val() == ""){
@@ -12088,6 +12135,10 @@ function validateAddContractForm(formId){
 			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
 			return false;
 		}
+	}
+	if($("#"+formId+" #partnerDesignation").val() == null || $("#"+formId+" #partnerDesignation").val() == undefined || $("#"+formId+" #partnerDesignation").val() == ""){
+		showMessageTheme2(0, "2nd partner representative designation required");
+		return false;
 	}
 	if($("#"+formId+" #partnerCountryId").val() == null || $("#"+formId+" #partnerCountryId").val() == undefined || $("#"+formId+" #partnerCountryId").val() == ""){
 		showMessageTheme2(0, "Country required");
@@ -12122,6 +12173,10 @@ function validateAddContractForm(formId){
 		showMessageTheme2(0, "Comment required");
 		return false;
 	}
+	if($("#recipientSignatureUpload").val() == ""){
+		showMessageTheme2(0, "Please upload your signature");
+		return false;
+	}
 	if($("#"+formId+" #validityStartDate").val() == null || $("#"+formId+" #validityStartDate").val() == undefined || $("#"+formId+" #validityStartDate").val() == ""){
 		showMessageTheme2(0, "Validity start date required");
 		return false;
@@ -12144,9 +12199,12 @@ function validateAddContractForm(formId){
 
 function getAddContractPayload(formId, b2bLeadId) {
     var requestData = {
+		firstPartyRepresentative: $("#" + formId + " #firstPartnerName").val(),
+		firstPartyDesignation: $("#" + formId + " #firstPartnerDesignation").val(),
         partnerType: $("#" + formId + " #contractPartnerType").val(),
         name: $("#" + formId + " #partnerName").val(),
         email: $("#" + formId + " #partnerEmail").val(),
+        secondPartyDesignation: $("#" + formId + " #partnerDesignation").val(),
         countryId: parseInt($("#" + formId + " #partnerCountryId").val()),
         stateId: parseInt($("#" + formId + " #partnerStateId").val()),
         cityId: parseInt($("#" + formId + " #partnerCityId").val()),
@@ -12223,7 +12281,8 @@ async function getEmailLogList(requestType, contractId){
 		payload = "?payload="+encode(JSON.stringify(payload));
 		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, true, 'partner-contract-details'+payload, '');
 		$("#viewB2BContractModal .modal-body").html(viewContractModalBody(responseData.details));
-		$("#viewB2BContractModal #editorData").html(responseData.details.commentData);
+		var cleanedCommentData = cleanBase64Images(responseData.details.commentData);
+		$("#viewB2BContractModal #editorData").html(cleanedCommentData);
 		$("#viewB2BContractModal").modal("show");
 	}else{
 		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
@@ -12293,7 +12352,7 @@ function viewContractModalBody(data){
 			html+=`</div>
 		</div>
 		<div id="editorData"></div>
-		<div class="full">
+		${/*<div class="full">
 			<div class="signuture py-3">
 				<img src="${PATH_FOLDER_IMAGE2}paulsignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
 			</div>
@@ -12302,7 +12361,7 @@ function viewContractModalBody(data){
 				<p class="m-0">${data.schoolName}</p>
 				<p class="m-0">(Authorised Signatory for International Schooling)</p>
 			</div>
-		</div>
+		</div>*/''}
 		<div class="full mt-4">
 			<div class="d-flex">
 				<p class="m-0"><b>Address:</b> ${data.schoolLocation}</p>
@@ -12343,3 +12402,128 @@ function calculateValidityEndDate() {
         $("#validityEndDate").val("");
     }
 }
+
+function signatureTable(partnerType, organisationName) {
+	var $editorContent = $("#editorData").length ? $("#editorData") : $(".jodit-workplace");
+	if ($editorContent.find("#leftSignatureBox").length || $editorContent.find("#rightSignatureBox").length) {
+		return;
+	}
+	var resellerName = "";
+	var resellerBracket = "";
+	if (partnerType === "I" && !organisationName) {
+		resellerName = $("#partnerName").val();
+		resellerBracket = "(As Individual)";
+	} else if (partnerType === "O") {
+		resellerName = organisationName || $("#partnerName").val();
+		var shortForm = resellerName
+			.split(/\s+/)
+			.map(w => w[0])
+			.join("")
+			.toUpperCase();
+		resellerBracket = `(${shortForm})`;
+	} else {
+		resellerName = $("#partnerName").val();
+		resellerBracket = "(Reseller)";
+	}
+	var html = `
+	  <table border="1" style="border-collapse:collapse; width:100%; text-align:center;">
+		<tbody>
+		  <tr>
+			<td style="width:50%; padding:10px; vertical-align:top;">
+			  For <b>INTERNATIONAL SCHOOLING PTE. LTD.</b><br/>
+			  (ISPL)
+			  <div id="leftSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+			  <p style="margin:0;"><i>(Signature)</i></p>
+			</td>
+			<td style="width:50%; padding:10px; vertical-align:top;">
+			  For <b><span id="resellerName" class="txt-capitalize-case">${resellerName}</span></b><br/>
+			  ${resellerBracket}
+			  <div id="rightSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+			  <p style="margin:0;"><i>(Signature)</i></p>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="padding:10px; text-align:left; font-size:14px;">
+			  Authorized Signatory - <span id="leftSignatoryName" class="txt-capitalize-case">${$("#firstPartnerName").val()}</span><br/>
+			  Designation – <span id="leftDesignation" class="txt-capitalize-case">${$("#firstPartnerDesignation").val()}</span><br/>
+			  Date: <span id="leftDate">${changeDateFormat(new Date(), "MMM-dd-yyyy")}</span>
+			</td>
+			<td style="padding:10px; text-align:left; font-size:14px;">
+			  Authorized Signatory - <span id="rightSignatoryName" class="txt-capitalize-case">${$("#partnerName").val()}</span><br/>
+			  Designation – <span id="rightDesignation" class="txt-capitalize-case">${$("#partnerDesignation").val()}</span><br/>
+			  Date: <span id="rightDate">____</span>
+			</td>
+		  </tr>
+		</tbody>
+	  </table>
+	  <br/>`;
+	editor.s.setCursorIn(editor.editor, false); 
+	editor.s.insertHTML(html);
+}
+
+async function previewContractPdf(){
+	var payload = {
+        commentData: editor.getEditorValue(),
+        b2bleadId: parseInt($("#b2bLeadId").val())
+    };
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
+	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		showMessageTheme2(0, responseData.message);
+		return;
+	}
+	var byteArray = new Uint8Array(responseData.pdfData);
+	var blob = new Blob([byteArray], { type: "application/pdf" });
+	var pdfUrl = URL.createObjectURL(blob) + "#toolbar=0&navpanes=0&scrollbar=0";
+	var modalHtml = `
+		<div class="modal fade" id="pdfPreviewModal" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document" style="max-width:60%;">
+			<div class="modal-content">
+			  <div class="modal-header p-2 bg-primary">
+				<h5 class="modal-title ml-2 font-weight-bold text-white">Contract Preview</h5>
+				<button type="button" class="close text-white mr-1" data-dismiss="modal">&times;</button>
+			  </div>
+			  <div class="modal-body" style="height:80vh;">
+				<iframe src="${pdfUrl}" frameborder="0" style="width:100%; height:100%;"></iframe>
+			  </div>
+			</div>
+		  </div>
+		</div>`;
+
+	if ($("#pdfPreviewModal").length == 1) {
+		$("#pdfPreviewModal").remove();
+	}
+	$("body").append(modalHtml);
+	$("#pdfPreviewModal").modal("show");
+}
+
+function bindContractFormEvents(partnerType) {
+	if (partnerType == "I") {
+		$("#partnerName").off("input").on("input", function () {
+			$("#resellerName").text($(this).val());
+			$("#rightSignatoryName").text($(this).val());
+		});
+	} else {
+		$("#partnerName").off("input").on("input", function () {
+			$("#rightSignatoryName").text($(this).val());
+		});
+	}
+	$("#firstPartnerName").off("input").on("input", function () {
+		$("#leftSignatoryName").text($(this).val());
+	});
+	$("#firstPartnerDesignation").off("input").on("input", function () {
+		$("#leftDesignation").text($(this).val());
+	});
+	$("#partnerDesignation").off("input").on("input", function () {
+		$("#rightDesignation").text($(this).val());
+	});
+}
+
+// function checkPreviewButtonVisibility() {
+//     var editorContent = $("#editorData").text().trim() || $(".jodit-wysiwyg").text().trim();
+//     var hasFile = $("#recipientSignatureUpload")[0].files.length > 0;
+//     if (editorContent.length > 0 && hasFile) {
+//         $("#previewContractBtn").show();
+//     } else {
+//         $("#previewContractBtn").hide();
+//     }
+// }

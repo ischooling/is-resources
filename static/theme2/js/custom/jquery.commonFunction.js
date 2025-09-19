@@ -6251,7 +6251,6 @@ function getBrowserDetail() {
     uAgentFull: navigator.userAgent,
   };
 }
-
 function getUploadInputBtn(inputId, uploadViewElementId, fileType, elem_id, btn_label_name, file_input_show_hide_flag, viewAttachmentModalId, is_attchementPDF, is_attchementUploaded, viewAttachmentFlag){
   var html =
   `<label class="label text-left full">${btn_label_name} :</label>
@@ -6285,4 +6284,53 @@ function getDuration(startDate, endDate) {
     String(minutes).padStart(2, '0'),
     String(seconds).padStart(2, '0')
   ].join(':');
+}
+
+function cleanBase64Images(htmlContent) {
+  if (!htmlContent || typeof htmlContent !== "string") return htmlContent;
+  return htmlContent.replace(
+    /(<img[^>]+src=["']data:image\/[^;]+;base64,)([^"']+)(["'][^>]*>)/gi,
+    function(match, prefix, base64Data, suffix) {
+      var fixedBase64 = base64Data.replace(/[\r\n]+/g, '');
+      fixedBase64 = fixedBase64.replace(/ /g, '+');
+      fixedBase64 = fixedBase64.replace(/[^A-Za-z0-9+/=]/g, '');
+      return prefix + fixedBase64 + suffix;
+    }
+  );
+}
+
+function handleRecipientSignatureUpload(input, targetId){
+  var file = input.files[0];
+  if(!file) return;
+
+  var allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+  if(allowedTypes.indexOf(file.type) === -1){
+    showMessageTheme2(2, "Only JPG or PNG images are allowed.");
+    input.value = "";
+    return;
+  }
+  
+  if (file.size > 300 * 1024) {
+    showMessageTheme2(2, "File size must be less than 300 KB.");
+    input.value = "";
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(evt){
+    var base64ImgTag = `<img src="${evt.target.result}" alt="Recipient Signature" data-name="${file.name}" style="max-width:120px;display:block;margin:auto;"/>`;
+    var $editorContent = $(".jodit-workplace").length ? $(".jodit-workplace") : $("#editorData");
+    var $targetBox = $editorContent.find("#" + targetId);
+    if($targetBox.length){
+      $targetBox.html(base64ImgTag);
+    }
+  };
+  reader.readAsDataURL(file);
+  if(targetId == "rightSignatureBox"){
+    $("#rightDate").text(changeDateFormat(new Date(), "MMM-dd-yyyy"))
+  }
+}
+
+function updateFileName(input){
+  var fileName = input.files.length > 0 ? input.files[0].name : "Choose file";
+  $(input).next(".custom-file-label").text(fileName);
 }
