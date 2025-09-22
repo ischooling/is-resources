@@ -196,9 +196,9 @@ function renderInvoicePreview(data) {
     var recipientAddress=`${data.payTo.addressLine || ''}, ${data.payTo.cityName || ''}, ${data.payTo.stateName || ''}, ${data.payTo.countryName || ''} ${data.payTo.pinCode || ''}`;
     var html=`
         <div class="invoice-preview padding-print" style="max-width:900px;margin:auto;font-family:Arial;">
-            <div class="d-flex justify-content-between align-items-start mb-3">
+           <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start mb-2">
                 <img src="${PATH_FOLDER_IMAGE2}is_logo_2025_blue.png" alt="Logo" style="max-width:250px;width: 100%; margin-right: auto; display: flex;">
-                <div class="text-right">
+                <div class="text-center text-md-right mt-2 mt-md-0">
                     <p>Date : ${data.invoiceDate}</p>
                     <p>Invoice No.: ${data.invoiceNo}</p>
                 </div>
@@ -209,8 +209,8 @@ function renderInvoicePreview(data) {
             <div>
                 <h4 class="font-weight-bold text-dark mb-4">${data.invoiceTitle}</h4>
             </div>
-            <div class="d-flex justify-content-between mb-4" style="gap: 10px;">
-                <div class="p-3 border rounded-10" style="max-width: 350px;width:50%;">
+            <div class="d-flex flex-column flex-md-row justify-content-between mb-4" style="gap: 10px;">
+                <div class="p-3 border rounded-10" style="max-width: 350px;width:100%;">
                     <p class="bg-primary mb-2 px-2 py-1 text-white w-fit-content rounded-10" style="margin-top:-30px;">To</p>
                     <h5><b>${data.payer.name}</b></h5>
                     <h6><b>${data.payer.email}</b></h6>`
@@ -219,7 +219,7 @@ function renderInvoicePreview(data) {
                     }
                     html+=`<p>${payerAddress}</p>
                 </div>
-                <div class="p-3 border rounded-10" style="max-width: 350px;width:50%;">
+                <div class="p-3 border rounded-10" style="max-width:350px;width:100%;">
                     <p class="bg-danger mb-2 px-2 py-1 text-white w-fit-content rounded-10" style="margin-top:-30px;">For</p>
                     <h5><b>${data.payTo.name}</b></h5>
                     <h6><b>${data.payTo.email}</b></h6>`
