@@ -3,7 +3,6 @@ var isSkipped = false;
 var videoUrl="N";
 
 function rendereDashboardContent(isParent){
-    debugger;
     customLoader(true);
     $("body").append(batchImpAnnouncementModal())
     var data = getStudentDashboardOrMigrationSection();

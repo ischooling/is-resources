@@ -13,13 +13,15 @@ function callStudentListByPartner(formId) {
 			cache : false,
 			timeout : 600000,
 			success : function(data) {
-			   console.log(data);
 				if (data['status'] == '0' || data['status'] == '2') {
 					showMessageTheme2(false, data['message']);
 					$("#enroll-list-skeleton").show();
 				} else {
 					
 						$("#enroll-list-skeleton").hide();
+						var enrollArray=[{"count":data.enrolledCount, "label":"Total Enrolled", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Partial Entry","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrolled","enrollmentValue":"3"}]
+						var enrollmentCountThumHtml = getB2BStudentEnrollmentCount(enrollArray);
+						$("#B2BStudentEnrollmentCountThumb").html(enrollmentCountThumHtml);
 						var htmls = B2BStudentListDetails(data.studentList, updateTransferMsg);
 						$("#enrolled-list").html(htmls);
 						$(".follow-up-no").click(function(){
@@ -37,6 +39,7 @@ function callStudentListByPartner(formId) {
 						// $('#tblCampaignList').dataTable().fnDestroy();
 						// $("#campaignlist").html(html);
 						// $('#tblCampaignList').dataTable();
+						$('[data-toggle="tooltip"]').tooltip();
 				}
 			}
 	   });
@@ -59,6 +62,7 @@ function getRequestForPartnerEnrolledList(formId){
     enrollmentListFilterDTO['referralCode']=$("#"+formId+" #referralCode").val();
     enrollmentListFilterDTO['academicYear']=$("#"+formId+" #academicYear option:selected").text();
     enrollmentListFilterDTO['enrollmentStatus']=$("#"+formId+" #enrollmentStatus").val();
+    enrollmentListFilterDTO['enrollmentBy']=$("#"+formId+" #enrollmentBy").val();
     enrollmentListFilterDTO['gradeId']=$("#"+formId+" #gradeId").val();
     enrollmentListFilterDTO['studentName']=$("#"+formId+" #studentName").val();
 	enrollmentListFilterDTO['email']=$("#"+formId+" #email").val();
@@ -145,7 +149,108 @@ function getPartnerCommissionRate(formId, elementId ,userId) {
 					} 
 					return reject()
 				}else{
-					resolve(data)
+					if(SCHOOL_ID != 2){
+						resolve(data)
+					}else{
+						var resolveData = commissionRate={
+							commissionRates: [
+									{
+									byPartnerValue: "10.0",
+									bySchoolValue: "5.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "1",
+									max_range: "5",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "167",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "15.0",
+									bySchoolValue: "10.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "6",
+									max_range: "10",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "168",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "15.0",
+									bySchoolValue: "10.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "11",
+									max_range: "20",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "169",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "20.0",
+									bySchoolValue: "15.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "21",
+									max_range: "30",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "170",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "20.0",
+									bySchoolValue: "15.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "31",
+									max_range: "50",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "171",
+									startDate: "Mar 18, 2025"
+									},
+									{
+									byPartnerValue: "25.0",
+									bySchoolValue: "20.0",
+									standardName: "All",
+									endDate: "Dec 31, 2999",
+									userNameCreatedBy: "IT Admin",
+									byPartnerType: "%",
+									learningProgramValue: "All",
+									min_range: "50",
+									max_range: "0",
+									bySchoolType: "%",
+									userNameFor: "Your Enrollment Partner Name",
+									id: "172",
+									startDate: "Mar 18, 2025"
+									}
+								],
+								message: "Filter data",
+								statusCode: "S001",
+								status: "1"
+							}
+						resolve(resolveData)
+					}
 	
 				}
 			}
@@ -206,7 +311,6 @@ function callPartnerListBy(formId, elementId) {
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			console.log(data);
 			if (data['status'] == '0' || data['status'] == '2') {
 				//showMessageTheme2(false, data['message']);
 			} else {
@@ -270,7 +374,6 @@ function updateStudentPartnerCommissionRate(studentStandardId, updateStatus, amo
 		async : false,
 		global : false,
 		success : function(data) {
-			console.log(data);
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
@@ -388,7 +491,148 @@ function getPartnerDashboardDetailsData(userId) {
 					redirectLoginPage();
 				} 
 			}else{
-				responseData=data;
+				if(SCHOOL_ID != 2){
+					responseData=data;
+				}else{
+					responseData = {
+						schoolLPDetails: {
+							learningProgramDetails: [
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Group Learning",
+								revenue_d: "675.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "BATCH",
+								revenue_id: "190.0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "337.5",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Dual Diploma",
+								revenue_d: "0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "DUAL_DIPLOMA",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "One-To-One Learning",
+								revenue_d: "1059.5",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "ONE_TO_ONE",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Flexy Program",
+								revenue_d: "120.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "ONE_TO_ONE_FLEX",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Self Study",
+								revenue_d: "170.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "SCHOLARSHIP",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "Self Study Plus",
+								revenue_d: "325.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "SSP",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "325.0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "English Learning Program - One to One",
+								revenue_d: "0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "ONE_TO_ONE",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "exact-path-enrollment"
+							},
+							{
+								c_revenue_id: "0",
+								partnerDicountSymbol: "%",
+								label: "English Learning Program - Self Study",
+								revenue_d: "75.0",
+								revenue_pending_id: "0",
+								c_revenue_pending_d: "0",
+								learningProgramCode: "SCHOLARSHIP",
+								revenue_id: "0",
+								schoolDicountSymbol: "%",
+								c_revenue_d: "0",
+								c_revenue_pending_id: "0",
+								revenue_pending_d: "0",
+								schoolPartnerDicountSymbol: "-",
+								enrollmentFor: "exact-path-enrollment"
+							}
+							],
+							referralCode: "CN2405019"
+						},
+						message: "Partner Learning Program details",
+						status: "1",
+						statusCode: "S001"
+						}
+				}
 			}
 		},
 		error: function(e){
@@ -508,8 +752,12 @@ function getReferralCodeAndLinksDetails(userId) {
 
 
 function getEnrollmentChart(eventid, lable, series){
+	if(SCHOOL_ID == 2){
+		series = [44, 55, 41, 17];
+		lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];
+	}
 	var options = {
-		series: series,//[44, 55, 41, 17],
+		series: series, //[44, 55, 41, 17],
 		labels: lable,//['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'],
 		chart: {
 			type: 'donut',
@@ -592,7 +840,6 @@ function getPartnerStudentGrade(formId, elementId ,userId, learningProgramCode,e
 		async : false,
 		global : false,
 		success : function(data) {
-			//console.log(data);
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
@@ -887,4 +1134,94 @@ function toggleLinkTab(type){
 		$('#seatLinksSection').removeClass('d-none').addClass('d-flex');
 		$('#enrollmentLinksSection').removeClass('d-flex').addClass('d-none');
 	}
+}
+
+function toggleB2BPartnerFilterForm(){
+	$("#partnerEnrollFilterForm").slideToggle();
+}
+
+async function enrollmentPartnerStudent(studentUserId){
+	var eligibleForRender=false;
+	var details={
+		'courseProviderId':41,
+		'signupPage':1,
+		'UNIQUEUUID':studentUserId,
+		'moduleName':'Student Enrollment',
+		'programLabel':'One-To-One Learning',
+		'moduleId':'STUDENT',
+		'learningProgram':'ONE_TO_ONE',
+		'signupType':'Offline',
+		'studentUserId':studentUserId
+	};
+	if(studentUserId==0){
+		eligibleForRender=true;
+	}else{
+		var payload = getRequestForStudentSelection('Offline', studentUserId);
+		var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'eligbile-for-edit',payload,'student/enrollment');
+		if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
+			if (responseData['status'] == '3') {
+				redirectLoginPage();
+			} else {
+				showMessage(false, responseData['message']);
+			}
+		} else {
+			details = responseData['details'];
+			eligibleForRender=true;
+		}
+	}
+	if(eligibleForRender){
+		$("head").append(`
+			<link href="${PATH_FOLDER_CSS2}style.css${SCRIPT_VERSION}" rel="stylesheet" type="text/css" >
+			<link href="${PATH_FOLDER_CSS2}new_signup_personalized.css${SCRIPT_VERSION}" rel="stylesheet" />
+			<style>
+				.circle{width: 30px;height: 30px;background-color: #fff;text-align: center;display: inline-block;border-radius: 50%;margin-left:0px !important;font-size: 8px;color:#000;line-height: 30px;font-weight: 900;}
+				.form-row .form-holder {
+					width: 49%;
+					margin-right: 20px;
+				}
+				.form-review-partner {
+					width: 100% !important;
+				}
+				.form-session-out{
+					display: flex;
+					flex-wrap: wrap !important;
+					margin-right: -5px;
+					margin-left: -5px;
+				}
+				.captcha-stylecss{
+					display: block !important;
+				}
+				.add-course-btn-partner{
+					display: flex !important;
+				}
+			</style>
+		`)
+		$("body").css("display", "block")
+		renderEnrollmentPage(details.courseProviderId, details.signupPage, details.UNIQUEUUID, details.moduleName, details.programLabel, details.moduleId, details.learningProgram, "", details.signupType, studentUserId)
+	}
+}
+
+async function resendMailToPartnerStudent(studentUserId, stuStandardId){
+	var payload = {
+		userId : studentUserId,
+		studentStandardId : stuStandardId
+	};
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'resend-credentiala',payload,'student/enrollment');
+	if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
+		if (responseData['status'] == '3') {
+			redirectLoginPage();
+		} else {
+			showMessageTheme2(0, responseData['message']);
+		}
+	}else{
+		showMessageTheme2(1, responseData['message']);
+		$("#"+studentUserId+"_"+stuStandardId).attr("data-original-title", "Resend Credentials");
+	}
+}
+
+function filterRequestData(formId, enrollmentValue){
+	resetEnrollmentForm(formId);
+	$('#'+formId+' #academicYear').select2('val', $('#'+formId+' #academicYear option:last').val());
+	$('#'+formId+' #enrollmentStatus').val(enrollmentValue).trigger("change");
+	callStudentListByPartner(formId);
 }

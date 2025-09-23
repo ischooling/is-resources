@@ -496,7 +496,7 @@ function getTeacherOfficialModel(){
 						if(roleAndModule.added=='Y'){
 							html+=`<button type="button" class="send btn btn-success " id="submit" onclick="return saveTeacherOfficialMail('teacherOfficialMailForm','TEACHER','ADD','','${moduleId}');"><i class="fa fa-envelope"></i>&nbsp;Save </button>`;
 						}
-						html+=`<button type="button" class="btn btn-danger " data-dismiss="modal">Close</button>
+						html+=`<button type="button" class="btn btn-danger ml-2" data-dismiss="modal">Close</button>
 					</div>
 				</div>
 			</form>

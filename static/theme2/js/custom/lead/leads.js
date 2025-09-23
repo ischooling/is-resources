@@ -1,9 +1,11 @@
+
 var watiTemplateContent;
 var emailTemplateContent;
 // var emailStatusInterval = null;
 // var pendingEmails = [];
 var successfulEmails = [];
 var failedOrOtherEmails = [];
+var editor;
 $(function () {
 	// $('[data-toggle="tooltip"]').tooltip()
 });
@@ -340,7 +342,7 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
 					 if(leadFrom=='dashboard'){
 						 $("#addNewLeadModal").modal('hide');
 						 $(".modal-backdrop").remove();
-						 var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType='+leadType
+						 var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadId=0&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType='+leadType
 						 getAsPost(urlSend);
 						 customLoader(false)
 					 }else{
@@ -1504,7 +1506,9 @@ var leadCountDetailDTO={};
 	strText='';
  }
  leadModifyDTO['leadFullSearch'] = strText;  
- 
+ if(strText!='' && strText!='0'){
+	leadFrom="advance-search";
+ }
  
  leadModifyDTO['showAllLeadsData'] = $("#"+formId+" #restrictedDataShow").val()!=undefined?$("#"+formId+" #restrictedDataShow").val():''; //'restricted';
  leadModifyDTO['leadNo'] = $("#"+formId+" #leadNoSearch").val()!=undefined?$("#"+formId+" #leadNoSearch").val():'';
@@ -1515,6 +1519,9 @@ var leadCountDetailDTO={};
  leadModifyDTO['leadType']=leadType;
  //leadModifyDTO['leadSource'] = $("#"+formId+" #leadSourceSearch").val();
  leadModifyDTO['leadSources'] = $("#"+formId+" #leadSourceSearch").val()!=undefined?$("#"+formId+" #leadSourceSearch").val():'';
+//  var leadOtheer=$("#"+formId+" #leadSourceSearch").val()!=undefined?$("#"+formId+" #leadSourceSearch option:selected").text():'';
+//  leadOtheer=(leadOtheer=='Select Source'?'':leadOtheer);
+//  leadModifyDTO['leadOtherList'] =leadOtheer;
  //leadModifyDTO['assignTo'] = $("#"+formId+" #leadAssignToSearch option:selected").val();
  leadModifyDTO['assignTos'] = $("#"+formId+" #leadAssignToSearch").val()!=undefined?$("#"+formId+" #leadAssignToSearch").val():'';
  //leadModifyDTO['leadStatus'] = $("#"+formId+" #leadStatusSearch").val();
@@ -1548,6 +1555,7 @@ var leadCountDetailDTO={};
  leadStudentDetailDTO['stdFname'] = $("#"+formId+" #leadstdfnameSearch").val();
  leadStudentDetailDTO['gurdianFname'] = $("#"+formId+" #leadParentfnameSearch").val();
  leadStudentDetailDTO['country'] = $("#"+formId+" #countryId option:selected").val();
+ leadStudentDetailDTO['countryList'] = $("#"+formId+" #countryIds").val()!=undefined?$("#"+formId+" #countryIds").val():'';
  leadStudentDetailDTO['state'] = $("#"+formId+" #stateId option:selected").val();
  leadStudentDetailDTO['city'] = $("#"+formId+" #cityId option:selected").val();
  leadStudentDetailDTO['standard'] = $("#"+formId+" #leadGradeSearch option:selected").val();
@@ -2397,7 +2405,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 				 }
 				 callLeadStatusList(''+formId+'',leadType,'leadStatus', false);
 				 callLeadSourceList(''+formId+'',leadType,'leadSource', true);
-				 callPCountries(''+formId+'', 0, 'countryId');
+				 
 				 getTggingMasterList(''+formId+'', 'leadTagging');
 				 $("#"+formId+" #leadTagging").select2({
 					theme:"bootstrap4",
@@ -2483,7 +2491,9 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						   if(leadDemo.leadStudentDetailDTO.isdCountryCodeAlter!=null || leadDemo.leadStudentDetailDTO.isdCountryCodeAlter !=''){
 							   itiAltPhoneNumber.setCountry($('#'+formId+' #pCountryCodeAlter').val());
 						   }
-						   $("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger('change');
+						   callPCountries(''+formId+'', 0, 'countryId',''+leadDemo.leadStudentDetailDTO.country+'');
+						  // $("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger('change');
+						   
 						// }else{
 						//    $("#"+formId+" #isdCode").val(leadDemo.leadStudentDetailDTO.isdCode).trigger('change');
 						// 	$("#"+formId+" #isdCodeAlter").val(leadDemo.leadStudentDetailDTO.isdCodeAlter).trigger('change');
@@ -5234,7 +5244,7 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				$(".nextFollow-"+leadId).html("<b>NO FOLLOWUP</b>");
 				$(".leadlist-status-"+leadId).html("<b>"+$('#leadStatus-'+leadId+' option:selected').text()+"</b>")
 				$(".leadlist-remark-"+leadId).html("<b>"+data['extra3']+"</b>");
-
+				$(".demo-status-row-"+leadId).html(data['extra4']);
 				var lType=leadType.toString().toLowerCase();
 				$(".nextSchedule-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
 				$(".nextFollow-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
@@ -6211,12 +6221,12 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 	return reponse;
 }
 
-function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid) {
+function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid, assignTo) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard', 'get-lead-list-campaign'),
-		data : JSON.stringify(getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName)),
+		data : JSON.stringify(getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, assignTo)),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
@@ -6303,13 +6313,14 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 }
    
 
-function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName) {
+function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, assignTo) {
 	var authentication = {};
 	var leadReportRequest = {};
 	leadReportRequest['schoolId'] = SCHOOL_ID;
 	leadReportRequest['modeSearch'] = modeSearch;
 	leadReportRequest['startDate'] = startDate;
 	leadReportRequest['endDate'] = endDate;
+	leadReportRequest['assignTo'] = assignTo;
 	
 	if(campaignName!=undefined && campaignName!=""){
 		leadReportRequest['reportType']="LEAD-LIST";
@@ -6321,8 +6332,14 @@ function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName) 
 			utmCampaign=$("#searchCampaignType").val();
 		}
 		leadReportRequest['utmCampaign'] = utmCampaign;
+		
 		leadReportRequest['reportType']="CAMPAIGN-LIST";
 	}
+	var countryIds=[];
+		if($("#searchCountryType").val()!='' && $("#searchCountryType").val()!=undefined){
+			countryIds=$("#searchCountryType").val();
+		}
+		leadReportRequest['countryIds'] = countryIds;
 
    
 	authentication['hash'] = getHash();
@@ -6345,7 +6362,8 @@ function getLeadCampaignWiseHtml(data){
 	var facebookInactivelead=0;
 
 	if(leadListCampaign.length>0){
-		
+		var ctrbgColor='';
+		var cprbgcolor='';
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
 			// if(leadCampaign.activeStatus=='Y'){
@@ -6364,22 +6382,100 @@ function getLeadCampaignWiseHtml(data){
 			
 
 			var spent = parseFloat(leadCampaign.totalSpend);
+			var cpc = parseFloat(leadCampaign.cpc);
+			var ctr = parseFloat(leadCampaign.ctr);
+			var reach = parseInt(leadCampaign.reach);
+			var frequency = parseFloat(leadCampaign.frequency);
 			var perLeadSmsSpent=spent/parseInt(leadCampaign.totalLead);
 			var perLeadFbSpent=0;
 			if(leadCampaign.totalFbLead!=''){
 				perLeadFbSpent=spent/parseInt(leadCampaign.totalFbLead);
 			}
 
+			ctrbgColor='';
+			if(ctr>=1){
+				ctrbgColor='bg-success';
+			}else if(ctr>0.56 && ctr<0.99){
+				ctrbgColor='bg-warning';
+			}else if(ctr<0.56){
+				ctrbgColor='bg-orange';
+			}
 
-			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+">";
-			htmlRet +="<td class=\"text-center\" style=\"max-width:70px !important;min-width:70px\">"+(sr)+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"');\">"+leadCampaign.campaignName+"</a></td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" class=\"text-center\"><span class=\"bg-success text-white text-center  badge font-12\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-12\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-12\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-12\">"+leadCampaign.totalFbLead+"</span></td>";
-			htmlRet +="<td style=\"vertical-align: top !important;min-width:180px\" class=\"text-center\"><span class=\"badge badge-pill badge-dark font-10\">$"+leadCampaign.totalSpend+"</span><br/><span class=\"badge badge-pill badge-primary font-10\">$"+perLeadSmsSpent.toFixed(2)+"</span> | <span class=\"badge badge-pill badge-info font-10\">$"+perLeadFbSpent.toFixed(2)+"</span> </td>";
+			cprbgcolor='';
+			if(perLeadFbSpent>=25){
+				cprbgcolor='bg-orange';
+			}else {
+				cprbgcolor='bg-success';
+			}
+
+
+
+			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+" style=\"border-bottom:1px solid;border-radius:0;\">";
+			htmlRet +="<td class=\"text-center\" style=\"vertical-align: top !important;max-width:70px !important;min-width:70px\">"+(sr)+"</td>";
+			// htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></td>";
+			
+			// htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" class=\"text-center\">";
+			// htmlRet +="<span class=\"bg-success text-white text-center  badge font-12\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-12\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-12\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-12\">"+leadCampaign.totalFbLead+"</span></td>";
+			// htmlRet +="<td style=\"vertical-align: top !important;min-width:180px\" class=\"text-center\">";
+			// htmlRet +="<span class=\"badge badge-pill badge-dark font-10\">$"+leadCampaign.totalSpend+"</span><br/>";
+			// htmlRet +="<span class=\"badge badge-pill badge-primary font-10\">$"+perLeadSmsSpent.toFixed(2)+"</span> | ";
+			// htmlRet +="<span class=\"badge badge-pill badge-info font-10\">$"+perLeadFbSpent.toFixed(2)+"</span> ";
+			// htmlRet +="</td>";
+			htmlRet +="<td colspan=\"3\"  style=\"vertical-align: top !important\">";
+				htmlRet +="<span class=\"font-14\"><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></span>";
+				htmlRet +="<span class=\"float-right\"><span class=\"bg-success text-white text-center  badge font-10\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-10\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-10\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-10\">"+leadCampaign.totalFbLead+"</span></span>";
+				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
+				htmlRet +="<tbody>";
+				htmlRet += "<tr style=\"background-color:#d3d1d1 !important\">";
+				
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Reach";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Impressions";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Frequency";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPR";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Spent";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Results";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPC";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0\">CTR";
+				htmlRet +="</td>";
+
+				htmlRet +="</tr>";
+				htmlRet += "<tr>";
+				
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+reach+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+frequency.toFixed(2)+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+cpc.toFixed(2)+"";
+				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%";
+				htmlRet +="</td>";
+
+				htmlRet +="</tr>";
+				htmlRet +="</tbody>";
+				htmlRet +="</table>";
+			
+			htmlRet +="</td>";
+			
 			htmlRet +="<td class=\"rounded-bottom-right-10\">";
 			var sizeCounselor=(leadCampaign.assignNames.length);
 			sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
-			htmlRet +="<span>"+sizeCounselor+"</span>";
+			htmlRet +="<span>"+sizeCounselor+" </span>";
+			htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Enrolled: <b>"+leadCampaign.totalConverted+"</b></span>";
 			htmlRet +="<div class=\"d-flex overflow-x-auto\" style=\"max-width:550px;\">";
 			if(leadCampaign.assignNames.length>0){
 				for (let s = 0; s < leadCampaign.assignNames.length; s++) {
@@ -6388,7 +6484,7 @@ function getLeadCampaignWiseHtml(data){
 					
 					htmlRet +="<div class=\"card-body d-flex px-2 pt-2 align-items-center pb-0\">";
 					htmlRet +="<span><img width=\"42\" class=\"avatar-icon\" src=\""+assignNameobj.profilePic+"\" alt=\"\" /></span>";
-					htmlRet +="<div class=\"pl-1\"><div class=\"teacher-name font-weight-semi-bold font-size-md\">"+assignNameobj.assignName+"</div>";
+					htmlRet +="<div class=\"pl-1\"><div class=\"teacher-name font-weight-semi-bold font-size-md\"><a href=\"javascript:void(0)\" onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','"+assignNameobj.assignTo+"');\">"+assignNameobj.assignName+"</a></div>";
 					htmlRet +="<div class=\"teacher-availability\">";
 					htmlRet +="<span class=\"total-hour text-primary\">"+assignNameobj.assignLead+" | </span><span class=\"total-hour text-success\">"+assignNameobj.assignActiveLead+" | </span><span class=\"total-hour text-danger\">"+assignNameobj.assignInactiveLead+"</span>";
 					htmlRet +="</div>";
@@ -6413,13 +6509,13 @@ function getLeadCampaignWiseHtml(data){
 			htmlRet +="<thead>";
 			htmlRet +="<tr>";
 			htmlRet +="<th style=\"5% !important\" class=\"text-center bg-primary text-white\">Sr no.</th>";
-            htmlRet +="<th class=\"text-center bg-primary text-white\">Student Name<br/>Grade</th>";
+            htmlRet +="<th class=\"text-center bg-primary text-white\">Lead No.<br/>Student Name<br/>Grade</th>";
             htmlRet +="<th class=\"text-center bg-primary text-white\">Email<br/>Country<br/>Create Date Time</th>";
             // htmlRet +="<th class=\"text-center bg-primary text-white\">Parent's Name<br/>Phone No.</th>";
             htmlRet +="<th class=\"text-center bg-primary text-white\">Ad_set<br/>Ad_Name</th>";
             htmlRet +="<th class=\"text-center bg-primary text-white\">Counselor Name<br/>Lead Status</th>";
             // htmlRet +="<th class=\"text-center bg-primary text-white\">Demo Booked</th>";
-            htmlRet +="<th class=\"text-center bg-primary text-white\">Remarks</th>";
+            htmlRet +="<th class=\"text-center bg-primary text-white\">Last Remarks</th>";
 			htmlRet +="</tr>";
 			htmlRet +="</thead>";
 			htmlRet +="<tbody class=\"campaign-td-"+sr+"\"></tbody>";
@@ -6451,6 +6547,16 @@ function getCampaignFooterTotal(data){
 	var totalInactiveLeads=0;
 	var totalFBLeads=0;
 	var totalFbSpend=0;
+
+	var totalCpc = 0;
+	var totalCtr = 0;
+
+	var totalDemo=0;
+	var totalDemoDone=0;
+	var totalWebDemo=0;
+	var totalCopyDemo=0;
+	var totalConvert=0;
+
 	if(leadListCampaign.length>0){
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
@@ -6459,23 +6565,36 @@ function getCampaignFooterTotal(data){
 			totalInactiveLeads=totalInactiveLeads+parseInt(leadCampaign.totalInactiveLead);
 			totalFBLeads=totalFBLeads+parseInt(leadCampaign.totalFbLead);
 			totalFbSpend=totalFbSpend+ parseFloat(leadCampaign.totalSpend);
+			totalCpc=totalCpc+ parseFloat(leadCampaign.cpc);
+			totalCtr=totalCtr+ parseFloat(leadCampaign.ctr);
+
+			totalDemo=totalDemo+ parseInt(leadCampaign.totalDemoLead);
+			totalDemoDone=totalDemoDone+ parseInt(leadCampaign.totalDemoDone);
+			totalWebDemo=totalWebDemo+parseInt(leadCampaign.totalWebDemoLead);
+			totalCopyDemo=totalCopyDemo+parseInt(leadCampaign.totalCopyDemoLead);
+			totalConvert=totalConvert+ parseFloat(leadCampaign.totalConverted);
 		}
 		var spent = totalFbSpend.toFixed(2);
+		var cpc = totalCpc.toFixed(2);
+		var ctr = totalCtr.toFixed(2);
 		var perLeadSmsSpent=spent/totalLeads;
 		var perLeadFbSpent=spent/totalFBLeads;
 
 		htmlRet +="<tr style=\"font-size:14px;background-color: #c9def3 !important;\">";
 		htmlRet +="<th class=\"text-center\"></th>";
 		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"</th>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">$"+totalFbSpend.toFixed(2)+"</td>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\"></td>";
+		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">$"+totalFbSpend.toFixed(2)+"</th>";//"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"
+		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">";
+		// htmlRet +="<span>$"+cpc+"</span> | <span>"+ctr+"%</span>"
+		htmlRet+="<span class=\"float-right\">"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"</span>"
+		htmlRet +="</th>";
+		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Demo Booked: <b>"+totalDemo+"</b> | By Website: <b>"+totalWebDemo+"</b> | By Link: <b>"+totalCopyDemo+"</b> | Demo Completed: <b>"+totalDemoDone+"</b> | Enrolled: <b>"+totalConvert+"</b></td>";
 		htmlRet +="</tr>";
 	}
 	return htmlRet;
 }
 
-function getListLeadCampaign(campaignName, eventid){
+function getListLeadCampaign(campaignName, eventid, assignTo){
 	var startDate = $("#dataLeadCampaignStartDate").val();
 	var endDate = $("#dataLeadCampaignEndDate").val();
 	var searchCountrytype = $("#searchLeadCampaignType").val();
@@ -6489,7 +6608,7 @@ function getListLeadCampaign(campaignName, eventid){
 		return false;
 	}
 	
-	callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,campaignName,eventid);
+	callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,campaignName,eventid, assignTo);
 }
 
 function getLeadListCampaignWiseHtml(data){
@@ -6501,10 +6620,12 @@ function getLeadListCampaignWiseHtml(data){
 		
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
-
+			var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+leadCampaign.leadno+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
+			//var totalLeadLink="clickLeadsLink('"+urlClick+"','', '','list','', '')";
+//			<a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">
 			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+">";
 			htmlRet +="<td class=\"text-center\">"+(sr++)+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;\"><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\"><a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">"+leadCampaign.leadno+"</a><br/><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\"><span class=\"child_email\">"+leadCampaign.email+"</span><br/>"+leadCampaign.country+"<br/>"+leadCampaign.assignDate+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.fbAddSet+"<br/>"+leadCampaign.fbAdd+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.assignName+"<br/>"+leadCampaign.leadStatus+"</td>";
@@ -7505,7 +7626,7 @@ function getRequestForCounselorLead(formId, modeSearch,startDate, endDate,  subl
 	return leadCommonDTO;
 }
 function callLeadUrl(leadFrom){
-	var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadFrom=LEAD&clickFrom='+leadFrom+'&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID;
+	var urlSend = '/dashboard/lead-data-list?moduleId='+moduleId+'&leadId=0&leadFrom=LEAD&clickFrom='+leadFrom+'&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID;
 	getAsPost(urlSend);
 	customLoader(false)
 }
@@ -7561,9 +7682,15 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 			if(leadCounselor.assignName=='Partial entry (Unassigned)')	{
 				assignTo="00";
 			}
+			if(leadCounselor.totalLead!=0){
+				var totalDivide=(leadCounselor.enrollment/leadCounselor.totalLead)*100;
+				totalDivide=totalDivide.toFixed(2);
+			}else{
+				totalDivide=0;
+			}
 			
 
-			var urlClick="/dashboard/lead-data-list?moduleId=" + moduleId +"&leadFrom=LEAD&currentPage=0&euid=" +ENCRYPTED_USER_ID + "&leadType=B2C";
+			var urlClick="/dashboard/lead-data-list?moduleId=" + moduleId +"&leadId=0&leadFrom=LEAD&currentPage=0&euid=" +ENCRYPTED_USER_ID + "&leadType=B2C";
 			
 			var totalLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','list-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
 			var uniqueLeadLink="clickLeadsLink('"+urlClick+"','"+startDate+"', '"+endDate+"','unique-"+assignTo+"','"+countryId+"', '"+campaignId+"')";
@@ -7700,8 +7827,36 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#f3f39e !important;color:#343a40;\" class=\"text-center\">";
 				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
 				htmlRet +="<tbody>";
+
+
+				// ---------- SH row ----------
+				htmlRet += "<tr style=\"background-color: #e9d45a;\">";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<span style=\"margin-right: 30px;\">S</span><a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadWebsiteLink + "\">" + leadCounselor.totalWebDemo + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadCopyLink + "\">" + leadCounselor.totalLinkDemo + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadDoneLink + "\">" + leadCounselor.totalDemoDone + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadInterestLink + "\">" + leadCounselor.totalDemoInterested + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotConfirm + "\">" + leadCounselor.totalDemoNotConfirm + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadRescheduleLink + "\">" + leadCounselor.totalDemoReschedule + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotShowLink + "\">" + leadCounselor.totalDemoNotShow + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadCancelLink + "\">" + leadCounselor.totalDemoCancel + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotIntrestedLink + "\">" + leadCounselor.totalDemoNotInterested + "</a></td>";
+				htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadPendingLink + "\">" + leadCounselor.totalDemoPending + "</a></td>";
+				htmlRet += "</tr>";
+
 				// ---------- BK row ----------
-				htmlRet += "<tr style=\"border-bottom: 1px solid #000;\">";
+				htmlRet += "<tr style=\"border-top: 1px solid #000;\">";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
 				htmlRet += "<span style=\"margin-right: 30px;\">B</span><a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadLink + "\">" + leadCounselor.totalBookDemo + "</a></td>";
 				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
@@ -7726,31 +7881,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + bookDemoLeadPendingLink + "\">" + leadCounselor.totalBookDemoPending + "</a></td>";
 				htmlRet += "</tr>";
 
-				// ---------- SH row ----------
-				htmlRet += "<tr>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<span style=\"margin-right: 30px;\">S</span><a href=\"javascript:void(0);\" onclick=\"" + demoLeadLink + "\">" + leadCounselor.totalDemo + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadWebsiteLink + "\">" + leadCounselor.totalWebDemo + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadCopyLink + "\">" + leadCounselor.totalLinkDemo + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadDoneLink + "\">" + leadCounselor.totalDemoDone + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadInterestLink + "\">" + leadCounselor.totalDemoInterested + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotConfirm + "\">" + leadCounselor.totalDemoNotConfirm + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadRescheduleLink + "\">" + leadCounselor.totalDemoReschedule + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotShowLink + "\">" + leadCounselor.totalDemoNotShow + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadCancelLink + "\">" + leadCounselor.totalDemoCancel + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadNotIntrestedLink + "\">" + leadCounselor.totalDemoNotInterested + "</a></td>";
-				htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">";
-				htmlRet += "<a href=\"javascript:void(0);\" onclick=\"" + demoLeadPendingLink + "\">" + leadCounselor.totalDemoPending + "</a></td>";
-				htmlRet += "</tr>";
+				
 				
 				htmlRet +="</tbody>"
 				htmlRet +="</table>";
@@ -7759,6 +7890,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#efd597;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+positiveLink+"\">"+leadCounselor.positiveEnroll+"</a></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+bookseatLink+"\">"+leadCounselor.reserved+"</a></td>";
 				htmlRet +="<td style=\"vertical-align: top !important;background-color:#c4d38a;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+convertLink+"\">"+leadCounselor.enrollment+"</a></td>";
+				htmlRet +="<td style=\"vertical-align: top !important;background-color:#e7f1c2;\" class=\"text-center\">"+totalDivide+"%</td>";
 				htmlRet +="</tr>";
 				
 				var countryIds=0;
@@ -7828,6 +7960,7 @@ function getLeadCounselorFootHtml(data, fontSize){
 		for (let ind = 0; ind < leadListCounselor.length; ind++) {
 			const leadCounselor = leadListCounselor[ind];
 			totalLeads+=leadCounselor.totalLead;
+			
 			duplicateLeadCount+=leadCounselor.duplicateLeadCount;
 			totalFbLeads+=leadCounselor.totalFbLead;
 
@@ -7875,29 +8008,21 @@ function getLeadCounselorFootHtml(data, fontSize){
 		htmlRet +="<tr style=\"font-size:11px;background-color: #c9def3 !important;\">";
 	}
 	var uniqLead=(totalLeads-duplicateLeadCount);
+	var totalDivide=0;
+	if(totalLeads!=0){
+		var totalDivide=(enrollment/totalLeads)*100;
+		totalDivide=totalDivide.toFixed(2);
+	}else{
+		totalDivide=0;
+	}
 	htmlRet +="<th class=\"text-center\"></th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"\"><span class=\"text-left\">"+totalLeads+"</span>  <span class=\"float-right\">"+(uniqLead>0?uniqLead:0) +"  |  "+duplicateLeadCount+"</span></th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\"><span class=\"text-left\">"+totalFbLeads+"</span>  <span class=\"float-right\">"+fbtotal +"  |  "+igtotal+"</span></td>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+unattended+"</td>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">Total</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"\"><span class=\"text-left\">"+totalLeads+"</span>  <span class=\"float-right\">"+(uniqLead>0?uniqLead:0) +"  |  "+duplicateLeadCount+"</span></th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\"><span class=\"text-left\">"+totalFbLeads+"</span>  <span class=\"float-right\">"+fbtotal +"  |  "+igtotal+"</span></td>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+unattended+"</td>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">";
 	htmlRet +="<table class=\"table w-100 mb-0 bg-transparent\">";
 	htmlRet +="<tbody>";
-
-	// 🔹 Booked (Bk) Row
-	htmlRet += "<tr style=\"border-bottom: 1px solid #000\">";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span style=\"margin-right: 30px;\">B</span>" + totalBookDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookWebDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookLinkDemo + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoDone + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoInterested + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotConfirm + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoReschedule + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotShow + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoCancel + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotInterested + "</td>";
-	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoPending + "</td>";
-	htmlRet += "</tr>";
 
 	// 🔹 Scheduled (Sh) Row
 	htmlRet += "<tr>";
@@ -7913,13 +8038,31 @@ function getLeadCounselorFootHtml(data, fontSize){
 	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoNotInterested + "</td>";
 	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalDemoPending + "</td>";
 	htmlRet += "</tr>";
+
+	// 🔹 Booked (Bk) Row
+	htmlRet += "<tr style=\"border-top: 1px solid #000\">";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\"><span style=\"margin-right: 30px;\">B</span>" + totalBookDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookWebDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookLinkDemo + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoDone + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoInterested + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotConfirm + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoReschedule + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotShow + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoCancel + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoNotInterested + "</td>";
+	htmlRet += "<td style=\"width:9%;border:0;border-radius:0;\" class=\"badge font-10 my-0\">" + totalBookDemoPending + "</td>";
+	htmlRet += "</tr>";
+
+	
 	htmlRet +="</tbody>";
 	htmlRet +="</table>";
 	htmlRet +="</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+totalHot+" | "+totalWarm+" | "+totalCold+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+positiveEnroll+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+reserved+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+enrollment+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+totalHot+" | "+totalWarm+" | "+totalCold+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+positiveEnroll+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+reserved+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+enrollment+"</th>";
+	htmlRet +="<th style=\"vertical-align: bottom !important;\" class=\"text-center\">"+totalDivide+"%</th>";
 	htmlRet +="</tr>";
 	return htmlRet;
 }
@@ -7972,14 +8115,14 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	html+='<tr>';
 	html+='<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>';
 	html+='<th class="text-center bg-primary text-white">Academic Counselor</th>';
-	html+='<th class="bg-primary text-white">Total Leads    U | D </th>';
+	html+='<th class="bg-primary text-white">Total    U | D </th>';
 	html+='<th class="bg-primary text-white">Total    FB | IG </th>';
 	html+='<th class="text-center bg-primary text-white">Unattended</th>';
 	html+='<th class="text-center bg-primary text-white">';
 	html+='<table class="w-100 table mb-0 bg-transparent">';
 	html+='<tbody>';
 	html+='<tr>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Book</br/>Schedule</td>';
+	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>';
 	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>';
 	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>';
 	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
@@ -8009,7 +8152,6 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 }
 
 function clickLeadsLink(ulrLink, startDate, endDate, leadClickFrom, country, campaighn){
-
 
 	var clickUrl=ulrLink+"&startDate="+startDate+"&endDate="+endDate+"&country="+country+"&campaign="+campaighn+"&clickFrom="+leadClickFrom
 	getAsPost(clickUrl);
@@ -11553,13 +11695,15 @@ function getEmailBroadcastLogsTemplate(actionId,userEmail){
 }
 
 
-function callDeviceCount(modeSearch, chartId, startDate, endDate) {
+function callDeviceCount(modeSearch, chartId, startDate, endDate, leadDemoStatus) {
 	data={};
 	data['modeSearch']=modeSearch;
 	data['startDate']=startDate;
 	data['endDate']=endDate;
+	data['leadDemoStatus']=leadDemoStatus;
 	data['userId']=USER_ID;
 	data['schoolId']=SCHOOL_ID;
+	
 
 		$.ajax({
 				type : "POST",
@@ -11574,9 +11718,15 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 					if (data['status'] == '0' || data['status'] == '2') {
 						showMessage(true, data['message']);
 					} else {
-						var htChart = getLeadsDeviceCountChart(data, chartId);
-						getLeadsBrowserCountChart(data);
-						getLeadsDeviceTypeCountChart(data);
+						if(leadDemoStatus=='Y'){
+							getLeadsDeviceCountChart(data, chartId);
+							getLeadsBrowserCountChart(data,'');
+							getLeadsDeviceTypeCountChart(data,'');
+						}else{
+							getLeadsDeviceCountChart(data, chartId);
+							getLeadsBrowserCountChart(data, '-demo');
+							getLeadsDeviceTypeCountChart(data, '-demo');
+						}
 					}
 				}
 			});
@@ -11617,7 +11767,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 			legend: {
 				show: false
 			}
-			};
+		};
 	
 			
 		var chart = new ApexCharts(document.querySelector("#"+chartId), options);
@@ -11628,7 +11778,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 	}
 
 
-	function getLeadsDeviceTypeCountChart(data){
+function getLeadsDeviceTypeCountChart(data, chartIdSufix){
 	
 		var options = {
 			series: [ data.winTotal, data.macTotal, data.androidTotal, data.iphoneTotal, data.ipodTotal],
@@ -11636,7 +11786,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 				width: '85%',
 				type: 'pie',
 			},
-			labels: ["Window", "MacOs", "Android", "iPhone", "iPod" ],
+			labels: ["Windows", "MacOs", "Android", "iPhone", "iPod" ],
 			theme: {
 				monochrome: {
 				enabled: true
@@ -11664,7 +11814,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 		};
 	
 			
-		var chart = new ApexCharts(document.querySelector("#chart-pie-device-type"), options);
+		var chart = new ApexCharts(document.querySelector("#chart-pie-device-type"+chartIdSufix), options);
 		chart.render();   
 		chart.update();
 	
@@ -11674,7 +11824,7 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 
 
 	
-	function getLeadsBrowserCountChart(data){
+	function getLeadsBrowserCountChart(data,chartIdSufix){
 	
 			var options = {
 				series: [data.chromeTotal, data.fireFoxTotal, data.safariTotal, data.edgeTotal, data.otherTotal],
@@ -11694,9 +11844,689 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate) {
 					}]	
         	};
 			
-		var chart = new ApexCharts(document.querySelector("#chart-pie-browser"), options);
+		var chart = new ApexCharts(document.querySelector("#chart-pie-browser"+chartIdSufix), options);
 		chart.render();   
 		chart.update();
 	
 		
 	}
+
+async function getB2BContractDetails(b2bleadId, type, publishedContractId){
+    var payload = {};
+    payload['b2bleadId'] = parseInt(b2bleadId);
+    if(type == "edit" && parseInt(publishedContractId) > 0){
+        payload['contractId'] = parseInt(publishedContractId);
+        payload['actionType'] = "V";
+    }
+	payload = "?payload="+encode(JSON.stringify(payload))
+	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, true, 'partner-contract-details'+payload, '');
+	responseData = responseData.details;
+	console.log(responseData);
+	if($("#b2bContractModal").length==1){
+		$("#b2bContractModal").remove();
+	}
+	$("body").append(createB2BAddContractModal(responseData))
+	if(responseData.contractStatus == "" || responseData.contractStatus == "P"){
+		$("#publishContractDetailsBtn").hide();
+	}else{
+		$("#publishContractDetailsBtn").show();
+	}
+	if($("#viewB2BContractModal").length==1){
+		$("#viewB2BContractModal").remove();
+	}
+	$("body").append(viewB2BContractModal())	
+	var cleanedCommentData = cleanBase64Images(responseData.commentData);
+	$("#editorData").html(cleanedCommentData);
+	$("#b2bContractModal").modal("show");
+	$("#contractDuration").val(responseData.durationYears);
+	$("#validityDuration").val(responseData.validityDays);
+	$("#contractStartDate").datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+		startDate: new Date()
+	});
+	$("#contractEndDate").datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+		startDate: new Date()
+	});
+	getAllCountryList('addContractForm','partnerCountryId');
+	$('#partnerCountryId').select2({
+        theme:"bootstrap4",
+    }).on("change", function(){
+        var selectedCountryID= $(this).val()
+        callStates('addContractForm',selectedCountryID, 'partnerCountryId', 'partnerStateId', 'partnerCityId')
+        if ($("#partnerStateId").hasClass("select2-hidden-accessible")) {
+            $("#partnerStateId").select2("destroy");
+        }
+        $("#partnerStateId").select2({
+            theme:"bootstrap4",
+        });
+        $("#partnerStateId").attr("disabled",false);
+    });
+    $("#partnerStateId").select2({
+        theme:"bootstrap4",
+    }).on("change", function(){
+        var selectedStateID= $(this).val()
+        callCities('addContractForm',selectedStateID, 'partnerStateId', 'partnerCityId')
+        if ($("#partnerCityId").hasClass("select2-hidden-accessible")) {
+            $("#partnerCityId").select2("destroy");
+        }
+        $("#partnerCityId").select2({
+            theme:"bootstrap4",
+        });
+        $("#partnerCityId").attr("disabled",false);
+    });
+    $("#partnerCityId").select2({
+        theme:"bootstrap4",
+    });
+
+	editor = new Jodit('#contractComment', {
+		width: 794, // A4 width in pixels
+    	height: 400, 
+		toolbarSticky: true,
+		uploader: { insertImageAsBase64URI: true },
+		toolbarAdaptive: false,
+		// buttons: [
+		// 	'source', '|',
+		// 	'bold', 'italic', 'underline', '|',
+		// 	'ul', 'ol', '|',
+		// 	'outdent', 'indent', '|',
+		// 	'font', 'fontsize', 'brush', 'paragraph', '|',
+		// 	'image', 'table', 'link', '|',
+		// 	'align', 'undo', 'redo', '|',
+		// 	'hr', 'eraser', 'fullsize'
+		// ],
+		events: {
+			afterInit: function () {
+				const observer = new MutationObserver(() => {
+				const keepBtn = Array.from(document.querySelectorAll('.jodit-ui-button__text')).find(btn => btn.textContent.trim() === 'Keep');
+					if(keepBtn) {
+						console.log("✅ 'Keep' button detected");
+
+						keepBtn.addEventListener('click', function () {
+						setTimeout(() => {
+							tableCenter();
+
+						}, 1500);
+						}, { once: true });
+						observer.disconnect();
+					}
+				});
+				observer.observe(document.body, {
+					childList: true,
+					subtree: true
+				});
+			}
+		}
+	});
+
+	// commentData will be disabled when these field are empty
+	const requiredFields = [
+		"#firstPartnerName",
+		"#firstPartnerDesignation",
+		"#contractPartnerType",
+		"#partnerName",
+		"#partnerEmail",
+		"#partnerDesignation",
+		"#partnerCountryId",
+		"#partnerStateId",
+		"#partnerCityId"
+	];
+	function areAllFieldsFilled() {
+		return requiredFields.every(sel => {
+			let val = $(sel).val();
+			return val !== undefined && val !== null && val.toString().trim() !== "";
+		});
+	}
+	function toggleEditorState() {
+		if (areAllFieldsFilled()) {
+			editor.setReadOnly(false);
+		} else {
+			editor.setReadOnly(true);
+		}
+	}
+	requiredFields.forEach(sel => {
+		$(document).on("input change", sel, toggleEditorState);
+	});
+	toggleEditorState();
+
+	// signature upload when commentData is not empty
+	function isEditorEmpty(editor) {
+		const val = editor.value.trim();
+		return (
+			val === "" ||
+			val === "<p><br></p>" ||
+			val.replace(/<p>|<\/p>|&nbsp;|\s/g, "") === ""
+		);
+	}
+	function hasSignatureFile() {
+		const input = $("#recipientSignatureUpload")[0];
+		if (input && input.files && input.files.length > 0) {
+			return true;
+		}
+		const labelText = $("#recipientSignatureUpload")
+			.next(".custom-file-label")
+			.text()
+			.trim();
+	
+		return labelText !== "" && labelText !== "Choose file...";
+	}
+	function toggleContractDependencies(editor) {
+		const emptyEditor = isEditorEmpty(editor);
+		const hasFile = hasSignatureFile();
+	
+		$("#recipientSignatureUpload")
+			.prop("disabled", emptyEditor)
+			.toggleClass("cursor", !emptyEditor);
+	
+		if (!emptyEditor && hasFile) {
+			$("#previewContractBtn").show();
+		} else {
+			$("#previewContractBtn").hide();
+		}
+	}
+	editor.events.on("change", function () {
+		toggleContractDependencies(editor);
+	});
+	$(document).on("change", "#recipientSignatureUpload", function () {
+		toggleContractDependencies(editor);
+	});
+
+	$("#validityStartDate").datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+		startDate: new Date()
+	})
+	$("#validityEndDate").datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+		startDate: new Date()
+	});
+	getTimeForDropdownContent('addContractForm', 'validityStartTime', 15);
+	getTimeForDropdownContent('addContractForm', 'validityEndTime', 15);
+	$("#contractPartnerType").val(responseData.partnerType).trigger("change");
+	$("#partnerCountryId").val(responseData.countryId).trigger("change");
+	$("#partnerStateId").val(responseData.stateId).trigger("change");
+	$("#partnerCityId").val(responseData.cityId).trigger("change");
+	if(responseData.durationStart != ""){
+		$("#contractStartDate").val(convertU2L(responseData.durationStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	if(responseData.durationEnd != ""){
+		$("#contractEndDate").val(convertU2L(responseData.durationEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	editor.setEditorValue(cleanedCommentData);	
+	setTimeout(function() {
+		var $editorContent = $(".jodit-workplace").length ? $(".jodit-workplace") : $("#editorData");
+		var $leftImg = $editorContent.find("#leftSignatureBox img");
+		if($leftImg.length && $leftImg.attr("data-name")){
+		  $("#recipientSignatureUpload").next(".custom-file-label").text($leftImg.attr("data-name"));
+		}
+		toggleContractDependencies(editor);
+	  }, 500);
+	if(responseData.validityStart != ""){
+		$("#validityStartDate").val(convertU2L(responseData.validityStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	if(responseData.validityEnd != ""){
+		$("#validityEndDate").val(convertU2L(responseData.validityEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)).datepicker("update");
+	}
+	$("#contractId").val(responseData.contractId);
+	$("#b2bLeadId").val(responseData.b2bLeadId);
+	
+	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		if ($(e.target).attr('href') === '#emailLogs') {
+			getEmailLogList("", "");
+		}
+	});
+	bindContractFormEvents(responseData.partnerOrgType);
+}
+
+function tableCenter(){
+	$(".jodit-container table").each(function(){
+        const table = $(this);
+        const styleWidth = table.css('width') || this.attr('width') || '';
+        const isFullWidth = styleWidth.trim() === '100%' || (styleWidth.endsWith('%') && parseFloat(styleWidth) >= 100);
+        if (!isFullWidth) {
+            table.css({
+                'margin-left': 'auto',
+                'margin-right': 'auto',
+                'display': 'table'
+            });
+        }
+    });
+	setTimeout(function(){
+		$('.jodit-container *, #contractComment *').each(function() {
+			// Loop through all attributes
+			$.each(this.attributes, function() {
+				if (this.name === 'onmouseover' || this.name === 'onmouseout' || this.name == "onmouseout") {
+					$(this.ownerElement).removeAttr(this.name);
+				}
+			});
+			$(".MsoCommentReference, .msocomanchor").remove();
+		});
+		document.querySelectorAll('.jodit-container *, #contractComment *').forEach(el => {
+			if (el.hasAttribute('onmouseover')) {
+			el.removeAttribute('onmouseover');
+			}
+			if (el.hasAttribute('onmouseout')) {
+			el.removeAttribute('onmouseout');
+			}
+		});
+
+	});
+}
+
+function validateAddContractForm(formId){
+	if($("#"+formId+" #firstPartnerName").val() == null || $("#"+formId+" #firstPartnerName").val() == undefined || $("#"+formId+" #firstPartnerName").val() == ""){
+		showMessageTheme2(0, "1st party representative name required");
+		return false;
+	}
+	if($("#"+formId+" #firstPartnerDesignation").val() == null || $("#"+formId+" #firstPartnerDesignation").val() == undefined || $("#"+formId+" #firstPartnerDesignation").val() == ""){
+		showMessageTheme2(0, "1st party representative designation required");
+		return false;
+	}
+	if($("#"+formId+" #contractPartnerType").val() == null || $("#"+formId+" #contractPartnerType").val() == undefined || $("#"+formId+" #contractPartnerType").val() == ""){
+		showMessageTheme2(0, "Partner type required");
+		return false;
+	}
+	if($("#"+formId+" #partnerName").val() == null || $("#"+formId+" #partnerName").val() == undefined || $("#"+formId+" #partnerName").val() == ""){
+		showMessageTheme2(0, "2nd partner representative name required");
+		return false;
+	}
+	if($("#"+formId+" #partnerEmail").val() == null || $("#"+formId+" #partnerEmail").val() == undefined || $("#"+formId+" #partnerEmail").val() == ""){
+		if (!validateEmail($("#partnerEmail").val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+	}
+	if($("#"+formId+" #partnerDesignation").val() == null || $("#"+formId+" #partnerDesignation").val() == undefined || $("#"+formId+" #partnerDesignation").val() == ""){
+		showMessageTheme2(0, "2nd partner representative designation required");
+		return false;
+	}
+	if($("#"+formId+" #partnerCountryId").val() == null || $("#"+formId+" #partnerCountryId").val() == undefined || $("#"+formId+" #partnerCountryId").val() == ""){
+		showMessageTheme2(0, "Country required");
+		return false;
+	}
+	if($("#"+formId+" #partnerStateId").val() == null || $("#"+formId+" #partnerStateId").val() == undefined || $("#"+formId+" #partnerStateId").val() == ""){
+		showMessageTheme2(0, "State required");
+		return false;
+	}
+	if($("#"+formId+" #partnerCityId").val() == null || $("#"+formId+" #partnerCityId").val() == undefined || $("#"+formId+" #partnerCityId").val() == ""){
+		showMessageTheme2(0, "City required");
+		return false;
+	}
+	if($("#"+formId+" #contractStartDate").val() == null || $("#"+formId+" #contractStartDate").val() == undefined || $("#"+formId+" #contractStartDate").val() == ""){
+		showMessageTheme2(0, "Contract duration start date required");
+		return false;
+	}
+	if (
+		$("#"+formId+" #contractDuration").val() == null || 
+		$("#"+formId+" #contractDuration").val() == undefined || 
+		$("#"+formId+" #contractDuration").val() === "" || 
+		$("#"+formId+" #contractDuration").val() === "0"
+	) {
+		showMessageTheme2(0, "Contract duration start date required");
+		return false;
+	}
+	if($("#"+formId+" #contractEndDate").val() == null || $("#"+formId+" #contractEndDate").val() == undefined || $("#"+formId+" #contractEndDate").val() == ""){
+		showMessageTheme2(0, "Contract duration end date required");
+		return false;
+	}
+	if(editor.getEditorValue() == null || editor.getEditorValue() == undefined || editor.getEditorValue() == "" || editor.getEditorValue() == "<p><br></p>"){
+		showMessageTheme2(0, "Comment required");
+		return false;
+	}
+	if($("#recipientSignatureUpload").val() == ""){
+		showMessageTheme2(0, "Please upload your signature");
+		return false;
+	}
+	if($("#"+formId+" #validityStartDate").val() == null || $("#"+formId+" #validityStartDate").val() == undefined || $("#"+formId+" #validityStartDate").val() == ""){
+		showMessageTheme2(0, "Validity start date required");
+		return false;
+	}
+	if (
+		$("#"+formId+" #validityDuration").val() == null || 
+		$("#"+formId+" #validityDuration").val() == undefined || 
+		$("#"+formId+" #validityDuration").val() === "" || 
+		$("#"+formId+" #validityDuration").val() === "0"
+	) {
+		showMessageTheme2(0, "Validity duration required");
+		return false;
+	}
+	if($("#"+formId+" #validityEndDate").val() == null || $("#"+formId+" #validityEndDate").val() == undefined || $("#"+formId+" #validityEndDate").val() == ""){
+		showMessageTheme2(0, "Validity end date required");
+		return false;
+	}
+	return true;
+}
+
+function getAddContractPayload(formId, b2bLeadId) {
+    var requestData = {
+		firstPartyRepresentative: $("#" + formId + " #firstPartnerName").val(),
+		firstPartyDesignation: $("#" + formId + " #firstPartnerDesignation").val(),
+        partnerType: $("#" + formId + " #contractPartnerType").val(),
+        name: $("#" + formId + " #partnerName").val(),
+        email: $("#" + formId + " #partnerEmail").val(),
+        secondPartyDesignation: $("#" + formId + " #partnerDesignation").val(),
+        countryId: parseInt($("#" + formId + " #partnerCountryId").val()),
+        stateId: parseInt($("#" + formId + " #partnerStateId").val()),
+        cityId: parseInt($("#" + formId + " #partnerCityId").val()),
+        durationStart: convertLocalToUTCWithRequiredFormat($("#" + formId + " #contractStartDate").val() + ' 00:00 AM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+        durationEnd: convertLocalToUTCWithRequiredFormat($("#" + formId + " #contractEndDate").val() + ' 23:59 PM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+		durationYears: parseInt($("#contractDuration").val()),
+        commentData: editor.getEditorValue(),
+        validityStart: convertLocalToUTCWithRequiredFormat($("#" + formId + " #validityStartDate").val() + ' 00:00 AM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+        validityEnd: convertLocalToUTCWithRequiredFormat($("#" + formId + " #validityEndDate").val() + ' 23:59 PM',DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER),
+		validityDays: parseInt($("#validityDuration").val()),
+        sessionUserId: parseInt(USER_ID),
+        actionType: "D",
+        b2bLeadId: parseInt(b2bLeadId),
+        pUserId: parseInt($("#" + formId + " #contractPartnerType").attr("data-partner-user-id")),
+        entityId: parseInt(b2bLeadId),
+        entityType: "B2B_REQUEST"
+    };
+
+    return requestData;
+}
+
+async function saveContractDetails(formId, b2bLeadId){
+	if(validateAddContractForm(formId)){
+		var payload = getAddContractPayload(formId, b2bLeadId);
+		console.log("payload", payload)
+		var data = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, "Contract save successfully","save-partner-contract-details", payload, "");
+		if (data.status == '0' || data.status == '2' || data.status == '3') {
+			showMessageTheme2(0, data.message);
+		}else{
+			showMessageTheme2(1, data.message);
+			$("#contractId").val(data.contractId);
+			$("#b2bLeadId").val(data.b2bLeadId);
+			if(data.status == "1"){
+				tableCenter();
+				$("#publishContractDetailsBtn").show();
+				showMessageTheme2(1, data.message);
+			}
+		}
+	}
+}
+
+async function publishContractDetails() {
+	if($("#contractId").val() == null || $("#contractId").val() == undefined || $("#contractId").val() == ""){
+		showMessageTheme2(0, "Contract ID required");
+		return false;
+	}
+	var b2bLeadId = $("#b2bLeadId").val();
+	var payload ={
+		actionType:"P",
+		b2bLeadId:parseInt(b2bLeadId),
+		contractId:parseInt($("#contractId").val()),
+		sessionUserId:USER_ID
+	}
+	var response =  await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true,"save-partner-contract-details", payload, "");
+	if (response.status == '0' || response.status == '2' || response.status == '3') {
+		showMessageTheme2(0, response.message);
+	}else{
+		showMessageTheme2(1, response.message);
+		$("#b2bContractModal").modal("hide");
+		$("#addContractB2b_" + b2bLeadId).addClass("d-none");
+		$("#addContractB2b_" + b2bLeadId).removeClass("d-inline-block");
+		$("#editContractB2b_" + b2bLeadId).removeClass("d-none");
+		// $("#publishContractDetailsBtn").hide();
+	}
+}
+
+
+async function getEmailLogList(requestType, contractId){
+	var payload = {};
+	if(requestType == "V"){
+		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
+		payload['contractId'] = parseInt(contractId);
+		payload['actionType'] = "V";
+		payload = "?payload="+encode(JSON.stringify(payload));
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, true, 'partner-contract-details'+payload, '');
+		$("#viewB2BContractModal .modal-body").html(viewContractModalBody(responseData.details));
+		var cleanedCommentData = cleanBase64Images(responseData.details.commentData);
+		$("#viewB2BContractModal #editorData").html(cleanedCommentData);
+		$("#viewB2BContractModal").modal("show");
+	}else{
+		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
+		payload = "?payload="+encode(JSON.stringify(payload));
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, false, 'get-all-partner-contracts'+payload, '');
+		if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+			showMessageTheme2(0, responseData.message);
+		}else{
+			var html=``;
+			if(responseData.details.length>0){
+				$.each(responseData.details, function(i,v){
+					html+=
+					`<tr>
+						<td class="text-center">${i+1}</td>
+						<td class="text-center">
+							<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="getEmailLogList(\'V\',\'${v.contractId}\')">
+								<i class="fa fa-eye"></i>&nbsp;View
+							</a>
+						</td>
+						<td class="text-center">${v.publishedDate == ""? "N/A":convertU2L(v.publishedDate, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</td>
+						<td class="text-center">
+							<span>${v.validityStart == ""? "N/A":convertU2L(v.validityStart, USER_TIMEZONE, DISPLAY_DATE_ONLY)} To ${v.validityEnd == ""? "N/A":convertU2L(v.validityEnd, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</span>
+						</td>
+						<td class="text-center">${v.createdByName}</td>
+						<td class="text-center">${v.acceptDate == ""? "N/A":convertU2L(v.acceptDate, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</td>
+					</tr>`;
+				});
+				$("#emailLogsTable #emailLogsTableBody").html(html);
+			}else{
+				html+=
+					`<tr>
+						<td class="text-center" colspan="6">No record found</td>
+					</tr>`
+				$("#emailLogsTable #emailLogsTableBody").html(html)
+			}
+		}
+	}
+	
+	console.log("email log", responseData);
+	
+	if(requestType != "V"){
+		
+	}
+}
+
+function viewContractModalBody(data){
+	var html=
+	`<div class="full">
+		<div class="full">
+			<img src="${schoolSettingsLinks.logoUrl+SCRIPT_VERSION}" style="max-width:300px;width:100%"/>
+		</div>
+		<div class="w-100 d-flex justify-content-between my-4">
+			<div>
+				<p class="m-0">${data.name}</p>
+				<p class="m-0">${data.countryName}</p>
+				<p class="m-0">${data.stateName}</p>
+				<p class="m-0">${data.cityName}</p>
+			</div>
+			<div calss="ml-auto">
+				<p class="m-0"><b>Date: </b>${data.createdAt == ""? "N/A":convertU2L(data.createdAt, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</p>`;
+				if(data.createdAt != ""){
+					var time = data.createdAt;
+					time=time.split(" ");
+					time = time[1].split(":");
+					html+=`<p class="m-0"><b>Time: </b>${data.createdAt == ""? "N/A":`${time[0]}:${time[1]}${time[0]>=12?"PM" : "AM"}`}</p>`;
+				}
+			html+=`</div>
+		</div>
+		<div id="editorData"></div>
+		${/*<div class="full">
+			<div class="signuture py-3">
+				<img src="${PATH_FOLDER_IMAGE2}paulsignature.png${SCRIPT_VERSION}" style="max-width:120px;width:100%"/>
+			</div>
+			<div class="signuture">
+				<p class="m-0">${data.createdByName}</p>
+				<p class="m-0">${data.schoolName}</p>
+				<p class="m-0">(Authorised Signatory for International Schooling)</p>
+			</div>
+		</div>*/''}
+		<div class="full mt-4">
+			<div class="d-flex">
+				<p class="m-0"><b>Address:</b> ${data.schoolLocation}</p>
+				${/*<p class="m-0 ml-auto">${data.name}</p>*/''}
+			</div>
+			
+			${data.publishedDate != ""? `<p class="m-0"><b>Date:</b> ${changeDateFormat(new Date(data.publishedDate), "MMM dd, yyyy hh:mm A")}</p>`:``}
+		</div>
+	</div>`;
+	return html;
+}
+
+function calculateContractEndDate() {
+    var startDate = $("#contractStartDate").val();
+    var duration = parseInt($("#contractDuration").val());
+    if (startDate && duration) {
+        var sDate = new Date(startDate);
+        var eDate = new Date(sDate);
+        eDate.setFullYear(sDate.getFullYear() + duration);
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var endDateFormatted = monthNames[eDate.getMonth()] + " " + (eDate.getDate() > 9 ? eDate.getDate() : "0" + eDate.getDate()) + ", " + eDate.getFullYear();
+        $("#contractEndDate").val(endDateFormatted);
+    } else {
+        $("#contractEndDate").val("");
+    }
+}
+function calculateValidityEndDate() {
+    var startDate = $("#validityStartDate").val();
+    var duration = parseInt($("#validityDuration").val());
+    if (startDate && duration) {
+        var sDate = new Date(startDate);
+        var eDate = new Date(sDate);
+        eDate.setDate(sDate.getDate() + duration);
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var endDateFormatted = monthNames[eDate.getMonth()] + " " + (eDate.getDate() > 9 ? eDate.getDate() : "0" + eDate.getDate()) + ", " + eDate.getFullYear();
+        $("#validityEndDate").val(endDateFormatted);
+    } else {
+        $("#validityEndDate").val("");
+    }
+}
+
+function signatureTable(partnerType, organisationName) {
+	var $editorContent = $("#editorData").length ? $("#editorData") : $(".jodit-workplace");
+	if ($editorContent.find("#leftSignatureBox").length || $editorContent.find("#rightSignatureBox").length) {
+		return;
+	}
+	var resellerName = "";
+	var resellerBracket = "";
+	if (partnerType === "I" && !organisationName) {
+		resellerName = $("#partnerName").val();
+		resellerBracket = "(As Individual)";
+	} else if (partnerType === "O") {
+		resellerName = organisationName || $("#partnerName").val();
+		var shortForm = resellerName
+			.split(/\s+/)
+			.map(w => w[0])
+			.join("")
+			.toUpperCase();
+		resellerBracket = `(${shortForm})`;
+	} else {
+		resellerName = $("#partnerName").val();
+		resellerBracket = "(Reseller)";
+	}
+	var html = `
+	  <table border="1" style="border-collapse:collapse; width:100%; text-align:center;">
+		<tbody>
+		  <tr>
+			<td style="width:50%; padding:10px; vertical-align:top;">
+			  For <b>INTERNATIONAL SCHOOLING PTE. LTD.</b><br/>
+			  (ISPL)
+			  <div id="leftSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+			  <p style="margin:0;"><i>(Signature)</i></p>
+			</td>
+			<td style="width:50%; padding:10px; vertical-align:top;">
+			  For <b><span id="resellerName" class="txt-capitalize-case">${resellerName}</span></b><br/>
+			  ${resellerBracket}
+			  <div id="rightSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+			  <p style="margin:0;"><i>(Signature)</i></p>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="padding:10px; text-align:left; font-size:14px;">
+			  Authorized Signatory - <span id="leftSignatoryName" class="txt-capitalize-case">${$("#firstPartnerName").val()}</span><br/>
+			  Designation – <span id="leftDesignation" class="txt-capitalize-case">${$("#firstPartnerDesignation").val()}</span><br/>
+			  Date: <span id="leftDate">${changeDateFormat(new Date(), "MMM-dd-yyyy")}</span>
+			</td>
+			<td style="padding:10px; text-align:left; font-size:14px;">
+			  Authorized Signatory - <span id="rightSignatoryName" class="txt-capitalize-case">${$("#partnerName").val()}</span><br/>
+			  Designation – <span id="rightDesignation" class="txt-capitalize-case">${$("#partnerDesignation").val()}</span><br/>
+			  Date: <span id="rightDate">____</span>
+			</td>
+		  </tr>
+		</tbody>
+	  </table>
+	  <br/>`;
+	editor.s.setCursorIn(editor.editor, false); 
+	editor.s.insertHTML(html);
+}
+
+async function previewContractPdf(){
+	var payload = {
+        commentData: editor.getEditorValue(),
+        b2bleadId: parseInt($("#b2bLeadId").val())
+    };
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
+	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		showMessageTheme2(0, responseData.message);
+		return;
+	}
+	var byteArray = new Uint8Array(responseData.pdfData);
+	var blob = new Blob([byteArray], { type: "application/pdf" });
+	var pdfUrl = URL.createObjectURL(blob) + "#toolbar=0&navpanes=0&scrollbar=0";
+	var modalHtml = `
+		<div class="modal fade" id="pdfPreviewModal" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document" style="max-width:60%;">
+			<div class="modal-content">
+			  <div class="modal-header p-2 bg-primary">
+				<h5 class="modal-title ml-2 font-weight-bold text-white">Contract Preview</h5>
+				<button type="button" class="close text-white mr-1" data-dismiss="modal">&times;</button>
+			  </div>
+			  <div class="modal-body" style="height:80vh;">
+				<iframe src="${pdfUrl}" frameborder="0" style="width:100%; height:100%;"></iframe>
+			  </div>
+			</div>
+		  </div>
+		</div>`;
+
+	if ($("#pdfPreviewModal").length == 1) {
+		$("#pdfPreviewModal").remove();
+	}
+	$("body").append(modalHtml);
+	$("#pdfPreviewModal").modal("show");
+}
+
+function bindContractFormEvents(partnerType) {
+	if (partnerType == "I") {
+		$("#partnerName").off("input").on("input", function () {
+			$("#resellerName").text($(this).val());
+			$("#rightSignatoryName").text($(this).val());
+		});
+	} else {
+		$("#partnerName").off("input").on("input", function () {
+			$("#rightSignatoryName").text($(this).val());
+		});
+	}
+	$("#firstPartnerName").off("input").on("input", function () {
+		$("#leftSignatoryName").text($(this).val());
+	});
+	$("#firstPartnerDesignation").off("input").on("input", function () {
+		$("#leftDesignation").text($(this).val());
+	});
+	$("#partnerDesignation").off("input").on("input", function () {
+		$("#rightDesignation").text($(this).val());
+	});
+}
+
+// function checkPreviewButtonVisibility() {
+//     var editorContent = $("#editorData").text().trim() || $(".jodit-wysiwyg").text().trim();
+//     var hasFile = $("#recipientSignatureUpload")[0].files.length > 0;
+//     if (editorContent.length > 0 && hasFile) {
+//         $("#previewContractBtn").show();
+//     } else {
+//         $("#previewContractBtn").hide();
+//     }
+// }

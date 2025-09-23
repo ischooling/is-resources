@@ -445,7 +445,7 @@ function autoSelectElementByValue(elementId, value){
 	}
 }
 
-function callLocationForPayment(){
+function callLocationForPayment(formId){
 	if(LOCATION_SERVICE_BYPASS=='true'){
 		callLocationForPaymentFill(JSON.parse(DEFAULT_LOCATION))
 	}else{
@@ -454,7 +454,7 @@ function callLocationForPayment(){
 			type : "GET",
 			url : PRO_IP_API_URL,
 			success : function(data) {
-				callLocationForPaymentFill(data)
+				callLocationForPaymentFill(data, formId)
 			},
 			error: function(e){
 				if (checkonlineOfflineStatus()) {
@@ -464,9 +464,13 @@ function callLocationForPayment(){
 		});
 	}
 }
-async function callLocationForPaymentFill(data){
+async function callLocationForPaymentFill(data, formId){
 	if(data!=undefined && data !=''){
-		$("#location").val(JSON.stringify(data));
+		if(formId != undefined){
+			$("#" + formId + " #location").val(JSON.stringify(data));
+		}else{
+			$("#location").val(JSON.stringify(data));
+		}
 	}
 }
 

@@ -247,8 +247,7 @@ function signupTeacherStage6OnLoadEvent(){
 	});
 }
 
-function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType) {
-
+function callForSignupTeacherAgreement(formId, userId, agreementLogId, controlType) {
 	if (!$('#agreementDeclarationConfirm').is(':checked')) {
 		showMessageTheme2(2, ' Please Accept the Declaration.');
 		return false
@@ -281,12 +280,12 @@ function callForSignupTeacherAgreement(formId,userId,agreementLogId, controlType
 				if(response.status == "3"){
 					redirectLoginPage();
 				}else if(response.status == "0" || response.status == "3"){
-					showMessageTheme2(0, res.message,"", true);
+					showMessageTheme2(0, response.message,"", true);
 				}
 				flag=false;
 			}else{
 				if(controlType=='SIGNUP'){
-					getStage6Data();
+					getStage5Data();
 				}else{
 					$('#teacherAgreementModal').modal('hide');
 					if($('#showTimePrefModal').val() == "true"){

@@ -675,7 +675,6 @@ function getRequestForPPCRequest(formId, moduleId, folderName) {
     }
   }
   PPCRequestDTO["utmTerm"] = getCookie("ut");
-  debugger;
   PPCRequestDTO["servingBaseUrl"] = getServingBaseUrl();
   return PPCRequestDTO;
 }
@@ -1451,6 +1450,7 @@ function callCampain(formId, value, elementId) {
     },
   });
 }
+
 //Browser detail
 function getBrowserDetail() {
   var nVer = navigator.appVersion;

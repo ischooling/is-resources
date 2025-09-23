@@ -112,9 +112,16 @@ function refreshCaptcha(id) {
   }
 }
 function getURLForHTML(apiType, suffixUrl) {
-  return (
-    BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl
-  );
+  if(apiType == "" || apiType == undefined){
+    return (
+      BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + suffixUrl
+    );
+  }else{
+    return (
+      BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl
+    );
+  }
+  
 }
 function getURLForHTMLWithPayload(apiType, suffixUrl) {
   let url = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl;
@@ -768,11 +775,11 @@ function callEmailCheck(formId, moduleId) {
         // 	$('#allReadyEmailFooter').show();
         // } else
         if (data["statusCode"] == "0044" || data["statusCode"] == "0043") {
-          showWrapper(true);
+          showWrapper(true, data["fr"], data["extra1"]);
           hideStep1Div();
           $("#emailVerify").show();
         } else if (data["statusCode"] == "02") {
-          showWrapper(true);
+          showWrapper(true, data["fr"], data["extra1"]);
           hideStep1Div();
           $("#userDeclined").show();
         } else {
@@ -1224,6 +1231,7 @@ function callStatesNew(formId, value, elementId, bindElementId) {
 // }
 
 function callForResetPassword(formId, moduleId) {
+  console.trace()
   hideMessage("");
   if (
     $("#password").val().trim() == "" &&
@@ -2343,7 +2351,8 @@ function bindFileUploadNew1(
                   "14" == uploadCategoryId ||
                   "15" == uploadCategoryId ||
                   "16" == uploadCategoryId ||
-                  "17" == uploadCategoryId
+                  "17" == uploadCategoryId ||
+                  "75" == uploadCategoryId
                 ) {
                   if (
                     data.result.userRole == "" ||
@@ -4022,6 +4031,20 @@ function showWarningMessage(warningMessage, functionName) {
     $("#statusMessage-1").html(
       '<svg xmlns="http://www.w3.org/2000/svg" width="70px" fill="#d92550" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>'
     );
+  }else if(warningMessage == "Are you sure you want to send credentials email to student?"){
+    $("#remarksresetDelete .modal-header")
+      .removeClass("bg-danger")
+      .addClass("bg-info");
+    $("#statusMessage-1 i").removeClass("fa-times");
+    $("#statusMessage-1 i").removeClass("text-danger");
+    $("#statusMessage-1 i").addClass("fa-envelope");
+    $("#statusMessage-1 i").css({ color: "#57abff" });
+    $("#remarksresetDelete .modal-footer #resetDeleteErrorWarningYes")
+      .removeClass("btn-outline-danger")
+      .addClass("btn-outline-info");
+    $("#remarksresetDelete .modal-footer #resetDeleteErrorWarningNo")
+      .removeClass("btn-danger")
+      .addClass("btn-info");
   }
 
   functionName = "$('#remarksresetDelete').modal('hide');" + functionName + ";";
@@ -4281,13 +4304,24 @@ function renderIsdCode(formId, elementId, defaultCountryISOCode) {
   }
   return iti;
 }
-function createSelect2Element(formId, elementId) {
-  if (
-    $("#" + formId + " #" + elementId).hasClass("select2-hidden-accessible")
-  ) {
+function createSelect2Element(formId, elementId, placeholder) {
+  if ($("#" + formId + " #" + elementId).hasClass("select2-hidden-accessible") ) {
     $("#" + formId + " #" + elementId).select2("destroy");
   }
-  $("#" + formId + " #" + elementId).select2();
+  if(placeholder != undefined){
+    $("#" + formId + " #" + elementId).select2({
+      placeholder:placeholder,
+    });
+  }else{
+    $("#" + formId + " #" + elementId).select2();
+  }
+  
+}
+
+function destroySelect2Element(formId, elementId) {
+  if ($("#" + formId + " #" + elementId).hasClass("select2-hidden-accessible") ) {
+    $("#" + formId + " #" + elementId).select2("destroy");
+  }
 }
 
 $(document).ready(function () {
@@ -4567,6 +4601,26 @@ function changeDateFormat(date, dateFormat) {
       (minutes > 9 ? minutes : "0" + minutes) +
       ":" +
       (seconds > 9 ? seconds : "0" + seconds) +
+      " " +
+      ampm
+    );
+  } else if ("MMM dd, yyyy hh:mm A" == dateFormat) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    return (
+      M.months[date.getMonth()] +
+      " " +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      ", " +
+      date.getFullYear() +
+      " " +
+      (hours > 9 ? hours : "0" + hours) +
+      ":" +
+      (minutes > 9 ? minutes : "0" + minutes) +
       " " +
       ampm
     );
@@ -4887,6 +4941,9 @@ $(document).on("hidden.bs.modal", ".modal", function () {
     $(".modal-backdrop")
       .last()
       .css("z-index", newZIndex - 10);
+    if(!$("body").hasClass("modal-open")){
+      $("body").addClass("modal-open");
+    }
   }
 });
 
@@ -5671,6 +5728,71 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage
       });
   });
 }
+function getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(globalflag, showMessage, url, payload, parentUrl){
+  return new Promise(function (resolve, reject) {
+      $.ajax({
+          type : "POST",
+          contentType : APPLICATION_JSON_VALUE,
+          url: getURLForHTML(parentUrl, url),
+          data : JSON.stringify(payload),
+          dataType : 'json',
+          global : globalflag,
+          success : function(data) {
+              if (data.status == '0' || data.status == '2' || data.status == '3') {
+                  if(data.status == '3'){
+                      redirectLoginPage();
+                  }else{
+                      if(showMessage){
+                        showMessageTheme2(0, data.message,'',true);
+                      }
+                  }
+                  resolve(data);
+              } else {
+                  resolve(data);
+              }
+          },
+          error: function (xhr, status, e) {
+              if(showMessage){
+                showMessageTheme2(0, e.responseText,'',true);
+              }
+              reject(e);
+          }
+      });
+  });
+}
+
+function getDashboardDataBasedUrlAndPayloadWithParentUrlGET(globalflag, showMessage, url, parentUrl){
+  return new Promise(function (resolve, reject) {
+      $.ajax({
+          type : "GET",
+          contentType : APPLICATION_JSON_VALUE,
+          url: getURLForHTML(parentUrl, url),
+          dataType : 'json',
+          global : globalflag,
+          success : function(data) {
+              if (data.status == '0' || data.status == '2' || data.status == '3') {
+                  if(data.status == '3'){
+                      redirectLoginPage();
+                  }else{
+                      if(showMessage){
+                        showMessageTheme2(0, data.message,'',true);
+                      }
+                  }
+                  resolve(data);
+              } else {
+                  resolve(data);
+              }
+          },
+          error: function (xhr, status, e) {
+              if(showMessage){
+                showMessageTheme2(0, e.responseText,'',true);
+              }
+              reject(e);
+          }
+      });
+  });
+}
+
 function getActualData(){
 	var responseData={};
 	if(LOCATION_SERVICE_BYPASS=='true'){
@@ -6011,12 +6133,6 @@ function getIsoFromIsd(isdCode) {
   return country ? country.iso2 : "us";
 }
 
-
-function backToMain(){
-  $("#dashboardContentInHTML").show();
-  $("#dashboardContentInHTMLAdditional").hide();
-}
-
 function safeUUID() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -6045,11 +6161,176 @@ function safeUUID() {
 function showAndHideDashboardAndAdditionalContent(type){
   if(type == "main"){
     $("#dashboardContentInHTML").show();
-    $("#dashboardContentInHTMLAdditional").html();
+    $("#dashboardContentInHTMLAdditional").html("");
     $("#dashboardContentInHTMLAdditional").hide();
   }else if(type == "additional"){
     $("#dashboardContentInHTML").hide();
-    $("#dashboardContentInHTMLAdditional").html();
+    $("#dashboardContentInHTMLAdditional").html("");
     $("#dashboardContentInHTMLAdditional").show();
   }
+}
+
+//Fill Browser data
+function fillBrowserDetail() {
+  var browserDetails = getBrowserDetail();
+  if (browserDetails != undefined && browserDetails != "") {
+    return JSON.stringify(browserDetails);
+  }
+  return "{}";
+}
+
+//Browser detail
+function getBrowserDetail() {
+  var nVer = navigator.appVersion;
+  var nAgt = navigator.userAgent;
+  var browserName = navigator.appName;
+  var fullVersion = "" + parseFloat(navigator.appVersion);
+  var majorVersion = parseInt(navigator.appVersion, 10);
+  var nameOffset, verOffset, ix;
+
+  // In Opera, the true version is after "Opera" or after "Version"
+
+  if ((verOffset = nAgt.indexOf("Opera")) != -1) {
+    browserName = "Opera";
+    fullVersion = nAgt.substring(verOffset + 6);
+    if ((verOffset = nAgt.indexOf("Version")) != -1)
+      fullVersion = nAgt.substring(verOffset + 8);
+  }
+  // In MSIE, the true version is after "MSIE" in userAgent
+  else if ((verOffset = nAgt.indexOf("MSIE")) != -1) {
+    browserName = "Microsoft Internet Explorer";
+    fullVersion = nAgt.substring(verOffset + 5);
+  }
+  // In Chrome, the true version is after "Chrome"
+  else if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
+    browserName = "Chrome";
+    fullVersion = nAgt.substring(verOffset + 7);
+  }
+  // In Safari, the true version is after "Safari" or after "Version"
+  else if ((verOffset = nAgt.indexOf("Safari")) != -1) {
+    browserName = "Safari";
+    fullVersion = nAgt.substring(verOffset + 7);
+    if ((verOffset = nAgt.indexOf("Version")) != -1)
+      fullVersion = nAgt.substring(verOffset + 8);
+  }
+  // In Firefox, the true version is after "Firefox"
+  else if ((verOffset = nAgt.indexOf("Firefox")) != -1) {
+    browserName = "Firefox";
+    fullVersion = nAgt.substring(verOffset + 8);
+  }
+  // In most other browsers, "name/version" is at the end of userAgent
+  else if (
+    (nameOffset = nAgt.lastIndexOf(" ") + 1) <
+    (verOffset = nAgt.lastIndexOf("/"))
+  ) {
+    browserName = nAgt.substring(nameOffset, verOffset);
+    fullVersion = nAgt.substring(verOffset + 1);
+    if (browserName.toLowerCase() == browserName.toUpperCase()) {
+      browserName = navigator.appName;
+    }
+  }
+
+  // trim the fullVersion string at semicolon/space if present
+
+  if ((ix = fullVersion.indexOf(";")) != -1)
+    fullVersion = fullVersion.substring(0, ix);
+  if ((ix = fullVersion.indexOf(" ")) != -1)
+    fullVersion = fullVersion.substring(0, ix);
+
+  majorVersion = parseInt("" + fullVersion, 10);
+  if (isNaN(majorVersion)) {
+    fullVersion = "" + parseFloat(navigator.appVersion);
+    majorVersion = parseInt(navigator.appVersion, 10);
+  }
+
+  return {
+    name: browserName,
+    fullVersion: fullVersion,
+    shortVersion: majorVersion,
+    navAppName: navigator.appName,
+    uAgentFull: navigator.userAgent,
+  };
+}
+function getUploadInputBtn(inputId, uploadViewElementId, fileType, elem_id, btn_label_name, file_input_show_hide_flag, viewAttachmentModalId, is_attchementPDF, is_attchementUploaded, viewAttachmentFlag){
+  var html =
+  `<label class="label text-left full">${btn_label_name} :</label>
+    <div class="upload-btn-wrapper box-shadow-none text-left d-flex flex-wrap" style="align-items: center;">`;
+      if(file_input_show_hide_flag){
+        html+=
+        `<div id="policeVeriProfile" class="file-btn  text-left w-fit-content float-left position-relative">
+          <span id="fileName8" class="fileName" style="display: none;"></span> 
+          <input onchange="uploadDocsFun(this, 'verify', \'${uploadViewElementId}\', \'${viewAttachmentFlag}\');" class="file-input" type="file" name="${inputId}" id="${inputId}" fileType="${fileType}" elem-id="${elem_id}" value="Upload ${btn_label_name}"/> 
+          <span class="btn primary-bg white-txt-color mt-1">Upload Police Verification</span>
+        </div>`;
+      }
+      if(viewAttachmentFlag){
+        html+=`<a id="${uploadViewElementId}" href="javascript:void(0);" target="_self" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1" data-file-extension="${is_attchementPDF ? 'P':'I'}" data-attachment-url="${is_attchementUploaded != ""?is_attchementUploaded:''}" style="${is_attchementUploaded != '' ? '' : 'display:none'  }" onclick="viewAttachmentInModal(this, \'${viewAttachmentModalId}\')">
+          <i class="fa fa-eye"></i>
+        </a>`;
+      }
+    html+=`</div>`;
+  return html;
+}
+
+function getDuration(startDate, endDate) {
+  var diffMs = new Date(endDate).getTime() - new Date(startDate).getTime();
+  if (diffMs < 0) diffMs = -diffMs;
+  var totalSec = Math.floor(diffMs / 1000);
+  var hours = Math.floor(totalSec / 3600);
+  var minutes = Math.floor((totalSec % 3600) / 60);
+  var seconds = totalSec % 60;
+  return [
+    String(hours).padStart(2, '0'),
+    String(minutes).padStart(2, '0'),
+    String(seconds).padStart(2, '0')
+  ].join(':');
+}
+
+function cleanBase64Images(htmlContent) {
+  if (!htmlContent || typeof htmlContent !== "string") return htmlContent;
+  return htmlContent.replace(
+    /(<img[^>]+src=["']data:image\/[^;]+;base64,)([^"']+)(["'][^>]*>)/gi,
+    function(match, prefix, base64Data, suffix) {
+      var fixedBase64 = base64Data.replace(/[\r\n]+/g, '');
+      fixedBase64 = fixedBase64.replace(/ /g, '+');
+      fixedBase64 = fixedBase64.replace(/[^A-Za-z0-9+/=]/g, '');
+      return prefix + fixedBase64 + suffix;
+    }
+  );
+}
+
+function handleRecipientSignatureUpload(input, targetId){
+  var file = input.files[0];
+  if(!file) return;
+
+  var allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+  if(allowedTypes.indexOf(file.type) === -1){
+    showMessageTheme2(2, "Only JPG or PNG images are allowed.");
+    input.value = "";
+    return;
+  }
+  
+  if (file.size > 300 * 1024) {
+    showMessageTheme2(2, "File size must be less than 300 KB.");
+    input.value = "";
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(evt){
+    var base64ImgTag = `<img src="${evt.target.result}" alt="Recipient Signature" data-name="${file.name}" style="max-width:120px;display:block;margin:auto;"/>`;
+    var $editorContent = $(".jodit-workplace").length ? $(".jodit-workplace") : $("#editorData");
+    var $targetBox = $editorContent.find("#" + targetId);
+    if($targetBox.length){
+      $targetBox.html(base64ImgTag);
+    }
+  };
+  reader.readAsDataURL(file);
+  if(targetId == "rightSignatureBox"){
+    $("#rightDate").text(changeDateFormat(new Date(), "MMM-dd-yyyy"))
+  }
+}
+
+function updateFileName(input){
+  var fileName = input.files.length > 0 ? input.files[0].name : "Choose file";
+  $(input).next(".custom-file-label").text(fileName);
 }

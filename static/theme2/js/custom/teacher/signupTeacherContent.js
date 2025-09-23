@@ -8,15 +8,15 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     $("body").append(generateTeacherEnrollmentContent(moduleName));
     createStepsImage();
     getFormsValidation();
-    if(signupPage >= 5 && signupPage <=6){
-        await getStage4Data();
-        if(signupPage == 6){
+    if(signupPage >= 6 && signupPage <=7){
+        await getStage5Data();
+        if(signupPage == 7){
             $("#submitVerificationModal").modal('hide');
 		    $('#inReviewForTeacherVerificationModal').modal({backdrop: 'static', keyboard: false});
         }
     }else{
-        if(signupPage >= 7){
-            await getStage5Data();
+        if(signupPage==5){
+            await getStage4Data();
         }
         if(signupPage==8){
             await getStage6Data();
@@ -152,7 +152,7 @@ function generateTeacherEnrollmentContent(moduleName){
                             <a>
                                 <span class="step-order" style="text-transform: capitalize !important;">Step 4</span>
                                 <div class="icon-circle"></div>
-                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Verification</span>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Contract Details</span>
                                 <span class="step-arrow-teacher step4"></span>    
                             </a>
                         </li>
@@ -160,7 +160,7 @@ function generateTeacherEnrollmentContent(moduleName){
                             <a>
                                 <span class="step-order" style="text-transform: capitalize !important;">Step 5</span>
                                 <div class="icon-circle"></div>
-                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Contract Details</span>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Verification</span>
                                 <span class="step-arrow-teacher step5"></span>    
                             </a>
                         </li>
@@ -312,7 +312,7 @@ function submitVerificationModal(){
                         </h4>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn k8-theme-btn secondary-bg white-txt-color" onclick="saveVerificationDetails('teacherSignupStage4');">Submit</button>
+                        <button type="submit" class="btn k8-theme-btn secondary-bg white-txt-color" onclick="saveVerificationDetails('teacherSignupStage5');">Submit</button>
                     </div>
                 </div>
             </div>
@@ -446,10 +446,10 @@ function videoInstructionModalContent() {
                 <div id="recordingSection"></div>
                 <h5 id="recordingWaitingText" style="font-weight: bold; color: #FFC008; margin-top: 12px; display: none;"></h5>
                 <div class="d-flex text-right" style="justify-content:space-between; align-items:center;">
-                    <a id="recordYourDemoInsideBtn" href="javascript:void(0);" class="btn btn-primary" style="border-radius: 6px;font-weight: bold;margin-top: 3%;">
+                    <button id="recordYourDemoInsideBtn" class="btn btn-primary" style="border-radius: 6px;font-weight: bold;margin-top: 3%;">
                         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Record your Demo<span>
-                    </a>
+                    </button>
                     <button id="approveDemoBtn" onclick="approvedDemoRecording();" class="btn btn-primary rounded mt-3" style="display: none;">Approve</button>
                 </div>
             </div>
@@ -461,7 +461,10 @@ function videoInstructionModalContent() {
 function getTeacherBasicInfoContent(signupTeacher){
     signupTeacher = signupTeacher.details.teacher;
     var html=
-        `<input type="hidden" id="userId" value="${USER_ID}" />
+        `<style>
+            .valid-check:after{translate: -12px;}
+        </style>
+        <input type="hidden" id="userId" value="${USER_ID}" />
         <input type="hidden" id="countryData" value="IN" />
         <input type="hidden" id="countryIsd" value="91" />
         <h3 id="first_step" >Personal Details</h3>
@@ -724,6 +727,19 @@ function getTeacherProfessionalDetailsContent(stup){
                     </div>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-holder">
+                    <label class="full">Internet Speed Test Screenshot <sup class="sup">*</sup></label>
+                    <div class="full upload-item-wrapper clone-item">
+                        <div class="upload-btn-wrapper mt-1 upload-item">
+                            <div class="uploaded-file valid-field valid-check" id="fileupload11Span" >${stup.uploadNetSpeedTestSSName!=null?stup.uploadNetSpeedTestSSName:'Upload Internet Speed Test Screenshot*'}</div>
+                            <input onchange="uploadDocsFun(this, \'academic\');" class="file-input" type="file" name="fileupload11" id="fileupload11" fileType="75" elem-id="11"> <span
+                                class="upload-btn primary-txt-color"> <i class="fa fa-upload"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>`;
         
         if(stup.demoVedioLink != null && stup.demoVedioLink != undefined && stup.demoVedioLink != ""){
@@ -756,12 +772,12 @@ function getTeacherProfessionalDetailsContent(stup){
                 <h3 class="text-left mb-0">Record Your Demo</h3>
                 <div id="approvedDemoRecording"></div>`;
                 entityIds = stup.sessionEntityIdList;
-                if(entityIds.length == 2){
+                if(entityIds.length == 2 && stup.firstMeetingStatus == 'second_joined'){
                     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
                         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Select Recording(s)</span>
                     <a>`;
-                }else if(entityIds.length == 1){
+                }else if((entityIds.length == 1 && stup.firstMeetingStatus == 'first_joined') || (entityIds.length == 2 && stup.firstMeetingStatus == '')){
                     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
                         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
                         <span>Record your Demo (2nd Attempt)</span>
@@ -912,6 +928,10 @@ function getTeacherReviewAndApprovalContent(){
                                                     <td><span id="editStage3teacherSupportingDocumentCV"></span></td>
                                                 </tr>
                                                 <tr>
+                                                    <th>Internet Speed Test Screenshot:</th>
+                                                    <td><span id="editStage3teacherInternetSpeedTestSS"></span></td>
+                                                </tr>
+                                                <tr>
                                                     <th>Demo Video:</th>
                                                     <td><span id="editStage3teacherDemoVedioLink"></span></td>
                                                 </tr>
@@ -934,7 +954,6 @@ function getTeacherReviewAndApprovalContent(){
 }
 
 function getTeacherVerificationDetailsContent(data){
-    console.log(data);
     var html=
         `<style>
             .valid-check:after{translate: -12px;}
@@ -1875,6 +1894,17 @@ function step3Skeleton(){
 
 function step4Skeleton(){
 	var html=
+	`<h3 class="alternate-txt-color">Contract Details</h3>
+	<div class="step1-skeleton">
+		<div class="form-row">
+			<div class="form-holder skeleton" style="height:893px;"></div>
+		</div>
+	</div>`;
+	return html;
+}
+
+function step5Skeleton(){
+	var html=
 	`<h3 class="alternate-txt-color" style="margin-bottom: 30px !important;">Verification</h3>
 	<div class="step1-skeleton">
 		<div style="border: rgb(232, 237, 239) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px;">
@@ -1911,17 +1941,6 @@ function step4Skeleton(){
                 <div class="form-holder skeleton" style="height:32px;width:25% !important;"></div>
                 <div class="form-holder skeleton" style="height:32px;width:25% !important;"></div>
             </div>
-		</div>
-	</div>`;
-	return html;
-}
-
-function step5Skeleton(){
-	var html=
-	`<h3 class="alternate-txt-color">Contract Details</h3>
-	<div class="step1-skeleton">
-		<div class="form-row">
-			<div class="form-holder skeleton" style="height:893px;"></div>
 		</div>
 	</div>`;
 	return html;

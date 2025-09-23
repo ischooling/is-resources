@@ -31,9 +31,9 @@ function showWarningMessageForAPCourses(warningMessage, functionName) {
 }
 
 function creditLimitOver(standardId, totalCredit){
-	var min_limit=$('#standardId').attr('min_limit');
-	var max_limit=$('#standardId').attr('max_limit');
-	var upper_band=$('#standardId').attr('upper_band');
+	var min_limit=$('#signupStage3 #standardId').attr('min_limit');
+	var max_limit=$('#signupStage3 #standardId').attr('max_limit');
+	var upper_band=$('#signupStage3 #standardId').attr('upper_band');
 	if(parseFloat(totalCredit)>parseFloat(max_limit)){
 		return true;
 	}
@@ -49,11 +49,11 @@ function assignEvent(indexPosition, subjectId, courseId, tabActive, userReachedM
 	var creditsLimitsOver=false;
 	// var creditsLimitsOver=creditLimitOver(standardId, totalCredit);
 	if(flagType == 'add'){
-		if(parseFloat($('#totalCreditInput').val())>=parseFloat($('#standardId').attr('upper_band'))){
-			showMessage(2, 'You can select a maximum of '+$('#standardId').attr('upper_band')+' credits.');
+		if(parseFloat($('#totalCreditInput').val())>=parseFloat($('#signupStage3 #standardId').attr('upper_band'))){
+			showMessage(2, 'You can select a maximum of '+$('#signupStage3 #standardId').attr('upper_band')+' credits.');
 			return false;
 		}
-		if(parseFloat($('#totalCreditInput').val())>=parseFloat($('#standardId').attr('max_limit'))){
+		if(parseFloat($('#totalCreditInput').val())>=parseFloat($('#signupStage3 #standardId').attr('max_limit'))){
 			creditsLimitsOver=true
 		}
 	}
@@ -163,27 +163,31 @@ function removeAllCourse() {
 
 async function showPaymentTermCondMode() {
 	hideModalMessage('');
-	if(SHOW_PAYMENT_OPTION=='Y'){
-		await callLocationForPaymentPromise();
-		if ($("#payMode").val() == 'registration') {
-			if ($('#bookAnEnrollmentTNC').length > 0) {
-				$('#courseFeeModalTNC').modal('hide');
-				$('#bookAnEnrollmentTNC').modal('show');
-				$("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
+	if($('#signupType').val() == 'Online' ){
+		if(SHOW_PAYMENT_OPTION=='Y'){
+			await callLocationForPaymentPromise();
+			if ($("#payMode").val() == 'registration') {
+				if ($('#bookAnEnrollmentTNC').length > 0) {
+					$('#courseFeeModalTNC').modal('hide');
+					$('#bookAnEnrollmentTNC').modal('show');
+					$("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
+				} else {
+					showMessage(0, 'No payment gateway enabled, please contact administrator!');
+				}
 			} else {
-				showMessage(0, 'No payment gateway enabled, please contact administrator!');
+				if ($('#callPaymentStudentModal').length > 0) {
+					await getAirwallexMethods();
+					$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false });
+	
+				} else {
+					showMessage(0, 'No payment gateway enabled, please contact administrator!');
+				}
 			}
 		} else {
-			if ($('#callPaymentStudentModal').length > 0) {
-				await getAirwallexMethods();
-				$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false });
-
-			} else {
-				showMessage(0, 'No payment gateway enabled, please contact administrator!');
-			}
+			$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
+			$('#goToDashboardWarningMessage').hide();
 		}
-	} else {
-		
+	}else{
 		$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
 		$('#goToDashboardWarningMessage').hide();
 	}
@@ -223,7 +227,7 @@ async function getAirwallexMethods(){
 
 function getAllCourseDetails(isGradeChange, courseId) {
 	$("#commonloaderId, #commonloaderBody").show();
-	var standardId = $("#standardId").val();
+	var standardId = $("#signupStage3 #standardId").val();
 	if (isGradeChange == 'Y') {
 		$('#selectedSubjects').val('');
 	}
@@ -269,9 +273,9 @@ function getAllCourseDetails(isGradeChange, courseId) {
 				showSpecificContentNew('ft_courses', courseId);
 				$('#courseFirstListOpen').val(1);
 				$("#addAndRemoveLoader").css({ "display": "none" });
-				if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+				if($('.learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
 					var dob=$('#dob').val();
-					$('#applyStandardId').val($('#gradeId').val()).trigger('change');
+					$('#applyStandardId').val($('#signupStage3 #gradeId').val()).trigger('change');
 					$('#dob').val(dob);
 				}
 			}
@@ -286,7 +290,7 @@ function getAllCourseDetails(isGradeChange, courseId) {
 	});
 }
 function updateCourseLimit(){
-	var standardId=$('#standardId').val();
+	var standardId=$('#signupStage3 #standardId').val();
 	var totalCredit=$('#totalCreditInput').val();
 	var creditsLimitsOver=creditLimitOver(standardId, totalCredit);
 	if(creditsLimitsOver){
@@ -302,11 +306,11 @@ function updateCourseLimit(){
 
 function getRequestForCourseSelection(courseId) {
 	var studentCourseDetailsInfoDTO = {};
-	studentCourseDetailsInfoDTO['userId'] = USER_ID;
+	studentCourseDetailsInfoDTO['userId'] = $('#userId').val();
 	studentCourseDetailsInfoDTO['courseId'] = courseId;
 	studentCourseDetailsInfoDTO['callFrom'] = 'signup';
-	if ($("#standardId").length > 0) {
-		studentCourseDetailsInfoDTO['standardId'] = $("#standardId").val();
+	if ($("#signupStage3 #standardId").length > 0) {
+		studentCourseDetailsInfoDTO['standardId'] = $("#signupStage3 #standardId").val();
 	}
 	if ($("#selectedSubjects").length > 0) {
 		studentCourseDetailsInfoDTO['selectedSubjects'] = $("#selectedSubjects").val();
@@ -589,18 +593,37 @@ function callForProgressionToDashboard() {
 				if (data['status'] == '3') {
 					redirectLoginPage();
 				} else {
-					if (reloadRequired) {
-						if (data['statusCode'] == 'ELIGIBLE_ADVANCE_PLAN') {
-
-						} else if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
-							window.location.reload();
-						} else {
-							showMessage(false, data['message']);
+					if($('#signupType').val() == 'Online' ){
+						if (reloadRequired) {
+							if (data['statusCode'] == 'ELIGIBLE_ADVANCE_PLAN') {
+	
+							} else if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
+								window.location.reload();
+							} else {
+								showMessage(false, data['message']);
+							}
 						}
+
+					}else{
+						applicationSubmittedModalOffline();
 					}
 				}
 			} else {
-				goAhead(data.redirectUrl, '');
+				if($('#signupType').val() == 'Online' ){
+					goAhead(data.redirectUrl, '');
+				}else{
+					if($('#userId').val()==USER_ID){
+						applicationSubmittedModalOffline();
+					}else{
+						$('#submitApplicationWarning').modal("hide");
+						backToMain();
+						showMessage(true, 'Student has been successfully enrolled');
+						window.setTimeout(function () {
+							$('#searchEnrolled').trigger('click');
+						}, 1000);
+					}
+					
+				}
 			}
 		}
 	});
@@ -609,7 +632,7 @@ function callForProgressionToDashboard() {
 
 function getRequestForProgressionToDashboard() {
 	var proceedToDashboardRequest = {};
-	proceedToDashboardRequest['userId'] = USER_ID;
+	proceedToDashboardRequest['userId'] = $('#userId').val();
 	return proceedToDashboardRequest;
 }
 
@@ -681,12 +704,12 @@ $("#pay-registration").unbind("click").bind("click", (function () {
 }));
 
 function validateRequestForPaymentModeSelection(formId, callForm) {
-	if (($('#standardId').val() >= 11 && $('#standardId').val() <= 17) || $('#standardId').val() == 8) {
+	if (($('#signupStage3 #standardId').val() >= 11 && $('#signupStage3 #standardId').val() <= 17) || $('#signupStage3 #standardId').val() == 8) {
 		return true;
 	}
-	var MIN_LIMIT = $('#standardId').attr('min_limit');
-	var MAX_LIMIT = $('#standardId').attr('max_limit');
-	var upper_band=$('#standardId').attr('upper_band');
+	var MIN_LIMIT = $('#signupStage3 #standardId').attr('min_limit');
+	var MAX_LIMIT = $('#signupStage3 #standardId').attr('max_limit');
+	var upper_band=$('#signupStage3 #standardId').attr('upper_band');
 	var totalCredit = parseFloat($('#totalCredit').attr('totalCredit'));
 	if (parseFloat(totalCredit) < parseFloat(MIN_LIMIT)) {
 		showMessage(0, 'Please select a minimum of ' + MIN_LIMIT + ' credits.');
@@ -700,11 +723,11 @@ function validateRequestForPaymentModeSelection(formId, callForm) {
 
 function getRequestForPaymentModeSelection(formId, courseId) {
 	var studentCourseDetailsInfoDTO = {};
-	studentCourseDetailsInfoDTO['userId'] = USER_ID;
+	studentCourseDetailsInfoDTO['userId'] = $('#userId').val();
 	studentCourseDetailsInfoDTO['courseId'] = courseId;
 	studentCourseDetailsInfoDTO['callFrom'] = 'signup';
-	if ($("#standardId").length > 0) {
-		studentCourseDetailsInfoDTO['standardId'] = $("#standardId").val();
+	if ($("#signupStage3 #standardId").length > 0) {
+		studentCourseDetailsInfoDTO['standardId'] = $("#signupStage3 #standardId").val();
 	}
 	if ($("#selectedSubjects").length > 0) {
 		studentCourseDetailsInfoDTO['selectedSubjects'] = $("#selectedSubjects").val();
@@ -799,7 +822,7 @@ function selectPaymentmentMethod(isBack) {
 
 function getRequestForReviewAndPaymentSelection(reloadRequired) {
 	var studentRequestDTO = {};
-	studentRequestDTO['userId'] = USER_ID;
+	studentRequestDTO['userId'] = $('#userId').val();
 	studentRequestDTO['reloadRequired'] = reloadRequired;
 	return studentRequestDTO;
 }
@@ -1104,32 +1127,38 @@ function closeCourseDetailModal(){
 function callForApplicationSubmit() {
 	var flag = false;
 	hideModalMessage('');
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/submit-application',
-		data: JSON.stringify(getRequestForApplicationSubmit()),
-		dataType: 'json',
-		async: false,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-				if (data['status'] == '3') {
-					redirectLoginPage();
+	if($('#signupType').val() == 'Online' ){
+		$.ajax({
+			type: "POST",
+			contentType: APPLICATION_JSON_VALUE,
+			url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/submit-application',
+			data: JSON.stringify(getRequestForApplicationSubmit()),
+			dataType: 'json',
+			async: false,
+			success: function (data) {
+				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+					if (data['status'] == '3') {
+						redirectLoginPage();
+					} else {
+						showMessage(false, data['message']);
+					}
 				} else {
-					showMessage(false, data['message']);
+					showMessage(true, 'Thank you! Your application has been successfully submitted');
+					if($('#signupType').val() == 'Online' ){
+						applicationSubmittedModal(data.details.contactEmail);
+					}
 				}
-			} else {
-				showMessage(true, 'Thank you! Your application has been successfully submitted');
-				applicationSubmittedModal(data.details.contactEmail);
 			}
-		}
-	});
+		});
+	}else{
+		callForProgressionToDashboard()
+	}
 	return flag;
 }
 
 function getRequestForApplicationSubmit() {
 	var applicationSubmitRequest = {};
-	applicationSubmitRequest['userId'] = USER_ID;
+	applicationSubmitRequest['userId'] = $('#userId').val();
 	return applicationSubmitRequest;
 }
 
@@ -1139,12 +1168,16 @@ function applicationSubmittedModal(contactEmail){
 	$('#submitApplicationWarning').modal("hide");
 }
 
-
+function applicationSubmittedModalOffline(){
+	$('#submitApplicationMsg').html('Your enrollment application is under review. For any further queries');
+	$('#goToDashboardWarningMessage').modal({ backdrop: 'static', keyboard: false })
+	$('#submitApplicationWarning').modal("hide");
+}
 
 function switchGrade(){
-	var standardId = $('#gradeId').val();
-	if($('#standardId').val().trim()==standardId){
-		$('#standardId').val(standardId);
+	var standardId = $('#signupStage3 #gradeId').val();
+	if($('#signupStage3 #standardId').val().trim()==standardId){
+		$('#signupStage3 #standardId').val(standardId);
 	}else{
 		if($('#selectedSubjects').val().trim()!=''){
 			$('#gradeChangeWarning').remove();
@@ -1171,7 +1204,7 @@ function switchGrade(){
 }
 
 function switchGradeYes(){
-	$("#standardId").val($("#gradeId").val())
+	$("#signupStage3 #standardId").val($("#signupStage3 #gradeId").val())
 	$('#gradeChangeWarning').modal('hide');
 	$("#selectedSubjects").val("");
 	$("#controlType").val("remove");
@@ -1180,7 +1213,7 @@ function switchGradeYes(){
 
 function switchGradeNo(standardId){
 	$('#gradeChangeWarning').modal('hide');
-	$("#gradeId").val($("#standardId").val()).trigger("change");
+	$("#gradeId").val($("#signupStage3 #standardId").val()).trigger("change");
 }
 
 function signupLogout(){

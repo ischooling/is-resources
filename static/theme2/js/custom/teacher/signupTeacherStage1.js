@@ -6,17 +6,21 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 	if(!scriptExecuted){
 		// COUNTRY CODE SCRIPT
 		inputContact = document.querySelector("#phone_no");
-		itiContcat = window.intlTelInput(inputContact);
-		if(IGNORECOUNTRYARRAY.includes(signupTeacher.countryData) || signupTeacher.countryData == '' || signupTeacher.countryData == undefined || signupTeacher.countryData == null) {
-            itiContcat.setCountry('us');
-        }else{
-			itiContcat.setCountry(signupTeacher.countryData);
+		if(inputContact == null || inputContact == undefined || inputContact == '') {
+			
+		}else{
+			itiContcat = window.intlTelInput(inputContact);
+			if(IGNORECOUNTRYARRAY.includes(signupTeacher.countryData) || signupTeacher.countryData == '' || signupTeacher.countryData == undefined || signupTeacher.countryData == null) {
+			  itiContcat.setCountry('us');
+			   }else{
+				itiContcat.setCountry(signupTeacher.countryData);
+			}
+			inputContact.addEventListener('countrychange', function(e) {
+				$('#countryData').val(itiContcat.getSelectedCountryData().iso2);
+				$('#countryIsd').val(itiContcat.getSelectedCountryData().dialCode);
+			});
+			scriptExecuted = true;
 		}
-		inputContact.addEventListener('countrychange', function(e) {
-			$('#countryData').val(itiContcat.getSelectedCountryData().iso2);
-			$('#countryIsd').val(itiContcat.getSelectedCountryData().dialCode);
-		});
-		scriptExecuted = true;
 	}
 	
 	$("#teacherFirstName").blur(function() {
@@ -274,6 +278,9 @@ function autoSelectDropDownTeacherBasicInformation(formId, signupTeacher){
 	if(signupTeacher.gender != '' && signupTeacher.gender != null){
 		$('#'+formId+' #teacherGender').val(signupTeacher.gender).trigger('change');
 	}
+	if(signupTeacher.uploadNetSpeedTestSSName != "" && signupTeacher.uploadNetSpeedTestSSName != undefined){
+		$("#fileupload11Span").closest(".valid-field").addClass("true");
+	}
 	$('#'+formId+' #maritalStatus').val(signupTeacher.maritalStatus).trigger('change');
 	$('#'+formId+' #countryData').val(signupTeacher.countryData).trigger('change');
 	$('#'+formId+' #countryIsd').val(signupTeacher.countryCode).trigger('change');
@@ -298,9 +305,13 @@ function autoSelectDropDownTeacherBasicInformation(formId, signupTeacher){
 	if(signupTeacher.contactNumber != ""){
 		mandatoryFields.push("phone_no");
 	}
+	if(signupTeacher.uploadNetSpeedTestSSName != ""){
+		mandatoryFields.push("fileupload11");
+	}
 }
 
 async function getStage1Data(step){
+	mandatoryFields=[];
 	if(step == '2'){
 		setSteps(2);
 		showSkeleton(true, "step2");

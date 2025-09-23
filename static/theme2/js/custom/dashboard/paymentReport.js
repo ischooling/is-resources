@@ -77,6 +77,58 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 					// $('#studentPaymentReportTable').dataTable({});
 				}
 			}
+
+			$("body").append(getWatiTemplatesHtml());
+		
+			$("#selectStudentAllDiv").attr("class","block")
+			$("#selectStudentAll").off('click').on('click', function () {
+				var studentnew = $("#studentIdMove").val();
+				var chkAll = this;
+				let chkRows = $("#studentPaymentReportTable").find(".checkStudent");
+				chkRows.each(function () {
+					$(this)[0].checked = chkAll.checked;
+				});
+				var studentNo='';
+
+				$.each($("input[name='student-move-another']:checked"), function(){
+					if(studentnew.indexOf($(this).val()) != -1){
+					}else{
+						studentNo = studentNo+','+$(this).val();
+					}
+				});
+
+				studentnew = studentnew + studentNo;
+				$("#studentIdMove").val(studentnew);
+				if($("#selectStudentAll").is(":checked")){}
+				else{
+					$("#studentIdMove").val('');
+				}
+			});
+
+			$(".checkStudent").off('click').on('click', function () {
+				var studentnew = $("#studentIdMove").val();
+				var chkAll = $("#selectStudentAll");
+				chkAll.attr("checked", "checked");
+				$("#studentPaymentReportTable .checkStudent").each(function () {
+					if (!$(this).is(":checked")) {
+						chkAll.prop('checked', false);
+						chkAll.removeAttr("checked", "checked");
+						if(studentnew.indexOf($(this).val()) != -1){
+							studentnew = studentnew.replace(","+$(this).val(), '')
+						}
+						return;
+					}
+				});
+				var studentNo='';
+				$.each($("input[name='student-move-another']:checked"), function(){
+					if(studentnew.indexOf($(this).val()) != -1){
+					}else{
+						studentNo = studentNo+','+$(this).val();
+					}  
+				});
+				studentnew = studentnew + studentNo;
+				$("#studentIdMove").val(studentnew);
+			});
 			customLoader(false);
 			return false;
 		}
@@ -459,4 +511,311 @@ function saveReferralCodeFromPaymentWindow() {
       }
     }
   });
+}
+
+function getWatiBroadcastTemplates(){
+	$("#allWatiBroadcastTemplatesList").html('');
+	$("#allWatiBroadcastTemplatesList").html('');
+	$('#mcustomWatiBroadcastTemplatesListClose').click(function(e) { 
+		//console.log("mcustomWatiTemplatesListClose :: clicked :: inside :: getWatiTemplates"); 
+		$("input#selectStudentAll").prop('checked','');
+		$('input[name="student-move-another"]').prop('checked','');
+		$("#studentIdMove").val("");
+	});
+	
+	var movestudentNo = $("#studentIdMove").val();
+	if(movestudentNo==''){
+		showMessageTheme2(0, 'Please check any one student','',false);
+		return false;
+	}
+	hideMessageTheme2('');
+	var students=$("#studentIdMove").val();
+	var selected = new Array();
+	$('input[name="student-move-another"]').each(function() {
+		selected.push($(this).val());
+   	});
+	//console.log("selected from allchecked :: " + selected);
+	students=students.substring(1,students.lenght)
+	var request={}
+	request['userId']=USER_ID;
+	request['students']=students;
+	//console.log(request);
+
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLFor('leads','get-wati-templates-for-student-list'),
+		data : JSON.stringify(request),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			if (data['statusCode'] == '0' || data['statusCode'] == '2' || data['statusCode'] == 'E001' || data['statusCode'] == 'E002') {
+				//showMessageTheme2(0, data['message'],'',true);
+				showMessageTheme2(0, data['message'],'',false);
+			} else {
+				watiTemplateContent=data;
+				//console.log('watiTemplateContent DATA : ' + JSON.stringify(watiTemplateContent));
+				$.each(watiTemplateContent.messageTemplates, function(index, obj) {
+					if(obj.customParams != null && obj.customParams != ''){
+						$.each(obj.customParams, function(i, param) {
+							var placeholder = "{{" + param.paramName + "}}";
+							var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							if (obj.bodyOriginal.includes("*{{"+param.paramName+"}}*")) {
+								var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							} else {
+								var regex = placeholder;
+							}
+							obj.body = obj.body.replace(regex, param.paramValue);
+							obj.bodyOriginal = obj.bodyOriginal.replace(regex, "<b>"+param.paramValue+"</b>");
+						});
+					}
+				});
+				
+				$("body").html(getWaringContent1());
+				var allWatiTemplatesListPopup = $("#allWatiTemplatesList");
+				allWatiTemplatesListPopup.html('');
+				$("#allWatiTemplatesList").html(customWatiTemplatesList(data));
+				var isDataTable = $.fn.dataTable.isDataTable("#mwatiBroadcastTable");
+				if(isDataTable){
+					$("#mwatiBroadcastTable").dataTable().fnDestroy();
+				}
+				$("#mwatiBroadcastTable").DataTable({
+					theme:"bootstrap4",
+					//order: [[3, 'desc']]
+				});
+				$('#mcustomWatiTemplatesList').modal('show'); //calling custom method
+				
+				var userListPopup = $("#usrPopData");
+				// userListPopup.html('');
+				userListPopup.html(swatiBroadcastSendMobileModal(data));
+
+				$("#mswatiBroadcastSendThroughMobile").modal("hide");
+				//return false;
+			}
+
+			return false;
+		}
+	});
+}
+
+function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers, d_status) {
+	$("#successFailedWatiMessagesModal").modal("hide");
+	//console.log("status of buton==" + JSON.stringify(d_status));
+	
+	$("#resetDeleteErrorWarningNo1").click(function(){
+		$("#remarksresetDelete2").hide();
+	});
+	$("#resetDeleteErrorWarningYes1").click(function(){
+		$("input#allchecked").prop('checked', false);
+		$("input#allcheckedFailed").prop('checked', false);
+		$("input#selectStudentAll").prop('checked', false); 
+		$('input[name="chk-users-lead"]').prop('checked', false);
+		$('input[name="student-move-another"]').prop('checked', false);
+	});
+	$("#resetDeleteErrorWarningYes2").click(function(){
+		$("input#allchecked").prop('checked', false);
+		$("input#allcheckedFailed").prop('checked', false);
+		$("input#selectStudentAll").prop('checked', false); 
+		$('input[name="chk-users-lead"]').prop('checked', false);
+		$('input[name="student-move-another"]').prop('checked', false);
+	});
+	$("#mcustomWatiTemplatesList").click(function(){
+		$("#selectStudentAll").prop("checked", false);
+	});
+
+	$('#templateName').html('<b>' + templateName + '</b> '); 
+	//$('#confirm_btn_data').html('<a id="confirm_btn" class="btn btn-primary mr-2" href="javascript:void(0);"  onclick="return showWarningMessageShow(\'Are you sure you want to send this data?\',\'sendWatiNotification( \\\''+templateName+'\\\','+index+') \');">SEND MSG</a>');
+	//$('#confirm_btn_data').html('<a id="resend_btn" class="btn btn-primary px-3 py-2 mr-2 mt-3 float-right" href="javascript:void(0);">Resend</a>');
+	$('#resendWatiMessagesData').html('<a id="resend_btn" class="btn btn-primary px-3 py-2 mr-2 mt-3 float-right" href="javascript:void(0);">Resend</a>');
+	
+
+	var request={}
+	request['userId']=USER_ID;
+	request['templateName']=templateName;
+	//request['broadcastName']="broadcastName";
+	//request['userData']="userData";
+	//request['leadID']=leadID; 
+	request['selectedUsers']=selectedUsers; 
+	//console.log(request);
+
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLFor('leads','send-wati-message-for-student'),
+		data : JSON.stringify(request),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			//if (data['statusCode'] == '0' || data['statusCode'] == '2' || data['statusCode'] == 'E001'|| data['statusCode'] == 'E002') {
+			if (data['statusCode'] == 'EX01' || data['statusCode'] == 'E004' ) {
+				showMessageTheme2(0, data['message'],'',false);
+				$("input#allchecked").prop('checked', false);
+				$('input[name="chk-users-lead"]').prop('checked', false);
+				return false;
+			} else { // $("input#selectStudentAll").removeAttr('checked'); 
+				$("#mswatiBroadcastSendThroughMobile").modal("hide");
+				$("#mcustomWatiTemplatesList").modal("hide");
+				$("input#allcheckedFailed").prop('checked', false);
+				$("input#selectStudentAll").prop('checked', false); 
+				$('input[name="chk-users-lead"]').prop('checked', false);
+				$('input[name="student-move-another"]').prop('checked', false);
+				//
+				$('#allcheckedFailed').prop('checked', false);
+				$('input[name="chk-users-lead-resend"]').prop('checked', false);
+				var backgrd_color, err_msg;
+				if(data.leadRes!=undefined){
+					if(d_status == "send" || d_status == "resend") {		
+						openSuccessFailedWatiMessages(data.leadRes, indexNo, templateName);  //successFailedWatiMessagesModal(data.leadRes);
+					}
+				}
+				$("#successFailedWatiMessagesModal").modal("show");
+			}
+
+			return false;
+		}
+	});
+	
+}
+
+
+function openSuccessFailedWatiMessages(resp_data,indexSF,templateName) {
+	
+	//console.log("resp_data :: " + JSON.stringify(resp_data));
+	var usrPopDataOnResend = $("#usrPopDataOnResend");
+	//usrPopDataOnResend.html('');
+	usrPopDataOnResend.html(successFailedWatiMessagesModal(resp_data));
+
+	//console.log( JSON.stringify(usrPopDataOnResend.html()));
+	$("#failedWatiTableDiv").slideDown();
+	$("#successWatiTableDiv").slideUp();
+	$("#successWatiTable").dataTable();
+
+	//if($("#successFailedWatiMessagesModal").length < 1) {
+	//$("body").append(successFailedWatiMessagesModal(resp_data))
+	//}
+	var table = $('#failedWatiTable').DataTable();
+	if (table) {
+        table.destroy();
+    }
+	var count=table.rows().count()
+	$("#failedWatiTable").dataTable({
+		lengthMenu: [[count], [count]],
+		lengthChange: false,
+		paging: false,
+		info: false
+        // columnDefs: [
+        //     { orderable: false, targets: 0 }
+        // ]
+    });
+
+	$("#successWatiDiv").css("cursor", "pointer");
+	$("#failedWatiDiv").css("cursor", "default");
+
+	$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	$("#chevron_success").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+
+	$("#successWatiDiv").click(function() {
+		$("#successWatiTableDiv").slideDown(500);
+		$("#failedWatiTableDiv").slideUp(500);
+		$("#failedWatiDiv").css("cursor", "pointer");
+		$("#successWatiDiv").css("cursor", "default");
+
+		$("#chevron_success").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	});
+
+	$("#failedWatiDiv").click(function() {
+		$("#failedWatiTableDiv").slideDown(500);
+		$("#successWatiTableDiv").slideUp(500);
+		$("#successWatiDiv").css("cursor", "pointer");
+		$("#failedWatiDiv").css("cursor", "default");
+
+		$("#chevron_failed").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_success").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	});
+
+	$('#resendWatiMessagesData').html('<a id="resend_btn" class="btn btn-primary px-3 py-2 mr-2 mt-3 float-right" href="javascript:void(0);">Resend</a>');
+	$('#selectionCountOnFailed').html('<span>Selected- </span><span id="selectedCountFailed">0</span> / <span id="totalCountFailed">0</span>');
+	$('#templateNameSF').html();
+	$('#templateNameSF').html('<b>' + templateName + '</b> '); //$('#confirm_btn_data').html('<a id="confirm_btn" class="btn btn-primary mr-2" href="javascript:void(0);"  onclick="return showWarningMessageShow(\'Are you sure you want to send this data?\',\'sendWatiNotification( \\\''+templateName+'\\\','+index+') \');">SEND MSG</a>');
+	boolvalSF =true;
+	$('#viewMethodCallingSF').html();
+    $('#viewMethodCallingSF').html('<a href="javascript:void(0)" class="btn btn-primary btn-sm rounded-circle" onclick="viewWatiTemplate('+boolvalSF+','+indexSF+', `'+templateName+'`);" > <i class="fa fa-eye text-white"></i> </a>');
+	//console.log('mt = ' + templateName);
+	$("#resend_btn").click(function () {
+		//console.log('clicked on resend') ;;
+		var sleads ='';
+		var leadNo='';
+		$.each($("input[name='chk-users-lead-resend']:checked"), function(){
+			leadNo = leadNo+','+$(this).val();
+		});
+		
+		sleads = sleads + leadNo;
+		var selectedLeads = sleads.substring(1,sleads.length); 
+		if(selectedLeads==''){
+			$('#remarksresetDelete2').modal('hide');
+			showMessageTheme2(0, 'Please check any one user to send message','',false);
+			return false;
+		}else{
+			showWarningMessageShow('Are you sure you want to resend the message?','sendWatiNotificationToUser( '+indexSF+',\''+templateName+'\',\''+selectedLeads+'\',\'resend\')', 'info-modal-sm');
+		}
+	});
+
+	var totalCheckboxes = $(".checkToSendFailed").length;
+    $("#totalCountFailed").text(totalCheckboxes);
+
+	$(".checkToSendFailed").click(function(){
+		updateSelectionCount();
+		var arrChkBox = [];
+		if($(".checkToSendFailed:checked").length>0){
+			if($(".checkToSendFailed:checked").length == $(".checkToSendFailed").length){
+				$("#allcheckedFailed").prop("checked",true);
+			}else{
+				$("#allcheckedFailed").prop("checked",false);
+			}
+			// $("#allcheckedDiv").addClass("d-inline-block").removeClass("d-none");
+		}else{
+			// $("#allcheckedDiv").addClass("d-none").removeClass("d-inline-block");
+			$("#allcheckedFailed").prop("checked",false);
+		}
+	});
+	$("#allcheckedFailed").click(function(){
+		if($(this).prop("checked")){
+			$(".checkToSendFailed").prop("checked",true);
+		}else{
+			$(".checkToSendFailed").prop("checked",false);
+		}
+		updateSelectionCount();
+	});
+
+	function updateSelectionCount(){
+        var selectedCountFailed = $(".checkToSendFailed:checked").length;
+        $("#selectedCountFailed").text(selectedCountFailed);
+    }
+}
+
+function closeModalAndFlushData(){
+	// if (emailStatusInterval) {
+	// 	clearInterval(emailStatusInterval);
+	// 	emailStatusInterval = null;
+	// }
+	// pendingEmails = [];
+	// successfulEmails = [];
+	// failedOrOtherEmails = [];
+	$("input#allchecked").prop('checked',false);
+	$("input#allCheckedEmail").prop('checked',false);
+	$('input[name="chk-users-lead"]').prop('checked',false);
+	$('input[name="chk-users-lead-email"]').prop('checked',false);
+	$(".stmsg").html('');
+	$("#successFailedWatiMessagesModalClose").modal("hide");
+	$('#allchecked').prop('checked',false);
+	$('#allCheckedEmail').prop('checked',false);
+	//added to flush all checked box
+	$("input#selectStudentAll").prop('checked',false);
+	$('input[name="student-move-another"]').prop('checked',false);
+	$("#studentIdMove").val("");
+	$("#remarksresetDelete1").remove();
+	$(".modal-backdrop").remove();
 }

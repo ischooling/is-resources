@@ -133,10 +133,10 @@ function submitSchoolAnnounce(formId,moduleId) {
 		fdata.append('lmsPlatform','37,38,39,40,41');
 	}
 	
-	fdata.append('announceTitle',escapeCharacters($("#"+formId+" #announceTitle").val()));
+	fdata.append('announceTitle', $("#"+formId+" #announceTitle").val());
 	fdata.append('attachment', $("#"+formId+" #fileuploadAnnounce").get(0).files[0]);
 	if(editor1!=undefined){
-		fdata.append('announceRemark',escapeCharacters(editor1.getData()));
+		fdata.append('announceRemark', editor1.getData().trim());
 	}
 	fdata.append('announceStartDate','');
 	fdata.append('startTime',$("#"+formId+" #startTimeInHrs").val()+':'+$("#"+formId+" #startTimeInMin").val()+':00');

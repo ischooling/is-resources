@@ -10,6 +10,18 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	var html=getLeadReportMasterContent(title, objectRights);
     $('#dashboardContentInHTML').html(html);
 
+	// var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
+	// 	html += await dashboardHeaderContent();
+	// 	html +='<div class="app-main  pb-4">'
+	// 			+'<div class="col p-0">'
+	// 				+'<div class="app-main__inner">';
+	// 					html +=await getLeadReportMasterContent(title, objectRights);
+	// 				html +='</div>'
+	// 			+'</div>'
+	// 		+'</div>'
+	// 	+'</div>';
+	// 	html +=await dashboardFooterContent();
+	// 	$('body').html(html);
 
 	$("#counselorStartDate").datepicker({
 			format : 'dd-mm-yyyy',
@@ -96,7 +108,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		var country = $("#leadReportSearch #countryId").val();
 		var utmCampaign="";
 		var utmCam = $("#leadReportSearch #searchCampaign").val();
-		if(utmCam.length>0){
+		if(utmCam!=undefined && utmCam.length>0){
 			utmCampaign=utmCam.join('@');
 		}
 		var reportType = $("#searchLeadCounselorReportType").val();
@@ -189,6 +201,11 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		placeholder:"Select Campaign"
         //dropdownParent:"#leadCounselorDataForm"
     });
+	$("#searchCountryType").select2({
+        theme:"bootstrap4",
+		placeholder:"Select Country"
+        //dropdownParent:"#leadCounselorDataForm"
+    });
     $("#dataLeadCampaignStartDate").datepicker({
         format : 'dd-mm-yyyy',
         autoclose: true,
@@ -203,6 +220,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	callLeadSourceList('reportLeadSearchForm','B2C','sourceSearch', true);
 	callLeadStatusList('reportLeadSearchForm','B2C','statusSearch', false);
 	callPCountries('reportLeadSearchForm', 0, 'countryId');
+	callPCountries('campaignForm', 0, 'searchCountryType');
 	callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','assignToSearch', true, OBJECT_RIGHTS.discardPermission, USER_ID);
 	callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','leadDemoAssign', true, OBJECT_RIGHTS.discardPermission, USER_ID);
 	callMasterCampainList('reportLeadSearchForm','','searchReportCampaign');
@@ -211,7 +229,8 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	callDaywiseLead("DAY","chart-pie-days",'','');
 	callCampainWise("DAY", "lead-source","chart-lead-source",'','');
 
-	callDeviceCount("DAY","chart-pie-device",'','');
+	callDeviceCount("DAY","chart-pie-device",'','','Y');
+	callDeviceCount("DAY","chart-pie-device-demo",'','','N');
 	
 	
 
@@ -222,7 +241,8 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 			$(".hideChartdate").css({"display":"none"})
 			callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",'','');
 			callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",'','');
-			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",'','');
+			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",'','','Y');
+			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device-demo",'','','N');
 			
 		}
 	});
@@ -241,7 +261,8 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
         }
         callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",startDate,endDate);
         callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",startDate,endDate);
-		callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",startDate,endDate);
+		callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",startDate,endDate,'Y');
+		callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device-demo",startDate,endDate, 'N');
     });
 
 	
@@ -382,6 +403,19 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
         callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
     });
 
+	$("#searchCountryType").on("change", function(){
+        var startDate = $("#dataLeadCampaignStartDate").val();
+        var endDate = $("#dataLeadCampaignEndDate").val();
+        
+        if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
+            startDate = $("#dataLeadCampaignStartDate").val();
+        }
+        if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
+            endDate = $("#dataLeadCampaignEndDate").val();
+        }
+        callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
+    });
+
     $("#btnLeadCampaignWiseSubmit").on("click",function(){
         var startDate = $("#dataLeadCampaignStartDate").val();
         var endDate = $("#dataLeadCampaignEndDate").val();
@@ -399,22 +433,55 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
     });
 }
 
+async function dashboardHeaderContent(){
+	var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
+	//console.log(schoolSettingsLinks);
+	var html=
+		'<div class="sticky-header">'
+			+'<div class="app-header header-shadow">'
+				+'<div class="app-header__logo">'
+					+'<a href="'+schoolSettingsLinks.schoolWebsite+'" target="blank" class="logo-src" style="background:url('+schoolSettingsLinks.logoUrl+SCRIPT_VERSION+');"></a>'
+				+'</div>'
+				+'<div class="app-header__logo"></div>'
+			+'</div>'
+		+'</div>';
+	return html;
+}
+
+async function dashboardFooterContent(){
+	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var html=
+	'<div class="app-wrapper-footer">'
+		+'<div class="app-footer">'
+			+'<div class="app-footer__inner">'
+				+'<div class="col">'
+					+'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+		+'<div class="server-message">'
+			+'<span class="msg" id="msgTheme2"></span>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
 function getLeadReportMasterContent(title, objectRights){
 	
-var html='<div class="app-page-title mb-3 py-2">'
-	+'<div class="page-title-wrapper">'
-	+'		<div class="page-title-heading">'
-	+'			<div class="page-title-icon">'
-	+'				<i class="fas fa-university text-primary"></i>'
-	+'			</div>'
-	+'			<div>'+title+'</div>'
-	+'		</div>'
-	+'	</div>'
-	+'</div>';
-	html+=getMainReportCard(objectRights);
-	html+=counselorReportPopup();
-	html+=getLeadReportSearchPopup(objectRights);
-	return html;
+	var html='<div class="app-page-title mb-3 py-2">'
+		+'<div class="page-title-wrapper">'
+		+'		<div class="page-title-heading">'
+		+'			<div class="page-title-icon">'
+		+'				<i class="fas fa-university text-primary"></i>'
+		+'			</div>'
+		+'			<div>'+title+'</div>'
+		+'		</div>'
+		+'	</div>'
+		+'</div>';
+		html+=getMainReportCard(objectRights);
+		html+=counselorReportPopup();
+		html+=getLeadReportSearchPopup(objectRights);
+		return html;
 }
 
 function getMainReportCard(objRight){
@@ -592,14 +659,14 @@ function getReportsTab(objRight){
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
 						<th class="text-center bg-primary text-white" style="width:110px;"><span class="changeHeadText">Counselor</span> Name</th>
-						<th class="bg-primary text-white" style="width:80px;"><span class="text-left" style="width:80px;">Total Leads</span>   <span class="float-right"> U | D</span> </th>
+						<th class="bg-primary text-white" style="width:80px;"><span class="text-left" style="width:80px;">Total</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white" style="width:75px;"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white" style="width:50px;">Un-attended</th>
 						<th class="text-center bg-primary text-white">
 							<table class="w-100 table mb-0 bg-transparent">
 								<tbody>
 									<tr>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Booked</br>Scheduled</td>
+										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>
 										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
@@ -618,6 +685,7 @@ function getReportsTab(objRight){
 						<th class="text-center bg-primary text-white" style="width:60px;">Positive</th>
 						<th class="text-center bg-primary text-white" style="width:60px;">Reserved</th>
 						<th class="text-center bg-primary text-white" style="width:60px;">Converted</th>
+						<th class="text-center bg-primary text-white" style="width:60px;">Conversion</th>
 					</tr>
 				</thead>
 				<thead id="listCounselorTheader_log" class="hidden" >
@@ -729,7 +797,7 @@ function getLeadReportChart(objRights){
 	var html='';
 	html+=`<div class="row">
 		<div class="col-md-12 col-lg-12">
-			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
+			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
 				<select class="form-control form-control-sm mr-1" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
 					<option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
 					<option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
@@ -750,24 +818,6 @@ function getLeadReportChart(objRights){
 		</div>
 	</div>
 	<hr/>
-	<div class="row">
-		<div class="col-lg-6 col-md-12">
-		<div class="main-card mb-3 card">
-			<div class="card-body">
-			<h5 class="card-title">Day Wise</h5>
-				<div id="chart-pie-days"></div>
-			</div>  
-		</div>   
-		</div>
-		<div class="col-lg-6 col-md-12">
-			<div class="main-card mb-3 card">
-			<div class="card-body">
-				<h5 class="card-title">Lead Source</h5>
-				<div id="chart-lead-source"></div>
-			</div>   
-			</div>   
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-lg-4 col-md-12">
 			<div class="main-card mb-3 card">
@@ -793,7 +843,52 @@ function getLeadReportChart(objRights){
 				</div>  
 			</div>   
 		</div>
-	</div>`;
+	</div>
+	<div class="row">
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Demo Device Wise</h5>
+					<div id="chart-pie-device-demo"></div>
+				</div>  
+			</div>   
+		</div>
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Demo Device Wise</h5>
+					<div id="chart-pie-device-type-demo"></div>
+				</div>  
+			</div>   
+		</div>
+		<div class="col-lg-4 col-md-12">
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+				<h5 class="card-title">Browser Wise Demo</h5>
+					<div id="chart-pie-browser-demo"></div>
+				</div>  
+			</div>   
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-6 col-md-12">
+		<div class="main-card mb-3 card">
+			<div class="card-body">
+			<h5 class="card-title">Day Wise</h5>
+				<div id="chart-pie-days"></div>
+			</div>  
+		</div>   
+		</div>
+		<div class="col-lg-6 col-md-12">
+			<div class="main-card mb-3 card">
+			<div class="card-body">
+				<h5 class="card-title">Lead Source</h5>
+				<div id="chart-lead-source"></div>
+			</div>   
+			</div>   
+		</div>
+	</div>
+	`;
 	return html;
 }
 
@@ -978,11 +1073,18 @@ return html;
 
 function getLeadCampaignPriceList(objRights){
 	var utmCampaignList = JSON.parse(objRights.utmCampaignList);	
+	// <th class="text-center bg-primary text-white">ACTIVE + IN-ACTIVE = Total Lead | FB API</th>
+    // <th class="text-center bg-primary text-white">Amount Spent<br/>Cost per Lead SMS | Cost per Lead FB</th>
 	var html='';
 	html+=`<div class="row">
         <div class="col-md-12 col-lg-12">
-            <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-                <div class="col-xl-4 col-lg-6 col-md-12 p-0">
+            <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" id="campaignForm">
+            	<div class="col-xl-3 col-lg-6 col-md-12 p-0">
+                    <select class="form-control  mr-1 searchCountryType" id="searchCountryType" name="searchCountryType" multiple="multiple">
+						<option></option>`
+                   html+=` </select>
+                </div>   
+				<div class="col-xl-4 col-lg-6 col-md-12 p-0">
                     <select class="form-control  mr-1 searchCampaignType" id="searchCampaignType" name="searchCampaignType" multiple="multiple">
 						<option></option>`
 						for(let u = 0; u < utmCampaignList.length; u++) {
@@ -1025,8 +1127,10 @@ function getLeadCampaignPriceList(objRights){
                 <tr>
                     <th class="text-center bg-primary text-white" style="max-width:70px;min-width:70px">Sr no.</th>
                     <th class="text-center bg-primary text-white">Campaign Name</th>
-                    <th class="text-center bg-primary text-white">ACTIVE + IN-ACTIVE = Total Lead | FB API</th>
-                    <th class="text-center bg-primary text-white">Amount Spent<br/>Cost per Lead SMS | Cost per Lead FB</th>
+                    <th class="text-center bg-primary text-white" colspan="2">
+					<span class="float-left">Amount Spent</span>
+					<span class="float-right">ACTIVE + IN-ACTIVE = Total Lead | FB API</span>
+					</th>
                     <th class="text-center bg-primary text-white" style="max-width:590px !important;width:590px">Counselor Name<br/>Lead | Active | In-active</th>
                 </tr>
             </thead>

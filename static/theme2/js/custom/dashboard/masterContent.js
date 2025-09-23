@@ -217,16 +217,17 @@ function getRelationshipContent(){
 	return html;
 }
 
-function getLearningProgramContent(schoolId){
+function getLearningProgramContent(schoolId, requestExtra){
+	if(requestExtra==undefined || requestExtra==''){
+		requestExtra = 'N';
+	}
 	var html='';
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForLearningProgramList('LEARNING_PROGRAM_LIST', schoolId)),
+		data: JSON.stringify(getRequestForLearningProgramList('LEARNING_PROGRAM_LIST', schoolId, requestExtra)),
 		dataType: "json",
-		cache: false,
-		timeout: 600000,
 		async: false,
 		success: function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
@@ -237,6 +238,10 @@ function getLearningProgramContent(schoolId){
 		}
 	});
 	return html;
+}
+
+function getAllLearningProgramContent(schoolId){
+	return getLearningProgramContent(schoolId, 'Y');
 }
 
 function getRequestForScholarschipUsers(key, userId){
@@ -701,7 +706,7 @@ function getCitiesOption(cities, preSelected){
 function getOptions(otions, preSelected){
 	var html=''
 	$.each(otions, function(k, v) {
-		html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
+		html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' enrollmentFor="'+v.extra+'" courseProviderId="'+v.extra1+'" >'+v.value+'</option>';
 	});
 	return html;
 }
@@ -928,10 +933,8 @@ function getSessionMasterContent(data, allStatus){
 				html+='<option value="'+v.value+'">'+v.value+'</option>';
 			}
 		}else{
-
 			var curyear=localStorage.getItem("convertYear");
 			if(curyear!='' && curyear!=undefined){
-				console.log(curyear);
 				var syear = v.value.toString().split("-")[0];
 				if(syear>=curyear){
 					if(v.extra=='Y'){
@@ -1088,7 +1091,7 @@ function getSessionMasterList(formId, elementId, allStatus){
 		timeout : 600000,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
 				var result = data['mastersData']['data'];
 				var html = getSessionMasterContent(result, allStatus);
@@ -1497,7 +1500,7 @@ function getToYears(lastJobFromYYYY) {
     return yearsMap;
 }
 
-function getRequestForLearningProgramList(key, schoolId){
+function getRequestForLearningProgramList(key, schoolId, requestExtra){
 	var request = {};
 	var requestData = {};
 	var authentication = {};
@@ -1505,6 +1508,7 @@ function getRequestForLearningProgramList(key, schoolId){
 	authentication['userType'] = 'COMMON';
 	requestData['requestKey'] = key;
 	requestData['requestValue'] = schoolId;
+	requestData['requestExtra'] = requestExtra;
 	request['requestData'] = requestData;
 	request['authentication'] = authentication;
 	return request;
@@ -1590,4 +1594,27 @@ function getNextGrade(formId, elementId){
 	} else {
 		return selectedOption.text();
 	}
+}
+
+
+function getTimeForDropdownContent(formId, elemntid, intervalValue){
+   var $select = $('#'+elemntid);
+   var start = 0; // Start time in minutes (0 minutes past midnight)
+   var end = 1440; // End time in minutes (1440 minutes in a day)
+   var interval = 30;
+   if(intervalValue != null && intervalValue != undefined){
+	interval = intervalValue;
+   }
+    // Interval in minutes
+	for (var hour = 0; hour < 24; hour++) {
+	   for (var minutes = 0; minutes < 60; minutes += interval) {
+		   var ampm = hour < 12 ? 'AM' : 'PM';
+		   var displayHour = hour % 12;
+		   displayHour = displayHour ? displayHour : '00'; // the hour '0' should be '12'
+		   var displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+		   var timeString = displayHour + ':' + displayMinutes + ' ' + ampm;
+		   $select.append($('<option></option>').val(timeString).html(timeString));
+	   }
+   }
+   $select.append('<option value="11:59 PM">11:59 PM</option>');
 }

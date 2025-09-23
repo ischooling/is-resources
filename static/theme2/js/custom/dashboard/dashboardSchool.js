@@ -22,11 +22,15 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     }
   } else if (pageNo == "dashboard") {
     if (SCHOOL_TYPE == "WLP") {
-      var urlSend = "/dashboard/admin-partner-dashboard?moduleId=" + moduleId;
-      getAsPost(urlSend);
-      customLoader(false);
+      // var urlSend = "/dashboard/admin-partner-dashboard?moduleId=" + moduleId;
+      // getAsPost(urlSend);
+      // customLoader(false);
       //partner-dashboard
-      //$('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
+      if(SCHOOL_ID != 2){
+        $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
+      }else{
+       $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)); 
+      }
     } else {
       callForDashboardData(
         "formIdIfAny",
@@ -213,6 +217,10 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     //     moduleId +
     //     "&ids=15,18,21&types=2"
     // );
+  } else if (pageNo == "teacher-profile-pending-bank-details") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "teacher-profile-pending-verification") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "6a") {
     callForDashboardData(
       "formIdIfAny",
@@ -659,14 +667,10 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     //var urlSend = CONTEXT_PATH+UNIQUEUUID+'/dashboard/lead-data-reports?moduleId='+moduleId+'&euid='+ENCRYPTED_USER_ID
     //window.open(urlSend, '_blank');
     //customLoader(false)
-    // var urlSend =
-    //   "/dashboard/lead-data-reports?moduleId=" +
-    //   moduleId +
-    //   "&euid=" +
-    //   ENCRYPTED_USER_ID;
+    // var urlSend ="/dashboard/lead-data-reports?moduleId=" +moduleId +"&euid=" +ENCRYPTED_USER_ID;
     // getAsPost(urlSend);
     // customLoader(false);
-    getContent(moduleId, pageNo, replaceDiv, extraParam);
+   getContent(moduleId, pageNo, replaceDiv, extraParam);
 
   } else if (pageNo == "school-announce") {
     callForDashboardData(
@@ -1064,7 +1068,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
   }
 
   //B2B Partner
-  else if (pageNo == "partner-dashboard" || pageNo == "partner-enrollment-list" || pageNo == "counselor-enrollment-list") {
+  else if (pageNo == "partner-dashboard" || pageNo == "partner-enrollment-list" || pageNo == "counselor-enrollment-list" || pageNo == "add-student-enrollment") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "admin-partner-enrollment-list") {
     // var urlSend =
@@ -2319,8 +2323,10 @@ function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
           $("#" + formId)[0].reset();
           //setTimeout(function(){ callDashboardPageSchool(roleModuleId, 'teacher-profile'); }, 1000);
         }
-        var userId = $("#profileApprovalId #userId").val();
-        $("#profileId_" + userId).remove();
+        if(formId != "teacherEditAgreement"){
+          var userId = $("#profileApprovalId #userId").val();
+          $("#profileId_" + userId).remove();
+        }
       }
       return false;
     }

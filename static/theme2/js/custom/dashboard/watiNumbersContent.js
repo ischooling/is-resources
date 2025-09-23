@@ -84,6 +84,8 @@ function getBodyOfTable() {
             const watiToken = item.watiToken.replace(/'/g, "\\'");
             const watiUrl = item.watiUrl.replace(/'/g, "\\'");
             const status = item.status.replace(/'/g, "\\'");
+            const studentWati = item.studentWati.replace(/'/g, "\\'");
+
             return `
               <tr>
                 <td>${index + 1}</td>
@@ -95,7 +97,7 @@ function getBodyOfTable() {
                   }
                 </td>
                 <td style="width:30%;">
-                  <button onclick="updateWati('${waNumber}', '${watiToken}', '${watiUrl}', '${status}');" class="update-btn btn btn-sm btn-primary " style="background-color:#1F509A" data-id="${item.id}">
+                  <button onclick="updateWati('${waNumber}', '${watiToken}', '${watiUrl}', '${status}', '${studentWati}');" class="update-btn btn btn-sm btn-primary " style="background-color:#1F509A" data-id="${item.id}">
                     Update <i class="fa fa-pencil"></i>
                   </button>
                   <button onclick="showFilterData(true, '${item.waNumber}');" class="btn btn-sm btn-alternate ">
@@ -322,7 +324,7 @@ function submitAddNumberForm(e){
   });
 }
 
-function updateWati(number, watiToken, watiUrl, status) {
+function updateWati(number, watiToken, watiUrl, status,studentWati) {
   var html = 
     `<div class="modal fade" id="updateWatiNumberModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">
       <div class="modal-dialog modal-lg modal-dialog-centered box-shadow-none" role="document" style="max-width:800px !important">
@@ -354,6 +356,13 @@ function updateWati(number, watiToken, watiUrl, status) {
                   <option value="I" ${status == "I" ? "selected" : ""}>Inactive</option>
                 </select>
               </div>
+              <div class="mb-3">
+                <label for="studentWati">Eligible for Wati Broadcast in Student List</label>
+                <select id="studentWati" class="form-control">
+                  <option value="Y" ${studentWati == "Y" ? "selected" : ""}>Active</option>
+                  <option value="N" ${studentWati == "N" ? "selected" : ""}>Inactive</option>
+                </select>
+              </div>
             </form>
           </div>
           <div class="modal-footer text-right">
@@ -376,7 +385,8 @@ function submitUpdateNumberForm(e, number, watiToken, watiUrl, status){
     number: $("#updateNumber").val().trim(),
     wUrl: $("#updateWUrl").val().trim(),
     wToken: $("#updateWToken").val().trim(),
-    status: $("#updateStatus").val()
+    status: $("#updateStatus").val(),
+    studentWati: $("#studentWati").val()
   };
 
   $.ajax({
@@ -399,6 +409,9 @@ function submitUpdateNumberForm(e, number, watiToken, watiUrl, status){
 
 var selectedUserKeys = [];
 function addWatiUser(number){
+  if($('#addWatiUserModal').length > 0){
+    $('#addWatiUserModal').remove()
+  }
   var html = 
     `<div class="modal fade" id="addWatiUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-modal="true">
       <div class="modal-dialog modal-lg modal-dialog-centered box-shadow-none" role="document" style="max-width:800px !important">

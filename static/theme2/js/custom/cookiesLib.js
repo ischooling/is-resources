@@ -33,7 +33,7 @@ function getCookie(key) {
     return false;
   }
   var keyValue = document.cookie.match("(^|;) ?" + key + "=([^;]*)(;|$)");
-  console.log("getCookie keyValue:: " + keyValue);
+  // console.log("getCookie keyValue:: " + keyValue);
   return keyValue ? keyValue[2] : "Test";
 }
 

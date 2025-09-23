@@ -167,7 +167,11 @@ button:focus {
 	width: 49% !important;
 	margin-right: 20px !important;
 }
-
+.btn-success {
+	color:#fff;
+	background-color:#1fc747 !important;
+	border-color:#1fc747
+}
 .timer{font-size: 18px;color:var(--pc);font-weight: bold; text-align: center;}
 
 .alert-message {
@@ -665,6 +669,13 @@ input::placeholder {
 		border-top: 1px solid #e6e6e6;
 	}
 	
+}
+
+@media ( max-width: 580px) {
+	.actions ul {
+		justify-content:center;
+		gap: 10px;
+	}
 }
 
 

@@ -128,7 +128,7 @@ function getReceivedTeachedProfileRequest(formId, moduleId){
   	requestBody['userId'] = USER_ID;
   	requestBody['moduleId'] = moduleId;
   	requestBody['types'] = "0,1";
-  	requestBody['ids'] = "13,24,20,21";
+  	requestBody['ids'] = "13,24"; 
 	return requestBody;
 }
 
@@ -146,7 +146,8 @@ function getPendingContractRequest(formId, moduleId){
   	requestBody['userId'] = USER_ID;
   	requestBody['moduleId'] = moduleId;
   	requestBody['types'] = "0,1";
-  	requestBody['ids'] = "19,20,22,23";
+  	// requestBody['ids'] = "19,20,22,23";
+  	requestBody['ids'] = "19";
 	return requestBody;
 }
 
@@ -173,20 +174,18 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
            	<td>${receivedTeachedProfile.mobileNumber}</td>
 			<td>${receivedTeachedProfile.userName}</td>
 			<td id="status_${receivedTeachedProfile.userId}">`;
-				if(receivedTeachedProfile.teacherFirstReset == 20){
-					html+=`Profile under verification`
-				}else if(receivedTeachedProfile.teacherFirstReset == 21){
-					html+=`Verification submitted`
+				if(receivedTeachedProfile.teacherFirstReset == 13){
+					html+=`Profile under review`;
 				}else if(receivedTeachedProfile.teacherFirstReset == 24){
-					html+=`Profile on hold`
+					html+=`Profile on hold`;
 				}else{
-					html+=`NA`
+					html+=`NA`;
 				}
 			html+=`</td>
 			<td class="text-center">`
 				if(ROLE_MODULE.viewed == 'Y'){
 					if(receivedTeachedProfile.generalMeetingId != 0){
-						html+=`<a onclick="openDemoRecordingModal('${receivedTeachedProfile.generalMeetingId}')" class="btn btn-primary btn-sm " href="javascript:void(0);">View Recording</a>`;
+						html+=`<a onclick="openDemoRecordingModal('${receivedTeachedProfile.generalMeetingId}', '${receivedTeachedProfile.userId}')" class="btn btn-primary btn-sm " href="javascript:void(0);">View Recording</a>`;
 					}else if(receivedTeachedProfile.demoVedioLink == ""){
 						html+=`N/A`
 					}else{
@@ -194,8 +193,8 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 					}
 				}
 			html+=`</td>
-			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.teacherFirstReset}', '${receivedTeachedProfile.isTeacherPoliceVerifide}');">Update Status</a>`:""}</td>
 			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${receivedTeachedProfile.userId}&moduleId=${receivedTeachedProfile.mangeUserListModId}&actionType=1a')"  >Click here</a> `:""}</td>
+			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.teacherFirstReset}', '${receivedTeachedProfile.isTeacherPoliceVerifide}');">Update Status</a>`:""}</td>
 			</tr>`;
 		}
 	}
@@ -237,12 +236,14 @@ function getPendingContractListHtml(pendingContractList){
 			<td>${pendingContract.userName}</td>
 			<td><a onclick="return callSchoolInneraction('teacher-agreement','?userId=${pendingContract.userId}&controlType=edit&moduleId=${moduleId}','section-linebox');" href="javascript:void(0);" class="waves-effect">Click here</a></td>
 			<td><a href="javascript:void(0);" onclick="return callAgreementReqModel('${pendingContract.userId}','${pendingContract.meetingId}');" class="waves-effect">Update Status</a></td>
-			<td><a href="${pendingContract.agreementUrl!=null?pendingContract.agreementUrl:'javascript:void(0);alert(\'No agreement yet generated\')'}" target="_blank"
-				class="waves-effect" style="position:relative;top:5px;"><i class="fa fa-download"></i>
-			</a> |
-			<a href="${pendingContract.agreementViewUrl!=null?pendingContract.agreementViewUrl:'javascript:void(0);alert(\'No agreement yet generated\')'}" target="_blank"
-				class="waves-effect" style="position:relative;top:5px;"><i class="fa fa-eye"></i>
-			</a></td>
+			<td>
+				${/*<a href="${pendingContract.agreementUrl!=null?pendingContract.agreementUrl:'javascript:void(0);alert(\'No agreement yet generated\')'}" target="_blank"
+					class="waves-effect" style="position:relative;top:5px;"><i class="fa fa-download"></i>
+				</a> |*/''}
+				<a href="${pendingContract.agreementViewUrl!=null?pendingContract.agreementViewUrl:'javascript:void(0);alert(\'No agreement yet generated\')'}" target="_blank"
+					class="waves-effect" style="position:relative;top:5px;"><i class="fa fa-eye"></i>
+				</a>
+			</td>
 			</tr>`;
 		}
 	}
@@ -332,43 +333,53 @@ function checkLinkValid(e, src){
 	    	$('#profileApprovalModal #userId').val(userId);
 	    	$('#profileApprovalModal #firstReset').val(firstReset);
 			let htmlOption = '';
-			if(firstReset == 13 && (Object.keys(statusUpdateHold).length == 0 || statusUpdateHold[userId] != 'verified')){
+			htmlOption = ``;
+			if(firstReset == 21 || firstReset == 22 ){
+				htmlOption = 
+				`<option value="0">Select status</option>
+				<option value="6" ${isTeacherPoliceVerifide == undefined || isTeacherPoliceVerifide == "N" ? 'disabled' : ''}>Redirect to Bank Details Step</option>
+				<option value="2">Decline</option>`
+			}else if(firstReset == 23){
+				htmlOption = `<option value="0">Select status</option>
+							  <option value="2">Decline</option>`;
+			}else{
 				htmlOption = `
-								<option value="0">Select status</option>
-								<!-- <option value="1">Approve</option> -->
-								<option value="5">Approve & Redirect to Verification Details</option>
-								<option value="4">Profile On Hold</option>
-								<option value="2">Decline</option>`;
-			}else if(firstReset == 20 || (isTeacherPoliceVerifide == 'Y' && firstReset == 21) || (Object.keys(statusUpdateHold).length != 0 && statusUpdateHold[userId] == 'verified')){
-				htmlOption = `
-								<option value="0">Select status</option>
-								<!-- <option value="1">Approve</option> -->
-								<option value="3">Approve Verification & Redirect to Contract Details</option>
-								<option value="4">Profile On Hold</option>
-								<option value="2">Decline</option>`;
-			}else if(isTeacherPoliceVerifide == 'N' && firstReset == 24 && (Object.keys(statusUpdateHold).length == 0 || statusUpdateHold[userId] != 'verified')){
-				htmlOption = `
-								<option value="0">Select status</option>
-								<!-- <option value="1">Approve</option> -->
-								<option value="5">Approve & Redirect to Verification Details</option>
-								<!-- <option value="4">Profile On Hold</option> -->
-								<option value="2">Decline</option>`;
-			}else if(isTeacherPoliceVerifide == 'Y' && firstReset == 24 || (Object.keys(statusUpdateHold).length != 0 && statusUpdateHold[userId] == 'verified')){
-				htmlOption = `
-								<option value="0">Select status</option>
-								<!-- <option value="1">Approve</option> -->
-								<option value="3">Approve Verification & Redirect to Contract Details</option>
-								<!-- <option value="4">Profile On Hold</option> -->
-								<optionU value="2">Decline</option>`;
-			}else if((Object.keys(statusUpdateHold).length == 0 || statusUpdateHold[userId] != 'verified')){
-				htmlOption = `
-								<option value="0">Select status</option>
-								<!-- <option value="1">Approve</option> -->
-								<option value="5">Approve & Redirect to Verification Details</option>
-								<option value="3">Approve Verification & Redirect to Contract Details</option>
-								<option value="4">Profile On Hold</option>
-								<option value="2">Decline</option>`;
+							<option value="0">Select status</option>
+							<!-- <option value="1">Approve</option> -->
+							<option value="3">Redirect to Contract Details</option>
+							<option value="4">Profile On Hold</option>
+							<option value="2">Decline</option>`;
 			}
+			// else if(firstReset == 20 || (isTeacherPoliceVerifide == 'Y' && firstReset == 21) || (Object.keys(statusUpdateHold).length != 0 && statusUpdateHold[userId] == 'verified')){
+			// 	htmlOption = `
+			// 					<option value="0">Select status</option>
+			// 					<!-- <option value="1">Approve</option> -->
+			// 					<option value="3">Approve Verification & Redirect to Contract Details</option>
+			// 					<option value="4">Profile On Hold</option>
+			// 					<option value="2">Decline</option>`;
+			// }else if(isTeacherPoliceVerifide == 'N' && firstReset == 24 && (Object.keys(statusUpdateHold).length == 0 || statusUpdateHold[userId] != 'verified')){
+			// 	htmlOption = `
+			// 					<option value="0">Select status</option>
+			// 					<!-- <option value="1">Approve</option> -->
+			// 					<option value="5">Approve & Redirect to Verification Details</option>
+			// 					<!-- <option value="4">Profile On Hold</option> -->
+			// 					<option value="2">Decline</option>`;
+			// }else if(isTeacherPoliceVerifide == 'Y' && firstReset == 24 || (Object.keys(statusUpdateHold).length != 0 && statusUpdateHold[userId] == 'verified')){
+			// 	htmlOption = `
+			// 					<option value="0">Select status</option>
+			// 					<!-- <option value="1">Approve</option> -->
+			// 					<option value="3">Approve Verification & Redirect to Contract Details</option>
+			// 					<!-- <option value="4">Profile On Hold</option> -->
+			// 					<optionU value="2">Decline</option>`;
+			// }else if((Object.keys(statusUpdateHold).length == 0 || statusUpdateHold[userId] != 'verified')){
+			// 	htmlOption = `
+			// 					<option value="0">Select status</option>
+			// 					<!-- <option value="1">Approve</option> -->
+			// 					<option value="5">Approve & Redirect to Verification Details</option>
+			// 					<option value="3">Approve Verification & Redirect to Contract Details</option>
+			// 					<option value="4">Profile On Hold</option>
+			// 					<option value="2">Decline</option>`;
+			// }
 			$("#profileApprovalModal #remarksStatus").html(htmlOption);
 			$('#profileApprovalId #remarksStatus').val('0');
 			getEmployeeSpecializationDropDown('profileApprovalId','employeeSpecialization');
@@ -511,6 +522,11 @@ function checkLinkValid(e, src){
 				   $("#status_"+userId).text('Profile On verification');
 				// setTimeout(function(){ callDashboardPageSchool(moduleId,'teacher-profile'); }, 1000);
 				   statusUpdateHold[userId] = 'verified'
+			   }else if($('#profileApprovalId #remarksStatus').val()==6){
+				   callCommonAction('','update-teacher-request','dashboard','RedirectToBankDetails',userId,remarks,'',roleModuleId);
+				//    $("#status_"+userId).text('Profile On verification');
+				// setTimeout(function(){ callDashboardPageSchool(moduleId,'teacher-profile'); }, 1000);
+				//    statusUpdateHold[userId] = 'verified'
 			   }
 			   $('#profileApprovalModal').modal('hide');
 			   if($('#profileApprovalId #remarksStatus').val() != 4 && $('#profileApprovalId #remarksStatus').val() != 5){
@@ -590,7 +606,7 @@ function checkLinkValid(e, src){
 	    	submitForTeacherInterviewSlots("sendMailInterViewForm","SCHOOL","SENDMAIL",moduleId);
 		});
 
-		function openDemoRecordingModal(meetingId){
+		function openDemoRecordingModal(meetingId, userId){
 			const payload = {
 				entityId: meetingId,
 				entityName: "GENERAL_MEETINGS"
@@ -604,14 +620,14 @@ function checkLinkValid(e, src){
 				async : false,
 				success : function(response) {
 					if (response.recordingArray[0].urls && response.recordingArray[0].urls.length > 0) {
-						populateTeacherRecordingModal(response.recordingArray[0].urls);
+						populateTeacherRecordingModal(response.recordingArray[0].urls, userId);
 					} else {
 						showMessage(false, "No recordings available.");
 					}
 				}
 			})
 		}
-		function populateTeacherRecordingModal(recordings) {
+		function populateTeacherRecordingModal(recordings, userId) {
 			const titles = {
 				"shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
 				"active_speaker.mp4": "Active Speaker",
@@ -671,6 +687,9 @@ function checkLinkValid(e, src){
 				}
 
 				modalContent += `
+							</div>
+							<div class="modal-footer">
+								<a href="javascript:void(0);" onclick="showWarningMessageShow('Are you sure you want to re-attempt recordings?', \'enableReattemptRecording(${userId})\');" class="btn btn-primary">Enable Re-Attempt Recordings</a>
 							</div>
 						</div>
 					</div>
@@ -846,3 +865,196 @@ function checkLinkValid(e, src){
 				}
 			});
 		}
+
+function getPendingVerificationProfileListRequestApi(formId, moduleId) {
+ hideMessageTheme2('');
+ var data = {}
+ data['firstReset'] = "21,22";
+ $.ajax({
+	 type : "POST",
+	 contentType : APPLICATION_JSON_VALUE,
+	 url : getURLForHTML('dashboard','get-pending-verification-teacher-profile'),
+	 data : JSON.stringify(data),
+	 dataType : 'json',
+	 cache : false,
+	 timeout : 600000,
+	 success : function(data) {
+		console.log(data);
+		 if (data['status'] == '0' || data['status'] == '2') {
+			 showMessageTheme2(0, data['message'],'',true);
+		 } else {
+			var html=getPendingVerificationTeachedProfileListHtml(data.teacherDetails);
+			$("#PendingVerificationProfileListBody").html(html);
+			 var table = $('#PendingVerificationProfileListTable').DataTable({"pagingType":"full"}); 
+			$('#PendingVerificationProfileListTable').on('page.dt',function(){
+				table.responsive.recalc();
+			}) 
+			$('.show-filter').on('click', function(){
+				$('.filter-fields').stop().slideToggle();
+			});
+		 }
+		 return false;
+	 }
+ });
+}
+
+function getPendingVerificationTeachedProfileListHtml(teacherDetails){
+	var html='';
+	if(teacherDetails.length>0){
+		for (let iu = 0; iu < teacherDetails.length; iu++) {
+			const teacherDetail = teacherDetails[iu];
+			
+			html+=`<tr id="profileId_${teacherDetail.userId}">	
+            <td style="text-align:center;">${iu+1}</td>
+			<td>${teacherDetail.countryName}</td>
+           	<td>${teacherDetail.teacherName}</td>
+           	<td>${teacherDetail.contactNumber}</td>
+			<td>${teacherDetail.email}</td>
+			<td id="status_${teacherDetail.userId}">`;
+				if(teacherDetail.policeVerificationAcceptance == 'Y'){
+					html+=`Submitted`;
+				}else{
+					html+=`Pending`
+				}
+			html+=`</td>
+			<td class="text-center">`
+				if(ROLE_MODULE.viewed == 'Y'){
+					if(teacherDetail.policeVerificationAcceptance == 'Y'){
+						html+=`<a href="javascript:void(0);" onclick="openVerficationModal(${teacherDetail.userId});" class="btn btn-primary btn-sm text-white">View</a>`;
+					}else{
+						html+=`N/A`;
+					}
+				}
+			html+=`</td>
+			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${teacherDetail.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')"  >Click here</a> `:""}</td>
+			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${teacherDetail.userId}', '${teacherDetail.firstReset}', '${teacherDetail.policeVerificationAcceptance == undefined ? "N" : teacherDetail.policeVerificationAcceptance}');">Update Status</a>`:""}</td>
+			</tr>`;
+		}
+	}
+	return html;
+}
+
+async function openVerficationModal(userId) {
+    var payload = { userId: userId };
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-verification-details', payload, '/teacher/signup');
+	if($("#verificationModal").length == 1){
+		$("#verificationModal").remove();
+	}
+	$("body").append(`
+		<div class="modal fade" id="verificationModal" tabindex="-1" role="dialog" aria-labelledby="verificationModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-header bg-primary text-white">
+						<h5 class="modal-title" id="verificationModalLabel">Teacher Verification Details</h5>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body" id="verificationModalBody" style="max-height: 600px; overflow: auto;">
+						<!-- Content will be injected here -->
+					</div>
+				</div>
+			</div>
+		</div>
+	`);
+    $("#verificationModalBody").html(getVerificationModalContent(responseData.details, userId));
+    $("#verificationModal").modal("show");
+	if($("#teacherVerificationAttchamentModal").length<1){
+		$("body").append(`<div class="modal fade fade-scale" id="teacherVerificationAttchamentModal" tabindex="-1">
+			<div class="modal-dialog modal-md  box-shadow-none" role="document">
+				<div class="modal-content">
+					<div class="modal-header pt-2 pb-2 bg-primary justify-content-between flex-wrap">
+						<h6 class="heading text-white">Preview File</h6>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body m-0 py-2" style="margin-top:0 !important">
+						
+					</div>
+				</div>
+			</div>
+		</div>`);
+	}
+}
+
+
+
+function getPendingBankDetailsProfileListRequestApi(formId, moduleId) {
+ hideMessageTheme2('');
+ $.ajax({
+	 type : "POST",
+	 contentType : APPLICATION_JSON_VALUE,
+	 url : getURLForHTML('dashboard','get-pending-bank-details-teacher-profile'),
+	 data : JSON.stringify(getReceivedTeachedProfileRequest(formId, moduleId)),
+	 dataType : 'json',
+	 cache : false,
+	 timeout : 600000,
+	 success : function(data) {
+		console.log(data);
+		 if (data['status'] == '0' || data['status'] == '2') {
+			 showMessageTheme2(0, data['message'],'',true);
+		 } else {
+			var html=getPendingBankDetailsTeacherProfileListHtml(data.teacherDetails);
+			$("#BankDetailsProfileListBody").html(html);
+			 var table = $('#BankDetailsProfileListTable').DataTable({"pagingType":"full"}); 
+			$('#BankDetailsProfileListTable').on('page.dt',function(){
+				table.responsive.recalc();
+			}) 
+			$('.show-filter').on('click', function(){
+				$('.filter-fields').stop().slideToggle();
+			});
+		 }
+		 return false;
+	 }
+ });
+}
+
+
+function getPendingBankDetailsTeacherProfileListHtml(teacherDetails){
+	var html='';
+	if(teacherDetails.length>0){
+		for (let iu = 0; iu < teacherDetails.length; iu++) {
+			const teacherDetail = teacherDetails[iu];
+			
+			html+=`<tr id="profileId_${teacherDetail.userId}">	
+            <td style="text-align:center;">${iu+1}</td>
+			<td>${teacherDetail.countryName}</td>
+           	<td>${teacherDetail.teacherName}</td>
+           	<td>${teacherDetail.contactNumber}</td>
+			<td>${teacherDetail.email}</td>
+			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${teacherDetail.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')"  >Click here</a> `:""}</td>
+			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${teacherDetail.userId}', '${teacherDetail.firstReset}', '${teacherDetail.isTeacherPoliceVerifide}');">Update Status</a>`:""}</td>
+			</tr>`;
+		}
+	}
+	return html;
+}
+
+async function enableReattemptRecording(userId){
+	var payload = {};
+	payload['userId'] = userId;
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'teacher-demo-recording-reattempt', payload, '/teacher/signup');
+	if(responseData.statusCode == "SUCCESS"){
+		showMessageTheme2(1, responseData.message);
+		$("#recordingModal").modal("hide");
+		$('#profileId_'+userId).remove();
+	}
+}
+
+
+
+function teacherVerificationAttchament(src){
+	console.log(src)
+	var fileExtension = $(src).attr("data-src").split('.').pop();
+	if(fileExtension == "pdf"){
+		
+	}else{
+		$("#teacherVerificationAttchamentModal .modal-body").html(
+			`<div class="full">
+				<img src="${$(src).attr("data-src")}" class="w-100"/>
+			</div>`
+		)
+	}
+	$("#teacherVerificationAttchamentModal").modal("show");
+}

@@ -12,6 +12,8 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 	getAllEventList('scheduleEventsSearchForm','eventType');
 	getAllEventList('scheduleEventsSearchForm','searchBy');
 	getAllCountryList('scheduleEventsSearchForm','countryId');
+	
+
 	getAllGrade(SCHOOL_ID, true);
 	$("#counselorName").select2({
 		theme:"bootstrap4"
@@ -72,10 +74,9 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 		submitLeadFollowupSave('followupB2BSaveForm','0', 'time-available', true,'leadFollowupB2BForm','','');
 	});
 
-	
-	
 
 	$('.tentative_date').css( "display", "none" );
+	
 	
 
 }
@@ -289,7 +290,7 @@ function scheduleEventthumb(data){
 		+'</div>';
 	return html;
 }
-function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchCondition, showPagination, countType){
+function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchCondition, showPagination, countType,remarkMendatory,minRemarkCount){
 	var getRecordingLimit = getSettingsByTypeAndKey("CONFIGURATION", "SHOW_RECORDINGS_LIMIT");
     getRecordingLimit = JSON.parse(getRecordingLimit);
     var recordingLimit = getRecordingLimit.data.metaValue;
@@ -419,7 +420,11 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 										+'<br/>';
 										
 										if(item.leadId>0){
-											html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\''+item.leadId+'\',\''+item.meetingFor+'\',\''+item.name+'\',\''+item.meetingStartTime+'\',\''+item.meetingEndTime+'\',\''+item.meetingDate+'\',\''+item.meetingEndDate+'\',\''+item.counselorTimeZone+'\',\''+item.inviteeStartTime+'\',\''+item.inviteeEndTime+'\',\''+item.inviteeMeetingDate+'\',\''+item.inviteeMeetingEndDate+'\',\''+item.inviteeTimezone+'\',\''+item.standardName+'\',\''+item.inviteeName+'\',\''+item.inviteeEmail+'\',\''+item.isdCode+'\',\''+item.phoneNo+'\',\''+item.countryName+'\', \''+item.inviteeCountry+'\')">Update</a>';
+											if(item.meetingFor == 'School Demo'){
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\''+item.leadId+'\',\''+item.meetingFor+'\',\''+item.name+'\',\''+item.meetingStartTime+'\',\''+item.meetingEndTime+'\',\''+item.meetingDate+'\',\''+item.meetingEndDate+'\',\''+item.counselorTimeZone+'\',\''+item.inviteeStartTime+'\',\''+item.inviteeEndTime+'\',\''+item.inviteeMeetingDate+'\',\''+item.inviteeMeetingEndDate+'\',\''+item.inviteeTimezone+'\',\''+item.standardName+'\',\''+item.inviteeName+'\',\''+item.inviteeEmail+'\',\''+item.isdCode+'\',\''+item.phoneNo+'\',\''+item.countryName+'\', \''+item.inviteeCountry+'\','+remarkMendatory+','+minRemarkCount+')">Update</a>';
+											}else{
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\''+item.leadId+'\',\''+item.meetingFor+'\',\''+item.name+'\',\''+item.meetingStartTime+'\',\''+item.meetingEndTime+'\',\''+item.meetingDate+'\',\''+item.meetingEndDate+'\',\''+item.counselorTimeZone+'\',\''+item.inviteeStartTime+'\',\''+item.inviteeEndTime+'\',\''+item.inviteeMeetingDate+'\',\''+item.inviteeMeetingEndDate+'\',\''+item.inviteeTimezone+'\',\''+item.standardName+'\',\''+item.inviteeName+'\',\''+item.inviteeEmail+'\',\''+item.isdCode+'\',\''+item.phoneNo+'\',\''+item.countryName+'\', \''+item.inviteeCountry+'\')">Update</a>';
+											}
 										}else{
 											html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\')">Update</a>';
 										}
@@ -473,7 +478,8 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 		return html;
 }	
 
-function updateSystemTraningModal(meetingId, leadId){
+function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount){
+	const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;	
 	var html =
 			'<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
 				+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">'
@@ -486,6 +492,7 @@ function updateSystemTraningModal(meetingId, leadId){
 						+'</div>'
 						+'<div class="modal-body">'
 							+'<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off">'
+							+'<input type="hidden" name="meetingType" id="meetingType" value=""  />'
 								+'<div class="row">'
 									+'<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">'
 										+'<label>Status</label>'
@@ -505,10 +512,16 @@ function updateSystemTraningModal(meetingId, leadId){
 									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
 										+'<label class="mb-0">Tentative Date</label>'
 										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
-								+'	</div>'
+									+'	</div>'
+									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">'
+										+'<label class="mb-0">Source</label>'
+										+'<select	name="leadSource" id="leadSource" class="form-control" ><option value="">Select Source</option></select>'
+									+'	</div>'
 									+'<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">'
 										+'<label>Remarks</label>'
-										+'<input type="text" name="remarks" id="remarks" class="form-control">'
+										+`<input type="text" name="remarks" id="remarks"  class="form-control ${isRemarkMandatory ? 'schedule_remarks remarks' : ''}" ${isRemarkMandatory ? `isRemarkMendatory="true" minlength="${minRemarkCount}" required` : ''}>`
+										+ `${(!isRemarkMandatory)? '':'<small id="scheduleRemarksCounter" class="text-muted">0 / '+minRemarkCount+'</small>'}`
+										
 									+'</div>'
 								+'</div>'
 							+'</form>'

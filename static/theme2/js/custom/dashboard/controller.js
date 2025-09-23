@@ -254,12 +254,14 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	}else if(pageNo=='counselor-dashboard'){
 		renderCounselorDashboard('Counselor Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='partner-enrollment-list'){
-		renderPartnerList('Enrollment List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+		renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+	}else if(pageNo=='add-student-enrollment'){
+		enrollmentPartnerStudent(0);
 	}else if(pageNo=='counselor-enrollment-list'){
-		renderCounselorEnrollList('Enrollment List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+		renderCounselorEnrollList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='admin-partner-enrollment-list'){
 		//$('#dashboardContentInHTML').html(
-			renderPartnerList('Enrollment List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+			renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 		//);
 	}else if(pageNo=='lead-list'){
 		if (USER_ROLE == "B2B_LEAD") {
@@ -419,7 +421,6 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
   }else if(pageNo == "delete-user"){
 	$('#dashboardContentInHTML').html(renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "teacher-profile"){
-	
 	$('#dashboardContentInHTML').html(renderReceivedTeachedProfileListDashboard('Received Teacher Profile', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "pending-training-remarks"){
 	$('#dashboardContentInHTML').html(renderPendingTeachedTrainingListDashboard('Pending Training Remarks', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
@@ -427,6 +428,10 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	$('#dashboardContentInHTML').html(renderPendingContractListDashboard('Pending Contract', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "rejected-teachers"){
 	$('#dashboardContentInHTML').html(renderRejectedTeacherListDashboard('Rejected Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+  }else if(pageNo == "teacher-profile-pending-verification"){
+	$('#dashboardContentInHTML').html(renderPendingVerificationTeachedProfileListDashboard('Pending Verification', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+  }else if(pageNo == "teacher-profile-pending-bank-details"){
+	$('#dashboardContentInHTML').html(renderBankDetailsTeacherProfleListDashboard('Pending Bank Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }
 //   else if(pageNo=='lead-report-list'){
 // 	$('#dashboardContentInHTML').html(renderSchoolReportDashboard('School Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));
@@ -486,4 +491,15 @@ function getModuleDetails(schoolId, roleId, userId, parentId, moduleType, module
 		}
 	});
 	return roleAndModule;
+}
+
+
+function backToDedicatedModule(moduleUrl){
+  if(moduleUrl=='partner-enrollment-list'){
+    callDashboardPageSchool('176','partner-enrollment-list');
+  }
+}
+function backToMain(){
+  $("#dashboardContentInHTML").show();
+  $("#dashboardContentInHTMLAdditional").hide();
 }

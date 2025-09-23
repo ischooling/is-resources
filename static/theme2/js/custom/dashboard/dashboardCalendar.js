@@ -72,10 +72,10 @@ function submitSchoolHoliday(formId) {
 	if($("#" + formId + " #holidayFor").val()=='TEACHER'){
 		fdata['lmsPlatform']='37,38,39,40,41';
 	}
-	fdata['holidayHome']=escapeCharacters($("#"+formId+" #holidayHome").val());
+	fdata['holidayHome']= $("#"+formId+" #holidayHome").val();
 	fdata['holidayStartDate']=$("#"+formId+" #holidayStartDate").val();
 	if(editor1!=undefined){
-		fdata['holidayRemark']=escapeCharacters(editor1.getData());
+		fdata['holidayRemark']= editor1.getData().trim();
 	}
 	
 	$.ajax({

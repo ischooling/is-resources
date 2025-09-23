@@ -581,28 +581,27 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">' +
     '	<label class="m-0">Grade</label>' +
     '	<select name="leadGradeSearch" id="leadGradeSearch" class="form-control" >' +
-    '		<option value="0">Select Grade</option>' +
-    getStandardContent(SCHOOL_ID, true, false) +
+    '		<option value="0">Select Grade</option>' +getStandardContent(SCHOOL_ID, true, false) +
     "	</select>" +
     "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">' +
     '	<label class="m-0">Country</label>' +
-    '	<select name="countryId" id="countryId" class="form-control" >' +
+    '	<select name="countryIds" id="countryIds" class="form-control" multiple >' +
     '		<option value="0">Select country</option>' +
     "	</select>" +
     "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">' +
-    '	<label class="m-0">State</label>' +
-    '	<select name="stateId" id="stateId" class="form-control" >' +
-    '		<option value="0">Select state</option>' +
-    "	</select>" +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">' +
-    '	<label class="m-0">City</label>' +
-    '	<select name="cityId" id="cityId" class="form-control" >' +
-    '		<option value="0">Select city</option>' +
-    "	</select>" +
-    "</div>	" +
+    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">' +
+    // '	<label class="m-0">State</label>' +
+    // '	<select name="stateId" id="stateId" class="form-control" >' +
+    // '		<option value="0">Select state</option>' +
+    // "	</select>" +
+    // "</div>" +
+    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">' +
+    // '	<label class="m-0">City</label>' +
+    // '	<select name="cityId" id="cityId" class="form-control" >' +
+    // '		<option value="0">Select city</option>' +
+    // "	</select>" +
+    // "</div>	" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 callWith">' +
     '	<label class="m-0">Connected With</label>' +
     '	<select name="callWithSearch" id="callWithSearch" class="form-control">' +
@@ -1232,6 +1231,20 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Source:</th>'
 									+'<td class="border-0 p-1" >'+leads.LeadSourceName+'</td>'
 								+'</tr>';
+                if(leads.leadOther!=''){
+                  html += '<tr>'
+                    +'<th class="border-0 p-1">Other Source:</th>'
+                    +'<td class="border-0 p-1" >'+leads.leadOther+'</td>'
+                  +'</tr>';
+                }
+                
+                if (leads.callbackConvertedDate!=="N/A"){
+                  html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Callback</td></tr>';
+                  html += '<tr class="bg-primary p-1 text-white">'
+                            +'<th class="border-0 p-1">Callback Time:</th>'
+                            +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+'('+USER_TIMEZONE+')'+'</td>'
+                          +'</tr>';
+                }
 
 								
 								html+='<tr>'
@@ -1334,6 +1347,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 														+'<tr>'
 															+'<th class="border-0 p-0 font-12">IP:</th>'
 															+'<td class="border-0 p-0 font-12">'+(leads.ip)+'</td>'
+														+'</tr>'
+														+'<tr>'
+															+'<th class="border-0 p-0 font-12">Payment IP:</th>'
+															+'<td class="border-0 p-0 font-12">'+(leads.paymentIp)+'</td>'
 														+'</tr>'
 														+'<tr>'
 															+'<th class="border-0 p-0 font-12">OS:</th>'
@@ -1485,7 +1502,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 													if(USER_ROLE=='DIRECTOR'){
 														html+='<tr>'
 														+'<th class="border-0 p-1">Call status:</th>'
-														+'<td class="border-0 p-1">'+(leads.zadarmaCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCount+')</td>'
+														+'<td class="border-0 p-1">'+(leads.zadarmaCallCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCallCount+')</td>'
 														+'</tr>';
 													}
 
@@ -1525,7 +1542,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tr>';
 								html+='<tr  class="" >'
 									+'<th class="border-0 p-1">Demo Status:</th>'
-									+'<td class="border-0 p-1">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
+									+'<td class="border-0 p-1 demo-status-row-'+leads.leadId+'">'+(leads.demoStatus!=''?leads.demoStatus:'N/A')+'</td>'
 								+'</tr>'
 								+'<tr  class="" >'
 									+'<th class="border-0 p-1">Assigned To:</th>'
@@ -1574,7 +1591,21 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								}	
 								html+='<tr>'
 									+'<th class="border-0 p-1" style="width:165px">Last Remarks:</th>'
-									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">'+(leads.followupRemark!=''?leads.followupRemark:'N/A')
+									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">';
+                  if (leads.followupRemark.includes("Lead already exists.")) {
+                      console.log("Contains jQuery!");
+                      var arrf = leads.followupRemark.split("-"); 
+                      var ldnoStr=arrf[0];
+                      var ldno=arrf[1];
+                      var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+ldno+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
+                          html+=ldnoStr+" - "; 
+                          html+="<a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">";
+                          html+=ldno;
+                          html+='</a>';
+                  }else{
+                    html+=(leads.followupRemark!=''?leads.followupRemark:'N/A');
+                  }
+                  
 										// +'<div class="dropdown d-inline-block" style="position: inherit;">'
 										// 	+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remarks</button>'
 										// 	+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px;">'

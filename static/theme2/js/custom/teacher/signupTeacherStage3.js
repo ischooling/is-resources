@@ -91,6 +91,7 @@ function previewFillSectionTeacher2(){
 		: $("#teacherSignupStage2 #fileupload3Span").html()
 	);
 	$('#editStage3teacherSupportingDocumentCV').text($("#teacherSignupStage2 #fileupload1Span").html());
+	$('#editStage3teacherInternetSpeedTestSS').text($("#teacherSignupStage2 #fileupload11Span").html());
 	$('#editStage3teacherPassport').text($("#teacherSignupStage2 #fileupload4Span").html());
 	
 	if($('#teacherSignupStage2 #editStage3optionsCheckboxes').is(':checked')){

@@ -52,12 +52,12 @@ function callForSignUpParents() {
 				var windowWidth = $(window).width();
 				var msg = "";
 				getAllCourseDetails('N','');
-				if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX'){
+				if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX'){
 					msg ="Wow! Academic & Communication Details Updated."
 				}else if($("#courseProviderId").val() == 39){
-					if($('#learingProgramHeader').html()=='English Learning Program - One to One'){
+					if($('.learingProgramHeader').html()=='English Learning Program - One to One'){
 						msg="Wow! Communication Details Updated"
-					}else if($('#learingProgramHeader').html()=='English Learning Program - Self Study'){
+					}else if($('.learingProgramHeader').html()=='English Learning Program - Self Study'){
 						msg="Wow! Communication Details Updated"
 					}
 				}
@@ -90,7 +90,7 @@ function validateRequestForSignupParent(){
 	// 	showMessage(0, 'Please use the English Keyboard while providing information');
 	// 	return false
 	// }
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		if ($("#signupStage2 #workingProfession").val()==0 || $("#signupStage2 #workingProfession").val() == '' || $("#signupStage2 #workingProfession").val()==null) {
 			showMessage(0, 'Student or a working professional is required');
 			return false
@@ -177,7 +177,7 @@ function getRequestForSignupParent(){
 	var authentication = {};
 	var signupParentDTO = {};
 	signupParentDTO['themeType'] = 'theme2';
-	if($('#learingProgramHeader').attr('val')=='ONE_TO_ONE_FLEX' ){
+	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		signupParentDTO['workingProfession'] = $("#signupStage2 #workingProfession").val();
 		signupParentDTO['institutionName'] = $("#signupStage2 #institutionName").val();
 		signupParentDTO['institutionCountryId'] = $("#signupStage2 #institutionCountryId").val();
@@ -509,12 +509,12 @@ function addressSameAs(){
 	var flag=$('#sameAsStudentLocation').is(':checked');
 	if(flag){
 		$('#sameAsStudentLocation').prop('disabled', true);
-		$('#signupStage2 #pCountryId').val($('#countryId').val()).trigger('change');
+		$('#signupStage2 #pCountryId').val($('#signupStage1 #countryId').val()).trigger('change');
 		window.setTimeout(function(){
-			$('#signupStage2 #pStateId').val($('#stateId').val()).trigger('change');
+			$('#signupStage2 #pStateId').val($('#signupStage1 #stateId').val()).trigger('change');
 			$('#signupStage2 #pStateId').prop('disabled',true);
 			window.setTimeout(function(){
-				$('#signupStage2 #pCityId').val($('#cityId').val()).trigger('change');
+				$('#signupStage2 #pCityId').val($('#signupStage1 #cityId').val()).trigger('change');
 				$('#signupStage2 #pCityId').prop('disabled',true).promise().done(function(){
 					$('#sameAsStudentLocation').prop('disabled',false);	
 				});
@@ -531,17 +531,21 @@ function addressSameAs(){
 	}
 }
 
-function getRequestForParentSelection(){
+function getRequestForParentSelection(studentUserId){
 	var studentRequestDTO = {};
-	studentRequestDTO['userId'] = USER_ID;
+	if(studentUserId){
+		studentRequestDTO['userId'] = studentUserId;
+	}else{
+		studentRequestDTO['userId'] = $('#userId').val();
+	}
 	return studentRequestDTO;
 }
-function callForParentSelection() {
+function callForParentSelection(studentUserId) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/get-parent-details',
-		data : JSON.stringify(getRequestForParentSelection()),
+		data : JSON.stringify(getRequestForParentSelection(studentUserId)),
 		dataType : 'json',
 		async : false,
 		global : false,

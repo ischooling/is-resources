@@ -23,10 +23,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 		clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 	}
+	getB2CLeadPopjs(objRights, roleAndModule);
 	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
-	getB2CLeadPopjs(objRights, roleAndModule);
 	generateTinyUrls();
 	
 	$("#btnClickLeadMove").on('click',function() {
@@ -389,14 +389,18 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 		}
+		getB2CLeadPopjs(objRights, roleAndModule);
 		$("#advanceLeadNewSearchForm #countryId" ).val(OBJECT_RIGHTS.country).trigger('change');
 		$("#advanceLeadNewSearchForm #campaignName" ).val(OBJECT_RIGHTS.utmCampName);
 		var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 		$("#advanceLeadNewSearchForm #leadAssignToSearch" ).val(OBJECT_RIGHTS.clickUserid).trigger('change');
+		if(OBJECT_RIGHTS.leadId!="0"){
+			$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
+			$("#advanceLeadNewSearchForm #leadAcadmicYear" ).val("all");
+		}
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 		//getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
 		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
-		getB2CLeadPopjs(objRights, roleAndModule);
 		generateTinyUrls();
 		
 		
@@ -681,7 +685,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			});
 			leadnew = leadCheckId + leadNotCheckId;
 			var leadId =leadnew.substring(1,leadnew.lenght);
-				var urlSend = '/dashboard/lead-merge-data?moduleId='+OBJECT_RIGHTS.moduleId+'&leadId='+leadId+'&leadFrom=MERGE&currentPage='+OBJECT_RIGHTS.currentPage+'&isSearch=false&countrolType=edit&leadType=B2C';
+				var urlSend = '/dashboard/lead-merge-data?moduleId='+OBJECT_RIGHTS.moduleId+'&leadId=0&leadFrom=MERGE&currentPage='+OBJECT_RIGHTS.currentPage+'&isSearch=false&countrolType=edit&leadType=B2C';
 				getAsPost(urlSend,'self');
 				//callLeadMergeData('leadMergeDataPopupForm', leadId, '${USER_ID}', 'edit', 'leadMergePopup','B2C',1)
 		});
@@ -923,8 +927,11 @@ function openPopup(formId, leadType){
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});
-	
 	$("#advanceLeadNewSearchForm #countryId").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#advanceLeadNewSearchForm"
+	});
+	$("#advanceLeadNewSearchForm #countryIds").select2({
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});	
@@ -1046,6 +1053,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	callLeadSourceList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadSourceSearch', true);
 	
 	callLeadStatusList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadStatusSearch', false);
+	callPCountries('advanceLeadNewSearchForm', 0, 'countryIds');
 	callPCountries('advanceLeadNewSearchForm', 0, 'countryId');
 	callUTMSourceList('advanceLeadNewSearchForm',''+objectRights.leadType+'','utmSourceSearch', true);
 	
@@ -1262,7 +1270,7 @@ function nextPage(currentPage){
 	if(OBJECT_RIGHTS.leadFrom=='advance-search'){
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', ''+OBJECT_RIGHTS.clickFrom+'-'+OBJECT_RIGHTS.clickUserid+'', '0', 'new', true,'totalleads', OBJECT_RIGHTS, ROLE_MODULE);
 	}else{
-		var urlSend = '/dashboard/lead-data-list?moduleId=111&leadFrom='+OBJECT_RIGHTS.leadFrom+'&clickFrom='+OBJECT_RIGHTS.clickFrom+'&currentPage='+currentPage+'&euid='+encuid+'&leadType=B2B';
+		var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId=0&leadFrom='+OBJECT_RIGHTS.leadFrom+'&clickFrom='+OBJECT_RIGHTS.clickFrom+'&currentPage='+currentPage+'&euid='+encuid+'&leadType=B2B';
 		getAsPost(urlSend);
 		customLoader(false)
 	}

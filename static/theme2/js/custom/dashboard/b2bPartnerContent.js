@@ -1,6 +1,7 @@
 async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, role){
-	customLoader(true);
 	var commissionRate = await getPartnerCommissionRate('','partnerCommitionRate',userId);
+	customLoader(true);
+	
 	$("#dashboardContentInHTML").html(partnerDashboardContent(title, roleAndModule, schoolId, userId, role, commissionRate));
 	generateTinyUrls();
 	//console.log("render",commissionRate)
@@ -16,7 +17,6 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 		// }
 			
 	});
-	
 	var data = getPartnerDashboardDetailsData(userId);
 	//console.log(data);
 	$("#chartContentDiv").html(partnerDashboardLPContent(data));
@@ -28,7 +28,6 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 	var revenue_pending_id=0.0;
 	var schoolDicountSymbol="";
 	var partnerDicountSymbol="";
-
 	$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
 		//console.log(learningProgram);
 		schoolDicountSymbol=learningProgram.schoolDicountSymbol;
@@ -136,7 +135,7 @@ function partnerDashboardLPContent(data){
 									+'<span class="d-inline-block mb-1">'
 										+learningProgram.label
 									+'</span>'
-									+'<span class="pull-right text-primary mb-1">Revenue: $'+revenue+'</span>'
+									+'<span class="pull-right text-primary mb-1">Revenue: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
 								+'</div>'
 							+'</h5>'
 							+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
@@ -152,9 +151,12 @@ function partnerDashboardLPContent(data){
 
 {/* <div class="page-title-subheading">${title}</div> */}
 function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, commissionRate){
+	const enrollmentMap= {GP:"Enrollment Partner",WLP:"Self School or Academy",RP:"Reseller Partner",EPER:"Enrollment Partner with Enrollment Rights"};
+
 	var data=getPartnerDashboardDetails(userId);
 	localStorage.setItem('convertYear',data.counselor.convertYear);
-	localStorage.setItem('referralCode',data.schoolServiceLinks.referralCode);
+	localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
+	localStorage.setItem('originalPartnerType'+USER_ID,data.originalPartnerType);
 	var html = 
 		`<div class="app-page-title mb-3 py-2">
 			<div class="page-title-wrapper">
@@ -162,9 +164,14 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
 					<div>
 						<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
-						
 					</div>
 				</div>
+				${
+					data.interestedFor == "B2B"?
+					`<div class="page-title-actions">
+						<h6 class="font-size-lg">Partner Type:&nbsp;<span class="text-primary">${enrollmentMap[data.originalPartnerType]||''}</span></h6>
+					</div>`:``
+				}
 			</div>
 		</div>
 
@@ -321,12 +328,13 @@ function getChartContent(commissionRate){
 function getEnrollmentLinksContent(data){
 	var html=
 		`<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2">
-			<h5 class="font-weight-semi-bold text-dark">Enrollments & Seats Reservation Links</h5>
+			<h5 class="font-weight-semi-bold text-dark">Enrollments ${data.interestedFor == "B2B"?'':'& Seats Reservation'} Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">
 					<div class="d-flex mb-3 rounded-pill bg-light border overflow-hidden" style="width: fit-content; position: relative; z-index: 9;">
 						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-white bg-primary border-0" id="enrollmentTabBtn" onclick="toggleLinkTab('enrollment')">Your Enrollment Links</button>
-						<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-dark bg-transparent border-0" id="seatTabBtn" onclick="toggleLinkTab('seat')">Seat Reservation Links</button>
+						${data.interestedFor == "B2B"?``:`<button type="button" class="btn btn-sm px-3 py-1 rounded-pill text-dark bg-transparent border-0" id="seatTabBtn" onclick="toggleLinkTab('seat')">Seat Reservation Links</button>`}
+						
 					</div>
 					<div id="enrollmentLinksSection" class="d-flex flex-wrap" style="gap:5px;">`;
 						$.each(data.schoolServiceLinks.learningProgramLinks, function(k,learningProgram){
@@ -462,11 +470,10 @@ async function dashboardFooterContent(){
 ///////Enrolled Page 
 async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	if(role=='B2B_PARTNER'){
-		$("#dashboardContentInHTML").html(partnerListContent(title, localStorage.getItem('referralCode')));
+		$("#dashboardContentInHTML").html(partnerListContent(title, localStorage.getItem('referralCode'+USER_ID), localStorage.getItem('originalPartnerType'+USER_ID) ));
 	}else if(USER_ROLE=='STUDENT_COUNSELOR' || USER_ROLE=='B2B_LEAD' || USER_ROLE=='DIRECTOR'){
 		$("#dashboardContentInHTML").html(partnerListContent('Partner '+title, ''));
 	}else{
-		// $("#partnerEnrollmentList").html(partnerListContent(title, ''));
 		var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
 			html+= await dashboardHeaderContent();
 			html+='<div class="app-main  pb-4">'
@@ -491,7 +498,7 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	});
 		
 	$("select#stateId").on("change",function(){
-		 callCities('partnerEnrollFilterForm', this.value, 'stateId');
+		callCities('partnerEnrollFilterForm', this.value, 'stateId');
 	});
 
 	$("select#partnerName").on("change",function(){
@@ -505,6 +512,9 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 		theme:"bootstrap4"
 	});
 	$("#enrollmentStatus").select2({
+		theme:"bootstrap4"
+	});
+	$("#enrollmentBy").select2({
 		theme:"bootstrap4"
 	});
 	$("#learningProgram").select2({
@@ -567,22 +577,25 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	
 }
 
-function partnerListContent(title, referralCode){
-	var hmlt=pageTitleEnrolledContent(title)
+function partnerListContent(title, referralCode, originalPartnerType){
+	var hmlt=pageTitleEnrolledContent(title, originalPartnerType)
 	hmlt+=mainCardEnrolled(referralCode)
 	return hmlt;
 }
 
-function pageTitleEnrolledContent(title){
+function pageTitleEnrolledContent(title, originalPartnerType){
 	var html = 
-		'<div class="app-page-title mb-3 py-2">'
-			+'<div class="page-title-wrapper">'
-				+'<div class="page-title-heading">'
-					+'<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>'
-					+'<h4>'+title+'</h4>'
-				+'</div>'
-			+'</div>'
-		+'</div>'
+		`<div class="app-page-title mb-3 py-2">
+			<div class="page-title-wrapper d-flex justify-content-between align-items-center">
+				<div class="page-title-heading">
+					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
+					<h4>${title}</h4>
+				</div>
+				<div class="page-title-actions">
+					<button onclick="toggleB2BPartnerFilterForm();" class="btn btn-sm btn-primary"><i class="fa fa-filter"></i>&nbsp;Filter</button>
+				</div>
+			</div>
+		</div>`
 	return html;
 }
 
@@ -590,6 +603,7 @@ function mainCardEnrolled(referralCode){
 	var html= 
 	'<div class="main-card mb-3 card">'
 		+'<div class="card-body">'
+			+'<div class="form-row" id="B2BStudentEnrollmentCountThumb"></div>'
 			//+B2BStudentListfilterFormSkeleton()
 			+'<div class="row">'
 				+B2BStudentListfilterForm(referralCode)
@@ -601,6 +615,27 @@ function mainCardEnrolled(referralCode){
 		+'</div>'
 	+'</div>'
 	+B2BStudentListCommissionPopup();
+	return html;
+}
+
+function getB2BStudentEnrollmentCount(enrollmentList){
+	var html=``;
+	$.each(enrollmentList, function(i,v){
+		html+=
+		`<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">
+			<div class="full p-2  border rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm ${i==0?'border-primary bg-light-primary':i==1?'border-success bg-light-success':'border-warning bg-light-warning'}">
+				<span class="line-left d-inline-block position-absolute rounded-10 ${i==0?'bg-primary':i==1?'bg-success':'bg-warning'}"></span>
+				<p class="m-0 font-12"><b>${v.label}</b></p>
+				<p class="m-0">`;
+					if(1>0){
+						html+=`<b><a href="javascript:void(0)" class="text-dark" onclick="filterRequestData(\'partnerEnrollFilterForm\', \'${v.enrollmentValue}\')">${v.count}</a></b>`;
+					}else{
+						html+=`-`;
+					}
+				html+=`</p>
+			</div>
+		</div>`;
+	});
 	return html;
 }
 
@@ -666,7 +701,7 @@ function B2BStudentListfilterFormSkeleton(){
 
 function B2BStudentListfilterForm(referralCode){
 	var html=
-	'<form id="partnerEnrollFilterForm">'
+	'<form id="partnerEnrollFilterForm" style="display: none;">'
 		+'<div class="col-12 mb-2">'
 			+'<div class="row">';
 			if(referralCode==''){
@@ -691,6 +726,14 @@ function B2BStudentListfilterForm(referralCode){
 					+ '<option value="3">Re-Enrolled</option>'
 					+ '<option value="1">Withdrawn</option>'
 					+ '<option value="2">Partial Entry</option>'
+					+'</select>'
+				+'</div>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
+					+'<label class="full text-primary">Enrollment By</label>'
+					+'<select class="form-control" name="enrollmentBy" id="enrollmentBy">'
+					+ '<option value="">Select enrollment by</option>'
+					+ '<option value="D">Direct enrolled</option>'
+					+ '<option value="P">Added by partner</option>'
 					+'</select>'
 				+'</div>'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
@@ -852,7 +895,6 @@ function B2BStudentListDetailsSkeleton(){
 }
 
 function B2BStudentListDetails(studentList, updateTransferMsg){
-	console.log(studentList);
 	var html= 
 		'<table class="table table-bordered font-12 border-radius-table" style="min-width:1300px;width:100%;font-size:11px !important" id="studentDataList">'
 			+'<thead>'
@@ -862,7 +904,8 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 					+'<th class="bg-primary text-white bold border-bottom-0">Enrollment Details</th>'
 					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Fee Details</th>'
 					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Fee Schedule</th>'
-					+'<th class="bg-primary text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Expected Commision</th>'
+					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Expected Commision</th>'
+					+'<th class="bg-primary text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Action</th>'
 				+'</tr>'
 			+'</thead>'
 			+'<tbody class="student-table-css">';
@@ -1087,7 +1130,10 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 														
 														var enrollColor="bg-primary";
 														var enrollType="ENROLLMENT VIA IS";
-														if(stuList.studentEnrollBy=='D'){
+														if(stuList.studentEnrollBy=='P'){
+															enrollType='ADDED BY PARTNER';
+															enrollColor="bg-orange";
+														}else if(stuList.studentEnrollBy=='D'){
 															enrollType='DIRECT ENROLLMENT';
 															enrollColor="bg-alternate";
 														}
@@ -1101,8 +1147,25 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 										+'</tbody>'
 									+'</table>'
 								+'</td>'
-						html+='</tr>';
-
+								+'<td>';
+								let tickFlag = true;
+									if(stuList.studentEnrollBy=='P' && stuList.admissionType == "Partial Entry"){
+										html+='<a href="javascript:void(0);" onclick="enrollmentPartnerStudent('+stuList.stdUserId+')" data-toggle="tooltip" data-placement="top" data-original-title="Edit" class="text-primary">'
+											+'<i class="fa fa fa-pencil" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>'
+										+'</a>';
+										tickFlag = false;
+									}
+									if(stuList.studentEnrollBy=='P' && stuList.admissionType == "Enrolled" && !stuList.password){
+										html+='<a id = "'+stuList.stdUserId+'_'+stuList.stuStandardId+'" href="javascript:void(0);" onclick="showWarningMessage(\'Are you sure you want to send credentials email to student?\',\'resendMailToPartnerStudent('+stuList.stdUserId+','+stuList.stuStandardId+')\');" data-toggle="tooltip" data-placement="top" data-original-title="' + (stuList.emailSendStatus == 0 ? 'Send Credentials' : 'Resend Credentials') + '" class="text-primary">'
+											+'<i class="fa fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>'
+										+'</a>';
+										tickFlag = false;
+									}
+									if(tickFlag){
+										html+='<i class="fa fa-check text-success"></i>'; 
+									}
+								html+='</div>'
+						+'</tr>';
 						sreno=sreno+1;
 					}
 				}else{
