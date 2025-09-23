@@ -927,8 +927,11 @@ function openPopup(formId, leadType){
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});
-	
 	$("#advanceLeadNewSearchForm #countryId").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#advanceLeadNewSearchForm"
+	});
+	$("#advanceLeadNewSearchForm #countryIds").select2({
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});	
@@ -1050,6 +1053,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	callLeadSourceList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadSourceSearch', true);
 	
 	callLeadStatusList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadStatusSearch', false);
+	callPCountries('advanceLeadNewSearchForm', 0, 'countryIds');
 	callPCountries('advanceLeadNewSearchForm', 0, 'countryId');
 	callUTMSourceList('advanceLeadNewSearchForm',''+objectRights.leadType+'','utmSourceSearch', true);
 	

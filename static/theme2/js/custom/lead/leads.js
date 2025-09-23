@@ -1555,6 +1555,7 @@ var leadCountDetailDTO={};
  leadStudentDetailDTO['stdFname'] = $("#"+formId+" #leadstdfnameSearch").val();
  leadStudentDetailDTO['gurdianFname'] = $("#"+formId+" #leadParentfnameSearch").val();
  leadStudentDetailDTO['country'] = $("#"+formId+" #countryId option:selected").val();
+ leadStudentDetailDTO['countryList'] = $("#"+formId+" #countryIds").val()!=undefined?$("#"+formId+" #countryIds").val():'';
  leadStudentDetailDTO['state'] = $("#"+formId+" #stateId option:selected").val();
  leadStudentDetailDTO['city'] = $("#"+formId+" #cityId option:selected").val();
  leadStudentDetailDTO['standard'] = $("#"+formId+" #leadGradeSearch option:selected").val();
@@ -2404,7 +2405,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 				 }
 				 callLeadStatusList(''+formId+'',leadType,'leadStatus', false);
 				 callLeadSourceList(''+formId+'',leadType,'leadSource', true);
-				 callPCountries(''+formId+'', 0, 'countryId');
+				 
 				 getTggingMasterList(''+formId+'', 'leadTagging');
 				 $("#"+formId+" #leadTagging").select2({
 					theme:"bootstrap4",
@@ -2490,7 +2491,9 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						   if(leadDemo.leadStudentDetailDTO.isdCountryCodeAlter!=null || leadDemo.leadStudentDetailDTO.isdCountryCodeAlter !=''){
 							   itiAltPhoneNumber.setCountry($('#'+formId+' #pCountryCodeAlter').val());
 						   }
-						   $("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger('change');
+						   callPCountries(''+formId+'', 0, 'countryId',''+leadDemo.leadStudentDetailDTO.country+'');
+						  // $("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger('change');
+						   
 						// }else{
 						//    $("#"+formId+" #isdCode").val(leadDemo.leadStudentDetailDTO.isdCode).trigger('change');
 						// 	$("#"+formId+" #isdCodeAlter").val(leadDemo.leadStudentDetailDTO.isdCodeAlter).trigger('change');

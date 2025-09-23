@@ -581,28 +581,27 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">' +
     '	<label class="m-0">Grade</label>' +
     '	<select name="leadGradeSearch" id="leadGradeSearch" class="form-control" >' +
-    '		<option value="0">Select Grade</option>' +
-    getStandardContent(SCHOOL_ID, true, false) +
+    '		<option value="0">Select Grade</option>' +getStandardContent(SCHOOL_ID, true, false) +
     "	</select>" +
     "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">' +
     '	<label class="m-0">Country</label>' +
-    '	<select name="countryId" id="countryId" class="form-control" >' +
+    '	<select name="countryIds" id="countryIds" class="form-control" multiple >' +
     '		<option value="0">Select country</option>' +
     "	</select>" +
     "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">' +
-    '	<label class="m-0">State</label>' +
-    '	<select name="stateId" id="stateId" class="form-control" >' +
-    '		<option value="0">Select state</option>' +
-    "	</select>" +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">' +
-    '	<label class="m-0">City</label>' +
-    '	<select name="cityId" id="cityId" class="form-control" >' +
-    '		<option value="0">Select city</option>' +
-    "	</select>" +
-    "</div>	" +
+    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">' +
+    // '	<label class="m-0">State</label>' +
+    // '	<select name="stateId" id="stateId" class="form-control" >' +
+    // '		<option value="0">Select state</option>' +
+    // "	</select>" +
+    // "</div>" +
+    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">' +
+    // '	<label class="m-0">City</label>' +
+    // '	<select name="cityId" id="cityId" class="form-control" >' +
+    // '		<option value="0">Select city</option>' +
+    // "	</select>" +
+    // "</div>	" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 callWith">' +
     '	<label class="m-0">Connected With</label>' +
     '	<select name="callWithSearch" id="callWithSearch" class="form-control">' +
