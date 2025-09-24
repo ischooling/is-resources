@@ -6331,6 +6331,6 @@ function handleRecipientSignatureUpload(input, targetId){
 }
 
 function updateFileName(input){
-  var fileName = input.files.length > 0 ? input.files[0].name : "Choose file";
+  var fileName = input.files.length > 0 ? input.files[0].name : "Choose file...";
   $(input).next(".custom-file-label").text(fileName);
 }

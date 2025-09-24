@@ -11942,8 +11942,6 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 				const observer = new MutationObserver(() => {
 				const keepBtn = Array.from(document.querySelectorAll('.jodit-ui-button__text')).find(btn => btn.textContent.trim() === 'Keep');
 					if(keepBtn) {
-						console.log("✅ 'Keep' button detected");
-
 						keepBtn.addEventListener('click', function () {
 						setTimeout(() => {
 							tableCenter();
@@ -12016,12 +12014,23 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 		const emptyEditor = isEditorEmpty(editor);
 		const hasFile = hasSignatureFile();
 	
-		$("#recipientSignatureUpload")
-			.prop("disabled", emptyEditor)
-			.toggleClass("cursor", !emptyEditor);
-	
-		if (!emptyEditor && hasFile) {
-			$("#previewContractBtn").show();
+		$("#recipientSignatureUpload").prop("disabled", emptyEditor).toggleClass("cursor", !emptyEditor);
+		if(emptyEditor){
+			$("#recipientSignatureUpload").val("").next(".custom-file-label").text("Choose file...").end()
+		}else{
+			var $leftImg = $("#leftSignatureBox img");
+			if ($leftImg.length) {
+				var fileName = $leftImg.attr("data-name") || "Choose file...";
+				$("#recipientSignatureUpload").next(".custom-file-label").text(fileName);
+			}
+		}
+		const leftImgName = $("#leftSignatureBox img").attr("data-name");
+		if (!emptyEditor) {
+			if (hasFile || (leftImgName && leftImgName !== "Choose file...")) {
+				$("#previewContractBtn").show();
+			} else {
+				$("#previewContractBtn").hide();
+			}
 		} else {
 			$("#previewContractBtn").hide();
 		}
@@ -12079,6 +12088,12 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 		}
 	});
 	bindContractFormEvents(responseData.partnerOrgType);
+	editor.events.on("beforePaste", function (e, pasteData) {
+		replaceContractPlaceholders(editor, pasteData);
+	});
+	editor.events.on("change", function () {
+		replaceContractPlaceholders(editor);
+	});
 }
 
 function tableCenter(){
@@ -12176,10 +12191,14 @@ function validateAddContractForm(formId){
 		showMessageTheme2(0, "Comment required");
 		return false;
 	}
-	if($("#recipientSignatureUpload").val() == ""){
+	if($("label[for='recipientSignatureUpload']").text() == "Choose file..."){
 		showMessageTheme2(0, "Please upload your signature");
 		return false;
 	}
+	// if($("#recipientSignatureUpload").val() == ""){
+	// 	showMessageTheme2(0, "Please upload your signature");
+	// 	return false;
+	// }
 	if($("#"+formId+" #validityStartDate").val() == null || $("#"+formId+" #validityStartDate").val() == undefined || $("#"+formId+" #validityStartDate").val() == ""){
 		showMessageTheme2(0, "Validity start date required");
 		return false;
@@ -12521,12 +12540,28 @@ function bindContractFormEvents(partnerType) {
 	});
 }
 
-// function checkPreviewButtonVisibility() {
-//     var editorContent = $("#editorData").text().trim() || $(".jodit-wysiwyg").text().trim();
-//     var hasFile = $("#recipientSignatureUpload")[0].files.length > 0;
-//     if (editorContent.length > 0 && hasFile) {
-//         $("#previewContractBtn").show();
-//     } else {
-//         $("#previewContractBtn").hide();
-//     }
-// }
+function replaceContractPlaceholders(editor, pasteData) {
+	const firstPartner = $("#firstPartnerName").val() || "";
+	const secondPartner = $("#partnerName").val() || "";
+
+	const replacements = [
+	  { regex: /#FIRST_PARTY_NAME#/gi, value: firstPartner },
+	  { regex: /#SECOND_PARTY_NAME#/gi, value: secondPartner }
+	];
+  
+	if (pasteData?.html) {
+	  replacements.forEach(r => {
+		pasteData.html = pasteData.html.replace(r.regex, r.value);
+	  });
+	  return;
+	}
+  
+	let content = editor.value || "";
+	replacements.forEach(r => {
+	  content = content.replace(r.regex, r.value);
+	});
+  
+	if (content !== editor.value) {
+	  editor.value = content;
+	}
+}
