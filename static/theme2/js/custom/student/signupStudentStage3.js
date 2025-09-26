@@ -161,27 +161,35 @@ function removeAllCourse() {
 	apCourseSelectionFlag = false;
 }
 
-async function showPaymentTermCondMode() {
+async function showPaymentTermCondMode(src) {
+	var schoolId = $(src).attr('schoolId');
+	var userPaymentDetailsId = $(src).attr('userPaymentDetailsId');
+	var entityType = $(src).attr('entityType');
+	var entityId = $(src).attr('entityId');
+	var paidByUserId = $(src).attr('paidByUserId');
+	await getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
+	$("#bookAnEnrollmentTNC").modal("hide");
+}
+async function showPaymentModal() {
+	
 	hideModalMessage('');
 	if($('#signupType').val() == 'Online' ){
 		if(SHOW_PAYMENT_OPTION=='Y'){
 			await callLocationForPaymentPromise();
 			if ($("#payMode").val() == 'registration') {
-				if ($('#bookAnEnrollmentTNC').length > 0) {
-					$('#courseFeeModalTNC').modal('hide');
-					$('#bookAnEnrollmentTNC').modal('show');
-					$("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
-				} else {
-					showMessage(0, 'No payment gateway enabled, please contact administrator!');
-				}
+				// $('#courseFeeModalTNC').modal('hide');
+				// $('#bookAnEnrollmentTNC').modal('show');
+				// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
+				var schoolId = $('.payabledetails').attr('schoolId');
+				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+				checkPayment("", userPaymentDetailsId, schoolId)
 			} else {
-				if ($('#callPaymentStudentModal').length > 0) {
-					await getAirwallexMethods();
-					$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false });
-	
-				} else {
-					showMessage(0, 'No payment gateway enabled, please contact administrator!');
-				}
+				var schoolId = $('.payabledetails').attr('schoolId');
+				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+				var entityType = $('.payabledetails').attr('entityType');
+				var entityId = $('.payabledetails').attr('entityId');
+				var paidByUserId = $('.payabledetails').attr('paidByUserId');
+				getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
 			}
 		} else {
 			$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
@@ -192,38 +200,6 @@ async function showPaymentTermCondMode() {
 		$('#goToDashboardWarningMessage').hide();
 	}
 }
-
-async function getAirwallexMethods(){
-	var counrtyCode = JSON.parse($("#location").val()).countryCode;
-	$.ajax({
-        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-airwallex-payment-methods?schoolId=${btoa(SCHOOL_ID)}&countryCode=${btoa(counrtyCode)}`,
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-			var html = '';
-            if (response.methods && response.methods.length > 0) {
-                $.each(response.methods, function (index, method) {
-                    html+=
-					`<a href="javascript:void(0);" onclick="commonPayment(\'airwallexPayButton\')">
-						<div class="payment-method-icon">`;
-							if(method.image == ""){
-								html+=`<p style="font-size: 14px;">${method.labelName}</p>`
-							}else{
-								html+=
-								`<img src="${PATH_FOLDER_IMAGE2}payment-gateway/${method.image}">
-								<p>${method.labelName}</p>`
-							}
-						html+=`</div>
-					</a>`;
-                });
-            } else {
-                html+='<div>No Payment Methods Available</div>';
-            }
-            $("#paymentMethods").html(html);
-		}
-	})
-}
-
 
 function getAllCourseDetails(isGradeChange, courseId) {
 	$("#commonloaderId, #commonloaderBody").show();
@@ -406,6 +382,8 @@ function choosePaymentOption() {
 			flag=false;
 		}
 	}
+	setActiveStep(4);
+	showSkeleton(true, "step4");
 	if(flag){
 		$.ajax({
 			type: "POST",
@@ -616,13 +594,11 @@ function callForProgressionToDashboard() {
 						applicationSubmittedModalOffline();
 					}else{
 						$('#submitApplicationWarning').modal("hide");
-						backToMain();
 						showMessage(true, 'Student has been successfully enrolled');
-						window.setTimeout(function () {
-							$('#searchEnrolled').trigger('click');
-						}, 1000);
+						window.setTimeout(function(){
+							backToDedicatedModule('partner-enrollment-list');
+						},1000);
 					}
-					
 				}
 			}
 		}

@@ -779,13 +779,15 @@ function validateElement(formId, fieldId, fielderrorId) {
 async function callEvaluatonPay(formId, callingFrom) {
   hideModalMessage(true);
   $("#evaluationDataSubmit").attr("disabled", false);
-  await getAirwallexMethods();
-  $("#callPaymentStudentModal").modal({ backdrop: "static", keyboard: false });
   $("#evaluationRequestFormModal").modal("hide");
-  setTimeout(function () {
-    $("body").addClass("modal-open");
-  }, 1000);
+  var schoolId = $('.payabledetails').attr('schoolId');
+  var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+  var entityType = $('.payabledetails').attr('entityType');
+  var entityId = $('.payabledetails').attr('entityId');
+  var paidByUserId = $('.payabledetails').attr('paidByUserId');
+  getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
 }
+
 function callEvaluationEmailCheck(studEmail, studUUID) {
   var data = {};
   data["studEmail"] = studEmail;
@@ -890,7 +892,6 @@ function validateForEvaluationSlots(formId) {
       lat = locations.lat;
       lon = locations.lon;
     }
-    console.log("callEvaluationFormFreeSlots");
     callEvaluationFormFreeSlots(
       "date=" +
         meetingDate +
@@ -921,8 +922,6 @@ function validateForEvaluationSlots(formId) {
   }
 }
 function callEvaluationFormFreeSlots(actionUrl) {
-  //   console.log(actionUrl);
-  console.log("evalution");
   $("#freeSlotList").html("");
   var finalUrl = "/get-request-demo-free-slots?" + actionUrl;
   $.ajax({

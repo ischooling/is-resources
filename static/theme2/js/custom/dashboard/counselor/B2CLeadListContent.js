@@ -1188,7 +1188,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
     }else if(leads.leadScore>=50 && leads.leadScore<80){
       lScoreColor='bg-warning';
     }else if(leads.leadScore<50){
-      lScoreColor='bg-danger';
+      lScoreColor='bg-primary';
     }
 
 		var bgColorDemo="";

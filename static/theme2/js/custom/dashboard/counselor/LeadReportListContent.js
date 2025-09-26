@@ -1166,6 +1166,7 @@ function openCampaignModal(campaignName){
 					</button>
 				</div>
 				<div class="modal-body">
+					<div><span class="bold p-1 campaign-name"></span></div>
 					<table class="table table-bordered">
 						<thead>
 							<tr class="bg-dark text-white font-weight-bold text-center">

@@ -1,3 +1,4 @@
+var APPLICATION_JSON_VALUE = "application/json";
 function getURLForSmile(suffixUrl) {
 	return BASE_URL + CONTEXT_PATH + SCHOOL_UUID + '/common/' + suffixUrl;
 }
@@ -101,33 +102,31 @@ function saveSmile() {
 	if (!validateRequestForSmile()) {
 		return false;
 	}
+	if($('#userPaymentDetailsId').val()!='' && $('#userId').val()!='' && $('#smileId').val()!=''){
+		getPaymentGatewaysOptions(SCHOOL_ID,$('#userPaymentDetailsId').val(),'BUY_A_SMILE',$('#smileId').val(),$('#userId').val());
+		return false;
+	}
 	$.ajax({
 		type: "POST",
 		url: getURLForSmile("buy-a-smile-save"),
 		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(getRequestForSmile()),
-		dataType: 'html',
-		success: function (html) {
-			if (html != "") {
-				var obj = JSON.parse(html);
-				if (obj.statusResponse.status == "FAILED"
-					|| obj.statusResponse.status == "EXCEPTION"
-					|| obj.statusResponse.status == "SESSIONOUT") {
-					showMessageBAS('serverError', obj.statusResponse.message);
-				} else if (obj.statusResponse.status == "NOPAYMENTGATEWAYENABLED") {
-					showMessageBAS('serverError', obj.statusResponse.message);
-				} else {
-					var obj = JSON.parse(html);
-					$('#smileId').val(obj.smileId);
-					callSigninStudentPay(this);
-				}
+		dataType: 'json',
+		success: function (data) {
+			if (data.statusResponse.status == "FAILED"
+				|| data.statusResponse.status == "EXCEPTION"
+				|| data.statusResponse.status == "SESSIONOUT") {
+				showMessageBAS('serverError', data.statusResponse.message);
+			} else if (data.statusResponse.status == "NOPAYMENTGATEWAYENABLED") {
+				showMessageBAS('serverError', data.statusResponse.message);
+			} else {
+				$('#smileId').val(data.smileId);
+				$('#userId').val(data.userId);
+				$('#userPaymentDetailsId').val(data.userPaymentDetailsId);
+				getPaymentGatewaysOptions(SCHOOL_ID,$('#userPaymentDetailsId').val(),'BUY_A_SMILE',$('#smileId').val(),$('#userId').val());
 			}
 		}
 	});
-}
-
-function callSigninStudentPay(formId, callingFrom) {
-	$('#callPaymentStudentModal').modal({ backdrop: 'static', keyboard: false })
 }
 
 function getRequestForSmile() {
@@ -154,63 +153,63 @@ function getRequestForSmile() {
 	return buyASmileRequestDTO;
 }
 
-function callStates(formId, value, elementId) {
-	hideMessage('');
-	if (!validateRequestForMaster(formId, elementId)) {
-		$("#" + formId + " #stateId").val(0);
-		resetDropdown($("#" + formId + " #stateId"), 'Select state');
-		$("#" + formId + " #cityId").val(0);
-		resetDropdown($("#" + formId + " #cityId"), 'Select city');
-		return false;
-	}
-	$("#stateId").prop("disabled", true);
-	resetDropdown($("#" + formId + " #cityId"), 'Select city');
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster(formId, 'STATES-LIST', value)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessageBAS('serverError', data['message']);
-			} else {
-				buildDropdown(data['mastersData']['states'], $('#stateId'), 'Select state');
-			}
-			$("#stateId").prop("disabled", false);
-		}
-	});
-}
+// function callStates(formId, value, elementId) {
+// 	hideMessage('');
+// 	if (!validateRequestForMaster(formId, elementId)) {
+// 		$("#" + formId + " #stateId").val(0);
+// 		resetDropdown($("#" + formId + " #stateId"), 'Select state');
+// 		$("#" + formId + " #cityId").val(0);
+// 		resetDropdown($("#" + formId + " #cityId"), 'Select city');
+// 		return false;
+// 	}
+// 	$("#stateId").prop("disabled", true);
+// 	resetDropdown($("#" + formId + " #cityId"), 'Select city');
+// 	$.ajax({
+// 		type: "POST",
+// 		contentType: APPLICATION_JSON_VALUE,
+// 		url: getURLForCommon('masters'),
+// 		data: JSON.stringify(getRequestForMaster(formId, 'STATES-LIST', value)),
+// 		dataType: 'json',
+// 		cache: false,
+// 		timeout: 600000,
+// 		success: function (data) {
+// 			if (data['status'] == '0' || data['status'] == '2') {
+// 				showMessageBAS('serverError', data['message']);
+// 			} else {
+// 				buildDropdown(data['mastersData']['states'], $('#stateId'), 'Select state');
+// 			}
+// 			$("#stateId").prop("disabled", false);
+// 		}
+// 	});
+// }
 
-function callCities(formId, value, elementId) {
-	hideMessage('');
-	if (!validateRequestForMaster(formId, elementId)) {
-		$("#" + formId + " #cityId").val(0);
-		resetDropdown($("#" + formId + " #cityId"), 'Select city');
-		return false;
-	}
-	$("#" + formId + " #cityId").prop("disabled", true);
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster('formId', 'CITIES-LIST', value)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessageBAS('serverError', data['message']);
-			} else {
-				buildDropdown(data['mastersData']['cities'], $('#cityId'), 'Select city');
-			}
-			$("#cityId").prop("disabled", false);
-			return false;
-		}
-	});
-}
+// function callCities(formId, value, elementId) {
+// 	hideMessage('');
+// 	if (!validateRequestForMaster(formId, elementId)) {
+// 		$("#" + formId + " #cityId").val(0);
+// 		resetDropdown($("#" + formId + " #cityId"), 'Select city');
+// 		return false;
+// 	}
+// 	$("#" + formId + " #cityId").prop("disabled", true);
+// 	$.ajax({
+// 		type: "POST",
+// 		contentType: APPLICATION_JSON_VALUE,
+// 		url: getURLForCommon('masters'),
+// 		data: JSON.stringify(getRequestForMaster('formId', 'CITIES-LIST', value)),
+// 		dataType: 'json',
+// 		cache: false,
+// 		timeout: 600000,
+// 		success: function (data) {
+// 			if (data['status'] == '0' || data['status'] == '2') {
+// 				showMessageBAS('serverError', data['message']);
+// 			} else {
+// 				buildDropdown(data['mastersData']['cities'], $('#cityId'), 'Select city');
+// 			}
+// 			$("#cityId").prop("disabled", false);
+// 			return false;
+// 		}
+// 	});
+// }
 
 function validateRequestForMaster(formId, elementId) {
 	if ($('#' + formId + ' #' + elementId).val() == '' || $('#' + formId + ' #' + elementId).val() <= 0) {
@@ -279,7 +278,7 @@ function hideMessage(id) {
 	$('#statusMessage').removeClass('success-color');
 	$('#statusMessage').removeClass('danger-color');
 	$('#statusMessage').html('');
-	$('#modalMessage').modal("hide");
+	// $('#modalMessage').modal("hide");
 }
 function showMessageBAS(elementId, message) {
 	$('#' + elementId).html(message);
@@ -293,31 +292,54 @@ function hideMessageBAS(elementId) {
 	$('#' + elementId).html('');
 
 }
-function callCommonPaymentGatewaySmile(formId, module, args, callCommonPaymentGateway) {
+
+function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway){
+	hideModalMessage('');
+	if(paymentGateway=='WELLSFARGO'){
+		$('#cardHolderNameError').hide();
+		$('#cardNumberError').hide();
+		$('#cardExpiryMonthError').hide();
+		$('#cardExpiryMonthError').hide();
+		$('#cardCodeError').hide();
+		if($('#cardHolderName').val()=='' || $('#cardHolderName').val()==undefined){
+			$('#cardHolderNameError').show();
+			return false;
+		}
+		if($('#cardNumber').val()=='' || $('#cardNumber').val()==undefined){
+			$('#cardNumberError').show();
+			return false;
+		}
+		if($('#cardExpiryYear').val()=='' || $('#cardExpiryYear').val()==undefined){
+			$('#cardExpiryMonthError').show();
+			return false;
+		}
+		if($('#cardExpiryMonth').val()=='' || $('#cardExpiryMonth').val()==undefined){
+			$('#cardExpiryMonthError').show();
+			return false;
+		}
+		if($('#cardCode').val()=='' || $('#cardCode').val()==undefined){
+			$('#cardCodeError').show();
+			return false;
+		}
+	}
 	customLoader(true);
 	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML('common', 'call-payment-gateway'),
-		data: JSON.stringify(getRequestForCommonPayment(formId, module, args, callCommonPaymentGateway)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
-			hideMessageBAS('serverError');
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessageBAS('serverError', data['message']);
-			} else {
-				if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('common','invoke-payment-gateway'),
+		data : JSON.stringify(invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway)),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			if (data.status == '0' || data.status == '2' || data.status == '3') {
+				showModalMessage(0, data['message']);
+				if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
 					window.location.reload();
-				} else {
-					showMessageBAS('serverError', data['message']);
-					if (data['paymentGateway'] == 'Smoovpay') {
-						prepareSmoovPayDataAndPostSmile(data['smoovPayData']);
-					} else {
-						window.location.replace(data['extra']);
-					}
 				}
+			} else {
+				showModalMessage(1, data.message);
+				window.location.replace(data.details.redirectUrl);
 			}
 			customLoader(false);
 			return false;
@@ -325,63 +347,27 @@ function callCommonPaymentGatewaySmile(formId, module, args, callCommonPaymentGa
 	});
 }
 
-function getRequestForCommonPayment(formId, module, args, eligiblePaymentGateway) {
-	var request = {};
-	var authentication = {};
-	if (module == 'common') {
-		authentication['userType'] = module;
-		authentication['userId'] = $("#smileId").val();
-		var commonPaymentInfoDTO = {};
-		if ($('#location').length > 0) {
-			commonPaymentInfoDTO['location'] = $('#location').val();
-		} else {
-			commonPaymentInfoDTO['location'] = '';
-		}
-		commonPaymentInfoDTO['themeType'] = 'theme2';
-		commonPaymentInfoDTO['paymentOptionName'] = 'Online'
-		commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-		commonPaymentInfoDTO['userType'] = module;
-		commonPaymentInfoDTO['moduleName'] = "common";
-		commonPaymentInfoDTO['paymentTitle'] = "Change a Life";
-		commonPaymentInfoDTO['paymentType'] = "annually";
-		commonPaymentInfoDTO['entityType'] = "BUY_A_SMILE";
-		commonPaymentInfoDTO['entityId'] = $('#smileId').val();
-		console.log("Data for Payment is :  ", commonPaymentInfoDTO);
+function invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway){
+	var paymentInitiateRequest = {};
+	if($('#location').length>0){
+		paymentInitiateRequest['location'] = $('#location').val();
+	}else{
+		paymentInitiateRequest['location'] = '';
 	}
-	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-	request['authentication'] = authentication;
-	request['commonPaymentInfo'] = commonPaymentInfoDTO;
+	paymentInitiateRequest['browserDetails'] = userPaymentDetailsId;
 
-	return request;
+	paymentInitiateRequest['userPaymentDetailsId'] = userPaymentDetailsId;
+	paymentInitiateRequest['paidByUserId'] = paidByUserId;
+	paymentInitiateRequest['schoolId'] = schoolId;
+	paymentInitiateRequest['paymentGateway'] = paymentGateway;
+	return paymentInitiateRequest;
 }
 
 function validateEmail(email) {
 	var expr = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
 	return expr.test(email);
 }
-function prepareSmoovPayDataAndPostSmile(smoovPayData) {
-	$("#smoovpayForm").attr("action", smoovPayData['endPoint']);
-	$("#smoovpayForm input[name*='action']").val(smoovPayData['action']);
-	$("#smoovpayForm input[name*='currency']").val(smoovPayData['currency']);
-	$("#smoovpayForm input[name*='version']").val(smoovPayData['version']);
-	$("#smoovpayForm input[name*='item_name_1']").val(smoovPayData['itemName1']);
-	$("#smoovpayForm input[name*='item_description_1']").val(smoovPayData['itemDescription1']);
-	$("#smoovpayForm input[name*='item_quantity_1']").val(smoovPayData['itemQuantity1']);
-	$("#smoovpayForm input[name*='item_amount_1']").val(smoovPayData['itemAmount1']);
-	$("#smoovpayForm input[name*='merchant']").val(smoovPayData['merchant']);
-	$("#smoovpayForm input[name*='ref_id']").val(smoovPayData['refId']);
-	$("#smoovpayForm input[name*='delivery_charge']").val(smoovPayData['deliveryCharge']);
-	$("#smoovpayForm input[name*='tax_amount']").val(smoovPayData['taxAmount']);
-	$("#smoovpayForm input[name*='tax_percentage']").val(smoovPayData['taxPercentage']);
-	$("#smoovpayForm input[name*='total_amount']").val(smoovPayData['totalAmount']);
-	$("#smoovpayForm input[name*='str_url']").val(smoovPayData['strUrl']);
-	$("#smoovpayForm input[name*='success_url']").val(smoovPayData['successUrl']);
-	$("#smoovpayForm input[name*='cancel_url']").val(smoovPayData['cancelUrl']);
-	$("#smoovpayForm input[name*='signature']").val(smoovPayData['signature']);
-	$("#smoovpayForm input[name*='signature_algorithm']").val(smoovPayData['signatureAlgorithm']);
-	//	alert($("#smoovpayForm").html());
-	$("#smoovpayForm").submit();
-}
+
 function getHash() {
 	return Math.random().toString(36);
 }
@@ -424,3 +410,7 @@ $.ajaxSetup({
 		xhr.setRequestHeader("UNIQUEUUID", UNIQUEUUID);
 	}
 });
+
+function encode(payload) {
+  return window.btoa(encodeURI(payload));
+}

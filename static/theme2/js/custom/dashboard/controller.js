@@ -502,4 +502,5 @@ function backToDedicatedModule(moduleUrl){
 function backToMain(){
   $("#dashboardContentInHTML").show();
   $("#dashboardContentInHTMLAdditional").hide();
+  $('html, body').animate({ scrollTop: 0 }, 500);
 }

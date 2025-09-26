@@ -501,3 +501,10 @@ async function callLocationForPaymentPromise() {
         }
     }
 }
+
+function getCountryISOCode(){
+	var localeISO_Code = navigator.language || navigator.userLanguage; 
+	var countryISO = localeISO_Code.split("-")[1]; 
+	// console.log("Country ISO:", countryISO.toLowerCase());
+	return countryISO.toLowerCase();
+}

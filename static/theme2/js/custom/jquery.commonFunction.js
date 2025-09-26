@@ -565,12 +565,12 @@ function resetDropdown(dropdown, emptyMessage) {
   //	dropdown.append('<option disabled selected> </option>');
 }
 $(document).ajaxStart(function (e) {
-  // ++AJAXREQUESTCOUNT;
+  AJAXREQUESTCOUNT++;
   // console.log("AJAX call started:");
   customLoader(true);
 });
 $(document).ajaxStop(function () {
-  //  --AJAXREQUESTCOUNT;
+  AJAXREQUESTCOUNT--;
   // if (AJAXREQUESTCOUNT <= 0) {
   //   AJAXREQUESTCOUNT = 0; // just to be safe, avoid negative counts
   //   // console.log("All AJAX calls completed");
@@ -1173,14 +1173,10 @@ function validateRequestForMaster(formId, elementId) {
   if ($("#" + formId + " #" + elementId).val() == null) {
     return false;
   }
-  if (
-    $("#" + formId + " #" + elementId)
-      .val()
-      .trim() == "" ||
-    $("#" + formId + " #" + elementId)
-      .val()
-      .trim() == 0
-  ) {
+  if(
+    $("#" + formId + " #" + elementId).val().trim() == "" ||
+    $("#" + formId + " #" + elementId).val().trim() == 0
+  ){
     return false;
   }
   return true;
@@ -1931,8 +1927,7 @@ function bindFileUploadNew1(
   data["uploadCategory"] = uploadCategoryId;
   data["uploadUserId"] = uploadUserId;
   data["skipSession"] = skipSession;
-  $("#fileupload" + uploadIndex)
-    .fileupload({
+  $("#fileupload" + uploadIndex).fileupload({
       formData: { payload: JSON.stringify(getFinalValue(data)) },
       url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/upload/" + UNIQUEUUID,
       dataType: "json",
@@ -1958,30 +1953,22 @@ function bindFileUploadNew1(
           );
         }
         if (SCHOOL_ID == 1) {
-          if (
-            (USER_ROLE != "TEACHER" &&
-              data.originalFiles.length &&
-              data.originalFiles[0]["size"] > 10276044.8) ||
-            (USER_ROLE == "TEACHER" &&
-              data.originalFiles.length &&
-              data.originalFiles[0]["size"] > 10276044.8)
-          ) {
+          if ((USER_ROLE != "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 10276044.8) || (USER_ROLE == "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 10276044.8)) {
             if (USER_ROLE == "TEACHER") {
               uploadErrors.push(MAX_SIZE_LIMIT_FOR_TEACHER);
             } else {
               uploadErrors.push(MAX_SIZE_LIMIT);
             }
             isError = true;
+          }else{
+            if((USER_ROLE != "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 5767168)) {
+              uploadErrors.push(MAX_SIZE_LIMIT);
+              isError = true;
+            }
           }
-        } else {
-          if (
-            (USER_ROLE != "TEACHER" &&
-              data.originalFiles.length &&
-              data.originalFiles[0]["size"] > 5767168) ||
-            (USER_ROLE == "TEACHER" &&
-              data.originalFiles.length &&
-              data.originalFiles[0]["size"] > 5767168)
-          ) {
+        } 
+        else {
+          if((USER_ROLE != "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 5767168) || (USER_ROLE == "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 5767168)) {
             if (USER_ROLE == "TEACHER") {
               uploadErrors.push(MAX_SIZE_LIMIT);
             } else {
@@ -4900,52 +4887,71 @@ $(".show-password").on("click", function () {
     $(this).find("i").toggleClass("fa-eye fa-eye-slash");
   }
 });
-var i = 0;
+// Open modal: adjust z-index
+$(document).on("shown.bs.modal", ".modal", function () {
+    const modal = $(this);
+    const openModals = $(".modal.show").not(this);
 
-$(document).on("shown.bs.modal", ".modal", function (e) {
-  var modalShow; 
-  if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
-  const modal = $(this);
-  const backdrops = $(".modal-backdrop");
-  
-  const modals = $(modalShow).not(this);
+    const baseZIndex = 1040;
+    const zIndex = baseZIndex + openModals.length * 10 + 10;
+    modal.css("z-index", zIndex);
 
-  // Calculate new z-index
-  let baseZIndex = 1050;
-  let zIndex = baseZIndex + modals.length * 20; // Each stacked modal increases z-index
-
-  modal.css("z-index", zIndex);
-
-  setTimeout(() => {
-    let backdrop = $(".modal-backdrop").not(".modal-stack").last();
-    backdrop
-      .css("z-index", zIndex - 10) // Ensure backdrop is behind modal
-      .addClass("modal-stack");
-  }, 10);
-  $('.tooltip.show').remove();
+    // Adjust backdrop
+    setTimeout(() => {
+        const backdrop = $(".modal-backdrop").not(".modal-stack").last();
+        backdrop.css("z-index", zIndex - 10).addClass("modal-stack");
+    }, 0);
 });
 
+// Close modal: keep remaining backdrops
 $(document).on("hidden.bs.modal", ".modal", function () {
-  var modalShow; 
-  if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
-  // Check if there are still open modals
-  if ($(modalShow).length === 0 && $(".modal.in").length === 0) {
-    // Remove leftover backdrop(s)
-    $(".modal-backdrop").remove();
-    $("body").removeClass("modal-open");
-  } else {
-    // Adjust z-index of the last open modal and its backdrop
-    const topModal = $(modalShow).last();
-    const newZIndex = 1050 + ($(modalShow).length - 1) * 20;
-    topModal.css("z-index", newZIndex);
-    $(".modal-backdrop")
-      .last()
-      .css("z-index", newZIndex - 10);
-    if(!$("body").hasClass("modal-open")){
-      $("body").addClass("modal-open");
+    const openModals = $(".modal.show"); // remaining modals
+
+    if (openModals.length > 0) {
+        // Adjust top modal and backdrop z-index
+        const topModal = openModals.last();
+        const newZIndex = 1040 + (openModals.length - 1) * 10 + 10;
+        topModal.css("z-index", newZIndex);
+
+        const topBackdrop = $(".modal-backdrop.modal-stack").last();
+        topBackdrop.css("z-index", newZIndex - 10);
+
+        if (!$("body").hasClass("modal-open")) {
+            $("body").addClass("modal-open");
+        }
+    } else {
+        // No modals open, remove modal-open class
+        $("body").removeClass("modal-open");
     }
-  }
 });
+
+
+
+// $(document).on("hidden.bs.modal", ".modal", function () {
+//   var modalShow; 
+//   if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
+//   // Check if there are still open modals
+//   if ($(modalShow).length === 0 && $(".modal.in").length === 0) {
+//     // Remove leftover backdrop(s)
+//     $(".modal-backdrop").remove();
+//     $("body").removeClass("modal-open");
+//   } else {
+//     // Adjust z-index of the last open modal and its backdrop
+//     const topModal = $(modalShow).last();
+//     const newZIndex = 1050 + ($(modalShow).length - 1) * 20;
+//     topModal.css("z-index", newZIndex);
+//     $(".modal-backdrop")
+//       .last()
+//       .css("z-index", newZIndex - 10);
+//     if(!$("body").hasClass("modal-open")){
+//       $("body").addClass("modal-open");
+//     }
+//   }
+// });
+
+
+
+
 
 $(document).ready(function () {
   $(".hamburger").on("click", function () {
@@ -5429,6 +5435,22 @@ async function getSchoolSettingsOffice(schoolId){
 		}
 		responseData = await getDataBasedUrlAndPayload('office', getSettingRequest(schoolId));
 		localStorage.setItem('ssoffice'+schoolId,JSON.stringify(responseData));
+		return responseData;
+	}catch(e){
+		showMessageTheme2(true, e)
+	}
+}
+
+async function getSchoolSettingsMails(schoolId){
+	try{
+		var responseData = await  getDesiredObject('mails'+schoolId);
+		if(typeof responseData =='object'){
+			if(!responseData.ntc){
+				return responseData;
+			}
+		}
+		responseData = await getDataBasedUrlAndPayload('mails', getSettingRequest(schoolId));
+		localStorage.setItem('mails'+schoolId,JSON.stringify(responseData));
 		return responseData;
 	}catch(e){
 		showMessageTheme2(true, e)

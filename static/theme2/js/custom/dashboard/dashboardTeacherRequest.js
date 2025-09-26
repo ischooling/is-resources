@@ -44,48 +44,7 @@ function callRequestTeacher(){
     $("#paymentTeacher").attr("disabled", true);
     //alert("My favourite sports are: " + subjectIds.join(", ")+" payAmount: "+payAmount+"amount: "+amount);
 }
-function generateTeacherRequest(formId, moduleId, eligiblePaymentGateway) {
-	hideMessage('');
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('student','teacher-request'),
-		data : JSON.stringify(getRequestForTeacherRequest(formId, moduleId, eligiblePaymentGateway)),
-		dataType : 'json',
-		cache : false,
-		timeout : 600000,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
-			} else {
-				showMessage(true, data['message']);
-				callCommonInitPayment('','STUDENT', eligiblePaymentGateway);
-				
-			}
-			return false;
-		}
-	});
-}
 
-function getRequestForTeacherRequest(formId, moduleId, eligiblePaymentGateway){
-	console.log('getRequestForTeacherRequest');
-	var request = {};
-	var authentication = {};
-	var requestData = {};
-	var studentTeacherRequestDTO = {};
-	studentTeacherRequestDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-	studentTeacherRequestDTO['studentId'] = $('#studentId').val();
-	studentTeacherRequestDTO['standardId'] = $('#standardId').val();
-	studentTeacherRequestDTO['subjectId'] = $('#totalSubjectIds').attr('data-subjectids');
-	studentTeacherRequestDTO['placementSubjectId'] = $('#totalPlacementSubjectIds').attr('data-placementSubjectIds');
-	requestData['studentTeacherRequestDTO'] = studentTeacherRequestDTO;
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = moduleId;
-	authentication['userId']=$('#userId').val();
-	request['authentication'] = authentication;
-	request['requestData'] = requestData;
-	return request;
-}
 function callKnowMoreAboutTeacher(){
 	$('#teacherassstdetails').modal('show');
 }

@@ -133,49 +133,6 @@ function getRequestForSigningContract(formId){
 	return request;
 }
 
-function callInitPayment(formId, moduleId) {
-	hideMessage('');
-	$('#callPaymentModal').modal('show');
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('school','signup/payment-initiated'),
-		data : JSON.stringify(getSchoolRequestForInitPayment(formId, moduleId)),
-		dataType : 'json',
-		cache : false,
-		async:false,
-		timeout : 600000,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
-			} else {
-				showMessage(true, data['message']);
-			}
-			return false;
-		}
-	});
-}
-function getSchoolRequestForInitPayment(formId, moduleId){
-	console.log('in 11');
-	var request = {};
-	var authentication = {};
-	var requestData = {};
-	var commonPaymentInfoDTO = {};
-	if($('#location').length>0){
-		commonPaymentInfoDTO['location'] = $('#location').val();
-	}else{
-		commonPaymentInfoDTO['location'] = '';
-	}
-	commonPaymentInfoDTO['userType'] = moduleId;
-	commonPaymentInfoDTO['moduleName'] = 'SCHOOL_B2B';
-	requestData['commonPaymentInfoDTO'] = commonPaymentInfoDTO;
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = moduleId;
-	authentication['userId']=$('#userId').val().trim();
-	request['authentication'] = authentication;
-	request['requestData'] = requestData;
-	return request;
-}
 function callWireTransferPayment(formId, moduleId) {
 	hideMessage('');
 	$.ajax({

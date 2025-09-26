@@ -31522,8 +31522,8 @@ table td.child ul li{white-space: normal;}
 .custom-btn div i{padding: 8px;background: #fff;color:#407ed7;width: 30px;border-radius: 4px;text-align: center;}
 .custom-btn div span{display: inline-block;padding: 0 10px 0 5px;color: #fff;}
 .custom-btn div > .tooltip{background:#fff !important}
-.payment-form form .pay-now-btn {display: inline-block;width:auto;border:2px solid #2d63e2;border-radius:6px; padding: 3px;}
-.payment-form form .pay-now-btn .btn{display: inline-block;padding:10px 30px;border-radius: 4px; color:#fff;background: #2d63e2;cursor: pointer; margin:0;}
+.payment-form form .pay-now-btn {display: inline-block;width:auto;border-radius:6px;}
+
 .h_scroll {display: none;}
 @media(max-width: 768px){
 	.payment-form form ul li label, .payment-form form ul li input:not([type="file"]), .payment-form form ul li textarea{width:100%;}

@@ -6392,7 +6392,9 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 							campaignEfStatusMsg='Not delivering due to some issues';
 						}
 					}
-					htm=`<tr><td>Start Date</td><td class="text-center">${startDate}</td><td class="text-center">Campaign Launch Date</td><td>-</td></tr>
+					$(".campaign-name").html(leadCampaign.campaignName);
+					htm=`
+					<tr><td>Start Date</td><td class="text-center">${startDate}</td><td class="text-center">Campaign Launch Date</td><td>-</td></tr>
 					<tr><td>Total Leads</td><td class="text-center">${totalLead}</td><td class="text-center">Higher is Better</td><td></td></tr>
 					<tr><td>Amount Spent</td><td class="text-center">$ ${spent}</td><td class="text-center"><$ 1000</td><td></td></tr>
 					<tr><td>CTR (Click Through Rate)</td><td class="text-center">${ctr.toFixed(2)}%</td><td class="text-center">>= 0.56% (Ideal: 1%+)</td><td class="${ctrbgColor}"></td></tr>
@@ -6465,6 +6467,8 @@ function getLeadCampaignWiseHtml(data){
 	if(leadListCampaign.length>0){
 		var ctrbgColor='';
 		var cprbgcolor='';
+		var cpcbgcolor='';	
+		var freqbgColor='';
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
 			// if(leadCampaign.activeStatus=='Y'){
@@ -6499,14 +6503,29 @@ function getLeadCampaignWiseHtml(data){
 			}else if(ctr>0.56 && ctr<0.99){
 				ctrbgColor='bg-warning';
 			}else if(ctr<0.56){
-				ctrbgColor='bg-red';
+				ctrbgColor='bg-danger';
 			}
+			
 
 			cprbgcolor='';
 			if(perLeadFbSpent>=25){
-				cprbgcolor='bg-red';
+				cprbgcolor='bg-danger';
 			}else {
 				cprbgcolor='bg-success';
+			}
+
+			cpcbgcolor='';
+			if(cpc>=5){
+				cpcbgcolor='bg-danger';
+			}else{
+				cpcbgcolor='bg-success';
+			}
+
+			freqbgColor='';
+			if(frequency<3){
+				freqbgColor='bg-success';
+			}else {
+				freqbgColor='bg-danger';
 			}
 
 
@@ -6544,11 +6563,11 @@ function getLeadCampaignWiseHtml(data){
 				
 				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+reach+"</td>";
 				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+frequency.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+freqbgColor+"\">"+frequency.toFixed(2)+"</td>";
 				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"</td>";
 				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"</td>";
 				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+cpc.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cpcbgcolor+"\">$"+cpc.toFixed(2)+"</td>";
 				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%</td>";
 				htmlRet += "<td style=\"width:11%;border:0;\" class=\"badge font-10 my-0\">";
 				htmlRet += "<a href=\"javascript:void(0)\" onClick=\"openCampaignModal('"+leadCampaign.campaignName+"')\" <i class=\"fa fa-eye fa-2x\"></a><br/>";

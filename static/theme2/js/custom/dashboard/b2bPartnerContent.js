@@ -574,7 +574,7 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	$("#btnClickCommission").on('click',function(){
 		updateStudentPartnerCommissionRate('', '', '', '','');
 	});
-	
+	$('html, body').animate({ scrollTop: 0 }, 500);
 }
 
 function partnerListContent(title, referralCode, originalPartnerType){
@@ -1075,11 +1075,18 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 														+'</span>'
 														+'<div class="follow-up-content text-center" style="display:'+classActiveCss+'">'
 															+'<div class="bg-light-primary p-2 m-2 rounded text-left">'
-																+'<span class="full d-block"><strong>Fee:</strong>'+stuSchedule.payAmount+'</span>'
-																+'<span class="full d-block"><strong>Payment Status:</strong> '+stuSchedule.status+'</span>'
-																+'<span class="full d-block"><strong>Schedule Date:</strong> '+stuSchedule.scheduleDate+'</span>';
+																+'<div class="full d-block mb-1">'
+																	+'<span><strong>Fee:</strong>'+stuSchedule.payAmount+'</span>';
+																	if(stuSchedule.status != "SUCCESS"){
+																		html+='<span class="float-right" id="payNowBtn'+stuSchedule.userPaymentDetailsId+'"><a href="javascript:void(0)" class="pay_now_btn btn btn-primary btn-sm py-0 px-1" onclick="getPaymentGatewaysOptions(\''+stuSchedule.schoolId+'\',\''+stuSchedule.userPaymentDetailsId+'\',\''+stuSchedule.entityType+'\',\''+stuSchedule.entityId+'\',\''+USER_ID+'\')">Pay Now</a></span>';
+																	}
+																html+='</div>'
+																+'<div class="full d-block"><strong class="float-left">Payment Status:</strong> <span class="d-inline-block" id="paymentStatus'+stuSchedule.userPaymentDetailsId+'">'+stuSchedule.status+'</span></div>'
+																+'<div class="full d-block"><strong>Schedule Date:</strong> <span>'+stuSchedule.scheduleDate+'</span></div>';
 																if(stuSchedule.payDate!=''){
-																	html+='<span class="full d-block"><strong>Payment Date:</strong> '+stuSchedule.payDate+'</span>';
+																	html+='<div class="full d-block"><strong>Payment Date:</strong> <span>'+stuSchedule.payDate+'</span></div>';
+																}else{
+																	html+='<div class="full d-none" id="paymentDate'+stuSchedule.userPaymentDetailsId+'Wrapper"><strong>Payment Date:</strong> <span id="paymentDate'+stuSchedule.userPaymentDetailsId+'"></span></div>';	
 																}
 															+'</div>'
 														+'</div>'

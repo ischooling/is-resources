@@ -183,6 +183,7 @@ function callForSignupStudentDetails() {
 					}else{
 						showMessage(false, data['message']);
 						setActiveStep(1);
+						$(".next-btn").removeClass("disabled")
 					}
 				}
 			} else {
@@ -650,6 +651,7 @@ async function moveStep(moveType){
 	}
 	else if(prevStep==4){
 		$(".step1, .step2, .step3").addClass("done-step");
+		
 	}
 	
 	if(moveType == "next"){

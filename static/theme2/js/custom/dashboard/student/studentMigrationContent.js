@@ -1619,14 +1619,10 @@ function getReviewAndPayRendered(data){
 		$(this).parent().closest('li').siblings().find('.a-content').slideUp();
 	});
 
-	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-		// bindFileUploadNew1('8', '32', data.userId, 4);
-		// bindFileUploadNew1('9', '33', data.userId, 4);
-		if(data.isOptedAlternetPaymentMethod==1){
-			$('#logout_modal_logout').modal('show');
-		}else if(data.isOptedAlternetPaymentMethod==2){
-			$('#wu_payment_warning').modal('show');
-		}
+	if(data.isOptedAlternetPaymentMethod==1){
+		$('#logout_modal_logout').modal('show');
+	}else if(data.isOptedAlternetPaymentMethod==2){
+		$('#wu_payment_warning').modal('show');
 	}
 	
 	if(data.schoolId==5){
@@ -1711,6 +1707,7 @@ function getReviewAndPayContent(data){
 				+'</section>'
 				+' <div class="col-md-12 col-sm-12 p-0 mt-3">';
 					if(!data.customPaymentEnabled){
+						console.log("data", data)
 						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>';
 					}
 					var paynow=true
@@ -1723,21 +1720,14 @@ function getReviewAndPayContent(data){
 						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right ml-2" onclick="callForProgressionToDashboard();">'+(paynow?'Pay Later':'Proceed to Dashboard')+'</button>';
 					}
 					if(paynow){
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="callClientCommonPaymentGateway(\'\',\'student\','+data.userId+','+data.userPaymentDetailsId+',\''+data.paymentType+'\','+data.paymentByUserId+');">Pay Now</button>';
+						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions('+data.schoolId+','+data.userPaymentDetailsId+',\''+data.entityType+'\','+data.entityId+','+USER_ID+');">Pay Now</button>';
 					}
 				html+=
 				'</div>'
 		+'</div>'
 	+'</div>'	
 
-	// +courseFeeModal(data)
-	// +bookAnEnrollmentTNCModal(data)
-	// +callPaymentStudentModal(data)
-	// +commonYocoCheckout(data)
-	// +referenceNumberModal(data)
-	// +logoutModalLogout(data)
 	+wuPaymentWarningModal(data)
-	// +k12EnrollFeeModal(data)
 	+goToDashboardWarningMessageModal(data)
 	// +smoovPayContent(data);
 	return html;
@@ -2307,488 +2297,40 @@ function advanceFeeShchedule(cdrDTO){
 		
 	return html;
 }
-// function courseFeeModal(data){
-// 	var html ='';
-// 	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-// 		html='<div class="modal fade theme-modal fade-scale " id="courseFeeModalTNC" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-// 			+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
-// 				+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
-// 					+'<div class="modal-header theme-header white-text" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
-// 						+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;">Further to my Enrollment with '+SCHOOL_NAME+', I agree to comply with the following as stated below, without any exceptions:</h4>'
-// 						+'<button type="button" class="close" data-dismiss="modal" style="color:#fff">×</button>'
-// 					+'</div>'
-// 					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-// 						+'<!-<p class="scroll-down" style="margin-top:5px;"><a href="#" class="animat=e"></a></p> -->'
-// 						+'<form id="signupStage4" name="signupCourse" method="post" autocomplete="off">'
-// 							+'<div class="full theme-text scroll-down-animatoin">'
-// 								+'<h4><i class="fa fa-arrow-down faa-falling animated"></i></h4>'
-// 							+'</div>'
-// 							+'<div class="agree">'
-// 								+'<ol>'
-// 									+'<li>I will submit only original academic work, documents and materials.</li>'
-// 									+'<li>I will complete all academic work/tasks independently without any support from any other individual(s) or resources.</li>'
-// 									+'<li>I agree to be reviewed by '+SCHOOL_NAME+' (or its authorized individuals/bodies) to review/verify the authenticity (or quantity/parameters) of my academic work at any point during my learning period (or after completion of learning period or even after issuance of qualification certificates).</li>'
-// 									+'<li>I agree that if my academic work (or any of its components as prescribed/required by '+SCHOOL_NAME+' for my particular course/grade/subject of study) is found to be misrepresented, counterfeit, copied, incomplete (or if there is a mismatch between the quality/quantity/nature of my academic work and the parameters prescribed/required by International Schooling), then my enrollment will be cancelled with immediate effect (irrespective of which stage my enrollment/learning is and even after the completion of my academic work) and I will not hold '+SCHOOL_NAME+' (or its authorized individuals/bodies) responsible/liable for the above actions taken by '+SCHOOL_NAME+'.</li>'
-// 									+'<li>I may be asked to provide additional information, proof, material in support of the information provided by me (especially related to but not limited to academic credentials, coursework and other relevant information in support of my eligibility/candidature with '+SCHOOL_NAME+') especially if the information provided by me is incomplete, inconsistent (or with discrepancies) or not as per the prescribed requirements of '+SCHOOL_NAME+'.</li>'
-// 									+'<li>I agree to complete all the credit/course requirements (including assessments) in the prescribed time/duration to earn my credits, in the absence of which I shall not be awarded any credits and I take complete responsibility of completing my coursework to be awarded credits (or my failure to earn credit due to the non-adherence to prescribed requirements of '+SCHOOL_NAME+') for the same.</li>'
-// 									+'<li>I will not misrepresent any facts or details to '+SCHOOL_NAME+' and not forge/misrepresent any documents, signatures or credentials and any deviation from the above (or from any other truthful representation of details) shall render my candidature to be cancelled (null/void) by '+SCHOOL_NAME+' with immediate effect upon discovery of such misrepresentation(s).</li>'
-// 									+'<li>I understand that all materials of International Schooling (including but not limited to all study materials used by me during my learning/coursework) are the sole and complete property of '+SCHOOL_NAME+' and I will not make any ‘commercial’ use of any of the '+SCHOOL_NAME+' courses, assignments, audio-visual resources, materials or any other collaterals.</li>'
-// 									+'<li>It’s the responsibility of students and parents to go through the website for any upcoming notifications.</li>'
-// 								+'</ol>'
-// 								+'<div class="modal-footer" style="text-align: left;">'
-// 									// +'<%--<div class="col-sm-2 col-xs-12" style="flex:1">'
-// 									// 	+'<img src="'+PATH_FOLDER_IMAGE2+data.pgName+'.png" align="left" width="150px">'
-// 									// +'</div> --%>'
-// 									+'<div class="col-sm-12 col-xs-12" style="flex: 1; display: flex; align-items: center">'
-// 										+'<span class="col-sm-12 col-xs-12">'
-// 											+'<input type="checkbox" id="chkval" name="chkval" class="checkbox-lg" />'
-// 											+'<label for="chkval" style="position:relative;top:-0.5px;color:#333;cursor:pointer">By clicking (ticking) the box here, I agree to abide by the above mentioned policies/points</label>'
-// 										+'</span>'
-// 										+'<button type="button" id="payTabData" class="btn btn-success" data-dismiss="modal" disabled="disabled" onclick="callSigninStudentPay(this,"signup");">Proceed</button>'
-// 									+'</div>'
-// 								+'</div>'
-// 							+'</div>'
-// 						+'</form>'
-// 					+'</div>'
-// 				+'</div>'
-// 			+'</div>'
-// 		+'</div>'
-// 	}
-// 	return html;
-// }
-			
-// function bookAnEnrollmentTNCModal(data){
-// 	var html ='';
-// 	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-// 		'<div class="modal fade theme-modal fade-scale" id="bookAnEnrollmentTNC" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-// 			+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
-// 				+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
-// 					+'<div class="modal-header theme-header white-text primary-bg white-txt-color" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
-// 						+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;padding-right: 20px;"> Further to my successful completion of the ‘Reserve an Enrollment Seat’ process with '+SCHOOL_NAME+',  I agree to comply with the following as stated below, without any exceptions:</h4>'
-// 						+'<button type="button" class="close" data-dismiss="modal" style="color:#fff">×</button>'
-// 					+'</div>'
-// 					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-// 						+'<form id="signupStage4" name="signupCourse" method="post" autocomplete="off">'
-// 							+'<div class="agree">'
-// 								+'<ol>'
-// 									+'<li>I understand that by paying the ‘Reserve an Enrollment Seat’ Fee, I am only reserving my Enrollment Seat at '+SCHOOL_NAME+' and I will only get access to the learning platform once the Course Fee is paid in full.</li>'
-// 									+'<li>I may be asked to provide additional information, and documents ( including but not limited to Age Proof, Address Proof, and Last Academic Proof) in support of the information provided by me (especially related to but not limited to academic credentials, coursework and other relevant information in support of my eligibility/candidature with '+SCHOOL_NAME+') especially if the information provided by me is incomplete, inconsistent (or with discrepancies) or not as per the prescribed requirements of '+SCHOOL_NAME+'.</li>'
-// 									+'<li>I will not misrepresent any facts or details to '+SCHOOL_NAME+'. and not forge/misrepresent any documents, signatures, or credentials and any deviation from the above (or from any other truthful representation of details) shall render my candidature to be canceled (null/void) by '+SCHOOL_NAME+' with immediate effect upon discovery of such misrepresentation(s).</li>'
-// 									+'<li>I understand that all materials of '+SCHOOL_NAME+' (including but not limited to all study materials used by me during my learning/coursework) are the sole and complete property of '+SCHOOL_NAME+' and I will not make any ‘commercial’ use of any of the '+SCHOOL_NAME+' courses, assignments, audio-visual resources, materials, or any other collaterals.</li>'
-// 									+'<li>I understand that the ‘Reserve an Enrollment Seat’ amount will be deducted from the Course Fee (which is subject to changes) once paid.</li>'
-// 									+'<li>It is my responsibility to go through the website for any upcoming notifications.</li>'
-// 									+'<li>‘Reserve an Enrollment Seat’ fee is valid till '+data.bookEnrollmentDuration+' days from the date of payment. My candidature shall be rendered null/void in case I fail to complete the Enrollment process.</li>'
-// 									+'<li>Under any circumstances/conditions, the fee paid for "Reserve an Enrollment Seat" is non-refundable and non-transferable.</li>'
-// 									+'<li>'+SCHOOL_NAME+' reserves the right to amend, limit or revoke this offer at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>'
-// 								+'</ol>'
-// 								+'<div class="modal-footer" style="text-align: left;">'
-// 									// +'<div class="col-sm-2 col-xs-12" style="flex:1">'
-// 									// 	+'<img src="'+PATH_FOLDER_IMAGE2+data.pgName+'.png'+SCRIPT_VERSION+'" align="left">'
-// 									// +'</div>'
-// 									+'<div class="col-sm-12 col-xs-12" style="flex: 1; display: flex; align-items: center">'
-// 										+'<span class="col-sm-12 col-xs-12" style="flex: auto;">'
-// 										+'<input type="checkbox" id="chkvalBook" class="checkbox-lg" name="chkvalBook" style="text-align: left"/>'
-// 											+'<label for="chkvalBook" style="position:relative;top:-0.5px;color:#333;cursor:pointer">By clicking (ticking) the box here, I agree to abide by the above mentioned policies/points</label>'
-// 										+'</span>'
-// 										+'<button type="button" id="payTabData" class="btn btn-success"data-dismiss="modal" disabled="disabled"onclick="callSigninStudentPay(this,\'signup\');">Pay Now</button>'
-// 									+'</div>'
-// 								+'</div>'
-// 							+'</div>'
-// 						+'</form>'
-// 					+'</div>'
-// 				+'</div>'
-// 			+'</div>'
-// 		+'</div>';
-// 	}
-// 	return html;
-// }
-
-// function callPaymentStudentModal(data){
-// 	var html ='';
-// 	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-// 		html=
-// 		'<div id="callPaymentStudentModal" class="modal theme-modal fade payment-opiton-modal" role="dialog" data-backdrop="static" data-keyboard="false">'
-// 			+'<div class="modal-dialog modal-lg">'
-// 				+'<div class="modal-content">'
-// 					+'<div class="modal-header primary-bg white-txt-color" style="padding: 10px;">'
-// 						+'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'
-// 							+'<span aria-hidden="true" style="color: #fff;">×</span>'
-// 						+'</button>'
-// 						+'<h4 class="modal-title" style="font-size: 14px">Payment</h4>'
-// 					+'</div>'
-// 					+'<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important; overflow-y: auto; height: 450px">'
-// 						+'<section class="payment-option-wrapper">'
-// 							+'<div class="full">'
-// 								+'<h4 class="section-heading primary-bg-before primary-bg-after">PAYMENT OPTIONS</h4>'
-// 								+'<button type="button" class="close" data-dismiss="modal" style="margin-top: -50px; color: #fff">&times;</button>'
-// 							+'</div>'
-// 							+'<div class="tab-wrapper">'
-// 								+'<div class="payment-tabs">'
-// 									+'<ul class="nav-tabs" role="tablist">';
-// 										if(data.pgs!=null){
-// 											html+=
-// 											'<li role="presentation" class="'+(data.pgs!=null?"active":"")+' primary-bg-active">'
-// 												+'<a href="#credit-card-payment" aria-controls="uploadTab" role="tab" data-toggle="tab" class="payment-option-itme active-tab primary-border-color ">Credit Card / Debit Card</a>'
-// 											+'</li>';
-// 										}
-// 										if(data.pgswu!=null){
-// 											html+=
-// 											'<li class="tab-item '+(data.pgs==null?"active":"")+' primary-bg-active primary-border-color">'
-// 												+'<a href="#westernUnion" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">Convera</a>'
-// 											+'</li>';
-// 										}
-// 										if(data.pgswt!=null){
-// 											html+=
-// 											'<li class="tab-item '+(data.pgs==null && data.pgswu==null?"active":"")+' primary-bg-active">'
-// 												+'<a href="#wire-payment" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">Wire Transfer</a>'
-// 											+'</li>';
-// 										}
-// 										if(data.pgsAlternate!=null){
-// 											html+=
-// 											'<li class="tab-item primary-border-color'+(data.pgs==null && data.pgswu==null?"active":"")+' primary-bg-active">'
-// 												+'<a href="#alternate-payment" aria-controls="browseTab" role="tab" data-toggle="tab" class="payment-option-itme primary-border-color">'+toTitleCase(data.pgsAlternate.gatewayName)+'</a>'
-// 											+'</li>';
-// 										}
-// 										html+=
-// 									'</ul>'
-// 								+'</div>'
-// 								+'<div class="payment-option tab-content">'
-// 									+'<div role="tabpanel" id="credit-card-payment" class="tab-pane '+(data.pgs!=null?"active":"")+' credit-card-payment flex-item primary-border-color">'
-// 										+'<div id="primary-pg" style="display:block;">'
-// 											+'<div class="payment-icon lg">';
-// 												if(data.pgName=='STRIPE'){
-// 													html+='<img src="'+PATH_FOLDER_IMAGE+'STRIPE.png"/>';
-// 												}else if(data.pgName=='Smoovpay'){
-// 													html+='<img src="'+PATH_FOLDER_IMAGE+'SMOOVPAY.png"/>';
-// 												}else if(data.pgName=='WELLSFARGO'){
-// 													html+='<img src="'+PATH_FOLDER_IMAGE+'wells_fargo.png"/>';
-// 												}
-// 												html+=
-// 											'</div>'
-// 											+'<div class="payment-icon">'
-// 												+'<h3 class="fw-600">We accept Mastercard and Visa</h3>'
-// 												+'<img src="'+PATH_FOLDER_IMAGE+'visa.png"/>'
-// 												+'<img src="'+PATH_FOLDER_IMAGE+'master-card.png"/>'
-// 											+'</div>';
-// 											if(data.enrollmentType!='REGISTRATION_REGISTER'){
-// 												html+='<p>Your SMS profile will be created instantly after successful payment</p>';
-// 											}
-// 											if(data.cr !=null && data.pgs.gatewayName=='Smoovpay'){
-// 												html+=
-// 												'<div class="full">'
-// 													+'<p>Our payment partner will display the Course Fees in Singapore Dollars on the payment page. The current Singapore Dollar rate is:</p>'
-// 													+'<p> <strong>1 '+data.fromCurrency+' = '+data.cr.conversionRation+' '+data.toCurrency+'</strong> </p>'
-// 													+'<p> <strong>Total payable fee: '+data.finalPayableAmountAfterCalculation+' '+data.toCurrency+'</strong></p>'
-// 												+'</div>';
-// 											}
-// 											if(data.schoolId==1){
-// 												html+=
-// 												'<div class="payment-icon " style="margin-top:0;margin-bottom:10px">'
-// 													+'<div class="smoov lg primary-bg white-txt-color" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=REGISTRATION_SUBJECT_FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \''+data.pgs.gatewayName+'\');">'
-// 														+'<span class="paypal-button-text" optional="">Pay Now</span>'
-// 													+'</div>'
-// 												+'</div>';
-												
-// 											}else if(data.pgs.gatewayName=='YOCO'){
-// 												html+=commonYocoCheckout(data);
-// 											}
-// 											html+=
-// 										'</div>'
-// 									+'</div>';
-// 									if(data.pgswu!=null){
-// 										html+=
-// 										'<div role="tabpanel" id="westernUnion" class="tab-pane '+(data.pgs==null?'active':'')+' credit-card-payment flex-item primary-border-color">'
-// 											+'<div class="payment-icon lg">'
-// 												+'<img src="'+PATH_FOLDER_IMAGE+'/convera-logo.svg">'
-// 												+'<p>&nbsp;</p>'
-// 												+'<h4 class="full fw-600 text-left">Payment Processing Time:</h4>'
-// 												+'<strong class="full fw-600">Card Payments: Upto 3 business days</strong>'
-// 												+'<strong class="full fw-600">Bank Transfer: 2-7 business days</strong>'
-// 											+'</div>'
-// 											+'<div class="payment-icon" style="margin-bottom:0">'
-// 												+'<h3 class="fw-600 text-left">Pay money from the comfort of your own home – Reliable, convenient international money transfer using your home/local currency</h3>'
-// 												+'<p>&nbsp;</p>'
-// 												+'<div class="row">'
-// 													+'<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">'
-// 														+'<ul class="full mt-4">'
-// 															+'<li>'
-// 																+'<h4 class="fw-600 text-left full">Step 1</h4>'
-// 																+'<strong class="full">Select your preferred currency and click on Get Quote</strong>'
-// 															+'</li>'
-// 															+'<p style="margin:0">&nbsp;</p>'
-// 															+'<li>'
-// 																+'<h4 class="fw-600 text-left full">Step 2</h4>'
-// 																+'<strong class="full">Verify your details – Student Name, Registered Email.</strong>'
-// 															+'</li>'
-// 															+'<li>'
-// 																+'<br/>'
-// 																+'<p>You can use a wide variety of services to complete your transactions. You can pay with your bank account or a credit/debit card* or use cash at your nearest in-person Convera agent location.</p>'
-// 															+'</li>'
-// 														+'</ul>'
-// 													+'</div>'
-// 													+'<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">'
-// 														//+'<iframe width="100%" height="225" src="https://www.youtube.com/embed/6XcIHVAaa04" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
-// 													+'</div>'
-// 												+'</div>'
-// 											+'</div>'
-// 											+'<div class="payment-icon" style="margin-top:0">'
-// 												+'<h3 class="fw-600">We accept Mastercard and Visa</h3>'
-// 												+'<img src="'+PATH_FOLDER_IMAGE+'visa.png"/>'
-// 												+'<img src="'+PATH_FOLDER_IMAGE+'master-card.png"/>'
-// 											+'</div>'
-// 											+'<div class="payment-icon" style="margin-top:0">'
-// 												+'<div class="smoov lg primary-bg white-txt-color" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=INSTALLMENT-FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \'CONVERA\');">'
-// 													+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now </span>'
-// 												+'</div>'
-// 											+'</div>'
-// 										+'</div>';
-// 									}
-// 									if(data.pgswt!=null){
-// 										html+=
-// 										'<div role="tabpanel" id="wire-payment" class="tab-pane '+(data.pgs==null && data.pgswu ==null?'active':'')+' wire-payment flex-item primary-border-color">'
-// 											+'<div class="payment-icon lg" style="mragin-top:0">'
-// 												+'<img src="'+PATH_FOLDER_IMAGE+'wt.png"/>'
-// 											+'</div>'
-// 											+'<div class="full">'
-// 												+'<p>If you choose this method, please add US $35.00 to cover the bank’s fees for wire transfer charges. Here are the banking instructions for your payment:</p>'
-// 												+'<ul>'
-// 													+'<li>'
-// 														+'<strong>BIC Name: Oversea-Chinese BankingCorporation Limited</strong>'
-// 													+'</li>'
-// 													+'<li>'
-// 														+'<strong>Bank Address: 63 Chulia Street, #11-01, OCBC Centre East, Singapore - 049514</strong>'
-// 													+'</li>'
-// 													+'<li>'
-// 														+'<strong>Swift Code: OCBCSGSG </strong>'
-// 													+'</li>'
-// 													+'<li>'
-// 														+'<strong>Bank Code: 7339 </strong>'
-// 													+'</li>'
-// 													+'<li>'
-// 														+'<strong>Branch Code: 503</strong></li>'
-// 													+'<li>'
-// 														+'<strong>Account Name: INTERNATIONAL SCHOOLING PTE. LTD.</strong>'
-// 													+'</li>'
-// 													+'<li>'
-// 														+'<strong>Account Number: 503396020301</strong>'
-// 													+'</li>'
-// 												+'</ul>'
-// 												+'<p>Please clearly identify Student Name and City/State/Country in the reference information that accompanies the wire transfer, so that we can properly credit your account.</p>'
-// 												+'<p>Your SMS profile will be created after the complete payment is processed in '+SCHOOL_NAME+'\'s bank Account</p>'
-// 											+'</div>'
-// 											+'<div class="payment-form">'
-// 												+'<form id="wirePaymentForm" name="wirePaymentForm" method="post">'
-// 													+'<input type="hidden" name="userPaymentDetailsId" id="userPaymentDetailsId" value="'+data.userPaymentDetailsId+'" />'
-// 													+'<input type="hidden" name="paymentTitle" id="paymentTitle" value="'+data.paymentTitle+'" />'
-// 													+'<ul>'
-// 														+'<li>'
-// 															+'<label>Payable Fee &nbsp;<b> '+data.currencyIsoCode+'</b></label>'
-// 															+'<input type="text" name="wireTransferAmount" disabled placeholder="Fee" id="wireTransferAmount" required="" value="'+data.wireTransferAmount+'"/>'
-// 														+'</li>'
-// 														+'<li>'
-// 															+'<label>Reference Number</label>'
-// 															+'<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');"/>'
-// 														+'</li>'
-// 														+'<li>'
-// 															+'<label>Proof of Payment</label>'
-// 															+'<div class="upload-btn-wrapper">'
-// 																+'<div class="file-btn">'
-// 																	+'<span id="fileName9" class="fileName" style="display: none;"></span> '
-// 																	+'<input type="file" name="fileupload9" id="fileupload9" value="Upload Proof of Payment"/> '
-// 																	+'<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>'
-// 																+'</div>'
-// 																+'<div id="divshowDocument9" class="custom-btn" style="display: none;">'
-// 																	+'<div>'
-// 																		+'<a id="showDocument9" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View"> '
-// 																			+'<i class="fa fa-eye"></i>'
-// 																		+'</a>'
-// 																	+'</div>'
-// 																+'</div>'
-// 																+'<div id="divdeleteDocument9" class="custom-btn" style="display: none;">'
-// 																	+'<div>'
-// 																		+'<a id="deleteDocument9" href="javascript.void(0)" data-toggle="tooltip" title="Delete"> '
-// 																			+'<i class="fa fa-trash"></i>'
-// 																		+'</a>'
-// 																	+'</div>'
-// 																+'</div>'
-// 																+'<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>'
-// 															+'</div>'
-// 														+'</li>'
-// 														+'<li>'
-// 															+'<label>&nbsp;</label>'
-// 															+'<div class="pay-now-btn primary-border-color">'
-// 																+'<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="callStudentTransferSubmitSignup(\'wirePaymentForm\',2,\'signup\','+data.paymentByUserId+',\''+data.pgswt.gatewayName+'\');">Submit</span>'
-// 															+'</div>'
-// 														+'</li>'
-// 													+'</ul>'
-// 												+'</form>'
-// 											+'</div>'
-// 										+'</div>';
-// 									}
-// 									if(data.pgsAlternate!=null){
-// 										html+=
-// 										'<div role="tabpanel" id="alternate-payment" class="tab-pane '+(data.pgs==null && data.pgswu ==null?'active':'')+' wire-payment flex-item primary-border-color">'
-// 											+'<div id="alternate-pg">'
-// 												+'<div class="payment-icon lg">';
-// 													if(data.pgsAlternate.pgName=='Stripe'){
-// 														html+='<img src="'+PATH_FOLDER_IMAGE+'STRIPE.png"/>';
-// 													}else if(data.pgsAlternate.pgName=='Smoovpay'){
-// 														html+='<img src="'+PATH_FOLDER_IMAGE+'SMOOVPAY.png"/>';
-// 													}else if(data.pgsAlternate.pgName=='WELLSFARGO'){
-// 														html+='<img src="'+PATH_FOLDER_IMAGE+'wells_fargo.png"/>';
-// 													}
-// 													html+=
-// 												'</div>'
-// 												+'<div class="payment-icon">'
-// 													+'<h3 class="fw-600">We accept Mastercard and Visa</h3>'
-// 													+'<img src="'+PATH_FOLDER_IMAGE+'visa.png"/>'
-// 													+'<img src="'+PATH_FOLDER_IMAGE+'master-card.png"/>'
-// 												+'</div>';
-// 												if(data.enrollmentType!='REGISTRATION_REGISTER'){
-// 													html+='<p>Your SMS profile will be created instantly after successful payment</p>';
-// 												}
-// 												if(data.cr && data.pgsAlternate.gatewayName=="Smoovpay"){
-// 													html+=
-// 													'<div class="full">'
-// 														+'<p>Our payment partner will display the Course Fees in Singapore Dollars on the payment page. The current Singapore Dollar rate is:</p>'
-// 														+'<p> <strong>1 '+data.fromCurrency+' = '+data.cr.conversionRation+' '+data.toCurrency+'</strong> </p>'
-// 														+'<p> <strong>Total payable fee: '+data.finalPayableAmountAfterCalculation+' '+data.toCurrency+'</strong></p>'
-// 													+'</div>';
-// 												}
-// 												html+=
-// 												'<div class="payment-icon " style="margin-top:0;margin-bottom:10px">'
-// 													+'<div class="smoov lg primary-bg white-txt-color" onclick="callCommonPaymentGateway(\'signupStage4\',\'student\',\'type=REGISTRATION_SUBJECT_FEE&userId='+data.userId+'&payId='+data.userPaymentDetailsId+'&paymentType='+data.paymentType+'&paymentByUserId='+data.paymentByUserId+'&entityType='+data.entityType+'&entityId='+data.entityId+'\', \''+data.pgsAlternate.gatewayName+'\');">'
-// 														+'<span class="paypal-button-text" optional="" style="font-size: 18px; color:#fff; vertical-align: bottom;">Pay Now</span>'
-// 													+'</div>'
-// 												+'</div>'
-// 											+'</div>'
-// 										+'</div>'
-// 									}
-// 									html+=
-// 								'</div>'
-// 							+'</div>'
-// 						+'</section>'
-// 					+'</div>'
-// 				+'</div>'
-// 			+'</div>'
-// 		+'</div>';
-// 	}
-// 	return html;	
-// }
-
-// function commonYocoCheckout(data){
-// 	var html = '';
-// 	if(data.yocoData != null){
-// 		html+=
-// 		'<div class="payment-icon " style="margin-top:0;margin-bottom:10px" style="display:none;">'
-// 			+'<div id="yocopaymentbutton" class="smoov lg primary-bg white-txt-color">'
-// 				+'<span class="paypal-button-text" optional="">Pay Now</span>'
-// 			+'</div>'
-// 		+'</div>';
-// 	}
-// 	return html;
-// }
-
-// function referenceNumberModal(data){
-// 	var html = '';
-// 	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-// 		+'<div class="modal fade theme-modal fade-scale " id="reference_number" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-// 			+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
-// 				+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
-// 					+'<div class="modal-header theme-header white-text" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
-// 						+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;">Confirmation!</h4>'
-// 						+'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'
-// 							+'<span aria-hidden="true" style="color: #fff;">×</span>'
-// 						+'</button>'
-// 					+'</div>'
-// 					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-// 						+'<div class="full form">'
-// 							+'<h4 class="modal-title fw-600">Are you sure you want to submit this reference number? Once submitted, you won’t be able to change this number again.</h4>'
-// 							+'<hr/>'
-// 							+'<div class="full text-right">'
-// 								+'<button type="button" class="btn bg-primary  text-white" id="proceedStudentPayment" data-dismiss="modal" style="background: #5cb85c !important">Yes</button>'
-// 								+'<button type="button" class="btn bg-primary  text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
-// 							+'</div>'
-// 						+'</div>'
-// 					+'</div>'
-// 				+'</div>'
-// 			+'</div>'
-// 		+'</div>';
-// 	}
-// 	return html;	
-// }
-
-// function logoutModalLogout(data){
-// 	var html = '';
-// 	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-// 		html='<div class="modal fade theme-modal fade-scale " id="logout_modal_logout" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-// 			+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
-// 				+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
-// 					+'<div class="modal-header theme-header white-text" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
-// 						+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;">Payment Under Verification</h4>'
-// 					+'</div>'
-// 					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-// 						+'<div class="full text-center">'
-// 							+'<br/>'
-// 							+'<h2 class="modal-title  text-center fw-600 " style="margin-bottom: 15px;">Your payment is under verification.</h2>'
-// 							+'<h4 class="modal-title  text-center">';
-// 								if(data.enrollmentType!='REGISTRATION_REGISTER'){
-// 									html+='You will be able to access the dashboard once the payment is received.'
-// 								}
-// 								html+=
-// 								'You can contact us at ' 
-// 								+'<b>'
-// 									+' <a href="mailto:'+data.contactEmail+'" target="_blank">'+data.contactEmail+'</a>'
-// 								+'</b> for more information'
-// 							+'</h4>'
-// 							+'<br/>'
-// 							+'<p class="text-center">'
-// 								+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
-// 							+'</p>'
-// 						+'</div>'
-// 					+'</div>'
-// 				+'</div>'
-// 			+'</div>'
-// 		+'</div>';
-// 	}
-// 	return html;	
-// }
 
 function wuPaymentWarningModal(data){
 	var html = '';
-	if(data.pgswu!=null){
-		html='<div class="modal fade fade-scale" id="wu_payment_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-			+'<div class="modal-dialog modal-lg  modal-dialog-centered box-shadow-none" role="document">'
-				+'<div class="modal-content">'
-					+'<div class="modal-header py-2 bg-primary text-white">'
-						+'<h5 class="modal-title">Payment Under Verification</h5>'
-					+'</div>'
-					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-						+'<div class="full text-center">'
-							+'<br/>'
-							+'<h2 class="modal-title  text-center fw-600" style="margin-bottom: 15px;">Your payment is under verification.</h2>'
-							+'<h4 class="modal-title  text-center">';
-							if(data.enrollmentType!='REGISTRATION_REGISTER'){
-								html+='Your payment is under verification. You will be able to access the dashboard once the payment is received.';
-							}else{
-								html+='Your payment is under verification.';
-							}
-							html+=
-								'You can contact us at '
-								+'<b> <a href="mailto:'+data.contactEmail+'" target="_blank">'+data.contactEmail+'</a></b>'
-								+'for more information'
-							+'</h4>'
-							+'If you would like to choose another payment method, kindly <a href="javascript:void(0);" onclick="$(\'#wu_payment_warning\').modal(\'hide\');callSigninStudentPay(this,\'signup\');" class="anchor-color">click here</a>'
-							+'<br/>'
-							+'<p class="text-center">'
-								+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
-							+'</p>'
-						+'</div>'
+	html='<div class="modal fade fade-scale" id="wu_payment_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
+		+'<div class="modal-dialog modal-lg  modal-dialog-centered box-shadow-none" role="document">'
+			+'<div class="modal-content">'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title">Payment Under Verification</h5>'
+				+'</div>'
+				+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
+					+'<div class="full text-center">'
+						+'<br/>'
+						+'<h2 class="modal-title  text-center fw-600" style="margin-bottom: 15px;">Your payment is under verification.</h2>'
+						+'<h4 class="modal-title  text-center">';
+						if(data.enrollmentType!='REGISTRATION_REGISTER'){
+							html+='Your payment is under verification. You will be able to access the dashboard once the payment is received.';
+						}else{
+							html+='Your payment is under verification.';
+						}
+						html+=
+							'You can contact us at '
+							+'<b> <a href="mailto:'+data.contactEmail+'" target="_blank">'+data.contactEmail+'</a></b>'
+							+'for more information'
+						+'</h4>'
+						+'If you would like to choose another payment method, kindly <a href="javascript:void(0);" onclick="$(\'#wu_payment_warning\').modal(\'hide\');callSigninStudentPay(this,\'signup\');" class="anchor-color">click here</a>'
+						+'<br/>'
+						+'<p class="text-center">'
+							+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
+						+'</p>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
-		+'</div>';
-	}
+		+'</div>'
+	+'</div>';
 	return html;
 }
 
@@ -3011,43 +2553,6 @@ function recommendedCourseModalContent(data){
 	+'</div>';
 	return html;
 }
-// function k12EnrollFeeModal(data){
-// 	var html = '';
-// 	if(data.pgs!=null || data.pgswu!=null || data.pgswt!=null){
-// 		html='<div class="modal fade theme-modal fade-scale " id="k12EnrollFee" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-// 			+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
-// 				+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
-// 					+'<div class="modal-header theme-header white-text" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
-// 						+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;">Registration with '+SCHOOL_NAME+'</h4>'
-// 					+'</div>'
-// 					+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
-// 						+'<form id="signupStage4" name="signupCourse" method="post" autocomplete="off">'
-// 							+'<div class="agree">'
-// 								+'<span style="margin-top: 25px; width: 100%; padding: 25px; color: #0056ad; font-weight: 550; font-size: 15px; line-height: 30px; background: #ebf5ff; float: left;">'
-// 									+'We confirm your online payment of '
-// 									+'<span style="color: #0e0f10; font-size: 17px;">US $100.0</span> '
-// 									+'is completed successfully. Your enrollment seat has been successfully booked. You can download the receipt by clicking on the button below.<br> '
-// 									+'<span style="text-align: center; padding: 0 0 0 0 0">';
-// 										if(data.returnUrl!=null){
-// 											html+='<a target="_blank" href="'+data.returnUrl+'" class="btn btn-default btn-md" style="width: 100%;">Download Reserve an Enrollment Seat receipt</a>';
-// 										}
-// 										html+=
-// 									'</span>'
-// 									+'<br/>'
-// 									+'You can contact us at <u>'+data.contactEmail+'</u> for more information regarding elementary enrollment.'
-// 								+'</span>'
-// 								+'<p class="text-center">'
-// 									+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
-// 								+'</p>'
-// 							+'</div>'
-// 						+'</form>'
-// 					+'</div>'
-// 				+'</div>'
-// 			+'</div>'
-// 		+'</div>';
-// 	}
-// 	return html;	
-// }
 
 function goToDashboardWarningMessageModal(data){
 	var html='<div class="modal fade theme-modal fade-scale" id="goToDashboardWarningMessage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
@@ -3074,31 +2579,3 @@ function goToDashboardWarningMessageModal(data){
 	+'</div>';
 	return html;
 }
-
-// function smoovPayContent(data){
-// 	var html =
-// 		'<form id="smoovpayForm" action="" method="post">'
-// 			+'<input type="hidden" name="action" value="pay" />'
-// 			+'<input type="hidden" name="currency" value="'+data.currencyIsoCode+'" />'
-// 			+'<input type="hidden" name="version" value="2.0" />'
-// 			+'<input type="hidden" name="item_name_1" value="" />'
-// 			+'<input type="hidden" name="item_description_1" value="" />'
-// 			+'<input type="hidden" name="item_quantity_1" value="" />'
-// 			+'<input type="hidden" name="item_amount_1" value="" />'
-// 			+'<input type="hidden" name="merchant" value="" />'
-// 			+'<input type="hidden" name="ref_id" value="" />'
-// 			+'<input type="hidden" name="delivery_charge" value="" />'
-// 			+'<input type="hidden" name="tax_amount" value="" />'
-// 			+'<input type="hidden" name="tax_percentage" value="" />'
-// 			+'<input type="hidden" name="total_amount" value="" />'
-// 			+'<input type="hidden" name="str_url" value="" />'
-// 			+'<input type="hidden" name="success_url" value="" />'
-// 			+'<input type="hidden" name="cancel_url" value="" />'
-// 			+'<input type="hidden" name="signature" value="" />'
-// 			+'<input type="hidden" name="signature_algorithm" value="" />'
-// 			+'<input type="hidden" name="submit v2" alt="SmoovPay!" />'
-// 			+'<input type="hidden" name="skip_success_page" value="1" />'
-// 		+'</form>';
-// 	return html;	
-// }
-

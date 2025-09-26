@@ -1,73 +1,61 @@
-function callCommonInitPayment(formId, moduleId, eligiblePaymentGateway) {
-	hideMessage('');
-	//$('#callPaymentModal').modal('show');
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('common','payment-initiated'),
-		data : JSON.stringify(getRequestForInitPayment(formId, moduleId, eligiblePaymentGateway)),
-		dataType : 'json',
-		cache : false,
-		async: false,
-		timeout : 600000,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(1, data['message']);
-			} else {
-				showMessage(1, data['message']);
-				callCommonPaymentGateway('','common','', eligiblePaymentGateway);
-			}
-			return false;
+var CHECK_PAYMENT_INTERVAL;
+var CHECK_PAYMENT_INTERVAL_COUNT=0;
+async function checkPayment(formId, userPaymentDetailsId, schoolId){
+	var payload = {
+		'userPaymentDetailsId' : userPaymentDetailsId,
+		'schoolId' : schoolId
+	};	
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'check-payment',payload,'common');
+	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		if (responseData.status == '3') {
+			redirectLoginPage();
+		} else {
+			showMessageTheme2(false, responseData['message']);
 		}
-	});
-}
-function getRequestForInitPayment(formId, moduleId, eligiblePaymentGateway){
-	var request = {};
-	var authentication = {};
-	var commonPaymentInfoDTO = {};
-	if($('#location').length>0){
-		commonPaymentInfoDTO['location'] = $('#location').val();
 	}else{
-		commonPaymentInfoDTO['location'] = '';
-	}
-	commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-	commonPaymentInfoDTO['userType'] = moduleId;
-	if(moduleId=='STUDENT'){
-		commonPaymentInfoDTO['studentId'] = $('#studentId').val().trim();
-		commonPaymentInfoDTO['moduleName'] = $('#moduleName').val().trim();
-		commonPaymentInfoDTO['paymentTitle'] = $('#paymentType').val().trim();
-		commonPaymentInfoDTO['paymentType'] = $('#paymentType').val().trim();
-		commonPaymentInfoDTO['paymentAmount'] = $('#totalPaymentAmount').attr('data-payAmount');
-	}else if(moduleId=='SCHOOL'){
-		commonPaymentInfoDTO['moduleName'] = $('#moduleName').val().trim();
-		commonPaymentInfoDTO['paymentTitle'] = $('#paymentType').val().trim();
-		commonPaymentInfoDTO['paymentType'] = $('#paymentType').val().trim();
-		if($('#paymentType').val()=='SCHOOL-STUDENT-FEE'){
-			commonPaymentInfoDTO['schoolId'] = $('#schoolId').val().trim();
-			commonPaymentInfoDTO['studentId'] = $('#totalStudentIds').val().trim();
-			commonPaymentInfoDTO['totalCount'] = $('#totalCount').val().trim();
-			commonPaymentInfoDTO['gradeId'] = $('#currentGradeId').val().trim();
+		if(responseData.details.type == "BOOKSESSION_FEE" || responseData.details.type == "EXTENSION_FEE"){
+			$('#courseFeeModalTNC').modal('hide');
+			$('#bookAnEnrollmentModel').modal('hide');
+			// $('#callPaymentStudentModal').modal('show');
+			getPaymentGatewaysOptions(responseData.details.schoolId, responseData.details.upid, responseData.details.entityType, responseData.details.entityId, responseData.details.userId)
+		}else if(responseData.details.type == "REGISTRATION_FEE_ADV" || responseData.details.type ==  "REGISTRATION_FEE" || responseData.details.type == "REGISTRATION_SUBJECT_FEE_ADV"){
+			if($("#bookAnEnrollmentModel").length>0){
+				$("#bookAnEnrollmentModel").remove();
+			}
+			$("body").append(await getTNCContent(responseData));
+			$('#bookAnEnrollmentModel').modal('show');
+		}else{
+			if($("#courseFeeModalTNC").length>0){
+				$("#courseFeeModalTNC").remove();
+			}
+			$("body").append(await courseFeeModalTNC(responseData));
+			$('#courseFeeModalTNC').modal('show');
 		}
+		$("#chkval").on("change", function(){
+			if($("#chkval").is(":checked")){
+				$("#payTabData").removeAttr("disabled");
+			}else{
+				$("#payTabData").attr("disabled", true);
+			}
+		});
+		$("#bookAnEnrollmentModel #bookAnEnrollmentChkval").on("change", function(){
+			if($("#bookAnEnrollmentModel #bookAnEnrollmentChkval").is(":checked")){
+				$("#bookAnEnrollmentModel #bookAnEnrollmentData").removeAttr("disabled");
+			}else{
+				$("#bookAnEnrollmentModel #bookAnEnrollmentData").attr("disabled", true);
+			}
+		});
 	}
-	commonPaymentInfoDTO['teacherRequestSubjectIds'] = $('#totalSubjectIds').attr('data-subjectids');
-//	commonPaymentInfoDTO['teacherRequestPlacementSubjectIds'] = $('#totalPlacementSubjectIds').attr('data-placementSubjectIds');
-	//alert(commonPaymentInfoDTO);
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = moduleId;
-	authentication['userId']=$('#userId').val().trim();
-	request['authentication'] = authentication;
-	request['commonPaymentInfo'] = commonPaymentInfoDTO;
-	return request;
 }
 
-function callCommonPaymentGateway(formId, module, args, callCommonPaymentGateway){
+async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway){
 	hideModalMessage('');
-	$('#cardHolderNameError').hide();
-	$('#cardNumberError').hide();
-	$('#cardExpiryMonthError').hide();
-	$('#cardExpiryMonthError').hide();
-	$('#cardCodeError').hide();
-	if(callCommonPaymentGateway=='WELLSFARGO'){
+	if(paymentGateway=='WELLSFARGO'){
+		$('#cardHolderNameError').hide();
+		$('#cardNumberError').hide();
+		$('#cardExpiryMonthError').hide();
+		$('#cardExpiryMonthError').hide();
+		$('#cardCodeError').hide();
 		if($('#cardHolderName').val()=='' || $('#cardHolderName').val()==undefined){
 			$('#cardHolderNameError').show();
 			return false;
@@ -89,455 +77,100 @@ function callCommonPaymentGateway(formId, module, args, callCommonPaymentGateway
 			return false;
 		}
 	}
-	customLoader(true);
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('common','call-payment-gateway'),
-		data : JSON.stringify(getRequestForCommonPayment(formId, module, args, callCommonPaymentGateway)),
-		dataType : 'json',
-		cache : false,
-		timeout : 600000,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showModalMessage(0, data['message']);
-				if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
-					window.location.reload();
-				}
-			} else {
-				showModalMessage(1, data['message']);
-				if(data['paymentGateway']=='Smoovpay'){
-					prepareSmoovPayDataAndPost(data['smoovPayData']);
-				}else{
-					window.location.replace(data['extra']);
-				}
-			}
-			customLoader(false);
-			return false;
-		}
-	});
-}
-function getRequestForCommonPayment(formId, module, args, eligiblePaymentGateway){
-	var request = {};
-	var authentication = {};
-	if(module=='common'){
-		authentication['userType'] = module;
-		authentication['userId'] = $("#userId").val().trim();
-		var commonPaymentInfoDTO = {};
-		if($('#location').length>0){
-			commonPaymentInfoDTO['location'] = $('#location').val();
-		}else{
-			commonPaymentInfoDTO['location'] = '';
-		}
-		commonPaymentInfoDTO['themeType'] = 'theme2';
-		commonPaymentInfoDTO['paymentOptionName'] = 'Online'
-		commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-		commonPaymentInfoDTO['userType'] = module;
-		if($('#moduleName').length>0){
-			commonPaymentInfoDTO['moduleName'] = $('#moduleName').val().trim();
-		}
-		if($('#paymentType').length>0){
-			commonPaymentInfoDTO['paymentTitle'] = $('#paymentType').val().trim();
-		}
-		if($('#paymentType').length>0){
-			commonPaymentInfoDTO['paymentType'] = $('#paymentType').val().trim();
-		}
-
-		if(eligiblePaymentGateway=='WELLSFARGO'){
-			var creditCard = {};
-			creditCard['cardHolderName']=$('#cardHolderName').val().trim();
-			creditCard['cardNumber']=$('#cardNumber').val().trim();
-			creditCard['expirationDate']=$('#cardExpiryYear').val().trim()+'-'+$('#cardExpiryMonth').val().trim();
-			creditCard['cardCode']=$('#cardCode').val().trim();
-			commonPaymentInfoDTO['creditCard']=creditCard;
-		}
-		if(args!=undefined && args !=''){
-			//type=EVALUATION_TEST&userId=3&payId=4354&paymentType=annually&paymentByUserId=3
-			var params = args.split("&");
-			var type=params[0].split("=");
-			var user=params[1].split("=");
-			var userPaymentId=params[2].split("=");
-			var paymentType=params[3].split("=");
-			var paymentByUserId = params[4].split("=");
-			var entityType = params[5].split("=");
-			var entityId = params[6].split("=");
-			commonPaymentInfoDTO['entityType']=entityType[1];
-			commonPaymentInfoDTO['entityId']=entityId[1];
-			commonPaymentInfoDTO['paymentByUserId'] = paymentByUserId[1];
-			authentication['userId'] = user[1];
-			commonPaymentInfoDTO['userPaymentId'] = userPaymentId[1];
-			if(type[1]=='SUBJECT_FEE'){
-				commonPaymentInfoDTO['paymentType'] = type[1];
-			}else{
-				commonPaymentInfoDTO['paymentType'] = paymentType[1];
-			}
-			commonPaymentInfoDTO['paymentTitle'] = type[1];
-		}
-	}else if(module=='student'){
-		authentication['userType'] = 'STUDENT';
-		var commonPaymentInfoDTO = {};
-		if($('#location').length>0){
-			commonPaymentInfoDTO['location'] = $('#location').val();
-		}else{
-			commonPaymentInfoDTO['location'] = '';
-		}
-		commonPaymentInfoDTO['themeType'] = 'theme2';
-		commonPaymentInfoDTO['paymentOptionName'] = 'Online'
-		commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-		commonPaymentInfoDTO['userType'] = moduleId;
-		if(eligiblePaymentGateway=='WELLSFARGO'){
-			var creditCard = {};
-			creditCard['cardHolderName']=$('#cardHolderName').val().trim();
-			creditCard['cardNumber']=$('#cardNumber').val().trim();
-			creditCard['expirationDate']=$('#cardExpiryYear').val().trim()+'-'+$('#cardExpiryMonth').val().trim();
-			creditCard['cardCode']=$('#cardCode').val().trim();
-			commonPaymentInfoDTO['creditCard']=creditCard;
-		}
-		if(args!=undefined && args !=''){
-			//type=INSTALLMENT-FEE&userId=331&payId=6691&paymentType=nineMonthly
-			var params = args.split("&");
-			var type=params[0].split("=");
-			var user=params[1].split("=");
-			var userPaymentId=params[2].split("=");
-			var paymentType=params[3].split("=");
-			var paymentByUserId = params[4].split("=");
-			var entityType = params[5].split("=");
-			var entityId = params[6].split("=");
-			commonPaymentInfoDTO['entityType']=entityType[1];
-			commonPaymentInfoDTO['entityId']=entityId[1];
-			commonPaymentInfoDTO['paymentByUserId'] = paymentByUserId[1];
-			authentication['userId'] = user[1];
-			commonPaymentInfoDTO['userPaymentId'] = userPaymentId[1];
-			if(type[1]=='SUBJECT_FEE'){
-				commonPaymentInfoDTO['paymentType'] = type[1];
-			}else{
-				commonPaymentInfoDTO['paymentType'] = paymentType[1];
-			}
-			commonPaymentInfoDTO['paymentTitle'] = type[1];
-		}else{
-			authentication['userId'] = $("#"+formId+" #userId").val().trim();
-			//commonPaymentInfoDTO['moduleName'] = $('#moduleName').val().trim();
-			commonPaymentInfoDTO['paymentTitle'] = $('#paymentType').val().trim();
-			commonPaymentInfoDTO['paymentType'] = $('#paymentType').val().trim();
-		}
-	}else if(module=='school'){
-		authentication['userType'] = 'SCHOOL';
-		authentication['userId'] = $("#userId").val().trim();
-		var commonPaymentInfoDTO = {};
-		if($('#location').length>0){
-			commonPaymentInfoDTO['location'] = $('#location').val();
-		}else{
-			commonPaymentInfoDTO['location'] = '';
-		}
-		commonPaymentInfoDTO['themeType'] = 'theme2';
-		commonPaymentInfoDTO['paymentOptionName'] = 'Online'
-		commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-		commonPaymentInfoDTO['userType'] = module;
-		commonPaymentInfoDTO['moduleName'] = 'SCHOOL_B2B';
-		if(eligiblePaymentGateway=='WELLSFARGO'){
-			var creditCard = {};
-			creditCard['cardHolderName']=$('#cardHolderName').val().trim();
-			creditCard['cardNumber']=$('#cardNumber').val().trim();
-			creditCard['expirationDate']=$('#cardExpiryYear').val().trim()+'-'+$('#cardExpiryMonth').val().trim();
-			creditCard['cardCode']=$('#cardCode').val().trim();
-			commonPaymentInfoDTO['creditCard']=creditCard;
-		}
-		if(args!=undefined && args !=''){
-			//'type=One_time_Application_Fee&userId=&payId=&paymentType=One_time_Application_Fee';
-			var params = args.split("&");
-			var type=params[0].split("=");
-			var user=params[1].split("=");
-			var userPaymentId=params[2].split("=");
-			var paymentType=params[3].split("=");
-			var entityType = params[4].split("=");
-			var entityId = params[5].split("=");
-			commonPaymentInfoDTO['entityType']=entityType[1];
-			commonPaymentInfoDTO['entityId']=entityId[1];
-			commonPaymentInfoDTO['paymentType'] = type[1];
-			commonPaymentInfoDTO['paymentTitle'] = type[1];
-		}else{
-			if($('#paymentType').val().trim()==undefined){
-				commonPaymentInfoDTO['paymentTitle'] = 'APPLICATION-FEE';
-				commonPaymentInfoDTO['paymentType'] = 'APPLICATION-FEE';
-			}else{
-				commonPaymentInfoDTO['paymentTitle'] = $('#paymentType').val().trim();
-				commonPaymentInfoDTO['paymentType'] = $('#paymentType').val().trim();
-			}
-		}
-	}else if(module=='student'){
-		authentication['userType'] = 'STUDENT';
-		var commonPaymentInfoDTO = {};
-		if($('#location').length>0){
-			commonPaymentInfoDTO['location'] = $('#location').val();
-		}else{
-			commonPaymentInfoDTO['location'] = '';
-		}
-		commonPaymentInfoDTO['themeType'] = 'theme2';
-		commonPaymentInfoDTO['paymentOptionName'] = 'Online'
-		commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-		commonPaymentInfoDTO['userType'] = moduleId;
-		if(eligiblePaymentGateway=='WELLSFARGO'){
-			var creditCard = {};
-			creditCard['cardHolderName']=$('#cardHolderName').val().trim();
-			creditCard['cardNumber']=$('#cardNumber').val().trim();
-			creditCard['expirationDate']=$('#cardExpiryYear').val().trim()+'-'+$('#cardExpiryMonth').val().trim();
-			creditCard['cardCode']=$('#cardCode').val().trim();
-			commonPaymentInfoDTO['creditCard']=creditCard;
-		}
-		if(args!=undefined && args !=''){
-			//type=INSTALLMENT-FEE&userId=331&payId=6691&paymentType=nineMonthly
-			var params = args.split("&");
-			var type=params[0].split("=");
-			var user=params[1].split("=");
-			var userPaymentId=params[2].split("=");
-			var paymentType=params[3].split("=");
-			var entityType = params[4].split("=");
-			var entityId = params[5].split("=");
-			commonPaymentInfoDTO['entityType']=entityType[1];
-			commonPaymentInfoDTO['entityId']=entityId[1];
-			authentication['userId'] = user[1];
-			commonPaymentInfoDTO['userPaymentId'] = userPaymentId[1];
-			commonPaymentInfoDTO['paymentType'] = type[1];
-			commonPaymentInfoDTO['paymentTitle'] = type[1];
-		}else{
-			authentication['userId'] = $("#"+formId+" #userId").val().trim();
-			//commonPaymentInfoDTO['moduleName'] = $('#moduleName').val().trim();
-			commonPaymentInfoDTO['paymentTitle'] = $('#paymentType').val().trim();
-			commonPaymentInfoDTO['paymentType'] = $('#paymentType').val().trim();
-		}
-	}else if(module=='school'){
-		authentication['userType'] = 'SCHOOL';
-		authentication['userId'] = $("#userId").val().trim();
-		var commonPaymentInfoDTO = {};
-		if($('#location').length>0){
-			commonPaymentInfoDTO['location'] = $('#location').val();
-		}else{
-			commonPaymentInfoDTO['location'] = '';
-		}
-		commonPaymentInfoDTO['themeType'] = 'theme2';
-		commonPaymentInfoDTO['paymentOptionName'] = 'Online'
-		commonPaymentInfoDTO['eligiblePaymentGateway'] = eligiblePaymentGateway;
-		commonPaymentInfoDTO['userType'] = module;
-		commonPaymentInfoDTO['moduleName'] = 'SCHOOL_B2B';
-		if(eligiblePaymentGateway=='WELLSFARGO'){
-			var creditCardDTO = {};
-			creditCardDTO['cardHolderName']=$('#cardHolderName').val().trim();
-			creditCardDTO['cardNumber']=$('#cardNumber').val().trim();
-			creditCardDTO['expirationDate']=$('#cardExpiryYear').val().trim()+'-'+$('#cardExpiryMonth').val().trim();
-			creditCardDTO['cardCode']=$('#cardCode').val().trim();
-			commonPaymentInfoDTO['creditCard']=creditCardDTO;
-		}
-		if(args!=undefined && args !=''){
-			//'type=One_time_Application_Fee&userId=&payId=&paymentType=One_time_Application_Fee';
-			var params = args.split("&");
-			var type=params[0].split("=");
-			var user=params[1].split("=");
-			var userPaymentId=params[2].split("=");
-			var paymentType=params[3].split("=");
-			var entityType = params[4].split("=");
-			var entityId = params[5].split("=");
-			commonPaymentInfoDTO['entityType']=entityType[1];
-			commonPaymentInfoDTO['entityId']=entityId[1];
-			commonPaymentInfoDTO['paymentType'] = type[1];
-			commonPaymentInfoDTO['paymentTitle'] = type[1];
-		}else{
-			commonPaymentInfoDTO['paymentTitle'] = 'APPLICATION-FEE';
-			commonPaymentInfoDTO['paymentType'] = 'APPLICATION-FEE';
-		}
-	}
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	request['authentication'] = authentication;
-	request['commonPaymentInfo'] = commonPaymentInfoDTO;
-	return request;
-}
-
-function prepareSmoovPayDataAndPost(smoovPayData){
-	$("#smoovpayForm").attr("action", smoovPayData['endPoint']);
-	$("#smoovpayForm input[name*='action']" ).val(smoovPayData['action']);
-	$("#smoovpayForm input[name*='currency']" ).val(smoovPayData['currency']);
-	$("#smoovpayForm input[name*='version']" ).val(smoovPayData['version']);
-	$("#smoovpayForm input[name*='item_name_1']" ).val(smoovPayData['itemName1']);
-	$("#smoovpayForm input[name*='item_description_1']" ).val(smoovPayData['itemDescription1']);
-	$("#smoovpayForm input[name*='item_quantity_1']" ).val(smoovPayData['itemQuantity1']);
-	$("#smoovpayForm input[name*='item_amount_1']" ).val(smoovPayData['itemAmount1']);
-	$("#smoovpayForm input[name*='merchant']" ).val(smoovPayData['merchant']);
-	$("#smoovpayForm input[name*='ref_id']" ).val(smoovPayData['refId']);
-	$("#smoovpayForm input[name*='delivery_charge']" ).val(smoovPayData['deliveryCharge']);
-	$("#smoovpayForm input[name*='tax_amount']" ).val(smoovPayData['taxAmount']);
-	$("#smoovpayForm input[name*='tax_percentage']" ).val(smoovPayData['taxPercentage']);
-	$("#smoovpayForm input[name*='total_amount']" ).val(smoovPayData['totalAmount']);
-	$("#smoovpayForm input[name*='str_url']" ).val(smoovPayData['strUrl']);
-	$("#smoovpayForm input[name*='success_url']" ).val(smoovPayData['successUrl']);
-	$("#smoovpayForm input[name*='cancel_url']" ).val(smoovPayData['cancelUrl']);
-	$("#smoovpayForm input[name*='signature']" ).val(smoovPayData['signature']);
-	$("#smoovpayForm input[name*='signature_algorithm']" ).val(smoovPayData['signatureAlgorithm']);
-//	alert($("#smoovpayForm").html());
-	$("#smoovpayForm").submit();
-}
-
-function callStudentWireTransferPayment(formId, paymentOption, userId, moduleId, callingFrom,paymentByUserId, gatewayName){
-	$.ajax({
-		type : "POST",
-		url : getURLForHTML('common','call-for-wire-transfer-payment'),
-		contentType : APPLICATION_JSON_VALUE,
-		data : JSON.stringify(getRequestForStudentWireTransferPayment(formId, paymentOption, userId, moduleId, callingFrom,paymentByUserId,gatewayName)),
-		dataType : 'html',
-		cache : false,
-		timeout : 600000,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(1, data['message']);
-			}else{
-				$('#callPaymentStudentModal').modal('hide');
-				if(callingFrom=='migration' || callingFrom=='signup'){
-					$('#logout_modal_logout').modal('hide');
-					setTimeout(function(){
-						$('#logout_modal_logout').modal('show');
-					},1000)
-				}else if(callingFrom=='EVALUATION_TEST'){
-					$('#logout_modal_evluation').modal('show');
-				}else{
-					$('#logout_modal_continue').modal('show');
-				}
-			}
-		}
-	});
-}
-
-function getRequestForStudentWireTransferPayment(formId, paymentOption, userId, moduleId, callingFrom, paymentByUserId, gatewayName) {
-	var paypalAndWireTransferPaymentInfoDTO = {};
-	paypalAndWireTransferPaymentInfoDTO['userId'] = userId;
-	paypalAndWireTransferPaymentInfoDTO['paymentByUserId'] = paymentByUserId;
-	paypalAndWireTransferPaymentInfoDTO['moduleId'] = moduleId;
-	paypalAndWireTransferPaymentInfoDTO['callingFrom'] = callingFrom;
-	paypalAndWireTransferPaymentInfoDTO['paymentMode'] = $('#editStage5PaymentMethod').text();
-	if (paymentOption == 1) {
-		paypalAndWireTransferPaymentInfoDTO['paymentOptionName'] = gatewayName;
-		paypalAndWireTransferPaymentInfoDTO['referenceNumber'] = $("#"+formId+" #wireTransferNumberPaypal").val().trim();
-		paypalAndWireTransferPaymentInfoDTO['uplaodedFileName'] = $("#"+formId+" #fileName8").html();
-		paypalAndWireTransferPaymentInfoDTO['amountPaid'] = $("#"+formId+" #paypalAmount").val().trim();
-		paypalAndWireTransferPaymentInfoDTO['userPaymentDetailsId'] = $("#"+formId+" #userPaymentDetailsId").val().trim();
-		paypalAndWireTransferPaymentInfoDTO['paymentTitle'] = $("#"+formId+" #paymentTitle").val().trim();
-	} else {
-		paypalAndWireTransferPaymentInfoDTO['paymentOptionName'] = gatewayName;
-		paypalAndWireTransferPaymentInfoDTO['referenceNumber'] = $("#"+formId+" #referenceNumber").val();
-		if('CASH'==gatewayName){
-			paypalAndWireTransferPaymentInfoDTO['uplaodedFileName'] =$("#"+formId+" #fileName8").html();
-		}else{
-			paypalAndWireTransferPaymentInfoDTO['uplaodedFileName'] =$("#"+formId+" #fileName9").html();
-		}
-		paypalAndWireTransferPaymentInfoDTO['amountPaid'] = $("#"+formId+" #wireTransferAmount").val();
-		paypalAndWireTransferPaymentInfoDTO['userPaymentDetailsId'] = $("#"+formId+" #userPaymentDetailsId").val();
-		paypalAndWireTransferPaymentInfoDTO['paymentTitle'] = $("#"+formId+" #paymentTitle").val();
-	}
-	console.log("Payment data is : " + JSON.stringify(paypalAndWireTransferPaymentInfoDTO));
-	return paypalAndWireTransferPaymentInfoDTO;
-}
-
-function callClientCommonPaymentGatewayOffline(formId, moduleId,userId,userPaymentDetailsId, termCondi, paymentByUserId){
-	customLoader(true);
-	$.ajax({
-		type : "POST",
-		url : getURLForHTML('common','call-for-client-common-payment-method-offline'),
-		contentType : APPLICATION_JSON_VALUE,
-		data : JSON.stringify(getRequestForClientPayment(formId, moduleId,userId,userPaymentDetailsId, termCondi,paymentByUserId)),
-		dataType : 'html',
-		cache : false,
-		timeout : 600000,
-		success : function(htmlContent) {
-			var stringMessage = [];
-        	stringMessage = htmlContent.split("|");
-			if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-				if(stringMessage[0] == "SESSIONOUT"){
-					redirectLoginPage();
-				}else{
-					showMessageTheme2(0, stringMessage[1],'',true);
-				}
-			} else if(stringMessage[0] == "NOPAYMENTGATEWAYENABLED"){
-				showMessageTheme2(0, stringMessage[1],'',true);
-			} else if(stringMessage[0] == "INVALIDPAYMENT"){
-				window.location.reload();
-			}else{
-				if(termCondi=='booksession' || termCondi=='extension' ){
-					$("#payTabBookingSessionModal").modal('hide');
-					$("#paymentBookSessionModel").html(htmlContent);
-					$('#callPaymentStudentModal').modal("hide")
-					// $('#courseFeeModalTNC').modal('show');
-				}else{
-					$("#paymentMethodModel").show();
-					$("#paymentMethodModel").html(htmlContent);
-				}
-				setTimeout(function(){$('body').addClass("modal-open");},1000);
-				}
-			}
-	});
-}
-
-async function callClientCommonPaymentGateway(formId, moduleId,userId,userPaymentDetailsId, termCondi, paymentByUserId){
-	await callLocationForPaymentPromise();
-	customLoader(true);
-	$.ajax({
-		type : "POST",
-		url : getURLForHTML('common','call-for-client-common-payment-method'),
-		contentType : APPLICATION_JSON_VALUE,
-		data : JSON.stringify(getRequestForClientPayment(formId, moduleId,userId,userPaymentDetailsId, termCondi,paymentByUserId)),
-		dataType : 'html',
-		global : false,
-		success : async function(htmlContent) {
-			//customLoader(false);
-			var stringMessage = [];
-        		stringMessage = htmlContent.split("|");
-			if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-				if(stringMessage[0] == "SESSIONOUT"){
-					redirectLoginPage();
-					customLoader(false);
-				}else{
-					showMessageTheme2(0, stringMessage[1],'',true);
-				}
-			} else if(stringMessage[0] == "NOPAYMENTGATEWAYENABLED"){
-				showMessageTheme2(0, stringMessage[1],'',true);
-			} else if(stringMessage[0] == "INVALIDPAYMENT"){
-				// window.location.reload();
-			}else{
-				if($('#reserveSeatModal').length==1){
-					$('#reserveSeatModal').modal('hide');
-				}
-				if(termCondi=='booksession' || termCondi=='extension' ){
-					$("#payTabBookingSessionModal").modal('hide');
-					$("#paymentBookSessionModel").html(htmlContent);
-					await getAirwallexMethods();
-					$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false})
-					$('#courseFeeModalTNC').modal('hide');
-				}else{
-					$("#paymentMethodModel").html(htmlContent);
-				}
-				setTimeout(function(){$('body').addClass("modal-open");},1000);
-			}
-		},
-		error : function(e) {
-			if (checkonlineOfflineStatus()) {
-				return;
-			}else{
-				showMessageTheme2(0, TECHNICAL_GLITCH,'',true);
-			}
-			customLoader(false);
-		}
-	});
-}
-
-function getRequestForClientPayment(formId, moduleId,userId,userPaymentDetailsId, termCondi,paymentByUserId){
-	var clientCommonPaymentInfoDTO = {};
+	var payload = {};
 	if($('#location').length>0){
-		clientCommonPaymentInfoDTO['location']=$('#location').val();
+		payload['location'] = $('#location').val();
+	}else{
+		payload['location'] = '';
 	}
-	clientCommonPaymentInfoDTO['userId']=userId;
-	clientCommonPaymentInfoDTO['paymentByUserId']=paymentByUserId;
-	clientCommonPaymentInfoDTO['moduleId']=moduleId;
-	clientCommonPaymentInfoDTO['userPaymentDetailsId']=userPaymentDetailsId;
-	clientCommonPaymentInfoDTO['termCondi']=termCondi;
-	return clientCommonPaymentInfoDTO;
+	payload['browserDetails'] = userPaymentDetailsId;
+	payload['userPaymentDetailsId'] = userPaymentDetailsId;
+	payload['paidByUserId'] = paidByUserId;
+	payload['schoolId'] = schoolId;
+	payload['paymentGateway'] = paymentGateway;
+
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'invoke-payment-gateway',payload,'common');
+	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		showModalMessage(0, responseData['message']);
+		if(responseData.statusCode=='ELIGIBLE_CUSTOME_PLAN' || responseData.statusCode=='REDIRECT_TO_DASHBOOARD'){
+			window.location.reload();
+		}
+	} else {
+		showModalMessage(1, "Please wait while redirecting to payment gateway...");
+		if(responseData.details.openSelf){
+			window.location.replace(responseData.details.redirectUrl);
+		}else{
+			if($(".paymentUnderProcessOverlay").length>0){
+				$(".paymentUnderProcessOverlay").remove();
+			}
+			$("body").append(paymentUnderProcessOverlay());
+			CHECK_PAYMENT_INTERVAL_COUNT=0;
+			CHECK_PAYMENT_INTERVAL = setInterval(()=>getPaymentPaidStatus(userPaymentDetailsId, schoolId), 10000);
+			window.open(responseData.details.redirectUrl, '_blank');
+		}
+	}
 }
 
+function initiateOfflinePayment(formId, userPaymentDetailsId, callingFrom, paymentByUserId, gatewayName, schoolId, elementId){
+	hideModalMessage('');
+	if($("#"+formId+" #referenceNumber").val()=='' || $("#"+formId+" #referenceNumber").val()==undefined){
+		showModalMessage(0, 'Reference Number is required');
+		return false;
+	}
+	if($("#"+formId+" #"+elementId).text() == undefined || $("#"+formId+" #"+elementId).text() == ''){
+		showModalMessage(0, 'Proof of Payment required');
+		return false;
+	}
+	var functionName="callOfflinePayment('" + formId + "', '"+userPaymentDetailsId+"', '"+paymentByUserId+"','"+callingFrom+"', '"+paymentByUserId+"', '"+gatewayName+"', '"+schoolId+"');"
+	$('#proceedStudentPayment').attr("onclick",functionName);
+	$('#cancelStudentPayment').attr("onclick","$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false});");
+	$('#callPaymentStudentModal').modal('hide');
+	$('#reference_number').modal('show');
+}
+
+async function callOfflinePayment(formId, userPaymentDetailsId, userId, callingFrom, paymentByUserId, gatewayName, schoolId){
+	var payload = {};
+	payload['userId'] = userId;
+	payload['paymentByUserId'] = paymentByUserId;
+	payload['userPaymentDetailsId'] = userPaymentDetailsId;
+	payload['callingFrom'] = callingFrom;
+	payload['gatewayName'] = gatewayName;
+	payload['referenceNumber'] = $("#"+formId+" #referenceNumber").val().trim();
+	if('CASH'==gatewayName){
+		payload['uplaodedFileName'] =$("#"+formId+" #fileName8").html();
+	}else{
+		payload['uplaodedFileName'] =$("#"+formId+" #fileName9").html();
+	}
+	payload['amountPaid'] = $("#"+formId+" #payAmount").val();
+	payload['schoolId'] = schoolId;
+	
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'offline-payment',payload,'common');
+	if(responseData.status == "1"){
+		$('#callPaymentStudentModal').modal('hide');
+		$('#logout_modal_logout').modal('hide');
+		setTimeout(function(){
+			$('#logout_modal_logout').modal('show');
+		},1000)
+	}
+}
+
+function getRequestForOfflinePayment(formId, userPaymentDetailsId, userId, callingFrom, paymentByUserId, gatewayName, schoolId) {
+	var offlinePaymentRequest = {};
+	offlinePaymentRequest['userId'] = userId;
+	offlinePaymentRequest['paymentByUserId'] = paymentByUserId;
+	offlinePaymentRequest['userPaymentDetailsId'] = userPaymentDetailsId;
+	offlinePaymentRequest['callingFrom'] = callingFrom;
+	offlinePaymentRequest['gatewayName'] = gatewayName;
+	offlinePaymentRequest['referenceNumber'] = $("#"+formId+" #referenceNumber").val().trim();
+	if('CASH'==gatewayName){
+		offlinePaymentRequest['uplaodedFileName'] =$("#"+formId+" #fileName8").html();
+	}else{
+		offlinePaymentRequest['uplaodedFileName'] =$("#"+formId+" #fileName9").html();
+	}
+	offlinePaymentRequest['amountPaid'] = $("#"+formId+" #payAmount").val();
+	offlinePaymentRequest['schoolId'] = schoolId;
+	return offlinePaymentRequest;
+}
 
 function continueWorking(){
 	$('#logout_modal_logout').modal('hide');
@@ -545,60 +178,6 @@ function continueWorking(){
 	setTimeout(function(){
 		window.location.reload();
 	},1000);
-}
-
-async function callSigninStudentPay(formId, callingFrom){
-	hideModalMessage(true);
-	await getAirwallexMethods();
-	$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false})
-	//setTimeout(function(){$('body').addClass('modal-open');},1000);
-	$('#courseFeeModalTNC').modal('hide');
-	$('#bookAnEnrollmentModel').modal('hide');
-	$('#wu_payment_warning').modal('hide');
-}
-function callStudentTransferSubmit(formId, paymentOption, callingFrom, paymentByUserId, gatewayName){
-	var functionName='';
-	var userId=$('#userId').val().trim();
-	if(paymentOption==1){
-		if($("#"+formId+" #wireTransferNumberPaypal").val().trim()=='' || $("#"+formId+" #wireTransferNumberPaypal").val().trim()==undefined){
-			showMessageTheme2(0, 'Reference Number is required','',true);
-			return false;
-		}
-		if("EVALUATION_TEST"==callingFrom){
-			functionName="callStudentWireTransferPayment('" + formId + "', '1', '"+userId+"', 'common','"+callingFrom+"', '"+paymentByUserId+"', '"+gatewayName+"');"
-		}else{
-			functionName="callStudentWireTransferPayment('" + formId + "', '1', '"+userId+"', 'student','"+callingFrom+"', '"+paymentByUserId+"', '"+gatewayName+"');"
-		}
-	}
-	if(paymentOption==2){
-		if($("#"+formId+" #referenceNumber").val().trim()=='' || $("#"+formId+" #referenceNumber").val().trim()==undefined){
-			showMessageTheme2(0, 'Reference Number is required','',true);
-			return false;
-		}
-		var elementId='fileName9';
-		if(gatewayName=='CASH'){
-			elementId='fileName8';
-		}
-		if($("#"+formId+" #"+elementId).text() == undefined || $("#"+formId+" #"+elementId).text() == ''){
-			showMessageTheme2(0, 'Proof of Payment required','',true);
-			return false;
-		}
-		if("EVALUATION_TEST"==callingFrom){
-			functionName="callStudentWireTransferPayment('" + formId + "', '2', '"+userId+"', 'common','"+callingFrom+"', '"+paymentByUserId+"', '"+gatewayName+"');"
-		}else{
-			functionName="callStudentWireTransferPayment('" + formId + "', '2', '"+userId+"', 'student','"+callingFrom+"', '"+paymentByUserId+"', '"+gatewayName+"');"
-		}
-	}
-	$('#callPaymentStudentModal').modal('hide');
-	if("EVALUATION_TEST"==callingFrom){
-		$('#proceedEvaluationPayment').attr("onclick",functionName);
-		$('#cancelEvaluationPayment').attr("onclick","$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false});");
-		$('#reference_number_evaluation').modal('show');
-	}else{
-		$('#proceedStudentPayment').attr("onclick",functionName);
-		$('#cancelStudentPayment').attr("onclick","$('#callPaymentStudentModal').modal({backdrop: 'static', keyboard: false});");
-		$('#reference_number').modal('show');
-	}
 }
 
 function showAlternatePG(){
@@ -610,8 +189,13 @@ function showPrimaryPG(){
 	$('#alternate-pg').hide(1000)
 }
 
-async function getAirwallexMethods(){
-	var counrtyCode = JSON.parse($("#location").val()).countryCode;
+async function getAirwallexMethods(buttonId){
+	var counrtyCode;
+	if($("#location").val() == ""){
+		counrtyCode = getCountryISOCode();
+	}else{
+		counrtyCode = JSON.parse($("#location").val()).countryCode;
+	}
 	$.ajax({
         url: `${APP_BASE_URL}${SCHOOL_UUID}/get-airwallex-payment-methods?schoolId=${btoa(SCHOOL_ID)}&countryCode=${btoa(counrtyCode)}`,
         type: 'GET',
@@ -621,8 +205,8 @@ async function getAirwallexMethods(){
             if (response.methods && response.methods.length > 0) {
                 $.each(response.methods, function (index, method) {
                     html+=
-					`<a href="javascript:void(0);" onclick="commonPayment(\'airwallexPayButton\')">
-						<div class="payment-method-icon">`;
+					`<a href="javascript:void(0);" onclick="commonPayment('${buttonId}')" class="">
+						<div class="payment-method-icon h-100">`;
 							if(method.image == ""){
 								html+=`<p style="font-size: 14px;">${method.labelName}</p>`
 							}else{
@@ -643,4 +227,929 @@ async function getAirwallexMethods(){
 
 function commonPayment(payBtnID){
 	$("#"+payBtnID).trigger("click");
+}
+
+async function getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId) {
+	hideMessage('');
+	var payload ={
+		'userPaymentDetailsId' : userPaymentDetailsId,
+		'entityType' : entityType,
+		'entityId' : entityId,
+		'paidByUserId' : paidByUserId,
+		'schoolId' : schoolId
+	}
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'/payment-gateway/options',payload,'common');
+	if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
+		if (responseData['status'] == '3') {
+			redirectLoginPage();
+		} else {
+			showMessageTheme2(false, responseData['message']);
+		}
+	}else{
+		if($('#paymentOptionsModal').length > 0) {
+			$('#paymentOptionsModal').remove();
+		}
+		$("body").append(await getPaymentGatewayOptionsModal(responseData.details));
+		await callLocationForPaymentPromise();
+		if($("#bookAnEnrollmentModel").hasClass("show")){
+			$("#bookAnEnrollmentModel").modal("hide");
+		}
+		$('#paymentOptionsModal').modal({ backdrop: 'static', keyboard: false });
+		$.each(responseData.details.paymentOptions, function(k,v){
+			if(v.name=='Airwallex'){
+				getAirwallexMethods('payButton'+(k+1));
+			}else if(v.name=='CASH'){
+				bindFileUploadNew1('8', '32', responseData.details.userId, 4, true);
+			}else if(v.name=='WIRETRANSFER'){
+				bindFileUploadNew1('9', '33', responseData.details.userId, 4, true);
+			}
+		});
+	}
+}
+
+async function getPaymentGatewayOptionsModal(details){
+	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var html=
+	`<div id="paymentOptionsModal" class="modal theme-modal fade payment-opiton-modal" role="dialog" data-backdrop="static" data-keyboard="false" style="overflow: auto;">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header py-2 primary-bg white-txt-color">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">×</span>
+					</button>
+					<h4 class="modal-title" style="font-size: 14px">&nbsp;</h4>
+				</div>
+				<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
+					<section class="payment-option-wrapper">
+						<div class="full">
+							<h4 class="section-heading primary-bg-before primary-bg-after">Payment Options Available</h4>
+							<span style="width:100%;display:inline-block"><i class="fa fa-star text-primary"></i>&nbsp;${SCHOOL_NAME} is trusted by the safest and most reputed payment ${SCHOOL_ID==1?'gateways, banks and wallets':'gateway and bank'}</span>
+						</div>
+						<div class="tab-wrapper">
+							<div class="payment-tabs">
+								<ul class="nav nav-tabs" role="tablist">`;
+									$.each(details.paymentOptions, function(k,v){
+										html+=
+										`<li role="presentation" class="nav-item">
+											<a href="#payment_option_${k+1}" aria-controls="paymentOption${k+1}" role="tab" data-toggle="tab" class="payment-option-itme secondary-border-color ${k==0?'active':''}">Option ${k+1}: Pay via ${toTitleCase(v.name)}</a>
+										</li>`;
+									});
+									html+=
+								`</ul>
+							</div>
+							<div class="payment-option tab-content">`;
+								$.each(details.paymentOptions, function(k,v){
+									html+=
+									`<div role="tabpanel" id="payment_option_${k+1}" class="tab-pane ${k==0?'active':''} credit-card-payment flex-item secondary-border-color h-100">
+										<div id="primary-pg" style="display:block;">`
+											if(v.name=='STRIPE' || v.name=='Airwallex' || v.name=='YOCO' || v.name=='WIRETRANSFER' || v.name=='CONVERA'){
+												html+=`
+												<div class="payment-icon lg">
+													<img src="${PATH_FOLDER_IMAGE2}${v.icon}">
+												</div>`;
+												if(v.name=='STRIPE' || v.name=='YOCO'){
+													html+=
+													`<div class="payment-icon m-0">
+														<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+															<img src="${PATH_FOLDER_IMAGE2}visa.png">
+															<p>Visa</p>
+														</div>
+														<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+															<img src="${PATH_FOLDER_IMAGE2}master-card.png">
+															<p>Mastercard</p>
+														</div>
+													</div>`;
+												}else if(v.name=='Airwallex'){
+													html+=`<div id="paymentMethods" class="payment-icon m-0 align-items-stretch"></div>`;
+												}
+											}
+											if(v.name=='CONVERA'){
+												html+=`
+												<div class="full lg">`;
+													html+=v.addtionalDetails;
+												html+=	
+												`</div>
+												<div class="payment-icon" style="margin-bottom:0">
+													<h3 class="fw-600 text-left">Pay money from the comfort of your own home - Reliable, convenient international money transfer using your home/local currency</h3>
+													<p>&nbsp;</p>
+													<div class="row">
+														<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+															<ul class="full mt-4">
+																<li>
+																	<h4 class="fw-600 text-left full">Step 1</h4>
+																	<strong class="full">Select your preferred currency and click on Get Quote</strong>
+																</li>
+																<p style="margin:0">&nbsp;</p>
+																<li>
+																	<h4 class="fw-600 text-left full">Step 2</h4>
+																	<strong class="full">Verify your details – Student Name, Registered Email.</strong>
+																</li>
+																<li>
+																	<br/>
+																	<p>You can use a wide variety of services to complete your transactions. You can pay with your bank account or a credit/debit card* or use cash at your nearest in-person Convera agent location.</p>
+																</li>
+															</ul>
+														</div>
+														<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+														</div>
+													</div>
+												</div>
+												<div class="payment-icon m-0">
+													<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+														<img src="${PATH_FOLDER_IMAGE2}visa.png">
+														<p>Visa</p>
+													</div>
+													<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+														<img src="${PATH_FOLDER_IMAGE2}master-card.png">
+														<p>Mastercard</p>
+													</div>
+												</div>`;
+											}else if(v.name=='WIRETRANSFER'){
+												html+=`
+													<div class="full">`;
+														if(v.additionalDetails!=''){
+															html+=`${v.additionalDetails}`;
+														}else{
+															html+=
+															`<p>Here are the banking instructions for your payment:</p>
+															<ul>
+																<li>
+																	<strong>Provide your bank details</strong>
+																</li>
+															</ul>`;
+														}
+														html+=
+														`<p>Please clearly identify Student Name and City/State/Country in the reference information that accompanies the bank transfer, so that we can properly credit your account.</p>
+														<p>Your SMS profile will be created after the complete payment is processed in ${SCHOOL_NAME}\'s bank Account</p>
+													</div>
+													<div class="payment-form mt-0">
+														<form id="wirePaymentForm" name="wirePaymentForm">
+															<ul>
+																<li>
+																	<label>Payable Fee &nbsp;<b>${schoolSettingsTechnical.currencyIsoCode}</b></label>
+																	<input type="text" name="payAmount" disabled placeholder="Fee" id="payAmount" required="" value="${details.payAmount}">
+																</li>
+																<li>
+																	<label>Reference Number</label>
+																	<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');">
+																</li>
+																<li>
+																	<label>Proof of Payment</label>
+																	<div class="upload-btn-wrapper">
+																		<div class="file-btn">
+																			<span id="fileName9" class="fileName" style="display: none;"></span>
+																			<input type="file" name="fileupload9" id="fileupload9" value="Upload Proof of Payment"/>
+																			<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>
+																		</div>
+																		<div id="divshowDocument9" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																			<div>
+																				<a id="showDocument9" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View">
+																					<i class="fa fa-eye"></i>
+																				</a>
+																			</div>
+																		</div>
+																		<div id="divdeleteDocument9" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																			<div>
+																				<a id="deleteDocument9" href="javascript.void(0)" data-toggle="tooltip" title="Delete">
+																					<i class="fa fa-trash"></i>
+																				</a>
+																			</div>
+																		</div>
+																		<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>
+																	</div>
+																</li>
+																<li>
+																	<label>&nbsp;</label>
+																	<div class="pay-now-btn secondary-border-color">
+																		<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="initiateOfflinePayment('wirePaymentForm','${details.upid}','signup','${details.userId}','${v.name}','${details.schoolId}', 'fileName9');">Submit</span>
+																	</div>
+																</li>
+															</ul>
+														</form>
+													</div>
+												`;
+											}else if(v.name=='CASH'){
+												html+=`
+													<div class="payment-icon lg">
+														<img src="${PATH_FOLDER_IMAGE2}${v.icon}">
+													</div>
+													<div class="payment-form mt-0">
+														<form id="cashPaymentForm" name="cashPaymentForm">
+															<ul>
+																<li>
+																	<label>Payable Fee &nbsp;<b>${schoolSettingsTechnical.currencyIsoCode}</b></label>
+																	<input type="text" name="payAmount" disabled placeholder="Fee" id="payAmount" required="" value="${details.payAmount}">
+																</li>
+																<li>
+																	<label>Reference Number</label>
+																	<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');">
+																</li>
+																<li>
+																	<label>Proof of Payment</label>
+																	<div class="upload-btn-wrapper">
+																		<div class="file-btn">
+																			<span id="fileName8" class="fileName" style="display: none;"></span>
+																			<input type="file" name="fileupload8" id="fileupload8" value="Upload Proof of Payment"/>
+																			<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>
+																		</div>
+																		<div id="divshowDocument8" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																			<div>
+																				<a id="showDocument8" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View">
+																					<i class="fa fa-eye"></i>
+																				</a>
+																			</div>
+																		</div>
+																		<div id="divdeleteDocument8" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																			<div>
+																				<a id="deleteDocument8" href="javascript.void(0)" data-toggle="tooltip" title="Delete">
+																					<i class="fa fa-trash"></i>
+																				</a>
+																			</div>
+																		</div>
+																		<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>
+																	</div>
+																</li>
+																<li>
+																	<label>&nbsp;</label>
+																	<div class="pay-now-btn secondary-border-color">
+																		<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="initiateOfflinePayment('cashPaymentForm','${details.upid}','signup','${details.paidByUserId}','${v.name}','${details.schoolId}','fileName8');"">Submit</span>
+																	</div>
+																</li>
+															</ul>
+														</form>
+													</div>
+												`;
+											}
+											if(v.name=='Airwallex'){
+												html+=`
+												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
+													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}');">
+														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
+													</div>
+												</div>`;
+											}
+											else if(v.name=='YOCO'){
+												 html+= `
+												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end" style="display:none;">
+													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color">
+														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
+													</div>
+												</div>`;
+											}
+											else if(v.name=='STRIPE' || v.name=='CONVERA'){
+												html+=
+												`<div class="payment-icon" style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
+													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}');">
+														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
+													</div>
+												</div>`;
+											}
+											html+=
+										`</div>
+									</div>`;
+								});
+								html+=
+							`</div>
+						</div>
+					</section>
+				</div>
+				<div class="modal-footer">
+					<div style="display:flex;flex-wrap:wrap;margin-right:auto;">
+						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
+							<i class="fa fa-lock" style="position:relative;top:3px"></i>
+							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">SSL Secured &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+							
+						</span>
+						<span style="display:inline-flex;align-items:self-start; margin-right:8px;position:relative;top:0px;font-weight:bold">
+							<svg xmlns="http://www.w3.org/2000/svg" style="position:relative;top:3px" width="17px" height="17px" viewBox="0 0 64 64" stroke-width="6" stroke="#000" fill="none"><path d="M32.39,7.32,14,15a1,1,0,0,0-.61.92V32.23h0A22.87,22.87,0,0,0,24.58,51.9l8.17,4.86,8.06-4.84A22.89,22.89,0,0,0,51.9,32.31V15a1,1,0,0,0-.65-.94L33.12,7.3A1,1,0,0,0,32.39,7.32Z"/><path d="M32.83,17.92l3.64,7.37a.16.16,0,0,0,.1.08l8.14,1.18a.13.13,0,0,1,.07.23L38.9,32.51a.12.12,0,0,0,0,.12l1.39,8.1a.14.14,0,0,1-.2.15l-7.27-3.83a.15.15,0,0,0-.13,0l-7.27,3.83a.14.14,0,0,1-.2-.15l1.39-8.1a.15.15,0,0,0,0-.12l-5.88-5.73a.13.13,0,0,1,.07-.23l8.13-1.18a.15.15,0,0,0,.11-.08l3.63-7.37A.13.13,0,0,1,32.83,17.92Z" stroke-linecap="round"/></svg>
+							<span style="display: inline-flex; text-align:left;">PCI-DSS Certified &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+							
+						</span>
+						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
+							<i class="fa fa-globe" style="position:relative;top:3px"></i>
+							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">Global Gateways &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+							
+						</span>
+						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
+							<i class="fa fa-globe" style="position:relative;top:3px"></i>
+							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">We never store your card details &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;	
+}
+
+async function getTNCContent(responseData){
+	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
+	const { details: { type, paymentName, registrationType, schoolId, upid, entityType, entityId, userId }} = responseData;
+	var html=
+	`<div id="bookAnEnrollmentModel" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header py-2 bg-primary text-white d-flex">
+					<h5 class="modal-title">`;
+						if(type == 'REGISTRATION_FEE' || type == 'REGISTRATION_FEE_ADV'){
+							var paymentNameBycondition="";
+							if(type == 'REGISTRATION_FEE'){
+								paymentNameBycondition = 'Reserve an Enrollment Seat';
+							}else if(type == 'REGISTRATION_FEE_ADV'){
+								paymentNameBycondition = 'Reserve an Enrollment Seat - Advance';
+							}
+							html+=`Further to my successful completion of the ‘${paymentNameBycondition}’ process with ${SCHOOL_NAME}, I agree to comply with the following as stated below, without any exceptions:`;
+						}
+						else if(type == 'REGISTRATION_SUBJECT_FEE' || type == 'REGISTRATION_SUBJECT_FEE_ADV'|| type == 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE' || type == 'SUBJECT_FEE'|| type == 'SUBJECT_FEE_ADV' || type == 'CUSTOMIZED_SUBJECT_FEE'){
+							if(((type == 'REGISTRATION_SUBJECT_FEE' || type == 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE') && (registrationType != 'REGISTRATION_FRESH') && (registrationType != 'REGISTRATION_FLEX_COURSE')) || type == 'REGISTRATION_SUBJECT_FEE_ADV' ){
+								html+=`Further to my Enrollment with ${SCHOOL_NAME},I agree to comply with the following as stated below, without any exceptions:`;
+							}else{
+								html+=`Fee Refund Policy`;
+							}
+						}
+						else if(type == 'EVALUATION_TEST'){
+							html+=`Fee Refund Policy And Terms & Conditions For ${schoolSettingsTechnical.evaluationModTermsName}`;
+						}
+						else if(type == 'BOOKSESSION_FEE'){
+							html+=`Fee Refund Policy And Terms & Conditions For Extra Class Fee`;
+						}else if(type == 'EXTENSION_FEE'){
+							html+=`Fee Refund Policy And Terms & Conditions For Academic Year Extension`;
+						}else{
+							html+=`Fee Refund Policy And Terms & Conditions For ${paymentName}`;
+						}
+					html+=`</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="bookAnEnrollmentPayment" name="bookAnEnrollmentPayment" method="post" autocomplete="off">
+						<div class="full" style="max-height: 400px;overflow-y: auto;">
+							<input type="hidden" id="userId" value="${userId}" />
+							<div class="agree">`;
+								if(type == 'REGISTRATION_FEE' || type == 'REGISTRATION_FEE_ADV'){
+									var paymentNameBycondition="";
+									if(type == 'REGISTRATION_FEE'){
+										paymentNameBycondition = 'Reserve an Enrollment Seat';
+									}else if(type == 'REGISTRATION_FEE_ADV'){
+										paymentNameBycondition = 'Reserve an Enrollment Seat - Advance';
+									}
+									
+									html+=
+									`<ol class="ol-style">
+										<li class="mb-1">I understand that by paying the ‘${paymentNameBycondition}’ Fee, I am only reserving my Enrollment Seat at ${SCHOOL_NAME} and I will only get access to the learning platform once the Course Fee is paid in full.</li>
+										<li class="mb-1">I may be asked to provide additional information, and documents ( including but not limited to Age Proof, Address Proof, and Last Academic Proof) in support of the information provided by me (especially related to but not limited to academic credentials, coursework and other relevant information in support of my eligibility/candidature with ${SCHOOL_NAME}) especially if the information provided by me is incomplete, inconsistent (or with discrepancies) or not as per the prescribed requirements of ${SCHOOL_NAME}.</li>
+										<li class="mb-1">I will not misrepresent any facts or details to ${SCHOOL_NAME}. and not forge/misrepresent any documents, signatures, or credentials and any deviation from the above (or from any other truthful representation of details) shall render my candidature to be canceled (null/void) by ${SCHOOL_NAME} with immediate effect upon discovery of such misrepresentation(s).</li>
+										<li class="mb-1">I understand that all materials of ${SCHOOL_NAME} (including but not limited to all study materials used by me during my learning/coursework) are the sole and complete property of ${SCHOOL_NAME} and I will not make any ‘commercial’ use of any of the ${SCHOOL_NAME} courses, assignments, audio-visual resources, materials, or any other collaterals.</li>
+										<li class="mb-1">I understand that the ‘${paymentNameBycondition}’ amount will be deducted from the Course Fee (which is subject to changes) once paid.</li>
+										<li class="mb-1">Under any circumstances/conditions, the fee paid for ‘${paymentNameBycondition}’ is non-refundable, non-transferable and non-adjustable.</li>
+										<li class="mb-1">It is my responsibility, as a student (or parent/guardian), to regularly check the website for any upcoming notifications. I understand and agree that ${SCHOOL_NAME} will not send me notifications or updates separately.</li>
+										<li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke this offer at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+									</ol>`;
+								}else if(type == 'REGISTRATION_SUBJECT_FEE' || type == 'REGISTRATION_SUBJECT_FEE_ADV' || type == 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE' || type == 'SUBJECT_FEE'|| type == 'SUBJECT_FEE_ADV'|| type == 'CUSTOMIZED_SUBJECT_FEE'){
+									if(((type == 'REGISTRATION_SUBJECT_FEE' || type == 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE') && (registrationType != 'REGISTRATION_FRESH') && (registrationType != 'REGISTRATION_FLEX_COURSE')) || type == 'REGISTRATION_SUBJECT_FEE_ADV'){
+										html+=
+										`<div class="terms-policy" style="font-size: 12px;" >
+											I as a parent/guardian/student:
+											<ol style="padding-left: 35px !important;margin-bottom: 16px;">
+												<li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify;">Declare that I have digitally signed this legal document (`;
+													if(schoolSettingsLinks.enrollmentPolicyUrl != ""){
+														html+=`<a class="theme-text" href="${schoolSettingsLinks.enrollmentPolicyUrl}" style="font-size: 12px;" target="_blank" >Service Agreement - Parent/Guardian/Student</a>`;
+													}
+												html+=`) with my full consent.</li>
+												<li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify">Declare that I have read and agree to the`;
+													if(schoolSettingsLinks.schoolPolicyUrl != ""){
+														html+=`<a class="theme-text" href="${schoolSettingsLinks.schoolPolicyUrl}" style="font-size: 12px;" target="_blank" >School Policies</a>
+														, <a class="theme-text" href="${schoolSettingsLinks.studentPolicytUrl}" style="font-size: 12px;" target="_blank" >Academic Integrity & Student Code of Conduct</a>`;
+													}
+													if(schoolSettingsLinks.termasOfUserUrl){
+														html+=`, <a class="theme-text" href="${schoolSettingsLinks.termasOfUserUrl}" style="font-size: 12px;" target="_blank" >Terms of Use</a>`;
+													}
+													if(schoolSettingsLinks.privacyPolicyUrl != ""){
+														html+=`, and <a class="theme-text" href="${schoolSettingsLinks.privacyPolicyUrl}" style="font-size: 12px;" target="_blank" >Privacy Policy.</a>`;
+													}
+												html+=`</li>
+												<li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify">Declare all information provided by me in any of the steps of the Enrollment Form are true, complete and correct to the best of my own knowledge and belief. I understand that in the event of any information being found suppressed/false or incorrect or any ineligibility detected at the time or after the enrollment, my enrollment (or that of my child/ward, as the case may be) is liable to be canceled with immediate effect</li>
+											</ol>
+											<div class="custom-checkbox-policy text-dark">
+												<input type="checkbox" name="bookAnEnrollmentChkval" id="bookAnEnrollmentChkval" required tabindex="7">
+												<label class="mb-0" for="bookAnEnrollmentChkval">By checking this box, I have read & agree to the above-mentioned terms and conditions.</label>
+											</div>
+											${/*<input type="checkbox" name="bookAnEnrollmentChkval" id="bookAnEnrollmentChkval" required tabindex="7" style="position: relative;top:3px">4 By checking this box, I have read & agree to the above-mentioned terms and conditions. */''}
+										</div>
+										<div class="full mt-2">
+											<button type="button" id="bookAnEnrollmentData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+										</div>`;
+									}else{
+										html+=
+										`<div class="px-3">
+										<ol class="pl-4 ol-style">
+											<li class="mb-1"> We provide a no-questions asked 100 percent refund (except Enrollment Fee/Reserve an Enrollment Seat Fee which cannot be refunded under any circumstances) for the FIRST 24 HOURS AFTER ENROLLMENT.</li>
+											<li class="mb-1">Only those students (or parents/guardians) who have chosen the One-time Payment option are eligible for any refunds, subject to other terms & conditions being met/satisfied. NO REFUND will be processed if a student (or parent/guardian) has chosen to pay in installments.</li>
+											<li class="mb-1">Refund requests must be initiated within 90 days of payment from the academic year start date (the academic year start date is counted as day 1). No refund can be claimed after completion of 90 days of enrollment. Days imply Calendar Days and are calculated on a 24-hour basis, irrespective of time zone.</li>
+											<li class="mb-1">The student (or parent/guardian) must send the notice of cancellation via email at <a href="mailto:${schoolSettingsOffice.contactEmail}" class="text-primary">${schoolSettingsOffice.contactEmail}</a> with the subject as ‘Request for Cancellation’.</li>
+										</ol>
+										<table id="feeTableTermsCondition" class="table">
+											<thead class="bg-primary text-white p-1">
+												<tr>
+													<th>Period After Enrollment*</th>
+													<th>% of Course Fee Refunded</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Within 15 days**</td>
+													<td>50</td>
+												</tr>
+												<tr>
+													<td>Within 16-30 days**</td>
+													<td>35</td>
+												</tr>
+												<tr>
+													<td>Within 31-60 days**</td>
+													<td>25</td>
+												</tr>
+												<tr>
+													<td>Within 61-90 days**</td>
+													<td>15</td>
+												</tr>
+												<tr>
+													<td>After 90 days**</td>
+													<td>0</td>
+												</tr>
+											</tbody>
+										</table>
+										<p class="m-0">* The refund/withdrawal must be initiated within the time frame.</p>
+										<p class="m-0">**(Calendar) Days are calculated on a 24-hour basis, irrespective of time zone.</p>
+
+										<div class="mt-3">
+											<p class="m-0 text-primary font-weight-bold">While mailing us your withdrawal request, kindly follow the following format to ease the process of refund (if any).</p>
+											<ul class="my-2">
+												<li>ACCOUNT HOLDER NAME:</li>
+												<li>BANK NAME:</li>
+												<li>BANK SWIFT CODE:</li>
+												<li>ACCOUNT NUMBER:</li>
+												<li>BANK BRANCH NAME:</li>
+												<li>BANK BRANCH STREET ADDRESS:</li>
+												<li>BANK BRANCH STREET CITY:</li>
+												<li>BANK BRANCH STREET STATE OR PROVINCE:</li>
+												<li>BANK BRANCH POSTAL CODE:</li>
+												<li>BANK BRANCH STREET COUNTRY:</li>
+												<li>ABA/ROUTING NUMBER (If applicable):</li>
+												<li>BENEFICIARY STREET ADDRESS:</li>
+												<li>BENEFICIARY CITY:</li>
+												<li>BENEFICIARY STATE OR PROVINCE:</li>
+												<li>BENEFICIARY POSTAL CODE:</li>
+												<li>BENEFICIARY COUNTRY:</li>
+												<li>BENEFICIARY PHONE NUMBER:</li>
+												<li>ENROLLED GRADE/COURSE:</li>
+											</ul>
+											<ol class="pl-3 py-2 ol-style">
+												<li class="mt-2">Kindly note that a refund will be made (if any) ONLY to the bank account from which the fee was paid. The refund amount (if any) will be exclusive of the handling fee & transaction fee. Without the specified format, the request will not be entertained.</li>
+												<li class="mt-2">Note: In case of concealment/misrepresentation of personal, academic, or any other detail by the student/guardian or/and in case of submission of false/fake documents by student/guardian, no refund shall apply.</li>
+												<li class="mt-2">Note: No refund of the Enrollment Fee/Reserve an Enrollment Seat Fee will be made under any circumstances.</li>
+												<li class="mt-2">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+												<li class="mt-2">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+											</ol>
+										</div>
+									</div>`;
+									}
+								}else if(type == 'EVALUATION_TEST'){
+									html+=
+									`<div class="">
+										<p class="m-0 font-weight-bold">Please note the important fee refund policy and terms & conditions mentioned below before paying for the ${schoolSettingsTechnical.evaluationModTermsName}:</p>
+										<ol class="font-12 mt-2 pl-4 ol-style">
+											<li class="mb-1">After receiving the payment, our team will reach out to you to confirm the appointment and provide you with the link to join the same.</li>
+											<li class="mb-1">Kindly note that your enrollment will be based on your performance in the ${schoolSettingsTechnical.evaluationModTermsName}.</li>
+											<li class="mb-1">The fee paid for the ${schoolSettingsTechnical.evaluationModTermsName} is separate from all other fees (included but not limited to course fee, enrollment fee) and is non-refundable, non-transferable and non-adjustable.</li>
+											<li class="mb-1">In case you do not appear for the ${schoolSettingsTechnical.evaluationModTermsName} at the scheduled appointment, you will be given only one more chance to appear for the ${schoolSettingsTechnical.evaluationModTermsName}. The second appointment must be fixed within 7 days from the first appointment, based on the convenience of the ${SCHOOL_NAME} Team.</li>
+											<li class="mb-1">In case you do not appear for the second appointment as well, the fee will be forfeited.</li>
+											<li class="mb-1">The ${schoolSettingsTechnical.evaluationModTermsName} result is final and binding and no communication regarding the result will be entertained.</li>
+											<li class="mb-1">The ${schoolSettingsTechnical.evaluationModTermsName} is only meant for the purpose of checking the eligibility of the student for the respective grade and the examiner of the ${schoolSettingsTechnical.evaluationModTermsName} may or may not issue a recommendation to the student based on his/her performance in the test. The ${schoolSettingsTechnical.evaluationModTermsName} is not meant to be a supplement to any other test and no transcript for the ${schoolSettingsTechnical.evaluationModTermsName} will be issued.</li>
+											<li class="mb-1">The result of the ${schoolSettingsTechnical.evaluationModTermsName} is valid for enrollment to the respective grade of ${SCHOOL_NAME}, for 60 days from the date of issuance.</li>
+											<li class="mb-1">In case you are found seeking help or using any unfair means or assistance during the ${schoolSettingsTechnical.evaluationModTermsName}, the fee will be forfeited and the test will be declared null and void.</li>
+											<li class="mb-1">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+											<li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+										</ol>
+									</div>`;
+								}else if(type == 'BOOKSESSION_FEE'){
+									hmtl+=
+									`<div class="">
+										<p class="m-0 font-weight-bold">Please note the important fee refund policy and terms & conditions before enrolling for Extra Classes:</p>
+										<ol class="font-12 mt-2 pl-4 ol-style">
+											<li class="mb-1">Extra Classes are defined as doubt-clearing classes which are in addition to your complimentary classes. For example, 2 extra classes per week mean 1 complimentary doubt-clearing class + 2 extra doubt-clearing classes = 3 doubt-clearing classes per week.</li>
+											<li class="mb-1">Students have to pay in full for the Extra Classes in advance.</li>
+											<li class="mb-1">Fees will be accepted through online payment methods only.</li>
+											<li class="mb-1">All your Extra Classes will be pre-booked at the beginning of every month. You will be notified duly about your Extra Classes Schedule via mail.</li>
+											<li class="mb-1">In case you want to change the date and/or timings of your Extra Class(s), you will have to inform ${SCHOOL_NAME} via mail at least 7 days in advance.</li>
+											<li class="mb-1">Under any circumstances/conditions, fee for Extra Class is non-refundable, non-transferable and non-adjustable. Absence is not valid for any compensation class or refund of fee.</li>
+											<li class="mb-1">The class will be compensated only if it is canceled by ${SCHOOL_NAME}. The compensation will occur only through policies of ${SCHOOL_NAME}. You cannot claim a refund of fees in such cases.</li>
+											<li class="mb-1">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+											<li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+										</ol>
+									</div>`;
+								}else if(type == 'EXTENSION_FEE'){
+									html+=
+									`<div class="px-4 py-2">
+										<p class="m-0 font-weight-bold">Please note the important fee refund policy and terms & conditions before extending academic year:</p>
+										<ol class="font-12 mt-2 pl-4 ol-style">
+											<li class="mb-1">We recommend that you consult with the School Admin (email to:<a href="mailto:${schoolSettingsMails.withdrawalRequestAdmin}">${schoolSettingsMails.withdrawalRequestAdmin}</a>) before opting for Paid Academic Year Extension.</li>
+											<li clsss="mb-1">Paid academic year extension can be availed for a period of a maximum of 4 weeks.</li>
+											<li class="mb-1">The school provides no other form of an academic year extension.</li>
+											<li class="mb-1">In case you are not able to complete this course even after availing paid extension for 4 weeks, no credit would be provided for this course, and it would be graded as Incomplete "(I)" in your annual transcript.</li>
+											<li class="mb-1">Under any circumstances/conditions, fee paid for Academic Year Extension is non-refundable, non-transferable and non-adjustable.</li>
+											<li class="mb-1">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+											<li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+										</ol>
+									</div>`;
+								}else{
+									html+=
+									`<div class="px-4 py-2">
+										<ol class="mt-2 pl-4 ol-style">
+											<li class="mb-1">I understand and agree that under any circumstances/conditions, the fee paid for ${paymentName} is non-refundable, non-transferable and non-adjustable.</li>
+											<li class="mb-1">I may be asked to provide additional information, and documents (including but not limited to Age Proof, Address Proof, and Last Academic Proof) in support of the information provided by me (especially related to but not limited to academic credentials, coursework and other relevant information in support of my eligibility/candidature with ${SCHOOL_NAME}) especially if the information provided by me is incomplete, inconsistent (or with discrepancies) or not as per the prescribed requirements of ${SCHOOL_NAME}.</li>
+											<li class="mb-1">I will not misrepresent any facts or details to ${SCHOOL_NAME} and not forge/misrepresent any documents, signatures, or credentials and any deviation from the above (or from any other truthful representation of details) shall render my candidature to be canceled (null/void) by ${SCHOOL_NAME} with immediate effect upon discovery of such misrepresentation(s).</li>
+											<li class="mb-1">It is my responsibility, as a student (or parent/guardian), to regularly check the website for any upcoming notifications. I understand and agree that ${SCHOOL_NAME} will not send me notifications or updates separately.</li>
+											<li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+										</ol>
+									</div>`;
+								}
+							html+=`</div>
+						</div>
+					</form>
+				</div>`;
+				if(((type == 'REGISTRATION_SUBJECT_FEE' || type == 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE') && (registrationType != 'REGISTRATION_FRESH') && (registrationType != 'REGISTRATION_FLEX_COURSE')) || type == 'REGISTRATION_SUBJECT_FEE_ADV'){
+
+				}else{
+					html+=
+					`<div class="modal-footer justify-content-between">
+						<div class="d-flex align-items-center">
+							<span class="d-flex" style="gap: 5px;">
+								<label for="bookAnEnrollmentChkval" class="m-0 text-dark">
+									<input type="checkbox" id="bookAnEnrollmentChkval" class="checkbox-lg" name="bookAnEnrollmentChkval">&nbsp;I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions.
+								</label>
+							</span>
+						</div>
+						<button type="button" id="bookAnEnrollmentData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+					</div>`;
+				}
+			html+=`</div>
+		</div>
+	</div>`;
+	return html
+}
+
+async function courseFeeModalTNC(responseData) {
+	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
+	var schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
+	var schoolSettingsMails = await getSchoolSettingsMails(SCHOOL_ID);
+	
+	const {
+       details:{ 
+			type,
+			paymentName,
+			registrationType,
+			schoolId, 
+			upid, 
+			entityType, 
+			entityId, 
+			userId
+		}
+    } = responseData;
+
+    // Helper function to determine which content to show
+    const getModalContent = () => {
+        if (type === 'REGISTRATION_FEE' || type === 'REGISTRATION_FEE_ADV') {
+            return `
+                <ol class="ol-style">
+                    <li class="mb-1">I understand that by paying the '${paymentName}' Fee, I am only reserving my Enrollment Seat at ${SCHOOL_NAME} and I will only get access to the learning platform once the Course Fee is paid in full.</li>
+                    <li class="mb-1">I may be asked to provide additional information, and documents ( including but not limited to Age Proof, Address Proof, and Last Academic Proof) in support of the information provided by me (especially related to but not limited to academic credentials, coursework and other relevant information in support of my eligibility/candidature with ${SCHOOL_NAME}) especially if the information provided by me is incomplete, inconsistent (or with discrepancies) or not as per the prescribed requirements of ${SCHOOL_NAME}.</li>
+                    <li class="mb-1">I will not misrepresent any facts or details to ${SCHOOL_NAME}. and not forge/misrepresent any documents, signatures, or credentials and any deviation from the above (or from any other truthful representation of details) shall render my candidature to be canceled (null/void) by ${SCHOOL_NAME} with immediate effect upon discovery of such misrepresentation(s).</li>
+                    <li class="mb-1">I understand that all materials of ${SCHOOL_NAME} (including but not limited to all study materials used by me during my learning/coursework) are the sole and complete property of ${SCHOOL_NAME} and I will not make any 'commercial' use of any of the ${SCHOOL_NAME} courses, assignments, audio-visual resources, materials, or any other collaterals.</li>
+                    <li class="mb-1">I understand that the '${paymentName}' amount will be deducted from the Course Fee (which is subject to changes) once paid.</li>
+                    <li class="mb-1">Under any circumstances/conditions, the fee paid for '${paymentName}' is non-refundable, non-transferable and non-adjustable.</li>
+                    <li class="mb-1">It is my responsibility, as a student (or parent/guardian), to regularly check the website for any upcoming notifications. I understand and agree that ${SCHOOL_NAME} will not send me notifications or updates separately.</li>
+                    <li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke this offer at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+                </ol>
+            `;
+        } else if (type === 'REGISTRATION_SUBJECT_FEE' || 
+                  type === 'REGISTRATION_SUBJECT_FEE_ADV' ||
+                  type === 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE' ||
+                  type === 'SUBJECT_FEE' ||
+                  type === 'SUBJECT_FEE_ADV' ||
+                  type === 'CUSTOMIZED_SUBJECT_FEE') {
+            
+            if (((type === 'REGISTRATION_SUBJECT_FEE' || 
+                 type === 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE') && 
+                 registrationType !== 'REGISTRATION_FRESH' && 
+                 registrationType !== 'REGISTRATION_FLEX_COURSE') || 
+                 type === 'REGISTRATION_SUBJECT_FEE_ADV') {
+                return `
+                    <div class="terms-policy" style="font-size: 12px;">
+                        I as a parent/guardian/student:
+                        <ol style="padding-left: 35px !important;margin-bottom: 16px;">
+                            <li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify;">Declare that I have digitally signed this legal document (
+                                ${schoolSettingsLinks?.enrollmentPolicyUrl ? `
+                                    <a class="theme-text" href="${schoolSettingsLinks.enrollmentPolicyUrl}" style="font-size: 12px;" target="_blank" >Service Agreement - Parent/Guardian/Student</a>
+                                ` : ''}
+                            ) with my full consent.</li>
+                            <li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify">Declare that I have read and agree to the
+                                ${schoolSettingsLinks?.schoolPolicyUrl ? `
+                                    <a class="theme-text" href="${schoolSettingsLinks.schoolPolicyUrl}" style="font-size: 12px;" target="_blank" >School Policies</a>
+                                ` : ''}
+                                ${schoolSettingsLinks?.studentPolicytUrl ? `
+                                    , <a class="theme-text" href="${schoolSettingsLinks.studentPolicytUrl}" style="font-size: 12px;" target="_blank" >Academic Integrity & Student Code of Conduct</a>
+                                ` : ''}
+                                ${schoolSettingsLinks?.termasOfUserUrl ? `
+                                    , <a class="theme-text" href="${schoolSettingsLinks.termasOfUserUrl}" style="font-size: 12px;" target="_blank" >Terms of Use</a>
+                                ` : ''}
+                                ${schoolSettingsLinks?.privacyPolicyUrl ? `
+                                    , and <a class="theme-text" href="${schoolSettingsLinks.privacyPolicyUrl}" style="font-size: 12px;" target="_blank" >Privacy Policy.</a>
+                                ` : ''}
+                            </li>
+                            <li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify">Declare all information provided by me in any of the steps of the Enrollment Form are true, complete and correct to the best of my own knowledge and belief. I understand that in the event of any information being found suppressed/false or incorrect or any ineligibility detected at the time or after the enrollment, my enrollment (or that of my child/ward, as the case may be) is liable to be canceled with immediate effect</li>
+                        </ol>
+                        <div class="custom-checkbox-policy">
+                            <input type="checkbox" name="chkval" id="chkval" required tabindex="7">
+                            <label class="mb-0" for="chkval">By checking this box, I have read & agree to the above-mentioned terms and conditions.</label>
+                        </div>
+                    </div>
+                    <div class="full mt-2">
+                        <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="px-3">
+                        <p class="my-1">Fee Refund Policy: Enrollment Fee is non-refundable, non-transferable, and non-adjustable under any condition, whether in the ONE-TIME, INSTALLMENT, or CUSTOMISED fee plan. Fee refunds are only applicable for students who have paid the ONE-TIME fee. The Installment and Customised fee plans are non-refundable, non-transferable, and non-adjustable under any condition. Fee refund requests must be initiated within 90 days from the academic year start date. The student is not eligible for a fee refund after the 90-day period under any condition. If all conditions are met, we refund 50% of the course fee if the enrollment period is within 15 days, 35% if the enrollment period is within 16-30 days, 25% if the enrollment period is within 31-60 days, 15% if the enrollment period is within 61-90 days, and no refund is possible after 90 days of enrollment. The refund/withdrawal must be initiated within the time frame. Calendar days are calculated on a 24-hour basis, irrespective of time zone.The parent/guardian/student must send the notice of cancellation via email to ${schoolSettingsOffice.contactEmail} with the subject as "Request for Cancellation of Enrollment." No refund will be given if any personal, academic, or other details are misrepresented or hidden, or if fake documents are submitted. A transaction charge of USD 80 will be deducted from all refunds mandatorily. Refunds will only be sent to the bank account details provided by the parent/guardian/student and only after receiving confirmation via email. Refund eligibility will be calculated from the date the refund request is received via email.</p>
+                    </div>
+                `;
+            }
+        } else if (type === 'EVALUATION_TEST') {
+            return `
+                <div class="">
+                    <p class="m-0 font-weight-bold">Fee Refund Policy And Terms & Conditions For ${schoolSettingsTechnical?.evaluationModTermsName}</p>
+                    <ol class="font-12 mt-2 pl-4 ol-style">
+                        <li class="mb-1">After receiving the payment, our team will reach out to you to confirm the appointment and provide you with the link to join the same.</li>
+                        <li class="mb-1">Kindly note that your enrollment will be based on your performance in the ${schoolSettingsTechnical?.evaluationModTermsName}.</li>
+                        <li class="mb-1">The fee paid for the ${schoolSettingsTechnical?.evaluationModTermsName} is separate from all other fees (included but not limited to course fee, enrollment fee) and is non-refundable, non-transferable and non-adjustable.</li>
+                        <li class="mb-1">In case you do not appear for the ${schoolSettingsTechnical?.evaluationModTermsName} at the scheduled appointment, you will be given only one more chance to appear for the ${schoolSettingsTechnical?.evaluationModTermsName}. The second appointment must be fixed within 7 days from the first appointment, based on the convenience of the ${SCHOOL_NAME} Team.</li>
+                        <li class="mb-1">In case you do not appear for the second appointment as well, the fee will be forfeited.</li>
+                        <li class="mb-1">The ${schoolSettingsTechnical?.evaluationModTermsName} result is final and binding and no communication regarding the result will be entertained.</li>
+                        <li class="mb-1">The ${schoolSettingsTechnical?.evaluationModTermsName} is only meant for the purpose of checking the eligibility of the student for the respective grade and the examiner of the ${schoolSettingsTechnical?.evaluationModTermsName} may or may not issue a recommendation to the student based on his/her performance in the test. The ${schoolSettingsTechnical?.evaluationModTermsName} is not meant to be a supplement to any other test and no transcript for the ${schoolSettingsTechnical?.evaluationModTermsName} will be issued.</li>
+                        <li class="mb-1">The result of the ${schoolSettingsTechnical?.evaluationModTermsName} is valid for enrollment to the respective grade of ${SCHOOL_NAME}, for 60 days from the date of issuance.</li>
+                        <li class="mb-1">In case you are found seeking help or using any unfair means or assistance during the ${schoolSettingsTechnical?.evaluationModTermsName}, the fee will be forfeited and the test will be declared null and void.</li>
+                        <li class="mb-1">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+                        <li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+                    </ol>
+                </div>
+            `;
+        } else if (type === 'BOOKSESSION_FEE') {
+            return `
+                <div class="">
+                    <p class="m-0 font-weight-bold">Fee Refund Policy And Terms & Conditions For Extra Class Fee</p>
+                    <ol class="font-12 mt-2 pl-4 ol-style">
+                        <li class="mb-1">Extra Classes are defined as doubt-clearing classes which are in addition to your complimentary classes. For example, 2 extra classes per week mean 1 complimentary doubt-clearing class + 2 extra doubt-clearing classes = 3 doubt-clearing classes per week.</li>
+                        <li class="mb-1">Students have to pay in full for the Extra Classes in advance.</li>
+                        <li class="mb-1">Fees will be accepted through online payment methods only.</li>
+                        <li class="mb-1">All your Extra Classes will be pre-booked at the beginning of every month. You will be notified duly about your Extra Classes Schedule via mail.</li>
+                        <li class="mb-1">In case you want to change the date and/or timings of your Extra Class(s), you will have to inform ${SCHOOL_NAME} via mail at least 7 days in advance.</li>
+                        <li class="mb-1">Under any circumstances/conditions, fee for Extra Class is non-refundable, non-transferable and non-adjustable. Absence is not valid for any compensation class or refund of fee.</li>
+                        <li class="mb-1">The class will be compensated only if it is canceled by ${SCHOOL_NAME}. The compensation will occur only through policies of ${SCHOOL_NAME}. You cannot claim a refund of fees in such cases.</li>
+                        <li class="mb-1">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+                        <li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+                    </ol>
+                </div>
+            `;
+        } else if (type === 'EXTENSION_FEE') {
+            return `
+                <div class="px-4 py-2">
+                    <p class="m-0 font-weight-bold">Fee Refund Policy And Terms & Conditions For Academic Year Extension</p>
+                    <ol class="font-12 mt-2 pl-4 ol-style">
+                        <li class="mb-1">We recommend that you consult with the School Admin (email to:<a href="mailto:${schoolSettingsMails?.withdrawalRequestAdmin}">${schoolSettingsMails?.withdrawalRequestAdmin}</a>) before opting for Paid Academic Year Extension.</li>
+                        <li clsss="mb-1">Paid academic year extension can be availed for a period of a maximum of 4 weeks.</li>
+                        <li class="mb-1">The school provides no other form of an academic year extension.</li>
+                        <li class="mb-1">In case you are not able to complete this course even after availing paid extension for 4 weeks, no credit would be provided for this course, and it would be graded as Incomplete "(I)" in your annual transcript.</li>
+                        <li class="mb-1">Under any circumstances/conditions, fee paid for Academic Year Extension is non-refundable, non-transferable and non-adjustable.</li>
+                        <li class="mb-1">Students (or their parents/guardians) are responsible for regularly checking the website for any upcoming notifications. ${SCHOOL_NAME} will not send notifications or updates separately to students (or their parents/guardians)..</li>
+                        <li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+                    </ol>
+                </div>
+            `;
+        } else if (type === 'EXTERNAL_PAYMENT') {
+            return `
+                <div class="px-4">
+                    <ol class="font-16 mt-2 pl-4 ol-style">
+                        <li class="mb-1">All fees are strictly non-refundable, non-negotiable, and non-transferable under any circumstances.</li>
+                        <li class="mb-1">Payments cannot be moved or credited to another student, program, intake, or academic year.</li>
+                        <li class="mb-1">This policy applies whether the student withdraws, defers, or is unable to attend or complete the program for any reason.</li>
+                        <li class="mb-1">${SCHOOL_NAME} acts only as a payment facilitator for the university and assumes no responsibility for any disputes or outcomes related to the program or the university.</li>
+                        <p class="mb-1 mt-4">By completing payment, the student and/or parent/guardian acknowledges and accepts this policy in full.</p>
+                    </ol>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="px-4 py-2">
+                    <p class="m-0 font-weight-bold">Fee Refund Policy And Terms & Conditions For ${paymentName}</p>
+                    <ol class="mt-2 pl-4 ol-style">
+                        <li class="mb-1">I understand and agree that under any circumstances/conditions, the fee paid for ${paymentName} is non-refundable, non-transferable and non-adjustable.</li>
+                        <li class="mb-1">I may be asked to provide additional information, and documents (including but not limited to Age Proof, Address Proof, and Last Academic Proof) in support of the information provided by me (especially related to but not limited to academic credentials, coursework and other relevant information in support of my eligibility/candidature with ${SCHOOL_NAME}) especially if the information provided by me is incomplete, inconsistent (or with discrepancies) or not as per the prescribed requirements of ${SCHOOL_NAME}.</li>
+                        <li class="mb-1">I will not misrepresent any facts or details to ${SCHOOL_NAME} and not forge/misrepresent any documents, signatures, or credentials and any deviation from the above (or from any other truthful representation of details) shall render my candidature to be canceled (null/void) by ${SCHOOL_NAME} with immediate effect upon discovery of such misrepresentation(s).</li>
+                        <li class="mb-1">It is my responsibility, as a student (or parent/guardian), to regularly check the website for any upcoming notifications. I understand and agree that ${SCHOOL_NAME} will not send me notifications or updates separately.</li>
+                        <li class="mb-1">${SCHOOL_NAME} reserves the right to amend, limit or revoke any offers or terms at any time prior to purchase and accepts no responsibility for any technical issues resulting in the failure to pay.</li>
+                    </ol>
+                </div>
+            `;
+        }
+    };
+
+    // Determine modal title
+    const getModalTitle = () => {
+        if (type === 'REGISTRATION_FEE' || type === 'REGISTRATION_FEE_ADV') {
+            return `Further to my successful completion of the '${paymentName}' process with ${SCHOOL_NAME}, I agree to comply with the following as stated below, without any exceptions:`;
+        } else if (type === 'REGISTRATION_SUBJECT_FEE' || 
+                  type === 'REGISTRATION_SUBJECT_FEE_ADV' ||
+                  type === 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE' ||
+                  type === 'SUBJECT_FEE' ||
+                  type === 'SUBJECT_FEE_ADV' ||
+                  type === 'CUSTOMIZED_SUBJECT_FEE') {
+            
+            if (((type === 'REGISTRATION_SUBJECT_FEE' || 
+                 type === 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE') && 
+                 registrationType !== 'REGISTRATION_FRESH' && 
+                 registrationType !== 'REGISTRATION_FLEX_COURSE') || 
+                 type === 'REGISTRATION_SUBJECT_FEE_ADV') {
+                return `Further to my Enrollment with ${SCHOOL_NAME},I agree to comply with the following as stated below, without any exceptions:`;
+            } else {
+                return 'Fee Refund Policy';
+            }
+        } else if (type === 'EVALUATION_TEST') {
+            return `Fee Refund Policy And Terms & Conditions For ${schoolSettingsTechnical?.evaluationModTermsName}`;
+        } else if (type === 'BOOKSESSION_FEE') {
+            return 'Fee Refund Policy And Terms & Conditions For Extra Class Fee';
+        } else if (type === 'EXTENSION_FEE') {
+            return 'Fee Refund Policy And Terms & Conditions For Academic Year Extension';
+        } else {
+            return `Fee Refund Policy And Terms & Conditions For ${paymentName}`;
+        }
+    };
+
+    // Determine if footer should be shown
+    const showFooter = !(
+        ((type === 'REGISTRATION_SUBJECT_FEE' || 
+          type === 'CUSTOMIZED_REGISTRATION_SUBJECT_FEE') && 
+         registrationType !== 'REGISTRATION_FRESH' && 
+         registrationType !== 'REGISTRATION_FLEX_COURSE') || 
+        type === 'REGISTRATION_SUBJECT_FEE_ADV'
+    );
+
+    const modalContent = getModalContent();
+    const modalTitle = getModalTitle();
+
+    return `
+        <div id="courseFeeModalTNC" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary d-flex">
+                        <h5 class="modal-title text-white">${modalTitle}</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    </div>
+                    <form id="dashboardPayment" name="dashboardPayment" method="post" autocomplete="off">
+                        <div class="modal-body" style="max-height: 400px;overflow-y: auto;">
+                            <p class="scroll-down" style="margin-top:5px;"><a href="#" class="animate"></a></p>
+                            <input type="hidden" id="userId" value="${userId}" />
+                            <div class="agree">
+                                ${modalContent}
+                            </div>
+                        </div>
+                        ${showFooter ? `
+                            <div class="modal-footer justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <span class="d-flex" style="gap: 5px;">
+                                       <input type="checkbox" id="chkval" class="checkbox-lg" name="chkval">
+                                       <label for="chkval" class="m-0">
+                                            ${type === 'EXTERNAL_PAYMENT' ? 
+                                                `I understand that all University Program fees are non-refundable and non-transferable, and that ${SCHOOL_NAME} only facilitates payment.` : 
+                                                `I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions.`
+                                            }
+                                        </label>
+                                   </span>
+                                </div>
+                               <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+                           </div>
+                        ` : ''}
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+// function getSignupStatus() {
+// 	if (!signupStageStatusInitiated) {
+// 		if(ENVIRONMENT!='dev'){
+// 			window.setInterval(function () { getSignupStatusFinal() }, 180000);
+// 		}
+// 	}
+// }
+
+
+async function getPaymentPaidStatus(userPaymentDetailsId, schoolId) {
+	if(userPaymentDetailsId != "" && schoolId != ""){
+		var payload = {
+			'userPaymentDetailsId' : userPaymentDetailsId,
+			'schoolId' : schoolId
+		};	
+		var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-payment-paid-status',payload,'common');
+		if (responseData.status == '1' ) {
+			if(CHECK_PAYMENT_INTERVAL_COUNT>10){
+				flushPaymentInterval();
+			}else{
+				CHECK_PAYMENT_INTERVAL_COUNT++;
+				if(responseData.statusCode == "SUCCESS" ){
+					clearInterval(CHECK_PAYMENT_INTERVAL);
+					if($("#payNowBtn"+userPaymentDetailsId).length>0){
+						$("#payNowBtn"+userPaymentDetailsId).remove();
+						$("#paymentStatus"+userPaymentDetailsId).text("SUCCESS");
+						$("#paymentDate"+userPaymentDetailsId+"Wrapper").removeClass("d-none");
+						$("#paymentDate"+userPaymentDetailsId).text(changeDateFormat(new Date(), "MMM-dd-yyyy"));
+					}
+					$("#paymentOptionsModal").modal("hide");
+					$(".paymentUnderProcessOverlay").remove();
+				}else if(responseData.statusCode == "FAILURE"){
+					flushPaymentInterval();
+				}
+			}
+		}
+	}
+}
+function flushPaymentInterval(){
+	clearInterval(CHECK_PAYMENT_INTERVAL);
+	$("#paymentOptionsModal").modal("hide");
+	$(".paymentUnderProcessOverlay").remove();
+	if($("#paymentStatusResponse").length>0){
+		$("#paymentStatusResponse").remove();
+	}
+	$("body").append(paymentStatusResponseModal());
+	$("#paymentStatusResponse").modal("show");
+}
+
+$(document).on("click","#signupStage4 #chkval", function(){
+	if($("#chkval").is(":checked")){
+		$("#payTabData").removeAttr("disabled");
+	}else{
+		$("#payTabData").attr("disabled", true);
+	}
+});
+$(document).on("click","#signupStage4 #chkvalBook", function(){
+	if($("#chkvalBook").is(":checked")){
+		$("#bookAnEnrollmentTNC #payTabData").removeAttr("disabled");
+	}else{
+		$("#bookAnEnrollmentTNC #payTabData").attr("disabled", true);
+	}
+});
+
+
+function paymentUnderProcessOverlay(){
+	var html=
+	`<div class="paymentUnderProcessOverlay">
+		<div style="text-align:center;color:#fff">`;
+			if(SCHOOL_ID==1){
+				html+=`<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" style="max-width:150px;width:100%"/>`
+			}else{
+				html+=
+				`<div class="ball-rotate">
+					<div style="background-color: rgb(247, 185, 36);"></div>
+				</div>
+				<p>Payment is under process ...</p>`
+			}
+			html+=`<h4>Payment is under process...</h4>
+		</div>
+	</div>`;
+	return html;
+}
+
+function paymentStatusResponseModal(){
+	var html=
+	`<div id="paymentStatusResponse" class="modal theme-modal fade payment-opiton-modal" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header py-2 primary-bg white-txt-color">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">×</span>
+					</button>
+				<h4 class="modal-title" style="font-size: 14px">&nbsp;</h4>
+				</div>
+				<div class="modal-body">
+					<h2 class="text-center">Oops!</h2>
+					<h3 class="text-danger text-center">Payment Incomplete</h3>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;	
 }

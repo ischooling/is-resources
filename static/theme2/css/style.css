@@ -566,6 +566,8 @@ input::placeholder {
 	width: 234px;
 }
 
+.copyRights{position: fixed;left: 0;right: 0;text-align: center;width: 100%;padding: 5px;bottom: 0;background-color: #fff;font-size: 12px;padding: 5px;border-top:1px solid #dedede}
+
 @media ( max-width: 991px) {
 	.steps ul li .step-arrow {
 		/* top: 45%;
@@ -1241,17 +1243,17 @@ input::placeholder {
 
 .theme-modal .modal-header {
 	position: relative;
-	background: #5117a5;
+	background: var(--pc);
 	color: #fff;
 }
 
 
 .theme-modal .modal-header .close {
-	position: absolute;
+	/* position: absolute;
 	right: 15px;
 	top: 50%;
 	transform: translateY(-50%);
-	-webkit-transform: translateY(-50%)
+	-webkit-transform: translateY(-50%) */
 }
 
 .theme-modal .theme-header {
@@ -2052,7 +2054,7 @@ label.error {
 	display: block;
 }
 
-.fade.fade-scale.in {
+.fade.fade-scale.in,  .fade.fade-scale.show{
 	opacity: 1;
 	transform: scale(1);
 }

@@ -45,8 +45,8 @@ function cartDetailContent(data, userId){
                                     var noOfWeeks = getWeeksBetweenDates(item.planStartDate, item.planEndDate);
                                     html+=
                                     `<li class="item vertical-timeline-element-content ml-0 bounce-in">
-                                        <span class="item-img">
-                                            <img src="${item.imgURl}" alt="course-img" style="aspect-ratio: 1; object-fit: cover;" />
+                                        <span class="item-img border">
+                                            <img src="${item.imgURl}" alt="course-img" style="aspect-ratio: 1; object-fit: contain;" />
                                         </span>
                                         <div class="item-info">
                                             <h4 class="item-name font-20 font-weight-bold mb-1">${item.subjectName}</h4>
@@ -210,7 +210,7 @@ function renderCartPaymentTerms(data){
                                         <input type="checkbox" id="chkvalBookSession" class="checkbox-lg" name="chkvalBook">
                                         <label for="chkvalBookSession" style="position: relative;top: -0.5px;color: #333;cursor: pointer;" >I confirm that I have read and agree to the above-mentioned fee refund policy and terms & conditions.</label>
                                     </div>
-                                    <button type="button" id="payBookingSessionTabData" class="btn btn-success" disabled="disabled" onclick="callClientCommonPaymentGateway('bookSessionPaymentModal','student','${USER_ID}','${data.userPaymentDetailsId}','booksession','${USER_ID}');" style="float:right">Pay Now</button>
+                                    <button type="button" id="payBookingSessionTabData" class="btn btn-success" disabled="disabled" onclick="checkPayment('bookSessionPaymentModal','${data.userPaymentDetailsId}','${SCHOOL_ID}');" style="float:right">Pay Now</button>
                                 </div>
                             </div>
                         </form>

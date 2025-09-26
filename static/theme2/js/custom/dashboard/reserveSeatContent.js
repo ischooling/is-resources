@@ -142,7 +142,7 @@ function getReserveSeatModal(data){
 					+'</div>'
 				+'</div>'
 				+'<div class="modal-footer text-right">'
-					+'<a href="javaScript:void(0);" class="btn btn-primary" onclick="callClientCommonPaymentGateway(\'paymentForm\',\'student\','+details.userId+','+details.userPaymentDetailsId+',\'advance-payment\','+details.userId+');">Proceed to Pay</a>'
+					+'<a href="javaScript:void(0);" class="btn btn-primary" onclick="checkPayment(\'paymentForm\','+details.userPaymentDetailsId+','+SCHOOL_ID+');">Proceed to Pay</a>'
 				+'</div>'
 			+'</div>'
 		+'</div>'

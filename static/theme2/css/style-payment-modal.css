@@ -24,23 +24,23 @@ a, a:hover, a:focus{text-decoration: none;}
 .payment-tabs{width: 200px;display: inline-block;}
 .payment-tabs ul, .payment-tabs ul li{width: 100% !important;float: left;border:0;display:inline-block !important}
 .payment-tabs ul li.tab-item, .payment-tabs .nav-tabs li{width:100% !important}
-.payment-tabs ul li .payment-option-itme{display: inline-block;width: 100%; padding: 10px;font-size: 14px;background:#fff; border: 1px solid;border-right:0;border-bottom:0;border-radius: 0; color: #090909;cursor: pointer;}
-.payment-tabs ul li .payment-option-itme:hover{background:var(--plc)}
+.payment-tabs ul li:not(.active) .payment-option-itme{display: inline-block;width: 100%; padding: 10px;font-size: 14px;background:#fff; border: 1px solid;border-right:0;border-bottom:0;border-radius: 0; color: #090909;cursor: pointer;}
+/* .payment-tabs ul li .payment-option-itme:hover{background:var(--plc)} */
 .payment-tabs ul li:last-child{border-bottom: 1px solid;}
-.payment-tabs .nav-tabs>li.active> a{background:var(--sc);color:#fff;margin: 0 !important;border:0 !important;}
+.payment-tabs .nav-tabs li.active a, .payment-tabs .nav-tabs li a.active{background-color:var(--sc) !important;color:#fff !important;margin: 0 !important;border:0 !important;}
 
-.payment-option-wrapper .payment-option{width: calc(100% - 200px);padding:0 !important}
-.payment-option-wrapper .payment-option .flex-item{border-right:1px solid rgba(233, 233, 233, 0.6); padding:30px; border:1px solid var(--pc);width: 100%;position:relative}
+.payment-option-wrapper .payment-option{width: calc(100% - 200px);padding:0 !important;}
+.payment-option-wrapper .payment-option .flex-item{border-right:1px solid rgba(233, 233, 233, 0.6); padding:30px; border:1px solid var(--sc);width: 100%;position:relative}
 .title{font-weight: 700;color:#007ed7;margin-bottom: 15px;display: inline-block;}
-.payment-option-wrapper .payment-option .flex-item .payment-icon{width: 100%;display: flex;flex-wrap: wrap;align-items: center; margin: 20px 0;}
+.payment-option-wrapper .payment-option .flex-item .payment-icon{width: 100%;gap:8px; display: flex;flex-wrap: wrap;align-items: center; margin: 20px 0;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon h3{margin:0 !important}
 .payment-option-wrapper .payment-option .flex-item .payment-icon.lg{margin-top: 0;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon img{width: 100%; max-width: 50px;  display: inline-block;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon.lg img{max-width:70px;margin-top: 0;border:0;}
-.payment-option-wrapper .payment-option .flex-item .pay-now-btn {display: inline-block;width:auto;border:2px solid var(--pc);border-radius:6px; padding: 3px;}
+.payment-option-wrapper .payment-option .flex-item .pay-now-btn {display: inline-block;width:auto;/*border:2px solid var(--pc);border-radius:6px;*/ padding: 3px;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn .btn{display: inline-block;padding:10px 30px;border-radius: 4px; color:#fff;background: var(--pc);cursor: pointer; margin:0;}
 
-.payment-method-icon{min-width: 120px; padding: 5px 10px; margin:0px 10px 10px 0px; text-align: center;border: 1px solid rgb(229 229 229 / 50%);box-shadow: 0px 1px 6px 1px rgba(0, 0, 0, 0.1);border-radius: 10px; ;}
+.payment-method-icon{min-width: 120px; padding: 5px 10px;text-align: center;border: 1px solid rgb(229 229 229 / 50%);box-shadow: 0px 0px 0px 1px rgb(142 140 140 / 20%);border-radius: 10px; ;}
 .payment-method-icon img{border-radius: 3px;max-height: 31px;object-fit: contain;}
 .payment-method-icon p{margin: 0px;font-size: 12px;}
 .blink-bg-warning{background:rgb(255 239 192) !important;}
@@ -63,7 +63,7 @@ a, a:hover, a:focus{text-decoration: none;}
 .payment-form  ul li input::placeholder{line-height:24px !important; }
 .payment-form  ul li .file-btn{position: relative;display: inline-block;width: auto;margin-bottom: 10px;}
 .payment-form  ul li .file-btn input[type="file"]{display: inline-block; width: 200px;height: 36px;position: relative;z-index: 1;opacity: 0;cursor: pointer;margin-right: 10px;}
-.payment-form  ul li .file-btn .btn{display: inline-block;padding: 9px 12px;background:var(--pc);color:#fff;position: absolute;left: 0;width: 100%;max-width: 200px;text-align: center;margin:0; }
+.payment-form  ul li .file-btn .btn{display: inline-block;padding: 9px 12px;background:var(--pc);color:#fff;position: absolute;left: 0;top:0; width: 100%;max-width: 200px;text-align: center;margin:0; }
 .custom-btn{display: inline-block;width: auto;background:#fff;padding:0; padding-right: 10px;margin-bottom: 10px;border:none !important;min-width:inherit}
 .custom-btn div{cursor: pointer;}
 .custom-btn div a{display:inline-block;padding:4px;background:var(--pc);border-radius:4px}
@@ -111,18 +111,21 @@ a, a:hover, a:focus{text-decoration: none;}
 
 /* --- Card Status --- */
 .card .status_icon { background: transparent url('../images/status_sprites.png') no-repeat 33px 0; }
-.card .invalid {color: #AD3333;background: #f8e7e7;}
-.card .valid {color: #33AD33;background: #e7f8e7;}
+.card .invalid:not(.form-control) {color: #AD3333;background: #f8e7e7;}
+.card .valid:not(.form-control) {color: #33AD33;background: #e7f8e7;}
 .card .invalid .status_icon { background-position: 3px 0 !important; }
 .card .valid .status_icon { background-position: -27px 0 !important; }
+
+.paymentUnderProcessOverlay{width: 100%;height: 100vh;position: fixed;left:0;top:0;background: rgba(0, 0, 0, 0.9);display: flex;justify-content: center;align-items: center;z-index: 99999999;}
+
 /* medai css start here  */
-@media(max-width: 990px){
+@media(max-width: 992px){
 	.payment-tabs, .payment-option-wrapper .payment-option{width: 100%;}
 	.payment-tabs ul li{width: auto;}
-	.payment-tabs ul li .payment-option-itme{height: 41px;border-right:1px solid var(--pc)}
-	.payment-tabs ul li:last-child .payment-option-itme{border-right:1px solid var(--pc);}
+	.payment-tabs ul li .payment-option-itme{height: 41px;border-right:1px solid var(--sc) !important}
+	.payment-tabs ul li:last-child .payment-option-itme{border-right:1px solid var(--sc) !important;}
 	.payment-tabs ul li:last-child .payment-option-itme{border-bottom:0;}
-	
+	.payment-form ul li input:not([type="file"]), .payment-form ul li textarea, .payment-form ul li label{width: 100% !important;}
 }
 @media(max-width: 768px){
 	.payment-form form ul li label, .payment-form form ul li input:not([type="file"]), .payment-form form ul li textarea{width:100%;}

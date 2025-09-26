@@ -19,7 +19,7 @@ function callStudentListByPartner(formId) {
 				} else {
 					
 						$("#enroll-list-skeleton").hide();
-						var enrollArray=[{"count":data.enrolledCount, "label":"Total Enrolled", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Partial Entry","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrolled","enrollmentValue":"3"}]
+						var enrollArray=[{"count":data.enrolledCount, "label":"Enrolled", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Not enrolled","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrolled","enrollmentValue":"3"}]
 						var enrollmentCountThumHtml = getB2BStudentEnrollmentCount(enrollArray);
 						$("#B2BStudentEnrollmentCountThumb").html(enrollmentCountThumHtml);
 						var htmls = B2BStudentListDetails(data.studentList, updateTransferMsg);
