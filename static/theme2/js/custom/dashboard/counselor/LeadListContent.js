@@ -168,6 +168,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			theme:"bootstrap4",
 			dropdownParent:"#"+formId
 		});
+		$("#"+formId+" #leadSupportTo").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#"+formId
+		});
 
 		callLeadSourceList(''+formId+'',objRights.leadType,'leadSource', true);
 		callPCountries(''+formId+'', 0, 'countryId');
@@ -182,6 +186,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		});
 
 		callLeadAssignUserList(''+formId+'',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID, false);
+		callLeadAssignUserList(''+formId+'',''+objRights.leadType+'','leadSupportTo', true, objRights.discardPermission, USER_ID, false);
 		
 
 		setTimeout(function() {

@@ -390,18 +390,18 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
             callLeadCampaignList($("#searchLeadCampaignType").val(),'','','','');
         }
     });
-    $("#searchCampaignType").on("change", function(){
-        var startDate = $("#dataLeadCampaignStartDate").val();
-        var endDate = $("#dataLeadCampaignEndDate").val();
+    // $("#searchCampaignType").on("change", function(){
+    //     var startDate = $("#dataLeadCampaignStartDate").val();
+    //     var endDate = $("#dataLeadCampaignEndDate").val();
         
-        if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
-            startDate = $("#dataLeadCampaignStartDate").val();
-        }
-        if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
-            endDate = $("#dataLeadCampaignEndDate").val();
-        }
-        callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
-    });
+    //     if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
+    //         startDate = $("#dataLeadCampaignStartDate").val();
+    //     }
+    //     if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
+    //         endDate = $("#dataLeadCampaignEndDate").val();
+    //     }
+    //     callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
+    // });
 
 	$("#searchCountryType").on("change", function(){
         var startDate = $("#dataLeadCampaignStartDate").val();
@@ -1125,7 +1125,7 @@ function getLeadCampaignPriceList(objRights){
          <thead id="listCampaignTfoot"></thead>
            <thead>
                 <tr>
-                    <th class="text-center bg-primary text-white" style="max-width:70px;min-width:70px">Sr no.</th>
+                    <th class="text-center bg-primary text-white" style="max-width:40px;min-width:40px">Sr no.</th>
                     <th class="text-center bg-primary text-white">Campaign Name</th>
                     <th class="text-center bg-primary text-white" colspan="2">
 					<span class="float-left">Amount Spent</span>
@@ -1146,8 +1146,51 @@ function getLeadCampaignPriceList(objRights){
         </div>
     </div>
 </div>`;
+html+=campaignScoreReportPopup();
 return html;
 }
+
+function openCampaignModal(campaignName){
+	console.log(campaignName);
+	callLeadCampaignList('campaign-wise', '', '', campaignName, '', 0);
+}
+	function campaignScoreReportPopup(){
+		var html='';
+		html+=`<div id="campaignScorePopup" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="top:40px">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content" >
+				<div class="modal-header py-2 bg-primary text-white">
+					<h5 class="modal-title">Campaign Performance Dashboard</h5>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-bordered">
+						<thead>
+							<tr class="bg-dark text-white font-weight-bold text-center">
+								<th>Metric</th>
+								<th>Value</th>
+								<th>Benchmark</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody id="campaignReportTbody">
+							
+						</tbody>
+					</table>
+				</div>	
+				<div class="modal-footer d-block">
+						<h5 class="font-weight-bold">Decision Guide</h5>
+						<div class="mb-2"><span class="text-white bg-success p-1 rounded">GREEN</span> = Excellent performance → Increase budget / Scale.</div>
+						<div class="mb-2"><span class="text-white bg-warning p-1 rounded">YELLOW</span> = Mixed performance → Monitor closely, optimize where needed.</div>
+						<div class="mb-2"><span class="text-white bg-danger p-1 rounded">RED</span> = Poor performance → Stop campaign and rebuild strategy.</div>
+				</div>
+			</div>
+		</div>
+		</div>`;
+		return html;
+	}
 
 
 

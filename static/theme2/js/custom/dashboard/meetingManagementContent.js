@@ -603,18 +603,18 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
     if (sessionUrls.length > 0) {
       modalContent += `
         <div class="session-block pb-4">
-          <h3 class="mb-3 mt-0">Meeting ID: ${meetingId}</h3>
+          <h5 class="mb-3 mt-0">Meeting ID: ${meetingId}</h5>
           ${sessionUrls.map((recording, index) => `
             <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-              <h4>${index + 1}. ${recording.title}</h4>
-              <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
+              <h6>${index + 1}. ${recording.title}</h6>
+              <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
             </div>
           `).join("")}
           ${
           transcriptUrl
               ? `
               <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                <h4>${sessionUrls.length + 1}. Transcript</h4>
+                <h6>${sessionUrls.length + 1}. Transcript</h6>
                 <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
               </div>`
               : ""
@@ -754,7 +754,7 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
     <div id="recurringMeetingModal" class="recurring-modal">
       <div class="p-3" style="background-color:#027FFF;">
         <h5 class="mb-0" style="color: white;font-size:18px;font-weight: 700;">${meetingTitle} | ${hostName}</h5>
-         <button onclick="closeRecurringModal();" type="button" class="p-2" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-30px;top:35px;background-color: white !important;border-radius: 5px 0px 0px 5px;font-size: 35px;border:0px;color:#000;">
+         <button onclick="closeRecurringModal();" type="button" class="p-2" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-37px;top:35px;background-color: white !important;border-radius: 5px 0px 0px 5px;font-size: 35px;border:0px;color:#000;">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -774,10 +774,10 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
             <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingEndDate" value="${endOfWeek}" class="form-control" placeholder="Select end date">
           </div>
 
-          <button id="filterRecurringSearchButton" type="submit" onclick="applyRecurringRecordingFilters('${entityId}');" class="btn ml-auto rounded" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold;">Search</button>
+          <button id="filterRecurringSearchButton" type="submit" onclick="applyRecurringRecordingFilters('${entityId}');" class="btn ml-auto rounded text-white" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold;">Search</button>
         </form>
 
-        <div class="mt-5 px-5" style="height: 80vh;overflow-y:auto;">
+        <div class="mt-5 px-5" style="height: 75vh;overflow-y:auto;">
           <table id="recurring-recordings-table" class="w-100 table">
             <thead style="background-color: #027FFF;position: sticky;top: 0;z-index: 1;">
               <tr style="font-size: 14px;">
@@ -818,8 +818,8 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
 
                             return `
                             <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                              <h4 style="font-size:13px;font-weight:700;">${i + 1}. ${title}</h4>
-                              <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording}', '${title}')">Play</button>
+                              <h6 style="font-size:13px;font-weight:700;">${i + 1}. ${title}</h6>
+                              <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording}', '${title}')">Play</button>
                             </div>`;
                           }).join('')}
 
@@ -828,7 +828,7 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
                             return transcriptUrl
                               ? `
                               <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                                <h4 style="font-size:13px;font-weight:700;">${session.recordings.length + 1}. Transcript</h4>
+                                <h6 style="font-size:13px;font-weight:700;">${session.recordings.length + 1}. Transcript</h6>
                                 <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
                               </div>`
                               : "";
@@ -939,8 +939,8 @@ function updateRecordingsTable(data) {
 
                 return `
                 <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                  <h4 style="font-size:13px;font-weight:700;">${i + 1}. ${title}</h4>
-                  <button class="btn btn-sm rounded" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording}', '${title}')">Play</button>
+                  <h6 style="font-size:13px;font-weight:700;">${i + 1}. ${title}</h6>
+                  <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording}', '${title}')">Play</button>
                 </div>`;
               }).join('')}
 
@@ -949,7 +949,7 @@ function updateRecordingsTable(data) {
                 return transcriptUrl
                   ? `
                   <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                    <h4 style="font-size:13px;font-weight:700;">${session.recordings.length + 1}. Transcript</h4>
+                    <h6 style="font-size:13px;font-weight:700;">${session.recordings.length + 1}. Transcript</h6>
                     <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
                   </div>`
                   : "";

@@ -6222,6 +6222,7 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 }
 
 function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid, assignTo) {
+
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -6236,76 +6237,173 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);
 			} else {
-				
 				var leadListCampaign=data.leadListCampaign;
-				if(leadListCampaign.length>0){
-					//$('#lead-campaign-list').dataTable().fnDestroy();
-					// var isDataTable = $.fn.dataTable.isDataTable('#lead-campaign-list');
-                    // if (isDataTable) {
-                    //     $('#lead-campaign-list').dataTable().fnDestroy();
-                    // }
-					if(campaignName!=''){
-						$(".campaign-tr-"+eventid+"").removeClass("d-none");
-						var httmlTop = getLeadListCampaignWiseHtml(data);
-						$(".campaign-td-"+eventid+"").html(httmlTop);
+				if(modeSearch!='campaign-wise'){
+					if(leadListCampaign.length>0){
+						if(campaignName!=''){
+							$(".campaign-tr-"+eventid+"").removeClass("d-none");
+							var httmlTop = getLeadListCampaignWiseHtml(data);
+							$(".campaign-td-"+eventid+"").html(httmlTop);
+						}else{
+							$(".campaign-tr-"+eventid+"").addClass("d-none");
+							var httmlTop = getLeadCampaignWiseHtml(data);
+							$("#leadCampaignListTbody").html(httmlTop);
+		
+							var httmlFoot = getCampaignFooterTotal(data);
+							$("#listCampaignTfoot").html(httmlFoot);
+						}
+						
+						$(".child_name").each(function () {
+							var text = $(this).text();
+							if(text!=''){
+								text=text.trim();
+							}
+							var textsplit=text.split(" ");
+							if(textsplit.length>1){
+								var sss = "";
+								for (let i = 0; i < textsplit.length; i++) {
+									const element = textsplit[i];
+									sss += element.replace(new RegExp(`.{1,25}`, 'g'), '$& ');
+								}
+								$(this).text(sss);
+							}else{
+								let spacedText = text.replace(new RegExp(`.{1,25}`, 'g'), '$& ');
+								$(this).text(spacedText);
+							}
+						//console.log(text);
+							
+						});
+						
+						$(".child_email").each(function () {
+							var text = $(this).text();
+							if(text!=''){
+								text=text.trim();
+							}
+							var textsplit=text.split(" ");
+							if(textsplit.length>1){
+							
+							}else{
+								let spacedText = text.replace(new RegExp(`.{1,50}`, 'g'), '$& ');
+								$(this).text(spacedText);
+							}
+						});
+	
 					}else{
-						$(".campaign-tr-"+eventid+"").addClass("d-none");
 						var httmlTop = getLeadCampaignWiseHtml(data);
 						$("#leadCampaignListTbody").html(httmlTop);
-	
-						var httmlFoot = getCampaignFooterTotal(data);
-						$("#listCampaignTfoot").html(httmlFoot);
 					}
-
-					//$("#lead-campaign-list").dataTable();
-				// 	$('#lead-campaign-list').dataTable({
-				// 		"iDisplayLength": 100, 
-				//    });
-
-				   
-				$(".child_name").each(function () {
-					var text = $(this).text();
-					if(text!=''){
-						text=text.trim();
-					}
-					var textsplit=text.split(" ");
-					if(textsplit.length>1){
-						var sss = "";
-						for (let i = 0; i < textsplit.length; i++) {
-							const element = textsplit[i];
-							sss += element.replace(new RegExp(`.{1,25}`, 'g'), '$& ');
-						}
-						$(this).text(sss);
-					}else{
-						let spacedText = text.replace(new RegExp(`.{1,25}`, 'g'), '$& ');
-						$(this).text(spacedText);
-					}
-				  //console.log(text);
-					
-				});
-				
-				$(".child_email").each(function () {
-					var text = $(this).text();
-					if(text!=''){
-						text=text.trim();
-					}
-					  var textsplit=text.split(" ");
-					  if(textsplit.length>1){
-					
-					  }else{
-						let spacedText = text.replace(new RegExp(`.{1,50}`, 'g'), '$& ');
-						$(this).text(spacedText);
-					  }
-				});
-
 				}else{
-					// var isDataTable = $.fn.dataTable.isDataTable('#lead-campaign-list');
-                    // if (isDataTable) {
-                    //     $('#lead-campaign-list').dataTable().fnDestroy();
-                    // }
-					var httmlTop = getLeadCampaignWiseHtml(data);
-					$("#leadCampaignListTbody").html(httmlTop);
+					console.log(leadListCampaign);
+					var startDate='';
+					var totalLead=0;
+					var spent = 0.0;
+					var cpc = 0.0;
+					var ctr = 0.0;
+					var reach = 0.0;
+					var frequency = 0.0;
+					var perLeadFbSpent=0.0;
+					var lConversion=0.0;
+					var lScore=0.0;
+					var lScoreColor='';			
+					var ctrbgColor='';
+					var cprbgcolor='';
+					var cpcbgcolor='';
+					var freqbgColor='';
+					var campaignStatusColor='';
+					var campaignStatusMsg='';	
+					var campaignEfStatusColor='';
+					var campaignEfStatusMsg='';	
+					if(leadListCampaign.length>0){
+						var leadCampaign=leadListCampaign[0];
+						startDate=leadCampaign.startDate;
+						totalLead=leadCampaign.totalFbLead;
+						spent = parseFloat(leadCampaign.totalSpend);
+						cpc = parseFloat(leadCampaign.cpc);
+						ctr = parseFloat(leadCampaign.ctr);
+						reach = parseInt(leadCampaign.reach);
+						frequency = parseFloat(leadCampaign.frequency);
+						lScore = parseFloat(leadCampaign.lScore);
+						lConversion=parseFloat(leadCampaign.lConversion);
 
+						perLeadFbSpent=0;
+						if(leadCampaign.totalFbLead!=''){
+							perLeadFbSpent=spent/parseInt(leadCampaign.totalFbLead);
+						}
+
+						lScoreColor='';
+						if(lScore>=80){
+							lScoreColor='bg-success';
+						}else if(lScore>=50 && lScore<80){
+							lScoreColor='bg-warning';
+						}else if(lScore<50){
+							lScoreColor='bg-danger';
+						}
+
+						ctrbgColor='';
+						if(ctr>=1){
+							ctrbgColor='bg-success';
+						}else if(ctr>0.56 && ctr<0.99){
+							ctrbgColor='bg-warning';
+						}else if(ctr<0.56){
+							ctrbgColor='bg-danger';
+						}
+
+						cpcbgcolor='';
+						if(cpc>=5){
+							cpcbgcolor='bg-danger';
+						}else{
+							cpcbgcolor='bg-success';
+						}
+
+						cprbgcolor='';
+						if(perLeadFbSpent>=25){
+							cprbgcolor='bg-danger';
+						}else {
+							cprbgcolor='bg-success';
+						}
+
+						freqbgColor='';
+						if(frequency<3){
+							freqbgColor='bg-success';
+						}else {
+							freqbgColor='bg-danger';
+						}
+						if(leadCampaign.campaignStatus=='ACTIVE'){
+							campaignStatusColor='bg-success';
+							campaignStatusMsg='Active';
+						}else if(leadCampaign.campaignStatus=='PAUSED'){
+							campaignStatusColor='bg-warning';	
+							campaignStatusMsg='Paused';
+						}else if(leadCampaign.campaignStatus=='DELETED' || leadCampaign.campaignStatus=='ARCHIVED'){
+							campaignStatusColor='bg-danger';
+							campaignStatusMsg='Inactive';
+						}
+						if(leadCampaign.campaignEffectiveStatus=='ACTIVE'){
+							campaignEfStatusColor='bg-success';
+							campaignEfStatusMsg='Actively delivering';
+						}else if(leadCampaign.campaignEffectiveStatus=='PAUSED'){
+							campaignEfStatusColor='bg-warning';
+							campaignEfStatusMsg='Paused';
+						}else if(leadCampaign.campaignEffectiveStatus=='IN_PROCESS'){
+							campaignEfStatusColor='bg-warning';
+							campaignEfStatusMsg='Updating';
+						}else if(leadCampaign.campaignEffectiveStatus=='WITH_ISSUES'){
+							campaignEfStatusColor='bg-warning';
+							campaignEfStatusMsg='Not delivering due to some issues';
+						}
+					}
+					htm=`<tr><td>Start Date</td><td class="text-center">${startDate}</td><td class="text-center">Campaign Launch Date</td><td>-</td></tr>
+					<tr><td>Total Leads</td><td class="text-center">${totalLead}</td><td class="text-center">Higher is Better</td><td></td></tr>
+					<tr><td>Amount Spent</td><td class="text-center">$ ${spent}</td><td class="text-center"><$ 1000</td><td></td></tr>
+					<tr><td>CTR (Click Through Rate)</td><td class="text-center">${ctr.toFixed(2)}%</td><td class="text-center">>= 0.56% (Ideal: 1%+)</td><td class="${ctrbgColor}"></td></tr>
+					<tr><td>CPC (Cost Per click) </td><td class="text-center">$ ${cpc.toFixed(2)}</td><td class="text-center">< $5</td><td class="${cpcbgcolor}"></td></tr>
+					<tr><td>CPR (Cost Per Result)</td><td class="text-center">$ ${perLeadFbSpent.toFixed(2)}</td><td class="text-center">$17 - $25</td><td class="${cprbgcolor}"></td></tr>
+					<tr><td>Frequency</td><td class="text-center">${frequency.toFixed(2)}</td><td class="text-center">< 3 (Best: 1-2)</td><td class="${freqbgColor}"></td></tr>
+					<tr><td>Conversion /Lead Quality</td><td class="text-center">${lConversion.toFixed(2)}/${lScore.toFixed(2)}</td><td class="text-center"></td><td class="${lScoreColor}"></td></tr>
+					<tr><td>Campaign Status</td><td class="text-center">${campaignStatusMsg}</td><td class="text-center"></td><td class="${campaignStatusColor}"></td></tr>
+					<tr><td>Campaign Effective Status</td><td class="text-center">${campaignEfStatusMsg}</td><td class="text-center"></td><td class="${campaignEfStatusColor}"></td></tr>`;
+					$("#campaignReportTbody").html(htm);
+					$("#campaignScorePopup").modal('show');
 				}
 			}
 		}
@@ -6333,6 +6431,9 @@ function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, 
 		}
 		leadReportRequest['utmCampaign'] = utmCampaign;
 		
+		leadReportRequest['reportType']="CAMPAIGN-LIST";
+	}
+	if(modeSearch=='campaign-wise'){
 		leadReportRequest['reportType']="CAMPAIGN-LIST";
 	}
 	var countryIds=[];
@@ -6398,20 +6499,20 @@ function getLeadCampaignWiseHtml(data){
 			}else if(ctr>0.56 && ctr<0.99){
 				ctrbgColor='bg-warning';
 			}else if(ctr<0.56){
-				ctrbgColor='bg-orange';
+				ctrbgColor='bg-red';
 			}
 
 			cprbgcolor='';
 			if(perLeadFbSpent>=25){
-				cprbgcolor='bg-orange';
+				cprbgcolor='bg-red';
 			}else {
 				cprbgcolor='bg-success';
 			}
 
 
-
-			htmlRet +="<tr class="+(leadCampaign.activeStatus=='N'?'bg-warning':'')+" style=\"border-bottom:1px solid;border-radius:0;\">";
-			htmlRet +="<td class=\"text-center\" style=\"vertical-align: top !important;max-width:70px !important;min-width:70px\">"+(sr)+"</td>";
+			var classTr=(leadCampaign.activeStatus=='N'?'bg-warning':'');
+			htmlRet +="<tr class=\""+classTr+"\" style=\"border-bottom:1px solid;border-radius:0;\">";
+			htmlRet +="<td class=\"text-center\" style=\"vertical-align: top !important;max-width:40px !important;min-width:40px\">"+(sr)+"</td>";
 			// htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" ><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></td>";
 			
 			// htmlRet +="<td style=\"vertical-align: top !important;min-width:250px\" class=\"text-center\">";
@@ -6428,42 +6529,31 @@ function getLeadCampaignWiseHtml(data){
 				htmlRet +="<tbody>";
 				htmlRet += "<tr style=\"background-color:#d3d1d1 !important\">";
 				
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Reach";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Impressions";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Frequency";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPR";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Spent";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Results";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPC";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0\">CTR";
-				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Reach</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Impressions</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Frequency</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPR</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Spent</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Results</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPC</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CTR</td>";
+				htmlRet += "<td style=\"width:11%;border:0;\" class=\"badge font-10 my-0\"></td>";
 
 				htmlRet +="</tr>";
 				htmlRet += "<tr>";
 				
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+reach+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+frequency.toFixed(2)+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+cpc.toFixed(2)+"";
-				htmlRet +="</td>";
-				htmlRet += "<td style=\"width:12%;border:0;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%";
-				htmlRet +="</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+reach+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+frequency.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+cpc.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%</td>";
+				htmlRet += "<td style=\"width:11%;border:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<a href=\"javascript:void(0)\" onClick=\"openCampaignModal('"+leadCampaign.campaignName+"')\" <i class=\"fa fa-eye fa-2x\"></a><br/>";
+				htmlRet += "<span class=\"font-10 bold\">"+leadCampaign.campaignStatus+"</span>";
+				htmlRet += "</td>";
 
 				htmlRet +="</tr>";
 				htmlRet +="</tbody>";
@@ -6620,6 +6710,15 @@ function getLeadListCampaignWiseHtml(data){
 		
 		for (let ind = 0; ind < leadListCampaign.length; ind++) {
 			const leadCampaign = leadListCampaign[ind];
+			var bgLeadcolor = '';
+			var totalLeadScore=parseFloat(leadCampaign.totalLeadScore);
+			if(totalLeadScore>=80 && totalLeadScore<=100){
+				bgLeadcolor = 'bg-success text-white';
+			}else if(totalLeadScore>=60 && totalLeadScore<80){
+				bgLeadcolor = 'bg-warning text-white';
+			}else{
+				bgLeadcolor = 'bg-danger text-white';
+			}
 			var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+leadCampaign.leadno+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
 			//var totalLeadLink="clickLeadsLink('"+urlClick+"','', '','list','', '')";
 //			<a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">
@@ -6628,7 +6727,7 @@ function getLeadListCampaignWiseHtml(data){
 			htmlRet +="<td style=\"vertical-align: top !important;\"><a href=\"javascript:void(0)\" onclick=\"getAsPost('"+urlSend+"');\">"+leadCampaign.leadno+"</a><br/><span class=\"child_name\">"+leadCampaign.childName+"</span><br/>"+leadCampaign.grade+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\"><span class=\"child_email\">"+leadCampaign.email+"</span><br/>"+leadCampaign.country+"<br/>"+leadCampaign.assignDate+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.fbAddSet+"<br/>"+leadCampaign.fbAdd+"</td>";
-			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.assignName+"<br/>"+leadCampaign.leadStatus+"</td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.assignName+"<br/>"+leadCampaign.leadStatus+"<br/><span class="+bgLeadcolor+">"+leadCampaign.totalLeadScore+"</span></td>";
 			// htmlRet +="<td style=\"vertical-align: top !important;\">"+(leadCampaign.demoDateTime!=''?'Y':'N')+"</td>";
 			htmlRet +="<td style=\"vertical-align: top !important;\">"+leadCampaign.followupRemark+"</td>";
 			htmlRet +="</tr>";

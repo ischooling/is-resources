@@ -989,7 +989,8 @@ function addSingleRowTime(formId, userId, cloneDiv, prestartTime, preendTime, us
 		$('.calday-hours').each(function(index, tr) { 
 			if(index==0){
 				if(strUnavailable=='Unavailable'){
-					getCalendarDateAvailability(formId, userId, "timeCalendarPopup",'',selectDate,"Month",true,""+prestartTime+"", ""+preendTime+"",'add-new-row',0,'daytime', userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit);
+					var monthStartDate = $("#firstStartDate").val();
+					getCalendarDateAvailability(formId, userId, "timeCalendarPopup",monthStartDate,selectDate,"Month",true,""+prestartTime+"", ""+preendTime+"",'add-new-row',0,'daytime', userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit);
 				}else{
 					if($(".calhours-"+(divLen-1)+"").find('.fromTime').val()!='' && $(".calhours-"+(divLen-1)+"").find('.toTime').val()!=''){
 

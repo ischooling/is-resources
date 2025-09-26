@@ -1182,6 +1182,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 			currentTimeStr=curentTime.date+' '+curentTime.time;
 		}
 		
+    lScoreColor='';
+    if(leads.leadScore>=80){
+      lScoreColor='bg-success';
+    }else if(leads.leadScore>=50 && leads.leadScore<80){
+      lScoreColor='bg-warning';
+    }else if(leads.leadScore<50){
+      lScoreColor='bg-danger';
+    }
+
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
 		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1450px;width:100%" id="leadDataList">'
@@ -1262,13 +1271,18 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'<tr>'
 									+'<th class="border-0 p-1">Added By:</th>'
 									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')+'</td>'
-								+'</tr>';
+								+'</tr>'
+                +'<tr>'
+										+'<th class="border-0 p-1">Lead Score:</th>'
+										+'<td class="border-0 p-1 "><span class="'+lScoreColor+' text-white bold p-1">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span></td>'
+									+'</tr>';
 								if(leads.leadSupportToName!=''){
 									html+='<tr>'
 										+'<th class="border-0 p-1">Supported By:</th>'
 										+'<td class="border-0 p-1">'+(leads.leadSupportToName!=''?leads.leadSupportToName:'N/A')+'</td>'
 									+'</tr>';
 								}
+									
 
 								html+='<tr>'
 									+'<th class="border-0 p-1">UTM:</th>'
