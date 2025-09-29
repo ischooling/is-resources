@@ -170,6 +170,11 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 					html+=
 					`</div>
 				</div>
+				<div class="mb-3 card border rounded-10">
+					<div class="card-body">`
+						+getStatsDetailsContent(data)
+					html+=`</div>
+				</div>
 				<div class="row">`
 					+getCounselorChartContent(commissionRate.commissionRates)
 					+getCounselorPartnerChartContent(commissionRate.commissionRates)
@@ -246,6 +251,62 @@ function getCounselorEnrollmentRangeContent(commissionRate){
 			html+=`</ul>
 		</div>`;
 	return html;
+}
+
+function getStatsDetailsContent(data){
+    var html=`
+        <div class="d-flex flex-wrap justify-content-center align-items-center">
+            <div class="card shadow-sm m-1 p-2 bg-light border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-clock text-primary mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold text-dark">Response Time</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold text-dark">10</h6>
+            </div>
+            <div class="card shadow-sm m-1 p-2 bg-info text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-bullseye mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Lead to Demo</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+            </div>
+            <div class="card shadow-sm m-1 p-2 bg-warning border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-user-check mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Demo to Enroll</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+            </div>
+            <div class="card shadow-sm m-1 p-2 bg-success text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-user-plus mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Lead to Enroll</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+            </div>
+            <div class="card shadow-sm m-1 p-2 bg-light border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-calendar-alt text-danger mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold text-dark">Joining Demo Time</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold text-dark">10</h6>
+            </div>
+            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-hourglass-half mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Time to Lead Conversion</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+            </div>
+            <div class="card shadow-sm m-1 p-2 bg-secondary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="fas fa-star mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Overall Rating</p>
+                </div>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+            </div>
+        </div>`;
+    return html;
 }
 
 function getCounselorChartContent(commissionRate){
