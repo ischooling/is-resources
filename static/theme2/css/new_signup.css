@@ -53,7 +53,8 @@ h6{font-size:16px;}
 .font-size-20{font-size: 20px !important;}
 .font-size-18{font-size: 18px !important;}
 .font-size-16{font-size: 16px !important;}
-hr {border:0;border-top:1px solid #eee;margin:20px 0; }
+hr {border:0;border-top:1px solid #e1e0e0;margin:20px 0; }
+.hr{background: #e1e0e0;}
 img{max-width: 100%;}
 a:focus, button:focus{border:0 !important;outline: none !important}
 hr{width: 100%;display: inline-block;border:1px solid rgba(255, 255, 255, 0.5) !important;}
@@ -392,3 +393,25 @@ border-radius:.25rem
         transform: rotate(360deg) scale(1)
     }
 }
+/* CREATE PASSWORD CSS STARTS FROM HERE */
+.signupButton{border: 2px solid var(--pc) !important;transition: background-color 0.3s ease}
+.signupButton:hover{background-color: white !important;color: var(--pc) !important;border: 2px solid var(--pc) !important;}
+.password-page {display: flex;flex-direction: column;align-items: center;background-color:#F1F3F5 !important;min-height: 100vh;justify-content: space-between;}
+.page-header {width: 100%;display: flex;justify-content: space-between;padding: 15px 30px;background: #fff;border-bottom: 1px solid #eee;}
+.password-card {background: #fff;border-radius: 12px;padding: 30px;box-shadow: 0px 4px 15px #c3c1c1 !important;width: 100%;max-width: 420px;text-align: center;margin: 40px auto;}
+.password-card-header i {background: #007bff;color: #fff;padding: 12px;border-radius: 50%;margin-bottom: 15px;}
+.password-card-header h2 {margin: 10px 0;font-size: 22px;font-weight: 600;}
+.password-card-header p {font-size: 14px;color: #777;margin-bottom: 20px;}
+.form-group {text-align: left;margin-bottom: 20px;}
+.input-wrapper {position: relative;}
+.input-wrapper input {width: 100%;padding: 12px 40px 12px 12px;border-radius: 8px;border: 1px solid #ddd;font-size: 14px;}
+.show-password {position: absolute;right: 12px;top: 50%;transform: translateY(-50%);cursor: pointer;}
+.error-msg {color: red;font-size: 12px;}
+.btn-primary {background: #007bff;border: none;border-radius: 8px;color: #fff;font-size: 16px;font-weight: 500;padding: 12px;width: 100%;cursor: pointer;margin-top: 10px;}
+.btn-primary:hover {background: #0056b3;}
+.password-card-footer {margin-top: 10px;font-size: 13px;}
+.page-footer {text-align: center;font-size: 13px;padding: 15px;color: #555;background: #fff;width: 100%;border-top: 1px solid #eee;}
+@media(max-width:768px){
+.password-page{padding:0 10px;}
+}
+/* CREATE PASSWORD CSS END FROM HERE */

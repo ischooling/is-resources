@@ -98,12 +98,3 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 .black-select2-option-txt .select2-results__options > li.select2-results__option, .black-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:#000 !important}
 .white-select2-option-txt .select2-results__options > li.select2-results__option, .white-select2-option-txt .select2-container--default .select2-selection--multiple .select2-selection__choice{color:#fff !important}
 
-.signupButton{
-    border: 2px solid var(--pc) !important;
-    transition: background-color 0.3s ease
-}
-.signupButton:hover{
-    background-color: white !important;
-    color: var(--pc) !important;
-    border: 2px solid var(--pc) !important;
-}

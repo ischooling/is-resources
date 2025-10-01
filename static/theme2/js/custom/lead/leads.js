@@ -277,8 +277,6 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
  return flag;
 }
 function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalId, leadType, objectRights, roleAndModule) {
-	
- //console.log("submitLeads", leadFrom);
  if(newTheme){
 			 hideMessageTheme2('');
 		 }else{
@@ -772,7 +770,6 @@ if ($("#"+formId+" #leadStatus").val()=='Demo Reschedule') {
  return flag;
 }
 function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId, objRights, roleAndModule) {
- //console.log(formId);
  $('.errorLeadCls').css( "display", "none" );
  $('.errorLeadCls').removeClass('success');
  $('#errorMessageLead').html('');
@@ -810,7 +807,6 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 	 cache : false,
 	 timeout : 600000,
 	 success : function(data) {
-		//console.log(data);
 		 if (data['status'] == '0' || data['status'] == '2') {
 			 //showMessage(true, data['message']);
 			 if(newTheme){
@@ -866,7 +862,6 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
  });
 }
 function getRequestForLeadFollowupSave(formId){
-	//console.log("getRequestForLeadFollowupSave");
 	var leadAddFormRequestDTO = {};
 	var authentication = {};
 	var leadCommonDTO = {};
@@ -1025,7 +1020,6 @@ function getRequestForLeadFollowupSave(formId){
 	leadCommonDTO['leadModifyDetailDTO']=leadModifyDetailDTO;
 	leadCommonDTO['leadCallFollowupDTO']=leadCallFollowupDTO;
 	leadCommonDTO['leadDemoInfo']=leadDemoInfo;
-	//console.log(leadCommonDTO);
 	
 	authentication['hash'] = getHash();
 	authentication['schoolId'] = SCHOOL_ID;
@@ -1129,7 +1123,6 @@ function leadFollowupActivityLogs(leadId, roleModuleId, logType){
 }
 
 function demoRequestAccept(requestDemoId, roleModuleId, userId, controlType, demoType) {
- //console.log("leads");
  hideMessage('');
  $.ajax({
 	 type : "POST",
@@ -1385,7 +1378,6 @@ function getPendingNotCall(){
 	 async:false,
 	 success : function(data) {
 		 if(data!=""){
-			 //console.log(data.leadCommonDTO);
 			 $('.custom_modal_wrapper').addClass('show-wrapper');
 			 $('.custom-modal ul').empty();
 			 var htmlVar="";
@@ -1468,7 +1460,6 @@ customLoader(true);
 		if (checkonlineOfflineStatus()) {
 			return;
 		}
-		console.log(e);
 		customLoader(false);
 	 }
  });
@@ -1496,7 +1487,6 @@ var leadStudentDetailDTO={};
 var leadDemoInfo={};
 var leadCallFollowupDTO={};
 var leadCountDetailDTO={};
-//  console.log('shortBy=> '+ shortBy+',  shortType=> ',shortType);
  leadModifyDTO['clickBy'] = callbadge;
  var strText = escapeCharacters($("#"+formId+" #leadFullSearch").val());
  //strText = strText.replace(' ', '');
@@ -1543,14 +1533,6 @@ var leadCountDetailDTO={};
  }else{
 	leadModifyDetailDTO['withLeadStatus']="N";
  }
- 
- 
-
- 
-
-//  console.log("leadSources :: " + $("#"+formId+" #leadSourceSearch").val());
-//  console.log("assignTos :: " + $("#"+formId+" #leadAssignToSearch").val());
-//  console.log("leadStatuses :: " + $("#"+formId+" #leadStatusSearch").val());
 
  leadStudentDetailDTO['stdFname'] = $("#"+formId+" #leadstdfnameSearch").val();
  leadStudentDetailDTO['gurdianFname'] = $("#"+formId+" #leadParentfnameSearch").val();
@@ -1647,9 +1629,6 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
 	recordsPerPage=leadPage;
  }
  leadAddFormRequestDTO['recordsPerPage']=recordsPerPage;
- //console.log(JSON.stringify(leadAddFormRequestDTO));
- //console.log(JSON.stringify(leadModifyDetailDTO));
- console.log(leadAddFormRequestDTO);
  return leadAddFormRequestDTO;
 }
 
@@ -2215,7 +2194,6 @@ function callStudentSignupStage(formId, userId) {
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 //showMessageTheme2(false, data['message']);
 			 } else {
-				 //console.log(data['signupStudentList']);
 				 var tblehtml="";
 				 
 				 for(i=0;i<data['signupStudentList'].length;i++){
@@ -2268,7 +2246,6 @@ function callDemoCountDetails(formId, userId, newTheme) {
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 //showMessageTheme2(false, data['message']);
 			 } else {
-				 //console.log("demoCountList",data['demoCountList']);
 				 if(data['demoCountList']!=null){
 					 for(i=0;i<data['demoCountList'].length;i++){
 						 var demoCount = data['demoCountList'][i];
@@ -2314,7 +2291,6 @@ function callLeadCountDetails(formId, userId) {
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 //showMessageTheme2(false, data['message']);
 			 } else {
-				 //console.log("demoCountList",data['demoCountList']);
 				 if(data['leadCountList']!=null){
 					 for(i=0;i<data['leadCountList'].length;i++){
 						 var demoCount = data['leadCountList'][i];
@@ -2356,7 +2332,6 @@ function getRequestForLeadCountDetails(formId, userId) {
 var	itiAltPhoneNumber;
 var	itiPhoneNumber;
 function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType, columnPermission) {
-	//console.log("callLeadsByLeadId",columnPermission);
 	if(columnPermission==true){
 		$(".b2cLeadsource").show();
 		$(".b2bLeadsource").show();
@@ -2395,7 +2370,6 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 				 showMessage(true, data['message']);
 			 } else {
 				$("#"+modalId).modal({ backdrop: 'static', keyboard: false });
-				 //console.log(data['leadDashboardCommon']['leadCommonDTO']);
 				 if(controlType=='add'){
 					$("#leadFormText").text("Add new lead");
 				 }else if(controlType=='addLeadClone'){
@@ -2471,7 +2445,6 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						   });
 						   itiPhoneNumber.setCountry($('#'+formId+' #pCountryCode').val());
 						   phoneNumber.addEventListener('countrychange', function(e) {
-							   //console.log("itiPhone=>", itiPhoneNumber.getSelectedCountryData());
 							   $('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
 							   $('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
 						   });
@@ -2484,7 +2457,6 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 							   //separateDialCode: true,
 						   });
 						   altPhoneNumber.addEventListener('countrychange', function(e) {
-							   //console.log("itiPhone=>", itiAltPhoneNumber.getSelectedCountryData());
 							   $('#'+formId+' #pCountryCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().iso2);
 							   $('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
 						   });
@@ -2549,7 +2521,6 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						callCities(formId, leadDemo.leadStudentDetailDTO.state, 'stateId');
 						$("#"+formId+" #cityId").val(leadDemo.leadStudentDetailDTO.city).trigger('change');
 					  }, 1000); 
-				    //console.log('renderDocumentContent', userId, leadId, 'LEAD-DOC');
 					$("#"+formId+" #leadSource").select2({
 						theme:"bootstrap4",
 						dropdownParent:"#"+formId+""
@@ -2628,7 +2599,6 @@ function callLeadCountGradeWiseDetails(formId, userId) {
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 //showMessageTheme2(false, data['message']);
 			 } else {
-				 //console.log("leadCountGradewise",data['leadCountGradewise']);
 				 if(data['leadCountGradewise']!=null){
 					 var htmlGradeWise = "";
 					 htmlGradeWise = htmlGradeWise + " <thead><tr><th>#</th> ";
@@ -2667,8 +2637,6 @@ function getRequestForLeadCountGradeWiseDetails(formId, userId) {
 
 
 function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, modalId, leadType, epdetailUpdateStatus,remarkMendatory,minRemarkCount) {
-//console.log(leadId);
-
  $("#"+formId+" #epdetailStatus").val(epdetailUpdateStatus);
  $("#"+formId+" #leadId").val(leadId);
  $("#"+formId+" #currentPage").val(currentPage);
@@ -2716,7 +2684,6 @@ function callGetOpenFollowup(formId, leadId, userId, controlType, currentPage, m
 				 showMessage(true, data['message']);
 			 } else {
 				 if(data['leadDashboardCommon']['leadCommonDTO']!=null){
-					//console.log(data['leadDashboardCommon']['leadCommonDTO'][0]['leadLastCallList'])
 					 var leadDemo = data['leadDashboardCommon']['leadCommonDTO'][0];
 
 					 if(leadType=='B2B'){
@@ -2913,7 +2880,6 @@ function callLeadDemoCountDetails(formId, userId,newTheme) {
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 //showMessageTheme2(false, data['message']);
 			 } else {
-				 //console.log("demoCountList",data['demoCountList']);
 				 if(data['leadDemoCountList']!=null){
 					 for(i=0;i<data['leadDemoCountList'].length;i++){
 						 var demoCount = data['leadDemoCountList'][i];
@@ -2959,7 +2925,6 @@ function getPingPopupScheduleCall(assignTo){
 	 timeout : 600000,
 	 async:false,
 	 success : function(htmlContent) {
-		//console.log(htmlContent);
 		if(htmlContent=='\n\n'){
 			htmlContent = htmlContent.replace("\n\n","");
 		}
@@ -3011,7 +2976,6 @@ function callforLeadCalculate(formId, dataType ,newTheme) {
 				if (data['status'] == '0' || data['status'] == '2') {
 					//showMessageTheme2(false, data['message']);
 				} else {
-					//console.log("demoCountList",data['demoCountList']);
 					var bindHtml = getLeadCalculatorHtml(data);
 					$("#leadCalculateTbody").html(bindHtml);
 					$("#dataMode").html($("#activeDataMode").val());
@@ -3525,9 +3489,6 @@ function getTotalLeadsChart(data, chartId){
 		series['name']="Positive Enrolled";
 		series['data']=positiveLeadData;
 		totalLeadSeries.push(series);
-		
-		//console.log(totalLeadSeries);
-
 			var options = {
 				series: totalLeadSeries,
 				chart: {
@@ -4208,7 +4169,6 @@ function sendBasicDetailsMail(b2bleadId){
 			if (checkonlineOfflineStatus()) {
 				return;
 			}
-			console.log(e);
 		}
 	});
 }
@@ -4260,7 +4220,6 @@ function resendB2BWelcomeMail(b2bleadId){
 			if (checkonlineOfflineStatus()) {
 				return;
 			}
-			console.log(e);
 		}
 	});
 }
@@ -4279,7 +4238,6 @@ function callLeadStatusList(formId, value, elementId, keyStatus) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(true, data['message']);
 			} else {
-				//console.log(data['mastersData']['data']);
 				result = data['mastersData']['data'];
 				dropdown = $("#"+formId+" #"+elementId);
 				dropdown.html('');
@@ -4363,7 +4321,6 @@ function getRequestForCampaignLead(leadid, elementId){
 
 
 function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType, openstatus) {
-	//console.log("callLeadMergeData");
  $.ajax({
 		 type : "POST",
 		 contentType : APPLICATION_JSON_VALUE,
@@ -4373,7 +4330,6 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 		 cache : false,
 		 timeout : 600000,
 		 success : function(data) {
-				//console.log(data);
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 showMessage(true, data['message']);
 			 } else {
@@ -5674,7 +5630,6 @@ function sendWatiNotification(templateName, index){
     $("#totalCount").text(totalCheckboxes);
 	
 	$("#confirm_btn").click(function () {
-		console.log("Confirm btn clicked::");
 		var sleads ='';
 		var leadNo='';
 		$.each($("input[name='chk-users-lead']:checked"), function(){
@@ -10915,7 +10870,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 	  }
   
 	  $('#leadAdvanceSearch').modal('hide');
-	  console.log("start time :" + new Date());
+	//   console.log("start time :" + new Date());
 	  if(objRights.clickByLead!=undefined){
 		callbadge=objRights.clickByLead;
 	  }
@@ -10924,7 +10879,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
   
 	  const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', payload, 'api/v1/leads');
   
-	  console.log("start success time :" + new Date());
+	//   console.log("start success time :" + new Date());
 	  customLoader(false);
   
 	  if (data['status'] == '0' || data['status'] == '2') {
@@ -11154,7 +11109,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		});
 	  }
   
-	  console.log("data success bind time :" + new Date());
+	//   console.log("data success bind time :" + new Date());
 	  return false;
   
 	} catch (e) {
@@ -11832,7 +11787,6 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate, leadDemoStatus
 				cache : false,
 				timeout : 600000,
 				success : function(data) {
-					console.log(data);
 					if (data['status'] == '0' || data['status'] == '2') {
 						showMessage(true, data['message']);
 					} else {
@@ -11979,7 +11933,6 @@ async function getB2BContractDetails(b2bleadId, type, publishedContractId){
 	payload = "?payload="+encode(JSON.stringify(payload))
 	responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, true, 'partner-contract-details'+payload, '');
 	responseData = responseData.details;
-	console.log(responseData);
 	if($("#b2bContractModal").length==1){
 		$("#b2bContractModal").remove();
 	}
@@ -12369,7 +12322,6 @@ function getAddContractPayload(formId, b2bLeadId) {
 async function saveContractDetails(formId, b2bLeadId){
 	if(validateAddContractForm(formId)){
 		var payload = getAddContractPayload(formId, b2bLeadId);
-		console.log("payload", payload)
 		var data = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, "Contract save successfully","save-partner-contract-details", payload, "");
 		if (data.status == '0' || data.status == '2' || data.status == '3') {
 			showMessageTheme2(0, data.message);
@@ -12461,7 +12413,7 @@ async function getEmailLogList(requestType, contractId){
 		}
 	}
 	
-	console.log("email log", responseData);
+	// console.log("email log", responseData);
 	
 	if(requestType != "V"){
 		
