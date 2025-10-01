@@ -44,6 +44,7 @@ var AJAXREQUESTCOUNT=0;
 var date = new Date();
 var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+var CAN_SHOW_ENROLL_RESERVE_MODAL = true;
 function copyToClipboardText(originalValue) {
   var $tempInput = $("<input>");
   $("body").append($tempInput);

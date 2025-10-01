@@ -144,49 +144,6 @@ function migrationDetailsOptionContent(data) {
 										if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
 											html+='You have been <b>Promoted</b> to the Next <b>'+studentCredit.nextGrade+'</b>';
 										}
-										// var checkCondtion=studentCredit.minmumCreditLimit;
-										// if(studentCredit.currentGradeId<11){
-											
-										// }else{
-										// 	var checkCondtion=0.0;
-										// 	if(studentCredit.studentPreviousCourseProvider==31){
-										// 		if(studentCredit.currentGradeId==12 || studentCredit.currentGradeId==13){
-										// 			checkCondtion=3.25;
-										// 		}else if(studentCredit.currentGradeId==14){
-										// 			checkCondtion=3.75;
-										// 		}else if(studentCredit.currentGradeId==15){
-										// 			checkCondtion=4.00;
-										// 		}else if(studentCredit.currentGradeId==16){
-										// 			checkCondtion=4.25;
-										// 		}else{
-										// 			checkCondtion=0.0;
-										// 		}
-										// 	}else{
-										// 		if(studentCredit.currentGradeId==12){
-										// 			checkCondtion=3.0;
-										// 		}else if(studentCredit.currentGradeId==13){
-										// 			checkCondtion=3.5;
-										// 		}else if(studentCredit.currentGradeId==14){
-										// 			checkCondtion=4.0;
-										// 		}else if(studentCredit.currentGradeId==15){
-										// 			checkCondtion=4.5;
-										// 		}else if(studentCredit.currentGradeId==15){
-										// 			checkCondtion=5.0;
-										// 		}else{
-										// 			checkCondtion=0.0;
-										// 		}
-										// 	}
-										// }
-										// if(parseFloat(studentCredit.totalCredit)<parseFloat(checkCondtion)){
-										// 	if(studentCredit.totalStringCredit=='0.0'){
-										// 		html+=checkCondtion+'.0';
-										// 	}else{
-										// 		html+=checkCondtion+' - '+studentCredit.totalStringCredit;
-										// 	}
-										// }else{
-										// 	html+='0.00';
-										// }
-										// html+=' Credits';
 									html+=
 									'</h5>'
 								+'</div>';
@@ -224,10 +181,18 @@ function migrationDetailsOptionContent(data) {
 										|| (studentCredit.currentGradeId==3 && studentCredit.avgCumulativeGpa > 2.0 && data.cgpaRule == 'Apply')
 										|| (studentCredit.currentGradeId>3) ){
 											if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-												html+=
-												'<div class="col text-center">'
-													+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
-												+'</div>';
+												$.each(data.migrationOptionsForNextGrade, function(k, migrationOption) {
+													html+=
+													'<div class="col text-center">'
+														+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);"'
+														if($.inArray(migrationOption.nextGradeId, [7,9,10,19,20,21])>=0){
+															html+='onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'' + migrationOption.nextGradeName + '\',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+														}else{
+															html+='onclick="callChoiceForStudentModel();"';
+														}
+														html+='>Enroll Now in '+studentCredit.nextGrade+'</a>'
+													+'</div>';
+												});
 											}else{
 												html+='<div class="col text-center mt-3">'
 													+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'

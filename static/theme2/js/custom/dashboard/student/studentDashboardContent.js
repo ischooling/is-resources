@@ -47,9 +47,8 @@ function rendereDashboardContent(isParent){
         renderAnnouncement(dashboardData.userId)
         renderActitify(dashboardData.userId)
         getCartCount(dashboardData.userId);
-
         // setTimeout(function () {
-            getReserveASeatForNextGrade(dashboardData.userId);
+            getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
         // }, 10000);
         
         $("#timeStuStandardId").val(dashboardData.studentStandardId);

@@ -32890,7 +32890,7 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 }
 
 /* Reserve Seat CSS Start Here*/
-.reserve-seat-wrapper{position:fixed;right:0;bottom:10px;z-index:999;transform:translateX(400px);-webkit-transform:translateX(400px);-moz-transform:translateX(400px);-ms-transform:translateX(400px);transition:0.5s ease-in-out;-webkit-transition:0.5s ease-in-out;-moz-transition:0.5s ease-in-out;-ms-transition:0.5s ease-in-out;}
+.reserve-seat-wrapper{position:fixed;right:0;bottom:20%;z-index:999;transform:translateX(400px);-webkit-transform:translateX(400px);-moz-transform:translateX(400px);-ms-transform:translateX(400px);transition:0.5s ease-in-out;-webkit-transition:0.5s ease-in-out;-moz-transition:0.5s ease-in-out;-ms-transition:0.5s ease-in-out;max-width:350px;width:100%;}
 .reserve-seat{max-width:350px;width:100%;display:flex;}
 .reserve-seat-wrapper.slide-in{transform:translateX(0px);-webkit-transform:translateX(0px);-moz-transform:translateX(0px);-ms-transform:translateX(0px);}
 .reserve-seat-graphics img{max-width:100px;}

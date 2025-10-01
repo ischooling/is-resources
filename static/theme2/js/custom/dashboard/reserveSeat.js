@@ -6,20 +6,28 @@ $(document).on("click", "#dashboardPayment #chkval", function () {
 	}
 });
 
-function showReserveSeatContent(){
-	$(".need-help-slide-wrapper").removeClass("slide-in");
-	$(".reserve-seat-btn").addClass("slide-out-btn");
-	$(".reserve-seat-slide-wrapper").addClass("slide-in");
-}
-function hideReserveSeatContent(){
-	$(".reserve-seat-btn").removeClass("slide-out-btn");
-	$(".reserve-seat-slide-wrapper").removeClass("slide-in");
+// function showReserveSeatContent(){
+// 	$(".need-help-slide-wrapper").removeClass("slide-in");
+// 	$(".reserve-seat-btn").addClass("slide-out-btn");
+// 	$(".reserve-seat-slide-wrapper").addClass("slide-in");
+// }
+// function hideReserveSeatContent(){
+// 	$(".reserve-seat-btn").removeClass("slide-out-btn");
+// 	$(".reserve-seat-slide-wrapper").removeClass("slide-in");
+// }
+
+function showEnrollReserveModal(){
+	// if($("#enrollReserveModal").length == 1){
+	// 	$("#enrollReserveModal").remove();
+	// }
+	// $("body").append(enrollReserveModalContent());
+	$("#enrollReserveModal").modal("show")
 }
 function showReserveSeatModal(){
 	$("#reserveSeatModal").modal("show");
 }
 
-function getReserveASeatForNextGrade(userId){
+function getReserveASeatForNextGrade(userId, nextGrade){
 	var postData = {};
 	postData['userId'] = userId;
 	$.ajax({
@@ -44,9 +52,14 @@ function getReserveASeatForNextGrade(userId){
 			} else {
 				if(data['statusCode'] == 'S001'){
 					if($("body .reserve-seat-wrapper").length == 0){
-						$("body").append(getReserveSeatContent(data));
+						$("body").append(getReserveSeatContent(data, nextGrade));
 					}
-					showReserveSeatContent();
+					setTimeout(() => {
+					// showReserveSeatContent();
+						if(CAN_SHOW_ENROLL_RESERVE_MODAL){
+							showEnrollReserveModal();
+						}
+					}, 1500);
 				}else{
 					// $(".need-help-slide-wrapper").removeClass("slide-in");
 					$('.reserve-seat-wrapper').hide();
@@ -96,6 +109,7 @@ function acceptReserveASeatForNextGrade(userId){
 				$('.reserve-seat-wrapper').hide();
 			} else {
 				var details = data.details;
+				$("#enrollReserveModal").modal("hide");
 				$('#reserveSeatModal').remove();
 				$('.reserve-seat-wrapper').after(getReserveSeatModal(data))
 				$('#reserveSeatModal').modal({ backdrop: 'static', keyboard: false })
@@ -123,4 +137,11 @@ function needHelpContentShow(needShow, isCliked) {
 		// 	$(".need-help-slide-wrapper").removeClass("slide-in");
 		// }
 	}
+}
+
+function backToEnrollReserveModal(){
+	$("#reserveSeatModal").modal("hide");
+	setTimeout(() => {
+		$("#enrollReserveModal").modal("show");
+	}, 300);
 }

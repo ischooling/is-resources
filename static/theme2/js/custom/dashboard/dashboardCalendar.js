@@ -418,6 +418,21 @@ function updateCalendarView() {
 	}
 }
 
+function checkIfAnyClassRunning(todayClassArray) {
+    var currentTime = new Date($("#currentTimeForUser").text());
+    var currentMs = currentTime.getTime();
+
+    for (var i = 0; i < todayClassArray.length; i++) {
+        var startTime = new Date(todayClassArray[i].start).getTime();
+        var endTime = new Date(todayClassArray[i].endTime).getTime();
+
+        if (currentMs >= startTime && currentMs <= endTime) {
+            return true;
+        }
+    }
+    return false;
+}
+
 var updateEventIconsStyle = true;
 function updateEventIcons(info, element, todayClassArray, viewName) {
 	if(updateEventIconsStyle){
@@ -462,6 +477,7 @@ function updateEventIcons(info, element, todayClassArray, viewName) {
 						}
 					}
 				}
+				CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(todayClassArray);
 				$('[data-toggle="tooltip"]').tooltip();
 				if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
 					$(".upcoming-icon").addClass("upcoming-week-view-icon");
