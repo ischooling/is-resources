@@ -1,12 +1,12 @@
-function editRow(src){
+function editRowPartner(src){
 	$(src).parent().closest("tr").find(".edit-value").hide();
 	$(src).parent().closest("tr").find(".edit-value-element").show();
 }
-function cancelEitRow(src){
+function cancelEitRowPartner(src){
 	$(src).parent().closest("tr").find(".edit-value").show();
 	$(src).parent().closest("tr").find(".edit-value-element").hide();
 }
-function bulkEdit(){
+function bulkEditPartner(){
 	$(".commissionTable").find(".edit-value").hide();
 	$(".commissionTable").find(".edit-value-element").show();
 	$(".bulk-update-and-cancel-btn").show();
@@ -14,7 +14,7 @@ function bulkEdit(){
 	$(".commissionTable > thead > tr th:nth-last-child(2)").addClass("rounded-top-right-10");
 	$(".commissionTable tbody tr:nth-last-child(1) td:nth-last-child(2)").addClass("rounded-bottom-right-10");
 }
-function cancelEitAllRow(){
+function cancelEitAllRowPartner(){
 	$(".commissionTable").find(".edit-value").show();
 	$(".commissionTable").find(".edit-value-element").hide();
 	$(".bulk-update-and-cancel-btn").hide();
@@ -245,7 +245,7 @@ function saveCommissionRate(formId) {
 	});
 }
 
-function getRequestForUpdateCommissionRate(formId, singleId){
+function getRequestForUpdateCommissionRatePartner(formId, singleId){
 	var request = {};
 	var commissionRates = [];
 	$('table.commissionTable > tbody > tr').each(function(index) {
@@ -291,23 +291,23 @@ function getRequestForUpdateCommissionRate(formId, singleId){
 	return request;
 }
 
-function validateUpdateCommissionRate(formId){
+function validateUpdateCommissionRatePartner(formId){
 	hideMessage('');
 	$('table.commissionTable > tbody > tr').each(function(index) {
 	});
 	return true;
 }
 // updateCommissionRate('filterCommissionRate')
-function updateCommissionRate(formId, id) {
+function updateCommissionRatePartner(formId, id) {
 	hideMessage('');
-	if(!validateUpdateCommissionRate(formId)){
+	if(!validateUpdateCommissionRatePartner(formId)){
 		return false;
 	}
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/update-commission-rate',
-		data : JSON.stringify(getRequestForUpdateCommissionRate(formId, id)),
+		data : JSON.stringify(getRequestForUpdateCommissionRatePartner(formId, id)),
 		dataType : 'json',
 		async : false,
 		global : false,
@@ -320,6 +320,7 @@ function updateCommissionRate(formId, id) {
 				}
 			}else{
 				showMessageTheme2(1, data['message'], '', true);
+				getCommissionRate("filterCommissionRate", true);
 			}
 		},
 		error: function(e){
@@ -330,7 +331,7 @@ function updateCommissionRate(formId, id) {
 	});
 }
 
-function resetCommissionRate(formId){
+function resetCommissionRatePartner(formId){
 	$("#"+formId+" #byPartnerType").val("P");
 	$("#"+formId+" #byPartnerValue").val("");
 	$("#"+formId+" #bySchoolType").val("P");
@@ -381,7 +382,7 @@ function getRequestForFilterCommissionRate(formId){
 	return filterRequest;
 }
 
-function fetchCommissionRate(formId) {
+function fetchCommissionRate(formId, isEdit) {
 	if($("#"+formId+" #learningProgramFilter").val().length==0){
 		showMessageTheme2(0, 'Select Learning program', '', true);
 		return false
@@ -412,7 +413,9 @@ function fetchCommissionRate(formId) {
 				}
 			}else{
 				responseData=data;
-				showMessageTheme2(1, 'Commission rate based on filter criteria', '', true);
+				if(!isEdit){
+					showMessageTheme2(1, 'Commission rate based on filter criteria', '', true);
+				}
 			}
 		},
 		error: function(e){
@@ -426,7 +429,7 @@ function fetchCommissionRate(formId) {
 
 
 
-function getRequestForCommissionRateLogs(parentId){
+function getRequestForCommissionRateLogsPartner(parentId){
 	var filterRequest = {};
 	var filter = {};
 	filter['parentId'] =  parentId;
@@ -439,13 +442,13 @@ function getRequestForCommissionRateLogs(parentId){
 	return filterRequest;
 }
 
-function commissionRateLogs(parentId) {
+function commissionRateLogsPartner(parentId) {
 	var responseData={};
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/commission-rate-logs',
-		data : JSON.stringify(getRequestForCommissionRateLogs(parentId)),
+		data : JSON.stringify(getRequestForCommissionRateLogsPartner(parentId)),
 		dataType : 'json',
 		async : false,
 		global : false,
@@ -475,14 +478,14 @@ $(document).on('show.bs.modal', function (event) {
 	var modalEle = $(event.target);
 	if (modalEle.hasClass('right-slide-modal')) {
         var zIndex = 1050 + $('.modal:visible').length * 20;
-        customModalShow(modalEle, zIndex);
+        customModalShowPartner(modalEle, zIndex);
     }
 	// var zIndex = 1050 + $('.modal:visible').length * 20;
     // var modalEle = $(this);
     // customModalShow(modalEle, zIndex)
 });
 
-function customModalShow(src, zIndex, ){
+function customModalShowPartner(src, zIndex, ){
 	$(src).css('z-index', zIndex);
 	$(src).find('.modal-dialog').css('margin-top', 60 * $('.right-slide-modal:visible').length); // Adjust margin-top dynamically
 	$(src).find(".modal-content").css("height", 'calc(100% - ' + (60 * $('.right-slide-modal:visible').length) + 'px)');

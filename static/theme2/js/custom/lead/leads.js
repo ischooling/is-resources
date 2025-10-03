@@ -9977,13 +9977,13 @@ function showWatiMessages(data){
 	if($("#watiLogsContent").length > 0){
 		$("#watiLogsContent").remove()
 	}
-	$("body").append(whatsappChatUI(data));
+	$("body").append(whatsappChatUI2(data));
 	$("#watiLogsTableData").DataTable({
 		theme:"bootstrap4",	 //destroy: true,	
 	});
 	$("#watiLogsContent").modal("show");
 }
-function whatsappChatUI(responseData) {
+function whatsappChatUI2(responseData) {
     const messages = [JSON.parse(JSON.stringify(responseData))]
         .filter(item => item.eventType === "message" || item.eventType === "broadcastMessage")
         .sort((a, b) => parseFloat(convertTZ(new Date(a.created), USER_TIMEZONE).getTime()) - parseFloat(convertTZ(new Date(a.created), USER_TIMEZONE).getTime()));

@@ -324,7 +324,7 @@ function getAddFormContent(){
 						+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">'
 							+'<label class="m-0 full">&nbsp;</label>'
 							+'<a href="javascript:void(0)" onclick="saveCommissionRate(\'saveCommissionRateForm\')" class="btn btn-success mr-1  btn-lg">Add Commission</a>'
-							+'<a href="javascript:void(0)" onclick="resetCommissionRate(\'saveCommissionRateForm\')" class="btn btn-primary  btn-lg">Reset</a>'
+							+'<a href="javascript:void(0)" onclick="resetCommissionRatePartner(\'saveCommissionRateForm\')" class="btn btn-primary  btn-lg">Reset</a>'
 						+'</div>'
 					+'</div>'
 				+'</form>'
@@ -364,7 +364,7 @@ function getFilterByContent(){
 					+'</div>'
 				+'</div>'
 				+'<div class="full text-right my-4">'
-					+'<a href="javascript:void(0)" class="btn btn-primary bulkEditBtn" onclick="bulkEdit()" style="display:none">Bulk Edit</a>'
+					+'<a href="javascript:void(0)" class="btn btn-primary bulkEditBtn" onclick="bulkEditPartner()" style="display:none">Bulk Edit</a>'
 				+'</div>'
 				+'<div class="full table-responsive">'
 					+'<table class="table table-bordered font-12 border-radius-table text-center commissionTable" style="min-width:1380px;width:100%" id="commissionRateFilteredData">'
@@ -385,8 +385,8 @@ function getFilterByContent(){
 						+'</tbody>'
 					+'</table>'
 					+'<div class="full text-right bulk-update-and-cancel-btn mb-4" style="display: none;">'
-						+'<a href="javascript:void(0)" class="text-decoration-none btn btn-primary mr-2" onclick="cancelEitAllRow()">Cancel</a>'
-						+'<a href="javascript:void(0)" class="text-decoration-none btn btn-success" onclick="updateCommissionRate(\'filterCommissionRate\',\'\')">Update</a>'
+						+'<a href="javascript:void(0)" class="text-decoration-none btn btn-primary mr-2" onclick="cancelEitAllRowPartner()">Cancel</a>'
+						+'<a href="javascript:void(0)" class="text-decoration-none btn btn-success" onclick="updateCommissionRatePartner(\'filterCommissionRate\',\'\')">Update</a>'
 					+'</div>'
 				+'</div>'
 			+'</form>'
@@ -468,8 +468,8 @@ function getDiscountRate(formId){
 	});
 }
 
-function getCommissionRate(formId){
-	var data=fetchCommissionRate(formId);
+function getCommissionRate(formId, isEdit){
+	var data=fetchCommissionRate(formId, isEdit);
 	var html=getFilteredCommissionRateContent(formId, data);
 	$('#commissionRateFilteredData > tbody').html(html);
 	$(".datepicker").datepicker({
@@ -568,18 +568,18 @@ function getFilteredCommissionRateContent(formId, data){
 				+'</div>'
 			+'</td>'
 			+'<td class="text-center border-width-1">'
-				+'<a href="javascript:void(0)" class="text-decoration-none text-primary edit-value" onclick="editRow(this)">'
+				+'<a href="javascript:void(0)" class="text-decoration-none text-primary edit-value" onclick="editRowPartner(this)">'
 					+'<i class="fa fa-edit"></i>'
 				+'</a>&nbsp;'
-				+'<a href="javascript:void(0)" class="text-decoration-none text-primary edit-value" onclick="getCommissionRateLogs('+commissionRate.id+')">'
+				+'<a href="javascript:void(0)" class="text-decoration-none text-primary edit-value" onclick="getCommissionRateLogsPartner('+commissionRate.id+')">'
 					+'<i class="fa fa-history"></i>'
 				+'</a>'
 				+'<div class="edit-value-element" style="display: none;">'
-					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-primary btn-sm mb-2" onclick="cancelEitRow(this)">'
-						+'cancel'
+					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-primary btn-sm mb-2" onclick="cancelEitRowPartner(this)">'
+						+'Cancel'
 					+'</a>'
 					+'<br/>'
-					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-success btn-sm" onclick="updateCommissionRate(\'filterCommissionRate\','+commissionRate.id+')">'
+					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-success btn-sm" onclick="updateCommissionRatePartner(\'filterCommissionRate\','+commissionRate.id+');">'
 						+'Update'
 					+'</a>'
 				+'</div>'
@@ -590,9 +590,9 @@ function getFilteredCommissionRateContent(formId, data){
 }
 
 commissionRateLogsContentModal()
-function getCommissionRateLogs(id){
-	var data=commissionRateLogs(id);
-	var html=getCommissionRateLogsContent(id, data);
+function getCommissionRateLogsPartner(id){
+	var data=commissionRateLogsPartner(id);
+	var html=getCommissionRateLogsContentPartner(id, data);
 	$('#commissionRateLogsTable > tbody').html(html);
 	// $(".datepicker").datepicker({
 	// 	autoclose: true,
@@ -600,14 +600,14 @@ function getCommissionRateLogs(id){
 	// });
 	$("#commissionRateLogs").modal("show");
 }
-function getCommissionRateLogsContent(id, data){
+function getCommissionRateLogsContentPartner(id, data){
 	var html = '';
 	$.each(data.commissionRates, function(k,commissionRate){
 		html+=
 		'<tr class="td-border-design border-color-gray" commissionRateId="'+commissionRate.id+'">'
 			+'<td class="border-width-1">'+(k+1)+'</td>'
-			+'<td class="border-width-1">'+commissionRate.standardName+'</td>'
-			+'<td class="border-width-1">'+commissionRate.learningProgramValue+'</td>'
+			+'<td class="border-width-1">'+(commissionRate.standardName == "" ? "All" : commissionRate.standardName)+'</td>'
+			+'<td class="border-width-1">'+(commissionRate.learningProgramValue == "" ? "All" : commissionRate.learningProgramValue)+'</td>'
 			+'<td class="p-0 border-width-1">'
 				+'<table class="table m-0" style="table-layout: fixed; max-width: 270px;">'
 					+'<tbody>'
