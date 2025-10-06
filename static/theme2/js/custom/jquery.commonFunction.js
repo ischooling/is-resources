@@ -1924,7 +1924,7 @@ function bindFileUploadNew1(
   uploadMethodType,
   skipSession
 ) {
-  var data = {};
+   var data = {};
   data["uploadCategory"] = uploadCategoryId;
   data["uploadUserId"] = uploadUserId;
   data["skipSession"] = skipSession;
@@ -1985,6 +1985,7 @@ function bindFileUploadNew1(
             "36" == uploadCategoryId ||
             "37" == uploadCategoryId ||
             "38" == uploadCategoryId
+            
           ) {
             showMessageTheme2ErrorNew(
               true,
@@ -2215,7 +2216,8 @@ function bindFileUploadNew1(
                     FILE_UPLOAD_PATH + file.fileName
                   );
                 }
-              } else if (uploadMethodType == 2) {
+              } 
+              else if (uploadMethodType == 2) {
                 hideMessageErrorNew("evaluationDocsError");
                 // console.log(
                 //   $("#fileupload" + uploadIndex)
@@ -2271,7 +2273,8 @@ function bindFileUploadNew1(
                     "fileupload" + uploadIndex + "Error"
                   );
                 }
-              } else if (uploadMethodType == 3) {
+              } 
+              else if (uploadMethodType == 3) {
                 $("#fileupload" + uploadIndex + "img").attr(
                   "fileName",
                   file.fileName
@@ -2351,7 +2354,8 @@ function bindFileUploadNew1(
                 } else {
                   $("#fileupload" + uploadIndex + "div").hide();
                 }
-              } else if (uploadMethodType == 4) {
+              } 
+              else if (uploadMethodType == 4) {
                 $("#fileName" + uploadIndex).html(file.fileName);
                 $("#fileupload" + uploadIndex + "Span").html(file.fileName);
                 $("#deleteDocument" + uploadIndex).attr(
@@ -2395,7 +2399,8 @@ function bindFileUploadNew1(
                 "36" == uploadCategoryId ||
                 "37" == uploadCategoryId ||
                 "33" == uploadCategoryId ||
-                "38" == uploadCategoryId
+                "38" == uploadCategoryId || 
+                "51" == uploadCategoryId 
               ) {
                 setTimeout(function () {
                   if ("34" == uploadCategoryId) {
@@ -2431,6 +2436,9 @@ function bindFileUploadNew1(
                       "fileupload5Error"
                     );
                   }else if ("33" == uploadCategoryId) {
+                    $("#fileupload1Span").text(file.fileName)
+                  }
+                  else if ("51" == uploadCategoryId) {
                     $("#fileupload1Span").text(file.fileName)
                   }
                 }, 500);

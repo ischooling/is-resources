@@ -171,7 +171,6 @@ async function showPaymentTermCondMode(src) {
 	$("#bookAnEnrollmentTNC").modal("hide");
 }
 async function showPaymentModal() {
-	
 	hideModalMessage('');
 	if($('#signupType').val() == 'Online' ){
 		if(SHOW_PAYMENT_OPTION=='Y'){
@@ -182,7 +181,7 @@ async function showPaymentModal() {
 				// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
 				var schoolId = $('.payabledetails').attr('schoolId');
 				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
-				checkPayment("", userPaymentDetailsId, schoolId)
+				checkPayment("", userPaymentDetailsId, schoolId);
 			} else {
 				var schoolId = $('.payabledetails').attr('schoolId');
 				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');

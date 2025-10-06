@@ -88,6 +88,7 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
 	payload['paidByUserId'] = paidByUserId;
 	payload['schoolId'] = schoolId;
 	payload['paymentGateway'] = paymentGateway;
+	payload['initiateVia'] = window.location.href.includes('fee-receipt') ? 'Link' : '';
 
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'invoke-payment-gateway',payload,'common');
 	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {

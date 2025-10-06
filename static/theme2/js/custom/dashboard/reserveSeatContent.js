@@ -156,7 +156,7 @@ function getReserveSeatModal(data) {
 				<div class="modal-footer border-0 px-4 pb-4 bg-transparent">
 					<a href="javascript:void(0);" 
 						class="btn btn-primary btn-block rounded-10 shadow btn-pay font-weight-bold font-16"
-						onclick="checkPayment('paymentForm', ${details.userPaymentDetailsId}, ${SCHOOL_ID});">
+						onclick="checkPayment('paymentForm', ${details.userPaymentDetailsId}, '${SCHOOL_ID}');">
 						<i class="fas fa-lock mr-2"></i> Proceed to Pay
 					</a>
 				</div>

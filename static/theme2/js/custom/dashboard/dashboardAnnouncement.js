@@ -106,40 +106,43 @@ function submitSchoolAnnounce(formId,moduleId) {
 	if(!validateRequestForSchoolAnnounce(formId)){
 		return false;
 	}
-	var fdata = new FormData();
-	fdata.append('userId',$("#"+formId+" #userId").val());
-	fdata.append('announceId',$("#"+formId+" #announceId").val());
-	fdata.append('enrollType',$("#"+formId+" #enrollType").select2('val'));
-	fdata.append('announceFor',$("#"+formId+" #announceFor").val());
-	fdata.append('standardId',$("#"+formId+" #standardId").select2('val'));
-	fdata.append('batchId',$("#"+formId+" #batchId").select2('val'));
-	fdata.append('studentId',$("#"+formId+" #studentId").select2('val'));
-	fdata.append('schoolId',$("#"+formId+" #schoolId").val());
-	fdata.append('subjectId',$("#"+formId+" #subjectIds").select2('val'));
+	var data = {};
+	data['userId']=$("#"+formId+" #userId").val();
+	data['announceId']=$("#"+formId+" #announceId").val();
+	data['enrollType']=$("#"+formId+" #enrollType").select2('val');
+	data['announceFor']=$("#"+formId+" #announceFor").val();
+	data['standardId']=$("#"+formId+" #standardId").select2('val');
+	data['batchId']=$("#"+formId+" #batchId").select2('val');
+	data['studentId']=$("#"+formId+" #studentId").select2('val');
+	data['schoolId']=$("#"+formId+" #schoolId").val();
+	data['subjectId']=$("#"+formId+" #subjectIds").select2('val');
 	if($("#" + formId + " #enrollType").val()=='BATCH'){
-		fdata.append('lmsPlatform','38,39,40,41');
+		data['lmsPlatform']='38,39,40,41';
 	}else if($("#" + formId + " #enrollType").val()=='ALL' || $("#" + formId + " #announceFor").val()=='TEACHER'){
-		fdata.append('lmsPlatform','37,38,39,40,41');
+		data['lmsPlatform']='37,38,39,40,41';
 	}else if($("#" + formId + " #enrollType").val()=='SSP'){
-		fdata.append('lmsPlatform','37,40,41');
+		data['lmsPlatform']='37,40,41';
 	}else if($("#" + formId + " #enrollType").val()=='SCHOLARSHIP'){
-		fdata.append('lmsPlatform','37,39,40,41');
+		data['lmsPlatform']='37,39,40,41';
 	}else if($("#" + formId + " #enrollType").val()=='ONE_TO_ONE_FLEX'){
-		fdata.append('lmsPlatform','37');
+		data['lmsPlatform']='37';
 	}else{
-		fdata.append('lmsPlatform','37,39,41');
+		data['lmsPlatform']='37,39,41';
 	}
 	if($("#" + formId + " #announceFor").val()=='TEACHER'){
-		fdata.append('lmsPlatform','37,38,39,40,41');
+		data['lmsPlatform']='37,38,39,40,41';
 	}
-	
-	fdata.append('announceTitle', $("#"+formId+" #announceTitle").val());
-	fdata.append('attachment', $("#"+formId+" #fileuploadAnnounce").get(0).files[0]);
+	data['announceTitle']= $("#"+formId+" #announceTitle").val();
+	if($("#" + formId + " #fileupload1Span").text()=='No file chosen...'){
+		data['attachment'] = "";
+	}else{
+		data['attachment'] = $("#" + formId +" #fileupload1Span").text();
+	}
 	if(editor1!=undefined){
-		fdata.append('announceRemark', editor1.getData().trim());
+		data['announceRemark']= editor1.getData().trim();
 	}
-	fdata.append('announceStartDate','');
-	fdata.append('startTime',$("#"+formId+" #startTimeInHrs").val()+':'+$("#"+formId+" #startTimeInMin").val()+':00');
+	data['announceStartDate']='';
+	data['startTime']=$("#"+formId+" #startTimeInHrs").val()+':'+$("#"+formId+" #startTimeInMin").val()+':00';
 	let isEndChecked1 = true;//$("#"+formId+" #checkAnnounceEnd").is(':checked');
 		if(isEndChecked1){}
 		else{
@@ -149,18 +152,26 @@ function submitSchoolAnnounce(formId,moduleId) {
 
 	$.ajax({
 		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','teacher-school-announce-submit'),
-		data : fdata,
+		data : JSON.stringify(data),
 		dataType : 'json',
 		type: "POST",
-		processData: false,
-		contentType: false,
-		enctype: 'multipart/form-data',
+		// processData: false,
+		// contentType: false,
+		// enctype: 'multipart/form-data',
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0, data['message']);
 			} else {
-				$('#'+formId+ ' #announceFor').val('').trigger("change");
+				// $('#'+formId+ ' #announceFor').val('').trigger("change");
+				$('#announceFor').select2('destroy');
+				$('#announceFor').select2({
+					theme: 'bootstrap4',
+					placeholder: 'Select an option',
+					dropdownParent: '#teacherSchoolannounce'
+				});
+
 				$('#'+formId+ ' #enrollType').val('').trigger("change");
 				$('#'+formId+ ' #lmsPlatform').val('').trigger("change");
 				$('#'+formId+ ' #standardId').val('').trigger("change");
@@ -173,7 +184,8 @@ function submitSchoolAnnounce(formId,moduleId) {
 				$("#"+formId+" #endDateDiv").show();
 				$("#"+formId+" #endTimeStartDiv").show();
 				initEditor(1, 'mymceAnnounce','Please start here', true);
-				$('#'+formId)[0].reset();
+				// $('#'+formId)[0].reset();
+				resetTeacherSchoolannounce()
 				showMessageTheme2(1, data['message']);
 				
 			}

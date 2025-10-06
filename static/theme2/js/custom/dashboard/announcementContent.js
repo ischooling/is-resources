@@ -52,7 +52,7 @@ function dashboardAnnouncementContent(data){
                                             html+=
                                         `</span>
                                         <h4 class="announcement-title">
-                                            <span>`+decodeURIComponent(schoolAnnounce.announceTitle);
+                                            <span>${schoolAnnounce.announceTitle}`
                                                 if(schoolAnnounce.replyStatus == 'N' && schoolAnnounce.latestStatus == 'Y'){
                                                     html+=
                                                     `<label class="m-0 announcement-ribbon accepted-announcement${schoolAnnounce.announcementId}">New</label>
@@ -81,7 +81,7 @@ function announcementModalContent(data){
                 <div class="modal-content">`;
                     html+=
                     `<div class="modal-header bg-primary text-white pt-2 pb-2">
-                        <h5 class="modal-title">`+decodeURIComponent(data.announcement.announceTitle)+`</h5>
+                        <h5 class="modal-title">${data.announcement.announceTitle}</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -100,7 +100,7 @@ function announcementModalContent(data){
                                 <tbody>
                                         <tr>
                                             <td class="text-center vertical-align-top">`+convertDatetimeWithFormat(data.announcement.createdDate,BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_ONLY)+`</td>
-                                            <td>`+decodeURIComponent(data.announcement.teacherRemark)+`</td>
+                                            <td>${data.announcement.teacherRemark}</td>
                                             <td class="text-center vertical-align-top">`;
                                                 if(data.announcement.fileType =='' || data.announcement.attachment == ''){
                                                     html+=`NA`;
@@ -111,7 +111,7 @@ function announcementModalContent(data){
                                                     <%-- <img  src="${announcement.attachment}" alt="" onclick="showDocument('${announcement.attachment}');" title=""  style="width: 50px; height: 50px; max-width: 100%;padding: 5px 3px 5px 3px" /> --%>
                                                     */''}`;
                                                 }else if(data.announcement.fileType == 'FILE'){
-                                                    html+=`<a href="${data.announcement.attachment}" target="blank">View</a>`;
+                                                    html+=`<a href="${FILE_UPLOAD_PATH + data.announcement.attachment}" target="blank">View</a>`;
                                                 }
                                             html+=`</td>
                                             <td class="text-center vertical-align-top">`;
