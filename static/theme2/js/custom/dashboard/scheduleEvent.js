@@ -372,7 +372,13 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                     ${sessionUrls.map((recording, index) => `
                         <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
                             <h6>${index + 1}. ${recording.title}</h6>
-                            <button class="btn btn-primary" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-primary" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
+                                <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
+                                <i class="fa fa-clone" style="font-size:20px;"></i>
+                                </button>
+                            </div>
+                            <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
                         </div>
                     `).join("")}
                     ${

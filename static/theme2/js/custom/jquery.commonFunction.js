@@ -6365,3 +6365,44 @@ function updateFileName(input){
   var fileName = input.files.length > 0 ? input.files[0].name : "Choose file...";
   $(input).next(".custom-file-label").text(fileName);
 }
+
+async function copyToClipboardSignedUrl(videoUrl) {
+  debugger;
+	try {
+	  const signedUrlResponse = await getSignedUrlForCopyClipboard(videoUrl);
+	  const parsed = JSON.parse(signedUrlResponse);
+	  const finalUrl = parsed.url;
+	  await navigator.clipboard.writeText(finalUrl);
+	  showToast("Copied!");
+	} catch (err) {
+	  showToast("Failed to copy!");
+	}
+}
+
+async function getSignedUrlForCopyClipboard(videoUrl) {
+      const payload = JSON.stringify({ url: videoUrl });
+			const encodePayload = window.btoa(payload);
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: BASE_URL + CONTEXT_PATH + "videos/signed-url?payload=" + encodePayload,
+        type: "GET",
+        contentType: "application/json",
+        global: false,
+        success: function(response) {
+          resolve(response); 
+        },
+        error: function(err) {
+          reject(err);
+        }
+      });
+    });
+}
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.visibility = "visible";
+    setTimeout(() => {
+    toast.style.visibility = "hidden";
+    }, 2500);
+}
