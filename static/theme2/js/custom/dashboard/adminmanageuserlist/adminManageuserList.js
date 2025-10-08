@@ -203,6 +203,7 @@ function resetCreateUserForm(formId) {
   $("#" + formId + " #password").val("");
   $("#" + formId + " #roleUser").val(0).trigger('change');
   $("#" + formId + " #supportRoleId").val("").trigger('change');
+   $("#" + formId + " #languages").val("").trigger('change');
   
 }
 function validateRequestForNewUser(formId) {
@@ -277,7 +278,7 @@ function getRequestForNewUser(formId) {
   signupStudentDTO["signupType"] = "Offline";
   signupStudentDTO["userType"] = "SCHOOL";
   signupStudentDTO["supportRoleId"] = $("#" + formId + " #supportRoleId").val();
-
+  signupStudentDTO["languagesKnown"] = $("#" + formId + " #languages").select2('val');
   request["signupStudentDTO"] = signupStudentDTO;
   authentication["hash"] = getHash();
   authentication["schoolId"] = SCHOOL_ID;

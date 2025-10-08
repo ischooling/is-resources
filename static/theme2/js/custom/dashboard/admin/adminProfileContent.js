@@ -24,7 +24,6 @@ async function renderProfilePage(arg0){
         startDate: new Date(),
         endDate: new Date()
     });
-    
     getAllCountryList('profilePageFromTag','country')
     await getAllCountryTimezone('profilePageFromTag','','countryTimezoneId');
     $('#country').select2({
@@ -59,10 +58,19 @@ async function renderProfilePage(arg0){
     $('#countryTimezoneId').select2({
         theme:"bootstrap4",
     });
+    $("#languages").select2({
+        theme:"bootstrap4",
+    });
     $("#country").val(responseData.details.countryId).trigger("change");
     $("#state").val(responseData.details.stateId).trigger("change");
     $("#city").val(responseData.details.cityId).trigger("change");
     $("#countryTimezoneId").val(responseData.details.countryTimezone).trigger("change");
+    if(responseData.details.languagesKnown!=''){
+        var lang =responseData.details.languagesKnown.split(',');
+        $.each(lang, function(i,e){
+            $("#languages option[value='" + e + "']").prop("selected", true);
+        });
+    }
     //return html;
     corpAdminProfile()
 }
@@ -200,6 +208,15 @@ function getProfilePageContent(data, callFrom){
                                         <div class="profile-label field-value font-weight-semi-bold text-dark countryTimezoneIdLabel">${data.countryTimezone}</div>
                                         <div class="field-input w-100">
                                             <select id="countryTimezoneId" name="countryTimezoneId" class="form-control field-input"></select>
+                                        </div> 
+                                    </div>  
+                                </div>
+                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                    <div class="form-group">
+                                        <label class="m-0">Languages</label>
+                                        <div class="profile-label field-value font-weight-semi-bold text-dark langKnownLabel">`+getLanguagesValueByCode(data.languagesKnown)+`</div>
+                                        <div class="field-input w-100">
+                                             <select id="languages" name="languages" class="form-control field-input" multiple>`+getLanguages(false)+`</select>
                                         </div> 
                                     </div>  
                                 </div>

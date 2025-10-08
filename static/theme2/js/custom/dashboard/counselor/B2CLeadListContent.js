@@ -590,6 +590,10 @@ function getLeadAdvanceSearchPopup(objRights) {
     '		<option value="0">Select country</option>' +
     "	</select>" +
     "</div>" +
+    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
+    '	<label class="m-0">Select Campaign</label>' +
+    '	<select  name="leadSearchCampaign" id="leadSearchCampaign" class="form-control leadSearchCampaign" multiple ></select>' +
+    "</div>" +
     // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">' +
     // '	<label class="m-0">State</label>' +
     // '	<select name="stateId" id="stateId" class="form-control" >' +
@@ -700,10 +704,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     '		<option value="14,15" >REVIEW DETAIL</option>' +
     "	</select>" +
     "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '	<label class="m-0">Select Campaign</label>' +
-    '	<select  name="leadSearchCampaign" id="leadSearchCampaign" class="form-control leadSearchCampaign" multiple ></select>' +
-    "</div>" +
+    
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
     '	<label class="m-0">Select Template</label>' +
     '	<select  name="leadSearchTemplate" id="leadSearchTemplate" class="form-control leadSearchTemplate" multiple >' +
@@ -1401,16 +1402,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									if(objRights.discardPermission || USER_ID==leads.assignTo){
 										html+='<div role="" class="mb-2 btn-group-sm btn-group-toggle text-left" data-toggle="buttons">'
 											+'<label class="btn btn-outline-success mr-1 '+(leads.leadCategory=='Hot'?'active':'')+'">'
-												+'<input type="radio"  name="leadCategory'+leads.leadId+'" id="hot'+leads.leadId+'" value="Hot" autocomplete="off" '+(leads.leadCategory=='Hot'?'checked':'')+' onchange="saveCategoryLead(\''+leads.leadId+'\',\'hot'+leads.leadId+'\');"> Hot'
+											+'<input type="radio"  name="leadCategory'+leads.leadId+'" id="hot'+leads.leadId+'" value="Hot" autocomplete="off" '+(leads.leadCategory=='Hot'?'checked':'')+' onchange="saveCategoryLead(\''+leads.leadId+'\',\'hot'+leads.leadId+'\');"> Hot'
 											+'</label>'
 											+'<label class="btn btn-outline-primary mr-1 '+(leads.leadCategory=='Cold'?'active':'')+'">'
-												+'<input type="radio"  name="leadCategory'+leads.leadId+'" id="cold'+leads.leadId+'" value="Cold" autocomplete="off" '+(leads.leadCategory=='Cold'?'checked':'')+' onchange="saveCategoryLead(\''+leads.leadId+'\',\'cold'+leads.leadId+'\');"> Cold'
+											+'<input type="radio"  name="leadCategory'+leads.leadId+'" id="cold'+leads.leadId+'" value="Cold" autocomplete="off" '+(leads.leadCategory=='Cold'?'checked':'')+' onchange="saveCategoryLead(\''+leads.leadId+'\',\'cold'+leads.leadId+'\');"> Cold'
 											+'</label>'
 											+'<label class="btn btn-outline-warning mr-1 '+(leads.leadCategory=='Warm'?'active':'')+'">'
-												+'<input type="radio" name="leadCategory'+leads.leadId+'" id="warm'+leads.leadId+'" value="Warm" autocomplete="off" '+(leads.leadCategory=='Warm'?'checked':'')+' onchange="saveCategoryLead(\''+leads.leadId+'\',\'warm'+leads.leadId+'\');"> Warm'
-											+'</label>';
-											
-										html+='</div>';
+											+'<input type="radio" name="leadCategory'+leads.leadId+'" id="warm'+leads.leadId+'" value="Warm" autocomplete="off" '+(leads.leadCategory=='Warm'?'checked':'')+' onchange="saveCategoryLead(\''+leads.leadId+'\',\'warm'+leads.leadId+'\');"> Warm'
+											+'</label>'
+                      +'</div>';
 									}
 								html+='</td></tr>';
 							html+='</tbody>'

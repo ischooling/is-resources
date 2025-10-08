@@ -257,6 +257,7 @@ function getMeetingType() {
 }
 
 function renderMeetingManagementContent() {
+  debugger;
   $("#meetingManagementMainDiv").append(getMeetingManagementContent());
   fetchUserIdToShowAllMeeting();
   fetchUserIdToShowRecurringMeeting();
@@ -677,6 +678,7 @@ function resetFilter() {
 }
 
 function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPageRecurring) {
+  debugger;
   $("<style>")
     .prop("type", "text/css")
     .html(`
