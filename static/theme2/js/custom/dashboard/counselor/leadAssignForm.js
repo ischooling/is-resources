@@ -217,7 +217,9 @@ function getRequestForUpdateCommissionRate(formId, singleId){
 			var bySchoolValue = tr.find('#bySchoolValue_'+id).val();
 			var bySchoolPartnerType = tr.find('#bySchoolPartnerType_'+id).val();
 			var bySchoolPartnerValue = tr.find('#bySchoolPartnerValue_'+id).val();
-			var enrollRange = tr.find('#enrollRange_'+id).val();
+			var enrollRangeMin = tr.find('#enrollRangeMin_'+id).val();
+			var enrollRangeMax = tr.find('#enrollRangeMax_'+id).val();
+			var enrollRange = enrollRangeMin + "-" + enrollRangeMax;
 			var startDate = tr.find('#startDate_'+id).val();
 			var endDate = tr.find('#endDate_'+id).val();
 			var commissionRate= {
@@ -241,6 +243,7 @@ function getRequestForUpdateCommissionRate(formId, singleId){
 	authentication['userId'] = USER_ID;
 	request['authentication'] = authentication;
 	request['commissionRates'] = commissionRates;
+	debugger;
 	return request;
 }
 
@@ -251,7 +254,7 @@ function validateUpdateCommissionRate(formId){
 	return true;
 }
 // updateCommissionRate('filterCommissionRate')
-function updateCommissionRate(formId, id) {
+function updateCommissionRate(formId, id, isEdit) {
 	hideMessage('');
 	if(!validateUpdateCommissionRate(formId)){
 		return false;
@@ -272,7 +275,12 @@ function updateCommissionRate(formId, id) {
 					showMessageTheme2(0, data['message'], '', false);
 				}
 			}else{
-				showMessageTheme2(1, data['message'], '', true);
+				debugger;
+				if(!isEdit){
+					showMessageTheme2(1, data['message'], '', true);
+				}else{
+					getCounselorCommissionRateFilter('filterCounselorCommissionRate');
+				}
 			}
 		},
 		error: function(e){
@@ -311,8 +319,8 @@ function getCommissionRateLogsContent(id, data){
 		html+=
 		'<tr class="td-border-design border-color-gray" commissionRateId="'+commissionRate.id+'">'
 			+'<td class="border-width-1">'+(k+1)+'</td>'
-			+'<td class="border-width-1">'+commissionRate.standardName+'</td>'
-			+'<td class="border-width-1">'+commissionRate.learningProgramValue+'</td>'
+			+'<td class="border-width-1">'+(commissionRate.standardName == "" ? "All" : commissionRate.standardName)+'</td>'
+			+'<td class="border-width-1">'+(commissionRate.learningProgramValue == "" ? "All" : commissionRate.learningProgramValue)+'</td>'
 			+'<td class="p-0 border-width-1">'
 				+'<table class="table m-0" style="table-layout: fixed; max-width: 270px;">'
 					+'<tbody>'

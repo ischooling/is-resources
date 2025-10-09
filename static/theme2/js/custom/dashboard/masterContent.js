@@ -1813,19 +1813,20 @@ function getLanguages(selectOption){
 	});
 	return html;
 }
-function getLanguagesValueByCode(langCode){
-	var existingValues='';
-	if(langCode!=undefined && langCode!=''){
-		langCode = langCode.split(',');
-		$.each(langCode, function(k, v) {
-			$.each(languages, function(k1, v1) {
-				if(v===v1.code){
-					existingValues=existingValues+v1.name+', ';
-				}
-			});
-		});
-		// var existingValues = langCode.filter(code => languages.includes(code)).join(', ');
-		console.log('Existing values:', existingValues);
-	}
-	return existingValues;
+function getLanguagesValueByCode(langCode) {
+    var existingValues = '';
+    if (langCode != undefined && langCode != '') {
+        langCode = langCode.split(',');
+        var names = [];
+        $.each(langCode, function (k, v) {
+            $.each(languages, function (k1, v1) {
+                if (v === v1.code) {
+                    names.push(v1.name);
+                }
+            });
+        });
+        existingValues = names.join(', ');
+        console.log('Existing values:', existingValues);
+    }
+    return existingValues;
 }

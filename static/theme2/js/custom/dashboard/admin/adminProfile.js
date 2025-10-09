@@ -247,10 +247,17 @@ async function saveProfileDetails(formId) {
         countryTimezone: $("#countryTimezoneId").val(),
         countryTimezoneId: $("#countryTimezoneId").attr("custom_timezone_id"),
         isdCode: $('#isdCode').val(),
-        userId: $('#userId').val()
+        userId: $('#userId').val(),
+        languageKnown: $("#languages").val()
     };
 
     var responseData = await getDashboardDataBasedUrlAndPayload(true, false, 'save-common-profile-details', requestDate);
+    if(responseData.statusCode == "SUCCESS"){
+        var selectedLangs = $("#languages option:selected").map(function() {
+            return $(this).text();
+        }).get().join(", ");
+        $(".langKnownLabel").text(selectedLangs || "N/A");
+    }
     console.log(responseData);
 
     cancelEditProfilePage();

@@ -1015,6 +1015,18 @@ function validateCounselorCommissionRate(formId){
 		showMessageTheme2(0, 'Applicable From Date required.', '', true);
 		return false
 	}
+	if($("#"+formId+" #enrollRangeMin").val()==""){
+		showMessageTheme2(0, 'Enrollment min range is required', '', true);
+		return false
+	}
+	if($("#"+formId+" #enrollRangeMax").val()==""){
+		showMessageTheme2(0, 'Enrollment max range is required', '', true);
+		return false
+	}
+	if($("#"+formId+" #enrollRangeMax").val() <= $("#"+formId+" #enrollRangeMin").val()){
+		showMessageTheme2(0, 'Enrollment max range should be greater than enrollment min', '', true);
+		return false
+	}
 	// if ($("#"+formId+" #endDate").val()=="") {
 	// 	showMessageTheme2(0, 'Applicable Till Date required.', '', true);
 	// 	return false
@@ -1054,7 +1066,7 @@ function getRequestForSaveCounselorCommissionRate(formId){
 	}else{
 		commissionRate['standardIds'] =  $("#"+formId+" #standardId").val();
 	}
-	commissionRate['enrollRange'] =  $("#"+formId+" #enrollRange").val();
+	commissionRate['enrollRange'] =  $("#"+formId+" #enrollRangeMin").val() + "-" + $("#"+formId+" #enrollRangeMax").val();
 	commissionRate['startDate'] =  $("#"+formId+" #startDate").val();
 	commissionRate['endDate'] =  $("#"+formId+" #endDate").val()!=undefined?$("#"+formId+" #endDate").val():"";
 	var authentication = {};
@@ -1063,6 +1075,7 @@ function getRequestForSaveCounselorCommissionRate(formId){
 	authentication['userId'] = USER_ID;
 	request['authentication'] = authentication;
 	request['commissionRate'] = commissionRate;
+	debugger;
 	return request;
 }
 
@@ -1198,16 +1211,11 @@ function getFilteredCounselorCommissionRateContent(formId, data){
 			+'<td class="border-width-1">'
 				+'<div class="edit-value">'+range+'</div>'
 				+'<div class="edit-value-element" style="display: none;">'
-					+'<select name="enrollRange_'+commissionRate.id+'" id="enrollRange_'+commissionRate.id+'" class="form-control bySchoolType">'
-						+'<option value="0">Select Range</option>'
-						+'<option value="1-5" '+((commissionRate.min_range+'-'+commissionRate.max_range)=='1-5'?'selected':'')+'>1-5</option>'
-						+'<option value="6-10" '+((commissionRate.min_range+'-'+commissionRate.max_range)=='6-10'?'selected':'')+'>6-10</option>'
-						+'<option value="11-20" '+((commissionRate.min_range+'-'+commissionRate.max_range)=='11-20'?'selected':'')+'>11-20</option>'
-						+'<option value="21-30" '+((commissionRate.min_range+'-'+commissionRate.max_range)=='21-30'?'selected':'')+'>21-30</option>'
-						+'<option value="31-50" '+((commissionRate.min_range+'-'+commissionRate.max_range)=='31-50'?'selected':'')+' >31-50</option>'
-						+'<option value="50-0" '+((commissionRate.min_range+'-'+commissionRate.max_range)=='50-0'?'selected':'')+'>50+</option>'
-					+'</select>'
+					+'<div class="d-flex gap-5">'
+						+'<input type="text" class="form-control" id="enrollRangeMin_'+commissionRate.id+'" name="enrollRangeMin_'+commissionRate.id+'" placeholder="Min" value="'+(commissionRate.min_range || '')+'" onkeydown="return M.digit(event);" maxlength="5" />'
+						+'<input type="text" class="form-control" id="enrollRangeMax_'+commissionRate.id+'" name="enrollRangeMax_'+commissionRate.id+'" placeholder="Max" value="'+(commissionRate.max_range || '')+'" onkeydown="return M.digit(event);" maxlength="5" />'
 					+'</div>'
+				+'</div>'
 			+'</td>'
 			+'<td class="border-width-1">'
 				+'<div class="edit-value">'+commissionRate.startDate+'</div>'
@@ -1230,10 +1238,10 @@ function getFilteredCounselorCommissionRateContent(formId, data){
 				+'</a>'
 				+'<div class="edit-value-element" style="display: none;">'
 					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-primary btn-sm mb-2" onclick="cancelEitRow(this)">'
-						+'cancel'
+						+'Cancel'
 					+'</a>'
 					+'<br/>'
-					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-success btn-sm" onclick="updateCommissionRate(\'filterCounselorCommissionRate\','+commissionRate.id+')">'
+					+'<a href="javascript:void(0)" class="text-decoration-none btn btn-success btn-sm" onclick="updateCommissionRate(\'filterCounselorCommissionRate\','+commissionRate.id+', '+true+')">'
 						+'Update'
 					+'</a>'
 				+'</div>'

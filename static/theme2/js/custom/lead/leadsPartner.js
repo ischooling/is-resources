@@ -56,7 +56,8 @@ function getRequestForSaveCommissionRate(formId){
 	}else{
 		commissionRate['standardIds'] =  $("#"+formId+" #standardId").val();
 	}
-	commissionRate['enrollRange'] =  $("#"+formId+" #enrollRange").val();
+	// commissionRate['enrollRange'] =  $("#"+formId+" #enrollRange").val();
+	commissionRate['enrollRange'] =  $("#minRange").val()+"-"+$("#maxRange").val();
 	commissionRate['startDate'] =  $("#"+formId+" #startDate").val();
 	commissionRate['endDate'] =  $("#"+formId+" #endDate").val()!=undefined?$("#"+formId+" #endDate").val():"";
 	var authentication = {};
@@ -206,6 +207,19 @@ function validateCommissionRate(formId){
 		showMessageTheme2(0, 'Applicable From Date required.', '', true);
 		return false
 	}
+	$("#minRange").val()+"-"+$("#maxRange").val()
+	if(!$("#minRange").val()){
+		showMessageTheme2(0, 'Please fill the min range.', '', true);
+		return false
+	}
+	if(!$("#maxRange").val()){
+		showMessageTheme2(0, 'Please fill the max range.', '', true);
+		return false
+	}
+	if(Number($("#minRange").val()) >= Number($("#maxRange").val())){
+		showMessageTheme2(0, 'Max range should be greater than min range.', '', true);
+		return false
+	}
 	// if ($("#"+formId+" #endDate").val()=="") {
 	// 	showMessageTheme2(0, 'Applicable Till Date required.', '', true);
 	// 	return false
@@ -264,7 +278,9 @@ function getRequestForUpdateCommissionRatePartner(formId, singleId){
 			var bySchoolValue = tr.find('#bySchoolValue_'+id).val();
 			var bySchoolPartnerType = tr.find('#bySchoolPartnerType_'+id).val();
 			var bySchoolPartnerValue = tr.find('#bySchoolPartnerValue_'+id).val()!=undefined?tr.find('#bySchoolPartnerValue_'+id).val():0;
-			var enrollRange = tr.find('#enrollRange_'+id).val();
+			var minEnrollRange = tr.find('#minEnrollRange_'+id).val();
+			var maxEnrollRange = tr.find('#maxEnrollRange_'+id).val();
+			var enrollRange = minEnrollRange+"-"+maxEnrollRange;
 			var startDate = tr.find('#startDate_'+id).val();
 			var endDate = tr.find('#endDate_'+id).val();
 			var commissionRate= {

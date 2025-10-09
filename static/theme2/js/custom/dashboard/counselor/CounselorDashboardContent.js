@@ -177,9 +177,9 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				</div>
 				<div class="row">`
 					+getCounselorChartContent(commissionRate.commissionRates)
-					+getCounselorPartnerChartContent(commissionRate.commissionRates)
-					+getCounselorEnrollmentLinksContent(data)
-				html+=`</div>`
+					{commissionRate.leadsB2B?html+=getCounselorPartnerChartContent(commissionRate.commissionRates):html+=""}
+					html+=getCounselorEnrollmentLinksContent(data, commissionRate.leadsB2B)
+				+`</div>`
 				+getCounselorRevenueContent()
 				+getCounselorEnrollmentStatisticsContent()
 			html+=`</div>`;
@@ -415,9 +415,9 @@ function getCounselorPartnerChartContent(commissionRate){
 	return html;
 }
 
-function getCounselorEnrollmentLinksContent(data){
+function getCounselorEnrollmentLinksContent(data, leadsB2B){
 	var html=
-		`<div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mb-2">
+		`<div class="${leadsB2B == false ? 'col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 mb-2' : 'col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mb-2'}">
 			<h5 class="font-weight-semi-bold text-dark mt-3">Enrollments & Seats Reservation Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">

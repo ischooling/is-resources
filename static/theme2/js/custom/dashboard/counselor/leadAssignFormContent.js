@@ -59,15 +59,13 @@ async function renderLeadAssignDashboard(title, roleAndModule, SCHOOL_ID, USER_I
 		dropdownParent: "#counselorSetCommitionPopup"
 	});
 
-
 	$(".datepicker").datepicker({
 		startDate: new Date(),
 		format : 'M dd, yyyy',
 		autoclose: true,
 	});
 
-
-	//getGradesByLearningProgram('saveCounselorCommissionRateForm','learningProgram','standardId','counselorSetCommitionPopup');
+	getGradesByLearningProgram('saveCounselorCommissionRateForm','learningProgram','standardId','counselorSetCommitionPopup');
 	//getGradesByLearningProgram('filterCounselorCommissionRate','standardIdFilter','standardId','counselorSetCommitionPopup');
 
 
@@ -302,17 +300,11 @@ function getCounselorSetCommitionPopup(){
 											</select>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Enrollment Range</label>
-											<select name="enrollRange" id="enrollRange" class="form-control">
-												<option value="0">Select Range</option>
-												<option value="1-5" >1-5</option>
-												<option value="6-10" >6-10</option>
-												<option value="11-20" >11-20</option>
-												<option value="21-30" >21-30</option>
-												<option value="31-50" >31-50</option>
-												<option value="50-0" >50+</option>
-												
-											</select>
+											<label class="m-0">Enrollment Min/Max Range</label>
+											<div class="d-flex gap-5">
+												<input type="text" class="form-control" id="enrollRangeMin" name="enrollRangeMin" placeholder="Min" value="" onkeydown="return M.digit(event);" maxlength="5" />
+												<input type="text" class="form-control" id="enrollRangeMax" name="enrollRangeMax" placeholder="Max" value="" onkeydown="return M.digit(event);" maxlength="5" />
+											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
 											<label class="m-0">Applicable From</label>
@@ -353,7 +345,7 @@ function getCounselorSetCommitionPopup(){
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">
 											<label class="m-0 full">&nbsp;</label>
 											<a href="javascript:void(0)" onclick="resetCounselorFilterByForm('filterCounselorCommissionRate')" class="btn btn-primary mr-1">Reset</a>
-											<a href="javascript:void(0)" onclick="getCounselorCommissionRateFilter('filterCounselorCommissionRate')" class="btn btn-success">Find</a>
+											<a href="javascript:void(0)" onclick="getCounselorCommissionRateFilter('filterCounselorCommissionRate', false)" class="btn btn-success">Find</a>
 										</div>
 									</div>
 								</div>
@@ -371,7 +363,7 @@ function getCounselorSetCommitionPopup(){
 											<th class="text-white bold border-bottom-0 text-center" style="width: 210px;">Commission By School</th>
 											<th class="text-white bold border-bottom-0 text-center" style="width: 210px;">Commission By Partner<br/>(Through IS)</th>
 											<th class="text-white bold border-bottom-0 text-center" style="width: 210px;">Commission By Partner<br/>(Direct enrollment)</th>
-											<th class="text-white bold border-bottom-0 text-center">Enrollment Range</th>
+											<th class="text-white bold border-bottom-0 text-center">Enrollment Min/Max Range</th>
 											<th class="text-white bold border-bottom-0 text-center">Applicable From</th>
 											<th class="text-white bold border-bottom-0 text-center">Applicable Till</th>
 											<th class="text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Action</th>
