@@ -66,10 +66,7 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
       '<button class=" btn btn-warning  text-white  btn-full-mobile mb-1"  id="addLead">Add New Leads</button>';
   }
   //if(USER_ROLE == 'DIRECTOR' || USER_ROLE == 'LEAD_MANAGER' || USER_ROLE == 'LEAD_MANAGER_PAYMENT' || objRights.feedbackPermission==false || objRights.defaultUserId==USER_ID){
-  if (
-    objRights.discardPermission == true ||
-    objRights.defaultUserId == USER_ID
-  ) {
+  if(objRights.leadMovePermission){
     html +=
       '<button class=" btn btn-danger  text-white btn-full-mobile mb-1" id="moveNewLead">Move Lead</button> ';
   }

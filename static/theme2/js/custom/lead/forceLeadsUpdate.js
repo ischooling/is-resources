@@ -8,6 +8,37 @@ function getTantativDate(i){
 	}
 }
 
+function getAllCallbackForUpdateRemark(userId) {
+	var responseData={};
+	var data={};
+	data['userId']=userId;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTMLWithPayload('dashboard', 'get-all-callback-for-remark-update'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		async : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					if(tt=='theme1'){
+						showMessage(false, data['message']);
+					}else{
+						showMessageTheme2(0, data['message'],'',true);
+					}
+				}
+			} else {
+				responseData=data;
+			}
+			return false;
+		}
+	});
+	return responseData;
+}
+
 function getAllDemoForUpdateStatus(userId) {
 	var responseData={};
 	var data={};
@@ -561,5 +592,6 @@ function updateBulkDemosStatus(remarkMendatory,minRemarkCount) {
 				customLoader(false);
 			}
 		 }
-	 });
+	});
 }
+

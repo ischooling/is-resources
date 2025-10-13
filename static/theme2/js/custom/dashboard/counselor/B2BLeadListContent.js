@@ -7,7 +7,7 @@ function getB2BListHeaderContent(roleAndModule, objRights){
 			html+='<button class="btn btn-warning  text-white mb-2 mr-2" id="addLead">Add New Lead</button>';
 		}
 		//if(USER_ROLE=='DIRECTOR' || objRights.feedbackPermission==false){
-		if(roleAndModule.updated=='Y'){	
+		if(objRights.leadMovePermission){
 			html+='<button class="btn btn-danger  mb-2 mr-2" id="moveNewLead">Move Lead</button> ';
 		}
 		//}

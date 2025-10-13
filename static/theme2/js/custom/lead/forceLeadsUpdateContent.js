@@ -1,5 +1,6 @@
 $(document).ready(function(){
 	if($.inArray(USER_ROLE, ['STUDENT','TEACHER','PARENT','DIRECTOR']) == -1) {
+		
 		// for remark Demo update
 		var data3 = getAllDemosForUpdateRemark(USER_ID);
 		if(data3.status==1){
@@ -43,6 +44,23 @@ $(document).ready(function(){
 				}
 			}
 		}
+		// for remark callback update
+		var data4 = getAllCallbackForUpdateRemark(USER_ID);
+		if(data4.status==1){
+			var callbackDetails=data4.details.callbackDetails.callbackDetails;
+			if(callbackDetails!=undefined){
+				if(callbackDetails.length>0){
+					if($("#callbackDetailsModal").length>0){
+						$("#callbackDetailsModal").remove();
+					}
+					$('body').append(forceCallbackUpdateModalContent(data4));
+					setTimeout(() => {
+						$("#callbackDetailsModal").modal("show");
+					}, 200);
+				}
+			}
+		}
+		// end
 		
 	}
 	
@@ -72,7 +90,25 @@ $(document).ready(function(){
 		let val = $(this).val();
 		let id = $(this).attr("id");
 		let minlength = $(this).attr("minlength");
-		let counterId = "#leadRemarksCounter_" + id.split("_")[1];
+		let counterId = "#leadRemarksCounter_" + id.split("_")[2];
+
+		// update counter live
+		$(counterId).text(val.length + " / "+ minlength);
+
+		// visual feedback
+		if (val.length < minlength) {
+			$(this).addClass("is-invalid");
+			$(counterId).attr("class", "text-red");
+		} else {
+			$(this).removeClass("is-invalid");
+			$(counterId).attr("class", "text-success");
+		}
+	});
+	$(document).on("input", ".callback_remarks", function () {
+		let val = $(this).val();
+		let id = $(this).attr("id");
+		let minlength = $(this).attr("minlength");
+		let counterId = "#callbackRemarksCounter_" + id.split("_")[2];
 
 		// update counter live
 		$(counterId).text(val.length + " / "+ minlength);
@@ -90,7 +126,7 @@ $(document).ready(function(){
 		let val = $(this).val();
 		let id = $(this).attr("id");
 		let minlength = $(this).attr("minlength");
-		let counterId = "#demoRemarksCounter_" + id.split("_")[1];
+		let counterId = "#demoRemarksCounter_" + id.split("_")[2];
 
 		// update counter live
 		$(counterId).text(val.length + " / " + minlength);
@@ -130,9 +166,7 @@ $(document).ready(function(){
 	});
 });
 function closeModal(modalId) {
-	 setTimeout(function () {
 		$("#"+modalId).modal('hide')
-	 }, 250); 
 }
 
 function forceDemoUpdateModalContent(data){
@@ -384,7 +418,7 @@ function leadDetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCo
 				<td class="py-1" style="vertical-align: top;">
 					<div class="form-group">
 						<label class="mb-0">Remarks</label>
-						<input type="text"  name="remarks_${i}"   id="remarks_${i}"  class="form-control ${isRemarkMandatory ? 'lead_remarks' : ''}  remarks" 
+						<input type="text" name="lead_remarks_${i}"   id="lead_remarks_${i}"  class="form-control ${isRemarkMandatory ? 'lead_remarks' : ''}  remarks" 
                                    ${isRemarkMandatory ? `minlength="${minRemarkCount}" required` : ''} />
                             ${isRemarkMandatory ? `<small id="leadRemarksCounter_${i}" class="text-muted">0 / ${minRemarkCount}</small>` : ''}
 					</div>
@@ -529,12 +563,99 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 					<div class="form-group">
 						<label class="mb-0">Remarks</label>
 						<input type="text" 
-                                   name="remarks_${i}" 
-                                   id="remarks_${i}" 
+                                   name="demo_remarks_${i}" 
+                                   id="demo_remarks_${i}" 
                                    class="form-control ${isRemarkMandatory ? 'demo_remarks' : ''}  remarks" 
                                    ${isRemarkMandatory ? `minlength="${minRemarkCount}" required` : ''} />
                             ${isRemarkMandatory ? `<small id="demoRemarksCounter_${i}" class="text-muted">0 / ${minRemarkCount}</small>` : ''}
 					</div>
+				</td>
+			</tr>`;
+		});
+	}
+	return html;
+}
+
+
+// for callback remark work by alok
+
+function forceCallbackUpdateModalContent(data){
+	var newThemeflag = tt=="theme2"?true:false;
+	var html=
+	`<div class="modal fade" id="callbackDetailsModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header bg-primary">
+					<h5 class="modal-title text-white">Upcoming Callback (<span class="leadTotalCount">${data.details.callbackDetails.callbackCount}</span>)</h5>
+				</div>
+				<div class="modal-body">
+					<div style="width:100%; text-align: center;font-weight: bold;display:none;color:red;margin-bottom: 10px;" id="callbackErrorTxt"></div>
+					<div class="full" style="max-height: 450px;overflow-y: auto;">
+						<table class="table table-borderedtable table-bordered font-12" id="callbackDetailsTable">
+							<thead>
+								<tr>
+									<th style="width: 350px;">Callback Date | Time  (${data.details.userTimezone})</th>
+									<th>Parent's Details</th>
+								</tr>
+							</thead>
+							<tbody>`
+								+callbackDetailsModalBodyContent(data.details.callbackDetails.callbackDetails);
+							html+=
+							`</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer text-right">
+				
+					<a href="javascript:void(0)" class="btn btn-success btn-sm" onclick="closeModal('callbackDetailsModal')"> Ok </a>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
+
+function callbackDetailsModalBodyContent(data){
+	var html=``;
+	if(data.length>0){
+		$.each(data, function(i,v){
+			var standard=v.standardname!=''?v.standardname.replace('Grade ',''):'';
+			html+=
+			`<tr data-leadId=`+v.leadId+` data-userId=`+v.userId+`>
+				<td class="py-1" style="vertical-align: top;">
+					<span class="full">`+v.userFullName+`</span>
+					<span class="full">`+v.callbackDateTime+`</span>
+				</td>
+				<td class="py-1" style="vertical-align: top;">
+					<table class="full">
+						<tbody>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Lead No:</th>
+								<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">`+v.leadNo+`</td>
+							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Last Callback Status:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.leadStatus+`</td>
+							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Grade:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+standard+`</td>
+							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Name:</th>
+								<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">`+v.childName+`</td>
+							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Email:</th>
+								<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">`+v.email+`</td>
+							</tr>
+							<tr>
+								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+`</td>
+							</tr>
+							
+						</tbody>
+					</table>
 				</td>
 			</tr>`;
 		});
