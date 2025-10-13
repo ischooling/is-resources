@@ -599,6 +599,190 @@ function getWatiBroadcastTemplates(){
 	});
 }
 
+function getWatiLogsFilterRecords(){
+	if($("#watiLogsRecordsFilterModal").length<1){
+		$("body").append(getWatiLogsRecordsFilterModal());
+		$("#watiLogsRecordsFilterModal #endDateDiv").hide();
+		$("#watiLogsRecordsFilterModal #endDateDiv").hide();
+		$("#watiLogsRecordsFilterModal #searchDateType").on("change", function(){
+			if($(this).val() === "CUSTOM"){
+				$("#watiLogsRecordsFilterModal #endDate").val('');
+				$("#watiLogsRecordsFilterModal #endDate").val('');
+				$("#watiLogsRecordsFilterModal #endDateDiv").show();
+				$("#watiLogsRecordsFilterModal #endDateDiv").show();
+			}else{
+				$("#watiLogsRecordsFilterModal #endDate").val('');
+				$("#watiLogsRecordsFilterModal #endDate").val('');
+				$("#watiLogsRecordsFilterModal #endDateDiv").hide();
+				$("#watiLogsRecordsFilterModal #endDateDiv").hide();
+			}
+		});
+		$("#watiLogsRecordsFilterModal #startDate").datepicker({
+			format : 'dd-mm-yyyy',
+			autoclose: true,
+		});
+		$("#watiLogsRecordsFilterModal #endDate").datepicker({
+			format : 'dd-mm-yyyy',
+			autoclose: true,
+		});
+		$("#watiLogsRecords #counsolerToSearch").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#watiLogsRecords"
+		});
+	}
+	$("#watiLogsRecordsFilterModal").modal("show");
+	setTimeout(function(){ getWatiLogsCounsolerNames('watiLogsRecords');}, 500);	
+}
+
+function parseDateFromDDMMYYYY(dateStr) {
+  const [day, month, year] = dateStr.split("-");
+  return new Date(`${year}-${month}-${day}T00:00:00`);
+}
+
+function getWatiLogsCounsolerNames(formId){
+	$.ajax({
+		type : "GET",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForWithoutApiTypeAndUnique('wati/api','get-counsoler-names'),
+		cache : false,
+		timeout : 600000,
+		success : function(data) { 
+			if(data.status == '0' || data.status == '2' || data.status == '3') {
+					if(data.status == '3'){
+                      redirectLoginPage();
+                  	}else{
+						if(showMessage){
+							showMessageTheme2(0, data.message,'',true);
+						}
+                  }
+			} else {
+				$("#" + formId + " #counsolerToSearch").empty();
+				$("#" + formId + " #counsolerToSearch").append(
+				$('<option>', { value: '', text: 'Select Counsoler' })
+				);
+				if (data.list && Array.isArray(data.list)) {
+				data.list.forEach(c => {
+					$("#" + formId + " #counsolerToSearch").append(
+					$('<option>', { value: c.id, text: c.name })
+					);
+				});
+				$("#" + formId + "  #counsolerToSearch").val(USER_ID).trigger('change');
+				getWatiLogsRecords('watiLogsRecords', '1');
+				}
+			}
+			return false;
+		}
+	});
+}
+
+
+
+function getWatiLogsRecords(formId, pageNo){
+	let startTime = '';
+	let endTime = '';
+	const counsolers = $("#"+formId+" #counsolerToSearch").val();
+	const counsolerIds = counsolers ? counsolers.join(",") : "";
+	const dayType = $("#"+formId+" #searchDateType").val();
+	const startDateStr = $("#" + formId + " #startDate").val();
+  	const endDateStr = $("#" + formId + " #endDate").val();
+	if(dayType == "CUSTOM" && (startDateStr == '' || startDateStr == undefined || endDateStr == '' || endDateStr == undefined)){
+		showMessageTheme2(0, "Please select date range.");
+		return false;
+	}
+	if(dayType == "CUSTOM"){
+		startTime = parseDateFromDDMMYYYY(startDateStr);
+		endTime = parseDateFromDDMMYYYY(endDateStr);
+		endTime.setHours(23, 59, 59, 999);
+	}else if (dayType === "DAY") {
+		startTime = new Date(today);
+		startTime.setHours(0, 0, 0, 0);
+		endTime = new Date(today);
+		endTime.setHours(23, 59, 59, 999);
+	} else if (dayType === "WEEK") {
+		const dayOfWeek = today.getDay();
+		const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+		startTime = new Date(today);
+		startTime.setDate(today.getDate() + diffToMonday);
+		startTime.setHours(0, 0, 0, 0);
+
+		endTime = new Date(startTime);
+		endTime.setDate(startTime.getDate() + 6);
+		endTime.setHours(23, 59, 59, 999);
+	} else if (dayType === "MONTH") {
+		startTime = new Date(today.getFullYear(), today.getMonth(), 1);
+		startTime.setHours(0, 0, 0, 0);
+		endTime = new Date(today);
+		endTime.setHours(23, 59, 59, 999);
+	}
+	if($("#"+formId+" #pageSize").val() == null || $("#"+formId+" #pageSize").val() == undefined || $("#"+formId+" #pageSize").val() == ""){
+		showMessageTheme2(0, "Page Size required");
+		return false;
+	}
+	var payload = {};
+	payload['counsolerIds'] = counsolerIds;
+	payload['startDate'] = convertDatetimeWithFormat(new Date(startTime), USER_TIMEZONE, BASE_TIMEZONE, DATETIME_UTC_FORMATTER);
+	payload['endDate'] = convertDatetimeWithFormat(new Date(endTime), USER_TIMEZONE, BASE_TIMEZONE, DATETIME_UTC_FORMATTER);
+	payload['pageCount'] = $("#"+formId+" #pageSize").val();
+	payload['pageNo'] = parseInt(pageNo);
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForWithoutApiTypeAndUnique('wati/api','get-wati-Logs-for-student'),
+		data : JSON.stringify(payload),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {  //console.log('get data on log call : ' +  JSON.stringify(data)); //console.log('msg : ' +  JSON.stringify(data.message)); console.log('statusCode : ' +  JSON.stringify(data['statusCode']));
+			if(data.status == '0' ||  data.status == 'EXCEPTION' ||  data.statusCode == '2' || data.status == '3') {
+					if(data.status == '3'){
+                      redirectLoginPage();
+                  	}else{
+						if(showMessage){
+							showMessageTheme2(0, data.message,'',true);
+						}
+                  }
+			} 
+			else {
+				console.log(data)
+				$("#watilogsRecordsTable #watilogsRecordsTbody").html(getWatiRecordsList(data));
+				var htmlpage=getWatiRecordsListPagging(data);
+				$(".watiRecordsListPagging").html(htmlpage);
+				if($("#watiLogDetailsModal").length>0){
+					$("#watiLogDetailsModal").remove();
+				}
+				$("body").append(getWatiLogDetailsModal());
+			}
+			return false;
+		}
+	});
+}
+
+
+async function showWatiLogDetails(watiContactNo, templateName){
+	if(watiContactNo == null || watiContactNo == undefined || watiContactNo == ""){
+		showMessageTheme2(0, "Contact Number invalid");
+		return false;
+	}else if(templateName == null || templateName == undefined || templateName == ""){
+		showMessageTheme2(0, "Template Name invalid");
+		return false;
+	}else{
+		var payload = {};
+		payload['contactNo'] = watiContactNo;
+		payload['templateName'] = templateName;
+		var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true,'get-wati-templates-by-contact-no',payload,'api/v1/leads');
+		console.log("data",data)
+		if($("#viewWatiTemplateModal").length>0){
+			$("#viewWatiTemplateModal").remove();
+		}
+		$("body").append(getViewWatiTemplateModal(data.messageTemplates[0].body, data.messageTemplates[0].lastModified));
+		// var htmlpage=getWatiRecordsListPagging(data);
+		// $(".watiLogDetailsListPagging").html(htmlpage);
+		// $("#watiLogDetailsModal").modal("show");
+		$("#viewWatiTemplateModal").modal("show");
+	}
+}
+
+
 function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers, d_status) {
 	$("#successFailedWatiMessagesModal").modal("hide");
 	//console.log("status of buton==" + JSON.stringify(d_status));
@@ -819,3 +1003,5 @@ function closeModalAndFlushData(){
 	$("#remarksresetDelete1").remove();
 	$(".modal-backdrop").remove();
 }
+
+

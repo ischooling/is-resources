@@ -9,6 +9,7 @@ function paymentReport(){
 						+'<input type="text" id="studentName"  placeholder="Search by Student Name, Email, Country/ City or Student-Id" class="form-control border-0 text-primary" style="background: #f0f9ff;"/>'
 					+'</div>'
 					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates()">Wati Broadcast</button>'
+					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiLogsFilterRecords()">Logs</button>'
 					+'<div class="filter-btn ml-2 d-inline-flex align-items-center">'
 						+'<a href="javascript:void(0)" class="btn btn-outline-primary mr-1 showFilterForm" >'
 							+'<i class="fa fa-filter"></i>'
@@ -1738,5 +1739,212 @@ function deleteWarning(warningMessage, callbackFunction) {
 				+'</div>'
 			+'</div>'
 		+'</div>';
+	return html;
+}
+
+function getWatiLogsRecordsFilterModal(){
+	var html=
+		`<div class="modal fade" id="watiLogsRecordsFilterModal" role="dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header py-2 bg-primary text-white">
+						<h5 class="modal-title ">Logs</h5>
+						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+					</div>
+					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
+						<form class="form-row" id="watiLogsRecords" autocomplete="off">
+						<div class="col-md-12 col-lg-2">
+							<label>Counsoler Name</label>
+							<select name="counsolerToSearch" id="counsolerToSearch" class="form-control" multiple>'
+								<option value="">Select Counsoler</option>'
+							</select>
+						</div>
+							<div class="col-md-12 col-lg-2">
+								<label>Fillter</label>
+								<select class="form-control mr-1" id="searchDateType" name="searchDateType">
+									<option value="DAY">Today</option>
+									<option value="WEEK">Week</option>
+									<option value="MONTH">Month</option>
+									<option value="CUSTOM">Custom</option>
+								</select>
+							</div>
+							<div class="col-md-12 col-lg-2" id="endDateDiv">
+								<label>Start Date<sup class="text-danger">*</sup></label>
+								<input class="form-control" name="startDate" id="startDate" placeholder="Start Date"/>    
+							</div> 
+							<div class="col-md-12 col-lg-2" id="endDateDiv">
+								<label>End Date<sup class="text-danger">*</sup></label>
+								<input class="form-control" name="endDate" id="endDate" placeholder="End Date"/>    
+							</div>
+							<div class="col-md-12 col-lg-1">
+								<label>Page Size<sup class="text-danger">*</sup></label>
+								<input class="form-control" name="pageSize" id="pageSize" value="10" placeholder="Page Size" onkeydown="return M.digit(event);"/>    
+							</div>
+						</form>
+						<hr/>
+						<div id="watilogsRecordsWrapper">
+							<table class="table table-bordered font-12 border-radius-table" id="watilogsRecordsTable" style="width:100%">
+								<thead>
+									<tr>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="5% !important">Sr no.</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Counselor Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Student Name | Student ID</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Template Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Delivered Date Time</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10">Action</th>
+									</tr>
+								</thead>
+								<tbody id="watilogsRecordsTbody"></tbody>
+							</table>
+						</div>
+						<div class="watiRecordsListPagging"></div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-success" onclick="getWatiLogsRecords(\'watiLogsRecords\', \'1\');">Search</button>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function getWatiRecordsList(data){
+	var html=``;
+	if(data.details.length>0){
+		$.each(data.details, function(i, v){
+			html+=
+			`<tr>
+				<td>${((data.pageNo-1)*10)+(i+1)}</td>
+				<td>${v.counselorName}</td>
+				<td>${v.studentName} | <b>${v.rollNo}</b></td>
+				<td>${v.templateName}</td>
+				<td>${convertDatetimeWithFormat(v.deliveredDateTime, 'Asia/Kolkata', USER_TIMEZONE, 'MMM dd, yyyy hh:mm a')}</td>
+				<td>
+					<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="showWatiLogDetails(\'${v.watiContactNo}\', \'${v.templateName}\')">View</a>
+				</td>
+			</tr>`;
+		});
+	}else{
+		html+=
+			`<tr>
+				<td colspan="6" class="font-weight-bold text-center">No record found</td>
+			</tr>`;
+	}
+	return html;
+}
+
+
+function getWatiLogDetailsModal(){
+	var html=
+		`<div class="modal fade" id="watiLogDetailsModal" role="dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header py-2 bg-primary text-white">
+						<h5 class="modal-title ">Logs Details</h5>
+						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+					</div>
+					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
+						<div id="watiLogDetailsWrapper">
+							<table class="table table-bordered font-12 border-radius-table" id="watiLogDetailsTable" style="width:100%">
+								<thead>
+									<tr>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="5% !important">Sr no.</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Template Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Delivered Date Time</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10">Action</th>
+									</tr>
+								</thead>
+								<tbody id="watiLogDetailsTbody"></tbody>
+							</table>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function getViewWatiTemplateModal(msg, dateTime){
+	msg = msg.replace(/\n\n/g, "<p>") + "<p>";
+	var date = convertTZ(new Date(dateTime), USER_TIMEZONE);
+	var currentDateStr = date.toLocaleDateString('en-US', {weekday: 'long',year: 'numeric',month: 'long',day: 'numeric'});
+	var timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+	var html=
+		`<div id="viewWatiTemplateModal" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" style="display: none; z-index: 1050;" aria-hidden="true">
+			<div class="modal-dialog modal-xl" style="width: 80% !important;">
+				<div class="d-flex flex-wrap wati-wrapper">
+					<div class="modal-content border-0 watiLogsTableDiv">
+						<div class="modal-header py-1 bg-primary text-white">
+							<h5 class="modal-title font-weight-bold">Wati Logs</h5>
+							<button type="button" class="close text-white" data-dismiss="modal">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1">
+							<div class="flex-grow-1">
+								<div class="chat-body">`;
+									if(msg.length <1){
+										html+=`<div class="center"><h1>No Chat Yet.</h1><div/>`;
+									}else{
+										html+=
+										`<div class="date-separator">
+											<span>${currentDateStr}</span>
+										</div>
+										<div class="message sent">
+											<div class="message-bubble">
+												${msg}
+												<div class="message-time">${timeString}</div>
+											</div>
+										</div>`;
+									}
+								html+=`</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function getWatiRecordsListPagging(datalimit){
+	var noOfPages = datalimit.totalPages;
+	var currentPage = datalimit.pageNo;
+	var showPageLimit = 2;
+	var leftLimit=currentPage-showPageLimit;
+	var rightLimit=currentPage+showPageLimit+1;
+	var startPageLimit=5;
+	var html='';
+	if(noOfPages>1){
+		html+='<ul class="pagination">';
+			if(currentPage != 1){
+				html+='<li class="page-item">'
+				+'<a class="page-link" href="javascript:void(0);" onclick="getWatiLogsRecords(\'watiLogsRecords\', \''+(currentPage-1)+'\')">Previous</a>'
+			 	+'</li>';
+			 }
+			for (let p = 1; p <= noOfPages; p++) {
+				if(p < startPageLimit || p > (noOfPages -1) || (p>=leftLimit && p<rightLimit) ){
+					if(p > (noOfPages -1) || (p<leftLimit && p>rightLimit)){
+						html+='...';
+					}
+					html+='<li class="page-item">'
+					+'<a href="javascript:void(0);" onclick="getWatiLogsRecords(\'watiLogsRecords\', \''+(p)+'\');" class="page-link '+(p==currentPage?'page-link-active':'')+'">'+p+'</a>'
+					+'</li>';
+				}else{
+
+				}
+			}
+			if(currentPage<noOfPages){
+				var nextPage=parseInt(currentPage)+1;
+				html+='<li class="page-item">'
+				+'<a class="page-link" href="javascript:void(0);" onclick="getWatiLogsRecords(\'watiLogsRecords\', \''+nextPage+'\');">Next</a>'
+				+'</li>';
+			}
+		html+='</ul>';
+	}
 	return html;
 }

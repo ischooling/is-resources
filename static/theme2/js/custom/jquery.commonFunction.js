@@ -149,6 +149,10 @@ function getURLForWithoutUnique(apiType, suffixUrl) {
   return BASE_URL + API_VERSION_WITHOUT_UNIQUEID + apiType + "/" + suffixUrl;
 }
 
+function getURLForWithoutApiTypeAndUnique(apiType, suffixUrl) {
+  return BASE_URL + CONTEXT_PATH + apiType + "/" + suffixUrl;
+}
+
 function getURLForAdmissionCycle(apiType, suffixUrl, session) {
   return (
     BASE_URL +
