@@ -4935,6 +4935,7 @@ $(document).on("hidden.bs.modal", ".modal", function () {
     } else {
         // No modals open, remove modal-open class
         $("body").removeClass("modal-open");
+        $(".modal-backdrop").remove()
     }
 });
 
