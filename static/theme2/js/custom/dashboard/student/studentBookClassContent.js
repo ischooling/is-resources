@@ -54,13 +54,12 @@ async function renderBookClassContent(
         autoclose: true,
         format: "M dd, yyyy",
         startDate: startDate,
-      })
-      .on("change", async function () {
+      }).on("change", async function () {
         data = await getDetailsForStudentBookaClass(
           responseData.details.studentStandardId
         );
         var moduleId = $("#bookClassContent").attr("data-moduleId");
-        $("#classesThumbCotentListWrapper").html(classesThumbCotentList(data));
+        $("#classesThumbCotentListWrapper").html(classesThumbCotentListNew(data));
         $("#bookClassContentThumbList").html(
           classThumbItemListContent(data.subjectList, moduleId)
         );
@@ -389,6 +388,7 @@ function classesThumbsButtletPointContent(classPlanCount, registerType, classDat
      html+=`</div>`;
   return html;
 }
+
 
 function classThumbItemContent(subjectList, moduleId) {
   var html = `<div class="row">

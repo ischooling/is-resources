@@ -485,7 +485,7 @@ function dataStudentProgressPagging(datalimit, isCron, reportType, weeklyReportI
 			if(currentPage<noOfPages){
 				var nextPage=parseInt(currentPage)+1;
 				html+='<li class="page-item">'
-				+'<a class="page-link" href="javascript:void(0);" onclick="callOpenStudentWeeklyReportPopup(\''+weeklyReportId+'\',\''+USER_ID+'\', \''+UNIQUEUUID+'\',\'\',\'\',\'\',\''+reportType+'\',\''+(nextPage)+'\');">Next</a>'
+				+'<a class="page-link" href="javascript:void(0);" onclick="callOpenStudentWeeklyReportPopup(\''+weeklyReportId+'\',\''+USER_ID+'\', \''+UNIQUEUUID+'\',\'\',\'\',\''+isCron+'\',\''+reportType+'\',\''+(nextPage)+'\');">Next</a>'
 				+'</li>';
 			}
 		html+='</ul>';
