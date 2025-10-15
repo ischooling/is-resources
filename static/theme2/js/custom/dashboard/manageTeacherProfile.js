@@ -650,15 +650,14 @@ function checkLinkValid(e, src){
 									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
-							<div class="modal-body" style="height: 70vh; overflow-y: auto;">
-				`;
-
-				if (recordings.length > 0) {
+							<div class="modal-body" style="height: 70vh; overflow-y: auto;">`;
+							const filteredRecordings = recordings.filter(urlObj => !urlObj.url.toLowerCase().endsWith('.json'));
+				if (filteredRecordings.length > 0) {
 				modalContent += `<div class="">`;
 
-				const transcriptUrl = recordings[recordings.length - 1]?.url;
+				const transcriptUrl = filteredRecordings[filteredRecordings.length - 1]?.url;
 
-				recordings.forEach((urlObj, index) => {
+				filteredRecordings.forEach((urlObj, index) => {
 					let label = "Recording";
 					for (const key in titles) {
 					if (urlObj.url.includes(key)) {

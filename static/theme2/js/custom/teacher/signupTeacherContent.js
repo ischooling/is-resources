@@ -2061,14 +2061,14 @@ function populateRecordingModal(recordings, title) {
                         <h5 style="font-size: 18px; font-weight: bold; color: #FFF; margin-bottom: 0px;">Available Recordings | ${title}</h5>
                         <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
                     </div>
-                    <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">
-    `;
-    if (recordings.length > 0) {
+                    <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
+                    const filteredRecordings = recordings.filter(urlObj => !urlObj.url.toLowerCase().endsWith('.json'));
+    if (filteredRecordings.length > 0) {
         modalContent += `<div class="session-block pb-4">`;
         // const transcriptUrl = recordings[recordings.length - 1]?.url;
-        const transcriptUrl = recordings[recordings.length - 1].url;
+        const transcriptUrl = filteredRecordings[filteredRecordings.length - 1].url;
     
-        recordings.forEach((urlObj, index) => {
+        filteredRecordings.forEach((urlObj, index) => {
             let label = "Recording";
             for (const key in titles) {
                 if (urlObj.url.includes(key)) {
