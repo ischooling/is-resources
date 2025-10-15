@@ -654,7 +654,7 @@ function checkLinkValid(e, src){
 				`;
 
 				if (recordings.length > 0) {
-				modalContent += `<div class="session-block pb-4">`;
+				modalContent += `<div class="">`;
 
 				const transcriptUrl = recordings[recordings.length - 1]?.url;
 

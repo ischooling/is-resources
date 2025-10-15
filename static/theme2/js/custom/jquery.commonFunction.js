@@ -4642,6 +4642,16 @@ function changeDateFormat(date, dateFormat) {
       ", " +
       date.getFullYear()
     );
+  } else if ("mm/dd/yyyy" == dateFormat) {
+    return (
+      (date.getMonth() > 8
+        ? date.getMonth() + 1
+        : "0" + (date.getMonth() + 1)) +
+      "/" +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      "/" +
+      date.getFullYear()
+    );
   } else {
     return (
       date.getFullYear() +
@@ -6410,4 +6420,11 @@ function showToast(message) {
     setTimeout(() => {
     toast.style.visibility = "hidden";
     }, 2500);
+}
+
+function getOrdinalSuffix(number) {
+  if (number === 1) return "1st";
+  if (number === 2) return "2nd";
+  if (number === 3) return "3rd";
+  return number + "th";
 }

@@ -441,10 +441,10 @@ function videoInstructionModalContent() {
                         </li>
                     </ul>
                     <p style="color:var(--pc);margin:10px 0px;"><b>You are free to be as creative and innovative in your demo video as you like.</b></p>
-                    <h5><b>3. You will have two attempts to record your demo class, but only one final recording may be submitted. You can choose which recording to submit for approval.</b></p>
+                    <h5><b>3. You will have ${noOfAttempts} attempts to record your demo class, but only one final recording may be submitted. You can choose which recording to submit for approval.</b></p>
                 </div>
                 <div id="recordingSection"></div>
-                <h5 id="recordingWaitingText" style="font-weight: bold; color: #FFC008; margin-top: 12px; display: none;"></h5>
+                ${/*<h5 id="recordingWaitingText" style="font-weight: bold; color: #FFC008; margin-top: 12px; display: none;"></h5>*/''}
                 <div class="d-flex text-right" style="justify-content:space-between; align-items:center;">
                     <button id="recordYourDemoInsideBtn" class="btn btn-primary" style="border-radius: 6px;font-weight: bold;margin-top: 3%;">
                         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
@@ -771,24 +771,28 @@ function getTeacherProfessionalDetailsContent(stup){
             html+=`<div style="margin: 20px 0px;">
                 <h3 class="text-left mb-0">Record Your Demo</h3>
                 <div id="approvedDemoRecording"></div>`;
-                entityIds = stup.sessionEntityIdList;
-                if(entityIds.length == 2 && stup.firstMeetingStatus == 'second_joined'){
-                    html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
-                        <span>Select Recording(s)</span>
-                    <a>`;
-                }else if((entityIds.length == 1 && stup.firstMeetingStatus == 'first_joined') || (entityIds.length == 2 && stup.firstMeetingStatus == '')){
-                    html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
-                        <span>Record your Demo (2nd Attempt)</span>
-                    <a>`;
-                }else{
-                    html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo();">
-                        <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
-                        <span>Record your Demo</span>
-                    <a>`;
-                }
-            html+=`</div>`
+                // entityIds = stup.sessionEntityIdList;
+                // if(entityIds.length == 2 && stup.firstMeetingStatus == 'second_joined'){
+                //     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo('teacherSignupStage2');">
+                //         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
+                //         <span>Select Recording(s)</span>
+                //     <a>`;
+                // }else if((entityIds.length == 1 && stup.firstMeetingStatus == 'first_joined') || (entityIds.length == 2 && stup.firstMeetingStatus == '')){
+                //     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo('teacherSignupStage2');">
+                //         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
+                //         <span>Record your Demo (2nd Attempt)</span>
+                //     <a>`;
+                // }else{
+                //     html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo('teacherSignupStage2');">
+                //         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
+                //         <span>Record your Demo</span>
+                //     <a>`;
+                // }
+                html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo('teacherSignupStage2');">
+                    <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
+                    <span>Record or select your Demo</span>
+                </a>
+            </div>`;
         }
         html+=`<div class="form-row">
             <div class="form-holder">
@@ -2061,8 +2065,8 @@ function populateRecordingModal(recordings, title) {
     `;
     if (recordings.length > 0) {
         modalContent += `<div class="session-block pb-4">`;
-    
-        const transcriptUrl = recordings[recordings.length - 1]?.url;
+        // const transcriptUrl = recordings[recordings.length - 1]?.url;
+        const transcriptUrl = recordings[recordings.length - 1].url;
     
         recordings.forEach((urlObj, index) => {
             let label = "Recording";
