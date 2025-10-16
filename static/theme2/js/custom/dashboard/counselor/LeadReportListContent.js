@@ -215,6 +215,15 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
         autoclose: true,
     });
 
+	$("#dataReviewStartDate").datepicker({
+        format : 'dd-mm-yyyy',
+        autoclose: true,
+    });
+    $("#dataReviewEndDate").datepicker({
+        format : 'dd-mm-yyyy',
+        autoclose: true,
+    });
+
 
 	getSessionMasterList('reportLeadSearchForm', 'acadmicYear', true);
 	callLeadSourceList('reportLeadSearchForm','B2C','sourceSearch', true);
@@ -231,8 +240,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 
 	callDeviceCount("DAY","chart-pie-device",'','','Y');
 	callDeviceCount("DAY","chart-pie-device-demo",'','','N');
-	
-	
+
 
 	$("#searchtypeTotalLead").on("change", function(){
 		if($("#searchtypeTotalLead").val()=='CUSTOM'){
@@ -431,6 +439,31 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
         }
         callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
     });
+
+	callCounselorReview("CUSTOM","reviewCounselor",'','');
+    $("#searchReviewtype").on("change", function(){
+        if($("#searchReviewtype").val()=='CUSTOM'){
+            $(".hideReviewdate").css({"display":"block"});
+        }else{
+            $(".hideReviewdate").css({"display":"none"})
+            callCounselorReview($("#searchReviewtype").val(),'reviewCounselor','','');
+        }
+    });
+
+    $("#btnReviewWiseSubmit").on("click",function(){
+        var startDate = $("#dataReviewStartDate").val();
+        var endDate = $("#dataReviewEndDate").val();
+        var searchReviewtype = $("#searchReviewtype").val();
+        if($("#dataReviewStartDate").val()=='' && $("#dataReviewStartDate").val()==undefined){
+            showMessageTheme2(1, 'Please choose start date','',true);
+                return false;
+        }
+        if($("#dataReviewEndDate").val()=='' && $("#dataReviewEndDate").val()==undefined){
+            showMessageTheme2(1, 'Please choose end date','',true);
+                return false;
+        }
+        callCounselorReview(searchReviewtype, 'reviewCounselor', startDate, endDate);
+    });
 }
 
 async function dashboardHeaderContent(){
@@ -545,6 +578,11 @@ function getReportsTab(objRight){
 					<span>Lead Detail By Campaign</span>
 				</a>
 			</li>
+			<li class="nav-item">
+				<a role="tab" class="nav-link" id="tab-9" data-toggle="tab" href="#tab-content-9">
+					<span>Counselor Review</span>
+				</a>
+			</li>
 		</ul>
 		<div class="tab-content p-3 border">`;
 		if(objRight.permissioncolumn=='Y'){
@@ -592,6 +630,12 @@ function getReportsTab(objRight){
 					html+=getLeadCampaignPriceList(objRight);
 				html+=`</div>
 			</div>
+			<div class="tab-pane tabs-animation fade show " id="tab-content-9" role="tabpanel">
+				<div class="tabs-animation">`
+					html+=getCounselorReviewList(objRight);
+				html+=`</div>
+			</div>
+			
 		</div>
 		</form>	`;
 		return html;
@@ -935,50 +979,50 @@ return html;
 function getLeadEnrollmentList(objRights){
 	var html='';
 	html+=`<div class="row">
-    <div class="col-md-12 col-lg-12">
-        <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-            <select class="form-control form-control-sm mr-1" id="searchStudenttype" name="searchStudenttype" style="width:fit-content">
-                <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
-                <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
-                <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
-                <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
-            </select>
-            <div class="hidestudentdate">
-                <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
-                    <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataStudentStartDate" class="form-control form-control-sm" id="dataStudentStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" /> 
-                        <div class="mx-1">To</div> 
-                        <input type="text" name="dataStudentEndDate" class="form-control form-control-sm mr-1" id="dataStudentEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
-                    </div>
-                    <button class="btn btn-primary" id="btnStudentWiseSubmit">Submit</button>
-                </div>
-            </div>
-            <button class=" btn btn-info" onclick="openModal('enrollmentList')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>
-        </div>
-    </div>
-</div>
-<hr/>
-<div class="row">
-    <div class="col-lg-12 col-md-12">
-        <table class="table table-bordered table-striped" id="enrolled-student" style="font-size:12px" >
-           <thead>
-                <tr>
-                    <th class="">Sr no.</th>
-                    <th>Student Name<br/>Grade Name</th>
-                    <th>Email<br/>Country</th>
-                    <th>Parent Name</th>
-                    <th>Enrollment Type<br/>Learning Mode</th>
-                    <th>Enrollment Date</th>
-                    <th>Assign Name</th>
-                    <th>System Training Date</th>
-                    <th>System Training Status</th>
-                </tr>
-            </thead>
-            <tbody id="enrollLeads"></tbody>
-        </table>
-    </div>
-</div>`;
-return html;
+		<div class="col-md-12 col-lg-12">
+			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
+				<select class="form-control form-control-sm mr-1" id="searchStudenttype" name="searchStudenttype" style="width:fit-content">
+					<option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
+					<option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
+					<option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
+					<option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
+				</select>
+				<div class="hidestudentdate">
+					<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
+						<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+							<input type="text" name="dataStudentStartDate" class="form-control form-control-sm" id="dataStudentStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" /> 
+							<div class="mx-1">To</div> 
+							<input type="text" name="dataStudentEndDate" class="form-control form-control-sm mr-1" id="dataStudentEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+						</div>
+						<button class="btn btn-primary" id="btnStudentWiseSubmit">Submit</button>
+					</div>
+				</div>
+				<button class=" btn btn-info" onclick="openModal('enrollmentList')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>
+			</div>
+		</div>
+	</div>
+	<hr/>
+	<div class="row">
+		<div class="col-lg-12 col-md-12">
+			<table class="table table-bordered table-striped" id="enrolled-student" style="font-size:12px" >
+			<thead>
+					<tr>
+						<th class="">Sr no.</th>
+						<th>Student Name<br/>Grade Name</th>
+						<th>Email<br/>Country</th>
+						<th>Parent Name</th>
+						<th>Enrollment Type<br/>Learning Mode</th>
+						<th>Enrollment Date</th>
+						<th>Assign Name</th>
+						<th>System Training Date</th>
+						<th>System Training Status</th>
+					</tr>
+				</thead>
+				<tbody id="enrollLeads"></tbody>
+			</table>
+		</div>
+	</div>`;
+	return html;
 }
 
 function getLeadSchoolDemoList(objRights){
@@ -1192,6 +1236,55 @@ function openCampaignModal(campaignName){
 		</div>`;
 		return html;
 	}
+
+
+function getCounselorReviewList(objRights){
+	var html='';
+	html+=`<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
+				<select class="form-control form-control-sm mr-1" id="searchReviewtype" name="searchReviewtype" style="width:fit-content">
+					<option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
+					<option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
+					<option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
+					<option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
+				</select>
+				<div class="hideReviewdate">
+					<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
+						<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+							<input type="text" name="dataReviewStartDate" class="form-control form-control-sm" id="dataReviewStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" /> 
+							<div class="mx-1">To</div> 
+							<input type="text" name="dataReviewEndDate" class="form-control form-control-sm mr-1" id="dataReviewEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+						</div>
+						<button class="btn btn-primary" id="btnReviewWiseSubmit">Submit</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr/>
+	<div class="row">
+		<div class="col-lg-12 col-md-12">
+			<table class="table table-bordered table-striped" id="counselor-review" style="font-size:12px" >
+			<thead>
+					<tr class="text-center bg-primary text-white">
+						<th>Sr no.</th>
+						<th>Counselor Name</th>
+						<th>Response time</th>
+						<th>Lead to Demo</th>
+						<th>Demo to Enroll</th>
+						<th>Lead to Enroll</th>
+						<th>Joining Demo Time</th>
+						<th>Time to lead conversion</th>
+						<th>Overall Rating</th>
+					</tr>
+				</thead>
+				<tbody id="reviewCounselor"></tbody>
+			</table>
+		</div>
+	</div>`;
+	return html;
+}	
 
 
 

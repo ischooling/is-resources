@@ -59,6 +59,7 @@ img{max-width: 100%;}
 a:focus, button:focus{border:0 !important;outline: none !important}
 hr{width: 100%;display: inline-block;border:1px solid rgba(255, 255, 255, 0.5) !important;}
 .text-center{text-align:center !important}
+.text-right{text-align:right !important}
 .button{display: flex;align-items:center; padding: 5px 10px;border: none;border-radius: 4px;font-size: 14px;cursor:pointer}
 .text-white{color:#fff}
 .p-0{padding: 0 !important;}

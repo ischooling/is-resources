@@ -1456,3 +1456,73 @@ function callMasterCampainList(formId, value, elementId) {
     }
   });
 }
+
+
+function getCounselorReviewDetails(modeSearch, eventId, startDate, endDate) {
+	var responseData={};
+	var dataRequest={};
+	dataRequest['modeSearch']=modeSearch;
+	dataRequest['startDate']=startDate;
+	dataRequest['endDate']=endDate;
+	dataRequest['userId']=USER_ID;
+	dataRequest['schoolId']=SCHOOL_ID;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/lead-counselor-review',
+		data : JSON.stringify(dataRequest),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} 
+			}else{
+				responseData=data;
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return responseData;
+}
+
+
+function callCounselorReviewDetailedData(modeSearch, eventId, startDate, endDate) {
+	data={};
+	data['modeSearch']=modeSearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['userId']=USER_ID;
+	data['schoolId']=SCHOOL_ID;
+
+	$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : getURLForHTML('dashboard', 'lead-counselor-review'),
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			timeout : 600000,
+			success : function(data) {
+				console.log("counselor review", data);
+				if (data['status'] == '0' || data['status'] == '2') {
+					showMessage(true, data['message']);
+				} else {
+					if(data.modeSearch=='CUSTOM'){
+						$(".hideReviewdate").css({"display":"block"});
+						$("#dataReviewStartDate").val(data.startDate);
+						$("#dataReviewEndDate").val(data.endDate);
+						$("#searchReviewtype").val(data.modeSearch);
+					}
+					var html=getLeadCounselorReviewHtml(data.counselorReviewList);
+					$("#"+eventId).html(html);
+				}
+			}
+		});
+	}

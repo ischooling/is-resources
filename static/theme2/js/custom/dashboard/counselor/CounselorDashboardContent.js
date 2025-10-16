@@ -147,6 +147,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 			</div>`;
 		html+=getCounselorB2BContent1();
 	}else{
+		var dataReview = getCounselorReviewDetails("CUSTOM","reviewCounselor",'','');
 		var data=getCounselorDetails(userId);
 		localStorage.setItem('convertYear',data.counselor.convertYear);
 		localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
@@ -172,7 +173,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				</div>
 				<div class="mb-3 card border rounded-10">
 					<div class="card-body">`
-						+getStatsDetailsContent(data)
+						+getStatsDetailsContent(dataReview)
 					html+=`</div>
 				</div>
 				<div class="row">`
@@ -254,56 +255,106 @@ function getCounselorEnrollmentRangeContent(commissionRate){
 }
 
 function getStatsDetailsContent(data){
+	console.log(data.counselorReviewList);
+	var reviewList =data.counselorReviewList;
+	var responseTime=10;
+	var leadToDemo=10;
+	var demoToEnroll=10;
+	var leadToEnroll=10;
+	var joiningDemoTime=10;
+	var timeToLeadConversion=10;
+	var overallRating=0;
+	var tfinalScore=0;
+	var totalLeadRating=0;
+	if(reviewList.length>0){
+		$.each(reviewList, function(i,v){
+			var leadData1 = v.leadData;
+			if(leadData1.length > 0){
+				$.each(leadData1, function(j, ld){
+					if(ld.dataType=='RESPONSE-TYPE'){
+						responseTime=ld.finalScore;
+					}
+					if(ld.dataType=='LEAD-DEMO'){
+						leadToDemo=ld.finalScore;
+					}
+					if(ld.dataType=='DEMO-ENROLL'){
+						demoToEnroll=ld.finalScore;
+					}
+					if(ld.dataType=='LEAD-ENROLL'){
+						leadToEnroll=ld.finalScore;
+					} 
+					if(ld.dataType=='MEETING-JOIN'){
+						joiningDemoTime=ld.finalScore;
+					} if(ld.dataType=='ENROLL-TIME'){
+						timeToLeadConversion=ld.finalScore;
+					}
+					tfinalScore+=parseInt(ld.finalScore);
+					if(ld.finalScore>0){
+						totalLeadRating+=1;
+					}
+				});
+				overallRating	=tfinalScore/totalLeadRating;
+			}
+		});
+	}
+	var bgColorStype='bg-secondary text-white';
+	if(overallRating>=8){
+		bgColorStype='bg-success text-white';
+	}else if(overallRating>=5 && overallRating<8){
+		bgColorStype='bg-warning';
+	}else{
+		bgColorStype='bg-danger text-white';
+	}
     var html=`
         <div class="d-flex flex-wrap justify-content-center align-items-center">
-            <div class="card shadow-sm m-1 p-2 bg-light border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-clock text-primary mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold text-dark">Response Time</p>
+                    <i class="fas fa-clock mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Response Time</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold text-dark">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${responseTime} /10</h6>
             </div>
-            <div class="card shadow-sm m-1 p-2 bg-info text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
                     <i class="fas fa-bullseye mr-1" style="font-size:14px;"></i>
                     <p class="mb-0 small font-weight-bold">Lead to Demo</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${leadToDemo} /10</h6>
             </div>
-            <div class="card shadow-sm m-1 p-2 bg-warning border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
                     <i class="fas fa-user-check mr-1" style="font-size:14px;"></i>
                     <p class="mb-0 small font-weight-bold">Demo to Enroll</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${demoToEnroll} /10</h6>
             </div>
-            <div class="card shadow-sm m-1 p-2 bg-success text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
                     <i class="fas fa-user-plus mr-1" style="font-size:14px;"></i>
                     <p class="mb-0 small font-weight-bold">Lead to Enroll</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${leadToEnroll} /10</h6>
             </div>
-            <div class="card shadow-sm m-1 p-2 bg-light border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-calendar-alt text-danger mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold text-dark">Joining Demo Time</p>
+                    <i class="fas fa-calendar-alt  mr-1" style="font-size:14px;"></i>
+                    <p class="mb-0 small font-weight-bold">Joining Demo Time</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold text-dark">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${joiningDemoTime} /10</h6>
             </div>
             <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
                     <i class="fas fa-hourglass-half mr-1" style="font-size:14px;"></i>
                     <p class="mb-0 small font-weight-bold">Time to Lead Conversion</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${timeToLeadConversion} /10</h6>
             </div>
-            <div class="card shadow-sm m-1 p-2 bg-secondary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+            <div class="card shadow-sm m-1 p-2 ${bgColorStype} border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
                 <div class="d-flex justify-content-center align-items-center">
                     <i class="fas fa-star mr-1" style="font-size:14px;"></i>
                     <p class="mb-0 small font-weight-bold">Overall Rating</p>
                 </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">10</h6>
+                <h6 class="mb-0 mt-1 text-center font-weight-bold">${overallRating.toFixed(1)} /10</h6>
             </div>
         </div>`;
     return html;

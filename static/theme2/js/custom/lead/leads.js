@@ -11345,33 +11345,32 @@ function callDeviceCount(modeSearch, chartId, startDate, endDate, leadDemoStatus
 	data['leadDemoStatus']=leadDemoStatus;
 	data['userId']=USER_ID;
 	data['schoolId']=SCHOOL_ID;
-	
 
-		$.ajax({
-				type : "POST",
-				contentType : APPLICATION_JSON_VALUE,
-				url : getURLForHTML('dashboard', 'lead-device-total'),
-				data : JSON.stringify(data),
-				dataType : 'json',
-				cache : false,
-				timeout : 600000,
-				success : function(data) {
-					if (data['status'] == '0' || data['status'] == '2') {
-						showMessage(true, data['message']);
-					} else {
-						if(leadDemoStatus=='Y'){
-							getLeadsDeviceCountChart(data, chartId);
-							getLeadsBrowserCountChart(data,'');
-							getLeadsDeviceTypeCountChart(data,'');
-						}else{
-							getLeadsDeviceCountChart(data, chartId);
-							getLeadsBrowserCountChart(data, '-demo');
-							getLeadsDeviceTypeCountChart(data, '-demo');
-						}
+	$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : getURLForHTML('dashboard', 'lead-device-total'),
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			timeout : 600000,
+			success : function(data) {
+				if (data['status'] == '0' || data['status'] == '2') {
+					showMessage(true, data['message']);
+				} else {
+					if(leadDemoStatus=='Y'){
+						getLeadsDeviceCountChart(data, chartId);
+						getLeadsBrowserCountChart(data,'');
+						getLeadsDeviceTypeCountChart(data,'');
+					}else{
+						getLeadsDeviceCountChart(data, chartId);
+						getLeadsBrowserCountChart(data, '-demo');
+						getLeadsDeviceTypeCountChart(data, '-demo');
 					}
 				}
-			});
-	   }
+			}
+		});
+	}
 	   
 	
 	
@@ -12204,3 +12203,86 @@ function replaceContractPlaceholders(editor, pasteData) {
 	  editor.value = content;
 	}
 }
+
+function callCounselorReview(modeSearch, eventId, startDate, endDate) {
+	data={};
+	data['modeSearch']=modeSearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['userId']=USER_ID;
+	data['schoolId']=SCHOOL_ID;
+
+	$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : getURLForHTML('dashboard', 'lead-counselor-review'),
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			timeout : 600000,
+			success : function(data) {
+				console.log("counselor review", data);
+				if (data['status'] == '0' || data['status'] == '2') {
+					showMessage(true, data['message']);
+				} else {
+					if(data.modeSearch=='CUSTOM'){
+						$(".hideReviewdate").css({"display":"block"});
+						$("#dataReviewStartDate").val(data.startDate);
+						$("#dataReviewEndDate").val(data.endDate);
+						$("#searchReviewtype").val(data.modeSearch);
+					}
+					var html=getLeadCounselorReviewHtml(data.counselorReviewList);
+					$("#"+eventId).html(html);
+				}
+			}
+		});
+	}
+
+	function getLeadCounselorReviewHtml(counselorReviewList){
+		var html = '<tr>';
+		if(counselorReviewList.length > 0){
+			var ind=1;
+			var finalScore=0;	
+			var totalFinalScore=0;
+			var totalLeadRating=0;
+			$.each(counselorReviewList, function(i,v){
+				html+=`<tr>`;
+				html+=`<td class="text-center">${ind}</td>`;
+				html+=`<td class="text-left">${v.assignName}</td>`;
+
+				var leadData1 = v.leadData;
+				if(leadData1.length > 0){
+					$.each(leadData1, function(j, ld){
+						if(ld.dataType=='RESPONSE-TYPE' || ld.dataType=='LEAD-DEMO' || ld.dataType=='DEMO-ENROLL'
+							|| ld.dataType=='LEAD-ENROLL' || ld.dataType=='MEETING-JOIN' || ld.dataType=='ENROLL-TIME'){
+							html+=`<td class="text-center">${ld.finalScore} /10</td>`;
+						}else{
+							html+=`<td class="text-center">0</td>`;
+						}
+						
+						finalScore+=parseInt(ld.finalScore);
+						if(ld.finalScore>0){
+							totalLeadRating+=1;
+						}
+					});
+					totalFinalScore	=finalScore/totalLeadRating;
+					html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
+					ind++;
+					totalFinalScore=0;
+					finalScore=0;
+					totalLeadRating=0;
+				}else{
+					totalFinalScore=0;
+					finalScore=0;
+					totalLeadRating=0
+				}
+				html+=`</tr>`;
+				
+			});
+			
+		}else{
+			html+=`<tr><td class="text-center" colspan="8">No record found</td></tr>`;
+		}
+		return html;
+		
+	}
