@@ -432,6 +432,11 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	$('#dashboardContentInHTML').html(renderPendingVerificationTeachedProfileListDashboard('Pending Verification', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
   }else if(pageNo == "teacher-profile-pending-bank-details"){
 	$('#dashboardContentInHTML').html(renderBankDetailsTeacherProfleListDashboard('Pending Bank Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+  }else if (pageNo === "assign-teacher-interview") {
+	renderTeacherInterviewAssignDashboard('Assign Teacher Interview', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
+  }else if(pageNo == "teacher-screening-profiles"){
+	$('#dashboardContentInHTML').html(renderTeacherPreScreeningProfileContent("Teacher Applications", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+	teacherScreeningProfileOnloadFunction();
   }
 //   else if(pageNo=='lead-report-list'){
 // 	$('#dashboardContentInHTML').html(renderSchoolReportDashboard('School Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));

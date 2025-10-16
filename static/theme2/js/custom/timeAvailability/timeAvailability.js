@@ -3796,10 +3796,16 @@ function scheduleMeetingForEvent(formId){
 
 	$("#meetingScheduleform").hide();
 	$("#thankyouPageSkeleton").show();
+	let url = '';
+	if($("#" + formId + " #meetingSlotType").val() == 'Teacher Interview'){
+		url = 'create-teacher-interview-assign-event';
+	}else{
+		url = 'meetingslots-new-submit-for-event';
+	}
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url: getURLFor('timeavailability','meetingslots-new-submit-for-event'),
+		url: getURLFor('timeavailability',url),
 		data : JSON.stringify(getRequestForSubmitMeetingForEvent(formId)),
 		dataType : 'json',
 		success : function(data) {
