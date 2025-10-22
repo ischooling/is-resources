@@ -2750,7 +2750,7 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 
 	}
 	if (callFrom == 'student-profile' && $("#preferedTimeSavedByStudentCount").val() >= 1) {
-		showMessageTheme2(0, "You have used your free reschedule for training. Please contact us at admin.support@internationalschooling.org or WhatsApp +65 82553106 if you need to further reschedule your system training", '', true);
+		showMessageTheme2(0, "You have used your free reschedule for training. Please contact us at admin.support@internationalschooling.org or WhatsApp +1 5854990662 if you need to further reschedule your system training", '', true);
 		return false;
 	}
 	var timeTeacherUserId = USER_ID;
