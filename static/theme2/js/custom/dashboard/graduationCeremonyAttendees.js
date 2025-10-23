@@ -10,7 +10,7 @@ function loadGraduationCeremonyAttendees(){
                 const studentInfo = `
                     <strong>${attendee.fullName}</strong><br>
                     <small>${attendee.email}</small><br>
-                    <small>Age: ${attendee.age}</small><br>
+                    <small>Age: ${!attendee.age ? "N/A" : attendee.age}</small><br>
                     <small>Phone No.: ${attendee.phoneNo}</small><br>
                     <small>Country: ${attendee.country}</small>
                 `;
@@ -49,11 +49,16 @@ function loadGraduationCeremonyAttendees(){
 }
 
 function sendGraduationCeremonyMailToEligibleStudents(){
+    var request = {};
+    request["eventName"] = "Graduation Ceremony 2025, Columbia";
+    request["location"] = "Bogotá, Colombia";
+    request["dateAndTime"] = "December 2025 (Tentative)";
     $.ajax({
         type: "POST",
         url: `${APP_BASE_URL}${SCHOOL_UUID}/send-graduation-ceremony-mail`,
         contentType: APPLICATION_JSON_VALUE,
         dataType: 'json',
+        data: JSON.stringify(request),
         success: function (response) {
             if(response.status == "SUCCESS"){
                 showMessageTheme2(1, response.message);
