@@ -257,7 +257,6 @@ function getMeetingType() {
 }
 
 function renderMeetingManagementContent() {
-  debugger;
   $("#meetingManagementMainDiv").append(getMeetingManagementContent());
   fetchUserIdToShowAllMeeting();
   fetchUserIdToShowRecurringMeeting();
@@ -678,7 +677,7 @@ function resetFilter() {
 }
 
 function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPageRecurring) {
-  debugger;
+  
   $("<style>")
     .prop("type", "text/css")
     .html(`
@@ -762,7 +761,6 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
           </td>
         </tr>`;
     }
-
     meetingsHtml += `
       <tr id="meetingRow${meeting.meetingId}" class="${disableButtonsOnEndTime ? '' : 'hover-blue'} trRecur" style="font-weight: bold; border-bottom: 1px solid #eee;">
         ${title == "Recurring Meetings" ? `
@@ -789,7 +787,7 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
             <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')" class="btn btn-sm btnRecur tdBtns text-danger"><i class="fa fa-trash fa-2x"></i></button>
             <button onclick="copyJoinUrl('${meeting.meetingId}')" class="btn btn-sm btnRecur tdBtns text-dark" title="Copy invite"><i class="fa fa-clone fa-2x"></i></button>
             ${meeting.recordingsCount > 0 ?
-            `<button onclick="showRecurringMeetingRecordings('${meeting.meetingId}','${meeting.title}','${meeting.hostName}')" class="btn btn-sm btn-outline-primary " title="Play Recording"><i class="fa fa-video"></i></button>`
+            `<button onclick="showRecurringMeetingRecordings('${meeting.meetingId}','${meetingTitle}','${meeting.hostName}')" class="btn btn-sm btn-outline-primary " title="Play Recording"><i class="fa fa-video"></i></button>`
             :
             ``
             }
@@ -832,7 +830,7 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
               (isUserAllowedRecordings && meeting.recordingsCount > 0) || 
               (!isUserAllowedRecordings && meeting.recordingsCount > 0 && new Date(meetingStartDate).setHours(0,0,0,0) >= new Date(pastDateLimit).setHours(0,0,0,0)) 
               ?
-              `<button onclick="openRecordingModal('${meeting.meetingId}', 'GENERAL_MEETINGS','${meeting.startDateTime?.split(" ")[0]}', '${meeting.title}', '${meeting.timeRange.split('-')[0]}', '${meeting.hostName}')" 
+              `<button onclick="openRecordingModal('${meeting.meetingId}', 'GENERAL_MEETINGS','${meeting.startDateTime?.split(" ")[0]}', '${meetingTitle}', '${meeting.timeRange.split('-')[0]}', '${meeting.hostName}')" 
                     style="border: 0; background: transparent; color: #027FFF !important; padding: 5px; box-shadow: 0px 0px transparent;" 
                     class="btn btn-sm" title="Play Recording">
                 <i class="fa fa-video-camera" style="font-size: 20px;"></i>
