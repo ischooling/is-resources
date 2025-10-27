@@ -315,11 +315,13 @@ function getRequestForFollowupSaveFromLeadListForBulk(data){
 			if(leadStatus=='Neutral'){
 				leadCallFollowupDTO['callBadge'] ='neutral';
 			}
-			if(leadStatus=='Assigned Working' 
-				||leadStatus=='Basic Details not Filled | Cold'){
+			if(leadStatus=='Assigned Working'){
 				leadCallFollowupDTO['callBadge'] ='gray';
 			}
-				if(leadStatus=='Converted'
+			if(leadStatus=='Basic Details not Filled | Cold'){
+				leadCallFollowupDTO['callBadge'] ='darkgreen';
+			}
+			if(leadStatus=='Converted'
 					||leadStatus=='Converted & On Boarding | Hot'){
 				leadCallFollowupDTO['callBadge'] ='green';
 				}

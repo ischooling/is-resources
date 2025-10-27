@@ -410,6 +410,8 @@ leadModifyDTO['leadType']=leadType;
 	leadStudentDetailDTO['city'] = $("#"+formId+" #cityId option:selected").val();
 	leadStudentDetailDTO['address'] = escapeCharacters($("#"+formId+" #leadAdd").val());
 	leadStudentDetailDTO['pincode'] = $("#"+formId+" #leadPin").val();
+	leadStudentDetailDTO['relationType'] = $("#"+formId+" #relationType").val();
+	
 	leadModifyDTO['leadAddName'] = $("#"+formId+" #leadAdder").val();
 	leadModifyDTO['controlType'] = $("#"+formId+" #countrolType").val();
 	leadModifyDTO['assignTo'] = $("#"+formId+" #leadAssignTo").val();
@@ -458,7 +460,8 @@ leadModifyDTO['leadType']=leadType;
 	leadStudentDetailDTO['city'] = $("#"+formId+" #cityId option:selected").val();
 	leadStudentDetailDTO['address'] = escapeCharacters($("#"+formId+" #leadAdd").val());
 	leadStudentDetailDTO['pincode'] = $("#"+formId+" #leadPin").val();
-	
+	leadStudentDetailDTO['relationType'] = $("#"+formId+" #relationType").val();
+
 	leadModifyDTO['parentleadId'] = $("#"+formId+" #parentleadId").val();
 	leadModifyDTO['leadId'] = $("#"+formId+" #leadId").val();
 	leadModifyDTO['leadNo'] =$("#"+formId+" #leadNo").val();
@@ -957,9 +960,11 @@ function getRequestForLeadFollowupSave(formId){
 	if($("#"+formId+" #leadStatus").val()=='Neutral'){
 		leadCallFollowupDTO['callBadge'] ='neutral';
 	}
-	if($("#"+formId+" #leadStatus").val()=='Assigned Working' 
-	|| $("#"+formId+" #leadStatus").val()=='Basic Details not Filled | Cold'){
+	if($("#"+formId+" #leadStatus").val()=='Assigned Working' ){
 		leadCallFollowupDTO['callBadge'] ='gray';
+	}
+	if($("#"+formId+" #leadStatus").val()=='Basic Details not Filled | Cold'){
+		leadCallFollowupDTO['callBadge'] ='darkgreen';
 	}
 	 if($("#"+formId+" #leadStatus").val()=='Converted'||
 	 $("#"+formId+" #leadStatus").val()=='Converted & On Boarding | Hot'){
@@ -4454,7 +4459,7 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 							if(leadMergeList.length>0){
 								$("#"+formId+" #mergeLeads").val(leadId);
 								$("#mergeleadlist").html('');
-								var htmld= getLeadMergeDataHtml(leadMergeList, leadDemo.leadModifyDTO.leadId);
+								var htmld= getLeadMergeDataHtml(leadMergeList, leadDemo.leadModifyDTO.leadId, leadType);
 								$("#mergeleadlist").html(htmld);
 								clickRedioForMergeLead(formId, modalId, leadType);
 							}
@@ -4490,10 +4495,14 @@ function getRequestForMergeLeadIds(formId, leadId, userId, leadType) {
 	return leadAddFormRequestDTO;
 }
 
-function getLeadMergeDataHtml(mergeLeadList, lid){
+function getLeadMergeDataHtml(mergeLeadList, lid, leadType){
 	var htmlLead="";
 	htmlLead=htmlLead+'<table class="table table-bordered table-striped" style="font-size:11px;">';
-	htmlLead=htmlLead+'<thead><tr><th>S. No.</th><th>Lead No<br/>Lead Source</th><th>Lead Status<br/>Lead Assign</th><th>Child Name<br/>Grade<br/>City | Country</th><th>Contact Info</th></tr></thead>';
+	if(leadType=='B2B'){
+		htmlLead=htmlLead+'<thead><tr><th>S. No.</th><th>Lead No<br/>Lead Source</th><th>Lead Status<br/>Lead Assign</th><th>Name<br/>Organization Name<br/>City | Country</th><th>Contact Info</th></tr></thead>';
+	}else{
+		htmlLead=htmlLead+'<thead><tr><th>S. No.</th><th>Lead No<br/>Lead Source</th><th>Lead Status<br/>Lead Assign</th><th>Child Name<br/>Grade<br/>City | Country</th><th>Contact Info</th></tr></thead>';
+	}
 	htmlLead=htmlLead+'<tbody>';
 	if(mergeLeadList!=null && mergeLeadList.length>0){
 		var mindex=1;
@@ -4505,7 +4514,13 @@ function getLeadMergeDataHtml(mergeLeadList, lid){
 			htmlLead=htmlLead+'</td>';
 			htmlLead=htmlLead+'<td>'+leads.leadModifyDTO.leadNo+'<br/>'+leads.leadModifyDTO.leadSourceName+'</td>';
 			htmlLead=htmlLead+'<td>'+leads.leadModifyDTO.leadStatus+'<br/>'+leads.leadModifyDTO.assignName+'</td>';
-			htmlLead=htmlLead+'<td>'+leads.leadStudentDetailDTO.stdFname+' '+leads.leadStudentDetailDTO.stdMname+' '+leads.leadStudentDetailDTO.stdLname+'<br/>'+(leads.leadStudentDetailDTO.standardName!=''?leads.leadStudentDetailDTO.standardName:'N/A');
+			htmlLead=htmlLead+'<td>'+leads.leadStudentDetailDTO.stdFname+' '+leads.leadStudentDetailDTO.stdMname+' '+leads.leadStudentDetailDTO.stdLname+'';
+			if(leadType=='B2B'){
+				htmlLead=htmlLead+'<br/>'+(leads.leadStudentDetailDTO.relationType!=''?leads.leadStudentDetailDTO.relationType:'N/A');
+			}else{
+				htmlLead=htmlLead+'<br/>'+(leads.leadStudentDetailDTO.standardName!=''?leads.leadStudentDetailDTO.standardName:'N/A');
+			}
+
 			htmlLead=htmlLead+'<br/>'+(leads.leadStudentDetailDTO.cityName!=''?leads.leadStudentDetailDTO.cityName:'N/A')+' | '+leads.leadStudentDetailDTO.countryName+'</td>';
 			htmlLead=htmlLead+'<td>'+leads.leadStudentDetailDTO.isdCode+' '+leads.leadStudentDetailDTO.phoneNo;
 			if(leads.leadStudentDetailDTO.phoneNoAlter!=''){
@@ -5491,9 +5506,11 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 	   if(leadStatus=='Neutral'){
 		   leadCallFollowupDTO['callBadge'] ='neutral';
 	   }
-	   if(leadStatus=='Assigned Working' 
-	   	||leadStatus=='Basic Details not Filled | Cold'){
+	   if(leadStatus=='Assigned Working'){
 		   leadCallFollowupDTO['callBadge'] ='gray';
+	   }
+	   if(leadStatus=='Basic Details not Filled | Cold'){
+		   leadCallFollowupDTO['callBadge'] ='darkgreen';
 	   }
 		if(leadStatus=='Converted'
 			||leadStatus=='Converted & On Boarding | Hot'){
@@ -12399,27 +12416,6 @@ function callCounselorReview(modeSearch, eventId, startDate, endDate) {
 	data['schoolId']=SCHOOL_ID;
 
 	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForHTML('dashboard', 'lead-counselor-review'),
-		data : JSON.stringify(data),
-		dataType : 'json',
-		cache : false,
-		timeout : 600000,
-		success : function(data) {
-			console.log("counselor review", data);
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(true, data['message']);
-			} else {
-				if(data.modeSearch=='CUSTOM'){
-					$(".hideReviewdate").css({"display":"block"});
-					$("#dataReviewStartDate").val(data.startDate);
-					$("#dataReviewEndDate").val(data.endDate);
-					$("#searchReviewtype").val(data.modeSearch);
-				}
-				var html=getLeadCounselorReviewHtml(data.counselorReviewList);
-				$("#"+eventId).html(html);
-			}
 		}
 	});
 }
@@ -12618,4 +12614,103 @@ async function callLeadAssignUserListBySchoolId(formId, value, elementId, keySta
         console.error("Error occurred:", err);
         throw err;
     }
+}
+
+function callCounselorReview(modeSearch, eventId, startDate, endDate) {
+	data={};
+	data['modeSearch']=modeSearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['userId']=USER_ID;
+	data['schoolId']=SCHOOL_ID;
+
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard', 'lead-counselor-review'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			console.log("counselor review", data);
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				if(data.modeSearch=='CUSTOM'){
+					$(".hideReviewdate").css({"display":"block"});
+					$("#dataReviewStartDate").val(data.startDate);
+					$("#dataReviewEndDate").val(data.endDate);
+					$("#searchReviewtype").val(data.modeSearch);
+				}
+				var html=getLeadCounselorReviewHtml(data.counselorReviewList);
+				$("#"+eventId).html(html);
+			}
+		}
+	});
+}
+
+function getLeadCounselorReviewHtml(counselorReviewList){
+	var html = '<tr>';
+	if(counselorReviewList.length > 0){
+		var ind=1;
+		var finalScore=0;	
+		var totalFinalScore=0;
+		var totalLeadRating=0;
+		$.each(counselorReviewList, function(i,v){
+			html+=`<tr>`;
+			html+=`<td class="text-center">${ind}</td>`;
+			html+=`<td class="text-left">${v.assignName}</td>`;
+
+			var leadData1 = v.leadData;
+
+			if(leadData1.length > 0){
+				$.each(leadData1, function(j, ld){
+					var headTitleName='';
+					if(ld.dataType=='RESPONSE-TYPE'){
+						headTitleName='Response Time';
+					}else if(ld.dataType=='LEAD-DEMO'){
+						headTitleName='Lead Demo';
+					}else if(ld.dataType=='DEMO-ENROLL'){
+						headTitleName='Demo to Enroll';
+					}else if(ld.dataType=='LEAD-ENROLL'){	
+						headTitleName='Lead to Enroll';
+					}else if(ld.dataType=='MEETING-JOIN'){
+						headTitleName='Meeting Join';
+					}else if(ld.dataType=='ENROLL-TIME'){
+						headTitleName='Enroll Time';
+					}
+
+					if(ld.dataType=='RESPONSE-TYPE' || ld.dataType=='LEAD-DEMO' || ld.dataType=='DEMO-ENROLL'
+						|| ld.dataType=='LEAD-ENROLL' || ld.dataType=='MEETING-JOIN' || ld.dataType=='ENROLL-TIME'){
+						html+=`<td class="text-center"><a href="javascript:void(0);"  onclick="callCounselorDetailReview('CUSTOM','${v.assignTo}', 'leadCounselorDetailReviewtbl', '', '', '${headTitleName}', '${ld.dataType}','0','10');">${ld.finalScore} /10</a></td>`;
+					}else{
+						html+=`<td class="text-center">0</td>`;
+					}
+					
+					finalScore+=parseInt(ld.finalScore);
+					if(ld.finalScore>0){
+						totalLeadRating+=1;
+					}
+				});
+				totalFinalScore	=finalScore/totalLeadRating;//parseInt(v.totalRating);
+				html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
+				ind++;
+				totalFinalScore=0;
+				finalScore=0;
+				totalLeadRating=0;
+			}else{
+				totalFinalScore=0;
+				finalScore=0;
+				totalLeadRating=0
+			}
+			html+=`</tr>`;
+			
+		});
+		
+	}else{
+		html+=`<tr><td class="text-center" colspan="8">No record found</td></tr>`;
+	}
+	return html;
+	
 }

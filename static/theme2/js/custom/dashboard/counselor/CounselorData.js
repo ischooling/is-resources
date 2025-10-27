@@ -1492,36 +1492,159 @@ function getCounselorReviewDetails(modeSearch, eventId, startDate, endDate) {
 }
 
 
-function callCounselorReviewDetailedData(modeSearch, eventId, startDate, endDate) {
+function callCounselorDetailReview(modeSearch, counselorId, eventId, startDate, endDate, headingTitle, dataType, currentPage, recordsPerPage) {
 	data={};
+	if(startDate=='' && endDate==''){
+		startDate = $("#dataReviewStartDate").val();
+        endDate = $("#dataReviewEndDate").val();
+        modeSearch = $("#searchReviewtype").val();
+	}
 	data['modeSearch']=modeSearch;
 	data['startDate']=startDate;
 	data['endDate']=endDate;
-	data['userId']=USER_ID;
+	data['userId']=counselorId;
 	data['schoolId']=SCHOOL_ID;
+	data['scoreTitle']=dataType;
+	data['currentPage']=currentPage;
+	data['recordsPerPage']=recordsPerPage;
 
 	$.ajax({
 			type : "POST",
 			contentType : APPLICATION_JSON_VALUE,
-			url : getURLForHTML('dashboard', 'lead-counselor-review'),
+			url : getURLForHTML('dashboard', 'lead-counselor-detail-review'),
 			data : JSON.stringify(data),
 			dataType : 'json',
 			cache : false,
 			timeout : 600000,
 			success : function(data) {
-				console.log("counselor review", data);
+				console.log("counselor detail review", data);
+				
 				if (data['status'] == '0' || data['status'] == '2') {
-					showMessage(true, data['message']);
+					showMessageTheme2(true, data['message']);
 				} else {
-					if(data.modeSearch=='CUSTOM'){
-						$(".hideReviewdate").css({"display":"block"});
-						$("#dataReviewStartDate").val(data.startDate);
-						$("#dataReviewEndDate").val(data.endDate);
-						$("#searchReviewtype").val(data.modeSearch);
+
+					if(dataType=="RESPONSE-TYPE"){
+						$(".startTh").text("Lead Create Time")
+						$(".endTh").text("Lead Response Time")
+						$(".diffTh").text("Different Time")
+					}else if(dataType=="LEAD-DEMO"){
+						$(".startTh").text("Demo Type")
+						$(".endTh").text("Demo Time")
+						$(".diffTh").text("Total")
+					}else if(dataType=="DEMO-ENROLL"){
+						$(".startTh").text("Demo Type")
+						$(".endTh").text("Demo Status")
+						$(".diffTh").text("Total")
+					}else if(dataType=="LEAD-ENROLL"){
+						$(".startTh").text("Lead Status")
+						$(".endTh").text("Convert Status")
+						$(".diffTh").text("Total")
+					}else if(dataType=="MEETING-JOIN"){
+						$(".startTh").text("Demo Time")
+						$(".endTh").text("Join Time")
+						$(".diffTh").text("Different Time")
+					}else if(dataType=="ENROLL-TIME"){
+						$(".startTh").text("Lead Created Time")
+						$(".endTh").text("Convert Time")
+						$(".diffTh").text("Total")
 					}
-					var html=getLeadCounselorReviewHtml(data.counselorReviewList);
+
+					var leadResponseScore = JSON.parse(data.leadResponseScore);
+					var htmScore=getLeadScoreChart(leadResponseScore, dataType);
+					$("#counselorResponseTimeChart").html(htmScore)
+
+					var htmlsd = getRatingScore(data);
+					$("#counselorRatingScore").html(htmlsd)
+
+					$('#counselorResponseTime').DataTable().clear().destroy();
+					var html=getLeadCounselorDetailReviewHtml(data.counselorReviewList);
 					$("#"+eventId).html(html);
+					var isDataTable = $.fn.dataTable.isDataTable('#counselorResponseTime');
+					if(isDataTable){
+						$('#counselorResponseTime').dataTable().fnDestroy();
+					}
+					$('#counselorResponseTime').DataTable();
 				}
+				$("#ratingTitle").text(headingTitle + " - Counselor Detail Review");
+				$("#counselorDetailRating").modal('show');
 			}
 		});
+	}
+	function getLeadScoreChart(leadResponseScore, dataType){
+		var scoreUnit='%';
+		if(dataType=="RESPONSE-TYPE"){
+			scoreUnit="Minute's"
+		}else if(dataType=='MEETING-JOIN'){
+			scoreUnit="Second's"
+		}else if(dataType=='ENROLL-TIME'){
+			scoreUnit="Hour's"
+		}
+		
+		var htmls = `
+		<div class="table-responsive">
+			<table class="table table-bordered table-sm mb-3 font-12">
+				<thead class="thead-light">
+					<tr>
+						<th class="text-center px-3 py-2">Range (${scoreUnit})</th>`;
+						if(leadResponseScore!=undefined && leadResponseScore.length>0){
+							var totalColumns = leadResponseScore.length;
+							$.each(leadResponseScore, function(index, score){    
+								var colorIntensity = ((totalColumns - 1 - index) / (totalColumns - 1)) * 100;
+								var backgroundColor = `hsl(${colorIntensity * 1.2}, 70%, 40%)`; 
+								var rangeDisplay = score.setTime;
+								if(score.setTime == "999999999") {
+									rangeDisplay = "> " + score.setTime2;
+								} else if(score.setTime2 == "999999999") {
+									rangeDisplay = score.setTime + " <";
+								} else {
+									rangeDisplay = score.setTime + " - " + score.setTime2;
+								}
+								htmls += `<th class="text-center px-3 py-2 text-white" style="background-color: ${backgroundColor}">${rangeDisplay}</th>`;
+							});
+							htmls+=`</tr>
+							<tr>
+							<th class="text-center px-3 py-2">Rating</th>`;
+							$.each(leadResponseScore, function(index, score){    
+								var actualScore = (10-parseFloat(score.score)).toFixed(1);
+								var scoreColor = "text-success";
+								if(actualScore <= 3) {
+									scoreColor = "text-danger";
+								} else if(actualScore <= 6) {
+									scoreColor = "text-warning";
+								}				
+								htmls += `<td class="text-center px-3 py-2 font-weight-bold ${scoreColor}">${actualScore}</td>`;
+							});
+						}	
+					htmls += `</tr>
+				</thead>
+			</table>
+		</div>`;
+		return htmls;
+	}
+
+	function getRatingScore(data){
+		var htmls=`<table class="table table-bordered font-11">`;
+		if(data!=undefined){
+			htmls+=`<tr><td class="bold bg-light border-right text-center">Total Lead</td><td class="bold bg-light border-right text-center">Total</td><td class="bold bg-light border-right text-center">Avg Range</td><td class="bold bg-light border-right text-center">Rating</td></tr>`;
+			htmls+=`<tr><td class="text-center">${data.totalLead}</td><td class="text-center">${data.totalScore}</td><td class="text-center">${data.avgScore} ${data.scoreUnit}</td><td class="text-center">${data.scoreRate}/ 10</td></tr>`;
+		}
+		htmls+='</table>'
+		return htmls;
+	}
+
+	function getLeadCounselorDetailReviewHtml(counselorReviewList){
+		var html='';
+		if(counselorReviewList && counselorReviewList.length > 0){
+			$.each(counselorReviewList, function(index, review){
+				var urlSend = '/dashboard/lead-data-list?moduleId=111&leadId='+review.leadNo+'&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='+ENCRYPTED_USER_ID+'&leadType=B2C';
+				html += `<tr>
+							<td class="text-center">${index + 1}</td>
+							<td><a href="javascript:void(0)" onclick="getAsPost('${urlSend}');">${review.leadNo}</a></td>
+							<td>${review.source}</td>
+							<td>${review.destination}</td>
+							<td>${review.responseTime}</td>
+						</tr>`;
+			});
+		}
+		return html;
 	}

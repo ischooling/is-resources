@@ -524,6 +524,7 @@ function getMainReportCard(objRight){
 			html+=getReportsTab(objRight);
 			html+='</div>';
 		html+='</div>';
+		html+=getRatingPopup();
 		
 	return html;
 }

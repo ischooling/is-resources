@@ -116,6 +116,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		var formId='';
 		var modelForm='';
 		if(LEAD_CATEGORY=='B2B'){
+			$("#modelTitle").text("Add new B2B lead");
 			formId='leadDataPopupB2BForm';
 			modelForm='leadPopupB2BForm';
 		}else{

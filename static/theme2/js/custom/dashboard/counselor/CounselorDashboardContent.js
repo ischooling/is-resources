@@ -184,6 +184,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				+getCounselorRevenueContent()
 				+getCounselorEnrollmentStatisticsContent()
 			html+=`</div>`;
+			html+=getRatingPopup();
 	}
 	
 	return html;
@@ -257,12 +258,12 @@ function getCounselorEnrollmentRangeContent(commissionRate){
 function getStatsDetailsContent(data){
 	console.log(data.counselorReviewList);
 	var reviewList =data.counselorReviewList;
-	var responseTime=10;
-	var leadToDemo=10;
-	var demoToEnroll=10;
-	var leadToEnroll=10;
-	var joiningDemoTime=10;
-	var timeToLeadConversion=10;
+	var responseTime=0;
+	var leadToDemo=0;
+	var demoToEnroll=0;
+	var leadToEnroll=0;
+	var joiningDemoTime=0;
+	var timeToLeadConversion=0;
 	var overallRating=0;
 	var tfinalScore=0;
 	var totalLeadRating=0;
@@ -285,7 +286,8 @@ function getStatsDetailsContent(data){
 					} 
 					if(ld.dataType=='MEETING-JOIN'){
 						joiningDemoTime=ld.finalScore;
-					} if(ld.dataType=='ENROLL-TIME'){
+					} 
+					if(ld.dataType=='ENROLL-TIME'){
 						timeToLeadConversion=ld.finalScore;
 					}
 					tfinalScore+=parseInt(ld.finalScore);
@@ -307,56 +309,74 @@ function getStatsDetailsContent(data){
 	}
     var html=`
         <div class="d-flex flex-wrap justify-content-center align-items-center">
-            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-clock mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Response Time</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${responseTime} /10</h6>
-            </div>
-            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-bullseye mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Lead to Demo</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${leadToDemo} /10</h6>
-            </div>
-            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-user-check mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Demo to Enroll</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${demoToEnroll} /10</h6>
-            </div>
-            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-user-plus mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Lead to Enroll</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${leadToEnroll} /10</h6>
-            </div>
-            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-calendar-alt  mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Joining Demo Time</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${joiningDemoTime} /10</h6>
-            </div>
-            <div class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-hourglass-half mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Time to Lead Conversion</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${timeToLeadConversion} /10</h6>
-            </div>
-            <div class="card shadow-sm m-1 p-2 ${bgColorStype} border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
-                <div class="d-flex justify-content-center align-items-center">
-                    <i class="fas fa-star mr-1" style="font-size:14px;"></i>
-                    <p class="mb-0 small font-weight-bold">Overall Rating</p>
-                </div>
-                <h6 class="mb-0 mt-1 text-center font-weight-bold">${overallRating.toFixed(1)} /10</h6>
-            </div>
-        </div>`;
+		<a href="javascript:void(0);" class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded text-decoration-none" 
+		style="flex:0 1 150px;min-width:175px;height:60px;"
+		onclick="callCounselorDetailReview('CUSTOM', '${USER_ID}' , 'leadCounselorDetailReviewtbl', '', '', 'Response Time', 'RESPONSE-TYPE','0','10');">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-clock mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Response Time</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${responseTime} /10</h6>
+		</a>
+		
+		<a href="javascript:void(0);" class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded text-decoration-none" 
+		style="flex:0 1 150px;min-width:175px;height:60px;"
+		onclick="callCounselorDetailReview('CUSTOM', '${USER_ID}' , 'leadCounselorDetailReviewtbl', '', '', 'Lead to Demo', 'LEAD-DEMO','0','10');">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-bullseye mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Lead to Demo</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${leadToDemo} /10</h6>
+		</a>
+		
+		<a href="javascript:void(0);" class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded text-decoration-none" 
+		style="flex:0 1 150px;min-width:175px;height:60px;"
+		onclick="callCounselorDetailReview('CUSTOM', '${USER_ID}' , 'leadCounselorDetailReviewtbl', '', '', 'Demo to Enroll', 'DEMO-ENROLL','0','10');">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-user-check mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Demo to Enroll</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${demoToEnroll} /10</h6>
+		</a>
+		
+		<a href="javascript:void(0);" class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded text-decoration-none" 
+		style="flex:0 1 150px;min-width:175px;height:60px;"
+		onclick="callCounselorDetailReview('CUSTOM', '${USER_ID}' , 'leadCounselorDetailReviewtbl', '', '', 'Lead to Enroll', 'LEAD-ENROLL','0','10');">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-user-plus mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Lead to Enroll</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${leadToEnroll} /10</h6>
+		</a>
+		
+		<a href="javascript:void(0);" class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded text-decoration-none" 
+		style="flex:0 1 150px;min-width:175px;height:60px;"
+		onclick="callCounselorDetailReview('CUSTOM', '${USER_ID}' , 'leadCounselorDetailReviewtbl', '', '', 'Joining Demo Time', 'MEETING-JOIN','0','10');">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-calendar-alt  mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Joining Demo Time</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${joiningDemoTime} /10</h6>
+		</a>
+		
+		<a href="javascript:void(0);" class="card shadow-sm m-1 p-2 bg-primary text-white border-0 rounded text-decoration-none" 
+		style="flex:0 1 150px;min-width:175px;height:60px;"
+		onclick="callCounselorDetailReview('CUSTOM', '${USER_ID}' , 'leadCounselorDetailReviewtbl', '', '', 'Time to Lead Conversion', 'ENROLL-TIME','0','10');">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-hourglass-half mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Time to Lead Conversion</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${timeToLeadConversion} /10</h6>
+		</a>
+		
+		<div class="card shadow-sm m-1 p-2 ${bgColorStype} border-0 rounded" style="flex:0 1 150px;min-width:175px;height:60px;">
+			<div class="d-flex justify-content-center align-items-center">
+				<i class="fas fa-star mr-1" style="font-size:14px;"></i>
+				<p class="mb-0 small font-weight-bold">Overall Rating</p>
+			</div>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${overallRating.toFixed(1)} /10</h6>
+		</div>
+	</div>`;
     return html;
 }
 
@@ -1557,6 +1577,41 @@ function getCounselorMeetingB2CContent3(){
 					+'</div>'
 				+'</div>'
 			+'</div>';
+	return html;
+}
+
+function getRatingPopup(){
+	var html=`<div id="counselorDetailRating" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-modal="true" >
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="ratingTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div id="counselorResponseTimeChart"></div>
+					<div id="counselorRatingScore"></div>
+					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorResponseTime">
+						<thead>
+							<tr>
+								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" >S No.</th>
+								<th class="bg-primary text-white bold border-bottom-0" >Lead No</th>
+								<th class="bg-primary text-white bold border-bottom-0 startTh" >Lead Create Time</th>
+								<th class="bg-primary text-white bold border-bottom-0 endTh">Lead Response Time</th>
+								<th class="bg-primary text-white bold border-bottom-0 diffTh">Different Time</th>
+							</tr>
+						</thead>
+						<tbody id="leadCounselorDetailReviewtbl"></tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					
+				</div>
+			</div>
+		</div>
+	</div>`;
 	return html;
 }
 

@@ -134,7 +134,7 @@ function getLeadFormB2BPopup(objectRights){
 		+'<div class="modal-dialog modal-xl">'
 			+'<div class="modal-content border-0">'
 				+'<div class="modal-header py-2 bg-primary text-white">'
-					+'<h5 class="modal-title" >Update Lead Details - <span id="leadNoText"></span></h5>'
+					+'<h5 class="modal-title" ><span id="modelTitle">Update Lead Details</span> - <span id="leadNoText"></span></h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
 						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
@@ -414,7 +414,7 @@ function getLeadMergeB2BFormPopup(objRights){
     +'<div class="modal-dialog modal-xl">'
     +'    <div class="modal-content border-0">'
     +'        <div class="modal-header py-2 bg-primary text-white">'
-    +'            <h5 class="modal-title" id="leadFormText">Merge Lead Form</h5>'
+    +'            <h5 class="modal-title" id="leadMergeFormText">Merge Lead Form</h5>'
     +'            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
     +'                <span aria-hidden="true">&times;</span>'
     +'            </button>'
@@ -437,23 +437,16 @@ function getLeadMergeB2BFormPopup(objRights){
 	+'			<input type="hidden" name="leadType" id="leadType" value="'+objRights.leadType+'" />'
 	+'			<div class="row">'
 	+'				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
-	+'						<label class="m-0">First Name*</label>'
+	+'						<label class="m-0">Name*</label>'
 	+'						<input type="text" name="leadstdfname" id="leadstdfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);">'
 	+'				</div>'
 	+'				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
-	+'					<label class="m-0">Middle Name</label>'
-	+'					<input type="text" name="leadstdmname" id="leadstdmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">'
+	+'					<label class="m-0">Organization Name</label>'
+	+'					<input type="text" name="leadGuardfname" id="leadGuardfname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">'
 	+'				</div>'
 	+'				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
-	+'					<label class="m-0">Last Name</label>'
-	+'					<input type="text" name="leadstdlname" id="leadstdlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">'
-	+'				</div>'
-	+'				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
-	+'					<label class="m-0">Grade*</label>'
-	+'					<select name="leadGrade" id="leadGrade" class="form-control" >'
-	+'						<option value="">Select Grade</option>'
-	+getStandardContent(objRights.schoolId,true, false)
-	+'					</select>'
+	+'					<label class="m-0">Designation</label>'
+	+'					<input type="text" name="relationType" id="relationType" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">'
 	+'				</div>'
 	+'				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">'
 	+'						<label class="m-0">Country</label>'
@@ -737,13 +730,26 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 	}
 	console.log(data);
 	var html='';
+	html+='<div class="d-flex align-items-center mb-2">';
 	html+='<input type="checkbox" id="selectLeadAll" class="ml-2" />&nbsp;All'
 	+'<select name="leadsPagging" id="leadsPagging" class="ml-1 my-2 rounded">'
 		+'<option value="10" '+(leaddata.recordsPerPage=='10'?'selected':'')+'>10</option>'
 		+'<option value="25" '+(leaddata.recordsPerPage=='25'?'selected':'')+'>25</option>'
 		+'<option value="50" '+(leaddata.recordsPerPage=='50'?'selected':'')+'>50</option>'
 		+'<option value="100" '+(leaddata.recordsPerPage=='100'?'selected':'')+'>100</option>'
-	+'</select>';
+	+'</select>'
+	+'		<label class="my-0 ml-5">Sort by</label>'
+	+'		<select name="leadsShortBy" id="leadsShortBy" class="form-control ml-2 col-xl-2 col-lg-2 col-md-6 col-sm-6 col-6" onchange="clickTotalLeads(\''+objectRights.clickFrom+"-"+objectRights.clickUserid+'\', \'0\',\'\',\'\');">'
+	+'			<option value="modifydate" '+(objectRights.shortBy=='modifydate'?'selected':'')+'>Modified Date</option>'
+	+'			<option value="createdate" '+(objectRights.shortBy=='createdate'?'selected':'')+'>Created Date</option>'
+	+'		</select>'
+	+'		<label class="my-0 ml-5">Ascending/ Descending</label>'
+	+'		<select name="leadsShortType" id="leadsShortType" class="form-control ml-2 col-xl-2 col-lg-2 col-md-6 col-sm-6 col-6" onchange="clickTotalLeads(\''+objectRights.clickFrom+"-"+objectRights.clickUserid+'\', \'0\',\'\',\'\');">'
+	+'			<option value="DESC" '+(objectRights.shortType=='DESC'?'selected':'')+'>Descending</option>'
+	+'			<option value="ASC" '+(objectRights.shortType=='ASC'?'selected':'')+'>Ascending</option>'
+	+'		</select>'
+	+'	</div>'
+
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
 		html+='<div class="lead-table-wrapper">'
@@ -767,6 +773,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 					}
 					html+='<th class="text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Action</th>'
 				+'</tr>'
+
 			+'</thead>'
 			+'<tbody class="lead-table-css">'
 			+'<input type="hidden" id="demoMovedTrue" />'
@@ -818,8 +825,21 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 															+'<tr>'
 																+'<th class="border-0 p-0 font-12">Is_Organic</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmTerm!=''?leads.utmTerm:'N/A')+'</td>'
-															+'</tr>'
-														+'</tbody>'
+															+'</tr>';
+															if(leads.leadPlatform!=''){
+																html+='<tr class="border-bottom">'
+																	+'<th class="border-0 p-0 font-12 vertical-align-top pr-1">Platform</th>'
+																	+'<td class="border-0 p-0 font-12 vertical-align-top"><img class="report-icon" src="'+PATH_FOLDER_IMAGE2+leads.leadPlatform+'.png'+SCRIPT_VERSION+'" width=\"16\" height=\"16\"></td>';
+																+'</tr>';
+															}
+															if(leads.fbImageUrl!=''){
+																html+='<tr>'
+																	+'<th colspan="2" class="border-0">'
+																		+'<a href="'+leads.fbImageUrl+'" class="btn btn-primary btn-sm" target="_blank">View Form Image</a>'
+																	+'</td>';
+																+'</tr>';
+															}
+														html+='</tbody>'
 													+'</table>';
 												}else{
 													html+='<table class="w-100"><tbody>'
@@ -885,11 +905,29 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 													+'<th class="border-0 p-1" style="width:165px">Phone:</th>'
 													+'<td class="border-0 p-1">'+(leads.isdCode!=''?leads.isdCode:'')+' '+(leads.phone!=''?leads.phone:'');
 														if(leads.isdCode!=''){
-															if(leads.verifiedWtsup>0){
-																html+='<span style="color:green;font-size:15px;">'
-																+'<a href="https://api.whatsapp.com/send?phone='+(leads.phoneIsd!=''?leads.phoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>'
-																+'</span>';
-															}
+															html+='<span>'
+																html+='<a href="https://api.whatsapp.com/send?phone='+(leads.phoneIsd!=''?leads.phoneIsd:'')+'" target="_target" class="position-relative">' 
+																html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
+																
+																if(leads.whatsAppVerifiedStatus=='N'){}
+																else{
+																	if(leads.whatsAppScbStatus=='N'){
+																		html+='<span style="left: 9px;color: black;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Sent"><i class="fa fa-minus-circle"></i></span>';
+																	}else{
+																		if(leads.whatsAppVerifiedStatus=='Y'){
+																			html+='<span style="left: 9px;color: green;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Sent"><i class="fa fa-check-circle"></i></span>';
+																		}else if(leads.whatsAppVerifiedStatus=='N'){
+																			html+='<span style="left: 9px;color: red;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Not Sent"><i class="fa fa-times-circle"></i></span>';
+																		}
+																	}
+																}
+																html+='</a>'
+															+'</span>';
+														}
+														html+='<br/>';
+														if(leads.phoneNoAlter!=''){
+															html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
+															html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>';
 														}
 													html+='</td>'
 												+'</tr>'
