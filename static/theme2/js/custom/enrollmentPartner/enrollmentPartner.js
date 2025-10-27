@@ -103,7 +103,6 @@ function getRequestForEnrollmentPartnerDetails(formId){
 		request['companyRegistration'] = $('input[name="companyRegistration"]:checked').val();
 	}
 	request['additionalInfo'] = $('#'+formId+' #additionalInfo').val();
-	debugger;
 	return request;
 }
 
@@ -120,7 +119,6 @@ function saveEnrollmentPartnerDetails(formId) {
 		async : false,
 		global : false,
 		success : function(data) {
-			debugger;
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
@@ -207,7 +205,6 @@ function setDefaultFormValues(data){
 }
 
 function enrollmentPartnerFormVaidation(formId){
-	debugger;
 	var formSubmissionflag = true;
 	if($("#"+formId+" #firstName").val() == undefined || $("#"+formId+" #firstName").val() == null || $("#"+formId+" #firstName").val() == ''){
 		formvalidationMsg(false, 'First Name is required','firstNameError');
@@ -295,6 +292,17 @@ function enrollmentPartnerFormVaidation(formId){
 			formvalidationMsg(false, 'Registration Type of Organization/Company is required','companyRegistrationError');
 			formSubmissionflag= false;
 		}
+	}
+	var additionalInfo = $("#"+formId+" #additionalInfo").val();
+	if(additionalInfo != undefined && additionalInfo != null && additionalInfo.trim() != ''){
+		var wordCount = additionalInfo.trim().split(/\s+/).length;
+		if(wordCount < 25){
+			formvalidationMsg(false, 'Please enter at least 25 words in Additional Information','additionalInfoError');
+			formSubmissionflag = false;
+		}
+	}else{
+		formvalidationMsg(false, 'Additional Information is required and should have at least 25 words','additionalInfoError');
+		formSubmissionflag = false;
 	}
 	return formSubmissionflag;
 }
@@ -423,5 +431,20 @@ function showServerError(isError, formId, elementId, errorMessage) {
 	} else {
 		$('#' + formId + ' #' + elementId).addClass('server-success');
 		$('#' + formId + ' #' + elementId).removeClass('server-error');
+	}
+}
+
+function liveWordCount(src){
+	var text = $(src).val().trim();
+	var words = text === '' ? 0 : text.split(/\s+/).length;
+	var minWords = 25;
+	var wordCountEle = $('#additionalInfoWordCount');
+
+	wordCountEle.text(words + ' / ' + minWords + ' words minimum');
+
+	if (words < minWords) {
+		wordCountEle.css('color', 'red');
+	} else {
+		wordCountEle.css('color', 'green');
 	}
 }
