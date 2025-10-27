@@ -12407,19 +12407,6 @@ function replaceContractPlaceholders(editor, pasteData) {
 	}
 }
 
-function callCounselorReview(modeSearch, eventId, startDate, endDate) {
-	data={};
-	data['modeSearch']=modeSearch;
-	data['startDate']=startDate;
-	data['endDate']=endDate;
-	data['userId']=USER_ID;
-	data['schoolId']=SCHOOL_ID;
-
-	$.ajax({
-		}
-	});
-}
-
 function getLeadCounselorReviewHtml(counselorReviewList){
 	var html = '<tr>';
 	if(counselorReviewList.length > 0){
