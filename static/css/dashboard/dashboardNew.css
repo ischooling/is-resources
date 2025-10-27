@@ -855,12 +855,14 @@ sup{color:#ff0000 !important}
     background: #dddddd;
 }
 .border-primary {border-color:#007fff !important}
+
 .bg-light-primary {background-color: #f4f7fe !important;}
 .bg-light-success {background-color: #d8fada !important;}
 .bg-light-warning {background-color: #fbefdc !important;}
 .bg-light-danger {background-color: #fdd9d7 !important;}
 .bg-light-dark {background-color: #dbdcdd !important;}
 .bg-light-orange {background-color: #fff3e8 !important;}
+
 .text-orange{color:#ff9432;}
 .text-alternate {color: #794c8a !important;}
 .border-orange {border-color: #ff9432 !important;}

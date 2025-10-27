@@ -553,8 +553,8 @@ function getB2BLeadCount(leadTotalData){
 	html+='</div>';
 	html+='</div>';
 	html+='<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">';
-	html+='<div class="full p-2 bg-light border border-secondary rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
-	html+='<span class="line-left bg-secondary d-inline-block position-absolute rounded-10"></span>';
+	html+='<div class="full p-2 bg-light-darkgreen border border-secondary-darkgreen rounded-10 position-relative mr-0 mr-sm-2 mb-2  shadow-sm ">';
+	html+='<span class="line-left bg-success d-inline-block position-absolute rounded-10"></span>';
 	html+='<p class="m-0 font-12"><b>Basic Details not Filled</b></p>';
 	html+='<p class="m-0"><b>';
 	if(leadTotalData.followupLead1>0){
