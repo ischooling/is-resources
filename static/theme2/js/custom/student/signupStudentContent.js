@@ -25,17 +25,6 @@ signupStageStatusInitiated=false;
 var signupStage1Form = '';
 var signupStage2Form = '';
 async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
-	if(signupType == "Online"){
-		if (DEPLOYMENT_MODE == 'PROD') {
-			//<!-- Google Tag Manager (noscript) -->
-			$("body").html('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PGC67T7" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
- 
-			//<!-- End Google Tag Manager (noscript) -->
-			//<!-- Facebook Pixel Code -->
-			$("body").append('<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2630519373836959&ev=PageView&noscript=1"/></noscript>')
-			//<!-- End Facebook Pixel Code -->
-		}
-	}
 	if(signupType == "Offline" && studentUserId != USER_ID){
 		signupStageStatusInitiated=false;
 	}
