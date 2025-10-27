@@ -759,3 +759,23 @@ function getLoaderContent(){
         html+=`</div>`;
       return html;
 }
+
+function checkonlineOfflineStatus() {
+  if (!navigator.onLine) {
+    if (tt == "theme1") {
+      showMessageTheme2(
+        true,
+        "Your device is offline, please check your internet connection."
+      );
+    } else {
+      showMessageTheme2(
+        0,
+        "Your device is offline, please check your internet connection.",
+        "",
+        true
+      );
+    }
+    return true;
+  }
+  return false;
+}

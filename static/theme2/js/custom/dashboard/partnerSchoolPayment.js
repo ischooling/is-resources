@@ -1,5 +1,7 @@
 var currentPagePaymentList = 1;
 function openStudentFeesModal(){
+    let html = '<option value="'+$("#partnerName").val()+'">'+$("#partnerName").text()+'</option>';
+    $("#partnerNameSearch").html(html);
     $("#studentFeesModal").modal('show');
 }
 
@@ -32,7 +34,7 @@ function getPayStudentFeesDetais(callFrom) {
         dataType: 'json',
         async: false,
         global: false,
-        success: function(data) {
+        success: async function(data) {
             if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
                 if (data['status'] == '3') {
                     redirectLoginPage();
@@ -43,7 +45,6 @@ function getPayStudentFeesDetais(callFrom) {
             } else {
                 var html = '';
                 let totalPayableToIS = 0;
-
                 $.each(data.studentFeeDetails, function(index, item) {
                     html += `<tr>
                         <td>
@@ -53,10 +54,10 @@ function getPayStudentFeesDetais(callFrom) {
                         <td>${item.studentId}</td>
                         <td>${item.studentName} | ${item.standardName}</td>
                         <td>${item.learningProgram}</td>
-                        <td>${item.parentSchoolCourseFee == undefined ? 'NA' : schoolSettingsTechnical.currencySymbol + item.parentSchoolCourseFee}</td>
-                        <td>${item.partnerCourseFee == undefined ? 'NA' : schoolSettingsTechnical.currencySymbol + item.partnerCourseFee}</td>`;
-                        html +=`<td>${item.partnerRevenue == undefined ? 'NA' : schoolSettingsTechnical.currencySymbol + item.partnerRevenue}</td>
-                        <td>${item.payableToIS == undefined ? 'NA' : schoolSettingsTechnical.currencySymbol + item.payableToIS}</td>
+                        <td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>
+                        <td>${item.partnerCourseFee == undefined ? 'NA' : currency + item.partnerCourseFee}</td>`;
+                        html +=`<td>${item.partnerRevenue == undefined ? 'NA' : currency + item.partnerRevenue}</td>
+                        <td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>
                         <td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>
                         <td>
                             <input type="hidden" class="studentStandardId" value="${item.StudentStandardId}" />
@@ -145,7 +146,7 @@ function getPartnerSchoolPaymentDetails(formId) {
         url: getURLForHTML('dashboard', 'get-partner-school-payment-details'),
         data: JSON.stringify(getRequestForSchoolPaymentFilter(formId)),
         dataType: 'json',
-        success: function(data) {
+        success: async function(data) {
             if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
                 if (data['status'] == '3') {
                     redirectLoginPage();
@@ -156,6 +157,12 @@ function getPartnerSchoolPaymentDetails(formId) {
                 var html = '';
                 $("#enroll-list-skeleton").hide();
                 $("#paymentListDiv").show();
+                let total_amount = data.total_amount;
+                let paid_amount = data.paid_amount;
+                let pending_amount = data.pending_amount;
+                $("#total_amount").text(currency + " " + total_amount);
+                $("#paid_amount").text(currency + " " + paid_amount);
+                $("#pending_amount").text(currency + " " + pending_amount);
                 if (data.paymentsList && data.paymentsList.length > 0) {
                     $.each(data.paymentsList, function(index, item) {
                         html+=`<tr id="payment-row-${item.sprId}">`;
@@ -167,7 +174,7 @@ function getPartnerSchoolPaymentDetails(formId) {
                         <td>${item.referenceNo}</td>
                         <td>${item.paymentVia}</td>
                         <td>${item.paymentName}</td>
-                        <td>${schoolSettingsTechnical.currencySymbol + " " + item.paymentAmount}</td>
+                        <td>${currency + " " + item.paymentAmount}</td>
                         <td>
                            ${item.attachmentUrl == undefined || item.attachmentUrl == '' || item.attachmentUrl == "N/A"
                            ? 'N/A'
@@ -208,7 +215,9 @@ function getPartnerSchoolPaymentDetails(formId) {
                 }
 
                 $("#paymentListTableBody").html(html);
-                $("#schoolPaymentPaginationContainer").html(renderPagination(currentPagePaymentList, data.totalPages));
+                if(data.paymentsList.length != 0){
+                    $("#schoolPaymentPaginationContainer").html(renderPaginationCommon(currentPagePaymentList, data.totalPages));
+                }
             }
         }
     });
@@ -260,12 +269,15 @@ function openPartnerPaymentModal(){
         return;
     }
     let requestData = {
-        "userId" : USER_ID
+        "userId" : USER_ID,
+        "totalFee": totalFee,
+        "schoolId": SCHOOL_ID,
+        studentStandardIdAndAmount
     }
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: getURLForHTML('dashboard', 'get-partner-payment-getway-details'),
+        url: getURLForHTML('dashboard', 'create-partner-payment-details'),
         data: JSON.stringify(requestData),
         dataType: 'json',
         success: function(data) {
@@ -277,11 +289,10 @@ function openPartnerPaymentModal(){
                 }
             } else {
                 console.log(data);
-                if($("#callPaymentPartnerModal").length > 0){
-                    $("body #callPaymentPartnerModal").remove();
-                }
-                $("body").append(callPaymentPartnerModal(data));
-                $("#callPaymentPartnerModal").modal('show');
+                let parentSchoolId = data.parentSchoolId;
+                let userPaymentDetailsId = data.userPaymentDetailsId;
+                let schoolPaymentRequestId = data.schoolPaymentRequestId;
+                getPaymentGatewaysOptions(parentSchoolId, SCHOOL_ID, userPaymentDetailsId, "SCHOOL_PAYMENT_REQUEST", schoolPaymentRequestId, USER_ID);
             }
         }
     });
@@ -411,17 +422,18 @@ function savePartnerTransferSubmit(formId, paymentGatewayType){
         "userId" : USER_ID,
         "studentStandardIdAndAmount": studentStandardIdAndAmount,
         "totalFee": totalFee,
-        "schoolId" : SCHOOL_ID,
-        "paymentName":"Bulk Student Course Fee", // it will be dynamic
-        "paymentVia": paymentGatewayType,
-        "refrenceNumber": paymentGatewayType == "WIRETRANSFER" ? $("#referenceNumberWire").val() : $("#referenceNumberCash").val(),
-        "attachments": paymentGatewayType == "WIRETRANSFER" ? bankTransferObj : cashTransferObj
+        "schoolId" : SCHOOL_ID
+        // "paymentName":"Bulk Student Course Fee", // it will be dynamic
+        // "paymentVia": paymentGatewayType,
+        // "refrenceNumber": paymentGatewayType == "WIRETRANSFER" ? $("#referenceNumberWire").val() : $("#referenceNumberCash").val(),
+        // "attachments": paymentGatewayType == "WIRETRANSFER" ? bankTransferObj : cashTransferObj
     }
 
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: getURLForHTML('dashboard', 'payment-student-fee-to-is-school'),
+        // url: getURLForHTML('dashboard', 'payment-student-fee-to-is-school'),
+        url: getURLForHTML('dashboard', 'create-partner-payment-details'),
         data: JSON.stringify(requestData),
         dataType: 'json',
         success: function(data) {
@@ -430,12 +442,9 @@ function savePartnerTransferSubmit(formId, paymentGatewayType){
                     redirectLoginPage();
                 } else {
                     showMessageTheme2(0, data['message'], '', true);
-                    $("#callPaymentPartnerModal").modal('hide');
-                    getPayStudentFeesDetais('searchStudentFees');
                 }
             } else {
                 showMessageTheme2(1, data['message'], '', true);
-                $("#callPaymentPartnerModal").modal('hide');
                 getPayStudentFeesDetais('searchStudentFees');
             }
         }
@@ -573,67 +582,58 @@ function resetPartner() {
     $("#paymentDateFrom, #paymentDateTo").val('');
 }
 
-function getPartnerSchools(schoolId) {
-    $.ajax({
-        type: "GET",
-        contentType: "application/json",
-        url: BASE_URL + CONTEXT_PATH + SCHOOL_ID + `/dashboard/get-partner-schools?schoolId=${schoolId}`,
-        dataType: 'json',
-        success: function(data) {
-            if (data['status'] === '0' || data['status'] === '2' || data['status'] === '3') {
-                if (data['status'] === '3') {
-                    redirectLoginPage();
-                } else {
-                    showMessageTheme2(0, data['message'], '', true);
-                }
-            } else {
-                const partnerSchools = data.partnerSchoolsList || [];
+async function initializeSchoolPaymentPage() {
+    try {
+        // $("#schoolPayment").append(await renderSchoolPayment());
+        callAllStandardList('searchStudentFees', 'gradeSearch');
 
-                const $schoolSelect = $('#schoolName');
-                const $partnerSelect = $('#partnerName');
-                const $partnerNameSearch = $('#partnerNameSearch');
+        $("#learningProgramSeach").html(
+            getLearningProgramAndCourseProviderMappingBySchoolId(SCHOOL_ID, "Select Learning Program", "")
+        );
 
-                if(partnerSchools.length == 1){
-                    const item = partnerSchools[0];
-
-                    $schoolSelect.empty().append(`<option value="${item.schoolId}">${item.schoolName}</option>`);
-                    $schoolSelect.data('fullList', partnerSchools).val(item.schoolId).attr("disabled", true);
-
-                    $partnerSelect.empty().append(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
-                    $partnerSelect.val(item.partnerUserId);
-
-                    $partnerNameSearch.empty().append(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
-                    $partnerNameSearch.val(item.partnerUserId);
-                }else{
-                    $schoolSelect.empty().append(`<option value="ALL">Select School Name</option>`);
-                    $partnerSelect.empty().append(`<option value="">Select Partner Name</option>`);
-                    $partnerNameSearch.empty().append(`<option value="">Select Partner Name</option>`);
-
-                    $schoolSelect.data('fullList', partnerSchools);
-
-                    partnerSchools.forEach(item => {
-                        $schoolSelect.append(`<option value="${item.schoolId}">${item.schoolName}</option>`);
-                    });
-                }
-            }
-        }
-    });
-}
-
-function getPartnerOnSchoolId(src){
-    const selectedSchoolId = $(src).val();
-    const partnerSchools = $(src).data('fullList') || [];
-    const $partnerSelect = $('#partnerName');
-    const $partnerNameSearch = $('#partnerNameSearch');
-
-    if (selectedSchoolId) {
-        const matched = partnerSchools.filter(item => item.schoolId === selectedSchoolId);
-        matched.forEach(item => {
-            $partnerSelect.html(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
-            $partnerNameSearch.html(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
+        $("#paymentDateFrom").datepicker({
+            autoclose: true,
+            format: 'M dd, yyyy',
+        }).on('changeDate', function (e) {
+            var fromDate = e.date;
+            $('#paymentDateTo').val('');
+            $('#paymentDateTo').datepicker('setStartDate', fromDate);
         });
-    }else{
-        $partnerSelect.html(`<option value="">Select Partner Name</option>`);
-        $partnerNameSearch.html(`<option value="">Select Partner Name</option>`);
+
+        $("#paymentDateTo").datepicker({
+            autoclose: true,
+            format: 'M dd, yyyy',
+            startDate: null
+        });
+
+        $("#paymentDateFromSearch").datepicker({
+            autoclose: true,
+            format: 'M dd, yyyy',
+        }).on('changeDate', function (e) {
+            var fromDate = e.date;
+            $('#paymentDateToSearch').val('');
+            $('#paymentDateToSearch').datepicker('setStartDate', fromDate);
+        });
+
+        $("#paymentDateToSearch").datepicker({
+            autoclose: true,
+            format: 'M dd, yyyy',
+            startDate: null
+        });
+
+        // $("#total_amount").text(currency + " " + "${total_amount}");
+        // $("#paid_amount").text(currency + " " + "${paid_amount}");
+        // $("#pending_amount").text(currency + " " + "${pending_amount}");
+
+        getSchoolSessionMasterList('paymentSeachForm', "academicSession", SCHOOL_ID);
+
+        $("select#schoolName").on("change",function(){
+            getSchoolSessionMasterList('paymentSeachForm', "academicSession", this.value);
+        });
+
+        $("#footerId").html(getCopyright());
+
+    } catch (e) {
+        console.error("Failed to initialize payment page:", e);
     }
 }

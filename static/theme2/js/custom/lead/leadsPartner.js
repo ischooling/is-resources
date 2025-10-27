@@ -1,3 +1,4 @@
+let PROGRESS_INTERVAL = null;
 function editRowPartner(src){
 	$(src).parent().closest("tr").find(".edit-value").hide();
 	$(src).parent().closest("tr").find(".edit-value-element").show();
@@ -6,13 +7,22 @@ function cancelEitRowPartner(src){
 	$(src).parent().closest("tr").find(".edit-value").show();
 	$(src).parent().closest("tr").find(".edit-value-element").hide();
 }
-function bulkEditPartner(){
-	$(".commissionTable").find(".edit-value").hide();
-	$(".commissionTable").find(".edit-value-element").show();
-	$(".bulk-update-and-cancel-btn").show();
-	$(".commissionTable > thead > tr > th:last-child, .commissionTable > tbody > tr > td:last-child").hide();
-	$(".commissionTable > thead > tr th:nth-last-child(2)").addClass("rounded-top-right-10");
-	$(".commissionTable tbody tr:nth-last-child(1) td:nth-last-child(2)").addClass("rounded-bottom-right-10");
+function bulkEditPartner(isEdit){
+	if(!isEdit){
+		$(".commissionTable").find(".edit-value").show();
+		$(".commissionTable").find(".edit-value-element").hide();
+		$(".bulk-update-and-cancel-btn").hide();
+		$(".commissionTable > thead > tr > th:last-child, .commissionTable > tbody > tr > td:last-child").show();
+		$(".commissionTable > thead > tr th:nth-last-child(2)").removeClass("rounded-top-right-10");
+		$(".commissionTable tbody tr:nth-last-child(1) td:nth-last-child(2)").removeClass("rounded-bottom-right-10");
+	}else{
+		$(".commissionTable").find(".edit-value").hide();
+		$(".commissionTable").find(".edit-value-element").show();
+		$(".bulk-update-and-cancel-btn").show();
+		$(".commissionTable > thead > tr > th:last-child, .commissionTable > tbody > tr > td:last-child").hide();
+		$(".commissionTable > thead > tr th:nth-last-child(2)").addClass("rounded-top-right-10");
+		$(".commissionTable tbody tr:nth-last-child(1) td:nth-last-child(2)").addClass("rounded-bottom-right-10");
+	}
 }
 function cancelEitAllRowPartner(){
 	$(".commissionTable").find(".edit-value").show();
@@ -249,6 +259,7 @@ function saveCommissionRate(formId) {
 				}
 			}else{
 				showMessageTheme2(1, data['message'], '', true);
+				getCommissionRate('filterCommissionRate')
 			}
 		},
 		error: function(e){
@@ -308,14 +319,22 @@ function getRequestForUpdateCommissionRatePartner(formId, singleId){
 }
 
 function validateUpdateCommissionRatePartner(formId){
+	var flag = true;
 	hideMessage('');
 	$('table.commissionTable > tbody > tr').each(function(index) {
+		var commissionrateid = $(this).attr("commissionrateid");
+		let endDate = $("#endDate_"+commissionrateid).val();
+		if(endDate == null || endDate == undefined || endDate == "N/A"){
+			showMessageTheme2(0, "Applicable till date required", '', false);
+			flag = false;
+		}
 	});
-	return true;
+	return flag;
 }
 // updateCommissionRate('filterCommissionRate')
 function updateCommissionRatePartner(formId, id) {
 	hideMessage('');
+
 	if(!validateUpdateCommissionRatePartner(formId)){
 		return false;
 	}
@@ -336,7 +355,8 @@ function updateCommissionRatePartner(formId, id) {
 				}
 			}else{
 				showMessageTheme2(1, data['message'], '', true);
-				getCommissionRate("filterCommissionRate", true);
+				getCommissionRate('filterCommissionRate', true);
+				bulkEditPartner(false);
 			}
 		},
 		error: function(e){
@@ -368,7 +388,11 @@ function getRequestForFilterCommissionRate(formId){
 	var filter = {};
 	filter['rawLeadId'] =  $("#partnerUserB2BSaveForm #rawLeadId").val();
 	var learningPrograms=[];
-	learningPrograms.push($("#"+formId+" #learningProgramFilter").val());
+	if($("#"+formId+" #learningProgramFilter").val() == null || $("#"+formId+" #learningProgramFilter").val().length == 0){
+		learningPrograms.push('A');
+	}else{
+		learningPrograms.push($("#"+formId+" #learningProgramFilter").val());
+	}
 	filter['learningPrograms'] = learningPrograms;
 	var isAllGrade=$("#"+formId+" #standardIdFilter").val().find((element) => element == 'A');
 	if(isAllGrade!= undefined || isAllGrade=='A' || isAllGrade==''){
@@ -405,12 +429,13 @@ function fetchCommissionRate(formId, isEdit) {
 	}
 	if ($("#"+formId+" #learningProgramFilter").val()=='A') {
 
-	}else{
-		if($("#"+formId+" #standardIdFilter").val().length==0){
-			showMessageTheme2(0, 'Select Grade', '', true);
-			return false
-		}
 	}
+	// }else{
+	// 	if($("#"+formId+" #standardIdFilter").val().length==0){
+	// 		showMessageTheme2(0, 'Select Grade', '', true);
+	// 		return false
+	// 	}
+	// }
 	var responseData={};
 	$.ajax({
 		type : "POST",
@@ -430,7 +455,7 @@ function fetchCommissionRate(formId, isEdit) {
 			}else{
 				responseData=data;
 				if(!isEdit){
-					showMessageTheme2(1, 'Commission rate based on filter criteria', '', true);
+					// showMessageTheme2(1, 'Commission rate based on filter criteria', '', true);
 				}
 			}
 		},
@@ -489,29 +514,31 @@ function commissionRateLogsPartner(parentId) {
 	return responseData;
 }
 
+// $(document).on('show.bs.modal', function (event) {
+// 	var modalEle = $(event.target);
+// 	const openModals = $(".modal.show").not(this);
+// 	if (modalEle.hasClass('right-slide-modal')) {
+//         var zIndex = 1050 + openModals.length * 10 + 10;
+//         customModalShowPartner(modalEle, zIndex);
+//     }
+// 	// var zIndex = 1050 + $('.modal:visible').length * 20;
+//     // var modalEle = $(this);
+//     // customModalShow(modalEle, zIndex)
+// });
 
-$(document).on('show.bs.modal', function (event) {
-	var modalEle = $(event.target);
-	if (modalEle.hasClass('right-slide-modal')) {
-        var zIndex = 1050 + $('.modal:visible').length * 20;
-        customModalShowPartner(modalEle, zIndex);
-    }
-	// var zIndex = 1050 + $('.modal:visible').length * 20;
-    // var modalEle = $(this);
-    // customModalShow(modalEle, zIndex)
-});
-
-function customModalShowPartner(src, zIndex, ){
-	$(src).css('z-index', zIndex);
-	$(src).find('.modal-dialog').css('margin-top', 60 * $('.right-slide-modal:visible').length); // Adjust margin-top dynamically
-	$(src).find(".modal-content").css("height", 'calc(100% - ' + (60 * $('.right-slide-modal:visible').length) + 'px)');
-	$('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack '+(zIndex-1));
-}
+// function customModalShowPartner(src, zIndex, ){
+// 	$(src).css('z-index', zIndex);
+// 	$(src).find('.modal-dialog').css('margin-top', 60 * $('.right-slide-modal:visible').length); // Adjust margin-top dynamically
+// 	$(src).find(".modal-content").css("height", 'calc(100% - ' + (60 * $('.right-slide-modal:visible').length) + 'px)');
+// 	setTimeout(() => {
+// 		$('body .modal-backdrop:last-child').css('z-index', zIndex - 1).addClass('modal-stack '+(zIndex-1));
+// 	},300)
+// }
   
-$(document).on('hidden.bs.modal', '.right-slide-modal', function () {
-	var index =$(this).css('z-index')-1;
-	$("body").find('.'+index).remove();
-});
+// $(document).on('hidden.bs.modal', '.right-slide-modal', function () {
+// 	var index =$(this).css('z-index')-1;
+// 	$("body").find('.'+index).remove();
+// });
 
 function getAllTimeZoneForPartner(fromTimeId) {
 	//hideMessage('');
@@ -535,4 +562,827 @@ function getAllTimeZoneForPartner(fromTimeId) {
 	});
 }
 
+
+var oldValue = {};
+function clickedOnThis(src){
+	if(!oldValue.hasOwnProperty(src.id)){
+		oldValue[src.id] = $(src).val();
+	}
+}
+ 
+var mainObject = {};
+function tempFunction(elementId){
+	var newValue = $("#"+elementId).val()
+	if(oldValue[elementId] != newValue){
+		if(!mainObject.hasOwnProperty($("#id_"+elementId.split("_")[1]).val())){
+			var rowObject = {};
+			rowObject[elementId.split("_")[0]] = newValue;
+			mainObject[$("#id_"+elementId.split("_")[1]).val()] = rowObject;
+		}else{
+			if(mainObject[$("#id_"+elementId.split("_")[1]).val()].hasOwnProperty(elementId.split("_")[0])){
+				mainObject[$("#id_"+elementId.split("_")[1]).val()][elementId.split("_")[0]]
+			}
+			mainObject[$("#id_"+elementId.split("_")[1]).val()][elementId.split("_")[0]] = newValue;
+		}
+		let excludeList = ['regFee_', 'bae_', 'progDisc_']
+		if(!excludeList.some(sub => elementId.startsWith(sub))){
+			updatedFieldHeighLight(true, elementId.split('_')[1]);
+		}
+		$("#"+elementId).addClass('border border-success');
+	}else{
+		let [key2, key1] = elementId.split("_");
+		key1 = $("#id_"+key1).val();
+		if (mainObject?.[key1]?.[key2] !== undefined) {
+			delete mainObject[key1][key2];
+			if (Object.keys(mainObject[key1]).length === 0) {
+				delete mainObject[key1];
+			}
+			updatedFieldHeighLight(false, elementId.split('_')[1]); 
+		}
+		$("#"+elementId).removeClass('border border-success');
+	}
+}
+
+
+function getCourseProviderOptions(courseProviderIds){
+	var html='';
+	for(var index=0;index<courseProviderIds.length;index++){
+		html+='<option value="'+courseProviderIds[index]+'">'+getCourseProviderNameByIds([courseProviderIds[index]])+'</option>';
+	}
+	return html;
+}
+
+function selectCourseProvider(){
+	var selectedLearningProgram = $("#feeStructureLearningProgram option:selected").data('id');
+	if(selectedLearningProgram != null && selectedLearningProgram != undefined){
+		$("#feeStructurecourseProvider").html(getCourseProviderOptions(selectedLearningProgram.toString().split(',')));
+	}else{
+		$("#feeStructurecourseProvider").html('');
+	}
+}
+
+function checkboxChecker(src){
+	if($(src).is(":checked")){
+		if($(src).attr("class").includes("classPayment2")){
+			$("#paymentGatewaysDiv").slideDown();
+			$('#stripePaymentMode').prop("checked", false)
+			$('#airwallexPaymentMode').prop("checked", false)
+		}
+	}else{
+		if($(src).attr("class").includes("classPayment2")){
+			$("#paymentGatewaysDiv").slideUp();
+			$('#stripePaymentMode').prop("checked", false)
+			$('#airwallexPaymentMode').prop("checked", false)
+		}
+	}
+}
+var currentFeeData = {};
+function getStandardFee(callFrom) {
+	if(callFrom != 'fromButton'){
+		$("#feeStructureLearningProgram").html(getLearningProgramAndCourseProviderMappingBySchoolId($("#pSchoolId").val(), false));
+		selectCourseProvider();
+		oldValue = {}
+		mainObject = {}
+	}
+	var feeStructureLearningProgram = $("#feeStructureLearningProgram").val();
+	var feeStructurecourseProvider = $("#feeStructurecourseProvider").val();
+	if(callFrom == 'fromButton'){
+		if(Object.keys(mainObject).length > 0){
+			showMessageTheme2(0, 'Please save your changes before getting data', '', true);
+			return false;
+		}
+		if(feeStructureLearningProgram == null || feeStructureLearningProgram == undefined || feeStructureLearningProgram == ''){
+			showMessageTheme2(0, 'Please select learning program', '', true);
+			return;
+		}
+		if(feeStructurecourseProvider == null || feeStructurecourseProvider == undefined || feeStructurecourseProvider == ''){
+			showMessageTheme2(0, 'Please select course provider program', '', true);
+			return;
+		}
+	}
+	var responseData={
+		"schoolId": $("#pSchoolId").val(),
+		"learningProgram":feeStructureLearningProgram,
+		"courseProvider": feeStructurecourseProvider
+	};
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLForHTML('dashboard','get-fee-structure'),
+		data : JSON.stringify(responseData),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(0, data['message'], '', true);
+				}
+			}else{
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").val("");
+				var gradesArr = ["KG","1","2","3","4","5","6","7","8","9","10","11","12"]
+				$.each(gradesArr, function(index, grade){
+					// $.each(data.feeDetailList[grade], function (i, value){
+						if(data.feeDetailList[grade] != undefined){
+							let id = data.feeDetailList[grade].id;
+							$("#id_"+index).val(id);
+							$("#id_"+index).attr("data-id", "id_"+id);
+							$("#regFee_"+index).val(data.feeDetailList[grade].regFee.toFixed(2));
+							$("#regFee_"+index).attr("data-id", "regFee_"+id);
+							$("#bae_"+index).val(data.feeDetailList[grade].bae.toFixed(2));
+							$("#bae_"+index).attr("data-id", "bae_"+id);
+							$("#progDisc_"+index).val(data.feeDetailList[grade].progDisc.toFixed(2));
+							$("#progDisc_"+index).attr("data-id", "progDisc_"+id);
+							$("#courseFee_"+index).val(data.feeDetailList[grade].courseFee.toFixed(2));
+							$("#courseFee_"+index).attr("data-id", "courseFee_"+id);
+							$("#annualDiscount_"+index).val(data.feeDetailList[grade].annualDisc.toFixed(2));
+							$("#annualDiscount_"+index).attr("data-id", "annualDiscount_"+id);
+							$("#minCredit_"+index).val(data.feeDetailList[grade].minCredit);
+							$("#minCredit_"+index).attr("data-id", "minCredit_"+id);
+							$("#ftFull_"+index).val(data.feeDetailList[grade].ftFull.toFixed(2));
+							$("#ftFull_"+index).attr("data-id", "ftFull_"+id);
+							$("#ftHalf_"+index).val(data.feeDetailList[grade].ftHalf.toFixed(2));
+							$("#ftHalf_"+index).attr("data-id", "ftHalf_"+id);
+							$("#crFull_"+index).val(data.feeDetailList[grade].crFull.toFixed(2));
+							$("#crFull_"+index).attr("data-id", "crFull_"+id);
+							$("#crHalf_"+index).val(data.feeDetailList[grade].crHalf.toFixed(2));
+							$("#crHalf_"+index).attr("data-id", "crHalf_"+id);
+							$("#advFull_"+index).val(data.feeDetailList[grade].advFull.toFixed(2));
+							$("#advFull_"+index).attr("data-id", "advFull_"+id);
+							$("#advHalf_"+index).val(data.feeDetailList[grade].advHalf.toFixed(2));
+							$("#advHalf_"+index).attr("data-id", "advHalf_"+id);
+							$("#honFull_"+index).val(data.feeDetailList[grade].honFull.toFixed(2));
+							$("#honFull_"+index).attr("data-id", "honFull_"+id);
+							$("#honHalf_"+index).val(data.feeDetailList[grade].honHalf.toFixed(2));
+							$("#honHalf_"+index).attr("data-id", "honHalf_"+id);
+							$("#apFull_"+index).val(data.feeDetailList[grade].apFull.toFixed(2));
+							$("#apFull_"+index).attr("data-id", "apFull_"+id);
+							$("#apHalf_"+index).val(data.feeDetailList[grade].apHalf.toFixed(2));	
+							$("#apHalf_"+index).attr("data-id", "apHalf_"+id);
+						}
+					// })
+				});
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger border-success');
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true)
+				currentFeeData = getData();
+			}
+		}
+	});
+	return responseData;
+}
+
+function saveStandardFee() {
+	// if(Object.keys(mainObject).length == 0){
+	// 	$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger');
+	// 	$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true);
+	// 	showMessageTheme2(1, 'No changes found', '', true);
+	// 	return;
+	// }else 
+	let updateFeeData = getDifferences(currentFeeData, getData());
+	if(Object.keys(updateFeeData).length == 0){
+		$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger');
+		$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true);
+		showMessageTheme2(1, 'No changes found', '', true);
+		return;
+	}
+	if(validationForStandardFee()){
+		return;
+	}
+	var requestData = {
+		"schoolId" : $("#pSchoolId").val(),
+		"learningProgram" : $("#feeStructureLearningProgram").val(),
+		"courseProviderId" : $("#feeStructurecourseProvider").val(),
+		"standardfeeDetails":Object.entries(updateFeeData),
+		"loginUser" : USER_ID,
+		"rowLeadId" : $("#partnerUserB2BSaveForm #rawLeadId").val()
+	};
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLForHTML('dashboard','add-update-fee-structure'),
+		data : JSON.stringify(requestData),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					$('[data-id="'+data['notValid']+'"]').addClass('border border-danger');
+					showMessageTheme2(0, data['message'], '', true);
+				}
+			}else{
+				oldValue = {};
+				mainObject = {};
+				updateFeeData = {};
+				currentFeeData = getData();
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger');
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-success');
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true);
+				showMessageTheme2(1, data['message'], '', true);
+				updatePartnerProgressBar();
+			}
+		}
+	});
+}
+ 
+function validationForStandardFee(){
+	var headArr = ['regFee_','bae_','progDisc_','courseFee_','annualDiscount_','minCredit_','ftFull_','ftHalf_','crFull_','crHalf_','advFull_','advHalf_','honFull_','honHalf_','apFull_','apHalf_'];
+	flag = false;
+	$.each(mainObject, function(key, value1) {
+		headArr.forEach(function(value2, index){
+			if($('[data-id="'+value2+key+'"]').val() == null || $('[data-id="'+value2+key+'"]').val() == undefined || $('[data-id="'+value2+key+'"]').val() == '' || $('[data-id="'+value2+key+'"]').val() == 0){
+				$('[data-id="'+value2+key+'"]').addClass('border border-danger')
+				flag = true;
+			}else{
+				$('[data-id="'+value2+key+'"]').removeClass('border border-danger')
+			}
+		})
+	});
+	return flag;
+}
+
+function getState(){
+	callStates('officeContactDetailsForm',$("#officeCountryId").val(),'officeCountryId','officeStateId')
+}
+
+function getCity(){
+	callCities('officeContactDetailsForm',$("#officeStateId").val(),'officeStateId','officeCityId')
+}
+
+function disabledEnableRow(rowId, index){
+	if($("#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+"").attr('disabled')){
+		$("#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+"").attr('disabled', false)
+	}else{
+		$("#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+"").attr('disabled', true)
+	}
+}
+
+function calculateFee(indexValue){
+	var courseFee = $("#courseFee_"+indexValue).val();
+	var minCredit = $("#minCredit_"+indexValue).val();
+	var annualDisc = $("#annualDiscount_"+indexValue).val();
+	if(minCredit == null || minCredit == undefined || minCredit == ''){
+		var classText = ['ftFull_', 'ftHalf_', 'crFull_', 'crHalf_', 'advFull_', 'advHalf_', 'honFull_', 'honHalf_', 'apFull_', 'apHalf_'];
+		classText.forEach(function(value, index){
+			$("#"+value+indexValue).val(0);
+		});
+	}else{
+		const base = (courseFee - annualDisc) / minCredit;
+		const adv = base + 25;
+		const ap = base + 50;
+		$("#ftFull_" + indexValue).val(base.toFixed(2));
+		$("#ftHalf_" + indexValue).val((base / 2).toFixed(2));
+		$("#crFull_" + indexValue).val(base.toFixed(2));
+		$("#crHalf_" + indexValue).val((base / 2).toFixed(2));
+		$("#advFull_" + indexValue).val(adv.toFixed(2));
+		$("#advHalf_" + indexValue).val((adv / 2).toFixed(2));
+		$("#honFull_" + indexValue).val(adv.toFixed(2));
+		$("#honHalf_" + indexValue).val((adv / 2).toFixed(2));
+		$("#apFull_" + indexValue).val(ap.toFixed(2));
+		$("#apHalf_" + indexValue).val((ap / 2).toFixed(2));
+	}
+}
+function updatedFieldHeighLight(update, indexValue) {
+    const fields = [
+        "ftFull", "ftHalf",
+        "crFull", "crHalf",
+        "advFull", "advHalf",
+        "honFull", "honHalf",
+        "apFull", "apHalf"
+    ];
+
+    fields.forEach(field => {
+        const selector = `#${field}_${indexValue}`;
+        if (update) {
+            $(selector).addClass("border border-success");
+        } else {
+            $(selector).removeClass("border border-success");
+        }
+    });
+}
+
+function updateFieldsBasedOnPartnerType() {
+    const partnerType = $('#originalPartnerType').val();
+    if (partnerType === 'GP') {
+      $('#whiteLabel').val('NWL').prop('disabled', true);
+      $('#commissionPayout').val('SWP').prop('disabled', true);
+      $('#enrollingStudent').val('FIS').prop('disabled', true);
+    } else if (partnerType === 'WLP') {
+      $('#whiteLabel').val('WLWC').prop('disabled', true);
+      $('#commissionPayout').val('PWP').prop('disabled', true);
+      $('#enrollingStudent').val('OWN').prop('disabled', true);
+    } else {
+      $('#whiteLabel').val('').prop('disabled', false);
+      $('#commissionPayout').val('').prop('disabled', false);
+      $('#enrollingStudent').val('').prop('disabled', false);
+    }
+	// updateTabsVisibility();
+}
+
+function updateTabsVisibility() {
+    const partnerType = $('#originalPartnerType').val();
+    const commissionValue = $('#commissionPayout').val();
+	debugger
+    if(partnerType === 'WLP') {
+	  $('#officeContactDetailsTab').show();
+	  $("#createPartnerTab").text("Update Partner");
+	  $("#createUserB2B").text("Next");
+	  $('#officeContactDetailsTab').tab('show');
+	  getOfficeContentsDetails('officeContactDetailsForm')
+	  if(commissionValue === 'PWP'){
+		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
+	  }
+    }else if(partnerType === 'GP' || partnerType === "EPER") {
+      $('#setCommissionRateTab').show();
+	  $("#createPartnerTab").text("Update Partner");
+	  $("#createUserB2B").text("Next");
+	  $('#setCommissionRateTab').tab('show');
+	  getCommissionRate("filterCommissionRate")
+	  if(commissionValue === 'PWP'){
+		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
+	  }else{
+		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:flex !important");
+	  }
+    }else{
+		$('#enrollRegTab').show();
+		$('#feeStructureTab').show();
+		$('#themeTab').show();
+		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:flex !important");
+	}
+}
+
+var activeLearningProgramStatusMap = {};
+async function initEnrollReg() {
+	return new Promise((resolve, reject) => {
+        $.ajax({
+            url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/get-learning-programs-status?schoolId=${$("#pSchoolId").val()}`,
+            method: 'GET',
+            success: function (response) {
+                try {
+                    var data = response.allLearningProgramsOptions || [];
+					if(data.status == 0){
+						initEnrollReg();
+					}else{
+						originalLearningProgramMap = {};
+						// updateLearningProgramMap = {};
+						activeLearningProgramStatusMap = {};
+
+						$.each(data, function (i, item) {
+							const statusInfo = {
+								status: item.learningProgramStatus,
+								enrollmentFor: item.enrollmentFor
+							};
+
+							originalLearningProgramMap[item.learningProgram] = statusInfo;
+
+							if (item.learningProgramStatus === 'Y') {
+								activeLearningProgramStatusMap[item.learningProgram] = statusInfo;
+							}
+						});
+
+						if (Object.keys(activeLearningProgramStatusMap).length === 0) {
+							$('#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab, #themeTab').hide();
+						} else {
+							$('#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab, #themeTab').show();
+						}
+						var html = enrollRegContent(data);
+						$('#enrollReg').html(html);
+						if (Object.keys(updateLearningProgramMap).length === 0) {
+							$("#syncCoursesAndSubjectsBtn").hide();
+						}else{
+							$("#syncCoursesAndSubjectsBtn").show();
+						}
+						resolve(response);
+					}
+                    
+                } catch (err) {
+                    reject(err);
+                }
+            },
+            error: function (err) {
+                console.error('Failed to fetch learning programs:', err);
+                reject(err);
+            }
+        });
+    });
+}
+
+function trackProgramChange(el) {
+	const key = $(el).data('key');
+	const enrollmentFor = $(el).data('enroll');
+	const newStatus = $(el).is(':checked') ? 'Y' : 'N';
+	const original = originalLearningProgramMap[key];
+  
+	if (original && original.status !== newStatus) {
+		updateLearningProgramMap[key] = {
+			status: newStatus,
+			enrollmentFor: enrollmentFor
+		};
+	} else {
+		delete updateLearningProgramMap[key];
+	}
+
+	if (newStatus === 'Y') {
+		activeLearningProgramStatusMap[key] = {
+			status: newStatus,
+			enrollmentFor: enrollmentFor
+		};
+	} else {
+		delete activeLearningProgramStatusMap[key];
+	}
+}
+
+function updateLearningProgramsPartner() {
+	if (Object.keys(activeLearningProgramStatusMap).length === 0) {
+		showMessageTheme2(2, 'Please select a learning program.');
+		return;
+	}
+	if (Object.keys(updateLearningProgramMap).length === 0) {
+		showMessageTheme2(2, 'No changes found.');
+		return;
+	}
+	const payload = {
+	  schoolId: $("#pSchoolId").val(),
+	  parentSchoolId: SCHOOL_ID,
+	  actionType: 'u',
+	  loginUser:USER_ID,
+	  updateLearningProgramMap: updateLearningProgramMap
+	};
+  
+	$.ajax({
+	  url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/save-learning-programs`,
+	  method: 'POST',
+	  contentType: 'application/json',
+	  data: JSON.stringify(payload),
+	  success: async function () {
+		showMessageTheme2(1, 'Learning program settings updated successfully!');
+		await initEnrollReg();
+		$("#syncCoursesAndSubjectsBtn").show();
+		updatePartnerProgressBar();
+	  },
+	  error: function (err) {
+		showMessageTheme2(0,'Failed to update.');
+		console.error(err);
+	  }
+	});
+}
+
+function saveLearningPrograms(){
+	const payload = {
+		schoolId: $("#pSchoolId").val(),
+		parentSchoolId: SCHOOL_ID,
+	};
+
+	$.ajax({
+		url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/save-learning-programs`,
+		method: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify(payload),
+		success: function (response) {
+		  console.log(response.message);
+		},
+		error: function (err) {
+		  console.error(err.message);
+		}
+	  });
+}
+
+function getData(){
+	var obj = {};
+	var headArr = ['regFee_','bae_','progDisc_','courseFee_','annualDiscount_','minCredit_','ftFull_','ftHalf_','crFull_','crHalf_','advFull_','advHalf_','honFull_','honHalf_','apFull_','apHalf_'];
+	$('#feeStructureTable tbody tr').each(function() {
+		let firstCell = $(this).find('td input').val();
+		if(firstCell != undefined && firstCell != ''){
+			var valueObj = {}
+			headArr.forEach(function(value, index){
+				var fieldValue = $('[data-id="'+value+firstCell+'"]').val();  
+				valueObj[value.split('_')[0]] = fieldValue;
+			});
+			obj[firstCell] = valueObj;
+		}
+	});
+    return obj;
+}
+
+function openFeeStructureLogsModal(){
+	if($("#feeStructureLogsModal").length > 0 ){
+		$("body #feeStructureLogsModal").remove();
+		$("body").append(feeStructureLogsModal());
+		$("#feeStructureLogsModal").modal("show");
+	}else{
+		$("body").append(feeStructureLogsModal());
+		$("#feeStructureLogsModal").modal("show");
+	}
+}
+
+// var PARTNER_SCHOOL_IMAGES = [];
+// function base64ImageFileAsURL(f, fileType, elemId, uploadType, expectedWidth, expectedHeight) {
+//     const reader = new FileReader();
+//     reader.onload = function (e) {
+//         var binaryData = reader.result.substr(reader.result.indexOf(',') + 1);
+//         var acceptFileTypes = /^image\/(png|jpe?g)$/i;
+//         var uploadFlag = true;
+
+//         if (!acceptFileTypes.test(f.type)) {
+//             showMessageTheme2(0, 'Only JPG, JPEG or PNG files are allowed.');
+// 			$(`#fileupload${elemId}`).val('');
+//             return false;
+//         }
+
+//         if (f.size > 1024 * 1024) {
+//             showMessageTheme2(0, 'File size should not exceed 1 MB.');
+// 			$(`#fileupload${elemId}`).val('');
+//             return false;
+//         }
+
+//         const img = new Image();
+//         img.src = e.target.result;
+//         img.onload = function () {
+//             if (img.width !== expectedWidth || img.height !== expectedHeight) {
+//                 showMessageTheme2(0, `Image must be ${expectedWidth}×${expectedHeight} px.`);
+// 				$(`#fileupload${elemId}`).val('');
+//                 return false;
+//             }
+
+//             const obj = {
+//                 fileName: f.name,
+//                 fileType: parseInt(fileType),
+//                 fileContent: binaryData,
+//                 previewUrl: e.target.result
+//             };
+
+//             const index = PARTNER_SCHOOL_IMAGES.findIndex(item => item.fileType === parseInt(fileType));
+//             if (index !== -1) PARTNER_SCHOOL_IMAGES.splice(index, 1);
+//             PARTNER_SCHOOL_IMAGES.push(obj);
+
+//             $(`#uploadSection${elemId}`).hide();
+//             $(`#fileDisplaySection${elemId}`).show();
+//             $(`#fileNameDisplay${elemId}`).text(f.name);
+//         };
+//     };
+
+//     reader.readAsDataURL(f);
+// }
+
+// function uploadDocsFun(src, uploadType, expectedWidth, expectedHeight) {
+//     const fileType = $(src).attr('fileType');
+//     const elemId = $(src).attr('elem-id');
+//     const file = src.files[0];
+//     if (file) {
+//         base64ImageFileAsURL(file, fileType, elemId, uploadType, expectedWidth, expectedHeight);
+//     }
+// }
+
+
+
+function closeImageModal(){
+	$("#imageModal").modal("hide");
+	setTimeout(() => {
+		$("#imageModal").remove();
+	}, 500);
+}
+
+
+
+function getDifferences(obj1, obj2) {
+  const differences = {};
+
+  for (const key in obj1) {
+    if (obj2.hasOwnProperty(key)) {
+      for (const subKey in obj1[key]) {
+        if (
+          obj2[key].hasOwnProperty(subKey) &&
+          obj1[key][subKey] !== obj2[key][subKey]
+        ) {
+          if (!differences[key]) differences[key] = {};
+          differences[key][subKey] = {
+            old: obj1[key][subKey],
+            new: obj2[key][subKey]
+          };
+        }
+      }
+    }
+  }
+
+  return differences;
+}
+
+function getLogData(indexValue){
+	let requestData = {
+		standardFeeId : $("#id_"+indexValue).val(),
+		schoolId : $("#pSchoolId").val(),
+		userId : USER_ID
+	}
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLForHTML('dashboard','get-standard-fee-log'),
+		data : JSON.stringify(requestData),
+		dataType : 'json',
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(0, data['message'], '', false);
+				}
+			}else{
+				if($("#feeStructureLogsModal").length == 1){
+					$("#feeStructureLogsModal").remove();
+				}
+				$("body").append(feeStructureLogsModal());
+				showLogCards(data.logList);
+				$("#feeStructureLogsModal").modal("show");
+			}
+		}
+	});
+}
+
+function showLogCards(logList) {
+	let html = "";
+	logList.sort((a, b) => b.id - a.id);
+	html += '<div class="container-fluid"><div class="row">';
+	logList.forEach((log, i) => {
+		const currData = JSON.parse(log.logData);
+		const prevLog = logList.find(l => l.id == log.prevLogId);
+		const prevData = prevLog ? JSON.parse(prevLog.logData) : {};
+
+		const diffs = compareObjects(prevData, currData);
+		const preview = Object.keys(diffs).slice(0, 2).map(key => `
+			<div class="d-flex justify-content-between">
+				<span class="text-muted">${formatLabel(key)}</span>
+				<span><b>${diffs[key].newVal}</b></span>
+			</div>
+		`).join('');
+
+		html += `
+			<div class="col-md-4 d-flex">
+				<div class="card mb-3 shadow-sm border flex-fill rounded-10">
+					<div class="card-header d-flex justify-content-between align-items-center bg-dark text-white py-2 rounded-top-left-10 rounded-top-right-10">
+						<div>
+							<b>${changeDateFormat(new Date(log.createdAt), "MMM dd, yyyy hh:mm A")}</b>
+							<span class="ml-2 small text-light">by ${log.createdByName == undefined ? USER_FULL_NAME : log.createdByName}</span>
+						</div>
+					</div>
+					<div class="card-body">
+						${preview || '<span class="text-muted">No visible changes</span>'}
+						<button class="btn btn-outline-primary btn-sm mt-3 view-all-btn" data-index="${i}">View All Changes</button>
+					</div>
+				</div>
+			</div>
+		`;
+	});
+	html += '</div></div>';
+
+	$("#feeStructureLogsModal .modal-body").html(html);
+
+	$(".view-all-btn").on("click", function () {
+		const index = $(this).data("index");
+		showFullChangeModal(logList[index], logList);
+	});
+}
+
+function compareObjects(oldObj, newObj) {
+	let diffs = {};
+	for (let key in newObj) {
+		if (newObj[key] != oldObj[key]) {
+			diffs[key] = {
+				oldVal: oldObj[key] || '—',
+				newVal: newObj[key]
+			};
+		}
+	}
+	return diffs;
+}
+
+function showFullChangeModal(currLog, logList) {
+	const prevLog = logList.find(l => l.id == currLog.prevLogId);
+	const prevData = prevLog ? JSON.parse(prevLog.logData) : {};
+	const currData = JSON.parse(currLog.logData);
+	const diffs = compareObjects(prevData, currData);
+
+	let updatedDate = currLog.updatedDate || currLog.createdAt;
+	diffs['updatedDate'] = {
+		oldVal: prevLog ? changeDateFormat(new Date(prevLog.updatedDate || prevLog.createdAt), "MMM dd, yyyy hh:mm A") : 'N/A',
+		newVal: changeDateFormat(new Date(updatedDate), "MMM dd, yyyy hh:mm A")
+	};
+
+	let html = `
+		<div class="modal fade" id="fullChangeModal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+				<div class="modal-content">
+					<div class="modal-header bg-primary text-white py-2">
+						<h5 class="modal-title">All Changes</h5>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						${Object.keys(diffs).length === 0
+							? `<p class="text-muted">No differences found.</p>`
+							: Object.keys(diffs).map(key => `
+								<div class="border-bottom pb-2 mb-2">
+									<div class="font-weight-bold">${formatLabel(key)}</div>
+									<div class="text-danger small">Old: ${diffs[key].oldVal}</div>
+									<div class="text-success small">New: ${diffs[key].newVal}</div>
+								</div>
+							  `).join('')}
+					</div>
+					<div class="modal-footer py-2">
+						<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	`;
+
+	$('#fullChangeModal').remove();
+	$('body').append(html);
+	$('#fullChangeModal').modal('show');
+}
+
+function updatePartnerProgressBar() {
+    $.ajax({
+        url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +  `/school-setup-progress-status?schoolId=${$("#pSchoolId").val()}`,
+        type: "GET",
+		dataType: "json",
+		contentType: "application/json",
+        success: function(response) {
+            if (response && response.details && response.details.OVERALL_PERCENTAGE !== undefined) {
+                var percentage = response.details.OVERALL_PERCENTAGE;
+				$("#partnerProgressBarFill").css("width", percentage + "%").attr("aria-valuenow", percentage);
+				$("#partnerProgressText").text(percentage + "% Complete");
+            }
+        },
+        error: function() {
+            console.error("Failed to fetch progress status");
+        }
+    });
+}
+
+function syncCoursesAndSubjects() {
+	var body = {
+		schoolId: $("#pSchoolId").val(),
+		parentSchoolId: SCHOOL_ID
+	}
+	$.ajax({
+		url: `${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/save-courses-and-subjects`,
+		method: "POST",
+		dataType: "json",
+		contentType: APPLICATION_JSON_VALUE,
+		data: JSON.stringify(body),
+		success: function () {
+			$(".partnerProgressBar").show();
+			updateLearningProgramMap = {};
+			checkCourseSubjectProgress();
+		},
+		error: function () {
+			showMessageTheme2(0, "Error syncing courses and subjects.");
+		}
+	});
+}
+
+function checkCourseSubjectProgress() {
+	if (PROGRESS_INTERVAL) {
+		clearInterval(PROGRESS_INTERVAL);
+	}
+	updateProgress();
+	PROGRESS_INTERVAL = setInterval(updateProgress, 5000);
+}
+
+function updateProgress() {
+	$.ajax({
+		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + `/school-setup-progress-status?schoolId=${$("#pSchoolId").val()}`,
+		method: "GET",
+		success: function (response) {
+			if (response && response.details && response.details.COURSE_SUBJECTS) {
+				let percentage = response.details.COURSE_SUBJECTS.PERCENTAGE || 0;
+
+				$(".partnerProgressBar").each(function () {
+					$(this).find(".progress-bar")
+						.css("width", percentage + "%")
+						.attr("aria-valuenow", percentage);
+					$(this).find(".partnerProgressText").text(percentage + "% Complete");
+				});
+
+				if (percentage >= 100) {
+					clearInterval(PROGRESS_INTERVAL);
+					PROGRESS_INTERVAL = null;
+					$("#syncCoursesAndSubjectsBtn").hide();
+					setTimeout(function(){
+						$("#feeStructureTab").tab("show");
+						getStandardFee('fromTab');
+					},1000);
+				}
+			}
+		},
+		error: function () {
+			console.warn("Error fetching progress status.");
+		}
+	});
+}
 

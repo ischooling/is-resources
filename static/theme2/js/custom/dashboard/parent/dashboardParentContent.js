@@ -119,7 +119,7 @@ async function footerContent(data){
         `<div class="app-wrapper-footer mt-sm-4">
             <div class="app-footer mt-sm-4">
                 <div class="app-footer__inner">
-                    <p style="margin: 0">${schoolSettingsTechnical.copyrightYear} © ${schoolSettingsTechnical.copyrightUrl}</p>
+                    <p style="margin: 0">Copyright © ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>
                 </div>
             </div>
         </div>`;

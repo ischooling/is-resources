@@ -1075,7 +1075,6 @@ function getRequestForSaveCounselorCommissionRate(formId){
 	authentication['userId'] = USER_ID;
 	request['authentication'] = authentication;
 	request['commissionRate'] = commissionRate;
-	debugger;
 	return request;
 }
 

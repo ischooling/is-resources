@@ -304,21 +304,31 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		$("#dashboardContentInHTML").html(getEmailLogsContent("Email Logs"));
 		$("#startDate").datepicker({
 			autoclose: true,
-			format: "yyyy-mm-dd",
-			todayHighlight: true,
+			format: 'yyyy-mm-dd',
+
 		});
-		$("#endDate").datepicker({
-			autoclose: true,
-			format: "yyyy-mm-dd",
-			todayHighlight: true,
+		$("#classStatus").select2({
+			theme:"bootstrap4",
+			minimumResultsForSearch:Infinity
+
 		});
-		getEmailLogsByEmail();
-  } else if (pageNo == "wati-numbers") {
+		$("#markStatus").select2({
+			theme:"bootstrap4",
+		});
+		$("#sortBy").select2({
+			theme:"bootstrap4",
+			minimumResultsForSearch:Infinity
+
+		});
+		getEmailLogsByEmail()
+	} else if (pageNo === "meeting-management") {
+    	getMeetingManagementContent("Meeting Management")
+	} else if (pageNo == "wati-numbers") {
 		renderWatiNumbersContent();
-  } else if (pageNo == "email-status") {
+  	} else if (pageNo == "email-status") {
 		$("#dashboardContentInHTML").html(getEmailVerifyContent("Email Verification", false));
-  }else if (pageNo == "extra-session-details") {
-    	$("#dashboardContentInHTML").html(renderManageClassContent('Manage Extra Classes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+  	}else if (pageNo == "extra-session-details") {
+    		$("#dashboardContentInHTML").html(renderManageClassContent('Manage Extra Classes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
 		getExtraSessionDetails('extraSessionDetails',0, ''+roleAndModule.moduleId+'');
 		$("#extraDetailSearch").on('keyup', function (e) {
 			if (e.key === 'Enter' || e.keyCode === 13) {
@@ -437,6 +447,104 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
   }else if(pageNo == "teacher-screening-profiles"){
 	$('#dashboardContentInHTML').html(renderTeacherPreScreeningProfileContent("Teacher Applications", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
 	teacherScreeningProfileOnloadFunction();
+  }else if(pageNo == "partner-school-payment"){
+	$('#dashboardContentInHTML').html(renderSchoolPayment());
+	initializeSchoolPaymentPage();
+  }else if (pageNo == "partner-enrollment-students-wlp") {
+	$('#dashboardContentInHTML').html(renderSchoolEnrollmentStudents("Enrollment Partner Student List"));
+	getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", SCHOOL_ID);
+    callPartnerCountries('partnerEnrollFilterForm', 0, 'countryId');
+    // callPartnerListBy('partnerEnrollFilterForm','partnerName');
+    getPartnerSchools(SCHOOL_ID);
+    callAllStandardList('partnerEnrollFilterForm', 'gradeId');
+
+    $("select#schoolName").on("change",function(){
+        getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", this.value);
+    });
+
+    $("select#countryId").on("change",function(){
+        callStates('partnerEnrollFilterForm', this.value, 'countryId');
+    });
+        
+    $("select#stateId").on("change",function(){
+        callCities('partnerEnrollFilterForm', this.value, 'stateId');
+    });
+
+    $("select#partnerName").on("change",function(){
+		$("#referralCode").val($('option:selected', this).attr('dail-referral-code'));
+   	});
+
+	$("#partnerName").select2({
+		theme:"bootstrap4"
+	});
+	$("#academicYear").select2({
+		theme:"bootstrap4"
+	});
+	$("#enrollmentStatus").select2({
+		theme:"bootstrap4"
+	});
+	$("#learningProgram").select2({
+		theme:"bootstrap4"
+	});
+	$("#gradeId").select2({
+		theme:"bootstrap4"
+	});
+	$("#commissionStatus").select2({
+		theme:"bootstrap4"
+	});
+	$("#countryId").select2({
+		theme:"bootstrap4"
+	});
+	$("#stateId").select2({
+		theme:"bootstrap4"
+	});
+	$("#cityId").select2({
+		theme:"bootstrap4"
+	});
+	$("#paymentDateFrom").datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+	});
+	$("#paymentDateTo").datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+	});
+	
+	$(".follow-up-no").click(function(){
+		$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
+		$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
+		$(this).parent().find(".follow-up-content").slideDown();
+		$(this).parent().siblings().find(".follow-up-content").slideUp();
+		$(this).parent().addClass("follow-up-accordian-active");
+		$(this).parent().siblings().removeClass("follow-up-accordian-active");
+	});
+
+	callStudentListByPartnerWLP('partnerEnrollFilterForm');
+	$("#searchEnrolled").on('click',function(){
+        currentPagePartnerEnrollmentList = 1;
+		callStudentListByPartnerWLP('partnerEnrollFilterForm');
+	});
+
+    $("#startDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+    }).on('changeDate', function (e) {
+        $('#endDate').val('');
+        $('#endDate').prop('disabled', false);
+        $('#endDate').datepicker('setStartDate', e.date);
+    });
+    
+    $("#endDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+    }).on('changeDate', function () {
+        if ($("#startDate").val() && $("#endDate").val()) {
+            getMonthlyRevenue();
+        }
+    });
+
+    getLearningProgramContentFromServer(SCHOOL_ID,'partnerEnrollFilterForm','learningProgram');
+    populateMonths();
   }
 //   else if(pageNo=='lead-report-list'){
 // 	$('#dashboardContentInHTML').html(renderSchoolReportDashboard('School Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));

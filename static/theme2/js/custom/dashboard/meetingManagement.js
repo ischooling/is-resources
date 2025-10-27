@@ -459,73 +459,73 @@ function setDateToToday(startAndEndDateIds) {
       .prop('disabled', true);
 }
 
-function goToPage(page) {
-  if($("#recurringMeetingModal").length == 1){
-    currentPageRecurringRecording = page;
-    applyRecurringRecordingFilters($("#recurringMeetingModal").data("entityId"));
-  } else {
-    if(currentTabId === "oneDayMeetings") {
-      currentPageOneDay = page;
-    } else if (currentTabId === "recurringMeetings") {
-      currentPageRecurring = page;
-    }
-    fetchMeetings($('#filterHostUserId').val());
-  }
-}
+// function goToPage(page) {
+//   if($("#recurringMeetingModal").length == 1){
+//     currentPageRecurringRecording = page;
+//     applyRecurringRecordingFilters($("#recurringMeetingModal").data("entityId"));
+//   } else {
+//     if(currentTabId === "oneDayMeetings") {
+//       currentPageOneDay = page;
+//     } else if (currentTabId === "recurringMeetings") {
+//       currentPageRecurring = page;
+//     }
+//     fetchMeetings($('#filterHostUserId').val());
+//   }
+// }
 
-function renderPagination(currentPage, totalPages) {
-  let paginationHtml = `
-    <nav aria-label="Page navigation" class="mt-3 full">
-      <ul class="pagination justify-content-center">
-        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="goToPage(${currentPage - 1})"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
-        </li>`;
+// function renderPagination(currentPage, totalPages) {
+//   let paginationHtml = `
+//     <nav aria-label="Page navigation" class="mt-3 full">
+//       <ul class="pagination justify-content-center">
+//         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+//           <button class="page-link" onclick="goToPage(${currentPage - 1})"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
+//         </li>`;
 
-  let startPage = Math.max(1, currentPage - 1);
-  let endPage = Math.min(totalPages, currentPage + 1);
+//   let startPage = Math.max(1, currentPage - 1);
+//   let endPage = Math.min(totalPages, currentPage + 1);
 
-  if (startPage > 1) {
-    paginationHtml += `
-      <li class="page-item">
-        <button class="page-link" onclick="goToPage(1)">1</button>
-      </li>`;
-    if (startPage > 2) {
-      paginationHtml += `
-        <li class="page-item">
-          <span class="page-link" style="background: transparent; border: 0px; padding: 6px 0px;">...</span>
-        </li>`;
-    }
-  }
+//   if (startPage > 1) {
+//     paginationHtml += `
+//       <li class="page-item">
+//         <button class="page-link" onclick="goToPage(1)">1</button>
+//       </li>`;
+//     if (startPage > 2) {
+//       paginationHtml += `
+//         <li class="page-item">
+//           <span class="page-link" style="background: transparent; border: 0px; padding: 6px 0px;">...</span>
+//         </li>`;
+//     }
+//   }
 
-  for (let i = startPage; i <= endPage; i++) {
-    paginationHtml += `
-      <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <button class="page-link" onclick="goToPage(${i})">${i}</button>
-      </li>`;
-  }
+//   for (let i = startPage; i <= endPage; i++) {
+//     paginationHtml += `
+//       <li class="page-item ${i === currentPage ? 'active' : ''}">
+//         <button class="page-link" onclick="goToPage(${i})">${i}</button>
+//       </li>`;
+//   }
 
-  if (endPage < totalPages) {
-    if (endPage < totalPages - 1) {
-      paginationHtml += `
-        <li class="page-item">
-          <span style="background: transparent; border: 0px; padding: 6px 0px;">...</span>
-        </li>`;
-    }
-    paginationHtml += `
-      <li class="page-item">
-        <button class="page-link" onclick="goToPage(${totalPages})">${totalPages}</button>
-      </li>`;
-  }
+//   if (endPage < totalPages) {
+//     if (endPage < totalPages - 1) {
+//       paginationHtml += `
+//         <li class="page-item">
+//           <span style="background: transparent; border: 0px; padding: 6px 0px;">...</span>
+//         </li>`;
+//     }
+//     paginationHtml += `
+//       <li class="page-item">
+//         <button class="page-link" onclick="goToPage(${totalPages})">${totalPages}</button>
+//       </li>`;
+//   }
 
-  paginationHtml += `
-        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-          <button class="page-link" onclick="goToPage(${currentPage + 1})">Next<i class="fa fa-chevron-right ml-2" style="font-size: 10px;"></i></button>
-        </li>
-      </ul>
-    </nav>`;
+//   paginationHtml += `
+//         <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+//           <button class="page-link" onclick="goToPage(${currentPage + 1})">Next<i class="fa fa-chevron-right ml-2" style="font-size: 10px;"></i></button>
+//         </li>
+//       </ul>
+//     </nav>`;
 
-  return paginationHtml;
-}
+//   return paginationHtml;
+// }
 
 async function fetchMeetings(filterHostUserId) {
   customLoader(true);
@@ -559,8 +559,8 @@ async function fetchMeetings(filterHostUserId) {
       const recurringMeetingsHtml = renderMeetings(res.data.recurringMeetings, true, totalPageOneDay, totalPageRecurring);
 
       const paginationHtml = currentTabId === "oneDayMeetings"
-        ? renderPagination(currentPageOneDay, totalPageOneDay)
-        : renderPagination(currentPageRecurring, totalPageRecurring);
+        ? renderPaginationCommon(currentPageOneDay, totalPageOneDay)
+        : renderPaginationCommon(currentPageRecurring, totalPageRecurring);
 
       const responseHtml = `
         <div class="tabs position-relative flex-wrap">
@@ -1933,7 +1933,7 @@ function showRecurringMeetingRecordings(entityId, meetingTitle, hostName) {
       try {
         populateRecurringRecording(res.data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek, res.recordingsTotalPages);
         if(res.recordingsTotalPages != 0){
-          $("#recurringPaginationContainer").html(renderPagination(currentPageRecurringRecording, res.recordingsTotalPages));
+          $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages));
         }
       } catch (error) {
         console.log("Error Fetching Data:", error);
@@ -1981,7 +1981,7 @@ function applyRecurringRecordingFilters(entityId) {
         updateRecordingsTable(res.data);
         $("#recurringMeetingModal").data("entityId", entityId);
         if(res.recordingsTotalPages > 0){
-          $("#recurringPaginationContainer").html(renderPagination(currentPageRecurringRecording, res.recordingsTotalPages));
+          $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages));
         } else{
           $("#recurringPaginationContainer").html('');
         }

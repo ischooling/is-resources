@@ -75,7 +75,8 @@ window.addEventListener("online", (event) => {
     showMessageTheme2(1, "You are back online", "", true);
   }
 });
-
+var serverMessageTimer=100;
+var serverMessageInterval = null;
 function redirectLoginPage() {
   if (signupPage > 0) {
     window.setTimeout(function () {
@@ -425,6 +426,13 @@ function hideMessage(signupError, id) {
     $("#messageDiv").hide();
   }
 }
+
+function hideMessageTheme2(){
+	clearInterval(serverMessageInterval);
+	$('.server-message').removeClass('show');
+	$('.message-hide-bar').css({'width':'100%',});
+}
+
 function showMessageTheme2(messageType, message, id, msgHide, timer) {
   if (timer == undefined || timer == null || timer == "") {
     timer = 6000;
@@ -460,9 +468,7 @@ function showMessageTheme2(messageType, message, id, msgHide, timer) {
     }
   }
 }
-$("#msgTheme2").click(function () {
-  $(".server-message").removeClass("show");
-});
+$("#msgTheme2").click(function () { $('.server-message').removeClass('show'); })
 function hideMessageTheme2(id) {
   $("#msgTheme2").html("");
   $(".server-message").removeClass("show");
@@ -6332,6 +6338,8 @@ function getDuration(startDate, endDate) {
   ].join(':');
 }
 
+
+
 function cleanBase64Images(htmlContent) {
   if (!htmlContent || typeof htmlContent !== "string") return htmlContent;
   return htmlContent.replace(
@@ -6382,7 +6390,6 @@ function updateFileName(input){
 }
 
 async function copyToClipboardSignedUrl(videoUrl) {
-  debugger;
 	try {
 	  const signedUrlResponse = await getSignedUrlForCopyClipboard(videoUrl);
 	  const parsed = JSON.parse(signedUrlResponse);
@@ -6427,4 +6434,141 @@ function getOrdinalSuffix(number) {
   if (number === 2) return "2nd";
   if (number === 3) return "3rd";
   return number + "th";
+}
+
+function getPaymentBySchoolId(schoolId){
+	let options = '';
+	$.ajax({
+		type : "GET",
+		contentType : "application/json",
+		url : BASE_URL + CONTEXT_PATH + '/' + schoolId +'/dashboard/get-partner-payment-options',
+		dataType : 'json',
+		async : false,
+		success : function(data) {
+			if (data.status) {
+                options += `<option value="">Select Payment Gateway</option>`;
+                if (data.pgList && data.pgList.length > 0) {
+                    data.pgList.forEach(function (pg) {
+                        if (pg.active === 'Y') {
+                            options += `<option value="${pg.getwayName}">${pg.getwayLabel}</option>`;
+                        }
+                    });
+                }
+            } else {
+                showMessageTheme2(0, data.message);
+            }
+		}
+	});
+	return options;
+}
+
+function formatMonth(date) {
+	const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+	return months[date.getMonth()] + " " + date.getFullYear().toString().slice(-2);
+}
+
+function allowOnlyNumbers(el) {
+	el.value = el.value
+	  .replace(/[^0-9.]/g, '')
+	  .replace(/^(\d*\.\d{0,2}).*$/, '$1')
+	  .replace(/(\..*)\./g, '$1');
+}
+
+function restrictMaxValue(src, max) {
+  let val = parseInt($(src).val(), 10);
+  if (isNaN(val)) {
+      $(src).val("");
+  } else if (val > max) {
+      $(src).val(max);
+  }
+}
+
+function getCopyright(){
+	return "Copyright © " + new Date().getFullYear() + " - " + SCHOOL_NAME + " - All Rights Reserved.";
+}
+
+function renderPaginationCommon(currentPage, totalPages) {
+	let paginationHtml = `
+	  <nav aria-label="Page navigation">
+		<ul class="pagination justify-content-center">
+		  <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+			<button class="page-link" onclick="goToPageCommon(${currentPage - 1})"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
+		  </li>`;
+  
+	let startPage = Math.max(1, currentPage - 1);
+	let endPage = Math.min(totalPages, currentPage + 1);
+  
+	if (startPage > 1) {
+	  paginationHtml += `
+		<li class="page-item">
+		  <button class="page-link" onclick="goToPageCommon(1)">1</button>
+		</li>`;
+	  if (startPage > 2) {
+		paginationHtml += `
+		  <li class="page-item">
+			<span class="page-link" style="background: transparent; border: 0px; padding: 6px 0px;">...</span>
+		  </li>`;
+	  }
+	}
+  
+	for (let i = startPage; i <= endPage; i++) {
+	  paginationHtml += `
+		<li class="page-item ${i === currentPage ? 'active' : ''}">
+		  <button class="page-link" onclick="goToPageCommon(${i})">${i}</button>
+		</li>`;
+	}
+  
+	if (endPage < totalPages) {
+	  if (endPage < totalPages - 1) {
+		paginationHtml += `
+		  <li class="page-item">
+			<span style="background: transparent; border: 0px; padding: 6px 0px;">...</span>
+		  </li>`;
+	  }
+	  paginationHtml += `
+		<li class="page-item">
+		  <button class="page-link" onclick="goToPageCommon(${totalPages})">${totalPages}</button>
+		</li>`;
+	}
+  
+	paginationHtml += `
+		  <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+			<button class="page-link" onclick="goToPageCommon(${currentPage + 1})">Next<i class="fa fa-chevron-right ml-2" style="font-size: 10px;"></i></button>
+		  </li>
+		</ul>
+	  </nav>`;
+  
+	return paginationHtml;
+}
+
+function goToPageCommon(page) {
+	if ($("#recurringMeetingModal").length === 1) {
+		currentPageRecurringRecording = page;
+		applyRecurringRecordingFilters($("#recurringMeetingModal").data("entityId"));
+	} else if (typeof currentTabId !== "undefined") {
+		if (currentTabId === "oneDayMeetings") {
+			currentPageOneDay = page;
+		} else if (currentTabId === "recurringMeetings") {
+			currentPageRecurring = page;
+		}
+		fetchMeetings($('#filterHostUserId').val());
+	}
+
+	if (typeof currentPagePartnerEnrollmentList !== "undefined") {
+		currentPagePartnerEnrollmentList = page;
+		callStudentListByPartner("partnerEnrollFilterForm");
+	}
+
+	if (typeof currentPagePaymentList !== "undefined") {
+		currentPagePaymentList = page;
+		getPartnerSchoolPaymentDetails("paymentSeachForm");
+	}
+}
+
+function formatLabel(str) {
+  if (!str) return '';
+  return str
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, s => s.toUpperCase())
+    .trim();
 }

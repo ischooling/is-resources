@@ -19,6 +19,12 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	HASHTAGLIST = await getTggingMasterListPromise('');
     var html=await getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
+	let allSchool = await getOfflineSchoolList(USER_ID);
+	let schoolDropDown = '';
+	allSchool.schoolList.forEach(school => { 
+		schoolDropDown += '<option value="'+school.schoolId+'" extraschooluserid="'+school.userId+'" ' + (school.schoolId == SCHOOL_ID ? 'selected="true"' : '')+'>'+school.schoolName+'</option>';
+	});
+	$("#leadDemoSchoolMove").append(schoolDropDown); 
 	var clickfrom='list';
 	if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 		clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
@@ -390,6 +396,12 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		if($('#logData').length<1){
 			$("body").append(getWatiTemplatesHtml());
 		}
+		let allSchool = await getOfflineSchoolList(USER_ID);
+		let schoolDropDown = '';
+		allSchool.schoolList.forEach(school => {
+			schoolDropDown += '<option value="'+school.schoolId+'" extraschooluserid="'+school.userId+'">'+school.schoolName+'</option>';
+		});
+		$("#leadDemoSchoolMove").append(schoolDropDown); 
 		var clickfrom='list';
 		if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 			clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
@@ -475,7 +487,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		}
 		
 		$('#moveLeads').modal('show');
-		callLeadAssignUserList('moveLeadNewForm',''+objRights.leadType+'','leadDemoAssignMove', true, objRights.discardPermission, USER_ID);
+		callLeadAssignUserList('moveLeadNewForm',''+objRights.leadType+'','leadDemoAssignMove', true, objRights.discardPermission, USER_ID, SCHOOL_ID);
 		$("#moveLeadNewForm #leadDemoAssignMove").select2({
 			theme:"bootstrap4",
 			dropdownParent:"#moveLeadNewForm"
@@ -747,7 +759,7 @@ async function dashboardFooterContent(){
 		+'<div class="app-footer">'
 			+'<div class="app-footer__inner">'
 				+'<div class="col">'
-					+'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
+					+'<p style="margin: 0"> Copyright © '+schoolSettingsTechnical.copyrightYear+' '+schoolSettingsTechnical.copyrightName+' - All Rights Reserved.</p>'
 				+'</div>'
 			+'</div>'
 		+'</div>'
@@ -869,10 +881,18 @@ function getMoveLeadsPopup(objRights){
 		+'					<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
 		+'						<label class="mb-0">Move Lead Assign to</label> '
 		+'						<select	name="leadDemoAssignMove" id="leadDemoAssignMove" class="form-control" >'
-		+'								<option value="0">Select Assign</option>'
-		+'							</select>'
-		+'					</div>'
-		+'					<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
+		+'							<option value="0">Select Assign</option>'
+		+'						</select>'
+		+'					</div>';
+						// if(objRights.leadType=='B2B'){
+					html+= '<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
+		+'						<label class="mb-0">Select School</label> '
+		+'						<select	name="leadDemoSchoolMove" id="leadDemoSchoolMove" class="form-control" onchange="callLeadAssignUserListBySchoolId(\'moveLeadNewForm\', \''+objRights.leadType+'\', \'leadDemoAssignMove\', \''+true+'\', \''+objRights.discardPermission+'\', \''+USER_ID+'\', \''+false+'\')">'
+		+'							<option value="0">Select School</option>'
+		+'						</select>'
+		+'					</div>';
+						// }
+					html += '<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
 		+'						<label class="mb-0">Interested To</label>'
 		+'						<select	name="leadIntrestedTo" id="leadIntrestedTo" class="form-control" >'
 		+'							<option value="B2C" '+(objRights.leadType=='B2C'?'selected':'')+'>B2C</option>'

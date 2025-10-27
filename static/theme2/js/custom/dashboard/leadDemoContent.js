@@ -219,6 +219,27 @@ async function dashboardFooterContent(){
 	return html;
 }
 
+function loaderContent(){
+	var html=
+	'<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
+		// +'<div class="loader primary-border-top-color">'
+		if(SCHOOL_ID==1){
+			
+			html+=`
+				<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024" />
+			`
+		}else{
+			html+=
+			'<div class="ball-rotate">'
+				+'<div style="background-color: rgb(247, 185, 36);"></div>'
+			+'</div>'
+			+'<p>Loading ...</p>'
+		}
+		html+=
+		// '</div>'
+	+'</div>';
+	return html;
+}
 function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotType, prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit) {
 	var response=true;
 	 customLoader(true);

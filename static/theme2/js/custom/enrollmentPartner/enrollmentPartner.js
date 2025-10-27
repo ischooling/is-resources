@@ -87,22 +87,23 @@ function getRequestForEnrollmentPartnerDetails(formId){
 	
 	
 	if('I'==$('input[name="partner_type"]:checked').val()){
-		request['workingCountries'] = $('#'+formId+' #workingCountries').val();//check how data captured
+		// request['workingCountries'] = $('#'+formId+' #workingCountries').val();//check how data captured
 		request['industryId'] = $('#'+formId+' #industryId').val();
 		if($('#'+formId+' #industryId').val()==99){
 			request['otherIndustry'] = $('#'+formId+' #otherIndustry').val();
 		}
-		request['experienceId'] = $('#'+formId+' #experienceId').val();
+		// request['experienceId'] = $('#'+formId+' #experienceId').val();
 	}else if('O'==$('input[name="partner_type"]:checked').val()){
 		request['organizationName'] = $('#'+formId+' #organizationName').val();
 		request['designation'] = $('#'+formId+' #designation').val();
-		request['operatingCountries'] = $('#'+formId+' #operatingCountries').val();//check how data captured
+		// request['operatingCountries'] = $('#'+formId+' #operatingCountries').val();//check how data captured
 		request['establishmentYear'] = $('#'+formId+' #establishmentYear').val();
 		request['noOfEmployee'] = $('#'+formId+' #noOfEmployee').val();
 		request['organizationType'] = $('input[name="organizationType"]:checked').val();
 		request['companyRegistration'] = $('input[name="companyRegistration"]:checked').val();
 	}
 	request['additionalInfo'] = $('#'+formId+' #additionalInfo').val();
+	debugger;
 	return request;
 }
 
@@ -119,6 +120,7 @@ function saveEnrollmentPartnerDetails(formId) {
 		async : false,
 		global : false,
 		success : function(data) {
+			debugger;
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
@@ -197,14 +199,15 @@ function setDefaultFormValues(data){
 	$("#stateId").val(data.details.stateId).trigger("change");
 	$("#cityId").val(data.details.cityId).trigger("change");
 	$("#noOfEmployee").val(data.details.noOfEmployees).trigger("change");
-	$("#operatingCountries").val(operatingCountries).trigger("change");
-	$("#workingCountries").val(workInCountries).trigger("change");
+	// $("#operatingCountries").val(operatingCountries).trigger("change");
+	// $("#workingCountries").val(workInCountries).trigger("change");
 	$("#establishmentYear").val(data.details.establishmentYear).trigger("change");
-	$("#experienceId").val(data.details.experienceId).trigger("change");
+	// $("#experienceId").val(data.details.experienceId).trigger("change");
 	$("#industryId").val(data.details.industryId).trigger("change");
 }
 
 function enrollmentPartnerFormVaidation(formId){
+	debugger;
 	var formSubmissionflag = true;
 	if($("#"+formId+" #firstName").val() == undefined || $("#"+formId+" #firstName").val() == null || $("#"+formId+" #firstName").val() == ''){
 		formvalidationMsg(false, 'First Name is required','firstNameError');
@@ -240,10 +243,10 @@ function enrollmentPartnerFormVaidation(formId){
 	}
 	
 	if($('input[name="partner_type"]:checked').val()=='I'){
-		if($("#"+formId+" #workingCountries").val() == undefined || $("#"+formId+" #workingCountries").val() == null || $("#"+formId+" #workingCountries").val().length == '0'){
-			formvalidationMsg(false, 'Actively Working Countries are required','workingCountriesError');
-			formSubmissionflag= false;
-		}
+		// if($("#"+formId+" #workingCountries").val() == undefined || $("#"+formId+" #workingCountries").val() == null || $("#"+formId+" #workingCountries").val().length == '0'){
+		// 	formvalidationMsg(false, 'Actively Working Countries are required','workingCountriesError');
+		// 	formSubmissionflag= false;
+		// }
 		// if($("#"+formId+" #numberOFoperatingCountries").val() == undefined || $("#"+formId+" #numberOFoperatingCountries").val() == null || $("#"+formId+" #numberOFoperatingCountries").val() == ''){
 		// 	showMessageTheme2(0, 'Last Name is either empty or invalid');
 		// 	return false;
@@ -258,10 +261,10 @@ function enrollmentPartnerFormVaidation(formId){
 				formSubmissionflag= false;
 			}
 		}
-		if($("#"+formId+" #experienceId").val() == undefined || $("#"+formId+" #experienceId").val() == null || $("#"+formId+" #experienceId").val() == ''){
-			formvalidationMsg(false, 'Years of Experience is required','experienceIdError');
-			formSubmissionflag= false;
-		}
+		// if($("#"+formId+" #experienceId").val() == undefined || $("#"+formId+" #experienceId").val() == null || $("#"+formId+" #experienceId").val() == ''){
+		// 	formvalidationMsg(false, 'Years of Experience is required','experienceIdError');
+		// 	formSubmissionflag= false;
+		// }
 		
 	}else if($('input[name="partner_type"]:checked').val()=='O'){
 		if($("#"+formId+" #organizationName").val() == undefined || $("#"+formId+" #organizationName").val() == null || $("#"+formId+" #organizationName").val() == ''){
@@ -272,10 +275,10 @@ function enrollmentPartnerFormVaidation(formId){
 			formvalidationMsg(false, 'Designation is required','designationError');
 			formSubmissionflag= false;
 		}
-		if($("#"+formId+" #operatingCountries").val() == undefined || $("#"+formId+" #operatingCountries").val() == null || $("#"+formId+" #operatingCountries").val().length == '0'){
-			formvalidationMsg(false, 'Actively Operating Countries are required','operatingCountriesError');
-			formSubmissionflag= false;
-		}
+		// if($("#"+formId+" #operatingCountries").val() == undefined || $("#"+formId+" #operatingCountries").val() == null || $("#"+formId+" #operatingCountries").val().length == '0'){
+		// 	formvalidationMsg(false, 'Actively Operating Countries are required','operatingCountriesError');
+		// 	formSubmissionflag= false;
+		// }
 		if($("#"+formId+" #establishmentYear").val() == undefined || $("#"+formId+" #establishmentYear").val() == null || $("#"+formId+" #establishmentYear").val() == ''){
 			formvalidationMsg(false, 'Year of Establishment is required','establishmentYearError');
 			formSubmissionflag= false;

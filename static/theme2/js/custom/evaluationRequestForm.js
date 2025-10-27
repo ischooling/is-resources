@@ -785,7 +785,7 @@ async function callEvaluatonPay(formId, callingFrom) {
   var entityType = $('.payabledetails').attr('entityType');
   var entityId = $('.payabledetails').attr('entityId');
   var paidByUserId = $('.payabledetails').attr('paidByUserId');
-  getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
+  getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
 }
 
 function callEvaluationEmailCheck(studEmail, studUUID) {

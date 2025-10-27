@@ -1076,7 +1076,17 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     // getAsPost(urlSend);
     // customLoader(false);
     getContent(moduleId, pageNo, replaceDiv, extraParam);
-  } else if (pageNo == "referral-and-links") {
+  }else if (pageNo == "partner-school-payment") {
+    // var urlSend ="/dashboard/get-partner-school-payment?moduleId=" + moduleId;
+    // getAsPost(urlSend);
+    // customLoader(false);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  }else if (pageNo == "partner-enrollment-students-wlp") {
+    // var urlSend ="/dashboard/get-partner-enrollment-students?moduleId=" + moduleId;
+    // getAsPost(urlSend);
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+    customLoader(false);
+  }else if (pageNo == "referral-and-links") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   }
 

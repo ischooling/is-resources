@@ -17,7 +17,7 @@ async function checkPayment(formId, userPaymentDetailsId, schoolId){
 			$('#courseFeeModalTNC').modal('hide');
 			$('#bookAnEnrollmentModel').modal('hide');
 			// $('#callPaymentStudentModal').modal('show');
-			getPaymentGatewaysOptions(responseData.details.schoolId, responseData.details.upid, responseData.details.entityType, responseData.details.entityId, responseData.details.userId)
+			getPaymentGatewaysOptions(responseData.details.schoolId, responseData.details.schoolId, responseData.details.upid, responseData.details.entityType, responseData.details.entityId, responseData.details.userId)
 		}else if(responseData.details.type == "REGISTRATION_FEE_ADV" || responseData.details.type ==  "REGISTRATION_FEE" || responseData.details.type == "REGISTRATION_SUBJECT_FEE_ADV"){
 			if($("#bookAnEnrollmentModel").length>0){
 				$("#bookAnEnrollmentModel").remove();
@@ -48,7 +48,7 @@ async function checkPayment(formId, userPaymentDetailsId, schoolId){
 	}
 }
 
-async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway){
+async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway,schoolIdOfPaymentGateway){
 	hideModalMessage('');
 	if(paymentGateway=='WELLSFARGO'){
 		$('#cardHolderNameError').hide();
@@ -87,6 +87,7 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
 	payload['userPaymentDetailsId'] = userPaymentDetailsId;
 	payload['paidByUserId'] = paidByUserId;
 	payload['schoolId'] = schoolId;
+	payload['schoolIdOfPaymentGateway'] = schoolIdOfPaymentGateway;
 	payload['paymentGateway'] = paymentGateway;
 	payload['initiateVia'] = window.location.href.includes('fee-receipt') ? 'Link' : '';
 
@@ -146,12 +147,21 @@ async function callOfflinePayment(formId, userPaymentDetailsId, userId, callingF
 	payload['schoolId'] = schoolId;
 	
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'offline-payment',payload,'common');
+	console.log(responseData);
 	if(responseData.status == "1"){
-		$('#callPaymentStudentModal').modal('hide');
+		showMessageTheme2(1,"Your Payment is under review.");
+		$('#callPaymentStudentModal, #paymentOptionsModal, #courseFeeModalTNC').modal('hide');
+		$('#payNowBtn').hide();
 		$('#logout_modal_logout').modal('hide');
 		setTimeout(function(){
 			$('#logout_modal_logout').modal('show');
-		},1000)
+		},1000);
+		if('CASH'==gatewayName){
+			$('#logout_modal_logout_cash').modal('hide');
+			setTimeout(function(){
+				$('#logout_modal_logout_cash').modal('show');
+			},1000);
+		}
 	}
 }
 
@@ -190,7 +200,7 @@ function showPrimaryPG(){
 	$('#alternate-pg').hide(1000)
 }
 
-async function getAirwallexMethods(buttonId){
+async function getAirwallexMethods(buttonId, schoolId){
 	var counrtyCode;
 	if($("#location").val() == ""){
 		counrtyCode = getCountryISOCode();
@@ -198,7 +208,7 @@ async function getAirwallexMethods(buttonId){
 		counrtyCode = JSON.parse($("#location").val()).countryCode;
 	}
 	$.ajax({
-        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-airwallex-payment-methods?schoolId=${btoa(SCHOOL_ID)}&countryCode=${btoa(counrtyCode)}`,
+        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-airwallex-payment-methods?schoolId=${btoa(schoolId)}&countryCode=${btoa(counrtyCode)}`,
         type: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -230,13 +240,14 @@ function commonPayment(payBtnID){
 	$("#"+payBtnID).trigger("click");
 }
 
-async function getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId) {
+async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId) {
 	hideMessage('');
 	var payload ={
 		'userPaymentDetailsId' : userPaymentDetailsId,
 		'entityType' : entityType,
 		'entityId' : entityId,
 		'paidByUserId' : paidByUserId,
+		'schoolIdOfPaymentGateway' : schoolIdOfPaymentGateway,
 		'schoolId' : schoolId
 	}
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'/payment-gateway/options',payload,'common');
@@ -258,7 +269,7 @@ async function getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityT
 		$('#paymentOptionsModal').modal({ backdrop: 'static', keyboard: false });
 		$.each(responseData.details.paymentOptions, function(k,v){
 			if(v.name=='Airwallex'){
-				getAirwallexMethods('payButton'+(k+1));
+				getAirwallexMethods('payButton'+(k+1), schoolIdOfPaymentGateway);
 			}else if(v.name=='CASH'){
 				bindFileUploadNew1('8', '32', responseData.details.userId, 4, true);
 			}else if(v.name=='WIRETRANSFER'){
@@ -484,7 +495,7 @@ async function getPaymentGatewayOptionsModal(details){
 											if(v.name=='Airwallex'){
 												html+=`
 												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
-													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}');">
+													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
 												</div>`;
@@ -500,7 +511,7 @@ async function getPaymentGatewayOptionsModal(details){
 											else if(v.name=='STRIPE' || v.name=='CONVERA'){
 												html+=
 												`<div class="payment-icon" style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
-													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}');">
+													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
 												</div>`;
@@ -640,7 +651,7 @@ async function getTNCContent(responseData){
 											${/*<input type="checkbox" name="bookAnEnrollmentChkval" id="bookAnEnrollmentChkval" required tabindex="7" style="position: relative;top:3px">4 By checking this box, I have read & agree to the above-mentioned terms and conditions. */''}
 										</div>
 										<div class="full mt-2">
-											<button type="button" id="bookAnEnrollmentData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+											<button type="button" id="bookAnEnrollmentData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
 										</div>`;
 									}else{
 										html+=
@@ -792,7 +803,7 @@ async function getTNCContent(responseData){
 								</label>
 							</span>
 						</div>
-						<button type="button" id="bookAnEnrollmentData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+						<button type="button" id="bookAnEnrollmentData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
 					</div>`;
 				}
 			html+=`</div>
@@ -878,7 +889,7 @@ async function courseFeeModalTNC(responseData) {
                         </div>
                     </div>
                     <div class="full mt-2">
-                        <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+                        <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
                     </div>
                 `;
             } else {
@@ -1039,7 +1050,7 @@ async function courseFeeModalTNC(responseData) {
                                         </label>
                                    </span>
                                 </div>
-                               <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+                               <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
                            </div>
                         ` : ''}
                     </form>

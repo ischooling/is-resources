@@ -488,7 +488,7 @@ async function dashboardFooterContent(){
 		+'<div class="app-footer">'
 			+'<div class="app-footer__inner">'
 				+'<div class="col">'
-					+'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
+					+'<p style="margin: 0">Copyright © '+schoolSettingsTechnical.copyrightYear+' '+schoolSettingsTechnical.copyrightName+' - All Rights Reserved.</p>'
 				+'</div>'
 			+'</div>'
 		+'</div>'

@@ -384,9 +384,7 @@ function footerContent(){
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
-                            <p>© ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName} | All Rights Reserved. 
-                                <a class="cs-color" href="${schoolSettingsTechnical.copyrightUrl}">${schoolSettingsTechnical.copyrightName}</a>
-                            </p>
+                            <p>Copyright © ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName} | All Rights Reserved.</p>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 text-right">
                             <p>`;

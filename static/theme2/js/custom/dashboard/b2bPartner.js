@@ -12,14 +12,14 @@ function callStudentListByPartner(formId) {
 			dataType : 'json',
 			cache : false,
 			timeout : 600000,
-			success : function(data) {
+			success : async function(data) {
 				if (data['status'] == '0' || data['status'] == '2') {
 					showMessageTheme2(false, data['message']);
 					$("#enroll-list-skeleton").show();
 				} else {
-					
+					schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 						$("#enroll-list-skeleton").hide();
-						var enrollArray=[{"count":data.enrolledCount, "label":"Enrolled", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Not enrolled","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrolled","enrollmentValue":"3"}]
+						var enrollArray=[{"count":data.enrolledCount, "label":"Enrollment", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Incomplate enrollment","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrollment","enrollmentValue":"3"}]
 						var enrollmentCountThumHtml = getB2BStudentEnrollmentCount(enrollArray);
 						$("#B2BStudentEnrollmentCountThumb").html(enrollmentCountThumHtml);
 						var htmls = B2BStudentListDetails(data.studentList, updateTransferMsg);
@@ -35,6 +35,15 @@ function callStudentListByPartner(formId) {
 						var payhtml = B2BStudentListCommission(data.studentList);
 						$(".studentCommitionList").html(payhtml);
 						$("#totalCommissionDate").text(data.currentDate);
+						let total_amount = data.total_amount;
+						let paid_amount = data.paid_amount;
+						let pending_amount = data.pending_amount;
+						let total_revenue = data.total_revenue;
+						$("#total_amount").text(schoolSettingsTechnical.currencySymbol + " " + total_amount);
+						$("#paid_amount").text(schoolSettingsTechnical.currencySymbol + " " + paid_amount);
+						$("#pending_amount").text(schoolSettingsTechnical.currencySymbol + " " + pending_amount);
+						$("#pending_amount").text(schoolSettingsTechnical.currencySymbol + " " + pending_amount);
+						$("#total_revenue").text(schoolSettingsTechnical.currencySymbol + " " + total_revenue);
 						//var html=getLeadMergeDataPopup(data.campainNameList);
 						// $('#tblCampaignList').dataTable().fnDestroy();
 						// $("#campaignlist").html(html);
@@ -71,6 +80,7 @@ function getRequestForPartnerEnrolledList(formId){
     enrollmentListFilterDTO['cityId']=$("#"+formId+" #cityId").val();
 	enrollmentListFilterDTO['commissionStatus']=$("#"+formId+" #commissionStatus").val();
 	enrollmentListFilterDTO['learningProgram']=$("#"+formId+" #learningProgram").val();
+	enrollmentListFilterDTO['enrollmentFor']=$("#" + formId + " #learningProgram option:selected").attr("data-enrollmentFor");
 	if($("#"+formId+" #paymentDateFrom").val()!=undefined && $("#"+formId+" #paymentDateFrom").val()!='' ){
 		var paymentDateFrom = $("#"+formId+" #paymentDateFrom").val();
 		//var paydate=paymentDateFrom.split("-")[2]+'-'+paymentDateFrom.split("-")[1]+'-'+paymentDateFrom.split("-")[0];
@@ -257,6 +267,30 @@ function getPartnerCommissionRate(formId, elementId ,userId) {
 		});
 	});
 }
+async function getPartnerCommissionRateSchool(formId, elementId, userId, callback) {
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + '/dashboard/get-partner-commission-rate',
+		data: JSON.stringify(getRequestForPartnerCommissionRate(formId, userId)),
+		dataType: 'json',
+		success: function (data) {
+			if (data.status === '3') {
+				redirectLoginPage();
+				return;
+			}
+			if (data.status === '0' || data.status === '2') {
+				return;
+			}
+			console.log("Commission rate data:", data);
+			if (callback) callback(data);
+		},
+		error: function (xhr, status, error) {
+			if (checkonlineOfflineStatus()) return;
+			console.error('Error: ' + error);
+		}
+	});
+}
 
 function getPartnerCommissionRateHtml(commissionRates){
 		var html="";
@@ -398,8 +432,12 @@ function updateStudentPartnerCommissionRate(studentStandardId, updateStatus, amo
 
 
 function resetEnrollmentForm(formID){
-	$("#"+formID+" #academicYear").val("0").trigger("change");
-	$("#"+formID+" #partnerName").val("").trigger("change");
+	if(USER_ROLE != 'SCHOOL_ADMIN'){
+		$("#"+formID+" #schoolName").val("").trigger("change");
+		$("#"+formID+" #partnerName").val("").trigger("change");
+	}
+	$("#"+formID+" #academicYear").val("ALL").trigger("change");
+	$("#"+formID+" #subPartner").val("").trigger("change");
 	$("#"+formID+" #enrollmentStatus").val("").trigger("change");
 	$("#"+formID+" #gradeId").val("").trigger("change");
 	$("#"+formID+" #countryId").val("").trigger("change");
@@ -494,144 +532,144 @@ function getPartnerDashboardDetailsData(userId) {
 				if(SCHOOL_ID != 2){
 					responseData=data;
 				}else{
-					responseData = {
-						schoolLPDetails: {
-							learningProgramDetails: [
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "Group Learning",
-								revenue_d: "675.0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "BATCH",
-								revenue_id: "190.0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "337.5",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "Dual Diploma",
-								revenue_d: "0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "DUAL_DIPLOMA",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "One-To-One Learning",
-								revenue_d: "1059.5",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "ONE_TO_ONE",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "Flexy Program",
-								revenue_d: "120.0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "ONE_TO_ONE_FLEX",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "Self Study",
-								revenue_d: "170.0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "SCHOLARSHIP",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "Self Study Plus",
-								revenue_d: "325.0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "SSP",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "325.0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "English Learning Program - One to One",
-								revenue_d: "0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "ONE_TO_ONE",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "exact-path-enrollment"
-							},
-							{
-								c_revenue_id: "0",
-								partnerDicountSymbol: "%",
-								label: "English Learning Program - Self Study",
-								revenue_d: "75.0",
-								revenue_pending_id: "0",
-								c_revenue_pending_d: "0",
-								learningProgramCode: "SCHOLARSHIP",
-								revenue_id: "0",
-								schoolDicountSymbol: "%",
-								c_revenue_d: "0",
-								c_revenue_pending_id: "0",
-								revenue_pending_d: "0",
-								schoolPartnerDicountSymbol: "-",
-								enrollmentFor: "exact-path-enrollment"
-							}
-							],
-							referralCode: "CN2405019"
-						},
-						message: "Partner Learning Program details",
-						status: "1",
-						statusCode: "S001"
-						}
+					// responseData = {
+					// 	schoolLPDetails: {
+					// 		learningProgramDetails: [
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "Group Learning",
+					// 			revenue_d: "675.0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "BATCH",
+					// 			revenue_id: "190.0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "337.5",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "Dual Diploma",
+					// 			revenue_d: "0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "DUAL_DIPLOMA",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "One-To-One Learning",
+					// 			revenue_d: "1059.5",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "ONE_TO_ONE",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "Flexy Program",
+					// 			revenue_d: "120.0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "ONE_TO_ONE_FLEX",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "Self Study",
+					// 			revenue_d: "170.0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "SCHOLARSHIP",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "Self Study Plus",
+					// 			revenue_d: "325.0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "SSP",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "325.0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "English Learning Program - One to One",
+					// 			revenue_d: "0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "ONE_TO_ONE",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "exact-path-enrollment"
+					// 		},
+					// 		{
+					// 			c_revenue_id: "0",
+					// 			partnerDicountSymbol: "%",
+					// 			label: "English Learning Program - Self Study",
+					// 			revenue_d: "75.0",
+					// 			revenue_pending_id: "0",
+					// 			c_revenue_pending_d: "0",
+					// 			learningProgramCode: "SCHOLARSHIP",
+					// 			revenue_id: "0",
+					// 			schoolDicountSymbol: "%",
+					// 			c_revenue_d: "0",
+					// 			c_revenue_pending_id: "0",
+					// 			revenue_pending_d: "0",
+					// 			schoolPartnerDicountSymbol: "-",
+					// 			enrollmentFor: "exact-path-enrollment"
+					// 		}
+					// 		],
+					// 		referralCode: "CN2405019"
+					// 	},
+					// 	message: "Partner Learning Program details",
+					// 	status: "1",
+					// 	statusCode: "S001"
+					// }
 				}
 			}
 		},
@@ -756,6 +794,10 @@ function getEnrollmentChart(eventid, lable, series){
 		series = [44, 55, 41, 17];
 		lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];
 	}
+	// if(USER_ID == "19321" || USER_ID == "14388"){
+	// 	series = [44, 55, 41, 17];
+	// 	lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];	
+	// }
 	var options = {
 		series: series, //[44, 55, 41, 17],
 		labels: lable,//['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'],
@@ -845,41 +887,85 @@ function getPartnerStudentGrade(formId, elementId ,userId, learningProgramCode,e
 					redirectLoginPage();
 				} 
 			}else{
-				if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='enrollment'){
-					var one_to_one=getRegisterDataByGrade(data,'one_to_one');
-					getEnrollmentChart(elementId, one_to_one.lable, one_to_one.series);
-				}else if(learningProgramCode=='ONE_TO_ONE_FLEX' && enrollmentFor=='enrollment'){
-					var fOnetoOne=getRegisterDataByGrade(data,'f_one_to_one');
-					getEnrollmentChart(elementId, fOnetoOne.lable, fOnetoOne.series);
-				}else if(learningProgramCode=='BATCH' && enrollmentFor=='enrollment'){
-					var group=getRegisterDataByGrade(data,'group');
-					getEnrollmentChart(elementId, group.lable, group.series);
-				}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='enrollment'){
-					var self=getRegisterDataByGrade(data,'self');
-					getEnrollmentChart(elementId, self.lable, self.series);
-				}else if(learningProgramCode=='SSP' && enrollmentFor=='enrollment'){
-					var ssp=getRegisterDataByGrade(data,'ssp');
-					getEnrollmentChart(elementId, ssp.lable, ssp.series);
-				}else if(learningProgramCode=='SSP' && enrollmentFor=='exact-path-enrollment'){
-					var el_ssp=getRegisterDataByGrade(data,'elpss');
-					getEnrollmentChart(elementId, el_ssp.lable, el_ssp.series);
-				}if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='exact-path-enrollment'){
-					var el_one_to_one=getRegisterDataByGrade(data,'el_one_to_one');
-					getEnrollmentChart(elementId, el_one_to_one.lable, el_one_to_one.series);
-				}else if(learningProgramCode=='BATCH' && enrollmentFor=='exact-path-enrollment'){
-					var el_group=getRegisterDataByGrade(data,'el_group');
-					getEnrollmentChart(elementId, el_group.lable, el_group.series);
-				}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='exact-path-enrollment'){
-					var el_self=getRegisterDataByGrade(data,'el_self');
-					getEnrollmentChart(elementId, el_self.lable, el_self.series);
-				}else if(learningProgramCode=='DUAL_DIPLOMA' && enrollmentFor=='enrollment'){
-					var dual=getRegisterDataByGrade(data,'dual');
-					getEnrollmentChart(elementId, dual.lable, dual.series);
+				if(USER_ID == "19321" || USER_ID == "14388"){
+					if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='enrollment'){
+						var one_to_one=getRegisterDataByGrade(data,'one_to_one');
+						var series= [77, 82, 93];
+						getEnrollmentChart(elementId, one_to_one.lable, series);
+					}else if(learningProgramCode=='ONE_TO_ONE_FLEX' && enrollmentFor=='enrollment'){
+						var fOnetoOne=getRegisterDataByGrade(data,'f_one_to_one');
+						var series= [106, 128, 93];
+						getEnrollmentChart(elementId, fOnetoOne.lable, series);
+					}else if(learningProgramCode=='BATCH' && enrollmentFor=='enrollment'){
+						var group=getRegisterDataByGrade(data,'group');
+						var series= [86, 72, 81];
+						getEnrollmentChart(elementId, group.lable, series);
+					}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='enrollment'){
+						var self=getRegisterDataByGrade(data,'self');
+						var series= [106, 128, 113];
+						getEnrollmentChart(elementId, self.lable, series);
+					}else if(learningProgramCode=='SSP' && enrollmentFor=='enrollment'){
+						var ssp=getRegisterDataByGrade(data,'ssp');
+						var series= [123, 158, 173];
+						getEnrollmentChart(elementId, ssp.lable, series);
+					}else if(learningProgramCode=='SSP' && enrollmentFor=='exact-path-enrollment'){
+						var el_ssp=getRegisterDataByGrade(data,'elpss');
+						getEnrollmentChart(elementId, el_ssp.lable, el_ssp.series);
+					}if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='exact-path-enrollment'){
+						var el_one_to_one=getRegisterDataByGrade(data,'el_one_to_one');
+						var series= [60, 54, 77];
+						getEnrollmentChart(elementId, el_one_to_one.lable, series);
+					}else if(learningProgramCode=='BATCH' && enrollmentFor=='exact-path-enrollment'){
+						var el_group=getRegisterDataByGrade(data,'el_group');
+						getEnrollmentChart(elementId, el_group.lable, el_group.series);
+					}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='exact-path-enrollment'){
+						var el_self=getRegisterDataByGrade(data,'el_self');
+						var series= [60, 54, 77];
+						getEnrollmentChart(elementId, el_self.lable, series);
+					}else if(learningProgramCode=='DUAL_DIPLOMA' && enrollmentFor=='enrollment'){
+						var dual=getRegisterDataByGrade(data,'dual');
+						var series= [349];
+						getEnrollmentChart(elementId, dual.lable, series);
+					}
 				}
-				// else if(elementId=='chart-pie-enroll-elpss'){
-				// 	var self=getRegisterDataByGrade(data,'elpss');
-				// 	getEnrollmentChart(elementId, self.lable, self.series);
-				// }
+				else{
+					if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='enrollment'){
+						var one_to_one=getRegisterDataByGrade(data,'one_to_one');
+						getEnrollmentChart(elementId, one_to_one.lable, one_to_one.series);
+					}else if(learningProgramCode=='ONE_TO_ONE_FLEX' && enrollmentFor=='enrollment'){
+						var fOnetoOne=getRegisterDataByGrade(data,'f_one_to_one');
+						getEnrollmentChart(elementId, fOnetoOne.lable, fOnetoOne.series);
+					}else if(learningProgramCode=='BATCH' && enrollmentFor=='enrollment'){
+						var group=getRegisterDataByGrade(data,'group');
+						getEnrollmentChart(elementId, group.lable, group.series);
+					}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='enrollment'){
+						var self=getRegisterDataByGrade(data,'self');
+						getEnrollmentChart(elementId, self.lable, self.series);
+					}else if(learningProgramCode=='SSP' && enrollmentFor=='enrollment'){
+						var ssp=getRegisterDataByGrade(data,'ssp');
+						getEnrollmentChart(elementId, ssp.lable, ssp.series);
+					}else if(learningProgramCode=='SSP' && enrollmentFor=='exact-path-enrollment'){
+						var el_ssp=getRegisterDataByGrade(data,'elpss');
+						getEnrollmentChart(elementId, el_ssp.lable, el_ssp.series);
+					}if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='exact-path-enrollment'){
+						var el_one_to_one=getRegisterDataByGrade(data,'el_one_to_one');
+						getEnrollmentChart(elementId, el_one_to_one.lable, el_one_to_one.series);
+					}else if(learningProgramCode=='BATCH' && enrollmentFor=='exact-path-enrollment'){
+						var el_group=getRegisterDataByGrade(data,'el_group');
+						getEnrollmentChart(elementId, el_group.lable, el_group.series);
+					}else if(learningProgramCode=='SCHOLARSHIP' && enrollmentFor=='exact-path-enrollment'){
+						var el_self=getRegisterDataByGrade(data,'el_self');
+						getEnrollmentChart(elementId, el_self.lable, el_self.series);
+					}else if(learningProgramCode=='DUAL_DIPLOMA' && enrollmentFor=='enrollment'){
+						var dual=getRegisterDataByGrade(data,'dual');
+						getEnrollmentChart(elementId, dual.lable, dual.series);
+					}
+					// else if(elementId=='chart-pie-enroll-elpss'){
+					// 	var self=getRegisterDataByGrade(data,'elpss');
+					// 	getEnrollmentChart(elementId, self.lable, self.series);
+					// }
+				}
+				
 				
 			}
 		},
@@ -1224,4 +1310,19 @@ function filterRequestData(formId, enrollmentValue){
 	$('#'+formId+' #academicYear').select2('val', $('#'+formId+' #academicYear option:last').val());
 	$('#'+formId+' #enrollmentStatus').val(enrollmentValue).trigger("change");
 	callStudentListByPartner(formId);
+}
+
+
+function showAdvanceSearchForm(){
+	$("#partnerEnrollFilterForm").stop().slideToggle();
+}
+function changeRevenueType(eleID){
+	var revenueType = $("#"+eleID).find(":selected").attr("data-value-type");
+	if(revenueType =="date"){
+		$(".date-range").hide();
+		$("#endDate").prop("disabled",true);
+		$("#startDate, #endDate").val("");
+	}else{
+		$(".date-range").show();
+	}
 }

@@ -55,29 +55,36 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 
 	var dirPercent=revenue==0.0?0.0:(revenue_d/revenue)*100;
 	var thIsPercent=revenue==0.0?0.0:(revenue_id/revenue)*100;
-	
 	// if(partnerDicountSymbol=='Flat'){
 	// 	$("#totalRevenueValue").html(parseFloat(revenue).toFixed(2)+' Flat');
 	// 	$("#directEnrollment").html(parseFloat(revenue_d).toFixed(2)+' Flat');
 	// 	$("#throughIs").html(parseFloat(revenue_id).toFixed(2)+' Flat');
 	// 	$("#pendingCommission").html(parseFloat(revenue_pending).toFixed(2)+' Flat');
 	// }else{
-		$("#totalRevenueValue").html(partnerDicountSymbol+' '+parseFloat(revenue).toFixed(2));
-		$("#directEnrollment").html(partnerDicountSymbol+' '+parseFloat(revenue_d).toFixed(2));
-		$("#throughIs").html(schoolDicountSymbol+' '+parseFloat(revenue_id).toFixed(2));
-		$("#pendingCommission").html(partnerDicountSymbol+' '+parseFloat(revenue_pending).toFixed(2));
+		if(USER_ID == "19321" || USER_ID == "14388"){
+			$("#totalRevenueValue").html(partnerDicountSymbol+' '+parseFloat("324705").toFixed(2));
+			$("#directEnrollment").html(partnerDicountSymbol+' '+parseFloat("310005").toFixed(2));
+			$("#throughIs").html(schoolDicountSymbol+' '+parseFloat("14700").toFixed(2));
+			$("#pendingCommission").html(partnerDicountSymbol+' '+parseFloat("15000").toFixed(2));
+		}else{
+			$("#totalRevenueValue").html(partnerDicountSymbol+' '+parseFloat(revenue).toFixed(2));
+			$("#directEnrollment").html(partnerDicountSymbol+' '+parseFloat(revenue_d).toFixed(2));
+			$("#throughIs").html(schoolDicountSymbol+' '+parseFloat(revenue_id).toFixed(2));
+			$("#pendingCommission").html(partnerDicountSymbol+' '+parseFloat(revenue_pending).toFixed(2));
+		}
+		
 	//}
-	
-	$("#dirPercent").html(parseInt(dirPercent.toFixed())+'%');
-	$("#thIsPercent").html(parseInt(thIsPercent.toFixed())+'%');
-
-	$("#dirPercent_p").html('$'+parseInt(revenue_pending_d));
-	$("#thIsPercent_p").html('$'+parseInt(revenue_pending_id));
-
-	var chartIndexVal1= $("#commissionRatesTab_0").attr("data-tab-value");
-	var valueMin1=$("#commissionRatesTab_0").attr("data-school-value");
-	var valueMax1=$("#commissionRatesTab_0").attr("data-partner-value");
-	getCommissionRatesChart('chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
+	if(USER_ID == "19321" || USER_ID == "14388"){
+		$("#dirPercent").html(parseInt("95.39")+'%');
+		$("#thIsPercent").html(parseInt("4.61")+'%');
+		$("#dirPercent_p").html('$'+parseInt("15000"));
+		$("#thIsPercent_p").html('$'+parseInt("0"));
+	}else{
+		$("#dirPercent").html(parseInt(dirPercent.toFixed())+'%');
+		$("#thIsPercent").html(parseInt(thIsPercent.toFixed())+'%');
+		$("#dirPercent_p").html('$'+parseInt(revenue_pending_d));
+		$("#thIsPercent_p").html('$'+parseInt(revenue_pending_id));
+	}
 	
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		var chartIndex = $(e.target).attr("data-tab-index");
@@ -93,9 +100,9 @@ function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, ro
 	var html =
 		'<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">'
 			+dashboardHeaderContent()
-			+'<div class="app-main  pb-4">'
+			+'<div class="app-main p-0">'
 				+'<div class="col p-0">'
-					+'<div class="app-main__inner">'
+					+'<div class="app-main__inner p-0">'
 						+partnerDashboardContent(title, roleAndModule, schoolId, userId, role)
 					+'</div>'
 				+'</div>'
@@ -119,30 +126,194 @@ function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, ro
 }
 
 function partnerDashboardLPContent(data){
+	if(USER_ID == "19321" || USER_ID == "14388"){
+	data = [{
+			"schoolLPDetails": {
+				"learningProgramDetails": [
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "Group Learning",
+						"revenue_d": "29545.91",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "BATCH",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0.0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "Dual Diploma",
+						"revenue_d": "53182.64",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "DUAL_DIPLOMA",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "One-To-One Learning",
+						"revenue_d": "35955.09",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "ONE_TO_ONE",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "Flexy Program",
+						"revenue_d": "46973.45",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "ONE_TO_ONE_FLEX",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0.0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "Self Study",
+						"revenue_d": "52882.64",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "SCHOLARSHIP",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "300.0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "Self Study Plus",
+						"revenue_d": "70810.17",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "SSP",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0.0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "English Learning Program - One to One",
+						"revenue_d": "17827.55",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "ONE_TO_ONE",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "exact-path-enrollment"
+					},
+					{
+						"c_revenue_id": "0",
+						"partnerDicountSymbol": "Flat",
+						"label": "English Learning Program - Self Study",
+						"revenue_d": "17827.55",
+						"revenue_pending_id": "0",
+						"c_revenue_pending_d": "0",
+						"learningProgramCode": "SCHOLARSHIP",
+						"revenue_id": "0",
+						"schoolDicountSymbol": "Flat",
+						"c_revenue_d": "0",
+						"c_revenue_pending_id": "0",
+						"revenue_pending_d": "0",
+						"schoolPartnerDicountSymbol": "-",
+						"enrollmentFor": "exact-path-enrollment"
+					}
+				],
+				"referralCode": "IN2505073"
+			},
+			"message": "Partner Learning Program details",
+			"status": "1",
+			"statusCode": "S001"
+		}];
+	}
 	var html =
 		'<div class="col-12 p-0">'
 			+'<div class="row">';
-			$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
-				var revenue= parseFloat(learningProgram.revenue_d)+parseFloat(learningProgram.revenue_id);
-				var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
-				revenue=revenue-revenue_pending;
-				html+=
-				'<div class="col-xl-4 col-4 col-md-6 col-sm-12 col-12 mb-4">'
-					+'<div class="w-100 card h-100">'
-						+'<div class="card-body">'
-							+'<h5 class="card-title">'
-								+'<div class="w-100 d-flex flex-wrap justify-content-between">'
-									+'<span class="d-inline-block mb-1">'
-										+learningProgram.label
-									+'</span>'
-									+'<span class="pull-right text-primary mb-1">Revenue: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
-								+'</div>'
-							+'</h5>'
-							+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
-						+'</div>  '
-					+'</div>' 
-				+'</div>';
-			});
+			if(USER_ID == "19321" || USER_ID == "14388"){
+				$.each(data[0].schoolLPDetails.learningProgramDetails, function(k,learningProgram){
+					var revenue= parseFloat(learningProgram.revenue_d)+parseFloat(learningProgram.revenue_id);
+					var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
+					revenue=revenue-revenue_pending;
+					html+=
+					'<div class="col-xl-4 col-4 col-md-6 col-sm-12 col-12 mb-4">'
+						+'<div class="w-100 card h-100">'
+							+'<div class="card-body">'
+								+'<h5 class="card-title">'
+									+'<div class="w-100 d-flex flex-wrap justify-content-between">'
+										+'<span class="d-inline-block mb-1">'
+											+learningProgram.label
+										+'</span>'
+										+'<span class="pull-right text-primary mb-1">Commission: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
+									+'</div>'
+								+'</h5>'
+								+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
+							+'</div>  '
+						+'</div>' 
+					+'</div>';
+				});
+			}else{
+				$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
+					var revenue= parseFloat(learningProgram.revenue_d)+parseFloat(learningProgram.revenue_id);
+					var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
+					revenue=revenue-revenue_pending;
+					html+=
+					'<div class="col-xl-4 col-4 col-md-6 col-sm-12 col-12 mb-4">'
+						+'<div class="w-100 card h-100">'
+							+'<div class="card-body">'
+								+'<h5 class="card-title">'
+									+'<div class="w-100 d-flex flex-wrap justify-content-between">'
+										+'<span class="d-inline-block mb-1">'
+											+learningProgram.label
+										+'</span>'
+										+'<span class="pull-right text-primary mb-1">Commission: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
+									+'</div>'
+								+'</h5>'
+								+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
+							+'</div>  '
+						+'</div>' 
+					+'</div>';
+				});
+			}
 			html+=
 			'</div>'
 		+'</div>'
@@ -168,9 +339,23 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 				</div>
 				${
 					data.interestedFor == "B2B"?
-					`<div class="page-title-actions">
+					`<div class="page-title-actions mr-auto position-relative">
 						<h6 class="font-size-lg">Partner Type:&nbsp;<span class="text-primary">${enrollmentMap[data.originalPartnerType]||''}</span></h6>
-					</div>`:``
+					</div>
+					<div class="bg-primary text-white px-3 py-1 rounded-10">
+						<div class="d-flex flex-wrap align-items-center">
+							<span class="float-left font-weight-semi-bold font-size-14 mr-2">Enrollment Partner Code</span>
+							<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
+						</div>
+						<div>
+							<a href="javascript:void(0)" class="bg-white text-primary rounded-10 font-weight-semi-bold p-0 px-1 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
+							<b class="copy-msg-1 text-white ml-1" style="color:#fff !important"></b>
+							<div style="top:18px;left:0;position:absolute;">
+								<input type="text" id="copyCode1" value="${data.schoolServiceLinks.referralCode}" style="opacity:0;height:0px">
+							</div>
+						</div>
+					</div>
+					`:``
 				}
 			</div>
 		</div>
@@ -183,20 +368,25 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 				html+=
 				`</div>
 			</div>
-			<div class="row">`
-				+getChartContent(commissionRate.commissionRates)
-				+getEnrollmentLinksContent(data)
+			<div class="row" id="commissionRow">`
 			html+=`</div>`
-			+getRevenueContent()
+			+getRevenueContent(data.originalPartnerType)
 			+getEnrollmentStatisticsContent()
 		html+=`</div>`;
+		getPartnerCommissionRateSchool('','partnerCommitionRate',userId, function(commissionData) {
+			$("#commissionRow").html(getChartContent(commissionData.commissionRates) + getEnrollmentLinksContent(data));
+			var chartIndexVal1= $("#commissionRatesTab_0").attr("data-tab-value");
+			var valueMin1=$("#commissionRatesTab_0").attr("data-school-value");
+			var valueMax1=$("#commissionRatesTab_0").attr("data-partner-value");
+			getCommissionRatesChart('chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
+		});
 	return html;
 }
 
 function getAccountManagerDetailsContent(data){
 	var html=
 		`<div class="row align-items-center">
-			<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 border-right text-dark mb-lg-0 mb-3">
+			<div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 border-right text-dark mb-lg-0 mb-3">
 				
 				<div class="full px-3">
 					<div class="d-flex w-100">
@@ -225,7 +415,7 @@ function getAccountManagerDetailsContent(data){
 					<div class="font-size-lg">${data.counselor.email}</div>
 				</div>
 			</div> 
-			<div class="col-xl-5 col-lg-12 col-md-12 col-sm-12 col-12 text-dark mb-lg-0 mb-3">
+			<div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 text-dark mb-lg-0 mb-3">
 				<div class="d-flex flex-wrap px-3 align-items-center justify-content-between">
 					<div class="mb-md-0 mb-3">
 						<div class="d-inline-flex w-100">
@@ -239,19 +429,7 @@ function getAccountManagerDetailsContent(data){
 						</div>
 						<div class="font-size-lg">${data.counselor.whatsapp}</div>    
 					</div>
-					<div class="bg-primary text-white px-3 py-2 rounded-10">
-						<div class="d-flex flex-wrap align-items-center">
-							<span class="float-left font-weight-semi-bold font-size-lg mr-2">Enrollment Partner Code</span>
-							<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
-						</div>
-						<div>
-							<a href="javascript:void(0)" class="bg-white text-primary rounded-10 font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
-							<b class="copy-msg-1 text-white ml-1" style="color:#fff !important"></b>
-							<div style="top:18px;left:0;position:absolute;">
-								<input type="text" id="copyCode1" value="${data.schoolServiceLinks.referralCode}" style="opacity:0;height:0px">
-							</div>
-						</div>
-					</div>
+					
 				</div>
 			</div>   
 		</div>`;
@@ -291,7 +469,12 @@ function getChartContent(commissionRate){
 					html+=
 					`<div class="tab-content">`;
 						$.each(commissionRate, function(i,v){
-							var symbol=v.bySchoolType=='%'?'':'$';
+							if(USER_ID == "19321" || USER_ID == "14388"){
+								v.bySchoolType='%';
+								var symbol=v.bySchoolType=='%'?'':'$';
+							}else{
+								var symbol=v.bySchoolType=='%'?'':'$';
+							}
 							html+=
 							`<div class="tab-pane tabs-animation fade ${i==0?'show active':''}" id="commissionRatesTabContent_`+i+`" role="tabpanel">
 								<div class="d-flex flex-wrap">
@@ -328,7 +511,7 @@ function getChartContent(commissionRate){
 function getEnrollmentLinksContent(data){
 	var html=
 		`<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2">
-			<h5 class="font-weight-semi-bold text-dark">Enrollments ${data.interestedFor == "B2B"?'':'& Seats Reservation'} Links</h5>
+			<h5 class="font-weight-semi-bold text-dark invisible">Enrollments ${data.interestedFor == "B2B"?'':'& Seats Reservation'} Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">
 					<div class="d-flex mb-3 rounded-pill bg-light border overflow-hidden" style="width: fit-content; position: relative; z-index: 9;">
@@ -372,16 +555,18 @@ function getEnrollmentLinksContent(data){
 	return html;
 }
 
-function getRevenueContent(){
-	var html=
+function getRevenueContent(partnerOrgType){
+	var showPendingCommission = partnerOrgType !== "WLP";
+	
+	var html =
 	`<div class="row mt-3">
 		<div class="col-12">
-			<h5 class="font-weight-semi-bold text-dark">Revenue Details</h5>
+			<h5 class="font-weight-semi-bold text-dark">Commission Details</h5>
 		</div>
 		<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-3"> 
 			<div class="bg-light-success border border-success px-2 p-1 rounded-10 h-100 d-flex align-items-center flex-column">
 				<div class="d-flex flex-wrap mb-1 w-100">
-					<h5 class="font-weight-semi-bold text-dark flex-grow-1 m-0 font-size-lg">Total Revenue: </h5>
+					<h5 class="font-weight-semi-bold text-dark flex-grow-1 m-0 font-size-lg">Total Commission: </h5>
 					<h5 class="font-weight-semi-bold text-dark m-0 font-size-lg" id="totalRevenueValue"></h5>
 				</div>
 				<div class="p-1 px-2 text-right rounded ml-auto" style="background:rgba(255, 255, 255, 0.6)">
@@ -406,6 +591,7 @@ function getRevenueContent(){
 				</div>
 			</div>
 		</div>
+		${showPendingCommission ? `
 		<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-3"> 
 			<div class="bg-light-orange border border-orange px-2 p-1 rounded-10 h-100 d-flex align-items-center flex-column">
 				<div class="d-flex flex-wrap mb-1 w-100">
@@ -418,6 +604,7 @@ function getRevenueContent(){
 				</div>
 			</div>
 		</div>
+		` : ''}
 	</div>`;
 	return html;
 }
@@ -461,9 +648,32 @@ async function dashboardFooterContent(){
 			+'</div>'
 		+'</div>'
 		+'<div class="server-message">'
-			+'<span class="msg" id="msgTheme2"></span>'
+			+'<span class="msg" id="msgTheme2"><i class="fa fa-exclamation-triangle"></i> </span>'
 		+'</div>'
 	+'</div>';
+	return html;
+}
+
+function loaderContent(){
+	var html=
+	'<div id="commonloaderIdNewLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
+		// +'<div class="loader primary-border-top-color">'
+		if(SCHOOL_ID==1){
+			// html+=
+			// '<div class="full">'
+			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'is_loader.gif" alt="${SCHOOL_NAME} Loader"/>'
+			// +'</div>';
+			html+=`<img src="`+PATH_FOLDER_IMAGE2+`loader-new.gif" alt="`+SCHOOL_NAME+` Loader" class="new-loader-2024" />`;
+		}else{
+			html+=
+			'<div class="ball-rotate">'
+				+'<div style="background-color: rgb(247, 185, 36);"></div>'
+			+'</div>'
+			+'<p>Loading ...</p>'
+		}
+		html+=
+		// '</div>'
+	'</div>';
 	return html;
 }
 
@@ -475,19 +685,19 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 		$("#dashboardContentInHTML").html(partnerListContent('Partner '+title, ''));
 	}else{
 		var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
-			html+= await dashboardHeaderContent();
-			html+='<div class="app-main  pb-4">'
+			// html+= await dashboardHeaderContent();
+			html+='<div class="app-main p-0">'
 				+'<div class="col p-0">'
-					+'<div class="app-main__inner">'
+					+'<div class="app-main__inner p-0">'
 						+partnerListContent(title, '')
 					+'</div>'
 				+'</div>'
 			+'</div>'
 		+'</div>';
-		html+= await dashboardFooterContent();
-		$('body').html(html);
+		// html+= await dashboardFooterContent();
+		$('#dashboardContentInHTML').html(html);
 	}
-	
+	getLearningProgramContentFromServer(SCHOOL_ID,'partnerEnrollFilterForm','learningProgram')
 	getSessionMasterList('partnerEnrollFilterForm', "academicYear", false);
 	callPartnerCountries('partnerEnrollFilterForm', 0, 'countryId');
 	callPartnerListBy('partnerEnrollFilterForm','partnerName');
@@ -574,6 +784,21 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	$("#btnClickCommission").on('click',function(){
 		updateStudentPartnerCommissionRate('', '', '', '','');
 	});
+
+	$("#startDate").datepicker({
+		format: 'M d, yyyy',
+		autoclose: true,
+	}).on("change", function(){
+		var startDate = new Date($(this).val());
+		startDate.setDate(startDate.getDate() + 1);
+		$("#endDate").datepicker("remove");
+		$("#endDate").datepicker({
+			format: 'M d, yyyy',
+			startDate: startDate,
+			autoclose: true,
+		});
+		$("#endDate").prop("disabled",false);
+	});
 	$('html, body').animate({ scrollTop: 0 }, 500);
 }
 
@@ -605,12 +830,20 @@ function mainCardEnrolled(referralCode){
 		+'<div class="card-body">'
 			+'<div class="form-row" id="B2BStudentEnrollmentCountThumb"></div>'
 			//+B2BStudentListfilterFormSkeleton()
-			+'<div class="row">'
-				+B2BStudentListfilterForm(referralCode)
-				+B2BStudentListDetailsSkeleton()
-				+'<div class="table-responsive col-12" id="enrolled-list">'
-					//+B2BStudentListDetails()
-				+'</div>'
+			// +'<div class="row">'
+			// 	+'<div class="col-12 mb-2 text-right">'
+			// 		+'<a href="javascript:void(0)" class="btn btn-primary btn-shadow mr-2" onclick="showAdvanceSearchForm()"><i class="fa fa-search mr-2"></i>Advance Search</a>';
+			// 		if(referralCode==''){
+			// 			html+='<a href="javascript:void(0)" class="btn btn-success btn-shadow" id="bulkCommission"><i class="fa fa-edit mr-2"></i>Bulk Commission</a>';
+			// 		}
+			// 	html+='</div>'
+			// +'</div>'
+			+B2BStudentListfilterForm(referralCode)
+			// +revenueThumbListContentSkeleton()
+			// +revenueThumbListContent()
+			+B2BStudentListDetailsSkeleton()
+			+'<div class="table-responsive col-12 px-0" id="enrolled-list">'
+				//+B2BStudentListDetails()
 			+'</div>'
 		+'</div>'
 	+'</div>'
@@ -623,8 +856,8 @@ function getB2BStudentEnrollmentCount(enrollmentList){
 	$.each(enrollmentList, function(i,v){
 		html+=
 		`<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">
-			<div class="full p-2  border rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm ${i==0?'border-primary bg-light-primary':i==1?'border-success bg-light-success':'border-warning bg-light-warning'}">
-				<span class="line-left d-inline-block position-absolute rounded-10 ${i==0?'bg-primary':i==1?'bg-success':'bg-warning'}"></span>
+			<div class="full p-2  border rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm ${i==0?'border-success bg-light-success':i==1?'border-warning bg-light-warning':'border-primary bg-light-primary'}">
+				<span class="line-left d-inline-block position-absolute rounded-10 ${i==0?'bg-success':i==1?'bg-warning':'bg-primary'}"></span>
 				<p class="m-0 font-12"><b>${v.label}</b></p>
 				<p class="m-0">`;
 					if(1>0){
@@ -641,7 +874,7 @@ function getB2BStudentEnrollmentCount(enrollmentList){
 
 function B2BStudentListfilterFormSkeleton(){
 	var html=
-		'<div class="col-12 mb-2" >'
+		'<div class="col-12 mb-2">'
 			+'<div class="row">'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-2">'
 					+'<div class="full rounded skeleton" style="height:42px"></div>'
@@ -701,18 +934,36 @@ function B2BStudentListfilterFormSkeleton(){
 
 function B2BStudentListfilterForm(referralCode){
 	var html=
-	'<form id="partnerEnrollFilterForm" style="display: none;">'
-		+'<div class="col-12 mb-2">'
-			+'<div class="row">';
-			if(referralCode==''){
-				html+='<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Select Partner</label>'
-					+'<select class="form-control" name="partnerName" id="partnerName" >'
+	'<form id="partnerEnrollFilterForm" style="display:none">'
+		+'<div class="col-12 mb-2 border rounded-10 pb-1 pt-4 px-4  mb-4 bg-light-primary">'
+			+'<div class="row">'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
+					+'<label class="full text-primary">Select School</label>'
+					+'<select class="form-control" name="schoolName" id="schoolName">'
+						+'<option>Select School</option>'
+						+'<option>International School</option>'
+						+'<option>International School 1</option>'
+						+'<option>International School 2</option>'
+						+'<option>International School 3</option>'
 					+'</select>'
 				+'</div>';
-			}
-
-			html+='<input type="hidden" class="form-control" name="referralCode" id="referralCode" value="'+referralCode+'"/>'
+				if(referralCode==''){
+					html+='<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
+						+'<label class="full text-primary">Select Partner</label>'
+						+'<select class="form-control" name="partnerName" id="partnerName" >'
+						+'</select>'
+					+'</div>';
+				}
+				html+='<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
+					+'<label class="full text-primary">Select Sub-Partner</label>'
+					+'<select class="form-control" name="subPartner" id="subPartner">'
+						+'<option>Select Sub-Partner</option>'
+						+'<option>Sub Partner1</option>'
+						+'<option>Sub Partner2</option>'
+						+'<option>Sub Partner3</option>'
+					+'</select>'
+				+'</div>'
+				+'<input type="hidden" class="form-control" name="referralCode" id="referralCode" value="'+referralCode+'"/>'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
 					+'<label class="full text-primary">Academic Year</label>'
 					+'<select class="form-control" name="academicYear" id="academicYear">'
@@ -775,13 +1026,6 @@ function B2BStudentListfilterForm(referralCode){
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
 					+'<label class="full text-primary">Learning Program</label>'
 					+'<select class="form-control" name="learningProgram" id="learningProgram">'
-						+'<option value="">Select Learning Program</option>'
-						// +'<option value="ONE_TO_ONE">One-to-One</option>'
-						// +'<option value="BATCH">Group</option>'
-						// +'<option value="SCHOLARSHIP">Self-Study With Plan</option>'
-						// +'<option value="SSP">Self-Study</option>'
-						// +'<option value="ONE_TO_ONE_FLEX">Flexy</option>'
-						+getLearningProgramContent(SCHOOL_ID)
 					+'</select>'
 				+'</div>'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
@@ -851,7 +1095,7 @@ function B2BStudentListfilterForm(referralCode){
 
 function B2BStudentListDetailsSkeleton(){
 	var html=
-		'<div class="col-12 mb-2" id="enroll-list-skeleton">'
+		'<div class="col-12 mb-2 px-0" id="enroll-list-skeleton">'
 		+'<table class="table table-bordered table-striped without_h_scroll" style="">'
 		+'<thead class="theme-bg primary-bg white-txt-color">'
 			+'<tr>'
@@ -1078,7 +1322,7 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 																+'<div class="full d-block mb-1">'
 																	+'<span><strong>Fee:</strong>'+stuSchedule.payAmount+'</span>';
 																	if(stuSchedule.status != "SUCCESS"){
-																		html+='<span class="float-right" id="payNowBtn'+stuSchedule.userPaymentDetailsId+'"><a href="javascript:void(0)" class="pay_now_btn btn btn-primary btn-sm py-0 px-1" onclick="getPaymentGatewaysOptions(\''+stuSchedule.schoolId+'\',\''+stuSchedule.userPaymentDetailsId+'\',\''+stuSchedule.entityType+'\',\''+stuSchedule.entityId+'\',\''+USER_ID+'\')">Pay Now</a></span>';
+																		html+='<span class="float-right" id="payNowBtn'+stuSchedule.userPaymentDetailsId+'"><a href="javascript:void(0)" class="pay_now_btn btn btn-primary btn-sm py-0 px-1" onclick="getPaymentGatewaysOptions(\''+stuSchedule.schoolId+'\',\''+stuSchedule.schoolId+'\',\''+stuSchedule.userPaymentDetailsId+'\',\''+stuSchedule.entityType+'\',\''+stuSchedule.entityId+'\',\''+USER_ID+'\')">Pay Now</a></span>';
 																	}
 																html+='</div>'
 																+'<div class="full d-block"><strong class="float-left">Payment Status:</strong> <span class="d-inline-block" id="paymentStatus'+stuSchedule.userPaymentDetailsId+'">'+stuSchedule.status+'</span></div>'
@@ -1224,7 +1468,7 @@ function B2BStudentListCommission(studentList){
 					+'<th class="bg-primary text-white bold border-bottom-0">Name</th>'
 					+'<th class="bg-primary text-white bold border-bottom-0">Fee Plan</th>'
 					+'<th class="bg-primary text-white bold border-bottom-0">Commission</th>'
-					+'<th class="bg-primary text-white bold border-bottom-0">Commission Status</th>'
+					+'<th class="bg-primary text-white bold rounded-top-right-10 border-bottom-0">Commission Status</th>'
 				+'</tr>'
 			+'</thead>'
 			+'<tbody class="student-table-css">';
@@ -1255,11 +1499,11 @@ function B2BStudentListCommission(studentList){
 					}
 					if(sreno==1){
 						html+='<tr>'
-								+'<td class="text-center" colspan="3">No Pending Commission</td>'
+								+'<td class="text-center rounded-bottom-left-10 rounded-bottom-right-10" colspan="5">No Pending Commission</td>'
 						html+='</tr>';
 					}
 				}else{
-					html+='<tr><td colspan="6" class="text-center bold font-16">No Record found</td></tr>';
+					html+='<tr><td colspan="6" class="text-center bold font-16 rounded-bottom-left-10 rounded-bottom-right-10 ">No Record found</td></tr>';
 				}
 			html+='</tbody>'
 		+'</table>';
@@ -1363,4 +1607,136 @@ function copyEnrollmentLink(eleID, msgEle){
 		//message='Student will get '+discount+'% disount on enrollment';
 	}
 	return copyURL(eleID,msgEle,message);
+}
+
+
+function revenueThumbListContentSkeleton(){
+	var html=
+		`<div class="col-12">
+			<div class="d-flex row">
+				<div class="flex-grow-1 mr-2 mb-2 skeleton rounded-10">
+					<div class="p-2 full invisible">
+						<p class="m-0 font-12"><b>Total Revenue</b></p>
+						<div class="m-0">
+							<span><b>$1,60,000</b></span>
+						</div>
+					</div>
+				</div>
+				<div class="flex-grow-1 mr-2 mb-2 skeleton rounded-10">
+					<div class="p-2 full invisible">
+						<div class="d-flex">
+							<div class="mr-1">
+								<p class="m-0 font-12"><b>Your Earnings</b></p>
+							</div>
+							<div class="mr-1">
+								<p class="m-0 font-12"><b>Your Earnings</b></p>
+							</div>
+							<div>
+								<p class="m-0 font-12"><b>Your Earnings</b></p>
+							</div>
+						</div>
+						<div class="m-0">
+							<span><b>Monthly Revenue&nbsp;</b><b>$1,60,000</b></span>
+						</div>
+					</div>
+				</div>
+				<div class="flex-grow-1 mr-2 mb-2 skeleton rounded-10">
+					<div class="p-2 full invisible">
+						<p class="m-0 font-12"><b>Your Earnings</b></p>
+						<div class="m-0">
+							<span><b>$1,60,000</b></span>
+						</div>
+					</div>
+				</div>
+				<div class="flex-grow-1 mr-2 mb-2 skeleton rounded-10">
+					<div class="p-2 full invisible">
+						<p class="m-0 font-12"><b>Total Payout to IS</b></p>
+						<div class="m-0">
+							<span><b>$1,60,000</b></span>
+						</div>
+					</div>
+				</div>
+				<div class="flex-grow-1 mr-2 mb-2 skeleton rounded-10">
+					<div class="p-2 full invisible">
+						<p class="m-0 font-12"><b>Pending</b></p>
+						<div class="m-0">
+							<span><b>$1,60,000</b></span>
+						</div>
+					</div>
+				</div>
+				<div class="flex-grow-1 mr-2 mb-2 skeleton rounded-10">
+					<div class="p-2 full invisible">
+						<p class="m-0 font-12"><b>Paid</b></p>
+						<div class="m-0">
+							<span><b>$1,60,000</b></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+function revenueThumbListContent(){
+	var html=
+		`<div class="col-12">
+			<div class="d-flex row">
+				<div class="p-2 bg-light-alternate border border-alternate rounded-10 position-relative mr-2 mb-2 shadow-sm text-alternate flex-grow-1" style="width:fit-content">
+					<span class="line-left bg-alternate d-inline-block position-absolute rounded-10"></span>
+					<p class="m-0 font-12"><b>Total Revenue</b></p>
+					<div class="m-0">
+						<span><b>$1,60,000</b></span>
+					</div>
+				</div>
+				<div class="p-2 bg-light-orange border border-orange rounded-10 position-relative mr-2 mb-2 shadow-sm text-orange flex-grow-1" style="width:fit-content">
+					<span class="line-left bg-orange d-inline-block position-absolute rounded-10"></span>
+					<div class="d-flex">
+						<div class="mr-1">
+							<select class="form-control form-control py-0 px-1" style="height:22px;font-size:12px" id="revenueType" onchange="changeRevenueType(\'revenueType\')">
+								<option value="" data-value-Type="custom">Custom</option>
+								<option value="" data-value-Type="date" selected>Mar 25</option>
+								<option value="" data-value-Type="date">Apr 25</option>
+							</select>
+						</div>
+						<div class="mr-1 date-range" style="display:none">
+							<input type="text" id="startDate" name="startDate" class="form-control datepikcer form-control py-0 px-1" placeholder="Date From" style="height:22px;font-size:12px;max-width:85px" readonly/>
+						</div>
+						<div class="date-range" style="display:none">
+							<input type="text" id="endDate" name="endDate" class="form-control datepikcer form-control py-0 px-1" placeholder="Date To" style="height:22px;font-size:12px;max-width:85px" readonly disabled/>
+						</div>
+					</div>
+					<div class="m-0">
+						<span><b>Monthly Revenue&nbsp;</b><b>$1,60,000</b></span>
+					</div>
+				</div>
+				<div class="p-2 bg-light-pink border border-pink rounded-10 position-relative mr-2 mb-2 shadow-sm text-pink flex-grow-1" style="width:fit-content">
+					<span class="line-left bg-pink d-inline-block position-absolute rounded-10"></span>
+					<p class="m-0 font-12"><b>Your Earnings</b></p>
+					<div class="m-0">
+						<span><b>$1,60,000</b></span>
+					</div>
+				</div>
+				<div class="p-2 bg-light-primary border border-primary rounded-10 position-relative mr-2 mb-2 shadow-sm text-primary flex-grow-1" style="width:fit-content">
+					<span class="line-left bg-primary d-inline-block position-absolute rounded-10"></span>
+					<p class="m-0 font-12"><b>Total Payout to IS</b></p>
+					<div class="m-0">
+						<span><b>$1,60,000</b></span>
+					</div>
+				</div>
+				<div class="p-2 bg-light-warning border border-warning rounded-10 position-relative mr-2 mb-2 shadow-sm text-warning flex-grow-1" style="width:fit-content">
+					<span class="line-left bg-warning d-inline-block position-absolute rounded-10"></span>
+					<p class="m-0 font-12"><b>Pending</b></p>
+					<div class="m-0">
+						<span><b>$1,60,000</b></span>
+					</div>
+				</div>
+				<div class="p-2 bg-light-success border border-success rounded-10 position-relative mr-2 mb-2 shadow-sm text-success flex-grow-1" style="width:fit-content">
+					<span class="line-left bg-success d-inline-block position-absolute rounded-10"></span>
+					<p class="m-0 font-12"><b>Paid</b></p>
+					<div class="m-0">
+						<span><b>$1,60,000</b></span>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
 }

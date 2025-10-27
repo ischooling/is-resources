@@ -48,7 +48,6 @@ function getApprovedTeacherList(moduleId, userId, schoolId, ids, types, currentP
 	data['currentPage'] = currentPage;
 	data['recordsPerPage'] = $("#approvePagging").val();
 	data['teacherSearch'] = $("#teacherSearch").val()!=undefined?$("#teacherSearch").val():"";
-	console.trace();
  $.ajax({
 	 type : "POST",
 	 contentType : APPLICATION_JSON_VALUE,

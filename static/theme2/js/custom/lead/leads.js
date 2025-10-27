@@ -4129,7 +4129,7 @@ function showBasicDetailsMailWarning(b2bLeadId) {
 		+'<div class="modal-dialog modal-md modal-notify modal-danger" role="document" style="max-width:500px;">'
 			+'<div class="modal-content">'
 				+'<div class="modal-body text-center">'
-					+'<h5 class="modal-title py-4" >Are you sure you want to send basic details mail?</h5>'
+					+'<h5 class="modal-title py-4" >Are you sure you want to send interest form mail?</h5>'
 					+'<div style="full text-center">'
 						+'<button type="button" class="btn btn-primary mr-2" id="discardSendBasicDetailsWarningYes" onclick="sendBasicDetailsMail(' + b2bLeadId + ');">Yes</button>'
 						+'<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
@@ -4693,7 +4693,7 @@ function getRequestForInactiveCampaignMaster(campid, activeInactive){
 
 
 function getPartnerLeadById(formId, leadId, modalId) {
- $.ajax({
+ 	$.ajax({
 		 type : "POST",
 		 contentType : APPLICATION_JSON_VALUE,
 		 url : getURLForHTML('/api/v1/leads', 'get-lead-data-byid'),
@@ -4701,12 +4701,10 @@ function getPartnerLeadById(formId, leadId, modalId) {
 		 dataType : 'json',
 		 cache : false,
 		 timeout : 600000,
-		 success : function(data) {
+		 success : async function(data) {
 			 if (data['status'] == '0' || data['status'] == '2') {
 				 showMessage(true, data['message']);
 			 } else {
-				$("#"+modalId).modal('show');
-				 
 				if(data['leadDashboardCommon']!=null){
 					if(data['leadDashboardCommon']['leadCommonDTO']!=null){
 					   var leadDemo = data['leadDashboardCommon']['leadCommonDTO'][0];
@@ -4753,20 +4751,54 @@ function getPartnerLeadById(formId, leadId, modalId) {
 							$("#"+formId+" #cityId").attr("disabled","disabled");
 							$("#"+formId+" #partnerType").val(leadDemo.leadModifyDTO.partnerTypeId);
 							$("#"+formId+" #originalTimezone").val(leadDemo.leadModifyDTO.originalPartnerTimzone).trigger('change');
-						}, 1000);  
-						$("#"+formId+" #originalPartnerType").val(leadDemo.leadStudentDetailDTO.originalPartnerType);
-						if(leadDemo.leadStudentDetailDTO.originalPartnerType == "WLP"){
-							$("#setDiscount, #setDiscountTab").attr("style","");
-							$("#setCommissionRate, #setCommissionRateTab").hide();
-						}else if(leadDemo.leadStudentDetailDTO.originalPartnerType == "GP"){
-							$("#setCommissionRate, #setCommissionRateTab").attr("style","");
-							$("#setDiscount, #setDiscountTab").hide();
+						}, 1000);
+						var originalPartnerType = leadDemo.leadStudentDetailDTO.originalPartnerType;
+						$("#"+formId+" #originalPartnerType").val(originalPartnerType);
+						if(originalPartnerType != ''){
+							$("#"+formId+" #originalPartnerType").attr('disabled', true);
+						}else{
+							$("#"+formId+" #originalPartnerType").removeAttr('disabled');
+							setTimeout(() => {
+								$('#setCommissionRateTab, #feeStructureTab, #officeContactDetailsTab, #enrollRegTab, #paymentOptionsTab, #themeTab').hide();
+							}, 300);
+							$('#originalPartnerType').on('change', function () {
+							  updateFieldsBasedOnPartnerType();
+							});
 						}
+						// if(leadDemo.leadStudentDetailDTO.originalPartnerType == "WLP"){
+						// 	$("#setDiscount, #setDiscountTab").attr("style","");
+						// 	$("#setCommissionRate, #setCommissionRateTab").hide();
+						// }else if(leadDemo.leadStudentDetailDTO.originalPartnerType == "GP"){
+						// 	$("#setCommissionRate, #setCommissionRateTab").attr("style","");
+						// 	$("#setDiscount, #setDiscountTab").hide();
+						// }
 						$("#"+formId+" #commissionPayout").val(leadDemo.leadModifyDTO.commissionPayout);
 						$("#"+formId+" #whiteLabel").val(leadDemo.leadModifyDTO.whiteLabel);
 						$("#"+formId+" #enrollingStudent").val(leadDemo.leadModifyDTO.enrollingStudent);
+						if(leadDemo.leadModifyDTO.pschoolId != null && leadDemo.leadModifyDTO.pschoolId != undefined && leadDemo.leadModifyDTO.pschoolId != ''){
+							$("#pSchoolId").val(leadDemo.leadModifyDTO.pschoolId);
+							// $("#feeStructureLearningProgram").append(getLearningProgramAndCourseProviderMappingBySchoolId(leadDemo.leadModifyDTO.pschoolId));
+							// selectCourseProvider();
+						}
+						if($("#pSchoolId").val() == ''){
+							$('#setCommissionRateTab, #feeStructureTab, #enrollRegTab, #paymentOptionsTab, #themeTab').hide();
+						}
+						await initEnrollReg();
+						updateFieldsBasedOnPartnerType();
+						updatePartnerProgressBar();
+						$("#partnerProgressBar").hide()
+							$("#partnerProgressBar").removeClass("d-flex")
+
+						if(originalPartnerType == "GP" || originalPartnerType == "EPER"){
+							$("#officeContactDetailsTab").hide();
+							$("#setCommissionRateTab").show();
+						}else if(originalPartnerType == "WLP"){
+							$("#partnerProgressBar").show()
+							$("#partnerProgressBar").addClass("d-flex")
+						}
 				   }
 				}
+				$("#"+modalId).modal('show');
 			 }
 		 }
 	});
@@ -4815,20 +4847,19 @@ function savePatnerWithReferralCode(formId, elementId) {
 
 	if($("#"+formId+" #partnerType").val()=='' 
 		|| $("#"+formId+" #partnerType").val()==undefined){
-		showMessageTheme2(false, 'Please select Location Partner Type');
+		showMessageTheme2(0, 'Please select Location Partner Type');
 		return false;
 	}
 	if($("#"+formId+" #originalPartnerType").val()=='' 
 		||  $("#"+formId+" #originalPartnerType").val()==undefined){
-		showMessageTheme2(false, 'Please select Partner Type');
+		showMessageTheme2(0, 'Please select Partner Type');
 		return false;
 	}
 	if($("#"+formId+" #originalTimezone").val()=='' 
 		||  $("#"+formId+" #originalTimezone").val()==undefined){
-		showMessageTheme2(false, 'Please select Timezone');
+		showMessageTheme2(0, 'Please select Timezone');
 		return false;
 	}
-
 
 	$.ajax({
 		type : "POST",
@@ -4840,21 +4871,11 @@ function savePatnerWithReferralCode(formId, elementId) {
 		timeout : 600000,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessageTheme2(false, data['message']);
+				showMessageTheme2(0, data['message']);
 			} else {
-
-				//var html=getLeadMergeDataPopup(data.campainNameList);
-				// $('#tblCampaignList').dataTable().fnDestroy();
-				// $("#campaignlist").html(html);
-				// $('#tblCampaignList').dataTable();
-				if($("#originalPartnerType").val() == "WLP"){
-					$("#setCommissionRate, #setCommissionRateTab").hide();
-					$("#setDiscount, #setDiscountTab").attr("style","");
-				}else{
-					$("#setCommissionRate, #setCommissionRateTab").attr("style","");
-					$("#setDiscount, #setDiscountTab").hide();
-				}
-				showMessageTheme2(true, data['message']);
+				$("#originalPartnerType").attr('disabled', true);
+				updateTabsVisibility();
+				showMessageTheme2(1, data['message']);
 			}
 		}
 	});
@@ -4888,6 +4909,167 @@ function getRequestForPartnerWithReferral(formId){
 	data['whiteLabel']=$("#"+formId+" #whiteLabel").val();
 	data['enrollingStudent']=$("#"+formId+" #enrollingStudent").val();
 	return data;
+}
+
+function getOfficeContentsDetails(formId){
+	var requestData = {
+		"schoolId":$("#pSchoolId").val(),
+		"rowleadId":$("#partnerUserB2BSaveForm #rawLeadId").val()
+	}
+	$.ajax({
+		type: "GET",
+		contentType: "application/json",
+		url: getURLForHTML('dashboard', 'get-office-contact-details?payload='+encode(JSON.stringify(requestData))),
+		dataType: 'json',
+		success: function(data){
+			if(data['status'] == '1'){
+				$("#"+formId+" #officeFacebook").val(data.details.officeFacebook);
+				$("#"+formId+" #officeInsta").val(data.details.officeInsta);
+				$("#"+formId+" #officeLinkedin").val(data.details.officeLinkedin);
+				$("#"+formId+" #officeX").val(data.details.officeX);
+				$("#"+formId+" #schoolWebsite").val(data.details.schoolWebsite);
+				$("#"+formId+" #officeYoutube").val(data.details.officeYoutube);
+				$("#"+formId+" #officeContactUs").val(data.details.contactUsUrl);
+				$("#"+formId+" #schoolTimezone").val(data.details.schoolTimezone).trigger('change');
+				$("#"+formId+" #officeContactNumber").val(data.details.schoolContact);
+				$("#"+formId+" #officeContactEmail").val(data.details.contactEmail);
+				$("#"+formId+" #superAdminEmail").val(data.details.schoolEmail);
+				$("#"+formId+" #supportNumber").val(data.details.supportNumber);
+				$("#"+formId+" #officeCountryId").val(data.details.officeCountryId).change();
+				$("#"+formId+" #officeStateId").val(data.details.officeStateId).change();
+				$("#"+formId+" #officeCityId").val(data.details.officeCityId).change();
+				$("#"+formId+" #supportNumWtsCheck").prop("checked",  data.details.supportNumWtsCheck == 'Y');
+				$("#"+formId+" #officeContactNumWtsCheck").prop("checked", data.details.officeContactNumWtsCheck == 'Y');
+				$("#"+formId+" #officeAddres").val(data.details.officeAddres);
+				$("#"+formId+" #supportEmail").val(data.details.supportEmail);
+				$("#"+formId+" #schoolName").val(data.details.schoolName);
+
+				if($("#"+formId+" #schoolName").val() == null || $("#"+formId+" #schoolName").val() == undefined || $("#"+formId+" #schoolName").val() == ''){
+					$("#"+formId+" #createUpdatePartnerContactBtn").text("Create")
+				}else{
+					$("#"+formId+" #createUpdatePartnerContactBtn").text("Update")
+				}
+				return data;
+			} else {
+				showMessageTheme2(0, data['message']);
+			}
+		},
+		error: function (e) {
+			console.log("ERROR ::", e);
+		}
+	});
+}
+
+
+
+function getUpdateOfficeContentDetails(formId){
+	if($("#officeContactEmail").val() == ""){
+		showMessageTheme2(0, "Please enter the office contact email")
+		return false;
+	}
+	if($("#officeContactNumber").val() == ""){
+		showMessageTheme2(0, "Please enter the office contact number")
+		return false;
+	}
+	if($("#supportEmail").val() == ""){
+		showMessageTheme2(0, "Please enter the support email")
+		return false;
+	}
+	if($("#supportNumber").val() == ""){
+		showMessageTheme2(0, "Please enter the support number")
+		return false;
+	}
+	if($("#schoolName").val() == ""){
+		showMessageTheme2(0, "Please enter the school name")
+		return false;
+	}
+	if($("#schoolTimezone").val() == ""){
+		showMessageTheme2(0, "Please enter the school timezone")
+		return false;
+	}
+	if($("#schoolWebsite").val() == ""){
+		showMessageTheme2(0, "Please enter the school website")
+		return false;
+	}
+	if($("#officeCountryId").val() == ""){
+		showMessageTheme2(0, "Please enter the country")
+		return false;
+	}
+	if($("#officeStateId").val() == ""){
+		showMessageTheme2(0, "Please enter the state")
+		return false;
+	}
+	if($("#officeCityId").val() == ""){
+		showMessageTheme2(0, "Please enter the city")
+		return false;
+	}
+	if($("#officeContactUs").val() == ""){
+		showMessageTheme2(0, "Please enter the contact us")
+		return false;
+	}
+	if($("#superAdminEmail").val() == ""){
+		showMessageTheme2(0, "Please enter the super admin email")
+		return false;
+	}
+	if($("#officeAddres").val() == ""){
+		showMessageTheme2(0, "Please enter the address")
+		return false;
+	}
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLForHTML('dashboard', 'update-office-contact-details'),
+		data: JSON.stringify(requestDataForOfficeContentDetails(formId)),
+		dataType: 'json',
+		success: function(data){
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0 , data.message ,'')
+			}else{
+				showMessageTheme2(1 , data.message ,'');
+				$("#pSchoolId").val(data["pSchoolId"]);
+				$("#enrollRegTab").show();
+				$("#createUpdatePartnerContactBtn").text("Next");
+				$('#enrollRegTab').tab('show');
+				initEnrollReg();
+				saveLearningPrograms();
+				updatePartnerProgressBar();
+
+			}
+		},
+		error: function (e) {
+			console.log("ERROR ::", e);
+		}
+	});
+}
+
+function requestDataForOfficeContentDetails(formId){
+	var requestdata = {
+		"schoolId": $("#pSchoolId").val(),
+		"logInUserId":USER_ID,
+		"rowLeadId":$('#partnerUserB2BSaveForm #rawLeadId').val(),
+		'officeFacebook':$("#"+formId+" #officeFacebook").val(),
+		'officeInsta':$("#"+formId+" #officeInsta").val(),
+		'officeLinkedin':$("#"+formId+" #officeLinkedin").val(),
+		'officeX':$("#"+formId+" #officeX").val(),
+		'schoolWebsite':$("#"+formId+" #schoolWebsite").val(),
+		'officeYoutube':$("#"+formId+" #officeYoutube").val(),
+		'contactUsUrl':$("#"+formId+" #officeContactUs").val(),
+		'schoolTimezone':$("#"+formId+" #schoolTimezone").val(),
+		'schoolContact':$("#"+formId+" #officeContactNumber").val(),
+		'contactEmail':$("#"+formId+" #officeContactEmail").val(),
+		'supportEmail':$("#"+formId+" #supportEmail").val(),
+		'schoolEmail':$("#"+formId+" #superAdminEmail").val(),
+		'supportNumber':$("#"+formId+" #supportNumber").val(),
+		'officeCountryId':$("#"+formId+" #officeCountryId").val(),
+		'officeStateId':$("#"+formId+" #officeStateId").val(),
+		'officeCityId':$("#"+formId+" #officeCityId").val(),
+		'supportNumWtsCheck':$("#"+formId+" #supportNumWtsCheck").is(":checked")?'Y':'N',
+		'officeContactNumWtsCheck':$("#"+formId+" #officeContactNumWtsCheck").is(":checked")?'Y':'N',
+		'officeAddres':$("#"+formId+" #officeAddres").val(),
+		'schoolName':$("#"+formId+" #schoolName").val()
+		
+	}
+	return requestdata;
 }
 
 function callPCountries(formId, value, elementId, preSelected) {
@@ -7501,7 +7683,7 @@ function callUTMSourceList(formId, value, elementId, keyStatus) {
 	});
 }
 
-function getRequestForLeadAssign(formId, key, value,  discardPermission,  requestExtra) {
+function getRequestForLeadAssign(formId, key, value,  discardPermission,  requestExtra, schoolId) {
   var request = {};
   var authentication = {};
   var requestData = {};
@@ -7514,7 +7696,11 @@ function getRequestForLeadAssign(formId, key, value,  discardPermission,  reques
     requestData["permissionStatus"] = discardPermission;
   }
   authentication["hash"] = getHash();
-  authentication["schoolId"] = SCHOOL_ID;
+  if(schoolId){
+  authentication["schoolId"] = schoolId;
+  }else{
+	  authentication["schoolId"] = SCHOOL_ID;
+  }
   authentication["schoolUUID"] = SCHOOL_UUID;
   authentication["userType"] = "COMMON";
   request["authentication"] = authentication;
@@ -7522,11 +7708,11 @@ function getRequestForLeadAssign(formId, key, value,  discardPermission,  reques
   return request;
 }
 
-async function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPermission, userId, selectStatus) {
+async function callLeadAssignUserList(formId, value, elementId, keyStatus, discardPermission, userId, selectStatus, schoolId) {
     hideMessageTheme2('');
     customLoader(false);
-
-    const payload = getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission, userId);
+	
+    const payload = getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission, userId, schoolId);
 
     try {
         const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'masters', payload, 'api/v1/common');
@@ -12213,76 +12399,223 @@ function callCounselorReview(modeSearch, eventId, startDate, endDate) {
 	data['schoolId']=SCHOOL_ID;
 
 	$.ajax({
-			type : "POST",
-			contentType : APPLICATION_JSON_VALUE,
-			url : getURLForHTML('dashboard', 'lead-counselor-review'),
-			data : JSON.stringify(data),
-			dataType : 'json',
-			cache : false,
-			timeout : 600000,
-			success : function(data) {
-				console.log("counselor review", data);
-				if (data['status'] == '0' || data['status'] == '2') {
-					showMessage(true, data['message']);
-				} else {
-					if(data.modeSearch=='CUSTOM'){
-						$(".hideReviewdate").css({"display":"block"});
-						$("#dataReviewStartDate").val(data.startDate);
-						$("#dataReviewEndDate").val(data.endDate);
-						$("#searchReviewtype").val(data.modeSearch);
-					}
-					var html=getLeadCounselorReviewHtml(data.counselorReviewList);
-					$("#"+eventId).html(html);
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard', 'lead-counselor-review'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			console.log("counselor review", data);
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				if(data.modeSearch=='CUSTOM'){
+					$(".hideReviewdate").css({"display":"block"});
+					$("#dataReviewStartDate").val(data.startDate);
+					$("#dataReviewEndDate").val(data.endDate);
+					$("#searchReviewtype").val(data.modeSearch);
 				}
+				var html=getLeadCounselorReviewHtml(data.counselorReviewList);
+				$("#"+eventId).html(html);
 			}
-		});
-	}
-
-	function getLeadCounselorReviewHtml(counselorReviewList){
-		var html = '<tr>';
-		if(counselorReviewList.length > 0){
-			var ind=1;
-			var finalScore=0;	
-			var totalFinalScore=0;
-			var totalLeadRating=0;
-			$.each(counselorReviewList, function(i,v){
-				html+=`<tr>`;
-				html+=`<td class="text-center">${ind}</td>`;
-				html+=`<td class="text-left">${v.assignName}</td>`;
-
-				var leadData1 = v.leadData;
-				if(leadData1.length > 0){
-					$.each(leadData1, function(j, ld){
-						if(ld.dataType=='RESPONSE-TYPE' || ld.dataType=='LEAD-DEMO' || ld.dataType=='DEMO-ENROLL'
-							|| ld.dataType=='LEAD-ENROLL' || ld.dataType=='MEETING-JOIN' || ld.dataType=='ENROLL-TIME'){
-							html+=`<td class="text-center">${ld.finalScore} /10</td>`;
-						}else{
-							html+=`<td class="text-center">0</td>`;
-						}
-						
-						finalScore+=parseInt(ld.finalScore);
-						if(ld.finalScore>0){
-							totalLeadRating+=1;
-						}
-					});
-					totalFinalScore	=finalScore/totalLeadRating;
-					html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
-					ind++;
-					totalFinalScore=0;
-					finalScore=0;
-					totalLeadRating=0;
-				}else{
-					totalFinalScore=0;
-					finalScore=0;
-					totalLeadRating=0
-				}
-				html+=`</tr>`;
-				
-			});
-			
-		}else{
-			html+=`<tr><td class="text-center" colspan="8">No record found</td></tr>`;
 		}
-		return html;
+	});
+}
+
+function getLeadCounselorReviewHtml(counselorReviewList){
+	var html = '<tr>';
+	if(counselorReviewList.length > 0){
+		var ind=1;
+		var finalScore=0;	
+		var totalFinalScore=0;
+		var totalLeadRating=0;
+		$.each(counselorReviewList, function(i,v){
+			html+=`<tr>`;
+			html+=`<td class="text-center">${ind}</td>`;
+			html+=`<td class="text-left">${v.assignName}</td>`;
+
+			var leadData1 = v.leadData;
+			if(leadData1.length > 0){
+				$.each(leadData1, function(j, ld){
+					if(ld.dataType=='RESPONSE-TYPE' || ld.dataType=='LEAD-DEMO' || ld.dataType=='DEMO-ENROLL'
+						|| ld.dataType=='LEAD-ENROLL' || ld.dataType=='MEETING-JOIN' || ld.dataType=='ENROLL-TIME'){
+						html+=`<td class="text-center">${ld.finalScore} /10</td>`;
+					}else{
+						html+=`<td class="text-center">0</td>`;
+					}
+					
+					finalScore+=parseInt(ld.finalScore);
+					if(ld.finalScore>0){
+						totalLeadRating+=1;
+					}
+				});
+				totalFinalScore	=finalScore/totalLeadRating;
+				html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
+				ind++;
+				totalFinalScore=0;
+				finalScore=0;
+				totalLeadRating=0;
+			}else{
+				totalFinalScore=0;
+				finalScore=0;
+				totalLeadRating=0
+			}
+			html+=`</tr>`;
+			
+		});
 		
+	}else{
+		html+=`<tr><td class="text-center" colspan="8">No record found</td></tr>`;
 	}
+	return html;
+	
+}
+
+
+// function checkPreviewButtonVisibility() {
+//     var editorContent = $("#editorData").text().trim() || $(".jodit-wysiwyg").text().trim();
+//     var hasFile = $("#recipientSignatureUpload")[0].files.length > 0;
+//     if (editorContent.length > 0 && hasFile) {
+//         $("#previewContractBtn").show();
+//     } else {
+//         $("#previewContractBtn").hide();
+//     }
+// }
+
+	
+function getEnrollmentPartnerPaymentDetails() {
+	let schoolId = $('#pSchoolId').val();
+	$.ajax({
+		type: "GET",
+		contentType: "application/json",
+		url: BASE_URL + CONTEXT_PATH + '/' + schoolId + '/dashboard/get-partner-payment-options',
+		dataType: 'json',
+		async: false,
+		success: function (data) {
+			if (data.status) {
+				let isStripeActive = false;
+				let isAirwallexActive = false;
+
+				$.each(data.pgList, function (index, item) {
+					if (item.getwayName == 'WIRETRANSFER') {
+						$('#WIRETRANSFER').prop("checked", item.active == 'Y').prop("initValue", item.active == 'Y').prop("paymentId", item.id);
+					} else if (item.getwayName == 'CASH') {
+						$('#CASH').prop("checked", item.active == 'Y').prop("initValue", item.active == 'Y').prop("paymentId", item.id);
+					} else if (item.getwayName.toUpperCase() == 'STRIPE') {
+						isStripeActive = item.active == 'Y';
+						$('#stripePaymentMode').prop("checked", isStripeActive).prop("initValue", isStripeActive).prop("paymentId", item.id);
+					} else if (item.getwayName.toUpperCase() == 'AIRWALLEX') {
+						isAirwallexActive = item.active == 'Y';
+						$('#airwallexPaymentMode').prop("checked", isAirwallexActive).prop("initValue", isAirwallexActive).prop("paymentId", item.id);
+					}
+				});
+
+				let finalToggle = (isStripeActive || isAirwallexActive);
+
+				$('#PAYMENTGATEWAY').prop("checked", finalToggle);
+
+				if (finalToggle) {
+					$('#paymentGatewaysDiv').show();
+				}
+			} else {
+				showMessageTheme2(0, data.message);
+			}
+		}
+	});
+}
+
+function getUpdatePartnerPaymentRequest() {
+    const modes = ["WIRETRANSFER", "CASH", "stripePaymentMode", "airwallexPaymentMode"];
+    const updateRequest = [];
+
+    modes.forEach(id => {
+        const element = $('#' + id);
+        const initValue = element.prop("initValue");
+        const isChecked = element.is(":checked");
+        const paymentId = element.prop("paymentId");
+
+        if (paymentId && initValue !== isChecked) {
+            updateRequest.push({
+                id: parseInt(paymentId),
+                value: isChecked ? 'Y' : 'N'
+            });
+        }
+    });
+
+    console.log("Update Request →", updateRequest);
+    return JSON.stringify({ updateRequest });
+}
+
+function updateEnrollmentPartnerPaymentDetails() {
+    let schoolId = $('#pSchoolId').val();
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: BASE_URL + CONTEXT_PATH + '/' + schoolId + '/dashboard/update-partner-payment-options',
+        data: getUpdatePartnerPaymentRequest(),
+        dataType: 'json',
+        async: false,
+        success: function (data) {
+            if (data.status == "1") {
+                showMessageTheme2(1, data.message);
+
+                const modes = ["WIRETRANSFER", "CASH", "stripePaymentMode", "airwallexPaymentMode"];
+                modes.forEach(id => {
+                    const el = $('#' + id);
+                    el.prop("initValue", el.is(":checked"));
+                });
+
+                updatePartnerProgressBar();
+            } else {
+                showMessageTheme2(0, data.message);
+            }
+        },
+        error: function (e) {
+            showMessageTheme2(0, 'Exception');
+        }
+    });
+}
+
+async function callLeadAssignUserListBySchoolId(formId, value, elementId, keyStatus, discardPermission, userId, selectStatus) {
+    hideMessageTheme2('');
+    customLoader(false);
+	let schoolId = $("#leadDemoSchoolMove").val();
+    const payload = getRequestForLeadAssign(formId, 'LEAD-ASSIGN-USER-LIST', value, discardPermission, userId, schoolId);
+
+    try {
+        const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'masters', payload, 'api/v1/common');
+
+        if (data.status === '0' || data.status === '2') {
+            showMessageTheme2(true, data.message);
+            return null;
+        }
+
+        const result = data.mastersData.data;
+        const $dropdown = $("#" + formId + " #" + elementId);
+        $dropdown.html('');
+        $dropdown.append('<option value="0">Select Assign</option>');
+
+        $.each(result, function(k, v) {
+            if (keyStatus) {
+                if (discardPermission) {
+                    $dropdown.append(`<option value="${v.key}">${v.value} - (${v.extra})</option>`);
+                } else {
+                    if (selectStatus) {
+                        $dropdown.append(`<option value="${v.key}" ${v.key == userId ? 'selected' : ''}>${v.value} - (${v.extra})</option>`);
+                    } else {
+                        $dropdown.append(`<option value="${v.key}">${v.value} - (${v.extra})</option>`);
+                    }
+                }
+            } else {
+                $dropdown.append(`<option value="${v.value}">${v.value}</option>`);
+            }
+        });
+
+        return result;
+    } catch (err) {
+        console.error("Error occurred:", err);
+        throw err;
+    }
+}

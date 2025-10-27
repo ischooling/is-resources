@@ -1,4 +1,4 @@
-function notEligibleForRequest(userId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl) {
+function notEligibleForRequest(userId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
 	var html = `
 	<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">
 		<div class="sticky-header">
@@ -41,7 +41,7 @@ function notEligibleForRequest(userId, schoolWebsite, logoUrl, copyrightYear, co
 			<div class="app-wrapper-footer">
 				<div class="app-footer">
 					<div class="app-footer__inner">
-						<p style="margin: 0">${copyrightYear} © ${copyrightUrl}</p>
+						<p style="margin: 0">Copyright © ${copyrightYear} ${copyrightName} - All Rights Reserved.</p>
 					</div>
 				</div>
 			</div>
@@ -50,8 +50,8 @@ function notEligibleForRequest(userId, schoolWebsite, logoUrl, copyrightYear, co
 	$('body').append(html);
 }
 
-function renderCustomPayment(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl) {
-	$('body').append(customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl));
+function renderCustomPayment(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
+	$('body').append(customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName));
 	var startDate = new Date();
 	var endDate = new Date();
 	startDate.setDate(endDate.getDate() - 30);
@@ -68,7 +68,7 @@ function renderCustomPayment(userId, studentStandardId, schoolWebsite, logoUrl, 
 	getPaymentDetails();
 }
 
-function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl) {
+function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
 	var html = `
 		<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">
 			<div class="sticky-header">
@@ -377,7 +377,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 			<div class="app-wrapper-footer">
 				<div class="app-footer">
 					<div class="app-footer__inner">
-						<p style="margin: 0">${copyrightYear} © ${copyrightUrl}</p>
+						<p style="margin: 0">Copyright © ${copyrightYear} ${copyrightName} - All Rights Reserved.</p>
 					</div>
 				</div>
 			</div>
@@ -407,9 +407,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 	return html;
 }
 
-function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl) {
+function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
 	var responseData = getAdvancePaymentDetails(studentStandardId);
-	$('body').append(customAdvanceContent(responseData, userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl));
+	$('body').append(customAdvanceContent(responseData, userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName));
 	var advanceFeeDetails = responseData.advanceFeeDetails;
 	if (responseData['advanceFeeStatus'] != 'C') {
 		$('#learningProgram').val('');
@@ -473,7 +473,7 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 	}
 }
 
-function customAdvanceContent(responseData, userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl) {
+function customAdvanceContent(responseData, userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
 	var advanceFeeDetails = responseData.advanceFeeDetails;
 	var html = 
 	`<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">
@@ -607,7 +607,7 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 		<div class="app-wrapper-footer">
 			<div class="app-footer">
 				<div class="app-footer__inner">
-					<p style="margin: 0">${copyrightYear} © ${copyrightUrl}</p>
+					<p style="margin: 0">Copyright © ${copyrightYear} ${copyrightName} - All Rights Reserved.</p>
 				</div>
 			</div>
 		</div>

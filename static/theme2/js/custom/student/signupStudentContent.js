@@ -44,10 +44,10 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	}
 	var html = await generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId);
 	if(signupType == "Online"){
-		$("body").append(html+showMessageInPopup());
+		$("#studentSignupWrapper").html(html+showMessageInPopup());
 	}else{
 		if(studentUserId == USER_ID){
-			$("body").append(html+showMessageInPopup());
+			$("#studentSignupWrapper").html(html+showMessageInPopup());
 		}else{
 			showAndHideDashboardAndAdditionalContent("additional")
 			$("#dashboardContentInHTMLAdditional").append(html+showMessageInPopup());
@@ -278,7 +278,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 				}else {
 					html+=
 					`<label class="d-flex justify-content-center font-weight-bold">Choose Learning Program</label>
-					<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;">
+					<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;-webkit-appearance:auto !important">
 						<option value="">Select Learning Program</option>
 						${getAllLearningProgramContent(SCHOOL_ID)}
 					</select>
@@ -3633,5 +3633,29 @@ function showMessageInPopup(){
 			+'</div>'
 		+'</div>'
 	+'</div>';
+	return html
+}
+
+function documentPreviewModal(){
+	var html=
+		`<div id="documentPreviewModal" class="modal fade fade-scale" role="dialog">
+			<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
+				<div class="modal-content">
+					<div class="modal-header py-2 bg-primary text-white d-flex">
+						<h5 class="modal-title text-white" >Preview</h5>
+						<button type="button" class="close text-white ml-auto close-with-red-color" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body" style="min-height:300px; max-height: 550px; overflow: auto; text-align: center;">
+						
+						<img id="documentPreview" src="" alt="" title=""style="width: auto; height: auto; max-width: 100%;" />
+					</div>
+					<div class="modal-footer">
+					<button type="button" class="btn btn-danger " data-dismiss="modal">Close</button>
+				</div>
+				</div>
+			</div>
+		</div>`
 	return html
 }

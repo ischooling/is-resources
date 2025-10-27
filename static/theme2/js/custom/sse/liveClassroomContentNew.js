@@ -325,7 +325,7 @@ async function liveClassConentPageFooter(){
                 +'<div class="app-footer__inner">'
                   +'<div class="app-footer__inner">'
                     +'<div class="col">'
-                      +'<p>'+schoolSettingsLinks.copywriteYear+'&Copy;'+schoolSettingsLinks.copywriteUrl+'</p>'
+                      +'<p>'+getCopyright()+'</p>'
                     +'</div>'
                   +'</div>'
                 +'</div>'

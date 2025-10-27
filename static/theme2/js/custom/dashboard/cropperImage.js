@@ -57,7 +57,7 @@
         fileType = files[0].type.split("/");
         fileType = fileType[1];
         if(fileType == "pdf"){
-          if(docType == "Profile Image"){
+          if(docType == "Profile Image" || docType == "Logo Image"){
             showMessageTheme2(2, 'Please upload files in JPG, PNG, and JPEG with max size of 5MB');
             $("#"+inputId).val("");
             return false;
@@ -76,7 +76,7 @@
             setTimeout(function() {
               $('#cropModalImg').attr('src', url);
               $('#cropModal').modal('show');
-              if(docType == "Profile Image"){
+              if(docType == "Profile Image" || docType == "Logo Image"){
                 $("#crop").text("Crop & Save");
               }else{
                 $("#crop").text("Crop");

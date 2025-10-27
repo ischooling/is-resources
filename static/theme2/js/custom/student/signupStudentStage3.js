@@ -167,7 +167,7 @@ async function showPaymentTermCondMode(src) {
 	var entityType = $(src).attr('entityType');
 	var entityId = $(src).attr('entityId');
 	var paidByUserId = $(src).attr('paidByUserId');
-	await getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
+	await getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
 	$("#bookAnEnrollmentTNC").modal("hide");
 }
 async function showPaymentModal() {
@@ -188,7 +188,7 @@ async function showPaymentModal() {
 				var entityType = $('.payabledetails').attr('entityType');
 				var entityId = $('.payabledetails').attr('entityId');
 				var paidByUserId = $('.payabledetails').attr('paidByUserId');
-				getPaymentGatewaysOptions(schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
+				getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
 			}
 		} else {
 			$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })

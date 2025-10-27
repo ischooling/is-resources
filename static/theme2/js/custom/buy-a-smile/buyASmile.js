@@ -103,7 +103,7 @@ function saveSmile() {
 		return false;
 	}
 	if($('#userPaymentDetailsId').val()!='' && $('#userId').val()!='' && $('#smileId').val()!=''){
-		getPaymentGatewaysOptions(SCHOOL_ID,$('#userPaymentDetailsId').val(),'BUY_A_SMILE',$('#smileId').val(),$('#userId').val());
+		getPaymentGatewaysOptions(SCHOOL_ID,SCHOOL_ID,$('#userPaymentDetailsId').val(),'BUY_A_SMILE',$('#smileId').val(),$('#userId').val());
 		return false;
 	}
 	$.ajax({
@@ -123,7 +123,7 @@ function saveSmile() {
 				$('#smileId').val(data.smileId);
 				$('#userId').val(data.userId);
 				$('#userPaymentDetailsId').val(data.userPaymentDetailsId);
-				getPaymentGatewaysOptions(SCHOOL_ID,$('#userPaymentDetailsId').val(),'BUY_A_SMILE',$('#smileId').val(),$('#userId').val());
+				getPaymentGatewaysOptions(SCHOOL_ID,SCHOOL_ID,$('#userPaymentDetailsId').val(),'BUY_A_SMILE',$('#smileId').val(),$('#userId').val());
 			}
 		}
 	});
@@ -293,7 +293,7 @@ function hideMessageBAS(elementId) {
 
 }
 
-function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway){
+function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway){
 	hideModalMessage('');
 	if(paymentGateway=='WELLSFARGO'){
 		$('#cardHolderNameError').hide();
@@ -327,7 +327,7 @@ function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, school
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('common','invoke-payment-gateway'),
-		data : JSON.stringify(invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway)),
+		data : JSON.stringify(invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway)),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
@@ -347,7 +347,7 @@ function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, school
 	});
 }
 
-function invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway){
+function invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway){
 	var paymentInitiateRequest = {};
 	if($('#location').length>0){
 		paymentInitiateRequest['location'] = $('#location').val();
@@ -359,6 +359,7 @@ function invokePaymentGatewayRequest(formId, userPaymentDetailsId, paidByUserId,
 	paymentInitiateRequest['userPaymentDetailsId'] = userPaymentDetailsId;
 	paymentInitiateRequest['paidByUserId'] = paidByUserId;
 	paymentInitiateRequest['schoolId'] = schoolId;
+	paymentInitiateRequest['schoolIdOfPaymentGateway'] = schoolIdOfPaymentGateway;
 	paymentInitiateRequest['paymentGateway'] = paymentGateway;
 	return paymentInitiateRequest;
 }

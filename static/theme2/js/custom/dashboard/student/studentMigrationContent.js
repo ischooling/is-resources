@@ -1685,7 +1685,7 @@ function getReviewAndPayContent(data){
 						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right ml-2" onclick="callForProgressionToDashboard();">'+(paynow?'Pay Later':'Proceed to Dashboard')+'</button>';
 					}
 					if(paynow){
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions('+data.schoolId+','+data.userPaymentDetailsId+',\''+data.entityType+'\','+data.entityId+','+USER_ID+');">Pay Now</button>';
+						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions('+data.schoolId+','+data.schoolId+','+data.userPaymentDetailsId+',\''+data.entityType+'\','+data.entityId+','+USER_ID+');">Pay Now</button>';
 					}
 				html+=
 				'</div>'

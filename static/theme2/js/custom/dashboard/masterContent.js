@@ -383,6 +383,13 @@ function getAllGrade(schoolId, selectOption){
     $('#gradeId').append(gradeOption);
 }
 
+function getAllGradeOnSelectId(elementId, selectOption){
+    var requiredGrades = ['N','KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'];
+    var gradeAll= getGradesData(requiredGrades);
+    var gradeOption = getGrades(gradeAll, selectOption);
+    $('#'+elementId).html(gradeOption);
+}
+
 function getGenderContent(){
 	var html='<option value="">Select gender*</option>';
 	html+='<option value="MALE">MALE</option>';
@@ -641,6 +648,72 @@ function getTimeZones(formId,elementId,elementIdCheck){
 					}
 				});
 			}
+		}
+	});
+}
+
+// function getLearningProgramContentFromServer(schoolId) {
+// 	debugger;
+//     return new Promise(function(resolve, reject){
+//         hideMessage('');
+//         const data = {
+//             userId: USER_ID,
+//             schoolId: schoolId
+//         };
+
+//         $.ajax({
+//             type: "GET",
+//             contentType: "application/json",
+//             url: getURLForHTML("dashboard", "get-learning-program-list?payload=" + encode(JSON.stringify(data))),
+//             dataType: "json",
+//             cache: false,
+//             timeout: 600000,
+//             success: function (response) {
+//                 if (response.status === '0' || response.status === '2') {
+//                     showMessage(true, response.message);
+//                     reject(response.message); // Rejecting the promise if the status indicates an issue
+//                 } else {
+//                     let html = '';
+//                     $.each(response.lpList, function (i, v) {
+//                         html += '<option value="' + v.learningProgram + '">' + v.learningProgramValue + '</option>';
+//                     });
+//                     resolve(html); // Resolving the promise with the generated HTML
+//                 }
+//             },
+//             error: function (error) {
+//                 console.error("Error:", error);
+//                 reject(error); // Rejecting the promise in case of an error
+//             }
+//         });
+//     });
+// }
+
+function getLearningProgramContentFromServer(schoolId,formId,elementId){
+	hideMessage('');
+	var data = {};
+	data["userId"] = USER_ID;
+	data["schoolId"] = schoolId;
+	$.ajax({
+	  type: "GET",
+	  contentType: "application/json",
+	  url: getURLForHTML("dashboard", "get-learning-program-list?payload="+encode(JSON.stringify(data))),
+	  dataType: "json",
+	  cache: false,
+	  timeout: 600000,
+	  success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				var dropdown = $('#'+formId+' #'+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="" data-enrollmentFor="">Select Learning Program</option>');
+				$.each(data.lpList, function(i, v){
+					dropdown.append('<option value="'+v.learningProgram+'"  data-enrollmentFor="'+v.enrollmentFor+'">'+v.learningProgramValue+'</option>');
+				});
+			}
+		},
+		error: function (e) {
+			//showMessage(true, e.responseText);
 		}
 	});
 }
@@ -1145,11 +1218,14 @@ function getSessionMasterContent(data, allStatus){
 
 		
 	});
-	// html+='<option value="4">2019-2020</option>'
-	// +'<option value="5">2020-2021</option>'
-	// +'<option value="1">2021-2022</option>'
-	// +'<option value="2">2022-2023</option>'
-	// +'<option value="3" selected>2023-2024</option>';
+	return html;
+}
+function getSessionMasterContentAll(data){
+	var html='';
+	html+='<option value="ALL">ALL</option>';
+	$.each(data, function(k, v) {
+		html+='<option value="'+v.value+'">'+v.value+'</option>';
+	});
 	return html;
 }
 function getUserBasedOnCriteria(key, value, extra, extra1){
@@ -1289,6 +1365,50 @@ function getSessionMasterList(formId, elementId, allStatus){
 		}
 	});
 }
+
+function getSchoolSessionMasterList(formId, elementId, schoolId){
+	if(schoolId == "ALL" || schoolId == ""){
+		schoolId = SCHOOL_ID
+	}
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMaster3('formId','SCHOOL-SESSIONS-LIST', schoolId)),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		async : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				var result = data['mastersData']['data'];
+				var html = getSessionMasterContentAll(result);
+				$('#'+formId+' #'+elementId).html(html);
+			}
+		},
+		error : function(e) {
+			console.log(e);
+		}
+	});
+}
+
+function getRequestForMaster3(formId, key, value) {
+	var request = {};
+	var authentication = {};
+	var requestData = {};
+	requestData["formId"] = formId;
+	requestData["requestKey"] = key;
+	requestData["requestValue"] = value;
+	authentication["hash"] = getHash();
+	authentication["schoolId"] = SCHOOL_ID;
+	authentication["schoolUUID"] = SCHOOL_UUID;
+	authentication["userType"] = "COMMON";
+	request["authentication"] = authentication;
+	request["requestData"] = requestData;
+	return request;
+  }
 
 function getGradesByLearningProgram(formId,learningProgram,standardId, parentElement){
 	var actualGrades='';
@@ -1698,6 +1818,7 @@ function getRequestForLearningProgramList(key, schoolId, requestExtra){
 	return request;
 }
 
+
 function updateLearningPrograms(formId, elementId){
 	var prefixHtml='<option value="">Select Learning Program</option><option value="ALL">All</option>';
 	$('#'+formId+' #'+elementId).html(prefixHtml+$('#'+formId+' #'+elementId).html());
@@ -1829,4 +1950,153 @@ function getLanguagesValueByCode(langCode) {
         console.log('Existing values:', existingValues);
     }
     return existingValues;
+}
+
+
+function getCourseProviderNameByIds(id){
+	var courseProviderObject = {
+		1:"Agilix Buzz",
+		2:"Odysseyware",
+		31:"Buzz",
+		36:"BUZZ",
+		37:"BUZZ-GC",
+		38:"BUZZ-GR",
+		39:"Exact-Path",
+		40:"Edmentum-Canvas",
+		41:"Courseware"
+	}
+	return courseProviderObject[id];
+}
+function getLearningProgramAndCourseProviderMappingBySchoolId(schoolId, defaultOption, defaultOptionValue){
+	var html='';
+	if(defaultOption){
+		if(defaultOptionValue){
+			html+=`<option value="${defaultOptionValue}" data-id="${defaultOptionValue}" >${defaultOption}</option>`;
+		}else{
+			html+=`<option value="" data-id="" >${defaultOption}</option>`;
+		}
+	}
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestLearningProgramAndCourseProvider('LEARNING_PROGRAM_WITH_COURSE_PROVIDER_ID', schoolId)),
+		dataType: "json",
+		cache: false,
+		timeout: 600000,
+		async: false,
+		success: function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageBAS('serverError', data['message']);
+				return false;
+			} else {
+				var details = data.mastersData.data;
+				$.each(details, function(k, v) {
+					html+=`<option value="${v.extra}" data-id="${v.extra2}" >${v.extra1}</option>`;
+				});
+			}
+		},
+		error: function(error) {
+			console.log("Error:", error);
+			return false;
+		}
+	});
+	return html;
+}
+
+function getRequestLearningProgramAndCourseProvider(key, schoolId){
+	var request = {};
+	var requestData = {};
+	var authentication = {};
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	requestData['requestKey'] = key;
+	requestData['requestValue'] = schoolId;
+	request['requestData'] = requestData;
+	request['authentication'] = authentication;
+	return request;
+}
+
+function callAllStandardList(formId, elementId) {
+	resetDropdown($('#'+formId+' #'+elementId), 'Select Grade');
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMaster('formId', 'ALL-STANDARD-LIST', 'gradeList')),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		async : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				var result = data['mastersData']['standards'];
+				var dropdown = $('#'+formId+' #'+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="0">Select Grade</option>');
+				$.each(result, function(k, v) {
+					dropdown.append('<option value="' + v.key + '">' + v.value+ ' </option>');
+				});
+			}
+		}
+	});
+}
+
+function getPartnerSchools(schoolId) {
+    $.ajax({
+        type: "GET",
+        contentType: "application/json",
+        url: BASE_URL + CONTEXT_PATH + SCHOOL_ID + `/dashboard/get-partner-schools?schoolId=${schoolId}`,
+        dataType: 'json',
+        success: function(data) {
+            if (data['status'] === '0' || data['status'] === '2' || data['status'] === '3') {
+                if (data['status'] === '3') {
+                    redirectLoginPage();
+                } else {
+                    showMessageTheme2(0, data['message'], '', true);
+                }
+            } else {
+                const partnerSchools = data.partnerSchoolsList || [];
+
+                const $schoolSelect = $('#schoolName');
+                const $partnerSelect = $('#partnerName');
+
+                if(partnerSchools.length == 1){
+                    const item = partnerSchools[0];
+
+                    $schoolSelect.empty().append(`<option value="${item.schoolId}">${item.schoolName}</option>`);
+                    $schoolSelect.data('fullList', partnerSchools).val(item.schoolId).attr("disabled", true);
+
+                    $partnerSelect.empty().append(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
+                    $partnerSelect.val(item.partnerUserId);
+                }else{
+                    $schoolSelect.empty().append(`<option value="">Select School Name</option>`);
+                    $partnerSelect.empty().append(`<option value="">Select Partner Name</option>`);
+
+                    $schoolSelect.data('fullList', partnerSchools);
+
+                    partnerSchools.forEach(item => {
+                        $schoolSelect.append(`<option value="${item.schoolId}">${item.schoolName}</option>`);
+                    });
+                }
+            }
+        }
+    });
+}
+
+function getPartnerOnSchoolId(src){
+    const selectedSchoolId = $(src).val();
+    const partnerSchools = $(src).data('fullList') || [];
+    const $partnerSelect = $('#partnerName');
+
+    if (selectedSchoolId) {
+        const matched = partnerSchools.filter(item => item.schoolId === selectedSchoolId);
+        matched.forEach(item => {
+            $partnerSelect.html(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
+        });
+    }else{
+        $partnerSelect.html(`<option value="ALL">Select Partner Name</option>`);
+    }
 }

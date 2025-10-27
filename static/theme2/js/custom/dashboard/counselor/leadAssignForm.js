@@ -243,7 +243,6 @@ function getRequestForUpdateCommissionRate(formId, singleId){
 	authentication['userId'] = USER_ID;
 	request['authentication'] = authentication;
 	request['commissionRates'] = commissionRates;
-	debugger;
 	return request;
 }
 
@@ -275,7 +274,6 @@ function updateCommissionRate(formId, id, isEdit) {
 					showMessageTheme2(0, data['message'], '', false);
 				}
 			}else{
-				debugger;
 				if(!isEdit){
 					showMessageTheme2(1, data['message'], '', true);
 				}else{

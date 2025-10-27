@@ -65,7 +65,6 @@ async function renderProfilePage(arg0){
     $("#state").val(responseData.details.stateId).trigger("change");
     $("#city").val(responseData.details.cityId).trigger("change");
     $("#countryTimezoneId").val(responseData.details.countryTimezone).trigger("change");
-    debugger;
     if(responseData.details.languagesKnown!=''){
         var lang = responseData.details.languagesKnown.split(',');
         $("#languages").val(lang).trigger("change");

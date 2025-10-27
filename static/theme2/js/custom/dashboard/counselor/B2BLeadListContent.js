@@ -905,6 +905,11 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 												html+='</td>'
 												+'</tr>'
 												+'<tr>'
+													+'<th class="border-0 p-1" style="width:165px">Partner Type:</th>'
+													+'<td class="border-0 p-1">'+(leads.type!=''?leads.type:'N/A');
+												html+='</td>'
+												+'</tr>'
+												+'<tr>'
 													+'<th class="border-0 p-1" style="width:165px">Message:</th>'
 													+'<td class="border-0 p-1">'
 														+'<div class="dropdown d-inline-block" style="position: inherit;">'
@@ -1040,7 +1045,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 								+'</tr>'
 								+'<tr>'
 									+'<td colspan="2" class="border-0 p-1">'
-										+'<a href="javascript:void(0)" onclick="showBasicDetailsMailWarning('+leads.rawLeadId+');" class="text-dark py-1 d-inline-block"><i class="fa fa-link text-primary"></i>&nbsp;Send Basic Details Mail</a>'
+										+'<a href="javascript:void(0)" onclick="showBasicDetailsMailWarning('+leads.rawLeadId+');" class="text-dark py-1 d-inline-block"><i class="fa fa-link text-primary"></i>&nbsp;Send Interest Form Mail</a>'
 									+'</td>'
 								+'</tr>';
 							}else{
@@ -1142,7 +1147,7 @@ function createB2BAddContractModal(data){
 		'<div id="b2bContractModal" class="modal right-slide-modal fade" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-backdrop="static">'
 			+'<div class="modal-dialog modal-xl">'
 				+'<div class="modal-content border-0">'
-					+'<div class="modal-header py-0 text-white card-header card-header-tabe">'
+					+'<div class="modal-header py-0 text-white card-header card-header-tabe bg-transparent">'
 						+'<ul class="nav" style="height: min-content;">'
 							+'<li class="nav-item"><a data-toggle="tab" href="#addContract" id="addContractTab" class="nav-link active">Draft Contract</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#emailLogs" id="emailLogsTab" class="nav-link">Email Logs</a></li>'

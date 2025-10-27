@@ -10390,7 +10390,7 @@ transition:opacity .2s;
 	width:100%;
 	bottom:0;
 	left:0;
-	z-index:9
+	z-index:99;
 }
 .fixed-footer .app-footer .app-footer__inner {
 	margin-left:280px;
@@ -16850,6 +16850,12 @@ display:block;
 width:8px;
 height:8px;
 border-radius:20px
+}
+.vertical-step-count{
+	position: absolute;
+    left: calc(25% - 120px);
+    font-weight: bold;
+    color: #636363;
 }
 .vertical-time-simple .timeline-title {
 	text-transform:none
@@ -31874,7 +31880,7 @@ to { background-color: rgb(6, 145, 6); }
 	-ms-transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out}
 .server-message.show{transform: translateY(0%);display: block;}
 .overlay{position: fixed;left: 0;top:0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.6);z-index: 999999}
-.server-message .msg{font-size: 18px;font-weight: 600;padding:17px 5px;color:#fff;width: 100%;display: inline-block;margin-bottom: 5px}
+.server-message .msg{font-size: 18px;font-weight: 600;padding:17px 5px;color:#fff;width: 100%;display: inline-block;position: relative;}
 .server-message .error{background:red;}
 .server-message .notification{background:#ff7100;}
 .server-message .success{background:green;}
@@ -32908,7 +32914,7 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 /* Enrollent partner form CSS Start Here*/
 	.enrollent-partner-form-bg{background:url('../images/enrollment_partner_form_bg.png');background-repeat:no-repeat;background-position:8%;background-size:cover;}
 	.enrollent-partner-thankyou-bg{background:url('../images/enrollment-partner-thankyou-bg.png');background-repeat:no-repeat;background-position:8% -70px;background-size:100%;}
-	.enrollment-partner-thankyou-img{max-width:350px;width:100%}
+	.enrollment-partner-thankyou-img{max-width:250px;width:100%}
 	.timeline-blue-line:before{background: var(--pc) !important;height:calc(100% - 49px);left:12px;width:9px}
 	.border-inset-white{box-shadow:inset 0 0 0 2px #fff !important}
 	.enrollment-tracker-wrapper .text-light{color:#c6c6c6 !important}
@@ -33716,3 +33722,5 @@ input:checked + .small-switch-slider:before {
 .text-primary-on-hover:hover{
 	color: var(--pc);
 }
+
+.modalConfettiCanvas{position: absolute;top: 0;left: 0;width: 100%;height: 100%;pointer-events: none; }
