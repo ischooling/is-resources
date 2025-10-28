@@ -357,7 +357,7 @@ function updateWati(number, watiToken, watiUrl, status,studentWati) {
                 </select>
               </div>
               <div class="mb-3">
-                <label for="studentWati">Eligible for Wati Broadcast in Student List</label>
+                <label for="studentWati">Eligible for Wati Broadcast in Student List and Teacher List</label>
                 <select id="studentWati" class="form-control">
                   <option value="Y" ${studentWati == "Y" ? "selected" : ""}>Active</option>
                   <option value="N" ${studentWati == "N" ? "selected" : ""}>Inactive</option>

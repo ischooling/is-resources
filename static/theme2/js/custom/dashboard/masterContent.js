@@ -556,6 +556,63 @@ function getLmsPlatformContent(schoolId) {
 	return html;
 }
 
+function getCourseContent(key,key1) {
+	var html = '<option value="">Select Course</option>';
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster("",'SUBJECT-LIST-BY-GRADE', key,"","",key1)),
+		dataType: 'json',
+		async: false,
+		success: function (data) {
+			if (data.status === '0' || data.status === '2') {
+				showMessage(true, data.message);
+			} else {
+				var result = data.mastersData?.subject
+				if (Array.isArray(result) && result.length > 0) {
+					result.forEach(function (v) {
+						html += `<option value="${v.key}">${v.value}</option>`;
+					});
+				}
+			}
+		},
+		error: function (e) {
+			console.error(e);
+		}
+	});
+	return html;
+}
+
+function getCountryListContent(schoolId) {
+	var html = '<option value="">Select Country List</option>';
+
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster1('COUNTRIES-LIST', schoolId)),
+		dataType: 'json',
+		async: false,
+		success: function (data) {
+			if (data.status === '0' || data.status === '2') {
+				showMessage(true, data.message);
+			} else {
+				var result = data.mastersData?.countries;
+				if (Array.isArray(result) && result.length > 0) {
+					result.forEach(function (v) {
+						html += `<option value="${v.key}">${v.value}</option>`;
+					});
+				}
+			}
+		},
+		error: function (e) {
+			console.error(e);
+		}
+	});
+	return html;
+}
+
 function getRequestForMaster1(key, value) {
 	var request = {};
 	var authentication = {};

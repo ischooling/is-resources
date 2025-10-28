@@ -1521,6 +1521,7 @@ var leadCountDetailDTO={};
  leadModifyDTO['assignTos'] = $("#"+formId+" #leadAssignToSearch").val()!=undefined?$("#"+formId+" #leadAssignToSearch").val():'';
  //leadModifyDTO['leadStatus'] = $("#"+formId+" #leadStatusSearch").val();
  leadModifyDTO['leadStatuses'] = $("#"+formId+" #leadStatusSearch").val();
+ leadModifyDTO['leadCallback'] = $("#"+formId+" #leadCallback").val();
  leadModifyDTO['leadAdderId'] = $("#"+formId+" #leadCreatedBy").val();
  leadModifyDTO['leadSupportTo'] = $("#"+formId+" #leadSupportTo option:selected").val()!=undefined?$("#"+formId+" #leadSupportTo option:selected").val():'';
  if($("#"+formId+" #checkByLead").is(":checked")){
@@ -1676,7 +1677,7 @@ if(leadType=='B2B'){}else{
 	$("#"+formId+" #leadSearchTemplate").val('').trigger('change');
 	$("#"+formId+" #leadSearchDeliveredStatus").val('ALL').trigger('change');
 	$("#"+formId+" #leadSearchCampaign").val(0).trigger('change');
-
+	$("#"+formId+" #leadCallback").val("").trigger('change');
 }
 
 

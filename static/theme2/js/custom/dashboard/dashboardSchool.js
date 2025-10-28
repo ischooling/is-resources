@@ -1011,6 +1011,12 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     var urlSend = "/dashboard/payment-reports?moduleId=" + moduleId;
     getAsPost(urlSend);
     customLoader(false);
+  }else if (pageNo == "onboarded-teacher-list") {
+    debugger;
+    // getContent(moduleId, pageNo, replaceDiv, extraParam);
+    var urlSend = "/dashboard/onboarded-teacher-list?moduleId=" + moduleId;
+    getAsPost(urlSend);
+    customLoader(false);
   } else if (pageNo == "teacher-recurring-classes-list") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo === "meeting-management") {

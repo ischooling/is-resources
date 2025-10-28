@@ -1,33 +1,22 @@
 var scriptRun = false;
-function getPaymentReportData(formId, forCountOnly, type, callFrom){
-	if($('#paymentStatus').val()!=''){
-		if($('#paymentStatus').val()!='ABS' && $('#paymentStatus').val()!='AP'){
-			if($('#startDate').val()=='' && $('#endDate').val()==''){
-				showMessageTheme2(0, 'Please choose Start Date and End Date','',true);
-				return false;
-			}
-		}
-	}
-	if(forCountOnly){
-		url=CONTEXT_PATH+UNIQUEUUID+"/dashboard/student-payment-report-count";
-	}else{
-		url=CONTEXT_PATH+UNIQUEUUID+"/dashboard/student-payment-report";
-	}
+function getOnboardedTeacherListData(type,callFrom){
+	
+	url=CONTEXT_PATH+UNIQUEUUID+"/dashboard/onboarded-teacher-list-data";
 	if(callFrom=='search'){
-		$(".filterStudentPaymentReportForm").css({"display": "none"});
+		$(".filterOnboardedTeacherListForm").css({"display": "none"});
 	}else{
-		$(".filterStudentPaymentReportForm").css({"display": "block"});
+		$(".filterOnboardedTeacherListForm").css({"display": "block"});
 	}
     customLoader(true);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : url,
-		data : JSON.stringify(getRequestForPaymentReport(formId, type, 'N')),
+		data : JSON.stringify(getRequestForOnboardedTeacherList(type)),
 		dataType : 'json',
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-				$('#studentPaymentReportTable tbody').empty();
+				$('#onboardedTeacherListTable tbody').empty();
 				if(data['status'] == '3'){
 					redirectLoginPage();
 				}else{
@@ -35,62 +24,28 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 				}
 				$('#pagination').twbsPagination('destroy');
 				$('#consolidate').html('');
-				$('#studentPaymentReportTable tbody').empty();
-				$("#studentPaymentReport #studentPaymentReportTable tbody").html('<tr><td class="text-center">No records found</td></tr>');
+				$('#onboardedTeacherListTable tbody').empty();
+				$("#onboardedTeacherList #onboardedTeacherListTable tbody").html('<tr><td class="text-center">No records found</td></tr>');
+				$("#selectTeacherAllDiv").attr("class","hidden")
 			} else {
-				//BIND DATA HERE
-				if(forCountOnly){
-					pageCount(data.count)
-				}else{
-					if(type==1){
-						pageCount(data.count)
-					}
-					$('#studentPaymentReportTable tbody').empty();
-					$("#studentPaymentReport #studentPaymentReportTable tbody").html(cardDetails(data)).promise().done(function(){
-						$.each(data.reports, function(key, item) {
-							getCommunicationLogList(item.studentStandardId, item.userId);
-							
-						});
-
-						$(".re-leadstatus").select2({
-							theme:'bootstrap4',
-						});
-						
-						// if(lRStatus!=""){
-						// 	$("#studentPaymentForm #reLeadStatus").val(lRStatus).trigger("change");
-						// }
-						$('.perfectScroll').perfectScrollbar();
-						$(".follow-up-no").click(function(){
-							$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
-							$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
-							$(this).parent().find(".follow-up-content").slideDown();
-							$(this).parent().siblings().find(".follow-up-content").slideUp();
-							$(this).parent().addClass("follow-up-accordian-active");
-							$(this).parent().siblings().removeClass("follow-up-accordian-active");
-						});
-					});
-					if(USER_ROLE=='DIRECTOR'){
-						if(data.consolidate!=null){
-							$('#consolidate').html(consolidateContent(data.consolidate,data.count));
-						}
-					}
-					// $('#studentPaymentReportTable').dataTable({});
+				$("#selectTeacherAllDiv").attr("class","block")
+				$('#onboardedTeacherListTable tbody').empty();
+				$("#onboardedTeacherList #onboardedTeacherListTable tbody").html(cardDetails(data))
+				if(type == 1){
+					pageCount(data.count)				
 				}
 			}
-
 			$("body").append(getWatiTemplatesHtml());
-		
-			$("#selectStudentAllDiv").attr("class","block")
-			$("#selectStudentAll").off('click').on('click', function () {
-				var studentnew = $("#studentIdMove").val();
+			$("#selectTeacherAll").off('click').on('click', function () {
+				var studentnew = $("#teacherIdMove").val();
 				var chkAll = this;
-				let chkRows = $("#studentPaymentReportTable").find(".checkStudent");
+				let chkRows = $("#onboardedTeacherListTable").find(".checkTeacher");
 				chkRows.each(function () {
 					$(this)[0].checked = chkAll.checked;
 				});
 				var studentNo='';
 
-				$.each($("input[name='student-move-another']:checked"), function(){
+				$.each($("input[name='teacher-move-another']:checked"), function(){
 					if(studentnew.indexOf($(this).val()) != -1){
 					}else{
 						studentNo = studentNo+','+$(this).val();
@@ -98,18 +53,18 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 				});
 
 				studentnew = studentnew + studentNo;
-				$("#studentIdMove").val(studentnew);
-				if($("#selectStudentAll").is(":checked")){}
+				$("#teacherIdMove").val(studentnew);
+				if($("#selectTeacherAll").is(":checked")){}
 				else{
-					$("#studentIdMove").val('');
+					$("#teacherIdMove").val('');
 				}
 			});
 
-			$(".checkStudent").off('click').on('click', function () {
-				var studentnew = $("#studentIdMove").val();
-				var chkAll = $("#selectStudentAll");
+			$(".checkTeacher").off('click').on('click', function () {
+				var studentnew = $("#teacherIdMove").val();
+				var chkAll = $("#selectTeacherAll");
 				chkAll.attr("checked", "checked");
-				$("#studentPaymentReportTable .checkStudent").each(function () {
+				$("#onboardedTeacherListTable .checkTeacher").each(function () {
 					if (!$(this).is(":checked")) {
 						chkAll.prop('checked', false);
 						chkAll.removeAttr("checked", "checked");
@@ -120,14 +75,14 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 					}
 				});
 				var studentNo='';
-				$.each($("input[name='student-move-another']:checked"), function(){
+				$.each($("input[name='teacher-move-another']:checked"), function(){
 					if(studentnew.indexOf($(this).val()) != -1){
 					}else{
 						studentNo = studentNo+','+$(this).val();
 					}  
 				});
 				studentnew = studentnew + studentNo;
-				$("#studentIdMove").val(studentnew);
+				$("#teacherIdMove").val(studentnew);
 			});
 			customLoader(false);
 			return false;
@@ -135,86 +90,38 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 	});
 }
 
-function getRequestForPaymentReport(formId, type, forDownload){
+function getRequestForOnboardedTeacherList(type){
 	var request={};
-	var PaymentReportRequestDTO={};
-	PaymentReportRequestDTO['schoolId'] = SCHOOL_ID;
-	PaymentReportRequestDTO['loginUserId'] = USER_ID;
-	PaymentReportRequestDTO['studentName'] = $('#studentName').val();
-	if($('#startDate').val()!=''){
-		PaymentReportRequestDTO['startDate'] = changeDateFormat(new Date($('#startDate').val()), 'yyyy-mm-ddd')+' 00:00:00';
-	}
-	if($('#endDate').val()!=''){
-		PaymentReportRequestDTO['endDate'] = changeDateFormat(new Date($('#endDate').val()), 'yyyy-mm-ddd')+' 23:59:59';
+	var TeacherListRequestDTO={};
+	TeacherListRequestDTO['schoolId'] = SCHOOL_ID;
+	TeacherListRequestDTO['loginUserId'] = USER_ID;
+	TeacherListRequestDTO['teacherName'] = $('#teacherName').val();
+	TeacherListRequestDTO['email'] = $('#teacherEmail').val();
+	TeacherListRequestDTO['applicationNo'] = $('#applicationNo').val();
+	if($('#learningPlatform').val()!=''){
+		TeacherListRequestDTO['lmsPlatformId'] = $('#learningPlatform').val();
 	}
 	if($('#gradeId').val()!=''){
-		PaymentReportRequestDTO['gradeId'] = $('#gradeId').select2('val');
+		TeacherListRequestDTO['standardId'] = $('#gradeId').val();
 	}
-	if($('#learningProgram').val()!=''){
-		PaymentReportRequestDTO['learningProgram'] = $('#learningProgram').select2('val');
+	if($('#subjectId').val()!=''){
+		TeacherListRequestDTO['courseId'] = $('#subjectId').val();
 	}
-	if($('#learningPlatform').val()!=''){
-		PaymentReportRequestDTO['learningPlatform'] = $('#learningPlatform').select2('val');
-	}
-	if($('#enrollStatus').val()!=''){
-		PaymentReportRequestDTO['enrollStatus'] =$('#enrollStatus').select2('val');
-	}
-	if($('#paymentStatus').val()!=''){
-		PaymentReportRequestDTO['paymentStatus'] = $('#paymentStatus').select2('val');
-	}
-	if($('#userId').val()!=''){
-		PaymentReportRequestDTO['refferalCode'] = [$('#userId option:selected').attr('data-reffcode')];
-	}else{
-		PaymentReportRequestDTO['userId'] = [];
-	}
-	if($('#sessionId').val()!=''){
-		PaymentReportRequestDTO['sessionId'] = $('#sessionId').val();
-		
-	}
-	if($('#reLeadStatus').val()!=''){
-		PaymentReportRequestDTO['status'] =$('#reLeadStatus').select2('val');
-	}
-	if($('#reEnrollStatus').val()!=''){
-		PaymentReportRequestDTO['reEnrollStatus'] = $('#reEnrollStatus').val();
-	}
-	if($('#remainingDueBy').val()!=''){
-		PaymentReportRequestDTO['remainingDueBy'] = $('#remainingDueBy').val();
-	}
-	if($('#lmsStatus').val()!=''){
-		PaymentReportRequestDTO['lmsStatus'] = $('#lmsStatus').val();
-	}
-	if($('#academicYearStatus').val()!=''){
-		PaymentReportRequestDTO['academicYearStatus'] = $('#academicYearStatus').val();
-	}
-	if($('#systemTrainStatus').val()!=''){
-		PaymentReportRequestDTO['systemTrainStatus'] = $('#systemTrainStatus').val();
-	}
-	if($('#teacherMapStaus').val()!=''){
-		PaymentReportRequestDTO['teacherMapStaus'] = $('#teacherMapStaus').val();
-	}
-	if($('#transcriptStatus').val()!=''){
-		PaymentReportRequestDTO['transcriptStatus'] = $('#transcriptStatus').val();
-	}
-	
-	
-	if(type==1){
-		$('#pageNumber').val(1)
+	if($('#countryId').val()!=''){
+		TeacherListRequestDTO['countryId'] =$('#countryId').val();
 	}
 	var pageNumber=$('#pageNumber').val();
 	pageNumber=pageNumber-1
 	if(pageNumber<0){
 		pageNumber=0;
 	}
-	PaymentReportRequestDTO['pageNumber'] = pageNumber;
-	PaymentReportRequestDTO['pageSize'] = $('#pageSize').val();
-	PaymentReportRequestDTO['type'] = type;
-	PaymentReportRequestDTO['forDownload'] = forDownload;
-	if($('#overDueBy').val()!='' && $('#overDueBy').val()!=0){
-		PaymentReportRequestDTO['overDueBy'] = $('#overDueBy').val();
-	}else{
-		PaymentReportRequestDTO['overDueBy'] = 45;
+	if(type == 1){
+		pageNumber=0;
 	}
-	request['paymentReportRequestDTO']=PaymentReportRequestDTO;
+	TeacherListRequestDTO['pageNumber'] = pageNumber;
+	TeacherListRequestDTO['pageSize'] = $('#pageSize').val();
+	request['teacherListRequestDTO']=TeacherListRequestDTO;
+	console.log(TeacherListRequestDTO)
 	return request;
 }
 
@@ -232,9 +139,10 @@ function pageCount(records){
 		next: "Next",  
 		prev: "Prev",  
 		onPageClick: function (event, page) {
+			console.log(page);
 			$("#pageNumber").val(page);
 			if(page>1){
-				getPaymentReportData('',false,2,'')
+				getOnboardedTeacherListData(2,"")
 			}
 			//$(".getPaymentReportData")[0].onclick();
 			//fetch content and render here
@@ -244,47 +152,18 @@ function pageCount(records){
 }
 
 
-function resetStudentPaymentForm(formID){
-	// Get the current date
-	// var currentDate = new Date();
-	// var firstDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-	// firstDate = changeDateFormat(firstDate, "MMM-dd-yyyy")
-	// var lastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-	// lastDate = changeDateFormat(lastDate, "MMM-dd-yyyy") 
-	//$('#'+formID)[0].reset();
-	$('#studentName').val('');
-	$('#'+formID+" #startDate").val('');
-	$('#'+formID+" #endDate").val('');
-	$('#'+formID+" #learningPlatform").val("").trigger("change");
-	$('#'+formID+" #learningProgram").val("").trigger("change");
+function resetOnboardedTeacherListForm(formID){
+	$('#teacherName').val('');
+	$('#teacherEmail').val('');
+	$('#applicationNo').val('');
+	$('#'+formID+" #learningPlatform").val($('#' + formID + ' #learningPlatform option:first').val()).trigger("change");
 	$('#'+formID+" #gradeId").val("").trigger("change");
-	$('#'+formID+" #paymentStatus").val('').trigger("change");//["ODUE","DUE"]
-	$('#'+formID+" #userId").val("").trigger("change");
-	$('#'+formID+" #overDueBy").val("0");
-	$('#'+formID+" #reLeadStatus").val("").trigger("change");
-	$('#'+formID+" #reEnrollStatus").val("").trigger("change");
-	$('#'+formID+" #remainingDueBy").val('');
-	$('#'+formID+" #lmsStatus").val('');
-	$('#'+formID+" #academicYearStatus").val('');
-	$('#'+formID+" #teacherMapStaus").val('');
-	$('#'+formID+" #systemTrainStatus").val('');
-
+	$('#'+formID+" #subjectId").val("").trigger("change");
+	$('#'+formID+" #countryId").val("").trigger("change");
 	$('#'+formID+" #pageSize").val("10").trigger("change");
-	//getPaymentReportData('',false,1,'');
-	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');
-	// $('#'+formID+' #pageSize').val($('#'+formID+' #pageSize option:first-child').val()).trigger('change');
-
-
-	
-
-	
-
-
-
-
 }
 
-function downloadStudentPaymentReport(formId, forCountOnly, type){
+function downloadOnboardedTeacherListReport(formId, forCountOnly, type){
 	customLoader(true);
 	$.ajax({
 		type : "POST",
@@ -517,20 +396,20 @@ function getWatiBroadcastTemplates(){
 	$("#allWatiBroadcastTemplatesList").html('');
 	$('#mcustomWatiBroadcastTemplatesListClose').click(function(e) { 
 		//console.log("mcustomWatiTemplatesListClose :: clicked :: inside :: getWatiTemplates"); 
-		$("input#selectStudentAll").prop('checked','');
-		$('input[name="student-move-another"]').prop('checked','');
-		$("#studentIdMove").val("");
+		$("input#selectTeacherAll").prop('checked','');
+		$('input[name="teacher-move-another"]').prop('checked','');
+		$("#teacherIdMove").val("");
 	});
 	
-	var movestudentNo = $("#studentIdMove").val();
+	var movestudentNo = $("#teacherIdMove").val();
 	if(movestudentNo==''){
-		showMessageTheme2(0, 'Please check any one student','',false);
+		showMessageTheme2(0, 'Please check any one teacher','',false);
 		return false;
 	}
 	hideMessageTheme2('');
-	var students=$("#studentIdMove").val();
+	var students=$("#teacherIdMove").val();
 	var selected = new Array();
-	$('input[name="student-move-another"]').each(function() {
+	$('input[name="teacher-move-another"]').each(function() {
 		selected.push($(this).val());
    	});
 	//console.log("selected from allchecked :: " + selected);
@@ -581,9 +460,8 @@ function getWatiBroadcastTemplates(){
 				}
 				$("#mwatiBroadcastTable").DataTable({
 					theme:"bootstrap4",
-					//order: [[3, 'desc']]
 				});
-				$('#mcustomWatiTemplatesList').modal('show'); //calling custom method
+				$('#mcustomWatiTemplatesList').modal('show');
 				
 				var userListPopup = $("#usrPopData");
 				// userListPopup.html('');
@@ -726,7 +604,7 @@ function getWatiLogsRecords(formId, pageNo){
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForWithoutApiTypeAndUnique('wati/api','get-wati-Logs-for-student'),
+		url : getURLForWithoutApiTypeAndUnique('wati/api','get-wati-Logs-for-teacher'),
 		data : JSON.stringify(payload),
 		dataType : 'json',
 		cache : false,
@@ -776,18 +654,14 @@ async function showWatiLogDetails(broadCastId,watiContactNo, templateName){
 			$("#viewWatiTemplateModal").remove();
 		}
 		$("body").append(getViewWatiTemplateModal(data.messageTemplates));
-		// var htmlpage=getWatiRecordsListPagging(data);
-		// $(".watiLogDetailsListPagging").html(htmlpage);
-		// $("#watiLogDetailsModal").modal("show");
 		$("#viewWatiTemplateModal").modal("show");
 	}
 }
-
-async function showWatiLogDetailsByStudentUserId(userId){
+async function showWatiLogDetailsByTeacherUserId(userId){
 	var payload = {};
 	payload['userId'] = userId;
 	payload['userTimezone'] = USER_TIMEZONE;
-	var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true,'get-wati-broadcast-by-student-userId',payload,'api/v1/leads');
+	var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true,'get-wati-broadcast-by-teacher-userId',payload,'api/v1/leads');
 	console.log("data",data)
 	if($("#viewWatiTemplateModal").length>0){
 		$("#viewWatiTemplateModal").remove();
@@ -796,8 +670,7 @@ async function showWatiLogDetailsByStudentUserId(userId){
 	$("#viewWatiTemplateModal").modal("show");
 }
 
-
-function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers, d_status) {
+function sendWatiNotificationToUserForTeacher(indexNo,templateName,selectedUsers, d_status) {
 	$("#successFailedWatiMessagesModal").modal("hide");
 	//console.log("status of buton==" + JSON.stringify(d_status));
 	
@@ -807,19 +680,19 @@ function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers
 	$("#resetDeleteErrorWarningYes1").click(function(){
 		$("input#allchecked").prop('checked', false);
 		$("input#allcheckedFailed").prop('checked', false);
-		$("input#selectStudentAll").prop('checked', false); 
+		$("input#selectTeacherAll").prop('checked', false); 
 		$('input[name="chk-users-lead"]').prop('checked', false);
-		$('input[name="student-move-another"]').prop('checked', false);
+		$('input[name="teacher-move-another"]').prop('checked', false);
 	});
 	$("#resetDeleteErrorWarningYes2").click(function(){
 		$("input#allchecked").prop('checked', false);
 		$("input#allcheckedFailed").prop('checked', false);
-		$("input#selectStudentAll").prop('checked', false); 
+		$("input#selectTeacherAll").prop('checked', false); 
 		$('input[name="chk-users-lead"]').prop('checked', false);
-		$('input[name="student-move-another"]').prop('checked', false);
+		$('input[name="teacher-move-another"]').prop('checked', false);
 	});
 	$("#mcustomWatiTemplatesList").click(function(){
-		$("#selectStudentAll").prop("checked", false);
+		$("#selectTeacherAll").prop("checked", false);
 	});
 
 	$('#templateName').html('<b>' + templateName + '</b> '); 
@@ -840,7 +713,7 @@ function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('leads','send-wati-message-for-student'),
+		url : getURLFor('leads','send-wati-message-for-teacher'),
 		data : JSON.stringify(request),
 		dataType : 'json',
 		cache : false,
@@ -852,13 +725,13 @@ function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers
 				$("input#allchecked").prop('checked', false);
 				$('input[name="chk-users-lead"]').prop('checked', false);
 				return false;
-			} else { // $("input#selectStudentAll").removeAttr('checked'); 
+			} else { // $("input#selectTeacherAll").removeAttr('checked'); 
 				$("#mswatiBroadcastSendThroughMobile").modal("hide");
 				$("#mcustomWatiTemplatesList").modal("hide");
 				$("input#allcheckedFailed").prop('checked', false);
-				$("input#selectStudentAll").prop('checked', false); 
+				$("input#selectTeacherAll").prop('checked', false); 
 				$('input[name="chk-users-lead"]').prop('checked', false);
-				$('input[name="student-move-another"]').prop('checked', false);
+				$('input[name="teacher-move-another"]').prop('checked', false);
 				//
 				$('#allcheckedFailed').prop('checked', false);
 				$('input[name="chk-users-lead-resend"]').prop('checked', false);
@@ -1011,9 +884,9 @@ function closeModalAndFlushData(){
 	$('#allchecked').prop('checked',false);
 	$('#allCheckedEmail').prop('checked',false);
 	//added to flush all checked box
-	$("input#selectStudentAll").prop('checked',false);
-	$('input[name="student-move-another"]').prop('checked',false);
-	$("#studentIdMove").val("");
+	$("input#selectTeacherAll").prop('checked',false);
+	$('input[name="teacher-move-another"]').prop('checked',false);
+	$("#teacherIdMove").val("");
 	$("#remarksresetDelete1").remove();
 	$(".modal-backdrop").remove();
 }

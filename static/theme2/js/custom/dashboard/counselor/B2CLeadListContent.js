@@ -311,6 +311,14 @@ function getLeadFormPopup(objRights) {
     '								<option value="">Select Support</option>' +
     "							</select>" +
     "						</div>" +
+    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
+    '							<label class="m-0">Callback</label>' +
+    '							<select name="leadCallback" id="leadCallback" class="form-control"  >' +
+    '								<option value="">Select Callback</option>' +
+    '								<option value="LWC">Lead With Callback</option>' +
+    '								<option value="LWOC">Lead Without Callback</option>' +
+    "							</select>" +
+    "						</div>" +
     '						<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 b2cLeadstatus">' +
     "							<label>Remarks</label>" +
     '							<textarea name="leadRemark" id="leadRemark" rows="3" class="form-control" style="height:50px"></textarea>' +
@@ -664,6 +672,14 @@ function getLeadAdvanceSearchPopup(objRights) {
     '							<label class="m-0">Lead Support To</label>' +
     '							<select name="leadSupportTo" id="leadSupportTo" class="form-control"  >' +
     '								<option value="">Select Support</option>' +
+    "							</select>" +
+    "						</div>" +
+    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
+    '							<label class="m-0">Callback</label>' +
+    '							<select name="leadCallback" id="leadCallback" class="form-control"  >' +
+    '								<option value="">Select Callback</option>' +
+    '								<option value="LWC">Lead With Callback</option>' +
+    '								<option value="LWOC">Lead Without Callback</option>' +
     "							</select>" +
     "						</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
