@@ -42,6 +42,9 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 			$("#dashboardContentInHTMLAdditional").append(html+showMessageInPopup());
 		}
 	}
+	if(USER_ROLE == "B2B_PARTNER"){
+		$("#learningProgramPartnerStudent").select2({theme:"bootstrap4"});
+	}
 	$("#formSteps").append(signupModals());
 	signupStage1Form = $('#signupStage1');
 	signupStage2Form = $('#signupStage2');
@@ -266,11 +269,13 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                 	<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
 				}else {
 					html+=
-					`<label class="d-flex justify-content-center font-weight-bold">Choose Learning Program</label>
-					<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;-webkit-appearance:auto !important">
-						<option value="">Select Learning Program</option>
-						${getAllLearningProgramContent(SCHOOL_ID)}
-					</select>
+					`<div class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 mx-auto">
+						<label class="d-flex justify-content-center font-weight-bold font-22">Choose Learning Program</label>
+						<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;-webkit-appearance:auto !important">
+							<option value="">Select Learning Program</option>
+							${getAllLearningProgramContent(SCHOOL_ID)}
+						</select>
+					</div>
 					<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
 				}
             html+=`</section>

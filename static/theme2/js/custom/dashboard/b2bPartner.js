@@ -19,7 +19,7 @@ function callStudentListByPartner(formId) {
 				} else {
 					schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 						$("#enroll-list-skeleton").hide();
-						var enrollArray=[{"count":data.enrolledCount, "label":"Enrollment", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Incomplate enrollment","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrollment","enrollmentValue":"3"}]
+						var enrollArray=[{"count":data.enrolledCount, "label":"Enrollment", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Incomplete enrollment","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrollment","enrollmentValue":"3"}]
 						var enrollmentCountThumHtml = getB2BStudentEnrollmentCount(enrollArray);
 						$("#B2BStudentEnrollmentCountThumb").html(enrollmentCountThumHtml);
 						var htmls = B2BStudentListDetails(data.studentList, updateTransferMsg);

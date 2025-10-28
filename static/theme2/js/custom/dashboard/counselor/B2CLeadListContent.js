@@ -1,12 +1,14 @@
 function getB2CListHeaderContent(roleAndModule, objRights) {
   var html = '<div class="row">';
-  html +=
-    '<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 order-md-2 text-right">';
-  html +=
-    '<button class=" btn btn-primary  text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
-  html +=
-    '<button class=" btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates()" >Email Broadcast</button>';
-  html += "</div>";
+  if(USER_ROLE != "B2B_PARTNER"){
+    html +=
+      '<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 order-md-2 text-right">';
+    html +=
+      '<button class=" btn btn-primary  text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
+    html +=
+      '<button class=" btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates()" >Email Broadcast</button>';
+    html += "</div>";
+  }
   html += '<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">';
   if (objRights.discardPermission) {
     if (roleAndModule.added == "Y") {
@@ -40,26 +42,32 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
   html +=
     '<div class="d-flex justify-content-end align-items-center" style="gap:6px;">';
   if (roleAndModule.added == "Y") {
-    html += '<b class="schoolDemoUrlAutoCounselor text-success"></b>';
-    html +=
-      '<input class="tinyUrl" type="hidden" id="school-demo-auto-counselor-url" value="' +
-      objRights.schoolDemoUrlAutoCounselor +
-      '" style="opacity:0;height:0px">';
-    html +=
-      '<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'school-demo-auto-counselor-url\', \'schoolDemoUrlAutoCounselor\')"  id="schoolDemoUrl">New Demo with auto counselor</button>';
+    if(USER_ROLE != "B2B_PARTNER"){
+        html += '<b class="schoolDemoUrlAutoCounselor text-success"></b>';
+      html +=
+        '<input class="tinyUrl" type="hidden" id="school-demo-auto-counselor-url" value="' +
+        objRights.schoolDemoUrlAutoCounselor +
+        '" style="opacity:0;height:0px">';
+      html +=
+        '<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'school-demo-auto-counselor-url\', \'schoolDemoUrlAutoCounselor\')"  id="schoolDemoUrl">New Demo with auto counselor</button>';
+    }
   }
   if (roleAndModule.added == "Y") {
-    html += '<b class="schoolDemoUrl text-success d-none"></b>';
-    html +=
-      '<input class="tinyUrl" type="hidden" id="common-school-demo-url" value="' +
-      objRights.schoolDemoUrl +
-      '" style="opacity:0;height:0px">';
-    html +=
-      '<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'common-school-demo-url\', \'schoolDemoUrl\')"  id="schoolDemoUrl">Add New Demo</button>';
+    if(USER_ROLE != "B2B_PARTNER"){
+      html += '<b class="schoolDemoUrl text-success d-none"></b>';
+      html +=
+        '<input class="tinyUrl" type="hidden" id="common-school-demo-url" value="' +
+        objRights.schoolDemoUrl +
+        '" style="opacity:0;height:0px">';
+      html +=
+        '<button class=" btn btn-primary  text-white  btn-full-mobile mb-1" onclick="copyURL(\'common-school-demo-url\', \'schoolDemoUrl\')"  id="schoolDemoUrl">Add New Demo</button>';
+    }
   }
   if (roleAndModule.added == "Y") {
-    html +=
-      '<button class=" btn btn-primary  text-white  btn-full-mobile mb-1"  id="addNewCampaign">Campaign List</button>';
+    if(USER_ROLE != "B2B_PARTNER"){
+      html +=
+        '<button class=" btn btn-primary  text-white  btn-full-mobile mb-1"  id="addNewCampaign">Campaign List</button>';
+    }
   }
   if (roleAndModule.added == "Y") {
     html +=
@@ -87,12 +95,16 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
   html += `<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #C6E2FF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #027FFF">
 				<p class="mb-0">Total Lead | Today\'s Lead</p>
 				<p id="totalTodayLeads" class="mb-0 text-white bg-primary px-2 rounded">- | -</p>
-			</div>
-			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
-				<p class="mb-0">Facebook Total Lead | Today\'s Lead</p>
-				<p id="fbTotalTodayLeads" class="mb-0 text-dark px-2 rounded" style="background-color:#F3F39E;">- | -</p>
-			</div>
-			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF5DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+			</div>`;
+      if(USER_ID != "19321" && USER_ID != "14388"){
+        html+=
+        `<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+          <p class="mb-0">Facebook Total Lead | Today\'s Lead</p>
+          <p id="fbTotalTodayLeads" class="mb-0 text-dark px-2 rounded" style="background-color:#F3F39E;">- | -</p>
+			  </div>`;
+      }
+			
+			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF5DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
 				<p class="mb-0">Today\'s Follow-ups</p>
 				<p id="todayFollowup" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
 			</div>
@@ -151,19 +163,26 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0279FD;padding: 5px 10px;font-weight: bold;">
 				<p class="mb-0" style="color:#0279FD">Cold</p>
 				<p id="coldLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#0279FD;">-</p>
-			</div>
-			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #7000FF;padding: 5px 10px;font-weight: bold;">
-				<p class="mb-0" style="color:#7000FF">Demo By Website</p>
-				<p id="demoByWebsiteCount" class="mb-0 text-white px-2 rounded" style="background-color:#7000FF;">-</p>
-			</div>
-			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0051FF;padding: 5px 10px;font-weight: bold;">
+			</div>`;
+      if(USER_ID != "19321" && USER_ID != "14388"){
+        html+=
+        `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #7000FF;padding: 5px 10px;font-weight: bold;">
+          <p class="mb-0" style="color:#7000FF">Demo By Website</p>
+          <p id="demoByWebsiteCount" class="mb-0 text-white px-2 rounded" style="background-color:#7000FF;">-</p>
+        </div>`;
+      }
+			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0051FF;padding: 5px 10px;font-weight: bold;">
 				<p class="mb-0" style="color:#0051FF">Demo By Link</p>
 				<p id="demoByLinkCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
-			</div>
-			<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
-				<p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
-				<p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
 			</div>`;
+      if(USER_ID != "19321" && USER_ID != "14388"){
+        html+=
+        `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
+          <p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
+          <p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
+        </div>`;
+      }
+		
   html += "</div>";
   html += "</div>";
 
@@ -1743,8 +1762,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<i class="fa fa-clone" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
 							if(roleModule.updated=='Y' ){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Partner with B2B" onclick="callLeadsByLeadId(\'leadDataPopupB2BForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupB2BForm\',\'B2C-B2B\','+objRights.discardPermission+');" >'
-									+'<i class="fa fa-handshake" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                if(USER_ROLE != "B2B_PARTNER"){
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Partner with B2B" onclick="callLeadsByLeadId(\'leadDataPopupB2BForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupB2BForm\',\'B2C-B2B\','+objRights.discardPermission+');" >'
+                    +'<i class="fa fa-handshake" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+							  }
 							}
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Activity logs" onclick="getAsPost(\'/dashboard/lead-followup-log-data?moduleId=moduleId='+objRights.moduleId+'&leadNo='+leads.leadNo+'&leadType=B2C\')">'
 									+'<i class="fa fa-tasks" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
@@ -1766,8 +1787,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								}
 							}
 							html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="WhatsApp chat log" onclick="callOpenWatsAppMessage(\'watsAppMsgModal\',\''+leads.leadId+'\');"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/WhatsApp.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+							if(USER_ROLE != "B2B_PARTNER"){
+                html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="WhatsApp chat log" onclick="callOpenWatsAppMessage(\'watsAppMsgModal\',\''+leads.leadId+'\');"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/WhatsApp.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+              }
 							if(leads.whatsAppVerifiedStatus == 'NA'){
 							}else{
 								var displayCss='none';
