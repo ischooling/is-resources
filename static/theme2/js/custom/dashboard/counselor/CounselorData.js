@@ -1023,7 +1023,7 @@ function validateCounselorCommissionRate(formId){
 		showMessageTheme2(0, 'Enrollment max range is required', '', true);
 		return false
 	}
-	if($("#"+formId+" #enrollRangeMax").val() <= $("#"+formId+" #enrollRangeMin").val()){
+	if(parseInt($("#"+formId+" #enrollRangeMax").val()) <= parseInt($("#"+formId+" #enrollRangeMin").val())){
 		showMessageTheme2(0, 'Enrollment max range should be greater than enrollment min', '', true);
 		return false
 	}
