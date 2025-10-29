@@ -6489,7 +6489,7 @@ function getCopyright(){
 
 function renderPaginationCommon(currentPage, totalPages) {
 	let paginationHtml = `
-	  <nav aria-label="Page navigation">
+	  <nav aria-label="Page navigation" class="mt-3 full">
 		<ul class="pagination justify-content-center">
 		  <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
 			<button class="page-link" onclick="goToPageCommon(${currentPage - 1})"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>

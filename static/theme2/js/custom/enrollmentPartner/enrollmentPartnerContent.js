@@ -339,6 +339,7 @@ function enrollmentPartnerBasicDetails(data){
 									+'<select id="noOfEmployee" name="noOfEmployee" class="form-control" required autocomplete="off" tabindex="21">'
 										// +'<option></option>';
 										$.each(data.details.employees, function(k, v){
+											if(v.value == "Self-employed") return;
 											html+='<option value="'+v.key+'">'+v.value+'</option>';
 										});
 									html+='</select>'
