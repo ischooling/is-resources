@@ -143,7 +143,7 @@ function updateSchoolHolidays(userId,holidayid,controllType,moduleId) {
 
 var CALENDAR_EVENT_DATA=[];
 function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag) {
-    return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
         $.ajax({
             type: "POST",
             contentType: APPLICATION_JSON_VALUE,
@@ -180,7 +180,7 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 					}
 					$('#schoolcalendar').fullCalendar('removeEvents')
 					//$('#schoolcalendar').fullCalendar('destroy');
-					getFullCalendar(finalEvents, viewName);
+					getFullCalendar(finalEvents, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag);
 					if(flag){
 						$("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
 					}
@@ -197,6 +197,71 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
         });
     });
 }
+// function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag) {
+// 	debugger
+//     return new Promise((resolve, reject) => {
+//         $.ajax({
+//             type: "POST",
+//             contentType: APPLICATION_JSON_VALUE,
+//             url: getURLForHTML('dashboard', 'school-calendar'),
+//             data: JSON.stringify(getRequestForSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate)),
+//             dataType: 'json',
+//             cache: false,
+//             timeout: 600000,
+//             async: true,
+//             success: function (data) {
+//                 if (data.status === '0' || data.status === '2') {
+//                     showMessageTheme2(0, data.message);
+//                     resolve([]);
+//                 } else if (data.status === '3') {
+//                     redirectLoginPage();
+//                     reject('Redirected to login');
+//                 } else {
+//                     var finalEvents = [];
+//                     var events = data.event || [];
+//                     if (events.length > 0) {
+//                         events.forEach(obj => {
+//                             if (obj.id.startsWith("announce", 0) || obj.id.startsWith("holiday", 0)) {
+//                                 finalEvents.push(obj);
+//                             } else {
+//                                 obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC + 'T' + TIME_UTC);
+//                                 obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, USER_TIMEZONE, DATE_UTC + 'T' + TIME_UTC);
+//                                 var baseDate = obj.start.split('T')[0];
+//                                 if ($.inArray(baseDate, data.holidays) < 0) {
+//                                     finalEvents.push(obj);
+//                                 }
+//                             }
+//                         });
+//                     }
+
+//                     // Your original logic with fixes
+//                     $('#schoolcalendar').fullCalendar('removeEvents');
+                    
+//                     // Only call getFullCalendar if it's the first time or if needed
+//                     if (!CALENDAR_EVENT) {
+//                         getFullCalendar(finalEvents, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate);
+//                     } else {
+//                         $('#schoolcalendar').fullCalendar('addEventSource', finalEvents);
+//                     }
+                    
+//                     if (flag) {
+//                         $("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
+//                     }
+                    
+//                     resolve(finalEvents);
+                    
+//                     if ($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek") {
+//                         $(".upcoming-icon").addClass("upcoming-week-view-icon");
+//                         $(".live-class-blink .live-symbol").addClass("live-week-view-icon");
+//                     } else {
+//                         $(".upcoming-icon").removeClass("upcoming-week-view-icon");
+//                         $(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
+//                     }
+//                 }
+//             }
+//         });
+//     });
+// }
 
 
 
@@ -309,10 +374,11 @@ function calendarTimeInterval() {
 
 
 // var data1=getStudentDashboardDetails();
-function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
-	todayClassArray = [];
-	var initialView = window.innerWidth < 768 ? 'listDay' : 'agendaDay';
-	
+var scrollEventTriggered = false;
+function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate) {
+    todayClassArray = [];
+    var initialView = window.innerWidth < 768 ? 'listDay' : 'agendaDay';
+
     $("#schoolcalendar").fullCalendar({
         header: {
             left: "prev,next today",
@@ -325,22 +391,35 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
             week: 'Weekly',
             day: 'Daily'
         },
-		forceEventDuration: true,
-		themeSystem: "bootstrap4",
-		bootstrapFontAwesome: true,
-		defaultView: initialView,
-		defaultDate: todayDate(),
-		timeFormat: 'h(:mm)a',
-		navLinks: true,
-		editable: false,
-		allDayDefault: false,
-		eventLimit: true,
-		eventStartEditable: false,
-		minTime: '00:00:00',
-		maxTime: '24:00:00',
-		slotDuration: '00:30:00',
-		events:CALENDAR_EVENT_DATA,
-		eventClick: function(info) {
+        forceEventDuration: true,
+        themeSystem: "bootstrap4",
+        bootstrapFontAwesome: true,
+        defaultView: initialView,
+        defaultDate: todayDate(),
+        timeFormat: 'h(:mm)a',
+        navLinks: true,
+        editable: false,
+        allDayDefault: false,
+        eventLimit: true,
+        eventStartEditable: false,
+        minTime: '00:00:00',
+        maxTime: '24:00:00',
+        slotDuration: '00:30:00',
+        events: CALENDAR_EVENT_DATA,
+        
+        // Add these callbacks for v3.10.1 to handle view changes
+        viewRender: function(view, element) {
+			if(getSession()){
+				var currentView = view.name;
+				var start = view.start.format('YYYY-MM-DD');
+				var end = view.end.format('YYYY-MM-DD');
+				// Reload events for the new date range
+            	callSchoolCalendar(formId, userId, UNIQUEUUID, currentView, start, end, true);
+			}else{
+				redirectLoginPage();
+			}
+		},
+        eventClick: function(info) {
             if (info.url) {
                 if (getSession()) {
                     classDetailsOnModal(info.url);
@@ -353,33 +432,39 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
                 eventDetailsOnModal(info.id, info.title, info.activities);
             }
         },
-		eventRender: function(event, element) {
-			if(event.id.startsWith("announce", 0) || event.id.startsWith("holiday", 0)){}else{
-				if (event.start && event.end) {
-					const startStr = event.start.format();  // "2025-05-20T09:30:00"
-					const endStr = event.end.format();      // "2025-05-20T10:20:00"
+        
+        eventRender: function(event, element) {
+            if (!event.id.startsWith("announce", 0) && !event.id.startsWith("holiday", 0)) {
+                if (event.start && event.end) {
+                    const startStr = event.start.format();
+                    const endStr = event.end.format();
 
-					const eventExists = todayClassArray.some(e =>
-						e.start === startStr &&
-						e.endTime === endStr &&
-						e.title === event.title
-					);
+                    const eventExists = todayClassArray.some(e =>
+                        e.start === startStr &&
+                        e.endTime === endStr &&
+                        e.title === event.title
+                    );
 
-					if (!eventExists) {
-						todayClassArray.push({
-							start: startStr,
-							endTime: endStr,
-							title: event.title
-						});
-					}
-				}
-				
-			}
-			updateEventIcons(event, element, todayClassArray, viewName);
-		},
+                    if (!eventExists) {
+                        todayClassArray.push({
+                            start: startStr,
+                            endTime: endStr,
+                            title: event.title
+                        });
+                    }
+                }
+            }
+            updateEventIcons(event, element, todayClassArray, viewName);
+        },
 
         eventAfterAllRender: function() {
-			scrollEvent();
+            if (!scrollEventTriggered) {
+                scrollEventTriggered = true;
+                setTimeout(function() {
+                    scrollEvent();
+                    scrollEventTriggered = false;
+                }, 800);
+            }
         },
 
         windowResize: function() {
@@ -388,8 +473,7 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName) {
     });
 
     CALENDAR_EVENT = true;
-	updateCalendarView()
-
+    updateCalendarView();
 }
 
 $(window).off('resize').on('resize', function() {
@@ -663,6 +747,7 @@ function needHelpContentShowTeacher(needShow) {
 }
 var scrollEventInterval = null;
 function scrollEvent(){
+	//console.log("scroll")
 	if (scrollEventInterval) {
 		clearInterval(scrollEventInterval);
 		scrollEventInterval = null;
@@ -670,7 +755,7 @@ function scrollEvent(){
 	scrollEventInterval = setInterval(function(){
         let $target = $(".live-class-blink").length ? $(".live-class-blink") : $(".upcoming-class-blink");
 		if ($target.length > 0 && $target.offset()) {
-            const scrollTopValue = $target.offset().top - 45;
+            const scrollTopValue = $target.offset().top - 65;
             $('.fc-scroller.fc-time-grid-container').animate({ scrollTop: scrollTopValue }, 1000);
             clearInterval(scrollEventInterval);
         }
@@ -679,28 +764,29 @@ function scrollEvent(){
 
 function calendarEventBind(){
 	$(document).on('click', '.fc-day-header, .fc-next-button, .fc-prev-button, .fc-agendaDay-button, .fc-agendaWeek-button', function () {
-		if(getSession()){
-			var viewName = $('#schoolcalendar').fullCalendar('getView').name;
-			var b = $('#schoolcalendar').fullCalendar('getDate');
-			var startdate = b.format('YYYY-MM-DD');
-			var enddate = b.format('YYYY-MM-DD');
-			if(viewName === 'agendaDay' || viewName == "listDay") {
+		// if(getSession()){
+		// 	debugger
+		// 	var viewName = $('#schoolcalendar').fullCalendar('getView').name;
+		// 	var b = $('#schoolcalendar').fullCalendar('getDate');
+		// 	var startdate = b.format('YYYY-MM-DD');
+		// 	var enddate = b.format('YYYY-MM-DD');
+		// 	if(viewName === 'agendaDay' || viewName == "listDay") {
 	
-			} else if(viewName === 'agendaWeek' || viewName === 'listWeek') {
-				const today = new Date(startdate);
-				const dates = startAndEndOfWeek(today);
-				startdate = dates[0];
-				enddate = dates[1];
-			} 
-			// else if (viewName === 'month') {
-			// 	const today = new Date(startdate);
-			// 	const dates = startAndEndOfMonth(today);
-			// 	startdate = dates[0];
-			// 	enddate = dates[1];
-			// }
-			callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, true)
-		}else{
-			redirectLoginPage();
-		}
+		// 	} else if(viewName === 'agendaWeek' || viewName === 'listWeek') {
+		// 		const today = new Date(startdate);
+		// 		const dates = startAndEndOfWeek(today);
+		// 		startdate = dates[0];
+		// 		enddate = dates[1];
+		// 	} 
+		// 	// else if (viewName === 'month') {
+		// 	// 	const today = new Date(startdate);
+		// 	// 	const dates = startAndEndOfMonth(today);
+		// 	// 	startdate = dates[0];
+		// 	// 	enddate = dates[1];
+		// 	// }
+		// 	callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, true)
+		// }else{
+		// 	redirectLoginPage();
+		// }
 	});
 }

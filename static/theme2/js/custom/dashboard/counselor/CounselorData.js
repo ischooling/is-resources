@@ -1080,7 +1080,7 @@ function getRequestForSaveCounselorCommissionRate(formId){
 
 
 function saveCounselorCommissionRate(formId) {
-	hideMessage('');
+	hideMessageTheme2('');
 	if(!validateCounselorCommissionRate(formId)){
 		return false;
 	}
@@ -1365,24 +1365,25 @@ async function getLeadListData(moduleId, leadFrom, clickFrom, startDate, endDate
     }
 }
 
-function getRequestForLeadReports(moduleId , userId){
+function getRequestForLeadReports(moduleId , userId, callFrom){
 	if(userId=='' || userId==undefined){
 		userId=USER_ID;
 	}
 	var data={};
 	data['userId']=userId;
 	data['moduleId'] = moduleId;
+	data['callFrom']=callFrom;
 	return data;
 }
 
-function getLeadReportData(moduleId, userId) {
+function getLeadReportData(moduleId, userId, callFrom) {
 	//"lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
 	return new Promise(function(resolve, reject){
 		$.ajax({
 			type : "POST",
 			contentType : APPLICATION_JSON_VALUE,
 			url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/lead-reports',
-			data : JSON.stringify(getRequestForLeadReports(moduleId, userId)),
+			data : JSON.stringify(getRequestForLeadReports(moduleId, userId, callFrom)),
 			dataType : 'json',
 			async:true,
 			global : true,

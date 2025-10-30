@@ -21,34 +21,34 @@ function renderTeacherPreScreeningProfileContent(title){
 function teacherScreeningFilter(){
     var html=
         `<form id="teacherScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2" style="display:none;">
-            <div class="form-row">
-                <div class="form-group col-md-4">
+            <div class="row">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Name</label>
-                    <input type="text" id="filterName" class="form-control" placeholder="Enter Name">
+                    <input type="text" id="filterName" class="form-control">
                 </div>
-                <div class="form-group col-md-4">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Phone</label>
-                    <input type="text" id="filterPhone" class="form-control" placeholder="Enter Phone" onkeydown="return M.digit(event);">
+                    <input type="text" id="filterPhone" class="form-control" onkeydown="return M.digit(event);">
                 </div>
-                <div class="form-group col-md-4">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Email</label>
-                    <input type="text" id="filterEmail" class="form-control" placeholder="Enter Email">
+                    <input type="text" id="filterEmail" class="form-control">
                 </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-md-4">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Country</label>
                     <select name="filterCountryId" id="filterCountryId" class="form-control">
                         <option value="0">Select country</option>
                     </select>
                 </div>
-                <div class="form-group col-md-4">
+            </div>
+            <div class="row">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Assigned To</label>
                     <select id="filterAssignedTo" class="form-control">
                         <option value="">All</option>
                     </select>
                 </div>
-                <div class="form-group col-md-4">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Application Status</label>
                     <select id="filterStatus" class="form-control">
                         <option value="">Select Status</option>
@@ -57,8 +57,24 @@ function teacherScreeningFilter(){
                         <option value="Rejected">Rejected</option>
                     </select>
                 </div>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                    <label>Grades</label>
+                    <select id="filterGrades" class="form-control">
+                        ${getStandardContentByCourseProviderId(SCHOOL_ID)}
+                    </select>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                    <label>Courses</label>
+                    <select id="filterCourses" class="form-control">
+                        ${getAllCoursesOptions('filterCourses')}
+                    </select>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                    <label>No. of records</label>
+                    <input type="text" id="pageSize" class="form-control" onkeydown="return M.digit(event);" value="10">
+                </div>
             </div>
-            <div class="d-flex justify-content-end">
+            <div class="d-flex justify-content-end mt-3">
                 <button type="button" class="btn btn-danger" onclick="resetTeacherScreening();"><i class="fa fa-undo"></i>&nbsp;Reset</button>
                 <button type="button" class="btn btn-success ml-2" onclick="applyFilterTeacherScreening();"><i class="fa fa-search"></i>&nbsp;Search</button>
             </div>
@@ -81,6 +97,7 @@ function teacherScreenTableContent(){
                         <th>Last/Current Organization Name</th>
                         <th>Resume/CV</th>
                         <th>Recent Photograph</th>
+                        <th>Preferred grades & courses</th>
                         <th>Linkedin Profile</th>
                         <th>Assigned To</th>
                         ${/*<th>Profile Status</th>
@@ -89,6 +106,42 @@ function teacherScreenTableContent(){
                 </thead>
                 <tbody></tbody>
             </table>
+        </div>
+        <div id="teacherScreeningPagination"></div>`
+    return html;
+}
+
+function teacherPreviousExperienceModalContent(oldGrades, oldCourses, newGrades, newCourses){
+    var html=
+        `<div id="teacherPreviousExperienceModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
+                <div class="modal-content border-0">
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Preferred grades & courses</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body overflow-y-auto" style="max-height: 80vh;">
+                        <p class="mb-2">
+                            <span class="font-weight-bold">Previous Grades:</span><br>
+                            ${toBulletPoints(oldGrades)}
+                        </p>
+                        <p class="mb-2">
+                            <span class="font-weight-bold">Previous Courses:</span><br>
+                            ${toBulletPoints(oldCourses, true)}
+                        </p>
+                        <p class="mb-2">
+                            <span class="font-weight-bold">New Grades:</span><br>
+                            ${toBulletPoints(newGrades)}
+                        </p>
+                        <p class="mb-2">
+                            <span class="font-weight-bold">New Courses:</span><br>
+                            ${toBulletPoints(newCourses, true)}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>`
     return html;
 }

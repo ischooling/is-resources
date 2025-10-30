@@ -1921,8 +1921,8 @@ function getTggingMasterListPromise(formId) {
                     resolve(''); // no data case
                 } else {
                     var result = data['mastersData']['data'];
-					console.log(result)
-                        resolve(result); // resolve with raw result
+					//console.log(result)
+                    resolve(result); // resolve with raw result
                     
                 }
             },
@@ -2156,4 +2156,38 @@ function getPartnerOnSchoolId(src){
     }else{
         $partnerSelect.html(`<option value="ALL">Select Partner Name</option>`);
     }
+}
+
+async function getAllCoursesOnBasisOfSchool(){
+    var payload = {};
+    payload['schoolId'] = SCHOOL_ID;
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-subject-details', payload, '/teacher/signup');
+    if(responseData && responseData.details.subjectDetails) {
+        const allCourses = [
+            ...responseData.details.subjectDetails.elementryAllSubject,
+            ...responseData.details.subjectDetails.middleAllSubject,
+            ...responseData.details.subjectDetails.highAllSubject
+        ];
+        const uniqueCourses = [...new Set(allCourses)];
+        return uniqueCourses;
+    }
+    return [];
+}
+
+function getAllCoursesOptions(elemId){
+	let optionsHTML = '';
+	getAllCoursesOnBasisOfSchool().then(courses => {
+        if (courses && courses.length > 0) {            
+            courses.forEach(course => {
+                optionsHTML += `<option value="${course}">${course}</option>`;
+            });
+            const coursesSelect = $('#'+elemId);
+            if (coursesSelect.length) {
+                coursesSelect.html(optionsHTML);
+            }
+        }
+    }).catch(error => {
+        console.error('Error loading courses:', error);
+    });
+	return optionsHTML;
 }

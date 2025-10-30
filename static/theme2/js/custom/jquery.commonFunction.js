@@ -6487,12 +6487,12 @@ function getCopyright(){
 	return "Copyright © " + new Date().getFullYear() + " - " + SCHOOL_NAME + " - All Rights Reserved.";
 }
 
-function renderPaginationCommon(currentPage, totalPages) {
+function renderPaginationCommon(currentPage, totalPages, context = '') {
 	let paginationHtml = `
-	  <nav aria-label="Page navigation" class="mt-3 full">
+	  <nav aria-label="Page navigation" class="full mt-3">
 		<ul class="pagination justify-content-center">
 		  <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-			<button class="page-link" onclick="goToPageCommon(${currentPage - 1})"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
+			<button class="page-link" onclick="goToPageCommon(${currentPage - 1}, '${context}')"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
 		  </li>`;
   
 	let startPage = Math.max(1, currentPage - 1);
@@ -6501,7 +6501,7 @@ function renderPaginationCommon(currentPage, totalPages) {
 	if (startPage > 1) {
 	  paginationHtml += `
 		<li class="page-item">
-		  <button class="page-link" onclick="goToPageCommon(1)">1</button>
+		  <button class="page-link" onclick="goToPageCommon(1, '${context}')">1</button>
 		</li>`;
 	  if (startPage > 2) {
 		paginationHtml += `
@@ -6514,7 +6514,7 @@ function renderPaginationCommon(currentPage, totalPages) {
 	for (let i = startPage; i <= endPage; i++) {
 	  paginationHtml += `
 		<li class="page-item ${i === currentPage ? 'active' : ''}">
-		  <button class="page-link" onclick="goToPageCommon(${i})">${i}</button>
+		  <button class="page-link" onclick="goToPageCommon(${i}, '${context}')">${i}</button>
 		</li>`;
 	}
   
@@ -6527,13 +6527,13 @@ function renderPaginationCommon(currentPage, totalPages) {
 	  }
 	  paginationHtml += `
 		<li class="page-item">
-		  <button class="page-link" onclick="goToPageCommon(${totalPages})">${totalPages}</button>
+		  <button class="page-link" onclick="goToPageCommon(${totalPages}, '${context}')">${totalPages}</button>
 		</li>`;
 	}
   
 	paginationHtml += `
 		  <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-			<button class="page-link" onclick="goToPageCommon(${currentPage + 1})">Next<i class="fa fa-chevron-right ml-2" style="font-size: 10px;"></i></button>
+			<button class="page-link" onclick="goToPageCommon(${currentPage + 1}, '${context}')">Next<i class="fa fa-chevron-right ml-2" style="font-size: 10px;"></i></button>
 		  </li>
 		</ul>
 	  </nav>`;
@@ -6541,27 +6541,34 @@ function renderPaginationCommon(currentPage, totalPages) {
 	return paginationHtml;
 }
 
-function goToPageCommon(page) {
-	if ($("#recurringMeetingModal").length === 1) {
-		currentPageRecurringRecording = page;
-		applyRecurringRecordingFilters($("#recurringMeetingModal").data("entityId"));
-	} else if (typeof currentTabId !== "undefined") {
-		if (currentTabId === "oneDayMeetings") {
-			currentPageOneDay = page;
-		} else if (currentTabId === "recurringMeetings") {
-			currentPageRecurring = page;
-		}
-		fetchMeetings($('#filterHostUserId').val());
-	}
-
-	if (typeof currentPagePartnerEnrollmentList !== "undefined") {
-		currentPagePartnerEnrollmentList = page;
-		callStudentListByPartner("partnerEnrollFilterForm");
-	}
-
-	if (typeof currentPagePaymentList !== "undefined") {
-		currentPagePaymentList = page;
-		getPartnerSchoolPaymentDetails("paymentSeachForm");
+function goToPageCommon(page, context) {
+	switch(context) {
+		case 'teacherScreening':
+			CURRENT_PAGE_TEACHER_SCREENING = page;
+			loadTeacherScreeningData();
+			break;
+		case 'partnerEnrollment':
+			currentPagePartnerEnrollmentList = page;
+			callStudentListByPartner("partnerEnrollFilterForm");
+			break;
+		case 'paymentList':
+			currentPagePaymentList = page;
+			getPartnerSchoolPaymentDetails("paymentSeachForm");
+			break;
+		case 'recurringMeeting':
+			currentPageRecurringRecording = page;
+			applyRecurringRecordingFilters($("#recurringMeetingModal").data("entityId"));
+			break;
+		case 'meetings':
+			if (currentTabId === "oneDayMeetings") {
+				currentPageOneDay = page;
+			} else if (currentTabId === "recurringMeetings") {
+				currentPageRecurring = page;
+			}
+			fetchMeetings($('#filterHostUserId').val());
+			break;
+		default:
+			console.warn('Unknown pagination context:', context);
 	}
 }
 

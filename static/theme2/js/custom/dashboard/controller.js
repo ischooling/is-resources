@@ -545,7 +545,16 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 
     getLearningProgramContentFromServer(SCHOOL_ID,'partnerEnrollFilterForm','learningProgram');
     populateMonths();
-  }
+  }else if(pageNo=='lead-setting'){
+		LEAD_CATEGORY="B2C";
+		if (USER_ROLE == "B2B_LEAD") {
+			LEAD_CATEGORY = "B2B";
+		}
+		if(SCHOOL_TYPE=='WLP'){
+			LEAD_CATEGORY = "B2B";
+		}
+		renderLeadSettingDashboard('Lead Settings',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
+	}
 //   else if(pageNo=='lead-report-list'){
 // 	$('#dashboardContentInHTML').html(renderSchoolReportDashboard('School Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));
 //   }

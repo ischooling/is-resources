@@ -5089,7 +5089,10 @@ function requestDataForOfficeContentDetails(formId){
 }
 
 function callPCountries(formId, value, elementId, preSelected) {
-	$("#" + formId + " #" + elementId).html('<option value="">Select country*</option>');
+	if(formId=='country-time-list'){
+	}else{
+		$("#" + formId + " #" + elementId).html('<option value="">Select country*</option>');
+	}
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
@@ -5101,9 +5104,14 @@ function callPCountries(formId, value, elementId, preSelected) {
 				showMessage(1, data['message']);
 			} else {
 				var countries = data['mastersData']['countries']
+				if(formId=='country-time-list'){
+					$("#" + formId + " #" + elementId).append('<option value="0" selected>All</option>');
+				}
 				$.each(countries, function(k, v) {
 					$("#" + formId + " #" + elementId).append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>');
 				});
+				
+				
 			}
 		}
 	});
@@ -10691,6 +10699,8 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  for(var i=0;i<leaddata.length;i++){
 			var leadsd = leaddata[i];
 			getLeadStatusLog(leadsd.leadNo, 'new-lead', objRights.adminStatus);
+			getLeadStartTimer(leadsd.assignLeadDatetime, leadsd.leadId);
+			getUpdateLeadCurrentTime(leadsd, leadsd.leadId);
 		  }
 		  curentTimeStamp(objRights.timeZoneOffset);
 		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });

@@ -1,4 +1,6 @@
+var CURRENT_PAGE_TEACHER_SCREENING = 1;
 function teacherScreeningProfileOnloadFunction(){
+    CURRENT_PAGE_TEACHER_SCREENING = 1;
     getAllCountryList('teacherScreeningFilterForm','filterCountryId');
     callLeadAssignUserList("teacherScreeningFilterForm", "" ,'filterAssignedTo', true, "", USER_ID, "");
     $("#teacherScreeningFilterForm #filterCountryId").select2({
@@ -9,7 +11,20 @@ function teacherScreeningProfileOnloadFunction(){
         placeholder: "Select Assign To",
         theme:"bootstrap4"
     });
-    loadTeacherScreeningData(false);
+    $("#teacherScreeningFilterForm #filterGrades").select2({
+        placeholder: "Select Grades",
+        theme:"bootstrap4",
+        allowClear: true,
+        multiple: true
+    });
+    $("#teacherScreeningFilterForm #filterCourses").select2({
+        placeholder: "Select Courses",
+        theme:"bootstrap4",
+        allowClear: true,
+        multiple: true
+    });
+    $("#teacherScreeningFilterForm #filterGrades").val("").trigger("change");
+    loadTeacherScreeningData();
 }
 
 function showFilterTeacherScreening(){
@@ -17,20 +32,14 @@ function showFilterTeacherScreening(){
 }
 
 function bindTeacherScreeningData(responseData) {
-    var table = $('#teacherScreeningTable').DataTable();
-    
-    if (table) {
-        table.clear().destroy();
-    }
     var tableBody = $('#teacherScreeningTable tbody');
     tableBody.empty();
-    
     if (responseData.DataArray && responseData.DataArray.length > 0) {
+        var pageSize = responseData.pagination.pageSize;
         responseData.DataArray.forEach(function(teacher, index) {
-            
-            var row = `
-                <tr>
-                    <td>${index + 1}</td>
+            var row = 
+                `<tr>
+                    <td>${(CURRENT_PAGE_TEACHER_SCREENING - 1) * pageSize + index + 1}</td>
                     <td>${teacher.userName}</td>
                     <td>
                         ${teacher.phoneNo || ''} 
@@ -54,6 +63,13 @@ function bindTeacherScreeningData(responseData) {
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
+                    <td>`
+                        if(teacher.oldGrades != "" || teacher.oldSubjects != "" || teacher.newGrades != "" || teacher.newSubjects != ""){
+                            row+=`<a href="javascript:void(0);" onclick="openPreviousExperience('${teacher.oldGrades}', '${teacher.oldSubjects}', '${teacher.newGrades}', '${teacher.newSubjects}');" class="btn btn-sm btn-outline-primary">View</a>`
+                        }else{
+                            row+=`N/A`
+                        }
+                    row+=`</td>
                     <td>
                         ${teacher.linkedInUrl ? 
                             `<a href="${teacher.linkedInUrl}" target="_blank" class="btn btn-sm btn-outline-primary" target="_blank">LinkedIn</a>` : 
@@ -71,30 +87,30 @@ function bindTeacherScreeningData(responseData) {
                             Resend Interview Booking Link
                         </button>
                     </td>*/''}
-                </tr>
-            `;
+                </tr>`;
             tableBody.append(row);
         });
+        $("#teacherScreeningPagination").html(renderPaginationCommon(CURRENT_PAGE_TEACHER_SCREENING, responseData.pagination.totalPages, "teacherScreening"));
     }else{
-        $('#teacherScreeningTable tbody').html('<tr><td colspan="13" class="text-center text-muted">No Data Found</td></tr>')
+        $("#teacherScreeningPagination").html('');
+        $('#teacherScreeningTable tbody').html('<tr><td colspan="12" class="text-center text-muted">No Data Found</td></tr>')
     }
-    $('#teacherScreeningTable').dataTable({
-        theme:"bootstrap4",
-    });
 }
 
-async function loadTeacherScreeningData(isFiltering) {
+async function loadTeacherScreeningData() {
     try {
         var payload = {};
         payload['schoolId'] = SCHOOL_ID;
-        if(isFiltering){
-            payload['userName'] = $("#filterName").val().trim();
-            payload['phoneNumber'] = $("#filterPhone").val().trim();
-            payload['email'] = $("#filterEmail").val().trim();
-            payload['country'] = $("#filterCountryId").val();
-            payload['assignTo'] = $("#filterAssignedTo").val();
-            payload['status'] = $("#filterStatus").val();
-        }
+        payload['userName'] = $("#teacherScreeningFilterForm #filterName").val().trim();
+        payload['phoneNumber'] = $("#teacherScreeningFilterForm #filterPhone").val().trim();
+        payload['email'] = $("#teacherScreeningFilterForm #filterEmail").val().trim();
+        payload['country'] = $("#teacherScreeningFilterForm #filterCountryId").val();
+        payload['assignTo'] = $("#teacherScreeningFilterForm #filterAssignedTo").val();
+        payload['status'] = $("#teacherScreeningFilterForm #filterStatus").val();
+        payload['standards'] = $("#teacherScreeningFilterForm #filterGrades").val();
+        payload['subjects'] = $("#teacherScreeningFilterForm #filterCourses").val();
+        payload['pageNo'] = CURRENT_PAGE_TEACHER_SCREENING;
+        payload['pageSize'] = $("#teacherScreeningFilterForm #pageSize").val().trim();
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-interview-data', payload, '/teacher/signup');
         bindTeacherScreeningData(responseData);
     } catch (error) {
@@ -104,7 +120,8 @@ async function loadTeacherScreeningData(isFiltering) {
 }
 
 function applyFilterTeacherScreening() {
-    loadTeacherScreeningData(true);
+    CURRENT_PAGE_TEACHER_SCREENING = 1;
+    loadTeacherScreeningData();
 }
 
 function resetTeacherScreening() {
@@ -112,8 +129,50 @@ function resetTeacherScreening() {
     $('#teacherScreeningFilterForm #filterCountryId').val('0').trigger('change');
     $('#teacherScreeningFilterForm #filterAssignedTo').val('').trigger('change');
     $('#teacherScreeningFilterForm #filterStatus').val('');
+    $('#teacherScreeningFilterForm #filterGrades').val('').trigger('change');
+    $('#teacherScreeningFilterForm #filterCourses').val('').trigger('change');
+    CURRENT_PAGE_TEACHER_SCREENING = 1;
+    $('#teacherScreeningFilterForm #pageSize').val('10')
 }
 
 function resendInterviewLink(teacherId) {
     alert('Interview booking link has been resent successfully!');
+}
+
+function openPreviousExperience(oldGrades, oldCourses, newGrades, newCourses){
+    if($("#teacherPreviousExperienceModal").length == 1){
+        $("#teacherPreviousExperienceModal").remove();
+    }
+    $("body").append(teacherPreviousExperienceModalContent(oldGrades, oldCourses, newGrades, newCourses))
+    $("#teacherPreviousExperienceModal").modal('show');
+}
+
+function toBulletPoints(value, isCourse = false) {
+    if (!value || value.trim() === "") return "N/A";
+
+    value = value.trim();
+
+    const specialPrefix = "All Courses - Language Arts, Mathematics, Science, Technology, Art";
+
+    if (isCourse && value.startsWith(specialPrefix)) {
+        if (value === specialPrefix) {
+            return specialPrefix
+        }
+
+        let rest = value.slice(specialPrefix.length).trim();
+        if (rest.startsWith(",")) rest = rest.slice(1).trim();
+
+        const extraItems = rest.split(",").map(v => v.trim()).filter(v => v !== "");
+
+        const extrasHtml = extraItems.length
+            ? `<ul class="mb-0 pl-3 list-type-disc">${extraItems.map(v => `<li>${v}</li>`).join("")}</ul>`
+            : "";
+
+        return `<ul class="pl-3 list-type-disc mb-0"><li>${specialPrefix}</li></ul>${extrasHtml}`;
+    }
+
+    const items = value.split(",").map(v => v.trim()).filter(v => v !== "");
+    if (items.length === 1) return items[0];
+
+    return `<ul class="mb-0 pl-3 list-type-disc">${items.map(v => `<li>${v}</li>`).join("")}</ul>`;
 }

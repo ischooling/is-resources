@@ -2,8 +2,6 @@
 var ROLE_MODULE="";
 var OBJECT_RIGHTS="";
 async function renderModuleListDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE){
-  	//var objRight= await getLeadReportData(roleAndModule.moduleId, USER_ID);
-	//var objectRights=objRight.objectRights;
 	ROLE_MODULE=roleAndModule;
 	var html=await getModuleContent(title);
     $('#dashboardContentInHTML').html(html);

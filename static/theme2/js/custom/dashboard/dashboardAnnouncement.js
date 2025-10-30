@@ -211,7 +211,7 @@ function callSubjectNameMultipleList(formId, value, userId,courseProviderId ,use
 					showMessageTheme2(0, data['message']);
 				} else {
 					var result = data['mastersData']['courseList'];
-					console.log(result);
+					//console.log(result);
 					var dropdown = $("#"+formId+" #subjectIds");
 					dropdown.html('');
 					$.each(result, function(k, v) {

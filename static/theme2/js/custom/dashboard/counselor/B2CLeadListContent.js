@@ -15,7 +15,7 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
       html +=
         '<form id="leadUploadId" name="leadUploadId" action="javascript:void(0);"  >';
       html +=
-        '<input type="hidden" name="userId" id="userId" value="${USER_ID}">';
+        '<input type="hidden" name="userId" id="userId" value="'+USER_ID+'">';
       html += '<div class="row align-items-center" id="leadUploadId">';
       html += '<div class="ml-3">';
       html += '<div class="file-upload">';
@@ -1208,12 +1208,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	+'</div>';
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
-		var currentTimeStr="";
-		if(leads.leadTimeZone!=''){
-			var timezoneG = getSystemTimezone();//Intl.DateTimeFormat().resolvedOptions().timeZone;
-			var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
-			currentTimeStr=curentTime.date+' '+curentTime.time;
-		}
+		
+
+  
 		
     lScoreColor='';
     if(leads.leadScore>=80){
@@ -1237,7 +1234,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					html+='<input type="checkbox" disabled="disabled" class="checkLead" id="lead-'+leads.leadId+'" name="lead-move-another" value="'+leads.leadId+'" />';
 				}
 				html+=''+leads.srNo+'&nbsp;Lead info <span class="leadInfoTime"></span>&nbsp;&nbsp;'+objRights.countryOffsetTimezone
-					+'<div>';
+					+'<div> ';
 						if(leads.demoFrom=='Demo by Website'){
 							bgColorDemo="background-color:#7000FF !important;color:#fff";
 							html+='<span class="float-right bold" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
@@ -1247,7 +1244,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 						}
 					html+='</div>'
 					+'</th>'
-					+'<th class="text-white bold border-bottom-0" style="width:400px;">Student | Parent Details</th>'
+					+'<th class="text-white bold border-bottom-0" style="width:400px;">Student | Parent Details </th>'
 					+'<th class="text-white bold border-bottom-0">School Demo Details <span class="leadDemoTime"></span>&nbsp;&nbsp;'+objRights.countryOffsetTimezone+' | Status Details</th>';
 					if(leads.leadLastCallList!=null && leads.leadLastCallList.length>0){
 						html+='<th class="text-white bold border-bottom-0 text-center" style="width:250px;">Follow Ups</th>';
@@ -1301,7 +1298,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Assigned Date:</th>'
 									+'<td class="border-0 p-1">'+(leads.createdDateStr!=''?leads.createdDateStr:'N/A')+'</td>'
 								+'</tr>'
-								+'<tr>'
+                  +'<tr><th class="border-0 p-1">Timer:</th>'
+                  +'<td class="bold font-12 p-1" colspan="2" id="timerLeadDisplay_'+leads.leadId+'"></td>'
+                +'</tr>'
+                +'<tr>'
 									+'<th class="border-0 p-1">Added By:</th>'
 									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')+'</td>'
 								+'</tr>'
@@ -1411,6 +1411,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'</td>'
 								+'</tr>';
 								
+                html+='<tr><td class="border-0 p-1 bold font-14" colspan="2" id="timerLeadDisplay_'+leads.leadId+'"></td></tr>';
 									if(objRights.discardPermission || USER_ID==leads.assignTo){
 										html+='<tr>'
 										// +'<th class="border-0 p-1">Campaign:</th>'
@@ -1429,8 +1430,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 											+'</td>'
 										+'</tr>';
 									}
-									html+='<tr>'
-									+'<td class="border-0 p-1" colspan="2">';
+									html+='<tr><td class="border-0 p-1" colspan="2">';
 									if(objRights.discardPermission || USER_ID==leads.assignTo){
 										html+='<div role="" class="mb-2 btn-group-sm btn-group-toggle text-left" data-toggle="buttons">'
 											+'<label class="btn btn-outline-success mr-1 '+(leads.leadCategory=='Hot'?'active':'')+'">'
@@ -1445,6 +1445,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                       +'</div>';
 									}
 								html+='</td></tr>';
+                
 							html+='</tbody>'
 						+'</table>'
 					+'</td>'
@@ -1542,8 +1543,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 												+'</tr>'
 												+'<tr>'
 													+'<th class="border-0 p-1">Lead’s Current Time:</th>'
-													+'<td class="border-0 p-1 bold">'+(currentTimeStr)+'</td>'
+													+'<td class="border-0 p-1 font-12" id="leadCurTimeText_'+leads.leadId+'"></td>'
+												+'</tr>'
+                        +'<tr>'
+													+'<th class="border-0 p-1">Lead’s Right time to call:</th>'
+													+'<td class="border-0 p-1 bold">'+(leads.leadRightStartTimeCall)+'</td>'
 												+'</tr>';
+                        
+
+
 												if(objRights.discardPermission ){
 													if(USER_ROLE=='DIRECTOR'){
 														html+='<tr>'
@@ -1881,4 +1889,63 @@ function b2cleadsPagging(leaddata, objRights){
 		html+='</div>';
 	}
 	return html;
+}
+
+function getUpdateLeadCurrentTime(leads, leadId){
+   var timerForCurTime;
+    clearInterval(timerForCurTime);
+    var currentTimeStr="";
+    var leadCurrtime=changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
+    var leadCurdate=changeDateFormat(new Date(), 'yyyy-mm-dd');
+    var leadCurSdate=new Date(leadCurdate+' '+leads.startDateTime);
+    var leadCurEdate=new Date(leadCurdate+' '+leads.endDateTime);
+
+    var leadCurrDateTime;
+    timerForCurTime = setInterval(function() {
+        if(leads.leadTimeZone!=''){
+          var timezoneG = getSystemTimezone();//Intl.DateTimeFormat().resolvedOptions().timeZone;
+          var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
+          var curentLeadRightTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leads.leadTimeZone ,"YYYY-MM-DD HH:mm:ss","HH:mm:ss");
+          currentTimeStr=curentTime.date+' '+curentTime.time;
+          leadCurrDateTime=new Date(curentLeadRightTime.date);
+        }
+        var leadrightTimeCallColor="text-danger bold";
+        if(leadCurrDateTime>=leadCurSdate && leadCurrDateTime<=leadCurEdate){
+            leadrightTimeCallColor="text-success bold";
+        }
+        $("#leadCurTimeText_"+leadId+"").html('<span class="'+leadrightTimeCallColor+'">'+currentTimeStr+'<span>');
+      }, 1000);
+
+}
+
+function getLeadStartTimer(leadstartDate, leadid){
+    var timer;
+    clearInterval(timer); // reset any previous timer
+    const startDate = new Date(leadstartDate);
+
+    // Update every second
+    timer = setInterval(function() {
+      var dateInKolkata = moment().tz("Asia/Singapore").format("YYYY-MM-DD HH:mm:ss");
+      var now = new Date(dateInKolkata);
+      var diff = now - startDate; // milliseconds difference
+
+      if (diff < 0) {
+        $('#timerLeadDisplay_'+leadid).text('⏳ Start time is in the future!').css('color', 'red');
+        return;
+      }
+
+      // Convert milliseconds → time components
+      var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      var minutes = Math.floor((diff / (1000 * 60)) % 60);
+      var seconds = Math.floor((diff / 1000) % 60);
+
+      var textdays="<span class="+(days>0?'text-danger':'')+">"+days+" days <span>";
+      var texthours="<span class="+(hours>0?'text-danger':'')+">"+hours+" hrs <span>";
+      var textminutes="<span class="+(minutes>0?'text-danger':'')+">"+minutes+" mins <span>";
+      var textseconds="<span class="+(seconds>0?'text-danger':'')+">"+seconds+" secs<span>";
+      // Format display
+      $('#timerLeadDisplay_'+leadid).html(`${textdays}${texthours}${textminutes}${textseconds}`)
+    }, 1000);
+
 }

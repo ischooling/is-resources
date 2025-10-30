@@ -559,8 +559,8 @@ async function fetchMeetings(filterHostUserId) {
       const recurringMeetingsHtml = renderMeetings(res.data.recurringMeetings, true, totalPageOneDay, totalPageRecurring);
 
       const paginationHtml = currentTabId === "oneDayMeetings"
-        ? renderPaginationCommon(currentPageOneDay, totalPageOneDay)
-        : renderPaginationCommon(currentPageRecurring, totalPageRecurring);
+        ? renderPaginationCommon(currentPageOneDay, totalPageOneDay, "meetings")
+        : renderPaginationCommon(currentPageRecurring, totalPageRecurring, "meetings");
 
       const responseHtml = `
         <div class="tabs position-relative flex-wrap">
@@ -1933,7 +1933,7 @@ function showRecurringMeetingRecordings(entityId, meetingTitle, hostName) {
       try {
         populateRecurringRecording(res.data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek, res.recordingsTotalPages);
         if(res.recordingsTotalPages != 0){
-          $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages));
+          $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages, "recurringMeeting"));
         }
       } catch (error) {
         console.log("Error Fetching Data:", error);
@@ -1981,7 +1981,7 @@ function applyRecurringRecordingFilters(entityId) {
         updateRecordingsTable(res.data);
         $("#recurringMeetingModal").data("entityId", entityId);
         if(res.recordingsTotalPages > 0){
-          $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages));
+          $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages, "recurringMeeting"));
         } else{
           $("#recurringPaginationContainer").html('');
         }

@@ -216,7 +216,7 @@ function getPartnerSchoolPaymentDetails(formId) {
 
                 $("#paymentListTableBody").html(html);
                 if(data.paymentsList.length != 0){
-                    $("#schoolPaymentPaginationContainer").html(renderPaginationCommon(currentPagePaymentList, data.totalPages));
+                    $("#schoolPaymentPaginationContainer").html(renderPaginationCommon(currentPagePaymentList, data.totalPages, "paymentList"));
                 }
             }
         }
