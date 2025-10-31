@@ -937,6 +937,10 @@ function handleSessionsWithData(sessionDataList, completedSessions, inProgressSe
 			changeDateFormat(new Date(session.endDateTime), "MMM dd, yyyy hh:mm:ss A") : 
 			`<i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>`;
 
+		const isInvalidRecording = session.startDateTime && session.endDateTime && new Date(session.startDateTime).getTime() === new Date(session.endDateTime).getTime();
+
+		const isShortRecording = session.startDateTime && session.endDateTime && (new Date(session.endDateTime).getTime() - new Date(session.startDateTime).getTime()) < 60000;
+
 		let duration = (session.startDateTime && session.endDateTime) ? 
 			getDuration(session.startDateTime, session.endDateTime) : 
 			`<i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>`;
@@ -945,6 +949,28 @@ function handleSessionsWithData(sessionDataList, completedSessions, inProgressSe
 		
 		if (session.meetingStatus === "IN_PROGRESS") {
 			actionContent = `<i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i> Meeting in progress`;
+		}else if (isInvalidRecording) {
+            actionContent =
+			`<div class="d-flex align-items-center" style="flex-direction: column; gap: 5px;">
+				<div class="text-danger small mb-1">
+					<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Invalid recording
+				</div>
+				<button onclick="reAttemptDemoRecording('${session.id}', '${attemptNumber}')" 
+						class="btn btn-sm btn-warning m-0" style="width: fit-content;">
+					Re-attempt
+				</button>
+			</div>`;
+        }else if (isShortRecording) {
+			actionContent = 
+			`<div class="d-flex align-items-center" style="flex-direction: column; gap: 5px;">
+				<div class="text-danger small mb-1">
+					<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Recording should be more than 1 minute
+				</div>
+				<button onclick="reAttemptDemoRecording('${session.id}', '${attemptNumber}')" 
+						class="btn btn-sm btn-warning m-0" style="width: fit-content;">
+					Re-attempt
+				</button>
+			</div>`;
 		} else if (session.meetingStatus === "ENDED" && (!session.recordingArray || session.recordingArray.length === 0)) {
 			actionContent = `Recording in progress <i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>`;
 		} else if (session.recordingArray && session.recordingArray.length > 0) {
