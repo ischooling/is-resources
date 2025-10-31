@@ -1021,7 +1021,6 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     getAsPost(urlSend);
     customLoader(false);
   }else if (pageNo == "onboarded-teacher-list") {
-    debugger;
     // getContent(moduleId, pageNo, replaceDiv, extraParam);
     var urlSend = "/dashboard/onboarded-teacher-list?moduleId=" + moduleId;
     getAsPost(urlSend);

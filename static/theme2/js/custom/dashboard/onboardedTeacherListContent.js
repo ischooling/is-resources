@@ -1,4 +1,4 @@
-function paymentReport(){
+function onboardedTeacher(){
 	var html =
 	'<div class="col-md-12 mt-4">'
 		+'<div class="main-card mb-3">'
@@ -7,7 +7,9 @@ function paymentReport(){
 				+'<div class="d-flex border-bottom full pb-2 border-primary">'
 					+'<div class="search full mr-auto" style="max-width:450px"></div>'
 					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates()">Wati Broadcast</button>'
-					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiLogsFilterRecords()">Logs</button>'
+					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiLogsFilterRecords()">Wati Logs</button>'
+					+ '<button class=" btn btn-focus text-white btn-full-mobile mr-2" onclick="getEmailBroadcastTemplates()">Email Broadcast</button>'
+					+'<button class=" btn btn-focus text-white btn-full-mobile mr-2" onclick="getMailLogsFilterRecords()">Email Logs</button>'
 					+'<div class="filter-btn ml-2 d-inline-flex align-items-center">'
 						+'<a href="javascript:void(0)" class="btn btn-outline-primary mr-1 showFilterForm" >'
 							+'<i class="fa fa-filter"></i>'
@@ -22,7 +24,6 @@ function paymentReport(){
 			+'<div class="row m-0" id="consolidate">'
 				
 			+'</div>'
-			+updateRefferelCode()
 			+'<div class="full mt-2" id="onboardedTeacherList">'
 			+'<div id="selectTeacherAllDiv" class="hidden"><input type="checkbox" id="selectTeacherAll" class="ml-2">&nbsp; All</div>'
 			+'<input type="hidden" name="teacherIdMove" id="teacherIdMove" value="">'
@@ -45,6 +46,7 @@ function paymentReport(){
 			+'<span class="msg" id="msgTheme2"></span>'
 		+'</div>'
 		+deleteWarning();
+	
 	return html;
 }
 
@@ -57,7 +59,7 @@ function cardDetails(data){
 						<div class="card-header-tab card-header">
 							<div class="card-header-title mr-auto">
 								<input type="checkbox" class="checkTeacher" id="teacher-${item.userId}" name="teacher-move-another" value="${item.userId}" /> 
-								<span class="mx-2">${key+1}.</span>`;
+								<span class="mx-2">${item.sno}.</span>`;
 								html+=`<img  id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE}${item.gender === "FEMALE"? 'female-profile':'male-profile' }.png${SCRIPT_VERSION}" alt="image"  thumbType=""/>`;
 								html+=`<div class="px-2 mb-0 w-100 rounded" style="background:#f0f9ff">
 									<h6 class="full">
@@ -71,7 +73,7 @@ function cardDetails(data){
 							${item.watibroadcast?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Wati Logs"  id="wati_logs_link" onclick="showWatiLogDetailsByTeacherUserId('${item.userId}')">
                    				 <img src="${PATH_FOLDER_IMAGE2}leadlist_icons/Wati.svg${SCRIPT_VERSION}" style="width:26px; margin-bottom: 4px;padding:4px;" />
 							</a>`:''}
-							
+							${item.brevobroadcast?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getMailLogUser(${item.userId})" ><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;"></i></a>&nbsp;`:''}
 							</div>
 						</div>
 						<div class="card-body">
@@ -83,7 +85,7 @@ function cardDetails(data){
                                         </div>
                                         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
                                             <label class="label bold">Email:</label>
-                                            <span class="field-value trans5s dobViewDate">${item.email}</span>
+                                            <span class="field-value trans5s teacher-email-${item.userId}" useremail="${item.email}">${item.email}</span>
                                         </div>
                                         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
                                             <label class="label bold">Username:</label>
@@ -145,7 +147,7 @@ function filterOnboardedTeacherListForm(){
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Grade</label>'
-							+'<select id="gradeId" class="form-control selectReset">'
+							+'<select id="gradeId" class="form-control selectReset" disabled>'
 								+'<option value="">Select Grade</option>'
 								// +getGradeListContent(SCHOOL_ID)
 							+'</select>'
@@ -205,35 +207,6 @@ function filterOnboardedTeacherListForm(){
 	+'</div>';
 	return html;
 }
-function updateRefferelCode(){
-	var html=`<div class="modal fade bd-example-modal-lg fade-scale" id="updateReferralCodeModal" tabindex="-1" aria-hidden="true">
-		<div class="modal-dialog modal-md" role="document">
-			<div class="modal-content">
-				
-				<div class="modal-header py-2 bg-primary text-white">
-					<h5 class="modal-title">Update Referral Code</h5>
-					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				</div>
-				<div class="modal-body">
-					<div class="full">
-						<input type="hidden" name="studentStandardId" id="studentStandardId"/>
-						<select id="newReferralCode" name="newReferralCode" class="form-control selectReset multiple-select-option">
-								<option value="">ALL</option>`;
-								html+=getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '');
-							html+=`</select>
-					</div>
-					<div class="full text-right">
-						<a href="javascript:void(0)" class="btn btn-primary" onclick="saveReferralCodeFromPaymentWindow();">Update</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>`;
-	return html
-}
-
-
-
 
 function swatiBroadcastContentModal(data){
 	//console.log('all data : ' + JSON.stringify(data));
@@ -1200,7 +1173,7 @@ function getWatiRecordsList(data){
 	}else{
 		html+=
 			`<tr>
-				<td colspan="6" class="font-weight-bold text-center">No record found</td>
+				<td colspan="7" class="font-weight-bold text-center">No record found</td>
 			</tr>`;
 	}
 	return html;
@@ -1342,6 +1315,857 @@ function getWatiRecordsListPagging(datalimit){
 				+'</li>';
 			}
 		html+='</ul>';
+	}
+	return html;
+}
+
+function getMailLogsRecordsFilterModal(){
+	var html=
+		`<div class="modal fade" id="mailLogsRecordsFilterModal" role="dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header py-2 bg-primary text-white">
+						<h5 class="modal-title ">Mail Logs</h5>
+						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+					</div>
+					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
+						<form class="form-row" id="mailLogsRecords" autocomplete="off">
+						<div class="col-md-12 col-lg-2">
+							<label>Counsoler Name</label>
+							<select name="counsolerToSearch" id="counsolerToSearch" class="form-control" multiple>'
+								<option value="">Select Counsoler</option>'
+							</select>
+						</div>
+							<div class="col-md-12 col-lg-2">
+								<label>Fillter</label>
+								<select class="form-control mr-1" id="searchDateType" name="searchDateType">
+									<option value="DAY">Today</option>
+									<option value="WEEK">Week</option>
+									<option value="MONTH">Month</option>
+									<option value="CUSTOM">Custom</option>
+								</select>
+							</div>
+							<div class="col-md-12 col-lg-2" id="endDateDiv">
+								<label>Start Date<sup class="text-danger">*</sup></label>
+								<input class="form-control" name="startDate" id="startDate" placeholder="Start Date"/>    
+							</div> 
+							<div class="col-md-12 col-lg-2" id="endDateDiv">
+								<label>End Date<sup class="text-danger">*</sup></label>
+								<input class="form-control" name="endDate" id="endDate" placeholder="End Date"/>    
+							</div>
+							<div class="col-md-12 col-lg-1">
+								<label>Page Size<sup class="text-danger">*</sup></label>
+								<input class="form-control" name="pageSize" id="pageSize" value="10" placeholder="Page Size" onkeydown="return M.digit(event);"/>    
+							</div>
+						</form>
+						<hr/>
+						<div id="maillogsRecordsWrapper">
+							<table class="table table-bordered font-12 border-radius-table" id="maillogsRecordsTable" style="width:100%">
+								<thead>
+									<tr>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="5% !important">Sr no.</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Teacher Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Counsoler Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Subject</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Status</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Delivered Date Time</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10">Action</th>
+									</tr>
+								</thead>
+								<tbody id="maillogsRecordsTbody"></tbody>
+							</table>
+						</div>
+						<div class="mailRecordsListPagging"></div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-success" onclick="getMailLogsRecords(\'mailLogsRecords\', \'1\');">Search</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="emailBroadcastLogsTemplate2" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md" style='width: 80% !important;'>
+                <div class="modal-content border-0">
+                    <div class="modal-header py-1 text-white bg-primary">
+                        <p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+                        <button type="button" class="close text-white" onclick="hideEmailTemplate()"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body px-1">
+                        <div class="mx-auto">
+                            <div class="screen">
+                                <div class="content">
+                                    <div class="full" id="emailBroadcastLogsTemplatePreview2" style="font-size:13px"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+	return html;
+}
+
+function getMailRecordsListPagging(datalimit){
+	var noOfPages = datalimit.totalPages;
+	var currentPage = datalimit.pageNo;
+	var showPageLimit = 2;
+	var leftLimit=currentPage-showPageLimit;
+	var rightLimit=currentPage+showPageLimit+1;
+	var startPageLimit=5;
+	var html='';
+	if(noOfPages>1){
+		html+='<ul class="pagination">';
+			if(currentPage != 1){
+				html+='<li class="page-item">'
+				+'<a class="page-link" href="javascript:void(0);" onclick="getMailLogsRecords(\'mailLogsRecords\', \''+(currentPage-1)+'\')">Previous</a>'
+			 	+'</li>';
+			 }
+			for (let p = 1; p <= noOfPages; p++) {
+				if(p < startPageLimit || p > (noOfPages -1) || (p>=leftLimit && p<rightLimit) ){
+					if(p > (noOfPages -1) || (p<leftLimit && p>rightLimit)){
+						html+='...';
+					}
+					html+='<li class="page-item">'
+					+'<a href="javascript:void(0);" onclick="getMailLogsRecords(\'mailLogsRecords\', \''+(p)+'\');" class="page-link '+(p==currentPage?'page-link-active':'')+'">'+p+'</a>'
+					+'</li>';
+				}else{
+
+				}
+			}
+			if(currentPage<noOfPages){
+				var nextPage=parseInt(currentPage)+1;
+				html+='<li class="page-item">'
+				+'<a class="page-link" href="javascript:void(0);" onclick="getMailLogsRecords(\'mailLogsRecords\', \''+nextPage+'\');">Next</a>'
+				+'</li>';
+			}
+		html+='</ul>';
+	}
+	return html;
+}
+
+function btoaUtf8(str) {
+  let bytes = new TextEncoder().encode(str);
+  let binary = Array.from(bytes, b => String.fromCharCode(b)).join('');
+  return btoa(binary);
+}
+
+
+function customEmailTemplatesList(tdata) {
+	var html=
+		`<style>
+			#emailBroadcastTable {
+				border-collapse: collapse;
+				border-radius: 10px;
+			}
+			#emailBroadcastTable td, th {
+				border: 1px solid #f7f7f7;
+			}
+		</style>
+		<div id="customEmailTemplatesList" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" data-backdrop="static" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="d-flex flex-wrap email-wrapper">
+					<div class="modal-content border-0 emailBroadcastTableDiv">
+						<div class="modal-header py-2 theme-bg text-white">
+							<h5 class="modal-title">Email Broadcast</h5>
+							<button type="button" class="close text-white" onclick="selfModalHide('customEmailTemplatesList'); closeModalAndFlushData();">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1" style='max-height: 500px;overflow-y: auto;'>
+							<div class="flex-grow-1">
+								<form class="full" action="javascript:void(0);">
+									<div class="full mb-1 mt-1 table-responsive">
+										<table class="table" id="emailBroadcastTable" style="font-size:14px;min-width:450px">
+											<thead>
+												<tr style='background-color:#E7F3FF;'>
+													<th style="width: 15%;color:#007EFF !important;" class="border text-white rounded-top-left-5">S. No.</th>
+													<th style="width: 40%;color:#007EFF !important;" class="border text-white">Template Name</th>
+													<th style="color:#007EFF !important;" class="border text-white text-center">View</th>
+													<th style="color:#007EFF !important;" class="border text-white text-center rounded-top-right-5">Send Broadcast</th>
+												</tr>
+											</thead>
+											<tbody>`;
+											
+											if(tdata.templates){
+												const userFirstName = USER_FULL_NAME.split(" ")[0];
+												let indexValue = 0;
+												$.each(tdata.templates, function(index, element) {
+													// if (element.name.toLowerCase().includes(userFirstName.toLowerCase())) {
+														indexValue++
+														var templateName = element.name;
+														let subject = element.subject;
+														html+=`<tr id="table_row_`+templateName+`">
+															<td style="vertical-align: middle !important;" class="font-weight-bold">`+ indexValue+`</td>
+															<td style="vertical-align: middle !important;" class="font-weight-bold">`+templateName+`</td>
+															<td style="vertical-align: middle !important;" class="text-center">
+																<a href="javascript:void(0)" class="btn btn-outline-dark btn-sm" style="text-decoration: none !important;" onclick="viewEmailTemplate(true, `+index+`, '`+templateName+`')">
+																	View<i class="fa fa-eye ml-1"></i>
+																</a>
+															</td>
+															<td style="vertical-align: middle !important;" class="text-center">
+																<a href="javascript:void(0)" class="btn btn-primary btn-sm text-white" style="text-decoration: none !important;" onclick="sendEmailNotification(\'`+btoaUtf8(templateName)+`\','`+btoaUtf8(subject)+`',`+index+`,\'`+element.id+`\')">
+																	Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
+																</a>
+															</td>
+														</tr>`;
+													// }
+												});
+											}
+											html+=`</tbody>
+										</table>  
+									</div>	          
+								</form>
+							</div>
+						</div>
+					</div>
+					
+					<div id="previewEmailModal" class="modal-content border-0 email-template hide-email-template" style="max-width:450px;">
+						<div class="modal-header py-1 text-white bg-primary">
+							<p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+							<button type="button" class="close text-white" onclick="viewEmailTemplate(false)"><span aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body px-1">
+							<div class="mx-auto">
+								${/*<div class="mobile-frame-top-bar">
+									<div class="status-bar">
+										<div class="time">`;
+											var D = new Date();
+											var H = D.getHours();
+											var M = D.getMinutes(); 
+												H>12?H=H -12:H;
+												M<10?M='0'+M:M;
+										html+=`${H}:${M}</div>
+										<div class="icons">
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 640 512">
+												<path d="M576 0c17.7 0 32 14.3 32 32l0 448c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-448c0-17.7 14.3-32 32-32zM448 96c17.7 0 32 14.3 32 32l0 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-352c0-17.7 14.3-32 32-32zM352 224l0 256c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32s32 14.3 32 32zM192 288c17.7 0 32 14.3 32 32l0 160c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-160c0-17.7 14.3-32 32-32zM96 416l0 64c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32s32 14.3 32 32z"/>
+											</svg>
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 576 512">
+												<path d="M464 160c8.8 0 16 7.2 16 16l0 160c0 8.8-7.2 16-16 16L80 352c-8.8 0-16-7.2-16-16l0-160c0-8.8 7.2-16 16-16l384 0zM80 96C35.8 96 0 131.8 0 176L0 336c0 44.2 35.8 80 80 80l384 0c44.2 0 80-35.8 80-80l0-16c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l0-16c0-44.2-35.8-80-80-80L80 96zm368 96L96 192l0 128 352 0 0-128z"/>
+											</svg>
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 640 512">
+												<path d="M54.2 202.9C123.2 136.7 216.8 96 320 96s196.8 40.7 265.8 106.9c12.8 12.2 33 11.8 45.2-.9s11.8-33-.9-45.2C549.7 79.5 440.4 32 320 32S90.3 79.5 9.8 156.7C-2.9 169-3.3 189.2 8.9 202s32.5 13.2 45.2 .9zM320 256c56.8 0 108.6 21.1 148.2 56c13.3 11.7 33.5 10.4 45.2-2.8s10.4-33.5-2.8-45.2C459.8 219.2 393 192 320 192s-139.8 27.2-190.5 72c-13.3 11.7-14.5 31.9-2.8 45.2s31.9 14.5 45.2 2.8c39.5-34.9 91.3-56 148.2-56zm64 160a64 64 0 1 0 -128 0 64 64 0 1 0 128 0z"/>
+											</svg>
+										</div>
+									</div>
+									<div class="header">
+										<span class="d-inline-block" style="line-height: 0px;">
+											<svg xmlns="http://www.w3.org/2000/svg" width="17px" fill="#fff" viewBox="0 0 448 512">
+												<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
+											</svg>
+										</span>
+										<span class="circle">Email</span>
+										<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
+											<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
+												<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
+											</svg>
+										</span>
+									</div>
+								</div>*/''}
+								<div class="screen">
+									<div class="content">
+										<div class="full" id="previewEmailTemplate" style="font-size:13px"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function emailBroadcastSendModal(data){
+	var html =
+			`<style>
+				#emailBroadcastSendTable {
+					border-collapse: collapse;
+				}
+				#emailBroadcastSendTable td, th {
+					border: 1px solid #f7f7f7;
+				}
+			</style>
+			<div id="emailBroadcastSendModal" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" data-backdrop="static" aria-hidden="true">
+				<div class="modal-dialog" style="width:40%;">
+					<div class="d-flex flex-wrap email-wrapper">
+						<div class="modal-content border-0">
+							<div class="modal-header py-1 bg-primary text-white align-items-center">
+								<div class="d-flex fsize-1 mb-0 align-items-center">
+									<button type="button" class="btn mr-2 btn-primary btn-sm d-flex align-items-center" style='gap:5px;' onclick="gotoBackEmailModal()">
+										<svg style='width:15px;' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+										</svg>
+										<span>Back</span>
+									</button>
+									<span class="">Selected Template: </span>
+									<span class="" id="templateNameEmail"></span>
+									<span class="" id="viewMethodCallingEmail"></span>
+								</div>
+								<div class="d-flex align-items-center">
+									<button id="emailBroadcastSendModalClose" style='width:16px;height:16px;font-size:22px;display:flex;justify-content:center;align-items:center;padding:0px 10px 4px;' type="button" class="btn btn-danger " onclick="selfModalHide('emailBroadcastSendModal'); closeModalAndFlushData();">&times;</button>
+								</div>
+							</div>
+							<div class="modal-body pt-1">
+								<form id="sendEmailBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
+									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
+										<table id="emailBroadcastSendTable" class="table" style="font-size:14px;min-width:450px;">
+											<thead>
+												<tr style='background-color:#E7F3FF'>
+													<th style='width:60px;' class="rounded-top-left-5 text-primary">
+														<span style='margin-left:-5px;' class="custom-checkbox custom-control d-inline-block" id="allcheckedEmailDiv"> 
+															<input type="checkbox" id="allCheckedEmail" value="" class="custom-control-input"> 
+															<label class="custom-control-label bold" for="allCheckedEmail">All</label> 
+														</span>
+													</th>
+													<th style='width:70px;' class="text-primary">S. No.</th>
+													<th class="px-1 text-primary">Name</th>
+													<th class="rounded-top-right-5 text-primary">Email</th>
+												</tr>
+											</thead>
+											<tbody>`;
+											$.each($("input[name='teacher-move-another']:checked"), function(index, checkbox) {
+                                                var userId = $(checkbox).val(); 
+                                                var name = $(".teacher-name-" + userId).attr("teachername") || '';
+                                                var email = $(".teacher-email-" + userId).attr("useremail")?.trim()
+												html+=`<tr id="esmsgcol_`+userId+`">
+															<td>
+																<div class="custom-checkbox custom-control">
+																	<input type="checkbox"
+																		name="chk-users-lead-email"
+																		id="${userId}"
+																		value="${userId}"
+																		data-email="${email}"
+																		data-name="${name}"
+																		class="custom-control-input checkToSendEmail"
+																	>
+																	<label id="label_email_${userId}" class="custom-control-label" for="${userId}"></label>
+																</div>
+															</td>
+															<td class="font-weight-bold">
+																${index+1}
+															</td>
+															<td class="font-weight-bold">
+																<input type="hidden" name="name" value="${name}" class="name">
+																${name}
+																<span class="stmsg" id="esmsg_${userId}"></span> 
+															</td>
+															<td>
+																<input type="hidden" name="email" value="${email}" class="email">
+																<div>${email}</div>
+															</td>	
+														</tr>`;
+                                            });
+											html+=`</tbody>
+										</table>  
+									</div>`;
+									html+=`
+									<div class="d-flex justify-content-between align-items-center">
+										<div id="selectedMessageCountEmail">
+											<span id="selectionCountEmail" class="mb-2 bg-primary text-white px-3 p-2 rounded-5"></span>
+										</div>
+										<div class="d-flex justify-content-center align-items-center">
+											<input type="radio" name="mailBroadcastTime" value="now" checked><p class="mb-0 ml-1"> Send Now </p>
+											<input type="radio" name="mailBroadcastTime" class="ml-3" value="bestTime"><p class="mb-0 ml-1"> Send At Best Time </p>
+										</div>
+										<div id="confirm_btn_data_email"></div>
+									</div>	
+								</form>
+							</div>
+						</div>
+					</div>
+
+					<div id="previewEmailModalSecond" class="modal-content border-0 email-template hide-email-template" style="max-width:450px;">
+						<div class="modal-header text-white bg-primary" style='padding: 6.5px;'>
+							<p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+							<button type="button" class="close text-white" onclick="viewEmailTemplate(false)"><span aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body px-1">
+							<div class="mx-auto">
+								${/*<div class="mobile-frame-top-bar">
+									<div class="status-bar">
+										<div class="time">`;
+											var D = new Date();
+											var H = D.getHours();
+											var M = D.getMinutes(); 
+												H>12?H=H -12:H;
+												M<10?M='0'+M:M;
+										html+=`${H}:${M}</div>
+										<div class="icons">
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 640 512">
+												<path d="M576 0c17.7 0 32 14.3 32 32l0 448c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-448c0-17.7 14.3-32 32-32zM448 96c17.7 0 32 14.3 32 32l0 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-352c0-17.7 14.3-32 32-32zM352 224l0 256c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32s32 14.3 32 32zM192 288c17.7 0 32 14.3 32 32l0 160c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-160c0-17.7 14.3-32 32-32zM96 416l0 64c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32s32 14.3 32 32z"/>
+											</svg>
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 576 512">
+												<path d="M464 160c8.8 0 16 7.2 16 16l0 160c0 8.8-7.2 16-16 16L80 352c-8.8 0-16-7.2-16-16l0-160c0-8.8 7.2-16 16-16l384 0zM80 96C35.8 96 0 131.8 0 176L0 336c0 44.2 35.8 80 80 80l384 0c44.2 0 80-35.8 80-80l0-16c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l0-16c0-44.2-35.8-80-80-80L80 96zm368 96L96 192l0 128 352 0 0-128z"/>
+											</svg>
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 640 512">
+												<path d="M54.2 202.9C123.2 136.7 216.8 96 320 96s196.8 40.7 265.8 106.9c12.8 12.2 33 11.8 45.2-.9s11.8-33-.9-45.2C549.7 79.5 440.4 32 320 32S90.3 79.5 9.8 156.7C-2.9 169-3.3 189.2 8.9 202s32.5 13.2 45.2 .9zM320 256c56.8 0 108.6 21.1 148.2 56c13.3 11.7 33.5 10.4 45.2-2.8s10.4-33.5-2.8-45.2C459.8 219.2 393 192 320 192s-139.8 27.2-190.5 72c-13.3 11.7-14.5 31.9-2.8 45.2s31.9 14.5 45.2 2.8c39.5-34.9 91.3-56 148.2-56zm64 160a64 64 0 1 0 -128 0 64 64 0 1 0 128 0z"/>
+											</svg>
+										</div>
+									</div>
+									<div class="header">
+										<span class="d-inline-block" style="line-height: 0px;">
+											<svg xmlns="http://www.w3.org/2000/svg" width="17px" fill="#fff" viewBox="0 0 448 512">
+												<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
+											</svg>
+										</span>
+										<span class="circle">Email</span>
+										<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
+											<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
+												<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
+											</svg>
+										</span>
+									</div>
+								</div>*/''}
+								<div class="screen">
+									<div class="content">
+										<div class="full" id="previewEmailTemplateSecond" style="font-size:13px"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		return html;
+}
+
+
+function successEmailTableContent(){
+	var html=
+		`<table id="successEmailTable" class="table mt-1 mb-0" style="font-size:14px;min-width:450px;">
+			<thead>
+				<tr style='background-color:#E7F3FF'>
+					<th style='width:80px;' class="rounded-top-left-5 px-1 text-primary">S. No.</th>
+					<th class="px-1 text-primary">Name</th>
+					<th class="rounded-top-right-5 text-primary">Email</th>
+				</tr>
+			</thead>
+			<tbody class="lead-table-css">`
+				$.each(successfulEmails, function(index, value){
+					var count = index + 1;
+					if(value.email != null && value.email != ''){
+						html+=`<tr id="esmsgcol_`+value.leadId+`">
+							<td>
+								<p class="m-0 font-weight-bold font-12">`+count+`</p>
+							</td>
+							<td>
+								<p class="m-0 font-weight-bold font-12"><span id="esmsg_`+value.leadId+`">`+value.name+`</span></p>
+							</td>
+							<td>
+								<p class="m-0 font-12">`+value.email+`</p>
+							</td>
+						</tr>`;
+					}
+				});
+			html+=`</tbody>
+		</table>`
+	return html;
+}
+
+function failedEmailTableContent(){
+	var html=
+		`<table id="failedEmailTable" class="table mt-1 mb-0" style="font-size:14px;min-width:450px;">
+			<thead>
+				<tr style='background-color:#E7F3FF'>
+					<th style='width:40px;' class="rounded-top-left-5 text-primary">
+						<span style='margin-left:-5px;' class="custom-checkbox custom-control d-inline-block" id="allcheckedEmailDivFailed"> 
+							<input type="checkbox" id="allCheckedFailedEmail" value="" class="custom-control-input"> 
+							<label class="custom-control-label bold" for="allCheckedFailedEmail">All</label> 
+						</span>
+					</th>
+					<th style='width:70px;' class="text-primary">S. No.</th>
+					<th class="px-1 text-primary">Name</th>
+					<th class="rounded-top-right-5 text-primary">Email</th>
+				</tr>
+			</thead>
+			<tbody class="lead-table-css">`
+				$.each(failedOrOtherEmails, function(index, value){
+					var count = index + 1;
+					if(value.email != null && value.email != ''){
+						html+=`<tr id="esmsgcol_`+value.leadId+`">
+							<td>
+								<div class="custom-checkbox custom-control">
+									<input type="checkbox" name="chk-users-lead-email-resend" id="failed_`+value.leadId+`" value="`+value.leadId+`" data-email="`+value.email+`" class="custom-control-input checkToSendEmailFailed">
+									<label id="label_failed_`+value.leadId+`" class="custom-control-label" for="failed_`+value.leadId+`"></label>
+								</div>
+							</td>
+							<td class="font-weight-bold">
+								`+count+`
+							</td>
+							<td class="font-weight-bold">
+								<input type="hidden" name="name" value="`+value.name+`" class="name font-12">
+								`+value.name+`
+							</td>
+							<td>
+							<input type="hidden" name="email" value="`+value.email+`" class="email font-12">
+								`+value.email+`
+							</td>	
+						</tr>`;
+					}
+				});
+			html+=`</tbody>
+		</table>
+		<div id="selectedMessageCountOnFailedEmail" class="my-2">
+			<span id="selectionCountOnFailedEmail" class="mb-2 bg-primary text-white px-3 p-2 rounded-5 font-12"></span>
+		</div>`;
+	return html;
+}
+
+function emailBroadcastLogsModal(data, name, email) {
+	let html = `
+		<style>
+			#emailBroadcastLogsModal {
+				border-collapse: collapse;
+				border-radius: 10px;
+			}
+			#emailBroadcastLogsModal td, th {
+				border: 1px solid #f7f7f7;
+			}
+		</style>
+		<div id="emailBroadcastLogsModal" class="modal fade fade-scale" role="dialog" aria-labelledby="emailBroadcastLogs" aria-hidden="true">
+			<div class="modal-dialog" style='width: 70%;'>
+				<div class="d-flex flex-wrap email-wrapper">
+					<div class="modal-content border-0">
+						<div class="modal-header py-1 bg-primary text-white">
+							<h5 class="modal-title">Email Broadcast Logs </h5>
+							<button type="button" class="close text-white" onclick="selfModalHide('emailBroadcastLogsModal')">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1">
+							<div class="flex-grow-1">
+								<div class="full mb-1 mt-1 table-responsive" style="max-height:80vh !important;">
+									<table class="table" id="emailBroadcastLogsTableData" style="font-size:14px; min-width:450px">
+										<thead style="position:sticky;top:0;z-index:10;">
+											<tr style='background-color:#E7F3FF'>
+												<th class="border text-primary">S.No.</th>
+												<th class="border text-primary">Sender</th>
+												<th class="border text-primary">Email Subject</th>
+												<th class="border text-primary">Sent Time</th>
+												<th class="border text-primary">Action</th>
+											</tr>
+										</thead>
+										<tbody>`;
+											if(data.length > 0){
+												$.each(data, function(index, item){
+													var parsedData = JSON.parse(data[index])
+													html+=`<tr>
+														<td>${index + 1}</td>
+														<td>${parsedData.senderName}</td>
+														<td>${parsedData.subject}</td>
+														<td>${parsedData.time}</td>
+														<td>
+															<button class="btn btn-primary btn-sm" onclick="getEmailBroadcastLogsTemplate(${parsedData.actionExecutionId},'${email}')">View Template</button>
+														</td>
+													<tr>`
+												})
+											}else{
+												html+=`<tr colspan="5">No Email Logs Found</tr>`
+											}
+										html+=`</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="emailBroadcastLogsTemplateWrapper"></div> 
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function emailBroadcastLogsTemplateContent(){
+	var html=
+		`<div id="emailBroadcastLogsTemplate" class="modal fade fade-scale" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-md" style='width: 80% !important;'>
+				<div  class="modal-content border-0 email-template" style="max-width:450px;">
+					<div class="modal-header py-1 text-white bg-primary">
+						<p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+						<button type="button" class="close text-white" onclick="viewEmailTemplate(false)"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body px-1">
+						<div class="mx-auto">
+							<div class="screen">
+								<div class="content">
+									<div class="full" id="emailBroadcastLogsTemplatePreview" style="font-size:13px"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function sendConfirmationModal(functionName){
+	var html =
+		`<div class="modal fade" id="sendConfirmationModal">
+			<div class="modal-dialog modal-sm" role="document" style="box-shadow: none; width: 450px; max-width: 100%; margin-top: 8%;">
+				<div class="modal-content text-center">
+					<div class="modal-header justify-content-center bg-primary" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>
+					<div class="modal-body delete-modal">
+						<p class="heading" style="color: #027FFF; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to send this data?</p>
+					</div>
+					<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">
+						<div class="text-center" style="margin: 0 auto;">
+							<button onclick="${functionName}" type="button" class="btn mr-1" style="color: #027FFF !important; border: 1px solid #027FFF !important; background: transparent !important;">Yes</button>
+							<button type="button" class="btn text-white" style="background:#027FFF" data-dismiss="modal">No</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function viewEmailTemplate(flag, indexNumber, templateName){
+	if(flag){
+		$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
+		$(".email-wrapper").addClass("active-email-template");
+		$(".email-template").removeClass("hide-email-template").addClass("show-email-template");
+		$("#customEmailTemplatesList > .modal-dialog").css({
+			"transition": "transform 0.3s ease",
+			"transform": "translateX(-200px)"
+		});
+		$("#previewEmailTemplate, #previewEmailTemplateSecond, #previewEmailTemplateThird").html('');
+		setTimeout(function(){
+			$("#previewEmailTemplate").html(getViewTemplateEmail(emailTemplateContent.responseBody.templates[indexNumber]));
+            $("#previewEmailTemplateSecond").html(getViewTemplateEmail(emailTemplateContent.responseBody.templates[indexNumber]));
+            $("#previewEmailTemplateThird").html(getViewTemplateEmail(emailTemplateContent.responseBody.templates[indexNumber]))
+		},200);
+	}else{
+		$(".email-wrapper").removeClass("active-email-template");
+		$(".email-template").addClass("hide-email-template").removeClass("show-email-template");
+		$(".modal-dialog").css({
+			"transform": "translateX(0)"
+		});
+	}
+}
+
+function getViewTemplateEmail(data){
+	const iframeId = "templatePreviewFrame_" + Date.now();
+	var html=
+		`<div class="main-card card mx-auto" style="height: 400px;">
+			<iframe id="${iframeId}" style="width:100%; height:100%; border:none;"></iframe>
+		</div>`
+
+		setTimeout(() => {
+			const iframe = document.getElementById(iframeId);
+			if (iframe && iframe.contentWindow) {
+				const doc = iframe.contentWindow.document;
+				doc.open();
+				doc.write(data.htmlContent);
+				doc.close();
+			}
+		}, 0);
+    return html;
+}
+
+function sendEmailNotification(templateName, subject, index, templateId){
+	templateName = atob(templateName)
+	subject = atob(subject);
+	var request={};
+	$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
+	$('#templateNameEmail').html('<b>' + templateName + '</b> ');
+	boolval =true;
+	$('#viewMethodCallingEmail').html('<a href="javascript:void(0)" class="btn btn-primary btn-sm rounded-circle" onclick="viewEmailTemplate('+boolval+','+index+', `'+templateName+'`);" > <i class="fa fa-eye text-white"></i> </a>');
+	$('#confirm_btn_data_email').html('<a id="confirm_btn_email" class="btn btn-primary mr-2" href="javascript:void(0);" >SEND</a>');
+	$('#selectionCountEmail').html('<span>Selected- </span><span id="selectedCountEmail">0</span> / <span id="totalCountEmail">0</span>');
+	$("#emailBroadcastSendModal").modal("show");
+	$("#customEmailTemplatesList").modal("hide");
+
+	var totalCheckboxes = $(".checkToSendEmail").length;
+    $("#totalCountEmail").text(totalCheckboxes);
+	
+	$("#confirm_btn_email").click(function () {
+		var sleads ='';
+		var leadNo='';
+		var selectedEmails = [];
+		$.each($("input[name='chk-users-lead-email']:checked"), function(){
+			let leadId = $(this).val();
+			let email = $(this).data("email");
+			leadNo = leadNo+','+$(this).val();
+			if (email) selectedEmails.push(email);
+		});
+		
+		sleads = sleads + leadNo;
+		var selectedLeads = sleads.substring(1,sleads.length); 
+		if(selectedLeads==''){ 
+			$('#remarksresetDelete2').modal('hide');
+			showMessageTheme2(0, 'Please check any one user to send message','',false);
+			return false;
+		}else{
+			let selectedUsers = [];
+			$("input[name='chk-users-lead-email']:checked").each(function () {
+				let email = $(this).data("email");
+				let parentemail = $(this).data("parentemail");
+				let leadId = $(this).val();
+				let name = $(this).data("name") || '';
+				let grade = $(this).data("grade") || '';
+				let leadVerifiedStatus = $(this).data("leadverifiedstatus") || '';
+				let mobileNo = $(this).data("mobile") || '';
+				let phoneNumber = $(this).data("phone") || '';
+				let isdCode = $(this).data("isdcode") || '';
+
+				const isValidEmail = (str) => str && str.includes("@") && str.includes(".");
+
+				const userData = (mail) => ({
+					email: mail,
+					leadId: leadId,
+					name: name,
+					grade: grade,
+					leadVerifiedStatus: leadVerifiedStatus,
+					mobileNo: mobileNo,
+					phoneNumber: phoneNumber,
+					isdCode: isdCode,
+				});
+
+				if (isValidEmail(email) && isValidEmail(parentemail)) {
+					if (email.toLowerCase() === parentemail.toLowerCase()) {
+						selectedUsers.push(userData(email));
+					} else {
+						selectedUsers.push(userData(email));
+						selectedUsers.push(userData(parentemail));
+					}
+				} else if (isValidEmail(email)) {
+					selectedUsers.push(userData(email));
+				} else if (isValidEmail(parentemail)) {
+					selectedUsers.push(userData(parentemail));
+				}
+			});
+			emailTemplateContent.users = selectedUsers;
+			if($("#sendConfirmationModal").length >= 1){
+				$("#sendConfirmationModal").remove();
+			}
+			$("body").append(sendConfirmationModal(`sendEmailNotificationToUser(${index}, '${btoa(templateName)}', '${btoa(subject)}', '${selectedLeads}', 'send', '${templateId}')`));
+			$("#sendConfirmationModal").modal("show");
+			// showWarningMessageShow('Are you sure you want to send this data?','sendEmailNotificationToUser( '+index+',\''+templateName+'\',\''+btoa(subject)+'\',\''+selectedLeads+'\',\'send\',\''+templateId+'\')', 'info-modal-sm');
+		}
+	});
+
+	$(".checkToSendEmail").click(function(){
+		updateSelectionCountEmail();
+		var arrChkBox = [];
+		if($(".checkToSendEmail:checked").length>0){
+			if($(".checkToSendEmail:checked").length == $(".checkToSendEmail").length){
+				$("#allCheckedEmail").prop("checked",true);
+			}else{
+				$("#allCheckedEmail").prop("checked",false);
+			}
+		}else{
+			$("#allCheckedEmail").prop("checked",false);
+		}
+	});
+	$("#allCheckedEmail").click(function(){
+		if($(this).prop("checked")){
+			$(".checkToSendEmail").prop("checked",true);
+		}else{
+			$(".checkToSendEmail").prop("checked",false);
+		}
+		updateSelectionCountEmail();
+	});
+
+	function updateSelectionCountEmail(){
+        var selectedCount = $(".checkToSendEmail:checked").length;
+        $("#selectedCountEmail").text(selectedCount);
+    }
+}
+
+function gotoBackEmailModal(){
+	// if (emailStatusInterval) {
+	// 	clearInterval(emailStatusInterval);
+	// 	emailStatusInterval = null;
+	// }
+	$('#allCheckedEmail').prop('checked',false);
+	$('input[name="chk-users-lead-email"]').prop('checked',false);
+	$('#allCheckedFailedEmail').prop('checked',false);
+	$('input[name="chk-users-lead-email-resend"]').prop('checked',false);
+	$("#emailBroadcastSendModal").modal("hide");
+	$("#customEmailTemplatesList").modal("show");
+	viewEmailTemplate(false);
+}
+
+function hideEmailTemplate(){
+	$('#emailBroadcastLogsTemplate2').modal('hide')
+}
+
+function getMailLogUserRecordsModal(){
+	var html=
+		`<div class="modal fade" id="mailLogUserRecordsModal" role="dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header py-2 bg-primary text-white">
+						<h5 class="modal-title ">Mail Logs</h5>
+						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+					</div>
+					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
+						<div id="maillogsRecordsWrapper">
+							<table class="table table-bordered font-12 border-radius-table" id="maillogUserRecordsTable" style="width:100%">
+								<thead>
+									<tr>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="5% !important">Sr no.</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Teacher Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Counsoler Name</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Subject</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Status</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Delivered Date Time</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10">Action</th>
+									</tr>
+								</thead>
+								<tbody id="maillogUserRecordsTbody"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="emailBroadcastLogsTemplate2" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md" style='width: 80% !important;'>
+                <div class="modal-content border-0">
+                    <div class="modal-header py-1 text-white bg-primary">
+                        <p class="modal-title fsize-1 m-0 font-weight-bold" id="modalLabel">Preview</p>
+                        <button type="button" class="close text-white" onclick="hideEmailTemplate()"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body px-1">
+                        <div class="mx-auto">
+                            <div class="screen">
+                                <div class="content">
+                                    <div class="full" id="emailBroadcastLogsTemplatePreview2" style="font-size:13px"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+	return html;
+}
+
+function getMailRecordsList(data){
+	var html=``;
+	if(data.details.length>0){
+		$.each(data.details, function(i, v){
+			html+=
+			`<tr>
+				<td>${((data.pageNo-1)*10)+(i+1)}</td>
+				<td>${v.receiver}</td>
+				<td>${v.sender}</b></td>
+				<td>${v.subject}</td>
+				<td>${v.status}</td>
+				<td>${v.createdAt}</td>
+				<td>
+					<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="getEmailBroadcastLogsTemplate2(\'${v.actionId}\',\'${v.reciverId}\')">View</a>
+				</td>
+			</tr>`;
+		});
+	}else{
+		html+=
+			`<tr>
+				<td colspan="7" class="font-weight-bold text-center">No record found</td>
+			</tr>`;
 	}
 	return html;
 }
