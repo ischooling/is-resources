@@ -1083,7 +1083,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 								+'</tr>'
 								+'<tr>'
 									+'<td colspan="2" class="border-0 p-1">'
-										+'<a href="javascript:void(0)" onclick="showBasicDetailsMailWarning('+leads.rawLeadId+');" class="text-dark py-1 d-inline-block"><i class="fa fa-link text-primary"></i>&nbsp;'+(leads.epdetailStatus=='Y'?'Schedule a Meeting':'Send Interest Form Mail')+'</a>'
+										+'<a href="javascript:void(0)" onclick="showBasicDetailsMailWarning('+leads.rawLeadId+', \''+(leads.epdetailStatus=='Y'?'schedule a meeting':'interest form')+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-link text-primary"></i>&nbsp;'+(leads.epdetailStatus=='Y'?'Schedule a Meeting':'Send Interest Form Mail')+'</a>'
 									+'</td>'
 								+'</tr>';
 							}else{

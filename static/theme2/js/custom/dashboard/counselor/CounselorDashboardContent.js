@@ -161,6 +161,22 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 							<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
 						</div>
 					</div>
+					<div class="page-title-actions mr-auto position-relative">
+						
+					</div>
+					<div class="bg-primary text-white px-3 py-1 rounded-10">
+						<div class="d-flex flex-wrap align-items-center">
+							<span class="float-left font-weight-semi-bold font-size-14 mr-2">Enrollment Partner Code</span>
+							<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
+						</div>
+						<div>
+							<a href="javascript:void(0)" class="bg-white text-primary rounded-10 font-weight-semi-bold py-0 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
+							<b class="copy-msg-1 text-white ml-1" style="color:#fff !important"></b>
+							<div style="top:18px;left:0;position:absolute;">
+								<input type="text" id="copyCode1" value="${data.schoolServiceLinks.referralCode}" style="opacity:0;height:0px">
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 	

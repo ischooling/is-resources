@@ -82,12 +82,18 @@ async function renderEnrollmentPartnerPage(UNIQUEUUID, MAINTENANCEDOWNTIME,paylo
 		if($("#asAnIndividual").prop("checked")){
 			$(".individual-field").show();
 			$(".organization-field").hide();
+			$(".additional-information-wrapper").addClass('col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12')
+			$("#additionalInfoLabel").text("Tell us more about you*")
 		}else if($("#behalfOfCompanyOrganization").prop("checked")){
 			$(".organization-field").show();
 			$(".individual-field").hide();
+			$(".additional-information-wrapper").addClass('col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12')
+			$("#additionalInfoLabel").text("Tell us more about your Company | Organization | Institution*")
 		}else{
 			$(".individual-field").show();
 			$(".organization-field").hide();
+			$(".additional-information-wrapper").addClass('col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12')
+			$("#additionalInfoLabel").text("Tell us more about you*")
 		}
 		// Set Default From Value below
 		setDefaultFormValues(data);
@@ -407,15 +413,15 @@ function enrollmentPartnerBasicDetails(data){
 								+'</div>'
 								+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 mb-2 additional-information-wrapper">'
 									// +'<p class="text-primary mb-0 font-weight-semi-bold">Any additional information you would like to share?</p>'
-									+'<label class="m-0">Tell us more about your Company | Organization | Institution*</label>'
+									+'<label id="additionalInfoLabel" class="m-0">Tell us more about you*</label>'
 									// +'<input type="text" id="additionalInfo" name="additionalInfo" value="'+data.details.additionalInfo+'" class="form-control">'
 									+'<textarea id="additionalInfo" name="additionalInfo" oninput="liveWordCount(this);" rows="1" value="'+data.details.additionalInfo+'" class="form-control">'+data.details.additionalInfo+'</textarea>'
 									+'<small id="additionalInfoWordCount" class="d-block mt-1">0 / 25 words minimum</small>'
 									+'<p class="m-0" id="additionalInfoError"></p>'
 								+'</div>'
-								+'<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2">'
+								+'<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2 organization-field">'
 									+'<div class="full">'
-										+'<p class="m-0 font-weight-semi-bold font-size-md organization-field">I, '+data.details.firstName+' '+data.details.lastName+', am filling this form to express my interest in partnering with '+SCHOOL_NAME+'</p>'
+										+'<p class="m-0 font-weight-semi-bold font-size-md">I, '+data.details.firstName+' '+data.details.lastName+', am filling this form to express my interest in partnering with '+SCHOOL_NAME+'</p>'
 									+'</div>'
 								+'</div>'
 								+'<div class="col-12 text-center">'

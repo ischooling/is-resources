@@ -146,11 +146,13 @@ function chooseTypeOfPartner(src){
 	if($(src).val()=="I"){
 		$(".individual-field").show();
 		$(".organization-field").hide();
-		$(".additional-information-wrapper").toggleClass('col-xl-6 col-lg-6 col-md-6 col-xl-12 col-lg-12 col-md-12 ')
+		$(".additional-information-wrapper").removeClass('col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12').addClass('col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12');
+		$("#additionalInfoLabel").text("Tell us more about you*")
 	}else{
 		$(".organization-field").show();
 		$(".individual-field").hide();
-		$(".additional-information-wrapper").toggleClass('col-xl-12 col-lg-12 col-md-12 col-xl-6 col-lg-6 col-md-6 ')
+		$(".additional-information-wrapper").removeClass('col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12').addClass('col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12');
+		$("#additionalInfoLabel").text("Tell us more about your Company | Organization | Institution*")
 	}
 }
 

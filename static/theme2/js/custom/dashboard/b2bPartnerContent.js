@@ -334,14 +334,15 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 				<div class="page-title-heading">
 					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
 					<div>
-						<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
+						<span class="text-primary welcome-name-text">Welcome ${data.userFullName} asdas</span>
 					</div>
 				</div>
-				${
-					data.interestedFor == "B2B"?
+				${data.interestedFor == "B2B"?
 					`<div class="page-title-actions mr-auto position-relative">
 						<h6 class="font-size-lg">Partner Type:&nbsp;<span class="text-primary">${enrollmentMap[data.originalPartnerType]||''}</span></h6>
 					</div>
+					`:``
+				}
 					<div class="bg-primary text-white px-3 py-1 rounded-10">
 						<div class="d-flex flex-wrap align-items-center">
 							<span class="float-left font-weight-semi-bold font-size-14 mr-2">Enrollment Partner Code</span>
@@ -355,8 +356,6 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 							</div>
 						</div>
 					</div>
-					`:``
-				}
 			</div>
 		</div>
 
@@ -384,6 +383,7 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 }
 
 function getAccountManagerDetailsContent(data){
+	console.log(data);
 	var html=
 		`<div class="row align-items-center">
 			<div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 border-right text-dark mb-lg-0 mb-3">
@@ -429,7 +429,6 @@ function getAccountManagerDetailsContent(data){
 						</div>
 						<div class="font-size-lg">${data.counselor.whatsapp}</div>    
 					</div>
-					
 				</div>
 			</div>   
 		</div>`;

@@ -4128,14 +4128,14 @@ function callB2BDashboardLead(moduleId,leadType) {
 	return leadCommonDTO;
 }
 
-function showBasicDetailsMailWarning(b2bLeadId) {
+function showBasicDetailsMailWarning(b2bLeadId, title) {
 	$('#warningSendBadicDetailsModel').remove();
 	var html=
 	'<div class="modal fade" id="warningSendBadicDetailsModel">'
 		+'<div class="modal-dialog modal-md modal-notify modal-danger" role="document" style="max-width:500px;">'
 			+'<div class="modal-content">'
 				+'<div class="modal-body text-center">'
-					+'<h5 class="modal-title py-4" >Are you sure you want to send interest form mail?</h5>'
+					+'<h5 class="modal-title py-4" >Are you sure you want to send '+title+' mail?</h5>'
 					+'<div style="full text-center">'
 						+'<button type="button" class="btn btn-primary mr-2" id="discardSendBasicDetailsWarningYes" onclick="sendBasicDetailsMail(' + b2bLeadId + ');">Yes</button>'
 						+'<button type="button" class="btn btn-danger  waves-effect text-right" data-dismiss="modal">No</button>'
