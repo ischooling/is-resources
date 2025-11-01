@@ -36,6 +36,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	generateTinyUrls();
 	
 	$("#btnClickLeadMove").on('click',function() {
+		
 		moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
 	});
 

@@ -388,7 +388,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                     </ul>
                 </div>
             </div>
-			<p class="copyRights">Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>
+			<p class="copyRights">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
         </div>`;
 		html += logOutModalContent();
     return html;

@@ -838,7 +838,7 @@ function updateRefferelCode(){
 								html+=getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '');
 							html+=`</select>
 					</div>
-					<div class="full text-right">
+					<div class="full text-right mt-1">
 						<a href="javascript:void(0)" class="btn btn-primary" onclick="saveReferralCodeFromPaymentWindow();">Update</a>
 					</div>
 				</div>

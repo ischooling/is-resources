@@ -1,3 +1,7 @@
+var schoolContactNumber;
+var schoolSupportNumber;
+var itiSchoolContactNumber;
+var itiSchoolSupportNumber;
 function renderPartnerCotent(partnerTypeId){
 	$("#LeadPartnerUserFormB2BPopup").html(createPartnerAndSetCommissionModal(partnerTypeId));
 	$('#saveCommissionRateForm #learningProgram').val('ONE_TO_ONE');
@@ -105,6 +109,26 @@ function renderPartnerCotent(partnerTypeId){
 	}else{
 		$("body").append(cropModalContent())
 	}
+	schoolContactNumber = document.querySelector("#officeContactNumber");
+	schoolSupportNumber = document.querySelector("#supportNumber");
+	itiSchoolContactNumber = window.intlTelInput(schoolContactNumber);
+	itiSchoolContactNumber.setCountry('US');
+	$('#officeContactNumberCountryCode').val(itiSchoolContactNumber.getSelectedCountryData().iso2);
+	$('#officeContactNumberDailCode').val(itiSchoolContactNumber.getSelectedCountryData().dialCode);
+	schoolContactNumber.addEventListener('countrychange', function(e) {
+		$('#officeContactNumberCountryCode').val(itiSchoolContactNumber.getSelectedCountryData().iso2);
+		$('#officeContactNumberDailCode').val(itiSchoolContactNumber.getSelectedCountryData().dialCode);
+
+	});
+	itiSchoolSupportNumber = window.intlTelInput(schoolSupportNumber);
+	itiSchoolSupportNumber.setCountry('US');
+	$('#supportNumberCountryCode').val(itiSchoolSupportNumber.getSelectedCountryData().iso2);
+	$('#supportNumberDailCode').val(itiSchoolSupportNumber.getSelectedCountryData().dialCode);
+	schoolSupportNumber.addEventListener('countrychange', function(e) {
+		$('#supportNumberCountryCode').val(itiSchoolSupportNumber.getSelectedCountryData().iso2);
+		$('#supportNumberDailCode').val(itiSchoolSupportNumber.getSelectedCountryData().dialCode);
+
+	});
 }
 
 function createPartnerAndSetCommissionModal(partnerTypeId){
@@ -133,7 +157,7 @@ function createPartnerAndSetCommissionModal(partnerTypeId){
 						// +'<h5 class="text-primary font-weight-bold my-2">Partner Name: Lsenda Global</h5>'
 						+'<ul class="nav" style="height: min-content;">'
 							+'<li class="nav-item"><a data-toggle="tab" href="#createPartner" id="createPartnerTab" class="nav-link active">'+headTitle+'</a></li>'
-							+'<li class="nav-item"><a data-toggle="tab" href="#officeContactDetails" onclick="getOfficeContentsDetails(\'officeContactDetailsForm \')" id="officeContactDetailsTab" class="nav-link">Office Contact Details</a></li>'
+							+'<li class="nav-item"><a data-toggle="tab" href="#officeContactDetails" onclick="getOfficeContentsDetails(\'officeContactDetailsForm \')" id="officeContactDetailsTab" class="nav-link">School Contact Details</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#enrollReg" id="enrollRegTab" onclick="initEnrollReg()" class="nav-link">Enrollment / Registration</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#feeStructure" onclick="getStandardFee(\'fromTab\');" id="feeStructureTab" class="nav-link">Add Your Fee Structure</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#setCommissionRate" id="setCommissionRateTab" class="nav-link">Set Commission Rate</a></li>'
@@ -259,7 +283,7 @@ function getCreatePartnerContent(buttonTitle){
 								+'<select name="originalPartnerType" id="originalPartnerType" class="form-control">'
 									+'<option value="">Select Partner Type</option>'
 									+'<option value="GP">Enrollment Partner</option>'
-									// +'<option value="WLP">Self School or Academy</option>'
+									+'<option value="WLP">Self School or Academy</option>'
 									// +'<option value="RP">Reseller Partner</option>'
 									+'<option value="EPER">Enrollment Partner with Enrollment Rights</option>'
 								+'</select>'
@@ -718,9 +742,11 @@ function getFilteredCommissionRateContent(formId, data){
 				+'</div>'
 			+'</td>'
 			+'<td class="border-width-1">'
+				// +'<div class="edit-value">'+ (commissionRate.endDate != 'Dec 31, 2999' ? commissionRate.endDate : 'N/A') +'</div>'
 				+'<div class="edit-value">'+ commissionRate.endDate +'</div>'
 				+'<div class="edit-value-element" style="display: none;">'
-					+'<input type="text" name="endDate" id="endDate_' + commissionRate.id + '" value="' + commissionRate.endDate  + '" class="datepicker form-control endDate">'
+					// +'<input type="text" name="endDate" id="endDate_' + commissionRate.id + '" value="' + (commissionRate.endDate != 'Dec 31, 2999' ? commissionRate.endDate : 'N/A') + '" class="datepicker form-control endDate">'
+					+'<input type="text" name="endDate" id="endDate_' + commissionRate.id + '" value="'+commissionRate.endDate+'" class="datepicker form-control endDate">'
 				+'</div>'
 			+'</td>'
 			+'<td class="text-center border-width-1">'
@@ -972,6 +998,10 @@ function getOfficeContactDetailsContent(){
 			<div class="col-xl-5 mx-auto">
 				<div class="p-1 bg-light-primary border border-primary rounded-10 card">
 					<form class="col-12 mt-2 mb-2" method="post" id="officeContactDetailsForm" action="javascript:void(0);">
+						<input type="hidden" name="officeContactNumberCountryCode" id="officeContactNumberCountryCode" value="" class="form-control" maxlength="100">
+						<input type="hidden" name="officeContactNumberDailCode" id="officeContactNumberDailCode" value="" class="form-control" maxlength="100">
+						<input type="hidden" name="supportNumberCountryCode" id="supportNumberCountryCode" value="" class="form-control" maxlength="100">
+						<input type="hidden" name="supportNumberDailCode" id="supportNumberDailCode" value="" class="form-control" maxlength="100">
 						<div class="row">
 							<div class="col-12 mb-2">
 								<label class="m-0">School Name
@@ -980,32 +1010,32 @@ function getOfficeContactDetailsContent(){
 								<input type="text" name="schoolName" id="schoolName" value="" maxlength="100" class="form-control">
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">Office Contact Email
+								<label class="m-0">School Email
 									<sub class="text-danger">*</sub>
 								</label>
 								<input type="email" name="officeContactEmail" id="officeContactEmail" value="" class="form-control" maxlength="100">
 							</div>
 							<div class="col-12 mb-2">
 								<label class="m-0">
-									<span>Office Contact Number</span>
+									<span>School Contact Number</span>
 									<sub class="text-danger">*</sub>
 									<span class="ml-2 font-12">Enabled on WhatsApp? <input type="checkbox" id="officeContactNumWtsCheck" /></span>
 								</label>
-								<input type="text" name="officeContactNumber" id="officeContactNumber" value="" class="form-control" maxlength="100">
+								<input type="text" name="officeContactNumber" id="officeContactNumber" value="" class="form-control" maxlength="15" onkeydown="return M.digit(event);">
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">Support Email
+								<label class="m-0">School Support Email
 									<sub class="text-danger">*</sub>
 								</label>
 								<input type="email" name="supportEmail" id="supportEmail" value="" class="form-control" maxlength="100">
 							</div>
 							<div class="col-12 mb-2">
 								<label class="m-0">
-									<span>Support Number</span>
+									<span>School Support Number</span>
 									<sub class="text-danger">*</sub>
 									<span class="ml-2 font-12">Enabled on WhatsApp? <input type="checkbox" id="supportNumWtsCheck" /></span>
 								</label>
-								<input type="text" name="supportNumber" id="supportNumber" value="" class="form-control" maxlength="100">
+								<input type="text" name="supportNumber" id="supportNumber" value="" class="form-control" maxlength="15" onkeydown="return M.digit(event);">
 							</div>
 							
 							<div class="col-12 mb-2">
@@ -1043,7 +1073,7 @@ function getOfficeContactDetailsContent(){
 								</select>
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">Contact Us
+								<label class="m-0">Contact Us Page
 									<sub class="text-danger">*</sub>
 								</label>
 								<input type="text" name="officeContactUs" id="officeContactUs" value="" class="form-control" maxlength="100">
@@ -1070,15 +1100,15 @@ function getOfficeContactDetailsContent(){
 							</div>
 							<div class="col-12 mb-2">
 								<label class="m-0">
-									<span>Super Admin Email</span>
+									<span>School Admin Email (for creating school account)</span>
 									<sub class="text-danger">*</sub>
-									<span class="ml-1 font-12">(for creating school account)</span>
+									${/*<span class="ml-1 font-12">(for creating school account)</span>*/''}
 								</label>
 								<input type="email" name="superAdminEmail" id="superAdminEmail" value="" class="form-control" maxlength="100" disabled="true">
 							</div>
 							<div class="col-12 mb-2 mt-1">
 								<label class="m-0">
-									<span>Address</span>
+									<span>School Address</span>
 									<sub class="text-danger">*</sub>
 								</label>
 								<input type="text" placeholder="Enter your Address" name="officeAddres" id="officeAddres" value="" class="form-control" maxlength="100">
@@ -1197,9 +1227,9 @@ function paymentOptionsContent() {
 								</label>
 							</div>
 						</div>`;
-						if (item.title === 'PAYMENTGATEWAY') {
+						if (item.title == 'PAYMENTGATEWAY') {
 							html += `
-							<div id="paymentGatewaysDiv" style="display:none;" class="pl-2 mt-1 mb-3">
+							<div id="paymentGatewaysDiv" class="pl-2 mt-1 mb-3">
 								<div class="bg-light-primary py-2 px-3 rounded-10 d-flex flex-column" style="gap:10px;">
 									
 									<div class="d-flex justify-content-between align-items-center">

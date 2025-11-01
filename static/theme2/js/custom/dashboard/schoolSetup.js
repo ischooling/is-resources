@@ -72,6 +72,7 @@ function updateColorPreview() {
 function generateGradient(primaryColor) {
     const darkerPrimary = darkenColor(primaryColor, 20);
     return `linear-gradient(90deg, ${primaryColor} 0%, ${darkerPrimary} 100%)`;
+    `radial-gradient(140.04% 140.04% at 101% 97%, rgba(11, 101, 255, 0.80) 32.81%, rgba(102, 178, 255, 0.80) 100%)`
 }
 
 function lightenColor(color, percent) {
@@ -129,7 +130,7 @@ function prefillColorData(parentColor) {
 	updateColorPreview();
 }
 
-function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeSetup, modalId){
+async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeSetup, modalId){
     var requiredFileTypes=[];
     var schoolLetterSetupTypes=[
         53, // TEACHER_CONTRACT_LETTER_HEAD
@@ -178,7 +179,7 @@ function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeS
         var thirdLight = lightenColor(thirdColor, 85);
         var fourthLight = lightenColor(fourthColor, 85);
         var primaryGradient = generateGradient(primaryColor);
-        var parentColor = `:root{--pc:${primaryColor};--plc:${primaryLight};--sc:${secondaryColor};--slc:${secondaryLight};--pgc:${primaryGradient};--tc:${thirdColor};--tlc:${thirdLight};--fc:${fourthColor};--flc:${fourthLight};}`;
+        var parentColor = `:root{--pc:${primaryColor};--plc:${primaryLight};--sc:${secondaryColor};--slc:${secondaryLight};--pgc:${primaryGradient};--tc:${thirdColor};--tlc:${thirdLight};--fc:${fourthColor};--flc:${fourthLight};--login-bg-color:${primaryColor};}`;
     }
 	
 	var body = {
@@ -187,15 +188,15 @@ function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeS
 		schoolId: $("#pSchoolId").val(),
 		parentColor: parentColor
 	}
+    var schoolSetupFlag = await getSchoolSettingsOffice($("#pSchoolId").val());
 	$.ajax({
 		type : "POST",
 		contentType : "application/json",
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/upload-school-attachments',
 		data : JSON.stringify(body),
 		dataType : 'json',
-		success : function(data) {
-            debugger
-			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+		success : async function(data) {
+            if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
 				} else {
@@ -205,10 +206,20 @@ function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeS
                 if(modalId != null && modalId != undefined && modalId != ''){
                     $("#"+modalId).modal("hide");
                 }
-                $("#schoolSetupCongratulationsModal").modal("show");
-                $('#schoolSetupCongratulationsModal').on('shown.bs.modal', function () {
-                    callConfetti('confettiCanvas');
-                });
+                if(schoolSetupFlag.isSchoolSetupComplete != "C"){
+                    if($("#schoolSetupCongratulationsModal").length == 1){
+                        $("#schoolSetupCongratulationsModal").remove();
+                    }
+                    $("body").append(getSchoolSetupCongratulationsModalContent());
+                    setTimeout(() => {
+                        $("#schoolSetupCongratulationsModal").modal("show");
+                        $('#schoolSetupCongratulationsModal').on('shown.bs.modal', function () {
+                            callConfetti('confettiCanvas');
+                        });
+                    }, 1000);
+                }else{
+                    showMessageTheme2(1, data['message'], '', false);
+                }
                 updatePartnerProgressBar();
 			}
 		}
@@ -262,7 +273,7 @@ function getPartnerSchoolImages(formId, rawLeadId){
                 if($("#schoolSetupCongratulationsModal").length>0){
                     $("#schoolSetupCongratulationsModal").remove();
                 }
-                $("body").append(getSchoolSetupCongratulationsModalContent());
+                // $("body").append(getSchoolSetupCongratulationsModalContent());
 			}
 		}
 	});
@@ -314,7 +325,6 @@ function callConfetti(elementId) {
     var existingScript = $("head script[src='" + confettiSrc + "']");
     
     if (existingScript.length === 0) {
-        // Script not loaded yet, load it and then call confetti
         var script = document.createElement("script");
         script.src = confettiSrc;
         script.onload = function() {
@@ -322,7 +332,6 @@ function callConfetti(elementId) {
         };
         document.head.appendChild(script);
     } else {
-        // Script already loaded, call confetti directly
         executeConfetti(elementId);
     }
 }

@@ -251,13 +251,13 @@ function loginFormContent(userName, fromSpoof){
                 <p class="m-0"> 
                         
                     <span class="primary-txt-color">`;
-                        if(schoolSettingsLinks.termasOfUserUrl != ''){
+                        if(schoolSettingsLinks.termasOfUserUrl != null && schoolSettingsLinks.termasOfUserUrl != undefined && schoolSettingsLinks.termasOfUserUrl != ''){
                             html+=`<a class="black-txt-color" href="${schoolSettingsLinks.termasOfUserUrl}" target="blank">Terms of use </a>`;
                         }
-                        if(schoolSettingsLinks.privacyPolicyUrl != ''){
+                        if(schoolSettingsLinks.privacyPolicyUrl != null && schoolSettingsLinks.privacyPolicyUrl != undefined && schoolSettingsLinks.privacyPolicyUrl != ''){
                             html+=`| <a class="black-txt-color" href="${schoolSettingsLinks.privacyPolicyUrl}" target="blank">Privacy Policy</a>`;
                         }
-                        html+=`<br />Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.
+                        html+=`<br />${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}
                     </span>
                 </p>
             </div>
@@ -384,7 +384,7 @@ function footerContent(){
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
-                            <p>Copyright © ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName} | All Rights Reserved.</p>
+                            <p>${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 text-right">
                             <p>`;

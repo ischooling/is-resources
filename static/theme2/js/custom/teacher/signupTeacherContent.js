@@ -1154,9 +1154,13 @@ function getContractDetailsContent(agreement){
         <div class="form-row">
             <div class="form-holder paypal-details primary-border-color">
                 <div class="contact-detail-header">
-                    <div class="com_logo">
-                        <img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.letterHeadImg}${SCRIPT_VERSION}" width="300px;" />
-                    </div>
+                    <div class="com_logo">`
+                        if(schoolSettingsOffice.schoolType == "WLP"){
+                            html+=`<img src="${schoolSettingsTechnical.letterHeadImg}${SCRIPT_VERSION}" width="300px;" />`
+                        }else{
+                            html+=`<img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.letterHeadImg}${SCRIPT_VERSION}" width="300px;" />`
+                        }
+                    html+=`</div>
                     <div class="com_add primary-txt-color">
                         <span style="float: right; width: 28%; height: 75px; text-align: right;">
                             ${schoolSettingsOffice.address}
@@ -1194,10 +1198,13 @@ function getContractDetailsContent(agreement){
                 </div>
                 <div class="contact-detail-footer" style="padding-top: 65px">
                     <div class="row">
-                        <div class="col-md-12">
-                            <img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" 
-                        alt="Authorized Signature" title="Authorized Signature" style="width: 150px;"/>
-                        </div>
+                        <div class="col-md-12">`
+                            if(schoolSettingsOffice.schoolType == "WLP"){
+                                html+=`<img src="${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" alt="Authorized Signature" title="Authorized Signature" style="width: 150px;"/>`
+                            }else{
+                                html+=`<img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" alt="Authorized Signature" title="Authorized Signature" style="width: 150px;"/>`
+                            }
+                        html+=`</div>
 
                         <div class="col-md-12">
                             <br />

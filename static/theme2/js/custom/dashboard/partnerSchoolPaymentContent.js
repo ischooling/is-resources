@@ -415,13 +415,13 @@ function studentFeesTable(){
                             <th class="font-weight-bold text-white border-bottom-0">Student ID</th>
                             <th class="font-weight-bold text-white border-bottom-0" style="width:12%;">Student Name | Grade</th>
                             <th class="font-weight-bold text-white border-bottom-0">Learning Program</th>
-                            <th class="font-weight-bold text-white border-bottom-0">IS Fees</th>
-                            <th class="font-weight-bold text-white border-bottom-0">Student Fees</th>`;
+                            ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">IS Fees</th>':''}
+                            <th class="font-weight-bold text-white border-bottom-0">Total Fee</th>`;
                             // <th class="font-weight-bold text-white border-bottom-0">Student Fees Pay Date</th>
-					html += `<th class="font-weight-bold text-white border-bottom-0">Revenue</th>
-                            <th class="font-weight-bold text-white border-bottom-0">Payable to IS</th>
-                            <th class="font-weight-bold text-white border-bottom-0">Commision Type | Rate</th>
-                            <th style="width:10%;" class="font-weight-bold text-white border-bottom-0">Payable to IS Input</th>
+					        html += `<th class="font-weight-bold text-white border-bottom-0">Commission Earned</th>
+                            ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">Payable to IS</th>':''}
+                            ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">Commision Type | Rate</th>':''}
+                            <th style="width:10%;" class="font-weight-bold text-white border-bottom-0 vertical-align-top rounded-top-right-10">Fee Payable to International Schooling</th>
                         </tr>
                     </thead>
                     <tbody id="schoolPaymentTable" style="max-height:420px;"></tbody>
@@ -464,7 +464,7 @@ function paymentRemarksModal(sprId){
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="addPaymentRemark" onclick="updatePaymentStatus('${sprId}')"> Add Remark</button>
+                        <button type="button" class="btn btn-primary" id="addPaymentRemark" onclick="updatePaymentStatus('${sprId}', \'paymentRemarksForm\', \'paymentRemarksModal\')"> Add Remark</button>
                     </div>
                 </div>
             </div>

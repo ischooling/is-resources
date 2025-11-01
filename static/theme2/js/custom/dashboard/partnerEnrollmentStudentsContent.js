@@ -260,6 +260,21 @@ async function partnerEnrollmentListDetails(studentList){
                                     <span class="font-weight-bold">Enrollment Type:</span>
                                     <span class="">${item.enrollType}</span>
                                 </div>
+                                <div class="mb-1">
+                                    <span class="${
+                                        item.studentEnrollBy === 'P'
+                                            ? 'bg-orange'
+                                            : item.studentEnrollBy === 'D'
+                                            ? 'bg-alternate'
+                                            : 'bg-primary'
+                                    } text-white rounded-pill px-2 py-1 small">${
+                                        item.studentEnrollBy === 'P'
+                                            ? 'ADDED BY PARTNER'
+                                            : item.studentEnrollBy === 'D'
+                                            ? 'DIRECT ENROLLMENT'
+                                            : 'ENROLLMENT VIA IS'
+                                    }</span>
+                                </div>
                             </td>
                             <td>
                                 <div class="mb-1">
@@ -278,7 +293,7 @@ async function partnerEnrollmentListDetails(studentList){
                                 </div>
                                 <div class="mb-1">
                                     <span class="font-weight-bold">Last Payment Date:</span>
-                                    <span class="">${item.paymentDate == 'N/A' || item.paymentDate == '' ? 'N/A' : changeDateFormat(new Date(item.paymentDate), "MMM-dd-yyyy hh:mm:ss")}</span>
+                                    <span class="">${item.paymentDate == 'N/A' || item.paymentDate == '' ? 'N/A' : item.paymentDate}</span>
                                 </div>
                             </td>`;
                             if(item.admissionType == 'Withdrawn'){
@@ -369,14 +384,14 @@ async function partnerEnrollmentListDetails(studentList){
                                 html += `<td class="p-0 vertical-align-middle text-center" style="width: 230px;">
                                             <strong>No Pending Fees</strong>
                                         </td>`;
-                            }                            
+                            } 
                             html+=`<td>
                                 <div class="mb-1">
                                     <span class="font-weight-bold">Commission:</span>
                                     <span class="">${item.commissionAmount == '' || item.commissionAmount == 'N/A' ? "N/A": currency +' '+ item.commissionAmount}</span>
                                 </div>
                                 <div class="mb-1">
-                                    <span class="font-weight-bold">Payout:</span>
+                                    <span class="font-weight-bold">Payout to IS:</span>
                                     <span class="">${item.totalPayoutToParentSchool == '' || item.totalPayoutToParentSchool == 'N/A' ? "N/A": currency +' '+ item.totalPayoutToParentSchool}</span>
                                 </div>
                                 <div class="mb-1">
@@ -393,22 +408,31 @@ async function partnerEnrollmentListDetails(studentList){
                                         tag = `<span class="bg-danger text-white p-1 rounded">No Revenue</span>`;
                                     } else if (item.paymentDueToParentSchool == "0.0" && item.parentSchoolPaymentStatus == "SUCCESS") {
                                         tag = `<span class="bg-success text-white p-1 rounded">Success</span>`;
-                                    } else if(item.totalPayoutToParentSchool != 'N/A' && item.paymentDueToParentSchool != 'N/A'){
-                                        if (item.totalPayoutToParentSchool !== item.paymentDueToParentSchool && item.parentSchoolPaymentStatus != "REJECTED") {
-                                        tag = `
-                                            <span class="bg-warning text-white p-1 rounded">Initiated</span>
-                                            ${pendingAmountHtml}
-                                        `;
-                                        } else {
+                                    } else if (item.totalPayoutToParentSchool != 'N/A' && item.paymentDueToParentSchool != 'N/A') {
+                                        if (
+                                            item.totalPayoutToParentSchool !== item.paymentDueToParentSchool &&
+                                            item.parentSchoolPaymentStatus != "REJECTED" &&
+                                            item.parentSchoolPaymentPgUsed == "WIRETRANSFER"
+                                        ) {
                                             tag = `
-                                                <span class="bg-primary text-white p-1 rounded">Pending</span>
+                                                <span class="bg-warning text-white p-1 rounded">Initiated</span>
                                                 ${pendingAmountHtml}
                                             `;
+                                        } else if (item.totalPayoutToParentSchool !== item.paymentDueToParentSchool) {
+                                            tag = `
+                                                <span class="text-white p-1 rounded" style="background:#007fff">Pending</span>
+                                                ${pendingAmountHtml}
+                                            `;
+                                        } else {
+                                            tag = `
+                                                <span class="text-white p-1 rounded" style="background:#007fff">Pending</span>
+                                            `;
                                         }
-                                    }else{
+                                    } else {
                                         tag = `
-                                                <span>N/A</span>`;
-                                    } 
+                                            <span>N/A</span>
+                                        `;
+                                    }
                                     html += tag;
                                 html+=`</div>
                                 <div class="mb-1">

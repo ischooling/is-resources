@@ -54,11 +54,12 @@ function getPayStudentFeesDetais(callFrom) {
                         <td>${item.studentId}</td>
                         <td>${item.studentName} | ${item.standardName}</td>
                         <td>${item.learningProgram}</td>
-                        <td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>
+                        ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>`:''}
+                        
                         <td>${item.partnerCourseFee == undefined ? 'NA' : currency + item.partnerCourseFee}</td>`;
                         html +=`<td>${item.partnerRevenue == undefined ? 'NA' : currency + item.partnerRevenue}</td>
-                        <td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>
-                        <td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>
+                        ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>`:''}
+                        ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>`:''}
                         <td>
                             <input type="hidden" class="studentStandardId" value="${item.StudentStandardId}" />
                             <input type="number" min="0" step="0.01" class="form-control payable-input payAmount" oninput="updateTotalPayable();" value="${item.payableToIS == undefined ? 'NA' : item.payableToIS}"/>
@@ -67,9 +68,8 @@ function getPayStudentFeesDetais(callFrom) {
                 });
                 var htmlFoot='';
                 htmlFoot= `<tr style="background-color:#E9E9E9;bottom:0;" class="position-sticky">
-                    <td colspan="10" class="font-weight-bold text-right">Total Payable</td>
+                    <td colspan="${schoolSettingsOffice.schoolType != 'WLP'?'10':'7'}" class="font-weight-bold text-right">Total Payable</td>
                     <td class="font-weight-bold">$<span class="total-payable-cell">${totalPayableToIS.toFixed(2)}</span></td>
-                    <td></td>
                 </tr>`;
 
                 $("#schoolPaymentTable").html(html);
@@ -298,28 +298,28 @@ function openPartnerPaymentModal(){
     });
 }
 
-function showPaymentRemarksModal(sprId){
-    if($("#paymentRemarksModal").length > 0){
-        $("body #paymentRemarksModal").remove();
-    }
-    $("body").append(paymentRemarksModal(sprId));
-    $("#paymentRemarksModal").modal('show');
-}
+// function showPaymentRemarksModal(sprId){
+//     if($("#paymentRemarksModal").length > 0){
+//         $("body #paymentRemarksModal").remove();
+//     }
+//     $("body").append(paymentRemarksModal(sprId));
+//     $("#paymentRemarksModal").modal('show');
+// }
 
-function updatePaymentStatus(sprId){
-    if($("#remarksStatus").val() == undefined || $("#remarksStatus").val() == ""){
+function updatePaymentStatus(sprId, formId, modalId){
+    if($("#"+modalId+" #"+formId+" #remarksStatus").val() == undefined || $("#"+modalId+" #"+formId+" #remarksStatus").val() == ""){
         showMessageTheme2(2, "Select Remarks Status");
         return false;
     }
-    if($("#remarks").val() == undefined || $("#remarks").val() == ""){
+    if($("#"+modalId+" #"+formId+" #remarks").val() == undefined || $("#"+modalId+" #"+formId+" #remarks").val() == ""){
         showMessageTheme2(2, "Enter Remarks");
         return false;
     }
     var reqData = {
         userId: USER_ID,
         sprId: parseInt(sprId),
-        status: $("#remarksStatus").val(),
-        remarks: $("#remarks").val()
+        status: $("#"+modalId+" #"+formId+" #remarksStatus").val(),
+        remarks: $("#"+modalId+" #"+formId+" #remarks").val()
     }
     $.ajax({
         type: "POST",

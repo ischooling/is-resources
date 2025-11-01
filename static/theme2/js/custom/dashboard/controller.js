@@ -1,6 +1,7 @@
 var schoolSettingsLinks;
 var schoolSettingsTechnical;
 var schoolSettings;
+var schoolSettingsOffice;
 var commonProfileDTO;
 var schoolList;
 var CALENDAR_EVENT=false;
@@ -11,6 +12,7 @@ async function initiateSetting(){
 	schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 	schoolSettings = await getSchoolSettingsOffice(SCHOOL_ID);
+	schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
 	commonProfileDTO = await getUserShortProfile(USER_ID);
 	schoolList= await getOfflineSchoolList(USER_ID);
 	parentColor=schoolSettingsTechnical.parentColor;
@@ -451,7 +453,7 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 	$('#dashboardContentInHTML').html(renderSchoolPayment());
 	initializeSchoolPaymentPage();
   }else if (pageNo == "partner-enrollment-students-wlp") {
-	$('#dashboardContentInHTML').html(renderSchoolEnrollmentStudents("Enrollment Partner Student List"));
+	$('#dashboardContentInHTML').html(renderSchoolEnrollmentStudents(`${schoolSettingsOffice.schoolType == "WLP" ? "Student Enrollment List" :"Enrollment Partner Student List"}`));
 	getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", SCHOOL_ID);
     callPartnerCountries('partnerEnrollFilterForm', 0, 'countryId');
     // callPartnerListBy('partnerEnrollFilterForm','partnerName');

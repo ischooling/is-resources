@@ -188,26 +188,38 @@ function callStudentListByPartnerWLP(formId) {
 }
 
 function populateMonths() {
-	const currentDate = new Date();
-	const $selectElement = $('#revenueType');
+    const currentDate = new Date();
+    const $selectElement = $('#revenueType');
+    $selectElement.empty();
 
-	for (let i = 4; i > 0; i--) { 
-		let date = new Date(currentDate);
-		date.setMonth(currentDate.getMonth() - i);
+    const customOption = $('<option></option>', {
+        value: '',
+        text: 'Custom',
+        'data-value-type': 'custom'
+    });
+    $selectElement.append(customOption);
 
-		let monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-		let monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    for (let i = 4; i >= 0; i--) {
+        let date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
 
-		const option = $('<option></option>', {
-			value: `${monthStart.toISOString()}|${monthEnd.toISOString()}`,
-			text: formatMonth(date),
-			'data-value-Type': 'date'
-		});
-		$selectElement.append(option);
-	}
+        let monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        let monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-	$selectElement.find('option').last().prop('selected', true);
-	getMonthlyRevenue();
+        const option = $('<option></option>', {
+            value: `${monthStart.toISOString()}|${monthEnd.toISOString()}`,
+            text: formatRevenueMonth(date),
+            'data-value-type': 'date'
+        });
+
+        $selectElement.append(option);
+    }
+
+    $selectElement.find('option').last().prop('selected', true);
+    getMonthlyRevenue();
+}
+
+function formatRevenueMonth(date) {
+    return date.toLocaleString('default', { month: 'short', year: 'numeric' });
 }
 
 function getMonthlyRevenue() {

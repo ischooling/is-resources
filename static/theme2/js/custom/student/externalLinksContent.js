@@ -229,7 +229,7 @@ function getFooterContent(){
         `<div class="app-wrapper-footer mt-sm-4">
             <div class="app-footer mt-sm-4">
                 <div class="app-footer__inner">
-                <p style="margin: 0">Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>
+                    <p style="margin:0">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
                 </div>
             </div>
         </div>`;

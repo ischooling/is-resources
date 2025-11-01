@@ -1735,7 +1735,8 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
 					callForDashboardData('formIdIfAny','lead-list?moduleId='+roleModuleId+'&leadFrom='+leadFrom+'&clickFrom=list&currentPage='+currentPage);
 				}, 1500);
 			}
-			 
+			 $("#leadDemoSchoolMove").val("1").trigger("change");
+			 $("#moveRemarks").val("");
 		 }
 		 return false;
 	 }
@@ -4799,7 +4800,7 @@ function getPartnerLeadById(formId, leadId, modalId) {
 						if($("#pSchoolId").val() == ''){
 							$('#setCommissionRateTab, #feeStructureTab, #enrollRegTab, #paymentOptionsTab, #themeTab').hide();
 						}
-						await initEnrollReg();
+						//await initEnrollReg();
 						updateFieldsBasedOnPartnerType();
 						updatePartnerProgressBar();
 						$("#partnerProgressBar").hide()
@@ -4959,6 +4960,12 @@ function getOfficeContentsDetails(formId){
 				$("#"+formId+" #officeAddres").val(data.details.officeAddres);
 				$("#"+formId+" #supportEmail").val(data.details.supportEmail);
 				$("#"+formId+" #schoolName").val(data.details.schoolName);
+				if(data.details.schoolContactCountryCode !=  undefined){
+					itiSchoolContactNumber.setCountry(data.details.schoolContactCountryCode);
+				}
+				if(data.details.supportNumberCountryCode !=  undefined){
+					itiSchoolSupportNumber.setCountry(data.details.supportNumberCountryCode);
+				}
 
 				if($("#"+formId+" #schoolName").val() == null || $("#"+formId+" #schoolName").val() == undefined || $("#"+formId+" #schoolName").val() == ''){
 					$("#"+formId+" #createUpdatePartnerContactBtn").text("Create")
@@ -4977,67 +4984,82 @@ function getOfficeContentsDetails(formId){
 }
 
 
-
 function getUpdateOfficeContentDetails(formId){
-	if($("#officeContactEmail").val() == ""){
+	if($("#officeContactEmail").val() == null || $("#officeContactEmail").val() == undefined || $("#officeContactEmail").val() == ""){
 		showMessageTheme2(0, "Please enter the office contact email")
 		return false;
 	}
-	if($("#officeContactNumber").val() == ""){
+	if($("#officeContactNumber").val() == null || $("#officeContactNumber").val() == undefined || $("#officeContactNumber").val() == ""){
 		showMessageTheme2(0, "Please enter the office contact number")
 		return false;
 	}
-	if($("#supportEmail").val() == ""){
+	if($("#supportEmail").val() == null || $("#supportEmail").val() == undefined || $("#supportEmail").val() == ""){
 		showMessageTheme2(0, "Please enter the support email")
 		return false;
 	}
-	if($("#supportNumber").val() == ""){
+	if($("#supportNumber").val() == null || $("#supportNumber").val() == undefined || $("#supportNumber").val() == ""){
 		showMessageTheme2(0, "Please enter the support number")
 		return false;
 	}
-	if($("#schoolName").val() == ""){
+	if($("#schoolName").val() == null || $("#schoolName").val() == undefined || $("#schoolName").val() == ""){
 		showMessageTheme2(0, "Please enter the school name")
 		return false;
 	}
-	if($("#schoolTimezone").val() == ""){
+	if($("#schoolTimezone").val() == null || $("#schoolTimezone").val() == undefined || $("#schoolTimezone").val() == ""){
 		showMessageTheme2(0, "Please enter the school timezone")
 		return false;
 	}
-	if($("#schoolWebsite").val() == ""){
+	if($("#schoolWebsite").val() == null || $("#schoolWebsite").val() == undefined || $("#schoolWebsite").val() == ""){
 		showMessageTheme2(0, "Please enter the school website")
 		return false;
 	}
-	if($("#officeCountryId").val() == ""){
+	if($("#officeCountryId").val() == null || $("#officeCountryId").val() == undefined || $("#officeCountryId").val() == ""){
 		showMessageTheme2(0, "Please enter the country")
 		return false;
 	}
-	if($("#officeStateId").val() == ""){
+	if($("#officeStateId").val() == null || $("#officeStateId").val() == undefined || $("#officeStateId").val() == ""){
 		showMessageTheme2(0, "Please enter the state")
 		return false;
 	}
-	if($("#officeCityId").val() == ""){
+	if($("#officeCityId").val() == null || $("#officeCityId").val() == undefined || $("#officeCityId").val() == ""){
 		showMessageTheme2(0, "Please enter the city")
 		return false;
 	}
-	if($("#officeContactUs").val() == ""){
+	if($("#officeContactUs").val() == null || $("#officeContactUs").val() == undefined || $("#officeContactUs").val() == ""){
 		showMessageTheme2(0, "Please enter the contact us")
 		return false;
 	}
-	if($("#superAdminEmail").val() == ""){
+	if($("#superAdminEmail").val() == null || $("#superAdminEmail").val() == undefined || $("#superAdminEmail").val() == ""){
 		showMessageTheme2(0, "Please enter the super admin email")
 		return false;
 	}
-	if($("#officeAddres").val() == ""){
+	if($("#officeAddres").val() == null || $("#officeAddres").val() == undefined || $("#officeAddres").val() == ""){
 		showMessageTheme2(0, "Please enter the address")
 		return false;
 	}
+	// if($("#officeContactNumberCountryCode").val() == null || $("#officeContactNumberCountryCode").val() == undefined || $("#officeContactNumberCountryCode").val() == ""){
+	// 	showMessageTheme2(0, "Please enter the city")
+	// 	return false;
+	// }
+	// if($("#officeContactNumberDailCode").val() == null || $("#officeContactNumberDailCode").val() == undefined || $("#officeContactNumberDailCode").val() == ""){
+	// 	showMessageTheme2(0, "Please enter the contact us")
+	// 	return false;
+	// }
+	// if($("#supportNumberCountryCode").val() == null || $("#supportNumberCountryCode").val() == undefined || $("#supportNumberCountryCode").val() == ""){
+	// 	showMessageTheme2(0, "Please enter the super admin email")
+	// 	return false;
+	// }
+	// if($("#supportNumberDailCode").val() == null || $("#supportNumberDailCode").val() == undefined || $("#supportNumberDailCode").val() == ""){
+	// 	showMessageTheme2(0, "Please enter the address")
+	// 	return false;
+	// }
 	$.ajax({
 		type: "POST",
 		contentType: "application/json",
 		url: getURLForHTML('dashboard', 'update-office-contact-details'),
 		data: JSON.stringify(requestDataForOfficeContentDetails(formId)),
 		dataType: 'json',
-		success: function(data){
+		success: async function(data){
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0 , data.message ,'')
 			}else{
@@ -5046,8 +5068,11 @@ function getUpdateOfficeContentDetails(formId){
 				$("#enrollRegTab").show();
 				$("#createUpdatePartnerContactBtn").text("Next");
 				$('#enrollRegTab').tab('show');
-				initEnrollReg();
-				saveLearningPrograms();
+				await saveLearningPrograms();
+				setTimeout(async function(){
+					await initEnrollReg();
+				}, 1000)
+				
 				updatePartnerProgressBar();
 
 			}
@@ -5072,10 +5097,14 @@ function requestDataForOfficeContentDetails(formId){
 		'contactUsUrl':$("#"+formId+" #officeContactUs").val(),
 		'schoolTimezone':$("#"+formId+" #schoolTimezone").val(),
 		'schoolContact':$("#"+formId+" #officeContactNumber").val(),
+		'schoolContactCountryCode':$("#"+formId+" #officeContactNumberCountryCode").val(),
+		'schoolContactDailCode':$("#"+formId+" #officeContactNumberDailCode").val(),
 		'contactEmail':$("#"+formId+" #officeContactEmail").val(),
 		'supportEmail':$("#"+formId+" #supportEmail").val(),
 		'schoolEmail':$("#"+formId+" #superAdminEmail").val(),
 		'supportNumber':$("#"+formId+" #supportNumber").val(),
+		'supportNumberCountryCode':$("#"+formId+" #supportNumberCountryCode").val(),
+		'supportNumberDailCode':$("#"+formId+" #supportNumberDailCode").val(),
 		'officeCountryId':$("#"+formId+" #officeCountryId").val(),
 		'officeStateId':$("#"+formId+" #officeStateId").val(),
 		'officeCityId':$("#"+formId+" #officeCityId").val(),
@@ -12559,7 +12588,7 @@ function updateEnrollmentPartnerPaymentDetails() {
                     const el = $('#' + id);
                     el.prop("initValue", el.is(":checked"));
                 });
-
+				$("#themeTab").tab("show");
                 updatePartnerProgressBar();
             } else {
                 showMessageTheme2(0, data.message);

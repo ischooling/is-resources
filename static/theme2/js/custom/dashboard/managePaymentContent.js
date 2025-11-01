@@ -863,7 +863,7 @@ function getPaymentRemark(schoolId, moduleId) {
 
                         <div id="pendingRemark" class="form-group">
                             <label for="message-text" class="control-label">Remarks:</label>
-                            <textarea class="form-control" id="remarks" maxlength="200" style="padding:6px 0"></textarea>
+                            <textarea class="form-control" id="remarks" maxlength="200"></textarea>
                         </div>
 
                         <div>

@@ -886,8 +886,7 @@ function updateFieldsBasedOnPartnerType() {
 function updateTabsVisibility() {
     const partnerType = $('#originalPartnerType').val();
     const commissionValue = $('#commissionPayout').val();
-	debugger
-    if(partnerType === 'WLP') {
+	if(partnerType === 'WLP') {
 	  $('#officeContactDetailsTab').show();
 	  $("#createPartnerTab").text("Update Partner");
 	  $("#createUserB2B").text("Next");
@@ -917,48 +916,51 @@ function updateTabsVisibility() {
 
 var activeLearningProgramStatusMap = {};
 async function initEnrollReg() {
-	return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         $.ajax({
             url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/get-learning-programs-status?schoolId=${$("#pSchoolId").val()}`,
             method: 'GET',
             success: function (response) {
                 try {
-                    var data = response.allLearningProgramsOptions || [];
-					if(data.status == 0){
-						initEnrollReg();
-					}else{
-						originalLearningProgramMap = {};
-						// updateLearningProgramMap = {};
-						activeLearningProgramStatusMap = {};
+                    const data = response.allLearningProgramsOptions || [];
 
-						$.each(data, function (i, item) {
-							const statusInfo = {
-								status: item.learningProgramStatus,
-								enrollmentFor: item.enrollmentFor
-							};
+                    if (data.status == 0) {
+                        console.warn("Retrying initEnrollReg due to incomplete data...");
+                        // Retry after a short delay to prevent tight recursion loop
+                        setTimeout(async () => {
+                            const retryResponse = await initEnrollReg();
+                            resolve(retryResponse);
+                        }, 1000);
+                        return;
+                    }
 
-							originalLearningProgramMap[item.learningProgram] = statusInfo;
+                    originalLearningProgramMap = {};
+                    activeLearningProgramStatusMap = {};
 
-							if (item.learningProgramStatus === 'Y') {
-								activeLearningProgramStatusMap[item.learningProgram] = statusInfo;
-							}
-						});
+                    $.each(data, function (i, item) {
+                        const statusInfo = {
+                            status: item.learningProgramStatus,
+                            enrollmentFor: item.enrollmentFor
+                        };
+                        originalLearningProgramMap[item.learningProgram] = statusInfo;
 
-						if (Object.keys(activeLearningProgramStatusMap).length === 0) {
-							$('#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab, #themeTab').hide();
-						} else {
-							$('#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab, #themeTab').show();
-						}
-						var html = enrollRegContent(data);
-						$('#enrollReg').html(html);
-						if (Object.keys(updateLearningProgramMap).length === 0) {
-							$("#syncCoursesAndSubjectsBtn").hide();
-						}else{
-							$("#syncCoursesAndSubjectsBtn").show();
-						}
-						resolve(response);
-					}
-                    
+                        if (item.learningProgramStatus === 'Y') {
+                            activeLearningProgramStatusMap[item.learningProgram] = statusInfo;
+                        }
+                    });
+
+                   
+                    const html = enrollRegContent(data);
+                    $('#enrollReg').html(html);
+
+                    if (Object.keys(updateLearningProgramMap).length === 0) {
+                        $("#syncCoursesAndSubjectsBtn").hide();
+                    } else {
+                        $("#syncCoursesAndSubjectsBtn").show();
+                    }
+
+                    resolve(response);
+
                 } catch (err) {
                     reject(err);
                 }
@@ -970,6 +972,7 @@ async function initEnrollReg() {
         });
     });
 }
+
 
 function trackProgramChange(el) {
 	const key = $(el).data('key');
@@ -1031,25 +1034,30 @@ function updateLearningProgramsPartner() {
 	});
 }
 
-function saveLearningPrograms(){
-	const payload = {
-		schoolId: $("#pSchoolId").val(),
-		parentSchoolId: SCHOOL_ID,
-	};
+function saveLearningPrograms() {
+	return new Promise((resolve, reject) => {
+		const payload = {
+			schoolId: $("#pSchoolId").val(),
+			parentSchoolId: SCHOOL_ID,
+		};
 
-	$.ajax({
-		url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/save-learning-programs`,
-		method: 'POST',
-		contentType: 'application/json',
-		data: JSON.stringify(payload),
-		success: function (response) {
-		  console.log(response.message);
-		},
-		error: function (err) {
-		  console.error(err.message);
-		}
-	  });
+		$.ajax({
+			url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/save-learning-programs`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(payload),
+			success: function (response) {
+				console.log(response.message);
+				resolve(response); // ✅ resolves the promise with response
+			},
+			error: function (err) {
+				console.error(err.message || err);
+				reject(err); // ❌ rejects on failure
+			}
+		});
+	});
 }
+
 
 function getData(){
 	var obj = {};
@@ -1316,7 +1324,8 @@ function updatePartnerProgressBar() {
                 var percentage = response.details.OVERALL_PERCENTAGE;
 				$("#partnerProgressBarFill").css("width", percentage + "%").attr("aria-valuenow", percentage);
 				$("#partnerProgressText").text(percentage + "% Complete");
-            }
+			}
+
         },
         error: function() {
             console.error("Failed to fetch progress status");
@@ -1377,6 +1386,12 @@ function updateProgress() {
 						$("#feeStructureTab").tab("show");
 						getStandardFee('fromTab');
 					},1000);
+					 if (Object.keys(activeLearningProgramStatusMap).length === 0) {
+						$('#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab, #themeTab').hide();
+                    } else {
+                        $('#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab, #themeTab').show();
+                    }
+
 				}
 			}
 		},

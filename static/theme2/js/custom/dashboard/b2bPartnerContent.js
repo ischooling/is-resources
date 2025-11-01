@@ -334,7 +334,7 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 				<div class="page-title-heading">
 					<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
 					<div>
-						<span class="text-primary welcome-name-text">Welcome ${data.userFullName} asdas</span>
+						<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
 					</div>
 				</div>
 				${data.interestedFor == "B2B"?
@@ -642,7 +642,7 @@ async function dashboardFooterContent(){
 		+'<div class="app-footer">'
 			+'<div class="app-footer__inner">'
 				+'<div class="col">'
-					+ `<p style="margin: 0">Copyright © ${schoolSettingsTechnical.copyrightYear} - ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>`
+					+ `<p style="margin:0">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>`
 				+'</div>'
 			+'</div>'
 		+'</div>'
@@ -853,7 +853,6 @@ function mainCardEnrolled(referralCode){
 function getB2BStudentEnrollmentCount(enrollmentList){
 	var html=``;
 	$.each(enrollmentList, function(i,v){
-		debugger
 		html+=
 		`<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">
 			<div class="full p-2  border rounded-10 position-relative mr-0 mr-sm-2 mb-2 shadow-sm ${i==0?'border-success bg-light-success':i==1?'border-warning bg-light-warning':'border-primary bg-light-primary'}">
