@@ -1438,7 +1438,7 @@ function callHippoLogsDataModal(data) {
 					<td>${value.type}</td>
 					<td>${changeDateFormat(new Date(value.startDate), 'MMM-dd-yyyy hh:mm:ss')}</td>
 					<td>${value.duration}</td>
-					<td style="text-transform: capitalize;">${value.duration!="00:00"?"answer": "no answer"}</td>
+					<td style="text-transform: capitalize;">${value.status != ""?value.status: value.recordingUrl!=""?"Completed": "No Answer"}</td>
 					<td>`;
 						if(value.recordingUrl != null && value.recordingUrl != undefined && value.recordingUrl != ""){
 							html+=`<button onclick="viewCallRecording('${value.recordingUrl}');" class='btn btn-primary btn-sm'>View Recording</button>`;
