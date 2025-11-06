@@ -123,8 +123,8 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 				<p id="followupLeadsCount" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
 			</div>`;
   html += "</div>";
-  html += '<div class="mt-2 d-flex" style="font-size:11px;gap:6px;">';
-  html += `<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #DADADA;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #898989">
+  html += `<div class="mt-2 d-flex" style="font-size:11px;gap:6px;">
+        <div class="d-flex justify-content-between align-items-center w-100" style="background-color: #DADADA;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #898989">
 				<p class="mb-0">Unattended Lead</p>
 				<p id="unattendedLeads" class="mb-0 text-white px-2 rounded" style="background-color:#898989;">-</p>
 			</div>
@@ -147,6 +147,21 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFE3E2;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #FF0005">
 				<p class="mb-0">Scrape</p>
 				<p id="scrapeLeadsCount" class="mb-0 text-white px-2 rounded" style="background-color:#FF0005;">-</p>
+			</div>`;
+
+  html += "</div>";
+  html += `<div class="mt-2 d-flex" style="font-size:11px;gap:6px;">
+        <div class="d-flex justify-content-between align-items-center w-100" style="background-color: #edf3ee;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #1EC749">
+				<p class="mb-0">Urgent</p>
+				<p id="urgentLeads" class="mb-0 px-2 rounded bg-success">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #edf3ee;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #F8B824">
+				<p class="mb-0">Important</p>
+				<p id="importantLeads" class="mb-0 px-2 rounded bg-warning">-</p>
+			</div>
+			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #f8ece5;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #ff9433">
+				<p class="mb-0">Normal</p>
+				<p id="normalLeads" class="mb-0 px-2 rounded bg-orange">-</p>
 			</div>`;
   html += "</div>";
 
@@ -269,18 +284,14 @@ function getLeadFormPopup(objRights) {
     '							<input type="email" name="leademailAlternet" id="leademailAlternet" class="form-control" value=""  maxlength="100"' +
     '						pattern="^([w-]+(?:.[w-]+)*)@((?:[w-]+.)*w[w-]{0,66}).([a-zA-Z]{2,10}(?:.[a-zA-z]{2})?)$">' +
     "						</div>" +
-    '						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
+    '						<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
     "							<label>Phone No.<span>*</span></label> " +
     '							<input type="text" name="phoneNo" id="phoneNo" class="form-control" value="" maxlength="15" />' +
     "						</div>" +
-    '						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
+    '						<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
     "							<label>Alt Phone No.</label> " +
     '							<input type="text" name="phoneNoAlter" id="phoneNoAlter" class="form-control" value=""  maxlength="15"  />' +
     "						</div>" +
-    // +'						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">'
-    // +'							<label>Alt Phone No.</label> '
-    // +'							<input type="text" name="phoneNoAlter" id="phoneNoAlter" class="form-control" value=""  maxlength="15"  />'
-    // +'						</div>'
     '						<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
     '							<label class="m-0">Tagging</label>' +
     '							<select name="leadTagging" id="leadTagging" multiple class="form-control" style="width:200px !important; height:30px !important;">' +
@@ -318,6 +329,12 @@ function getLeadFormPopup(objRights) {
     '								<option value="LWC">Lead With Callback</option>' +
     '								<option value="LWOC">Lead Without Callback</option>' +
     "							</select>" +
+    "						</div>" +
+    '						<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
+    '							<label class="m-0">Priority</label>' +
+    '							<select name="leadPriority" id="leadPriority" class="form-control" >' +
+    '								<option value="">Select Priority</option> ' +
+    "						</select>" +
     "						</div>" +
     '						<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 b2cLeadstatus">' +
     "							<label>Remarks</label>" +
@@ -682,46 +699,38 @@ function getLeadAdvanceSearchPopup(objRights) {
     '								<option value="LWOC">Lead Without Callback</option>' +
     "							</select>" +
     "						</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '	<label class="m-0">UTM Source</label>' +
-    '	<select name="utmSourceSearch" id="utmSourceSearch" class="form-control"  >' +
-    '		<option value="">Select UTM Source</option>' +
-    "	</select>" +
-    "</div>" +
+    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
+    // '	<label class="m-0">UTM Source</label>' +
+    // '	<select name="utmSourceSearch" id="utmSourceSearch" class="form-control"  >' +
+    // '		<option value="">Select UTM Source</option>' +
+    // "	</select>" +
+    // "</div>" +
+     '				<div class="col-xl-3 col-lg-4 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
+    '							<label class="m-0">Priority</label>' +
+    '							<select name="leadPriority" id="leadPriority" class="form-control" >' +
+    '								<option value="" ></option> ' +
+    "						</select>" +
+    "						</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
     '	<label class="m-0">Start Date</label>' +
-    '	<input type="text" name="leadStartDateSearch" id="leadStartDateSearch" value="' +
-    objRights.startDate +
+    '	<input type="text" name="leadStartDateSearch" id="leadStartDateSearch" value="' +objRights.startDate +
     '" class="form-control datepicker" readonly onkeydown="return false">' +
     "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
     '	<label class="m-0">To Date</label>' +
-    '	<input type="text" name="leadEndDateSearch" id="leadEndDateSearch" value="' +
-    objRights.endDate +
+    '	<input type="text" name="leadEndDateSearch" id="leadEndDateSearch" value="' +objRights.endDate +
     '" class="form-control datepicker" readonly onkeydown="return false">' +
     "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
     '	<label class="m-0">Date Type</label>' +
     '	<select name="searchDateType" id="searchDateType" class="form-control"  >' +
     '		<option value="">Select Date Type</option>' +
-    '		<option value="create-lead" ' +
-    (objRights.searchType == "create-lead" ? "selected" : "") +
-    " >Created Lead</option>" +
-    '		<option value="modify-lead" ' +
-    (objRights.searchType == "modify-lead" ? "selected" : "") +
-    ">Modify Lead</option>" +
-    '		<option value="demo-Book" ' +
-    (objRights.searchType == "demo-Book" ? "selected" : "") +
-    ">Demo Book</option>" +
-    '		<option value="demo-lead" ' +
-    (objRights.searchType == "demo-lead" ? "selected" : "") +
-    ">Demo Schedule</option>" +
-    '		<option value="callschedule-lead" ' +
-    (objRights.searchType == "callschedule-lead" ? "selected" : "") +
-    ">Call Schedule </option>" +
-    '		<option value="call-done" ' +
-    (objRights.searchType == "call-done" ? "selected" : "") +
-    ">Call Done</option>" +
+    '		<option value="create-lead" ' + (objRights.searchType == "create-lead" ? "selected" : "") +" >Created Lead</option>" +
+    '		<option value="modify-lead" ' + (objRights.searchType == "modify-lead" ? "selected" : "") +">Modify Lead</option>" +
+    '		<option value="demo-Book" ' +(objRights.searchType == "demo-Book" ? "selected" : "") +">Demo Book</option>" +
+    '		<option value="demo-lead" ' + (objRights.searchType == "demo-lead" ? "selected" : "") + ">Demo Schedule</option>" +
+    '		<option value="callschedule-lead" ' + (objRights.searchType == "callschedule-lead" ? "selected" : "") + ">Call Schedule </option>" +
+    '		<option value="call-done" ' +(objRights.searchType == "call-done" ? "selected" : "") +">Call Done</option>" +
     "	</select>" +
     "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
@@ -1175,6 +1184,25 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDemoSupport','${leadTotalData.leadFrom}')">${leadTotalData.totalDemoSupport}</a>`
       : "-";
   $("#assignedToLeadManagerCount").html(`${assignedToLeadManagerCountHTML}`);
+
+  var urgentLeads =
+    leadTotalData.urgentLead > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalUrgentLead','${leadTotalData.leadFrom}')">${leadTotalData.urgentLead}</a>`
+      : "-";
+  $("#urgentLeads").html(`${urgentLeads}`);
+
+  var importantLead =
+    leadTotalData.importantLead > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalImportantLead','${leadTotalData.leadFrom}')">${leadTotalData.importantLead}</a>`
+      : "-";
+  $("#importantLeads").html(`${importantLead}`);
+
+  var normalLead =
+    leadTotalData.normalLead > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalNormalLead','${leadTotalData.leadFrom}')">${leadTotalData.normalLead}</a>`
+      : "-";
+  $("#normalLeads").html(`${normalLead}`);
+
 }
 function getB2cLeadList(leaddata, objRights, roleModule){
 	//console.log(objRights);
@@ -1237,14 +1265,24 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					+'<div> ';
 						if(leads.demoFrom=='Demo by Website'){
 							bgColorDemo="background-color:#7000FF !important;color:#fff";
-							html+='<span class="float-right bold" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
+							html+='<span class="float-right bold p-1" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}else if(leads.demoFrom=='Demo by Link'){
 							bgColorDemo="background-color:#2200FF !important;color:#fff";
-							html+='<span class="float-right bold" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
+							html+='<span class="float-right bold p-1" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}
+            var priorityColor='bg-warning text-dark';
+            if(leads.priority=='Urgent'){
+                priorityColor='bg-success';
+            }else if(leads.priority=='Normal'){
+                priorityColor='bg-orange';
+            }else if(leads.priority=='Important'){
+                priorityColor='bg-warning text-dark';
+            }else{
+              priorityColor='';
+            }
 					html+='</div>'
 					+'</th>'
-					+'<th class="text-white bold border-bottom-0" style="width:400px;">Student | Parent Details </th>'
+					+'<th class="text-white bold border-bottom-0" style="width:400px;">Student | Parent Details '+(leads.priority==''?'':'<span class="p-1 bold '+priorityColor+' rounded font-14 float-right"><i class="fa fa-paperclip fa-18"></i>&nbsp;&nbsp;'+leads.priority+'</span>')+'</th>'
 					+'<th class="text-white bold border-bottom-0">School Demo Details <span class="leadDemoTime"></span>&nbsp;&nbsp;'+objRights.countryOffsetTimezone+' | Status Details</th>';
 					if(leads.leadLastCallList!=null && leads.leadLastCallList.length>0){
 						html+='<th class="text-white bold border-bottom-0 text-center" style="width:250px;">Follow Ups</th>';

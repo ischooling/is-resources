@@ -2191,3 +2191,29 @@ function getAllCoursesOptions(elemId){
     });
 	return optionsHTML;
 }
+
+
+function getPriorityMasterList(formId, elementId){
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMaster('formId','PRIORITY-LIST')),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+			} else {
+				var result = data['mastersData']['data'];
+					var html = '<option value="">Select Priority</option>';
+					$.each(result, function(k, v) {
+						html+='<option value="'+v.value+'" data-shorttag="'+v.extra+'">'+v.value+'</option>';
+						
+					});
+					$('#'+formId+' #'+elementId).html(html);
+				
+			}
+		}
+	});
+}

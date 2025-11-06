@@ -180,6 +180,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			theme:"bootstrap4",
 			dropdownParent:"#"+formId
 		});
+		$("#"+formId+" #leadPriority").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#"+formId
+		});
 
 		callLeadSourceList(''+formId+'',objRights.leadType,'leadSource', true);
 		callPCountries(''+formId+'', 0, 'countryId');
@@ -226,6 +230,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			$('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
 		});
 		getTggingMasterList(''+formId+'', 'leadTagging');
+		getPriorityMasterList(''+formId+'', 'leadPriority');
 		
 		
 
@@ -570,6 +575,10 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 				theme:"bootstrap4",
 				dropdownParent:"#"+formId
 			});
+			$("#"+formId+" #leadPriority").select2({
+				theme:"bootstrap4",
+				dropdownParent:"#"+formId
+			});
 
 			callLeadSourceList(''+formId+'',objRights.leadType,'leadSource', true);
 			callPCountries(''+formId+'', 0, 'countryId');
@@ -584,7 +593,6 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			});
 
 			callLeadAssignUserList(''+formId+'',''+objRights.leadType+'','leadAssignTo', true, objRights.discardPermission, USER_ID);
-			
 
 			setTimeout(function() {
 				$("#"+formId+" #leadAssignTo").val(USER_ID).trigger('change');
@@ -615,6 +623,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 				$('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
 			});
 			getTggingMasterList(''+formId+'', 'leadTagging');
+			getPriorityMasterList(''+formId+'', 'leadPriority');
 			
 
 		});
@@ -1076,6 +1085,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 
 	getSessionMasterList('advanceLeadNewSearchForm', 'leadAcadmicYear', true);
 	getTggingMasterList('advanceLeadNewSearchForm', 'leadTagSearch')
+	getPriorityMasterList('advanceLeadNewSearchForm', 'leadPriority');
 	
 	callLeadSourceList('advanceLeadNewSearchForm',''+objectRights.leadType+'','leadSourceSearch', true);
 	

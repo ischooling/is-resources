@@ -15,31 +15,19 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
  var flag=true;
  if(leadFrom=='leadlist'){
 	 if ($("#"+formId+" #leadUpdateSource").val()==null || $("#"+formId+" #leadUpdateSource").val()=='0') {
-		 if(newTheme){
-				 showMessageTheme2(0, "Please select Lead Source",'',true);
-			 }else{
-				 showMessage(true, "Please select Lead Source");
-			 }
+		showMessageTheme2(0, "Please select Lead Source",'',true);
 		 return false;
 	 }
  }else if(leadFrom=='leadlistPopup' || leadFrom=='new-leadlistPopup'){
 	if($("#"+formId+" #countrolType").val()!='edit'){
 
 		if ($("#"+formId+" #leadSource").val()==null || $("#"+formId+" #leadSource").val()=='0' || $("#"+formId+" #leadSource").val()=='') {
-			if(newTheme){
-					showMessageTheme2(0, "Please select Lead Source",'',true);
-				}else{
-					showMessage(true, "Please select Lead Source");
-				}
+			showMessageTheme2(0, "Please select Lead Source",'',true);
 			return false;
 		}
 		if(leadType!='B2B'){
 			if ($("#"+formId+" #leadGrade").val()==null || $("#"+formId+" #leadGrade").val()=='') {
-				if(newTheme){
-					showMessageTheme2(0, 'Please choose grade','',true);
-				}else{
-					showMessage(true, 'Please choose grade');
-				}
+				showMessageTheme2(0, 'Please choose grade','',true);
 				return false;
 			}
 		}
@@ -79,41 +67,30 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
 	 }
 	 if($("#"+formId+" #phoneNo").val()!='' && $("#"+formId+" #phoneNo").val()!=null){
 		if ($("#"+formId+" #isdCode").val()==null || $("#"+formId+" #isdCode").val()=='0') {
-			if(newTheme){
-				showMessageTheme2(0, "Please choose ISD Code",'',true);
-			}else{
-				showMessage(true, "Please choose ISD Code");
-			}
+			showMessageTheme2(0, "Please choose ISD Code",'',true);
 			return false;
 		}
 	 }
 
 
-	 if ($("#"+formId+" #leadstdfname").val()==null || $("#"+formId+" #leadstdfname").val()=='') {
-		 
-		 if(newTheme){
-			 showMessageTheme2(0, "Please enter Student's First Name",'',true);
-		 }else{
-			 showMessage(true, "Please enter Student's First Name");
-		 }
+	if ($("#"+formId+" #leadstdfname").val()==null || $("#"+formId+" #leadstdfname").val()=='') {
+		 showMessageTheme2(0, "Please enter Student's First Name",'',true);
 		 return false;
 	}
 
 	if($("#"+formId+" #countrolType").val()!='edit'){
 		if ($("#"+formId+" #leadStatus").val()==null || $("#"+formId+" #leadStatus").val()=='') {
-			if(newTheme){
-				showMessageTheme2(0, 'Please choose Lead Status','',true);
-			}else{
-				showMessage(true, 'Please choose Lead Status');
-			}
+			showMessageTheme2(0, 'Please choose Lead Status','',true);
 			return false;
 		}
 		if ($("#"+formId+" #leadAssignTo").val()==null || $("#"+formId+" #leadAssignTo").val()==0) {
-			if(newTheme){
-				showMessageTheme2(0, 'Please select Lead Assigned To','',true);
-			}else{
-				showMessage(true, 'Please select Lead Assigned To');
-			}
+			showMessageTheme2(0, 'Please select Lead Assigned To','',true);
+			return false;
+		}
+	}
+	if(leadType!='B2B'){
+		if ($("#"+formId+" #leadPriority").val()==null || $("#"+formId+" #leadPriority").val()=='') {
+			showMessageTheme2(0, "Please Select Lead Priority",'',true);
 			return false;
 		}
 	}
@@ -277,11 +254,7 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
  return flag;
 }
 function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalId, leadType, objectRights, roleAndModule) {
- if(newTheme){
-			 hideMessageTheme2('');
-		 }else{
-			 hideMessage('');
-		 }
+ hideMessageTheme2('');
  if(!validateRequestForLeadSave(formId, newTheme, leadFrom, leadType)){
 	 return false;
  }
@@ -295,11 +268,7 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
 	 timeout : 600000,
 	 success : function(data) {
 		 if (data['status'] == '0' || data['status'] == 'FAILED' || data['status'] == 'EXCEPTION' || data['status'] == 'SESSIONOUT' ) {
-			 if(newTheme){
-				 showMessageTheme2(0, data['message'],'',true);
-			 }else{
-				 showMessage(true, data['message']);
-			 }
+			showMessageTheme2(0, data['message'],'',true);
 		 } else {
 			$('#documentDiv').html('');
 			 if(newTheme){
@@ -360,6 +329,7 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
 			 $('#'+formId+' #countrolType').val('');
 			 $('#'+formId+' #mergeLeads').val('');
 			 $("#"+formId+" #leadTagging").val(0).trigger('change');
+			 $("#"+formId+" #leadPriority").val(0).trigger('change');
 			 $("#leadNoMove").val('');
 			 $("#leadDataList .checkLead").prop('checked', false);
 		 }
@@ -421,6 +391,7 @@ leadModifyDTO['leadType']=leadType;
 	leadModifyDTO['parentleadId'] = $("#"+formId+" #parentleadId").val();
 	leadModifyDetailDTO['remarks'] = escapeCharacters($("#leadRemark").val());
 	leadCallFollowupDTO['leadTagging'] = $("#"+formId+" #leadTagging").val();
+	leadModifyDetailDTO['priority'] = $("#"+formId+" #leadPriority").val();
 	leadModifyDetailDTO['mergeLeadsId'] = $("#"+formId+" #mergeLeads").val();
 	leadModifyDTO['leadDataFrom']='leadlistPopup';
  }else if(leadFrom=='dashboard'){
@@ -1568,7 +1539,7 @@ var leadCountDetailDTO={};
 			 // 	 leadCommonDTO['sbsbStatus']="N";
 			 //  }
 leadModifyDetailDTO['acadmicYear'] = $("#"+formId+" #leadAcadmicYear").val()!=undefined?$("#"+formId+" #leadAcadmicYear").val():'';
-leadModifyDetailDTO['priority'] = $("#"+formId+" #leadPrioritySearch").val()!=undefined?$("#"+formId+" #leadPrioritySearch").val():'';
+leadModifyDetailDTO['priority'] = $("#"+formId+" #leadPriority").val()!=undefined?$("#"+formId+" #leadPriority").val():'';
 leadModifyDetailDTO['utmSource'] = $("#"+formId+" #utmSourceSearch").val()!=undefined?$("#"+formId+" #utmSourceSearch").val():'';
 //leadModifyDetailDTO['utmCampaign'] = $("#"+formId+" #leadSearchCampaign").val();
 if($("#"+formId+" #campaignName").val()!=undefined && $("#campaignName").val()!=''){
@@ -2388,6 +2359,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 				 callLeadSourceList(''+formId+'',leadType,'leadSource', true);
 				 
 				 getTggingMasterList(''+formId+'', 'leadTagging');
+				 getPriorityMasterList(''+formId+'', 'leadPriority');
 				 $("#"+formId+" #leadTagging").select2({
 					theme:"bootstrap4",
 					dropdownParent:"#"+formId
@@ -2519,6 +2491,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						$("#"+formId+" #leadStatus").val(leadDemo.leadModifyDTO.leadStatus).trigger('change');
 						$("#"+formId+" #leadSupportTo").val(data.leadDashboardCommon.leadCommonDTO[0].leadModifyDTO.leadSupportTo).trigger('change');
 						$("#"+formId+" #leadTagging").val(leadDemo.leadCallFollowupDTO.leadTagging).trigger('change');
+						$("#"+formId+" #leadPriority").val(leadDemo.leadModifyDetailDTO.priority).trigger('change');
 					}, 1000);
 					setTimeout(function () {
 						callStates(formId, leadDemo.leadStudentDetailDTO.country, 'countryId');

@@ -117,10 +117,11 @@ function getCountryRightTimeList(objectRights) {
 				<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2 saveCountryTimeBtn" onclick="saveCountryRightTime();" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span class="d-md-none">&nbsp; Add</span></a></td>
 			</tr>`;
 			if(countryRightCallList.length>0){
+				var i=2;
 				for (let j = 0; j < countryRightCallList.length; j++) {
 					const rightCall = countryRightCallList[j];
 					html+=`<tr>
-						<td></td>
+						<td>${i++}</td>
 						<td class="text-center bold">${rightCall.countryName}</td>
 						<td class="text-center bold">${rightCall.startCall} - ${rightCall.endCall}</td>
 						<td><a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="return showDeleteCountryRightTimeModelFunction('saveCountryRightTime(\\\'${rightCall.righttimecallid}\\\',\\\'delete\\\')','${rightCall.countryName}','${rightCall.startCall} - ${rightCall.endCall}')"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a></td>
@@ -138,4 +139,54 @@ function getCountryRightTimeList(objectRights) {
 	$("#rightTimeTocall").html(rightTimeTocall);
 	$("#discardCountryRightTime").modal("show");
 }
+
+
+function updatePriority(priorityId) {
+	data={};
+	data['schoolId']=SCHOOL_ID;
+	data['userId']=USER_ID;
+	data['priorityId']=priorityId;
+	data['minRange']=$("#minRange_"+priorityId).val();
+	data['maxRange']=$("#maxRange_"+priorityId).val();
+	data['leadCateUnit']=$("#leadCateUnit_"+priorityId).val();
+
+	$.ajax({
+			type : "POST",
+			contentType : APPLICATION_JSON_VALUE,
+			url : getURLForHTML('dashboard', 'save-lead-priority'),
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			timeout : 600000,
+			success : function(data) {
+                if (data['status'] == '0' || data['status'] == '2') {
+                    showMessageTheme2(0, data['message']);
+                } else {
+                    showMessageTheme2(1, data['message']);
+					var priorityList = data.priorityList;
+					html='';
+					if(priorityList!=null && priorityList.length>0){
+						var i=1;
+						for (let k = 0; k < priorityList.length; k++) {
+							const priority = priorityList[k];
+							html+=`<tr>
+									<td>${i++}</td>
+									<td>${priority.priority}</td>
+									<td><input type="text" class="form-control form-control-sm" name="minRange" id="minRange_${priority.priorityId}"  value="${priority.minRange}"/></td>
+									<td><input type="text" class="form-control form-control-sm" name="maxRange" id="maxRange_${priority.priorityId}" value="${priority.maxRange}"/></td>
+									<td>
+										<select class="form-control form-control-sm" name="leadCateUnit" id="leadCateUnit_${priority.priorityId}">
+											<option value="per" ${priority.rangeUnit=='per'?'selected':''}>%</option>
+											<option value="price" ${priority.rangeUnit=='price'?'selected':''}>Price</option>
+										</select>
+									</td>
+									<td><a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="return updatePriority('${priority.priorityId}')">Update</a></td>
+								</tr>`;
+						}
+						$("#priority-list").html(html);
+					}
+                }
+			}
+	   });
+   }
 
