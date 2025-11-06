@@ -892,9 +892,9 @@ function updateTabsVisibility() {
 	  $("#createUserB2B").text("Next");
 	  $('#officeContactDetailsTab').tab('show');
 	  getOfficeContentsDetails('officeContactDetailsForm')
-	  if(commissionValue === 'PWP'){
-		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
-	  }
+	//   if(commissionValue === 'PWP'){
+	// 	$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
+	//   }
     }else if(partnerType === 'GP' || partnerType === "EPER") {
       $('#setCommissionRateTab').show();
 	  $("#createPartnerTab").text("Update Partner");

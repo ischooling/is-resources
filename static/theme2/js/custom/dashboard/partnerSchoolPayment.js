@@ -44,34 +44,39 @@ function getPayStudentFeesDetais(callFrom) {
                 }
             } else {
                 var html = '';
+                var htmlFoot = '';
                 let totalPayableToIS = 0;
-                $.each(data.studentFeeDetails, function(index, item) {
-                    html += `<tr>
-                        <td>
-                            <input type="checkbox" class="row-checkbox paymentCheck"  />
-                        </td>
-                        <td>${item.partnerName}</td>
-                        <td>${item.studentId}</td>
-                        <td>${item.studentName} | ${item.standardName}</td>
-                        <td>${item.learningProgram}</td>
-                        ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>`:''}
-                        
-                        <td>${item.partnerCourseFee == undefined ? 'NA' : currency + item.partnerCourseFee}</td>`;
-                        html +=`<td>${item.partnerRevenue == undefined ? 'NA' : currency + item.partnerRevenue}</td>
-                        ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>`:''}
-                        ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>`:''}
-                        <td>
-                            <input type="hidden" class="studentStandardId" value="${item.StudentStandardId}" />
-                            <input type="number" min="0" step="0.01" class="form-control payable-input payAmount" oninput="updateTotalPayable();" value="${item.payableToIS == undefined ? 'NA' : item.payableToIS}"/>
-                        </td>
+                if(data.studentFeeDetails.length > 0){
+                    $.each(data.studentFeeDetails, function(index, item) {
+                        html += `<tr>
+                            <td>
+                                <input type="checkbox" class="row-checkbox paymentCheck"  />
+                            </td>
+                            <td>${item.partnerName}</td>
+                            <td>${item.studentId}</td>
+                            <td>${item.studentName} | ${item.standardName}</td>
+                            <td>${item.learningProgram}</td>
+                            ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>`:''}
+                            
+                            <td>${item.partnerCourseFee == undefined ? 'NA' : currency + item.partnerCourseFee}</td>`;
+                            html +=`<td>${item.partnerRevenue == undefined ? 'NA' : currency + item.partnerRevenue}</td>
+                            ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>`:''}
+                            ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>`:''}
+                            <td>
+                                <input type="hidden" class="studentStandardId" value="${item.StudentStandardId}" />
+                                <input type="number" min="0" step="0.01" class="form-control payable-input payAmount" oninput="updateTotalPayable();" value="${item.payableToIS == undefined ? 'NA' : item.payableToIS}"/>
+                            </td>
+                        </tr>`;
+                    });
+                    htmlFoot= `<tr style="background-color:#E9E9E9;bottom:0;" class="position-sticky">
+                        <td colspan="${schoolSettingsOffice.schoolType != 'WLP'?'10':'7'}" class="font-weight-bold text-right">Total Payable</td>
+                        <td class="font-weight-bold">$<span class="total-payable-cell">${totalPayableToIS.toFixed(2)}</span></td>
                     </tr>`;
-                });
-                var htmlFoot='';
-                htmlFoot= `<tr style="background-color:#E9E9E9;bottom:0;" class="position-sticky">
-                    <td colspan="${schoolSettingsOffice.schoolType != 'WLP'?'10':'7'}" class="font-weight-bold text-right">Total Payable</td>
-                    <td class="font-weight-bold">$<span class="total-payable-cell">${totalPayableToIS.toFixed(2)}</span></td>
-                </tr>`;
-
+                }else{
+                    html+=`<tr>
+                        <td colspan="8" class="text-center">No record found</td>
+                    </tr>`
+                }
                 $("#schoolPaymentTable").html(html);
                 $("#schoolPaymentTableFoot").html(htmlFoot);
 
@@ -198,7 +203,7 @@ function getPartnerSchoolPaymentDetails(formId) {
                         <td>${item.scheduledPayDate == 'N/A' ? 'N/A' : changeDateFormat(new Date(item.scheduledPayDate),"MMM-dd-yyyy hh:mm:ss A")}</td>
                         <td>${item.payDate == 'N/A' ? 'N/A' : changeDateFormat(new Date(item.payDate),"MMM-dd-yyyy hh:mm:ss A")}</td>`;
                         if (USER_ROLE == "DIRECTOR") {
-                            if (item.paymentStatus === 'SUCCESS' || item.paymentStatus === 'REJECTED') {
+                            if (item.paymentStatus === 'SUCCESS' || item.paymentStatus === 'REJECTED' || item.paymentStatus === 'FAILURE') {
                                 html += `<td>N/A</td>`;
                             } else {
                                 html += `<td>

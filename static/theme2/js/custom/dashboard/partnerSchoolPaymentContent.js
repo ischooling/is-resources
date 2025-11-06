@@ -41,7 +41,7 @@ function schoolPaymentCard(){
     var html=
         `<div class="main-card mb-3 card rounded-10">
             <div class="card-body">
-                <h5 class="font-weight-semi-bold text-dark">Enrollment Partner/ School Payment</h5>`
+                <h5 class="font-weight-semi-bold text-dark">School Payment</h5>`
                 // +schoolPaymentCardSkeleton()
                 html+=`<div class="d-flex w-50 ml-1 mt-3">
                     <div class="p-2 rounded-10 mr-2 mb-2 shadow-sm flex-grow-1" style="width:100%; background-color:#CCE5FF;">
@@ -391,7 +391,7 @@ function searchStudentFeesContent(){
                 <input type="text" id="paymentDateToSearch" class="form-control" />
             </div>
             <div class="col-12 mt-2 text-right mb-2">
-				<button type="reset" class="btn btn-primary btn-shadow float-right pr-4 pl-4 mr-2" id="resetStudentFeesBtn">Reset</button>
+				<button type="reset" class="btn btn-danger btn-shadow float-right pr-4 pl-4 mr-2" id="resetStudentFeesBtn">Reset</button>
                 <a href="javascript:void(0)" class="btn btn-success btn-shadow float-right pr-4 pl-4 mr-2" id="searchStudentFeesBtn" onclick="getPayStudentFeesDetais('searchStudentFees')">Search</a>
             </div>
         </div>`
@@ -424,7 +424,11 @@ function studentFeesTable(){
                             <th style="width:10%;" class="font-weight-bold text-white border-bottom-0 vertical-align-top rounded-top-right-10">Fee Payable to International Schooling</th>
                         </tr>
                     </thead>
-                    <tbody id="schoolPaymentTable" style="max-height:420px;"></tbody>
+                    <tbody id="schoolPaymentTable" style="max-height:420px;">
+                        <tr>
+                            <td colspan="8" class="text-center">No record found</td>
+                        </tr>
+                    </tbody>
 					<tfoot id="schoolPaymentTableFoot"></tfoot>
                 </table>
             </div>

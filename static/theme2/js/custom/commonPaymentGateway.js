@@ -295,7 +295,7 @@ async function getPaymentGatewayOptionsModal(details){
 					<section class="payment-option-wrapper">
 						<div class="full">
 							<h4 class="section-heading primary-bg-before primary-bg-after">Payment Options Available</h4>
-							<span style="width:100%;display:inline-block"><i class="fa fa-star text-primary"></i>&nbsp;${SCHOOL_NAME} is trusted by the safest and most reputed payment ${SCHOOL_ID==1?'gateways, banks and wallets':'gateway and bank'}</span>
+							<span style="width:100%;display:inline-block"><i class="fa fa-star text-primary"></i>&nbsp;${details.schoolNameOfPaymentGateway} is trusted by the safest and most reputed payment ${SCHOOL_ID==1?'gateways, banks and wallets':'gateway and bank'}</span>
 						</div>
 						<div class="tab-wrapper">
 							<div class="payment-tabs">

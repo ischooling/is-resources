@@ -190,7 +190,7 @@ function partnerEnrollFilterForm(){
                         <input type="text" class="form-control" value="25" name="pageSize" id="pageSize"/>
                     </div>
                     <div class="col-12 mt-2 text-right">`
-                        html+=`<a href="javascript:void(0)" class="btn btn-primary btn-shadow float-right pr-4 pl-4" onclick="resetEnrollmentForm(\'partnerEnrollFilterForm\')">Reset</a>
+                        html+=`<a href="javascript:void(0)" class="btn btn-danger btn-shadow float-right pr-4 pl-4" onclick="resetEnrollmentForm(\'partnerEnrollFilterForm\')">Reset</a>
                         <a href="javascript:void(0)" class="btn btn-success btn-shadow float-right pr-4 pl-4 mr-2" onclick="callStudentListByPartnerWLP(\'partnerEnrollFilterForm\')">Search</a>
                     </div>
                 </div>

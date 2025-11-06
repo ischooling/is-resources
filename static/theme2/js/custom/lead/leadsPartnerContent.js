@@ -1229,7 +1229,7 @@ function paymentOptionsContent() {
 						</div>`;
 						if (item.title == 'PAYMENTGATEWAY') {
 							html += `
-							<div id="paymentGatewaysDiv" class="pl-2 mt-1 mb-3">
+							<div id="paymentGatewaysDiv" class="pl-2 mt-1 mb-3" style="display:none;">
 								<div class="bg-light-primary py-2 px-3 rounded-10 d-flex flex-column" style="gap:10px;">
 									
 									<div class="d-flex justify-content-between align-items-center">
