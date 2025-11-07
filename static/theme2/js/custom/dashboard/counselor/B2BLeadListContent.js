@@ -1,5 +1,6 @@
-
-
+const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_SHOWING_DRAFT_CONTRACT');
+var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
+const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
 
 function getB2BListHeaderContent(roleAndModule, objRights){
 	var html='<div class="full text-right">'
@@ -1114,7 +1115,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 									+'</td>'
 								+'</tr>';
 							}
-							if(USER_ROLE == "DIRECTOR"){
+							if(isUserAllowed){
 								html+='<tr>'
 									+'<td colspan="2" class="border-0 p-1">'
 										+'<a id="addContractB2b_'+leads.rawLeadId+'" href="javascript:void(0)" onclick="getB2BContractDetails(\''+leads.rawLeadId+'\', \'add\', \'\')" class="text-dark py-1 '+(parseInt(leads.contractsCount) == 0 && leads.leadFollowStatus.trim() == "Converted & On Boarding | Hot" ? "d-inline-block":"d-none")+'"><i class="fa fa-plus-square text-primary"></i>&nbsp;Draft Contract</a>'
