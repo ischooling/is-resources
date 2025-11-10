@@ -1130,7 +1130,7 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
       "formIdIfAny",
       "saved-evaluation-content?moduleId=" + moduleId
     );
-  } else if (pageNo == "assign-teacher-interview") {
+  } else if (pageNo == "teacher-assign-interview") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "teacher-screening-profiles") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);

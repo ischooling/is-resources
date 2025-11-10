@@ -54,7 +54,6 @@ function teacherScreeningFilter(){
                         <option value="">Select Status</option>
                         <option value="Approved For Interview">Approved For Interview</option>
                         <option value="Approved for Selection Process">Approved for Selection Process</option>
-                        <option value="Rejected">Rejected</option>
                     </select>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
@@ -82,7 +81,7 @@ function teacherScreeningFilter(){
     return html;
 }
 
-function teacherScreenTableContent(){
+function teacherScreenTableContent(status){
     var html=
         `<div class="table-responsive mt-3 bg-white p-2">
             <table id="teacherScreeningTable" class="table table-bordered font-12">
@@ -100,8 +99,8 @@ function teacherScreenTableContent(){
                         <th>Preferred grades & courses</th>
                         <th>Linkedin Profile</th>
                         <th>Assigned To</th>
-                        ${/*<th>Profile Status</th>
-                        <th>Action</th>*/''}
+                       <th>Profile Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -139,6 +138,55 @@ function teacherPreviousExperienceModalContent(oldGrades, oldCourses, newGrades,
                             <span class="font-weight-bold">New Courses:</span><br>
                             ${toBulletPoints(newCourses, true)}
                         </p>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}
+
+function teacherScreeningProfileStatusModal(id, status){
+    var html=
+        `<div class="modal fade show" id="teacherScreeningProfileStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Profile Approval</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form autocomplete="off" id="teacherScreeningProfileStatusForm">
+                            <div class="form-group">
+                                <label for="teacherScreeningProfileStatus" class="control-label">Status:</label>
+                                <select class="form-control" name="teacherScreeningProfileStatus" id="teacherScreeningProfileStatus" onchange="viewAssignToListForInterview();">
+                                    <option value="0">Select status</option>`
+                                    if(status == "Approved For Interview"){
+                                        html+=`<option value="Approved for Selection Process">Approve for Selection Process</option>
+                                        <option value="Reject">Reject</option>`
+                                    }else if(status == "Approved for Selection Process"){
+                                        html+=`<option value="Reject">Reject</option>`
+                                    }else {
+                                        html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                        <option value="Reject">Reject</option>`
+                                    }
+                               html+=`</select>
+                            </div>
+                            <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
+                                <label>Assigned To</label>
+                                <select id="assignedToInterview" class="form-control">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="message-text" class="control-label">Remarks:</label>
+                                <textarea id="teacherScreeningProfileRemarks" class="form-control px-2" maxlength="200"></textarea>
+                            </div>
+                        </form>
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-danger mr-2" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="updateTeacherScreeningProfile(${id});">Save</button>
+                        </div>
                     </div>
                 </div>
             </div>

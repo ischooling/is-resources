@@ -27,7 +27,7 @@ async function renderTeacherInterviewAssignDashboard(title, roleAndModule, SCHOO
 	});
 
 	$("#saveTeacherInterviewAssign").on('click', function(){
-		saveLeadAssignToCounselor(USER_ID,'studentAssignCounselor','', 'TEACHER_INITIAL_INTERVIEW');
+		saveLeadAssignToCounselor(USER_ID,'studentAssignCounselor','', 'INITIAL-INTERVIEW');
 	});
 
 
@@ -112,7 +112,7 @@ function getTeacherInterviewAssignDataList(){
 								<th style="width:5% !important">S. No.</th>
 								<th style="width:10% !important">Counselor Name</th>
 								<th style="width:5% !important">Order</th>
-								<th style="width:5% !important">Total Student Assign </th>
+								<th style="width:5% !important">Total Teacher Assign </th>
 								<th style="width:5% !important">Active/ Inactive</th>
 								<th style="width:5% !important">Assign/ Total</th>
 								<th style="width:8%">Time Prefrence</th>

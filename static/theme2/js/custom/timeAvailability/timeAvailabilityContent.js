@@ -1,11 +1,12 @@
 
 var schoolSettingsLinks;
-(async function() {
-    schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
-})();
+// (async function() {
+    
+// })();
 
 
-function renderCounselorCotent(data){
+async function renderCounselorCotent(data){
+	schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	$("#timeAvailabilityUIContent").html(getCounselorCotent(data)+serverMessageContent());
 	callLocationDetails('meetingBookSlotForm');
 	$('.time-slot-radio').change(function() {
@@ -75,8 +76,9 @@ function renderCounselorCotent(data){
 	// 		getCalendarForMeeting("bookMeetingCalendar","","Month", location.timezone);
 	// 	}
 	// }, 1000);
-	
-
+	if(data.thanksStaus == "Y"){
+		$("#thankyouContent").show();
+	}
 }
 function getLocationAndSelectCountry() {
 	return new Promise(function (resolve, reject) {
@@ -269,7 +271,7 @@ function getCounselorCotent(data){
 					if(data.leadType!=undefined && data.leadType=='B2B'){
 						html+='';
 					}else{
-						if(data.timePreferenceSlotName == 'Interview'){
+						if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){
 							html+='';
 						}else{
 							html+='<h4 class="text-center font-weight-bold px-3 bg-primary-gradient text-white py-3">Book Your FREE Live School Demo</h4>';
@@ -353,7 +355,7 @@ function getCounselorMeetingDetailsCotent(data){
 						+'</div>'
 					+'</span>';
 					if(data.leadType!=undefined && data.leadType=='B2B'){}
-					else if(data.timePreferenceSlotName == 'Interview'){}
+					else if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){}
 					else{
 						html += 
 						'<div class="full hide-on-second-step rounded border p-3 mt-2">'
@@ -419,7 +421,7 @@ function getCounselorDatePickerCotent(data){
 						if(data.leadType!=undefined && data.leadType=='B2B'){
 							html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the Partnership Discussion</h5>';
 						}else{
-							if(data.timePreferenceSlotName == 'Interview'){
+							if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){
 							html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the Interview</h5>';
 						}else{
 							html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the School Demo</h5>';
@@ -509,7 +511,7 @@ function getCounselorScheduleEventCotent(data){
 			html +='<div class="full px-4 pt-4">';
 			if(data.leadType!=undefined && data.leadType=='B2B'){
 				html +='<h5 class="text-black font-weight-bold">Individual/Organization Details</h5>';
-			}else if(data.timePreferenceSlotName == 'Interview'){
+			}else if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){
 				html +='<h5 class="text-black font-weight-bold">Attendee Details</h5>';
 			}else{
 				html +='<h5 class="text-black font-weight-bold">Parent Details</h5>';
@@ -617,67 +619,67 @@ function thankyouPageContent(data){
 		counsellorName = data.userName
 	}
 	var html=
-	'<div class="col-xl-6 col-lg-7 col-md-10 col-sm-12 col-12 px-md-3 px-0 mr-auto ml-auto mt-md-5 mt-0 mb-4" id="thankyouContent" style="display:none">'
-		+'<div class="d-flex card flex-row counselor-slot-ui-flex">'
-			+'<div class="w-100 p-4">'
-				+'<div class="full text-center">'
-					+'<a href="'+schoolSettingsLinks.schoolWebsite+'" target="blank">'
-						+'<img src="'+schoolSettingsLinks.logoUrl+''+SCRIPT_VERSION+'" style="max-width: 300px;width: 100%;" />'
-					+'</a>'
-				+'</div>'
-				+'<div class="full text-center my-4">'
-					+'<h4 class="text-center font-weight-bold"><i class="fa fa-check-circle text-success"></i>&nbsp;Your '+data.meetingFor+' is booked</h4>'
-					+'<p class="font-size-lg mb-0">A calendar invitation has been sent to your email address.</p>'
-				+'</div>'
-				+'<div class="full px-md-4 px-0">'
-					+'<div class="full">'
-						+'<ul class="p-3 m-0 border rounded-10">'
-							+'<li>'
-								+'<label class="name font-weight-bold text-dark font-size-lg cName full mb-3">'+counsellorName+'</label>'
-							+'</li>'
-							+'<li>'
-								+'<span class="text-gray font-weight-semi-bold full mb-3">'
-									+'<div class="d-flex align-items-top flex-wrap">'
-										+'<span>'
-											+'<i class="fa fa-clock mr-1" style="line-height:22px"></i>Duration:'
-										+'</span>'	
-										+'<label class="m-0 ml-1" id="thankUserName">'+data.timeDuration+'</label>'
-									+'</div>'
-								+'</span>'
-							+'</li>'
-							// +'<li>'
-							// 	+'<span class="text-gray font-weight-semi-bold full mb-3">'
-							// 		+'<div class="d-flex align-items-top">'	
-							// 			+'<i class="fa fa-user mr-2" style="line-height:22px"></i><label class="m-0" id="thankUserName">'+data.userName+'</label>'
-							// 		+'</div>'
-							// 	+'</span>'
-							// +'</li>'
-							+'<li>'
-								+'<span class="text-gray font-weight-semi-bold full mb-3">'
-									+'<div class="d-flex align-items-top flex-wrap">'	
-										+'<span>'
-											+'<i class="fa fa-calendar mr-1" style="line-height:22px"></i>Selected Date & Time:'
-										+'</span>'	
-										+'<label class="m-0 ml-1" id="thankTimeAndDate">'+data.selectTimeDate+'</label>'
-									+'</div>'
-								+'</span>'
-							+'</li>'
-							+'<li class="mb-0">'
-								+'<span class="text-gray font-weight-semi-bold full mb-3">'
-									+'<div class="d-flex align-items-top flex-wrap">'	
-										+'<span>'
-											+'<i class="fa fa-globe mr-1" style="line-height:22px"></i>Selected Time Zone:'
-										+'</span>'	
-										+'<label class="m-0 ml-1" id="thankSelectTimeZone">'+data.selectTimeZone.replaceAll('  ','+')+'</label>'
-									+'</div>'
-								+'</span>'
-							+'</li>'
-						+'</ul>'
-						+'<p class="full font-size-lg mt-2 mb-0 text-center"> Please check your email to join the '+data.meetingFor+'.</p>'
-					+'</div>'
-				+'</div>'
-			+'</div>'
-		+'</div>'
-	+'</div>'
+	`<div class="col-xl-6 col-lg-7 col-md-10 col-sm-12 col-12 px-md-3 px-0 mr-auto ml-auto mt-md-5 mt-0 mb-4" id="thankyouContent" style="display:none">
+		<div class="d-flex card flex-row counselor-slot-ui-flex">
+			<div class="w-100 p-4">
+				<div class="full text-center">
+					<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+						<img src="${schoolSettingsLinks.logoUrl + SCRIPT_VERSION}" style="max-width: 300px;width: 100%;" />
+					</a>
+				</div>
+				<div class="full text-center my-4">
+					<h4 class="text-center font-weight-bold"><i class="fa fa-check-circle text-success"></i>&nbsp;Your ${data.meetingFor == 'Initial-Interview' ? 'Interview' : data.meetingFor} is booked</h4>
+					<p class="font-size-lg mb-0">A calendar invitation has been sent to your email address.</p>
+				</div>
+				<div class="full px-md-4 px-0">
+					<div class="full">
+						<ul class="p-3 m-0 border rounded-10">
+							<li>
+								<label class="name font-weight-bold text-dark font-size-lg cName full mb-3">${counsellorName}</label>
+							</li>
+							<li>
+								<span class="text-gray font-weight-semi-bold full mb-3">
+									<div class="d-flex align-items-top flex-wrap">
+										<span>
+											<i class="fa fa-clock mr-1" style="line-height:22px"></i>Duration:'
+										</span>	
+										<label class="m-0 ml-1" id="thankUserName">${data.timeDuration}</label>
+									</div>
+								</span>
+							</li>
+							${/*<li>
+								<span class="text-gray font-weight-semi-bold full mb-3">
+									<div class="d-flex align-items-top">	
+										<i class="fa fa-user mr-2" style="line-height:22px"></i><label class="m-0" id="thankUserName">+data.userName</label>
+									</div>
+								</span>
+							</li>*/''}
+							<li>
+								<span class="text-gray font-weight-semi-bold full mb-3">
+									<div class="d-flex align-items-top flex-wrap">	
+										<span>
+											<i class="fa fa-calendar mr-1" style="line-height:22px"></i>Selected Date & Time:'
+										</span>	
+										<label class="m-0 ml-1" id="thankTimeAndDate">${data.selectTimeDate}</label>
+									</div>
+								</span>
+							</li>
+							<li class="mb-0">
+								<span class="text-gray font-weight-semi-bold full mb-3">
+									<div class="d-flex align-items-top flex-wrap">	
+										<span>
+											<i class="fa fa-globe mr-1" style="line-height:22px"></i>Selected Time Zone:'
+										</span>	
+										<label class="m-0 ml-1" id="thankSelectTimeZone">${data.selectTimeZone.replaceAll('  ','+')}</label>
+									</div>
+								</span>
+							</li>
+						</ul>
+						<p class="full font-size-lg mt-2 mb-0 text-center"> Please check your email to join the ${data.meetingFor == 'Initial-Interview' ? 'Interview' : data.meetingFor}.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`
 	return html;
 }

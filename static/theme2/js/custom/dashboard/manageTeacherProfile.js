@@ -157,7 +157,7 @@ function getRejectedTeacherListRequest(formId, moduleId){
   	requestBody['userId'] = USER_ID;
   	requestBody['moduleId'] = moduleId;
   	requestBody['types'] = "2";
-  	requestBody['ids'] = "15,18,21";
+  	requestBody['ids'] = "15,18,21,25";
 	return requestBody;
 }
 

@@ -804,6 +804,13 @@ async function startDemoRecordingFun(attempt, isReattempting){
 			dataType: "json",
 			success: function (response) { 
 				if(response.status == 1){
+					if($("#start-meeting-popup-teacher").length == 1){
+						$("#start-meeting-popup-teacher").remove();
+					}
+					$("body").append(showStartMeetingPopupTeacher(responseDataDemoRecording.data.title, response.redirectUrl));
+					setTimeout(() => {
+						$("#start-meeting-popup-teacher").modal("show");
+					}, 500);
 					window.open(response.redirectUrl, '_blank');
 					clearInterval(recordingPollingInterval);
 					recordingPollingInterval = null;

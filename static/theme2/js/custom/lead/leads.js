@@ -1938,7 +1938,9 @@ customLoader(true);
 		 } else {
 			showMessageTheme2(1, data['message'],'',true);
 			if(forUse=='ORIENT'){
-			getOrientaionAssignUser();
+				getOrientaionAssignUser();
+			}else if(forUse == 'INITIAL-INTERVIEW'){
+				getTeacherInterviewAssign();
 			}else{
 				getLeadAssignUser(OBJECT_RIGHTS);
 			}

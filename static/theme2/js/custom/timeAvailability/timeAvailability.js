@@ -1,7 +1,7 @@
 var validatToSaveFlag = true;
 var validatToSaveMsg = ''
 var overLapmsg='';
-var dropdownTimeGap = 15;
+var dropdownTimeGap = 5;
 var totalGivenTime = [];  
 var excludeDates =[];
 var dayCounts = [];
@@ -665,7 +665,7 @@ function addNewRowTime(dayname, indx, prestartTime, preendTime, userRoleId, min,
 	}
 	var divLen = $('.'+dayname+'-'+indx).not('.unavailable-'+dayname+'-'+indx).length;
 	if(divLen>0){
-		$('.'+dayname+'-'+indx).each(function(index, tr) { 
+		$('.'+dayname+'-'+indx).each(function(index, tr) {
 			if(index==(divLen-1)){
 				var day_Ids=$(this).attr("id");//$(".available-"+dayname+'-'+indx+"").attr("id");
 				var prePositionInd= parseInt(day_Ids.split("-")[2]);
@@ -707,6 +707,7 @@ function addNewRowTime(dayname, indx, prestartTime, preendTime, userRoleId, min,
 					if(prePositionInd == 0 && !$("."+dayname+"-time-"+prePositionInd+"").find(".remove-time-slot-btn").hasClass("time-save-Y")){
 						$("."+dayname+"-time-"+positionInd+"").find('.fromTime').prepend("<option value=''>Start Time</option>");
 					}
+					debugger;
 					$("."+dayname+"-time-"+positionInd+"").find('.fromTime').val("").trigger("change");
 				}
 				if(callFrom=='remove-slot-week'){
@@ -727,7 +728,6 @@ function addNewRowTime(dayname, indx, prestartTime, preendTime, userRoleId, min,
 						var timestamp = Date.parse(fromT);
 						var dateObject = new Date(timestamp);
 						var timeinter = getTimePlusInterval(dateObject,slotBufferLimit);
-						
 						if(USER_ROLE !="TEACHER" && USER_ROLE !="DIRECTOR"){
 							var ST = timeinter;
 							$("."+dayname+"-time-"+positionInd+"").find('.fromTime').val(timeinter);
@@ -3393,8 +3393,8 @@ function dataForBookAnEventSlot() {
 				locationData = JSON.parse(locationData);
 				renderCounselorCotent(data);
 				setTimeout( function() {
+					getLocationAndSelectCountryFill('bookSlotForEventForm', locationData, data);
 				}, 1000);
-				getLocationAndSelectCountryFill('bookSlotForEventForm', locationData, data);
 				customLoader(false);
 				// renderStudentEnrollmentRecord(data, moduleId, clickFrom, currentPage);
 				
@@ -3742,6 +3742,7 @@ function inactiveMeetingSlotType(userId,slotTypeId,activeSlot,overlayEleWrapper,
 				}
 				$('[data-toggle="tooltip"]').tooltip('dispose');
 				$('[data-toggle="tooltip"]').tooltip();
+				ps1 = new PerfectScrollbar('.perfectScroll');
 			}
 			return false;
 		}
@@ -3956,6 +3957,7 @@ function dropdownparseTime(time) {
 }
 var bindStartTimeDorpDownFlag = true;
 function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap){
+	debugger;
 	var startTime_endTime_gap = minTimeSlotGap;
 	var end_Time_endTime_gap = maxTimeSlotGap;
 	startTime_endTime_gap = parseInt(startTime_endTime_gap, 10);
@@ -4014,7 +4016,7 @@ function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap
 						endMinuteslimit = 24 * 60
 					}
 				}else{
-					var startMinutes = dropdownparseTime(startTime) + 15;
+					var startMinutes = dropdownparseTime(startTime) + dropdownTimeGap;
 					var endMinuteslimit = dropdownparseTime(startTime);
 				}
 				if(USER_ROLE== "TEACHER"){
@@ -4035,7 +4037,8 @@ function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap
 					// 	var formattedStartTime = `${startHour}:${startMinute.toString().padStart(2, '0')} ${startPeriod}`;
 					// 	startTimeDropdown.append(`<option value="${formattedStartTime}">${formattedStartTime}</option>`);
 					// }
-					for (var i = startMinutes; i <=(isLastTimeShow?(endMinuteslimit - 15):endMinuteslimit); i += 15) {
+					for (var i = startMinutes; i <=(isLastTimeShow?(endMinuteslimit - 15):endMinuteslimit); i += dropdownTimeGap) {
+						debugger;
 						var endHour = Math.floor(i / 60);
 						var endMinutes = i % 60;
 						var endPeriod = endHour >= 12 ? "PM" : "AM";
@@ -4047,7 +4050,8 @@ function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap
 					}
 				}else{
 					var i;
-					for (i = startMinutes; i < 24*60; i += 15) {
+					for (i = startMinutes; i < 24*60; i += dropdownTimeGap) {
+						debugger;
 						var endHour = Math.floor(i / 60);
 						var endMinutes = i % 60;
 						var endPeriod = endHour >= 12 ? "PM" : "AM";

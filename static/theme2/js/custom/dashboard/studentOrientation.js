@@ -882,7 +882,7 @@ function saveInactiveAssignCounselorOrient(userId, checkedVal, orderBy, forUse) 
 			 showMessageTheme2(0, data['message'],'',true);
 		 } else {
 			showMessageTheme2(1, data['message'],'',true);
-			if(forUse == 'TEACHER_INITIAL_INTERVIEW'){
+			if(forUse == 'INITIAL-INTERVIEW'){
 				getTeacherInterviewAssign();
 			}else{
 				getOrientaionAssignUser();

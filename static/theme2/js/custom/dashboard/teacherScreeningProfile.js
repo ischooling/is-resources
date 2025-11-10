@@ -1,8 +1,10 @@
 var CURRENT_PAGE_TEACHER_SCREENING = 1;
-function teacherScreeningProfileOnloadFunction(){
+async function teacherScreeningProfileOnloadFunction(){
     CURRENT_PAGE_TEACHER_SCREENING = 1;
     getAllCountryList('teacherScreeningFilterForm','filterCountryId');
-    callLeadAssignUserList("teacherScreeningFilterForm", "" ,'filterAssignedTo', true, "", USER_ID, "");
+    let payload = {}
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
+    bindAssignTo('teacherScreeningFilterForm', 'filterAssignedTo', responseData);
     $("#teacherScreeningFilterForm #filterCountryId").select2({
         placeholder: "Select Country",
         theme:"bootstrap4"
@@ -24,6 +26,7 @@ function teacherScreeningProfileOnloadFunction(){
         multiple: true
     });
     $("#teacherScreeningFilterForm #filterGrades").val("").trigger("change");
+    $("#teacherScreeningFilterForm #filterCourses").val("").trigger("change");
     loadTeacherScreeningData();
 }
 
@@ -38,14 +41,12 @@ function bindTeacherScreeningData(responseData) {
         var pageSize = responseData.pagination.pageSize;
         responseData.DataArray.forEach(function(teacher, index) {
             var row = 
-                `<tr>
+                `<tr id="tr_${teacher.id}">
                     <td>${(CURRENT_PAGE_TEACHER_SCREENING - 1) * pageSize + index + 1}</td>
                     <td>${teacher.userName}</td>
                     <td>
                         ${teacher.phoneNo || ''} 
-                        ${teacher.isWhatsappAvailable == "Y" 
-                        ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` 
-                        : ''}
+                        ${teacher.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}
                     </td>
                     <td>${teacher.email || ''}</td>
                     <td>${teacher.country} | ${teacher.state} | ${teacher.city}</td>
@@ -76,17 +77,29 @@ function bindTeacherScreeningData(responseData) {
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
-                    <td>${teacher.assignedTo || 'N/A'}</td>
-                    ${/*<td>
-                        <button class="btn btn-sm font-12 btn-warning" onclick="openUpdateStatusModal(${teacher.id}, '${teacher.status || ''}')">
-                            Update Status
-                        </button>
-                    </td>
+                    <td>${teacher.assignTo || 'N/A'}</td>
+                    <td>${teacher.status || 'N/A'}</td>
                     <td>
-                        <button class="btn btn-sm font-12 btn-info" onclick="resendInterviewLink(${teacher.id})">
-                            Resend Interview Booking Link
-                        </button>
-                    </td>*/''}
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModal(${teacher.id}, '${teacher.status || ''}')">
+                                        <i class="fas fa-edit me-2"></i>&nbsp;Update Status
+                                    </a>
+                                </li>`;
+                                if(teacher.status != ""){
+                                    row+=`<li>
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${teacher.id})">
+                                            <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                                        </a>
+                                    </li>`
+                                }
+                            row+=`</ul>
+                        </div>
+                    </td>
                 </tr>`;
             tableBody.append(row);
         });
@@ -139,6 +152,7 @@ function resendInterviewLink(teacherId) {
     alert('Interview booking link has been resent successfully!');
 }
 
+
 function openPreviousExperience(oldGrades, oldCourses, newGrades, newCourses){
     if($("#teacherPreviousExperienceModal").length == 1){
         $("#teacherPreviousExperienceModal").remove();
@@ -170,9 +184,134 @@ function toBulletPoints(value, isCourse = false) {
 
         return `<ul class="pl-3 list-type-disc mb-0"><li>${specialPrefix}</li></ul>${extrasHtml}`;
     }
-
-    const items = value.split(",").map(v => v.trim()).filter(v => v !== "");
+    const items = value.replaceAll(", ", "#").split(",").map(v => v.replaceAll("#", ", ").trim()).filter(v => v !== "");
     if (items.length === 1) return items[0];
 
     return `<ul class="mb-0 pl-3 list-type-disc">${items.map(v => `<li>${v}</li>`).join("")}</ul>`;
+}
+
+function openUpdateStatusModal(id, status){
+    if($("#teacherScreeningProfileStatusModal").length == 1){
+        $("#teacherScreeningProfileStatusModal").remove();
+    }
+    $("body").append(teacherScreeningProfileStatusModal(id, status));
+    $("#assignedToInterview").select2({
+        placeholder: "Select Assign To",
+        theme:"bootstrap4"
+    });
+    setTimeout(() => {
+        $("#teacherScreeningProfileStatusModal").modal("show");
+    }, 200);
+}
+
+async function updateTeacherScreeningProfile(id){
+    var selectedStatus = $("#teacherScreeningProfileStatus").val();
+    if(selectedStatus == ""){
+        showMessageTheme2(2, "Please select status");
+        return false;
+    }
+    if(selectedStatus == "Approved For Interview"){
+        if($("#assignedToInterview").val() == ""){
+            showMessageTheme2(2, "Please select assign to");
+            return false;
+        }
+    }
+    if($("#teacherScreeningProfileRemarks").val() == ""){
+        showMessageTheme2(2, "Please enter remarks");
+        return false;
+    }
+    var payload = {};
+    payload["entityId"] = id;
+    payload["entityType"] = "INITIAL-INTERVIEW";
+    payload["assignTo"] = $("#assignedToInterview").val();
+    payload["status"] = $("#teacherScreeningProfileStatus").val();
+    payload["remarks"] = $("#teacherScreeningProfileRemarks").val();
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
+    if(responseData.status == "SUCCESS"){
+        if(selectedStatus == 'Reject'){
+            $("#teacherScreeningTable tbody #tr_"+id).remove();
+        }else{
+            var assignedToText = $("#assignedToInterview option:selected").text();
+            var displayName = assignedToText.split("-")[0].trim();
+            updateTableRowDirectly(id, selectedStatus, displayName);
+        }
+        showMessageTheme2(1, responseData.message);
+        $("#teacherScreeningProfileStatusModal").modal("hide");
+    }else{
+        showMessageTheme2(0, responseData.message);
+    }
+
+}
+async function viewAssignToListForInterview(){
+    var selectedStatus = $("#teacherScreeningProfileStatus").val();
+    if(selectedStatus == "Approved For Interview"){
+        let payload = {}
+        var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
+        bindAssignTo('teacherScreeningProfileStatusForm', 'assignedToInterview', responseData);
+        $("#assignedToInterviewDiv").show();
+    }else{
+        $("#assignedToInterviewDiv").hide();
+        $("#assignedToInterview").val("").trigger("change");
+    }
+}
+
+async function resendTeacherInterviewLink(id){
+    var payload = {}
+    payload["entityId"] = id;
+    payload["entityType"] = "INITIAL-INTERVIEW";
+    payload["status"] = 'Resend Interview Link';
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
+    if(responseData.status == "SUCCESS"){
+        showMessageTheme2(1, responseData.message);
+    }else{
+        showMessageTheme2(0, responseData.message);
+    }
+}
+
+function bindAssignTo(formId, selectId, responseData) {
+    const element = $("#" + formId+" #"+selectId);
+    element.empty();
+    element.append('<option value="">Select assign to</option>');
+
+    if (responseData && Array.isArray(responseData.assignTo)) {
+        $.each(responseData.assignTo, function (i, item) {
+            element.append(
+                "<option value='" + item.id + "'>" + item.userFullName + " - (" + item.email + ")</option>"
+            );
+        });
+    }
+}
+
+function updateTableRowDirectly(teacherId, newStatus, assignedTo) {
+    var row = $('#tr_' + teacherId);
+    
+    if(row.length) {
+        if(newStatus != "Approved for Selection Process"){
+            row.find('td:eq(11)').text(assignedTo || 'N/A');
+        }
+        row.find('td:eq(12)').text(newStatus || 'N/A');
+        
+        var dropdownHtml = `
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModal(${teacherId}, '${newStatus || ''}')">
+                            <i class="fas fa-edit me-2"></i>&nbsp;Update Status
+                        </a>
+                    </li>`;
+        if(newStatus && newStatus !== "" && newStatus !== "N/A") {
+            dropdownHtml += `<li>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${teacherId})">
+                            <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                        </a>
+                    </li>`;
+        }
+        
+        dropdownHtml += `</ul>
+            </div>`;
+        row.find('td:eq(13)').html(dropdownHtml);
+    }
 }

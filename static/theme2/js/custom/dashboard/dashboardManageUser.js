@@ -436,6 +436,11 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 					  +'<a href="'+value.spoofLink+'" class="dropdown-item">'
 						+'<i class="fa fa-eye"></i>View as Teacher'
 					  +'</a>'
+					  +(value.meetingCount  <= 0
+						? ""
+						: '<a href="javascript:void(0);" class="dropdown-item" onclick="showWarningMessageShow(\'Are you sure you want to re-attempt recordings?\', \'enableReattemptRecording(' + value.userId + ')\');">'
+							+ '<i class="fa fa-cogs"></i>&nbsp;&nbsp;Flush Recording'
+						+ '</a>')
 					+'</div>'
 				  +'</div>'
 				+'</td>'

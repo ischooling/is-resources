@@ -55,5 +55,5 @@ function getTeacherInterviewAssignTableHtml(assignUserList){
 	}else if (chckValue=='Y') {
 		chckValue='N';
 	}
-	saveInactiveAssignCounselorOrient(userId, chckValue, orderBy, 'TEACHER_INITIAL_INTERVIEW');
+	saveInactiveAssignCounselorOrient(userId, chckValue, orderBy, 'INITIAL-INTERVIEW');
 }

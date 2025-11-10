@@ -426,7 +426,11 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\''+item.leadId+'\',\''+item.meetingFor+'\',\''+item.name+'\',\''+item.meetingStartTime+'\',\''+item.meetingEndTime+'\',\''+item.meetingDate+'\',\''+item.meetingEndDate+'\',\''+item.counselorTimeZone+'\',\''+item.inviteeStartTime+'\',\''+item.inviteeEndTime+'\',\''+item.inviteeMeetingDate+'\',\''+item.inviteeMeetingEndDate+'\',\''+item.inviteeTimezone+'\',\''+item.standardName+'\',\''+item.inviteeName+'\',\''+item.inviteeEmail+'\',\''+item.isdCode+'\',\''+item.phoneNo+'\',\''+item.countryName+'\', \''+item.inviteeCountry+'\')">Update</a>';
 											}
 										}else{
-											html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\')">Update</a>';
+											if(item.meetingFor == 'Initial-Interview'){
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Initial-Interview\')">Update</a>';
+											}else{
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\')">Update</a>';
+											}
 										}
 										if(item.meetingStatus != 'Cancelled' && item.meetingStatus != 'Reschedule'){
 											html+='<br/>'
@@ -478,7 +482,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 		return html;
 }	
 
-function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount){
+function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount, eventName){
 	const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;	
 	var html =
 			'<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
@@ -497,17 +501,23 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 									+'<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">'
 										+'<label>Status</label>'
 										+'<select name="status" id="status" class="form-control">'
-											+'<option value="">Select Status</option>'
-											+'<option value="COMPLETED">Completed</option>'
-											+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
-											+'<option value="NOTATTENDED">No Show</option>'
-											+'<option value="CANCELLED">Cancelled</option>'
-											+'<option value="RESCHEDULE">Reschedule</option>'
-											+'<option value="Demo Confirmed">Demo Confirmed</option>'
-											+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
-											+'<option value="Not Interested">Not Interested</option>'
-											+'<option value="Positive to enrollment">Positive to enrollment</option>'
-										+'</select>'
+											+'<option value="">Select Status</option>';
+											if(eventName == 'Initial-Interview'){
+										html +='<option value="COMPLETED">Completed</option>'
+												+'<option value="CANCELLED">Cancelled</option>'
+												+'<option value="RESCHEDULE">Reschedule</option>';
+											}else{
+										html +='<option value="COMPLETED">Completed</option>'
+												+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
+												+'<option value="NOTATTENDED">No Show</option>'
+												+'<option value="CANCELLED">Cancelled</option>'
+												+'<option value="RESCHEDULE">Reschedule</option>'
+												+'<option value="Demo Confirmed">Demo Confirmed</option>'
+												+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
+												+'<option value="Not Interested">Not Interested</option>'
+												+'<option value="Positive to enrollment">Positive to enrollment</option>';
+											}
+										html +='</select>'
 									+'</div>'
 									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
 										+'<label class="mb-0">Tentative Date</label>'

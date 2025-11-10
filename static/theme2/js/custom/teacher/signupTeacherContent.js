@@ -2118,3 +2118,48 @@ function populateRecordingModal(recordings, title) {
     $("body").append(modalContent);
     $("#recordingModal").modal("show");
 }
+
+function showStartMeetingPopupTeacher(meetingName, url) {
+    var html=`
+        <div class="modal fade" id="start-meeting-popup-teacher" tabindex="-1" role="dialog" aria-labelledby="startMeetingLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-white d-flex justify-content-between align-items-center" style="background-color:var(--pc); color:#fff;">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-info-circle mr-2" style="font-size: 24px;"></i>
+                            <h5 class="modal-title font-weight-bold">Information</h5>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h6 class="text-center mb-3">
+                            <strong>${meetingName}</strong>
+                        </h6>
+                        <div class="text-center mb-3">
+                            <a href="${url}" target="_blank" class="btn btn-primary font-weight-bold">Start Demo</a>
+                        </div>
+                        <hr class="my-4 border-top-dashed">
+                        <h6 class="text-center mb-2">
+                            If you face issues with joining, copy the host link below and paste it into a new tab on your browser:
+                        </h6>
+                        <p class="copy-msg-1 text-center font-weight-bold mb-2"></p>
+                        ${DEPLOYMENT_MODE != "PROD" ?
+                            `<textarea readonly class="form-control mb-3">${url}</textarea>`
+                            :
+                            `<input type="hidden">`
+                        }
+                        <div class="text-center">
+                            <button class="btn btn-success font-weight-bold copy-link-button" data-url="${url}" onclick="copyURL('copyURL1','copy-msg-1')">
+                                Copy Link
+                            </button>
+                        </div>
+                        <input type="text" id="copyURL1" value="${url}" style="opacity:0;height:0;">
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
+  }
+  

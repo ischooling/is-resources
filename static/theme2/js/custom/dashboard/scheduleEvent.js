@@ -261,7 +261,7 @@ function updateMeetingStatus(meetingId, leadId) {
 
 function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry,remarkMendatory,minRemarkCount){
 	confirmationFlag=true;
-	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount));
+	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount,eventName));
 	$("#confirmeUpdateModalWrapper").html(confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry));
 	$('#updateSystemTraningModal').modal('show');
     $('.tentativeDate').datepicker({
