@@ -199,6 +199,7 @@ function callForSignupStudentDetails() {
 				}
 				if($("#signupType").val() == "Offline"){
 					$("#learningProgramPartnerStudent").attr("disabled", true);
+					$("#signupLearningProgramWrapper").hide();
 				}
 				callForParentSelection();
 			}
@@ -588,6 +589,7 @@ async function moveStep(moveType){
 	}
 	if(prevStep==1){
 		$("#learningProgramPartnerStudent").attr("disabled", false);
+		$("#signupLearningProgramWrapper").show()
 		if(currentStep != prevStep && currentStep > prevStep){
 			$('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'step-1.png');
 			if(courseProviderId == 39){

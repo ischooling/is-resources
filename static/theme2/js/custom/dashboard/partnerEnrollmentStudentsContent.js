@@ -269,10 +269,10 @@ async function partnerEnrollmentListDetails(studentList){
                                             : 'bg-primary'
                                     } text-white rounded-pill px-2 py-1 small">${
                                         item.studentEnrollBy === 'P'
-                                            ? 'ADDED BY PARTNER'
+                                            ? 'Added by Partner'
                                             : item.studentEnrollBy === 'D'
-                                            ? 'DIRECT ENROLLMENT'
-                                            : 'ENROLLMENT VIA IS'
+                                            ? 'Direct Enrollment'
+                                            : 'Enrollment via IS'
                                     }</span>
                                 </div>
                             </td>

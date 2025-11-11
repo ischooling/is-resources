@@ -1383,12 +1383,12 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 														}
 														
 														var enrollColor="bg-primary";
-														var enrollType="ENROLLMENT VIA IS";
+														var enrollType="Enrollment via IS";
 														if(stuList.studentEnrollBy=='P'){
-															enrollType='ADDED BY PARTNER';
+															enrollType='Added by Partner';
 															enrollColor="bg-orange";
 														}else if(stuList.studentEnrollBy=='D'){
-															enrollType='DIRECT ENROLLMENT';
+															enrollType='Direct Enrollment';
 															enrollColor="bg-alternate";
 														}
 														html+='<tr>'

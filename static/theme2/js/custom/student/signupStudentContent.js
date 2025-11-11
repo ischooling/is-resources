@@ -269,10 +269,10 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                 	<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
 				}else {
 					html+=
-					`<div class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 mx-auto">
-						<label class="d-flex justify-content-center font-weight-bold font-22">Choose Learning Program</label>
+					`<div id="signupLearningProgramWrapper" class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 mx-auto">
+						<label class="d-flex justify-content-center font-weight-bold font-22">Choose Program</label>
 						<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;-webkit-appearance:auto !important">
-							<option value="">Select Learning Program</option>
+							<option value="">Select Program</option>
 							${getAllLearningProgramContent(SCHOOL_ID)}
 						</select>
 					</div>
@@ -1176,7 +1176,7 @@ function getParentDetailsContent(data) {
         if ($('#learingProgramHeader').val() == 'ONE_TO_ONE_FLEX') {
             parentHeaderLabel = 'Academic & Communication Details';
         } else {
-            parentHeaderLabel = 'Parent / Guardian Details';
+            parentHeaderLabel = 'Parent | Guardian Details';
         }
     }
 
