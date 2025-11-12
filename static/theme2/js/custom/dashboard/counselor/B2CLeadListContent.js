@@ -6,7 +6,7 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
     html +=
       '<button class=" btn btn-primary  text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
     html +=
-      '<button class=" btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates()" >Email Broadcast</button>';
+        '<button class=" btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates(\'B2C\')" >Email Broadcast</button>';
     html += "</div>";
   }
   html += '<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">';

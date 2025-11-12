@@ -1464,6 +1464,18 @@ function callHippoLogsDataModal(data) {
 	return html;
 }
 
+function base64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+    String.fromCharCode('0x' + p1)
+  ));
+}
+
+function base64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+  ).join(''));
+}
+
 function customEmailTemplatesList(tdata) {
 	var html=
 		`<style>
@@ -1504,7 +1516,27 @@ function customEmailTemplatesList(tdata) {
 												const userFirstName = USER_FULL_NAME.split(" ")[0];
 												let indexValue = 0;
 												$.each(tdata.templates, function(index, element) {
-													if (element.name.toLowerCase().includes(userFirstName.toLowerCase())) {
+													if(USER_ROLE != 'B2B_LEAD'){
+														if (element.name.toLowerCase().includes(userFirstName.toLowerCase())) {
+															indexValue++
+															var templateName = element.name;
+															let subject = element.subject;
+															html+=`<tr id="table_row_`+templateName+`">
+																<td style="vertical-align: middle !important;" class="font-weight-bold">`+ indexValue+`</td>
+																<td style="vertical-align: middle !important;" class="font-weight-bold">`+templateName+`</td>
+																<td style="vertical-align: middle !important;" class="text-center">
+																	<a href="javascript:void(0)" class="btn btn-outline-dark btn-sm" style="text-decoration: none !important;" onclick="viewEmailTemplate(true, `+index+`, '`+templateName+`')">
+																		View<i class="fa fa-eye ml-1"></i>
+																	</a>
+																</td>
+																<td style="vertical-align: middle !important;" class="text-center">
+																	<a href="javascript:void(0)" class="btn btn-primary btn-sm text-white" style="text-decoration: none !important;" onclick="sendEmailNotification(\'`+encode2(templateName)+`\','`+encode2(subject)+`',`+index+`,\'`+element.id+`\')">
+																		Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
+																	</a>
+																</td>
+															</tr>`;
+														}
+													}else{
 														indexValue++
 														var templateName = element.name;
 														let subject = element.subject;
@@ -1517,7 +1549,7 @@ function customEmailTemplatesList(tdata) {
 																</a>
 															</td>
 															<td style="vertical-align: middle !important;" class="text-center">
-																<a href="javascript:void(0)" class="btn btn-primary btn-sm text-white" style="text-decoration: none !important;" onclick="sendEmailNotification(\'`+btoa(templateName)+`\','`+btoa(subject)+`',`+index+`,\'`+element.id+`\')">
+																<a href="javascript:void(0)" class="btn btn-primary btn-sm text-white" style="text-decoration: none !important;" onclick="sendEmailNotification(\'`+encode2(templateName)+`\','`+encode2(subject)+`',`+index+`,\'`+element.id+`\')">
 																	Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
 																</a>
 															</td>
@@ -2016,7 +2048,7 @@ function emailBroadcastLogsModal(data, name, email) {
 										<tbody>`;
 											if(data.length > 0){
 												$.each(data, function(index, item){
-													var parsedData = JSON.parse(data[index])
+													var parsedData = data[index]
 													html+=`<tr>
 														<td>${index + 1}</td>
 														<td>${parsedData.senderName}</td>

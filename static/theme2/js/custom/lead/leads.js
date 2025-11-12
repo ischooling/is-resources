@@ -10907,7 +10907,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
   }
   
 
-function getEmailTemplates() {	
+function getEmailTemplates(type) {	
 	var moveleadNo = $("#leadNoMove").val();
 	if(moveleadNo==''){
 		showMessageTheme2(0, 'Please check any one lead','',false);
@@ -10924,7 +10924,7 @@ function getEmailTemplates() {
 	var request={}
 	request['userId']=USER_ID;
 	request['leadIds']=leads;
-
+	request['leadListType']=type;
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -10998,6 +10998,7 @@ function viewEmailTemplate(flag, indexNumber, templateName){
 		$(".modal-dialog").css({
 			"transform": "translateX(0)"
 		});
+		$(".modal-dialog").removeAttr("style");
 	}
 }
 
@@ -11016,8 +11017,8 @@ function gotoBackEmailModal(){
 }
 
 function sendEmailNotification(templateName, subject, index, templateId){
-	templateName = atob(templateName)
-	subject = atob(subject);
+	templateName = decode2(templateName)
+	subject = decode2(subject);
 	var request={};
 	$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
 	$('#templateNameEmail').html('<b>' + templateName + '</b> ');
@@ -11077,7 +11078,7 @@ function sendEmailNotification(templateName, subject, index, templateId){
 			if($("#sendConfirmationModal").length >= 1){
 				$("#sendConfirmationModal").remove();
 			}
-			$("body").append(sendConfirmationModal(`sendEmailNotificationToUser(${index}, '${btoa(templateName)}', '${btoa(subject)}', '${selectedLeads}', 'send', '${templateId}')`));
+			$("body").append(sendConfirmationModal(`sendEmailNotificationToUser(${index}, '${encode2(templateName)}', '${encode2(subject)}', '${selectedLeads}', 'send', '${templateId}')`));
 			$("#sendConfirmationModal").modal("show");
 			// showWarningMessageShow('Are you sure you want to send this data?','sendEmailNotificationToUser( '+index+',\''+templateName+'\',\''+btoa(subject)+'\',\''+selectedLeads+'\',\'send\',\''+templateId+'\')', 'info-modal-sm');
 		}
@@ -11112,8 +11113,8 @@ function sendEmailNotification(templateName, subject, index, templateId){
 }
 
 function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_status,templateId) {	
-	templateName = atob(templateName)
-	subject = atob(subject)
+	templateName = decode2(templateName)
+	subject = decode2(subject)
 	$("#resetDeleteErrorWarningNo1").click(function(){
 		$("#remarksresetDelete2").hide();
 	});
@@ -11164,7 +11165,7 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			if (data['statusCode'] == 'EX01' || data['statusCode'] == 'E004' ) {
+			if (data['statusCode'] == 'EX01' || data['statusCode'] == 'E004' ||  data['statusCode'] == 'FAILED' || data['statusCode'] == '0' ||  data['status'] == '0') {
 				showMessageTheme2(0, data['message'],'',false);
 				$("input#allCheckedEmail").prop('checked', false);
 				$('input[name="chk-users-lead-email"]').prop('checked', false);

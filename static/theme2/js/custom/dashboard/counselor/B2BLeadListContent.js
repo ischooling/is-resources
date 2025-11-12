@@ -4,6 +4,7 @@ const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
 
 function getB2BListHeaderContent(roleAndModule, objRights){
 	var html='<div class="full text-right">'
+		html +='<button class="btn btn-focus text-white mb-2 mr-2" onclick="getEmailTemplates(\'B2B\')" >Email Broadcast</button>';
 		if(roleAndModule.added=='Y'){
 			html+='<button class="btn btn-warning  text-white mb-2 mr-2" id="addLead">Add New Lead</button>';
 		}
@@ -1106,6 +1107,9 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 									+'</td>'
 								+'</tr>';
 								
+							}
+							if(leads.emailBroadcastCount>0){
+								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>&nbsp;Email Broadcast</a>';
 							}
 							if(leads.leadStatus=='Converted & On Boarding | Hot')
 							{

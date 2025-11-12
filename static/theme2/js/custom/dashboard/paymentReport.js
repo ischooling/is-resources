@@ -1210,8 +1210,8 @@ function closeModalAndFlushData(){
 }
 
 function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_status,templateId) {	
-	templateName = atob(templateName)
-	subject = atob(subject)
+	templateName = decode2(templateName)
+	subject = decode2(subject)
 	$("#resetDeleteErrorWarningNo1").click(function(){
 		$("#remarksresetDelete2").hide();
 	});

@@ -2040,7 +2040,7 @@ function sendEmailNotification(templateName, subject, index, templateId){
 			if($("#sendConfirmationModal").length >= 1){
 				$("#sendConfirmationModal").remove();
 			}
-			$("body").append(sendConfirmationModal(`sendEmailNotificationToUser(${index}, '${btoa(templateName)}', '${btoa(subject)}', '${selectedLeads}', 'send', '${templateId}')`));
+			$("body").append(sendConfirmationModal(`sendEmailNotificationToUser(${index}, '${encode2(templateName)}', '${encode2(subject)}', '${selectedLeads}', 'send', '${templateId}')`));
 			$("#sendConfirmationModal").modal("show");
 			// showWarningMessageShow('Are you sure you want to send this data?','sendEmailNotificationToUser( '+index+',\''+templateName+'\',\''+btoa(subject)+'\',\''+selectedLeads+'\',\'send\',\''+templateId+'\')', 'info-modal-sm');
 		}

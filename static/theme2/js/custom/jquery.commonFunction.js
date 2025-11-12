@@ -5358,6 +5358,18 @@ function decode(payload) {
   return window.atob(payload);
 }
 
+function encode2(payload) {
+  const bytes = new TextEncoder().encode(payload);
+  const bin = Array.from(bytes, b => String.fromCharCode(b)).join('');
+  return window.btoa(bin);
+}
+
+function decode2(encoded) {
+  const bin = atob(encoded);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
 function disablePastTimes(startTimeID, endTime, currentDate) {
   var currentHour = currentDate.getHours();
   var currentMinute = currentDate.getMinutes();
