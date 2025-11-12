@@ -1458,13 +1458,13 @@ function callMasterCampainList(formId, value, elementId) {
 }
 
 
-function getCounselorReviewDetails(modeSearch, eventId, startDate, endDate) {
+function getCounselorReviewDetails(modeSearch, eventId, startDate, endDate, userId) {
 	var responseData={};
 	var dataRequest={};
 	dataRequest['modeSearch']=modeSearch;
 	dataRequest['startDate']=startDate;
 	dataRequest['endDate']=endDate;
-	dataRequest['userId']=USER_ID;
+	dataRequest['userId']=userId;
 	dataRequest['schoolId']=SCHOOL_ID;
 	$.ajax({
 		type : "POST",
@@ -1649,3 +1649,195 @@ function callCounselorDetailReview(modeSearch, counselorId, eventId, startDate, 
 		}
 		return html;
 	}
+
+var getCounselorReportListFlag = true
+function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFrom, eventid) {
+	data={};
+	data['schoolId']=SCHOOL_ID;
+	data['userId']=USER_ID;
+	data['modeSearch']=modesearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['callFrom']=callFrom;
+	data['assignTo']=assignTo;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard', 'counselor-list-report'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		cache : false,
+		global : getCounselorReportListFlag,
+		timeout : 600000,
+		success : function(data) {
+			console.log(data);
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				if(callFrom==''){
+					getCounselorReportListFlag = false;
+					var html=getcounselorReportListHtml(data, modesearch, startDate, endDate, callFrom);
+					$('#counselor-list-report').html(html);
+					var dataList=data.dataList;
+					if(dataList.length>0){	
+						for (let u = 0; u < dataList.length; u++) {	
+							const report = dataList[u];
+							getcounselorReportList(''+report.assignTo+'',''+modesearch+'',''+startDate+'', ''+endDate+'', 'DAILY-REPORT', 'counselorReportTbody_');
+						}
+					}
+
+					// if(dataList.length>0){	
+					// 	for (let u = 0; u < dataList.length; u++) {	
+					// 		const report = dataList[u];
+					// 		console.log("getCounselorReviewDetails=> "+report.assignTo);
+					// 		var dataRate = getCounselorReviewDetails(''+modesearch+'',"reviewCounselor",''+startDate+'', ''+endDate+'', report.assignTo);
+							
+					// 		var reviewList =dataRate.counselorReviewList;
+					// 		var responseTime=0;
+					// 		var leadToDemo=0;
+					// 		var demoToEnroll=0;
+					// 		var leadToEnroll=0;
+					// 		var joiningDemoTime=0;
+					// 		var timeToLeadConversion=0;
+					// 		var overallRating=0;
+					// 		var tfinalScore=0;
+					// 		var totalLeadRating=0;
+					// 		if(reviewList!=undefined && reviewList.length>0){
+					// 			$.each(reviewList, function(i,v){
+					// 				var leadData1 = v.leadData;
+					// 				if(leadData1.length > 0){
+					// 					$.each(leadData1, function(j, ld){
+					// 						if(ld.dataType=='RESPONSE-TYPE'){
+					// 							responseTime=ld.finalScore;
+					// 						}
+					// 						if(ld.dataType=='LEAD-DEMO'){
+					// 							leadToDemo=ld.finalScore;
+					// 						}
+					// 						if(ld.dataType=='DEMO-ENROLL'){
+					// 							demoToEnroll=ld.finalScore;
+					// 						}
+					// 						if(ld.dataType=='LEAD-ENROLL'){
+					// 							leadToEnroll=ld.finalScore;
+					// 						} 
+					// 						if(ld.dataType=='MEETING-JOIN'){
+					// 							joiningDemoTime=ld.finalScore;
+					// 						} 
+					// 						if(ld.dataType=='ENROLL-TIME'){
+					// 							timeToLeadConversion=ld.finalScore;
+					// 						}
+					// 						tfinalScore+=parseInt(ld.finalScore);
+					// 						if(ld.finalScore>0){
+					// 							totalLeadRating+=1;
+					// 						}
+					// 					});
+					// 					overallRating	=tfinalScore/totalLeadRating;
+					// 				}
+					// 			});
+					// 			$('#rating_'+report.assignTo).html(overallRating.toFixed(1));
+					// 		}
+					// 	}
+					// }
+				}else{
+					getCounselorReportListFlag = true;
+					var html =getcounselorReportTbodyHtml(data);
+					$('#'+eventid+assignTo).html(html);
+				}
+			}
+			
+		}
+	});
+}
+
+function getcounselorReportListHtml(data){
+	var dataList=data.dataList;
+	var html='';
+	if(dataList.length>0){	
+		for (let u = 0; u < dataList.length; u++) {	
+			const report = dataList[u];
+			var modSrc='';
+			if(report.modeSearch=='DAY'){
+				modSrc='Today';
+			}else{
+				modSrc=report.startsDate+' to '+report.endsDate;
+			}
+			html+=`<div class="${!OBJECT_RIGHTS.searchUser?'col-md-4':'col-md-2'}" style="overflow:auto;">
+					<table  class="table table-bordered responsive nowrap" style="width:100%;">
+						<thead>
+							<tr>
+								<th colspan="2" class="bg-primary text-white"><p class="mb-0 text-center">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0">${modSrc}</p> </th>
+							</tr>
+						</thead>
+						<tbody class="font-10" id="counselorReportTbody_${report.assignTo}"></tbody>
+					</table>
+				</div>`;
+				
+		}
+	}
+	return html;
+}	
+
+function getcounselorReportTbodyHtml(report){
+	var dataList=report.dataList;
+	var html='';
+	if(dataList.length>0){	
+		for (let u = 0; u < dataList.length; u++) {	
+			const leadReport = dataList[u];
+			html+=`<tr><th class="p-1">Total Lead Received </th><td>${leadReport.totalLeads}</td></tr>`;
+			if(!OBJECT_RIGHTS.searchUser){
+				html+=`<tr><th class="p-1">Expected numbers for today</th>
+				<td><input type="text" value="${leadReport.expectedToday}" id="dailyNumber_${leadReport.assignTo}" class="mr-2" style="padding: 2px 2px 4px 2px;" />
+				<a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2 saveCounselorExpected" onclick="saveCounselorExpected(${leadReport.assignTo});" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span class="d-md-none">&nbsp; Add</span></a>
+				</td></tr>`;
+			}else{
+				html+=`<tr><th class="p-1">Expected numbers for today</th><td>${leadReport.expectedToday}</td></tr>`;
+			}
+				html+=`<tr><th class="p-1">Demo received by website </th><td>${leadReport.totalWebsite}</td></tr>
+				<tr><th class="p-1">Demo received by Zoho Chats</th><td>${leadReport.totalZoho}</td></tr>
+				<tr><th class="p-1">Demo completed </th><td>${leadReport.totalDemoDone}</td></tr>
+				<tr><th class="p-1">Call Dailed </th><td>${leadReport.totalCalls}</td></tr>
+				<tr><th class="p-1">Call Completed </th><td>${leadReport.totalCallComplete}</td></tr>
+				<tr><th class="p-1">Demo Arranged </th><td>${leadReport.totalCopyurl}</td></tr>
+				<tr><th class="p-1">Enrollments </th><td>${leadReport.totalConvert}</td></tr>
+				<tr><th class="p-1">Email sent </th><td>-</td></tr>
+				<tr><th class="p-1">Enrollment Link Share </th><td>-</td></tr>
+				<tr><th class="p-1">Wati/ whatsapp sent </th><td>-</td></tr>`;
+				// <tr><th class="p-1">Rating </th><td id="rating_${leadReport.assignTo}">-</td></tr>
+			
+					
+					
+		}
+	}
+	return html;
+}
+
+
+
+function saveCounselorExpected(assignTo) {
+	var dataRequest={};
+	dataRequest['assignTo']=assignTo;
+	dataRequest['dailynumber']=$("#dailyNumber_"+assignTo).val();
+	dataRequest['userId']=USER_ID;
+	dataRequest['schoolId']=SCHOOL_ID;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-counselor-expected',
+		data : JSON.stringify(dataRequest),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				showMessageTheme2(0, data['message']);
+			}else{
+				showMessageTheme2(1, data['message']);
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return responseData;
+}

@@ -128,6 +128,42 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 			console.log(chartIndex)
 			getCounselorPartnerCommissionRatesChart('c_chart_school'+chartIndex,''+chartIndexVal+'', valueMin1, valueMax1);
 		});
+
+		$("#dataStartDate").datepicker({
+			format : 'dd-mm-yyyy',
+			autoclose: true,
+		});
+		$("#dataEndDate").datepicker({
+			format : 'dd-mm-yyyy',
+			autoclose: true,
+		});
+
+		getcounselorReportList('0','DAY','','','','');
+		$(".hidedate").css({"display":"none"})
+		$("#searchtypeTotalLead").on("change", function(){
+			if($("#searchtypeTotalLead").val()=='CUSTOM'){
+				$(".hidedate").css({"display":"block"});
+			}else{
+				$(".hidedate").css({"display":"none"})
+				getcounselorReportList('0',$("#searchtypeTotalLead").val(),'','','','');
+				
+			}
+		});
+
+		$("#btnWiseSubmit").on("click",function(){
+			var startDate = $("#dataStartDate").val();
+			var endDate = $("#dataEndDate").val();
+			var searchCountrytype = $("#searchtypeTotalLead").val();
+			if($("#dataStartDate").val()=='' && $("#dataStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+					return false;
+			}
+			if($("#dataEndDate").val()=='' && $("#dataEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+					return false;
+			}
+			getcounselorReportList('0',searchCountrytype,startDate,endDate,'','');
+		});
 	}
 }
 {/* <div class="page-title-subheading">${title}</div> */}
@@ -147,7 +183,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 			</div>`;
 		html+=getCounselorB2BContent1();
 	}else{
-		var dataReview = getCounselorReviewDetails("CUSTOM","reviewCounselor",'','');
+		var dataReview = getCounselorReviewDetails("CUSTOM","reviewCounselor",'','', USER_ID);
 		var data=getCounselorDetails(userId);
 		localStorage.setItem('convertYear',data.counselor.convertYear);
 		localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
@@ -201,6 +237,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				+getCounselorEnrollmentStatisticsContent()
 			html+=`</div>`;
 			html+=getRatingPopup();
+			html+=getSelfCounselorReport();
 	}
 	
 	return html;
@@ -283,7 +320,7 @@ function getStatsDetailsContent(data){
 	var overallRating=0;
 	var tfinalScore=0;
 	var totalLeadRating=0;
-	if(reviewList.length>0){
+	if(reviewList!=undefined && reviewList.length>0){
 		$.each(reviewList, function(i,v){
 			var leadData1 = v.leadData;
 			if(leadData1.length > 0){
@@ -1631,3 +1668,32 @@ function getRatingPopup(){
 	return html;
 }
 
+
+function getSelfCounselorReport(){
+	var html=`<div class="main-card mb-3 card">
+                <div class="card-body">
+					<div class="d-flex">
+						<div class="col-md-4">	
+							<select class="form-control form-control-sm mr-1 mb-2 col-md-4 float-right" id="searchtypeTotalLead" name="searchtypeTotalLead">
+								<option value="DAY" >Today</option>
+								<option value="WEEK" >Week</option>
+								<option value="MONTH" >Month</option>
+								<option value="CUSTOM">Custom</option>
+							</select>
+						</div>
+						<div class="hidedate">
+							<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
+								<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+									<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+									<div class="mx-1">To</div>
+									<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+								</div>
+								<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
+							</div>
+						</div>
+					</div>
+					<div class="row" id="counselor-list-report"></div>
+			</div>
+        </div>`;
+	return html;
+}
