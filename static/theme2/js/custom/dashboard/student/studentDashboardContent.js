@@ -329,16 +329,18 @@ function batchImpAnnouncementModal(){
                             <h6 class="font-weight-semi-bold text-justify text-primary" style="line-height: 26px;">Our Group Learning batch for UTC+ time zone starts on Sept 18, 2024 and for UTC- time zone starts on Sep 25, 2024! To secure your enrollment please make sure to pay the full fee at the earliest. Don't miss out - enroll today!</h6>
                             <h6 class="d-flex flex-wrap align-items-center justify-content-start font-weight-semi-bold  mt-3 fullView" style="gap:10px">
                                 For any queries regarding enrollment, please
-                                <a target="_blank" href="https://chat.internationalschooling.org/onboarding-support?uuid=${UNIQUEUUID}" class="notify-bell-chat d-flex justify-content-center align-items-center group position-relative" style="width: fit-content;">
-                                    <svg class="chat-logo bg-primary" width="35" height="35" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M16.0156 16.0156V16.7969C16.0156 17.4414 15.4883 17.9688 14.8438 17.9688H7.61719L7.42188 18.125L4.88281 20.0781V17.9688H3.32031C2.67578 17.9688 2.14844 17.4414 2.14844 16.7969V8.59375C2.14844 7.94922 2.67578 7.42188 3.32031 7.42188H7.8125V6.64062H3.32031C2.24609 6.64062 1.36719 7.51953 1.36719 8.59375V16.7969C1.36719 17.8711 2.24609 18.75 3.32031 18.75H4.10156V21.6797L7.89063 18.75H14.8438C15.918 18.75 16.7969 17.8711 16.7969 16.7969V16.0156H16.0156Z" fill="white"/>
-                                        <path d="M21.6797 4.29688C22.3242 4.29688 22.8516 4.82422 22.8516 5.46875V13.6719C22.8516 14.3164 22.3242 14.8438 21.6797 14.8438H20.1172V16.9727L17.5781 15.0195L17.3828 14.8438H10.1562C9.51172 14.8438 8.98438 14.3164 8.98438 13.6719V5.46875C8.98438 4.82422 9.51172 4.29688 10.1562 4.29688H21.6797ZM21.6797 3.51562H10.1562C9.08203 3.51562 8.20312 4.39453 8.20312 5.46875V13.6719C8.20312 14.7461 9.08203 15.625 10.1562 15.625H17.1094L20.8984 18.5547V15.625H21.6797C22.7539 15.625 23.6328 14.7461 23.6328 13.6719V5.46875C23.6328 4.39453 22.7539 3.51562 21.6797 3.51562Z" fill="white"/>
-                                    </svg>
-                                    <span class="chat-message" style="box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .5) !important;padding:8px 5px 8px 22px">
-                                        Talk to School Administration
-                                    </span>
-                                    <span class="UNSEEN start-100 translate-middle badge position-absolute"></span>
-                                </a>
+                                ${CHAT_URL != ''?`
+                                    <a target="_blank" href="${CHAT_URL}/onboarding-support?uuid=${UNIQUEUUID}" class="notify-bell-chat d-flex justify-content-center align-items-center group position-relative" style="width: fit-content;">
+                                        <svg class="chat-logo bg-primary" width="35" height="35" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16.0156 16.0156V16.7969C16.0156 17.4414 15.4883 17.9688 14.8438 17.9688H7.61719L7.42188 18.125L4.88281 20.0781V17.9688H3.32031C2.67578 17.9688 2.14844 17.4414 2.14844 16.7969V8.59375C2.14844 7.94922 2.67578 7.42188 3.32031 7.42188H7.8125V6.64062H3.32031C2.24609 6.64062 1.36719 7.51953 1.36719 8.59375V16.7969C1.36719 17.8711 2.24609 18.75 3.32031 18.75H4.10156V21.6797L7.89063 18.75H14.8438C15.918 18.75 16.7969 17.8711 16.7969 16.7969V16.0156H16.0156Z" fill="white"/>
+                                            <path d="M21.6797 4.29688C22.3242 4.29688 22.8516 4.82422 22.8516 5.46875V13.6719C22.8516 14.3164 22.3242 14.8438 21.6797 14.8438H20.1172V16.9727L17.5781 15.0195L17.3828 14.8438H10.1562C9.51172 14.8438 8.98438 14.3164 8.98438 13.6719V5.46875C8.98438 4.82422 9.51172 4.29688 10.1562 4.29688H21.6797ZM21.6797 3.51562H10.1562C9.08203 3.51562 8.20312 4.39453 8.20312 5.46875V13.6719C8.20312 14.7461 9.08203 15.625 10.1562 15.625H17.1094L20.8984 18.5547V15.625H21.6797C22.7539 15.625 23.6328 14.7461 23.6328 13.6719V5.46875C23.6328 4.39453 22.7539 3.51562 21.6797 3.51562Z" fill="white"/>
+                                        </svg>
+                                        <span class="chat-message" style="box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .5) !important;padding:8px 5px 8px 22px">
+                                            Talk to School Administration
+                                        </span>
+                                        <span class="UNSEEN start-100 translate-middle badge position-absolute"></span>
+                                    </a>`:''}
+                                
                             </h6>
                         </div>
                         <div class="modal-footer justify-content-center">
@@ -360,8 +362,8 @@ function onBordingMandotryVideo(){
                     </div>
                     <div class="modal-body d-flex flex-wrap px-1 full pt-1">
                         <div class="d-flex w-100 my-2">
-                            <div class="header-dots mr-0 position-relative ml-auto" style="min-width: 60px;">
-                                <a target="_blank" href="https://chat.internationalschooling.org/signIn?uuid=`+UNIQUEUUID+`" class="notify-bell-chat d-flex justify-content-center align-items-center group">
+                        ${CHAT_URL != ''?`<div class="header-dots mr-0 position-relative ml-auto" style="min-width: 60px;">
+                                <a target="_blank" href="${CHAT_URL}/signIn?uuid=`+UNIQUEUUID+`" class="notify-bell-chat d-flex justify-content-center align-items-center group">
                                     <svg class="chat-logo bg-primary" width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M16.0156 16.0156V16.7969C16.0156 17.4414 15.4883 17.9688 14.8438 17.9688H7.61719L7.42188 18.125L4.88281 20.0781V17.9688H3.32031C2.67578 17.9688 2.14844 17.4414 2.14844 16.7969V8.59375C2.14844 7.94922 2.67578 7.42188 3.32031 7.42188H7.8125V6.64062H3.32031C2.24609 6.64062 1.36719 7.51953 1.36719 8.59375V16.7969C1.36719 17.8711 2.24609 18.75 3.32031 18.75H4.10156V21.6797L7.89063 18.75H14.8438C15.918 18.75 16.7969 17.8711 16.7969 16.7969V16.0156H16.0156Z" fill="white"/>
                                         <path d="M21.6797 4.29688C22.3242 4.29688 22.8516 4.82422 22.8516 5.46875V13.6719C22.8516 14.3164 22.3242 14.8438 21.6797 14.8438H20.1172V16.9727L17.5781 15.0195L17.3828 14.8438H10.1562C9.51172 14.8438 8.98438 14.3164 8.98438 13.6719V5.46875C8.98438 4.82422 9.51172 4.29688 10.1562 4.29688H21.6797ZM21.6797 3.51562H10.1562C9.08203 3.51562 8.20312 4.39453 8.20312 5.46875V13.6719C8.20312 14.7461 9.08203 15.625 10.1562 15.625H17.1094L20.8984 18.5547V15.625H21.6797C22.7539 15.625 23.6328 14.7461 23.6328 13.6719V5.46875C23.6328 4.39453 22.7539 3.51562 21.6797 3.51562Z" fill="white"/>
@@ -369,7 +371,7 @@ function onBordingMandotryVideo(){
                                     <span class="chat-message" style="box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5) !important;">Talk to School Administration</span>
                                     <span class="UNSEEN start-100 translate-middle badge position-absolute"></span>
                                 </a>
-                            </div>
+                            </div>`:''}
                         </div>
                         <div class="full">
                             <div id="player"></div>

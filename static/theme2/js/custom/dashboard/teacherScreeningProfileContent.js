@@ -99,7 +99,7 @@ function teacherScreenTableContent(status){
                         <th>Preferred grades & courses</th>
                         <th>Linkedin Profile</th>
                         <th>Assigned To</th>
-                       <th>Profile Status</th>
+                        <th>Application Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>

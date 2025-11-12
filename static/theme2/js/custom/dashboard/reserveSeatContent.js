@@ -68,7 +68,9 @@ function needHelpSlideContent(standardId){
 						+'<h6 style="font-size:14px" class="m-0">Need Any Help?</h6>'
 					+'</div>'
 					+'<div class="d-flex text-center mt-2">'
-						+'<a href="https://chat.internationalschooling.org/signIn?uuid='+UNIQUEUUID+'" target="_blank" class="btn btn-primary btn-outline-white mr-2 w-100" onclick="needHelpContentShow(false)">Yes</a>'
+						if(CHAT_URL != ''){
+							+'<a href="'+CHAT_URL+'/signIn?uuid='+UNIQUEUUID+'" target="_blank" class="btn btn-primary btn-outline-white mr-2 w-100" onclick="needHelpContentShow(false)">Yes</a>'
+						}
 						+'<a href="javascript:void(0)" class="btn btn-white btn-outline-primary w-100" onclick="needHelpContentShow(false, true)">No</a>'
 					+'</div>'
 				+'</div>'
