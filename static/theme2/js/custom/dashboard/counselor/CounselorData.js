@@ -1679,7 +1679,7 @@ function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFr
 					var html=getcounselorReportListHtml(data, modesearch, startDate, endDate, callFrom);
 					$('#counselor-list-report').html(html);
 					var dataList=data.dataList;
-					if(dataList.length>0){	
+					if(dataList != null && dataList!= undefined && dataList.length>0){	
 						for (let u = 0; u < dataList.length; u++) {	
 							const report = dataList[u];
 							getcounselorReportList(''+report.assignTo+'',''+modesearch+'',''+startDate+'', ''+endDate+'', 'DAILY-REPORT', 'counselorReportTbody_');
@@ -1751,7 +1751,7 @@ function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFr
 function getcounselorReportListHtml(data){
 	var dataList=data.dataList;
 	var html='';
-	if(dataList.length>0){	
+	if(dataList != null && dataList!= undefined && dataList.length>0){	
 		for (let u = 0; u < dataList.length; u++) {	
 			const report = dataList[u];
 			var modSrc='';
