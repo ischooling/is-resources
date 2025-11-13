@@ -598,16 +598,16 @@ function validateRequestForLeadFollowupSave(formId, newTheme, leadType){
 		 return false;
 	 }
 
-	if(leadType=='B2B'){
-		var leadStaus = $("#"+formId+" #leadStatus").val();
-		var epdetailStatus = $("#"+formId+" #epdetailStatus").val();
-		if(leadStaus=='Converted & On Boarding | Hot'){
-			if(epdetailStatus!='Y'){
-				showMessageTheme2(0, 'Please update the Enrollment Partner Form before creating the partner dashboard.','',true);
-				return false;
-			}
-		}
- 	}
+	// if(leadType=='B2B'){
+	// 	var leadStaus = $("#"+formId+" #leadStatus").val();
+	// 	var epdetailStatus = $("#"+formId+" #epdetailStatus").val();
+	// 	if(leadStaus=='Converted & On Boarding | Hot'){
+	// 		if(epdetailStatus!='Y'){
+	// 			showMessageTheme2(0, 'Please update the Enrollment Partner Form before creating the partner dashboard.','',true);
+	// 			return false;
+	// 		}
+	// 	}
+ 	// }
 	 
 	//  if ($("#"+formId+" #callscheduleDate").val()==undefined || $("#"+formId+" #callscheduleDate").val()=='') {
 	// 	 $('.errorLeadCls').fadeIn();
@@ -1591,6 +1591,7 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  leadModifyDTO['clickFrom']=clickFrom;//$("#"+formId+" #clickFrom").val();
  leadModifyDTO['userId']=USER_ID;
  leadModifyDTO['schoolId']=SCHOOL_ID;
+ leadModifyDTO['leadPartnerType']= $("#"+formId+" #leadPartnerTypeSearch").val();
  leadCommonDTO['leadModifyDTO']=leadModifyDTO;
  leadCommonDTO['leadModifyDetailDTO']=leadModifyDetailDTO;
  leadCommonDTO['leadStudentDetailDTO']=leadStudentDetailDTO;
@@ -1612,16 +1613,18 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
 
 
 function advanceLeadSearchStudentReset(formId, leadType){
- $("#"+formId+" #leadNoSearch").val('').trigger('change');
- $("#"+formId+" #leadSourceSearch").val('').trigger('change');
- $("#"+formId+" #leadStatusSearch").val('').trigger('change');
- $("#"+formId+" #leadFullSearch").val('');
- $('#'+formId+' input[name="checkLeadForZCall"]').prop('checked', false);
+	$("#"+formId+" #leadNoSearch").val('').trigger('change');
+	$("#"+formId+" #leadSourceSearch").val('').trigger('change');
+	$("#"+formId+" #leadStatusSearch").val('').trigger('change');
+	$("#"+formId+" #leadFullSearch").val('');
+	$('#'+formId+' input[name="checkLeadForZCall"]').prop('checked', false);
  
-if(leadType=='B2B'){}else{
-	$("#"+formId+" #leadAssignToSearch").val('').trigger('change');
-	$("#"+formId+" #leadDemoAssignSearch").val('').trigger('change');
-}
+	if(leadType=='B2B'){
+		$("#"+formId+" #leadPartnerTypeSearch").val('');
+	}else{
+		$("#"+formId+" #leadAssignToSearch").val('').trigger('change');
+		$("#"+formId+" #leadDemoAssignSearch").val('').trigger('change');
+	}
 	$("#"+formId+" #followMedSearch").val('').trigger('change');
 	$("#"+formId+" #leademailIdSearch").val('');
 	$("#"+formId+" #phoneNoSearch").val('');
@@ -4746,7 +4749,7 @@ function getPartnerLeadById(formId, leadId, modalId) {
 						}, 1000);
 						var originalPartnerType = leadDemo.leadStudentDetailDTO.originalPartnerType;
 						$("#"+formId+" #originalPartnerType").val(originalPartnerType);
-						if(originalPartnerType != ''){
+						if(originalPartnerType != null && originalPartnerType != ''){
 							$("#"+formId+" #originalPartnerType").attr('disabled', true);
 						}else{
 							$("#"+formId+" #originalPartnerType").removeAttr('disabled');
@@ -4824,12 +4827,12 @@ function getRequestForPartnerByLeadId(formId, leadId) {
 
 
 function createPartnerUser(formId, leadId, modalId, partnerTypeId, epdetailUpdateStatus){
-	if(epdetailUpdateStatus!='Y'){
-		showMessageTheme2(0, 'Please update the Enrollment Partner Form before creating the partner dashboard.','',true);
-	}else{
+	// if(epdetailUpdateStatus!='Y'){
+	// 	showMessageTheme2(0, 'Please update the Enrollment Partner Form before creating the partner dashboard.','',true);
+	// }else{
 		renderPartnerCotent(partnerTypeId);
 		getPartnerLeadById(formId, leadId, modalId);
-	}
+	// }
 	
 }
 
@@ -12715,4 +12718,100 @@ function getLeadCounselorReviewHtml(counselorReviewList){
 	}
 	return html;
 	
+}
+
+function renderB2bAttachment(discardPermission, userId, leadId){
+	var html=b2bAttachmentModal(discardPermission, userId, leadId)+getChatImageCropContent()+pdfPreview()+deleteWarning();
+	$('#b2bAttachmentUploadWrapper').html(html);
+	//initChatCrop()
+	$("#b2bAttachmentDate").datepicker({
+		format : 'M dd, yyyy',
+	    autoclose: true,
+	});
+	uploadedB2bAttachmentsLogs(discardPermission, userId, leadId)
+	$('#b2bAttachmentModal').modal({ backdrop: 'static', keyboard: false })
+}
+
+function getRequestForB2bAttachments(userId, leadId, documentsFor){
+	var b2bAttachmentRequest = {};
+	b2bAttachmentRequest['userId'] = userId;
+	b2bAttachmentRequest['entityId'] = leadId;
+	b2bAttachmentRequest['entityType'] = 'LEADS';
+	b2bAttachmentRequest['documentsFor'] = documentsFor;
+	return b2bAttachmentRequest;
+}
+
+function getB2bAttachmentDetails(userId, leadId, documentsFor) {
+	var responseData={};
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/api/v1/leads/b2b-attachment-details',
+		data : JSON.stringify(getRequestForB2bAttachments(userId, leadId, documentsFor)),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			responseData=data
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return responseData;
+}
+
+function getRequestForB2bAttachmentLog(userId, leadId, documentsFor){
+	var b2bAttachmentRequest = {};
+	b2bAttachmentRequest['entityType'] = 'LEADS';
+	b2bAttachmentRequest['entityId'] = leadId;
+	b2bAttachmentRequest['userId'] = userId;
+	b2bAttachmentRequest['b2bAttachmentName'] = $('#b2bAttachmentName').val();
+	b2bAttachmentRequest['b2bAttachmentDate'] = $('#b2bAttachmentDate').val();
+	b2bAttachmentRequest['uploadDocuments'] = getUploadedDocuments();
+	return b2bAttachmentRequest;
+}
+function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, dataInputID, uploadInputDivId){
+	if ($("#b2bAttachmentName").val()=='') {
+		showMessageTheme2(0, 'Enter Document Name','',true);
+		return false
+	}
+	if ($("#"+dataInputID).val()=='') {
+		showMessageTheme2(0, 'Select date.','',true);
+		return false
+	}
+	if ($("#"+uploadInputDivId).attr("uploaded")!='Y') {
+		showMessageTheme2(0, 'Please upload a document.','',true);
+		return false
+	}
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/api/v1/leads/save-b2b-attachment-log',
+		data : JSON.stringify(getRequestForB2bAttachmentLog(userId, leadId, documentsFor)),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(0, data['message']);
+				}
+			}else{
+				$('#isuploaded').val('true');
+				uploadedB2bAttachmentsLogs(discardPermission, userId, leadId);
+				resetB2bAttachmentFormElement();
+				showMessageTheme2(1, data['message']);
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
 }

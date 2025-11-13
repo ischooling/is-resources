@@ -1381,11 +1381,14 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 																+'</td>'
 															+'</tr>';
 														}
-														
 														var enrollColor="bg-primary";
 														var enrollType="Enrollment via IS";
 														if(stuList.studentEnrollBy=='P'){
-															enrollType='Added by Partner';
+															if(stuList.referralCode == localStorage.getItem('referralCode'+USER_ID)){
+																enrollType='Added by Myself';
+															}else{
+																enrollType='Added by Partner';
+															}
 															enrollColor="bg-orange";
 														}else if(stuList.studentEnrollBy=='D'){
 															enrollType='Direct Enrollment';

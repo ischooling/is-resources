@@ -218,6 +218,15 @@ function resetChatSupportFormElement(){
   uploadDocs=[];
 }
 
+function resetB2bAttachmentFormElement(){
+  removeUploadImageChatSupport(this, 'OD3', 'OD3Icon', 'Other Document 3','','OD3div','OD3ViewAndRemoveBtn',3)
+	$("#b2bAttachmentName").val("");
+	$("#b2bAttachmentDate").val("");
+	$('#b2bAttachmentDate').data('datepicker').clearDates();
+	$("#OD3").val("");
+  uploadDocs=[];
+}
+
 // function addMoreDocs(eleID){
 //   if(showAddMoreBtnArray.length<1){
 //     showMessageTheme2(0, 'You can not add more documents');

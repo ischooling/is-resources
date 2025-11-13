@@ -2119,3 +2119,100 @@ function sendConfirmationModal(functionName){
 		</div>`;
 	return html;
 }
+
+function b2bAttachmentModal(discardPermission, userId, leadId){
+	var html=
+	'<div id="b2bAttachmentModal" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
+		+'<div class="modal-dialog modal-xl">'
+			+'<div class="modal-content border-0">'
+				+'<div class="modal-header py-2 bg-primary text-white">'
+					+'<h5 class="modal-title" >Update and View Document</h5>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+				+'</div>'
+				+'<div class="modal-body">'
+					+'<div class="row">'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1" style="display:none;">'
+							+'<input type="hidden" class="form-control" id="isuploaded" name="isuploaded" value="false">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
+							+'<label class="m-0">Attachment Name</label>'
+							+'<input class="form-control" id="b2bAttachmentName" name="b2bAttachmentName" />'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
+							+'<label class="m-0">Select date</label>'
+							+'<input type="text" name="b2bAttachmentDate" id="b2bAttachmentDate" class="form-control" readonly onkeydown="return false">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
+							+'<label class="m-0 full">&nbsp;</label>'
+							+'<div class="full position-relative" id="OD3div" uploaded="" fileName="" docType="B2B attachments" thumbType="" data-PDFURL="" >'
+								+'<input type="file" id="OD3" class="upload-input form-control" onchange="cropImageChatSupport(event,\'OD3\',\'OD3Icon\',\'OD3div\',\'Chat documents\',\'\',\'OD3ViewAndRemoveBtn\',3)">'
+								+'<label for="OD3" class="upload-label form-control mb-0 btn btn-primary"><i class="fa fa-upload mr-2"></i>Upload</label>'
+							+'</div>'
+							+'<div class="full" id="OD3ViewAndRemoveBtn" style="display: none;">'
+								+'<a id="OD3View" href="javascript:void(0);"  class="btn btn-outline-success mr-2" onclick="viewAttachmentChatSupport(this, \'uploadFile\',\'I\',\'OD3div\')">'
+									+'<i class="fa fa-eye mr-2"></i>View'
+								+'</a>'
+								+'<button type="button" id="OD3Remove" class="btn btn-outline-danger" onclick="showWarningMessageShow(\'Are you sure you want to remove this document?\', \'removeUploadImageChatSupport(this, \\\'OD3\\\', \\\'OD3Icon\\\', \\\'Chat documents\\\',\\\'\\\',\\\'OD3div\\\',\\\'OD3ViewAndRemoveBtn\\\',3) \')"><i class="fa fa-trash mr-2"></i>Remove </button>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">'
+							+'<label class="m-0 full">&nbsp;</label>'
+							+'<button type="button" class="btn btn-success  pr-4 pl-4" id="saveB2bAttachmentBtn" onclick="saveB2bAttachmentLogs(\''+discardPermission+'\', '+userId+','+leadId+',\'B2B_ATTACHMENTS\', \'b2bAttachmentDate\', \'OD3div\')">Save</button>'
+						+'</div>'
+						+'<div class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2 table-responsive uploadedB2bAttachmentLogs">'
+							
+						+'</div>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
+function uploadedB2bAttachmentsLogs(discardPermission, userId, leadId){
+	var data=getB2bAttachmentDetails(userId, leadId,'B2B_ATTACHMENTS')
+	var html=
+	'<table class="table table-bordered table-striped" style="font-size:11px;">'
+		+'<thead>'
+			+'<tr>'
+				+'<th>S. No.</th>'
+				+'<th>From</th>'
+				+'<th>Date</th>'
+				+'<th>View</th>'
+				+'<th>Added by</th>'
+				+'<th>Added date</th>';
+				if(discardPermission){
+					html+'<th>Action</th>';
+				}
+				html+=
+			'</tr>'
+		+'</thead>'
+		+'<tbody>';
+			$.each(data.b2bSupports, function(k,b2bSupport){
+				html+=
+				'<tr>'
+					+'<td id="chatSupportId_'+b2bSupport.b2bLeadDocId+'">'+(k+1)+'</td>'
+					+'<td>'+b2bSupport.docName+'</td>'
+					+'<td>'+b2bSupport.docDate+'</td>'
+					+'<td>';
+					$.each(b2bSupport.documents, function(k1,document){
+						html+=
+						'<div id="viewDoc_'+k+'" thumbType="'+document.docType+'" data-PDFURL="'+document.filePath+'">'
+							+'<a href="javascript:void(0);"  class="btn btn-outline-success" onclick="viewAttachmentChatSupport(this, \'uploadFile\',\'I\',\'viewDoc_'+k+'\')">'
+								+'<i class="fa fa-eye mr-2"></i>View'
+							+'</a>'
+						+'</div>';
+					});
+					html+=
+					'</td>'
+					+'<td>'+b2bSupport.createdBy+'</td>'
+					+'<td>'+b2bSupport.createdDate+'</td>'
+				+'</tr>';
+			});
+			html+=
+		'</tbody>'
+	+'</table>';
+	$('.uploadedB2bAttachmentLogs').html(html);
+	return 
+}

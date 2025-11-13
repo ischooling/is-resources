@@ -21,6 +21,7 @@ function getB2BListHeaderContent(roleAndModule, objRights){
 		html+='</div>';
 		html+='<div class="form-row mt-2" id="b2b-total-head"></div>';
 		html+='<div class="full overflow-x-auto" id="b2b-lead-list"></div>';
+		html+='<div id="b2bAttachmentUploadWrapper"></div>';
 		
 	return html;
 }
@@ -277,11 +278,19 @@ function getLeadAdvanceSearchB2BPopup(objectRights){
 	+'						<option value="all">All</option>'
 	+'						</select>'
 	+'					</div>'
-	+'					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 mb-1 mt-1">'
+	+'					<div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12 mb-1 mt-1">'
 	+'						<label class="m-0">Search with any text</label>'
 	+'						<input type="text" name="leadFullSearch" id="leadFullSearch"  class="form-control"/> '
 	+'					</div>'
-	+'					<div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12 mb-1 mt-1"></div>'
+	+'					<div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12 mb-1 mt-1">'
+	+'						<label class="m-0">Partner Type</label>'
+	+'						<select name="leadPartnerTypeSearch" id="leadPartnerTypeSearch" class="form-control">'
+    +'							<option value="">Select Partner Type</option>'
+	+'							<option value="GP">Enrollment Partner</option>'
+	+'							<option value="WLP">Self School or Academy</option>'
+	+'							<option value="EPER">Enrollment Partner with Enrollment Rights</option>'
+	+'						</select>'
+	+'					</div>'
 	+'				</div>'
 	+'				<div class="row">'
 	+'					<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">'
@@ -1106,10 +1115,18 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 										+'<a href="javascript:void(0)" onclick="showResendB2BWelcomeMailWarning('+leads.rawLeadId+');" class="text-dark py-1 d-inline-block"><i class="fa fa-link text-primary"></i>&nbsp;Resend Login Details Mail</a>'
 									+'</td>'
 								+'</tr>';
-								
 							}
+							html+='<tr>'
+								+'<td colspan="2" class="border-0 p-1">'
+									+'<a href="javascript:void(0)" onclick="renderB2bAttachment(\''+objRights.discardPermission+'\',\''+USER_ID+'\',\''+leads.leadId+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-upload text-primary"></i>&nbsp;Upload Attachment</a>'
+								+'</td>'
+							+'</tr>';
 							if(leads.emailBroadcastCount>0){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>&nbsp;Email Broadcast</a>';
+								html+='<tr>'
+										+'<td colspan="2" class="border-0 p-1">'
+											+'<a href="javascript:void(0)" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-envelope text-primary"></i>&nbsp;Email Broadcast</a>'
+										+'</td>'
+									+'</tr>';
 							}
 							if(leads.leadStatus=='Converted & On Boarding | Hot')
 							{

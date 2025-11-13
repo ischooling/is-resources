@@ -97,9 +97,9 @@ function renderPartnerCotent(partnerTypeId){
 		}
 	});
 
-    // $('#originalPartnerType').on('change', function () {
-    //   updateFieldsBasedOnPartnerType();
-    // });
+    $('#originalPartnerType').on('change', function () {
+      updateFieldsBasedOnPartnerType();
+    });
     // $('#commissionPayout').on('change', function () {
 	// 	updateTabsVisibility();
     // });
@@ -248,11 +248,11 @@ function getCreatePartnerContent(buttonTitle){
 							+'</div>'
 							+'<div class="col-12 mb-2">'
 								+'<label class="m-0">Middle Name</label>'
-								+'<input type="text" name="mname" id="mname" value=""  class="form-control" maxlength="100" disabled>'
+								+'<input type="text" name="mname" id="mname" value=""  class="form-control" maxlength="100">'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Last Name<sub class="text-danger">*</sub></label>'
-								+'<input type="text" name="lname" id="lname" value=""  class="form-control" maxlength="100" disabled>'
+								+'<label class="m-0">Last Name</label>'
+								+'<input type="text" name="lname" id="lname" value=""  class="form-control" maxlength="100">'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
 								+'<label class="m-0">Email<sub class="text-danger">*</sub></label>'
@@ -303,7 +303,7 @@ function getCreatePartnerContent(buttonTitle){
 							+'<div class="col-12 mb-2">'
 								+'<label class="m-0">White Label</label>'
 								+'<select name="whiteLabel" id="whiteLabel" class="form-control">'
-									+'<option value="NWL">No white - labeling '+SCHOOL_NAME+' Colors and Logor</option>'
+									+'<option value="NWL">No white - labeling '+SCHOOL_NAME+' Colors and Logo</option>'
 									+'<option value="WLWC">With White Label Custom Colors and Logo</option>'
 								+'</select>'
 							+'</div>'

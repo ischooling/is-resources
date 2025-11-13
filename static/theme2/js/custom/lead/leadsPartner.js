@@ -867,7 +867,7 @@ function updatedFieldHeighLight(update, indexValue) {
 
 function updateFieldsBasedOnPartnerType() {
     const partnerType = $('#originalPartnerType').val();
-    if (partnerType === 'GP') {
+    if (partnerType === 'GP' || partnerType === 'EPER') {
       $('#whiteLabel').val('NWL').prop('disabled', true);
       $('#commissionPayout').val('SWP').prop('disabled', true);
       $('#enrollingStudent').val('FIS').prop('disabled', true);
