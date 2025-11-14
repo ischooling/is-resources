@@ -595,7 +595,11 @@ function callForProgressionToDashboard() {
 						$('#submitApplicationWarning').modal("hide");
 						showMessage(true, 'Student has been successfully enrolled');
 						window.setTimeout(function(){
-							backToDedicatedModule('partner-enrollment-list');
+							if(schoolSettingsOffice.schoolType == "WLP"){
+								backToDedicatedModule('partner-enrollment-students-wlp');
+							}else{
+								backToDedicatedModule('partner-enrollment-list');
+							}
 						},1000);
 					}
 				}

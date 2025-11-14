@@ -283,7 +283,7 @@ function getCreatePartnerContent(buttonTitle){
 								+'<select name="originalPartnerType" id="originalPartnerType" class="form-control">'
 									+'<option value="">Select Partner Type</option>'
 									+'<option value="GP">Enrollment Partner</option>'
-									+'<option value="WLP">Self School or Academy</option>'
+									+'<option value="WLP">White Label Partner</option>'
 									// +'<option value="RP">Reseller Partner</option>'
 									+'<option value="EPER">Enrollment Partner with Enrollment Rights</option>'
 								+'</select>'

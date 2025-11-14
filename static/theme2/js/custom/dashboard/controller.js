@@ -625,6 +625,8 @@ function getModuleDetails(schoolId, roleId, userId, parentId, moduleType, module
 function backToDedicatedModule(moduleUrl){
   if(moduleUrl=='partner-enrollment-list'){
     callDashboardPageSchool('176','partner-enrollment-list');
+  }else if(moduleUrl=='partner-enrollment-students-wlp'){
+	callDashboardPageSchool('194','partner-enrollment-students-wlp');
   }
 }
 function backToMain(){

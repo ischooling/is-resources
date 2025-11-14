@@ -322,7 +322,7 @@ function partnerDashboardLPContent(data){
 
 {/* <div class="page-title-subheading">${title}</div> */}
 function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, commissionRate){
-	const enrollmentMap= {GP:"Enrollment Partner",WLP:"Self School or Academy",RP:"Reseller Partner",EPER:"Enrollment Partner with Enrollment Rights"};
+	const enrollmentMap= {GP:"Enrollment Partner",WLP:"White Label Partner",RP:"Reseller Partner",EPER:"Enrollment Partner with Enrollment Rights"};
 
 	var data=getPartnerDashboardDetails(userId);
 	localStorage.setItem('convertYear',data.counselor.convertYear);

@@ -211,7 +211,8 @@ async function partnerEnrollmentListDetails(studentList){
 					<th class="bg-primary text-white bold border-bottom-0">Enrollment Details</th>
 					<th class="bg-primary text-white bold border-bottom-0 text-center">Payment Details</th>
 					<th class="bg-primary text-white bold border-bottom-0 text-center">Fee Schedule</th>
-					<th class="bg-primary text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Expected Commission</th>
+					<th class="bg-primary text-white bold border-bottom-0" style="border-top-color:transparent;border-right-color:transparent">Expected Commission</th>
+                    <th class="bg-primary text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Action</th>
 				</tr>
 			</thead>
             <tbody>`
@@ -269,7 +270,7 @@ async function partnerEnrollmentListDetails(studentList){
                                             : 'bg-primary'
                                     } text-white rounded-pill px-2 py-1 small">${
                                         item.studentEnrollBy === 'P'
-                                            ? 'Added by Partner'
+                                            ? 'Added by Myself'
                                             : item.studentEnrollBy === 'D'
                                             ? 'Direct Enrollment'
                                             : 'Enrollment via IS'
@@ -439,8 +440,25 @@ async function partnerEnrollmentListDetails(studentList){
                                     <span class="font-weight-bold">Payment Date:</span>
                                     <span class="">${item.lastPayDate}</span>
                                 </div>
-                            </td>
-                        </tr>`
+                            </td><td>`;
+                            let tickFlag = true;
+									if(item.studentEnrollBy=='P' && item.admissionType == "Partial Entry"){
+										html+='<a href="javascript:void(0);" onclick="enrollmentPartnerStudent('+item.stdUserId+')" data-toggle="tooltip" data-placement="top" data-original-title="Edit" class="text-primary">'
+											+'<i class="fa fa fa-pencil" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>'
+										+'</a>';
+										tickFlag = false;
+									}
+									if(item.studentEnrollBy=='P' && item.admissionType == "Successfully Enrolled" && item.password == 'N/A'){
+										html+='<a id = "'+item.stdUserId+'_'+item.stuStandardId+'" href="javascript:void(0);" onclick="showWarningMessage(\'Are you sure you want to send credentials email to student?\',\'resendMailToPartnerStudent('+item.stdUserId+','+item.stuStandardId+')\');" data-toggle="tooltip" data-placement="top" data-original-title="' + (item.emailSendStatus == 0 ? 'Send Credentials' : 'Resend Credentials') + '" class="text-primary">'
+											+'<i class="fa fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>'
+										+'</a>';
+										tickFlag = false;
+									}
+									if(tickFlag){
+										html+='<i class="fa fa-check text-success"></i>'; 
+									}
+								html+='</div>'
+                        +'</td></tr>'
                     })
                 }else{
                     html+=`<tr>
