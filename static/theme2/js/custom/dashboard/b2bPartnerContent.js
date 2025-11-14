@@ -520,9 +520,29 @@ function getEnrollmentLinksContent(data){
 					</div>
 					<div id="enrollmentLinksSection" class="d-flex flex-wrap" style="gap:5px;">`;
 						$.each(data.schoolServiceLinks.learningProgramLinks, function(k,learningProgram){
+							var lProgram="";
+							if(learningProgram.label=="Group Learning"){	
+								lProgram="BATCH";	
+							}else if(learningProgram.label=="Dual Diploma"){
+								lProgram="DUAL_DIPLOMA";
+							}else if(learningProgram.label=="One-To-One Learning"
+								|| learningProgram.label=="English Learning Program - One to One"
+							){
+								lProgram="ONE_TO_ONE";
+							}else if(learningProgram.label=="Flexy Program"){
+								lProgram="ONE_TO_ONE_FLEX";
+							}else if(learningProgram.label=="Self Study"
+								|| learningProgram.label=="English Learning Program - Self Study"
+							){
+								lProgram="SCHOLARSHIP";
+							}else if(learningProgram.label=="Self Study Plus"){
+								lProgram="SSP";
+							}else if(learningProgram.label=="Connect To Impact"){
+								lProgram="CTI";
+							}
 							html+=
 							`<div>
-								<a href="javascript:void(0)" class="bg-light-primary text-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k}','${learningProgram.learningProgramCode}_class_${k}')">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
+								<a href="javascript:void(0)" class="bg-light-primary text-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k}','${learningProgram.learningProgramCode}_class_${k}');saveCounselorDashboardCopyLink('${data.schoolServiceLinks.referralCode}', '${lProgram}');">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
 								<b class="${learningProgram.learningProgramCode}_class_${k} mx-1"></b>
 								<div style="top:18px;left:0;position:absolute;">
 									<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
@@ -532,6 +552,28 @@ function getEnrollmentLinksContent(data){
 					html+=`</div>
 					<div id="seatLinksSection" class="d-none flex-wrap" style="gap:5px;">`;
 						$.each(data.schoolServiceLinks.learningProgramRasLinks, function(k,learningProgram){
+
+							var lProgram="";
+							if(learningProgram.label=="Group Learning"){	
+								lProgram="BATCH";	
+							}else if(learningProgram.label=="Dual Diploma"){
+								lProgram="DUAL_DIPLOMA";
+							}else if(learningProgram.label=="One-To-One Learning"
+								|| learningProgram.label=="English Learning Program - One to One"
+							){
+								lProgram="ONE_TO_ONE";
+							}else if(learningProgram.label=="Flexy Program"){
+								lProgram="ONE_TO_ONE_FLEX";
+							}else if(learningProgram.label=="Self Study"
+								|| learningProgram.label=="English Learning Program - Self Study"
+							){
+								lProgram="SCHOLARSHIP";
+							}else if(learningProgram.label=="Self Study Plus"){
+								lProgram="SSP";
+							}else if(learningProgram.label=="Connect To Impact"){
+								lProgram="CTI";
+							}
+
 							const excludedLabels = [
 								"Flexy Program",
 								"English Learning Program - One to One",
@@ -540,7 +582,7 @@ function getEnrollmentLinksContent(data){
 							if (excludedLabels.includes(learningProgram.label)) return;
 							html+=
 							`<div>
-								<a href="javascript:void(0)" class="bg-seat-light-primary text-seat-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k+"_seat"}','${learningProgram.learningProgramCode}_class_${k+"_seat"}')">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
+								<a href="javascript:void(0)" class="bg-seat-light-primary text-seat-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k+"_seat"}','${learningProgram.learningProgramCode}_class_${k+"_seat"}');saveCounselorDashboardCopyLink('${data.schoolServiceLinks.referralCode}', '${lProgram}');">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
 								<b class="${learningProgram.learningProgramCode}_class_${k+"_seat"} mx-1"></b>
 								<div style="top:18px;left:0;position:absolute;">
 									<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k+"_seat"}" value="${learningProgram.link}" style="opacity:0;height:0px">

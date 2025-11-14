@@ -1764,7 +1764,7 @@ function getcounselorReportListHtml(data){
 					<table  class="table table-bordered responsive nowrap" style="width:100%;">
 						<thead>
 							<tr>
-								<th colspan="2" class="bg-primary text-white"><p class="mb-0 text-center">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0">${modSrc}</p> </th>
+								<th colspan="2" class="bg-primary text-white "><p class="mb-0 text-center font-12">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0 font-12">${modSrc}</p> </th>
 							</tr>
 						</thead>
 						<tbody class="font-10" id="counselorReportTbody_${report.assignTo}"></tbody>
@@ -1798,9 +1798,10 @@ function getcounselorReportTbodyHtml(report){
 				<tr><th class="p-1">Call Completed </th><td>${leadReport.totalCallComplete}</td></tr>
 				<tr><th class="p-1">Demo Arranged </th><td>${leadReport.totalCopyurl}</td></tr>
 				<tr><th class="p-1">Enrollments </th><td>${leadReport.totalConvert}</td></tr>
-				<tr><th class="p-1">Email sent </th><td>-</td></tr>
-				<tr><th class="p-1">Enrollment Link Share </th><td>-</td></tr>
-				<tr><th class="p-1">Wati/ whatsapp sent </th><td>-</td></tr>`;
+				<tr><th class="p-1">Wati/ whatsapp sent </th><td>${leadReport.totalWati}</td></tr>
+				<tr><th class="p-1">Email sent </th><td>${leadReport.totalEmail}</td></tr>
+				<tr><th class="p-1">Enrollment Link Share /Copy </th><td>${leadReport.totalRedirectlink} /${leadReport.totalCopylink}</td></tr>
+				`;
 				// <tr><th class="p-1">Rating </th><td id="rating_${leadReport.assignTo}">-</td></tr>
 			
 					
@@ -1840,4 +1841,37 @@ function saveCounselorExpected(assignTo) {
 		}
 	});
 	return responseData;
+}
+
+function saveCounselorDashboardCopyLink(referralCode, learningProgram) {
+	var dataRequest={};
+	dataRequest['referralCode']=referralCode;
+	dataRequest['learningProgram']=learningProgram;
+	dataRequest['dataFrom']="COPY";
+	dataRequest['location']=DEFAULT_LOCATION;
+	dataRequest['schoolId']=SCHOOL_ID;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/save-copy-link',
+		data : JSON.stringify(dataRequest),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				//showMessageTheme2(0, data['message']);
+				console.log(data['message'])
+			}else{
+				//showMessageTheme2(1, data['message']);
+				console.log(data['message'])
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return true;
 }

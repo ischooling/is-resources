@@ -1930,28 +1930,34 @@ function b2cleadsPagging(leaddata, objRights){
 }
 
 function getUpdateLeadCurrentTime(leads, leadId){
+  const leaddatas=leads;
    var timerForCurTime;
     clearInterval(timerForCurTime);
     var currentTimeStr="";
-    var leadCurrtime=changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
-    var leadCurdate=changeDateFormat(new Date(), 'yyyy-mm-dd');
-    var leadCurSdate=new Date(leadCurdate+' '+leads.startDateTime);
-    var leadCurEdate=new Date(leadCurdate+' '+leads.endDateTime);
+    var timezoneG = getSystemTimezone();//Intl.DateTimeFormat().resolvedOptions().timeZone;
+    //var leadCurrtime=changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
+    var leadCurdate1=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,"YYYY-MM-DD","HH:mm:ss");;
+    var leadCurdate=leadCurdate1.date;
+    var leadCurSdate=new Date(leadCurdate+' '+leaddatas.startDateTime);
+    var leadCurEdate=new Date(leadCurdate+' '+leaddatas.endDateTime);
 
     var leadCurrDateTime;
     timerForCurTime = setInterval(function() {
-        if(leads.leadTimeZone!=''){
-          var timezoneG = getSystemTimezone();//Intl.DateTimeFormat().resolvedOptions().timeZone;
-          var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leads.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
-          var curentLeadRightTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leads.leadTimeZone ,"YYYY-MM-DD HH:mm:ss","HH:mm:ss");
+        if(leaddatas.leadTimeZone!=''){
+          var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
+          var curentLeadRightTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,"YYYY-MM-DD HH:mm:ss","HH:mm:ss");
           currentTimeStr=curentTime.date+' '+curentTime.time;
           leadCurrDateTime=new Date(curentLeadRightTime.date);
         }
-        var leadrightTimeCallColor="text-danger bold";
-        if(leadCurrDateTime>=leadCurSdate && leadCurrDateTime<=leadCurEdate){
-            leadrightTimeCallColor="text-success bold";
+        //console.log("currentTimeStr "+currentTimeStr + " "+timezoneG + " "+ leaddatas.leadTimeZone+ " " +leadId);
+        //console.log("leadCurrDateTime "+leadCurrDateTime);
+        if(leadId==leaddatas.leadId){
+            var leadrightTimeCallColor="text-danger bold";
+            if(leadCurrDateTime>=leadCurSdate && leadCurrDateTime<=leadCurEdate){
+                leadrightTimeCallColor="text-success bold";
+            }
+            $("#leadCurTimeText_"+leadId+"").html('<span class="'+leadrightTimeCallColor+'">'+currentTimeStr+'<span>');
         }
-        $("#leadCurTimeText_"+leadId+"").html('<span class="'+leadrightTimeCallColor+'">'+currentTimeStr+'<span>');
       }, 1000);
 
 }

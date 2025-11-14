@@ -6579,6 +6579,10 @@ function goToPageCommon(page, context) {
 			}
 			fetchMeetings($('#filterHostUserId').val());
 			break;
+    case 'userApplication':
+      CURRENT_PAGE_USER_APPLICATION = page;
+			loadUserApplicationData();
+			break;
 		default:
 			console.warn('Unknown pagination context:', context);
 	}

@@ -835,6 +835,11 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     // );
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   }
+  else if (pageNo == "counselor-daily-report") {
+    //getContent(moduleId, pageNo, replaceDiv, extraParam);
+    var urlSend ="/dashboard/counselor-daily-report?moduleId=" + moduleId +"&userId=" + USER_ID;
+    getAsPost(urlSend);
+  }
 
 
   //Student - left-side
@@ -1133,6 +1138,8 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
   } else if (pageNo == "teacher-assign-interview") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "teacher-screening-profiles") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  } else if (pageNo == "user-screening-profiles") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else {
     customLoader(false);

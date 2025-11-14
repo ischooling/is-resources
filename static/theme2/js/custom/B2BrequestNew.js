@@ -657,6 +657,7 @@ function callCountries(formId, value, elementId) {
 }
 function callLocationAndSelectCountryNew(formId) {
   $.ajax({
+    async: false,
     global: false,
     type: "GET",
     url: PRO_IP_API_URL,
