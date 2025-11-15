@@ -159,7 +159,7 @@ function createPartnerAndSetCommissionModal(partnerTypeId){
 							+'<li class="nav-item"><a data-toggle="tab" href="#createPartner" id="createPartnerTab" class="nav-link active">'+headTitle+'</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#officeContactDetails" onclick="getOfficeContentsDetails(\'officeContactDetailsForm \')" id="officeContactDetailsTab" class="nav-link">School Contact Details</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#enrollReg" id="enrollRegTab" onclick="initEnrollReg()" class="nav-link">Enrollment / Registration</a></li>'
-							+'<li class="nav-item"><a data-toggle="tab" href="#feeStructure" onclick="getStandardFee(\'fromTab\');" id="feeStructureTab" class="nav-link">Add Your Fee Structure</a></li>'
+							+'<li class="nav-item"><a data-toggle="tab" href="#feeStructure" onclick="getStandardFee(\'fromTab\');" id="feeStructureTab" class="nav-link">School Fee Structure</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#setCommissionRate" id="setCommissionRateTab" class="nav-link">Set Commission Rate</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#setDiscount" id="setDiscountTab" class="nav-link" style="display:none">Set Discount</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#paymentOptions" id="paymentOptionsTab" class="nav-link" onclick="getEnrollmentPartnerPaymentDetails();">Payment Options</a></li>'

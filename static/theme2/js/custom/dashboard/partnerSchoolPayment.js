@@ -512,7 +512,7 @@ function base64ImageFileAsURL(f, fileType, src, uploadType, elemId) {
         $("#divdeleteDocument" + elemId).show();
 
         $("#showDocument" + elemId).off("click").on("click", function () {
-            showDocument(obj);
+            showDocumentPartner(obj);
         });
 
         $("#deleteDocument" + elemId).off("click").on("click", function () {
@@ -543,7 +543,7 @@ function deleteDocument(fileType, elemId, pgName) {
     $("#fileupload" + elemId).val('');
 }
 
-function showDocument(fileObj) {
+function showDocumentPartner(fileObj) {
     if (!fileObj) {
         showMessageTheme2(0, 'No file to preview.');
         return;
