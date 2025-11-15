@@ -305,7 +305,7 @@ function partnerDashboardLPContent(data){
 										+'<span class="d-inline-block mb-1">'
 											+learningProgram.label
 										+'</span>'
-										+'<span class="pull-right text-primary mb-1">Commission: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
+										+'<span class="pull-right text-primary mb-1">'+(schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue: $' : 'Commission: $')+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
 									+'</div>'
 								+'</h5>'
 								+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
@@ -345,7 +345,7 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 				}
 					<div class="bg-primary text-white px-3 py-1 rounded-10">
 						<div class="d-flex flex-wrap align-items-center">
-							<span class="float-left font-weight-semi-bold font-size-14 mr-2">Enrollment Partner Code</span>
+							<span class="float-left font-weight-semi-bold font-size-14 mr-2">${enrollmentMap[data.originalPartnerType] == 'White Label Partner' ? 'Partner Code' : 'Enrollment Partner Code'}</span>
 							<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
 						</div>
 						<div>
@@ -461,7 +461,7 @@ function getEnrollmentRangeContent(commissionRate){
 function getChartContent(commissionRate){
 	var html=
 		`<div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12 mb-2">
-			<h5 class="font-weight-semi-bold text-dark">Your Commission Rates</h5>
+			<h5 class="font-weight-semi-bold text-dark">${schoolSettingsOffice.schoolType == 'WLP' ? 'Total Revenue and Profit' : 'Your Commission Rates'}</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">`
 					+getEnrollmentRangeContent(commissionRate)
@@ -481,12 +481,12 @@ function getChartContent(commissionRate){
 										<div class="mb-3">
 											<span class="h-100 bg-primary rounded float-left mr-2" style="width:4px"></span>
 											<h5 class="font-weight-light m-0">${symbol} ${v.bySchoolValue} ${v.bySchoolType}</h5>
-											<p class="font-12 mb-2">Commission-Through IS</p>
+											<p class="font-12 mb-2">${schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue-Through IS' : 'Commission-Through IS'}</p>
 										</div>
 										<div>
 											<span class="h-100 bg-alternate rounded float-left mr-2" style="width:4px"></span>
 											<h5 class="font-weight-light m-0">${symbol} ${v.byPartnerValue} ${v.byPartnerType}</h5>
-											<p class="font-12 m-0">Commission-Direct Enrollment</p>
+											<p class="font-12 m-0">${schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue-Direct Enrollment' : 'Commission-Direct Enrollment'}</p>
 										</div>
 									</div>
 									<div class="mx-auto overflow-hidden" style="position: relative; max-width:200px;max-height:101px;">
@@ -602,12 +602,12 @@ function getRevenueContent(partnerOrgType){
 	var html =
 	`<div class="row mt-3">
 		<div class="col-12">
-			<h5 class="font-weight-semi-bold text-dark">Commission Details</h5>
+			<h5 class="font-weight-semi-bold text-dark">${showPendingCommission ? 'Commission Details' : 'Total Revenue and Profit'}</h5>
 		</div>
 		<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-3"> 
 			<div class="bg-light-success border border-success px-2 p-1 rounded-10 h-100 d-flex align-items-center flex-column">
 				<div class="d-flex flex-wrap mb-1 w-100">
-					<h5 class="font-weight-semi-bold text-dark flex-grow-1 m-0 font-size-lg">Total Commission: </h5>
+					<h5 class="font-weight-semi-bold text-dark flex-grow-1 m-0 font-size-lg">${showPendingCommission ? 'Total Commission: ' : 'Total Revenue'}</h5>
 					<h5 class="font-weight-semi-bold text-dark m-0 font-size-lg" id="totalRevenueValue"></h5>
 				</div>
 				<div class="p-1 px-2 text-right rounded ml-auto" style="background:rgba(255, 255, 255, 0.6)">
