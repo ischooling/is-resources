@@ -944,7 +944,7 @@ function getSelectedUsersData() {
 
     $.each($("input[name='chk-users-lead']:checked"), function() {
         var row = $(this).closest("tr");
-        var userId = $(this).val();   // <-- this is leadId
+        var userId = $(this).val();
         var name = row.find("input.name").val() || '';
         var grade = row.find("input.grade").val() || '';
 

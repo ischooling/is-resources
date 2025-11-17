@@ -79,7 +79,7 @@ function cardDetails(data){
 											${item.rollNumber} | ${item.enrolledStatus} | ${item.gradeName} | ${item.learningPlan} | ${item.lmsPlatform}
 										</span>
 									</h6>
-									<h5 class="mb-1"><span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.studentName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>
+									<h5 class="mb-1"><span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>
 									${item.watibroadcast?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Wati Logs"  id="wati_logs_link" onclick="showWatiLogDetailsByStudentUserId('${item.userId}')" data-toggle="tooltip" data-placement="top" data-original-title="wati log">
 										<img src="${PATH_FOLDER_IMAGE2}leadlist_icons/Wati.svg${SCRIPT_VERSION}" style="width:16px;" />
 									</a> &nbsp;`:''}
@@ -131,8 +131,8 @@ function cardDetails(data){
 											<span class="field-value trans5s ">${item.updateProfileStudentDTO.nationality}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Lms UserId | User Name | Password:</label>
-											<span class="field-value trans5s "><br/>${item.updateProfileStudentDTO.lmsUserId==null?'N/A':item.updateProfileStudentDTO.lmsUserId} |  ${item.updateProfileStudentDTO.lmsUserName} |  ${item.updateProfileStudentDTO.lmsUserPassword}</span>
+											<label class="label bold">Lms UserId :</label>
+											<span class="field-value trans5s ">${item.updateProfileStudentDTO.lmsUserId==null?'N/A':item.updateProfileStudentDTO.lmsUserId}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Academic Start - End Dates:</label>
