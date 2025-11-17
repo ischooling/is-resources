@@ -89,6 +89,7 @@ async function dashboardFooterContent(){
 			+'<span class="msg" id="msgTheme2"></span>'
 		+'</div>'
 	+'</div>';
+	html +=getLoaderContent();
 	return html;
 }
 

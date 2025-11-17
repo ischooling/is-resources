@@ -1503,7 +1503,8 @@ function callCounselorDetailReview(modeSearch, counselorId, eventId, startDate, 
 	data['modeSearch']=modeSearch;
 	data['startDate']=startDate;
 	data['endDate']=endDate;
-	data['userId']=counselorId;
+	data['counselorId']=counselorId;
+	data['userId']=USER_ID;
 	data['schoolId']=SCHOOL_ID;
 	data['scoreTitle']=dataType;
 	data['currentPage']=currentPage;
@@ -1764,7 +1765,7 @@ function getcounselorReportListHtml(data){
 					<table  class="table table-bordered responsive nowrap" style="width:100%;">
 						<thead>
 							<tr>
-								<th colspan="2" class="bg-primary text-white "><p class="mb-0 text-center font-12">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0 font-12">${modSrc}</p> </th>
+								<th colspan="2" class="bg-primary text-white "><p class="mb-0 text-center font-12">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0 font-12">${modSrc}</p> <p class="text-center mb-0 font-12">${report.rating} /10</p></th>
 							</tr>
 						</thead>
 						<tbody class="font-10" id="counselorReportTbody_${report.assignTo}"></tbody>

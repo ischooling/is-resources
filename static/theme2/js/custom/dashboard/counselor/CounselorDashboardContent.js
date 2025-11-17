@@ -326,29 +326,34 @@ function getStatsDetailsContent(data){
 			if(leadData1.length > 0){
 				$.each(leadData1, function(j, ld){
 					if(ld.dataType=='RESPONSE-TYPE'){
-						responseTime=ld.finalScore;
+						responseTime=ld.finalScore>=0?ld.finalScore:'-';
 					}
 					if(ld.dataType=='LEAD-DEMO'){
-						leadToDemo=ld.finalScore;
+						leadToDemo=ld.finalScore>=0?ld.finalScore:'-';
 					}
 					if(ld.dataType=='DEMO-ENROLL'){
-						demoToEnroll=ld.finalScore;
+						demoToEnroll=ld.finalScore>=0?ld.finalScore:'-';
 					}
 					if(ld.dataType=='LEAD-ENROLL'){
-						leadToEnroll=ld.finalScore;
+						leadToEnroll=ld.finalScore>=0?ld.finalScore:'-';
 					} 
 					if(ld.dataType=='MEETING-JOIN'){
-						joiningDemoTime=ld.finalScore;
+						joiningDemoTime=ld.finalScore>=0?ld.finalScore:'-';
 					} 
 					if(ld.dataType=='ENROLL-TIME'){
-						timeToLeadConversion=ld.finalScore;
+						timeToLeadConversion=ld.finalScore>=0?ld.finalScore:'-';
 					}
-					tfinalScore+=parseInt(ld.finalScore);
-					if(ld.finalScore>0){
+					tfinalScore+=parseInt(ld.finalScore>=0 ? ld.finalScore : 0);
+					if(ld.finalScore>=0){
 						totalLeadRating+=1;
 					}
 				});
-				overallRating	=tfinalScore/totalLeadRating;
+				//overallRating	=tfinalScore/totalLeadRating;
+				if(tfinalScore>=0 && totalLeadRating){
+					overallRating	=tfinalScore/totalLeadRating;
+				}else{
+					overallRating=0;
+				}
 			}
 		});
 	}

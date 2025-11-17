@@ -12425,54 +12425,6 @@ function replaceContractPlaceholders(editor, pasteData) {
 	}
 }
 
-function getLeadCounselorReviewHtml(counselorReviewList){
-	var html = '<tr>';
-	if(counselorReviewList.length > 0){
-		var ind=1;
-		var finalScore=0;	
-		var totalFinalScore=0;
-		var totalLeadRating=0;
-		$.each(counselorReviewList, function(i,v){
-			html+=`<tr>`;
-			html+=`<td class="text-center">${ind}</td>`;
-			html+=`<td class="text-left">${v.assignName}</td>`;
-
-			var leadData1 = v.leadData;
-			if(leadData1.length > 0){
-				$.each(leadData1, function(j, ld){
-					if(ld.dataType=='RESPONSE-TYPE' || ld.dataType=='LEAD-DEMO' || ld.dataType=='DEMO-ENROLL'
-						|| ld.dataType=='LEAD-ENROLL' || ld.dataType=='MEETING-JOIN' || ld.dataType=='ENROLL-TIME'){
-						html+=`<td class="text-center">${ld.finalScore} /10</td>`;
-					}else{
-						html+=`<td class="text-center">0</td>`;
-					}
-					
-					finalScore+=parseInt(ld.finalScore);
-					if(ld.finalScore>0){
-						totalLeadRating+=1;
-					}
-				});
-				totalFinalScore	=finalScore/totalLeadRating;
-				html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
-				ind++;
-				totalFinalScore=0;
-				finalScore=0;
-				totalLeadRating=0;
-			}else{
-				totalFinalScore=0;
-				finalScore=0;
-				totalLeadRating=0
-			}
-			html+=`</tr>`;
-			
-		});
-		
-	}else{
-		html+=`<tr><td class="text-center" colspan="8">No record found</td></tr>`;
-	}
-	return html;
-	
-}
 
 
 // function checkPreviewButtonVisibility() {
@@ -12688,17 +12640,21 @@ function getLeadCounselorReviewHtml(counselorReviewList){
 
 					if(ld.dataType=='RESPONSE-TYPE' || ld.dataType=='LEAD-DEMO' || ld.dataType=='DEMO-ENROLL'
 						|| ld.dataType=='LEAD-ENROLL' || ld.dataType=='MEETING-JOIN' || ld.dataType=='ENROLL-TIME'){
-						html+=`<td class="text-center"><a href="javascript:void(0);"  onclick="callCounselorDetailReview('CUSTOM','${v.assignTo}', 'leadCounselorDetailReviewtbl', '', '', '${headTitleName}', '${ld.dataType}','0','10');">${ld.finalScore} /10</a></td>`;
+						html+=`<td class="text-center"><a href="javascript:void(0);"  onclick="callCounselorDetailReview('CUSTOM','${v.assignTo}', 'leadCounselorDetailReviewtbl', '', '', '${headTitleName}', '${ld.dataType}','0','10');">${ld.finalScore>=0 ? ld.finalScore : '-'} /10</a></td>`;
 					}else{
 						html+=`<td class="text-center">0</td>`;
 					}
-					
-					finalScore+=parseInt(ld.finalScore);
-					if(ld.finalScore>0){
+
+					finalScore+=parseInt(ld.finalScore>=0 ? ld.finalScore : 0);
+					if(ld.finalScore>=0){
 						totalLeadRating+=1;
 					}
 				});
-				totalFinalScore	=finalScore/totalLeadRating;//parseInt(v.totalRating);
+				if(finalScore>=0 && totalLeadRating){
+					totalFinalScore	=finalScore/totalLeadRating;
+				}else{
+					totalFinalScore=0;
+				}
 				html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
 				ind++;
 				totalFinalScore=0;
