@@ -120,7 +120,8 @@ function getLeadFollowupFormB2BPopup(objRights){
 	html+='</div>';
 	html+='<div class="modal-footer">';
 	html+='<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>';
-	html+='<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveB2BFollowup">Save Status</button>';
+	html+='<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveB2BFollowup">Save Status With Mail</button>';
+	html+='<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveB2BFollowupWithoutMail">Save Status Without Mail</button>';
 	html+='</div>';
 			
     html+=' </div>';

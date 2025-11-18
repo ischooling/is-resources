@@ -743,7 +743,7 @@ if ($("#"+formId+" #leadStatus").val()=='Demo Reschedule') {
  
  return flag;
 }
-function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId, objRights, roleAndModule) {
+function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId, objRights, roleAndModule, followupWithoutMail) {
  $('.errorLeadCls').css( "display", "none" );
  $('.errorLeadCls').removeClass('success');
  $('#errorMessageLead').html('');
@@ -776,7 +776,7 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 	 type : "POST",
 	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLFor('leads','save-leads-followup'),
-	 data : JSON.stringify(getRequestForLeadFollowupSave(formId)),
+	 data : JSON.stringify(getRequestForLeadFollowupSave(formId, followupWithoutMail)),
 	 dataType : 'json',
 	 cache : false,
 	 timeout : 600000,
@@ -835,7 +835,7 @@ function submitLeadFollowupSave(formId,roleModuleId, leadFrom, newTheme, modalId
 	 }
  });
 }
-function getRequestForLeadFollowupSave(formId){
+function getRequestForLeadFollowupSave(formId, followupWithoutMail){
 	var leadAddFormRequestDTO = {};
 	var authentication = {};
 	var leadCommonDTO = {};
@@ -843,7 +843,11 @@ function getRequestForLeadFollowupSave(formId){
 	var leadModifyDetailDTO={};
 	var leadCallFollowupDTO={};
 	var leadDemoInfo={};
-	
+	if(followupWithoutMail == 'Y'){
+		leadCallFollowupDTO['followupWithoutMail'] = 'Y'
+	}else{
+		leadCallFollowupDTO['followupWithoutMail'] = 'N'
+	}
 	leadModifyDTO['leadId'] = $("#"+formId+" #leadId").val();
 	leadCallFollowupDTO['followupBy'] =$("#"+formId+" #followMed").val();
 	

@@ -54,6 +54,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule);
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	});
+	$("#saveB2BFollowupWithoutMail").unbind().bind("click", function(){
+		submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule, "Y");
+		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+	});
 
 	$("#btnAddCampaign").on('click', function(){
 		var leadCampaignName= $("#leadCampaignName").val();
@@ -451,6 +455,11 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 
 		$("#saveB2BFollowup").unbind().bind("click", function(){
 			submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule);
+			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+		});
+		
+		$("#saveB2BFollowupWithoutMail").unbind().bind("click", function(){
+			submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule, "Y");
 			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 		});
 
