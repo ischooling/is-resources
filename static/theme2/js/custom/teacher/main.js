@@ -335,7 +335,6 @@ function base64ImageFileAsURL(f, fileType, src, uploadType, viewAttachmentEleID,
                 bankUploadDocsObj.push(obj);
             }
             if(uploadType == "verify"){
-                console.log(base64URL)
                 verifyUploadDocsObj.filter(function(item){
                     if(item.fileType == fileType){
                         var index = getObjectIndex(verifyUploadDocsObj, fileType);

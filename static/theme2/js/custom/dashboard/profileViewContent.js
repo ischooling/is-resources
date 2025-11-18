@@ -1,5 +1,4 @@
 function teacherBankDetialsContent(bankDetails, userId){
-	console.log(bankDetails.accountCurrency);
 	var html = 
 	'<div class="modal fade modal-design" id="editProfileModal" role="dialog">'
 		+'<div class="modal-dialog modal-xl" role="document">'
