@@ -18,7 +18,7 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 			
 	});
 	var data = getPartnerDashboardDetailsData(userId);
-	//console.log(data);
+	console.log(data);
 	$("#chartContentDiv").html(partnerDashboardLPContent(data));
 	var revenue=0.0;
 	var revenue_d=0.0;
@@ -61,7 +61,7 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 	// 	$("#throughIs").html(parseFloat(revenue_id).toFixed(2)+' Flat');
 	// 	$("#pendingCommission").html(parseFloat(revenue_pending).toFixed(2)+' Flat');
 	// }else{
-		if(USER_ID == "19321" || USER_ID == "14388"){
+		if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
 			$("#totalRevenueValue").html(partnerDicountSymbol+' '+parseFloat("324705").toFixed(2));
 			$("#directEnrollment").html(partnerDicountSymbol+' '+parseFloat("310005").toFixed(2));
 			$("#throughIs").html(schoolDicountSymbol+' '+parseFloat("14700").toFixed(2));
@@ -74,7 +74,7 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 		}
 		
 	//}
-	if(USER_ID == "19321" || USER_ID == "14388"){
+	if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
 		$("#dirPercent").html(parseInt("95.39")+'%');
 		$("#thIsPercent").html(parseInt("4.61")+'%');
 		$("#dirPercent_p").html('$'+parseInt("15000"));
@@ -126,8 +126,8 @@ function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, ro
 }
 
 function partnerDashboardLPContent(data){
-	if(USER_ID == "19321" || USER_ID == "14388"){
-	data = [{
+	if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
+		data = [{
 			"schoolLPDetails": {
 				"learningProgramDetails": [
 					{
@@ -269,7 +269,7 @@ function partnerDashboardLPContent(data){
 	var html =
 		'<div class="col-12 p-0">'
 			+'<div class="row">';
-			if(USER_ID == "19321" || USER_ID == "14388"){
+			if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
 				$.each(data[0].schoolLPDetails.learningProgramDetails, function(k,learningProgram){
 					var revenue= parseFloat(learningProgram.revenue_d)+parseFloat(learningProgram.revenue_id);
 					var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
@@ -283,7 +283,8 @@ function partnerDashboardLPContent(data){
 										+'<span class="d-inline-block mb-1">'
 											+learningProgram.label
 										+'</span>'
-										+'<span class="pull-right text-primary mb-1">Commission: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
+										// +'<span class="pull-right text-primary mb-1">Commission: $'+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
+										+'<span class="pull-right text-primary mb-1">'+(schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue: $' : 'Commission: $')+(revenue == 0  ? (308*k):revenue)+'</span>'
 									+'</div>'
 								+'</h5>'
 								+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
@@ -468,7 +469,7 @@ function getChartContent(commissionRate){
 					html+=
 					`<div class="tab-content">`;
 						$.each(commissionRate, function(i,v){
-							if(USER_ID == "19321" || USER_ID == "14388"){
+							if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
 								v.bySchoolType='%';
 								var symbol=v.bySchoolType=='%'?'':'$';
 							}else{

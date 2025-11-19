@@ -790,10 +790,10 @@ function getReferralCodeAndLinksDetails(userId) {
 
 
 function getEnrollmentChart(eventid, lable, series){
-	if(SCHOOL_ID == 2){
-		series = [44, 55, 41, 17];
-		lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];
-	}
+	// if(SCHOOL_ID == 2){
+	// 	series = [44, 55, 41, 17];
+	// 	lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];
+	// }
 	// if(USER_ID == "19321" || USER_ID == "14388"){
 	// 	series = [44, 55, 41, 17];
 	// 	lable = ['Grade K - 5', 'Grade 6 - 8', 'Grade 9 - 12', 'Flexy Program'];	
@@ -887,7 +887,7 @@ function getPartnerStudentGrade(formId, elementId ,userId, learningProgramCode,e
 					redirectLoginPage();
 				} 
 			}else{
-				if(USER_ID == "19321" || USER_ID == "14388"){
+				if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
 					if(learningProgramCode=='ONE_TO_ONE' && enrollmentFor=='enrollment'){
 						var one_to_one=getRegisterDataByGrade(data,'one_to_one');
 						var series= [77, 82, 93];

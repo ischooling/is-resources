@@ -1418,7 +1418,6 @@ function renderCourseSelectionContent(csr){
 }
 
 function getCourseSelectionContent(csr){
-	debugger;
 	var html='';
 	if(csr.standardId!=8){
 	}
