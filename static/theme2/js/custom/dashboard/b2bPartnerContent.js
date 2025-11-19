@@ -379,6 +379,16 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 			var valueMin1=$("#commissionRatesTab_0").attr("data-school-value");
 			var valueMax1=$("#commissionRatesTab_0").attr("data-partner-value");
 			getCommissionRatesChart('chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
+		}).then(function(){
+			setTimeout(function() {
+				$('a[data-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function (e) {
+					var chartIndex = $(e.target).data("tab-index");
+					var chartIndexVal = $(e.target).data("tab-value");
+					var valueMin1 = $(e.target).data("school-value");
+					var valueMax1 = $(e.target).data("partner-value");
+					getCommissionRatesChart('chart' + chartIndex, chartIndexVal, valueMin1, valueMax1);
+				});
+			}, 1000);
 		});
 	return html;
 }
