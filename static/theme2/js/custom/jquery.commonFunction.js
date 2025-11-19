@@ -6595,3 +6595,32 @@ function formatLabel(str) {
     .replace(/^./, s => s.toUpperCase())
     .trim();
 }
+
+
+function changeDateFormatK8(date, dateFormat) {
+  if ("mm-dd-yyyy" == dateFormat) {
+    return ((date.getMonth() > 8 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + "-" + date.getFullYear());
+  } else if ("yyyy-mm-dd" == dateFormat) {
+    return (date.getFullYear() + "-" + (date.getMonth() > 8 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()));
+  } else if ("yyyy-mm-dd hh:mm:ss" == dateFormat) {
+    return (date.getFullYear() + "-" + (date.getMonth() > 8 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + " " + (date.getHours() > 9 ? date.getHours() : "0" + date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0" + date.getMinutes()) + ":" + (date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds()));
+  } else if ("MMM-dd-yyyy hh:mm:ss" == dateFormat) {
+    return (M.months[date.getMonth()] +" " +(date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +", " +date.getFullYear() +" " +(date.getHours() > 9 ? date.getHours() : "0" + date.getHours()) +":" +(date.getMinutes() > 9 ? date.getMinutes() : "0" + date.getMinutes()) +":" +(date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds()));
+  } else if ("MMM dd, yyyy hh:mm:ss A" == dateFormat) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    return (M.months[date.getMonth()] + " " + (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + ", " + date.getFullYear() + " " +(hours > 9 ? hours : "0" + hours) +":" +(minutes > 9 ? minutes : "0" + minutes) +":" +(seconds > 9 ? seconds : "0" + seconds) +" " +ampm);
+  } else if ("dd-mm-yyyy" == dateFormat) {
+    return ((date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + "-" + (date.getMonth() > 8 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1)) + "-" + date.getFullYear());
+  } else if ("MMM-dd-yyyy" == dateFormat) {
+    return (M.months[date.getMonth()] + " " + (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + ", " + date.getFullYear());
+  } else {
+    return (date.getFullYear() + "-" + (date.getMonth() > 8 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())
+    );
+  }
+}

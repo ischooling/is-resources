@@ -776,12 +776,6 @@ function checkLinkValid(e, src){
 			return BASE_URL + CONTEXT_PATH + "videos/signed-url?payload=" + encodePayload;
 		}
 
-		function getURLForSignVideo(videoUrl) {
-			const payload = JSON.stringify({ url: videoUrl });
-			const encodePayload = window.btoa(payload);
-			return BASE_URL + CONTEXT_PATH + "videos/signed-url?payload=" + encodePayload;
-		}
-		
 		function getURLForTranscriptContent(transcriptUrl) {
 			var payload = JSON.stringify({ url: transcriptUrl });
 			var encodePayload = window.btoa(payload);
