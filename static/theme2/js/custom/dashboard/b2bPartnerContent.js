@@ -469,7 +469,7 @@ function getChartContent(commissionRate){
 					html+=
 					`<div class="tab-content">`;
 						$.each(commissionRate, function(i,v){
-							if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
+							if(USER_ID == "19321" || USER_ID == "14388"){
 								v.bySchoolType='%';
 								var symbol=v.bySchoolType=='%'?'':'$';
 							}else{
