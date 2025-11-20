@@ -1802,6 +1802,18 @@ function getcounselorReportTbodyHtml(report){
 				<tr><th class="p-1">Wati/ whatsapp sent </th><td>${leadReport.totalWati}</td></tr>
 				<tr><th class="p-1">Email sent </th><td>${leadReport.totalEmail}</td></tr>
 				<tr><th class="p-1">Enrollment Link Share /Copy </th><td>${leadReport.totalRedirectlink} /${leadReport.totalCopylink}</td></tr>
+				<tr><th class="p-1">Total Meetings Count </th><td>${leadReport.totalNumberOfMeetings}</td></tr>
+				<tr><th class="p-1">Total Meetings Time </th><td>${leadReport.totalMeetingTime}</td></tr>
+				<tr>
+					<th class="p-1">Total Login Time </th>
+					<td>`
+						if(leadReport.totalLoginTime == 0){
+							html+=`${leadReport.totalLoginTime}`
+						}else{
+							html+=`<a href="javascript:void(0);" onclick="applyFilterDashboardMonitoring('reports','details', '${leadReport.assignTo}', '${leadReport.startsDate}', '${leadReport.endsDate}')" class="text-primary font-weight-semi-bold">${leadReport.totalLoginTime}</a>`
+						}
+					html+=`</td>
+				</tr>
 				`;
 				// <tr><th class="p-1">Rating </th><td id="rating_${leadReport.assignTo}">-</td></tr>
 			

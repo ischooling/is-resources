@@ -50,7 +50,9 @@ function bindUserApplicationData(responseData) {
             var row = 
                 `<tr id="tr_${user.id}">
                     <td>${(CURRENT_PAGE_USER_APPLICATION - 1) * pageSize + index + 1}</td>
-                    <td> 
+                    <td>
+                        ${changeDateFormat(new Date(user.createdAt), "MMM-dd-yyyy")}
+                        &nbsp;|&nbsp; 
                         ${user.userName} 
                         &nbsp;|&nbsp;
                         +${user.phoneNo || ''} 

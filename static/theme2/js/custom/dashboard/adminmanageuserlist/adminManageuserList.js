@@ -228,6 +228,10 @@ function validateRequestForNewUser(formId) {
     showMessageTheme2(0, "Email is either empty or invalid");
     return false;
   }
+  if ($("#" + formId + " #noOfWorkingHours").val() == "") {
+    showMessageTheme2(0, "Please fill working hours in a day.");
+    return false;
+  }
   return true;
 }
 
@@ -279,6 +283,7 @@ function getRequestForNewUser(formId) {
   signupStudentDTO["userType"] = "SCHOOL";
   signupStudentDTO["supportRoleId"] = $("#" + formId + " #supportRoleId").val();
   signupStudentDTO["languagesKnown"] = $("#" + formId + " #languages").select2('val');
+  signupStudentDTO["workingHours"] = $("#" + formId + " #noOfWorkingHours").val();
   request["signupStudentDTO"] = signupStudentDTO;
   authentication["hash"] = getHash();
   authentication["schoolId"] = SCHOOL_ID;

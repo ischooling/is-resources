@@ -547,6 +547,9 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 
     getLearningProgramContentFromServer(SCHOOL_ID,'partnerEnrollFilterForm','learningProgram');
     populateMonths();
+  }else if(pageNo == "dashboard-monitoring"){
+	$("#dashboardContentInHTML").html(dashboardMonitoringContent());
+	dashboardMonitoringOnLoad("dashboardMonitoringFilterForm");
   }else if(pageNo=='lead-setting'){
 		LEAD_CATEGORY="B2C";
 		if (USER_ROLE == "B2B_LEAD") {

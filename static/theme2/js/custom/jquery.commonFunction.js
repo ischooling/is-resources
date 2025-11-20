@@ -5729,7 +5729,9 @@ function detectBrave() {
 }
 
 function getDashboardDataBasedUrlAndPayload(globalflag,showMessage,url,payload) {
-  customLoader(true);
+  if(globalflag){
+    customLoader(true);
+  }
   return new Promise(function (resolve, reject) {
     $.ajax({
       type: "POST",
@@ -5854,6 +5856,43 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrlGET(globalflag, showMess
               reject(e);
           }
       });
+  });
+}
+
+function callCommonAjax(ajaxReqDetails){
+    return new Promise(function (resolve, reject) {
+      $.ajax({
+        type : ajaxReqDetails.method,
+        contentType : APPLICATION_JSON_VALUE,
+        url: ajaxReqDetails.url,
+        data: JSON.stringify(ajaxReqDetails.body),
+        dataType : 'json',
+        global : ajaxReqDetails.global,
+        success : function(data) {
+          if (data.status == '0' || data.status == '2' || data.status == '3') {
+            if(data.status == '3'){
+              redirectLoginPage();
+            }else{
+              if(ajaxReqDetails.showMessage){
+                showMessageTheme2(0, data.message,'',true);
+              }
+            }
+            if(ajaxReqDetails.onFaildResolved){
+              resolve(data);
+            }
+          } else {
+            if(ajaxReqDetails.onSuccessResolved){
+              resolve(data);
+            }
+          }
+        },
+        error: function (xhr, status, e) {
+          if(ajaxReqDetails.showMessage){
+            showMessageTheme2(0, e.responseText,'',true);
+          }
+          reject(e);
+        }
+    });
   });
 }
 
@@ -6594,4 +6633,17 @@ function formatLabel(str) {
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, s => s.toUpperCase())
     .trim();
+}
+
+function formatTimeDisplay(timeInSeconds) {
+  if (!timeInSeconds) return '0m';
+  const minutes = Math.floor(timeInSeconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (hours > 0) {
+    return `${hours}h ${remainingMinutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
 }

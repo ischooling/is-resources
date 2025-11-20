@@ -1601,6 +1601,48 @@ function getAllCounselorList(formId,elementId){
 	});
 }
 
+function getAllAdminCounselorList(formId,elementId){
+	var userId = $('#userId').val();
+	if(userId==undefined || userId==null || userId==''){
+		userId=USER_ID;
+	}
+	var forAll = getValidatedUser(USER_ID)
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMaster('formId','ADMIN-COUNSELOR-LIST')),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		async : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				var result = data['mastersData']['counselorList'];
+				if(result.length>0){
+					var dropdown = $('#'+formId+' #'+elementId);
+					dropdown.html('');
+					// dropdown.append('<option value="">Select User</option>');
+					$.each(result, function(k, v) {
+						if(forAll){
+							dropdown.append('<option value="' + v.key + '">'+ v.value + ' </option>');
+						}else{
+							if(userId==v.key){
+								dropdown.html('<option value="' + v.key + '" selected>'+ v.value + ' </option>');
+								return false;
+							}else{
+								dropdown.append('<option value="' + v.key + '">'+ v.value + ' </option>');
+							}
+						}
+					});
+				}
+			}
+		}
+	});
+}
+
 function getAllEventList(formId,elementId){
 	$.ajax({
 		type : "POST",

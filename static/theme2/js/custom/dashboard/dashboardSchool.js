@@ -1139,6 +1139,8 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "teacher-screening-profiles") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
+  } else if (pageNo == "dashboard-monitoring") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "user-screening-profiles") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else {
