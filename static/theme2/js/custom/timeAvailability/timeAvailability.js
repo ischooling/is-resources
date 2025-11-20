@@ -707,7 +707,6 @@ function addNewRowTime(dayname, indx, prestartTime, preendTime, userRoleId, min,
 					if(prePositionInd == 0 && !$("."+dayname+"-time-"+prePositionInd+"").find(".remove-time-slot-btn").hasClass("time-save-Y")){
 						$("."+dayname+"-time-"+positionInd+"").find('.fromTime').prepend("<option value=''>Start Time</option>");
 					}
-					debugger;
 					$("."+dayname+"-time-"+positionInd+"").find('.fromTime').val("").trigger("change");
 				}
 				if(callFrom=='remove-slot-week'){
@@ -3957,7 +3956,6 @@ function dropdownparseTime(time) {
 }
 var bindStartTimeDorpDownFlag = true;
 function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap){
-	debugger;
 	var startTime_endTime_gap = minTimeSlotGap;
 	var end_Time_endTime_gap = maxTimeSlotGap;
 	startTime_endTime_gap = parseInt(startTime_endTime_gap, 10);
@@ -4038,7 +4036,6 @@ function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap
 					// 	startTimeDropdown.append(`<option value="${formattedStartTime}">${formattedStartTime}</option>`);
 					// }
 					for (var i = startMinutes; i <=(isLastTimeShow?(endMinuteslimit - 15):endMinuteslimit); i += dropdownTimeGap) {
-						debugger;
 						var endHour = Math.floor(i / 60);
 						var endMinutes = i % 60;
 						var endPeriod = endHour >= 12 ? "PM" : "AM";
@@ -4051,7 +4048,6 @@ function checkStartTimeVlidation(src,flag,minTimeSlotGap,maxTimeSlotGap, slotGap
 				}else{
 					var i;
 					for (i = startMinutes; i < 24*60; i += dropdownTimeGap) {
-						debugger;
 						var endHour = Math.floor(i / 60);
 						var endMinutes = i % 60;
 						var endPeriod = endHour >= 12 ? "PM" : "AM";

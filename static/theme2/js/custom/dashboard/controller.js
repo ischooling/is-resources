@@ -558,7 +558,7 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		renderLeadSettingDashboard('Lead Settings',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
 	}
 	else if(pageNo=='user-screening-profiles'){
-		$('#dashboardContentInHTML').html(renderUserApplicationContent("User Applications", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+		$('#dashboardContentInHTML').html(renderUserApplicationContent("Job Applicants", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
 		userApplicationProfileOnloadFunction();
 	}
 //   else if(pageNo=='lead-report-list'){
