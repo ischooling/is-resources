@@ -90,6 +90,7 @@ async function dashboardFooterContent(){
 		+'</div>'
 	+'</div>';
 	html +=getLoaderContent();
+	html +=getAllCounselorTasks();
 	return html;
 }
 
@@ -141,6 +142,42 @@ function getCounslorDailyReport(){
 					</div>
 					<div class="row" id="counselor-list-report"></div>
 			`;
+	return html;
+}
+
+
+function getAllCounselorTasks(){
+	var html=`<div id="counselorAddTaskpopup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-modal="true" >
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="counselorTaskTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					
+					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
+						<thead>
+							<tr>
+								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" >S No.</th>
+								<th class="bg-primary text-white bold border-bottom-0" >Task Name</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 262px;">Time</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 150px;">Status</th>
+								<th class="bg-primary text-white bold border-bottom-0">Description</th>
+							</tr>
+						</thead>
+						<tbody id="counselorTaskList">
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					
+				</div>
+			</div>
+		</div>
+	</div>`;
 	return html;
 }
 

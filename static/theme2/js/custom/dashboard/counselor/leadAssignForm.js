@@ -94,18 +94,32 @@ function getLeadAssignUser(objectRights) {
 		var inc=1;
 		for (let m = 0; m < assignUserList.length; m++) {
 			const assignUser = assignUserList[m];
-			var autoInc=assignUser.orderBy!=''?assignUser.orderBy:inc
-			html+=`<tr class="assignItem">	
-				 <td class="text-left"><input type="hidden" class="assignto"  value="${assignUser.assignTo}">
-				<b>${assignUser.assignName}</b><br/>`;
+			var autoInc=assignUser.orderBy!=''?assignUser.orderBy:inc;
+
+			var bgColorStype='bg-secondary text-white';
+			if(assignUser.rating>=8){
+				bgColorStype='bg-success text-white';
+			}else if(assignUser.rating>=5 && assignUser.rating<8){
+				bgColorStype='bg-warning';
+			}else{
+				bgColorStype='bg-danger text-white';
+			}
+			
+			html+=`<tr class="assignItem"  >	
+				 <td class="text-left" style="vertical-align:top"><input type="hidden" class="assignto"  value="${assignUser.assignTo}">
+				<b>${assignUser.assignName.split(" ")[0]}</b>`;
+				if(assignUser.counselorActivate == 'Y'){
+					html+=`<span class="${bgColorStype} text-center badge font-10 float-right">${assignUser.rating}</span>`;
+				}
+				html+=`<br/>`;
 					var assignRoles=assignUser.assignRole;
 					for (let r = 0; r < assignRoles.length; r++) {
 						const aRol = assignRoles[r];
 						html+=`<div>${aRol}</div>`;
 					}
 				html+=`</td>
-				 <td><input type="text" class="form-control form-control-sm rowindex" name="orderBy" class="rowindex" value="${autoInc}" size="5"  maxlength="5" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/></td>
-				 <td>
+				 <td style="vertical-align:top"><input type="text" class="form-control form-control-sm rowindex" name="orderBy" class="rowindex" value="${autoInc}" size="5"  maxlength="5" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/></td>
+				 <td style="vertical-align:top">
 					<div class="d-flex align-items-center">
 						<span class="d-inline-flex">
 							<input type="text" name="totalAssignLead" class="totalAssignLead form-control form-control-sm" value="${assignUser.totalAssignLeads}" size="5"  maxlength="5"  ${assignUser.counselorActivate == 'Y' ? '':'disabled'}/>
@@ -118,7 +132,7 @@ function getLeadAssignUser(objectRights) {
 						</span>	
 					</div>
 				</td>
-				<td>
+				<td style="vertical-align:top">
 				 	<label class="switch" >
 						<input class="switch-input assignActiveCouns" id="counselorCheckbox${assignUser.assignTo}"  type="checkbox" ${assignUser.counselorActivate == 'Y' ? 'checked':''}  value="${assignUser.counselorActivate}" 
 						onclick="activeCounselor(this.value, '${assignUser.assignTo}', '${autoInc}')" data-size="mini"/>

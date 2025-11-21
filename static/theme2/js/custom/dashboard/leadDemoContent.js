@@ -399,7 +399,7 @@ function getCalendarDemoAvailability(formId, userId,elementId, startDate, slotTy
 		var timedates = timeSlotList[i];
 		var timedates1 = (timeSlotList.length-1)!=i?timeSlotList[i+1]:'12:00 AM';
 		let time24h = convertTo24Hour(timedates);
-		time24h=time24h.replace(":","");
+		time24h=time24h.replaceAll(":","");
 
 		htmlCal=htmlCal+'<tr>';
 		htmlCal=htmlCal+'<td class="bold" style="font-size:12px;"><span class="p-1 mb-1 mr-1 text-center font-weight-semi-bold d-inline-block text-primary border border-primary rounded-5 font-12">'+timedates+' - '+timedates1+'</span></td>';

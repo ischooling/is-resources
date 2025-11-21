@@ -40,10 +40,13 @@ function bindTeacherScreeningData(responseData) {
     if (responseData.DataArray && responseData.DataArray.length > 0) {
         var pageSize = responseData.pagination.pageSize;
         responseData.DataArray.forEach(function(teacher, index) {
+            const source = typeof teacher.location === "string" ? JSON.parse(teacher.location).by : teacher.location?.by;
             var row = 
                 `<tr id="tr_${teacher.id}">
                     <td>${(CURRENT_PAGE_TEACHER_SCREENING - 1) * pageSize + index + 1}</td>
-                    <td>${teacher.userName}</td>
+                    <td>${teacher.userName}
+                        ${source ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${source}</p>` : ""}
+                    </td>
                     <td>
                         ${teacher.phoneNo || ''} 
                         ${teacher.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}

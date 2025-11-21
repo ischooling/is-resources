@@ -12649,7 +12649,7 @@ function getLeadCounselorReviewHtml(counselorReviewList){
 						html+=`<td class="text-center">0</td>`;
 					}
 
-					finalScore+=parseInt(ld.finalScore>=0 ? ld.finalScore : 0);
+					finalScore+=parseFloat(ld.finalScore>=0 ? ld.finalScore : 0);
 					if(ld.finalScore>=0){
 						totalLeadRating+=1;
 					}
@@ -12659,7 +12659,15 @@ function getLeadCounselorReviewHtml(counselorReviewList){
 				}else{
 					totalFinalScore=0;
 				}
-				html+=`<td class="text-center font-weight-bold">${totalFinalScore.toFixed(1)} /10</td>`;
+				var bgColorStype='bg-secondary text-white';
+				if(totalFinalScore>=8){
+					bgColorStype='bg-success text-white';
+				}else if(totalFinalScore>=5 && totalFinalScore<8){
+					bgColorStype='bg-warning';
+				}else{
+					bgColorStype='bg-danger text-white';
+				}
+				html+=`<td class="text-center font-weight-bold ${bgColorStype}">${Number((totalFinalScore).toFixed(1))} /10</td>`;
 				ind++;
 				totalFinalScore=0;
 				finalScore=0;

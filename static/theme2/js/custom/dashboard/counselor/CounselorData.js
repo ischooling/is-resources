@@ -13,7 +13,7 @@ function callStudentListByCounselor(formId) {
 			cache : false,
 			timeout : 600000,
 			success : function(data) {
-			   console.log(data);
+			   //console.log(data);
 				if (data['status'] == '0' || data['status'] == '2') {
 					showMessageTheme2(false, data['message']);
 					$("#enroll-list-skeleton").show();
@@ -215,7 +215,7 @@ function callPartnerListBy(formId, elementId) {
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			console.log(data);
+			//console.log(data);
 			if (data['status'] == '0' || data['status'] == '2') {
 				//showMessageTheme2(false, data['message']);
 			} else {
@@ -279,7 +279,7 @@ function updateStudentCounselorCommissionRate(studentStandardId, updateStatus, a
 		async : false,
 		global : false,
 		success : function(data) {
-			console.log(data);
+			//console.log(data);
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
@@ -1671,85 +1671,59 @@ function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFr
 		global : getCounselorReportListFlag,
 		timeout : 600000,
 		success : function(data) {
-			console.log(data);
+			//console.log(data);
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0, data['message']);
 			} else {
-				if(callFrom==''){
-					getCounselorReportListFlag = false;
-					var html=getcounselorReportListHtml(data, modesearch, startDate, endDate, callFrom);
-					$('#counselor-list-report').html(html);
-					var dataList=data.dataList;
-					if(dataList != null && dataList!= undefined && dataList.length>0){	
-						for (let u = 0; u < dataList.length; u++) {	
-							const report = dataList[u];
-							getcounselorReportList(''+report.assignTo+'',''+modesearch+'',''+startDate+'', ''+endDate+'', 'DAILY-REPORT', 'counselorReportTbody_');
-						}
+				getCounselorReportListFlag = false;
+				var html=getcounselorReportListHtml(data, modesearch, startDate, endDate, callFrom);
+				$('#counselor-list-report').html(html);
+				var dataList=data.dataList;
+				if(dataList != null && dataList!= undefined && dataList.length>0){	
+					for (let u = 0; u < dataList.length; u++) {	
+						const report = dataList[u];
+						getcounselorDailyDetailReportList(''+report.assignTo+'',''+modesearch+'',''+startDate+'', ''+endDate+'', 'DAILY-REPORT', 'counselorReportTbody_');
 					}
-
-					// if(dataList.length>0){	
-					// 	for (let u = 0; u < dataList.length; u++) {	
-					// 		const report = dataList[u];
-					// 		console.log("getCounselorReviewDetails=> "+report.assignTo);
-					// 		var dataRate = getCounselorReviewDetails(''+modesearch+'',"reviewCounselor",''+startDate+'', ''+endDate+'', report.assignTo);
-							
-					// 		var reviewList =dataRate.counselorReviewList;
-					// 		var responseTime=0;
-					// 		var leadToDemo=0;
-					// 		var demoToEnroll=0;
-					// 		var leadToEnroll=0;
-					// 		var joiningDemoTime=0;
-					// 		var timeToLeadConversion=0;
-					// 		var overallRating=0;
-					// 		var tfinalScore=0;
-					// 		var totalLeadRating=0;
-					// 		if(reviewList!=undefined && reviewList.length>0){
-					// 			$.each(reviewList, function(i,v){
-					// 				var leadData1 = v.leadData;
-					// 				if(leadData1.length > 0){
-					// 					$.each(leadData1, function(j, ld){
-					// 						if(ld.dataType=='RESPONSE-TYPE'){
-					// 							responseTime=ld.finalScore;
-					// 						}
-					// 						if(ld.dataType=='LEAD-DEMO'){
-					// 							leadToDemo=ld.finalScore;
-					// 						}
-					// 						if(ld.dataType=='DEMO-ENROLL'){
-					// 							demoToEnroll=ld.finalScore;
-					// 						}
-					// 						if(ld.dataType=='LEAD-ENROLL'){
-					// 							leadToEnroll=ld.finalScore;
-					// 						} 
-					// 						if(ld.dataType=='MEETING-JOIN'){
-					// 							joiningDemoTime=ld.finalScore;
-					// 						} 
-					// 						if(ld.dataType=='ENROLL-TIME'){
-					// 							timeToLeadConversion=ld.finalScore;
-					// 						}
-					// 						tfinalScore+=parseInt(ld.finalScore);
-					// 						if(ld.finalScore>0){
-					// 							totalLeadRating+=1;
-					// 						}
-					// 					});
-					// 					overallRating	=tfinalScore/totalLeadRating;
-					// 				}
-					// 			});
-					// 			$('#rating_'+report.assignTo).html(overallRating.toFixed(1));
-					// 		}
-					// 	}
-					// }
-				}else{
-					getCounselorReportListFlag = true;
-					var html =getcounselorReportTbodyHtml(data);
-					$('#'+eventid+assignTo).html(html);
 				}
+				
+			}
+			
+		}
+	});
+}
+function getcounselorDailyDetailReportList(assignTo, modesearch, startDate, endDate, callFrom, eventid) {
+	data={};
+	data['schoolId']=SCHOOL_ID;
+	data['userId']=USER_ID;
+	data['modeSearch']=modesearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['callFrom']=callFrom;
+	data['assignTo']=assignTo;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard', 'counselor-daily-detail-report'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		cache : false,
+		global : getCounselorReportListFlag,
+		timeout : 600000,
+		success : function(data) {
+			//console.log(data);
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				getCounselorReportListFlag = true;
+				var html =getcounselorReportTbodyHtml(data, assignTo);
+				$('#'+eventid+assignTo).html(html);
 			}
 			
 		}
 	});
 }
 
-function getcounselorReportListHtml(data){
+function getcounselorReportListHtml(data, assignTo){
 	var dataList=data.dataList;
 	var html='';
 	if(dataList != null && dataList!= undefined && dataList.length>0){	
@@ -1777,7 +1751,13 @@ function getcounselorReportListHtml(data){
 	return html;
 }	
 
-function getcounselorReportTbodyHtml(report){
+function openAddTask(assignTo){
+	$("#assignto").val(assignTo);
+	getTask(assignTo,0);
+	$("#counselorAddTaskpopup").modal('show');
+}
+
+function getcounselorReportTbodyHtml(report, assignTo){
 	var dataList=report.dataList;
 	var html='';
 	if(dataList.length>0){	
@@ -1815,7 +1795,16 @@ function getcounselorReportTbodyHtml(report){
 					html+=`</td>
 				</tr>
 				`;
-				// <tr><th class="p-1">Rating </th><td id="rating_${leadReport.assignTo}">-</td></tr>
+				if(!OBJECT_RIGHTS.searchUser){
+					$("#counselorTaskTitle").text(USER_FULL_NAME+" Task");
+					html+=`<tr><th class="p-1">Task</th>
+					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${leadReport.totalTask>0?'View':'Add'} task</span></a>
+					</td></tr>`;
+				}else{
+					html+=`<tr><th class="p-1">Total Task</th>
+					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}');" style="line-height:8px;"><span>&nbsp; ${leadReport.totalTask}</span></a>
+					</td></tr>`;
+				}
 			
 					
 					
@@ -1888,3 +1877,169 @@ function saveCounselorDashboardCopyLink(referralCode, learningProgram) {
 	});
 	return true;
 }
+
+function saveTask(formId, callFrom, taskid) {
+	if(callFrom!="delete"){
+
+		if($("#"+formId+" #taskname").val()==''){
+			showMessageTheme2(0, "Please fill task name");
+			return false;
+		}
+		if($("#"+formId+" #taskname").val()==''){
+			showMessageTheme2(0, "Please fill task name");
+			return false;
+		}
+		if($("#"+formId+" #fromTime").val()=='' && $("#"+formId+" #toTime").val()==''){
+			showMessageTheme2(0, "Please select start and end time");
+			return false;
+		}
+		var sTime=$("#"+formId+" #fromTime").val();
+		var eTime=$("#"+formId+" #toTime").val();
+		if (sTime && eTime) {
+			if (sTime >= eTime) {
+				showMessageTheme2(0, 'Please choose an end time greater than start time.', '', true);
+				return false;
+			}
+		}
+		if($("#"+formId+" #status").val()==''){
+			showMessageTheme2(0, "Please select status");
+			return false;
+		}
+		if($("#"+formId+" #description").val()==''){
+			showMessageTheme2(0, "Please enter description");
+			return false;
+		}
+	}
+
+
+	var dataRequest={};
+	if(taskid==0){
+		taskid=$("#"+formId+" #taskid").val()!=undefined?$("#"+formId+" #taskid").val():0;
+	}
+	dataRequest['taskid']=taskid;
+	dataRequest['assignTo']=$("#"+formId+" #assignto").val();
+	dataRequest['taskName']=$("#"+formId+" #taskname").val();
+	dataRequest['starttime']=$("#"+formId+" #fromTime").val();;
+	dataRequest['endtime']=$("#"+formId+" #toTime").val();;
+	dataRequest['status']=$("#"+formId+" #status").val();;
+	dataRequest['description']=$("#"+formId+" #description").val();
+	dataRequest['callFrom']=callFrom;
+	dataRequest['userId']=USER_ID;
+	dataRequest['schoolId']=SCHOOL_ID;
+	//console.log(dataRequest);
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-counselor-task',
+		data : JSON.stringify(dataRequest),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			//console.log(data);
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				showMessageTheme2(0, data['message']);
+			}else{
+				showMessageTheme2(1, data['message']);
+				$("#"+formId+" #taskname").val('')
+				$("#"+formId+" #fromTime").val('').trigger('change')
+				$("#"+formId+" #toTime").val('').trigger('change')
+				$("#"+formId+" #status").val('PENDING')
+				$("#"+formId+" #description").val('')
+				var html=getTaskList(data);
+				$("#counselorTaskList").html(html);
+				//$("#counselorAddTaskpopup").modal('hide')
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return true;
+}
+
+
+function getTask(assignTo, taskid) {
+	var startDate = $("#dataStartDate").val()!=undefined?$("#dataStartDate").val():'';
+	var endDate = $("#dataEndDate").val()!=undefined?$("#dataEndDate").val():'';
+	var dataRequest={};
+	dataRequest['taskid']=taskid;
+	dataRequest['assignTo']=assignTo;
+	dataRequest['modeSearch']=$("#searchtypeTotalLead").val()!=undefined?$("#searchtypeTotalLead").val():"DAY";
+	dataRequest['startDate']=startDate;
+	dataRequest['endDate']=endDate;
+	dataRequest['userId']=USER_ID;
+	dataRequest['schoolId']=SCHOOL_ID;
+	//console.log(dataRequest);
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-counselor-task',
+		data : JSON.stringify(dataRequest),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			//console.log(data);
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				//showMessageTheme2(0, data['message']);
+				var html=getTaskList(data);
+				$("#counselorTaskList").html(html);
+			}else{
+				//showMessageTheme2(1, data['message']);
+				if(taskid>0){
+					var dataList=data.taskList;
+					var task=dataList[0];
+					var startTime=convertTo24Hour(task.starttime);
+					var endTime=convertTo24Hour(task.endtime);
+					$("#counselorAddTask #taskid").val(task.taskid)
+					$("#counselorAddTask #taskname").val(task.taskName);
+					$("#counselorAddTask #fromTime").val(startTime).trigger('change');
+					$("#counselorAddTask #toTime").val(endTime).trigger('change');
+					$("#counselorAddTask #status").val(task.status);
+					$("#counselorAddTask #description").val(task.description);
+					
+
+				}else{
+					var html=getTaskList(data);
+					$("#counselorTaskList").html(html);
+				}
+				//$("#counselorAddTaskpopup").modal('hide')
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return true;
+}
+
+function getTaskList(data){
+	var dataList=data.taskList;
+	$("#counselorTaskTitle").text(data.assignName+" Task")
+	var html='';
+	var sr=1;
+	if(dataList.length>0){	
+		for (let u = 0; u < dataList.length; u++) {	
+			const leadtask = dataList[u];
+			html+=`<tr><td class="p-1">${sr++}</td>
+				<td class="p-1">${leadtask.taskName}</td>
+				<td class="p-1">${leadtask.starttime} - ${leadtask.endtime}</td>
+				<td class="p-1">${leadtask.status}</td>
+				<td class="p-1">${leadtask.description}</td>`;
+				if(!OBJECT_RIGHTS.searchUser){
+					html+=`<td class="p-1"><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="getTask('counselorAddTask','${leadtask.taskid}');"><i class="icon ion-android-create" style="font-size:15px;line-height:13px"></i></a>
+					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="saveTask('counselorAddTask','delete','${leadtask.taskid}');"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
+					</td></tr>`;
+				}
+			}
+		}else{
+			html+=`<tr><td class="p-1 text-center bold" colspan="5">No Task</td>`;
+		}
+	return html;
+}
+

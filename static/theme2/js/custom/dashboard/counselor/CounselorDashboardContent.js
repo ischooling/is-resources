@@ -164,6 +164,13 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 			}
 			getcounselorReportList('0',searchCountrytype,startDate,endDate,'','');
 		});
+
+		$(".fromTime").select2({
+			theme:"bootstrap4",
+		});
+		$(".toTime").select2({
+			theme:"bootstrap4",
+		});
 	}
 }
 {/* <div class="page-title-subheading">${title}</div> */}
@@ -220,8 +227,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				<div class="mb-3 card border rounded-10">
 					<div class="card-body">`
 						+getAccountManagerDetailsContent(data)
-					html+=
-					`</div>
+					html+=`</div>
 				</div>
 				<div class="mb-3 card border rounded-10">
 					<div class="card-body">`
@@ -238,6 +244,7 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 			html+=`</div>`;
 			html+=getRatingPopup();
 			html+=getSelfCounselorReport();
+			html+=getCounselorAddTask(data.timeslotlist);
 	}
 	
 	return html;
@@ -343,7 +350,7 @@ function getStatsDetailsContent(data){
 					if(ld.dataType=='ENROLL-TIME'){
 						timeToLeadConversion=ld.finalScore>=0?ld.finalScore:'-';
 					}
-					tfinalScore+=parseInt(ld.finalScore>=0 ? ld.finalScore : 0);
+					tfinalScore+=parseFloat(ld.finalScore>=0 ? ld.finalScore : 0);
 					if(ld.finalScore>=0){
 						totalLeadRating+=1;
 					}
@@ -432,7 +439,7 @@ function getStatsDetailsContent(data){
 				<i class="fas fa-star mr-1" style="font-size:14px;"></i>
 				<p class="mb-0 small font-weight-bold">Overall Rating</p>
 			</div>
-			<h6 class="mb-0 mt-1 text-center font-weight-bold">${overallRating.toFixed(1)} /10</h6>
+			<h6 class="mb-0 mt-1 text-center font-weight-bold">${Number((overallRating).toFixed(1))} /10</h6>
 		</div>
 	</div>`;
     return html;
@@ -1746,3 +1753,83 @@ function getSelfCounselorReport(){
         </div>`;
 	return html;
 }
+
+function getCounselorAddTask(timeslotlist){
+	var html=`<div id="counselorAddTaskpopup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-modal="true" >
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="counselorTaskTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					
+					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
+						<thead>
+							<tr>
+								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" >S No.</th>
+								<th class="bg-primary text-white bold border-bottom-0" >Task Name</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 262px;">Time</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 150px;">Status</th>
+								<th class="bg-primary text-white bold border-bottom-0">Description</th>
+								<th class="bg-primary text-white bold border-bottom-0"></th>
+							</tr>
+							<tr>
+								<td ><input type="hidden" name="taskid" id="taskid" value="" /><input type="hidden" name="assignto" id="assignto" value="" /></td>
+								<td  ><input type="text" value="" id="taskname" class="mr-2 form-control"/></td>
+								<td style="width: 262px;"><div class="my-1 mx-0 row align-items-center justify-content-sm-start available-dropdown-Wrapper justify-content-around">
+									<div class="flex-grow-1 flex-sm-grow-0">
+										<select class="form-control font-12 fromTime" id="fromTime">
+											<option value="">Start Time</option>`;
+											if(timeslotlist.length>0){
+												for (let i = 0; i < timeslotlist.length; i++) {
+													const timeopt = timeslotlist[i];
+													var startTime=convertTo24Hour(timeopt);
+													//var strSelect = (preStartTime==startTime)?'selected':'';
+													html+=`<option value="${startTime}" >${timeopt}</option>`;
+												}
+											}
+										html+=`</select>
+									</div>-
+									<div class="flex-grow-1 flex-sm-grow-0"> 
+										<select class="form-control font-12 toTime" id="toTime">
+											<option value="">End Time</option>`;
+											if(timeslotlist.length>0){
+												for (let i = 0; i < timeslotlist.length; i++) {
+													const timeopt = timeslotlist[i];
+													var startTime=convertTo24Hour(timeopt);
+													//var strSelect = (preEndTime==startTime)?'selected':'';
+													html+=`<option value="${startTime}" >${timeopt}</option>`;
+												}
+											}
+										html+=`</select>
+									</div>
+									</div>
+								</td>
+								<td style="width: 150px;">
+									<select class="form-control font-12" id="status">
+										<option value="PENDING">Pending</option>
+										<option value="IN-PROCESS">In-Process</option>
+										<option value="COMPLETED">Completed</option>
+									</select>			
+								</td>
+								<td><textarea type="text" value="" id="description" class="mr-2 form-control" ></textarea></td>
+								<td ><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary saveTask" onclick="saveTask('counselorAddTask','add','0');">Save</a></td>
+							</tr>
+						</thead>
+						<tbody id="counselorTaskList">
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
+
+

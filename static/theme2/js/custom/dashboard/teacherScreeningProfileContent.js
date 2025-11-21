@@ -23,7 +23,7 @@ function teacherScreeningFilter(){
         `<form id="teacherScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2" style="display:none;">
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Name</label>
+                    <label>Name/Source</label>
                     <input type="text" id="filterName" class="form-control">
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
