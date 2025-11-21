@@ -59,6 +59,9 @@ function bindUserApplicationData(responseData) {
                         ${user.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}    
                         &nbsp;|&nbsp;
                         ${user.email || ''}
+                        ${
+                        JSON.parse(user.location).by ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${JSON.parse(user.location).by || ''}</p>` : ""
+                        }                              
                     </td>
                     <td>${user.country} | ${user.state} | ${user.city}</td>
                     <td>${user.lastSalary ? user.currency + ' ' + user.lastSalary : ''}</td>

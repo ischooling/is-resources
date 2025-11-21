@@ -112,7 +112,7 @@ function userApplicationTableContent(status){
                 <thead class="bg-primary text-white">
                     <tr>
                         <th>S.No.</th>
-                        <th style="min-width: 130px;">Applied Date | Name | Phone Number | Email</th>
+                        <th style="min-width: 130px;">Applied Date | Name | Phone Number | Email | Source</th>
                         <th>Country | Province | City</th>
                         <th>Last/Current Salary (per annum)</th>
                         <th>Last/Current Organization Name</th>
