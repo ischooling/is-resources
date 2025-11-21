@@ -148,7 +148,7 @@ function timeToSeconds(timeString) {
     return hours * 3600 + minutes * 60 + seconds;
 }
 
-function formatTime(seconds) {
+function formatTimeForActivityTimer(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -158,7 +158,7 @@ function formatTime(seconds) {
 function updateCurrentSessionDisplay() {
     if (IS_USER_ACTIVE && ACTIVE_SECONDS > 0) {
         const totalSeconds = timeToSeconds(TOTAL_ACTIVE_TIME || "00:00:00") + ACTIVE_SECONDS;
-        $('#timerValue').text(formatTime(totalSeconds));
+        $('#timerValue').text(formatTimeForActivityTimer(totalSeconds));
     }
 }
 
@@ -196,7 +196,7 @@ async function getActivityTotalTimeByDate(trackerDate) {
             
             if (IS_USER_ACTIVE) {
                 const totalSeconds = timeToSeconds(TOTAL_ACTIVE_TIME) + ACTIVE_SECONDS;
-                $('#timerValue').text(formatTime(totalSeconds));
+                $('#timerValue').text(formatTimeForActivityTimer(totalSeconds));
                 $('#liveIndicator').show();
                 $('#pausedIndicator').hide();
             } else {
