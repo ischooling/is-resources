@@ -20,6 +20,7 @@ async function renderCounselorDailyReportDashboard(title, roleAndModule, SCHOOL_
 		html +=await dashboardFooterContent();
 		$('body').html(html);
 
+		getAdminReportList('0','DAY','','','','');
         getcounselorReportList('0','DAY','','','','');
 
 	$("#dataStartDate").datepicker({
@@ -37,6 +38,7 @@ async function renderCounselorDailyReportDashboard(title, roleAndModule, SCHOOL_
 			$(".hidedate").css({"display":"block"});
 		}else{
 			$(".hidedate").css({"display":"none"})
+			getAdminReportList('0',$("#searchtypeTotalLead").val(),'','','','');
 			getcounselorReportList('0',$("#searchtypeTotalLead").val(),'','','','');
 			
 		}
@@ -54,6 +56,7 @@ async function renderCounselorDailyReportDashboard(title, roleAndModule, SCHOOL_
             showMessageTheme2(1, 'Please choose end date','',true);
 		        return false;
         }
+		getAdminReportList('0',searchCountrytype,startDate,endDate,'','');
 		getcounselorReportList('0',searchCountrytype,startDate,endDate,'','');
     });
 
@@ -112,35 +115,69 @@ function getLeadReportMasterContent(title, objectRights){
 
 function getMainReportCard(objRight){
 	var html='';
-		html+='<div class="main-card mb-3 card">';
-			html+='<div class="card-body">';
-			html+=getCounslorDailyReport();
-			html+='</div>';
-		html+='</div>';
+		html+=`<div class="main-card mb-3 card">
+			
+		<div class="card-body">
+			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
+				<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
+					<option value="DAY" >Today</option>
+					<option value="WEEK" >Week</option>
+					<option value="MONTH" >Month</option>
+					<option value="CUSTOM">Custom</option>
+				</select>
+				<div class="hidedate">
+					<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
+						<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+							<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+							<div class="mx-1">To</div>
+							<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+						</div>
+						<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
+					</div>
+				</div>
+			</div>
+
+			<ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
+			<li class="nav-item">
+				<a role="tab" class="nav-link active" id="tab-1" data-toggle="tab" href="#tab-content-1">
+					<span>Counselor Report</span>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a role="tab" class="nav-link" id="tab-2" data-toggle="tab" href="#tab-content-2">
+					<span>Admin Report</span>
+				</a>
+			</li>
+			</ul>
+			<div class="tab-content p-3 border">
+			<div class="tab-pane tabs-animation fade show active" id="tab-content-1" role="tabpanel">
+				<div class="tabs-animation">`;
+					html+=getCounslorDailyReport();
+					html+=`</div>
+			</div>
+			<div class="tab-pane tabs-animation fade show " id="tab-content-2" role="tabpanel">
+				<div class="tabs-animation">`;
+				html+=getAdminDailyReport()
+				html+=`</div>
+			</div>`;
+			
+
+			html+=`</div>
+			</div>
+		</div>`;
 		
 	return html;
 }
 
 function getCounslorDailyReport(){
-	var html=`<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
-						<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
-							<option value="DAY" >Today</option>
-							<option value="WEEK" >Week</option>
-							<option value="MONTH" >Month</option>
-							<option value="CUSTOM">Custom</option>
-						</select>
-						<div class="hidedate">
-							<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
-								<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-									<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
-									<div class="mx-1">To</div>
-									<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
-								</div>
-								<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
-							</div>
-						</div>
-					</div>
-					<div class="row" id="counselor-list-report"></div>
+	var html=`
+			<div class="row" id="counselor-list-report"></div>
+			`;
+	return html;
+}
+function getAdminDailyReport(){
+	var html=`
+			<div class="row" id="admin-list-report"></div>
 			`;
 	return html;
 }
@@ -161,10 +198,10 @@ function getAllCounselorTasks(){
 					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
 						<thead>
 							<tr>
-								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" >S No.</th>
+								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="width: 60px;">S No.</th>
 								<th class="bg-primary text-white bold border-bottom-0" >Task Name</th>
-								<th class="bg-primary text-white bold border-bottom-0" style="width: 262px;">Time</th>
-								<th class="bg-primary text-white bold border-bottom-0" style="width: 150px;">Status</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 200px;">Time</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 100px;">Status</th>
 								<th class="bg-primary text-white bold border-bottom-0">Description</th>
 							</tr>
 						</thead>

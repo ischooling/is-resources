@@ -1676,7 +1676,7 @@ function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFr
 				showMessageTheme2(0, data['message']);
 			} else {
 				getCounselorReportListFlag = false;
-				var html=getcounselorReportListHtml(data, modesearch, startDate, endDate, callFrom);
+				var html=getcounselorReportListHtml(data);
 				$('#counselor-list-report').html(html);
 				var dataList=data.dataList;
 				if(dataList != null && dataList!= undefined && dataList.length>0){	
@@ -1723,7 +1723,7 @@ function getcounselorDailyDetailReportList(assignTo, modesearch, startDate, endD
 	});
 }
 
-function getcounselorReportListHtml(data, assignTo){
+function getcounselorReportListHtml(data){
 	var dataList=data.dataList;
 	var html='';
 	if(dataList != null && dataList!= undefined && dataList.length>0){	
@@ -1752,6 +1752,7 @@ function getcounselorReportListHtml(data, assignTo){
 }	
 
 function openAddTask(assignTo){
+	$(`#new-text-${assignTo}`).text("Seen").removeClass("color-changing").addClass("text-success");
 	$("#assignto").val(assignTo);
 	getTask(assignTo,0);
 	$("#counselorAddTaskpopup").modal('show');
@@ -1798,12 +1799,22 @@ function getcounselorReportTbodyHtml(report, assignTo){
 				if(!OBJECT_RIGHTS.searchUser){
 					$("#counselorTaskTitle").text(USER_FULL_NAME+" Task");
 					html+=`<tr><th class="p-1">Task</th>
-					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${leadReport.totalTask>0?'View':'Add'} task</span></a>
+					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${leadReport.totalTask>0?'Add/View':'Add'} task</span></a>
 					</td></tr>`;
 				}else{
 					html+=`<tr><th class="p-1">Total Task</th>
-					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}');" style="line-height:8px;"><span>&nbsp; ${leadReport.totalTask}</span></a>
-					</td></tr>`;
+					<td class="d-flex justify-content-center align-items-center">`
+						if (leadReport.totalTask > 0) {
+							html+=`<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary mr-2" onclick="openAddTask('${assignTo}');" style="line-height:8px;">${leadReport.totalTask}</a>`;
+							if(leadReport.readStatus > 0){
+								html+=`<span id="new-text-${assignTo}" class="mb-0 font-weight-semi-bold color-changing">New!</span>`
+							}else{
+								html+=`<span class="mb-0 text-success font-weight-semi-bold">Seen</span>`
+							}
+						} else {
+							html+=`<p class="mb-0">${leadReport.totalTask}</p>`;
+						}
+					html+=`</td></tr>`;
 				}
 			
 					
@@ -1878,7 +1889,7 @@ function saveCounselorDashboardCopyLink(referralCode, learningProgram) {
 	return true;
 }
 
-function saveTask(formId, callFrom, taskid) {
+function saveTask(formId, callFrom, taskid, callType) {
 	if(callFrom!="delete"){
 
 		if($("#"+formId+" #taskname").val()==''){
@@ -1941,14 +1952,21 @@ function saveTask(formId, callFrom, taskid) {
 				showMessageTheme2(0, data['message']);
 			}else{
 				showMessageTheme2(1, data['message']);
+				$("#"+formId+" #taskid").val('')
 				$("#"+formId+" #taskname").val('')
 				$("#"+formId+" #fromTime").val('').trigger('change')
 				$("#"+formId+" #toTime").val('').trigger('change')
 				$("#"+formId+" #status").val('PENDING')
 				$("#"+formId+" #description").val('')
-				var html=getTaskList(data);
-				$("#counselorTaskList").html(html);
-				//$("#counselorAddTaskpopup").modal('hide')
+				if(callType=='counselor'){
+					var html=getTaskList(data);
+					$("#counselorTaskList").html(html);
+				}else if(callType=='admin'){
+					var html =getTaskTableHtml(data.taskList);
+                    $("#adminTaskTbody").html(html); 
+					$("#adminAddTaskpopup").modal('hide')
+				}
+				//
 			}
 		},
 		error: function(e){
@@ -2028,12 +2046,12 @@ function getTaskList(data){
 			const leadtask = dataList[u];
 			html+=`<tr><td class="p-1">${sr++}</td>
 				<td class="p-1">${leadtask.taskName}</td>
-				<td class="p-1">${leadtask.starttime} - ${leadtask.endtime}</td>
+				<td class="p-1">${leadtask.startDateTime} - ${leadtask.endtime}</td>
 				<td class="p-1">${leadtask.status}</td>
 				<td class="p-1">${leadtask.description}</td>`;
 				if(!OBJECT_RIGHTS.searchUser){
 					html+=`<td class="p-1"><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="getTask('counselorAddTask','${leadtask.taskid}');"><i class="icon ion-android-create" style="font-size:15px;line-height:13px"></i></a>
-					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="saveTask('counselorAddTask','delete','${leadtask.taskid}');"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
+					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="saveTask('counselorAddTask','delete','${leadtask.taskid}','counselor');"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
 					</td></tr>`;
 				}
 			}
@@ -2043,3 +2061,102 @@ function getTaskList(data){
 	return html;
 }
 
+function getAdminReportList(assignTo, modesearch, startDate, endDate, callFrom, eventid) {
+	data={};
+	data['schoolId']=SCHOOL_ID;
+	data['userId']=USER_ID;
+	data['modeSearch']=modesearch;
+	data['startDate']=startDate;
+	data['endDate']=endDate;
+	data['callFrom']=callFrom;
+	data['assignTo']=assignTo;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard', 'admin-list-report'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		cache : false,
+		global : true,
+		timeout : 600000,
+		success : function(data) {
+			//console.log(data);
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				//getCounselorReportListFlag = false;
+				var html=getAdminReportListHtml(data );
+				$('#admin-list-report').html(html);
+				
+			}
+			
+		}
+	});
+}
+
+
+function getAdminReportListHtml(data){
+	var dataList=data.dataList;
+	var html='';
+	if(dataList != null && dataList!= undefined && dataList.length>0){	
+		for (let u = 0; u < dataList.length; u++) {	
+			const report = dataList[u];
+			var modSrc='';
+			if(report.modeSearch=='DAY'){
+				modSrc='Today';
+			}else{
+				modSrc=report.startsDate+' to '+report.endsDate;
+			}
+			html+=`<div class="${!OBJECT_RIGHTS.searchUser?'col-md-4':'col-md-2'}" style="overflow:auto;">
+					<table  class="table table-bordered responsive nowrap" style="width:100%;">
+						<thead>
+							<tr>
+								<th colspan="2" class="bg-primary text-white "><p class="mb-0 text-center font-12">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0 font-12">${modSrc}</p></th>
+							</tr>
+						</thead>
+						<tbody class="font-10" id="adminReportTbody_${report.assignTo}">
+						<tr><th class="p-1">Wati/ whatsapp sent </th><td>${report.totalWati}</td></tr>
+						<tr><th class="p-1">Email sent </th><td>${report.totalEmail}</td></tr>
+						<tr><th class="p-1">Total Meetings Count </th><td>${report.totalNumberOfMeetings}</td></tr>
+						<tr><th class="p-1">Total Meetings Time </th><td>${report.totalMeetingTime}</td></tr>
+						<tr>
+							<th class="p-1">Total Login Time </th>
+							<td>`;
+								if(report.totalLoginTime == 0){
+									html+=`${report.totalLoginTime}`
+								}else{
+									html+=`<a href="javascript:void(0);" onclick="applyFilterDashboardMonitoring('reports','details', '${report.assignTo}', '${report.startsDate}', '${report.endsDate}')" class="text-primary font-weight-semi-bold">${report.totalLoginTime}</a>`
+								}
+							html+=`</td>
+						</tr>
+						`;
+						if(!OBJECT_RIGHTS.searchUser){
+							$("#counselorTaskTitle").text(USER_FULL_NAME+" Task");
+							html+=`<tr><th class="p-1">Task</th>
+							<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${report.assignTo}');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${report.totalTask>0?'Add/View':'Add'} task</span></a>
+							</td></tr>`;
+						}else{
+							html+=`<tr><th class="p-1">Total Task</th>
+							<td class="d-flex justify-content-center align-items-center">`
+								if (report.totalTask > 0) {
+									html+=
+									`<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary mr-2" onclick="openAddTask('${report.assignTo}');" style="line-height:8px;">${report.totalTask}</a>`
+										if(report.readStatus > 0){
+											html+=`<span id="new-text-${report.assignTo}" class="mb-0 font-weight-semi-bold color-changing">New!</span>`
+										}else{
+											html+=`<span class="mb-0 text-success font-weight-semi-bold">Seen</span>`
+										}
+								} else {
+									html+=`<p class="mb-0">${report.totalTask}</p>`;
+								}
+							html+=`</td></tr>`;
+						}
+						
+						html+=`</tbody>
+					</table>
+				</div>`;
+				
+		}
+	}
+	return html;
+}

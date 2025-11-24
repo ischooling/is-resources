@@ -881,7 +881,9 @@ function getRequestForLeadFollowupSave(formId, followupWithoutMail){
 	//$("#"+formId+" #selectStatusOfLead").val();
 	
 	if($("#"+formId+" #leadStatus").val()=='Call Completed'
-		||$("#"+formId+" #leadStatus").val()=='Not Answering | Not reachable | Switch off' ){
+		|| $("#"+formId+" #leadStatus").val()=='Not Answering' || $("#"+formId+" #leadStatus").val()=='Not reachable' 
+		|| $("#"+formId+" #leadStatus").val()=='Switch off' 
+	 ){
 			leadCallFollowupDTO['callBadge'] ='followup1'
 	}
 
@@ -5472,7 +5474,8 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 	   //$("#"+formId+" #selectStatusOfLead").val();
 	   leadCallFollowupDTO['customDate']= 'NO FOLLOWUP';
 	   if(leadStatus=='Call Completed'
-		   ||leadStatus=='Not Answering | Not reachable | Switch off' ){
+		   || leadStatus=='Not Answering' || leadStatus=='Not reachable' || leadStatus=='Switch off' 
+		 ){
 			   leadCallFollowupDTO['callBadge'] ='followup1'
 	   }
    

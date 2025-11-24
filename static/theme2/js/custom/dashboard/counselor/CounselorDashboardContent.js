@@ -1769,10 +1769,10 @@ function getCounselorAddTask(timeslotlist){
 					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
 						<thead>
 							<tr>
-								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" >S No.</th>
+								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="width: 60px;">S No.</th>
 								<th class="bg-primary text-white bold border-bottom-0" >Task Name</th>
-								<th class="bg-primary text-white bold border-bottom-0" style="width: 262px;">Time</th>
-								<th class="bg-primary text-white bold border-bottom-0" style="width: 150px;">Status</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 200px;">Time</th>
+								<th class="bg-primary text-white bold border-bottom-0" style="width: 100px;">Status</th>
 								<th class="bg-primary text-white bold border-bottom-0">Description</th>
 								<th class="bg-primary text-white bold border-bottom-0"></th>
 							</tr>
@@ -1816,7 +1816,7 @@ function getCounselorAddTask(timeslotlist){
 									</select>			
 								</td>
 								<td><textarea type="text" value="" id="description" class="mr-2 form-control" ></textarea></td>
-								<td ><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary saveTask" onclick="saveTask('counselorAddTask','add','0');">Save</a></td>
+								<td ><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary saveTask" onclick="saveTask('counselorAddTask','add','0','counselor');">Save</a></td>
 							</tr>
 						</thead>
 						<tbody id="counselorTaskList">

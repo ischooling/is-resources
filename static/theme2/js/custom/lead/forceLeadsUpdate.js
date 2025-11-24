@@ -260,8 +260,9 @@ function getRequestForFollowupSaveFromLeadListForBulk(data){
 			
 			//$("#"+formId+" #selectStatusOfLead").val();
 			leadCallFollowupDTO['customDate']= 'NO FOLLOWUP';
-			if(leadStatus=='Call Completed'
-				||leadStatus=='Not Answering | Not reachable | Switch off' ){
+			if(leadStatus=='Call Completed' 
+				|| leadStatus=='Not Answering' || leadStatus=='Not reachable' || leadStatus=='Switch off' 
+			){
 					leadCallFollowupDTO['callBadge'] ='followup1'
 			}
 		
