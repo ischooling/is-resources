@@ -502,6 +502,17 @@ function getPartnerDashboardDetails(userId) {
 				} 
 			}else{
 				responseData=data;
+				if(USER_ROLE == "B2B_PARTNER"){
+					if(data.bankDetailsExist == "N"){
+						if($("#b2bBankDetailsModal").length == 1){
+							$("#b2bBankDetailsModal").remove();
+						}
+						$("body").append(b2bBankDetailsModal());
+						setTimeout(() => {
+							$("#b2bBankDetailsModal").modal("show");
+						}, 300);
+					}
+				}
 			}
 		},
 		error: function(e){

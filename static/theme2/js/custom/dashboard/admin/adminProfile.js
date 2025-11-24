@@ -336,3 +336,17 @@ function saveProfileImage(userId, docType){
 	});
 
 }
+
+function editBankDetailsProfile(){
+    $("#bankDetailsAction").addClass("d-flex").removeClass("d-none");
+    $(".editBankDetailsBtn").hide();
+    $(".bank-details-field").hide();
+    $(".bank-details-input-field").show();
+}
+
+function cancelBankDetailsUpdation(){
+    $("#bankDetailsAction").addClass("d-none").removeClass("d-flex");
+    $(".editBankDetailsBtn").show();
+    $(".bank-details-field").show();
+    $(".bank-details-input-field").hide();
+}

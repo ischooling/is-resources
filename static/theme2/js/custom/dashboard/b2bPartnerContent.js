@@ -1,4 +1,6 @@
+var schoolSettingsOffice;
 async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, role){
+	schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
 	var commissionRate = await getPartnerCommissionRate('','partnerCommitionRate',userId);
 	customLoader(true);
 	
@@ -1797,5 +1799,71 @@ function revenueThumbListContent(){
 				</div>
 			</div>
 		</div>`;
+	return html;
+}
+
+function b2bBankDetailsModal(){
+	var html=
+		`<div class="modal fade" id="b2bBankDetailsModal" tabindex="-1" role="dialog" aria-labelledby="b2bBankDetailsModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="box-shadow: 0 0;">
+				<div class="modal-content shadow-lg border-0 rounded">
+					<div class="modal-header bg-primary text-white">
+						<h5 class="modal-title bg-primary text-white" id="b2bBankDetailsModalLabel">
+							<i class="fa fa-university mr-2"></i> Bank Details
+						</h5>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+				
+					<div class="modal-body">
+						<form id="b2bBankDetailsForm">
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="bicName">BIC Name</label>
+									<input type="text" class="form-control" id="bicName">
+								</div>
+								<div class="form-group col-md-6">
+									<label for="bankAddress">Bank Address</label>
+									<input type="text" class="form-control" id="bankAddress">
+								</div>
+							</div>
+
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="swiftCode">Swift Code</label>
+									<input type="text" class="form-control" id="swiftCode">
+								</div>
+								<div class="form-group col-md-6">
+									<label for="bankCode">Bank Code</label>
+									<input type="text" class="form-control" id="bankCode">
+								</div>
+							</div>
+
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="branchCode">Branch Code</label>
+									<input type="text" class="form-control" id="branchCode">
+								</div>
+								<div class="form-group col-md-6">
+									<label for="accountName">Account Holder Name</label>
+									<input type="text" class="form-control" id="accountName">
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label for="accountNumber">Account Number</label>
+								<input type="text" class="form-control" id="accountNumber" onkeydown="return M.digit(event);">
+							</div>
+						</form>
+					</div>
+				
+					<div class="modal-footer">
+						<button type="button" class="btn btn-light border" data-dismiss="modal">Add Later</button>
+						<button type="button" class="btn btn-primary" onclick="saveB2bBankDetails('fromModal');">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>`
 	return html;
 }

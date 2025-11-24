@@ -16,8 +16,16 @@ async function renderProfilePage(arg0){
         userIdSession: USER_ID
     };
     var responseData = await getDashboardDataBasedUrlAndPayload(true, false, 'get-common-profile-details', payload);
-    var html= getProfilePageContent(responseData.details, callFrom)
+    var html= getProfilePageContent(responseData.details, callFrom);
     $("#dashboardContentInHTML").html(html);
+    if(USER_ROLE == "B2B_PARTNER"){
+        var payloadBank = {
+        userId: USER_ID,
+        };
+        var responseDataBank = await getDashboardDataBasedUrlAndPayload(true, false, 'get-partner-bank-details', payloadBank);
+        $("#bankDetailsWrapper").html(getProfileBankDetailsContent(responseDataBank.bankDetails));
+        cancelBankDetailsUpdation();
+    }
     $("#addedDate").datepicker({
         autoclose: true,
         format: "M dd, yyyy",
@@ -73,7 +81,7 @@ async function renderProfilePage(arg0){
         // });
     }
     //return html;
-    corpAdminProfile()
+    corpAdminProfile();
 }
 
 function getProfilePageContent(data, callFrom){
@@ -98,24 +106,29 @@ function getProfilePageContent(data, callFrom){
                                         <span class="upload-img-btn">
                                             <i class="fa fa-upload"></i> Upload </span>
                                         </div>
-                                    </div>`;
-                                    if(callFrom==''){
-                                        html+=`<a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right editProfileBtn" onclick="editProfilePage()">
-                                            <i class="fa fa-edit"></i>&nbsp; Edit
-                                        </a>`;
-                                    }
-
-                                   html+=`<p class="text-center img-notification">Profile Image (Max size 5MB)</p>
+                                    </div>
+                                    <p class="text-center img-notification">Profile Image (Max size 5MB)</p>
                                 </div>
                                 <div class="profile-name text-primary text-center font-weight-semi-bold font-size-lg mt-2 userNameLabel">${data.userFullName}</div>
                                 <div class="profile-name text-dark text-center font-size-12 mb-1">Recognition</div>    
                             </div>    
                         </div>
-                        <div class="profile-details-wrapper mt-3 float-left w-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fa fa-user font-24 bg-light-primary text-primary rounded p-1 mr-2" aria-hidden="true"></i>
+                                <h5 class="font-weight-bold text-dark">Personal Details</h5>
+                            </div>`
+                            if(callFrom==''){
+                                html+=`<a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right editProfileBtn" onclick="editProfilePage()">
+                                    <i class="fa fa-edit"></i>&nbsp; Edit
+                                </a>`;
+                            }
+                        html+=`</div>
+                        <div class="profile-details-wrapper float-left w-100">
                             <input type="hidden" id="pCountryCode" value="${data.countryCode}"/>
                             <input type="hidden" id="isdCode" value="${data.dialCode}"/>
                             <input type="hidden" id="userId" value="${data.userId}"/>
-                            <div class="row mt-5 ">
+                            <div class="row mt-4 ">
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
                                         <label class="m-0">User Name</label>
@@ -230,8 +243,11 @@ function getProfilePageContent(data, callFrom){
                             </div>
                         </div>
                     </form>
-                </div>    
-            </div>    
+                </div>`
+                if(USER_ROLE == "B2B_PARTNER"){
+                    html+=`<div id="bankDetailsWrapper"></div>`;
+                }
+            html+=`</div>    
         </div>`;
     return html;
 }
@@ -269,4 +285,90 @@ function serverMessageContent(){
             +'<span class="msg" id="msgTheme2"></span>'
         +'</div>';
     return html;	
+}
+
+function getProfileBankDetailsContent(data){
+    var html=
+        `<hr>
+        <div class="px-4 mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-university font-24 bg-light-primary text-primary rounded p-1 mr-2" aria-hidden="true"></i>
+                    <h5 class="font-weight-bold text-dark">Bank Details</h5>
+                </div>
+                <a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right editBankDetailsBtn" onclick="editBankDetailsProfile();">
+                    <i class="fa fa-edit"></i>&nbsp; Edit
+                </a>
+            </div>
+            <div class="row mt-4">
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">BIC Name</label>
+                        <div id="bicNameLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.iban}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="bicNameB2b" name="bicNameB2b" class="form-control" value="${data == "N/A" ? "" : data.iban}"/>
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">Bank Address</label>
+                        <div id="bankAddressLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.bankBranchAddress}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="bankAddressB2b" name="bankAddressB2b" class="form-control" value="${data == "N/A" ? "" : data.bankBranchAddress}"/>
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">Swift Code</label>
+                        <div id="swiftCodeLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.swiftCode}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="swiftCodeB2b" name="swiftCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.swiftCode}"/>
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">Bank Code</label>
+                        <div id="bankCodeLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.bankIfsc}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="bankCodeB2b" name="bankCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.bankIfsc}"/>
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">Branch Code</label>
+                        <div id="branchCodeLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.routeNo}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="branchCodeB2b" name="branchCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.routeNo}"/>
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">Account Holder Name</label>
+                        <div id="accountNameLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.accountHolderFirstName}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="accountNameB2b" name="accountNameB2b" class="form-control" value="${data == "N/A" ? "" : data.accountHolderFirstName}"/>
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="form-group">
+                        <label class="m-0">Account Number</label>
+                        <div id="accountNumberLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.accountNo}</div> 
+                        <div class="w-100 bank-details-input-field">
+                            <input type="text" id="accountNumberB2b" name="accountNumberB2b" class="form-control" value="${data == "N/A" ? "" : data.accountNo}" onkeydown="return M.digit(event);"/>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+            <div id="bankDetailsAction" class="d-flex justify-content-end align-items-center gap-5">
+                <button class="btn btn-sm btn-danger" onclick="cancelBankDetailsUpdation();">Cancel</button>
+                <button class="btn btn-sm btn-primary" onclick="saveB2bBankDetails('fromProfile');">Update</button>
+            </div>
+        </div>`
+    return html;
 }

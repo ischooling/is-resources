@@ -9241,7 +9241,7 @@ function populateZadarmaRecords(data, data2,meetingTitle, totalPages,totalCount)
 				<tr style="font-size: 14px;">
 					<th class="p-2 rounded-top-left-10 border-right-0 border-primary" style="background-color:rgb(200, 224, 247); font-weight: normal; color:rgb(38, 146, 253)">Lead No</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Caller</th>
-				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Dailed No</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Dialed No</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Type</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Call Start</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Duration (in sec)</th>
@@ -9304,7 +9304,7 @@ function renderZadarmaTable(data) {
 					<thead style="background-color:#f2f2f2;">
 						<tr style="font-size:12px">
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Caller</th>
-							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dailed No.</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dialed No.</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Type</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Call Start</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Duration (in sec)</th>
@@ -9355,7 +9355,7 @@ function renderUnMatchZadarmaTable(data) {
 					<thead style="background-color:#f79797;">
 						<tr style="font-size:12px">
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Caller</th>
-							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dailed No.</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dialed No.</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Type</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Call Start</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Duration (in sec)</th>
@@ -9527,7 +9527,7 @@ function populateCallhippoRecords(data, data2,meetingTitle, totalPages,totalCoun
 				<tr style="font-size: 14px;">
 					<th class="p-2 rounded-top-left-10 border-right-0 border-primary" style="background-color:rgb(200, 224, 247); font-weight: normal; color:rgb(38, 146, 253)">Lead No</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Caller</th>
-				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Dailed No</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Dialed No</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Type</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Call Start</th>
 				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(200, 224, 247);font-weight: normal; color:rgb(38, 146, 253)">Duration</th>
@@ -9590,7 +9590,7 @@ function renderCallhippoTable(data) {
 					<thead style="background-color:#f2f2f2;">
 						<tr style="font-size:12px">
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Caller</th>
-							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dailed No.</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dialed No.</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Type</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Call Start</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Duration (in sec)</th>
@@ -9641,7 +9641,7 @@ function renderUnMatchCallhippoTable(data) {
 					<thead style="background-color:#f79797;">
 						<tr style="font-size:12px">
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Caller</th>
-							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dailed No.</th>
+							<th class="py-1 px-2 font-weight-bold text-dark border-0">Dialed No.</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Type</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Call Start</th>
 							<th class="py-1 px-2 font-weight-bold text-dark border-0">Duration (in sec)</th>

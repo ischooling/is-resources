@@ -1776,7 +1776,7 @@ function getcounselorReportTbodyHtml(report, assignTo){
 				html+=`<tr><th class="p-1">Demo received by website </th><td>${leadReport.totalWebsite}</td></tr>
 				<tr><th class="p-1">Demo received by Zoho Chats</th><td>${leadReport.totalZoho}</td></tr>
 				<tr><th class="p-1">Demo completed </th><td>${leadReport.totalDemoDone}</td></tr>
-				<tr><th class="p-1">Call Dailed </th><td>${leadReport.totalCalls}</td></tr>
+				<tr><th class="p-1">Call Dialed </th><td>${leadReport.totalCalls}</td></tr>
 				<tr><th class="p-1">Call Completed </th><td>${leadReport.totalCallComplete}</td></tr>
 				<tr><th class="p-1">Demo Arranged </th><td>${leadReport.totalCopyurl}</td></tr>
 				<tr><th class="p-1">Enrollments </th><td>${leadReport.totalConvert}</td></tr>
