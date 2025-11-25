@@ -92,7 +92,7 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 					joinClass += '<a href="' + v.meetingUrl + '" target="_blank">Join Class</a>';
 					joinClass+=' | ';
 					joinClass+='<b class="copy-msg-'+v.meetingId+' text-success ml-1"></b>'
-					joinClass+='<a id="_createLink'+v.meetingId+'" href="javascript:void(0);"  class="btn btn-sm btn-primary" onclick="copyURL(\'hiddenForCopy'+v.meetingId+'\', \'copy-msg-'+v.meetingId+'\')">Copy Custom URL</a>';
+					joinClass+='<a id="_createLink'+v.meetingId+'" href="javascript:void(0);"  class="btn btn-sm btn-primary class-copy-button" onclick="copyURL(\'hiddenForCopy'+v.meetingId+'\', \'copy-msg-'+v.meetingId+'\')">Copy Custom URL</a>';
 				}else{
 					joinClass+='<a id="joinClass'+v.meetingId+'" href="'+v.externalMeetingUrl+'"  class="btn btn-sm btn-success" target="_blank"><i data-toggle="tooltip" title="Join Class" class="fa fa-video"></i></a>';
 					joinClass+=' | ';
@@ -102,7 +102,7 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 				joinClass+='<br/>'
 				+'<input class="tinyUrl" style="display: none;" type="text" id="copyURL'+k+'" value="'+v.externalUserLink+'">'
 				+'<b class="copy-msg-'+k+'"></b>'
-				+'<button id="copyURL'+k+'" onclick="copyURL(\'copyURL'+k+'\',\'copy-msg-'+k+'\')" class="btn btn-primary btn-sm mt-2">Copy External User link</a>'
+				+'<button id="copyURL'+k+'" onclick="copyURL(\'copyURL'+k+'\',\'copy-msg-'+k+'\')" class="btn btn-primary btn-sm mt-2 class-copy-button">Copy External User link</a>'
 				// joinClass+='<a href="'+v.externalUserLink+'">'+v.externalUserLink+'</a>';
 			}else if(v.meetingCurStatus!='F'){
 				if(v.studentName!='N/A'){
