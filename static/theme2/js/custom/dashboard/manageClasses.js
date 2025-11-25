@@ -168,6 +168,11 @@ function classroomSessionsData(formId, elementId, moduleId, argument, userId, ro
 						$('#' + elementId + ' tbody tr td:first-child').addClass('dtr-control');
 					}
 				});
+				$('#classroomSessionsList tbody tr td:first-child').click(function(){
+					setTimeout(function(){
+						$(".class-copy-button").prop("disabled", false).css("pointer-events", "").css("opacity", "");
+					},500)
+				});
 			}
 			customLoader(false);
 			return false;
