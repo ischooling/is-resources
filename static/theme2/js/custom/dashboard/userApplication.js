@@ -1,4 +1,4 @@
-var CURRENT_PAGE_USER_APPLICATION = 1;
+var CURRENT_PAGE_USER_APPLICATION = 1; 
 async function userApplicationProfileOnloadFunction(){
     CURRENT_PAGE_USER_APPLICATION = 1;
     getAllCountryList('userScreeningFilterForm','filterCountryId');

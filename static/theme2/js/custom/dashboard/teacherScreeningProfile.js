@@ -44,29 +44,46 @@ function bindTeacherScreeningData(responseData) {
             var row = 
                 `<tr id="tr_${teacher.id}">
                     <td>${(CURRENT_PAGE_TEACHER_SCREENING - 1) * pageSize + index + 1}</td>
-                    <td>${teacher.userName}
-                        ${source ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${source}</p>` : ""}
-                    </td>
                     <td>
-                        ${teacher.phoneNo || ''} 
-                        ${teacher.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}
+                        ${changeDateFormat(new Date(teacher.createdAt), "MMM-dd-yyyy")}
+                        &nbsp;|&nbsp; 
+                        ${teacher.userName} 
+                        &nbsp;|&nbsp;
+                        +${teacher.phoneNo || ''} 
+                        ${teacher.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}    
+                        &nbsp;|&nbsp;
+                        ${teacher.email || ''}
+                        ${source ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${source}</p>` : ""}                            
                     </td>
-                    <td>${teacher.email || ''}</td>
                     <td>${teacher.country} | ${teacher.state} | ${teacher.city}</td>
                     <td>${teacher.lastSalary ? teacher.currency + ' ' + teacher.lastSalary : ''}</td>
                     <td>${teacher.lastOrgName || ''}</td>
                     <td>
                         ${teacher?.attachments?.uploadDocumentTeacherResumeURL ? 
-                            `<a href="${teacher?.attachments?.uploadDocumentTeacherResumeURL}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>` : 
+                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewTeacherScreenAttachementResumeAndPhoto(\'${teacher?.attachments?.uploadDocumentTeacherResumeURL}\','viewTeacherScreenAttachementModal')">View Resume</a>` : 
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
                     <td>
                         ${teacher?.attachments?.uploadDocumentTeacherPassportURL ? 
-                            `<a href="${teacher?.attachments?.uploadDocumentTeacherPassportURL}" target="_blank" class="btn btn-sm btn-outline-primary">View Photo</a>` : 
+                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewTeacherScreenAttachementResumeAndPhoto(\'${teacher?.attachments?.uploadDocumentTeacherPassportURL}\','viewTeacherScreenAttachementModal')">View Photo</a>` : 
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
+                    ${/*
+                        <td>
+                            ${teacher?.attachments?.uploadDocumentTeacherResumeURL ? 
+                                `<a href="${teacher?.attachments?.uploadDocumentTeacherResumeURL}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>` : 
+                                '<span class="text-muted">N/A</span>'
+                            }
+                        </td>
+                        <td>
+                            ${teacher?.attachments?.uploadDocumentTeacherPassportURL ? 
+                                `<a href="${teacher?.attachments?.uploadDocumentTeacherPassportURL}" target="_blank" class="btn btn-sm btn-outline-primary">View Photo</a>` : 
+                                '<span class="text-muted">N/A</span>'
+                            }
+                        </td>    
+                    */''}
                     <td>`
                         if(teacher.oldGrades != "" || teacher.oldSubjects != "" || teacher.newGrades != "" || teacher.newSubjects != ""){
                             row+=`<a href="javascript:void(0);" onclick="openPreviousExperience('${teacher.oldGrades}', '${teacher.oldSubjects}', '${teacher.newGrades}', '${teacher.newSubjects}');" class="btn btn-sm btn-outline-primary">View</a>`
@@ -317,4 +334,38 @@ function updateTableRowDirectly(teacherId, newStatus, assignedTo) {
             </div>`;
         row.find('td:eq(13)').html(dropdownHtml);
     }
+}
+
+async function viewTeacherScreenAttachementResumeAndPhoto(url, modalId){
+    var base64URL = await urlToBase64(url);
+    var attachmentType = getExtension(url)
+    if(attachmentType != 'pdf'){
+        $("#"+modalId+" .upload_img img").attr('src',base64URL)
+        $("#"+modalId+' .upload_img').removeClass("d-none");
+        $("#"+modalId+" .upload_pdf").addClass("d-none");
+    }else{ 
+        $("#"+modalId+" .upload_pdf .pre_upload_pdf").remove();
+        $("#"+modalId+" .upload_pdf#pre_upload_pdf_div").append('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data="'+base64URL+'"></object>');
+        $("#"+modalId+" .upload_pdf a.download-pdf-btn").attr("href",base64URL);
+        $("#"+modalId+" .upload_pdf").removeClass("d-none");
+        $("#"+modalId+' .upload_img').addClass("d-none");
+    }   
+    $("#"+modalId).modal("show");  
+}
+
+function getExtension(url) {
+    if (!url) return "";
+    return url.split('.').pop().split('?')[0]; 
+}
+
+async function urlToBase64(url) {
+    var response = await fetch(url);
+    var blob = await response.blob();
+
+    return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+    });
 }

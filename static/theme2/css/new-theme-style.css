@@ -33737,3 +33737,16 @@ input:checked + .small-switch-slider:before {
   75%  { color: #3a86ff; }
   100% { color: #ff3b3b; }
 }
+
+.task-list-table ol {
+    list-style: decimal;
+    padding-left: 12px;
+}
+
+.task-list-table ul{
+	padding-left: 12px;
+}
+
+.task-list-table ul li{
+	list-style: disc;
+}

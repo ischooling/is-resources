@@ -79,7 +79,8 @@ function getAllTaskList(assignTo, currentPage, taskid) {
                   $("#counselorAddTask #fromTime").val(startTime).trigger('change');
                   $("#counselorAddTask #toTime").val(endTime).trigger('change');
                   $("#counselorAddTask #status").val(task.status);
-                  $("#counselorAddTask #description").val(task.description);
+                  //$("#counselorAddTask #description").val(task.description);
+				  editor1.setData(task.description);
                   $('#adminAddTaskpopup').modal('show');
                 }else{
                     var html =getTaskTableHtml(taskList);
@@ -114,7 +115,7 @@ function getTaskTableHtml(taskList){
 				<td class="p-1">${leadtask.description}</td>`;
 				//if(!OBJECT_RIGHTS.searchUser){
 					html+=`<td class="p-1 d-flex gap-5 justify-content-center align-items-center"><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="getAllTaskList('${USER_ID}', 0, '${leadtask.taskid}')"><i class="icon ion-android-create" style="font-size:15px;line-height:13px"></i></a>
-					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="saveTask('counselorAddTask','delete','${leadtask.taskid}','admin');"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
+					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="showWarningMessage('Are you sure you want to delete this task?', 'saveTask(\\'counselorAddTask\\',\\'delete\\',\\'${leadtask.taskid}\\',\\'admin\\')')"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
 					</td></tr>`;
 				//}
 			}

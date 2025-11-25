@@ -171,6 +171,15 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 		$(".toTime").select2({
 			theme:"bootstrap4",
 		});
+
+		$("#taskDate").datepicker({
+			format : 'dd-mm-yyyy',
+			startDate: "-1d",
+			endDate: new Date(),
+			autoclose: true,
+		}).datepicker("setDate", changeDateFormat(new Date(),"dd-mm-yyyy"));
+
+		initEditor(1, 'description','Please start here', false);
 	}
 }
 {/* <div class="page-title-subheading">${title}</div> */}
@@ -1765,8 +1774,65 @@ function getCounselorAddTask(timeslotlist){
 					</button>
 				</div>
 				<div class="modal-body">
-					
-					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
+				<form id="counselorAddTask">
+				<input type="hidden" name="taskid" id="taskid" value="" />
+				<input type="hidden" name="assignto" id="assignto" value="${USER_ID}" />
+						<div class="row">
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+								<label for="taskname">Task Name</label>
+								<input type="text" id="taskname" class="form-control" maxlength="500"/>
+							</div>
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+								<label>Task Date (DD-MM-YYYY)</label>
+								<div class="d-flex align-items-center">
+									<input type="text" id="taskDate" class="form-control" readonly onkeydown="return false"/>
+								</div>
+							</div>
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+								<label>Time</label>
+								<div class="d-flex align-items-center">
+									<select class="form-control font-12 mr-2 fromTime" id="fromTime">
+										<option value="">Start Time</option>`
+										if(timeslotlist.length>0){
+											for (let i = 0; i < timeslotlist.length; i++) {
+												const timeopt = timeslotlist[i];
+												var startTime=convertTo24Hour(timeopt);
+												//var strSelect = (preStartTime==startTime)?'selected':'';
+												html+=`<option value="${startTime}" >${timeopt}</option>`;
+											}
+										}
+									html+=`</select>
+									<span class="mx-1">-</span>
+									<select class="form-control font-12 toTime" id="toTime">
+										<option value="">End Time</option>`
+										if(timeslotlist.length>0){
+											for (let i = 0; i < timeslotlist.length; i++) {
+												const timeopt = timeslotlist[i];
+												var startTime=convertTo24Hour(timeopt);
+												//var strSelect = (preEndTime==startTime)?'selected':'';
+												html+=`<option value="${startTime}" >${timeopt}</option>`;
+											}
+										}
+									html+=`</select>
+								</div>
+							</div>
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+								<label for="status">Status</label>
+								<select class="form-control font-12" id="status">
+									<option value="PENDING">Pending</option>
+									<option value="IN-PROCESS">In-Process</option>
+									<option value="COMPLETED">Completed</option>
+								</select>
+							</div>
+							<div class="col-12 mb-3">
+								<label for="description">Description</label>
+								<textarea id="description" class="form-control" rows="3"></textarea>
+							</div>
+						</div>
+						<a href="javascript:void(0)" class="btn btn-lg btn-primary saveTask mb-3 float-right" onclick="saveTask('counselorAddTask','add','0','counselor');">Save</a>
+					</form>
+
+					<table class="table table-bordered font-12 border-radius-table task-list-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
 						<thead>
 							<tr>
 								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="width: 60px;">S No.</th>
@@ -1776,55 +1842,10 @@ function getCounselorAddTask(timeslotlist){
 								<th class="bg-primary text-white bold border-bottom-0">Description</th>
 								<th class="bg-primary text-white bold border-bottom-0"></th>
 							</tr>
-							<tr>
-								<td ><input type="hidden" name="taskid" id="taskid" value="" /><input type="hidden" name="assignto" id="assignto" value="" /></td>
-								<td  ><input type="text" value="" id="taskname" class="mr-2 form-control"/></td>
-								<td style="width: 262px;"><div class="my-1 mx-0 row align-items-center justify-content-sm-start available-dropdown-Wrapper justify-content-around">
-									<div class="flex-grow-1 flex-sm-grow-0">
-										<select class="form-control font-12 fromTime" id="fromTime">
-											<option value="">Start Time</option>`;
-											if(timeslotlist.length>0){
-												for (let i = 0; i < timeslotlist.length; i++) {
-													const timeopt = timeslotlist[i];
-													var startTime=convertTo24Hour(timeopt);
-													//var strSelect = (preStartTime==startTime)?'selected':'';
-													html+=`<option value="${startTime}" >${timeopt}</option>`;
-												}
-											}
-										html+=`</select>
-									</div>-
-									<div class="flex-grow-1 flex-sm-grow-0"> 
-										<select class="form-control font-12 toTime" id="toTime">
-											<option value="">End Time</option>`;
-											if(timeslotlist.length>0){
-												for (let i = 0; i < timeslotlist.length; i++) {
-													const timeopt = timeslotlist[i];
-													var startTime=convertTo24Hour(timeopt);
-													//var strSelect = (preEndTime==startTime)?'selected':'';
-													html+=`<option value="${startTime}" >${timeopt}</option>`;
-												}
-											}
-										html+=`</select>
-									</div>
-									</div>
-								</td>
-								<td style="width: 150px;">
-									<select class="form-control font-12" id="status">
-										<option value="PENDING">Pending</option>
-										<option value="IN-PROCESS">In-Process</option>
-										<option value="COMPLETED">Completed</option>
-									</select>			
-								</td>
-								<td><textarea type="text" value="" id="description" class="mr-2 form-control" ></textarea></td>
-								<td ><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary saveTask" onclick="saveTask('counselorAddTask','add','0','counselor');">Save</a></td>
-							</tr>
 						</thead>
 						<tbody id="counselorTaskList">
 						</tbody>
 					</table>
-				</div>
-				<div class="modal-footer">
-					
 				</div>
 			</div>
 		</div>

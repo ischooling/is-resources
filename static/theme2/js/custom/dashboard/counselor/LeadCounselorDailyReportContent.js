@@ -195,7 +195,7 @@ function getAllCounselorTasks(){
 				</div>
 				<div class="modal-body">
 					
-					<table class="table table-bordered font-12 border-radius-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
+					<table class="table table-bordered font-12 border-radius-table task-list-table" style="width:100%;font-size:11px !important" id="counselorAddTask">
 						<thead>
 							<tr>
 								<th class="bg-primary text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="width: 60px;">S No.</th>

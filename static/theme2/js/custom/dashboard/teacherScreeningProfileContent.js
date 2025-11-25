@@ -15,6 +15,7 @@ function renderTeacherPreScreeningProfileContent(title){
         </div>`
         +teacherScreeningFilter()
         +teacherScreenTableContent()
+        +viewTeacherScreenAttachementModalContent()
     return html;
 }
 
@@ -88,9 +89,7 @@ function teacherScreenTableContent(status){
                 <thead class="bg-primary text-white">
                     <tr>
                         <th>S.No.</th>
-                        <th>Name</th>
-                        <th style="width: 130px;">Phone Number</th>
-                        <th>Email</th>
+                        <th style="min-width: 130px;">Applied Date | Name | Phone Number | Email | Source</th>
                         <th>Country | Province | City</th>
                         <th>Last/Current Salary (per annum)</th>
                         <th>Last/Current Organization Name</th>
@@ -192,4 +191,30 @@ function teacherScreeningProfileStatusModal(id, status){
             </div>
         </div>`
     return html;
+}
+
+function viewTeacherScreenAttachementModalContent(){
+	var html=
+	'<div class="modal fade fade-scale" id="viewTeacherScreenAttachementModal" tabindex="-1">'
+		+'<div class="modal-dialog modal-md  box-shadow-none" role="document">'
+			+'<div class="modal-content">'
+				+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-between flex-wrap">'
+					+'<h6 class="heading text-white">Preview File</h6>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+				+'</div>'
+				+'<div class="modal-body m-0 py-2" style="margin-top:0 !important">'
+					+'<div id="pre_upload_image_div" class="full text-center upload_img d-none">'
+						+'<img id="pre_upload_image" class="w-100" src="" />'
+					+'</div>'
+					+'<div id="pre_upload_pdf_div" class=" full text-center upload_pdf d-none">'
+						+'<div class="full">'
+							+'<a href="" target="_blank" class="btn btn-sm btn-primary download-pdf-btn mb-2 pull-right" download="file.pdf">Download PDF</a>'
+						+'</div>'
+						+'<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data=""></object>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
 }

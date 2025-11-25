@@ -1892,8 +1892,8 @@ function saveCounselorDashboardCopyLink(referralCode, learningProgram) {
 function saveTask(formId, callFrom, taskid, callType) {
 	if(callFrom!="delete"){
 
-		if($("#"+formId+" #taskname").val()==''){
-			showMessageTheme2(0, "Please fill task name");
+		if($("#"+formId+" #taskDate").val()==''){
+			showMessageTheme2(0, "Please fill task date");
 			return false;
 		}
 		if($("#"+formId+" #taskname").val()==''){
@@ -1916,9 +1916,16 @@ function saveTask(formId, callFrom, taskid, callType) {
 			showMessageTheme2(0, "Please select status");
 			return false;
 		}
-		if($("#"+formId+" #description").val()==''){
-			showMessageTheme2(0, "Please enter description");
-			return false;
+		// if($("#"+formId+" #description").val()==''){
+		// 	showMessageTheme2(0, "Please enter description");
+		// 	return false;
+		// }
+		if(editor1!=undefined){
+			var str = escapeCharacters(editor1.getData());
+			if(str==''){
+				showMessageTheme2(0, "Please add description ");
+				return false;
+			}
 		}
 	}
 
@@ -1928,12 +1935,13 @@ function saveTask(formId, callFrom, taskid, callType) {
 		taskid=$("#"+formId+" #taskid").val()!=undefined?$("#"+formId+" #taskid").val():0;
 	}
 	dataRequest['taskid']=taskid;
+	dataRequest['taskDate']=$("#"+formId+" #taskDate").val()
 	dataRequest['assignTo']=$("#"+formId+" #assignto").val();
 	dataRequest['taskName']=$("#"+formId+" #taskname").val();
-	dataRequest['starttime']=$("#"+formId+" #fromTime").val();;
-	dataRequest['endtime']=$("#"+formId+" #toTime").val();;
-	dataRequest['status']=$("#"+formId+" #status").val();;
-	dataRequest['description']=$("#"+formId+" #description").val();
+	dataRequest['starttime']=$("#"+formId+" #fromTime").val();
+	dataRequest['endtime']=$("#"+formId+" #toTime").val();
+	dataRequest['status']=$("#"+formId+" #status").val();
+	dataRequest['description']=editor1.getData().trim();
 	dataRequest['callFrom']=callFrom;
 	dataRequest['userId']=USER_ID;
 	dataRequest['schoolId']=SCHOOL_ID;
@@ -1957,7 +1965,8 @@ function saveTask(formId, callFrom, taskid, callType) {
 				$("#"+formId+" #fromTime").val('').trigger('change')
 				$("#"+formId+" #toTime").val('').trigger('change')
 				$("#"+formId+" #status").val('PENDING')
-				$("#"+formId+" #description").val('')
+				editor1.setData("")
+				// $("#"+formId+" #description").val('')
 				if(callType=='counselor'){
 					var html=getTaskList(data);
 					$("#counselorTaskList").html(html);
@@ -2017,7 +2026,8 @@ function getTask(assignTo, taskid) {
 					$("#counselorAddTask #fromTime").val(startTime).trigger('change');
 					$("#counselorAddTask #toTime").val(endTime).trigger('change');
 					$("#counselorAddTask #status").val(task.status);
-					$("#counselorAddTask #description").val(task.description);
+					// $("#counselorAddTask #description").val(task.description);
+					editor1.setData(task.description);
 					
 
 				}else{
@@ -2051,7 +2061,7 @@ function getTaskList(data){
 				<td class="p-1">${leadtask.description}</td>`;
 				if(!OBJECT_RIGHTS.searchUser){
 					html+=`<td class="p-1"><a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="getTask('counselorAddTask','${leadtask.taskid}');"><i class="icon ion-android-create" style="font-size:15px;line-height:13px"></i></a>
-					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="saveTask('counselorAddTask','delete','${leadtask.taskid}','counselor');"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
+					<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="showWarningMessage('Are you sure you want to delete this task?', 'saveTask(\\'counselorAddTask\\',\\'delete\\',\\'${leadtask.taskid}\\',\\'counselor\\')')"><i class="lnr-trash" style="font-size:15px;line-height:13px"></i></a>
 					</td></tr>`;
 				}
 			}
