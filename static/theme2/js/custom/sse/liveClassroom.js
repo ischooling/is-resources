@@ -589,7 +589,7 @@ function classReviewTable(rclasses, startDate, endDate){
   +'<th class="text-white"><b>Accepted Hours</b></th>'
   +'<th class="text-white"><b>Accepted 1:1 Hours</b></th>'
   +'<th class="text-white"><b>Accepted Batch Hours</b></th>'
-  +'<th class="text-white"><b>Accepted Admin Hours</b></th>'
+  +'<th class="text-white"><b>Accepted Admin Hours / Max Allowed (Agreement)</b></th>'
   +'</tr></thead><tbody>';
   var a=1;
   for(md=0;md<rclasses.length;md++){
@@ -609,8 +609,7 @@ function classReviewTable(rclasses, startDate, endDate){
     +'<td class="text-dark text-center bold" style=\"background-color: #c9dff5 !important;\">'+rclasses[md]['acceptTime']+'</td>'
     +'<td class="text-dark text-center">'+rclasses[md]['oneTime']+'</td>'
     +'<td class="text-dark text-center">'+rclasses[md]['batchTime']+'</td>'
-    +'<td class="text-dark text-center">'+rclasses[md]['adminTime']+'</td>'
-    
+    +'<td class="text-dark text-center">'+rclasses[md]['adminTime']+' / '+rclasses[md]['agreementAdminTime']+'</td>' 
     +'</tr>';
   }
   htmlTbl+='</tbody></table>';
