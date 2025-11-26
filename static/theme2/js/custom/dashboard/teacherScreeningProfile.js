@@ -336,36 +336,47 @@ function updateTableRowDirectly(teacherId, newStatus, assignedTo) {
     }
 }
 
-async function viewTeacherScreenAttachementResumeAndPhoto(url, modalId){
-    var base64URL = await urlToBase64(url);
-    var attachmentType = getExtension(url)
-    if(attachmentType != 'pdf'){
-        $("#"+modalId+" .upload_img img").attr('src',base64URL)
-        $("#"+modalId+' .upload_img').removeClass("d-none");
-        $("#"+modalId+" .upload_pdf").addClass("d-none");
-    }else{ 
-        $("#"+modalId+" .upload_pdf .pre_upload_pdf").remove();
-        $("#"+modalId+" .upload_pdf#pre_upload_pdf_div").append('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data="'+base64URL+'"></object>');
-        $("#"+modalId+" .upload_pdf a.download-pdf-btn").attr("href",base64URL);
-        $("#"+modalId+" .upload_pdf").removeClass("d-none");
-        $("#"+modalId+' .upload_img').addClass("d-none");
-    }   
-    $("#"+modalId).modal("show");  
+async function viewTeacherScreenAttachementResumeAndPhoto(url, modalId) {
+
+    var blobUrl = await urlToBlobUrl(url); 
+    var attachmentType = getExtension(url);
+
+    if (attachmentType != 'pdf') {
+
+        $("#" + modalId + " .upload_img img").attr('src', blobUrl);
+        $("#" + modalId + ' .upload_img').removeClass("d-none");
+        $("#" + modalId + " .upload_pdf").addClass("d-none");
+        customLoader(false);
+    } else {
+
+        $("#" + modalId + " .upload_pdf .pre_upload_pdf").remove();
+        var objectTag = $('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data="' + blobUrl + '"></object>');
+        objectTag.on("load", function () {
+            customLoader(false);
+           
+        });
+        $("#"+modalId+" #pre_upload_pdf_div").append(objectTag);
+        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", blobUrl);
+        $("#" + modalId + " .upload_pdf").removeClass("d-none");
+        $("#" + modalId + ' .upload_img').addClass("d-none");
+    }
+    customLoader(false);
+    $("#" + modalId).modal("show");
 }
 
 function getExtension(url) {
     if (!url) return "";
-    return url.split('.').pop().split('?')[0]; 
+    return url.split('.').pop().split('?')[0];
 }
 
-async function urlToBase64(url) {
+async function urlToBlobUrl(url) {
+    customLoader(true);
     var response = await fetch(url);
+    if (!response.ok) {
+        customLoader(false);
+        showMessageTheme2(0, "Failed to fetch PDF")
+    }
     var blob = await response.blob();
-
-    return new Promise((resolve, reject) => {
-        var reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-    });
+    customLoader(false);
+    return URL.createObjectURL(blob);
 }

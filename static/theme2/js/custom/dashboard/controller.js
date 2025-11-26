@@ -307,7 +307,10 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		$("#startDate").datepicker({
 			autoclose: true,
 			format: 'yyyy-mm-dd',
-
+		});
+		$("#endDate").datepicker({
+			autoclose: true,
+			format: 'yyyy-mm-dd',
 		});
 		$("#classStatus").select2({
 			theme:"bootstrap4",

@@ -10390,7 +10390,7 @@ transition:opacity .2s;
 	width:100%;
 	bottom:0;
 	left:0;
-	z-index:99;
+	z-index:9;
 }
 .fixed-footer .app-footer .app-footer__inner {
 	margin-left:280px;

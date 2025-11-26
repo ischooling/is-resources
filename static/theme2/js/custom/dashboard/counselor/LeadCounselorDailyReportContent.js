@@ -32,19 +32,29 @@ async function renderCounselorDailyReportDashboard(title, roleAndModule, SCHOOL_
 		autoclose: true,
 	});
 
+	
 	$(".hidedate").css({"display":"none"})
 	$("#searchtypeTotalLead").on("change", function(){
+		var counselorid = 0;
+		if($("#counselorid").val()!=undefined && $("#counselorid").val()!=''){
+			counselorid=$("#counselorid").val();
+		}
 		if($("#searchtypeTotalLead").val()=='CUSTOM'){
 			$(".hidedate").css({"display":"block"});
 		}else{
 			$(".hidedate").css({"display":"none"})
-			getAdminReportList('0',$("#searchtypeTotalLead").val(),'','','','');
-			getcounselorReportList('0',$("#searchtypeTotalLead").val(),'','','','');
+			//getAdminReportList('0',$("#searchtypeTotalLead").val(),'','','','');
+			getcounselorReportList(''+counselorid+'',$("#searchtypeTotalLead").val(),'','','','');
 			
 		}
 	});
 
 	$("#btnWiseSubmit").on("click",function(){
+		console.log(counselorid);
+		var counselorid = 0;
+		if($("#counselorid").val()!=undefined && $("#counselorid").val()!=''){
+			counselorid=$("#counselorid").val();
+		}
         var startDate = $("#dataStartDate").val();
         var endDate = $("#dataEndDate").val();
         var searchCountrytype = $("#searchtypeTotalLead").val();
@@ -56,8 +66,52 @@ async function renderCounselorDailyReportDashboard(title, roleAndModule, SCHOOL_
             showMessageTheme2(1, 'Please choose end date','',true);
 		        return false;
         }
-		getAdminReportList('0',searchCountrytype,startDate,endDate,'','');
-		getcounselorReportList('0',searchCountrytype,startDate,endDate,'','');
+		//getAdminReportList('0',searchCountrytype,startDate,endDate,'','');
+		getcounselorReportList(''+counselorid+'',''+searchCountrytype+'',''+startDate+'',''+endDate+'','','');
+    });
+
+
+	$("#dataAdminStartDate").datepicker({
+        format : 'dd-mm-yyyy',
+        autoclose: true,
+	});
+	$("#dataAdminEndDate").datepicker({
+		format : 'dd-mm-yyyy',
+		autoclose: true,
+	});
+	$(".hideAdmindate").css({"display":"none"})
+	$("#searchtypeAdminTotalLead").on("change", function(){
+		var counselorid = 0;
+		if($("#adminid").val()!=undefined && $("#adminid").val()!=''){
+			counselorid=$("#adminid").val();
+		}
+		if($("#searchtypeAdminTotalLead").val()=='CUSTOM'){
+			$(".hideAdmindate").css({"display":"block"});
+		}else{
+			$(".hideAdmindate").css({"display":"none"})
+			getAdminReportList('0',$("#searchtypeAdminTotalLead").val(),'','','','');
+			
+		}
+	});
+
+	$("#btnAdminWiseSubmit").on("click",function(){
+		console.log(counselorid);
+		var counselorid = 0;
+		if($("#adminid").val()!=undefined && $("#adminid").val()!=''){
+			counselorid=$("#adminid").val();
+		}
+        var startDate = $("#dataAdminStartDate").val();
+        var endDate = $("#dataAdminEndDate").val();
+        var searchCountrytype = $("#searchtypeAdminTotalLead").val();
+        if($("#dataAdminStartDate").val()=='' && $("#dataAdminStartDate").val()==undefined){
+            showMessageTheme2(1, 'Please choose start date','',true);
+		        return false;
+        }
+        if($("#dataAdminEndDate").val()=='' && $("#dataAdminEndDate").val()==undefined){
+            showMessageTheme2(1, 'Please choose end date','',true);
+		        return false;
+        }
+		getAdminReportList(''+counselorid+'',''+searchCountrytype+'',''+startDate+'',''+endDate+'','','');
     });
 
 }
@@ -118,25 +172,6 @@ function getMainReportCard(objRight){
 		html+=`<div class="main-card mb-3 card">
 			
 		<div class="card-body">
-			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
-				<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
-					<option value="DAY" >Today</option>
-					<option value="WEEK" >Week</option>
-					<option value="MONTH" >Month</option>
-					<option value="CUSTOM">Custom</option>
-				</select>
-				<div class="hidedate">
-					<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
-						<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-							<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
-							<div class="mx-1">To</div>
-							<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
-						</div>
-						<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
-					</div>
-				</div>
-			</div>
-
 			<ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
 			<li class="nav-item">
 				<a role="tab" class="nav-link active" id="tab-1" data-toggle="tab" href="#tab-content-1">
@@ -151,12 +186,53 @@ function getMainReportCard(objRight){
 			</ul>
 			<div class="tab-content p-3 border">
 			<div class="tab-pane tabs-animation fade show active" id="tab-content-1" role="tabpanel">
-				<div class="tabs-animation">`;
+				<div class="tabs-animation">
+					<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
+						<div class="d-flex w-25 ml-auto mb-2" id="selectCounselorList"></div>
+						<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
+							<option value="DAY" >Today</option>
+							<option value="WEEK" >Week</option>
+							<option value="MONTH" >Month</option>
+							<option value="CUSTOM">Custom</option>
+						</select>
+						<div class="hidedate">
+							<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
+								<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+									<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+									<div class="mx-1">To</div>
+									<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+								</div>
+								<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
+							</div>
+						</div>
+					</div>
+				`;
 					html+=getCounslorDailyReport();
 					html+=`</div>
 			</div>
 			<div class="tab-pane tabs-animation fade show " id="tab-content-2" role="tabpanel">
-				<div class="tabs-animation">`;
+				<div class="tabs-animation">
+				
+				<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
+					<div class="d-flex w-25 ml-auto mb-2" id="selectAdminList"></div>
+					<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeAdminTotalLead" name="searchtypeAdminTotalLead" style="width:fit-content">
+						<option value="DAY" >Today</option>
+						<option value="WEEK" >Week</option>
+						<option value="MONTH" >Month</option>
+						<option value="CUSTOM">Custom</option>
+					</select>
+					<div class="hideAdmindate">
+						<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
+							<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+								<input type="text" name="dataAdminStartDate" class="form-control form-control-sm" id="dataAdminStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+								<div class="mx-1">To</div>
+								<input type="text" name="dataAdminEndDate" class="form-control form-control-sm" id="dataAdminEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+							</div>
+							<button class="btn btn-primary" id="btnAdminWiseSubmit">Submit</button>
+						</div>
+					</div>
+				</div>
+				`;
 				html+=getAdminDailyReport()
 				html+=`</div>
 			</div>`;
@@ -170,15 +246,11 @@ function getMainReportCard(objRight){
 }
 
 function getCounslorDailyReport(){
-	var html=`
-			<div class="row" id="counselor-list-report"></div>
-			`;
+	var html=`<div class="row" id="counselor-list-report"></div>`;
 	return html;
 }
 function getAdminDailyReport(){
-	var html=`
-			<div class="row" id="admin-list-report"></div>
-			`;
+	var html=`<div class="row" id="admin-list-report"></div>`;
 	return html;
 }
 

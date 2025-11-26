@@ -1678,6 +1678,7 @@ function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFr
 				getCounselorReportListFlag = false;
 				var html=getcounselorReportListHtml(data);
 				$('#counselor-list-report').html(html);
+				
 				var dataList=data.dataList;
 				if(dataList != null && dataList!= undefined && dataList.length>0){	
 					for (let u = 0; u < dataList.length; u++) {	
@@ -1686,6 +1687,32 @@ function getcounselorReportList(assignTo, modesearch, startDate, endDate, callFr
 					}
 				}
 				
+				if(parseInt(assignTo)==0){
+					var counselorReport="<select id='counselorid'><option value=''>--Select--</option>";
+					if(dataList != null && dataList!= undefined && dataList.length>0){	
+						for (let u = 0; u < dataList.length; u++) {	
+							const report = dataList[u];
+							var selectOpt =  (report.assignTo==parseInt(assignTo))?'selected':'';
+							counselorReport+="<option value='"+report.assignTo+"' "+selectOpt+">"+report.assignName+"</option>";
+						}
+					}
+					counselorReport+="</select>";
+					$('#selectCounselorList').html(counselorReport);
+					$("#counselorid").select2({
+						theme:"bootstrap4",
+					});
+	
+					$("#counselorid").on("change", function(){
+						var counselorid = $("#counselorid").val();
+						var startDate = $("#dataStartDate").val();
+						var endDate = $("#dataEndDate").val();
+						var searchCountrytype = $("#searchtypeTotalLead").val();
+						getcounselorReportList(''+counselorid+'',''+searchCountrytype+'',''+startDate+'',''+endDate+'','','');
+					});
+				}else{
+					//$("#counselorid").val(assignTo).trigger('change');
+				}
+
 			}
 			
 		}
@@ -1735,6 +1762,7 @@ function getcounselorReportListHtml(data){
 			}else{
 				modSrc=report.startsDate+' to '+report.endsDate;
 			}
+
 			html+=`<div class="${!OBJECT_RIGHTS.searchUser?'col-md-4':'col-md-2'}" style="overflow:auto;">
 					<table  class="table table-bordered responsive nowrap" style="width:100%;">
 						<thead>
@@ -2080,6 +2108,7 @@ function getAdminReportList(assignTo, modesearch, startDate, endDate, callFrom, 
 	data['endDate']=endDate;
 	data['callFrom']=callFrom;
 	data['assignTo']=assignTo;
+	console.log(data);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -2097,7 +2126,31 @@ function getAdminReportList(assignTo, modesearch, startDate, endDate, callFrom, 
 				//getCounselorReportListFlag = false;
 				var html=getAdminReportListHtml(data );
 				$('#admin-list-report').html(html);
-				
+
+				if(parseInt(assignTo)==0){
+					var dataList=data.dataList;
+					var counselorReport="<select id='adminid'><option value=''>--Select--</option>";
+					if(dataList != null && dataList!= undefined && dataList.length>0){	
+						for (let u = 0; u < dataList.length; u++) {	
+							const report = dataList[u];
+							var selectOpt =  (report.assignTo==parseInt(assignTo))?'selected':'';
+							counselorReport+="<option value='"+report.assignTo+"' "+selectOpt+">"+report.assignName+"</option>";
+						}
+					}
+					counselorReport+="</select>";
+					$('#selectAdminList').html(counselorReport);
+					$("#adminid").select2({
+						theme:"bootstrap4",
+					});
+	
+					$("#adminid").on("change", function(){
+						var counselorid = $("#adminid").val();
+						var startDate = $("#dataAdminStartDate").val();
+						var endDate = $("#dataAdminEndDate").val();
+						var searchCountrytype = $("#searchtypeAdminTotalLead").val();
+						getAdminReportList(''+counselorid+'',''+searchCountrytype+'',''+startDate+'',''+endDate+'','','');
+					});
+				}
 			}
 			
 		}
