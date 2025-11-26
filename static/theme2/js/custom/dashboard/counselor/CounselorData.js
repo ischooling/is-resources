@@ -1779,10 +1779,10 @@ function getcounselorReportListHtml(data){
 	return html;
 }	
 
-function openAddTask(assignTo){
+function openAddTask(assignTo, calltype){
 	$(`#new-text-${assignTo}`).text("Seen").removeClass("color-changing").addClass("text-success");
 	$("#assignto").val(assignTo);
-	getTask(assignTo,0);
+	getTask(assignTo,0, calltype);
 	$("#counselorAddTaskpopup").modal('show');
 }
 
@@ -1827,13 +1827,13 @@ function getcounselorReportTbodyHtml(report, assignTo){
 				if(!OBJECT_RIGHTS.searchUser){
 					$("#counselorTaskTitle").text(USER_FULL_NAME+" Task");
 					html+=`<tr><th class="p-1">Task</th>
-					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${leadReport.totalTask>0?'Add/View':'Add'} task</span></a>
+					<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${assignTo}','counselor');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${leadReport.totalTask>0?'Add/View':'Add'} task</span></a>
 					</td></tr>`;
 				}else{
 					html+=`<tr><th class="p-1">Total Task</th>
 					<td class="d-flex justify-content-center align-items-center">`
 						if (leadReport.totalTask > 0) {
-							html+=`<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary mr-2" onclick="openAddTask('${assignTo}');" style="line-height:8px;">${leadReport.totalTask}</a>`;
+							html+=`<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary mr-2" onclick="openAddTask('${assignTo}','counselor');" style="line-height:8px;">${leadReport.totalTask}</a>`;
 							if(leadReport.readStatus > 0){
 								html+=`<span id="new-text-${assignTo}" class="mb-0 font-weight-semi-bold color-changing">New!</span>`
 							}else{
@@ -2016,13 +2016,19 @@ function saveTask(formId, callFrom, taskid, callType) {
 }
 
 
-function getTask(assignTo, taskid) {
+function getTask(assignTo, taskid, calltype) {
 	var startDate = $("#dataStartDate").val()!=undefined?$("#dataStartDate").val():'';
 	var endDate = $("#dataEndDate").val()!=undefined?$("#dataEndDate").val():'';
+	var modeSearch = $("#searchtypeTotalLead").val()!=undefined?$("#searchtypeTotalLead").val():"DAY";
+	if(calltype=='admin'){
+		var startDate = $("#dataAdminStartDate").val()!=undefined?$("#dataAdminStartDate").val():'';
+		var endDate = $("#dataAdminEndDate").val()!=undefined?$("#dataAdminEndDate").val():'';
+		var modeSearch = $("#searchtypeAdminTotalLead").val()!=undefined?$("#searchtypeAdminTotalLead").val():"DAY";
+	}
 	var dataRequest={};
 	dataRequest['taskid']=taskid;
 	dataRequest['assignTo']=assignTo;
-	dataRequest['modeSearch']=$("#searchtypeTotalLead").val()!=undefined?$("#searchtypeTotalLead").val():"DAY";
+	dataRequest['modeSearch']=modeSearch
 	dataRequest['startDate']=startDate;
 	dataRequest['endDate']=endDate;
 	dataRequest['userId']=USER_ID;
@@ -2196,14 +2202,14 @@ function getAdminReportListHtml(data){
 						if(!OBJECT_RIGHTS.searchUser){
 							$("#counselorTaskTitle").text(USER_FULL_NAME+" Task");
 							html+=`<tr><th class="p-1">Task</th>
-							<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${report.assignTo}');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${report.totalTask>0?'Add/View':'Add'} task</span></a>
+							<td><a href="javascript:void(0)" class="btn btn-lg btn-outline-primary btn-sm mr-2" onclick="openAddTask('${report.assignTo}','admin');" style="line-height:0;"><i class="icon ion-android-add" style="font-size:15px;line-height:13px"></i><span>&nbsp; ${report.totalTask>0?'Add/View':'Add'} task</span></a>
 							</td></tr>`;
 						}else{
 							html+=`<tr><th class="p-1">Total Task</th>
 							<td class="d-flex justify-content-center align-items-center">`
 								if (report.totalTask > 0) {
 									html+=
-									`<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary mr-2" onclick="openAddTask('${report.assignTo}');" style="line-height:8px;">${report.totalTask}</a>`
+									`<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary mr-2" onclick="openAddTask('${report.assignTo}','admin');" style="line-height:8px;">${report.totalTask}</a>`
 										if(report.readStatus > 0){
 											html+=`<span id="new-text-${report.assignTo}" class="mb-0 font-weight-semi-bold color-changing">New!</span>`
 										}else{
