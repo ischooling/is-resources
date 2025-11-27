@@ -543,23 +543,12 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<form action="javascript:void(0);" id="advanceLeadNewSearchForm" name="advanceLeadNewSearchForm" autocomplete=\'off\'>' +
     '			<input type="hidden" name="restrictedDataShow" id="restrictedDataShow" value="YES">' +
     '			<input type="hidden" name="advancedformclick" id="advancedformclick" value="YES">' +
-    '			<input type="hidden" name="currentPageSearch" id="currentPageSearch" value="' +
-    objRights.currentPage +
-    '">' +
-    '			<input type="hidden" name="clickFromSearch" id="clickFromSearch" value="' +
-    objRights.clickFrom +
-    '">' +
-    '			<input type="hidden" name="leadFromSearch" id="leadFromSearch" value="' +
-    objRights.leadFrom +
-    '">' +
-    '			<input type="hidden" name="leadFromSearchModuleId" id="leadFromSearchModuleId" value="' +
-    objRights.moduleId +
-    '">' +
-    '			<input type="hidden" name="leadType" id="leadType" value="' +
-    objRights.leadType +
-    '">' +
-    '			<input type="hidden" name="userId" id="userId" value="' +
-    USER_ID +
+    '			<input type="hidden" name="currentPageSearch" id="currentPageSearch" value="' +objRights.currentPage +'">' +
+    '			<input type="hidden" name="clickFromSearch" id="clickFromSearch" value="' +objRights.clickFrom +'">' +
+    '			<input type="hidden" name="leadFromSearch" id="leadFromSearch" value="' +objRights.leadFrom +'">' +
+    '			<input type="hidden" name="leadFromSearchModuleId" id="leadFromSearchModuleId" value="' +objRights.moduleId +'">' +
+    '			<input type="hidden" name="leadType" id="leadType" value="' + objRights.leadType +'">' +
+    '			<input type="hidden" name="userId" id="userId" value="' +USER_ID +
     '">' +
     '			<input type="hidden" name="campaignName" id="campaignName" value="">' +
     '<div class="row">' +
@@ -1508,10 +1497,24 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 													
 												html+='</td>'
 												+'</tr>'	
+                        
 												+'<tr>'
 													+'<th class="border-0 p-1" style="width:165px">Child Name: </th>'
 													+'<td class="border-0 p-1">'+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'</td>'
-												+'</tr>'
+												+'</tr>';
+                          if(leads.learningProgram!=''){
+                            html+='<tr>'
+                              +'<th class="border-0 p-1" style="width:165px">Learning Program: </th>'
+                              +'<td class="border-0 p-1">'+(leads.learningProgram!=''?leads.learningProgram:'N/A')+'</td>'
+                            +'</tr>';
+                          }
+                          
+                          if(leads.language!=''){
+                            html+='<tr>'
+                              +'<th class="border-0 p-1" style="width:165px">Language: </th>'
+                              +'<td class="border-0 p-1">'+(leads.language!=''?leads.language:'N/A')+'</td>'
+                            +'</tr>';
+                          }
 												// +'<tr>'
 												// 	+'<th class="border-0 p-1" style="width:165px">Age: </th>'
 												// 	+'<td class="border-0 p-1">'+(leads.age!=''?leads.age:'N/A')+'</td>'
@@ -1524,7 +1527,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 												// 	+'<th class="border-0 p-1" style="width:165px">Relation: </th>'
 												// 	+'<td class="border-0 p-1">'+(leads.relation!=''?leads.relation:'N/A')+'</td>'
 												// +'</tr>'
-												+'<tr>'
+												html+='<tr>'
 													+'<th class="border-0 p-1" style="width:165px">City | Country:</th>'
 													+'<td class="border-0 p-1">'+(leads.cityName!=''?leads.cityName:'N/A')+' | '+(leads.countryName!=''?leads.countryName:'N/A')+'</td>'
 												+'</tr>'
