@@ -1219,15 +1219,13 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 		+'<option value="25" '+(leaddata.recordsPerPage=='25'?'selected':'')+'>25</option>'
 		+'<option value="50" '+(leaddata.recordsPerPage=='50'?'selected':'')+'>50</option>'
 		+'<option value="100" '+(leaddata.recordsPerPage=='100'?'selected':'')+'>100</option>'
-	+'</select>';
+	+'</select>'
+  +'<span class="leadInfoTime ml-3 bg-dark text-white p-1"></span>'
 	+'<div>'
 		
 	+'</div>';
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
-		
-
-  
 		
     lScoreColor='';
     if(leads.leadScore>=80){
@@ -1237,6 +1235,35 @@ function getB2cLeadList(leaddata, objRights, roleModule){
     }else if(leads.leadScore<50){
       lScoreColor='bg-primary';
     }
+
+    var childName='N/A';
+    var childAge='N/A';
+    var childGrade='N/A';
+    var currentCurriculum='N/A';
+    var agentRemark='N/A';
+    var agentRecording='';
+    
+     if(leads.aidataList!=null && leads.aidataList.length>0){
+        aidataList=leads.aidataList;
+        for (let c = 0; c < aidataList.length; c++) {
+          const aidata = aidataList[c];
+          if(aidata.value!=''){
+            if(aidata.key=='child_name'){
+              childName=aidata.value;
+            }else if(aidata.key=='child_age'){
+              childAge=aidata.value;
+            }else if(aidata.key=='updated_grade'){
+              childGrade=aidata.value;
+            }else if(aidata.key=='prev_curriculum'){
+              currentCurriculum=aidata.value;
+            }else if(aidata.key=='call_summary'){
+              agentRemark=aidata.value;
+            }else if(aidata.key=='recording_url'){
+              agentRecording=aidata.value;
+            }
+          }
+        }
+      }
 
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
@@ -1250,15 +1277,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 				}else {
 					html+='<input type="checkbox" disabled="disabled" class="checkLead" id="lead-'+leads.leadId+'" name="lead-move-another" value="'+leads.leadId+'" />';
 				}
-				html+=''+leads.srNo+'&nbsp;Lead info <span class="leadInfoTime"></span>&nbsp;&nbsp;'+objRights.countryOffsetTimezone
-					+'<div> ';
-						if(leads.demoFrom=='Demo by Website'){
-							bgColorDemo="background-color:#7000FF !important;color:#fff";
-							html+='<span class="float-right bold p-1" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
-						}else if(leads.demoFrom=='Demo by Link'){
-							bgColorDemo="background-color:#2200FF !important;color:#fff";
-							html+='<span class="float-right bold p-1" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
-						}
+        // +objRights.countryOffsetTimezone
+        // <span class="leadInfoTime"></span>
+        // '+objRights.countryOffsetTimezone+'
+				html+=''+leads.srNo+'.&nbsp;Filled details &nbsp;<span class="font-weight-bold">'+leads.leadNo+'</span> | Lead Score: <span class="'+lScoreColor+' text-white bold p-1 rounded">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span><br><div class="d-flex justify-content-center"><p class="bold font-12 p-1 bg-white text-dark w-fit-content mt-1 mb-0 rounded" id="timerLeadDisplay_'+leads.leadId+'"></p></div>'
             var priorityColor='bg-warning text-dark';
             if(leads.priority=='Urgent'){
                 priorityColor='bg-success';
@@ -1269,10 +1291,19 @@ function getB2cLeadList(leaddata, objRights, roleModule){
             }else{
               priorityColor='';
             }
-					html+='</div>'
-					+'</th>'
-					+'<th class="text-white bold border-bottom-0" style="width:400px;">Student | Parent Details '+(leads.priority==''?'':'<span class="p-1 bold '+priorityColor+' rounded font-14 float-right"><i class="fa fa-paperclip fa-18"></i>&nbsp;&nbsp;'+leads.priority+'</span>')+'</th>'
-					+'<th class="text-white bold border-bottom-0">School Demo Details <span class="leadDemoTime"></span>&nbsp;&nbsp;'+objRights.countryOffsetTimezone+' | Status Details</th>';
+					html+='</th>'
+					+'<th class="text-white bold border-bottom-0" style="width:400px;">AI Agent updated details '+(leads.priority==''?'':'<span class="p-1 bold '+priorityColor+' rounded font-14 float-right"><i class="fa fa-paperclip fa-18"></i>&nbsp;&nbsp;'+leads.priority+'</span>')+'</th>'
+					+'<th class="text-white bold border-bottom-0">Demo | call back details'
+            +'<div> ';
+						if(leads.demoFrom=='Demo by Website'){
+							bgColorDemo="background-color:#7000FF !important;color:#fff";
+							html+='<span class="float-right bold p-1 rounded" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
+						}else if(leads.demoFrom=='Demo by Link'){
+							bgColorDemo="background-color:#2200FF !important;color:#fff";
+							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
+						}
+            html+='</div>'
+          +'</th>';
 					if(leads.leadLastCallList!=null && leads.leadLastCallList.length>0){
 						html+='<th class="text-white bold border-bottom-0 text-center" style="width:250px;">Follow Ups</th>';
 					}else{
@@ -1288,32 +1319,93 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'">'
 						+'<table class="w-100">'
 							+'<tbody>'
+
 								+'<tr>'
-									+'<th class="border-0 p-1">No.:</th>'
-									+'<td class="border-0 p-1 lead-row-td-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'" >'+leads.leadNo+'</td>'
+									+'<th class="border-0 p-0"></th>'
+									+'<td class="border-0 p-0 lead-row-td-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'" ></td>'
 								+'</tr>'
-								
+
 								+'<tr>'
 									+'<th class="border-0 p-1">Source:</th>'
-									+'<td class="border-0 p-1" >'+leads.LeadSourceName+'</td>'
-								+'</tr>';
+									+'<td class="border-0 p-1" >'+(leads.LeadSourceName)
+                    if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
+                      html+='<span class="float-right">'
+                        +'<a href="javascript:void(0);" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
+                          +'<i class="fa fa-edit"></i>&nbsp;Update'
+                        +'</a>'
+                      +'</span>';
+                    }
+                  +'</td>'
+								+'</tr>'
                 if(leads.leadOther!=''){
                   html += '<tr>'
                     +'<th class="border-0 p-1">Other Source:</th>'
                     +'<td class="border-0 p-1" >'+leads.leadOther+'</td>'
                   +'</tr>';
                 }
-                
-                if (leads.callbackConvertedDate!=="N/A"){
-                  html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Callback</td></tr>';
-                  html += '<tr class="bg-primary p-1 text-white">'
-                            +'<th class="border-0 p-1">Callback Time:</th>'
-                            +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+'('+USER_TIMEZONE+')'+'</td>'
-                          +'</tr>';
-                }
-
-								
-								html+='<tr>'
+                html+='<tr>'
+									+'<th class="border-0 p-1">Created date & time:</th>'
+									+'<td class="border-0 p-1">'+(leads.createdDateStr!=''?leads.createdDateStr:'N/A')+'</td>'
+								+'</tr>'
+                +'<tr>'
+									+'<th class="border-0 p-1">Parent Name:</th>'
+									+'<td class="border-0 p-1">'+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'</td>'
+								+'</tr>'
+                +'<tr>'
+                  +'<th class="border-0 p-1">Grade: </th>'
+                  +'<td class="border-0 p-1">'+(leads.standardName!=''?leads.standardName.replace('Grade',''):'N/A')+'</td>'
+                +'</tr>'
+                +'<tr>'
+                  +'<th class="border-0 p-1">Email:</th>'
+                  +'<td class="border-0 p-1">'+(leads.email!=''?leads.email:'N/A');
+                  if(leads.email!=''){
+                    if(leads.verifiedEmail>0){
+                      html+='<span style="color:green;font-size:15px;" data-toggle="tooltip" data-placement="top" data-original-title="Email Verified"><i class="fa fa-check-circle"></i></span>';
+                    }else if(leads.verifiedEmail<1){
+                      html+='<span style="color:green;font-size:15px;"><i class="fa fa-remove"></i></span>';
+                    }
+                  }
+                  html+='<br/>';
+                  if(leads.emailAlternet!=''){
+                    html+=(leads.emailAlternet!=''?leads.emailAlternet:'N/A');
+                  }
+                html+='</td>'
+                +'</tr>'
+                +'<tr>'
+                  +'<th class="border-0 p-1">City | Country:</th>'
+                  +'<td class="border-0 p-1">'+(leads.cityName!=''?leads.cityName:'N/A')+' | '+(leads.countryName!=''?leads.countryName:'N/A')+'</td>'
+                +'</tr>'
+                +'<tr>'
+                  +'<th class="border-0 p-1">Mobile:</th>'
+                  +'<td class="border-0 p-1">'+(leads.isdCode!=''?leads.isdCode:'')+' '+(leads.phone!=''?leads.phone:'N/A');
+                    if(leads.isdCode!=''){
+                      html+='<span>'
+                        html+='<a href="https://api.whatsapp.com/send?phone='+(leads.phoneIsd!=''?leads.phoneIsd:'')+'" target="_target" class="position-relative">' 
+                          html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
+                          
+                            if(leads.whatsAppVerifiedStatus=='N'){}
+                            else{
+                              if(leads.whatsAppScbStatus=='N'){
+                                html+='<span style="left: 9px;color: black;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Sent"><i class="fa fa-minus-circle"></i></span>';
+                              }else{
+                                if(leads.whatsAppVerifiedStatus=='Y'){
+                                  html+='<span style="left: 9px;color: green;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Sent"><i class="fa fa-check-circle"></i></span>';
+                                }else if(leads.whatsAppVerifiedStatus=='N'){
+                                  html+='<span style="left: 9px;color: red;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Not Sent"><i class="fa fa-times-circle"></i></span>';
+                                }
+                              }
+                            }
+                        html+='</a>'
+                      +'</span>';
+                    }
+                    html+='<br/>';
+                    if(leads.phoneNoAlter!=''){
+                      html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
+                      html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>';
+                    }
+                  html+='</td>'
+                +'</tr>'
+                +'<tr>'
 									+'<th class="border-0 p-1">Lead Status:</th>'
 									+'<td class="border-0 p-1 leadlist-status-'+leads.leadId+'">'+(leads.leadStatus!=''?leads.leadStatus:'N/A')+'</td>'
 								+'</tr>'
@@ -1321,28 +1413,23 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Assigned To:</th>'
 									+'<td class="border-0 p-1">'+(leads.assignName!=''?leads.assignName:'N/A')+'</td>'
 								+'</tr>'
-								+'<tr>'
-									+'<th class="border-0 p-1">Assigned Date:</th>'
-									+'<td class="border-0 p-1">'+(leads.createdDateStr!=''?leads.createdDateStr:'N/A')+'</td>'
-								+'</tr>'
-                  +'<tr><th class="border-0 p-1">Timer:</th>'
-                  +'<td class="bold font-12 p-1" colspan="2" id="timerLeadDisplay_'+leads.leadId+'"></td>'
-                +'</tr>'
                 +'<tr>'
 									+'<th class="border-0 p-1">Added By:</th>'
 									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')+'</td>'
 								+'</tr>'
-                +'<tr>'
-										+'<th class="border-0 p-1">Lead Score:</th>'
-										+'<td class="border-0 p-1 "><span class="'+lScoreColor+' text-white bold p-1">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span></td>'
-									+'</tr>';
+                if (leads.callbackConvertedDate!=="N/A"){
+                  html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Callback</td></tr>';
+                  html += '<tr class="bg-primary p-1 text-white">'
+                    +'<th class="border-0 p-1">Callback Time:</th>'
+                    +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+'('+USER_TIMEZONE+')'+'</td>'
+                  +'</tr>';
+                }
 								if(leads.leadSupportToName!=''){
 									html+='<tr>'
 										+'<th class="border-0 p-1">Supported By:</th>'
 										+'<td class="border-0 p-1">'+(leads.leadSupportToName!=''?leads.leadSupportToName:'N/A')+'</td>'
 									+'</tr>';
 								}
-									
 
 								html+='<tr>'
 									+'<th class="border-0 p-1">UTM:</th>'
@@ -1386,7 +1473,6 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 														+'</tr>';
 													}
 
-														
 												}else{
 													html+='<tr>'
 																+'<th class="border-0 p-0 font-12">Source:</th>'
@@ -1471,13 +1557,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 											+'</label>'
                       +'</div>';
 									}
-								html+='</td></tr>';
+								html+='</td></tr>'
                 
-							html+='</tbody>'
+							+'</tbody>'
 						+'</table>'
-					+'</td>'
+					+'</td>';
 					//style="max-width: 696px;min-width: 696px;"
-					+'<td class="p-0 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top">'
+          
+         
+					html+='<td class="p-0 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top">'
 						+'<table class="w-100">'
 							+'<tbody>'
 								+'<tr>'
@@ -1485,36 +1573,36 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										+'<table class="w-100">'
 											+'<tbody>'
 												+'<tr>'
-													+'<th class="border-0 p-1" style="width:165px">Grade: </th>'
-													+'<td class="border-0 p-1">'+(leads.standardName!=''?leads.standardName.replace('Grade',''):'N/A');
-													if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
-														html+='<span class="float-right">'
-															+'<a href="javascript:void(0);" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
-																+'<i class="fa fa-edit"></i>&nbsp;Update'
-															+'</a>'
-														+'</span>';
-													}
-													
-												html+='</td>'
-												+'</tr>'	
-                        
-												+'<tr>'
 													+'<th class="border-0 p-1" style="width:165px">Child Name: </th>'
-													+'<td class="border-0 p-1">'+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'</td>'
-												+'</tr>';
-                          if(leads.learningProgram!=''){
-                            html+='<tr>'
-                              +'<th class="border-0 p-1" style="width:165px">Learning Program: </th>'
-                              +'<td class="border-0 p-1">'+(leads.learningProgram!=''?leads.learningProgram:'N/A')+'</td>'
-                            +'</tr>';
-                          }
+													+'<td class="border-0 p-1">'+(childName)
+                            if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
+														  html+='<span class="float-right">'
+                                +'<a href="javascript:void(0);" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
+                                  +'<i class="fa fa-edit"></i>&nbsp;Update'
+                                +'</a>'
+														  +'</span>';
+													  }
+                          html+='</td>'
+												+'</tr>'
+                        +'<tr>'
+                          +'<th class="border-0 p-1" style="width:165px">Age:</th>'
+                          +'<td class="border-0 p-1">'+childAge+'</td>'
+                        +'</tr>'
+                        +'<tr>'
+                          +'<th class="border-0 p-1">Grade: </th>'
+                          +'<td class="border-0 p-1">'+childGrade+'</td>'
+                        +'</tr>'
+                        +'<tr>'
+                          +'<th class="border-0 p-1">Current Curriculum: </th>'
+                          +'<td class="border-0 p-1">'+currentCurriculum+'</td>'
+                        +'</tr>'
+                        if(leads.learningProgram!=''){
+                          html+='<tr>'
+                            +'<th class="border-0 p-1" style="width:165px">Interested Learning Program: </th>'
+                            +'<td class="border-0 p-1">'+(leads.learningProgram!=''?leads.learningProgram:'N/A')+'</td>'
+                          +'</tr>';
+                        }
                           
-                          if(leads.language!=''){
-                            html+='<tr>'
-                              +'<th class="border-0 p-1" style="width:165px">Language: </th>'
-                              +'<td class="border-0 p-1">'+(leads.language!=''?leads.language:'N/A')+'</td>'
-                            +'</tr>';
-                          }
 												// +'<tr>'
 												// 	+'<th class="border-0 p-1" style="width:165px">Age: </th>'
 												// 	+'<td class="border-0 p-1">'+(leads.age!=''?leads.age:'N/A')+'</td>'
@@ -1527,58 +1615,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 												// 	+'<th class="border-0 p-1" style="width:165px">Relation: </th>'
 												// 	+'<td class="border-0 p-1">'+(leads.relation!=''?leads.relation:'N/A')+'</td>'
 												// +'</tr>'
+
 												html+='<tr>'
-													+'<th class="border-0 p-1" style="width:165px">City | Country:</th>'
-													+'<td class="border-0 p-1">'+(leads.cityName!=''?leads.cityName:'N/A')+' | '+(leads.countryName!=''?leads.countryName:'N/A')+'</td>'
-												+'</tr>'
-												+'<tr>'
-													+'<th class="border-0 p-1" style="width:165px">Phone:</th>'
-													+'<td class="border-0 p-1">'+(leads.isdCode!=''?leads.isdCode:'')+' '+(leads.phone!=''?leads.phone:'N/A');
-														if(leads.isdCode!=''){
-															html+='<span>'
-																html+='<a href="https://api.whatsapp.com/send?phone='+(leads.phoneIsd!=''?leads.phoneIsd:'')+'" target="_target" class="position-relative">' 
-																	html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
-																	
-																		if(leads.whatsAppVerifiedStatus=='N'){}
-																		else{
-																			if(leads.whatsAppScbStatus=='N'){
-																				html+='<span style="left: 9px;color: black;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Sent"><i class="fa fa-minus-circle"></i></span>';
-																			}else{
-																				if(leads.whatsAppVerifiedStatus=='Y'){
-																					html+='<span style="left: 9px;color: green;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Sent"><i class="fa fa-check-circle"></i></span>';
-																				}else if(leads.whatsAppVerifiedStatus=='N'){
-																					html+='<span style="left: 9px;color: red;font-size: 12x;position: absolute;top: -7px;" data-toggle="tooltip" data-placement="top" data-original-title="Wati Message Not Sent"><i class="fa fa-times-circle"></i></span>';
-																				}
-																			}
-																		}
-																html+='</a>'
-															+'</span>';
-														}
-														html+='<br/>';
-														if(leads.phoneNoAlter!=''){
-															html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
-															html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>';
-														}
-													
-													html+='</td>'
-												+'</tr>'
-												+'<tr>'
-													+'<th class="border-0 p-1" style="width:165px">Email:</th>'
-													+'<td class="border-0 p-1">'+(leads.email!=''?leads.email:'N/A');
-													if(leads.email!=''){
-														if(leads.verifiedEmail>0){
-															html+='<span style="color:green;font-size:15px;" data-toggle="tooltip" data-placement="top" data-original-title="Email Verified"><i class="fa fa-check-circle"></i></span>';
-														}else if(leads.verifiedEmail<1){
-															html+='<span style="color:green;font-size:15px;"><i class="fa fa-remove"></i></span>';
-														}
-													}
-													html+='<br/>';
-													if(leads.emailAlternet!=''){
-														html+=(leads.emailAlternet!=''?leads.emailAlternet:'N/A');
-													}
-												html+='</td>'
-												+'</tr>'
-												+'<tr>'
 													+'<th class="border-0 p-1" style="width:165px;background-color:'+(leads.leadStatus=='Converted'?'#baf3cd':'#f0ddc1')+';">Lead To Enrolled:</th>'
 													+'<td class="border-0 p-1">'+(leads.leadTotalDay!=''?leads.leadTotalDay:'0')+'</td>'
 												+'</tr>'
@@ -1587,28 +1625,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 													+'<td class="border-0 p-1 font-12" id="leadCurTimeText_'+leads.leadId+'"></td>'
 												+'</tr>'
                         +'<tr>'
-													+'<th class="border-0 p-1">Lead’s Right time to call:</th>'
+													+'<th class="border-0 p-1">Right time to call:</th>'
 													+'<td class="border-0 p-1 bold">'+(leads.leadRightStartTimeCall)+'</td>'
-												+'</tr>';
-                        
-
-
-												if(objRights.discardPermission ){
-													if(USER_ROLE=='DIRECTOR'){
-														html+='<tr>'
-														+'<th class="border-0 p-1">Call status:</th>'
-														+'<td class="border-0 p-1">'+(leads.zadarmaCallCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCallCount+')</td>'
-														+'</tr>';
-													}
-
-													html+='<tr>'
-													+'<th class="border-0 p-1">Step:</th>'
-													+'<td class="border-0 p-1">'+(leads.curentStage!=''?leads.curentStage:'N/A')+'</td>'
-													+'</tr>';
-												}
-												html+='<tr>'
+												+'</tr>'
 												+'<tr>'
 													+'<td colspan="2"  class="border-0 p-1 leadtagstatus_'+leads.leadNo+'"></td>'
+												+'</tr>'
+                        +'<tr>'
+													+'<th class="border-0 p-1">Any remarks for the academic expert:</th>'
+													+'<td class="border-0 p-1">'+agentRemark+'</td>'
 												+'</tr>'
 												+'<th class="border-0 p-1" style="width:165px">Message:</th>'
 												+'<td class="border-0 p-1">'
@@ -1619,9 +1644,53 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 														+'</div>'
 													+'</div>'
 												+'</td>'
-											+'</tr>'
-											+'</tbody>'
+                        +'</tr>';
+                        if(leads.aidataList!=null && leads.aidataList.length>0){
+                        html+='<tr>'
+                        +'<th class="border-0 p-1" style="width:165px">Agent:</th>'
+												+'<td class="border-0 p-1">'
+													+'<div class="dropdown d-inline-block" style="position: inherit;">'
+														+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Agent Detail</button>'
+														+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px;">';
+                        
+                          aidataList=leads.aidataList;
+                          html+='<table class="table table-bordered font-11 mt-2">';
+                          for (let c = 0; c < aidataList.length; c++) {
+                            const aidata = aidataList[c];
+                            if(aidata.key=='total_duration_seconds'){
+                              var timesend=secondsToHMS(aidata.value);
+                              html+='<tr><td>total_duration (HH:MM:SS)</td><td>'+timesend+'</td></tr>';
+                            }else{
+                              if(aidata.value!='' 
+                                && aidata.value!='Any/Both'
+                                && aidata.value!='ended'
+                                && aidata.value!='call_analyzed'
+                                && aidata.key!='is_confirmed'
+                                && aidata.key!='call_summary'
+                              ){
+                                html+='<tr><td>'+aidata.key+'</td><td>'+aidata.value+'</td></tr>';
+                              }
+                            }
+                          }
+                           html+='</table>'
+														+'</div>'
+													+'</div>'
+												+'</td>'
+											+'</tr>';
+                        }
+											html+='</tbody>'
 										+'</table>'
+                    html += 
+                    '<div class="d-flex align-items-center mb-1" style="gap:10px;">'
+                        +'<span class="ml-1">Call recording:</span>'
+                        +( agentRecording 
+                            ? '<audio controls style="height:40px; transform:scale(0.9);">'
+                                +'<source src="'+agentRecording+'">'
+                                +'Your browser does not support the audio element.'
+                            +'</audio>'
+                            : '<span style="margin-left: 22%;">N/A</span>'
+                        )
+                    +'</div>'
 									+'</td>'
 								+'</tr>'
 							+'</tbody>'
@@ -1631,6 +1700,18 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					
 						+'<table class="w-100 demotable" style="border: solid #027ffe 1px;background-color: #D5E3FC;">'
 							+'<tbody>';
+               if(leads.language!=''){
+                  html+='<tr>'
+                    +'<th class="border-0 p-1" style="width:165px">Preferred Language: </th>'
+                    +'<td class="border-0 p-1">'+(leads.language!=''?leads.language:'N/A')+'</td>'
+                  +'</tr>';
+                }
+                if(leads.leadPreviousDate){
+                   html+='<tr>'
+                    +'<th class="border-0 p-1" style="width:165px">Previous Date & time : </th>'
+                    +'<td class="border-0 p-1">'+(leads.leadPreviousDate?leads.leadPreviousDate:'N/A')+'</td>'
+                  +'</tr>';
+                }
 							html+='<tr class="" >'
 									+'<th class="border-0 p-1">Date & Time:</th>'
 									+'<td class="border-0 p-1">'+(leads.leadDemoIstDate!=''?leads.leadDemoIstDate:'N/A')+'</td>'
@@ -1646,7 +1727,19 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tbody>'
 							+'</table>'
 							+'<table class="w-100 border-bottom demotable">'
-							+'<tbody>';
+							+'<tbody>'
+              +'<tr>'
+                +'<th class="border-0 p-1">Demo confirmation:</th>'
+                +'<td class="border-0 p-1">'+(leads.demoConfirmation=='Y'?'Yes':'No')+'</td>'
+              +'</tr>';
+              if (leads.callbackConvertedDate!=="N/A"){
+                html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Callback</td></tr>';
+                html += '<tr class="bg-primary p-1 text-white">'
+                  +'<th class="border-0 p-1">Callback Time:</th>'
+                  +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+'('+USER_TIMEZONE+')'+'</td>'
+                +'</tr>';
+              }
+							html+='<tr>'
 								if(objRights.discardPermission){
 									html+='<tr>'
 										+'<th class="border-0 p-1">Connected Through:</th>'
@@ -1700,6 +1793,20 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   }else{
                     html+=(leads.followupRemark!=''?leads.followupRemark:'N/A');
                   }
+
+                  if(objRights.discardPermission ){
+                    if(USER_ROLE=='DIRECTOR'){
+                      html+='<tr>'
+                        +'<th class="border-0 p-1">Call status:</th>'
+                        +'<td class="border-0 p-1">'+(leads.zadarmaCallCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCallCount+')</td>'
+                      +'</tr>';
+                    }
+                    html+='<tr>'
+                      +'<th class="border-0 p-1">Step:</th>'
+                      +'<td class="border-0 p-1">'+(leads.curentStage!=''?leads.curentStage:'N/A')+'</td>'
+                    +'</tr>';
+                  }
+                  html+='<tr>'
                   
 										// +'<div class="dropdown d-inline-block" style="position: inherit;">'
 										// 	+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remarks</button>'

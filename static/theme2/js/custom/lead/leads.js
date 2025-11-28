@@ -10716,7 +10716,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			getLeadStartTimer(leadsd.assignLeadDatetime, leadsd.leadId);
 			getUpdateLeadCurrentTime(leadsd, leadsd.leadId);
 		  }
-		  curentTimeStamp(objRights.timeZoneOffset);
+		  curentTimeStamp(data.objectRights.timeZoneOffset);
 		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
 		  $(".leadSearchCampaign").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
 		  $(".leadSearchTemplate").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
