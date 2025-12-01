@@ -238,17 +238,33 @@ function getLeadFormPopup(objRights) {
     '" />' +
     '				<div class="row">' +
     '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '							<label class="m-0">First Name*</label>' +
+    '							<label class="m-0">Parent First Name*</label>' +
+    '							<input type="text" name="leadGuardfname" id="leadGuardfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '						<label class="m-0">Parent Middle Name</label>' +
+    '						<input type="text" name="leadGuardmname" id="leadGuardmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '						<label class="m-0">Parent Last Name</label>' +
+    '						<input type="text" name="leadGuardlname" id="leadGuardlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '							<label class="m-0">Child First Name*</label>' +
     '							<input type="text" name="leadstdfname" id="leadstdfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
     "					</div>" +
     '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '						<label class="m-0">Middle Name</label>' +
+    '						<label class="m-0">Child Middle Name</label>' +
     '						<input type="text" name="leadstdmname" id="leadstdmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
     "					</div>" +
     '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '						<label class="m-0">Last Name</label>' +
+    '						<label class="m-0">Child Last Name</label>' +
     '						<input type="text" name="leadstdlname" id="leadstdlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
     "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
+    '							<label class="m-0">Age</label>' +
+    '							<input type="text" name="leadAge" id="leadAge" class="form-control" value=""  maxlength="3" >' +
+    "						</div>" +
     '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
     '						<label class="m-0">Grade*</label>' +
     '						<select name="leadGrade" id="leadGrade" class="form-control" >' +
@@ -274,6 +290,7 @@ function getLeadFormPopup(objRights) {
     '								<option value="0">Select city</option>' +
     "							</select>" +
     "						</div>" +
+    
     '						<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
     '							<label class="m-0">Email*</label>' +
     '							<input type="email" name="leademailId" id="leademailId" class="form-control" value=""  ' +
@@ -1264,6 +1281,12 @@ function getB2cLeadList(leaddata, objRights, roleModule){
           }
         }
       }
+      if(leads.fname!=''){
+        childName=(leads.fname+' '+leads.mname+ ' '+leads.lname);
+      }
+      if(leads.age!=''){
+        childAge=leads.age;
+      }
 
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
@@ -1349,7 +1372,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tr>'
                 +'<tr>'
 									+'<th class="border-0 p-1">Parent Name:</th>'
-									+'<td class="border-0 p-1">'+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'</td>'
+									+'<td class="border-0 p-1">'+(leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname +'</td>'
 								+'</tr>'
                 +'<tr>'
                   +'<th class="border-0 p-1">Grade: </th>'
@@ -1667,6 +1690,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                                 && aidata.value!='call_analyzed'
                                 && aidata.key!='is_confirmed'
                                 && aidata.key!='call_summary'
+                                && aidata.key!='recording_url'
+                                && aidata.key!='child_name'
+                                && aidata.key!='child_age'
                               ){
                                 html+='<tr><td>'+aidata.key+'</td><td>'+aidata.value+'</td></tr>';
                               }

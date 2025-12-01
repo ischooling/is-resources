@@ -73,8 +73,8 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
 	 }
 
 
-	if ($("#"+formId+" #leadstdfname").val()==null || $("#"+formId+" #leadstdfname").val()=='') {
-		 showMessageTheme2(0, "Please enter Student's First Name",'',true);
+	if ($("#"+formId+" #leadGuardfname").val()==null || $("#"+formId+" #leadGuardfname").val()=='') {
+		 showMessageTheme2(0, "Please enter Parent First Name",'',true);
 		 return false;
 	}
 
@@ -97,118 +97,71 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
 	 
  }else if(leadFrom=='dashboard'){
 	 if ($("#"+formId+" #leadSource").val()==null || $("#"+formId+" #leadSource").val()=='0') {
-		 if(newTheme){
-				 showMessageTheme2(0, "Please select Lead Source",'',true);
-			 }else{
-				 showMessage(true, "Please select Lead Source");
-			 }
+		 showMessageTheme2(0, "Please select Lead Source",'',true);
 		 return false;
 	 }
 	 if ($("#"+formId+" #phoneNo").val()==null || $("#"+formId+" #phoneNo").val()=='') {
-		 if(newTheme){
-			 showMessageTheme2(0, "Please enter phone no",'',true);
-		 }else{
-			 showMessage(true, "Please enter phone no");
-		 }
+		showMessageTheme2(0, "Please enter phone no",'',true);
 		 return false;
 	 }
 	 if ($("#"+formId+" #leadAssignTo").val()==null || $("#"+formId+" #leadAssignTo").val()==0) {
-		 if(newTheme){
-			 showMessageTheme2(0, 'Please select Lead Assigned To','',true);
-		 }else{
-			 showMessage(true, 'Please select Lead Assigned To');
-		 }
+		 showMessageTheme2(0, 'Please select Lead Assigned To','',true);
 		 return false;
 	 }
  }else{
  	if(formId!='leadMergeDataPopupForm' && formId!='leadMergeDataPopupB2BForm'){
 		 if ($("#"+formId+" #leadSource").val()==null || $("#"+formId+" #leadSource").val()=='0') {
-			 if(newTheme){
-					 showMessageTheme2(0, "Please select Lead Source",'',true);
-				 }else{
-					 showMessage(true, "Please select Lead Source");
-				 }
-			 return false;
+			showMessageTheme2(0, "Please select Lead Source",'',true);
+			return false;
 		 }
 		
 	
 		if ($("#"+formId+" #leademailId").val()==null || $("#"+formId+" #leademailId").val()=='') {
-			if(newTheme){
+
 			if ($("#"+formId+" #phoneNo").val()==null || $("#"+formId+" #phoneNo").val()=='') {
 				showMessageTheme2(0, "Please enter email or phone no",'',true);
 				return false;
 			}
-			}else{
-				showMessage(true, "Please fill Email");
-				return false;
-			}
+			showMessageTheme2(0, "Please enter email",'',true);
+			return false;
 		}
 		if ($("#"+formId+" #leademailId").val()!=null && $("#"+formId+" #leademailId").val()!='') {
 			if (!validateEmail($("#"+formId+" #leademailId").val())) {
-				if(newTheme){
-					showMessageTheme2(0, "Email is either empty or invalid",'',true);
-				}else{
-					showMessage(true, "Email is either empty or invalid");
-				}
+				showMessageTheme2(0, "Email is either empty or invalid",'',true);
 				return false
 			}
 		}
 	
 		if ($("#"+formId+" #phoneNo").val()==null || $("#"+formId+" #phoneNo").val()=='') {
-			if(newTheme){
-			if ($("#"+formId+" #leademailId").val()==null || $("#"+formId+" #leademailId").val()=='') {
+			if ($("#"+formId+" #phoneNo").val()==null || $("#"+formId+" #phoneNo").val()=='') {
 				showMessageTheme2(0, "Please enter email or phone no",'',true);
 				return false;
 			}
-			}else{
-				showMessage(true, "Please enter phone no");
-				return false;
-			}
+			showMessageTheme2(0, "Please enter phone no",'',true);
+			return false;
 		}
 		if($("#"+formId+" #phoneNo").val()!='' && $("#"+formId+" #phoneNo").val()!=null){
 			if ($("#"+formId+" #isdCode").val()==null || $("#"+formId+" #isdCode").val()=='0') {
-				if(newTheme){
-					showMessageTheme2(0, "Please choose ISD Code",'',true);
-				}else{
-					showMessage(true, "Please choose ISD Code");
-				}
+				showMessageTheme2(0, "Please choose ISD Code",'',true);
 				return false;
 			}
 		}
 	 
-		if ($("#"+formId+" #leadstdfname").val()==null || $("#"+formId+" #leadstdfname").val()=='') {
-			
-			if(newTheme){
-				showMessageTheme2(0, "Please enter Student's First Name",'',true);
-			}else{
-				showMessage(true, "Please enter Student's First Name");
-			}
+		if ($("#"+formId+" #leadGuardfname").val()==null || $("#"+formId+" #leadGuardfname").val()=='') {
+			showMessageTheme2(0, "Please enter Parent First Name",'',true);
 			return false;
 		}
 	
 		if ($("#"+formId+" #leadStatus").val()==null || $("#"+formId+" #leadStatus").val()=='') {
-			if(newTheme){
-				showMessageTheme2(0, 'Please choose Lead Status','',true);
-			}else{
-				showMessage(true, 'Please choose Lead Status');
-			}
+			showMessageTheme2(0, 'Please choose Lead Status','',true);
 			return false;
 		}
 		if ($("#"+formId+" #leadAssignTo").val()==null || $("#"+formId+" #leadAssignTo").val()==0) {
-			if(newTheme){
-				showMessageTheme2(0, 'Please select Lead Assigned To','',true);
-			}else{
-				showMessage(true, 'Please select Lead Assigned To');
-			}
+			showMessageTheme2(0, 'Please select Lead Assigned To','',true);
 			return false;
 		}
 		if ($("#"+formId+" #leadRemark").val()==null || $("#"+formId+" #leadRemark").val()=='') {
-		
-			if(newTheme){
-				showMessageTheme2(0, 'Please fill Lead Remarks','',true);
-			}else{
-				showMessage(true, 'Please fill Lead Remarks');
-			}
+			showMessageTheme2(0, 'Please fill Lead Remarks','',true);
 			return false;
 		}
 	}
@@ -358,6 +311,7 @@ leadModifyDTO['leadType']=leadType;
 	leadModifyDTO['leadSource'] =$("#"+formId+" #leadSource").val();
 	leadModifyDTO['leadId'] = $("#"+formId+" #leadId").val();
 	leadStudentDetailDTO['stdDob'] = $("#"+formId+" #leadDOB").val();
+	leadStudentDetailDTO['age'] = $("#"+formId+" #leadAge").val();
 	leadStudentDetailDTO['gender'] = $("#"+formId+" #leadGender option:selected").val();
 	leadStudentDetailDTO['standard'] = $("#"+formId+" #leadGrade option:selected").val();
 	leadStudentDetailDTO['email'] = $("#"+formId+" #leademailId").val();
@@ -410,6 +364,7 @@ leadModifyDTO['leadType']=leadType;
 		leadModifyDTO['leadSource'] =$("#"+formId+" #leadSource").val();
 	}
 	leadStudentDetailDTO['stdDob'] = $("#"+formId+" #leadDOB").val();
+	leadStudentDetailDTO['age'] = $("#"+formId+" #leadAge").val();
 	leadStudentDetailDTO['gender'] = $("#"+formId+" #leadGender option:selected").val();
 	leadStudentDetailDTO['email'] = $("#"+formId+" #leademailId").val();
 	leadStudentDetailDTO['isdCountryCode'] = $("#"+formId+" #pCountryCode").val();
@@ -2407,6 +2362,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						$("#"+formId+" #leadGender").val(leadDemo.leadStudentDetailDTO.gender);
 						$("#"+formId+" #leademailId").val(leadDemo.leadStudentDetailDTO.email);
 						$("#"+formId+" #phoneNo").val(leadDemo.leadStudentDetailDTO.phoneNo);
+						$("#"+formId+" #leadAge").val(leadDemo.leadStudentDetailDTO.age);
 						
 						$("#"+formId+" #leademailAlternet").val(leadDemo.leadStudentDetailDTO.emailAlternet);
 						//$("#"+formId+" #leadType").val(leadType);
@@ -2462,7 +2418,6 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						// }
 						
 						$("#"+formId+" #phoneNoAlter").val(leadDemo.leadStudentDetailDTO.phoneNoAlter);
-						
 						$("#"+formId+" #leadstdfname").val(leadDemo.leadStudentDetailDTO.stdFname);
 						$("#"+formId+" #leadstdmname").val(leadDemo.leadStudentDetailDTO.stdMname);
 						$("#"+formId+" #leadstdlname").val(leadDemo.leadStudentDetailDTO.stdLname);
