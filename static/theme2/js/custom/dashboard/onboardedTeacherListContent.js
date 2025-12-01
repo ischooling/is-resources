@@ -77,6 +77,12 @@ function cardDetails(data){
                    				 <img src="${PATH_FOLDER_IMAGE2}leadlist_icons/Wati.svg${SCRIPT_VERSION}" style="width:26px; margin-bottom: 4px;padding:4px;" />
 							</a>`:''}
 							${item.brevobroadcast?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getMailLogUser(${item.userId})" ><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;"></i></a>&nbsp;`:''}
+							${item.callhippoCount > 0?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="CallHippo Logs"  id="wati_logs_link" onclick="getCallHippoLogs('${item.phoneNo.split(" ")[1]}')">
+                   				 <img src="${PATH_FOLDER_IMAGE2}leadlist_icons/CallHippo.svg${SCRIPT_VERSION}" style="width:26px; margin-bottom: 4px;padding:4px;" />
+							</a>`:''}
+							${item.zadarmaCount > 0?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs"  id="wati_logs_link" onclick="getZadarmaLogs('${item.phoneNo.split(" ")[1]}')">
+                   				 <img src="${PATH_FOLDER_IMAGE2}leadlist_icons/Zadarma.svg${SCRIPT_VERSION}" style="width:26px; margin-bottom: 4px;padding:4px;" />
+							</a>`:''}
 							</div>
 						</div>
 						<div class="card-body">
@@ -2171,4 +2177,184 @@ function getMailRecordsList(data){
 			</tr>`;
 	}
 	return html;
+}
+
+function zadarmaLogsDataModal(data) {
+	let html = `
+		<style>
+			#zadarmaLogsTable {
+				border-collapse: collapse;
+				border-radius: 10px;
+			}
+			#zadarmaLogsTable td, th {
+				border: 1px solid #f7f7f7;
+			}
+		</style>
+		<div id="zadarmaLogsContent" class="modal fade bd-example-modal-lg fade-scale" role="dialog" aria-labelledby="zadarmaLogsLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl" style='width: 80% !important;'>
+				<div class="d-flex flex-wrap zadarma-wrapper">
+					<div class="modal-content border-0 zadarmaLogsTableDiv">
+						<div class="modal-header py-1 bg-primary text-white">
+							<h5 class="modal-title font-weight-bold">Zadarma Logs</h5>
+							<button type="button" class="close text-white" onclick="selfModalHide('zadarmaLogsContent')">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1">
+							<div class="flex-grow-1">
+								<form class="full" action="javascript:void(0);">
+									<div class="full mb-1 mt-1 table-responsive" style="max-height:80vh !important;">
+										<table class="table" id="zadarmaLogsTableData" style="font-size:14px; min-width:450px">
+											<thead style="position:sticky;top:0;z-index:10;">
+												<tr style='background-color:#E7F3FF'>
+													<th class="border text-primary">S.No.</th>
+													<th class="border text-primary">Caller</th>
+													<th class="border text-primary">Dailled No.</th>
+													<th class="border text-primary">Type</th>
+													<th class="border text-primary">Call Start</th>
+													<th class="border text-primary">Duration (in sec)</th>
+													<th class="border text-primary">Status</th>
+													<th class="border text-primary">Action</th>
+												</tr>
+											</thead>
+											<tbody>`;
+	
+	if (data.length > 0) {
+		data.forEach((value, index) => {
+			html += `
+				<tr>
+					<td>${index + 1}</td>
+					<td>${value.caller}</td>
+					<td>${value.dialledNumber}</td>
+					<td>${value.type == "I" ? "Incoming" : "Outgoing"}</td>
+					<td>${changeDateFormat(new Date(value.callStart), 'MMM-dd-yyyy hh:mm:ss')}</td>
+					<td>${value.seconds}</td>
+					<td style="text-transform: capitalize;">${value.status}</td>
+					<td>`;
+						if(value.recordings != null || value.recordings != undefined){
+							html+=`<button onclick="viewCallRecording('${value.recordings}');" class='btn btn-primary btn-sm'>View Recording</button>`;
+						}else{
+							html+=``;
+						}
+					html+=`</td>
+				</tr>`;
+		});
+	} else {
+		html += `<tr><td colspan="8" class="text-center">No logs available</td></tr>`;
+	}
+	html += `</tbody>
+										</table>
+									</div>	          
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function callHippoLogsDataModal(data) {
+	let html = `
+		<style>
+			#callHippoLogsTable {
+				border-collapse: collapse;
+				border-radius: 10px;
+			}
+			#callHippoLogsTable td, th {
+				border: 1px solid #f7f7f7;
+			}
+		</style>
+		<div id="callHippoLogsContent" class="modal fade bd-example-modal-lg fade-scale" role="dialog" aria-labelledby="callHippoLogsLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl" style='width: 80% !important;'>
+				<div class="d-flex flex-wrap zadarma-wrapper">
+					<div class="modal-content border-0 callHippoLogsTableDiv">
+						<div class="modal-header py-1 bg-primary text-white">
+							<h5 class="modal-title font-weight-bold">Call Hippo Logs</h5>
+							<button type="button" class="close text-white" onclick="selfModalHide('callHippoLogsContent')">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1">
+							<div class="flex-grow-1">
+								<form class="full" action="javascript:void(0);">
+									<div class="full mb-1 mt-1 table-responsive" style="max-height:80vh !important;">
+										<table class="table" id="callHippoLogsTableData" style="font-size:14px; min-width:450px">
+											<thead style="position:sticky;top:0;z-index:10;">
+												<tr style='background-color:#E7F3FF'>
+													<th class="border text-primary">S.No.</th>
+													<th class="border text-primary">Caller</th>
+													<th class="border text-primary">Dailled No.</th>
+													<th class="border text-primary">Type</th>
+													<th class="border text-primary">Call Start</th>
+													<th class="border text-primary">Duration</th>
+													<th class="border text-primary">Status</th>
+													<th class="border text-primary">Action</th>
+												</tr>
+											</thead>
+											<tbody>`;
+	if (data.length > 0) {
+		data.forEach((value, index) => {
+			html += `
+				<tr>
+					<td>${index + 1}</td>
+					<td>${value.callerName}</td>
+					<td>${value.type == "Outgoing" ? value.toNumber : value.fromNumber}</td>
+					<td>${value.type}</td>
+					<td>${changeDateFormat(new Date(value.startDate), 'MMM-dd-yyyy hh:mm:ss')}</td>
+					<td>${value.duration}</td>
+					<td style="text-transform: capitalize;">${value.status != ""?value.status: value.recordingUrl!=""?"Completed": "No Answer"}</td>
+					<td>`;
+						if(value.recordingUrl != null && value.recordingUrl != undefined && value.recordingUrl != ""){
+							html+=`<button onclick="viewCallRecording('${value.recordingUrl}');" class='btn btn-primary btn-sm'>View Recording</button>`;
+						}else{
+							html+=``;
+						}
+					html+=`</td>
+				</tr>`;
+		});
+	} else {
+		html += `<tr><td colspan="8" class="text-center">No logs available</td></tr>`;
+	}
+	html += `</tbody>
+										</table>
+									</div>	          
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function viewCallRecording(url) {
+    let modalId = "callRecordingModal";
+    $("#" + modalId).remove();
+
+    let html = `
+        <div id="${modalId}" class="modal fade bd-example-modal-lg fade-scale" tabindex="-1" role="dialog" aria-labelledby="callRecordingLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content border-0">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title font-weight-bold">Call Recording</h5>
+                        <button type="button" onClick="removeRecordingModel('${modalId}')" class="close text-white" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p>Click play to listen to the recording.</p>
+                        <audio controls class="w-100">
+                            <source src="${url}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+    $("body").append(html);
+    $("#" + modalId).modal("show");
 }

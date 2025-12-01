@@ -1675,3 +1675,43 @@ function getMailLogUser(userId){
 		}
 	});
 }
+
+function getZadarmaLogs(number){
+    $.ajax({
+        type: "GET",
+        url: BASE_URL + CONTEXT_PATH + `zadarma/v1/get-logs?number=${number}`,
+        dataType: "json",
+        success: function (response) {
+			if(response.status == 'success'){
+					let modalContent = zadarmaLogsDataModal(response.logs);
+					if($("#zadarmaLogsContent").length > 0){
+						$("#zadarmaLogsContent").remove();
+					}
+					$("body").append(modalContent);
+					$("#zadarmaLogsContent").modal("show");
+			}else{
+				showMessageTheme2(0, response.message)
+			}
+        }
+    });
+}
+
+function getCallHippoLogs(number){
+    $.ajax({
+        type: "GET",
+        url: BASE_URL + CONTEXT_PATH + `callhippo/v1/get-logs?number=${number}`,
+        dataType: "json",
+        success: function (response) {
+			if(response.status == 'success'){
+				let modalContent = callHippoLogsDataModal(response.logs);
+				if($("#callHippoLogsContent").length > 0){
+					$("#callHippoLogsContent").remove();
+				}
+				$("body").append(modalContent);
+				$("#callHippoLogsContent").modal("show");
+			}else{
+				showMessageTheme2(0, response.message)
+			}
+        }
+    });
+}
