@@ -269,32 +269,32 @@ function communicationLogsContentForUserApplication(userId, useRole){
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">
                                     <label class="m-0 full">&nbsp;Attachment (if any)</label>
                                     <div class="full position-relative" 
-                                        id="fileuploadLog6div" 
+                                        id="fileuploadLog7div" 
                                         uploaded="" 
                                         fileName="" 
                                         docType="communicationLog" 
                                         thumbType="" 
                                         data-PDFURL="">
                                         
-                                        <input type="file" id="fileuploadLog6" class="upload-input form-control"
-                                            onchange="cropImageChatSupport(event,'fileuploadLog6','fileuploadLog6Icon','fileuploadLog6div','communicationLog','','fileuploadLog6ViewAndRemoveBtn',3)">
+                                        <input type="file" id="fileuploadLog7" class="upload-input form-control"
+                                            onchange="cropImageChatSupport(event,'fileuploadLog7','fileuploadLog7Icon','fileuploadLog7div','communicationLog','','fileuploadLog7ViewAndRemoveBtn',3)">
                                         
                                         <label class="upload-label form-control mb-0 btn btn-primary">
                                             <i class="fa fa-upload mr-2"></i>Upload
                                         </label>
                                     </div>
 
-                                    <div class="full" id="fileuploadLog6ViewAndRemoveBtn" style="display: none;">
-                                        <a id="fileuploadLog6View" href="javascript:void(0);"
+                                    <div class="full" id="fileuploadLog7ViewAndRemoveBtn" style="display: none;">
+                                        <a id="fileuploadLog7View" href="javascript:void(0);"
                                             class="btn btn-outline-success mr-2"
-                                            onclick="viewAttachmentChatSupport(this, 'uploadFile','I','fileuploadLog6div')">
+                                            onclick="viewAttachmentChatSupport(this, 'uploadFile','I','fileuploadLog7div')">
                                             <i class="fa fa-eye mr-2"></i>View
                                         </a>
 
-                                        <button type="button" id="fileuploadLog6Remove" class="btn btn-outline-danger"
+                                        <button type="button" id="fileuploadLog7Remove" class="btn btn-outline-danger"
                                             onclick="showWarningMessageShow(
                                                 'Are you sure you want to remove this document?',
-                                                'removeUploadImageChatSupport(this, \\'fileuploadLog6\\', \\'fileuploadLog6Icon\\', \\'communicationLog\\', \\'\\', \\'fileuploadLog6div\\', \\'fileuploadLog6ViewAndRemoveBtn\\',3)'
+                                                'removeUploadImageChatSupport(this, \\'fileuploadLog7\\', \\'fileuploadLog7Icon\\', \\'communicationLog\\', \\'\\', \\'fileuploadLog7div\\', \\'fileuploadLog7ViewAndRemoveBtn\\',3)'
                                             )">
                                             <i class="fa fa-trash mr-2"></i>Remove
                                         </button>
@@ -303,7 +303,7 @@ function communicationLogsContentForUserApplication(userId, useRole){
                             </div>
                             <div class="position-relative form-group">
                                 <label for="title" title="Mandatory field">Comment<sup class="text-danger font-size-md"><b>*</b></sup></label>
-                                <div id="commentEditor"></div>
+                                <div id="commentEditorJA"></div>
                             </div>
                             <div class="position-relative form-group text-right mb-0">
                                 <a href="javascript:void(0)" class="btn btn-sm btn-primary px-4" onclick="saveCommunicationLogJA('userScreeningProfileStatusForm', '${userId}', '${useRole}')">Add</a>

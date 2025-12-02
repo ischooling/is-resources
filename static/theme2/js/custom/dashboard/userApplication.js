@@ -367,10 +367,10 @@ function openCommunicationLogsModalForUserApplication(userId, userRole){
         $("#userApplicationCommunicationLogsModal").remove();
     }
     $("body").append(communicationLogsContentForUserApplication(userId, userRole));
-    initEditor(1, 'commentEditor','Enter comments', false);
-    $("#fileuploadLog6").on("change",function(){
-        var attachment = $("#fileuploadLog6").val().split("\\")[2]
-        $("#fileuploadLog6Span").text(attachment);
+    initEditor(1, 'commentEditorJA','Enter comments', false);
+    $("#fileuploadLog7").on("change",function(){
+        var attachment = $("#fileuploadLog7").val().split("\\")[2]
+        $("#fileuploadLog7Span").text(attachment);
     });
     // callProfileEnrollStatusListTA('teacherScreeningProfileStatusForm','RE-EN','reLeadStatus', false);
     getCommunicationLogDataJA('communicationLogTableJA', userId, userRole);
@@ -388,7 +388,7 @@ function getRequestForCommunicationLogJA(formId, userId, userRole) {
     uploadDocs = [];
 
     // Grab file div
-    var fileDiv = $("#" + formId + " #fileuploadLog6div");
+    var fileDiv = $("#" + formId + " #fileuploadLog7div");
     var isUploaded = fileDiv.attr("uploaded");
     var fileName = fileDiv.attr("fileName");
     var filePath = fileDiv.attr("data-PDFURL"); // base64
@@ -401,7 +401,7 @@ function getRequestForCommunicationLogJA(formId, userId, userRole) {
             docType: docType || "communicationLog",
             fileName: fileName,
             filePath: filePath,
-            imgID: "fileuploadLog6"
+            imgID: "fileuploadLog7"
         });
 
         commonCommentsDTO['uploadFile'] = fileName;
@@ -447,7 +447,7 @@ async function saveCommunicationLogJA(formId, userId, userRole){
     var responseData = await callCommonAjax(ajaxReqDetails);
     if(responseData.status == 1){
         showMessageTheme2(1, responseData.message);
-        resetCommunicationLogForm(formId);
+        resetCommunicationLogFormJA(formId);
         getCommunicationLogDataJA('communicationLogTableJA', userId, userRole);
     }else{
         showMessageTheme2(0, responseData.message)
@@ -506,23 +506,23 @@ async function getCommunicationLogDataJA(elementId, userId, userRole){
     }
 }
 
-function resetCommunicationLogForm(formId){
+function resetCommunicationLogFormJA(formId){
     $("#" + formId)[0].reset();
 
     if (editor1 !== undefined) {
         editor1.setData("");
     }
 
-    const div = $("#fileuploadLog6div");
+    const div = $("#fileuploadLog7div");
 
     div.attr("uploaded", "");
     div.attr("fileName", "");
     div.attr("thumbType", "");
     div.attr("data-PDFURL", "");
     div.show();
-    $("#fileuploadLog6ViewAndRemoveBtn").hide();
-    $("#fileuploadLog6").val("");
-    $("#fileuploadLog6").show();
-    $("#fileuploadLog6Icon").remove();
+    $("#fileuploadLog7ViewAndRemoveBtn").hide();
+    $("#fileuploadLog7").val("");
+    $("#fileuploadLog7").show();
+    $("#fileuploadLog7Icon").remove();
     uploadDocs = [];
 }

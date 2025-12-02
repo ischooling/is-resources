@@ -403,7 +403,7 @@ function openCommunicationLogsModalForTeacherApplication(teacherId, userRole){
         $("#teacherApplicationCommunicationLogsModal").remove();
     }
     $("body").append(communicationLogsContentForTeacherApplication(teacherId, userRole));
-    initEditor(1, 'commentEditor','Enter comments', false);
+    initEditor(1, 'commentEditorTA','Enter comments', false);
     $("#fileuploadLog6").on("change",function(){
         var attachment = $("#fileuploadLog6").val().split("\\")[2]
         $("#fileuploadLog6Span").text(attachment);
@@ -483,7 +483,7 @@ async function saveCommunicationLogTA(formId, teacherId, userRole){
     var responseData = await callCommonAjax(ajaxReqDetails);
     if(responseData.status == 1){
         showMessageTheme2(1, responseData.message);
-        resetCommunicationLogForm(formId);
+        resetCommunicationLogFormTA(formId);
         getCommunicationLogDataTA('communicationLogTableTA', teacherId, userRole);
     }else{
         showMessageTheme2(0, responseData.message)
@@ -542,7 +542,7 @@ async function getCommunicationLogDataTA(elementId,teacherId, userRole){
     }
 }
 
-function resetCommunicationLogForm(formId){
+function resetCommunicationLogFormTA(formId){
     $("#" + formId)[0].reset();
 
     if (editor1 !== undefined) {

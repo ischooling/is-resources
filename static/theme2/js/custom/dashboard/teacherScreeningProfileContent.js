@@ -290,7 +290,7 @@ function communicationLogsContentForTeacherApplication(teacherId, useRole){
                             </div>
                             <div class="position-relative form-group">
                                 <label for="title" title="Mandatory field">Comment<sup class="text-danger font-size-md"><b>*</b></sup></label>
-                                <div id="commentEditor"></div>
+                                <div id="commentEditorTA"></div>
                             </div>
                             <div class="position-relative form-group text-right mb-0">
                                 <a href="javascript:void(0)" class="btn btn-sm btn-primary px-4" onclick="saveCommunicationLogTA('teacherScreeningProfileStatusForm', '${teacherId}', '${useRole}')">Add</a>
