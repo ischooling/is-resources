@@ -51,7 +51,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 
     $("#searchLeadCounselorReportType").on("change", function(){
         if($("#searchLeadCounselorReportType").val()=='Counselor'){
-            $(".changeHeadText").text('Academic Counselor');
+            $(".changeHeadText").text('Academic Expert');
         }else if($("#searchLeadCounselorReportType").val()=='LOGS'){
             $(".changeHeadText").text('User');
         } else{

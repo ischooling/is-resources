@@ -2,7 +2,7 @@
 function getManageSessionTableHeader(role) {
 	var html = ''
 
-	html = '<th>S.No.</th><th>LMS Platform</th><th>Student Name/User Name</th><th>Meeting Vendor User</th><th>Grade</th><th>Student ID</th><th>Enroll Status</th>';
+	html = '<th>S.No.</th><th>LMS Platform</th><th>Learning Program</th><th>Student Name/User Name</th><th>Grade</th><th>Student ID</th><th>Enroll Status</th>';
 	if (SCHOOL_ID == 1) {
 		html += '<th>Default Enrollment Status</th>';
 	}
@@ -14,16 +14,17 @@ function getManageSessionTableBody(result, userId, role) {
 	var html = '';
 	$.each(result, function (k, v) {
 		action = '';
-		var zoomCommand = getZoomCommandContent('ZOOM', v.aggrigatorStatus, v.aggregatorId, v.userId, v.userKey, v.groupId);
+		// var zoomCommand = getZoomCommandContent('ZOOM', v.aggrigatorStatus, v.aggregatorId, v.userId, v.userKey, v.groupId);
 		// var lensCommand = getZoomCommandContent('LENS', v.lensStatus, v.lensAggregatorId, v.userId, v.lensUserKey, v.lensGroupId);
 		html +=
 			'<tr id="sessionSubjectStudent' + v.studentId + '">'
 			+ '<td>' + v.sno + '</td>'
 			+ '<td>' + v.courseProviderName + '</td>'
+			+ '<td>' + v.learningProgram + '</td>'
 			+ '<td>' + v.studentName + '<br/>' + v.userName + '</td>'
-			+ '<td>'
-			+ zoomCommand
-			+ '</td>'
+			// + '<td>'
+			// + zoomCommand
+			// + '</td>'
 			+ '<td>' + v.gradeName + '</td>'
 			+ '<td>' + v.rollNo + '</td>'
 			+ '<td>' + v.enrollStatus + '</td>';

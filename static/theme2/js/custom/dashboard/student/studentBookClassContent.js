@@ -29,11 +29,13 @@ async function renderBookClassContent(
     data = await getDetailsForStudentBookaClass(
       responseData.details.studentStandardId
     );
-    if (!renderingflag) {
+    if(!renderingflag) {
+      var activeIndex = $(".courseThumb.bg-primary").index(".courseThumb") + 1;
       $("#classesThumbCotentListWrapper").html(classesThumbCotentListNew(data));
       $("#bookClassContentThumbList").html(
         classThumbItemListContent(data.subjectList, moduleId)
       );
+      $("#bookClassContentThumbList .courseThumbWrapper:nth-child("+activeIndex+") .courseThumb").trigger("click");
     } else {
       $("#dashboardContentInHTML").html(
           getBookClassContent(
@@ -43,6 +45,7 @@ async function renderBookClassContent(
             responseData.details.classPlanCount
           )
       );
+      $("#bookClassContentThumbList .courseThumb").first().trigger("click");
      // $("#pageTitle").html(pageTitleContent(data, moduleId, false));
     }
     if ($('[data-toggle="tooltip"]').length > 0) {
@@ -55,6 +58,7 @@ async function renderBookClassContent(
         format: "M dd, yyyy",
         startDate: startDate,
       }).on("change", async function () {
+        var activeIndex = $(".courseThumb.bg-primary").index(".courseThumb") + 1;
         data = await getDetailsForStudentBookaClass(
           responseData.details.studentStandardId
         );
@@ -63,6 +67,8 @@ async function renderBookClassContent(
         $("#bookClassContentThumbList").html(
           classThumbItemListContent(data.subjectList, moduleId)
         );
+        $("#bookClassContentThumbList .courseThumbWrapper:nth-child("+activeIndex+") .courseThumb").trigger("click");
+        
       });
     studentBookClassOnLoad();
   }
@@ -109,46 +115,204 @@ function pageTitleContentForClassError() {
   return html;
 }
 
-function getBookClassContent(
-  data,
-  moduleId,
-  showAcademicYearValidation,
-  classPlanCount
-) {
+function getBookClassContent(data,moduleId,showAcademicYearValidation,classPlanCount) {
+  var firstSubject = data.subjectList[0];
+  console.log(data);
   var html=
     `<div id="bookClassContent" data-moduleId="${moduleId}">
       <div id="pageTitle"></div>
       <div id="classPlanCount" data-classPlanCount="${classPlanCount}"></div>
-      <div class="main-card mb-3 card">
-        <div class="card-body">`;
-          if (showAcademicYearValidation == "Y") {
-            html += `<h4 class="my-3 font-weight-semi-bold text-center text-primary">Your academic year has not started yet. You will be able to book your classes once your academic year starts</h4>`;
-          } else {
-            html += `<div id="totalClassSectionWrapper">` + classesThumbsContentNew(data);
-            html +=
-              `</div>` +
-              classesThumbsButtletPointContent(classPlanCount, data.registerType, data.classData) +
-              classThumbItemContent(data.subjectList, moduleId);
-          }
-        html+=`</div>
-      </div>
+      <div class="main-card mb-3">`;
+        if (showAcademicYearValidation == "Y") {
+          html+=
+          `<div class="card">
+            <div class="card-body">
+              <h4 class="my-3 font-weight-semi-bold text-center text-primary">Your academic year has not started yet. You will be able to book your classes once your academic year starts</h4>
+            </div>
+          </div>`;
+        }
+        else {
+          html+=`  
+            <div class="row">
+              <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 mb-3" id="left-course-wrapper">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">`;
+                      if(data.classData.year[0].comp>0){
+                        html+=`<div class="full" id="totalClassSectionWrapper">`
+                          +classesThumbsContentNew(data)
+                        html+=`</div>`;
+                      }
+                        
+                       html+=`<div>`;
+                          html+=`<div>`;
+                              if(data.subjectList[0].name != "All Courses" && data.subjectList.length != 1){
+                                html+=`<h5 class="font-16 text-dark mt-3 mb-2 font-weight-semi-bold">Your Selected Courses</h5>`;
+                              }else if(data.subjectList.length== 1){
+                                html+=`<h5 class="font-16 text-dark mt-3 mb-2 font-weight-semi-bold">Your Selected Course</h5>`;
+                              }else{
+                                html+=`<h5 class="font-16 text-dark mt-3 mb-2 font-weight-semi-bold">Your ${data.subjectList.length} Selected Courses</h5>`;
+                              }
+                          html+=`</div>
+                          <div class="${data.subjectList[0].name != "All Courses" ? '':'mt-3'}">${classThumbItemContent(data.subjectList, moduleId)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="full">`;
+                      html+=classesThumbsButtletPointContent(classPlanCount, data.registerType, data.classData)
+                    html+=`</div>
+                  </div>
+                </div>
+                <div class="full my-3">
+                  <h5 class="m-0 font-weight-semi-bold">Book Classes for this week</h5>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-xl-12 mb-2 p-0">
+                        <h5 class="font-weight-bold">
+                          ${/*
+                            Book a class for the week from <span class="text-primary">`;
+                              var weekStartAndEndDage = getStartAndEndDayOfType("week",new Date(),DISPLAY_DATE_ONLY);
+                              html +=weekStartAndEndDage.startDatetime + " to " + weekStartAndEndDage.endDatetime;
+                            html += `</span>`;  
+                          */''}`;
+                          if(DEPLOYMENT_MODE != "PROD") {
+                            html += 
+                              `<span class="d-inline-block ml-1">
+                                  <input type="text" name="bookingDate" id="bookingDate" placeholder="Select Date" class="form-control w-fit-content" readonly onkeydown="return false"/>
+                              </span>`;
+                          }
+                        html +=`</h5>    
+                      </div>
+                  </div>
+                    <div class="full" id="singleCourseView">`;
+                      html+=getSingleCourseViewContent(firstSubject, moduleId);
+                    html+=`</div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+      html+=`</div>
     </div>`;
   return html;
+}
+
+function getSingleCourseViewContent(data, moduleId){
+    // data = JSON.parse(data); 
+    var html=
+    `<div>
+        <div class="full">
+          <img src="${data.img}" class="rounded-10 border-bottom border-primary h-sm" style="object-fit: cover;" />    
+        </div>
+        <div class="full my-3">
+          <h6 class="font-weight-semi-bold text-dark">${data.name}</h6>
+        </div>
+        <div class="d-flex flex-wrap">
+          <div class="font-14 font-weight-semi-bold mr-2 mb-1">Left: <span class="d-inline-block px-2 p-1 mr-2 rounded bg-warning text-white" style="line-height:16px">${data.left}</span></div>
+          <div class="font-14 font-weight-semi-bold mr-2 mb-1">Missed by You: <span class="d-inline-block px-2 p-1 mr-2 rounded bg-dark text-white" style="line-height:16px">${data.missedByYou}</span></div>
+          <div class="font-14 font-weight-semi-bold mr-2 mb-1">Missed by Teacher: <span class="d-inline-block px-2 p-1 mr-2 rounded bg-pink text-white" style="line-height:16px">${data.missedByTeacher}</span></div>
+          <div class="font-14 font-weight-semi-bold mr-2 mb-1">Rescheduled: <span class="d-inline-block px-2 p-1 mr-2 rounded bg-orange text-white" style="line-height:16px">${data.rescheduled}</span></div>
+          <div class="font-14 font-weight-semi-bold mr-2 mb-1">Completed: <span class="d-inline-block px-2 p-1 mr-2 rounded bg-alternate text-white" style="line-height:16px">${data.completed}</span></div>
+        </div>
+        <div class="full my-3">
+          <a href="javascript:void(0)" onclick="bookedCalssCotentFun(\'${data.subjectId}\',\'${moduleId}\',\'${data.studentStandardId}\',\'\', ${data.teacherName != "" ? true : false}, ${data.weekLeftClass},${data.assignedTeacherCount});" class="btn btn-primary flex-grow-1 mr-1">Booked Classes</a>`;
+            if(data.subjectId != 0) {
+              html += `<a href="javascript:void(0)" onclick="bookingSlotModalNew('${data.subjectId}','${moduleId}','${data.studentStandardId}', ${data.teacherName != "" ? true : false},${data.weekLeftClass},${data.assignedTeacherCount});"  class="btn flex-grow-1 ${data.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"}" ${data.teacherName != ""? 'data-toggle="tooltip" title="" data-original-title="' +(data.weekLeftClass < 1? "You have booked all your classes for this week": data.assignedTeacherCount == 1? "Book a class with " + data.teacherName + "": "Book a class") +'"': ""}>Book a Class (${data.weekLeftClass})</a>`;
+            } else {
+              html += `<a href="javascript:void(0)" onclick="bookingSlotModalForElementry('${data.subjectId}','${moduleId}','${data.studentStandardId}', ${data.teacherName != "" ? true : false },${data.weekLeftClass},${data.assignedTeacherCount});"  class="btn flex-grow-1 ${data.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"}" ${data.teacherName != "" ? 'data-toggle="tooltip" title="" data-original-title="' + (data.weekLeftClass < 1 ? "You have booked all your classes for this week" : data.assignedTeacherCount == 1 ? "Book a class with " + data.teacherName + "" : "Book a class") + '"': ""}>Book a Class (${data.weekLeftClass})</a>`;
+            }
+        html+=`</div>
+    </div>
+    ${/*
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
+          <div class="d-flex flex-column h-100 border border-primary rounded-10">
+            <div class="full course-img-wrapper">
+                <img src="${v.img}" class="rounded-top-left-10 rounded-top-right-10 border-bottom border-primary h-sm" style="object-fit: cover;" />    
+            </div>
+            <div class="w-100 d-flex flex-column justify-content-between h-100 course-detials-wrapper p-2">
+              <div class="full mt-1">
+                  <h6 class="font-weight-semi-bold text-dark">${v.name}</h6>
+              </div>
+              <div class="full">
+                <div class="d-flex flex-wrap course-detials justify-content-center mb-3">
+                    <span class="d-inline-flex px-2 border border-primary text-primary rounded bg-light-primary flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Total</div>
+                        <div class="font-weight-semi-bold font-10">${v.total}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-success text-success rounded bg-light-success flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Booked</div>
+                        <div class="font-weight-semi-bold font-10">${v.booked}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-warning text-warning rounded bg-light-warning flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Left</div>
+                        <div class="font-weight-semi-bold font-10">${v.left}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-danger text-danger rounded bg-light-danger flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Expired</div>
+                        <div class="font-weight-semi-bold font-10">${v.expired}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-dark text-dark rounded bg-light flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Missed by You</div>
+                        <div class="font-weight-semi-bold font-10">${v.missedByYou}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-orange text-orange rounded bg-light-orange flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Rescheduled</div>
+                        <div class="font-weight-semi-bold font-10">${v.rescheduled}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-alternate text-alternate rounded bg-light-alternate flex-column text-center  mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Completed</div>
+                        <div class="font-weight-semi-bold font-10">${v.completed}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-pink text-pink rounded bg-light-pink flex-column text-center mb-1">
+                        <div class="font-weight-semi-bold font-10">Classes Missed by Teacher</div>
+                        <div class="font-weight-semi-bold font-10">${v.missedByTeacher}</div>
+                    </span>
+                </div>  
+                <div class="d-flex flex-wrap" style="gap:6px">
+                    <a href="javascript:void(0)" onclick="bookedCalssCotentFun(\'${v.subjectId}\',\'${moduleId}\',\'${v.studentStandardId}\',\'\', ${v.teacherName != "" ? true : false}, ${v.weekLeftClass},${v.assignedTeacherCount});" class="btn btn-primary flex-grow-1">Booked Classes</a>`;
+                    if(v.subjectId != 0) {
+                      html += `<a href="javascript:void(0)" onclick="bookingSlotModalNew('${v.subjectId}','${moduleId}','${v.studentStandardId}', ${v.teacherName != "" ? true : false},${v.weekLeftClass},${v.assignedTeacherCount});"  class="btn flex-grow-1 ${v.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"}" ${v.teacherName != ""? 'data-toggle="tooltip" title="" data-original-title="' +(v.weekLeftClass < 1? "You have booked all your classes for this week": v.assignedTeacherCount == 1? "Book a class with " + v.teacherName + "": "Book a class") +'"': ""}>Book a Class (${v.weekLeftClass})</a>`;
+                    } else {
+                      html += `<a href="javascript:void(0)" onclick="bookingSlotModalForElementry('${v.subjectId}','${moduleId}','${v.studentStandardId}', ${v.teacherName != "" ? true : false },${v.weekLeftClass},${v.assignedTeacherCount});"  class="btn flex-grow-1 ${v.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"}" ${v.teacherName != "" ? 'data-toggle="tooltip" title="" data-original-title="' + (v.weekLeftClass < 1 ? "You have booked all your classes for this week" : v.assignedTeacherCount == 1 ? "Book a class with " + v.teacherName + "" : "Book a class") + '"': ""}>Book a Class (${v.weekLeftClass})</a>`;
+                    }
+                html += `</div>  
+              </div>  
+            </div>
+          </div>
+      </div>  
+      */''}`;
+    return html;
 }
 
 function classesThumbsContentNew(data) {
   var classYearCount = data.classData.year[0];
   var classWeekCount = data.classData.week[0];
-  var html =
-    `<div class="d-flex flex-md-row flex-column justify-content-center align-items-center text-center">`;
+  var html=
+    `<div class="bg-primary rounded-10 p-3 text-white text-center">
+      <h5 class="font-18">Your Complimentry Classes</h5>`;
       if(classYearCount.comp>0){
-        html+=`<p class="bg-primary text-white p-2 col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 rounded mr-md-3 mr-0">You have ${classYearCount.comp} complimentary classes for the 42 weeks</p>`;
+        html+=
+        `<div class="d-flex flex-wrap align-items-center justify-content-between">
+          <span>For 42 weeks</span>
+          <span class="font-22">${classYearCount.comp}</span>
+        </div>`;
       }
-       if(classWeekCount.comp>0){
-        html+=`<p class="bg-primary text-white p-2 col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 rounded">You have ${classWeekCount.comp} complimentary classes per week</p>`;
-       }
-    html+=`</div>
-    <div id="classesThumbCotentListWrapper">` + classesThumbCotentListNew(data);
+      if(classWeekCount.comp>0){
+        html+=
+        `<div class="d-flex flex-wrap align-items-center justify-content-between">
+          <span>per week</span>
+          <span class="font-22">${classWeekCount.comp}</span>
+        </div>`;
+      }
     html+=`</div>`;
   return html;
 }
@@ -363,13 +527,33 @@ function classesThumbCotentList(data) {
 function classesThumbsButtletPointContent(classPlanCount, registerType, classData) {
   var classWeekCount = classData.week[0];
   var html=
-    `<h5 class="font-weight-bold mb-0 mt-3">Class Booking Instructions</h5>
-    <div class="d-flex flex-wrap bg-light rounded-10 px-2 pt-2 pb-1 mt-3 mb-4">
-      <span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Week Structure: Sunday to Saturday.</p></span>`;
+    `<h5 class="font-weight-semi-bold mb-0">
+      <i class="fa fa-info-circle mr-1"></i>
+      Class Booking Instructions
+    </h5>
+    <div class="mt-2">
+      <p class="m-0 mb-2"><span class="d-inline-block px-2 p-1 mr-2 rounded bg-light text-dark" style="line-height:16px">1</span>Weekly Class Structure: Monday to Friday</p>
+      <p class="m-0 mb-2"><span class="d-inline-block px-2 p-1 mr-2 rounded bg-light text-dark" style="line-height:16px">2</span>You can book `;
       if(classWeekCount.comp>0){
-        html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Free Classes: Available only from Monday to Friday.</p></span>`;
+        html += classWeekCount.comp;
+      }  else {
+        html += classWeekCount.extra;
       }
-      html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Booking & Counting: Classes are booked and counted on a weekly basis.</p></span>`;
+      if(classPlanCount>0){
+        html +=` complimentary`; 
+      }
+      html +=` classes in a week.</p>`;
+      if(classPlanCount>0){
+        html +=` <p class="m-0 mb-0"><span class="d-inline-block px-2 p-1 mr-2 rounded bg-light text-dark" style="line-height:16px">3</span>Unbooked complimentary classes will expire at the end of week.</p>`;
+      }
+    html+=`</div>
+    ${/*<div class="d-flex flex-wrap bg-light rounded-10 px-2 pt-2 pb-1 mt-3 mb-4">
+        <span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Week Structure: Sunday to Saturday.</p></span>`;
+        if(classWeekCount.comp>0){
+          html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Free Classes: Available only from Monday to Friday.</p></span>`;
+        }
+        html+=
+        `<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Booking & Counting: Classes are booked and counted on a weekly basis.</p></span>`;
         if (registerType == "ONE_TO_ONE" || registerType == "SSP") {
           html += `<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Free Class Limit: You can book ${
             classPlanCount == "1" ? "one" : "three"
@@ -377,43 +561,45 @@ function classesThumbsButtletPointContent(classPlanCount, registerType, classDat
             classPlanCount == "1" ? "class" : "classes"
           } per week ${classPlanCount == "3" || registerType == "SSP" ? "" : "per course."}</p></span>`;
         }
-  html += `<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Maximum Classes: Up to ` ;
-  if(classWeekCount.comp>0){
-    html += classWeekCount.comp;
-  }else{
-    html += classWeekCount.extra;
-  }
-  html+=` classes can be booked per week.</p></span>`;
-  html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Your classes will begin within 7 days of your system training date.</p></span>`;
-     html+=`</div>`;
+        html += 
+        `<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> 
+          <p class="m-0 pl-1">Maximum Classes: Up to ` ;
+            if(classWeekCount.comp>0){
+              html += classWeekCount.comp;
+            }else{
+              html += classWeekCount.extra;
+            }
+          html+=` classes can be booked per week.</p>
+        </span>`;
+        html+=`<span class="p-1 px-2 d-inline-flex align-items-center font-weight-semi-bold bg-white rounded-15 mr-3 mb-2"><label class="p-1 d-inline-block bg-primary rounded-circle m-0"></label> <p class="m-0 pl-1">Your classes will begin within 7 days of your system training date.</p></span>`;
+      html+=`</div> */''}`;
   return html;
 }
 
 
 function classThumbItemContent(subjectList, moduleId) {
-  var html = `<div class="row">
-            <div class="col-xl-12">
-                <h5 class="font-weight-bold">Book a class for the week from 
+  var html = 
+        `${/*
+            <div class="row">
+              <div class="col-xl-12">
+                  <h5 class="font-weight-bold">Book a class for the week from 
                     <span class="text-primary">`;
-  var weekStartAndEndDage = getStartAndEndDayOfType(
-    "week",
-    new Date(),
-    DISPLAY_DATE_ONLY
-  );
-  html +=
-    weekStartAndEndDage.startDatetime + " to " + weekStartAndEndDage.endDatetime;
-  html += `</span>`;
-  if (DEPLOYMENT_MODE != "PROD") {
-    html += `<span class="d-inline-block ml-1">
-                <input type="text" name="bookingDate" id="bookingDate" class="form-control w-fit-content"/>
-            </span>`;
-  }
-  html +=
-    `</h5>    
-            </div>
-        </div>
-        <div class="row" id="bookClassContentThumbList">` +
-    classThumbItemListContent(subjectList, moduleId);
+                      var weekStartAndEndDage = getStartAndEndDayOfType("week",new Date(),DISPLAY_DATE_ONLY);
+                      html +=weekStartAndEndDage.startDatetime + " to " + weekStartAndEndDage.endDatetime;
+                    html += `</span>`;
+                    if(DEPLOYMENT_MODE != "PROD") {
+                      html += 
+                        `<span class="d-inline-block ml-1">
+                            <input type="text" name="bookingDate" id="bookingDate" class="form-control w-fit-content"/>
+                        </span>`;
+                    }
+                    html +=`</h5>    
+              </div>
+          </div>
+          */''}`;
+        
+        html+=`<div class="row" id="bookClassContentThumbList">` 
+        +classThumbItemListContent(subjectList, moduleId);
   html += `</div>`;
   return html;
 }
@@ -421,124 +607,76 @@ function classThumbItemContent(subjectList, moduleId) {
 function classThumbItemListContent(subjectList, moduleId) {
   var html = ``;
   $.each(subjectList, function (i, v) {
-    html += `<div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="d-flex flex-column h-100 border border-primary rounded-10">
-                <div class="full course-img-wrapper">
-                    <img src="${
-                      v.img
-                    }" class="rounded-top-left-10 rounded-top-right-10 border-bottom border-primary h-sm" style="object-fit: cover;" />    
-                </div>
-                <div class="w-100 d-flex flex-column justify-content-between h-100 course-detials-wrapper p-2">
-                    <div class="full mt-1">
-                        <h6 class="font-weight-semi-bold text-dark">${
-                          v.name
-                        }</h6>
-                    </div>
-                    <div class="full">
-                        <div class="d-flex flex-wrap course-detials justify-content-center mb-3">
-                            <span class="d-inline-flex px-2 border border-primary text-primary rounded bg-light-primary flex-column text-center mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Total</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.total
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-success text-success rounded bg-light-success flex-column text-center mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Booked</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.booked
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-warning text-warning rounded bg-light-warning flex-column text-center mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Left</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.left
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-danger text-danger rounded bg-light-danger flex-column text-center mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Expired</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.expired
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-dark text-dark rounded bg-light flex-column text-center mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Missed by You</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.missedByYou
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-orange text-orange rounded bg-light-orange flex-column text-center mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Rescheduled</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.rescheduled
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-alternate text-alternate rounded bg-light-alternate flex-column text-center  mr-1 mb-1">
-                                <div class="font-weight-semi-bold font-10">Completed</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.completed
-                                }</div>
-                            </span>
-                            <span class="d-inline-flex px-1 border border-pink text-pink rounded bg-light-pink flex-column text-center mb-1">
-                                <div class="font-weight-semi-bold font-10">Classes Missed by Teacher</div>
-                                <div class="font-weight-semi-bold font-10">${
-                                  v.missedByTeacher
-                                }</div>
-                            </span>
-                        </div>  
-                        <div class="d-flex flex-wrap" style="gap:6px">
-                            <a href="javascript:void(0)" onclick="bookedCalssCotentFun('${
-                              v.subjectId
-                            }','${moduleId}','${v.studentStandardId}','', ${
-      v.teacherName != "" ? true : false
-    }, ${v.weekLeftClass},${
-      v.assignedTeacherCount
-    });" class="btn btn-primary flex-grow-1">Booked Classes</a>`;
-    if (v.subjectId != 0) {
-      html += `<a href="javascript:void(0)" onclick="bookingSlotModalNew('${
-        v.subjectId
-      }','${moduleId}','${v.studentStandardId}', ${
-        v.teacherName != "" ? true : false
-      },${v.weekLeftClass},${
-        v.assignedTeacherCount
-      });"  class="btn flex-grow-1 ${
-        v.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"
-      }" ${
-        v.teacherName != ""
-          ? 'data-toggle="tooltip" title="" data-original-title="' +
-            (v.weekLeftClass < 1
-              ? "You have booked all your classes for this week"
-              : v.assignedTeacherCount == 1
-              ? "Book a class with " + v.teacherName + ""
-              : "Book a class") +
-            '"'
-          : ""
-      }>Book a Class (${v.weekLeftClass})</a>`;
-    } else {
-      html += `<a href="javascript:void(0)" onclick="bookingSlotModalForElementry('${
-        v.subjectId
-      }','${moduleId}','${v.studentStandardId}', ${
-        v.teacherName != "" ? true : false
-      },${v.weekLeftClass},${
-        v.assignedTeacherCount
-      });"  class="btn flex-grow-1 ${
-        v.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"
-      }" ${
-        v.teacherName != ""
-          ? 'data-toggle="tooltip" title="" data-original-title="' +
-            (v.weekLeftClass < 1
-              ? "You have booked all your classes for this week"
-              : v.assignedTeacherCount == 1
-              ? "Book a class with " + v.teacherName + ""
-              : "Book a class") +
-            '"'
-          : ""
-      }>Book a Class (${v.weekLeftClass})</a>`;
-    }
-    html += `</div>  
-                    </div>  
-                </div>
+    var subjectData = v;
+    html += 
+      `<div class="col-xl-12 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 courseThumbWrapper">
+        <div class="full p-2 rounded border cursor courseThumb ${i==0? 'bg-primary text-white border-primary':'border'}" data-subject='${JSON.stringify(subjectData)}' onclick="viewSingleCourseDetails(this, \'${moduleId}\')">
+          <h6 class="text-center mb-2 font-14 font-weight-semi-bold">${v.name}</h6>
+          <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div class="font-12">Total: <span class=" total-num text-primary font-weight-semi-bold">${v.total}</span></div>
+            <div class="font-12">Booked: <span class=" booked-num text-success font-weight-semi-bold">${v.booked}</span></div>
+            <div class="font-12">Expired: <span class=" expired-num text-danger font-weight-semi-bold">${v.expired}</span></div>
+          </div>
+        </div>
+      </div>
+      ${/*
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
+          <div class="d-flex flex-column h-100 border border-primary rounded-10">
+            <div class="full course-img-wrapper">
+                <img src="${v.img}" class="rounded-top-left-10 rounded-top-right-10 border-bottom border-primary h-sm" style="object-fit: cover;" />    
             </div>
-        </div> `;
+            <div class="w-100 d-flex flex-column justify-content-between h-100 course-detials-wrapper p-2">
+              <div class="full mt-1">
+                  <h6 class="font-weight-semi-bold text-dark">${v.name}</h6>
+              </div>
+              <div class="full">
+                <div class="d-flex flex-wrap course-detials justify-content-center mb-3">
+                    <span class="d-inline-flex px-2 border border-primary text-primary rounded bg-light-primary flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Total</div>
+                        <div class="font-weight-semi-bold font-10">${v.total}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-success text-success rounded bg-light-success flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Booked</div>
+                        <div class="font-weight-semi-bold font-10">${v.booked}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-warning text-warning rounded bg-light-warning flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Left</div>
+                        <div class="font-weight-semi-bold font-10">${v.left}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-danger text-danger rounded bg-light-danger flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Expired</div>
+                        <div class="font-weight-semi-bold font-10">${v.expired}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-dark text-dark rounded bg-light flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Missed by You</div>
+                        <div class="font-weight-semi-bold font-10">${v.missedByYou}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-orange text-orange rounded bg-light-orange flex-column text-center mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Rescheduled</div>
+                        <div class="font-weight-semi-bold font-10">${v.rescheduled}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-alternate text-alternate rounded bg-light-alternate flex-column text-center  mr-1 mb-1">
+                        <div class="font-weight-semi-bold font-10">Completed</div>
+                        <div class="font-weight-semi-bold font-10">${v.completed}</div>
+                    </span>
+                    <span class="d-inline-flex px-1 border border-pink text-pink rounded bg-light-pink flex-column text-center mb-1">
+                        <div class="font-weight-semi-bold font-10">Classes Missed by Teacher</div>
+                        <div class="font-weight-semi-bold font-10">${v.missedByTeacher}</div>
+                    </span>
+                </div>  
+                <div class="d-flex flex-wrap" style="gap:6px">
+                    <a href="javascript:void(0)" onclick="bookedCalssCotentFun(\'${v.subjectId}\',\'${moduleId}\',\'${v.studentStandardId}\',\'\', ${v.teacherName != "" ? true : false}, ${v.weekLeftClass},${v.assignedTeacherCount});" class="btn btn-primary flex-grow-1">Booked Classes</a>`;
+                    if(v.subjectId != 0) {
+                      html += `<a href="javascript:void(0)" onclick="bookingSlotModalNew('${v.subjectId}','${moduleId}','${v.studentStandardId}', ${v.teacherName != "" ? true : false},${v.weekLeftClass},${v.assignedTeacherCount});"  class="btn flex-grow-1 ${v.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"}" ${v.teacherName != ""? 'data-toggle="tooltip" title="" data-original-title="' +(v.weekLeftClass < 1? "You have booked all your classes for this week": v.assignedTeacherCount == 1? "Book a class with " + v.teacherName + "": "Book a class") +'"': ""}>Book a Class (${v.weekLeftClass})</a>`;
+                    } else {
+                      html += `<a href="javascript:void(0)" onclick="bookingSlotModalForElementry('${v.subjectId}','${moduleId}','${v.studentStandardId}', ${v.teacherName != "" ? true : false },${v.weekLeftClass},${v.assignedTeacherCount});"  class="btn flex-grow-1 ${v.weekLeftClass < 1 ? "btn-outline-dark" : "btn-outline-primary"}" ${v.teacherName != "" ? 'data-toggle="tooltip" title="" data-original-title="' + (v.weekLeftClass < 1 ? "You have booked all your classes for this week" : v.assignedTeacherCount == 1 ? "Book a class with " + v.teacherName + "" : "Book a class") + '"': ""}>Book a Class (${v.weekLeftClass})</a>`;
+                    }
+                html += `</div>  
+              </div>  
+            </div>
+          </div>
+      </div>  
+      */''} `;
   });
   return html;
 }
@@ -796,8 +934,8 @@ function weeklyBookClassConfirmationModal(
                         <div class="d-flex flex-wrap my-1">
                             <span class="font-weight-semi-bold font-size-md mr-3 text-dark" style="min-width:100px">Date & time:</span>
                             <span class="font-12">${classStartTime}` +
-    " - " +
-    `${classEndTime}</span>
+                              " - " +
+                            `${classEndTime}</span>
                         </div>
                         <div class="d-flex flex-wrap my-1">
                             <span class="font-weight-semi-bold font-size-md mr-3 text-dark" style="min-width:100px">Course Name:</span>

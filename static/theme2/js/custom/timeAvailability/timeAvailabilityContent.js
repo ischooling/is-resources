@@ -359,7 +359,7 @@ function getCounselorMeetingDetailsCotent(data){
 					else{
 						html += 
 						'<div class="full hide-on-second-step rounded border p-3 mt-2">'
-							+'<div class="mb-2 font-weight-bold text-primary" style="font-size:24px">Meet our Academic Counselor to know more:</div>';
+							+'<div class="mb-2 font-weight-bold text-primary" style="font-size:24px">Meet our Academic Expert to know more:</div>';
 							// if(data.forAllCounselor == 'true'){
 							// 	html += '<div class="mb-2 font-weight-bold">During these '+data.timeDuration+' minutes, Counselor will cover the below-mentioned points:</div>';
 							// }else{

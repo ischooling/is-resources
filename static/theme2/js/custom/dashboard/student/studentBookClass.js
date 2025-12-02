@@ -498,15 +498,16 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
       if (data["status"] == "0" || data["status"] == "2") {
         showMessageTheme2(0, data["message"], "", false);
       } else {
+         showMessageTheme2(1, data["message"], "", false);
         $("#weeklyBookClassConfirmationModal").modal("hide");
-        renderBookClassContent(
+        setTimeout(function () { renderBookClassContent(
           `${data.studentStandardId}`,
           `${roleModuleId}`,
           $("#classPlanCount").attr("data-classPlanCount"),
           false,
           `${roleModuleId}`
-        );
-        showMessageTheme2(1, data["message"], "", false);
+        ); }, 1000);
+        
       }
       return false;
     },
@@ -627,5 +628,24 @@ function getClassTypeColor(index) {
     console.error("Invalid Number");
   } else {
     return color[index];
+  }
+}
+
+
+function viewSingleCourseDetails(src,moduleId){
+  var sujectData = $(src).attr('data-subject'); 
+  sujectData = JSON.parse(sujectData)
+  $("#singleCourseView").html(getSingleCourseViewContent(sujectData,moduleId));
+  $(src).addClass("bg-primary text-white");
+  $(src).parent().siblings().children().removeClass("bg-primary text-white border-primary");
+  $(src).find(".total-num").removeClass('text-primary');
+  $(src).find(".booked-num").removeClass('text-success');
+  $(src).find(".expired-num").removeClass('text-danger');
+  $(src).parent().siblings().children().find(".total-num").addClass("text-primary");
+  $(src).parent().siblings().children().find(".booked-num").addClass("text-success");
+  $(src).parent().siblings().children().find(".expired-num").addClass("text-danger");
+  var windowWidth = $(window).width();
+  if(windowWidth < 1200){
+    $("html, body").animate({ scrollTop: $("#left-course-wrapper").height()+30  }, "slow");
   }
 }

@@ -1044,6 +1044,22 @@ function getStudentDetails(formId,moduleId) {
 						$("#"+formId+" #meetingVendor").prop('disabled',false);
 					}
 				} 	
+				if(formId=='recurringClass' && $("#"+formId+" #meetingType").val()== "ODM"){
+					$("#boughtWeekDropdownWrapper").show();
+					var dropdown=`<option value="">Select Week</option>`;
+					$.each(data.userData.weekList, function(i,v){
+						dropdown+=`<option value="${v}">${v}</option>`;
+					});
+					$("#"+formId+" #boughtWeekDropdownWrapper #boughtWeek").html(dropdown);
+					if ($.fn.select2 && $("#"+formId+" #boughtWeekDropdownWrapper #boughtWeek").hasClass('select2-hidden-accessible')) {
+						$("#"+formId+" #boughtWeekDropdownWrapper #boughtWeek").select2('destroy');
+					}
+					$("#"+formId+" #boughtWeekDropdownWrapper #boughtWeek").select2({
+						theme:"bootstrap4"
+					});
+				}else{
+					$("#boughtWeekDropdownWrapper").hide();
+				}
 				callSubjectNameByStudent(formId, userData['userId']);
 				if((data.userData.standardId >= 11 && data.userData.standardId <= 17) || (data.userData.standardId == 19) || (data.userData.registrationType == "SSP")){
 					bookedCalssCotentFun(0, userData['studentStandardId'])

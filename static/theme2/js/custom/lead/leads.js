@@ -8368,7 +8368,7 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
     html+='<thead>';
 	html+='<tr>';
 	html+='<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>';
-	html+='<th class="text-center bg-primary text-white">Academic Counselor</th>';
+	html+='<th class="text-center bg-primary text-white">Academic Expert</th>';
 	html+='<th class="bg-primary text-white">Total    U | D </th>';
 	html+='<th class="bg-primary text-white">Total    FB | IG </th>';
 	html+='<th class="text-center bg-primary text-white">Unattended</th>';

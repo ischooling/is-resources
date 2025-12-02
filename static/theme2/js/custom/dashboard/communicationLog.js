@@ -9,7 +9,9 @@ function communicationLog(){
 			$("#fileuploadLog6Span").text(attachment);
 		});
         loadContentFlag=1;
-		callProfileEnrollStatusList('communicationLogForm','RE-EN','reLeadStatus', false);
+		if(USER_ROLE == "STUDENT"){
+			callProfileEnrollStatusList('communicationLogForm','RE-EN','reLeadStatus', false);
+		}
 		// $('#communicationLogForm #reLeadStatus').select2({
 		// 	theme:'bootstrap4',
 		// })
@@ -74,7 +76,9 @@ function getRequestForCommunicationLog(formId){
 		commonCommentsDTO['entityName']='STUDENT';
 	}
 	commonCommentsDTO['title']=$("#"+formId+" #logTitle").val();
-	commonCommentsDTO['status']=$("#"+formId+" #reLeadStatus").val();
+	if(USER_ROLE == "STUDENT"){
+		commonCommentsDTO['status']=$("#"+formId+" #reLeadStatus").val();
+	}
 	
 	if($("#" + formId + " #fileuploadLog6Span").text()=='No file chosen...'){
 		commonCommentsDTO['uploadFile'] = '';

@@ -70,6 +70,11 @@ function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,con
 		meetingSlotDTO['subjectId'] = $("#" + formId + " #subjectIds").val();
 		meetingSlotDTO['meetingVendor'] = $("#" + formId + " #meetingVendor").val();
 		meetingSlotDTO['studentStandardId'] = $("#" + formId + " #studentStandardId").val();
+		meetingSlotDTO['studentStandardId'] = $("#" + formId + " #studentStandardId").val();
+		if( $("#" + formId + " #boughtWeek").val()!=undefined &&  $("#" + formId + " #boughtWeek").val()!=''){
+			meetingSlotDTO['anotherWeekStartDate'] = $("#" + formId + " #boughtWeek").val().split(" - ")[0];
+			meetingSlotDTO['anotherWeekEndDate'] = $("#" + formId + " #boughtWeek").val().split(" - ")[1];
+		}
 	}else{
 		 mType = $('#classroomSessionFilter #meetingType').val();
 		var studentStandardId = $('#classroomSessionFilter #studentName').val();
@@ -90,6 +95,9 @@ function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,con
 	}
 	
 	meetingSlotDTO['meetingType'] = mType;//"STUDENT_DOUBT_SESSION";
+	if($('#'+formId+' #meetingType').val()=="ODM"){
+		meetingSlotDTO['week']=$('#' + formId +' #boughtWeek').val();
+	}
 	var  mDtae= $('#' + formId +' #meetingDate').val();
 	
 	mDtae=changeDateFormat(new Date(mDtae), 'dd-mm-yyyy');

@@ -28,6 +28,14 @@ async function teacherScreeningProfileOnloadFunction(){
     $("#teacherScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#teacherScreeningFilterForm #filterCourses").val("").trigger("change");
     loadTeacherScreeningData();
+    if($("#cropModalChatSuport").length == 1){
+        $("#cropModalChatSuport").remove();
+    }
+    $("body").append(getChatImageCropContentTA());
+    if($("#uploadFile").length == 1){
+        $("#uploadFile").remove();
+    }
+    $("body").append(pdfPreviewTA());
 }
 
 function showFilterTeacherScreening(){
@@ -117,7 +125,12 @@ function bindTeacherScreeningData(responseData) {
                                         </a>
                                     </li>`
                                 }
-                            row+=`</ul>
+                                row+=`<li>
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForTeacherApplication(${teacher.id}, 'USER_SCREENING')">
+                                        <i class="fas fa-comment me-2"></i>&nbsp;Communication Logs
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </td>
                 </tr>`;
@@ -253,7 +266,7 @@ async function updateTeacherScreeningProfile(id){
         }else{
             var assignedToText = $("#assignedToInterview option:selected").text();
             var displayName = assignedToText.split("-")[0].trim();
-            updateTableRowDirectly(id, selectedStatus, displayName);
+            updateTableRowDirectlyTA(id, selectedStatus, displayName);
         }
         showMessageTheme2(1, responseData.message);
         $("#teacherScreeningProfileStatusModal").modal("hide");
@@ -268,9 +281,9 @@ async function viewAssignToListForInterview(){
         let payload = {}
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
         bindAssignTo('teacherScreeningProfileStatusForm', 'assignedToInterview', responseData);
-        $("#assignedToInterviewDiv").show();
+        $("#teacherScreeningProfileStatusForm #assignedToInterviewDiv").show();
     }else{
-        $("#assignedToInterviewDiv").hide();
+        $("#teacherScreeningProfileStatusForm #assignedToInterviewDiv").hide();
         $("#assignedToInterview").val("").trigger("change");
     }
 }
@@ -302,14 +315,14 @@ function bindAssignTo(formId, selectId, responseData) {
     }
 }
 
-function updateTableRowDirectly(teacherId, newStatus, assignedTo) {
+function updateTableRowDirectlyTA(teacherId, newStatus, assignedTo) {
     var row = $('#tr_' + teacherId);
     
     if(row.length) {
         if(newStatus != "Approved for Selection Process"){
-            row.find('td:eq(11)').text(assignedTo || 'N/A');
+            row.find('td:eq(9)').text(assignedTo || 'N/A');
         }
-        row.find('td:eq(12)').text(newStatus || 'N/A');
+        row.find('td:eq(10)').text(newStatus || 'N/A');
         
         var dropdownHtml = `
             <div class="dropdown">
@@ -329,8 +342,12 @@ function updateTableRowDirectly(teacherId, newStatus, assignedTo) {
                         </a>
                     </li>`;
         }
-        
-        dropdownHtml += `</ul>
+        dropdownHtml += `<li>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForTeacherApplication(${teacherId}, 'USER_SCREENING')">
+                            <i class="fas fa-comment me-2"></i>&nbsp;Communication Logs
+                        </a>
+                    </li>
+                </ul>
             </div>`;
         row.find('td:eq(13)').html(dropdownHtml);
     }
@@ -379,4 +396,169 @@ async function urlToBlobUrl(url) {
     var blob = await response.blob();
     customLoader(false);
     return URL.createObjectURL(blob);
+}
+
+function openCommunicationLogsModalForTeacherApplication(teacherId, userRole){
+    if($("#teacherApplicationCommunicationLogsModal").length == 1){
+        $("#teacherApplicationCommunicationLogsModal").remove();
+    }
+    $("body").append(communicationLogsContentForTeacherApplication(teacherId, userRole));
+    initEditor(1, 'commentEditor','Enter comments', false);
+    $("#fileuploadLog6").on("change",function(){
+        var attachment = $("#fileuploadLog6").val().split("\\")[2]
+        $("#fileuploadLog6Span").text(attachment);
+    });
+    // callProfileEnrollStatusListTA('teacherScreeningProfileStatusForm','RE-EN','reLeadStatus', false);
+    getCommunicationLogDataTA('communicationLogTableTA', teacherId, userRole);
+    setTimeout(() => {
+        $("#teacherApplicationCommunicationLogsModal").modal("show");
+    }, 300);
+}
+
+function getRequestForCommunicationLogTA(formId, teacherId, userRole) {
+
+    var commonCommentsRequest = {};
+    var commonCommentsDTO = {};
+
+    // RESET uploadDocs array first (har request fresh)
+    uploadDocs = [];
+
+    // Grab file div
+    var fileDiv = $("#" + formId + " #fileuploadLog6div");
+    var isUploaded = fileDiv.attr("uploaded");
+    var fileName = fileDiv.attr("fileName");
+    var filePath = fileDiv.attr("data-PDFURL"); // base64
+    var docType = fileDiv.attr("docType");
+
+    // 🟢 If uploaded push into uploadDocs in EXACT format you want
+    if (isUploaded == "Y" && fileName && filePath) {
+
+        uploadDocs.push({
+            docType: docType || "communicationLog",
+            fileName: fileName,
+            filePath: filePath,
+            imgID: "fileuploadLog6"
+        });
+
+        commonCommentsDTO['uploadFile'] = fileName;
+
+    } else {
+        commonCommentsDTO['uploadFile'] = "";
+    }
+    commonCommentsDTO['entityId'] = teacherId;
+    commonCommentsDTO['entityName'] = userRole;
+    commonCommentsDTO['title'] = $("#" + formId + " #logTitle").val();
+    // commonCommentsDTO['status'] = $("#" + formId + " #reLeadStatus").val();
+
+    if (editor1 != undefined) {
+        commonCommentsDTO['comments'] = escapeCharacters(editor1.getData());
+    }
+
+    commonCommentsDTO['documentUploads'] = uploadDocs;
+
+    commonCommentsRequest['commonCommentsDTO'] = commonCommentsDTO;
+
+    return commonCommentsRequest;
+}
+
+async function saveCommunicationLogTA(formId, teacherId, userRole){
+    if(editor1.getData()==null || editor1.getData()=='' || editor1.getData()=='undefined'){
+        showMessageTheme2(0,"Comments mandatory",'',true);
+		return false;
+    }
+	if(editor1.getData().length>2999){
+		showMessageTheme2(0,"Comments can not be more than 3000 characters.",'',true);
+		return false;
+	}
+    var payload = getRequestForCommunicationLogTA(formId, teacherId, userRole);
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + UNIQUEUUID + "/api/v1/dashboard/save-user-communication-log",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        showMessageTheme2(1, responseData.message);
+        resetCommunicationLogForm(formId);
+        getCommunicationLogDataTA('communicationLogTableTA', teacherId, userRole);
+    }else{
+        showMessageTheme2(0, responseData.message)
+    }
+}
+
+function callProfileEnrollStatusListTA(formId, value, elementId, keyStatus) {
+	hideMessageTheme2('');
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-STATUS-LIST', value)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(true, data['message']);
+			} else {
+				//console.log(data['mastersData']['data']);
+				result = data['mastersData']['data'];
+				dropdown = $("#"+formId+" #"+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="0">Select Status</option>');
+				$.each(result, function (k, v) {
+					if(keyStatus){
+						dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
+					}else{
+						dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
+					}
+				});
+			}
+		}
+	});
+}
+
+async function getCommunicationLogDataTA(elementId,teacherId, userRole){
+    var payload = {}
+    payload["userId"] = teacherId;
+    payload["role"] = userRole;
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + UNIQUEUUID + "/api/v1/dashboard/get-user-communication-log",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.statusResponse.statusCode == 1){
+        $('#'+elementId+' > tbody').html(getAddCommunicationLogTablebodyTA(responseData));
+    }else{
+        $('#'+elementId+' > tbody').html(`<tr><td colspan="6" class="text-center">No data found</td></tr>`)
+    }
+}
+
+function resetCommunicationLogForm(formId){
+    $("#" + formId)[0].reset();
+
+    if (editor1 !== undefined) {
+        editor1.setData("");
+    }
+
+    const div = $("#fileuploadLog6div");
+
+    div.attr("uploaded", "");
+    div.attr("fileName", "");
+    div.attr("thumbType", "");
+    div.attr("data-PDFURL", "");
+    div.show();
+    $("#fileuploadLog6ViewAndRemoveBtn").hide();
+    $("#fileuploadLog6").val("");
+    $("#fileuploadLog6").show();
+    $("#fileuploadLog6Icon").remove();
+    uploadDocs = [];
 }

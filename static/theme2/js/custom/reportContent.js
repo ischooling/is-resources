@@ -205,7 +205,7 @@ function getReportsTab(objRight){
 				<thead id="listCounselorTheader">
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Counselor</span> Name</th>
+						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Expert</span> Name</th>
 						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white">Unattended</th>
@@ -237,7 +237,7 @@ function getReportsTab(objRight){
 				<thead id="listCounselorTheader_log" class="hidden" >
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Counselor</span> Name</th>
+						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Expert</span> Name</th>
 						<th class="text-center bg-primary text-white">Call | Call Hippo</th>
 						<th class="text-center bg-primary text-white">Wati</th>
 						<th class="text-center bg-primary text-white">Whatsapp</th>

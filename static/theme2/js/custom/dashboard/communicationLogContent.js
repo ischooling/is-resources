@@ -20,14 +20,16 @@ function getAddCommunicationLogForm(){
 						+'<label for="title" class="">Title</label>'
 						+'<input name="logTitle" id="logTitle" placeholder="Title" type="text" value="" class="form-control">'
 					+'</div>'
-				+'</div>'
-				+'<div class="col-lg-4 col-md-6 col-sm-12 col-12">'
-					+'<div class="position-relative form-group">'
-						+'<label for="title" class="">Status</label>'
-						+'<select id="reLeadStatus" class="form-control"></select>'
-					+'</div>'
-				+'</div>'
-				+'<div class="col-lg-4 col-md-6 col-sm-12 col-12">'
+				+'</div>';
+				if(USER_ROLE == "STUDENT"){
+					html+='<div class="col-lg-4 col-md-6 col-sm-12 col-12">'
+						+'<div class="position-relative form-group">'
+							+'<label for="title" class="">Status</label>'
+							+'<select id="reLeadStatus" class="form-control"></select>'
+						+'</div>'
+					+'</div>';
+				}
+				html+='<div class="col-lg-4 col-md-6 col-sm-12 col-12">'
 					+'<div class="position-relative form-group">'
 						+'<label for="title" class="">Attachment&nbsp;(if any)</label>'
 						+'<div class="file-upload">'
@@ -56,9 +58,11 @@ function getAddCommunicationLogTableHeader(){
 	'<thead>'
 		+'<tr>'	
 			+'<td>S.No.</td>'
-			+'<td>Title</td>'
-			+'<td>Status</td>'
-			+'<td>Comments</td>'
+			+'<td>Title</td>';
+			if(USER_ROLE == "STUDENT"){
+				html+='<td>Status</td>';
+			}
+			html+='<td>Comments</td>'
 			+'<td>Attachment</td>'
 			+'<td>Added by/Added At</td>'
 		+'</tr>'
@@ -71,9 +75,11 @@ function getAddCommunicationLogTablebody(result){
 			html+=
 				'<tr id="commLog'+v.commentId+'">'
 					+'<td>'+(k+1)+'</td>'
-					+'<td>'+v.title+'</td>'
-					+'<td>'+v.status+'</td>'
-					+'<td>'+v.comments+'</td>'
+					+'<td>'+v.title+'</td>';
+					if(USER_ROLE == "STUDENT"){
+						html+='<td>'+v.status+'</td>';
+					}
+					html+='<td>'+v.comments+'</td>'
 					+'<td class="text-center">';
 						if(v.uploadFile != '' && v.uploadFile != 'No file chosen...'){
 							html+='<a target="_blank" href="'+FILE_UPLOAD_PATH+''+v.uploadFile+'" ><i class="fa fa-eye"></i></a>';

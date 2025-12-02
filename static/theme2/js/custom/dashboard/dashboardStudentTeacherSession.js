@@ -3679,10 +3679,11 @@ function callTeacherClassesToUpdateStatus() {
 					//showMessageTheme2(2, "",'',true);
 				}
 			} else {
+				debugger;
 				if($("#teacherMeetingStatus").length<1){
 					$("body").append(meetingStatusUpdateModal(data.details))
 				}
-				if(data.details.classDetails != '' && data.details.showUpdateClassPopupStatus){
+				if(data.details.classCount >0 && data.details.showUpdateClassPopupStatus){
 					$("#teacherMeetingStatus").modal("show");
 				}
 			}
