@@ -1439,14 +1439,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                 +'<tr>'
 									+'<th class="border-0 p-1">Added By:</th>'
 									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')+'</td>'
-								+'</tr>'
-                if (leads.callbackConvertedDate!=="N/A"){
-                  html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Callback</td></tr>';
-                  html += '<tr class="bg-primary p-1 text-white">'
-                    +'<th class="border-0 p-1">Callback Time:</th>'
-                    +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+'('+USER_TIMEZONE+')'+'</td>'
-                  +'</tr>';
-                }
+								+'</tr>';
 								if(leads.leadSupportToName!=''){
 									html+='<tr>'
 										+'<th class="border-0 p-1">Supported By:</th>'

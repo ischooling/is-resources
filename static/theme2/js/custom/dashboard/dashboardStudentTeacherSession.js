@@ -3683,7 +3683,7 @@ function callTeacherClassesToUpdateStatus() {
 				if($("#teacherMeetingStatus").length<1){
 					$("body").append(meetingStatusUpdateModal(data.details))
 				}
-				if(data.details.classCount >0 && data.details.showUpdateClassPopupStatus){
+				if(data.details.classDetails.classCount >0 && data.details.showUpdateClassPopupStatus){
 					$("#teacherMeetingStatus").modal("show");
 				}
 			}
