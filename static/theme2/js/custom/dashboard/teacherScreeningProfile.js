@@ -57,11 +57,27 @@ function bindTeacherScreeningData(responseData) {
                         &nbsp;|&nbsp; 
                         ${teacher.userName} 
                         &nbsp;|&nbsp;
-                        +${teacher.phoneNo || ''} 
-                        ${teacher.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}    
+                        ${
+                            teacher.isWhatsappAvailable == "Y"
+                            ? `<a href="https://wa.me/${(teacher.phoneNo || '').replace(/\\D/g, '')}"
+                                target="_blank"
+                                style="cursor:pointer; color:inherit; text-decoration:none; display:inline-flex; align-items:center;">
+                                    +${teacher.phoneNo || ''}
+                                    <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png"
+                                        width="16"
+                                        height="16"
+                                        alt="WhatsApp"
+                                        style="margin-left:5px;" />
+                            </a>`
+                            : `+${teacher.phoneNo || ''}`
+                        }
                         &nbsp;|&nbsp;
                         ${teacher.email || ''}
-                        ${source ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${source}</p>` : ""}                            
+                        ${
+                            source 
+                            ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${source}</p>`
+                            : ""
+                        }                            
                     </td>
                     <td>${teacher.country} | ${teacher.state} | ${teacher.city}</td>
                     <td>${teacher.lastSalary ? teacher.currency + ' ' + teacher.lastSalary : ''}</td>
@@ -127,7 +143,7 @@ function bindTeacherScreeningData(responseData) {
                                 }
                                 row+=`<li>
                                     <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForTeacherApplication(${teacher.id}, 'USER_SCREENING')">
-                                        <i class="fas fa-comment me-2"></i>&nbsp;Communication Logs
+                                        <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
                                     </a>
                                 </li>
                             </ul>
@@ -344,7 +360,7 @@ function updateTableRowDirectlyTA(teacherId, newStatus, assignedTo) {
         }
         dropdownHtml += `<li>
                         <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForTeacherApplication(${teacherId}, 'USER_SCREENING')">
-                            <i class="fas fa-comment me-2"></i>&nbsp;Communication Logs
+                            <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
                         </a>
                     </li>
                 </ul>

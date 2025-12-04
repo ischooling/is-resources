@@ -58,19 +58,35 @@ function bindUserApplicationData(responseData) {
         responseData.DataArray.forEach(function(user, index) {
             var row = 
                 `<tr id="tr_${user.id}">
-                    <td>${(CURRENT_PAGE_USER_APPLICATION - 1) * pageSize + index + 1}</td>
+                    <td>
+                        ${(CURRENT_PAGE_USER_APPLICATION - 1) * pageSize + index + 1}
+                    </td>
+
                     <td>
                         ${changeDateFormat(new Date(user.createdAt), "MMM-dd-yyyy")}
                         &nbsp;|&nbsp; 
                         ${user.userName} 
                         &nbsp;|&nbsp;
-                        +${user.phoneNo || ''} 
-                        ${user.isWhatsappAvailable == "Y" ? `<span style="margin-left: 5px;"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" /></span>` : ''}    
+                        ${
+                            user.isWhatsappAvailable == "Y"
+                            ? `<a href="https://wa.me/${user.phoneNo}" target="_blank" style="text-decoration:none; color:inherit;">
+                                    +${user.phoneNo}
+                                    <span style="margin-left: 5px;">
+                                        <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" />
+                                    </span>
+                            </a>`
+                            : `+${user.phoneNo || ''}`
+                        }
                         &nbsp;|&nbsp;
                         ${user.email || ''}
+
                         ${
-                        JSON.parse(user.location).by ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${JSON.parse(user.location).by || ''}</p>` : ""
-                        }                              
+                            JSON.parse(user.location).by
+                            ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">
+                                    ${JSON.parse(user.location).by}
+                            </p>`
+                            : ""
+                        }
                     </td>
                     <td>${user.country} | ${user.state} | ${user.city}</td>
                     <td>${user.lastSalary ? user.currency + ' ' + user.lastSalary : ''}</td>
@@ -94,7 +110,13 @@ function bindUserApplicationData(responseData) {
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
-                    <td>${user.assignTo || 'N/A'}</td>
+                    <td>
+                    ${
+                        user.assignTo && user.assignTo.toLowerCase().includes("syeed")
+                        ? `CEO`
+                        : (user.assignTo || "N/A")
+                    }
+                    </td>
                     <td>${user.status || 'N/A'}</td>
                     <td>
                         <div class="dropdown">
@@ -116,7 +138,7 @@ function bindUserApplicationData(responseData) {
                                 }
                                 row+=`<li>
                                     <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING')">
-                                        <i class="fas fa-comment me-2"></i>&nbsp;Communication Logs
+                                        <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
                                     </a>
                                 </li>
                             </ul>

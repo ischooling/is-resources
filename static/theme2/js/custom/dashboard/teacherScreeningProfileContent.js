@@ -233,7 +233,7 @@ function communicationLogsContentForTeacherApplication(teacherId, useRole){
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
-                        <h5 class="modal-title">Communication Logs</h5>
+                        <h5 class="modal-title">Remark Logs</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
                         </button>
@@ -243,7 +243,7 @@ function communicationLogsContentForTeacherApplication(teacherId, useRole){
                             <div class="row">
                                 <div class="col-lg-4 col-md-6 col-sm-12 col-12">
                                     <div class="position-relative form-group">
-                                        <label for="title" class="">Title</label>
+                                        <label for="title" class="">Remark Title</label>
                                         <input name="logTitle" id="logTitle" placeholder="Title" type="text" value="" class="form-control">
                                     </div>
                                 </div>
