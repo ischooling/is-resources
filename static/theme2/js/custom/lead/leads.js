@@ -73,7 +73,7 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
 	 }
 
 
-	if ($("#"+formId+" #leadGuardfname").val()==null || $("#"+formId+" #leadGuardfname").val()=='') {
+	if (leadType!='B2B' && ($("#"+formId+" #leadGuardfname").val()==null || $("#"+formId+" #leadGuardfname").val()=='')) {
 		 showMessageTheme2(0, "Please enter Parent First Name",'',true);
 		 return false;
 	}
