@@ -96,7 +96,7 @@ function userScreeningFilter(){
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
                         <option value="applied">Applied</option>
                         <option value="Approved For Interview">Approve For Interview</option>
-                        <option value="Step 2 | Few Question">Step 2 | Few Question</option>
+                        <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                         <option value="On Hold">On Hold</option>
                         <option value="accepted">Accepted</option>
                         <option value="Reject">Rejected</option>
@@ -158,7 +158,7 @@ function userApplicationProfileStatusModal(id, status, role){
                                     <option value="0">Select status</option>`
                                     if(role == "Teacher"){
                                         if(status == "Applied"){
-                                            html+=`<option value="Step 2 | Few Question">Step 2 | Few Question</option>
+                                            html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
@@ -173,14 +173,14 @@ function userApplicationProfileStatusModal(id, status, role){
                                             <option value="Approved for Selection Process">Approve for Selection Process</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
-                                        }else if(status == "Step 2 | Few Question"){
+                                        }else if(status == "Step 2 | Few Questions"){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }
                                     }else{
                                         if(status == "Applied"){
-                                            html+=`<option value="Step 2 | Few Question">Step 2 | Few Question</option>
+                                            html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
@@ -195,7 +195,7 @@ function userApplicationProfileStatusModal(id, status, role){
                                             w<option value="Accepted">Accepted</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
-                                        }else if(status == "Step 2 | Few Question"){
+                                        }else if(status == "Step 2 | Few Questions"){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;

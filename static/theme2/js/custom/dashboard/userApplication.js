@@ -26,7 +26,7 @@ async function userApplicationProfileOnloadFunction(){
             $("#applicantsStatus").html(html);
         }else{
             var html = `<option value="applied">Applied</option>
-                        <option value="Step 2 | Few Question">Step 2 | Few Question</option>
+                        <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                         <option value="Approved For Interview">Approved For Interview</option>
                         <option value="accepted">Accepted</option>
                         <option value="Rejected">Rejected</option>
@@ -245,7 +245,7 @@ async function updateUserApplicationProfile(id){
             showMessageTheme2(2, "Please select assign to");
             return false;
         }
-    }else if(selectedStatus == "Step 2 | Few Question"){
+    }else if(selectedStatus == "Step 2 | Few Questions"){
         if($("#userApplicationProfileStatusForm #questions").val() == ""){
             showMessageTheme2(2, "Please select any question");
             return false;
@@ -294,7 +294,7 @@ async function applicantsViewAssignToListForInterview(role){
         bindAssignToJA('userApplicationProfileStatusForm', 'assignedToInterview', responseData);
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").show();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
-    }else if(selectedStatus == "Step 2 | Few Question") {
+    }else if(selectedStatus == "Step 2 | Few Questions") {
         var payload = {}
         payload["schoolId"] = SCHOOL_ID;
         payload["roleType"] = role;
@@ -380,7 +380,8 @@ function updateTableRowDirectly(userId, newStatus, assignedTo) {
     var row = $('#tr_' + userId);
     
     if(row.length) {
-        if(newStatus != "Approved for Selection Process"){
+        if(newStatus == "Step 2 | Few Questions"){}
+        else if(newStatus != "Approved for Selection Process"){
             row.find('td:eq(10)').text(assignedTo || 'N/A');
         }
         row.find('td:eq(11)').text(newStatus || 'N/A');
