@@ -26,6 +26,7 @@ async function userApplicationProfileOnloadFunction(){
             $("#applicantsStatus").html(html);
         }else{
             var html = `<option value="applied">Applied</option>
+                        <option value="Step 2 | Few Question">Step 2 | Few Question</option>
                         <option value="Approved For Interview">Approved For Interview</option>
                         <option value="accepted">Accepted</option>
                         <option value="Rejected">Rejected</option>
@@ -106,8 +107,14 @@ function bindUserApplicationData(responseData) {
                     </td>
                     <td>
                         ${user.linkedInUrl ? 
-                            `<a href="${user.linkedInUrl}" target="_blank" class="btn btn-sm btn-outline-primary" target="_blank">LinkedIn</a>` : 
+                            `<a href="${user.linkedInUrl}" target="_blank" class="btn btn-sm btn-outline-primary">LinkedIn</a>` : 
                             '<span class="text-muted">N/A</span>'
+                        }
+                    </td>
+                    <td>
+                       ${user.isAnswersAvailable > 0 
+                            ? `<a href="javascript:void(0);" class="btn btn-sm btn-outline-primary" onclick="openQAModal('${user.id}')">View</a>` 
+                            : '<span class="text-muted">N/A</span>'
                         }
                     </td>
                     <td>
@@ -117,7 +124,7 @@ function bindUserApplicationData(responseData) {
                         : (user.assignTo || "N/A")
                     }
                     </td>
-                    <td>${user.status || 'N/A'}</td>
+                    <td>${user.status}</td>
                     <td>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -215,6 +222,10 @@ function openUpdateStatusModalUserApplication(id, status, role){
         placeholder: "Select Assign To",
         theme:"bootstrap4"
     });
+    $("#questions").select2({
+        placeholder: "Select questions",
+        theme:"bootstrap4"
+    });
     if(status == "Hold"){
         $("#userApplicationProfileStatus option[value='Hold']").remove()
     }
@@ -223,17 +234,20 @@ function openUpdateStatusModalUserApplication(id, status, role){
     }, 200);
 }
 
-
-
 async function updateUserApplicationProfile(id){
     var selectedStatus = $("#userApplicationProfileStatus").val();
     if(selectedStatus == null || selectedStatus == undefined || selectedStatus == ""){
         showMessageTheme2(2, "Please select status");
         return false;
     }
-    if(selectedStatus == null || selectedStatus == undefined || selectedStatus == "Approved For Interview"){
+    if(selectedStatus == "Approved For Interview"){
         if($("#userApplicationProfileStatusForm #assignedToInterview").val() == ""){
             showMessageTheme2(2, "Please select assign to");
+            return false;
+        }
+    }else if(selectedStatus == "Step 2 | Few Question"){
+        if($("#userApplicationProfileStatusForm #questions").val() == ""){
+            showMessageTheme2(2, "Please select any question");
             return false;
         }
     }
@@ -241,10 +255,19 @@ async function updateUserApplicationProfile(id){
         showMessageTheme2(2, "Please enter remarks");
         return false;
     }
+    var selectedQuestionIds = $("#userApplicationProfileStatusForm #questions").val();
+    var finalQuestionsArr = [];
+    $("#userApplicationProfileStatusForm #questions option:selected").each(function () {
+        finalQuestionsArr.push({
+            questionText: $(this).data("text"),
+            questionType: $(this).data("type")
+        });
+    });
     var payload = {};
     payload["entityId"] = id;
     payload["entityType"] = "INITIAL-INTERVIEW";
     payload["assignTo"] = $("#userApplicationProfileStatusForm #assignedToInterview").val();
+    payload["questions"] = finalQuestionsArr;
     payload["status"] = $("#userApplicationProfileStatus").val();
     payload["remarks"] = $("#userApplicationProfileRemarks").val();
     var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
@@ -261,18 +284,40 @@ async function updateUserApplicationProfile(id){
     }else{
         showMessageTheme2(0, responseData.message);
     }
-
 }
-async function applicantsViewAssignToListForInterview(){
+
+async function applicantsViewAssignToListForInterview(role){
     var selectedStatus = $("#userApplicationProfileStatus").val();
     if(selectedStatus == "Approved For Interview"){
         let payload = {}
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
-        bindAssignTo('userApplicationProfileStatusForm', 'assignedToInterview', responseData);
+        bindAssignToJA('userApplicationProfileStatusForm', 'assignedToInterview', responseData);
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").show();
+        $("#userApplicationProfileStatusForm #questionsDiv").hide();
+    }else if(selectedStatus == "Step 2 | Few Question") {
+        var payload = {}
+        payload["schoolId"] = SCHOOL_ID;
+        payload["roleType"] = role;
+        var ajaxReqDetails = {
+            method: "POST",
+            url: APP_BASE_URL + "get-job-application-questions",
+            body: payload,
+            global: true,
+            showMessage: false,
+            onFaildResolved: true,
+            onSuccessResolved: true
+        }
+        var responseData = await callCommonAjax(ajaxReqDetails);
+        if(responseData.status == 1){
+            bindQuestionsToJA('userApplicationProfileStatusForm', 'questions', responseData)
+        }
+        $("#userApplicationProfileStatusForm #assignedToInterviewDiv").hide();
+        $("#userApplicationProfileStatusForm #questionsDiv").show();
     }else{
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").hide();
+        $("#userApplicationProfileStatusForm #questionsDiv").hide();
         $("#userApplicationProfileStatusForm #assignedToInterview").val("").trigger("change");
+        $("#userApplicationProfileStatusForm #questions").val("").trigger("change");
     }
 }
 
@@ -291,28 +336,54 @@ async function applicantsViewAssignToListForInterview(){
 //     }
 // }
 
-// function bindAssignTo(formId, selectId, responseData) {
-//     const element = $("#" + formId+" #"+selectId);
-//     element.empty();
-//     element.append('<option value="">Select assign to</option>');
+function bindAssignToJA(formId, selectId, responseData) {
+    const element = $("#" + formId+" #"+selectId);
+    element.empty();
+    element.append('<option value="">Select assign to</option>');
 
-//     if (responseData && Array.isArray(responseData.assignTo)) {
-//         $.each(responseData.assignTo, function (i, item) {
-//             element.append(
-//                 "<option value='" + item.id + "'>" + item.userFullName + " - (" + item.email + ")</option>"
-//             );
-//         });
-//     }
-// }
+    if (responseData && Array.isArray(responseData.assignTo)) {
+        $.each(responseData.assignTo, function (i, item) {
+            element.append(
+                "<option value='" + item.id + "'>" + item.userFullName + " - (" + item.email + ")</option>"
+            );
+        });
+    }
+}
+
+function bindQuestionsToJA(formId, selectId, responseData) {
+    const element = $("#" + formId + " #" + selectId);
+    element.empty();
+    const common = responseData.data.commonQuestions || [];
+    const role = responseData.data.roleQuestions || [];
+
+    const allQuestions = [...common, ...role];
+
+    if (allQuestions.length === 0) {
+        element.append('<option value="">No questions found</option>');
+        return;
+    }
+
+    allQuestions.forEach(q => {
+        const isMandatory = q.questionType === "M";
+        const label = isMandatory ? `${q.questionText} *` : q.questionText;
+
+        element.append(
+            `<option value='${q.id}' data-text="${q.questionText}" data-type="${q.questionType}">
+                ${label}
+            </option>`
+        );
+    });
+    element.trigger("change");
+}
 
 function updateTableRowDirectly(userId, newStatus, assignedTo) {
     var row = $('#tr_' + userId);
     
     if(row.length) {
         if(newStatus != "Approved for Selection Process"){
-            row.find('td:eq(9)').text(assignedTo || 'N/A');
+            row.find('td:eq(10)').text(assignedTo || 'N/A');
         }
-        row.find('td:eq(10)').text(newStatus || 'N/A');
+        row.find('td:eq(11)').text(newStatus || 'N/A');
         
         var dropdownHtml = `
             <div class="dropdown">
@@ -335,7 +406,7 @@ function updateTableRowDirectly(userId, newStatus, assignedTo) {
         
         dropdownHtml += `</ul>
             </div>`;
-        row.find('td:eq(13)').html(dropdownHtml);
+        row.find('td:eq(12)').html(dropdownHtml);
     }
 }
 
@@ -547,4 +618,72 @@ function resetCommunicationLogFormJA(formId){
     $("#fileuploadLog7").show();
     $("#fileuploadLog7Icon").remove();
     uploadDocs = [];
+}
+
+function showAddQuestionsMOdal(){
+    $("#addQuestionsModal").remove();
+    $("body").append(addQuestionsModal());
+    setTimeout(() => {
+        $("#addQuestionsModal").modal("show");
+    }, 300);
+    $("#addQuestionsModal #roleType").select2({
+        placeholder: "Select User Role",
+        theme:"bootstrap4"
+    })
+}
+
+async function saveQuestion(modalId){
+    if($("#"+modalId + " #roleType").val() == ""){
+        showMessageTheme2(0, "Please select a role type.");
+        return;
+    }
+    if($("#"+modalId + " #questionText").val().trim() == ""){
+        showMessageTheme2(0, "Please enter a question.");
+        return;
+    }
+    var payload = {};
+    payload["schoolId"] = SCHOOL_ID;
+    payload["roleType"] = $("#"+modalId + " #roleType").val();
+    payload["questionText"] = $("#"+modalId + " #questionText").val().trim();
+    payload["questionType"] = $("input[name='questionType']:checked").val();
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + "save-job-application-question",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        showMessageTheme2(1, responseData.message);
+        $("#"+modalId + " #roleType").val("Common").trigger("change");
+        $("#"+modalId + " #questionText").val("");
+        $("input[name='questionType'][value='M']").prop("checked", true);
+    }else{
+        showMessageTheme2(0, responseData.message);
+    }
+}
+
+async function openQAModal(entityId){
+    var payload = {};
+    payload["entityId"] = entityId;
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + "get-applicant-specific-questions",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        $("#qaModal").remove();
+        $("body").append(qaModalContent(responseData.data));
+        setTimeout(() => {
+            $("#qaModal").modal("show");
+        }, 300);
+    }
 }

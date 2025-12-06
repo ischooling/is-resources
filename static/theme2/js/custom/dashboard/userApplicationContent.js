@@ -8,8 +8,11 @@ function renderUserApplicationContent(title){
                 </div>
             </div>
         </div>
-        <div class="d-flex align-items-center">
-            <a href="javascript:void(0)" onclick="showFilterUserApplication();" class="btn btn-primary ml-auto">
+        <div class="d-flex align-items-center justify-content-end gap-5">
+            <a href="javascript:void(0)" onclick="showAddQuestionsMOdal();" class="btn btn-outline-primary">
+                <i class="fa fa-question"></i> Add Questions
+            </a>
+            <a href="javascript:void(0)" onclick="showFilterUserApplication();" class="btn btn-primary">
                 <i class="fa fa-filter"></i> Filter
             </a>
         </div>`
@@ -93,6 +96,7 @@ function userScreeningFilter(){
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
                         <option value="applied">Applied</option>
                         <option value="Approved For Interview">Approve For Interview</option>
+                        <option value="Step 2 | Few Question">Step 2 | Few Question</option>
                         <option value="On Hold">On Hold</option>
                         <option value="accepted">Accepted</option>
                         <option value="Reject">Rejected</option>
@@ -122,8 +126,7 @@ function userApplicationTableContent(status){
                         <th>Resume/CV</th>
                         <th>Recent Photograph</th>
                         <th>Linkedin Profile</th>
-                        ${/*
-                        */''}
+                        <th>Q/A</th>
                         <th>Assigned To</th>
                         <th>Applicants Status</th>
                         <th>Action</th>
@@ -151,11 +154,11 @@ function userApplicationProfileStatusModal(id, status, role){
                         <form autocomplete="off" id="userApplicationProfileStatusForm">
                             <div class="form-group">
                                 <label for="userApplicationProfileStatus" class="control-label">Status:</label>
-                                <select class="form-control" name="userApplicationProfileStatus" id="userApplicationProfileStatus" onchange="applicantsViewAssignToListForInterview();">
+                                <select class="form-control" name="userApplicationProfileStatus" id="userApplicationProfileStatus" onchange="applicantsViewAssignToListForInterview('${role}');">
                                     <option value="0">Select status</option>`
                                     if(role == "Teacher"){
                                         if(status == "Applied"){
-                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            html+=`<option value="Step 2 | Few Question">Step 2 | Few Question</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
@@ -170,10 +173,14 @@ function userApplicationProfileStatusModal(id, status, role){
                                             <option value="Approved for Selection Process">Approve for Selection Process</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Step 2 | Few Question"){
+                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
                                     }else{
                                         if(status == "Applied"){
-                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            html+=`<option value="Step 2 | Few Question">Step 2 | Few Question</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
@@ -188,15 +195,22 @@ function userApplicationProfileStatusModal(id, status, role){
                                             w<option value="Accepted">Accepted</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Step 2 | Few Question"){
+                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
-                                        
                                     }
                                html+=`</select>
                             </div>
                             <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
                                 <label>Assigned To</label>
-                                <select id="assignedToInterview" class="form-control">
-                                </select>
+                                <select id="assignedToInterview" class="form-control"></select>
+                            </div>
+                            <div id="questionsDiv" class="form-group" style="display: none;">
+                                <label>Questions</label>
+                                <select id="questions" class="form-control" multiple></select>
+                                <p class="text-warning mb-0 font-12 ml-1 mt-1 font-weight-semi-bold">Note- Please select the question priority wise.</p>
                             </div>
                             <div class="form-group">
                                 <label for="message-text" class="control-label">Remarks:</label>
@@ -440,4 +454,112 @@ function pdfPreviewJA(){
 		+'</div>'
 	+'</div>';
 	return html;
+}
+
+function addQuestionsModal(){
+    var html=
+        `<div class="modal fade" id="addQuestionsModal" tabindex="-1">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content text-center">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Question</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="padding-top:12px">
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
+                                <label>User Role</label>
+                                <select name="roleType" id="roleType" class="form-control">
+                                    <option value="Common">Common</option>
+                                    <option value="Teacher">Teacher</option>
+                                    <option value="Admissions Manager">Admissions Manager</option>
+                                    <option value="Enrollment Manager">Enrollment Manager</option>
+                                    <option value="Enrollment Success Manager">Enrollment Success Manager</option>
+                                    <option value="Business Development Manager">Business Development Manager</option>
+                                    <option value="Business Development Associate">Business Development Associate</option>
+                                    <option value="Business Associate">Business Associate</option>
+                                    <option value="Administration Head">Administration Head</option>
+                                    <option value="Administration Associate">Administration Associate</option>
+                                    <option value="Head of School">Head of School</option>
+                                    <option value="Associate Head of School">Associate Head of School</option>
+                                    <option value="Principal">Principal</option>
+                                    <option value="Associate Principal">Associate Principal</option>
+                                    <option value="Operations Manager">Operations Manager</option>
+                                    <option value="Academic Coordinator">Academic Coordinator</option>
+                                    <option value="Admissions Counselor">Admissions Counselor</option>
+                                    <option value="Teacher Coordinator">Teacher Coordinator</option>
+                                    <option value="Human Resources Manager">Human Resources Manager</option>
+                                    <option value="IT Administrator">IT Administrator</option>
+                                    <option value="Office Assistant">Office Assistant</option>
+                                    <option value="Special Educator">Special Educator</option>
+                                    <option value="Activity Teacher">Activity Teacher</option>
+                                    <option value="Art Teacher">Art Teacher</option>
+                                    <option value="Music Teacher">Music Teacher</option>
+                                    <option value="Drama Teacher">Drama Teacher</option>
+                                    <option value="Career Counselor">Career Counselor</option>
+                                    <option value="College / University Counselor">College / University Counselor</option>
+                                    <option value="Accountant">Accountant</option>
+                                    <option value="Student Engagement Officer">Student Engagement Officer</option>
+                                    <option value="Psychologist">Psychologist</option>
+                                    <option value="Content Writer">Content Writer</option>
+                                    <option value="Digital Marketing Executive">Digital Marketing Executive</option>
+                                    <option value="Social Media Manager">Social Media Manager</option>
+                                    <option value="Community Engagement Officer">Community Engagement Officer</option>
+                                    <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
+                                </select>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
+                                <label>Question Type</label><br>
+                                <label class="mr-3 mt-2">
+                                    <input type="radio" name="questionType" value="M" checked> Mandatory
+                                </label>
+                                <label>
+                                    <input type="radio" name="questionType" value="N"> Non-Mandatory
+                                </label>
+                            </div>
+                            <div class="col-12 mt-3 text-left">
+                                <label>Question</label>
+                                <textarea id="questionText" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button class="btn btn-primary ml-auto" onclick="saveQuestion('addQuestionsModal')">Save Question</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}
+
+function qaModalContent(data){
+    var html=
+        `<div id="qaModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
+                <div class="modal-content border-0">
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Questions & Answers</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body overflow-y-auto" style="max-height: 80vh;">`
+                        data.forEach(function(item){
+                            html+=
+                            `<div class="mb-3 p-3 border rounded">
+                                <p class="mb-1 font-weight-bold">
+                                    Q${item.displayOrder}. ${item.questionText}
+                                    ${item.questionType === "M" ? `<span class="text-danger">*</span>` : ""}
+                                </p>
+                                <label class="text-muted mb-1 d-block">Answer</label>
+                                <p class="mb-0 pl-2">${item.answerText || "<em class='text-muted'>No answer</em>"}</p>
+                            </div>`
+                        })
+                    html+=`</div>
+                </div>
+            </div>
+        </div>`
+    return html;
 }

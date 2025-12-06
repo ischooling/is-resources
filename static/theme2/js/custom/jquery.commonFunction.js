@@ -6654,3 +6654,11 @@ function secondsToHMS(seconds) {
     const secs = seconds % 60;
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
+
+function getRemainingDays(lastAnsweringDate) {
+  var today = new Date();
+  var lastDate = new Date(lastAnsweringDate);
+  var diffMs = lastDate - today;
+  var remaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  return remaining > 0 ? remaining : 0;
+}
