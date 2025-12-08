@@ -1770,7 +1770,13 @@ function getcounselorReportListHtml(data){
 								<th colspan="2" class="bg-primary text-white "><p class="mb-0 text-center font-12">${report.assignName.split(" ")[0]}'s Report</p> <p class="text-center mb-0 font-12">${modSrc}</p> <p class="text-center mb-0 font-12">${report.rating} /10</p></th>
 							</tr>
 						</thead>
-						<tbody class="font-10" id="counselorReportTbody_${report.assignTo}"></tbody>
+						<tbody class="font-10 " id="counselorReportTbody_${report.assignTo}">
+							<tr>
+							<td class="text-center">
+							<div class="loader"><div class="line-scale-pulse-out"><div></div><div></div><div></div><div></div><div></div></div></div>
+							</td>
+							</tr>
+						</tbody>
 					</table>
 				</div>`;
 				

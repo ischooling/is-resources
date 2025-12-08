@@ -57,6 +57,7 @@ function userScreeningFilter(){
                         <option value="Business Development Manager">Business Development Manager</option>
                         <option value="Business Development Associate">Business Development Associate</option>
                         <option value="Business Associate">Business Associate</option>
+                        <option value="School Admin">School Admin</option>
                         <option value="Administration Head">Administration Head</option>
                         <option value="Administration Associate">Administration Associate</option>
                         <option value="Head of School">Head of School</option>
@@ -480,6 +481,7 @@ function addQuestionsModal(){
                                     <option value="Business Development Manager">Business Development Manager</option>
                                     <option value="Business Development Associate">Business Development Associate</option>
                                     <option value="Business Associate">Business Associate</option>
+                                    <option value="School Admin">School Admin</option>
                                     <option value="Administration Head">Administration Head</option>
                                     <option value="Administration Associate">Administration Associate</option>
                                     <option value="Head of School">Head of School</option>

@@ -4309,6 +4309,8 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 							$("#"+formId+" #leademailId").val(leadDemo.leadStudentDetailDTO.email);
 							$("#"+formId+" #phoneNo").val(leadDemo.leadStudentDetailDTO.phoneNo);
 							$("#"+formId+" #leademailAlternet").val(leadDemo.leadStudentDetailDTO.emailAlternet);
+
+							$("#"+formId+" #leadAge").val(leadDemo.leadStudentDetailDTO.age);
 							//$("#"+formId+" #leadType").val(leadType);
 							//if(leadType=='B2B'){
 							   if(leadDemo.leadStudentDetailDTO.isdCountryCode==null || leadDemo.leadStudentDetailDTO.isdCountryCode==''){

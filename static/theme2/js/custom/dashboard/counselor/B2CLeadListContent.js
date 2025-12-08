@@ -852,22 +852,36 @@ function getLeadMergeFormPopup(objRights) {
     '<input type="hidden" name="pCountryCode" id="pCountryCode" value="" />' +
     '<input type="hidden" name="isdCodeAlter" id="isdCodeAlter" value="" />' +
     '<input type="hidden" name="pCountryCodeAlter" id="pCountryCodeAlter" value="" />' +
-    '			<input type="hidden" name="leadType" id="leadType" value="' +
-    objRights.leadType +
-    '" />' +
+    '	<input type="hidden" name="leadType" id="leadType" value="' +objRights.leadType +'" />' +
     '			<div class="row">' +
-    '				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '						<label class="m-0">First Name*</label>' +
-    '						<input type="text" name="leadstdfname" id="leadstdfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
-    "				</div>" +
-    '				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '					<label class="m-0">Middle Name</label>' +
-    '					<input type="text" name="leadstdmname" id="leadstdmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
-    "				</div>" +
-    '				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '					<label class="m-0">Last Name</label>' +
-    '					<input type="text" name="leadstdlname" id="leadstdlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
-    "				</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '							<label class="m-0">Parent First Name*</label>' +
+    '							<input type="text" name="leadGuardfname" id="leadGuardfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '						<label class="m-0">Parent Middle Name</label>' +
+    '						<input type="text" name="leadGuardmname" id="leadGuardmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '						<label class="m-0">Parent Last Name</label>' +
+    '						<input type="text" name="leadGuardlname" id="leadGuardlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '							<label class="m-0">Child First Name*</label>' +
+    '							<input type="text" name="leadstdfname" id="leadstdfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '						<label class="m-0">Child Middle Name</label>' +
+    '						<input type="text" name="leadstdmname" id="leadstdmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
+    '						<label class="m-0">Child Last Name</label>' +
+    '						<input type="text" name="leadstdlname" id="leadstdlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
+    "					</div>" +
+    '					<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
+    '							<label class="m-0">Age</label>' +
+    '							<input type="text" name="leadAge" id="leadAge" class="form-control" value=""  maxlength="3" >' +
+    "						</div>" +
     '				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
     '					<label class="m-0">Grade*</label>' +
     '					<select name="leadGrade" id="leadGrade" class="form-control" >' +
