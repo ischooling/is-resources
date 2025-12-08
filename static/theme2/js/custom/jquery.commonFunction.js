@@ -6662,3 +6662,127 @@ function getRemainingDays(lastAnsweringDate) {
   var remaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
   return remaining > 0 ? remaining : 0;
 }
+
+function checkAiSummaryAvailable(entityId, entityType) {
+    var isAvailable = false;
+
+    $.ajax({
+        type: "POST",
+        url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-recordings-summary",
+        contentType: "application/json",
+        async: false,
+        data: JSON.stringify({
+            entityId: entityId,
+            entityType: entityType
+        }),
+        success: function(res) {
+            if (res.summary && res.summary.summaryDetails && res.summary.summaryDetails.length > 0) {
+                isAvailable = true;
+            }
+        },
+        error: function() {
+            isAvailable = false;
+        }
+    });
+
+    return isAvailable;
+}
+
+function showAiSummary(entityId, entityType) {
+
+    const requestObj = {
+        entityId: entityId,
+        entityType: entityType
+    };
+
+    $.ajax({
+        type: "POST",
+        url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-recordings-summary",
+        contentType: "application/json",
+        data: JSON.stringify(requestObj),
+
+        success: function (res) {
+            if (!res.summary) {
+                showMessage(0, "AI Summary not available");
+                return;
+            }
+
+            openAiSummaryModal(res.summary);
+        },
+
+        error: function () {
+            showMessage(0, "Failed to load AI Summary");
+        }
+    });
+}
+
+function openAiSummaryModal(summary) {
+
+    $("#aiSummaryModalCustom").remove();
+
+      var modalHtml = `
+          <div class="modal fade show" id="aiSummaryModalCustom" tabindex="-1" role="dialog" style="display:block; z-index: 99999;">
+            <div class="modal-dialog modal-lg" role="document" style="z-index:100000;">
+              
+              <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+                
+                <div class="modal-header py-2 bg-primary text-white">
+                  <h5 class="modal-title">AI Summary</h5>
+                  <button type="button" class="close text-white" onclick="closeAiSummaryModal();" aria-label="Close">
+                    <span aria-hidden="true"><i class="fa fa-times"></i></span>
+                  </button>
+                </div>
+
+                <div class="modal-body" id="ai-summary-content" style="height:70vh; overflow-y:auto; padding:20px;">
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Backdrop -->
+          <div class="modal-backdrop fade show" style="z-index: 99990;"></div>
+          `;
+    $("body").append(modalHtml);
+
+	var html = ''
+    + '<h3 style="font-size:22px;"><b>Ai Summary</b></h3>'
+    + '<hr>'
+    + '<h4 style="font-size:20px;"><b>' + summary.summaryTitle + '</b></h4>'
+    + '<p style="font-size:15px;">' + summary.summaryOverview + '</p>'
+    + '<h5 style="font-size:18px; margin-top:20px;"><b>Ai Summary Details</b></h5>'
+    + '<hr>';
+
+	summary.summaryDetails.forEach(function(item, i) {
+		html += ''
+			+ '<h4 style="font-size:17px;"><b>' + (i + 1) + '. ' + item.label + '</b></h4>'
+			+ '<p style="font-size:15px;">' + item.summary + '</p>'
+			+ '<hr>';
+	});
+
+    $("#ai-summary-content").html(html);
+}
+
+function closeAiSummaryModal() {
+    $("#aiSummaryModalCustom").remove();
+    $(".modal-backdrop").remove();
+}
+
+function generateAiSummary(meetingId) {
+
+  $.ajax({
+      type: "GET",
+      url: BASE_URL + CONTEXT_PATH + "crons/backfill-meetings-summary-details",
+      data: {
+          meetingId: meetingId,
+          pageSize: 10
+      },
+      success: function(response) {
+          showMessage(true, "Summary Generated: " + response);
+      },
+      error: function() {
+          showMessage(true, "Failed to generate AI Summary");
+      }
+  });
+}

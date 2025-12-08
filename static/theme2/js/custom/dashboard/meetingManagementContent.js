@@ -6,7 +6,7 @@ function getMeetingManagementContent() {
     `)
     .appendTo("head");
 
-  let htmlContent = `
+  var htmlContent = `
     <!-- showMessage -->
     <div class="modal fade" id="modalMessage" tabindex="-1" role="dialog" style="z-index: 1040; display: none;" aria-hidden="true">
       <div class="modal-dialog modal-notify modal-info" role="document">
@@ -562,7 +562,7 @@ function showStartMeetingPopup(meetingName, meetingDate, meetingStartTime, url) 
   });
 }
 
-function populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName) {
+function populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body) {
   const titles = {
     "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
     "active_speaker.mp4": "Active Speaker",
@@ -574,10 +574,12 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
     "-1.2.mp4": "Recording 2",
     "audio_only": "Audio File",
   };
+  var entityId = body.entityId;
+	var entityName = body.entityName;
 
   var meetingStartDateFormatted = changeDateFormat(new Date(meetingStartDate), "MMM-dd-yyyy");
 
-  let modalContent = `
+  var modalContent = `
     <div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
       <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%;margin: auto; margin-top:50px;">
         <div class="">
@@ -627,6 +629,33 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
           }
         </div>`;
     }
+    const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
+        if (summaryAvailable) {
+            modalContent += `
+                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                    style="border-bottom:1px solid #eee;">
+                    <h4>${sessionUrls.length + 2}. Ai Summary</h4>
+                    <button class="btn btn-sm bg-white rounded" 
+                            style="border:1px solid #000; color:#000;" 
+                            onclick="showAiSummary('${entityId}', '${entityName}')">
+                        Summary
+                    </button>
+                </div>
+            `;
+        }
+        if (!summaryAvailable) {
+            modalContent += `
+                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                    style="border-bottom:1px solid #eee;">
+                    <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
+                    <button class="btn btn-sm bg-white rounded" 
+                            style="border:1px solid #000; color:#000;" 
+                            onclick="generateAiSummary('${meetingId}')">
+                        Generate Summary
+                    </button>
+                </div>
+            `;
+        }
   });
 
   modalContent += `
@@ -636,7 +665,7 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
     </div>
   `;
 
-  let modalElement = $("#recordingModal");
+  var modalElement = $("#recordingModal");
   if (modalElement.length > 0) {
     modalElement.remove();
   }
@@ -645,7 +674,7 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
   $("#recordingModal").modal("show");
 }
 
-function populateRecurringRecording(data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek){
+function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek){
   startOfWeek = changeDateFormat(new Date(startOfWeek), "MMM-dd-yyyy");
   endOfWeek = changeDateFormat(new Date(endOfWeek), "MMM-dd-yyyy");
   var pastDateLimit = new Date();
@@ -795,6 +824,9 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
             <tbody id="recurringRecordingsTableBody">
             ${data
             .map((session, index) => {
+              var id = session.entityId;
+              var type = "GENERAL_MEETINGS";
+              var summaryAvailable = checkAiSummaryAvailable(id, type);
               var sessionDate = new Date(session.startTime);
               var showRecordingButton = sessionDate >= pastDateLimit || USER_ROLE == "DIRECTOR";
               return`
@@ -814,7 +846,7 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
                       <div class="recording-list" id="recording-${index}" style="display: none;">
                         <div>
                           ${session.recordings.map((recording, i) => {
-                            let title;
+                            var title;
                             for (const key in titles) {
                               if (recording.includes(key)) {
                                 title = titles[key];
@@ -845,6 +877,32 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
                               </div>`
                               : "";
                           })() : ""}
+                          ${(() => {
+                              return `
+                                <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center"
+                                    style="border-bottom:1px solid #eee;">
+                                  
+                                  <h6 style="font-size:13px;font-weight:700;">
+                                    ${session.recordings.length + 2}. 
+                                    ${summaryAvailable ? "AI Summary" : "Generate AI Summary"}
+                                  </h6>
+
+                                  ${
+                                    summaryAvailable
+                                      ? `<button class="btn btn-sm bg-white rounded"
+                                                style="border:1px solid #000;color:#000;"
+                                                onclick="showAiSummary('${entityId}', '${entityName}')">
+                                            Summary
+                                        </button>`
+                                      : `<button class="btn btn-sm bg-white rounded"
+                                                style="border:1px solid #000;color:#000;"
+                                                onclick="generateAiSummary('${session.meetingId}')">
+                                            Generate Summary
+                                        </button>`
+                                  }
+                                </div>
+                              `;
+                          })()}
                         </div>
                       </div>
                     </td>
@@ -901,7 +959,7 @@ function populateRecurringRecording(data, meetingTitle, hostName, entityId, star
   });
 }
 
-function updateRecordingsTable(data) {
+function updateRecordingsTable(data, body) {
   var pastDateLimit = new Date();
   pastDateLimit.setDate(pastDateLimit.getDate() - recordingLimit);
   if (!data || data.length === 0) {
@@ -920,7 +978,7 @@ function updateRecordingsTable(data) {
     "audio_only": "Audio File",
   };
 
-  let recordingsHtml =
+  var recordingsHtml =
    data.map((session, index) => {
     var sessionDate = new Date(session.startTime);
     var showRecordingButton = sessionDate >= pastDateLimit || USER_ROLE == "DIRECTOR";
@@ -941,7 +999,7 @@ function updateRecordingsTable(data) {
           <div class="recording-list" id="recording-${index}" style="display: none;">
             <div>
               ${session.recordings.map((recording, i) => {
-                let title = "Unknown Recording";
+                var title = "Unknown Recording";
                 for (const key in titles) {
                   if (recording.includes(key)) {
                     title = titles[key];
@@ -972,6 +1030,35 @@ function updateRecordingsTable(data) {
                   </div>`
                   : "";
               })() : ""}
+              ${(() => {
+                var entityId = body.entityId;
+                var entityName = body.entityName;
+                var summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
+                    return `
+                      <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center"
+                          style="border-bottom:1px solid #eee;">
+                        
+                        <h6 style="font-size:13px;font-weight:700;">
+                          ${session.recordings.length + 2}. 
+                          ${summaryAvailable ? "AI Summary" : "Generate AI Summary"}
+                        </h6>
+
+                        ${
+                          summaryAvailable
+                            ? `<button class="btn btn-sm bg-white rounded"
+                                      style="border:1px solid #000;color:#000;"
+                                      onclick="showAiSummary('${entityId}', '${entityName}')">
+                                  Summary
+                              </button>`
+                            : `<button class="btn btn-sm bg-white rounded"
+                                      style="border:1px solid #000;color:#000;"
+                                      onclick="generateAiSummary('${session.meetingId}')">
+                                  Generate Summary
+                              </button>`
+                        }
+                      </div>
+                    `;
+                })()}
             </div>
           </div>
         </td>

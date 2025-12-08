@@ -492,7 +492,7 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
             if (res.statusCode === 0 && res.status === "success") {
                 const recordings = res.data.recordingUrls;
                 if (recordings && recordings.length > 0) {
-                    populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName);
+                    populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body);
                 } else {
                     showMessageTheme2(0, "No recordings available.", '', true);
                 }
@@ -503,7 +503,7 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
     });
 }
 
-function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName) {
+function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body) {
     const titles = {
         "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
         "active_speaker.mp4": "Active Speaker",
@@ -515,6 +515,8 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
 		"-1.2.mp4": "Recording 2",
         "audio_only": "Audio File",
     };
+	let entityId = body.entityId;
+	let entityName = body.entityName;
 
     let modalContent = `
         <div id="recordingModal" class="modal fade" tabindex="-1">
@@ -567,6 +569,33 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                             : ""
                     }
                 </div>`;
+        }
+		const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
+        if (summaryAvailable) {
+            modalContent += `
+                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                    style="border-bottom:1px solid #eee;">
+                    <h4>${sessionUrls.length + 2}. Ai Summary</h4>
+                    <button class="btn btn-sm bg-white rounded" 
+                            style="border:1px solid #000; color:#000;" 
+                            onclick="showAiSummary('${entityId}', '${entityName}')">
+                        Summary
+                    </button>
+                </div>
+            `;
+        }
+        if (!summaryAvailable) {
+            modalContent += `
+                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                    style="border-bottom:1px solid #eee;">
+                    <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
+                    <button class="btn btn-sm bg-white rounded" 
+                            style="border:1px solid #000; color:#000;" 
+                            onclick="generateAiSummary('${meetingId}')">
+                        Generate Summary
+                    </button>
+                </div>
+            `;
         }
     });
 

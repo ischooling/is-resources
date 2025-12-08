@@ -1620,7 +1620,7 @@ function openRecordingModal(entityId, entityType, meetingStartDate, title, start
       if (res.statusCode === 0 && res.status === "success") {
         const recordings = res.data.recordingUrls;
         if (recordings && recordings.length > 0) {
-          populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName);
+          populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body);
         } else {
           showMessageTheme2(0, "No recordings available.", '', true);
         }
@@ -1931,7 +1931,7 @@ function showRecurringMeetingRecordings(entityId, meetingTitle, hostName) {
     success: function (response) {
       var res = JSON.parse(response)
       try {
-        populateRecurringRecording(res.data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek, res.recordingsTotalPages);
+        populateRecurringRecordingModal(res.data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek, res.recordingsTotalPages);
         if(res.recordingsTotalPages != 0){
           $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages, "recurringMeeting"));
         }
@@ -1967,7 +1967,8 @@ function applyRecurringRecordingFilters(entityId) {
     meetingStartDate: $("#filterRecurringMeetingStartDate").val() == '' ? '' : changeDateFormat(new Date($("#filterRecurringMeetingStartDate").val()), "yyyy-mm-dd"),
     meetingEndDate: $("#filterRecurringMeetingEndDate").val() == '' ? '' : changeDateFormat(new Date($("#filterRecurringMeetingEndDate").val()), "yyyy-mm-dd"),
     limit: 10,
-    pageNo: currentPageRecurringRecording
+    pageNo: currentPageRecurringRecording,
+    entityName: "GENERAL_MEETINGS"
   };
 
   $.ajax({
@@ -1978,7 +1979,7 @@ function applyRecurringRecordingFilters(entityId) {
     success: function (response) {
       var res = JSON.parse(response);
       try {
-        updateRecordingsTable(res.data);
+        updateRecordingsTable(res.data, body);
         $("#recurringMeetingModal").data("entityId", entityId);
         if(res.recordingsTotalPages > 0){
           $("#recurringPaginationContainer").html(renderPaginationCommon(currentPageRecurringRecording, res.recordingsTotalPages, "recurringMeeting"));
