@@ -151,7 +151,7 @@ function getTableData(data) {
             '<td>' + data[i].mailStatus + '</td>' + 
             '<td class="d-flex gap-5">' +
             '<button class="btn btn-sm btn-primary" onclick="viewEmaillogsPopupConent('+data[i].id+',\''+mails+'\',\''+ccs+'\',\''+bccs+'\',\''+data[i].subject+'\',\''+data[i].time+'\',\''+data[i].urlParameters+'\')"><i class="fa fa-eye"></i></button>' +
-            '<a href="' + BASE_URL + CONTEXT_PATH + UNIQUEUUID + '/dashboard/email-content?payload=' + data[i].urlParameters + '" target="_blank" class="btn btn-sm btn-primary" ><i class="fa fa-link"></i></a>' +
+            '<a href="' + BASE_URL + CONTEXT_PATH + UNIQUEUUID + '/dashboard/email-content/'+SCHOOL_ID+'?payload=' + data[i].urlParameters + '" target="_blank" class="btn btn-sm btn-primary" ><i class="fa fa-link"></i></a>' +
             '</td>' +
             '</tr>';
         rows += row;
@@ -174,7 +174,7 @@ function viewEmaillogsPopupConent(emailId,mails,cc,bcc,subject,time,urlParameter
     $("#sendTo").html(mails);
     $("#emailSubject").html(subject);
     $("#attachment").html(attch);
-    $("#emailTemplate").attr('src',BASE_URL+CONTEXT_PATH+UNIQUEUUID+'/dashboard'+'/email-content?payload='+urlParameters);
+    $("#emailTemplate").attr('src',BASE_URL+CONTEXT_PATH+UNIQUEUUID+'/dashboard'+'/email-content/'+SCHOOL_ID+'?payload='+urlParameters);
     $(".email_logs_slide_popup").addClass("viewSlideContent")
 }
 

@@ -57,7 +57,6 @@ function qaSectionContent(data, entityId, entityType, userName, lastAnsweringDat
                                             <div class="mr-3 text-white font-weight-semi-bold rounded-10 p-1" style="background:var(--pgc);">Q${item.displayOrder}.</div>
                                             <div class="w-100">
                                                 <h5 class="font-weight-bold mb-3">${item.questionText} ${item.questionType == "M" ? "<span class='text-danger'>*</span>" : ""}</h5>
-                                                <label class="font-weight-bold" style="opacity: 0.8;">Your Answer</label>
                                                 <textarea id="answer_${item.id}" class="form-control" rows="3" maxLength="4000" placeholder="Type your answer here..."></textarea>
                                             </div>
                                         </div>
@@ -81,8 +80,7 @@ function qaThankYouContent(type) {
     return `
     <div class="d-flex flex-column justify-content-center align-items-center p-md-5 p-2 mt-md-5 mt-4">
         <i class="fa fa-check font-30 p-2 rounded-circle mb-2" style="background-color: #CFE5E4; color: #0D9487;"></i>
-        <h4 class="font-weight-bold" style="color: #0D9487;">${type == "directThankyou" ? "Questions Already Sumitted" : "Questions Submitted!"}</h4>
-        <p class="text-center">${type == "directThankyou" ? "" : "Thank you for submitting your questions."} We will get back to you if there is a fitment for the role applied.</p>
-        <a href="https://internationalschooling.org/career" target="_blank" class="btn btn-lg text-white rounded-10" style="background: var(--pgc);">GO TO JOB OPENINGS</a>
+        <h4 class="font-weight-bold" style="color: #0D9487;">${type == "directThankyou" ? "Answers Already Sumitted" : "Amazing, we have received your responses!"}</h4>
+        <p class="text-center">${type == "directThankyou" ? "" : "Thank you so much for trusting and choosing International Schooling. <br/>"} If your answers matched our requirements, our team will shortly send you a meeting calendar to book your first round of interview.</p>
     </div>`;
 }

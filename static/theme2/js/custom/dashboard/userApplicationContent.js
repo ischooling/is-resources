@@ -555,7 +555,6 @@ function qaModalContent(data){
                                     Q${item.displayOrder}. ${item.questionText}
                                     ${item.questionType === "M" ? `<span class="text-danger">*</span>` : ""}
                                 </p>
-                                <label class="text-muted mb-1 d-block">Answer</label>
                                 <p class="mb-0 pl-2">${item.answerText || "<em class='text-muted'>No answer</em>"}</p>
                             </div>`
                         })
