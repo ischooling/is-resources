@@ -42,7 +42,7 @@ async function renderBookClassContent(
             data,
             moduleId,
             responseData.details.showAcademicYearValidation,
-            responseData.details.classPlanCount
+            data.compClassPerweek
           )
       );
       $("#bookClassContentThumbList .courseThumb").first().trigger("click");
@@ -116,6 +116,7 @@ function pageTitleContentForClassError() {
 }
 
 function getBookClassContent(data,moduleId,showAcademicYearValidation,classPlanCount) {
+  
   var firstSubject = data.subjectList[0];
   console.log(data);
   var html=
@@ -294,6 +295,7 @@ function getSingleCourseViewContent(data, moduleId){
 }
 
 function classesThumbsContentNew(data) {
+  
   var classYearCount = data.classData.year[0];
   var classWeekCount = data.classData.week[0];
   var html=
@@ -303,14 +305,14 @@ function classesThumbsContentNew(data) {
         html+=
         `<div class="d-flex flex-wrap align-items-center justify-content-between">
           <span>For 42 weeks</span>
-          <span class="font-22">${classYearCount.comp}</span>
+          <span class="font-22">${data.compClassYear}</span>
         </div>`;
       }
       if(classWeekCount.comp>0){
         html+=
         `<div class="d-flex flex-wrap align-items-center justify-content-between">
           <span>per week</span>
-          <span class="font-22">${classWeekCount.comp}</span>
+          <span class="font-22">${data.compClassPerweek}</span>
         </div>`;
       }
     html+=`</div>`;
@@ -525,6 +527,7 @@ function classesThumbCotentList(data) {
 }
 
 function classesThumbsButtletPointContent(classPlanCount, registerType, classData) {
+  
   var classWeekCount = classData.week[0];
   var html=
     `<h5 class="font-weight-semi-bold mb-0">
@@ -535,7 +538,7 @@ function classesThumbsButtletPointContent(classPlanCount, registerType, classDat
       <p class="m-0 mb-2"><span class="d-inline-block px-2 p-1 mr-2 rounded bg-light text-dark" style="line-height:16px">1</span>Weekly Class Structure: Monday to Friday</p>
       <p class="m-0 mb-2"><span class="d-inline-block px-2 p-1 mr-2 rounded bg-light text-dark" style="line-height:16px">2</span>You can book `;
       if(classWeekCount.comp>0){
-        html += classWeekCount.comp;
+        html += classPlanCount;
       }  else {
         html += classWeekCount.extra;
       }

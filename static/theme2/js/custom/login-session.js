@@ -163,7 +163,8 @@ function callUserLoginFun(formId, moduleId, loginType) {
 						}else{
 							showMessage(true, data.message);
 						}
-						$('#sessionOutPermission').modal('hide')
+						$('#sessionOutPermission').modal('hide');
+						window.location.reload();
 					}
 				}else{
 					showMessage(true, redirectUrl);

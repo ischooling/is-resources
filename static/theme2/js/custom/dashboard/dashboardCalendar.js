@@ -460,10 +460,10 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUU
         eventAfterAllRender: function() {
             if (!scrollEventTriggered) {
                 scrollEventTriggered = true;
+				scrollEvent();
                 setTimeout(function() {
-                    scrollEvent();
                     scrollEventTriggered = false;
-                }, 800);
+                }, 1500);
             }
         },
 

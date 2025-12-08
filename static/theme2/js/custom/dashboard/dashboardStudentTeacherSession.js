@@ -3679,7 +3679,6 @@ function callTeacherClassesToUpdateStatus() {
 					//showMessageTheme2(2, "",'',true);
 				}
 			} else {
-				debugger;
 				if($("#teacherMeetingStatus").length<1){
 					$("body").append(meetingStatusUpdateModal(data.details))
 				}
