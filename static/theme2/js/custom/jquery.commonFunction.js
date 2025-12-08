@@ -6747,11 +6747,11 @@ function openAiSummaryModal(summary) {
     $("body").append(modalHtml);
 
 	var html = ''
-    + '<h3 style="font-size:22px;"><b>Ai Summary</b></h3>'
+    + '<h3 style="font-size:22px;"><b>AI Summary</b></h3>'
     + '<hr>'
     + '<h4 style="font-size:20px;"><b>' + summary.summaryTitle + '</b></h4>'
     + '<p style="font-size:15px;">' + summary.summaryOverview + '</p>'
-    + '<h5 style="font-size:18px; margin-top:20px;"><b>Ai Summary Details</b></h5>'
+    + '<h5 style="font-size:18px; margin-top:20px;"><b>AI Summary Details</b></h5>'
     + '<hr>';
 
 	summary.summaryDetails.forEach(function(item, i) {
@@ -6769,7 +6769,7 @@ function closeAiSummaryModal() {
     $(".modal-backdrop").remove();
 }
 
-function generateAiSummary(meetingId) {
+function generateAiSummary(meetingId, entityId, entityName) {
 
   $.ajax({
       type: "GET",
@@ -6779,6 +6779,7 @@ function generateAiSummary(meetingId) {
           pageSize: 10
       },
       success: function(response) {
+          showAiSummary(entityId, entityName);
           showMessage(true, "Summary Generated: " + response);
       },
       error: function() {

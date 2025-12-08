@@ -650,7 +650,7 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
                     <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
                     <button class="btn btn-sm bg-white rounded" 
                             style="border:1px solid #000; color:#000;" 
-                            onclick="generateAiSummary('${meetingId}')">
+                            onclick="generateAiSummary('${meetingId}', '${entityId}', '${entityName}')">
                         Generate Summary
                     </button>
                 </div>
@@ -896,7 +896,7 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
                                         </button>`
                                       : `<button class="btn btn-sm bg-white rounded"
                                                 style="border:1px solid #000;color:#000;"
-                                                onclick="generateAiSummary('${session.meetingId}')">
+                                                onclick="generateAiSummary('${session.meetingId}','${entityId}', '${entityName}')">
                                             Generate Summary
                                         </button>`
                                   }
@@ -1052,7 +1052,7 @@ function updateRecordingsTable(data, body) {
                               </button>`
                             : `<button class="btn btn-sm bg-white rounded"
                                       style="border:1px solid #000;color:#000;"
-                                      onclick="generateAiSummary('${session.meetingId}')">
+                                      onclick="generateAiSummary('${session.meetingId}','${entityId}', '${entityName}')">
                                   Generate Summary
                               </button>`
                         }
