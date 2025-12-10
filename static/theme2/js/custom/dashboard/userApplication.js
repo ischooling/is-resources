@@ -18,25 +18,27 @@ async function userApplicationProfileOnloadFunction(){
         theme:"bootstrap4"
     }).on("change", function(){
         if($(this).val()=="Teacher"){
-            var html = `<option value="">Select Status</option>
-                        <option value="applied">Applied</option>
-                        <option value="Approved For Interview">Approved For Interview</option>
-                        <option value="Approved for Selection Process">Approved for Selection Process</option>
-                        <option value="Hold">Hold</option>`;
+            var html=`<option value="">Select Status</option>
+                <option value="applied">Applied</option>
+                <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                <option value="Approved For Interview">Approved For Interview</option>
+                <option value="Approved for Selection Process">Approved for Selection Process</option>
+                <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
         }else{
-            var html = `<option value="applied">Applied</option>
-                        <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
-                        <option value="Approved For Interview">Approved For Interview</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Hold">Hold</option>`;
+            var html=`<option value="">Select Status</option>
+                <option value="applied">Applied</option>
+                <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                <option value="Approved For Interview">Approved For Interview</option>
+                <option value="accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+                <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
         }
     });
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
-    loadUserApplicationData();
+    loadUserApplicationData('onLoad');
     if($("#cropModalChatSuport").length == 1){
         $("#cropModalChatSuport").remove();
     }
@@ -161,7 +163,7 @@ function bindUserApplicationData(responseData) {
     }
 }
 
-async function loadUserApplicationData() {
+async function loadUserApplicationData(type) {
     try {
         var payload = {};
         payload['schoolId'] = SCHOOL_ID;
@@ -174,7 +176,11 @@ async function loadUserApplicationData() {
         // payload['status'] = $("#userScreeningFilterForm #filterStatus").val();
         payload['pageNo'] = CURRENT_PAGE_USER_APPLICATION;
         payload['pageSize'] = $("#userScreeningFilterForm #pageSize").val().trim();
-        payload['status'] = $("#userScreeningFilterForm #applicantsStatus").val().trim();
+        if(type == "onLoad"){
+            payload['status'] = "applied"
+        }else {
+            payload['status'] = $("#userScreeningFilterForm #applicantsStatus").val().trim();
+        }
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-user-screening-data', payload, '/teacher/signup');
         bindUserApplicationData(responseData);
     } catch (error) {
@@ -185,15 +191,7 @@ async function loadUserApplicationData() {
 
 function applyFilterUserApplication() {
     CURRENT_PAGE_USER_APPLICATION = 1;
-    // if($("#userScreeningFilterForm #filterAppliedUserRole").val() == null || $("#userScreeningFilterForm #filterAppliedUserRole").val() == undefined || $("#userScreeningFilterForm #filterAppliedUserRole").val() == ""){
-    //     showMessageTheme2(0, "Applied User Role is required");
-    //     return false;
-    // }
-    if($("#userScreeningFilterForm #applicantsStatus").val() == null || $("#userScreeningFilterForm #applicantsStatus").val() == undefined || $("#userScreeningFilterForm #applicantsStatus").val() == ""){
-        showMessageTheme2(0, "Status is required");
-        return false;
-    }
-    loadUserApplicationData();
+    loadUserApplicationData('filter');
 }
 
 function resetUserApplication() {
@@ -202,11 +200,6 @@ function resetUserApplication() {
     $("#filterAppliedUserRole").val("").trigger("change");
     CURRENT_PAGE_USER_APPLICATION = 1;
     $('#userScreeningFilterForm #pageSize').val('10');
-     var html = `<option value="applied">Applied</option>
-                <option value="Approved For Interview">Approve For Interview</option>
-                <option value="accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>`;
-    $("#applicantsStatus").html(html);
 }
 
 // function resendInterviewLink(teacherId) {
@@ -225,9 +218,15 @@ function openUpdateStatusModalUserApplication(id, status, role){
     $("#questions").select2({
         placeholder: "Select questions",
         theme:"bootstrap4"
+    }).on('select2:select', function (e) {
+        var element = e.params.data.element;
+        var $element = $(element);
+        $element.detach();
+        $(this).append($element);
+        $(this).trigger("change");
     });
-    if(status == "Hold"){
-        $("#userApplicationProfileStatus option[value='Hold']").remove()
+    if(status == "On Hold"){
+        $("#userApplicationProfileStatus option[value='On Hold']").remove()
     }
     setTimeout(() => {
         $("#userApplicationProfileStatusModal").modal("show");

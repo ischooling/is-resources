@@ -95,6 +95,7 @@ function userScreeningFilter(){
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Status</label>
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
+                        <option value="">Select status</option>
                         <option value="applied">Applied</option>
                         <option value="Approved For Interview">Approve For Interview</option>
                         <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
@@ -169,7 +170,7 @@ function userApplicationProfileStatusModal(id, status, role){
                                         }else if(status == "Approved for Selection Process"){
                                             html+=`<option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
-                                        }else if(status == "Hold"){
+                                        }else if(status == "On Hold"){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="Approved for Selection Process">Approve for Selection Process</option>
                                             <option value="On Hold">On Hold</option>
@@ -191,7 +192,7 @@ function userApplicationProfileStatusModal(id, status, role){
                                         }else if(status == "Accepted"){
                                             html+=`<option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
-                                        }else if(status == "Hold"){
+                                        }else if(status == "On Hold"){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             w<option value="Accepted">Accepted</option>
                                             <option value="On Hold">On Hold</option>
@@ -216,6 +217,7 @@ function userApplicationProfileStatusModal(id, status, role){
                             <div class="form-group">
                                 <label for="message-text" class="control-label">Remarks:</label>
                                 <textarea id="userApplicationProfileRemarks" class="form-control px-2" maxlength="200"></textarea>
+                                <p class="text-warning mb-0 font-12 ml-1 mt-1 font-weight-semi-bold">Note- Remarks will be sent to the applicant via email.</p>
                             </div>
                         </form>
                         <div class="d-flex justify-content-end">

@@ -5734,7 +5734,7 @@ function getWatiTemplates() {
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			if (data['statusCode'] == '0' || data['statusCode'] == '2' || data['statusCode'] == 'E001' || data['statusCode'] == 'E002') {
+			if (data['statusCode'] == '0' || data['statusCode'] == '2'  || data['status'] == '0' || data['status'] == '2'  || data['statusCode'] == 'E001' || data['statusCode'] == 'E002') {
 				//showMessageTheme2(0, data['message'],'',true);
 				showMessageTheme2(0, data['message'],'',false);
 			} else {
