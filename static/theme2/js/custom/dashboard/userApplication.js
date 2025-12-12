@@ -1,6 +1,12 @@
-var CURRENT_PAGE_USER_APPLICATION = 1; 
+var CURRENT_PAGE_USER_APPLICATION = 1;
+var USER_APPLICATION_FILTER_STATE = {
+    filterValues: {}
+};
 async function userApplicationProfileOnloadFunction(){
     CURRENT_PAGE_USER_APPLICATION = 1;
+    USER_APPLICATION_FILTER_STATE = {
+        filterValues: {}
+    };
     getAllCountryList('userScreeningFilterForm','filterCountryId');
     // let payload = {}
     // var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
@@ -13,13 +19,19 @@ async function userApplicationProfileOnloadFunction(){
         placeholder: "Select Assign To",
         theme:"bootstrap4"
     });
+    $("#filterStartDate, #filterEndDate").datepicker({
+       format: "M dd, yyyy",
+       autoclose: true
+    });
+    // $("#filterStartDate, #filterEndDate").datepicker("setDate", new Date());
+    // $("#filterStartDate, #filterEndDate").prop("disabled", true)
     $("#userScreeningFilterForm #filterAppliedUserRole").select2({
         placeholder: "Select Applied User Role",
         theme:"bootstrap4"
     }).on("change", function(){
         if($(this).val()=="Teacher"){
             var html=`<option value="">Select Status</option>
-                <option value="applied">Applied</option>
+                <option value="Applied">Applied</option>
                 <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                 <option value="Approved For Interview">Approved For Interview</option>
                 <option value="Approved for Selection Process">Approved for Selection Process</option>
@@ -27,18 +39,18 @@ async function userApplicationProfileOnloadFunction(){
             $("#applicantsStatus").html(html);
         }else{
             var html=`<option value="">Select Status</option>
-                <option value="applied">Applied</option>
+                <option value="Applied">Applied</option>
                 <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                 <option value="Approved For Interview">Approved For Interview</option>
                 <option value="accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>
+                <option value="Reject">Rejected</option>
                 <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
         }
     });
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
-    loadUserApplicationData('onLoad');
+    loadUserApplicationData(false, "onLoad");
     if($("#cropModalChatSuport").length == 1){
         $("#cropModalChatSuport").remove();
     }
@@ -82,6 +94,10 @@ function bindUserApplicationData(responseData) {
                         }
                         &nbsp;|&nbsp;
                         ${user.email || ''}
+
+                        ${user.isNewApplicant == "Y"
+                            ? `<span id="newApplicationText${user.id}" class="color-changing font-16 font-weight-bold">New!</span>` : ``
+                        }
 
                         ${
                             JSON.parse(user.location).by
@@ -128,29 +144,34 @@ function bindUserApplicationData(responseData) {
                     </td>
                     <td>${user.status}</td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}')">
-                                        <i class="fas fa-edit me-2"></i>&nbsp;Update Status
-                                    </a>
-                                </li>`;
-                                if(user.status != "" && user.appliedUserRole == "Teacher"){
-                                    row+=`<li>
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${user.id})">
-                                            <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                        <div class="d-flex align-items-center gap-5">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}')">
+                                            <i class="fas fa-edit me-2"></i>&nbsp;Update Status
                                         </a>
-                                    </li>`
-                                }
-                                row+=`<li>
-                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING')">
-                                        <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
-                                    </a>
-                                </li>
-                            </ul>
+                                    </li>`;
+                                    if(user.status != "" && user.appliedUserRole == "Teacher"){
+                                        row+=`<li>
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${user.id})">
+                                                <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                                            </a>
+                                        </li>`
+                                    }
+                                    row+=`<li>
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING')">
+                                            <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div data-toggle="tooltip" data-placement="top" title="Discard">
+                                <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${user.id}, 'Discard')&quot;)"></i>
+                            </div>
                         </div>
                     </td>
                 </tr>`;
@@ -159,39 +180,53 @@ function bindUserApplicationData(responseData) {
         $("#userApplicationPagination").html(renderPaginationCommon(CURRENT_PAGE_USER_APPLICATION, responseData.pagination.totalPages, "userApplication"));
     }else{
         $("#userApplicationPagination").html('');
-        $('#userApplicationTable tbody').html('<tr><td colspan="11" class="text-center text-muted">No Data Found</td></tr>')
+        $('#userApplicationTable tbody').html('<tr><td colspan="13" class="text-center text-muted">No Data Found</td></tr>')
     }
 }
 
-async function loadUserApplicationData(type) {
+async function loadUserApplicationData(isToday, callFrom) {
+    var startVal = $("#userScreeningFilterForm #filterStartDate").val();
+    var endVal   = $("#userScreeningFilterForm #filterEndDate").val();
     try {
         var payload = {};
         payload['schoolId'] = SCHOOL_ID;
-        payload['userName'] = $("#userScreeningFilterForm #filterName").val().trim();
-        payload['phoneNumber'] = $("#userScreeningFilterForm #filterPhone").val().trim();
-        payload['email'] = $("#userScreeningFilterForm #filterEmail").val().trim();
-        payload['appliedUserRole'] = $("#userScreeningFilterForm #filterAppliedUserRole").val().trim();
-        payload['country'] = $("#userScreeningFilterForm #filterCountryId").val();
-        // payload['assignTo'] = $("#userScreeningFilterForm #filterAssignedTo").val();
-        // payload['status'] = $("#userScreeningFilterForm #filterStatus").val();
         payload['pageNo'] = CURRENT_PAGE_USER_APPLICATION;
-        payload['pageSize'] = $("#userScreeningFilterForm #pageSize").val().trim();
-        if(type == "onLoad"){
-            payload['status'] = "applied"
-        }else {
-            payload['status'] = $("#userScreeningFilterForm #applicantsStatus").val().trim();
+        payload['pageSize'] = $("#recordsPerPageJA").val();
+        if (isToday) {
+            payload['startDate'] = changeDateFormat(new Date(), "yyyy-mm-dd") + " 00:00:00";
+            payload['endDate'] = changeDateFormat(new Date(), "yyyy-mm-dd") + " 23:59:59";
+        } else if(!isToday && callFrom == "card") {
+            payload['startDate'] = "" 
+            payload['endDate'] = "";
+        }else{
+            payload['startDate'] = startVal ? changeDateFormat(new Date(startVal), "yyyy-mm-dd") + " 00:00:00" : ""; 
+            payload['endDate'] = endVal ? changeDateFormat(new Date(endVal), "yyyy-mm-dd") + " 23:59:59" : "";
         }
+        payload['userName'] = USER_APPLICATION_FILTER_STATE.filterValues.userName || "";
+        payload['phoneNumber'] = USER_APPLICATION_FILTER_STATE.filterValues.phoneNumber || "";
+        payload['email'] = USER_APPLICATION_FILTER_STATE.filterValues.email || "";
+        payload['appliedUserRole'] = USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole || "";
+        payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
+        payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-user-screening-data', payload, '/teacher/signup');
-        bindUserApplicationData(responseData);
+        if(responseData.statusCode == "SUCCESS"){
+            bindUserApplicationData(responseData);
+            if(callFrom == "filter" || callFrom == "onLoad"){
+                $("#todayRecordsJA").text(responseData.todayRecords)
+                $("#totalRecordsJA").text(responseData.overallRecords)
+            }
+            $('[data-toggle="tooltip"]').tooltip();
+        }
     } catch (error) {
         console.error('Error loading user application data:', error);
-        $('#userApplicationTable tbody').html('<tr><td colspan="11" class="text-center text-muted">No Data Available</td></tr>');
+        $('#userApplicationTable tbody').html('<tr><td colspan="13" class="text-center text-muted">No Data Available</td></tr>');
     }
 }
 
 function applyFilterUserApplication() {
     CURRENT_PAGE_USER_APPLICATION = 1;
-    loadUserApplicationData('filter');
+    updateFormState();
+    loadUserApplicationData(false, "filter");
 }
 
 function resetUserApplication() {
@@ -200,11 +235,22 @@ function resetUserApplication() {
     $("#filterAppliedUserRole").val("").trigger("change");
     CURRENT_PAGE_USER_APPLICATION = 1;
     $('#userScreeningFilterForm #pageSize').val('10');
+    $("#filterDateDuration").val("Custom").trigger("change");
+    USER_APPLICATION_FILTER_STATE = {
+        filterValues: {}
+    };
 }
 
-// function resendInterviewLink(teacherId) {
-//     alert('Interview booking link has been resent successfully!');
-// }
+function updateFormState() {
+    USER_APPLICATION_FILTER_STATE.filterValues = {
+        userName: $("#userScreeningFilterForm #filterName").val().trim(),
+        phoneNumber: $("#userScreeningFilterForm #filterPhone").val().trim(),
+        email: $("#userScreeningFilterForm #filterEmail").val().trim(),
+        appliedUserRole: $("#userScreeningFilterForm #filterAppliedUserRole").val().trim(),
+        country: $("#userScreeningFilterForm #filterCountryId").val(),
+        status: $("#userScreeningFilterForm #applicantsStatus").val().trim()
+    };
+}
 
 function openUpdateStatusModalUserApplication(id, status, role){
     if($("#userApplicationProfileStatusModal").length == 1){
@@ -233,7 +279,26 @@ function openUpdateStatusModalUserApplication(id, status, role){
     }, 200);
 }
 
-async function updateUserApplicationProfile(id){
+async function updateUserApplicationProfile(id, status){
+    if (status === "Discard") {
+        const payload = {
+            entityId: id,
+            entityType: "INITIAL-INTERVIEW",
+            status: "Discard",
+            remarks: "Discarded"
+        };
+
+        const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
+
+        if (responseData.statusCode === "SUCCESS") {
+            $("#userApplicationTable tbody #tr_"+id).remove();
+            showMessageTheme2(1, responseData.message);
+        } else {
+            showMessageTheme2(0, responseData.message);
+        }
+
+        return;
+    }
     var selectedStatus = $("#userApplicationProfileStatus").val();
     if(selectedStatus == null || selectedStatus == undefined || selectedStatus == ""){
         showMessageTheme2(2, "Please select status");
@@ -279,7 +344,9 @@ async function updateUserApplicationProfile(id){
             updateTableRowDirectly(id, selectedStatus, displayName);
         // }
         showMessageTheme2(1, responseData.message);
+        loadUserApplicationData(false, "filter");
         $("#userApplicationProfileStatusModal").modal("hide");
+        $("#newApplicationText"+String(id)).remove();
     }else{
         showMessageTheme2(0, responseData.message);
     }
@@ -377,15 +444,17 @@ function bindQuestionsToJA(formId, selectId, responseData) {
 
 function updateTableRowDirectly(userId, newStatus, assignedTo) {
     var row = $('#tr_' + userId);
-    
     if(row.length) {
-        if(newStatus == "Step 2 | Few Questions"){}
-        else if(newStatus != "Approved for Selection Process"){
+        if(newStatus == "Step 2 | Few Questions" || newStatus == "On Hold" || newStatus == "Accepted"){
+        }else if(USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole == "Teacher" && newStatus == "Reject"){
+            row.remove();
+        }else if(newStatus != "Approved for Selection Process"){
             row.find('td:eq(10)').text(assignedTo || 'N/A');
         }
         row.find('td:eq(11)').text(newStatus || 'N/A');
         
         var dropdownHtml = `
+        <div class="d-flex align-items-center gap-5">
             <div class="dropdown">
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-ellipsis-v"></i>
@@ -405,7 +474,11 @@ function updateTableRowDirectly(userId, newStatus, assignedTo) {
         }
         
         dropdownHtml += `</ul>
-            </div>`;
+            </div>
+            <div data-toggle="tooltip" data-placement="top" title="Discard">
+                <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${userId}, 'Discard')&quot;)"></i>
+            </div>
+        </div>`;
         row.find('td:eq(12)').html(dropdownHtml);
     }
 }
@@ -542,6 +615,8 @@ async function saveCommunicationLogJA(formId, userId, userRole){
         showMessageTheme2(1, responseData.message);
         resetCommunicationLogFormJA(formId);
         getCommunicationLogDataJA('communicationLogTableJA', userId, userRole);
+        $("#newApplicationText"+userId).remove();
+        loadUserApplicationData(false, "filter");
     }else{
         showMessageTheme2(0, responseData.message)
     }
@@ -620,7 +695,7 @@ function resetCommunicationLogFormJA(formId){
     uploadDocs = [];
 }
 
-function showAddQuestionsMOdal(){
+function showAddQuestionsModal(){
     $("#addQuestionsModal").remove();
     $("body").append(addQuestionsModal());
     setTimeout(() => {
@@ -686,4 +761,48 @@ async function openQAModal(entityId){
             $("#qaModal").modal("show");
         }, 300);
     }
+}
+
+function setFilterDatesAccordingly(src, startDateId, endDateId) {
+    const value = $(src).val();
+    const today = new Date();
+
+    const getStartOfWeek = (date) => {
+        const diff = date.getDate() - date.getDay();
+        return new Date(date.getFullYear(), date.getMonth(), diff);
+    };
+    const getEndOfWeek = (date) => {
+        const start = getStartOfWeek(new Date(date));
+        return new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+    };
+    const getStartOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
+    const getEndOfMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+    if (value === "Today") {
+        const d = changeDateFormat(today, "MMM-dd-yyyy");
+        $(startDateId + "," + endDateId).val(d).prop("disabled", true);
+        return;
+    }
+
+    if (value === "Week") {
+        $(startDateId).val(changeDateFormat(getStartOfWeek(today), "MMM-dd-yyyy")).prop("disabled", true);
+        $(endDateId).val(changeDateFormat(getEndOfWeek(today), "MMM-dd-yyyy")).prop("disabled", true);
+        return;
+    }
+
+    if (value === "Month") {
+        $(startDateId).val(changeDateFormat(getStartOfMonth(today), "MMM-dd-yyyy")).prop("disabled", true);
+        $(endDateId).val(changeDateFormat(getEndOfMonth(today), "MMM-dd-yyyy")).prop("disabled", true);
+        return;
+    }
+    $(startDateId).val("").prop("disabled", false);
+    $(endDateId).val("").prop("disabled", true);
+    $(startDateId).off("change").on("change", function () {
+        $(endDateId).val("").prop("disabled", false);
+        $(endDateId).datepicker("setStartDate", $(startDateId).val());
+    });
+    $(endDateId).off("change").on("change", function () {
+        var endVal = $(endDateId).val();
+        if (!endVal || endVal.trim() === "") return;
+    });
 }

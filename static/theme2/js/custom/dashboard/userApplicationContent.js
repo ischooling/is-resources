@@ -9,7 +9,7 @@ function renderUserApplicationContent(title){
             </div>
         </div>
         <div class="d-flex align-items-center justify-content-end gap-5">
-            <a href="javascript:void(0)" onclick="showAddQuestionsMOdal();" class="btn btn-outline-primary">
+            <a href="javascript:void(0)" onclick="showAddQuestionsModal();" class="btn btn-outline-primary">
                 <i class="fa fa-question"></i> Add Questions
             </a>
             <a href="javascript:void(0)" onclick="showFilterUserApplication();" class="btn btn-primary">
@@ -24,7 +24,7 @@ function renderUserApplicationContent(title){
 
 function userScreeningFilter(){
     var html=
-        `<form id="userScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2" style="display:none;">
+        `<form id="userScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2">
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Name</label>
@@ -88,21 +88,34 @@ function userScreeningFilter(){
                         <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
                     </select>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                ${/*<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>No. of records</label>
                     <input type="text" id="pageSize" class="form-control" onkeydown="return M.digit(event);" value="10">
-                </div>
+                </div>*/''}
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Status</label>
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
                         <option value="">Select status</option>
-                        <option value="applied">Applied</option>
+                        <option value="Applied">Applied</option>
                         <option value="Approved For Interview">Approve For Interview</option>
                         <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                         <option value="On Hold">On Hold</option>
                         <option value="accepted">Accepted</option>
                         <option value="Reject">Rejected</option>
                     </select>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                    <label>Date</label>
+                    <div class="d-flex gap-5">
+                        <select onchange="setFilterDatesAccordingly(this, '#filterStartDate', '#filterEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14">
+                            <option value="Today">Today</option>  
+                            <option value="Week">Week</option>
+                            <option value="Month">Month</option>
+                            <option value="Custom" selected>Custom</option>
+                        </select>
+                        <input type="text" class="form-control" id="filterStartDate" readonly onkeydown="return false" />
+                        <input type="text" class="form-control" id="filterEndDate" readonly onkeydown="return false" />
+                    </div>
                 </div>
             </div>
             <div class="d-flex justify-content-end mt-3">
@@ -115,7 +128,23 @@ function userScreeningFilter(){
 
 function userApplicationTableContent(status){
     var html=
-        `<div class="table-responsive mt-3 bg-white p-2">
+        `<div class="d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center w-fit-content mb-3" style="background-color: #C6E2FF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #027FFF">
+                <p class="mb-0">Total Applications | Today's Applications</p>
+                <p class="mb-0 text-white bg-primary px-2 rounded ml-2"><a href="javascript:void(0);" id="totalRecordsJA" onclick="loadUserApplicationData(false, 'card');" class="text-white">0</a> | <a href="javascript:void(0);" id="todayRecordsJA" onclick="loadUserApplicationData(true, 'card');" class="text-white">0</a></p>
+            </div>
+            <div class="form-inline">
+                <label class="mr-2">Show</label>
+                <select id="recordsPerPageJA" class="form-control form-control-sm" onchange="loadUserApplicationData()">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <label class="ml-2">entries</label>
+            </div>
+        </div>
+        <div class="table-responsive mt-3 bg-white p-2">
             <table id="userApplicationTable" class="table table-bordered font-12">
                 <thead class="bg-primary text-white">
                     <tr>
@@ -186,7 +215,7 @@ function userApplicationProfileStatusModal(id, status, role){
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
-                                             html+=`<option value="Accepted">Accepted</option>
+                                            html+=`<option value="Accepted">Accepted</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Accepted"){
@@ -212,12 +241,12 @@ function userApplicationProfileStatusModal(id, status, role){
                             <div id="questionsDiv" class="form-group" style="display: none;">
                                 <label>Questions</label>
                                 <select id="questions" class="form-control" multiple></select>
-                                <p class="text-warning mb-0 font-12 ml-1 mt-1 font-weight-semi-bold">Note- Please select the question priority wise.</p>
+                                <p class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold">Note- Please select the question priority wise.</p>
                             </div>
                             <div class="form-group">
                                 <label for="message-text" class="control-label">Remarks:</label>
                                 <textarea id="userApplicationProfileRemarks" class="form-control px-2" maxlength="200"></textarea>
-                                <p class="text-warning mb-0 font-12 ml-1 mt-1 font-weight-semi-bold">Note- Remarks will be sent to the applicant via email.</p>
+                                <p class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold">Note- Remarks will be sent to the applicant via email.</p>
                             </div>
                         </form>
                         <div class="d-flex justify-content-end">
