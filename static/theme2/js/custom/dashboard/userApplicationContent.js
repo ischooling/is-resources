@@ -10,7 +10,7 @@ function renderUserApplicationContent(title){
         </div>
         <div class="d-flex align-items-center justify-content-end gap-5">
             <a href="javascript:void(0)" onclick="showAddQuestionsModal();" class="btn btn-outline-primary">
-                <i class="fa fa-question"></i> Add Questions
+                View/Add Questions
             </a>
             <a href="javascript:void(0)" onclick="showFilterUserApplication();" class="btn btn-primary">
                 <i class="fa fa-filter"></i> Filter
@@ -71,7 +71,7 @@ function userScreeningFilter(){
                         <option value="Human Resources Manager">Human Resources Manager</option>
                         <option value="IT Administrator">IT Administrator</option>
                         <option value="Office Assistant">Office Assistant</option>
-                        <option value="Special Educator">Special Educator</option>
+                        <option value="Special Educators">Special Educators</option>
                         <option value="Activity Teacher">Activity Teacher</option>
                         <option value="Art Teacher">Art Teacher</option>
                         <option value="Music Teacher">Music Teacher</option>
@@ -79,6 +79,7 @@ function userScreeningFilter(){
                         <option value="Career Counselor">Career Counselor</option>
                         <option value="College / University Counselor">College / University Counselor</option>
                         <option value="Accountant">Accountant</option>
+                        <option value="Student Admission Advisor">Student Admission Advisor</option>
                         <option value="Student Engagement Officer">Student Engagement Officer</option>
                         <option value="Psychologist">Psychologist</option>
                         <option value="Content Writer">Content Writer</option>
@@ -95,10 +96,12 @@ function userScreeningFilter(){
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Status</label>
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
-                        <option value="">Select status</option>
+                        <option value="">Select Status</option>
                         <option value="Applied">Applied</option>
                         <option value="Approved For Interview">Approve For Interview</option>
                         <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                        <option value="Few Questions Submitted">Few Questions Submitted</option>
+                        <option value="New Applications">New Applications</option>
                         <option value="On Hold">On Hold</option>
                         <option value="accepted">Accepted</option>
                         <option value="Reject">Rejected</option>
@@ -129,10 +132,16 @@ function userScreeningFilter(){
 function userApplicationTableContent(status){
     var html=
         `<div class="d-flex flex-column">
-            <div class="d-flex justify-content-between align-items-center w-fit-content mb-3" style="background-color: #C6E2FF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #027FFF">
-                <p class="mb-0">Total Applications | Today's Applications</p>
-                <p class="mb-0 text-white bg-primary px-2 rounded ml-2"><a href="javascript:void(0);" id="totalRecordsJA" onclick="loadUserApplicationData(false, 'card');" class="text-white">0</a> | <a href="javascript:void(0);" id="todayRecordsJA" onclick="loadUserApplicationData(true, 'card');" class="text-white">0</a></p>
-            </div>
+            <div class="d-flex align-items-center gap-10">
+                <div class="d-flex justify-content-between align-items-center w-fit-content mb-3" style="background-color: #C6E2FF;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #027FFF">
+                    <p class="mb-0">Total Applications | Today's Applications</p>
+                    <p class="mb-0 text-white bg-primary px-2 rounded ml-2"><a href="javascript:void(0);" id="totalRecordsJA" onclick="loadUserApplicationData(false, 'card');" class="text-white">0</a> | <a href="javascript:void(0);" id="todayRecordsJA" onclick="loadUserApplicationData(true, 'card');" class="text-white">0</a></p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center w-fit-content mb-3" style="background-color: #FFFFDE;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+                    <p class="mb-0">Teacher | Other Roles</p>
+                    <p class="mb-0 text-dark px-2 rounded ml-2" style="background-color: #F3F39E"><a href="javascript:void(0);" id="teachingRecordsJA" onclick="loadUserApplicationData(false, 'teachingCard', 'true');" class="text-dark">0</a> | <a href="javascript:void(0);" id="nonTeachingRecordsJA" onclick="loadUserApplicationData(false, 'teachingCard', false);" class="text-dark">0</a></p>
+                </div>
+            </div> 
             <div class="form-inline">
                 <label class="mr-2">Show</label>
                 <select id="recordsPerPageJA" class="form-control form-control-sm" onchange="loadUserApplicationData()">
@@ -172,7 +181,7 @@ function userApplicationTableContent(status){
 
 function userApplicationProfileStatusModal(id, status, role){
     var html=
-        `<div class="modal fade show" id="userApplicationProfileStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+        `<div class="modal right-slide-modal fade show" id="userApplicationProfileStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
@@ -186,7 +195,7 @@ function userApplicationProfileStatusModal(id, status, role){
                             <div class="form-group">
                                 <label for="userApplicationProfileStatus" class="control-label">Status:</label>
                                 <select class="form-control" name="userApplicationProfileStatus" id="userApplicationProfileStatus" onchange="applicantsViewAssignToListForInterview('${role}');">
-                                    <option value="0">Select status</option>`
+                                    <option value="0">Select Status</option>`
                                     if(role == "Teacher"){
                                         if(status == "Applied"){
                                             html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
@@ -205,6 +214,10 @@ function userApplicationProfileStatusModal(id, status, role){
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Step 2 | Few Questions"){
+                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else if(status == "Few Questions Submitted"){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
@@ -230,6 +243,10 @@ function userApplicationProfileStatusModal(id, status, role){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Few Questions Submitted"){
+                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
                                     }
                                html+=`</select>
@@ -238,10 +255,36 @@ function userApplicationProfileStatusModal(id, status, role){
                                 <label>Assigned To</label>
                                 <select id="assignedToInterview" class="form-control"></select>
                             </div>
-                            <div id="questionsDiv" class="form-group" style="display: none;">
+                            <div id="questionsDiv" class="form-group" style="display:none;">
                                 <label>Questions</label>
-                                <select id="questions" class="form-control" multiple></select>
-                                <p class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold">Note- Please select the question priority wise.</p>
+
+                                <p class="text-secondary mb-2 font-14 font-weight-semi-bold">
+                                    Note- Drag the questions you want to send to user
+                                </p>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center gap-5 mb-2">
+                                            <h6 class="text-muted">Available Questions</h6>
+                                            <a href="javascript:void(0);" id="addAllQuestionsBtn" class="btn btn-outline-primary btn-sm" onclick="addAllQuestions();" style="display:none;">Add All →</a>
+                                        </div>
+                                        <ul id="availableQuestions"
+                                            class="list-group sortable-group p-2 border rounded"
+                                            style="height: 40vh; overflow-y: auto;">
+                                        </ul>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center gap-5 mb-2">
+                                            <h6 class="text-primary">Selected Questions (Priority Order)</h6>
+                                            <a href="javascript:void(0);" id="removeAllQuestionsBtn" class="btn btn-outline-danger btn-sm" onclick="removeAllQuestions();" style="display:none;">← Remove All</a>
+                                        </div>
+                                        <ul id="selectedQuestions"
+                                            class="list-group sortable-group p-2 border rounded"
+                                            style="height: 40vh; overflow-y: auto;">
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="message-text" class="control-label">Remarks:</label>
@@ -490,74 +533,140 @@ function pdfPreviewJA(){
 
 function addQuestionsModal(){
     var html=
-        `<div class="modal fade" id="addQuestionsModal" tabindex="-1">
+        `<div class="modal right-slide-modal fade" id="addQuestionsModal" tabindex="-1">
             <div class="modal-dialog" role="document">
                 <div class="modal-content text-center">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Question</h5>
+                        <h5 class="modal-title">View/Add Question</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body" style="padding-top:12px">
-                        <div class="row">
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
-                                <label>User Role</label>
-                                <select name="roleType" id="roleType" class="form-control">
-                                    <option value="Common">Common</option>
-                                    <option value="Teacher">Teacher</option>
-                                    <option value="Admissions Manager">Admissions Manager</option>
-                                    <option value="Enrollment Manager">Enrollment Manager</option>
-                                    <option value="Enrollment Success Manager">Enrollment Success Manager</option>
-                                    <option value="Business Development Manager">Business Development Manager</option>
-                                    <option value="Business Development Associate">Business Development Associate</option>
-                                    <option value="Business Associate">Business Associate</option>
-                                    <option value="School Admin">School Admin</option>
-                                    <option value="Administration Head">Administration Head</option>
-                                    <option value="Administration Associate">Administration Associate</option>
-                                    <option value="Head of School">Head of School</option>
-                                    <option value="Associate Head of School">Associate Head of School</option>
-                                    <option value="Principal">Principal</option>
-                                    <option value="Associate Principal">Associate Principal</option>
-                                    <option value="Operations Manager">Operations Manager</option>
-                                    <option value="Academic Coordinator">Academic Coordinator</option>
-                                    <option value="Admissions Counselor">Admissions Counselor</option>
-                                    <option value="Teacher Coordinator">Teacher Coordinator</option>
-                                    <option value="Human Resources Manager">Human Resources Manager</option>
-                                    <option value="IT Administrator">IT Administrator</option>
-                                    <option value="Office Assistant">Office Assistant</option>
-                                    <option value="Special Educator">Special Educator</option>
-                                    <option value="Activity Teacher">Activity Teacher</option>
-                                    <option value="Art Teacher">Art Teacher</option>
-                                    <option value="Music Teacher">Music Teacher</option>
-                                    <option value="Drama Teacher">Drama Teacher</option>
-                                    <option value="Career Counselor">Career Counselor</option>
-                                    <option value="College / University Counselor">College / University Counselor</option>
-                                    <option value="Accountant">Accountant</option>
-                                    <option value="Student Engagement Officer">Student Engagement Officer</option>
-                                    <option value="Psychologist">Psychologist</option>
-                                    <option value="Content Writer">Content Writer</option>
-                                    <option value="Digital Marketing Executive">Digital Marketing Executive</option>
-                                    <option value="Social Media Manager">Social Media Manager</option>
-                                    <option value="Community Engagement Officer">Community Engagement Officer</option>
-                                    <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
-                                </select>
+                        <ul class="nav nav-tabs" id="questionTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link font-weight-semi-bold active" id="view-tab" data-toggle="tab" href="#viewQuestionsTab" onclick="getAllQuestions();" role="tab">View Questions</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link font-weight-semi-bold" id="add-tab" data-toggle="tab" href="#addQuestionsTab" role="tab">Add Question</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3">
+                            <div class="tab-pane fade show active" id="viewQuestionsTab" role="tabpanel">
+                                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 text-left p-0">
+                                    <label>Filter Role</label>
+                                    <select name="filterRoleType" onchange="getAllQuestions();" id="filterRoleType" class="form-control">
+                                        <option value="">All</option>
+                                        <option value="Common">Common</option>
+                                        <option value="Teacher">Teacher</option>
+                                        <option value="Admissions Manager">Admissions Manager</option>
+                                        <option value="Enrollment Manager">Enrollment Manager</option>
+                                        <option value="Enrollment Success Manager">Enrollment Success Manager</option>
+                                        <option value="Business Development Manager">Business Development Manager</option>
+                                        <option value="Business Development Associate">Business Development Associate</option>
+                                        <option value="Business Associate">Business Associate</option>
+                                        <option value="School Admin">School Admin</option>
+                                        <option value="Administration Head">Administration Head</option>
+                                        <option value="Administration Associate">Administration Associate</option>
+                                        <option value="Head of School">Head of School</option>
+                                        <option value="Associate Head of School">Associate Head of School</option>
+                                        <option value="Principal">Principal</option>
+                                        <option value="Associate Principal">Associate Principal</option>
+                                        <option value="Operations Manager">Operations Manager</option>
+                                        <option value="Academic Coordinator">Academic Coordinator</option>
+                                        <option value="Admissions Counselor">Admissions Counselor</option>
+                                        <option value="Teacher Coordinator">Teacher Coordinator</option>
+                                        <option value="Human Resources Manager">Human Resources Manager</option>
+                                        <option value="IT Administrator">IT Administrator</option>
+                                        <option value="Office Assistant">Office Assistant</option>
+                                        <option value="Special Educators">Special Educators</option>
+                                        <option value="Activity Teacher">Activity Teacher</option>
+                                        <option value="Art Teacher">Art Teacher</option>
+                                        <option value="Music Teacher">Music Teacher</option>
+                                        <option value="Drama Teacher">Drama Teacher</option>
+                                        <option value="Career Counselor">Career Counselor</option>
+                                        <option value="College / University Counselor">College / University Counselor</option>
+                                        <option value="Accountant">Accountant</option>
+                                        <option value="Student Admission Advisor">Student Admission Advisor</option>
+                                        <option value="Student Engagement Officer">Student Engagement Officer</option>
+                                        <option value="Psychologist">Psychologist</option>
+                                        <option value="Content Writer">Content Writer</option>
+                                        <option value="Digital Marketing Executive">Digital Marketing Executive</option>
+                                        <option value="Social Media Manager">Social Media Manager</option>
+                                        <option value="Community Engagement Officer">Community Engagement Officer</option>
+                                        <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
+                                    </select>
+                                </div>
+                                <p class="mt-2 mb-0 text-danger font-weight-semi-bold text-left px-2 py-1 rounded font-12">Note: <span class="font-weight-bold">*</span> are mandatory questions</p>
+                                <div id="allQuestionsWrapper" style="max-height: 60vh; overflow-y: auto;"></div>
+                                <div id="changeQuesPriorityBtnWrapper" class="d-flex gap-10 justify-content-end align-items-center">
+                                    <a href="javascript:void(0);" id="changePriorityBtn" class="btn btn-primary mr-2" onclick="enablePriorityChange();">Change questions priority</a>
+                                    <a href="javascript:void(0);" id="saveOrderBtn" class="btn btn-success mr-2 d-none" onclick="saveNewOrder();">Save New Order</a>
+                                    <a href="javascript:void(0);" id="cancelOrderBtn" class="btn btn-secondary mr-2 d-none" onclick="cancelPriorityChange();">Cancel</a>
+                                </div>
                             </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
-                                <label>Question Type</label><br>
-                                <label class="mr-3 mt-2">
-                                    <input type="radio" name="questionType" value="M" checked> Mandatory
-                                </label>
-                                <label>
-                                    <input type="radio" name="questionType" value="N"> Non-Mandatory
-                                </label>
-                            </div>
-                            <div class="col-12 mt-3 text-left">
-                                <label>Question</label>
-                                <textarea id="questionText" class="form-control" rows="3"></textarea>
-                            </div>
-                            <div class="col-12 mt-3">
-                                <button class="btn btn-primary ml-auto" onclick="saveQuestion('addQuestionsModal')">Save Question</button>
+                            <div class="tab-pane fade" id="addQuestionsTab" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
+                                        <label>User Role</label>
+                                        <select name="roleType" id="roleType" class="form-control">
+                                            <option value="Common">Common</option>
+                                            <option value="Teacher">Teacher</option>
+                                            <option value="Admissions Manager">Admissions Manager</option>
+                                            <option value="Enrollment Manager">Enrollment Manager</option>
+                                            <option value="Enrollment Success Manager">Enrollment Success Manager</option>
+                                            <option value="Business Development Manager">Business Development Manager</option>
+                                            <option value="Business Development Associate">Business Development Associate</option>
+                                            <option value="Business Associate">Business Associate</option>
+                                            <option value="School Admin">School Admin</option>
+                                            <option value="Administration Head">Administration Head</option>
+                                            <option value="Administration Associate">Administration Associate</option>
+                                            <option value="Head of School">Head of School</option>
+                                            <option value="Associate Head of School">Associate Head of School</option>
+                                            <option value="Principal">Principal</option>
+                                            <option value="Associate Principal">Associate Principal</option>
+                                            <option value="Operations Manager">Operations Manager</option>
+                                            <option value="Academic Coordinator">Academic Coordinator</option>
+                                            <option value="Admissions Counselor">Admissions Counselor</option>
+                                            <option value="Teacher Coordinator">Teacher Coordinator</option>
+                                            <option value="Human Resources Manager">Human Resources Manager</option>
+                                            <option value="IT Administrator">IT Administrator</option>
+                                            <option value="Office Assistant">Office Assistant</option>
+                                            <option value="Special Educators">Special Educators</option>
+                                            <option value="Activity Teacher">Activity Teacher</option>
+                                            <option value="Art Teacher">Art Teacher</option>
+                                            <option value="Music Teacher">Music Teacher</option>
+                                            <option value="Drama Teacher">Drama Teacher</option>
+                                            <option value="Career Counselor">Career Counselor</option>
+                                            <option value="College / University Counselor">College / University Counselor</option>
+                                            <option value="Accountant">Accountant</option>
+                                            <option value="Student Admission Advisor">Student Admission Advisor</option>
+                                            <option value="Student Engagement Officer">Student Engagement Officer</option>
+                                            <option value="Psychologist">Psychologist</option>
+                                            <option value="Content Writer">Content Writer</option>
+                                            <option value="Digital Marketing Executive">Digital Marketing Executive</option>
+                                            <option value="Social Media Manager">Social Media Manager</option>
+                                            <option value="Community Engagement Officer">Community Engagement Officer</option>
+                                            <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
+                                        <label>Question Type</label><br>
+                                        <label class="mr-3 mt-2">
+                                            <input type="radio" name="questionType" value="M" checked> Mandatory
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="questionType" value="N"> Non-Mandatory
+                                        </label>
+                                    </div>
+                                    <div class="col-12 mt-3 text-left">
+                                        <label>Question</label>
+                                        <textarea id="questionText" class="form-control" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button class="btn btn-primary float-right" onclick="saveQuestion('addQuestionsModal')">Save Question</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -593,5 +702,49 @@ function qaModalContent(data){
                 </div>
             </div>
         </div>`
+    return html;
+}
+
+function allQuestionsContent(data) {
+    var html=``;
+    if (data.commonQuestions && data.commonQuestions.length > 0) {
+        if($("#addQuestionsModal #filterRoleType").val() == "" || $("#addQuestionsModal #filterRoleType").val() == "Common"){
+            html+=`<h6 class="text-primary font-weight-bold my-2 text-left">Common Questions 
+                <a href="javascript:void(0)" class="btn btn-sm btn-outline-primary d-none revert-role-btn" onclick="revertSingleRole('Common')"><i class="fa fa-refresh" aria-hidden="true"></i> Revert</a>
+            </h6>
+            <ul class="list-group mb-3 w-75 sortable-group" data-role="Common">`;
+                data.commonQuestions.forEach(q => {
+                    html+=
+                    `<li class="list-group-item text-left sortable-item" data-id="${q.id}" data-role="${q.roleType}">
+                        <div><i class="fa fa-arrows-v text-primary d-none" aria-hidden="true"></i> <strong>Q.${q.displayOrder}</strong> ${q.questionText} <span class="text-danger font-weight-semi-bold">${q.questionType == "M" ? "*" : ""}</span></div>
+                    </li>`;
+                });
+            html+=`</ul>`;
+        }
+    }
+    if(data.roleQuestions && data.roleQuestions.length > 0) {
+        var grouped = {};
+        data.roleQuestions.forEach(q => {
+            if (!grouped[q.roleType]) grouped[q.roleType] = [];
+            grouped[q.roleType].push(q);
+        });
+        Object.keys(grouped).forEach(role => {
+            html+=
+            `<h6 class="text-primary font-weight-bold mt-4 mb-2 text-left">${role} Questions
+                <a href="javascript:void(0)" class="btn btn-sm btn-outline-primary d-none revert-role-btn" onclick="revertSingleRole('${role}')"><i class="fa fa-refresh" aria-hidden="true"></i> Revert</a>
+            </h6>
+            <ul class="list-group mb-3 w-75 sortable-group" data-role="${role}">`;
+            grouped[role].forEach(q => {
+                html += `
+                    <li class="list-group-item text-left sortable-item" data-id="${q.id}" data-role="${q.roleType}">
+                        <div><i class="fa fa-arrows-v text-primary d-none" aria-hidden="true"></i> <strong>Q.${q.displayOrder}</strong> ${q.questionText} <span class="text-danger font-weight-semi-bold">${q.questionType == "M" ? "*" : ""}</span></div>
+                    </li>`;
+                });
+            html+=`</ul>`;
+        });
+    }
+    if (html.trim() === "") {
+        html = `<p class="text-muted">No questions available.</p>`;
+    }
     return html;
 }

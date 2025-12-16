@@ -2,6 +2,13 @@ var CURRENT_PAGE_USER_APPLICATION = 1;
 var USER_APPLICATION_FILTER_STATE = {
     filterValues: {}
 };
+var USER_APPLICATION_PAGINATION_STATE = {
+    isToday: false,
+    callFrom: 'onLoad',
+    isTeaching: null
+};
+var ORIGINAL_ORDER_BACKUP = {};
+var sortableInstances = {};
 async function userApplicationProfileOnloadFunction(){
     CURRENT_PAGE_USER_APPLICATION = 1;
     USER_APPLICATION_FILTER_STATE = {
@@ -33,6 +40,8 @@ async function userApplicationProfileOnloadFunction(){
             var html=`<option value="">Select Status</option>
                 <option value="Applied">Applied</option>
                 <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                <option value="Few Questions Submitted">Few Questions Submitted</option>
+                <option value="New Applications">New Applications</option>
                 <option value="Approved For Interview">Approved For Interview</option>
                 <option value="Approved for Selection Process">Approved for Selection Process</option>
                 <option value="On Hold">On Hold</option>`;
@@ -41,6 +50,8 @@ async function userApplicationProfileOnloadFunction(){
             var html=`<option value="">Select Status</option>
                 <option value="Applied">Applied</option>
                 <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                <option value="Few Questions Submitted">Few Questions Submitted</option>
+                <option value="New Applications">New Applications</option>
                 <option value="Approved For Interview">Approved For Interview</option>
                 <option value="accepted">Accepted</option>
                 <option value="Reject">Rejected</option>
@@ -155,9 +166,9 @@ function bindUserApplicationData(responseData) {
                                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
                                         </a>
                                     </li>`;
-                                    if(user.status != "" && user.appliedUserRole == "Teacher"){
+                                    if((user.status == "Approved For Interview" || user.status == "Approved for Selection Process") && user.appliedUserRole == "Teacher"){
                                         row+=`<li>
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${user.id})">
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLinkJA(${user.id})">
                                                 <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
                                             </a>
                                         </li>`
@@ -184,36 +195,60 @@ function bindUserApplicationData(responseData) {
     }
 }
 
-async function loadUserApplicationData(isToday, callFrom) {
-    var startVal = $("#userScreeningFilterForm #filterStartDate").val();
-    var endVal   = $("#userScreeningFilterForm #filterEndDate").val();
+async function loadUserApplicationData(isToday, callFrom, isTeaching) {
+    // var startVal = $("#userScreeningFilterForm #filterStartDate").val();
+    // var endVal   = $("#userScreeningFilterForm #filterEndDate").val();
+    if (arguments.length > 0) {
+        CURRENT_PAGE_USER_APPLICATION = 1;
+        USER_APPLICATION_PAGINATION_STATE.isToday = isToday;
+        USER_APPLICATION_PAGINATION_STATE.callFrom = callFrom;
+        USER_APPLICATION_PAGINATION_STATE.isTeaching = isTeaching;
+    }
     try {
         var payload = {};
         payload['schoolId'] = SCHOOL_ID;
         payload['pageNo'] = CURRENT_PAGE_USER_APPLICATION;
         payload['pageSize'] = $("#recordsPerPageJA").val();
-        if (isToday) {
+        const {
+            isToday: lastIsToday,
+            callFrom: lastCallFrom,
+            isTeaching: lastIsTeaching
+        } = USER_APPLICATION_PAGINATION_STATE;
+        if (lastIsToday) {
             payload['startDate'] = changeDateFormat(new Date(), "yyyy-mm-dd") + " 00:00:00";
             payload['endDate'] = changeDateFormat(new Date(), "yyyy-mm-dd") + " 23:59:59";
-        } else if(!isToday && callFrom == "card") {
-            payload['startDate'] = "" 
+        } 
+        else if (!lastIsToday && lastCallFrom === "card") {
+            payload['startDate'] = "";
             payload['endDate'] = "";
-        }else{
-            payload['startDate'] = startVal ? changeDateFormat(new Date(startVal), "yyyy-mm-dd") + " 00:00:00" : ""; 
-            payload['endDate'] = endVal ? changeDateFormat(new Date(endVal), "yyyy-mm-dd") + " 23:59:59" : "";
+        } 
+        else {
+            payload['startDate'] = USER_APPLICATION_FILTER_STATE.filterValues.startDate
+                ? changeDateFormat(new Date(USER_APPLICATION_FILTER_STATE.filterValues.startDate), "yyyy-mm-dd") + " 00:00:00"
+                : "";
+            payload['endDate'] = USER_APPLICATION_FILTER_STATE.filterValues.endDate
+                ? changeDateFormat(new Date(USER_APPLICATION_FILTER_STATE.filterValues.endDate), "yyyy-mm-dd") + " 23:59:59"
+                : "";
         }
         payload['userName'] = USER_APPLICATION_FILTER_STATE.filterValues.userName || "";
         payload['phoneNumber'] = USER_APPLICATION_FILTER_STATE.filterValues.phoneNumber || "";
         payload['email'] = USER_APPLICATION_FILTER_STATE.filterValues.email || "";
-        payload['appliedUserRole'] = USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole || "";
+        if (lastCallFrom === "teachingCard") {
+            payload['appliedUserRole'] = lastIsTeaching ? "Teacher" : "Not Teacher";
+        } else {
+            payload['appliedUserRole'] =
+                USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole || "";
+        }
         payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
         payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-user-screening-data', payload, '/teacher/signup');
         if(responseData.statusCode == "SUCCESS"){
             bindUserApplicationData(responseData);
             if(callFrom == "filter" || callFrom == "onLoad"){
-                $("#todayRecordsJA").text(responseData.todayRecords)
-                $("#totalRecordsJA").text(responseData.overallRecords)
+                $("#todayRecordsJA").text(responseData.todayRecords);
+                $("#totalRecordsJA").text(responseData.overallRecords);
+                $("#teachingRecordsJA").text(responseData.teachingRecords);
+                $("#nonTeachingRecordsJA").text(responseData.nonTeachingRecords);
             }
             $('[data-toggle="tooltip"]').tooltip();
         }
@@ -248,7 +283,9 @@ function updateFormState() {
         email: $("#userScreeningFilterForm #filterEmail").val().trim(),
         appliedUserRole: $("#userScreeningFilterForm #filterAppliedUserRole").val().trim(),
         country: $("#userScreeningFilterForm #filterCountryId").val(),
-        status: $("#userScreeningFilterForm #applicantsStatus").val().trim()
+        status: $("#userScreeningFilterForm #applicantsStatus").val().trim(),
+        startDate: $("#userScreeningFilterForm #filterStartDate").val(),
+        endDate:  $("#userScreeningFilterForm #filterEndDate").val(),
     };
 }
 
@@ -282,6 +319,7 @@ function openUpdateStatusModalUserApplication(id, status, role){
 async function updateUserApplicationProfile(id, status){
     if (status === "Discard") {
         const payload = {
+            sessionUserId: USER_ID,
             entityId: id,
             entityType: "INITIAL-INTERVIEW",
             status: "Discard",
@@ -296,7 +334,6 @@ async function updateUserApplicationProfile(id, status){
         } else {
             showMessageTheme2(0, responseData.message);
         }
-
         return;
     }
     var selectedStatus = $("#userApplicationProfileStatus").val();
@@ -310,7 +347,7 @@ async function updateUserApplicationProfile(id, status){
             return false;
         }
     }else if(selectedStatus == "Step 2 | Few Questions"){
-        if($("#userApplicationProfileStatusForm #questions").val() == ""){
+        if ($("#userApplicationProfileStatusForm #selectedQuestions .sortable-item").length === 0) {
             showMessageTheme2(2, "Please select any question");
             return false;
         }
@@ -319,15 +356,16 @@ async function updateUserApplicationProfile(id, status){
         showMessageTheme2(2, "Please enter remarks");
         return false;
     }
-    var selectedQuestionIds = $("#userApplicationProfileStatusForm #questions").val();
     var finalQuestionsArr = [];
-    $("#userApplicationProfileStatusForm #questions option:selected").each(function () {
+    $("#userApplicationProfileStatusForm #selectedQuestions .sortable-item").each(function (index) {
         finalQuestionsArr.push({
             questionText: $(this).data("text"),
-            questionType: $(this).data("type")
+            questionType: $(this).data("type"),
+            displayOrder: index + 1
         });
     });
     var payload = {};
+    payload["sessionUserId"] = USER_ID;
     payload["entityId"] = id;
     payload["entityType"] = "INITIAL-INTERVIEW";
     payload["assignTo"] = $("#userApplicationProfileStatusForm #assignedToInterview").val();
@@ -339,9 +377,9 @@ async function updateUserApplicationProfile(id, status){
         // if(selectedStatus == 'Reject'){
         //     $("#userApplicationTable tbody #tr_"+id).remove();
         // }else{
-            var assignedToText = $("#userApplicationProfileStatusForm #assignedToInterview option:selected").text();
-            var displayName = assignedToText.split("-")[0].trim();
-            updateTableRowDirectly(id, selectedStatus, displayName);
+            // var assignedToText = $("#userApplicationProfileStatusForm #assignedToInterview option:selected").text();
+            // var displayName = assignedToText.split("-")[0].trim();
+            // updateTableRowDirectly(id, selectedStatus, displayName);
         // }
         showMessageTheme2(1, responseData.message);
         loadUserApplicationData(false, "filter");
@@ -375,7 +413,7 @@ async function applicantsViewAssignToListForInterview(role){
         }
         var responseData = await callCommonAjax(ajaxReqDetails);
         if(responseData.status == 1){
-            bindQuestionsToJA('userApplicationProfileStatusForm', 'questions', responseData)
+            bindQuestionsToJA('userApplicationProfileStatusForm', responseData);
         }
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").hide();
         $("#userApplicationProfileStatusForm #questionsDiv").show();
@@ -387,20 +425,18 @@ async function applicantsViewAssignToListForInterview(role){
     }
 }
 
-
-
-// async function resendTeacherInterviewLink(id){
-//     var payload = {}
-//     payload["entityId"] = id;
-//     payload["entityType"] = "INITIAL-INTERVIEW";
-//     payload["status"] = 'Resend Interview Link';
-//     var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
-//     if(responseData.status == "SUCCESS"){
-//         showMessageTheme2(1, responseData.message);
-//     }else{
-//         showMessageTheme2(0, responseData.message);
-//     }
-// }
+async function resendTeacherInterviewLinkJA(id){
+    var payload = {}
+    payload["entityId"] = id;
+    payload["entityType"] = "INITIAL-INTERVIEW";
+    payload["status"] = 'Resend Interview Link';
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
+    if(responseData.status == "SUCCESS"){
+        showMessageTheme2(1, responseData.message);
+    }else{
+        showMessageTheme2(0, responseData.message);
+    }
+}
 
 function bindAssignToJA(formId, selectId, responseData) {
     const element = $("#" + formId+" #"+selectId);
@@ -416,72 +452,80 @@ function bindAssignToJA(formId, selectId, responseData) {
     }
 }
 
-function bindQuestionsToJA(formId, selectId, responseData) {
-    const element = $("#" + formId + " #" + selectId);
-    element.empty();
+function bindQuestionsToJA(formId, responseData) {
+    const available = $("#" + formId + " #availableQuestions");
+    const selected = $("#" + formId + " #selectedQuestions");
+
+    available.empty();
+    selected.empty();
+
     const common = responseData.data.commonQuestions || [];
     const role = responseData.data.roleQuestions || [];
-
     const allQuestions = [...common, ...role];
 
     if (allQuestions.length === 0) {
-        element.append('<option value="">No questions found</option>');
+        available.html(`<li class="list-group-item text-muted">No questions found</li>`);
         return;
     }
 
     allQuestions.forEach(q => {
-        const isMandatory = q.questionType === "M";
-        const label = isMandatory ? `${q.questionText} *` : q.questionText;
-
-        element.append(
-            `<option value='${q.id}' data-text="${q.questionText}" data-type="${q.questionType}">
-                ${label}
-            </option>`
-        );
+        available.append(`
+            <li class="list-group-item sortable-item bg-gradient-custom-blue"
+                data-id="${q.id}"
+                data-text="${q.questionText}"
+                data-type="${q.questionType}">
+                
+                <i class="fa fa-arrows text-primary mr-2"></i>
+                ${q.questionText}
+                ${q.questionType === "M" ? `<span class="text-danger">*</span>` : ``}
+                (${q.roleType})
+            </li>
+        `);
     });
-    element.trigger("change");
+
+    enableDualSortable();
 }
 
-function updateTableRowDirectly(userId, newStatus, assignedTo) {
-    var row = $('#tr_' + userId);
-    if(row.length) {
-        if(newStatus == "Step 2 | Few Questions" || newStatus == "On Hold" || newStatus == "Accepted"){
-        }else if(USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole == "Teacher" && newStatus == "Reject"){
-            row.remove();
-        }else if(newStatus != "Approved for Selection Process"){
-            row.find('td:eq(10)').text(assignedTo || 'N/A');
-        }
-        row.find('td:eq(11)').text(newStatus || 'N/A');
+// function updateTableRowDirectly(userId, newStatus, assignedTo) {
+//     var row = $('#tr_' + userId);
+//     if(row.length) {
+//         if(newStatus == "Step 2 | Few Questions" || newStatus == "On Hold" || newStatus == "Accepted"){
+//         }else if(USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole == "Teacher" && newStatus == "Reject"){
+//             row.remove();
+//         }else if(newStatus != "Approved for Selection Process"){
+//             row.find('td:eq(10)').text(assignedTo || 'N/A');
+//         }
+//         row.find('td:eq(11)').text(newStatus || 'N/A');
         
-        var dropdownHtml = `
-        <div class="d-flex align-items-center gap-5">
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${userId}, '${newStatus || ''}')">
-                            <i class="fas fa-edit me-2"></i>&nbsp;Update Status
-                        </a>
-                    </li>`;
-        if(newStatus && newStatus !== "" && newStatus !== "N/A") {
-            dropdownHtml += `<li>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${userId})">
-                            <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
-                        </a>
-                    </li>`;
-        }
+//         var dropdownHtml = `
+//         <div class="d-flex align-items-center gap-5">
+//             <div class="dropdown">
+//                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+//                     <i class="fas fa-ellipsis-v"></i>
+//                 </button>
+//                 <ul class="dropdown-menu">
+//                     <li>
+//                         <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${userId}, '${newStatus || ''}')">
+//                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
+//                         </a>
+//                     </li>`;
+//         if(newStatus && newStatus !== "" && newStatus !== "N/A") {
+//             dropdownHtml += `<li>
+//                         <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${userId})">
+//                             <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+//                         </a>
+//                     </li>`;
+//         }
         
-        dropdownHtml += `</ul>
-            </div>
-            <div data-toggle="tooltip" data-placement="top" title="Discard">
-                <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${userId}, 'Discard')&quot;)"></i>
-            </div>
-        </div>`;
-        row.find('td:eq(12)').html(dropdownHtml);
-    }
-}
+//         dropdownHtml += `</ul>
+//             </div>
+//             <div data-toggle="tooltip" data-placement="top" title="Discard">
+//                 <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${userId}, 'Discard')&quot;)"></i>
+//             </div>
+//         </div>`;
+//         row.find('td:eq(12)').html(dropdownHtml);
+//     }
+// }
 
 async function viewResumeAndPhoto(url, modalId){
     
@@ -704,7 +748,12 @@ function showAddQuestionsModal(){
     $("#addQuestionsModal #roleType").select2({
         placeholder: "Select User Role",
         theme:"bootstrap4"
-    })
+    });
+    $("#addQuestionsModal #filterRoleType").select2({
+        // placeholder: "Select User Role",
+        theme:"bootstrap4"
+    });
+    getAllQuestions();
 }
 
 async function saveQuestion(modalId){
@@ -805,4 +854,214 @@ function setFilterDatesAccordingly(src, startDateId, endDateId) {
         var endVal = $(endDateId).val();
         if (!endVal || endVal.trim() === "") return;
     });
+}
+
+async function getAllQuestions(){
+    var payload = {}
+    payload["schoolId"] = SCHOOL_ID;
+    payload["roleType"] = $("#addQuestionsModal #filterRoleType").val();
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + "get-job-application-questions",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        $("#allQuestionsWrapper").html(allQuestionsContent(responseData.data));
+        if($("#allQuestionsWrapper").html().includes("No questions available")){
+            $("#changeQuesPriorityBtnWrapper").addClass("d-none").removeClass("d-flex");
+        }else{
+            $("#changeQuesPriorityBtnWrapper").addClass("d-flex").removeClass("d-none");
+        }
+    }
+}
+
+function enablePriorityChange() {
+    ORIGINAL_ORDER_BACKUP = {};
+    sortableInstances = {};
+    $(".sortable-group").each(function () {
+        const role = $(this).attr("data-role") || "Common";
+        ORIGINAL_ORDER_BACKUP[role] = [];
+
+        $(this).find(".sortable-item").each(function () {
+            ORIGINAL_ORDER_BACKUP[role].push({
+                id: $(this).data("id"),
+                html: $(this).prop("outerHTML")
+            });
+        });
+    });
+
+    $(".sortable-group").each(function () {
+        const role = $(this).attr("data-role") || "Common";
+        sortableInstances[role] = new Sortable(this, {
+            animation: 150,
+            ghostClass: "bg-light-primary",
+            handle: ".list-group-item",
+            group: {
+                put: false,
+                pull: false
+            }
+        });
+    });
+    $(".list-group-item").addClass("cursor");
+    $(".fa-arrows-v").removeClass("d-none");
+    $("#changePriorityBtn").addClass("d-none");
+    $("#saveOrderBtn").removeClass("d-none");
+    $("#cancelOrderBtn").removeClass("d-none");
+    $(".revert-role-btn").removeClass("d-none");
+}
+
+async function saveNewOrder() {
+    let rolesPayload = {};
+    $(".sortable-group").each(function () {
+        const roleType = $(this).attr("data-role") || "Common";
+        let orders = [];
+        $(this).find(".sortable-item").each(function (index) {
+            orders.push({
+                id: $(this).data("id"),
+                displayOrder: index + 1
+            });
+        });
+        rolesPayload[roleType] = orders;
+    });
+    const payload = {
+        schoolId: SCHOOL_ID,
+        roles: rolesPayload
+    };
+    console.log("FINAL ONE-SHOT PAYLOAD:", payload);
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + "update-job-application-question-order",
+        body: payload,
+        global: true,
+        showMessage: true,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+    await callCommonAjax(ajaxReqDetails);
+    showMessageTheme2(1, "Questions priority updated successfully!");
+    $(".list-group-item").removeClass("cursor");
+    $(".fa-arrows-v").addClass("d-none");
+    $("#changePriorityBtn").removeClass("d-none");
+    $("#saveOrderBtn").addClass("d-none");
+    $("#cancelOrderBtn").addClass("d-none");
+    await getAllQuestions();
+}
+
+function cancelPriorityChange() {
+    Object.keys(sortableInstances).forEach(role => {
+        if (sortableInstances[role]) {
+            sortableInstances[role].destroy();
+        }
+    });
+    Object.keys(ORIGINAL_ORDER_BACKUP).forEach(role => {
+        let ulSelector = role === "Common"
+            ? `.sortable-group[data-role="Common"]` 
+            : `.sortable-group[data-role="${role}"]`;
+
+        const ul = $(ulSelector);
+        ul.html("");
+
+        ORIGINAL_ORDER_BACKUP[role].forEach(item => {
+            ul.append(item.html);
+        });
+    });
+    $(".list-group-item").removeClass("cursor");
+    $(".fa-arrows-v").addClass("d-none");
+    $("#changePriorityBtn").removeClass("d-none");
+    $("#saveOrderBtn").addClass("d-none");
+    $("#cancelOrderBtn").addClass("d-none");
+    $(".revert-role-btn").addClass("d-none");
+}
+
+function revertSingleRole(role) {
+    if (!ORIGINAL_ORDER_BACKUP[role]) return;
+    let ulSelector = role === "Common"
+        ? `.sortable-group[data-role="Common"]`
+        : `.sortable-group[data-role="${role}"]`;
+    const ul = $(ulSelector);
+    ul.html("");
+    ORIGINAL_ORDER_BACKUP[role].forEach(item => {
+        ul.append(item.html);
+    });
+    ul.find(".fa-arrows-v").removeClass("d-none");
+}
+
+function enableDualSortable() {
+    new Sortable(document.getElementById("availableQuestions"), {
+        group: {
+            name: "questions",
+            pull: true,
+            put: true
+        },
+        animation: 150,
+        ghostClass: "bg-light-primary",
+        onAdd: function (evt) {
+            syncGradientClasses();
+            updateBulkButtonsVisibility();
+        },
+        onRemove: function () {
+            syncGradientClasses();
+            updateBulkButtonsVisibility();
+        }
+    });
+
+    new Sortable(document.getElementById("selectedQuestions"), {
+        group: {
+            name: "questions",
+            pull: true,
+            put: true
+        },
+        animation: 150,
+        ghostClass: "bg-light-primary",
+        onAdd: function (evt) {
+            syncGradientClasses();
+            updateBulkButtonsVisibility();
+        },
+        onRemove: function () {
+            syncGradientClasses();
+            updateBulkButtonsVisibility();
+        }
+    });
+    syncGradientClasses();
+    updateBulkButtonsVisibility();
+}
+
+function syncGradientClasses() {
+    $("#availableQuestions .sortable-item").removeClass("bg-gradient-custom-green").addClass("bg-gradient-custom-blue");
+    $("#selectedQuestions .sortable-item").removeClass("bg-gradient-custom-blue").addClass("bg-gradient-custom-green");
+}
+
+function addAllQuestions() {
+    $("#availableQuestions .sortable-item").each(function () {
+        $("#selectedQuestions").append(this);
+    });
+    syncGradientClasses();
+    updateBulkButtonsVisibility();
+}
+
+function removeAllQuestions() {
+    $("#selectedQuestions .sortable-item").each(function () {
+        $("#availableQuestions").append(this);
+    });
+    syncGradientClasses();
+    updateBulkButtonsVisibility();
+}
+
+function updateBulkButtonsVisibility() {
+    if ($("#availableQuestions .sortable-item").length > 0) {
+        $("#addAllQuestionsBtn").show();
+    } else {
+        $("#addAllQuestionsBtn").hide();
+    }
+
+    if ($("#selectedQuestions .sortable-item").length > 0) {
+        $("#removeAllQuestionsBtn").show();
+    } else {
+        $("#removeAllQuestionsBtn").hide();
+    }
 }
