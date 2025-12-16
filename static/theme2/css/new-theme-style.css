@@ -33750,3 +33750,11 @@ input:checked + .small-switch-slider:before {
 .task-list-table ul li{
 	list-style: disc;
 }
+
+.bg-gradient-custom-green {
+    background: linear-gradient(to top, #c2e7cb, #f4fdf6) !important;
+}
+
+.bg-gradient-custom-blue {
+    background: linear-gradient(to top, #c1d6ec, #f4f7fe) !important;
+}
