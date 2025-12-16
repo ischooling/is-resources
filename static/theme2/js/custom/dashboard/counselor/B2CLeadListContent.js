@@ -163,6 +163,13 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 				<p class="mb-0">Normal</p>
 				<p id="normalLeads" class="mb-0 px-2 rounded bg-orange">-</p>
 			</div>`;
+      if(USER_ID != "19321" && USER_ID != "14388"){
+        html+=
+        `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
+          <p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
+          <p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
+        </div>`;
+      }
   html += "</div>";
 
   html += '<hr class="w-100">';
@@ -190,13 +197,11 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 				<p class="mb-0" style="color:#0051FF">Demo By Link</p>
 				<p id="demoByLinkCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
 			</div>`;
-      if(USER_ID != "19321" && USER_ID != "14388"){
-        html+=
-        `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
-          <p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
-          <p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
-        </div>`;
-      }
+      html+=`<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0051FF;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#0051FF">Demo By Agent</p>
+				<p id="demoByAgentCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
+			</div>`;
+      
 		
   html += "</div>";
   html += "</div>";
@@ -1199,6 +1204,12 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       : "-";
   $("#demoByLinkCount").html(`${demoByLinkCountHTML}`);
 
+  var demoByAgentCountHTML =
+    leadTotalData.totalAgentUrlDemo > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalAgentUrlDemo','${leadTotalData.leadFrom}')">${leadTotalData.totalAgentUrlDemo}</a>`
+      : "-";
+  $("#demoByAgentCount").html(`${demoByAgentCountHTML}`);
+
   var assignedToLeadManagerCountHTML =
     leadTotalData.totalDemoSupport > 0
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDemoSupport','${leadTotalData.leadFrom}')">${leadTotalData.totalDemoSupport}</a>`
@@ -1336,6 +1347,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							bgColorDemo="background-color:#7000FF !important;color:#fff";
 							html+='<span class="float-right bold p-1 rounded" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}else if(leads.demoFrom=='Demo by Link'){
+							bgColorDemo="background-color:#2200FF !important;color:#fff";
+							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
+						}else if(leads.demoFrom=='Demo by Agent'){
 							bgColorDemo="background-color:#2200FF !important;color:#fff";
 							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}

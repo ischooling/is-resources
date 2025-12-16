@@ -284,6 +284,7 @@ function getRequestForNewUser(formId) {
   signupStudentDTO["supportRoleId"] = $("#" + formId + " #supportRoleId").val();
   signupStudentDTO["languagesKnown"] = $("#" + formId + " #languages").select2('val');
   signupStudentDTO["workingHours"] = $("#" + formId + " #noOfWorkingHours").val();
+  signupStudentDTO["workingTime"] = $("#" + formId + " #workingTime").val();
   request["signupStudentDTO"] = signupStudentDTO;
   authentication["hash"] = getHash();
   authentication["schoolId"] = SCHOOL_ID;

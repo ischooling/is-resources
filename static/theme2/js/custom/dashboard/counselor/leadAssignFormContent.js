@@ -115,7 +115,7 @@ function getLeadAssignDataList(objectRights){
 						<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap text-center" id="leadAssignCounselor" style="width:100%;min-width:1200px;font-size:11px">
 							<thead class="bg-primary text-white">
 								<tr>
-									<th class="font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="width:12% !important">Academic Expert Name<br/>Roles</th>
+									<th class="font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="width:18% !important">Academic Expert Name<br/>Roles</th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:5% !important">Order</th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:10% !important">Lead | Demo Limit</th>
 									<th class="font-weight-normal border-bottom-0 vertical-align-middle" style="width:5% !important">Active | Inactive </th>

@@ -1937,7 +1937,6 @@ function showRecurringMeetingRecordings(entityId, meetingTitle, hostName) {
         }
       } catch (error) {
         console.log("Error Fetching Data:", error);
-        
       }
     }
   });

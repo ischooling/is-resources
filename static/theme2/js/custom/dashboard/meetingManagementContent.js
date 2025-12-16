@@ -891,12 +891,12 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
                                     summaryAvailable
                                       ? `<button class="btn btn-sm bg-white rounded"
                                                 style="border:1px solid #000;color:#000;"
-                                                onclick="showAiSummary('${entityId}', '${entityName}')">
+                                                onclick="showAiSummary('${entityId}', 'GENERAL_MEETINGS')">
                                             Summary
                                         </button>`
                                       : `<button class="btn btn-sm bg-white rounded"
                                                 style="border:1px solid #000;color:#000;"
-                                                onclick="generateAiSummary('${session.meetingId}','${entityId}', '${entityName}')">
+                                                onclick="generateAiSummary('${session.meetingId}','${entityId}', 'GENERAL_MEETINGS')">
                                             Generate Summary
                                         </button>`
                                   }
