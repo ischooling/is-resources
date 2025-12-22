@@ -103,7 +103,8 @@ function userScreeningFilter(){
                         <option value="Few Questions Submitted">Few Questions Submitted</option>
                         <option value="New Applications">New Applications</option>
                         <option value="On Hold">On Hold</option>
-                        <option value="accepted">Accepted</option>
+                        <option value="Accepted for Contract">Accepted for Contract</option>
+                        <option value="Another Round of Interview">Another Round of Interview</option>
                         <option value="Reject">Rejected</option>
                     </select>
                 </div>
@@ -160,8 +161,7 @@ function userApplicationTableContent(status){
                         <th>S.No.</th>
                         <th style="min-width: 130px;">Applied Date | Name | Phone Number | Email | Source</th>
                         <th>Country | Province | City</th>
-                        <th>Last/Current Salary (per annum)</th>
-                        <th>Last/Current Organization Name</th>
+                        <th>Last/Current Salary (per annum)<br>Last/Current Organization Name</th>
                         <th>Applied User Role</th>
                         <th>Resume/CV</th>
                         <th>Recent Photograph</th>
@@ -179,21 +179,34 @@ function userApplicationTableContent(status){
     return html;
 }
 
-function userApplicationProfileStatusModal(id, status, role){
+function userApplicationProfileStatusModal(id, status, role, interviewStatus){
     var html=
-        `<div class="modal right-slide-modal fade show" id="userApplicationProfileStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+        `<div class="modal right-slide-modal fade" id="userApplicationProfileStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
-                        <h5 class="modal-title">Profile Approval</h5>
+                        <h5 class="modal-title">Update Application Status</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form autocomplete="off" id="userApplicationProfileStatusForm">
-                            <div class="form-group">
-                                <label for="userApplicationProfileStatus" class="control-label">Status:</label>
+                        <form autocomplete="off" id="userApplicationProfileStatusForm">`
+                            if(interviewStatus == "Booked"){
+                                html+=
+                                `<div class="form-group">
+                                    <label>Interview Status</label>
+                                    <select id="eventStatus" class="form-control">
+                                        <option value="">Select Interview Status</option>
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="CANCELLED">Cancelled</option>
+                                        <option value="RESCHEDULE">Reschedule</option>
+                                        <option value="NOTATTENDED">No Show</option>
+                                    </select>
+                                </div>`
+                            }
+                            html+=`<div class="form-group">
+                                <label for="userApplicationProfileStatus" class="control-label">Application Status:</label>
                                 <select class="form-control" name="userApplicationProfileStatus" id="userApplicationProfileStatus" onchange="applicantsViewAssignToListForInterview('${role}');">
                                     <option value="0">Select Status</option>`
                                     if(role == "Teacher"){
@@ -209,7 +222,8 @@ function userApplicationProfileStatusModal(id, status, role){
                                             html+=`<option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "On Hold"){
-                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
+                                            html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                                            <option value="Approved For Interview">Approve For Interview</option>
                                             <option value="Approved for Selection Process">Approve for Selection Process</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
@@ -221,6 +235,10 @@ function userApplicationProfileStatusModal(id, status, role){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Another Round of Interview"){
+                                           html+=`<option value="Approved for Selection Process">Approve for Selection Process</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
                                     }else{
                                         if(status == "Applied"){
@@ -228,15 +246,16 @@ function userApplicationProfileStatusModal(id, status, role){
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
-                                            html+=`<option value="Accepted">Accepted</option>
+                                            html+=`<option value="Accepted for Contract">Accepted for Contract</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
-                                        }else if(status == "Accepted"){
+                                        }else if(status == "Accepted for Contract"){
                                             html+=`<option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "On Hold"){
-                                            html+=`<option value="Approved For Interview">Approve For Interview</option>
-                                            w<option value="Accepted">Accepted</option>
+                                            html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+                                            <option value="Approved For Interview">Approve For Interview</option>
+                                            <option value="Accepted for Contract">Accepted for Contract</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Step 2 | Few Questions"){
@@ -247,6 +266,10 @@ function userApplicationProfileStatusModal(id, status, role){
                                             html+=`<option value="Approved For Interview">Approve For Interview</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Another Round of Interview"){
+                                           html+=`<option value="Accepted for Contract">Accepted for Contract</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
                                     }
                                html+=`</select>
@@ -254,6 +277,13 @@ function userApplicationProfileStatusModal(id, status, role){
                             <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
                                 <label>Assigned To</label>
                                 <select id="assignedToInterview" class="form-control"></select>
+                            </div>
+                            <div id="durationDiv" class="form-group" style="display: none;">
+                                <label>Duration</label>
+                                <select id="duration" class="form-control">
+                                    <option value="15">15 Min</option>
+                                    <option value="30">30 Min</option>
+                                </select>
                             </div>
                             <div id="questionsDiv" class="form-group" style="display:none;">
                                 <label>Questions</label>
@@ -288,13 +318,14 @@ function userApplicationProfileStatusModal(id, status, role){
                             </div>
                             <div class="form-group">
                                 <label for="message-text" class="control-label">Remarks:</label>
-                                <textarea id="userApplicationProfileRemarks" class="form-control px-2" maxlength="200"></textarea>
-                                <p class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold">Note- Remarks will be sent to the applicant via email.</p>
+                                <textarea id="userApplicationProfileRemarks" class="form-control px-2" minlength="25" maxlength="200" oninput="wordsCountValidate(this, \'userApplicationProfileRemarksCounter\');" required></textarea>
+                                <small id="userApplicationProfileRemarksCounter" class="text-muted">0 / 25</small>
+                                <p id="remarksPara" class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold d-none">Note- Remarks will be sent to the applicant via email.</p>
                             </div>
                         </form>
                         <div class="d-flex justify-content-end">
                             <button type="button" class="btn btn-danger mr-2" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" onclick="updateUserApplicationProfile(${id});">Save</button>
+                            <button type="button" class="btn btn-primary" onclick="updateUserApplicationProfile(${id},'${interviewStatus}');">Save</button>
                         </div>
                     </div>
                 </div>
@@ -335,7 +366,7 @@ function communicationLogsContentForUserApplication(userId, useRole){
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
-                        <h5 class="modal-title">Remark Logs</h5>
+                        <h5 class="modal-title">Communication Log</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
                         </button>
@@ -393,6 +424,7 @@ function communicationLogsContentForUserApplication(userId, useRole){
                             <div class="position-relative form-group">
                                 <label for="title" title="Mandatory field">Comment<sup class="text-danger font-size-md"><b>*</b></sup></label>
                                 <div id="commentEditorJA"></div>
+                                <small id="commentEditorJACounter" class="text-muted">0 / 25</small>
                             </div>
                             <div class="position-relative form-group text-right mb-0">
                                 <a href="javascript:void(0)" class="btn btn-sm btn-primary px-4" onclick="saveCommunicationLogJA('userScreeningProfileStatusForm', '${userId}', '${useRole}')">Add</a>

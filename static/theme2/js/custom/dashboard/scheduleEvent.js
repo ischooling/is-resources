@@ -180,8 +180,22 @@ function sendMailToInviteeForDemo(meetingId) {
 }
 
 function updateMeetingStatus(meetingId, leadId) {
-	
 	var status = $('#status').val();
+    var userId = $('#userId').val();
+    var eventStatus = $('#applicationStatus').val();
+    var duration=0;
+    var assignToUserId=0;
+    if(eventStatus!='' && eventStatus!=undefined && eventStatus=='Another Round of Interview'){
+        duration=$('#duration').val();
+        assignToUserId=$('#assignedToInterview').val();
+    }
+    if(status=='COMPLETED'){
+        if(eventStatus=='' || eventStatus==undefined){
+            showMessageTheme2(0, "Application Status field is required.",'',true);
+		    return false;
+        }
+
+    }
     var leadSource = $('#leadSource option:selected').text();
     leadSource= (leadSource=='Select Source'?'':leadSource);
 	var remarks = $('#remarks').val();
@@ -229,6 +243,9 @@ function updateMeetingStatus(meetingId, leadId) {
 	data['remarks']=remarks;
     data['tentativeDate']=tentativeDate;
     data['leadSource']=leadSource;
+    data['eventStatus']=eventStatus;
+    data['duration']=duration;
+    data['assignToUserId']=assignToUserId;
 	customLoader(true);
 	 $.ajax({
 		 type : "POST",
@@ -245,12 +262,21 @@ function updateMeetingStatus(meetingId, leadId) {
 					showMessageTheme2(0, data['message'],'',true);
 				}
 			} else {
-				$('#meetingStatus_'+leadId).html($('#scheduleEventMeetingStatus #status option:selected').text());
-				$('#meetingComments_'+leadId).html($('#scheduleEventMeetingStatus #remarks').val());
-				$('#confirmeUpdateSystemTraningModal').modal('hide');
-				$('#updateSystemTraningModal').modal('hide');					
-				showMessageTheme2(1, data['message'],'',true);
-				customLoader(false);
+                if(eventStatus!='' && eventStatus!=undefined && eventStatus=='Another Round of Interview' && assignToUserId!=userId){
+                     $('#confirmeUpdateSystemTraningModal').modal('hide');
+                    $('#updateSystemTraningModal').modal('hide');					
+                    showMessageTheme2(1, data['message'],'',true);
+                    customLoader(false);
+                    setTimeout(() => { renderDataForScheduledEvents('scheduleEventSearchForm','first-search',1,'','count'); }, 300);
+                    
+                }else{
+                    $('#meetingStatus_'+meetingId).html($('#scheduleEventMeetingStatus #status option:selected').text());
+                    $('#meetingComments_'+meetingId).html($('#scheduleEventMeetingStatus #remarks').val());
+                    $('#confirmeUpdateSystemTraningModal').modal('hide');
+                    $('#updateSystemTraningModal').modal('hide');					
+                    showMessageTheme2(1, data['message'],'',true);
+                    customLoader(false);
+                }
 			}
 		 }
 	 });
@@ -261,7 +287,7 @@ function updateMeetingStatus(meetingId, leadId) {
 
 function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry,remarkMendatory,minRemarkCount){
 	confirmationFlag=true;
-	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount,eventName));
+	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount,eventName,name));
 	$("#confirmeUpdateModalWrapper").html(confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry));
 	$('#updateSystemTraningModal').modal('show');
     $('.tentativeDate').datepicker({
@@ -286,6 +312,7 @@ function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartT
         $(".leadSourceHide").hide();
     }
     callScheduleLeadSourceList('scheduleEventMeetingStatus','B2C','leadSource', true);
+    getAllInterviewerList('scheduleEventMeetingStatus','assignedToInterview');
 }
 
 function comfirmeupdateMeetingStatus(meetingId, leadId,status){
@@ -644,4 +671,65 @@ function callScheduleLeadSourceList(formId, value, elementId, keyStatus) {
 			}
 		}
 	});
+}
+
+function showAndHideDuration(formId){
+    if($("#"+formId+ " #applicationStatus").val() == "Another Round of Interview"){
+        $("#"+formId+ " #durationDiv").show();
+        $("#"+formId+ " #assignedToInterviewDiv").show();
+    }else{
+        $("#"+formId+ " #durationDiv").hide();
+        $("#"+formId+ " #assignedToInterviewDiv").hide();
+    }
+}
+
+function moveCounselorInScheduleEvents(meetingId){
+    $("#moveCounselorInScheduleEventModal").remove();
+    $("body").append(moveCounselorInScheduleEventModal(meetingId));
+    setTimeout(() => {
+        $("#moveCounselorInScheduleEventModal").modal("show");
+    }, 300);
+
+    getAllInterviewerList('moveCounselorInScheduleEventForm','assigneeMove');
+}
+
+function moveInterviewData(meetingId) {
+  var data={};
+	data['meetingId']=meetingId;
+    data['assignToUserId']=$('#assigneeMove').val();
+    data['userId']=USER_ID;
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('timeavailability','move-interview'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+		   console.log(data);
+			if (data['statusCode'] == '0' || data['statusCode'] == '2' || data['status'] == 'FAILED') {
+				showMessageTheme2(0, data['message'],'',true);
+			} else {
+			   showMessageTheme2(1, data['message'],'',false);
+                $("#moveCounselorInScheduleEventModal").modal("hide");
+                renderDataForScheduledEvents('scheduleEventSearchForm','first-search',1,'','count');
+			}
+			return false;
+		}
+	});
+}
+
+function showHideApplicationStatus(src){
+    var status = $(src).val();
+    if (status == "CANCELLED" || status == "RESCHEDULE" || status == ""){
+        $("#applicationStatusDiv").hide();
+        $("#durationDiv").hide();
+        $("#assignedToInterviewDiv").hide();
+        
+    } else {
+        $("#applicationStatusDiv").show();
+        $("#durationDiv").show();
+        $("#assignedToInterviewDiv").show();
+    }
 }

@@ -848,9 +848,7 @@ function getOrientaionAssignUser() {
                     showMessageTheme2(0, data['message']);
                 } else {
                     var html =getAssignUserTableHtml(assignUserList);
-                    $("#orientAssignUser").html(html); 
-                
-                    
+                    $("#orientAssignUser").html(html);                    
                 }
                 
 			}

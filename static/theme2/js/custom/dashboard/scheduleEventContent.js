@@ -12,8 +12,6 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 	getAllEventList('scheduleEventsSearchForm','eventType');
 	getAllEventList('scheduleEventsSearchForm','searchBy');
 	getAllCountryList('scheduleEventsSearchForm','countryId');
-	
-
 	getAllGrade(SCHOOL_ID, true);
 	$("#counselorName").select2({
 		theme:"bootstrap4"
@@ -404,13 +402,11 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 														+'<td class="border-0 p-1 vertical-align-top" style="word-break:break-word">'+item.leadAssignName+'</td>'
 													+'</tr>';
 												}
-												
-												
 											html+='</tbody>'
 										+'</table>'
 									+'</td>'
 									+'<td style="border-top-width:5px;border-top-style:solid;border-top-color:'+item.bgColor+'" class="vertical-align-top">'
-										+'<span id="meetingStatus_'+item.leadId+'" >'+item.meetingStatus+'</span>'
+										+'<span id="meetingStatus_'+item.meetingId+'">'+item.meetingStatus+'</span>'
 										+'<br/>';
 										if(item.meetingStatus != 'Cancelled' && item.meetingStatus != 'Reschedule'){
 											html+='<a href="'+item.startMeetingUrl+'" target="_blank" class="text-primary font-weight-semi-bold">Start Meeting</a>'
@@ -418,7 +414,6 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 										}
 										html+='<a href="'+item.rescheduleUrl+'" target="_blank" class="text-primary font-weight-semi-bold">Reschedule Meeting</a>'
 										+'<br/>';
-										
 										if(item.leadId>0){
 											if(item.meetingFor == 'School Demo'){
 												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\''+item.leadId+'\',\''+item.meetingFor+'\',\''+item.name+'\',\''+item.meetingStartTime+'\',\''+item.meetingEndTime+'\',\''+item.meetingDate+'\',\''+item.meetingEndDate+'\',\''+item.counselorTimeZone+'\',\''+item.inviteeStartTime+'\',\''+item.inviteeEndTime+'\',\''+item.inviteeMeetingDate+'\',\''+item.inviteeMeetingEndDate+'\',\''+item.inviteeTimezone+'\',\''+item.standardName+'\',\''+item.inviteeName+'\',\''+item.inviteeEmail+'\',\''+item.isdCode+'\',\''+item.phoneNo+'\',\''+item.countryName+'\', \''+item.inviteeCountry+'\','+remarkMendatory+','+minRemarkCount+')">Update</a>';
@@ -427,7 +422,9 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 											}
 										}else{
 											if(item.meetingFor == 'Initial-Interview'){
-												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Initial-Interview\')">Update</a>';
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Initial-Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\')">Update</a>';
+											}else if(item.meetingFor == 'Interview'){
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Interview\',\''+item.appliedUserRole+'\')">Update</a>';
 											}else{
 												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\')">Update</a>';
 											}
@@ -436,11 +433,15 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 											html+='<br/>'
 											+'<input class="tinyUrl" style="display: none;" type="text" id="copyURL'+key+'" value="'+item.copyLinkUrl+'">'
 											+'<b class="copy-msg-'+key+'"></b>'
-											+'<button id="copyURL'+key+'" onclick="copyURL(\'copyURL'+key+'\',\'copy-msg-'+key+'\')" class="btn btn-primary btn-sm mt-2">User joining link</a>'
+											+'<button id="copyURL'+key+'" onclick="copyURL(\'copyURL'+key+'\',\'copy-msg-'+key+'\')" class="btn btn-primary btn-sm mt-2">User joining link</button>';
 										}
 										
+										if((item.meetingFor == "Initial-Interview" || item.meetingFor == "Interview") && (item.meetingStatus != 'Cancelled' && item.meetingStatus != 'Reschedule')){
+											html+='<br/>'
+											+'<a href="javascript:void(0);" onclick="moveCounselorInScheduleEvents(\''+item.meetingId+'\');" class="btn btn-sm btn-secondary mt-1">Move</a>';
+										}
 									html+='</td>'
-									+'<td style="border-top-width:5px;border-top-style:solid;border-top-color:'+item.bgColor+'" class="vertical-align-top" id="meetingComments_'+item.leadId+'">'+item.meetingComments+'</td>'
+									+'<td style="border-top-width:5px;border-top-style:solid;border-top-color:'+item.bgColor+'" class="vertical-align-top" id="meetingComments_'+item.meetingId+'">'+item.meetingComments+'</td>'
 									+'<td style="border-top-width:5px;border-top-style:solid;border-top-color:'+item.bgColor+'" class="vertical-align-top text-center rounded-bottom-right-10 ">'
 										+'<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="sendMailToInviteeForDemo(\''+item.meetingId+'\')">Send Mail</a>'
 										if(item.recordingCount != 0 && (USER_ROLE == "DIRECTOR" || meetingStartDateTime > pastDateLimit)){
@@ -482,7 +483,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 		return html;
 }	
 
-function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount, eventName){
+function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount, eventName,appliedUserRole){
 	const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;	
 	var html =
 			'<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
@@ -498,28 +499,62 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 							+'<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off">'
 							+'<input type="hidden" name="meetingType" id="meetingType" value=""  />'
 								+'<div class="row">'
-									+'<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">'
-										+'<label>Status</label>'
-										+'<select name="status" id="status" class="form-control">'
+									+'<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">'
+										+'<label>';
+										if(eventName == 'Initial-Interview'  || eventName == 'Interview'){
+											html +='Interview Status';
+										}else{
+											html +='Status';
+										}
+										html +='</label>'
+										+'<select name="status" id="status" class="form-control" onchange="showHideApplicationStatus(this);">'
 											+'<option value="">Select Status</option>';
-											if(eventName == 'Initial-Interview'){
-										html +='<option value="COMPLETED">Completed</option>'
-												+'<option value="CANCELLED">Cancelled</option>'
-												+'<option value="RESCHEDULE">Reschedule</option>';
-											}else{
-										html +='<option value="COMPLETED">Completed</option>'
-												+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
-												+'<option value="NOTATTENDED">No Show</option>'
-												+'<option value="CANCELLED">Cancelled</option>'
-												+'<option value="RESCHEDULE">Reschedule</option>'
-												+'<option value="Demo Confirmed">Demo Confirmed</option>'
-												+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
-												+'<option value="Not Interested">Not Interested</option>'
-												+'<option value="Positive to enrollment">Positive to enrollment</option>';
-											}
+										if(eventName == 'Initial-Interview' || eventName == 'Interview'){
+											html +='<option value="COMPLETED">Completed</option>'
+													+'<option value="CANCELLED">Cancelled</option>'
+													+'<option value="RESCHEDULE">Reschedule</option>'
+													+'<option value="NOTATTENDED">No Show</option>';
+										}else{
+											html +='<option value="COMPLETED">Completed</option>'
+													+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
+													+'<option value="NOTATTENDED">No Show</option>'
+													+'<option value="CANCELLED">Cancelled</option>'
+													+'<option value="RESCHEDULE">Reschedule</option>'
+													+'<option value="Demo Confirmed">Demo Confirmed</option>'
+													+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
+													+'<option value="Not Interested">Not Interested</option>'
+													+'<option value="Positive to enrollment">Positive to enrollment</option>';
+										}
 										html +='</select>'
 									+'</div>'
-									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
+									if(eventName == 'Initial-Interview' || eventName == 'Interview'){
+										html+='<div id="applicationStatusDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">'
+											+'<label>Application Status</label>'
+											+'<select name="applicationStatus" id="applicationStatus" class="form-control" onchange="showAndHideDuration(\'scheduleEventMeetingStatus\');">'
+												+'<option value="">Select Application Status</option>'
+												+'<option value="Another Round of Interview">Another Round of Interview</option>'
+												if(appliedUserRole== 'Teacher'){
+													html+='<option value="Approved for Selection Process">Approved for Selection Process</option>';
+												}else{
+													html+='<option value="Accepted for Contract">Accepted for Contract</option>';
+												}
+												html+='<option value="On Hold">On Hold</option>'
+												+'<option value="Reject">Reject</option>'
+											+'</select>'
+										+'</div>'
+										+'<div id="assignedToInterviewDiv" class="form-group" style="display: none;">'
+											+'<label>Assigned To</label>'
+											+'<select id="assignedToInterview" class="form-control"></select>'
+										+'</div>'
+										+'<div id="durationDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">'
+											+'<label>Duration</label>'
+											+'<select name="duration" id="duration" class="form-control">'
+												+'<option value="15">15 Min</option>'
+												+'<option value="30">30 Min</option>'
+											+'</select>'
+										+'</div>'
+									}
+									html+='<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
 										+'<label class="mb-0">Tentative Date</label>'
 										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
 									+'	</div>'
@@ -531,7 +566,6 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 										+'<label>Remarks</label>'
 										+`<input type="text" name="remarks" id="remarks"  class="form-control ${isRemarkMandatory ? 'schedule_remarks remarks' : ''}" ${isRemarkMandatory ? `isRemarkMendatory="true" minlength="${minRemarkCount}" required` : ''}>`
 										+ `${(!isRemarkMandatory)? '':'<small id="scheduleRemarksCounter" class="text-muted">0 / '+minRemarkCount+'</small>'}`
-										
 									+'</div>'
 								+'</div>'
 							+'</form>'
@@ -745,4 +779,34 @@ function pagination(clickFrom, boxSearchCondition, countType){
             }
 		html+='</ul>';
         return html;
+}
+
+function moveCounselorInScheduleEventModal(meetingId){
+	var html=
+		`<div class="modal fade" id="moveCounselorInScheduleEventModal">
+			<div class="modal-dialog modal-md" role="document">
+				<div class="modal-content">
+					<div class="modal-header p-2 bg-primary text-white">
+						<h5 class="m-0">Move Event</h5>
+					</div>
+					<form action="javascript:void(0);" id="moveCounselorInScheduleEventForm" name="moveCounselorInScheduleEventForm" autocomplete='off'>
+						<div class="modal-body delete-modal">
+							<div class="full">
+								<div class="form-group mb-2 p-0">
+									<label class="mb-0">Move interview</label> 
+									<select	name="assigneeMove" id="assigneeMove" class="form-control" >
+										<option value="0">Select Assignee</option>
+									</select>
+								</div>
+							</div>
+							<div class="full mt-1">
+								<button type="button" class="btn btn-success  float-right pr-4 pl-4" onclick="moveInterviewData(${meetingId});">Move</button>
+								<button type="button" class="btn btn-info  float-right pr-4 pl-4 mr-2" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>`
+	return html;
 }

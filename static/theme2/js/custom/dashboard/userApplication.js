@@ -40,9 +40,11 @@ async function userApplicationProfileOnloadFunction(){
             var html=`<option value="">Select Status</option>
                 <option value="Applied">Applied</option>
                 <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
-                <option value="Few Questions Submitted">Few Questions Submitted</option>
+                <option value="Few Questions Submitted">Few Questions Submitted</option> 
                 <option value="New Applications">New Applications</option>
                 <option value="Approved For Interview">Approved For Interview</option>
+                <option value="Accepted for Contract">Accepted for Contract</option>
+                <option value="Another Round of Interview">Another Round of Interview</option>
                 <option value="Approved for Selection Process">Approved for Selection Process</option>
                 <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
@@ -53,7 +55,8 @@ async function userApplicationProfileOnloadFunction(){
                 <option value="Few Questions Submitted">Few Questions Submitted</option>
                 <option value="New Applications">New Applications</option>
                 <option value="Approved For Interview">Approved For Interview</option>
-                <option value="accepted">Accepted</option>
+                <option value="Accepted for Contract">Accepted for Contract</option>
+                <option value="Another Round of Interview">Another Round of Interview</option>
                 <option value="Reject">Rejected</option>
                 <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
@@ -119,8 +122,7 @@ function bindUserApplicationData(responseData) {
                         }
                     </td>
                     <td>${user.country} | ${user.state} | ${user.city}</td>
-                    <td>${user.lastSalary ? user.currency + ' ' + user.lastSalary : ''}</td>
-                    <td>${user.lastOrgName || ''}</td>
+                    <td>${user.lastSalary ? user.currency + ' ' + user.lastSalary : ''}<br>${user.lastOrgName || ''}</td>
                     <td>${user.appliedUserRole || ''}</td>
                     <td>
                         ${user?.attachments?.uploadDocumentUserResumeURL ? 
@@ -147,11 +149,24 @@ function bindUserApplicationData(responseData) {
                         }
                     </td>
                     <td>
-                    ${
-                        user.assignTo && user.assignTo.toLowerCase().includes("syeed")
-                        ? `CEO`
-                        : (user.assignTo || "N/A")
-                    }
+                        <p class="mb-1">${user.assignTo && user.assignTo.toLowerCase().includes('syeed') ? 'CEO' : (user.assignTo || 'N/A')}</p>
+                        ${user.meetingDetails == "NA" && user.interviewStatus == "NA" ?
+                            ""
+                            :
+                            `<button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary view-details-btn"
+                                data-toggle="popover"
+                                data-placement="left"
+                                data-html="true"
+                                title="<b>Interview Details</b>"
+                                data-content="
+                                <b>Date & Time:</b> ${user.meetingDetails || 'N/A'} <br>
+                                <b>Interview Status:</b> ${user.interviewStatus || 'N/A'} <br>
+                            ">
+                                View
+                            </button>`
+                        }
                     </td>
                     <td>${user.status}</td>
                     <td>
@@ -162,11 +177,11 @@ function bindUserApplicationData(responseData) {
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}')">
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}','${user.interviewStatus}')">
                                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
                                         </a>
                                     </li>`;
-                                    if((user.status == "Approved For Interview" || user.status == "Approved for Selection Process") && user.appliedUserRole == "Teacher"){
+                                    if((user.status == "Approved For Interview" || user.status == "Approved for Selection Process")){
                                         row+=`<li>
                                             <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLinkJA(${user.id})">
                                                 <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
@@ -175,7 +190,7 @@ function bindUserApplicationData(responseData) {
                                     }
                                     row+=`<li>
                                         <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING')">
-                                            <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
+                                            <i class="fas fa-comment me-2"></i>&nbsp;Communication Log
                                         </a>
                                     </li>
                                 </ul>
@@ -251,6 +266,10 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
                 $("#nonTeachingRecordsJA").text(responseData.nonTeachingRecords);
             }
             $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="popover"]').popover({
+                trigger: 'click',
+                container: 'body'
+            });
         }
     } catch (error) {
         console.error('Error loading user application data:', error);
@@ -289,11 +308,27 @@ function updateFormState() {
     };
 }
 
-function openUpdateStatusModalUserApplication(id, status, role){
+function openUpdateStatusModalUserApplication(id, status, role, interviewStatus){
     if($("#userApplicationProfileStatusModal").length == 1){
         $("#userApplicationProfileStatusModal").remove();
     }
-    $("body").append(userApplicationProfileStatusModal(id, status, role));
+    $("body").append(userApplicationProfileStatusModal(id, status, role, interviewStatus));
+    $("#eventStatus").on('change', function(){
+        var status = $(this).val();
+        if (status === "COMPLETED" || status === "NOTATTENDED") {
+            if($("#userApplicationProfileStatus option[value='Another Interview']").length){
+                return;
+            }
+            $("#userApplicationProfileStatus option[value='0']").after('<option value="Another Round of Interview">Another Round of Interview</option>');
+            $("#userApplicationProfileStatus").parent().show();
+        }else{
+            $("#userApplicationProfileStatus option[value='Another Interview']").remove();
+            $("#userApplicationProfileStatus").val("0").trigger("change");
+            if (status === "CANCELLED" || status === "RESCHEDULE") {
+                $("#userApplicationProfileStatus").parent().hide();
+            }
+        }
+    })
     $("#assignedToInterview").select2({
         placeholder: "Select Assign To",
         theme:"bootstrap4"
@@ -336,7 +371,15 @@ async function updateUserApplicationProfile(id, status){
         }
         return;
     }
+    var eventStatus = $("#eventStatus").val();
+    if(status=='Booked'){
+        if(eventStatus == null || eventStatus == undefined || eventStatus == ""){
+            showMessageTheme2(2, "Please select interview status");
+            return false;
+        }
+    }
     var selectedStatus = $("#userApplicationProfileStatus").val();
+    var duration=15;
     if(selectedStatus == null || selectedStatus == undefined || selectedStatus == ""){
         showMessageTheme2(2, "Please select status");
         return false;
@@ -351,9 +394,14 @@ async function updateUserApplicationProfile(id, status){
             showMessageTheme2(2, "Please select any question");
             return false;
         }
+    }else if(selectedStatus == "Another Round of Interview"){
+        duration = $("#userApplicationProfileStatusForm #duration").val();
     }
     if($("#userApplicationProfileRemarks").val() == null || $("#userApplicationProfileRemarks").val() == undefined ||  $("#userApplicationProfileRemarks").val() == ""){
         showMessageTheme2(2, "Please enter remarks");
+        return false;
+    }else if($("#userApplicationProfileRemarks").val().length <25){
+        showMessageTheme2(2, "Remarks can not be less than 25 characters.");
         return false;
     }
     var finalQuestionsArr = [];
@@ -372,6 +420,8 @@ async function updateUserApplicationProfile(id, status){
     payload["questions"] = finalQuestionsArr;
     payload["status"] = $("#userApplicationProfileStatus").val();
     payload["remarks"] = $("#userApplicationProfileRemarks").val();
+    payload["duration"] = duration;
+    payload["eventStatus"] = eventStatus;
     var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
     if(responseData.status == "SUCCESS"){
         // if(selectedStatus == 'Reject'){
@@ -392,12 +442,18 @@ async function updateUserApplicationProfile(id, status){
 
 async function applicantsViewAssignToListForInterview(role){
     var selectedStatus = $("#userApplicationProfileStatus").val();
-    if(selectedStatus == "Approved For Interview"){
+    if(selectedStatus == "Approved For Interview" || selectedStatus == "Another Round of Interview"){
         let payload = {}
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
         bindAssignToJA('userApplicationProfileStatusForm', 'assignedToInterview', responseData);
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").show();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
+        $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
+        if(selectedStatus == "Approved For Interview"){
+            $("#userApplicationProfileStatusForm #durationDiv").hide();
+        }else{
+            $("#userApplicationProfileStatusForm #durationDiv").show();
+        }
     }else if(selectedStatus == "Step 2 | Few Questions") {
         var payload = {}
         payload["schoolId"] = SCHOOL_ID;
@@ -417,11 +473,15 @@ async function applicantsViewAssignToListForInterview(role){
         }
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").hide();
         $("#userApplicationProfileStatusForm #questionsDiv").show();
+        $("#userApplicationProfileStatusForm #durationDiv").hide();
+        $("#userApplicationProfileStatusForm #remarksPara").removeClass("d-none");
     }else{
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").hide();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
+        $("#userApplicationProfileStatusForm #durationDiv").hide();
         $("#userApplicationProfileStatusForm #assignedToInterview").val("").trigger("change");
         $("#userApplicationProfileStatusForm #questions").val("").trigger("change");
+        $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
     }
 }
 
@@ -577,7 +637,7 @@ function openCommunicationLogsModalForUserApplication(userId, userRole){
         $("#userApplicationCommunicationLogsModal").remove();
     }
     $("body").append(communicationLogsContentForUserApplication(userId, userRole));
-    initEditor(1, 'commentEditorJA','Enter comments', false);
+    initEditor(1, 'commentEditorJA','Enter comments', false, ckEditorCountValidate);
     $("#fileuploadLog7").on("change",function(){
         var attachment = $("#fileuploadLog7").val().split("\\")[2]
         $("#fileuploadLog7Span").text(attachment);
@@ -642,6 +702,10 @@ async function saveCommunicationLogJA(formId, userId, userRole){
     }
 	if(editor1.getData().length>2999){
 		showMessageTheme2(0,"Comments can not be more than 3000 characters.",'',true);
+		return false;
+	}
+    if(editor1.getData().length<25){
+		showMessageTheme2(0,"Comments can not be less than 25 characters.",'',true);
 		return false;
 	}
     var payload = getRequestForCommunicationLogJA(formId, userId, userRole);
@@ -1063,5 +1127,64 @@ function updateBulkButtonsVisibility() {
         $("#removeAllQuestionsBtn").show();
     } else {
         $("#removeAllQuestionsBtn").hide();
+    }
+}
+
+$(document).on('click', function (e) {
+    $('[data-toggle="popover"]').each(function () {
+        if (
+            !$(this).is(e.target) &&
+            $(this).has(e.target).length === 0 &&
+            $('.popover').has(e.target).length === 0
+        ) {
+            $(this).popover('hide');
+        }
+    });
+});
+
+function wordsCountValidate(src, counterEleId){
+	var val = $(src).val();
+    var id = $(src).attr("id");
+    var minlength = $(src).attr("minlength");
+    var counterId = "#"+counterEleId;
+
+    // update counter live
+    $(counterId).text(val.length + " / " + minlength);
+
+    // visual feedback
+    if (val.length < minlength) {
+        $(src).addClass("is-invalid");
+        $(counterId).attr("class", "text-red");
+    } else {
+        $(src).removeClass("is-invalid");
+        $(counterId).attr("class", "text-success");
+    }
+}
+
+function ckEditorCountValidate(editor, elementId, counterEleId) {
+
+    // get plain text from CKEditor
+    const text = editor.getData()
+        .replace(/<[^>]*>/g, '')
+        .trim();
+
+    const minlength = $("#" + elementId).attr("minlength") || 25;
+    const length = text.length;
+
+    const counterId = "#" + counterEleId;
+
+    $(counterId).text(length + " / " + minlength);
+
+    if (length < minlength) {
+        $(".ck-editor__editable").css({"border-color":"red"});
+        $("#" + elementId).addClass("is-invalid");
+        $(counterId).removeClass("text-success text-muted").addClass("text-red");
+        return false;
+    }
+    else {
+        $("#" + elementId).removeClass("is-invalid");
+        $(".ck-editor__editable").css({"border-color":"green"});
+        $(counterId).removeClass("text-red text-muted").addClass("text-success");
+        return true;
     }
 }

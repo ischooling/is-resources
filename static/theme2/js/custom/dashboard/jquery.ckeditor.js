@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
 });
-function initEditor(index, elementId, placeholder, needToFlush){
+function initEditor(index, elementId, placeholder, needToFlush, onChangeCallback){
 	console.log(elementId + ' = ' + placeholder);
 
 	if (index == 1 && editor1) {
@@ -37,6 +37,12 @@ function initEditor(index, elementId, placeholder, needToFlush){
 			} else if (index == 4) {
 				editor4 = editor;
 			}
+			if (typeof onChangeCallback === "function") {
+				editor.model.document.on('change:data', () => {
+					onChangeCallback(editor, elementId, elementId+"Counter");
+				});
+			}
+
 			return editor;  // This return is now properly connected to the function
 		})
 		.catch(err => {

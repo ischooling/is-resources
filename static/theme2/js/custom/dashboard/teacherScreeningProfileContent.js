@@ -151,7 +151,7 @@ function teacherScreeningProfileStatusModal(id, status){
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
-                        <h5 class="modal-title">Profile Approval</h5>
+                        <h5 class="modal-title">Update Application Status</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
                         </button>

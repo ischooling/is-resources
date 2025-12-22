@@ -584,6 +584,34 @@ function getCourseContent(key,key1) {
 	return html;
 }
 
+function getAllInterviewerList(formId,elementId){
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMaster('formId','INTERVIEWER_LIST',USER_ROLE)),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		async : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				var result = data['mastersData']['eventsList'];
+				if(result.length>0){
+					var dropdown =  $('#'+formId+' #'+elementId);
+					dropdown.html('');
+					$.each(result, function(k, v) {
+						dropdown.append('<option value="' + v.key + '">'+ v.value + ' </option>');
+					});
+				}
+			}
+		}
+	});
+
+}	
+
 function getCountryListContent(schoolId) {
 	var html = '<option value="">Select Country List</option>';
 

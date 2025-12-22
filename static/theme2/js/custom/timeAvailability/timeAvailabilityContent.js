@@ -641,7 +641,7 @@ function thankyouPageContent(data){
 								<span class="text-gray font-weight-semi-bold full mb-3">
 									<div class="d-flex align-items-top flex-wrap">
 										<span>
-											<i class="fa fa-clock mr-1" style="line-height:22px"></i>Duration:'
+											<i class="fa fa-clock mr-1" style="line-height:22px"></i>Duration:
 										</span>	
 										<label class="m-0 ml-1" id="thankUserName">${data.timeDuration}</label>
 									</div>
@@ -658,7 +658,7 @@ function thankyouPageContent(data){
 								<span class="text-gray font-weight-semi-bold full mb-3">
 									<div class="d-flex align-items-top flex-wrap">	
 										<span>
-											<i class="fa fa-calendar mr-1" style="line-height:22px"></i>Selected Date & Time:'
+											<i class="fa fa-calendar mr-1" style="line-height:22px"></i>Selected Date & Time:
 										</span>	
 										<label class="m-0 ml-1" id="thankTimeAndDate">${data.selectTimeDate}</label>
 									</div>
@@ -668,7 +668,7 @@ function thankyouPageContent(data){
 								<span class="text-gray font-weight-semi-bold full mb-3">
 									<div class="d-flex align-items-top flex-wrap">	
 										<span>
-											<i class="fa fa-globe mr-1" style="line-height:22px"></i>Selected Time Zone:'
+											<i class="fa fa-globe mr-1" style="line-height:22px"></i>Selected Time Zone:
 										</span>	
 										<label class="m-0 ml-1" id="thankSelectTimeZone">${data.selectTimeZone.replaceAll('  ','+')}</label>
 									</div>
