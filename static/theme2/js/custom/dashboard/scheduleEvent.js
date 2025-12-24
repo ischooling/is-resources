@@ -190,9 +190,11 @@ function updateMeetingStatus(meetingId, leadId) {
         assignToUserId=$('#assignedToInterview').val();
     }
     if(status=='COMPLETED'){
-        if(eventStatus=='' || eventStatus==undefined){
-            showMessageTheme2(0, "Application Status field is required.",'',true);
-		    return false;
+        if($("#meetingType").val()=='Initial-Interview' || $("#meetingType").val()=='Interview' ){
+            if(eventStatus=='' || eventStatus==undefined){
+                showMessageTheme2(0, "Application Status field is required.",'',true);
+                return false;
+            }
         }
 
     }
