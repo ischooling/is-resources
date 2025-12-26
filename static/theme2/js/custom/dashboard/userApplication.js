@@ -460,6 +460,7 @@ async function applicantsViewAssignToListForInterview(role){
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").show();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
         $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
+        $("#updateUserApplicationProfileBtn").text("Save");
         if(selectedStatus == "Approved For Interview"){
             $("#userApplicationProfileStatusForm #durationDiv").hide();
         }else{
@@ -486,6 +487,7 @@ async function applicantsViewAssignToListForInterview(role){
         $("#userApplicationProfileStatusForm #questionsDiv").show();
         $("#userApplicationProfileStatusForm #durationDiv").hide();
         $("#userApplicationProfileStatusForm #remarksPara").removeClass("d-none");
+        $("#updateUserApplicationProfileBtn").text("Send Questions");
     }else{
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").hide();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
@@ -493,6 +495,7 @@ async function applicantsViewAssignToListForInterview(role){
         $("#userApplicationProfileStatusForm #assignedToInterview").val("").trigger("change");
         $("#userApplicationProfileStatusForm #questions").val("").trigger("change");
         $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
+        $("#updateUserApplicationProfileBtn").text("Save");
     }
 }
 

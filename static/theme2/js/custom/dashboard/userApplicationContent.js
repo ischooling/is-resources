@@ -331,7 +331,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                         </form>
                         <div class="d-flex justify-content-end">
                             <button type="button" class="btn btn-danger mr-2" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" onclick="updateUserApplicationProfile(${id},'${interviewStatus}');">Send Questions</button>
+                            <button id="updateUserApplicationProfileBtn" type="button" class="btn btn-primary" onclick="updateUserApplicationProfile(${id},'${interviewStatus}');">Save</button>
                         </div>
                     </div>
                 </div>
