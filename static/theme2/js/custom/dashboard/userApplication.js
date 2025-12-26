@@ -93,9 +93,9 @@ function bindUserApplicationData(responseData) {
 
                     <td>
                         ${changeDateFormat(new Date(user.createdAt), "MMM-dd-yyyy")}
-                        &nbsp;|&nbsp; 
+                        <br/> 
                         ${user.userName} 
-                        &nbsp;|&nbsp;
+                        <br/> 
                         ${
                             user.isWhatsappAvailable == "Y"
                             ? `<a href="https://wa.me/${user.phoneNo}" target="_blank" style="text-decoration:none; color:inherit;">
@@ -106,7 +106,7 @@ function bindUserApplicationData(responseData) {
                             </a>`
                             : `+${user.phoneNo || ''}`
                         }
-                        &nbsp;|&nbsp;
+                        <br/>
                         ${user.email || ''}
 
                         ${user.isNewApplicant == "Y"
@@ -144,7 +144,10 @@ function bindUserApplicationData(responseData) {
                     </td>
                     <td>
                        ${user.isAnswersAvailable > 0 
-                            ? `<a href="javascript:void(0);" class="btn btn-sm btn-outline-primary" onclick="openQAModal('${user.id}')">View</a>` 
+                            ? `
+                                <p class="mb-2">Submitted Date & Time: <br/><strong class="text-primary">${changeDateFormat(new Date(user.answerSubmittedDate), "MMM dd, yyyy hh:mm:ss A")}</strong></p>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-primary" onclick="openQAModal('${user.id}')">View</a>
+                            ` 
                             : '<span class="text-muted">N/A</span>'
                         }
                     </td>
@@ -397,12 +400,20 @@ async function updateUserApplicationProfile(id, status){
     }else if(selectedStatus == "Another Round of Interview"){
         duration = $("#userApplicationProfileStatusForm #duration").val();
     }
-    if($("#userApplicationProfileRemarks").val() == null || $("#userApplicationProfileRemarks").val() == undefined ||  $("#userApplicationProfileRemarks").val() == ""){
-        showMessageTheme2(2, "Please enter remarks");
-        return false;
-    }else if($("#userApplicationProfileRemarks").val().length <25){
-        showMessageTheme2(2, "Remarks can not be less than 25 characters.");
-        return false;
+    var remarks = $("#userApplicationProfileRemarks").val()?.trim();
+    if (selectedStatus === "Step 2 | Few Questions") {
+        if (remarks && remarks.length < 25) {
+            showMessageTheme2(2, "Remarks can not be less than 25 characters.");
+            return false;
+        }
+    } else {
+        if (!remarks) {
+            showMessageTheme2(2, "Please enter remarks");
+            return false;
+        } else if (remarks.length < 25) {
+            showMessageTheme2(2, "Remarks can not be less than 25 characters.");
+            return false;
+        }
     }
     var finalQuestionsArr = [];
     $("#userApplicationProfileStatusForm #selectedQuestions .sortable-item").each(function (index) {
@@ -431,7 +442,7 @@ async function updateUserApplicationProfile(id, status){
             // var displayName = assignedToText.split("-")[0].trim();
             // updateTableRowDirectly(id, selectedStatus, displayName);
         // }
-        showMessageTheme2(1, responseData.message);
+        showMessageTheme2(1, selectedStatus == "Step 2 | Few Questions" ? "Questions sent successfully!" : responseData.message);
         loadUserApplicationData(false, "filter");
         $("#userApplicationProfileStatusModal").modal("hide");
         $("#newApplicationText"+String(id)).remove();

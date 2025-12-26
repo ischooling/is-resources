@@ -159,7 +159,13 @@ function userApplicationTableContent(status){
                 <thead class="bg-primary text-white">
                     <tr>
                         <th>S.No.</th>
-                        <th style="min-width: 130px;">Applied Date | Name | Phone Number | Email | Source</th>
+                        <th style="min-width: 130px;">
+                            Applied Date<br/>
+                            Name<br/>
+                            Phone Number<br/>
+                            Email<br/> 
+                            Source
+                        </th>
                         <th>Country | Province | City</th>
                         <th>Last/Current Salary (per annum)<br>Last/Current Organization Name</th>
                         <th>Applied User Role</th>
@@ -190,7 +196,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                             <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body overflow-auto">
                         <form autocomplete="off" id="userApplicationProfileStatusForm">`
                             if(interviewStatus == "Booked"){
                                 html+=
@@ -325,7 +331,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                         </form>
                         <div class="d-flex justify-content-end">
                             <button type="button" class="btn btn-danger mr-2" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" onclick="updateUserApplicationProfile(${id},'${interviewStatus}');">Save</button>
+                            <button type="button" class="btn btn-primary" onclick="updateUserApplicationProfile(${id},'${interviewStatus}');">Send Questions</button>
                         </div>
                     </div>
                 </div>
