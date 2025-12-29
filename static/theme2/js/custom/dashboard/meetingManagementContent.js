@@ -562,7 +562,7 @@ function showStartMeetingPopup(meetingName, meetingDate, meetingStartTime, url) 
   });
 }
 
-function populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body) {
+function populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body,message,status) {
   const titles = {
     "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
     "active_speaker.mp4": "Active Speaker",
@@ -588,7 +588,41 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
             <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
           </div>
           <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
+          if(status === "UnAuthorized" || status === "Pending" || status === "Denied" ){
+           modalContent += `<div class="alert ${status === 'Denied'?'alert-danger':'alert-warning'}  mt-3 py-2 d-flex justify-content-between align-items-center" id="request-status-containt">
+                            <span id="request-status-message">${message}</span>
+                             <button type="button" class="btn btn-sm btn-outline-dark ms-3 ${status === 'Pending'?'':'d-none'}" id="refreshBtn">Refresh</button>
+                            </div>
+                            <div class="alert alert-success mt-3 py-2 d-none" id="successMsg"> Request sent successfully </div>
+                            `;
+          }
+          if(status === "UnAuthorized"){
+          modalContent += ` <div class="card" id="request-permission-card">
+                                <div class="card-body">
+                                  <h5 class="card-title mb-3">Request for Recordings</h5>
+                                  <div class="d-flex gap-2 align-items-start flex-wrap">
+                                    <div class="flex-grow-1">
+                                      <textarea
+                                        class="form-control"
+                                        id="remark"
+                                        rows="1"
+                                        maxlength="500"
+                                        placeholder="Enter your remark (max 500 characters)..."
+                                      ></textarea>
+                                      <div class="form-text text-end">
+                                        <span id="charCount">0</span>/500
+                                      </div>
+                                    </div>
 
+                                    <div class="mx-2">
+                                      <button class="btn btn-primary px-4" id="sendBtn" disabled>
+                                        Send Request
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>`;         
+          }
   recordings.forEach(record => {
     const meetingId = record.meetingId;
     const sessionUrls = record.urls

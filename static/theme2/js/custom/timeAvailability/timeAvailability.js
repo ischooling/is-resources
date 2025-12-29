@@ -3152,9 +3152,10 @@ function getEventList(eventList, userId,prestartTime, preendTime, userRoleId, mi
 											+'<span class="ml-auto check-disable-overlay '+(events.slotActiveByUser=='N'?"envetn_overlay":"")+'">';
 												// +'<a href="javascript:void(0)" class="cursor mr-2" style="color:#ccc" data-toggle="tooltip" data-placement="top" title="Edit" onclick="'+editFun+'"><i class="fa fa-edit"></i></a>';
 												// html+='<a href="javascript:void(0)" class="cursor mr-2" style="color:#ccc" data-toggle="tooltip" data-placement="top" title="Remove" onclick="showDeleteEventWarningModal()"><i class="fa fa-trash"></i></a>';
-												//if(events.userRole!='TEACHER'){
-												html+='<a href="javascript:void(0)" style="color:#ccc" onclick="copyURL(\'copyLink-'+e+'\',\'start-copy-msg-'+e+'\')" data-toggle="tooltip" data-placement="top" title="Copy Link"><i class="fa fa-copy"></i></a>';
-												//}
+												// if(events.slotName!='Interview'){
+												
+													html+='<a href="javascript:void(0)" style="color:#ccc" onclick="copyURL(\'copyLink-'+e+'\',\'start-copy-msg-'+e+'\')" data-toggle="tooltip" data-placement="top" title="Copy Link"><i class="fa fa-copy"></i></a>';
+												// }
 												// html+'=<a href='+events.meetingBookUrl+' target="_blank" class="cursor btn btn-sm btn-success">Copy Link</a>';
 											html+='</span>'
 											+'<div style="top:18px;left:0;position:absolute;">'

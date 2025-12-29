@@ -213,7 +213,7 @@ function getOrientList(data){
 				html=html+"<p class='m-0'></p>"
 				html=html+"<div><a href=\"javascript:void(0);\" onclick=\""+sendMail+"\" class='btn btn-sm btn-warning mb-1 '>Send Mail <i class='pe-7s-paper-plane'></i></a></div>";
 				if(dlist.recordingsCount != 0 && (USER_ROLE == "DIRECTOR" || showRecordingButton)){
-					html=html+'<div><a href=\"javascript:void(0);\" class="btn btn-sm btn-primary " onclick="openRecordingModal(\''+dlist.meetingId+'\',\'MEETINGS\',\''+dlist.studentName+'\',\'System Training\',\''+bookDate[0]+'\',\''+bookTime[0]+'\',\''+dlist.assignName+'\',\''+dlist.bookStartDateTimeSingapore+'\')">View Recording <i class="pe-7s-video"></i></a></div>'
+					html=html+'<div><a href=\"javascript:void(0);\" class="btn btn-sm btn-primary " onclick="openRecordingModal(\''+dlist.meetingId+'\',\'MEETINGS\',\''+dlist.studentName+'\',\'System Training\',\''+bookDate[0]+'\',\''+bookTime[0]+'\',\''+dlist.assignName+'\',\''+dlist.bookStartDateTimeSingapore+'\')">Recording <i class="pe-7s-video"></i></a></div>'
 				}
 				html=html+"</td>";
 			}
@@ -481,7 +481,7 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
 		meetingDate: formatDateToYYYYMMDDHH(convertLocalToUTC(bookStartDateTimeSingapore, "YYYY-MM-DD HH:mm:ss", BASE_TIMEZONE, "YYYY-MM-DD HH:mm:ss")),
 		meetingType: "SYS-TRAINING"
     };
-
+	$('#recordingModal').remove()
     $.ajax({
         type: "POST",
         url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-event-recordings",
@@ -489,10 +489,31 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
         contentType: APPLICATION_JSON_VALUE,
         success: function (response) {
             const res = JSON.parse(response);
-            if (res.statusCode === 0 && res.status === "success") {
+            if (res.statusCode === 0) {
                 const recordings = res.data.recordingUrls;
-                if (recordings && recordings.length > 0) {
-                    populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body);
+                if (recordings) {
+                    populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body,res.message,res.status);
+					const maxChars = 500;
+                    $('#remark').on('input', function () {
+                        const length = $(this).val().trim().length;
+                        $('#charCount').text(length);
+                        $('#sendBtn').prop('disabled', length === 0 || length > maxChars);
+                    });
+                    $('#sendBtn').on('click', function () {
+                        const remark = $('#remark').val().trim();
+                        if (!remark || remark.length > maxChars) {
+                        return;
+                        }
+                        const recordingDetails = `${meetingTitle} - ${changeDateFormat(new Date(meetingStartDate), "MMM-dd-yyyy")} ${meetingStartTime} | ${hostName}`;
+                        sendRequestRecording(remark, entityId, entityType,recordingDetails);
+                        $('#remark').val('');
+                        $('#charCount').text(0);
+                        $('#sendBtn').prop('disabled', true);
+                    });
+                    $('#refreshBtn').on('click', function () {
+                        closeAllVideoModal();
+                        openRecordingModal(entityId, entityType, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, bookStartDateTimeSingapore);
+                    });
                 } else {
                     showMessageTheme2(0, "No recordings available.", '', true);
                 }
@@ -503,7 +524,37 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
     });
 }
 
-function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body) {
+function sendRequestRecording(remark,entityId, entityType,recordingDetails) {
+  const body = {
+    entityId: entityId,
+    entityName: entityType,
+    remark: remark,
+    recordingDetails:recordingDetails,
+    userId:USER_ID
+  };
+  $.ajax({
+    type: "POST",
+    url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/send-recording-request",
+    data: JSON.stringify(body),
+    contentType: APPLICATION_JSON_VALUE,
+    success: function (response) {
+      const res = JSON.parse(response);
+      if (res.statusCode === 0 && res.status === "success") {
+         $('#successMsg').removeClass('d-none');
+         $('#request-permission-card').addClass('d-none');
+          $('#request-status-message').text('Request is in pending');
+          $('#refreshBtn').removeClass('d-none');
+         setTimeout(() => {
+           $('#successMsg').addClass('d-none');
+         }, 2000);
+      } else {
+        showMessageTheme2(0, `Error: ${res.message}`, '', true);
+      }
+    }
+  });
+}
+
+function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body,message,status) {
     const titles = {
         "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
         "active_speaker.mp4": "Active Speaker",
@@ -527,6 +578,41 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                         <button onclick="closeAllVideoModal();" type="button" class="close btn-close text-white" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                     </div>
                     <div class="modal-body">`;
+					if(status === "UnAuthorized" || status === "Pending" || status === "Denied" ){
+					modalContent += `<div class="alert ${status === 'Denied'?'alert-danger':'alert-warning'}  mt-3 py-2 d-flex justify-content-between align-items-center" id="request-status-containt">
+										<span id="request-status-message">${message}</span>
+										<button type="button" class="btn btn-sm btn-outline-dark ms-3 ${status === 'Pending'?'':'d-none'}" id="refreshBtn">Refresh</button>
+										</div>
+										<div class="alert alert-success mt-3 py-2 d-none" id="successMsg"> Request sent successfully </div>
+										`;
+					}
+					if(status === "UnAuthorized"){
+					modalContent += ` <div class="card" id="request-permission-card">
+											<div class="card-body">
+											<h5 class="card-title mb-3">Request for Recordings</h5>
+											<div class="d-flex gap-2 align-items-start flex-wrap">
+												<div class="flex-grow-1">
+												<textarea
+													class="form-control"
+													id="remark"
+													rows="1"
+													maxlength="500"
+													placeholder="Enter your remark (max 500 characters)..."
+												></textarea>
+												<div class="form-text text-end">
+													<span id="charCount">0</span>/500
+												</div>
+												</div>
+
+												<div class="mx-2">
+												<button class="btn btn-primary px-4" id="sendBtn" disabled>
+													Send Request
+												</button>
+												</div>
+											</div>
+											</div>
+										</div>`;         
+					}
 
     recordings.forEach(record => {
         const meetingId = record.meetingId;

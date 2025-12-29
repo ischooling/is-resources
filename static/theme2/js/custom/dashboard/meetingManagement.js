@@ -1617,10 +1617,31 @@ function openRecordingModal(entityId, entityType, meetingStartDate, title, start
     contentType: APPLICATION_JSON_VALUE,
     success: function (response) {
       const res = JSON.parse(response);
-      if (res.statusCode === 0 && res.status === "success") {
+      if (res.statusCode === 0) {
         const recordings = res.data.recordingUrls;
-        if (recordings && recordings.length > 0) {
-          populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body);
+        if (recordings) {
+          populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body,res.message,res.status);
+              const maxChars = 500;
+              $('#remark').on('input', function () {
+                const length = $(this).val().trim().length;
+                $('#charCount').text(length);
+                $('#sendBtn').prop('disabled', length === 0 || length > maxChars);
+              });
+              $('#sendBtn').on('click', function () {
+                const remark = $('#remark').val().trim();
+                if (!remark || remark.length > maxChars) {
+                  return;
+                }
+                const recordingDetails = `${title} - ${changeDateFormat(new Date(meetingStartDate), "MMM-dd-yyyy")} ${startTime} | ${hostName}`;
+                sendRequestRecording(remark, entityId, entityType,recordingDetails);
+                $('#remark').val('');
+                $('#charCount').text(0);
+                $('#sendBtn').prop('disabled', true);
+              });
+               $('#refreshBtn').on('click', function () {
+                closeAllVideoModal();
+                openRecordingModal(entityId, entityType, meetingStartDate, title, startTime, hostName);
+               });
         } else {
           showMessageTheme2(0, "No recordings available.", '', true);
         }
@@ -1630,6 +1651,38 @@ function openRecordingModal(entityId, entityType, meetingStartDate, title, start
     }
   });
 }
+
+
+function sendRequestRecording(remark,entityId, entityType,recordingDetails) {
+  const body = {
+    entityId: entityId,
+    entityName: entityType,
+    remark: remark,
+    recordingDetails:recordingDetails,
+    userId:USER_ID
+  };
+  $.ajax({
+    type: "POST",
+    url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/send-recording-request",
+    data: JSON.stringify(body),
+    contentType: APPLICATION_JSON_VALUE,
+    success: function (response) {
+      const res = JSON.parse(response);
+      if (res.statusCode === 0 && res.status === "success") {
+         $('#successMsg').removeClass('d-none');
+         $('#request-permission-card').addClass('d-none');
+          $('#request-status-message').text('Request is in pending');
+          $('#refreshBtn').removeClass('d-none');
+         setTimeout(() => {
+           $('#successMsg').addClass('d-none');
+         }, 2000);
+      } else {
+        showMessageTheme2(0, `Error: ${res.message}`, '', true);
+      }
+    }
+  });
+}
+
 
 function playRecording(videoUrl, title) {
   var videoModal = $("#videoModal");

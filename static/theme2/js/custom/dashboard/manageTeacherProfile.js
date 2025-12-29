@@ -185,7 +185,7 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 			<td class="text-center">`
 				if(ROLE_MODULE.viewed == 'Y'){
 					if(receivedTeachedProfile.generalMeetingId != 0){
-						html+=`<a onclick="openDemoRecordingModal('${receivedTeachedProfile.generalMeetingId}', '${receivedTeachedProfile.userId}')" class="btn btn-primary btn-sm " href="javascript:void(0);">View Recording</a>`;
+						html+=`<a onclick="openDemoRecordingModal('${receivedTeachedProfile.generalMeetingId}', '${receivedTeachedProfile.userId}')" class="btn btn-primary btn-sm " href="javascript:void(0);">Recording</a>`;
 					}else if(receivedTeachedProfile.demoVedioLink == ""){
 						html+=`N/A`
 					}else{
