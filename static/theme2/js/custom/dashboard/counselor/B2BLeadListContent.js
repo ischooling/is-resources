@@ -1338,7 +1338,7 @@ function getAddContractTabContent(data){
 								+'</small>'
 							+'</div>'
 							+'<div style="margin-left:15px;margin-bottom:40px;">'
-								+'<button type="button" id="previewContractBtn" class="btn btn-info" style="display:none;" onclick="previewContractPdf();">Preview Contract</button>'
+								+'<button type="button" id="previewContractBtn" class="btn btn-info" style="display:none;" onclick="previewContractPdf(\'B2B\');">Preview Contract</button>'
 							+'</div>'
 						+'</div>'
 						+'<hr/>'

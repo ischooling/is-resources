@@ -144,7 +144,7 @@ function generateTeacherEnrollmentContent(moduleName){
                             <a>
                                 <span class="step-order" style="text-transform: capitalize !important;">Step 3</span>
                                 <div class="icon-circle"></div>
-                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Application Under Review</span>
+                                <span class="step-order" style="text-transform: capitalize !important;font-weight: bold;">Demo Under Review</span>
                                 <span class="step-arrow-teacher step3"></span>    
                             </a>
                         </li>
@@ -242,13 +242,13 @@ function submitInterviewSlotModalContent(){
                 <div class="modal-content">
                     <div class="modal-header primary-bg white-txt-color">
                         <button type="button" class="close secondary-bg white-txt-color" onclick="return closeSubmitSlotModel()">&times;</button>
-                        <h4 class="modal-title">Confirmation</h4>
+                        <h4 class="modal-title">Note</h4>
                     </div>
                     <div class="modal-body">
                         <h4>
                             <b>Dear <span id="fullName"></span>,<br>
                                 <br>
-                                Kindly review your application properly before clicking the submit button as there will be no further changes in your details once the application has been submitted.<br>
+                                Kindly review your details properly before clicking the submit button as there will be no further changes in your details once the demo has been submitted.<br>
                                 <br>
                                 Thanks<br>
                                 ${schoolSettingsOffice.schoolName}</b>
@@ -269,14 +269,14 @@ function inReviewForTeacherDetailsModalContent(){
             <div class="modal-dialog modal-md">
                 <div class="modal-content">
                     <div class="modal-header primary-bg white-txt-color">
-                        <h4 class="modal-title">Application Under Review</h4>
+                        <h4 class="modal-title">Demo Under Review</h4>
                     </div>
                     <div class="modal-body">
                         <div class="modal-body" style="margin-top: 0 !important">
                             <p style="font: bold 16px Arial, Helvetica, sans-serif; text-align: justify">Dear 
                                 <span class="text-capitalize" id="teacherFullName">${USER_FULL_NAME}</span>
                                 <td></td>,<br>
-                                <br> Your application is <span class="text-primary primary-txt-color">Under
+                                <br> Your demo is <span class="text-primary primary-txt-color">Under
                                     Review</span>. We will get back to you within 1 week.<br>
                                 <br> Thanks<br> ${schoolSettingsOffice.schoolName}
                             </p>
@@ -298,7 +298,7 @@ function submitVerificationModal(){
                 <div class="modal-content">
                     <div class="modal-header primary-bg white-txt-color">
                         <button type="button" class="close secondary-bg white-txt-color" onclick="return closeVerificationModal()">&times;</button>
-                        <h4 class="modal-title">Confirmation</h4>
+                        <h4 class="modal-title">Note</h4>
                     </div>
                     <div class="modal-body">
                         <h4>
@@ -416,8 +416,8 @@ function videoInstructionModalContent() {
                 </button>
             </div>
             <div style="background-color: #F1F3F5; height: 100vh; overflow-y: auto;padding: 35px;color:#4f4f4f;">
-                <div style="border:1px solid #4f4f4f;border-radius:14px;padding:16px;max-height:300px;overflow-y:auto">
-                    <h5><b>1. To qualify for the next round, you are requested to record a demo class of 4-7 minutes duration on the topic of your choice from our 
+                <div style="border:1px solid #4f4f4f;border-radius:14px;padding:16px;">
+                    <h5><b>1. To qualify for the next round, you are requested to record a demo video of 4-7 minutes duration on the topic of your choice from our 
                     <a class="primary-txt-color" href="https://internationalschooling.org/course-catalog/" target="_blank">Course Catalog</a></b></h5>
                     <h6 style="margin:5px 0px;"><b>Following are the general guidelines which can help to make the video:</b></h6>
                     <ul>
@@ -425,12 +425,12 @@ function videoInstructionModalContent() {
                         <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>You need to have a stable internet connection.</li>
                         <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>You will need to check whether your computer’s audio and webcam are working fine.</li>
                         <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>You need to dress professionally and have the right posture and body language.</li>
-                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>The medium of instruction must be in English.</li>
+                        <li style="font-size:13px;"><i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>The medium of instruction must be English.</li>
                     </ul><br>
 
                     <h5><b>2. Please remember that you have to record the video with a mindset that you are in front of a student, so you have to first introduce yourself and then proceed with the demo of the particular course you are applying for.</b></p>
 
-                    <h6 style="color:var(--pc);margin:5px 0px;"><b>Your demo video will be judged on the following criteria by our panel:</b></h6>
+                    <h6 style="color:var(--pc);margin:5px 0px;"><b>Your demo video will be reviewed on the following criteria by our panel:</b></h6>
                     <ul>
                         <li style="font-size:13px;">
                             <i class="fa fa-check-circle-o" style="margin:2px;color:var(--pc);font-size:20px;" aria-hidden="true"></i>Content Knowledge 
@@ -441,17 +441,17 @@ function videoInstructionModalContent() {
                         </li>
                     </ul>
                     <p style="color:var(--pc);margin:10px 0px;"><b>You are free to be as creative and innovative in your demo video as you like.</b></p>
-                    <h5><b>3. You will have ${noOfAttempts} attempts to record your demo class, but only one final recording may be submitted. You can choose which recording to submit for approval.</b></p>
+                    <h5><b>3. You will have ${noOfAttempts} attempts to record your demo video, but only one final recording may be submitted. You can choose which recording to submit for approval.</b></p>
                 </div>
                 <div id="recordingSection"></div>
                 ${/*<h5 id="recordingWaitingText" style="font-weight: bold; color: #FFC008; margin-top: 12px; display: none;"></h5>*/''}
-                <div class="d-flex text-right" style="justify-content:space-between; align-items:center;">
-                    <button id="recordYourDemoInsideBtn" class="btn btn-primary" style="border-radius: 6px;font-weight: bold;margin-top: 3%;">
+                <div class="d-flex text-center" style="justify-content:space-between; align-items:center;">
+                    <button id="recordYourDemoInsideBtn" class="btn btn-primary" style="border-radius: 6px;font-weight: bold; margin-top: 1%; margin-right: auto; margin-left: auto; margin-bottom: 0px;">
                         <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
-                        <span>Record your Demo<span>
+                        <span>LIVE RECORD YOUR DEMO<span>
                     </button>
-                    <button id="approveDemoBtn" onclick="approvedDemoRecording();" class="btn btn-primary rounded mt-3" style="display: none;">Approve</button>
                 </div>
+                <button id="approveDemoBtn" onclick="approvedDemoRecording();" class="btn btn-primary rounded" style="display: none;">Submit</button>
             </div>
         </div>
     `;
@@ -768,8 +768,8 @@ function getTeacherProfessionalDetailsContent(stup){
                 </div>
             </div>`
         }else{
-            html+=`<div style="margin: 20px 0px;">
-                <h3 class="text-left mb-0">Record Your Demo</h3>
+            html+=`<div style="margin: 20px auto; display: flex; flex-direction: column;">
+                <h3 class="text mb-0">Record Your Demo</h3>
                 <div id="approvedDemoRecording"></div>`;
                 // entityIds = stup.sessionEntityIdList;
                 // if(entityIds.length == 2 && stup.firstMeetingStatus == 'second_joined'){
@@ -788,9 +788,9 @@ function getTeacherProfessionalDetailsContent(stup){
                 //         <span>Record your Demo</span>
                 //     <a>`;
                 // }
-                html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px;" onclick="openModalForDemoVideo('teacherSignupStage2');">
+                html+=`<a id="recordYourDemoOutsideBtn" href="javascript:void(0);" class="btn btn-sm btn-primary" style="border-radius: 12px;font-weight: bold; padding: 10px; width: fit-content; margin: auto;" onclick="openModalForDemoVideo('teacherSignupStage2');">
                     <i class="fa fa-video-camera" style="margin-right: 4px;background-color: white;border-radius: 50%;color:var(--pc);padding: 5px;" aria-hidden="true"></i>
-                    <span>Record or select your Demo</span>
+                    <span>LIVE RECORD YOUR DEMO</span>
                 </a>
             </div>`;
         }
@@ -823,7 +823,7 @@ function getTeacherProfessionalDetailsContent(stup){
 function getTeacherReviewAndApprovalContent(){
     var html=
         `<h3>
-           Application Under Review <br>
+           Demo Under Review <br>
             <p style="font-size: 14px;">Kindly Review your details</p>
         </h3>
         <div class="form-row">
@@ -1029,7 +1029,7 @@ function getTeacherVerificationDetailsContent(data){
                 <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
                 <div class="form-row">
                     <div class="form-holder">
-                        <label class="full">Recommendation Letter 1</label>
+                        <label class="full">Recommendation Letter 1<sup class="text-danger">*</sup></label>
                         <div class="full upload-item-wrapper clone-item">
                             <div class="upload-btn-wrapper mt-1 upload-item">
                                 <div class="uploaded-file valid-field valid-check" id="fileupload7Span" >${checkValueValidation(data.attachments.recommendationLetter1Name, "Upload Recommendation Letter 1")}</div>
@@ -1040,7 +1040,7 @@ function getTeacherVerificationDetailsContent(data){
                         </div>
                     </div>
                     <div class="form-holder">
-                        <label class="full">Recommendation Letter 2</label>
+                        <label class="full">Recommendation Letter 2<sup class="text-danger">*</sup></label>
                         <div class="full">
                             <div class="upload-btn-wrapper mt-1">
                                 <div class="uploaded-file valid-field valid-check" id="fileupload8Span">${checkValueValidation(data.attachments.recommendationLetter2Name, "Upload Recommendation Letter 2")}</div>
@@ -1052,7 +1052,7 @@ function getTeacherVerificationDetailsContent(data){
                     </div>
                 </div>
                 <div>
-                    <h6 class="mb-1" style="font-weight: bold;color: gray;">Reference 1</h6>
+                    <h6 class="mb-1" style="font-weight: bold;color: gray;">Reference 1<sup class="text-danger">*</sup></h6>
                     <div class="form-row d-flex flex-wrap gap-3">
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
                             <input id="reference1Name" type="text" class="form-control-field" placeholder="Name" value="${data.employeeReference?.[0]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
@@ -1067,7 +1067,7 @@ function getTeacherVerificationDetailsContent(data){
                             <input id="reference1Designation" type="text" class="form-control-field" placeholder="Designation" value="${data.employeeReference?.[0]?.designation || ''}" maxlength="50">
                         </div>
                     </div>
-                    <h6 class="mt-2 mb-1" style="font-weight: bold;color: gray;">Reference 2</h6>
+                    <h6 class="mt-2 mb-1" style="font-weight: bold;color: gray;">Reference 2<sup class="text-danger">*</sup></h6>
                     <div class="form-row d-flex flex-wrap gap-3">
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
                             <input id="reference2Name" type="text" class="form-control-field" placeholder="Name" value="${data.employeeReference?.[1]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
@@ -1144,107 +1144,94 @@ function getTeacherVerificationDetailsContent(data){
 
 function getContractDetailsContent(agreement){
     agreement = agreement.details.teacherAgreementDetails;
+    var formattedPublishDateTime = changeDateFormat(new Date(agreement.publishDateTime), "MMM dd, yyyy hh:mm A");
+    var datePart = formattedPublishDateTime.substring(0, 12);
+    var timePart = formattedPublishDateTime.substring(13);
     var html=
         `<input type="hidden" id="userIdAgreement" value="${agreement.userId}" />
         <input type="hidden" id="agreementLogId" value="${agreement.agreementLogId}" />
         <input type="hidden" id="agreementAcceptanceFrom" value="${agreement.agreementAcceptanceFrom}" />
+        <input type="hidden" id="location" value="" />
 
         <h3>Contract Details</h3>
 
         <div class="form-row">
             <div class="form-holder paypal-details primary-border-color">
                 <div class="contact-detail-header">
-                    <div class="com_logo">`
+                    <div class="">`
                         if(schoolSettingsOffice.schoolType == "WLP"){
                             html+=`<img src="${schoolSettingsTechnical.letterHeadImg}${SCRIPT_VERSION}" width="300px;" />`
                         }else{
-                            html+=`<img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.letterHeadImg}${SCRIPT_VERSION}" width="300px;" />`
+                            html+=`<img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="300px;" />`
                         }
                     html+=`</div>
-                    <div class="com_add primary-txt-color">
+                    ${/*<div class="com_add primary-txt-color">
                         <span style="float: right; width: 28%; height: 75px; text-align: right;">
                             ${schoolSettingsOffice.address}
                         </span>
-                    </div>
+                    </div>*/''}
                 </div>
                 <div class="text-editor-content" style="min-height: 250px; padding-top: 65px">
-                    <span style="float: left; width: 50%; margin-top: 5px;">
-                        <strong>Ref No.:</strong> ${agreement.agreementRefNumber}
-                    </span>
-                    <span style="float: right; width: 50%; margin-top: 5px; text-align: right;">
-                        <strong>Date:</strong> ${agreement.agreementDate}
-                    </span>
-                    <span style="float: left; width: 100%; margin-top: 20px; font-weight: bold; height: auto;">
-                        ${agreement.salutation}${agreement.salutation!=''?'. ':''}${agreement.name},<br />
-                    </span>
-                    <span style="float: left; width: 100%; margin-top: 0px; font-weight: normal; height: auto;">
-                        ${agreement.address1}${agreement.address1!=''?',<br />':''}
-                        ${agreement.address2}${agreement.address2!=''?',<br />':''}
-                        ${agreement.city}${agreement.city!=''?',<br />':''}
-                        ${agreement.state}${agreement.state!=''?',<br />':''}
-                        ${agreement.country}${agreement.country!=''?',<br />':''}
-                        ${agreement.pincode}
-                    </span>
-                    <span style="float: left; width: 45%; margin-top: 10px;"></span>
-                    <span style="text-align: center; margin-top: 10px;">
-                        <strong><u>Sub: Offer Letter</u></strong>
-                    </span>
-                    <span style="float: left; width: 100%; margin-top: 10px;margin-bottom:10px;">
-                        Dear <strong>${agreement.salutation}${agreement.salutation!=''?'. ':''}${agreement.name}</strong>
-                    </span>
-                    ${agreement.content}
-                    <p style="margin-bottom: 40px;">With Best Regards</p>
-                
-                </div>
-                <div class="contact-detail-footer" style="padding-top: 65px">
-                    <div class="row">
-                        <div class="col-md-12">`
-                            if(schoolSettingsOffice.schoolType == "WLP"){
-                                html+=`<img src="${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" alt="Authorized Signature" title="Authorized Signature" style="width: 150px;"/>`
-                            }else{
-                                html+=`<img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" alt="Authorized Signature" title="Authorized Signature" style="width: 150px;"/>`
-                            }
-                        html+=`</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="width:60%;">
+                            <div style="font-weight:bold; margin-bottom:4px;">
+                                ${agreement.salutation}${agreement.salutation ? '. ' : ''}${agreement.name},
+                            </div>
+                            <div style="font-weight:normal;">
+                                ${agreement.city}${agreement.city ? ',<br/>' : ''}
+                                ${agreement.state}${agreement.state ? ',<br/>' : ''}
+                                ${agreement.country}
+                            </div>
+                        </div>
 
-                        <div class="col-md-12">
-                            <br />
-                            <p>${schoolSettingsTechnical.authorizedPersonName}</p> 
-                            <p>${schoolSettingsOffice.schoolName}</p>
-                            <p>(Authorised Signatory for ${schoolSettingsOffice.schoolName})</p>
-                        </div>
-                        <div class="col-md-12">
-                            <br />
-                            <p>
-                                <strong>Acceptance of Offer:</strong>
-                            </p>
-                            <p>I have read the above offer letter and hereby acknowledge my
-                                acceptance of the above terms and conditions of employment.</p>
-                        </div>
-                        <div class="col-md-12">
-                            <br />
-                            <p>
-                                <strong>Place:</strong> ${agreement.schoolCountry}
-                            </p>
-                            <div class="row">
-                                <div class="col-md-6 col-sm-6 col-xs-12">
-                                    <p>
-                                        <strong>Date:</strong>   ${agreement.agreementDate}
-                                    </p>
-                                </div>
-                                <div class="col-md-6 col-sm-6 col-xs-12 text-right text-xs-left">
-                                    <strong>Name:</strong> ${agreement.salutation}${agreement.salutation!=''?'. ':''}${agreement.name}
-                                </div>
+                        <div style="width:40%; text-align:right;">
+                            <div>
+                                <strong>Date:</strong> ${datePart}
+                            </div>
+                            <div>
+                                <strong>Time:</strong> ${timePart}
                             </div>
                         </div>
                     </div>
-                    <div class="form-row">
+
+                    <div id="editorData" style="margin-top:25px;">
+                        ${cleanBase64Images(agreement.content)}
+                    </div>
+                </div>
+                <div class="contact-detail-footer" style="padding-top: 12px">
+                    <div class="full mt-4 mb-4 signature-upload">
+                        <label class="mb-2 text-dark" style="font-weight: bold;">
+                            Upload Recipient Signature
+                        </label>
+                        <div class="custom-file">
+                            <input 
+                                type="file" 
+                                class="custom-file-input cursor" 
+                                id="recipientSignatureUpload"
+                                accept="image/*"
+                                onchange="handleRecipientSignatureUpload(this, 'rightSignatureBox'); updateFileName(this); handleFileInputCancel('teacherSignupStage4', 'recipientSignatureUpload', 'rightSignatureBox');"
+                            >
+                            <label class="custom-file-label text-truncate" for="recipientSignatureUpload">
+                                Choose file...
+                            </label>
+                        </div>
+                        <small class="form-text text-danger font-12 mt-1">
+                            Please upload your signature image (PNG/JPG only, white/transparent background, max size: 300KB).
+                        </small>
+                    </div>
+                    <div class="full mt-4">
+                        <div class="d-flex">
+                            <p class="m-0"><b>Address:</b> ${schoolSettingsOffice.address}</p>
+                            ${/*<p class="m-0 ml-auto">${data.name}</p>*/''}
+                        </div>
+                        ${agreement.publishDateTime != "" ? `<p class="m-0"><b>Date:</b> ${formattedPublishDateTime}</p>`:``}
+                    </div>
+                    <div class="form-row" style="display: flex; flex-direction: column; gap: 3px; margin-top: 10px;">
+                        <p class="mb-0" style="font-weight: bold;">Acceptance of Offer</p>
                         <div class="custom-checkbox-policy">
-                            <br /> <br />
                             <input type="checkbox" class="wishSameParent" id="agreementDeclarationConfirm" name="agreementDeclarationConfirm" ${agreement.firstReset == 22 ? 'checked':''}>
-                            <label for="agreementDeclarationConfirm" class="undertaking ml-2" style="color: #000;cursor:pointer;">By
-                                clicking (ticking) the box here, I understand the responsibility
-                                to abide by all the rules, regulations and the above mentioned
-                                policies/points as established by ${schoolSettingsOffice.schoolName}
+                            <label for="agreementDeclarationConfirm" class="undertaking ml-2" style="color: #000;cursor:pointer;">
+                                I hereby confirm that I have read and agree to the Terms. I understand that this agreement is digitally signed and does not require a physical signature.
                             </label>
                         </div>
                     </div>
@@ -1588,7 +1575,7 @@ function getTeacherBankAccountDetails(){
                 </div>
             </div>
         </div>
-        <div class="form-row">
+        ${/*<div class="form-row">
             <div class="form-holder paypal-details primary-border-color"  style="width:50% !important;margin:auto; background-color:#fffbf5;">
                 <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
                 <div class="form-row">
@@ -1629,7 +1616,8 @@ function getTeacherBankAccountDetails(){
                     </div>
                 </div>
             </div>
-        </div>`
+        </div>*/''}
+        `
     return html;
 }
 
@@ -1853,7 +1841,7 @@ function step2Skeleton(){
 function step3Skeleton(){
 	var html=
 	`<h3 class="alternate-txt-color">
-        Application Under Review
+        Demo Under Review
         <br/>
         <p style="font-size: 14px;">Kindly Review your details</p>
     </h3>
@@ -2161,5 +2149,59 @@ function showStartMeetingPopupTeacher(meetingName, url) {
             </div>
         </div>`;
     return html;
-  }
-  
+}
+
+function contractExpiredModalContent() {
+    return `
+    <div id="contractExpiredModal" class="modal modal-design fade" role="dialog"
+         data-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header primary-bg white-txt-color">
+                    <h4 class="modal-title">Contract Expired</h4>
+                </div>
+                <div class="modal-body">
+                    <p style="font: bold 16px Arial, Helvetica, sans-serif; text-align: justify">
+                        Dear <span class="text-capitalize">${USER_FULL_NAME}</span>,<br><br>
+                        Your agreement has <span class="text-danger">expired</span>.
+                        Please contact the administration for further assistance.<br><br>
+                        Thanks<br>
+                        ${schoolSettingsOffice.schoolName}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn k8-theme-btn primary-bg white-txt-color"
+                            onclick="logout();">
+                        Log out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function confirmationContractModal(){
+    var html=
+        `<div id="confirmationContractModal" class="modal modal-design fade" role="dialog">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header primary-bg white-txt-color">
+                        <h4 class="modal-title">Are you sure you want to proceed?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-body" style="margin-top: 0 !important">
+                            <p style="font: bold 16px Arial, Helvetica, sans-serif; text-align: justify">
+                                Please note that once the contract is accepted, you will not be able to go back to the previous step.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer text-center" style="padding:0 15px">
+                        <button type="button" class="btn k8-theme-btn primary-bg white-txt-color" onclick="confirmAcceptContractYes();">Yes</button>
+                        <button type="button" class="btn k8-theme-btn" style="background-color: red;" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}

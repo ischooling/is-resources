@@ -167,7 +167,7 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 		for (let iu = 0; iu < receivedTeachedProfileList.length; iu++) {
 			const receivedTeachedProfile = receivedTeachedProfileList[iu];
 			
-			html+=`<tr id="profileId_${receivedTeachedProfile.userId}">	
+			html+=`<tr id="profileId_${receivedTeachedProfile.userId}" class="profileId_${receivedTeachedProfile.userId}">	
             <td style="text-align:center;">${iu+1}</td>
 			<td>${receivedTeachedProfile.countryName}</td>
            	<td>${receivedTeachedProfile.name}</td>
@@ -175,9 +175,9 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 			<td>${receivedTeachedProfile.userName}</td>
 			<td id="status_${receivedTeachedProfile.userId}">`;
 				if(receivedTeachedProfile.teacherFirstReset == 13){
-					html+=`Profile under review`;
+					html+=`Demo under review`;
 				}else if(receivedTeachedProfile.teacherFirstReset == 24){
-					html+=`Profile on hold`;
+					html+=`On hold`;
 				}else{
 					html+=`NA`;
 				}
@@ -194,7 +194,27 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 				}
 			html+=`</td>
 			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${receivedTeachedProfile.userId}&moduleId=${receivedTeachedProfile.mangeUserListModId}&actionType=1a')"  >Click here</a> `:""}</td>
-			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.teacherFirstReset}', '${receivedTeachedProfile.isTeacherPoliceVerifide}');">Update Status</a>`:""}</td>
+			<td class="text-center">
+				${
+					ROLE_MODULE.updated == "Y"
+					? `
+					<div class="dropdown">
+						<button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="dropdown" aria-expanded="false">
+							<i class="fas fa-ellipsis-v"></i>
+						</button>
+						<div class="dropdown-menu dropdown-menu-right">
+							<a class="dropdown-item" href="javascript:void(0);" onclick="return callPendingReqModel('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.teacherFirstReset}', '${receivedTeachedProfile.isTeacherPoliceVerifide}');">
+								<i class="fas fa-edit mr-2"></i> Update Status
+							</a>
+							<a class="dropdown-item" href="javascript:void(0);" onclick="addTeacherContract('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.name}', '${receivedTeachedProfile.userName}', '${receivedTeachedProfile.contractId}');">
+								<i class="fas fa-file-contract mr-2"></i> <span id="addContractSpan${receivedTeachedProfile.userId}">${receivedTeachedProfile.contractId > 0 ? "Add/Edit Contract" : "Add Contract"}</span>
+							</a>
+						</div>
+					</div>
+					`
+					: ""
+				}
+			</td>
 			</tr>`;
 		}
 	}
@@ -234,7 +254,10 @@ function getPendingContractListHtml(pendingContractList){
            	<td>${pendingContract.name}</td>
 			<td>${pendingContract.mobileNumber}</td>
 			<td>${pendingContract.userName}</td>
-			<td><a onclick="return callSchoolInneraction('teacher-agreement','?userId=${pendingContract.userId}&controlType=edit&moduleId=${moduleId}','section-linebox');" href="javascript:void(0);" class="waves-effect">Click here</a></td>
+			<td>
+				${/*<a onclick="return callSchoolInneraction('teacher-agreement','?userId=${pendingContract.userId}&controlType=edit&moduleId=${moduleId}','section-linebox');" href="javascript:void(0);" class="waves-effect">Click here</a>*/''}
+				<a onclick="addTeacherContract('${pendingContract.userId}', '${pendingContract.name}', '${pendingContract.userName}', '${pendingContract.contractId}');" href="javascript:void(0);" class="waves-effect">Click here</a>
+			</td>
 			<td><a href="javascript:void(0);" onclick="return callAgreementReqModel('${pendingContract.userId}','${pendingContract.meetingId}');" class="waves-effect">Update Status</a></td>
 			<td>
 				${/*<a href="${pendingContract.agreementUrl!=null?pendingContract.agreementUrl:'javascript:void(0);alert(\'No agreement yet generated\')'}" target="_blank"
@@ -345,9 +368,9 @@ function checkLinkValid(e, src){
 			}else{
 				htmlOption = `
 							<option value="0">Select status</option>
-							<!-- <option value="1">Approve</option> -->
-							<option value="3">Redirect to Contract Details</option>
-							<option value="4">Profile On Hold</option>
+							<!-- <option value="1">Approve</option>
+							<option value="3">Redirect to Contract Details</option> -->
+							<option value="4">On Hold</option>
 							<option value="2">Decline</option>`;
 			}
 			// else if(firstReset == 20 || (isTeacherPoliceVerifide == 'Y' && firstReset == 21) || (Object.keys(statusUpdateHold).length != 0 && statusUpdateHold[userId] == 'verified')){
@@ -382,7 +405,7 @@ function checkLinkValid(e, src){
 			// }
 			$("#profileApprovalModal #remarksStatus").html(htmlOption);
 			$('#profileApprovalId #remarksStatus').val('0');
-			getEmployeeSpecializationDropDown('profileApprovalId','employeeSpecialization');
+			// getEmployeeSpecializationDropDown('profileApprovalId','employeeSpecialization');
 			
 	    //  $('#profileApprovalModal #meetingId').val(meetingId);
 
@@ -516,7 +539,7 @@ function checkLinkValid(e, src){
 				   callCommonAction('','update-teacher-request','dashboard','decline',userId,remarks,'',roleModuleId);
 			   }else if($('#profileApprovalId #remarksStatus').val()==4){
 				   callCommonAction('','update-teacher-request','dashboard','hold',userId,remarks,'',roleModuleId);
-				   $("#status_"+userId).text('Profile On Hold')
+				   $("#status_"+userId).text('On Hold')
 			   }else if($('#profileApprovalId #remarksStatus').val()==5){
 				   callCommonAction('','update-teacher-request','dashboard','verification',userId,remarks,'',roleModuleId);
 				   $("#status_"+userId).text('Profile On verification');
@@ -1035,8 +1058,6 @@ async function enableReattemptRecording(userId){
 	}
 }
 
-
-
 function teacherVerificationAttchament(src){
 	console.log(src)
 	var fileExtension = $(src).attr("data-src").split('.').pop();
@@ -1050,4 +1071,531 @@ function teacherVerificationAttchament(src){
 		)
 	}
 	$("#teacherVerificationAttchamentModal").modal("show");
+}
+
+async function addTeacherContract(userId, name, email, contractId) {
+    $("#addTeacherContractModal").remove();
+    var payload = { userId: userId };
+    const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-agreement-details', payload, '/teacher/signup');
+    
+    $("body").append(addTeacherContractModal(responseData.details.teacherAgreementDetails, userId, name, email, contractId));
+    
+    if (contractId != 0) {
+        $("#publishTeacherContractBtn").show();
+        $("#previewTeacherContractBtn").show();
+    }
+    
+    setTimeout(() => {
+        $("#addTeacherContractModal").modal("show");
+    }, 300);
+    
+    $('#teacherContractForm #specialization').select2({
+        theme: "bootstrap4",
+        dropdownParent: "#specializationWrapper"
+    });
+    
+	getAllNationalityList("teacherContractForm", "teacherNationality");
+    getEmployeeSpecializationDropDown("teacherContractForm", "specialization");
+    renderWorkingDaysCheckboxes();
+    initializeCountryStateCity("teacherContractForm", "teacherContractCountry", "teacherContractState", "teacherContractCity");
+    var data = responseData.details.teacherAgreementDetails;
+
+	$(".working-day-checkbox").each(function () {
+        var val = parseInt($(this).val());
+        if (data?.workingDays.includes(val)) {
+            $(this).prop("checked", true);
+        }
+    });
+
+	if (data.countryId) {
+		setTimeout(() => {
+			$("#teacherContractForm #teacherNationality").val(data.countryId).trigger("change");
+			$("#teacherContractForm #teacherContractCountry").val(data.countryId).trigger("change");
+		}, 300);
+	}
+
+	if (data.stateId) {
+		setTimeout(() => {
+			$("#teacherContractForm #teacherContractState").val(data.stateId).trigger("change");
+		}, 600);
+	}
+
+	if (data.cityId) {
+		setTimeout(() => {
+			$("#teacherContractForm #teacherContractCity").val(data.cityId).trigger("change");
+		}, 900);
+	}
+
+    if (data.specialization) {
+        setTimeout(() => {
+            $('#teacherContractForm #specialization').val(data.specialization.split(',')).trigger('change');
+        }, 500);
+    }
+    
+    editor = new Jodit('#teacherContractCommentData', {
+        width: 794,
+        height: 400,
+        toolbarSticky: true,
+        uploader: { insertImageAsBase64URI: true },
+        toolbarAdaptive: false,
+        events: {
+            change: function () {
+                toggleContractEditor("teacherContractForm");
+            }
+        }
+    });
+    
+    if (data.content && data.content.trim() !== "") {
+        editor.value = cleanBase64Images(data.content);
+        editor.setReadOnly(false);
+		$("#teacherContractForm label[for='recipientSignatureUpload']").text($("#leftSignatureBox img").data("name"));
+    } else {
+        editor.setReadOnly(true);
+        editor.value = '<p class="text-muted">Please fill contract details above to enable editor.</p>';
+    }
+
+	$("#teacherContractForm #teacherNationality").select2({
+		theme:"bootstrap4"
+	})
+
+    $("#teacherContractForm #contractDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#teacherContractForm #contractStartDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#teacherContractForm #contractEndDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#teacherContractForm #contractValidityStartDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#teacherContractForm #contractValidityEndDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+
+    if (data.validityStart && data.validityEnd) {
+        var start = new Date(data.validityStart);
+        var end = new Date(data.validityEnd);
+        var duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        if (duration > 0) {
+            $('#teacherContractForm #contractValidityDuration').val(duration).trigger('change');
+        }
+    }
+    
+    if (data.contractDurationYears > 0) {
+        setTimeout(() => {
+            calculateEndDate('teacherContractForm', 'contractStartDate', 'contractDuration', 'contractEndDate', 'YEAR');
+        }, 100);
+    }
+    
+    $("#teacherContractForm").on(
+        "keyup change",
+        "#referenceNumber, #firstPartyName, #firstPartyDesignation, #teacherName, #teacherEmail, #teacherType, #teacherDesignation, #employmentType, #workingHours, #adminHours, #monthlySalary, #contractStartDate, #contractDuration, #teacherContractCountry, #teacherContractState, #teacherContractCity",
+        function () {
+            toggleContractEditor("teacherContractForm");
+        }
+    );
+}
+
+function validateTeacherContractForm(formId) {
+
+    if ($("#" + formId + " #referenceNumber").val().trim() === "") {
+        showMessageTheme2(0, "Please enter reference number");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select contract creation date");
+        return false;
+    }
+
+    if ($("#" + formId + " #firstPartyName").val().trim() === "") {
+        showMessageTheme2(0, "Please enter first party name");
+        return false;
+    }
+
+    if ($("#" + formId + " #firstPartyDesignation").val().trim() === "") {
+        showMessageTheme2(0, "Please enter first party designation");
+        return false;
+    }
+
+    if ($("#" + formId + " #teacherName").val().trim() === "") {
+        showMessageTheme2(0, "Please enter teacher's name");
+        return false;
+    }
+
+    if ($("#" + formId + " #teacherEmail").val().trim() === "") {
+        showMessageTheme2(0, "Please enter teacher's email");
+        return false;
+    }
+
+    if ($("#" + formId + " #teacherType").val() === "") {
+        showMessageTheme2(0, "Please select type of teacher");
+        return false;
+    }
+
+    if ($("#" + formId + " #teacherDesignation").val().trim() === "") {
+        showMessageTheme2(0, "Please enter teacher designation");
+        return false;
+    }
+
+    var employmentType = $("#" + formId + " #employmentType").val();
+    if (employmentType === "") {
+        showMessageTheme2(0, "Please select employment type");
+        return false;
+    }
+
+    if (employmentType === "Full-Time") {
+        if ($("#" + formId + " #workingHours").val().trim() === "") {
+            showMessageTheme2(0, "Please enter agreed working hours per month");
+            return false;
+        }
+
+        if ($("#" + formId + " #adminHours").val().trim() === "") {
+            showMessageTheme2(0, "Please enter admin task hours per month");
+            return false;
+        }
+    }
+
+	if ($("#" + formId + " #monthlySalary").val().trim() === "") {
+		showMessageTheme2(0, "Please enter monthly salary");
+		return false;
+	}
+
+	var selectedWorkingDays = getSelectedWorkingDayIds();
+	if (selectedWorkingDays.length === 0) {
+		showMessageTheme2(0, "Please select at least one working day");
+		return false;
+	}
+
+    if (typeof editor === "undefined" || editor.value.trim() === "" || editor.value.trim() == "<p><br></p>") {
+        showMessageTheme2(0, "Please add contract comment");
+        return false;
+    }
+
+	// if ($("#" + formId + " label[for='recipientSignatureUpload']").text() == "Choose file...") {
+	// 	showMessageTheme2(0, "Please upload your signature");
+	// 	return false;
+	// }
+	
+	if ($("#" + formId + " #teacherSignatureBox").length == 0) {
+		showMessageTheme2(0, "Please upload your signature");
+		return false;
+	}
+
+    if ($("#" + formId + " #contractStartDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select contract start date");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractEndDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select contract duration");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractValidityStartDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select validity start date");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractValidityEndDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select validity duration");
+        return false;
+    }
+
+    return true;
+}
+
+function getRequestForTeacherContract(formId, userId) {
+    var request = {};
+    var authentication = {};
+    var teacherAgreementDTO = {};
+
+    if (typeof editor !== "undefined") {
+        // teacherAgreementDTO["content"] = escapeCharacters(editor.value.trim());
+        teacherAgreementDTO["content"] = editor.getEditorValue();
+    }
+    teacherAgreementDTO["agreementRefNumber"] = escapeCharacters($("#" + formId + " #referenceNumber").val());
+    teacherAgreementDTO["agreementDate"] = changeDateFormat(new Date($("#" + formId + " #contractDate").val()), "yyyy-mm-dd");
+    teacherAgreementDTO["roleType"] = $("#" + formId + " #roleType").val();
+    teacherAgreementDTO["firstPartyName"] = escapeCharacters($("#" + formId + " #firstPartyName").val());
+    teacherAgreementDTO["firstPartyDesignation"] = escapeCharacters($("#" + formId + " #firstPartyDesignation").val());
+    teacherAgreementDTO["teacherName"] = escapeCharacters($("#" + formId + " #teacherName").val());
+    teacherAgreementDTO["teacherEmail"] = escapeCharacters($("#" + formId + " #teacherEmail").val());
+    // teacherAgreementDTO["typeOfTeacher"] = $("#" + formId + " #teacherType").val();
+    teacherAgreementDTO["teacherDesignation"] = toTitleCase($("#" + formId + " #teacherDesignation").val());
+    // teacherAgreementDTO["teacherDepartment"] = toTitleCase($("#" + formId + " #teacherDepartment").val());
+    teacherAgreementDTO["employeeType"] = $("#" + formId + " #employmentType").val();
+    teacherAgreementDTO["workingHours"] = $("#" + formId + " #workingHours").val();
+    teacherAgreementDTO["adminTaskHours"] = $("#" + formId + " #adminHours").val();
+    teacherAgreementDTO["currency"] = $("#" + formId + " #teacherCurrency").val();
+    teacherAgreementDTO["payOut"] = $("#" + formId + " #monthlySalary").val();
+	teacherAgreementDTO["workingDays"] = getSelectedWorkingDayIds();
+    teacherAgreementDTO["nationality"] = $("#" + formId + " #teacherNationality").val();
+    teacherAgreementDTO["countryId"] = $("#" + formId + " #teacherContractCountry").val();
+    teacherAgreementDTO["stateId"] = $("#" + formId + " #teacherContractState").val();
+    teacherAgreementDTO["cityId"] = $("#" + formId + " #teacherContractCity").val();
+    teacherAgreementDTO["durationStart"] = changeDateFormat(new Date($("#" + formId + " #contractStartDate").val()), "yyyy-mm-dd");
+    teacherAgreementDTO["durationEnd"] = changeDateFormat(new Date($("#" + formId + " #contractEndDate").val()), "yyyy-mm-dd");
+    teacherAgreementDTO["contractDurationYears"] = $("#" + formId + " #contractDuration").val();
+    teacherAgreementDTO["validityStart"] = changeDateFormat(new Date($("#" + formId + " #contractValidityStartDate").val()), "yyyy-mm-dd");
+    teacherAgreementDTO["validityEnd"] = changeDateFormat(new Date($("#" + formId + " #contractValidityEndDate").val()), "yyyy-mm-dd");
+    teacherAgreementDTO["validityDurationDays"] = $("#" + formId + " #contractValidityDuration").val();
+    teacherAgreementDTO["employeeSpecialization"] = $("#" + formId + " #specialization").val();
+    teacherAgreementDTO["agreementSaveType"] = "D";
+    authentication["hash"] = getHash();
+    authentication["schoolId"] = SCHOOL_ID;
+    authentication["schoolUUID"] = SCHOOL_UUID;
+    authentication["userType"] = ROLE_MODULE.moduleId;
+    authentication["userId"] = userId;
+
+    request["authentication"] = authentication;
+    request["teacherAgreementDTO"] = teacherAgreementDTO;
+
+    return request;
+}
+
+
+async function saveTeacherContract(formId, userId){
+	if (!validateTeacherContractForm(formId)) {
+        return;
+    }
+	var ajaxReqDetails = {
+        method: "POST",
+        url: getURLFor("dashboard", "submit-teacher-agreement-content"),
+        body: getRequestForTeacherContract(formId, userId),
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+		showMessageTheme2(1, responseData.message);
+		$("#publishTeacherContractBtn").show();
+		$("#previewTeacherContractBtn").show();
+		$("#" + formId + " #contractId").val(responseData.responseData.contractId);
+		$("#addContractSpan" + userId).text("Add/Edit Contract")
+	}else{
+		showMessageTheme2(0, responseData.message);
+	}
+}
+
+function canEnableContractEditor(formId) {
+    if ($("#" + formId + " #referenceNumber").val().trim() === "") return false;
+    if ($("#" + formId + " #contractDate").val().trim() === "") return false;
+    if ($("#" + formId + " #firstPartyName").val().trim() === "") return false;
+    if ($("#" + formId + " #firstPartyDesignation").val().trim() === "") return false;
+    if ($("#" + formId + " #teacherName").val().trim() === "") return false;
+    if ($("#" + formId + " #teacherEmail").val().trim() === "") return false;
+    if ($("#" + formId + " #teacherType").val() === "") return false;
+    if ($("#" + formId + " #teacherDesignation").val().trim() === "") return false;
+    if ($("#" + formId + " #employmentType").val() === "") return false;
+    var employmentType = $("#" + formId + " #employmentType").val();
+    if (employmentType === "Full-Time") {
+        if ($("#" + formId + " #workingHours").val().trim() === "") return false;
+        if ($("#" + formId + " #adminHours").val().trim() === "") return false;
+    }
+    if ($("#" + formId + " #monthlySalary").val().trim() === "") return false;
+	if ($("#" + formId + " #teacherContractCountry").val() === "") return false;
+    if ($("#" + formId + " #teacherContractState").val() === "") return false;
+    if ($("#" + formId + " #teacherContractCity").val() === "") return false;
+    if ($("#" + formId + " #contractStartDate").val().trim() === "") return false;
+    if ($("#" + formId + " #contractDuration").val() === "0") return false;
+
+    return true;
+}
+
+function toggleContractEditor(formId) {
+    if (typeof editor === "undefined") return;
+    if (canEnableContractEditor(formId)) {
+        editor.setReadOnly(false);
+        if (editor.value && editor.value.indexOf("Please fill contract details above") !== -1) {
+            editor.value = "";
+        }
+    } else {
+        editor.setReadOnly(true);
+        if (!editor.value || editor.value.trim() === "" || editor.value.trim() == "<p><br></p>") {
+            editor.value = '<p class="text-muted">Please fill contract details above to enable editor.</p>';
+        }
+    }
+	if (editor.options.readonly || isEditorEmpty()) {
+        // $("#recipientSignatureUpload").prop("disabled", true);
+        $("#uploadTeacherSignatureBtn").prop("disabled", true);
+    } else {
+        // $("#recipientSignatureUpload").prop("disabled", false);
+        $("#uploadTeacherSignatureBtn").prop("disabled", false);
+    }
+}
+
+function isEditorEmpty() {
+    if (typeof editor === "undefined") return true;
+    var val = editor.value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim();
+    if (val === "Please fill contract details above to enable editor.") {
+        return true;
+    }
+    return val === "";
+}
+
+function signatureTableTeacher(formId) {
+	if (typeof editor === "undefined") return;
+	var editorContent = $(".jodit-workplace");
+	if (editorContent.find("#leftSignatureBox").length || editorContent.find("#rightSignatureBox").length) {
+		return;
+	}
+	var firstPartyName = $("#" + formId + " #firstPartyName").val() || "";
+	var firstPartyDesignation = $("#" + formId + " #firstPartyDesignation").val() || "";
+
+	var secondPartyName = $("#" + formId + " #teacherName").val() || "";
+	var secondPartyDesignation = $("#" + formId + " #teacherDesignation").val() || "";
+
+	var todayDate = changeDateFormat(new Date(), "MMM-dd-yyyy");
+
+	var html =
+	`<table id="teacherSignatureBox" style="border-collapse:collapse; width:100%; text-align:center;">
+		<tbody>
+			<tr>
+				<td style="width:50%; padding:10px; vertical-align:top;">
+					For <b>${firstPartyName}</b>
+					<div id="leftSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+					<p style="margin:0;"><i>(Signature)</i></p>
+				</td>
+				<td style="width:50%; padding:10px; vertical-align:top;">
+					For <b>${secondPartyName}</b>
+					<div id="rightSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+					<p style="margin:0;"><i>(Signature)</i></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td style="padding:10px; text-align:left; font-size:14px; text-align: center;">
+					Authorized Signatory - 
+					<span class="txt-capitalize-case">${firstPartyName}</span><br/>
+					Designation – 
+					<span class="txt-capitalize-case">${firstPartyDesignation}</span><br/>
+					Date: ${todayDate}
+				</td>
+
+				<td style="padding:10px; text-align:left; font-size:14px; text-align: center;">
+					Authorized Signatory - 
+					<span class="txt-capitalize-case">${secondPartyName}</span><br/>
+					Designation – 
+					<span class="txt-capitalize-case">${secondPartyDesignation}</span><br/>
+					Date: <span id="rightDate">____</span>
+				</td>
+			</tr>
+		</tbody>
+	</table><br/>`;
+	editor.s.setCursorIn(editor.editor, false);
+	editor.s.insertHTML(html);
+}
+
+function getRequestForTeacherPublishContract(formId, userId){
+	var request = {};
+    var authentication = {};
+    var teacherAgreementDTO = {};
+	teacherAgreementDTO["agreementSaveType"] = "P";
+	teacherAgreementDTO["contractId"] = $("#" + formId + " #contractId").val();
+	authentication["hash"] = getHash();
+    authentication["schoolId"] = SCHOOL_ID;
+    authentication["schoolUUID"] = SCHOOL_UUID;
+    authentication["userType"] = ROLE_MODULE.moduleId;
+    authentication["userId"] = userId;
+
+    request["authentication"] = authentication;
+    request["teacherAgreementDTO"] = teacherAgreementDTO;
+    return request;
+}
+
+async function publishTeacherContract(formId, userId){
+	var ajaxReqDetails = {
+        method: "POST",
+        url: getURLFor("dashboard", "submit-teacher-agreement-content"),
+        body: getRequestForTeacherPublishContract(formId, userId),
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+		$("#addTeacherContractModal").modal("hide");
+		$(".profileId_"+userId).remove();
+		showMessageTheme2(1, responseData.message);
+	}else{
+		showMessageTheme2(0, responseData.message);
+	}
+}
+
+function insertTeacherSignature(formId) {
+    signatureTableTeacher(formId);
+    const signatureUrl = PATH_FOLDER_IMAGE + schoolSettingsTechnical.teachAgreementSign;
+    if (!signatureUrl) return;
+
+    convertImageToBase64(signatureUrl, function (base64) {
+        const imgHtml = `
+            <img
+                src="${base64}"
+                alt="Authorized Signature"
+                style="max-width:120px; display:block; margin:auto;"
+                data-type="FIRST_PARTY_SIGNATURE"
+            />
+        `;
+
+        $("#leftSignatureBox").html(imgHtml);
+    });
+}
+
+function preSelectCurrency(src){
+	if($(src).val() == "101"){
+		$("#teacherContractForm #teacherCurrency").val("INR");
+	}else{
+		$("#teacherContractForm #teacherCurrency").val("USD");
+	}
+}
+
+function renderWorkingDaysCheckboxes() {
+	var days = getWeekDays();
+	var html = "";
+
+  	$.each(days, function (index, day) {
+		html += 
+		`<div class="form-check form-check-inline">
+			<input 
+				class="form-check-input working-day-checkbox"
+				type="checkbox"
+				id="day_${day.dayId}"
+				value="${day.dayId}"
+				data-short="${day.shortName}"
+			/>
+			<label class="form-check-label" for="day_${day.dayId}">
+				${day.shortName}
+			</label>
+		</div>`
+  	});
+
+  	$("#workingDaysContainer").html(html);
+}
+
+function getSelectedWorkingDayIds() {
+    var dayIds = [];
+    $(".working-day-checkbox:checked").each(function () {
+        dayIds.push(parseInt($(this).val()));
+    });
+    return dayIds;
 }

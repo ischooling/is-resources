@@ -12306,41 +12306,6 @@ function signatureTable(partnerType, organisationName) {
 	editor.s.insertHTML(html);
 }
 
-async function previewContractPdf(){
-	var payload = {
-        commentData: editor.getEditorValue(),
-        b2bleadId: parseInt($("#b2bLeadId").val())
-    };
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
-	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
-		showMessageTheme2(0, responseData.message);
-		return;
-	}
-	var byteArray = new Uint8Array(responseData.pdfData);
-	var blob = new Blob([byteArray], { type: "application/pdf" });
-	var pdfUrl = URL.createObjectURL(blob) + "#toolbar=0&navpanes=0&scrollbar=0";
-	var modalHtml = `
-		<div class="modal fade" id="pdfPreviewModal" tabindex="-1" role="dialog">
-		  <div class="modal-dialog" role="document" style="max-width:60%;">
-			<div class="modal-content">
-			  <div class="modal-header p-2 bg-primary">
-				<h5 class="modal-title ml-2 font-weight-bold text-white">Contract Preview</h5>
-				<button type="button" class="close text-white mr-1" data-dismiss="modal">&times;</button>
-			  </div>
-			  <div class="modal-body" style="height:80vh;">
-				<iframe src="${pdfUrl}" frameborder="0" style="width:100%; height:100%;"></iframe>
-			  </div>
-			</div>
-		  </div>
-		</div>`;
-
-	if ($("#pdfPreviewModal").length == 1) {
-		$("#pdfPreviewModal").remove();
-	}
-	$("body").append(modalHtml);
-	$("#pdfPreviewModal").modal("show");
-}
-
 function bindContractFormEvents(partnerType) {
 	if (partnerType == "I") {
 		$("#partnerName").off("input").on("input", function () {

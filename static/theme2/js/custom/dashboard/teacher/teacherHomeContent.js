@@ -25,6 +25,7 @@ async function rendereTeacherHomeContent(){
             $('body').append(teacherAgreementContent(commonProfileDTO, JSON.parse(responseData.teacherAgreementDTO)));
             $("#teacherAgreementModal").modal('show');
             $("#preferenceTimeavailabilityFlag").val(true);
+            callLocationDetails('teacherAgreementModal');
         }
     }
     callTeacherClassesToUpdateStatus()
@@ -121,6 +122,7 @@ function teacherAgreementContent(data, responseData){
     var html=
         `<div class="modal fade " id="teacherAgreementModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" data-backdrop="static">
             <input type="hidden" id="userId" value="${data.userId}">
+            <input type="hidden" id="location" value="">
             <div class="modal-dialog modal-xl" role="document" style="top:0%;">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
@@ -140,7 +142,7 @@ function teacherAgreementContent(data, responseData){
                             `<div class="form-check flex-grow-1">
                                 <label class="form-check-label text-dark custom-checkbox">
                                     <input class="form-check-input" type="checkbox" id="agreementDeclarationConfirm">
-                                        <span class="ml-4"> By clicking (ticking) the box here, I understand the responsibility to abide by all the rules, regulations and the above mentioned policies/points as established by ${schoolSettings.schoolName}</span>
+                                        <span class="ml-4">I hereby confirm that I have read and agree to the Terms. I understand that this agreement is digitally signed and does not require a physical signature.</span>
                                         <span class="form-check-sign">
                                             <span class="check"></span>
                                         </span>
@@ -148,7 +150,7 @@ function teacherAgreementContent(data, responseData){
                             </div>`
                         }
                         html+=`
-                        <button type="submit" onclick="callForSignupTeacherAgreement('','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info" style="float:right;">Confirm</button>
+                        <button type="submit" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info" style="float:right;">Confirm</button>
                     </div>
                 </div>
             </div>
@@ -157,78 +159,73 @@ function teacherAgreementContent(data, responseData){
 }
 
 function teacherAgreementView(data){
+    var formattedPublishDateTime = changeDateFormat(new Date(data.publishDateTime), "MMM dd, yyyy hh:mm A");
+    var datePart = formattedPublishDateTime.substring(0, 12);
+    var timePart = formattedPublishDateTime.substring(13);
     var html=
     `
         <body style="font-family: 'Times New Roman', Times, serif; height: 100%; text-align: justify">
             <div class="contract-page" style="width: 21cm; margin: 0 auto; padding: 10px 10px 20px; page-break-after: always; ">
                 <div>
-                    <img src="${PATH_FOLDER_IMAGE}${data.agreementLetterHeadImg}${SCRIPT_VERSION}" width="300px;" />
+                    <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="300px;" />
                     ${/*<img src="${PATH_FOLDER_IMAGE}letter-header.png${SCRIPT_VERSION}" width="300px;" />*/''}
                 </div>
-                <span style="float: left; width: 50%; height: 75px;">
-                    ${/*<strong>Tele:</strong> 011-4578902*/''}
-                </span>
-                <span style="float: right; width: 50%; height: 75px; text-align: right;">
-                    ${data.addressSchool}
-                </span>
-                <span style="float: left; width: 50%; margin-top: 5px;">
-                    <strong>Ref No.:</strong> ${data.agreementRefNumber}
-                </span>
-                <span style="float: right; width: 50%; margin-top: 5px; text-align: right;">
-                    <strong>Date:</strong> ${data.agreementDate}
-                </span>
-                <span style="float: left; width: 100%; margin-top: 20px; font-weight: bold; height: auto;">
-                    ${data.salutation}${data.salutation!=''?'. ':''}${data.name},<br />
-                </span>
-                <span style="float: left; width: 100%; margin-top: 0px; font-weight: normal; height: auto;">
-                    ${data.address1}${data.address1!=''?',<br />':''}
-                    ${data.address2}${data.address2!=''?',<br />':''}
-                    ${data.city}${data.city!=''?',<br />':''}
-                    ${data.state}${data.state!=''?',<br />':''}
-                    ${data.country}${data.country!=''?',<br />':''}
-                    ${data.pincode}
-                </span>
-                <span style="float: left; width: 45%; margin-top: 10px;"></span>
-                <span style="text-align: center; margin-top: 10px;">
-                    <strong><u>Sub: Offer Letter</u></strong>
-                </span>
-                <span style="float: left; width: 100%; margin-top: 10px;margin-bottom:10px;">
-                    Dear <strong>${data.salutation}${data.salutation!=''?'. ':''}${data.name}</strong>
-                </span>
-                ${data.content}
-                <p style="margin-bottom: 40px;">With Best Regards</p>
-                <span style="width: 50%; height: 85px;">
-                    <img src="${PATH_FOLDER_IMAGE}${data.agreementSignImg}${SCRIPT_VERSION}"
-                        alt="Authorized Signature" title="Authorized Signature" style="width: 150px;"/>
-                </span>
-                <p style="width: 100%; float: left; text-align: left; margin-top: 40px; margin-bottom: 50px;">
-                    ${schoolSettingsTechnical.authorizedPersonName} <br />
-                    ${data.schoolName} <br />
-                    (Authorised Signatory for ${data.schoolName})
-                </p>
-                <p style="margin-bottom: 0; margin-top: 50px;">
-                    <strong>Acceptance of Offer:</strong>
-                </p>
-                <p style="margin-top: 0;">
-                    I have read the above offer letter and
-                    hereby acknowledge my acceptance of the above terms and conditions of
-                    employment.
-                </p>
-                <span style="width: 50%; float: left; height: 28px;">
-                    <span><strong>Place:</strong>${data.schoolCountry}</span>
-                </span>
-                <span style="width: 50%; float: right; text-align: right; height: 28px;">
-                    ${/*<img src="${PATH_FOLDER_IMAGE}${TEACHER_AGREEMENT_SIGNTURE}${SCRIPT_VERSION}"
-                        alt="Authorized Signature" title="Authorized Signature" style="width: 150px; height: 25px;"/>*/''}
-                </span>
-                <span style="width: 50%; float: left;">
-                <strong>Date:</strong> ${data.agreementDate}</span>
-                <span style="float: right; width: 50%; text-align: right">
-                    <strong>Name:</strong> ${data.salutation}${data.salutation!=''?'. ':''}${data.name}
-                </span>
-                ${/*<div>
-                    <img src="${PATH_FOLDER_IMAGE}letter-footer.jpg${SCRIPT_VERSION}" width="100%;" />
-                </div>*/''}
+                <div class="text-editor-content" style="min-height: 250px; padding-top: 65px">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="width:60%;">
+                            <div style="font-weight:bold; margin-bottom:4px;">
+                                ${data.salutation}${data.salutation ? '. ' : ''}${data.name},
+                            </div>
+                            <div style="font-weight:normal;">
+                                ${data.city}${data.city ? ',<br/>' : ''}
+                                ${data.state}${data.state ? ',<br/>' : ''}
+                                ${data.country}
+                            </div>
+                        </div>
+
+                        <div style="width:40%; text-align:right;">
+                            <div>
+                                <strong>Date:</strong> ${datePart}
+                            </div>
+                            <div>
+                                <strong>Time:</strong> ${timePart}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editorData" style="margin-top:25px;">
+                        ${cleanBase64Images(data.content)}
+                    </div>
+                    <div class="contact-detail-footer" style="padding-top: 12px">
+                        <div class="full mt-4 mb-4 signature-upload">
+                            <label class="mb-2 text-dark" style="font-weight: bold;">
+                                Upload Recipient Signature
+                            </label>
+                            <div class="custom-file">
+                                <input 
+                                    type="file" 
+                                    class="custom-file-input cursor" 
+                                    id="recipientSignatureUpload"
+                                    accept="image/*"
+                                    onchange="handleRecipientSignatureUpload(this, 'rightSignatureBox'); updateFileName(this); handleFileInputCancel('teacherSignupStage4', 'recipientSignatureUpload', 'rightSignatureBox');"
+                                >
+                                <label class="custom-file-label text-truncate" for="recipientSignatureUpload">
+                                    Choose file...
+                                </label>
+                            </div>
+                            <small class="form-text text-danger font-12 mt-1">
+                                Please upload your signature image (PNG/JPG only, white/transparent background, max size: 300KB).
+                            </small>
+                        </div>
+                        <div class="full mt-4">
+                            <div class="d-flex">
+                                <p class="m-0"><b>Address:</b> ${schoolSettingsOffice.address}</p>
+                                ${/*<p class="m-0 ml-auto">${data.name}</p>*/''}
+                            </div>
+                            ${data.publishDateTime != "" ? `<p class="m-0"><b>Date:</b> ${formattedPublishDateTime}</p>`:``}
+                        </div>
+                    </div>
+                </div>
             </div>
         </body>
     `

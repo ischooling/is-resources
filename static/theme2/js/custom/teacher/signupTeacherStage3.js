@@ -142,7 +142,7 @@ function submitSignupTeacherReviewAndApproval(){
 				showMessageTheme2(0, stringMessage[1]);
 			}else{
 				$('#submitInterviewSlotModal').modal('hide');
-				showMessageTheme2(1, 'Request has been sent successfully for approval');
+				showMessageTheme2(1, 'Demo has been sent successfully for review');
 				setTimeout(() => {
 					$('#inReviewForTeacherDetailsModal').modal({backdrop: 'static', keyboard: false});
 				}, 500);

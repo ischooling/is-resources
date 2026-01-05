@@ -30,7 +30,13 @@ async function renderCounselorCotent(data){
 		$(".slot-wrapper").hide();
 		$("#bookSlotForEventForm #meetingZoneId").val($(this).val());
 		var selectDate=$("#meetingTodayDate").val();
-		getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Month", ""+$(this).val()+"");
+		 getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Month", ""+$(this).val()+"");
+		// if($("#meetingFor").val() == "Interview" || $("#meetingFor").val() == "Initial-Interview"){
+		// 	selectDate = new Date()
+		// 	getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Week", ""+$(this).val()+"");
+		// }else{
+		// 	getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Month", ""+$(this).val()+"");
+		// }
 	});
 	$("#countryTimezoneId").select2({
 		theme:"bootstrap4",
@@ -681,5 +687,25 @@ function thankyouPageContent(data){
 			</div>
 		</div>
 	</div>`
+	return html;
+}
+
+function renderExpiredInterviewContent(){
+	var html=
+		`<div class="d-flex align-items-center" style="background:url(${PATH_FOLDER_IMAGE2}otp_process_bg.png${SCRIPT_VERSION});background-size:cover;background-repeat:no-repeat; height:100vh; padding-bottom:60px">
+			<div class="card mx-3 mx-sm-auto w-100 px-3 py-4 px-md-5 border-primary rounded-15" style="max-width:500px;border-top:7px solid">
+				<div class="text-center pb-4">
+					<span class="bg-light-danger text-center rounded-circle d-inline-flex align-items-center justify-content-center text-white" style="width:75px;height:75px;">
+						<span class="bg-danger text-center rounded-circle d-inline-flex align-items-center justify-content-center text-white" style="width:55px;height:55px;">
+							<i class="fa fa-exclamation-triangle font-20" aria-hidden="true"></i>
+						</span>
+					</span>
+				</div>
+				<div id="verify-identity" class="full">
+					<h5 class="font-weight-bold text-dark text-center">This link has expired</h5>
+					<p class="text-dark text-center">Kindly reach out to <a href="mailto:careers@internationalschooling.org" class="font-weight-semi-bold">careers@internationalschooling.org</a> for further assistance.</p>
+				</div>
+			</div>
+		</div>`
 	return html;
 }

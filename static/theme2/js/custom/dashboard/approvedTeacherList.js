@@ -229,7 +229,8 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 									html+=`<a class="dropdown-item"  target="_blank" href="${teacherRequest.teacherPaySlipUrl}"><i class="fa fa-dollar-sign"></i>&nbsp;Pay Slips</a>`;
 								}	
 								if(ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y'){
-									html+=`<a class="dropdown-item" onclick="return callSchoolInneraction('teacher-agreement','?userId=${teacherRequest.userId}&controlType=editAgain&moduleId=${ROLE_MODULE.moduleId}','section-linebox');" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Edit Agreement</a>`;
+									// html+=`<a class="dropdown-item" onclick="return callSchoolInneraction('teacher-agreement','?userId=${teacherRequest.userId}&controlType=editAgain&moduleId=${ROLE_MODULE.moduleId}','section-linebox');" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Edit Agreement</a>`;
+									html+=`<a class="dropdown-item" onclick="addTeacherContract('${teacherRequest.userId}', '${teacherRequest.name}', '${teacherRequest.email}', '${teacherRequest.contractId}')" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Edit Agreement</a>`;
 									if(teacherRequest.showPtmOption == 'Y'){
 										html+=`<a class="dropdown-item"   href="javascript:void(0);" onclick="return showWarningMessage('Are you sure you want to inactive book a PTM Option?','activateInactiveBookaClassForPtmAndCustom(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'PTM\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'N\\\') '); "><i class="fa fa-edit"></i>&nbsp;Inactive Book a PTM Option</a>`;
 									}else{

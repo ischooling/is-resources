@@ -1,5 +1,6 @@
 var form;
 var verifyUploadDocsObj = [];
+var isContractConfirmed = false;
 $(function(){
     var form_validation = $("#formvalidation");
     var back_button = $("[href='#previous']");
@@ -259,6 +260,7 @@ function setSteps(step){
             function() {
                 $(this).parent().find(".tooltip-content").css({"display":"none"})
             });
+            $(".prev-btn").hide();
             $(".next-btn").css("margin-left", "auto");
     } else {
         $('.steps ul li:nth-child(5) a .icon-circle').html(`<div class="icon-div"></div><span class="icon">${getIcon(4,false)}</span>`);
@@ -470,9 +472,17 @@ async function moveStep(moveType, isRender){
                     return true;
                 }
             }
-            else if(nextStep==5){
-                var serverCheck = callForSignupTeacherAgreement('teacherSignupStage4','','','');
-                if(serverCheck){
+            else if (nextStep == 5) {
+                if (!validateTeacherAgreement('teacherSignupStage4')) {
+                    return false;
+                }
+                if (!isContractConfirmed) {
+                    openConfirmationContractModal();
+                    return false;
+                }
+                isContractConfirmed = false;
+                var serverCheck = await callForSignupTeacherAgreement('teacherSignupStage4', '', '', '');
+                if (serverCheck) {
                     return true;
                 } else {
                     return false;

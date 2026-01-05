@@ -6440,6 +6440,21 @@ function updateFileName(input){
   $(input).next(".custom-file-label").text(fileName);
 }
 
+function handleFileInputCancel(formId, inputId, imgId, defaultLabel = "Choose file...") {
+  var input = $("#" + formId + " #" + inputId);
+  var label = input.next(".custom-file-label");
+  input.on("change", function () {
+    if (this.files && this.files.length > 0) return;
+    var img = $("#" + formId + " #" + imgId + " img");
+    if (img.length) {
+      var originalName = img.attr("data-name") || defaultLabel;
+      label.text(originalName);
+    } else {
+      label.text(defaultLabel);
+    }
+});
+}
+
 async function copyToClipboardSignedUrl(videoUrl) {
 	try {
 	  const signedUrlResponse = await getSignedUrlForCopyClipboard(videoUrl);
@@ -6786,4 +6801,67 @@ function generateAiSummary(meetingId, entityId, entityName) {
           showMessage(true, "Failed to generate AI Summary");
       }
   });
+}
+
+async function previewContractPdf(callFrom){
+  var payload = {};
+  payload["commentData"] = editor.getEditorValue();
+  if(callFrom == "B2B"){
+    payload["entityId"] = parseInt($("#b2bLeadId").val());
+    payload["entityType"] = "CONTRACT_DETAILS";
+  }else if(callFrom == "TEACHER"){
+    payload["entityId"] = parseInt($("#contractId").val());
+    payload["entityType"] = "TEACHER_AGREEMENT_LOG";
+  }
+  
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
+	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		showMessageTheme2(0, responseData.message);
+		return;
+	}
+	var byteArray = new Uint8Array(responseData.pdfData);
+	var blob = new Blob([byteArray], { type: "application/pdf" });
+	var pdfUrl = URL.createObjectURL(blob) + "#toolbar=0&navpanes=0&scrollbar=0";
+  window.open(pdfUrl);
+	// var modalHtml = `
+	// 	<div class="modal fade" id="pdfPreviewModal" tabindex="-1" role="dialog">
+	// 	  <div class="modal-dialog" role="document" style="max-width:60%;">
+	// 		<div class="modal-content">
+	// 		  <div class="modal-header p-2 bg-primary">
+	// 			<h5 class="modal-title ml-2 font-weight-bold text-white">Contract Preview</h5>
+	// 			<button type="button" class="close text-white mr-1" data-dismiss="modal">&times;</button>
+	// 		  </div>
+	// 		  <div class="modal-body" style="height:80vh;">
+	// 			<iframe src="${pdfUrl}" frameborder="0" style="width:100%; height:100%;"></iframe>
+	// 		  </div>
+	// 		</div>
+	// 	  </div>
+	// 	</div>`;
+
+	// if ($("#pdfPreviewModal").length == 1) {
+	// 	$("#pdfPreviewModal").remove();
+	// }
+	// $("body").append(modalHtml);
+	// $("#pdfPreviewModal").modal("show");
+}
+
+function convertImageToBase64(imageUrl, callback) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = function () {
+    const canvas = document.createElement("canvas");
+    canvas.width = this.width;
+    canvas.height = this.height;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(this, 0, 0);
+
+    const base64 = canvas.toDataURL("image/png");
+    callback(base64);
+  };
+
+  img.onerror = function () {
+    console.error("Signature image load failed:", imageUrl);
+  };
+  img.src = imageUrl;
 }

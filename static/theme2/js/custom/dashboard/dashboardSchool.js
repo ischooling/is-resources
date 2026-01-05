@@ -2331,8 +2331,13 @@ function submitTeacherAgreement(formId, moduleId, roleModuleId, saveType) {
       return false;
     }
   }
-  if (editor1.getData() == "") {
-   showMessageTheme2(0, "Agreement content is required");
+  // if (editor1.getData() == "") {
+  //  showMessageTheme2(0, "Agreement content is required");
+  //   return false;
+  // }
+  var content = editor.value.replace(/<[^>]*>/g, "").trim();
+  if (content === "") {
+    showMessageTheme2(0, "Agreement content is required");
     return false;
   }
   var actualURL = "";
@@ -2383,8 +2388,11 @@ function getRequestForSubmitTeacherAgreement(formId, moduleId, saveType) {
   var authentication = {};
   // var requestData = {};
   var teacherAgreementDTO = {};
-  if (editor1 != undefined) {
-    teacherAgreementDTO["content"] = escapeCharacters(editor1.getData());
+  // if (editor1 != undefined) {
+  //   teacherAgreementDTO["content"] = escapeCharacters(editor1.getData());
+  // }
+  if (editor != undefined) {
+    teacherAgreementDTO["content"] = escapeCharacters(editor.value);
   }
   teacherAgreementDTO["agreementRefNumber"] = escapeCharacters(
     $("#" + formId + " #agreementRefNumber").val()

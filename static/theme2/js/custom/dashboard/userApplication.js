@@ -45,7 +45,9 @@ async function userApplicationProfileOnloadFunction(){
                 <option value="Approved For Interview">Approved For Interview</option>
                 <option value="Accepted for Contract">Accepted for Contract</option>
                 <option value="Another Round of Interview">Another Round of Interview</option>
+                <option value="Final Round of Interview">Final Round of Interview</option>
                 <option value="Approved for Selection Process">Approved for Selection Process</option>
+                <option value="Hired">Hired</option>
                 <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
         }else{
@@ -57,6 +59,8 @@ async function userApplicationProfileOnloadFunction(){
                 <option value="Approved For Interview">Approved For Interview</option>
                 <option value="Accepted for Contract">Accepted for Contract</option>
                 <option value="Another Round of Interview">Another Round of Interview</option>
+                <option value="Final Round of Interview">Final Round of Interview</option>
+                <option value="Hired">Hired</option>
                 <option value="Reject">Rejected</option>
                 <option value="On Hold">On Hold</option>`;
             $("#applicantsStatus").html(html);
@@ -180,14 +184,20 @@ function bindUserApplicationData(responseData) {
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}','${user.interviewStatus}')">
+                                        <a class="dropdown-item meeting-anchor" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}','${user.interviewStatus}','${user.meetingId}','${user.meetingDetails}')">
                                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
                                         </a>
                                     </li>`;
-                                    if((user.status == "Approved For Interview" || user.status == "Approved for Selection Process")){
+                                    if((user.status == "Another Round of Interview" || user.status == "Approved For Interview" || user.status == "Approved for Selection Process") && user.interviewStatus == 'NA'){
                                         row+=`<li>
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLinkJA(${user.id})">
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="openResendTeacherInterviewModal(${user.id}, 'InterviewLink', '${user.interviewBookLinkExpireDate}')">
                                                 <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                                            </a>
+                                        </li>`
+                                    }else if((user.status == "Another Round of Interview" || user.status == "Approved For Interview" || user.status == "Approved for Selection Process") && user.interviewStatus == 'Booked'){
+                                         row+=`<li>
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLinkJA(${user.id},'ConfirmationLink')">
+                                                <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Confirmation Link
                                             </a>
                                         </li>`
                                     }
@@ -311,27 +321,11 @@ function updateFormState() {
     };
 }
 
-function openUpdateStatusModalUserApplication(id, status, role, interviewStatus){
+function openUpdateStatusModalUserApplication(id, status, role, interviewStatus, meetingId, meetingDetails){
     if($("#userApplicationProfileStatusModal").length == 1){
         $("#userApplicationProfileStatusModal").remove();
     }
     $("body").append(userApplicationProfileStatusModal(id, status, role, interviewStatus));
-    $("#eventStatus").on('change', function(){
-        var status = $(this).val();
-        if (status === "COMPLETED" || status === "NOTATTENDED") {
-            if($("#userApplicationProfileStatus option[value='Another Interview']").length){
-                return;
-            }
-            $("#userApplicationProfileStatus option[value='0']").after('<option value="Another Round of Interview">Another Round of Interview</option>');
-            $("#userApplicationProfileStatus").parent().show();
-        }else{
-            $("#userApplicationProfileStatus option[value='Another Interview']").remove();
-            $("#userApplicationProfileStatus").val("0").trigger("change");
-            if (status === "CANCELLED" || status === "RESCHEDULE") {
-                $("#userApplicationProfileStatus").parent().hide();
-            }
-        }
-    })
     $("#assignedToInterview").select2({
         placeholder: "Select Assign To",
         theme:"bootstrap4"
@@ -346,12 +340,69 @@ function openUpdateStatusModalUserApplication(id, status, role, interviewStatus)
         $(this).append($element);
         $(this).trigger("change");
     });
+    if(meetingId!=''){
+        var trRow =
+            `<tr>
+                <td>${meetingDetails}</td>
+                <td>${interviewStatus}</td>
+                <td>`
+                    if(interviewStatus== "Completed" || interviewStatus == "No Show"){
+                        trRow+=
+                        `<a href="javascript:void(0)" class="btn btn-sm" title="Play Recording" onclick="openRecordingModal('${meetingId}', 'MEETINGS','', 'Interview', '', '')">
+                            <i class="fa fa-video-camera fa-2x text-danger"></i>
+                        </a>`;
+                    }else{
+                        trRow+=`N/A`;
+                    }
+                html+=`</td>
+            </tr>`;
+        
+        $("#jobApplicationMeetingsTable tbody").html(trRow);
+        $("#jobApplicationMeetingsTable").show();
+    }else{
+        $("#jobApplicationMeetingsTable").hide();
+    }
+    
+
     if(status == "On Hold"){
         $("#userApplicationProfileStatus option[value='On Hold']").remove()
     }
     setTimeout(() => {
         $("#userApplicationProfileStatusModal").modal("show");
     }, 200);
+}
+
+function eventStatuschangeEvent(src, applicationStatus){
+    var status = $(src).val();
+    if (status === "COMPLETED" || status === "NOTATTENDED") {
+        if($("#userApplicationProfileStatus option[value='Another Interview']").length){
+            return;
+        }
+        if($("#userApplicationProfileStatus option[value='Another Round of Interview']").length === 0) {
+            $("#userApplicationProfileStatus option[value='0']").after('<option value="Another Round of Interview">Another Round of Interview</option>');
+        }
+        $("#userApplicationProfileStatus").parent().show();
+        if(applicationStatus == "Approved For Interview" || applicationStatus == "Another Round of Interview"){
+            if($("#userApplicationProfileStatus option[value='Final Round of Interview']").length === 0) {
+                $("#userApplicationProfileStatus option[value='Another Round of Interview']").after('<option value="Final Round of Interview">Final Round of Interview</option>');
+            }
+        }else{
+            if($("#userApplicationProfileStatus option[value='Final Round of Interview']").length > 0) {
+                $("#userApplicationProfileStatus option[value='Final Round of Interview']").remove(); 
+            }
+        }
+    }else{
+        if($("#userApplicationProfileStatus option[value='Another Interview']").length > 0) {
+            $("#userApplicationProfileStatus option[value='Another Interview']").remove();
+        }
+        if($("#userApplicationProfileStatus option[value='Final Round of Interview']").length > 0) {
+            $("#userApplicationProfileStatus option[value='Final Round of Interview']").remove(); 
+        } 
+        $("#userApplicationProfileStatus").val("0").trigger("change");
+        if (status === "CANCELLED" || status === "RESCHEDULE") {
+            $("#userApplicationProfileStatus").parent().hide();
+        }
+    }
 }
 
 async function updateUserApplicationProfile(id, status){
@@ -387,7 +438,7 @@ async function updateUserApplicationProfile(id, status){
         showMessageTheme2(2, "Please select status");
         return false;
     }
-    if(selectedStatus == "Approved For Interview"){
+    if(selectedStatus == "Approved For Interview" || selectedStatus == "Another Round of Interview" || selectedStatus == "Final Round of Interview"){
         if($("#userApplicationProfileStatusForm #assignedToInterview").val() == ""){
             showMessageTheme2(2, "Please select assign to");
             return false;
@@ -397,7 +448,9 @@ async function updateUserApplicationProfile(id, status){
             showMessageTheme2(2, "Please select any question");
             return false;
         }
-    }else if(selectedStatus == "Another Round of Interview"){
+    }
+    
+    if(selectedStatus == "Another Round of Interview" || selectedStatus == "Final Round of Interview"){
         duration = $("#userApplicationProfileStatusForm #duration").val();
     }
     var remarks = $("#userApplicationProfileRemarks").val()?.trim();
@@ -457,6 +510,15 @@ async function applicantsViewAssignToListForInterview(role){
         let payload = {}
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
         bindAssignToJA('userApplicationProfileStatusForm', 'assignedToInterview', responseData);
+        const interviewBookLinkValidityDaysSetting = getSettingsByTypeAndKey('CONFIGURATION','INTERVIEW_BOOK_LINK_VALIDITY_DAYS');
+        const interviewBookLinkValidityDays = JSON.parse(interviewBookLinkValidityDaysSetting).data.metaValue
+        var today = new Date();
+        today.setDate(today.getDate() + parseInt(interviewBookLinkValidityDays));
+        $("#userApplicationProfileStatusForm #interviewValidDate")
+            .datepicker({
+                format: "M dd, yyyy",
+                autoclose: true
+            }).datepicker("setDate", today);
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").show();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
         $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
@@ -465,6 +527,13 @@ async function applicantsViewAssignToListForInterview(role){
             $("#userApplicationProfileStatusForm #durationDiv").hide();
         }else{
             $("#userApplicationProfileStatusForm #durationDiv").show();
+        }
+        if(selectedStatus == "Final Round of Interview"){
+            $("#duration option[value='15']").remove(); 
+        }else{
+            if($("#duration option[value='15']").length === 0) {
+                $("#duration option[value='30']").before('<option value="15">15 Min</option>');
+            }
         }
     }else if(selectedStatus == "Step 2 | Few Questions") {
         var payload = {}
@@ -499,14 +568,32 @@ async function applicantsViewAssignToListForInterview(role){
     }
 }
 
-async function resendTeacherInterviewLinkJA(id){
+async function resendTeacherInterviewLinkJA(id, mailName){
+    if(mailName == "InterviewLink"){
+        if($("#resendTeacherInterviewForm #interviewBookLinkExpireDate").val() == ""){
+            showMessageTheme2(0, "Please select the validity date for the interview")
+            return false;
+        }
+        if(isExpired($("#resendTeacherInterviewForm #interviewBookLinkExpireDate").val())){
+            showMessageTheme2(0, "Please select a future validity date.")
+            return false;
+        }
+    }
     var payload = {}
     payload["entityId"] = id;
     payload["entityType"] = "INITIAL-INTERVIEW";
-    payload["status"] = 'Resend Interview Link';
+    if(mailName=='InterviewLink'){
+        payload["interviewBookLinkExpireDate"] = changeDateFormat(new Date($("#resendTeacherInterviewForm #interviewBookLinkExpireDate").val()), "yyyy-mm-dd");
+        payload["status"] = 'Resend Interview Link';
+    }else{
+        payload["status"] = 'Resend Confirmation Link';
+    }
     var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'update-teacher-screening-data-status', payload, '');
     if(responseData.status == "SUCCESS"){
         showMessageTheme2(1, responseData.message);
+        if(mailName=='InterviewLink'){
+            $("#resendTeacherInterviewModal").modal("hide");
+        }
     }else{
         showMessageTheme2(0, responseData.message);
     }
@@ -883,7 +970,7 @@ async function openQAModal(entityId){
     var responseData = await callCommonAjax(ajaxReqDetails);
     if(responseData.status == 1){
         $("#qaModal").remove();
-        $("body").append(qaModalContent(responseData.data));
+        $("body").append(qaModalContent(responseData));
         setTimeout(() => {
             $("#qaModal").modal("show");
         }, 300);
@@ -1200,5 +1287,58 @@ function ckEditorCountValidate(editor, elementId, counterEleId) {
         $(".ck-editor__editable").css({"border-color":"green"});
         $(counterId).removeClass("text-red text-muted").addClass("text-success");
         return true;
+    }
+}
+
+
+function openRecordingModal(entityId, entityType, meetingStartDate, title, startTime, hostName) {
+  const body = {
+    entityId: entityId,
+    entityName: entityType,
+    meetingDate: changeDateFormat(new Date(meetingStartDate), "yyyy-mm-dd"),
+    meetingType: entityType,
+  };
+  $.ajax({
+    type: "POST",
+    url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-event-recordings",
+    data: JSON.stringify(body),
+    contentType: APPLICATION_JSON_VALUE,
+    success: function (response) {
+      const res = JSON.parse(response);
+      if (res.statusCode === 0 && res.status === "success") {
+        const recordings = res.data.recordingUrls;
+        if (recordings && recordings.length > 0) {
+          populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body);
+        } else {
+          showMessageTheme2(0, "No recordings available.", '', true);
+        }
+      } else {
+        showMessageTheme2(0, `Error: ${res.message}`, '', true);
+      }
+    }
+  });
+}
+
+function openResendTeacherInterviewModal(userId, mailName, expiredDate){
+    $("#resendTeacherInterviewModal").remove();
+    $("body").append(resendTeacherInterviewModalContent(userId, mailName));
+    $("#resendTeacherInterviewModal").modal("show");
+    toggleExpiredIcon(expiredDate)
+    $("#resendTeacherInterviewForm #interviewBookLinkExpireDate").datepicker({
+        format: "M dd, yyyy",
+        autoclose: true,
+        startDate: new Date(expiredDate)
+    })
+    .datepicker("setDate", new Date(expiredDate))
+    .on("changeDate", function (e) {
+        toggleExpiredIcon(e.date);
+    });
+}
+
+function toggleExpiredIcon(dateValue) {
+    if (isExpired(dateValue)) {
+        $("#resendTeacherInterviewForm .fa-exclamation-triangle").removeClass("d-none");
+    } else {
+        $("#resendTeacherInterviewForm .fa-exclamation-triangle").addClass("d-none");
     }
 }

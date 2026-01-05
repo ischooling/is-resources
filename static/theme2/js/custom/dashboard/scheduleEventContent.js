@@ -424,7 +424,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 											if(item.meetingFor == 'Initial-Interview'){
 												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Initial-Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\')">Update</a>';
 											}else if(item.meetingFor == 'Interview'){
-												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Interview\',\''+item.appliedUserRole+'\')">Update</a>';
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\')">Update</a>';
 											}else{
 												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\')">Update</a>';
 											}
@@ -552,6 +552,10 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 												+'<option value="15">15 Min</option>'
 												+'<option value="30">30 Min</option>'
 											+'</select>'
+										+'</div>'
+										+'<div id="interviewValidDateDiv" style="display: none;" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">'
+											+'<label for="interviewValidDate" class="control-label">Interview link is valid till</label>'
+											+'<input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled />'
 										+'</div>'
 									}
 									html+='<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'

@@ -56,6 +56,7 @@ async function getStage5Data(){
 	signupTeacherStage5OnLoadEvent(responseData.details);
 	$(".step-5-skeleton").hide();
 	$("#teacherSignupStage5").show();
+	$(".next-btn a").text("Next");
 }
 
 function verificationValidationOnSave(formId){
@@ -75,11 +76,22 @@ function verificationValidationOnSave(formId){
         }
     }
 
-    // 2. Police declaration checkbox
-    if (!$('#policeVerificationCheck').is(':checked')) {
-        showMessageTheme2(2, 'Please accept the police verification declaration.');
-        return false;
-    }
+	// 2. Recommendation Letter validation
+	if (
+		$("#" + formId + " #fileupload7Span").html().trim() === '' ||
+		$("#" + formId + " #fileupload7Span").html().trim() === 'Upload Recommendation Letter 1'
+	) {
+		showMessageTheme2(2, 'Please Upload Recommendation Letter 1');
+		return false;
+	}
+
+	if (
+		$("#" + formId + " #fileupload8Span").html().trim() === '' ||
+		$("#" + formId + " #fileupload8Span").html().trim() === 'Upload Recommendation Letter 2'
+	) {
+		showMessageTheme2(2, 'Please Upload Recommendation Letter 2');
+		return false;
+	}
 
 	// 3. Reference validation
     const validateReference = (refNum) => {
@@ -88,17 +100,23 @@ function verificationValidationOnSave(formId){
         const phone = $(`#reference${refNum}Phone`).val().trim();
         const designation = $(`#reference${refNum}Designation`).val().trim();
 
-        const anyFilled = name || email || phone || designation;
-        const allFilled = name && email && phone && designation;
-
-        if (anyFilled && !allFilled) {
-            showMessageTheme2(2, `Please fill all fields for Reference ${refNum}.`);
-            return false;
-        }
+        if (!name || !email || !phone || !designation) {
+			showMessageTheme2(2, `Please fill all fields for Reference ${refNum}.`);
+			return false;
+		}
         return true;
     };
+	if (!validateReference(1) || !validateReference(2)) {
+        return false;
+    }
 
-    // 4. File upload validation
+	// 4. Police declaration checkbox
+    if (!$('#policeVerificationCheck').is(':checked')) {
+        showMessageTheme2(2, 'Please accept the police verification declaration.');
+        return false;
+    }
+
+    // 5. File upload validation
     if (
         $("#" + formId + " #fileupload9Span").html().trim() === '' ||
         $("#" + formId + " #fileupload9Span").html().trim() === 'Upload Police Verification'
@@ -115,10 +133,6 @@ function verificationValidationOnSave(formId){
         return false;
     }
 
-
-    if (!validateReference(1) || !validateReference(2)) {
-        return false;
-    }
 	return true;
 }
 

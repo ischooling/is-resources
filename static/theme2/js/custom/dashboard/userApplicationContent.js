@@ -105,6 +105,8 @@ function userScreeningFilter(){
                         <option value="On Hold">On Hold</option>
                         <option value="Accepted for Contract">Accepted for Contract</option>
                         <option value="Another Round of Interview">Another Round of Interview</option>
+                        <option value="Final Round of Interview">Final Round of Interview</option>
+                        <option value="Hired">Hired</option>
                         <option value="Reject">Rejected</option>
                     </select>
                 </div>
@@ -193,16 +195,28 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                     <div class="modal-header py-2 bg-primary text-white">
                         <h5 class="modal-title">Update Application Status</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body overflow-auto">
-                        <form autocomplete="off" id="userApplicationProfileStatusForm">`
+                        <div class="table-responsive full">
+                            <table class="table table-bordered font-12 border-radius-table" id="jobApplicationMeetingsTable">
+                                <thead class="bg-primary text-white">
+                                    <tr>
+                                        <th>Interview Details</th>
+                                        <th>Interview Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <form class="full" autocomplete="off" id="userApplicationProfileStatusForm">`;
                             if(interviewStatus == "Booked"){
                                 html+=
                                 `<div class="form-group">
                                     <label>Interview Status</label>
-                                    <select id="eventStatus" class="form-control">
+                                    <select id="eventStatus" class="form-control" onchange="eventStatuschangeEvent(this, \'${status}\')">
                                         <option value="">Select Interview Status</option>
                                         <option value="COMPLETED">Completed</option>
                                         <option value="CANCELLED">Cancelled</option>
@@ -225,7 +239,8 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved for Selection Process"){
-                                            html+=`<option value="On Hold">On Hold</option>
+                                            html+=`<option value="Hired">Hired</option>
+                                            <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "On Hold"){
                                             html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
@@ -244,6 +259,14 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                         }else if(status == "Another Round of Interview"){
                                            html+=`<option value="Approved for Selection Process">Approve for Selection Process</option>
                                             <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else if(status == "Final Round of Interview"){
+                                           html+=`<option value="Approved for Selection Process">Approve for Selection Process</option>
+                                            <option value="Hired">Hired</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else if(status == "Hired"){
+                                           html+=`<option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }
                                     }else{
@@ -276,13 +299,29 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                            html+=`<option value="Accepted for Contract">Accepted for Contract</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Final Round of Interview"){
+                                           html+=`<option value="Hired">Hired</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else if(status == "Hired"){
+                                           html+=`<option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
                                     }
                                html+=`</select>
                             </div>
                             <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
-                                <label>Assigned To</label>
-                                <select id="assignedToInterview" class="form-control"></select>
+                                <div class="row">
+                                    <div class="col-md-6 col-12">
+                                        <label>Assigned To</label>
+                                        <select id="assignedToInterview" class="form-control"></select>
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label for="interviewValidDate" class="control-label">Interview link is valid till</label>
+                                        <input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled />
+                                    </div>
+                                </div>
                             </div>
                             <div id="durationDiv" class="form-group" style="display: none;">
                                 <label>Duration</label>
@@ -714,7 +753,7 @@ function addQuestionsModal(){
     return html;
 }
 
-function qaModalContent(data){
+function qaModalContent(responseData){
     var html=
         `<div id="qaModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
@@ -726,7 +765,7 @@ function qaModalContent(data){
                         </button>
                     </div>
                     <div class="modal-body overflow-y-auto" style="max-height: 80vh;">`
-                        data.forEach(function(item){
+                        responseData.data.forEach(function(item){
                             html+=
                             `<div class="mb-3 p-3 border rounded">
                                 <p class="mb-1 font-weight-bold">
@@ -784,5 +823,140 @@ function allQuestionsContent(data) {
     if (html.trim() === "") {
         html = `<p class="text-muted">No questions available.</p>`;
     }
+    return html;
+}
+
+
+function populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body) {
+    const titles = {
+        "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
+        "active_speaker.mp4": "Active Speaker",
+        "shared_screen_with_gallery_view.mp4": "Shared Screen With Gallery View",
+        "gallery_view.mp4": "Gallery View",
+        "shared_screen.mp4": "Shared Screen",
+        "shared_screen_with_speaker_view_CC.mp4": "Shared Screen With Speaker View CC",
+        "-1.1.mp4": "Recording",
+        "-1.2.mp4": "Recording 2",
+        "audio_only": "Audio File",
+    };
+    var entityId = body.entityId;
+    var entityName = body.entityName;
+    var meetingStartDateFormatted = changeDateFormat(new Date(meetingStartDate), "MMM-dd-yyyy");
+
+    var modalContent = 
+    `<div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%;margin: auto; margin-top:50px;">
+            <div class="">
+                <div class="d-flex justify-content-between align-items-center" style="padding: 15px 10px; background: #027FFF;">
+                    <h5 class="text-white mb-0" style="font-size: 18px; font-weight: bold;">Available Recordings | ${title} | ${meetingStartDateFormatted} ${startTime} | ${hostName}</h5>
+                    <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
+                </div>
+                <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
+                    recordings.forEach(record => {
+                        const meetingId = record.meetingId;
+                        const sessionUrls = record.urls.map(urlData => {
+                            for (const key in titles) {
+                                if (urlData.url.includes(key)) {
+                                    return { url: urlData.url, title: titles[key] };
+                                }
+                            }
+                        })
+                        const transcriptUrl = record.urls[record.urls.length - 1]?.url;
+
+                        if(sessionUrls.length > 0) {
+                        modalContent += `
+                            <div class="session-block pb-4">
+                            <h5 class="mb-3 mt-0">Meeting ID: ${meetingId}</h5>
+                            ${sessionUrls.map((recording, index) => `
+                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                                <h6>${index + 1}. ${recording.title}</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
+                                    <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
+                                    <i class="fa fa-clone" style="font-size:20px;"></i>
+                                    </button>
+                                </div>
+                                <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
+                                </div>
+                            `).join("")}
+                            ${
+                            transcriptUrl
+                                ? `
+                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                                    <h6>${sessionUrls.length + 1}. Transcript</h6>
+                                    <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                                </div>`
+                                : ""
+                            }
+                            </div>`;
+                        }
+                        const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
+                        if (summaryAvailable) {
+                            modalContent += `
+                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                                    style="border-bottom:1px solid #eee;">
+                                    <h4>${sessionUrls.length + 2}. Ai Summary</h4>
+                                    <button class="btn btn-sm bg-white rounded" 
+                                            style="border:1px solid #000; color:#000;" 
+                                            onclick="showAiSummary('${entityId}', '${entityName}')">
+                                        Summary
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        if (!summaryAvailable) {
+                            modalContent += `
+                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                                    style="border-bottom:1px solid #eee;">
+                                    <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
+                                    <button class="btn btn-sm bg-white rounded" 
+                                            style="border:1px solid #000; color:#000;" 
+                                            onclick="generateAiSummary('${meetingId}', '${entityId}', '${entityName}')">
+                                        Generate Summary
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    });
+                modalContent+=`</div>
+            </div>
+        </div>
+    </div>`;
+    var modalElement = $("#recordingModal");
+    if (modalElement.length > 0) {
+        modalElement.remove();
+    }
+    $("body").append(modalContent);
+    $("#recordingModal").modal("show");
+}
+
+function resendTeacherInterviewModalContent(userId, mailName){
+    var html=
+        `<div class="modal fade show" id="resendTeacherInterviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+            <div class="modal-dialog" style="max-width: 500px;" role="document">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Resend Interview Link</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row justify-content-center" id="resendTeacherInterviewForm">
+                            <div class="col-12 text-center">
+                                <label>Interview Link is valid till:</label>
+                            </div>
+                            <div class="col-12 d-flex justify-content-center align-items-center">
+                                <input type="text" class="form-control col-4" id="interviewBookLinkExpireDate" readonly onkeydown="return false"/>
+                                <i class="fa fa-exclamation-triangle text-danger ml-2 font-26 d-none" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="float-right mt-3">
+                            <a href="javascript:void(0);" class="btn btn-primary" onclick="resendTeacherInterviewLinkJA('${userId}', '${mailName}')">Resend Link</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`
     return html;
 }

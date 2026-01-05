@@ -882,8 +882,8 @@ function updateRecordingButtons(completedCount, inProgressCount, maxAttempts) {
 		$("#recordYourDemoInsideBtn").hide();
 	} else {
 		$("#recordYourDemoInsideBtn span").text(
-			usedAttempts === 0 ? "Record Your Demo" : 
-			`Record Your Demo (${getOrdinalSuffix(nextAttempt)} Attempt)`
+			usedAttempts === 0 ? "LIVE RECORD YOUR DEMO" : 
+			`LIVE RECORD YOUR DEMO (${getOrdinalSuffix(nextAttempt)} Attempt)`
 		);
 		$('#recordYourDemoInsideBtn').show().attr('data-attempt', nextAttempt);
 		$('#recordYourDemoInsideBtn').attr("onclick", `startDemoRecording('${nextAttempt}', ${false})`);
@@ -905,7 +905,7 @@ function handleSessionsWithData(sessionDataList, completedSessions, inProgressSe
 	
 	if ($("#mergedRecordingTable").length === 0) {
 		let tableWrapper = `
-			<div class="mt-3 bg-white p-3 rounded shadow-sm" style="padding: 30px 0px 10px;">
+			<div class="mt-3 bg-white p-3 rounded shadow-sm" style="padding: 30px 0px 0px;">
 				<table id="mergedRecordingTable" class="table table-bordered">
 					<thead style="background-color: #027fff; color: white;">
 						<tr>
@@ -1029,7 +1029,7 @@ function handleSessionsWithData(sessionDataList, completedSessions, inProgressSe
 
 	if (completedSessions.length > 0) {
 		$("#approveDemoBtn").show();
-		$("#approveDemoBtn").css("margin-left", "auto");
+		$("#approveDemoBtn").css({"display": "flex", "margin-left": "auto", "margin-bottom": "16px"});
 
 		if (completedSessions.length > 1) {
 			$('input[name="selectedDemoRecording"]').show();

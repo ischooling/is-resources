@@ -185,7 +185,7 @@ function updateMeetingStatus(meetingId, leadId) {
     var eventStatus = $('#applicationStatus').val();
     var duration=0;
     var assignToUserId=0;
-    if(eventStatus!='' && eventStatus!=undefined && eventStatus=='Another Round of Interview'){
+    if(eventStatus!='' && eventStatus!=undefined && (eventStatus=='Another Round of Interview')){
         duration=$('#duration').val();
         assignToUserId=$('#assignedToInterview').val();
     }
@@ -264,7 +264,7 @@ function updateMeetingStatus(meetingId, leadId) {
 					showMessageTheme2(0, data['message'],'',true);
 				}
 			} else {
-                if(eventStatus!='' && eventStatus!=undefined && eventStatus=='Another Round of Interview' && assignToUserId!=userId){
+                if(eventStatus!='' && eventStatus!=undefined && (eventStatus=='Another Round of Interview' || eventStatus=='Final Round of Interview') && assignToUserId!=userId){
                      $('#confirmeUpdateSystemTraningModal').modal('hide');
                     $('#updateSystemTraningModal').modal('hide');					
                     showMessageTheme2(1, data['message'],'',true);
@@ -296,6 +296,14 @@ function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartT
 		autoclose: true,
 		format: 'mm-dd-yyyy',
 	});
+    const interviewBookLinkValidityDaysSetting = getSettingsByTypeAndKey('CONFIGURATION','INTERVIEW_BOOK_LINK_VALIDITY_DAYS');
+    const interviewBookLinkValidityDays = JSON.parse(interviewBookLinkValidityDaysSetting).data.metaValue
+    var today = new Date();
+    today.setDate(today.getDate() + parseInt(interviewBookLinkValidityDays));
+    $("#scheduleEventMeetingStatus #interviewValidDate").datepicker({
+        format: "M dd, yyyy",
+        autoclose: true
+    }).datepicker("setDate", today);
     $("#scheduleEventMeetingStatus #status").on('change',function(){
 		if($('#scheduleEventMeetingStatus #status').val()=="Positive to enrollment"){
 			$('.tentative_date').css("display", "block" );
@@ -764,9 +772,18 @@ function showAndHideDuration(formId){
     if($("#"+formId+ " #applicationStatus").val() == "Another Round of Interview"){
         $("#"+formId+ " #durationDiv").show();
         $("#"+formId+ " #assignedToInterviewDiv").show();
+        $("#"+formId+ " #interviewValidDateDiv").show();
+        // if($("#"+formId+ " #applicationStatus").val() == "Final Round of Interview"){
+        //     $("#"+formId+ " #duration option[value='15']").remove(); 
+        // }else{
+        //     if($("#"+formId+ " #duration option[value='15']").length === 0) {
+        //         $("#"+formId+ " #duration option[value='30']").before('<option value="15">15 Min</option>');
+        //     }
+        // }
     }else{
         $("#"+formId+ " #durationDiv").hide();
         $("#"+formId+ " #assignedToInterviewDiv").hide();
+        $("#"+formId+ " #interviewValidDateDiv").hide();
     }
 }
 
@@ -813,10 +830,17 @@ function showHideApplicationStatus(src){
         $("#applicationStatusDiv").hide();
         $("#durationDiv").hide();
         $("#assignedToInterviewDiv").hide();
-        
+        $("#applicationStatus").val('').trigger('change');
     } else {
         $("#applicationStatusDiv").show();
-        $("#durationDiv").show();
-        $("#assignedToInterviewDiv").show();
+        // $("#durationDiv").show();
+        // $("#assignedToInterviewDiv").show();
+        if(status == "COMPLETED" || status == "NOTATTENDED"){
+            if($("#applicationStatus option[value='Final Round of Interview']").length === 0) {
+                $("#applicationStatus option[value='Another Round of Interview']").after('<option value="Final Round of Interview">Final Round of Interview</option>');
+            }
+        }else{
+            $("#applicationStatus option[value='Final Round of Interview']").remove();
+        }
     }
 }

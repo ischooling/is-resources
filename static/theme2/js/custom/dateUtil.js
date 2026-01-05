@@ -155,3 +155,57 @@ function getSaturdayAfterNDays(n) {
 
     return `${year}-${month}-${day}`;
 }
+
+function calculateEndDate(formId, startDateId, durationId, endDateId, type) {
+    var startDate = $("#" + formId + " #" + startDateId).val();
+    var duration  = parseInt($("#" + formId + " #" + durationId).val());
+
+    if (!startDate || !duration) {
+        $("#" + formId + " #" + endDateId).val("");
+        return;
+    }
+
+    var sDate = new Date(startDate);
+    var eDate = new Date(sDate);
+
+    if (type === "YEAR") {
+        eDate.setFullYear(sDate.getFullYear() + duration);
+    }else if (type === "MONTH") {
+		eDate.setMonth(sDate.getMonth() + duration);
+	} else if (type === "DAY") {
+        eDate.setDate(sDate.getDate() + duration);
+    }
+
+    var monthNames = ["Jan","Feb","Mar","Apr","May","Jun", "Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    var day = eDate.getDate();
+    if (day < 10) {
+        day = "0" + day;
+    }
+
+    var endDateFormatted =
+        monthNames[eDate.getMonth()] + " " +
+        day + ", " + eDate.getFullYear();
+
+    $("#" + formId + " #" + endDateId).val(endDateFormatted);
+}
+
+function getWeekDays() {
+  return [
+	{ dayId: 1, shortName: "Sun", fullName: "Sunday" },
+    { dayId: 2, shortName: "Mon", fullName: "Monday" },
+    { dayId: 3, shortName: "Tue", fullName: "Tuesday" },
+    { dayId: 4, shortName: "Wed", fullName: "Wednesday" },
+    { dayId: 5, shortName: "Thu", fullName: "Thursday" },
+    { dayId: 6, shortName: "Fri", fullName: "Friday" },
+    { dayId: 7, shortName: "Sat", fullName: "Saturday" }
+  ];
+}
+
+function isExpired(expiredDate) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const exp = new Date(expiredDate);
+    exp.setHours(0,0,0,0);
+    return exp < today;
+}

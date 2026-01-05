@@ -255,7 +255,6 @@ function getCalendarTable(formId, userId, data, visitDate, callFrom, prestartTim
 	if(USER_ROLE_ID == 3 && bookingDateList.length<1){
 		timeDropdownlimit=getTimeLastValue(min,timeDropdown);
 	}
-	
 	var htmlCal = "";
 	htmlCal=htmlCal+'<table class="table mb-0 text-center" style="table-layout:fixed;">';
 	htmlCal=htmlCal+'<thead><tr>'
@@ -2557,12 +2556,13 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 	var htmlw = "";
 	var timeDropdown =data.timeAvailabilityList;
 	var dataDayList = data.weekDaysAvailabilityList;
+	var availableDays = data.acceptedWorkingDays;
 	if(dataDayList.length>0){
 		for (let d = 0; d < dataDayList.length; d++) {
 			htmlw="";
 			const days = dataDayList[d];
 			var userTimeAvailable = days.timeSlotAvailability;
-			
+			var isDayAllowed = availableDays && availableDays.includes(String(days.dayId));
 			htmlw=htmlw+'<li class="list-group-item px-0 p-md-2">';
 			htmlw=htmlw+'<div class="widget-content p-0">';
 				htmlw=htmlw+'<div class="widget-content-wrapper flex-wrap align-items-baseline">';
@@ -2571,18 +2571,24 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 						htmlw=htmlw+'<div class="widget-content-left">';
 							htmlw=htmlw+'<div class="custom-checkbox custom-control">';
 								var funChange="getDaysCheckUncheck('day"+days.dayId+"','"+prestartTime+"','"+preendTime+"', '"+userRoleId+"', '"+min+"', '"+max+"', '"+slotBufferLimit+"', '"+slotDateLimit+"', '"+slotDayLimit+"', '"+discardPermission+"');";
-							
 							if(userRoleId!=3){
 								htmlw=htmlw+'<input type="checkbox" id="day'+days.dayId+'" value="'+days.dayId+'" data-name="'+days.dayName+'" data-dayname="'+days.dayName+'-'+days.dayId+'" onChange="'+funChange+'" '+((discardPermission && discardPermission==="false")?'disabled style="pointer-events:none;opacity:0.5;"':'')+' class="custom-control-input week-slot-available">';
-								htmlw=htmlw+'<label class="custom-control-label bold text-uppercase" for="day'+days.dayId+'">'+days.dayName+'</label>';
+                                htmlw=htmlw+'<label class="custom-control-label bold text-uppercase" for="day'+days.dayId+'">'+days.dayName+'</label>';
 							}else{
 								var disablclass="";
 								if(USER_ROLE_ID==2){
-									disablclass="";
+									disablclass=false;
 								}else if(days.dataType=='Y' && userRoleId==3){
-									disablclass="disabled";
+									disablclass=true;
 								}
-								htmlw=htmlw+'<input type="checkbox" id="day'+days.dayId+'" value="'+days.dayId+'" data-name="'+days.dayName+'" data-dayname="'+days.dayName+'-'+days.dayId+'" onChange="'+funChange+'" '+disablclass+' class="custom-control-input week-slot-available">';
+								if(isDayAllowed && USER_ROLE_ID != 3){
+									disablclass=false;
+								}else if(!isDayAllowed && days.timeSlotAvailability[0].dayCheck == 'Y' && USER_ROLE_ID != 3){
+									disablclass=false;
+								}else{
+									disablclass=true;
+								}
+								htmlw = htmlw + '<input type="checkbox" id="day' + days.dayId + '" value="' + days.dayId + '" data-name="' + days.dayName + '" data-dayname="' + days.dayName + '-' + days.dayId + '" onChange="' + funChange + '" ' + (disablclass  ? 'disabled style="pointer-events:none;opacity:0.5;"' : '') + ' class="custom-control-input week-slot-available">';
 								htmlw=htmlw+'<label class="custom-control-label bold text-uppercase" for="day'+days.dayId+'">'+days.dayName+'</label>';
 							}
 								
@@ -2598,7 +2604,7 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 					htmlw=htmlw+'</div>';
 					htmlw=htmlw+'<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12 text-right mt-2 mt-sm-0 p-0">';
 						// htmlw=htmlw+'<h5 class="font-weight-semi-bold" style="font-size:14px">Action</h5>';
-						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );\" style='line-height:0;" + ((discardPermission && discardPermission === "false" && userRoleId != 3) ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
+						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"" + (isDayAllowed ? "addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );" : "") + "\" style='line-height:0;" + ((!isDayAllowed || discardPermission && discardPermission === "false" && userRoleId != 3) ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
 						if(slotTypeId>0){}else{
 							
 							var ddclass="";
@@ -3501,6 +3507,7 @@ function callFreeSlotsToBookEvent(visitDate,dayId) {
 
 
 function getCalendarForMeeting(elementId,  startDate, slotType, timeZone) {
+	
 	var userId=$('#userId').val();
 	var eventId=$('#eventId').val();
 	var request = {userId:userId, eventId: eventId, startDate: startDate, slotType:slotType, timeZone:timeZone};
@@ -3514,9 +3521,28 @@ function getCalendarForMeeting(elementId,  startDate, slotType, timeZone) {
 		async: true,
 		timeout: 600000,
 		success: function (data) {
+			console.log(data)
 				if (data['status'] == '0' || data['status'] == '2') {
                     showMessage(true, data['message']);
                 } else {
+
+					var calendarDateList = data.calendarDateList;
+					var today = data.today; // "2025-12-29"
+					var allowedSlotDaysSetting = getSettingsByTypeAndKey('CONFIGURATION','INTERVIEW_SLOT_BOOK_DAYS_LIMIT');
+					var allowedSlotDays = JSON.parse(allowedSlotDaysSetting).data.metaValue
+
+					if($("#meetingFor").val() == "Interview" || $("#meetingFor").val() == "Initial-Interview"){
+						var startIndex = calendarDateList.findIndex(item => item.slotDate === today);
+						if (startIndex !== -1) {
+							calendarDateList = calendarDateList.slice(
+								startIndex,
+								startIndex + allowedSlotDays
+							);
+						}
+					}
+					console.log(calendarDateList);
+
+
 					$("."+elementId).html('');
 					$(".calender-nav").removeClass('d-none').addClass('d-flex');
                    	var htmlss = getMeetingCalendarTable(userId, data, startDate);

@@ -543,3 +543,260 @@ function getBankDetailsTeacherProfileContentList(){
 			</table>`;
         return html;
 }
+
+function addTeacherContractModal(data, userId, name, email, contractId) {
+    var dayOptions = '';
+    for (var i = 1; i <= 30; i++) {
+        dayOptions += `<option value="${i}">${i} Day${i > 1 ? 's' : ''}</option>`;
+    }
+    var contractDate = data?.agreementDate ? changeDateFormat(new Date(data.agreementDate), "MMM-dd-yyyy") : changeDateFormat(new Date(), "MMM-dd-yyyy");
+    var validityStartDate = data?.validityStart ? changeDateFormat(new Date(data.validityStart), "MMM-dd-yyyy") : "";
+    var validityEndDate = data?.validityEnd ? changeDateFormat(new Date(data.validityEnd), "MMM-dd-yyyy") : "";
+    var validityDuration = 0;
+    if (data?.validityStart && data?.validityEnd) {
+        var start = new Date(data.validityStart);
+        var end = new Date(data.validityEnd);
+        validityDuration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    }
+    var isContractFilled = data?.content && data.content.trim() !== "";
+    var html =
+        `<div class="modal right-slide-modal fade show" id="addTeacherContractModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Add Contract</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body overflow-auto">
+                        <form autocomplete="off" id="teacherContractForm">
+                            <input type="hidden" id="contractId" value="${contractId}">
+                            <h6 class="font-weight-bold mb-2">Contract Details</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Reference Number</label>
+                                        <input type="text" class="form-control" id="referenceNumber" value="${data.agreementRefNumber || ''}">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Contract Creation Date</label>
+                                        <input type="text" class="form-control" id="contractDate" value="${contractDate}" readonly onkeydown="return false" disabled>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Role Type</label>
+                                        <select class="form-control" id="roleType" disabled>
+                                            <option value="Teacher">Teacher</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">First Party Representative Details</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Name</label>
+                                        <input type="text" class="form-control" id="firstPartyName" value="Alwin Sabu">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Designation</label>
+                                        <input type="text" class="form-control" id="firstPartyDesignation" value="Associate Director">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">Second Party Representative Details</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Name</label>
+                                        <input type="text" class="form-control" value="${data.name || name || ''}" id="teacherName" ${name || data.name ? "disabled" : ""}>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" value="${email || ''}" id="teacherEmail" ${email ? "disabled" : ""}>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Teacher's Designation</label>
+                                        <input type="text" class="form-control" id="teacherDesignation" value="${data?.designation || ''}">
+                                    </div>
+									<div class="form-group col-md-3 col-12">
+                                        <label>Employment Type</label>
+                                        <select class="form-control" id="employmentType">
+                                            <option value="">Select Employment Type</option>
+                                            <option value="Part-Time" ${data.employeeType === 'Part-Time' ? 'selected' : ''}>Part-Time</option>
+                                            <option value="Full-Time" ${data.employeeType === 'Full-Time' ? 'selected' : ''}>Full-Time</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Agreed Working Hours per Month</label>
+                                        <input type="text" class="form-control" id="workingHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.workingHours || ''}">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Admin Task Hours per Month</label>
+                                        <input type="text" class="form-control" id="adminHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.admintTaskHours || ''}">
+                                    </div>
+									<div class="form-group col-md-4 col-12" id="specializationWrapper">
+                                        <label>Course Specialization</label>
+                                        <select class="form-control" id="specialization" multiple>
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+									<div class="form-group col-md-3 col-12">
+                                        <label>Nationality</label>
+                                        <select class="form-control" id="teacherNationality" onchange="preSelectCurrency(this);"></select>
+                                    </div>
+									<div class="form-group col-md-1 col-12">
+                                        <label>Currency</label>
+                                        <select class="form-control" id="teacherCurrency" disabled>
+											<option value="USD" selected>USD</option>
+											<option value="INR">INR</option>
+										</select>
+                                    </div>
+                                    <div class="form-group col-md-2 col-12">
+                                        <label>Monthly Salary</label>
+                                        <input type="text" class="form-control" id="monthlySalary" onkeydown="return M.digit(event);" value="${data?.payOut || ''}">
+                                    </div>
+                                    <div class="form-group col-md-4 col-12">
+                                        <label>Working Days</label>
+                                        <div id="workingDaysContainer"></div>
+                                    </div>
+                                </div>
+								
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Country</label>
+                                        <select class="form-control" id="teacherContractCountry"></select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>State / Province</label>
+                                        <select class="form-control" id="teacherContractState"></select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>City</label>
+                                        <select class="form-control" id="teacherContractCity"></select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">Contract Duration</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Starting Date of Contract</label>
+                                        <input
+                                            onchange="calculateEndDate(
+                                                'teacherContractForm',
+                                                'contractStartDate',
+                                                'contractDuration',
+                                                'contractEndDate',
+                                                'YEAR'
+                                            )"
+                                            type="text" class="form-control" id="contractStartDate" readonly onkeydown="return false" value="${contractDate}"
+                                        >
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Contract Duration</label>
+                                        <select 
+                                            onchange="calculateEndDate(
+                                                'teacherContractForm',
+                                                'contractStartDate',
+                                                'contractDuration',
+                                                'contractEndDate',
+                                                'YEAR'
+                                            )"
+                                            class="form-control" id="contractDuration"
+                                        >
+                                            <option value="0">Select Duration</option>
+                                            <option value="1" ${data.contractDurationYears == 1 ? 'selected' : ''}>1 Year</option>
+                                            <option value="2" ${data.contractDurationYears == 2 ? 'selected' : ''}>2 Years</option>
+                                            <option value="3" ${data.contractDurationYears == 3 ? 'selected' : ''}>3 Years</option>
+                                            <option value="4" ${data.contractDurationYears == 4 ? 'selected' : ''}>4 Years</option>
+                                            <option value="5" ${data.contractDurationYears == 5 ? 'selected' : ''}>5 Years</option>
+                                            <option value="6" ${data.contractDurationYears == 6 ? 'selected' : ''}>6 Years</option>
+                                            <option value="7" ${data.contractDurationYears == 7 ? 'selected' : ''}>7 Years</option>
+                                            <option value="8" ${data.contractDurationYears == 8 ? 'selected' : ''}>8 Years</option>
+                                            <option value="9" ${data.contractDurationYears == 9 ? 'selected' : ''}>9 Years</option>
+                                            <option value="10" ${data.contractDurationYears == 10 ? 'selected' : ''}>10 Years</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Effective End Date</label>
+                                        <input type="text" class="form-control" id="contractEndDate" readonly onkeydown="return false" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div id="teacherContractCommentData"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div style="flex:1;">
+                                        ${/*<label class="font-weight-bold d-block mb-2">Upload Your Signature</label>
+                                        <div class="custom-file" style="max-width: 400px;">
+                                            <input type="file" class="custom-file-input" id="recipientSignatureUpload" accept="image/*" onchange="signatureTableTeacher('teacherContractForm'); handleRecipientSignatureUpload(this, 'leftSignatureBox'); updateFileName(this); handleFileInputCancel('teacherContractForm', 'recipientSignatureUpload', 'leftSignatureBox');" ${isContractFilled ? 'disabled' : ''}>
+                                            <label class="custom-file-label text-truncate" for="recipientSignatureUpload">Choose file...</label>
+                                        </div>
+                                        <small class="form-text text-danger font-12 mt-1" style="max-width: 75%;">
+                                            Please upload your signature image (PNG/JPG only, white/transparent background, max size: 300KB).
+                                        </small>*/''}
+										<label class="font-weight-bold d-block mb-2">Signature</label>
+										<button id="uploadTeacherSignatureBtn" type="button" class="btn btn-primary" onclick="insertTeacherSignature('teacherContractForm')">Upload Signature</button>
+										<button id="previewTeacherContractBtn" type="button" class="btn btn-success" style="display: none;" onclick="previewContractPdf('TEACHER');">Preview Contract</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">Set the Validity for Offer of Acceptance</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Starting Date of Validity</label>
+                                        <input
+                                            onchange="calculateEndDate(
+                                                'teacherContractForm',
+                                                'contractValidityStartDate',
+                                                'contractValidityDuration',
+                                                'contractValidityEndDate',
+                                                'DAY'
+                                            )"
+                                            type="text" class="form-control" id="contractValidityStartDate" readonly onkeydown="return false" value="${validityStartDate}"
+                                        >
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Valid Till (Days)</label>
+                                        <select
+                                            onchange="calculateEndDate(
+                                                'teacherContractForm',
+                                                'contractValidityStartDate',
+                                                'contractValidityDuration',
+                                                'contractValidityEndDate',
+                                                'DAY'
+                                            )"
+                                            class="form-control" id="contractValidityDuration">
+                                            <option value="0">Select Days</option>
+                                            ${dayOptions}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Effective Validity End Date</label>
+                                        <input type="text" class="form-control" id="contractValidityEndDate" readonly onkeydown="return false" disabled value="${validityEndDate}">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="d-flex justify-content-end gap-10">
+                            <button type="button" class="btn btn-success" onclick="saveTeacherContract('teacherContractForm', '${userId}');">Save Draft</button>
+                            <button type="button" class="btn btn-primary" id="publishTeacherContractBtn" data-contract-Id="" onclick="publishTeacherContract('teacherContractForm', '${userId}');" style="display: ${isContractFilled ? 'block' : 'none'};">Initiate Contract</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
+}

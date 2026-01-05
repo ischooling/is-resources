@@ -2287,3 +2287,72 @@ function getPriorityMasterList(formId, elementId){
 		}
 	});
 }
+
+function initializeCountryStateCity(formId, countryId, stateId, cityId){
+    if(!countryId){ countryId = "countryId"; }
+    if(!stateId){ stateId = "stateId"; }
+    if(!cityId){ cityId = "cityId"; }
+
+    getAllCountryList(formId, countryId);
+
+    $("#" + formId + " #" + countryId).on("change", function() {
+        if($(this).val()) {
+            callStates(formId, this.value, countryId, stateId);
+            $("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
+        } else {
+            $("#" + formId + " #" + stateId).html(`<option value="">Select State/Province*</option>`).prop("disabled", true);
+            $("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
+
+            if($("#"+formId+" #"+cityId).data('select2')) {
+                $("#"+formId+" #"+cityId).select2("destroy").select2({ theme:"bootstrap4" });
+            }
+        }
+
+        if($("#"+formId+" #"+stateId).data('select2')) {
+            $("#"+formId+" #"+stateId).select2("destroy").select2({ theme:"bootstrap4" });
+        }
+    });
+
+    $("#" + formId + " #" + stateId).on("change", function() {
+        if($(this).val()) {
+            callCities(formId, this.value, stateId, cityId);
+        } else {
+            $("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
+        }
+
+        if($("#"+formId+" #"+cityId).data('select2')) {
+            $("#"+formId+" #"+cityId).select2("destroy").select2({ theme:"bootstrap4" });
+        }
+    });
+    $("#" + formId + " #" + countryId).select2({ theme:"bootstrap4" });
+    $("#" + formId + " #" + stateId).select2({ theme:"bootstrap4" });
+    $("#" + formId + " #" + cityId).select2({ theme:"bootstrap4" });
+}
+
+function getAllNationalityList(formId,elementId){
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMaster('formId','COUNTRIES-LIST')),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		async : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				var result = data['mastersData']['countries'];
+				if(result.length>0){
+					var dropdown = $('#'+formId+' #'+elementId);
+					dropdown.html('');
+					dropdown.append('<option value="">Select Country</option>');
+					$.each(result, function(k, v) {
+						dropdown.append('<option custom_country_icon="' + v.extra + '" custom_dial_code="' + v.extra1 + '" value="' + v.key + '">'+ v.extra2 + ' </option>');
+					});
+				}
+			}
+		}
+	});
+}

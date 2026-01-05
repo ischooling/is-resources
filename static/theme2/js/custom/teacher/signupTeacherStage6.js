@@ -1,4 +1,4 @@
-var bankUploadDocsObj = [];
+// var bankUploadDocsObj = [];
 
 function signupTeacherStage6OnLoadEvent(){
 	$('#accountCurrency').html(getCurrenciesOption());
@@ -247,7 +247,40 @@ function signupTeacherStage6OnLoadEvent(){
 	});
 }
 
-function callForSignupTeacherAgreement(formId, userId, agreementLogId, controlType) {
+function validateTeacherAgreement(formId) {
+    if (
+        $("#" + formId + " #rightSignatureBox").html().includes('<br>') &&
+        $("#" + formId + " label[for='recipientSignatureUpload']").text().trim() == "Choose file..."
+    ) {
+        showMessageTheme2(2, "Please upload your signature");
+        return false;
+    }
+
+    if (!$('#agreementDeclarationConfirm').is(':checked')) {
+        showMessageTheme2(2, 'Please Accept the Declaration.');
+        return false;
+    }
+
+    return true;
+}
+
+function openConfirmationContractModal() {
+    $("#confirmationContractModal").remove();
+    $("body").append(confirmationContractModal());
+	$("#confirmationContractModal").modal("show");
+}
+
+function confirmAcceptContractYes() {
+    isContractConfirmed = true;
+    $("#confirmationContractModal").modal("hide");
+    moveStep("next");
+}
+
+async function callForSignupTeacherAgreement(formId, userId, agreementLogId, controlType) {
+	if($("#" + formId + " #rightSignatureBox").html().includes('<br>') && $("#" + formId + " label[for='recipientSignatureUpload']").text().trim() == "Choose file..."){
+        showMessageTheme2(2, "Please upload your signature");
+        return false;
+    }
 	if (!$('#agreementDeclarationConfirm').is(':checked')) {
 		showMessageTheme2(2, ' Please Accept the Declaration.');
 		return false
@@ -265,16 +298,17 @@ function callForSignupTeacherAgreement(formId, userId, agreementLogId, controlTy
 	var data={}
 	data['userId']=userId;
 	data['agreementLogId']=agreementLogId;
-	data['agreementLogId']=agreementLogId;
 	data['controlType']=controlType;
-
+	data['content'] = $("#editorData").html();
+	data['location'] = $("#" + formId + " #location").val();
+	data['additionalDetails'] = fillBrowserDetail();
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('teacher/signup','save-Teacher-Declaration'),
 		data : JSON.stringify(data),
 		dataType : 'json',
-		async:false,
+		async: false,
 		success : function(response) {
 			if(response.statusCode == "FAILED"){
 				if(response.status == "3"){
@@ -294,7 +328,7 @@ function callForSignupTeacherAgreement(formId, userId, agreementLogId, controlTy
 						$("#timePreferencePopup").modal("hide");	
 					}
 				}
-				showMessageTheme2(1, 'Teacher Agreement details updated successfully.',"", true);
+				showMessageTheme2(1, 'Contract accepted successfully',"", true);
 				flag=true;
 			}
 		}
@@ -382,10 +416,10 @@ function callForSignupTeacherAccountAndContact(formId) {
             showMessageTheme2(2, 'Bank postal code can\'t be blank.');
             return false;
         }
-        if ($("#" + formId + " #fileupload5Span").html() == '' || $("#" + formId + " #fileupload5Span").html() == 'No file Selected*') {
-            showMessageTheme2(2, 'Upload document for Address Proof.');
-            return false;
-        }
+        // if ($("#" + formId + " #fileupload5Span").html() == '' || $("#" + formId + " #fileupload5Span").html() == 'No file Selected*') {
+        //     showMessageTheme2(2, 'Upload document for Address Proof.');
+        //     return false;
+        // }
 
         $.ajax({
             type: "POST",
@@ -422,7 +456,7 @@ function getRequestForTeacherAccountAndContact(formId){
 	var accountType = "BANK_ACCOUNT";
 	
 	teacherPaymentInfoDTO['userId'] = USER_ID;
-	teacherPaymentInfoDTO['attachments'] = bankUploadDocsObj;
+	// teacherPaymentInfoDTO['attachments'] = bankUploadDocsObj;
 	teacherPaymentInfoDTO['accountType'] = accountType;
 	teacherPaymentInfoDTO['accountCurrency'] = $("#"+formId+" #accountCurrency").val();
 	teacherPaymentInfoDTO['accountNumber'] = $("#"+formId+" #accountNumber").val();
