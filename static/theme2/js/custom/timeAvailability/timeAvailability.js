@@ -2583,8 +2583,10 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 								}
 								if(isDayAllowed && USER_ROLE_ID != 3){
 									disablclass=false;
-								}else if(!isDayAllowed && days.timeSlotAvailability[0].dayCheck == 'Y' && USER_ROLE_ID != 3){
-									disablclass=false;
+								}else if(days.timeSlotAvailability != null){
+									if(!isDayAllowed && days.timeSlotAvailability[0].dayCheck == 'Y' && USER_ROLE_ID != 3){
+										disablclass=false;
+									}
 								}else{
 									disablclass=true;
 								}

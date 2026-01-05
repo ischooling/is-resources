@@ -207,7 +207,7 @@ function teacherAgreementView(data){
                                     class="custom-file-input cursor" 
                                     id="recipientSignatureUpload"
                                     accept="image/*"
-                                    onchange="handleRecipientSignatureUpload(this, 'rightSignatureBox'); updateFileName(this); handleFileInputCancel('teacherSignupStage4', 'recipientSignatureUpload', 'rightSignatureBox');"
+                                    onchange="handleRecipientSignatureUpload(this, 'rightSignatureBox'); updateFileName(this); handleFileInputCancel('teacherAgreementModal', 'recipientSignatureUpload', 'rightSignatureBox');"
                                 >
                                 <label class="custom-file-label text-truncate" for="recipientSignatureUpload">
                                     Choose file...
