@@ -1,0 +1,1 @@
+function callMeetingRecordingSummary(a){data={},data.leadid=a,data.userId=USER_ID,$.ajax({type:"POST",contentType:APPLICATION_JSON_VALUE,url:getURLFor("leads","get-meeting-recordings-summary"),data:JSON.stringify(data),dataType:"json",cache:!1,timeout:6e5,success:function(a){console.log(a),"0"!=a.status&&"2"!=a.status||showMessage(!0,a.message)}})}

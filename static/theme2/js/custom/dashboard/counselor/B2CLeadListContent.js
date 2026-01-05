@@ -1690,40 +1690,40 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 												+'</td>'
                         +'</tr>';
                         if(leads.aidataList!=null && leads.aidataList.length>0){
-                        html+='<tr>'
-                        +'<th class="border-0 p-1" style="width:165px">Agent:</th>'
-												+'<td class="border-0 p-1">'
-													+'<div class="dropdown d-inline-block" style="position: inherit;">'
-														+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Agent Detail</button>'
-														+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px;">';
-                        
-                          aidataList=leads.aidataList;
-                          html+='<table class="table table-bordered font-11 mt-2">';
-                          for (let c = 0; c < aidataList.length; c++) {
-                            const aidata = aidataList[c];
-                            if(aidata.key=='total_duration_seconds'){
-                              var timesend=secondsToHMS(aidata.value);
-                              html+='<tr><td>total_duration (HH:MM:SS)</td><td>'+timesend+'</td></tr>';
-                            }else{
-                              if(aidata.value!='' 
-                                && aidata.value!='Any/Both'
-                                && aidata.value!='ended'
-                                && aidata.value!='call_analyzed'
-                                && aidata.key!='is_confirmed'
-                                && aidata.key!='call_summary'
-                                && aidata.key!='recording_url'
-                                && aidata.key!='child_name'
-                                && aidata.key!='child_age'
-                              ){
-                                html+='<tr><td>'+aidata.key+'</td><td>'+aidata.value+'</td></tr>';
+                          html+='<tr>'
+                            +'<th class="border-0 p-1" style="width:165px">Agent:</th>'
+                            +'<td class="border-0 p-1">'
+                              +'<div class="dropdown d-inline-block" style="position: inherit;">'
+                                +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Agent Detail</button>'
+                                +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px;">';
+                            
+                              aidataList=leads.aidataList;
+                              html+='<table class="table table-bordered font-11 mt-2">';
+                              for (let c = 0; c < aidataList.length; c++) {
+                                const aidata = aidataList[c];
+                                if(aidata.key=='total_duration_seconds'){
+                                  var timesend=secondsToHMS(aidata.value);
+                                  html+='<tr><td>total_duration (HH:MM:SS)</td><td>'+timesend+'</td></tr>';
+                                }else{
+                                  if(aidata.value!='' 
+                                    && aidata.value!='Any/Both'
+                                    && aidata.value!='ended'
+                                    && aidata.value!='call_analyzed'
+                                    && aidata.key!='is_confirmed'
+                                    && aidata.key!='call_summary'
+                                    && aidata.key!='recording_url'
+                                    && aidata.key!='child_name'
+                                    && aidata.key!='child_age'
+                                  ){
+                                    html+='<tr><td>'+aidata.key+'</td><td>'+aidata.value+'</td></tr>';
+                                  }
+                                }
                               }
-                            }
-                          }
-                           html+='</table>'
-														+'</div>'
-													+'</div>'
-												+'</td>'
-											+'</tr>';
+                              html+='</table>'
+                                +'</div>'
+                              +'</div>'
+                            +'</td>'
+                          +'</tr>';
                         }
 											html+='</tbody>'
 										+'</table>'
@@ -1771,7 +1771,37 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Assigned To:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoAssignName!=''?leads.demoAssignName:'N/A')+'</td>'
 								+'</tr>'
-								+'</tbody>'
+                if(USER_ROLE=='DIRECTOR'){
+                  if(leads.demoSummaryStatus){
+                    html+='<tr>'
+                          +'<td class="border-0 p-1" colspan="2">'
+                            +'<div class="dropdown d-inline-block" style="position: inherit;">'
+                              +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Demo Summary</button>'
+                              +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px; max-height:350px; overflow: auto;">';
+                            demoSummary=JSON.parse(leads.demoSummary);
+                            html+='<table class="table table-bordered font-11 mt-2">';
+                            $.each(demoSummary.reply, function(key, value) {
+                                html += '<tr>';
+                                html += '<td class="bold">' + key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) + '</td>';  // Pretty key name
+                                
+                                if ($.isArray(value)) {
+                                    html += '<td class="array">[' + value.join(', ') + ']</td>';
+                                } else if (typeof value === 'object') {
+                                    html += '<td class="nested">' + JSON.stringify(value, null, 2) + '</td>';
+                                } else {
+                                    html += '<td>' + value + '</td>';
+                                }
+                                html += '</tr>';
+                            });
+                            html+='</table>'
+                              +'</div>'
+                            +'</div>'
+                          +'</td>'
+                        +'</tr>';
+                  }
+                }
+                    
+								html+='</tbody>'
 							+'</table>'
 							+'<table class="w-100 border-bottom demotable">'
 							+'<tbody>'
