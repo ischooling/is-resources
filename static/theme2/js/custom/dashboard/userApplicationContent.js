@@ -844,83 +844,90 @@ function populateRecordingModal(recordings, meetingStartDate, title, startTime, 
     var meetingStartDateFormatted = changeDateFormat(new Date(meetingStartDate), "MMM-dd-yyyy");
 
     var modalContent = 
-    `<div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
-        <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%;margin: auto; margin-top:50px;">
-            <div class="">
-                <div class="d-flex justify-content-between align-items-center" style="padding: 15px 10px; background: #027FFF;">
-                    <h5 class="text-white mb-0" style="font-size: 18px; font-weight: bold;">Available Recordings | ${title} | ${meetingStartDateFormatted} ${startTime} | ${hostName}</h5>
-                    <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
+    `<div id="recordingModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header py-2 bg-primary text-white d-flex">
+                    <h5 class="modal-title">
+                        Available Recordings | ${title} | ${meetingStartDateFormatted} ${startTime} | ${hostName}
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">&times;</span>
+					</button>
                 </div>
-                <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
-                    recordings.forEach(record => {
-                        const meetingId = record.meetingId;
-                        const sessionUrls = record.urls.map(urlData => {
-                            for (const key in titles) {
-                                if (urlData.url.includes(key)) {
-                                    return { url: urlData.url, title: titles[key] };
+                <div class="modal-body">
+                    <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
+                        recordings.forEach(record => {
+                            const meetingId = record.meetingId;
+                            const sessionUrls = record.urls.map(urlData => {
+                                for (const key in titles) {
+                                    if (urlData.url.includes(key)) {
+                                        return { url: urlData.url, title: titles[key] };
+                                    }
                                 }
-                            }
-                        })
-                        const transcriptUrl = record.urls[record.urls.length - 1]?.url;
+                            })
+                            const transcriptUrl = record.urls[record.urls.length - 1]?.url;
 
-                        if(sessionUrls.length > 0) {
-                        modalContent += `
-                            <div class="session-block pb-4">
-                            <h5 class="mb-3 mt-0">Meeting ID: ${meetingId}</h5>
-                            ${sessionUrls.map((recording, index) => `
-                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                                <h6>${index + 1}. ${recording.title}</h6>
-                                <div class="d-flex align-items-center gap-2">
-                                    <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
-                                    <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
-                                    <i class="fa fa-clone" style="font-size:20px;"></i>
-                                    </button>
-                                </div>
-                                <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
-                                </div>
-                            `).join("")}
-                            ${
-                            transcriptUrl
-                                ? `
-                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                                    <h6>${sessionUrls.length + 1}. Transcript</h6>
-                                    <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
-                                </div>`
-                                : ""
+                            if(sessionUrls.length > 0) {
+                            modalContent += `
+                                <div class="session-block pb-4">
+                                <h5 class="mb-3 mt-0">Meeting ID: ${meetingId}</h5>
+                                ${sessionUrls.map((recording, index) => `
+                                    <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                                    <h6>${index + 1}. ${recording.title}</h6>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
+                                        <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
+                                        <i class="fa fa-clone" style="font-size:20px;"></i>
+                                        </button>
+                                    </div>
+                                    <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
+                                    </div>
+                                `).join("")}
+                                ${
+                                transcriptUrl
+                                    ? `
+                                    <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                                        <h6>${sessionUrls.length + 1}. Transcript</h6>
+                                        <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                                    </div>`
+                                    : ""
+                                }
+                                </div>`;
                             }
-                            </div>`;
-                        }
-                        const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
-                        if (summaryAvailable) {
-                            modalContent += `
-                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
-                                    style="border-bottom:1px solid #eee;">
-                                    <h4>${sessionUrls.length + 2}. Ai Summary</h4>
-                                    <button class="btn btn-sm bg-white rounded" 
-                                            style="border:1px solid #000; color:#000;" 
-                                            onclick="showAiSummary('${entityId}', '${entityName}')">
-                                        Summary
-                                    </button>
-                                </div>
-                            `;
-                        }
-                        if (!summaryAvailable) {
-                            modalContent += `
-                                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
-                                    style="border-bottom:1px solid #eee;">
-                                    <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
-                                    <button class="btn btn-sm bg-white rounded" 
-                                            style="border:1px solid #000; color:#000;" 
-                                            onclick="generateAiSummary('${meetingId}', '${entityId}', '${entityName}')">
-                                        Generate Summary
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    });
-                modalContent+=`</div>
+                            const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
+                            if (summaryAvailable) {
+                                modalContent += `
+                                    <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                                        style="border-bottom:1px solid #eee;">
+                                        <h4>${sessionUrls.length + 2}. Ai Summary</h4>
+                                        <button class="btn btn-sm bg-white rounded" 
+                                                style="border:1px solid #000; color:#000;" 
+                                                onclick="showAiSummary('${entityId}', '${entityName}')">
+                                            Summary
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                            if (!summaryAvailable) {
+                                modalContent += `
+                                    <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+                                        style="border-bottom:1px solid #eee;">
+                                        <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
+                                        <button class="btn btn-sm bg-white rounded" 
+                                                style="border:1px solid #000; color:#000;" 
+                                                onclick="generateAiSummary('${meetingId}', '${entityId}', '${entityName}')">
+                                            Generate Summary
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        });
+                    modalContent+=`</div>
+                </div>
             </div>
         </div>
+        
     </div>`;
     var modalElement = $("#recordingModal");
     if (modalElement.length > 0) {

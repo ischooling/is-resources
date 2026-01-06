@@ -209,11 +209,11 @@ function callAgilixbuzzSyncUser(formId, moduleId, requestKey, value, lmsProvider
 }
 
 
-function validateRequestForBuzzGetUserGradeBookSummery(formId, moduleId, requestKey, lmsProviderId) {
+function validateRequestForBuzzGetUserGradeBookSummary(formId, moduleId, requestKey, lmsProviderId) {
 	return true;
 }
 
-function getRequestForBuzzGetUserGradeBookSummery(formId, moduleId, requestKey,lmsProviderId) {
+function getRequestForBuzzGetUserGradeBookSummary(formId, moduleId, requestKey,lmsProviderId) {
 	var  GetEnrollmentRequests= {};
 	GetEnrollmentRequests['uniqueId']= UNIQUEUUID;
 	GetEnrollmentRequests['moduleId'] = moduleId;
@@ -223,16 +223,16 @@ function getRequestForBuzzGetUserGradeBookSummery(formId, moduleId, requestKey,l
 	return GetEnrollmentRequests;
 }
 
-function callBuzzGetUserGradeBookSummery(formId, moduleId, requestKey, lmsProviderId) {
+function callBuzzGetUserGradeBookSummary(formId, moduleId, requestKey, lmsProviderId) {
 	hideMessage('');
-	if (!validateRequestForBuzzGetUserGradeBookSummery(formId, moduleId, requestKey, lmsProviderId)) {
+	if (!validateRequestForBuzzGetUserGradeBookSummary(formId, moduleId, requestKey, lmsProviderId)) {
 		return false;
 	}
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('lms-sync','get-grade-book-summery'),
-		data : JSON.stringify(getRequestForBuzzGetUserGradeBookSummery(formId, moduleId, requestKey,lmsProviderId)),
+		url : getURLFor('lms-sync','get-grade-book-summary'),
+		data : JSON.stringify(getRequestForBuzzGetUserGradeBookSummary(formId, moduleId, requestKey,lmsProviderId)),
 		dataType : 'json',
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {

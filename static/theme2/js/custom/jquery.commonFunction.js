@@ -5877,13 +5877,9 @@ function callCommonAjax(ajaxReqDetails){
                 showMessageTheme2(0, data.message,'',true);
               }
             }
-            if(ajaxReqDetails.onFaildResolved){
-              resolve(data);
-            }
+            resolve(data);
           } else {
-            if(ajaxReqDetails.onSuccessResolved){
-              resolve(data);
-            }
+            resolve(data);
           }
         },
         error: function (xhr, status, e) {
@@ -6733,33 +6729,33 @@ function showAiSummary(entityId, entityType) {
 
 function openAiSummaryModal(summary) {
 
-    $("#aiSummaryModalCustom").remove();
+    // $("#aiSummaryModalCustom").remove();
 
-      var modalHtml = `
-          <div class="modal fade show" id="aiSummaryModalCustom" tabindex="-1" role="dialog" style="display:block; z-index: 99999;">
-            <div class="modal-dialog modal-lg" role="document" style="z-index:100000;">
+    //   var modalHtml = `
+    //       <div class="modal fade show" id="aiSummaryModalCustom" tabindex="-1" role="dialog" style="display:block; z-index: 99999;">
+    //         <div class="modal-dialog modal-lg" role="document" style="z-index:100000;">
               
-              <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+    //           <div class="modal-content" style="border-radius:12px; overflow:hidden;">
                 
-                <div class="modal-header py-2 bg-primary text-white">
-                  <h5 class="modal-title">AI Summary</h5>
-                  <button type="button" class="close text-white" onclick="closeAiSummaryModal();" aria-label="Close">
-                    <span aria-hidden="true"><i class="fa fa-times"></i></span>
-                  </button>
-                </div>
+    //             <div class="modal-header py-2 bg-primary text-white">
+    //               <h5 class="modal-title">AI Summary</h5>
+    //               <button type="button" class="close text-white" onclick="closeAiSummaryModal();" aria-label="Close">
+    //                 <span aria-hidden="true"><i class="fa fa-times"></i></span>
+    //               </button>
+    //             </div>
 
-                <div class="modal-body" id="ai-summary-content" style="height:70vh; overflow-y:auto; padding:20px;">
-                </div>
+    //             <div class="modal-body" id="ai-summary-content" style="height:70vh; overflow-y:auto; padding:20px;">
+    //             </div>
 
-              </div>
+    //           </div>
 
-            </div>
-          </div>
+    //         </div>
+    //       </div>
 
-          <!-- Backdrop -->
-          <div class="modal-backdrop fade show" style="z-index: 99990;"></div>
-          `;
-    $("body").append(modalHtml);
+    //       <!-- Backdrop -->
+    //       <div class="modal-backdrop fade show" style="z-index: 99990;"></div>
+    //       `;
+    // $("body").append(modalHtml);
 
 	var html = ''
     + '<h3 style="font-size:22px;"><b>AI Summary</b></h3>'

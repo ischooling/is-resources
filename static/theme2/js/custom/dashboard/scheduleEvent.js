@@ -10,6 +10,10 @@ var meeting_Id;
 var advSearch=false;
 var noRecordFlag=false;
 var confirmationFlag = true;
+var summaryPollInterval = null;
+// let AI_MODEL= "qwen2.5:3b";
+// let AI_MODEL= "deepseek-custom";
+let AI_MODEL= "gemma2:2b-instruct-q4_K_M";
 function renderDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondition,countType){
 	getScheduleEventContent();
 	getDataForScheduledEvents(formId,clickFrom,currentPageNo,boxSearchCondition,countType);
@@ -491,7 +495,7 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
 
         if (sessionUrls.length > 0) {
             modalContent += `
-                <div class="session-block pb-4">
+                <div class="session-block mb-0" style="border-bottom: 0;">
                     <h5>Meeting ID: ${meetingId}</h5>
                     ${sessionUrls.map((recording, index) => `
                         <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
@@ -509,40 +513,56 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                         transcriptUrl 
                             ? `
                             <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                                <h6>${sessionUrls.length + 1}. Transcript</h6>
-                                <button class="btn btn-secondary " onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                                <h6>${sessionUrls.length + 1}. Transcript/AI Summaries</h6>
+                                <button class="btn btn-secondary " onclick="openTranscriptAndSummaryModal('${meetingId}','${entityId}','${entityName}')">Read</button>
                             </div>`
                             : ""
                     }
                 </div>`;
         }
-        const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
-        if (summaryAvailable) {
-            modalContent += `
-                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
-                    style="border-bottom:1px solid #eee;">
-                    <h4>${sessionUrls.length + 2}. Ai Summary</h4>
-                    <button class="btn btn-sm bg-white rounded" 
-                            style="border:1px solid #000; color:#000;" 
-                            onclick="showAiSummary('${entityId}', '${entityName}')">
-                        Summary
-                    </button>
-                </div>
-            `;
-        }
-        if (!summaryAvailable) {
-            modalContent += `
-                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
-                    style="border-bottom:1px solid #eee;">
-                    <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
-                    <button class="btn btn-sm bg-white rounded" 
-                            style="border:1px solid #000; color:#000;" 
-                            onclick="generateAiSummary('${meetingId}','${entityId}', '${entityName}')">
-                        Generate Summary
-                    </button>
-                </div>
-            `;
-        }
+        // const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
+        // // if (summaryAvailable) {
+        // //     modalContent += `
+        // //         <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+        // //             style="border-bottom:1px solid #eee;">
+        // //             <h6>${sessionUrls.length + 2}. Zoom AI Summary</h6>
+        // //             <button class="btn btn-sm bg-white rounded" 
+        // //                     style="border:1px solid #000; color:#000;" 
+        // //                     onclick="showAiSummary('${entityId}', '${entityName}')">
+        // //                 Summary
+        // //             </button>
+        // //         </div>
+        // //     `;
+        // // }
+        // if (!summaryAvailable) {
+        //     modalContent += `
+        //         <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
+        //             style="border-bottom:1px solid #eee;">
+        //             <h6>${sessionUrls.length + 2}. Generate Ai Summary</h6>
+        //             <button class="btn btn-sm bg-white rounded" 
+        //                     style="border:1px solid #000; color:#000;" 
+        //                     onclick="generateAiSummary('${meetingId}','${entityId}', '${entityName}')">
+        //                 Generate Summary
+        //             </button>
+        //         </div>
+        //     `;
+        // }
+        // // if (!aiSummary){
+        //     modalContent +=
+        //     `<div class="recording-item pb-3 pt-2 px-3" style="border-bottom:1px solid #eee;">
+        //         <div class="row">
+        //             <div class="col-md-4">
+        //                 <label class="mb-1 fw-semibold">Select Model</label>
+        //                 <select id="aiModalSelection" class="form-control form-control-sm">
+        //                     <option value="Ollama">Ollama</option>
+        //                 </select>
+        //             </div>
+        //             <div class="col-md-3 d-flex align-items-end">
+        //                 <button class="btn btn-sm w-100" style="border:1px solid #000; color:#000; background:#fff;" onclick="generateAiSummary('${meetingId}','${entityId}','${entityName}')"> Generate AI Summary</button>
+        //             </div>
+        //         </div>
+        //     </div>`;
+        // }
     });
 
     modalContent += `
@@ -640,57 +660,97 @@ function convertToVTT(videoUrl) {
     return transcriptUrl;
 }
 
-function displayVTT(content, title) {
+function displayVTT(content) {
     const output = $("#transcript-modal-body");
     output.empty();
+    if (!content || content.includes("<Error><Code>")) {
+        output.append(`<p style="font-size:16px;">No Transcript Available</p>`);
+    } else {
+        const lines = content.split("\n");
+        lines.forEach(line => {
+            line = line.trim();
+            if (
+                line === "WEBVTT" ||
+                /^\d+$/.test(line) ||
+                line.includes("-->")
+            ) {
+                return;
+            }
 
-	if(content.includes("<Error><Code>")){
-		output.append(`<p style="font-size: 18px;">No Transcript Available</p>`)
-	} else {
-		var lines = content.split("\n");
-		lines.forEach(line => {
-			var p = $("<p></p>").text(line);
-			output.append(p);
-		});
-	}
-
-    $("#transcriptModalTitle").html(title);
-    $("#transcriptModal").modal("show");
+            if (line.length) {
+                output.append(
+                    `<p style="font-size:14px; margin-bottom:6px;">${line}</p>`
+                );
+            }
+        });
+    }
 }
 
-function showVTTFile(url, title) {
-    let transcriptModal = $("#transcriptModal");
+function openTranscriptAndSummaryModal(meetingId, entityId, entityName) {
+    let transcriptAndSummaryModal = $("#transcriptAndSummaryModal");
 
-    if (transcriptModal.length === 0) {
+    if (transcriptAndSummaryModal.length === 0) {
         $("body").append(`
-            <div id="transcriptModal" class="modal fade" tabindex="-1">
-                <div class="modal-dialog" style="max-width:70%;">
-                    <div class="modal-content" style="height: 80vh;">
+            <div id="transcriptAndSummaryModal" class="modal fade" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-centered" style="box-shadow: 0 0;">
+                    <div class="modal-content">
                         <div class="modal-header theme-bg">
-                            <h5 id="transcriptModalTitle" class="modal-title text-white">Transcript</h5>
-                            <button type="button" class="close btn-close text-white" data-bs-dismiss="modal" aria-label="Close" onclick="closeTranscriptModal();">&times;</button>
+                            <h5 class="modal-title text-white">Transcript/AI Summaries</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                         </div>
-                        <div id="transcript-modal-body" class="modal-body text-left" style="overflow-y: auto;">
-                            <!-- Transcript content will be populated here -->
+
+                        <div class="modal-body p-0">
+                            <div class="container-fluid h-100">
+                                <div class="row h-100">
+                                    <div class="col-md-6 border-end d-flex flex-column p-0 h-100">
+                                        <div class="p-3 border-bottom bg-light">
+                                            <h6 class="mb-0 font-weight-bold">Transcript</h6>
+                                        </div>
+                                        <div id="transcript-modal-body" class="p-3" style="max-height: 70vh; overflow: auto;"></div>
+                                    </div>
+
+                                    <div class="col-md-6 d-flex flex-column p-0 h-100">
+                                        <div class="d-flex flex-column">
+                                            <div class="p-3 border-bottom bg-light">
+                                                <h6 class="mb-0 font-weight-bold">Deepseek AI Summary</h6>
+                                            </div>
+                                            <div id="ollama-ai-summary" class="p-3" style="max-height: 35vh; overflow: auto;">
+                                                <div id="ollama-summary-content" class="d-none"></div>
+                                                <div id="ollama-generate-btn" class="text-center mt-3 d-none">
+                                                    <button class="btn btn-sm btn-outline-dark" onclick="generateAiSummary('${meetingId}','${entityId}','${entityName}', 'OLLAMA')">
+                                                        Generate Deepseek AI Summary
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column border-bottom">
+                                            <div class="p-3 border-bottom bg-light">
+                                                <h6 class="mb-0 font-weight-bold">Zoom AI Summary</h6>
+                                            </div>
+                                            <div id="zoom-ai-summary" class="p-3" style="max-height: 35vh; overflow: auto;">
+                                                <div id="zoom-summary-content" class="d-none"></div>
+                                                <div id="zoom-generate-btn" class="text-center mt-3 d-none">
+                                                    <button class="btn btn-sm btn-outline-dark" onclick="generateAiSummary('${meetingId}','${entityId}','${entityName}', 'ZOOM')">
+                                                        Generate Zoom AI Summary
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         `);
     }
-    customLoader(true);
-	const vttFile = convertToVTT(url);
-    $.ajax({
-        type: "GET",
-        contentType: APPLICATION_JSON_VALUE,
-        dataType: 'json',
-        url: getURLForTranscriptContent(vttFile),
-        success: function(responseData) {
-            customLoader(false); 
-            displayVTT(responseData.content, title);
-        }
-    });
+
+    $("#transcriptAndSummaryModal").modal("show");
+    fetchTranscriptAndSummary(meetingId, entityId, entityName);
 }
+
+
 
 function closeAllVideoModal(){
 	$("#recordingModal").modal("hide");
@@ -703,10 +763,6 @@ function closeVideoModal(){
         videoElement.currentTime = 0;
     }
     $("#videoModal").modal("hide");
-}
-
-function closeTranscriptModal(){
-    $("#transcriptModal").modal("hide");
 }
 
 function formatDateToYYYYMMDD(dateStr) {
@@ -843,4 +899,119 @@ function showHideApplicationStatus(src){
             $("#applicationStatus option[value='Final Round of Interview']").remove();
         }
     }
+}
+
+function formatOllamaText(text) {
+    if (!text) return "";
+    return text
+        .replace(/### (.*)/g, "<h5>$1</h5>")
+        .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+        .replace(/\n\n/g, "<br/><br/>")
+        .replace(/\n/g, "<br/>");
+}
+
+function showTranscriptAndSummaryFromApi(apiResponse, meetingId, entityId, entityName) {
+    displayVTT(apiResponse.details.transcript);
+
+    if (apiResponse.details.zoomSummary) {
+        var zoom = apiResponse.details.zoomSummary;
+        let zoomHtml = `
+            <h5>${zoom.summaryTitle}</h5>
+            <p style="font-size:14px;">${zoom.summaryOverview}</p>
+            <hr/>
+        `;
+
+        zoom.summaryDetails.forEach((item, i) => {
+            zoomHtml += `
+                <h6>${i + 1}. ${item.label}</h6>
+                <p style="font-size:13px;">${item.summary}</p>
+                <hr/>
+            `;
+        });
+
+        $("#zoom-summary-content")
+            .removeClass("d-none")
+            .html(zoomHtml);
+    } else {
+        $("#zoom-generate-btn").removeClass("d-none");
+    }
+    if (apiResponse.details.ollamaSummary) {
+        var formattedOllama = formatOllamaText(apiResponse.details.ollamaSummary);
+
+        $("#ollama-summary-content")
+            .removeClass("d-none")
+            .html(formattedOllama);
+    } else {
+        $("#ollama-generate-btn").removeClass("d-none");
+    }
+}
+
+async function fetchTranscriptAndSummary(meetingId, entityId, entityName) {
+    showLoadingState();
+    var payload = {};
+    payload["model"] = AI_MODEL;
+    payload["userId"] = USER_ID;
+    payload["entityType"] = entityName;
+    payload["entityId"] = entityId;
+    payload["forceGenerate"] = false;
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + "ai/summary",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.details == null){
+        pollSummaryStatus(entityId, entityName, meetingId);
+    }else if(responseData.details){
+        if (!responseData.details.ollamaSummary) {
+            pollSummaryStatus(entityId, entityName, meetingId);
+        }
+        showTranscriptAndSummaryFromApi(responseData, meetingId, entityId, entityName);
+    }else{
+        showMessageTheme2(0, responseData.message);
+    }
+}
+
+function showLoadingState() {
+    if($("#summaryLoader").length == 0){
+        var loadingHtml = `
+            <div id="summaryLoader" class="text-center text-muted">
+                <i class='fa fa-spinner fancytree-helper-spin text-primary' aria-hidden='true'></i>
+                <span class="ms-2">Generating...</span>
+            </div>
+        `;
+    }
+    $("#transcript-modal-body").html(loadingHtml);
+    $("#zoom-summary-content").removeClass("d-none").html(loadingHtml);
+    $("#ollama-summary-content").removeClass("d-none").html(loadingHtml);
+    $("#zoom-generate-btn").addClass("d-none");
+    $("#ollama-generate-btn").addClass("d-none");
+}
+
+async function pollSummaryStatus(entityId, entityName, meetingId) {
+    summaryPollInterval = setInterval(async () => {
+        var statusPayload = {};
+        statusPayload["model"] = AI_MODEL;
+        statusPayload["userId"] = USER_ID;
+        statusPayload["entityType"] = entityName;
+        statusPayload["entityId"] = entityId;
+        statusPayload["forceGenerate"] = false;
+        var ajaxReqDetails = {
+            method: "POST",
+            url: APP_BASE_URL + "ai/summary-status",
+            body: statusPayload,
+            global: false,
+            showMessage: false
+        };
+        var statusResponse = await callCommonAjax(ajaxReqDetails);
+        if (statusResponse.details && statusResponse.details.ollamaSummary) {
+            clearInterval(summaryPollInterval);
+            summaryPollInterval = null;
+            showTranscriptAndSummaryFromApi(statusResponse, meetingId, entityId, entityName);
+        }
+    }, 30000);
 }

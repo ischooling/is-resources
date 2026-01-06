@@ -171,7 +171,7 @@ function uploadSWPRCSV(formId, studentId, standardId) {
 	});
 }
 
-function sendMailStudentGradebookSummery(payload, uploadId, startdate, enddate){
+function sendMailStudentGradebookSummary(payload, uploadId, startdate, enddate){
 	subReportType=$("#subReportTypevalue").val();
 	//goAhead('send-mail-student-weekly-progress-report?studentId='+studentId+'&uploadId='+uploadId+'&forDownload=false', '');
 	var data={};
@@ -194,7 +194,7 @@ function sendMailStudentGradebookSummery(payload, uploadId, startdate, enddate){
 }
 
 
-function callDateWiseGradebokSummery(lmsUserId,lmsProId,stuserId) {
+function callDateWiseGradebokSummary(lmsUserId,lmsProId,stuserId) {
 	var startdate = $("#startdate").val();
 	var enddate = $("#enddate").val();
 	if(startdate=='' && enddate==''){
@@ -338,7 +338,7 @@ function getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId
 						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['studentStringId']+"</td>";
 						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['grade']+"</td>";
 						htmlTable  = htmlTable + "<td>"+weeklyStudent[i]['createdDate']+"</td>";
-						htmlTable  = htmlTable + "<td><a href='javascript:void(0);' onclick = \"sendMailStudentGradebookSummery('"+weeklyReportId+"','"+weeklyStudent[i]['payload']+"','"+weeklyStudent[i]['uploadId']+"','"+weeklyStudent[i]['startDate']+"','"+weeklyStudent[i]['endDate']+"','weekly')\" data-toggle=\"tooltip\" title=\" Send Report\"><i class=\"fa fa-view\"></i>&nbsp;Resend Report</a></td>";
+						htmlTable  = htmlTable + "<td><a href='javascript:void(0);' onclick = \"sendMailStudentGradebookSummary('"+weeklyReportId+"','"+weeklyStudent[i]['payload']+"','"+weeklyStudent[i]['uploadId']+"','"+weeklyStudent[i]['startDate']+"','"+weeklyStudent[i]['endDate']+"','weekly')\" data-toggle=\"tooltip\" title=\" Send Report\"><i class=\"fa fa-view\"></i>&nbsp;Resend Report</a></td>";
 						htmlTable = htmlTable + "<input type='hidden' class='studentsId' value='"+weeklyStudent[i]['studentId']+"'/>"
 						htmlTable  = htmlTable + "</tr>";
 						inc = inc +1;
