@@ -220,14 +220,13 @@ function getLeadFormB2BPopup(objectRights){
 							+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadstatus">'
 								+'<label class="m-0">Lead Status & Category<sup class="text-danger">*</sup></label>'
 								+'<select name="leadStatus" id="leadStatus" class="form-control">'
-									+'<option value="">Select Status</option>'
-									
+									+'<option value="">Select status</option>'
 								+'</select>'
 							+'</div>'
 							+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadstatus">'
 								+'<label class="m-0">Lead Assigned To*</label>'
 								+'<select name="leadAssignTo" id="leadAssignTo" class="form-control" >'
-									+'<option value="">Select Assign</option>'
+									+'<option value="">Select assign</option>'
 									
 								+'</select>'
 							+'</div>'
@@ -882,7 +881,6 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 														+'</tbody>'
 													+'</table>';
 												}
-												
 											html+='</div>'
 										+'</div>'
 									+'</td>'
@@ -1133,7 +1131,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 							{
 								html+='<tr>'
 									+'<td colspan="2" class="border-0 p-1">'
-										+'<a href="javascript:void(0)" onclick="createPartnerUser(\'partnerUserB2BSaveForm\',\''+leads.leadId+'\',\'leadPartnerUserB2B\',\''+leads.partnerTypeId+'\',\''+leads.epdetailStatus+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-user text-primary"></i>&nbsp;'+((leads.partnerTypeId==undefined || leads.partnerTypeId=='' || leads.partnerTypeId==0)?'Create Partner':'Update Partner')+'</a>'
+										+'<a href="javascript:void(0)" onclick="createPartnerUser(\'partnerUserB2BSaveForm\',\''+leads.leadId+'\',\'leadPartnerUserB2B\',\''+leads.partnerTypeId+'\',\''+leads.epdetailStatus+'\', \''+leads.partnerDefaultSettings+'\', \''+leads.partnerType+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-user text-primary"></i>&nbsp;'+((leads.partnerTypeId==undefined || leads.partnerTypeId=='' || leads.partnerTypeId==0)?'Create Partner':'Update Partner')+'</a>'
 									+'</td>'
 								+'</tr>';
 							}

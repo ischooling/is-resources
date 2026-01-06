@@ -4650,7 +4650,7 @@ function getRequestForInactiveCampaignMaster(campid, activeInactive){
 
 
 
-function getPartnerLeadById(formId, leadId, modalId) {
+function getPartnerLeadById(formId, leadId, modalId, partnerDefaultSettings) {
  	$.ajax({
 		 type : "POST",
 		 contentType : APPLICATION_JSON_VALUE,
@@ -4682,11 +4682,16 @@ function getPartnerLeadById(formId, leadId, modalId) {
 							$("#"+formId+" #pCountryCode").val(leadDemo.leadStudentDetailDTO.isdCountryCode);
 							$("#"+formId+" #isdCode").val(leadDemo.leadStudentDetailDTO.isdCode);
 						}
-
-						if (itiPhoneNumber && typeof itiPhoneNumber.destroy === 'function') {
-							itiPhoneNumber.destroy();
-						}
 						var phoneNumber = document.querySelector("#"+formId+" #phoneNo");
+						if (phoneNumber && phoneNumber.parentNode) {
+							if (itiPhoneNumber && typeof itiPhoneNumber.destroy === 'function') {
+								try {
+									itiPhoneNumber.destroy();
+								} catch (e) {
+									console.warn("Ignore destroy error:", e);
+								}
+							}
+						}
 						itiPhoneNumber = window.intlTelInput(phoneNumber, {
 							//separateDialCode: true,
 						});
@@ -4697,15 +4702,15 @@ function getPartnerLeadById(formId, leadId, modalId) {
 							$('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
 						});
 
-						$("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country);
+						$("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger("change");
 						setTimeout(function () {
 							callStates(formId, leadDemo.leadStudentDetailDTO.country, 'countryId');
-							$("#"+formId+" #stateId").val(leadDemo.leadStudentDetailDTO.state);
+							$("#"+formId+" #stateId").val(leadDemo.leadStudentDetailDTO.state).trigger("change");
 							$("#"+formId+" #stateId").attr("disabled","disabled");
 						}, 1000);
 						setTimeout(function () {
 							callCities(formId, leadDemo.leadStudentDetailDTO.state, 'stateId');
-							$("#"+formId+" #cityId").val(leadDemo.leadStudentDetailDTO.city);
+							$("#"+formId+" #cityId").val(leadDemo.leadStudentDetailDTO.city).trigger("change");
 							$("#"+formId+" #cityId").attr("disabled","disabled");
 							$("#"+formId+" #partnerType").val(leadDemo.leadModifyDTO.partnerTypeId);
 							$("#"+formId+" #originalTimezone").val(leadDemo.leadModifyDTO.originalPartnerTimzone).trigger('change');
@@ -4748,8 +4753,13 @@ function getPartnerLeadById(formId, leadId, modalId) {
 							$("#partnerProgressBar").removeClass("d-flex")
 
 						if(originalPartnerType == "GP" || originalPartnerType == "EPER"){
-							$("#officeContactDetailsTab").hide();
-							$("#setCommissionRateTab").show();
+							if(partnerDefaultSettings != "PARENT"){
+								$("#officeContactDetailsTab").hide();
+								$("#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab").show();
+							}else{
+								$("#officeContactDetailsTab").hide();
+								$("#setCommissionRateTab, #feeStructureTab, #paymentOptionsTab").hide();
+							}
 						}else if(originalPartnerType == "WLP"){
 							$("#partnerProgressBar").show()
 							$("#partnerProgressBar").addClass("d-flex")
@@ -4788,13 +4798,12 @@ function getRequestForPartnerByLeadId(formId, leadId) {
     return leadAddFormRequestDTO;
 }
 
-
-function createPartnerUser(formId, leadId, modalId, partnerTypeId, epdetailUpdateStatus){
+function createPartnerUser(formId, leadId, modalId, partnerTypeId, epdetailUpdateStatus, partnerDefaultSettings, partnerType){
 	// if(epdetailUpdateStatus!='Y'){
 	// 	showMessageTheme2(0, 'Please update the Enrollment Partner Form before creating the partner dashboard.','',true);
 	// }else{
-		renderPartnerCotent(partnerTypeId);
-		getPartnerLeadById(formId, leadId, modalId);
+		renderPartnerCotent(partnerTypeId, partnerDefaultSettings, partnerType);
+		getPartnerLeadById(formId, leadId, modalId, partnerDefaultSettings);
 	// }
 	
 }
@@ -4802,7 +4811,21 @@ function createPartnerUser(formId, leadId, modalId, partnerTypeId, epdetailUpdat
 
 function savePatnerWithReferralCode(formId, elementId) {
 	hideMessageTheme2('');
-
+	if($("#"+formId+" #countryId").val()=='' 
+		|| $("#"+formId+" #countryId").val()==undefined){
+		showMessageTheme2(0, 'Please select Country');
+		return false;
+	}
+	if($("#"+formId+" #stateId").val()=='' 
+		|| $("#"+formId+" #stateId").val()==undefined){
+		showMessageTheme2(0, 'Please select State');
+		return false;
+	}
+	if($("#"+formId+" #cityId").val()=='' 
+		|| $("#"+formId+" #cityId").val()==undefined){
+		showMessageTheme2(0, 'Please select Location City');
+		return false;
+	}
 	if($("#"+formId+" #partnerType").val()=='' 
 		|| $("#"+formId+" #partnerType").val()==undefined){
 		showMessageTheme2(0, 'Please select Location Partner Type');
@@ -4827,17 +4850,24 @@ function savePatnerWithReferralCode(formId, elementId) {
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
-		success : function(data) {
+		success : async function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0, data['message']);
 			} else {
 				$("#originalPartnerType").attr('disabled', true);
 				updateTabsVisibility();
 				showMessageTheme2(1, data['message']);
+				if($("#originalPartnerType").val() != 'WLP'){
+					await saveLearningPrograms();
+				}
+				if($("#originalPartnerType").val() == "WLP"){
+					$("#saveCommissionRateForm #learningProgram").html(`<option value="A" selected="" data-select2-id="1432">All Program</option>`);
+					$("#saveCommissionRateForm #standardId").html(`<option value="A">ALL Grade</option>`);
+				}
 			}
 		}
 	});
-   }
+}
 
 function getRequestForPartnerWithReferral(formId){
 	var data = {};
@@ -4866,6 +4896,7 @@ function getRequestForPartnerWithReferral(formId){
 	data['commissionPayout']=$("#"+formId+" #commissionPayout").val();
 	data['whiteLabel']=$("#"+formId+" #whiteLabel").val();
 	data['enrollingStudent']=$("#"+formId+" #enrollingStudent").val();
+	data['isSubPartner']=false;
 	return data;
 }
 
@@ -5088,7 +5119,8 @@ function callPCountries(formId, value, elementId, preSelected) {
 	return true;
 }
 
-function getPartnerTypeList(formId, value,elementId, preSelected) {
+
+function getPartnerTypeList(formId, value,elementId, preSelected, partnerTypeId, partnerDefaultSettings) {
 	$("#" + formId + " #" + elementId).html('<option value="">Select Partner type*</option>');
 	$.ajax({
 		type: "POST",
@@ -5104,9 +5136,15 @@ function getPartnerTypeList(formId, value,elementId, preSelected) {
 			} else {
 				var partnerType = data['mastersData']['data'];
 				$.each(partnerType, function(k, v) {
-					$("#" + formId + " #" + elementId).append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>');
+					$("#" + formId + " #" + elementId).append('<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>');
 				});
-
+				if(partnerDefaultSettings == "PARENT"){
+					if(partnerTypeId != null && partnerTypeId != undefined && partnerTypeId != "" && partnerTypeId != "1"){
+						for(var i=(parseInt(partnerTypeId)-1);i>=1;i--){
+							$("#" + formId + " #" + elementId+" option[value='"+i+"']").remove();
+						}
+					}
+				}
 			}
 		}
 	});
@@ -10644,12 +10682,10 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  $("#b2c-lead-list").html(html);
 		}
 	  } else {
-		if ($("#advanceLeadNewSearchForm #campaignName").val()) {
-		  $("#advanceLeadNewSearchForm #leadSearchCampaign")
-			.val($("#advanceLeadNewSearchForm #campaignName").val())
-			.trigger('change');
+		if($("#advanceLeadNewSearchForm #campaignName").val()) {
+		  $("#advanceLeadNewSearchForm #leadSearchCampaign").val($("#advanceLeadNewSearchForm #campaignName").val()).trigger('change');
 		}
-  
+
 		if (objRights.leadType == 'B2B') {
 		  const html = getB2bLeadList(data, objRights, roleModule);
 		  $("#b2b-lead-list").html(html);
@@ -12368,32 +12404,55 @@ function replaceContractPlaceholders(editor, pasteData) {
 
 	
 function getEnrollmentPartnerPaymentDetails() {
-	let schoolId = $('#pSchoolId').val();
+	if($("#originalPartnerType").val() == "WLP"){
+		entityId = $('#pSchoolId').val();
+		entityType = "SCHOOL";
+	}else{
+		entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+		entityType = "INDIVIDUAL";
+	}
+	let payload = {
+		entityId,
+		entityType
+	}
 	$.ajax({
-		type: "GET",
+		type: "POST",
 		contentType: "application/json",
-		url: BASE_URL + CONTEXT_PATH + '/' + schoolId + '/dashboard/get-partner-payment-options',
+		url: BASE_URL + CONTEXT_PATH + '/' + SCHOOL_ID + '/dashboard/get-partner-payment-options',
 		dataType: 'json',
+		data : JSON.stringify(payload),
 		async: false,
 		success: function (data) {
+			console.log(data);
 			if (data.status) {
 				let isStripeActive = false;
 				let isAirwallexActive = false;
-
+				$("#paymentOptions").html(paymentOptionsContent(data.pgList));
 				$.each(data.pgList, function (index, item) {
-					if (item.getwayName == 'WIRETRANSFER') {
-						$('#WIRETRANSFER').prop("checked", item.active == 'Y').prop("initValue", item.active == 'Y').prop("paymentId", item.id);
-					} else if (item.getwayName == 'CASH') {
-						$('#CASH').prop("checked", item.active == 'Y').prop("initValue", item.active == 'Y').prop("paymentId", item.id);
-					} else if (item.getwayName.toUpperCase() == 'STRIPE') {
-						isStripeActive = item.active == 'Y';
-						$('#stripePaymentMode').prop("checked", isStripeActive).prop("initValue", isStripeActive).prop("paymentId", item.id);
-					} else if (item.getwayName.toUpperCase() == 'AIRWALLEX') {
-						isAirwallexActive = item.active == 'Y';
-						$('#airwallexPaymentMode').prop("checked", isAirwallexActive).prop("initValue", isAirwallexActive).prop("paymentId", item.id);
+					if (!Array.isArray(item.paymentGatway)) {
+						if (item.getwayName == 'WIRETRANSFER') {
+							$('#WIRETRANSFER').prop("checked", item.active == 'Y').prop("initValue", item.active == 'Y').prop("paymentId", item.id);
+						} else if (item.getwayName == 'CASH') {
+							$('#CASH').prop("checked", item.active == 'Y').prop("initValue", item.active == 'Y').prop("paymentId", item.id);
+						}
+						else if (item.getwayName == 'GENERATE_FEE') {
+							$('#GENERATE_FEE').prop("checked", item.generateFeeReceiptFromSystem == 'Y').prop("initValue", item.generateFeeReceiptFromSystem == 'Y');
+						}
+						else if (item.getwayName == 'ENROLLMENT_PAYMENT') {
+							$('#ENROLLMENT_PAYMENT').prop("checked", item.showPaymentAtEnrollment == 'Y').prop("initValue", item.showPaymentAtEnrollment == 'Y');
+						}
+					}else{
+						$.each(item.paymentGatway, function(i,v){
+							if (v.getwayName.toUpperCase() == 'STRIPE') {
+								isStripeActive = v.active == 'Y';
+								$('#STRIPE').prop("checked", isStripeActive).prop("initValue", isStripeActive).prop("paymentId", v.id);
+							} else if (v.getwayName.toUpperCase() == 'AIRWALLEX') {
+								isAirwallexActive = v.active == 'Y';
+								$('#AIRWALLEX').prop("checked", isAirwallexActive).prop("initValue", isAirwallexActive).prop("paymentId", v.id);
+							}
+						});
 					}
 				});
-
 				let finalToggle = (isStripeActive || isAirwallexActive);
 
 				$('#PAYMENTGATEWAY').prop("checked", finalToggle);
@@ -12409,10 +12468,14 @@ function getEnrollmentPartnerPaymentDetails() {
 }
 
 function getUpdatePartnerPaymentRequest() {
-    const modes = ["WIRETRANSFER", "CASH", "stripePaymentMode", "airwallexPaymentMode"];
+	
+		
+
+	console.log(PAYMENTGETWAY)
+    const payload = {};
     const updateRequest = [];
 
-    modes.forEach(id => {
+    PAYMENTGETWAY.forEach(id => {
         const element = $('#' + id);
         const initValue = element.prop("initValue");
         const isChecked = element.is(":checked");
@@ -12425,9 +12488,21 @@ function getUpdatePartnerPaymentRequest() {
             });
         }
     });
+	payload["updateRequest"] = updateRequest;
+	if($("#originalPartnerType").val() == "WLP"){
+		entityId = $('#pSchoolId').val();
+		entityType = "SCHOOL";
+	}else{
+		entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+		entityType = "INDIVIDUAL";
+	}
+	payload['entityId'] = entityId;
+	payload['entityType'] = entityType;
+	payload['generateFeeReceiptFromSystem']=$("#GENERATE_FEE").is(":checked") ? 'Y' : 'N';
+	payload['showPaymentAtEnrollment']=$("#ENROLLMENT_PAYMENT").is(":checked") ? 'Y' : 'N';
 
     console.log("Update Request →", updateRequest);
-    return JSON.stringify({ updateRequest });
+    return JSON.stringify(payload);
 }
 
 function updateEnrollmentPartnerPaymentDetails() {
@@ -12435,7 +12510,7 @@ function updateEnrollmentPartnerPaymentDetails() {
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: BASE_URL + CONTEXT_PATH + '/' + schoolId + '/dashboard/update-partner-payment-options',
+        url: BASE_URL + CONTEXT_PATH + '/' + SCHOOL_ID + '/dashboard/update-partner-payment-options',
         data: getUpdatePartnerPaymentRequest(),
         dataType: 'json',
         async: false,
@@ -12443,13 +12518,14 @@ function updateEnrollmentPartnerPaymentDetails() {
             if (data.status == "1") {
                 showMessageTheme2(1, data.message);
 
-                const modes = ["WIRETRANSFER", "CASH", "stripePaymentMode", "airwallexPaymentMode"];
-                modes.forEach(id => {
+                PAYMENTGETWAY.forEach(id => {
                     const el = $('#' + id);
                     el.prop("initValue", el.is(":checked"));
                 });
-				$("#themeTab").tab("show");
-                updatePartnerProgressBar();
+				if($("#originalPartnerType").val() == 'WLP'){
+					$("#themeTab").tab("show");
+					updatePartnerProgressBar();
+				}
             } else {
                 showMessageTheme2(0, data.message);
             }

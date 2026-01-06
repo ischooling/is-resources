@@ -484,7 +484,7 @@ function showHideDiv(isHide, divId) {
   }
 }
 function getHash() {
-  return Math.random().toString(36);
+  return Math.random().toString(36).substring(2);
 }
 function showMessageTheme2RequestDemoPage(isWarnig, message, id, fid) {
   //	$('#'+id).parent().removeClass('error-message-hide');
@@ -6499,30 +6499,56 @@ function getOrdinalSuffix(number) {
 }
 
 function getPaymentBySchoolId(schoolId){
-	let options = '';
-	$.ajax({
-		type : "GET",
-		contentType : "application/json",
-		url : BASE_URL + CONTEXT_PATH + '/' + schoolId +'/dashboard/get-partner-payment-options',
-		dataType : 'json',
-		async : false,
-		success : function(data) {
-			if (data.status) {
-                options += `<option value="">Select Payment Gateway</option>`;
-                if (data.pgList && data.pgList.length > 0) {
-                    data.pgList.forEach(function (pg) {
-                        if (pg.active === 'Y') {
-                            options += `<option value="${pg.getwayName}">${pg.getwayLabel}</option>`;
-                        }
-                    });
+  var entityId, entityType;
+
+  if (USER_ROLE == "SCHOOL_ADMIN") {
+      entityId = SCHOOL_ID;
+      entityType = "SCHOOL";
+  } else {
+      entityId = USER_ID;
+      entityType = "USER_ID";
+  }
+  var payload = { entityId, entityType };
+  var options = '';
+  $.ajax({
+      type: "POST",
+      contentType: "application/json",
+      url: BASE_URL + CONTEXT_PATH + '/' + schoolId + '/dashboard/get-partner-payment-options',
+      dataType: 'json',
+      data: JSON.stringify(payload),
+      async: false,
+      success: function (data) {
+          if(data.status) {
+            options += `<option value="">Select Payment Gateway</option>`;
+            if(data.pgList && data.pgList.length > 0) {
+              console.log(data.pgList)
+              data.pgList.forEach(function (pg) {
+                if(pg.active === 'Y') {
+                  options += 
+                  `<option value="${pg.getwayName}">
+                      ${pg.getwayLabel}
+                  </option>`;
                 }
-            } else {
-                showMessageTheme2(0, data.message);
+                if(pg.paymentGatway && pg.paymentGatway.length > 0) {
+                  pg.paymentGatway.forEach(function (subPg) {
+                    if(subPg.active === 'Y') {
+                      options+= 
+                      `<option value="${subPg.getwayName}">
+                          ${subPg.getwayLabel}
+                      </option>`;
+                    }
+                  });
+                }
+              });
             }
-		}
-	});
-	return options;
+          }else{
+            showMessageTheme2(0, data.message);
+          }
+      }
+  });
+  return options;
 }
+
 
 function formatMonth(date) {
 	const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -6612,6 +6638,10 @@ function goToPageCommon(page, context) {
 		case 'partnerEnrollment':
 			currentPagePartnerEnrollmentList = page;
 			callStudentListByPartner("partnerEnrollFilterForm");
+			break;
+    case 'partnerEnrollmentList':
+			currentPagePartnerEnrollmentList = page;
+			callStudentListByPartnerWLP("partnerEnrollFilterForm");
 			break;
 		case 'paymentList':
 			currentPagePaymentList = page;

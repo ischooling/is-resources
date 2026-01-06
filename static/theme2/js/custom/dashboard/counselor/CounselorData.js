@@ -303,9 +303,13 @@ function updateStudentCounselorCommissionRate(studentStandardId, updateStatus, a
   
 
 
+
 function resetEnrollmentForm(formID){
+	if(USER_ROLE != 'SCHOOL_ADMIN'){
+		$("#"+formID+" #schoolName").val("").trigger("change");
+		$("#"+formID+" #partnerName").val("").trigger("change");
+	}
 	$("#"+formID+" #academicYear").val("0").trigger("change");
-	$("#"+formID+" #partnerName").val("").trigger("change");
 	$("#"+formID+" #enrollmentStatus").val("").trigger("change");
 	$("#"+formID+" #gradeId").val("").trigger("change");
 	$("#"+formID+" #countryId").val("").trigger("change");

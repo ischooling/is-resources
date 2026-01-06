@@ -697,6 +697,7 @@ function getRequestForGradeFees() {
 		}
 	}
 	advancePaymentCalculationRequest['courseProviderId'] = courseProviderId;
+	advancePaymentCalculationRequest['studentStandardId'] = $('#studentDetailsId').attr('studentstandardid');
 	var request = {};
 	request['request'] = advancePaymentCalculationRequest
 	return request;

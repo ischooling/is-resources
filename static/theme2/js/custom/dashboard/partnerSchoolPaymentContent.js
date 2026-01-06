@@ -1,6 +1,7 @@
 var schoolSettingsLinks;
 function renderSchoolPayment(){
 	schoolSettingsLinks = getSchoolSettingsLinks(SCHOOL_ID);
+    
     var html=
         `<div class="px-4 mt-2">`
             // +dashboardHeaderContent()
@@ -10,8 +11,7 @@ function renderSchoolPayment(){
             +studentFeesModalContent()
         html+=`</div>`;
         getPartnerSchoolPaymentDetails('paymentSeachForm');
-		getPartnerSchools(SCHOOL_ID);
-    return html;
+	return html;
 }
 
 function dashboardHeaderContent(){
@@ -41,7 +41,7 @@ function schoolPaymentCard(){
     var html=
         `<div class="main-card mb-3 card rounded-10">
             <div class="card-body">
-                <h5 class="font-weight-semi-bold text-dark">School Payment</h5>`
+                <h5 class="font-weight-semi-bold text-dark">${USER_ROLE == 'B2B_PARTNER' ? 'Enrollment Partner Payment' : 'School Payment'}</h5>`
                 // +schoolPaymentCardSkeleton()
                 html+=`<div class="d-flex w-50 ml-1 mt-3">
                     <div class="p-2 rounded-10 mr-2 mb-2 shadow-sm flex-grow-1" style="width:100%; background-color:#CCE5FF;">
@@ -82,15 +82,25 @@ function schoolPaymentFilter(){
                     <form id="paymentSeachForm">
                         <div class="row">
 							<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-								<label for="schoolName" class="full text-primary">School Name</label>
-								<select id="schoolName" class="form-control" onchange="getPartnerOnSchoolId(this);">
-									<option value="ALL">Select School Name</option>
-								</select>
-							</div>
+                                <label for="schoolName" class="full text-primary">School Name</label>`;
+                                if(USER_ROLE == "DIRECTOR"){
+                                    html+=`<select id="schoolName" class="form-control" onchange="getPartnerSchoolsBase(\'schoolName\');"></select>`;
+                                }else if(USER_ROLE == "SCHOOL_ADMIN"){
+                                    html+=`<input type="text" id="schoolName" class="form-control" disabled readyonly/>`;
+                                }else if(USER_ROLE == "B2B_PARTNER"){
+                                    html+=`<input type="text" id="schoolName" class="form-control" disabled readyonly/>`;
+                                }
+                            html+=`</div> 
 							<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="partnerName" class="full text-primary">Partner Name</label>
-                                <select id="partnerName" disabled class="form-control"></select>
-                            </div>
+                                <label for="partnerName" class="full text-primary">Partner Name</label>`;
+                                if(USER_ROLE == "DIRECTOR"){
+                                    html+=`<select id="partnerName" class="form-control"></select>`;
+                                }else if(USER_ROLE == "SCHOOL_ADMIN"){
+                                    html+=`<input type="text" id="partnerName" class="form-control" disabled readyonly/>`;
+                                }else if(USER_ROLE == "B2B_PARTNER"){
+                                    html+=`<input type="text" id="partnerName" class="form-control" disabled readyonly/>`;
+                                }
+                            html+`</div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
                                 <label for="academicSession" class="full text-primary">Academic Session</label>
                                 <select id="academicSession" class="form-control"></select>
@@ -311,6 +321,7 @@ function viewStudentList(){
                                     <th>Grade</th>
                                     <th>Leaning Program</th>
                                     <th>Payment Amount</th>
+                                    <th>Sub Partner Name</th>
                                 </tr>
                             </thead>
                             <tbody id="studentListTableBody"></tbody>
@@ -415,12 +426,16 @@ function studentFeesTable(){
                             <th class="font-weight-bold text-white border-bottom-0">Student ID</th>
                             <th class="font-weight-bold text-white border-bottom-0" style="width:12%;">Student Name | Grade</th>
                             <th class="font-weight-bold text-white border-bottom-0">Learning Program</th>
-                            ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">IS Fees</th>':''}
+                            ${/*
+                                ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">IS Fees</th>':''}    
+                            */''}
                             <th class="font-weight-bold text-white border-bottom-0">Total Fee</th>`;
                             // <th class="font-weight-bold text-white border-bottom-0">Student Fees Pay Date</th>
 					        html += `<th class="font-weight-bold text-white border-bottom-0">Commission Earned</th>
-                            ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">Payable to IS</th>':''}
-                            ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">Commision Type | Rate</th>':''}
+                            ${/*
+                                ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">Payable to IS</th>':''}
+                                ${schoolSettingsOffice.schoolType != 'WLP'? '<th class="font-weight-bold text-white border-bottom-0">Commision Type | Rate</th>':''}
+                            */''}
                             <th style="width:10%;" class="font-weight-bold text-white border-bottom-0 vertical-align-top rounded-top-right-10">Fee Payable to International Schooling</th>
                         </tr>
                     </thead>
@@ -478,7 +493,7 @@ function paymentRemarksModal(sprId){
 
 function documentPreviewModal(){
 	var html=
-		`<div class="modal fade" id="documentPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+		`<div class="modal fade  mohit sahu" id="documentPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
 			<div class="modal-dialog modal-lg">
 				<div class="modal-content">
 				<div class="modal-header bg-primary">

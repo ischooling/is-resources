@@ -1,6 +1,6 @@
 var currentPagePaymentList = 1;
 function openStudentFeesModal(){
-    let html = '<option value="'+$("#partnerName").val()+'">'+$("#partnerName").text()+'</option>';
+    let html = '<option value="'+$("#partnerName").val()+'">'+$("#partnerName").val()+'</option>';
     $("#partnerNameSearch").html(html);
     $("#studentFeesModal").modal('show');
 }
@@ -23,7 +23,9 @@ function getPayStudentFeesDetais(callFrom) {
         "standardId" : $("#"+callFrom+" #gradeSearch").val(),
         "learningProgram" : $("#"+callFrom+" #learningProgramSeach").val(),
         "paymentDateFrom" : dateFrom,
-        "paymentDateTo" : dateTo
+        "paymentDateTo" : dateTo,
+        "userId" : USER_ID,
+        "userRole": USER_ROLE
 	};
 
     $.ajax({
@@ -51,17 +53,22 @@ function getPayStudentFeesDetais(callFrom) {
                         html += `<tr>
                             <td>
                                 <input type="checkbox" class="row-checkbox paymentCheck"  />
+                                <input type="hidden" id="partnerUserId" value="${item.partnerUserId}"/>
                             </td>
                             <td>${item.partnerName}</td>
                             <td>${item.studentId}</td>
                             <td>${item.studentName} | ${item.standardName}</td>
                             <td>${item.learningProgram}</td>
-                            ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>`:''}
+                            ${/*
+                                ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.parentSchoolCourseFee == undefined ? 'NA' : currency + item.parentSchoolCourseFee}</td>`:''}    
+                            */''}
                             
                             <td>${item.partnerCourseFee == undefined ? 'NA' : currency + item.partnerCourseFee}</td>`;
                             html +=`<td>${item.partnerRevenue == undefined ? 'NA' : currency + item.partnerRevenue}</td>
-                            ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>`:''}
-                            ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>`:''}
+                            ${/*
+                                ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.payableToIS == undefined ? 'NA' : currency + item.payableToIS}</td>`:''}
+                                ${schoolSettingsOffice.schoolType != 'WLP'? `<td>${item.commisionType == undefined ? 'NA' : item.commisionType == 'P' ? 'Percentage' : 'Amount'} | ${item.commisionRate == undefined ? 'NA' : item.commisionRate}</td>`:''}
+                            */''}
                             <td>
                                 <input type="hidden" class="studentStandardId" value="${item.StudentStandardId}" />
                                 <input type="number" min="0" step="0.01" class="form-control payable-input payAmount" oninput="updateTotalPayable();" value="${item.payableToIS == undefined ? 'NA' : item.payableToIS}"/>
@@ -69,7 +76,7 @@ function getPayStudentFeesDetais(callFrom) {
                         </tr>`;
                     });
                     htmlFoot= `<tr style="background-color:#E9E9E9;bottom:0;" class="position-sticky">
-                        <td colspan="${schoolSettingsOffice.schoolType != 'WLP'?'10':'7'}" class="font-weight-bold text-right">Total Payable</td>
+                        <td colspan="${schoolSettingsOffice.schoolType != 'WLP'?'7':'7'}" class="font-weight-bold text-right">Total Payable</td>
                         <td class="font-weight-bold">$<span class="total-payable-cell">${totalPayableToIS.toFixed(2)}</span></td>
                     </tr>`;
                 }else{
@@ -115,9 +122,13 @@ function getRequestForSchoolPaymentFilter(formId) {
     if(USER_ROLE == 'SCHOOL_ADMIN'){
         schoolPaymentFilterDTO['fromSchoolId'] =  $("#" + formId + " #schoolName").val() == undefined ? SCHOOL_ID : $("#" + formId + " #schoolName").val();
     }else{
-        schoolPaymentFilterDTO['fromSchoolId'] =  $("#" + formId + " #schoolName").val() == undefined ? "ALL" : $("#" + formId + " #schoolName").val();
+        schoolPaymentFilterDTO['fromSchoolId'] =  ($("#" + formId + " #schoolName").val() == undefined || $("#" + formId + " #schoolName").val() == "") ? "ALL" : $("#" + formId + " #schoolName").val();
     }
-    schoolPaymentFilterDTO['partnerUserId'] = $("#" + formId + " #partnerName").val() == undefined ? "" : $("#" + formId + " #partnerName").val();
+    if(USER_ROLE == 'B2B_PARTNER'){
+        schoolPaymentFilterDTO['partnerUserId'] = USER_ID;
+    }else{
+        schoolPaymentFilterDTO['partnerUserId'] = $("#" + formId + " #partnerName").val() == undefined ? "" : $("#" + formId + " #partnerName").val();
+    }
     schoolPaymentFilterDTO['academicYear'] = $("#" + formId + " #academicSession").val() == undefined ? "ALL" : $("#" + formId + " #academicSession").val();
     schoolPaymentFilterDTO['transactionNo'] = $("#" + formId + " #transactionNo").val() == undefined ? "" : $("#" + formId + " #transactionNo").val().trim();
     schoolPaymentFilterDTO['referenceNo'] = $("#" + formId + " #userRefNo").val() == undefined ? "" : $("#" + formId + " #userRefNo").val().trim();
@@ -203,13 +214,13 @@ function getPartnerSchoolPaymentDetails(formId) {
                         <td>${item.scheduledPayDate == 'N/A' ? 'N/A' : changeDateFormat(new Date(item.scheduledPayDate),"MMM-dd-yyyy hh:mm:ss A")}</td>
                         <td>${item.payDate == 'N/A' ? 'N/A' : changeDateFormat(new Date(item.payDate),"MMM-dd-yyyy hh:mm:ss A")}</td>`;
                         if (USER_ROLE == "DIRECTOR") {
-                            if (item.paymentStatus === 'SUCCESS' || item.paymentStatus === 'REJECTED' || item.paymentStatus === 'FAILURE') {
+                            // if (item.paymentStatus === 'SUCCESS' || item.paymentStatus === 'REJECTED' || item.paymentStatus === 'FAILURE') {
                                 html += `<td>N/A</td>`;
-                            } else {
-                                html += `<td>
-                                    <button class="btn btn-sm btn-primary mr-1" style="font-size:10px;" onclick="showPaymentRemarksModal('${item.sprId}')">Approve/Reject Payment</button>
-                                </td>`;
-                            }
+                            // } else {
+                            //     html += `<td>
+                            //         <button class="btn btn-sm btn-primary mr-1" style="font-size:10px;" onclick="showPaymentRemarksModal('${item.sprId}')">Approve/Reject Payment</button>
+                            //     </td>`;
+                            // }
                         }
                         html += `</tr>`;
                     });
@@ -259,6 +270,7 @@ function getStudentList(sprId) {
                         <td>${item.gradeName}</td>
                         <td>${item.learningProgramName}</td>
                         <td>$${item.paymentAmount}</td>
+                        <td>${item.partnerName}</td>
                     </tr>`;
                 })
                 $("#studentListTableBody").html(html);
@@ -379,9 +391,11 @@ function getDataForConfirmAndPay(){
         if (row.find(".paymentCheck").is(":checked")) {
             let fee = row.find(".payAmount").val();
             let studentStandardId = row.find(".studentStandardId").val();
+            let partnerUserId = row.find("#partnerUserId").val();
             if (fee) {
                 selectedPayments.push({
                     studentStandardId: studentStandardId,
+                    partnerUserId:partnerUserId,
                     payAmount: fee
                 });
                 totalFee += Number(fee);
@@ -640,5 +654,84 @@ async function initializeSchoolPaymentPage() {
 
     } catch (e) {
         console.error("Failed to initialize payment page:", e);
+    }
+}
+
+async function getPartnerSchoolList(){
+    if(USER_ROLE == "DIRECTOR"){
+        var payload ={};
+        var data =  await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, "/dashboard/get-all-seller-base-school", payload, "");
+        var html = `<option value="">Select School Name</option>`;
+        const partnerSchools = data.partnerSchoolsList || [];
+        $('#schoolName').empty();
+        if(partnerSchools.length === 1) {
+            const item = partnerSchools[0];
+            $('#schoolName').append(`<option value="${item.schoolId}">${item.schoolName}</option>`).val(item.schoolId).attr("disabled", true);
+            return;
+        }else{
+            $.each(partnerSchools, function(i,item){
+                html+=`<option value="${item.schoolId}">${item.schoolName}</option>`;
+            });
+        }
+        $('#schoolName').html(html);
+    }else{
+        $('#schoolName').val(SCHOOL_NAME)
+        getPartnerSchoolsBase("schoolName")
+    } 
+}
+
+function getPartnerSchoolsBase(eleID) {
+    var schoolId;
+    if(USER_ROLE == "DIRECTOR"){
+        schoolId = $("#"+eleID).val();
+        
+    }else{
+        schoolId=SCHOOL_ID;
+    }
+    if(schoolId != null && schoolId != undefined && schoolId != ""){
+        $.ajax({
+            type: "GET",
+            contentType: "application/json",
+            url: BASE_URL + CONTEXT_PATH + SCHOOL_ID + `/dashboard/get-partner-schools?schoolId=${schoolId}`,
+            dataType: 'json',
+            success: function (data) {
+                if(data.status === '0' || data.status === '2' || data.status === '3') {
+                    if (data.status === '3') {
+                        redirectLoginPage();
+                    } else {
+                        showMessageTheme2(0, data.message, '', true);
+                    }
+                    return;
+                }
+                if(USER_ROLE == "DIRECTOR"){
+                    var partnerSchools = data.partnerSchoolsList || [];
+                    var selectedSchoolId = schoolId;
+                    var html = ``;
+                    if (selectedSchoolId != "") {
+                        var matched = $.grep(partnerSchools, function(item){
+                            return item.schoolId === selectedSchoolId;
+                        });
+                        html+=`<option value="">Select Partner</option>`;
+                        $.each(matched, function(i, item){
+                            html += `<option value="${item.partnerUserId}">${item.partnerName}</option>`;
+                        });
+
+                    }else{
+                        html+=`<option value="ALL">Select Partner Name</option>`;
+                        
+                    }
+                    $('#partnerName').html(html);
+                    if(matched.length>0){
+                        $('#partnerName').prop("disabled",false);
+                    }
+                }else{
+                    var partner = data.partnerSchoolsList.find(item => item.partnerUserId === USER_ID);
+                    var partnerName = partner ? partner.partnerName : null;
+                    $('#partnerName').val(partnerName)
+                }
+            }
+        });
+    }else{
+        $("#partnerName").val("");
     }
 }

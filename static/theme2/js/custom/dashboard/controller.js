@@ -455,6 +455,7 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
   }else if(pageNo == "partner-school-payment"){
 	$('#dashboardContentInHTML').html(renderSchoolPayment());
 	initializeSchoolPaymentPage();
+	getPartnerSchoolList()
   }else if (pageNo == "partner-enrollment-students-wlp") {
 	$('#dashboardContentInHTML').html(renderSchoolEnrollmentStudents(`${schoolSettingsOffice.schoolType == "WLP" ? "Student Enrollment List" :"Enrollment Partner Student List"}`));
 	getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", SCHOOL_ID);
@@ -567,6 +568,12 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		userApplicationProfileOnloadFunction();
 	}else if(pageNo=='task'){
 		renderTaskListDashboard("Task", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
+	}
+	else if(pageNo=='partner-fee-structure'){
+		renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
+	}
+	else if(pageNo=='add-sub-partner'){
+		renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
 	}
 //   else if(pageNo=='lead-report-list'){
 // 	$('#dashboardContentInHTML').html(renderSchoolReportDashboard('School Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));

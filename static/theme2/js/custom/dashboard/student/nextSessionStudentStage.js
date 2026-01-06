@@ -533,11 +533,14 @@ function validateRequestForPaymentOption(formId) {
 	return true;
 }
 
-function submitCourse() {
+async function submitCourse(partnerEnrollmentFlag) {
 	var flag = validateRequestForPaymentModeSelection();
 	if (flag) {
 		if(ADVANCE_FEE_PAID || $('#studentPaymentModal').is(':visible')){
 			callForReviewAndPaymentSelection('Y');
+		}else if(partnerEnrollmentFlag == "P" || SHOW_PAYMENT_OPTION == 'N'){
+			choosePaymentOption(partnerEnrollmentFlag);
+			// callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
 		}else{
 			callForPaymentModeSelection('nextSessionCourseModal','');
 			return false;
@@ -578,6 +581,7 @@ function displaySection3() {
 	$('#divNextSessionCourseChoose, #divNextSessionCourseWrapper').hide();
 	$('#divNextSessionCourseReview').show();
 	$(".btn-finish").show();
+	$("#studentPaymentModal").modal("hide");
 }
 
 function removeSlideAnimationClass(){
@@ -613,7 +617,6 @@ function callForPaymentModeSelection(formId, callFrom) {
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/get-payment-details',
 		data : JSON.stringify(getRequestForPaymentModeSelection(formId,callFrom)),
 		dataType : 'json',
-		global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
                 if (data['status'] == '3') {
@@ -662,7 +665,8 @@ $(window).on("load", function(){
 	radioBtnChecked()
 });
 
-function choosePaymentOption() {
+
+function choosePaymentOption(partnerEnrollmentFlag) {
 	var flag=true;
 	if(SHOW_PAYMENT_OPTION=='Y'){
 		if($("#pay-one").prop("checked") == true || $("#pay-three").prop("checked") == true || $("#pay-registration").prop("checked") == true || $("#pay-custom").prop("checked") == true){
@@ -700,7 +704,7 @@ function choosePaymentOption() {
 					if(SHOW_PAYMENT_OPTION=='Y'){
 						$("#studentPaymentModal").modal("hide");
 					}
-					callForReviewAndPaymentSelection('Y');
+					callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
 					if(SHOW_PAYMENT_OPTION=='Y'){
 						showMessageTheme2(1, 'Payment Mode Selected.', '', true);
 						hideModalMessage();
@@ -732,7 +736,9 @@ function getRequestForReviewAndPaymentSelection(reloadRequired){
 	return studentRequestDTO;
 }
 
-function callForReviewAndPaymentSelection(reloadRequired) {
+
+function callForReviewAndPaymentSelection(reloadRequired, partnerEnrollmentFlag, signupType) {
+	customLoader(true)
 	hideMessage('');
 	$.ajax({
 		type : "POST",
@@ -740,7 +746,6 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/get-student-review-details',
 		data : JSON.stringify(getRequestForReviewAndPaymentSelection(reloadRequired)),
 		dataType : 'json',
-		global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
                 if (data['status'] == '3') {
@@ -758,7 +763,7 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 					}
                 }
             } else {
-				getReviewAndPayRendered(data);
+				getReviewAndPayRendered(data, partnerEnrollmentFlag, signupType);
 			}
 		},
 		error: function(e){
@@ -966,7 +971,7 @@ function callForApplicationSubmit() {
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
-		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/migration/submit-application',
+		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/submit-application',
 		data: JSON.stringify(getRequestForApplicationSubmit()),
 		dataType: 'json',
 		async: false,
@@ -993,6 +998,43 @@ function getRequestForApplicationSubmit() {
 
 function applicationSubmittedModal(contactEmail){
 	$('#submitApplicationMsg').html('Your enrollment application is under review. For any further queries, reach out to <a class="priamry-txt-color" href="mailto:'+contactEmail+'">'+contactEmail+'</a>');
-	$('#goToDashboardWarningMessage').modal({ backdrop: 'static', keyboard: false })
+	$('#goToDashboardWarningMessage').modal({ backdrop: 'static', keyboard: false });
 	$('#submitApplicationWarning').modal("hide");
+}
+
+async function showPaymentModal() {
+	hideModalMessage('');
+	if($('#signupType').val() == 'Online' ){
+		if(SHOW_PAYMENT_OPTION=='Y'){
+			await callLocationForPaymentPromise();
+			if ($("#payMode").val() == 'registration') {
+				// $('#courseFeeModalTNC').modal('hide');
+				// $('#bookAnEnrollmentTNC').modal('show');
+				// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
+				var schoolId = $('.payabledetails').attr('schoolId');
+				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+				checkPayment("", userPaymentDetailsId, schoolId);
+			} else {
+				var schoolId = $('.payabledetails').attr('schoolId');
+				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+				var entityType = $('.payabledetails').attr('entityType');
+				var entityId = $('.payabledetails').attr('entityId');
+				var paidByUserId = $('.payabledetails').attr('paidByUserId');
+				getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
+			}
+		} else {
+			$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
+			$('#goToDashboardWarningMessage').hide();
+		}
+	}else{
+		$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
+		$('#goToDashboardWarningMessage').hide();
+	}
+}
+function logoutConfimation(flag, url){
+	if(flag){
+		window.location.href = url;
+	}else{
+		$("#logoutSignupModal").modal("hide");
+	}
 }

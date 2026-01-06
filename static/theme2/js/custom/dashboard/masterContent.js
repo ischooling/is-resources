@@ -738,7 +738,7 @@ function getTimeZones(formId,elementId,elementIdCheck){
 }
 
 // function getLearningProgramContentFromServer(schoolId) {
-// 	debugger;
+
 //     return new Promise(function(resolve, reject){
 //         hideMessage('');
 //         const data = {
@@ -2103,6 +2103,11 @@ function getLearningProgramAndCourseProviderMappingBySchoolId(schoolId, defaultO
 			html+=`<option value="" data-id="" >${defaultOption}</option>`;
 		}
 	}
+	if($("#originalPartnerType").val() == "WLP"){
+		schoolId = $('#pSchoolId').val();
+	}else{
+		schoolId = SCHOOL_ID;
+	}
 	$.ajax({
 		type: "POST",
 		contentType: "application/json",
@@ -2177,44 +2182,69 @@ function getPartnerSchools(schoolId) {
         contentType: "application/json",
         url: BASE_URL + CONTEXT_PATH + SCHOOL_ID + `/dashboard/get-partner-schools?schoolId=${schoolId}`,
         dataType: 'json',
-        success: function(data) {
-            if (data['status'] === '0' || data['status'] === '2' || data['status'] === '3') {
-                if (data['status'] === '3') {
+        success: function (data) {
+
+            if (data.status === '0' || data.status === '2' || data.status === '3') {
+                if (data.status === '3') {
                     redirectLoginPage();
                 } else {
-                    showMessageTheme2(0, data['message'], '', true);
+                    showMessageTheme2(0, data.message, '', true);
                 }
-            } else {
-                const partnerSchools = data.partnerSchoolsList || [];
-
-                const $schoolSelect = $('#schoolName');
-                const $partnerSelect = $('#partnerName');
-
-                if(partnerSchools.length == 1){
-                    const item = partnerSchools[0];
-
-                    $schoolSelect.empty().append(`<option value="${item.schoolId}">${item.schoolName}</option>`);
-                    $schoolSelect.data('fullList', partnerSchools).val(item.schoolId).attr("disabled", true);
-
-                    $partnerSelect.empty().append(`<option value="${item.partnerUserId}">${item.partnerName}</option>`);
-                    $partnerSelect.val(item.partnerUserId);
-                }else{
-                    $schoolSelect.empty().append(`<option value="">Select School Name</option>`);
-                    $partnerSelect.empty().append(`<option value="">Select Partner Name</option>`);
-
-                    $schoolSelect.data('fullList', partnerSchools);
-
-                    partnerSchools.forEach(item => {
-                        $schoolSelect.append(`<option value="${item.schoolId}">${item.schoolName}</option>`);
-                    });
-                }
+                return;
             }
+
+            const partnerSchools = data.partnerSchoolsList || [];
+            const $schoolSelect = $('#schoolName');
+            const $partnerSelect = $('#partnerName');
+
+            $schoolSelect.empty();
+            $partnerSelect.empty();
+
+            // If only one partner-school mapping exists
+            if (partnerSchools.length === 1) {
+                const item = partnerSchools[0];
+
+                $schoolSelect
+                    .append(`<option value="${item.schoolId}">${item.schoolName}</option>`)
+                    .val(item.schoolId)
+                    .attr("disabled", true);
+
+                $partnerSelect
+                    .append(`<option value="${item.partnerUserId}">${item.partnerName}</option>`)
+                    .val(item.partnerUserId);
+
+                $schoolSelect.data('fullList', partnerSchools);
+                return;
+            }
+
+            // Multiple entries → create unique school dropdown
+            $schoolSelect.append(`<option value="">Select School Name</option>`);
+            $partnerSelect.append(`<option value="${USER_ID}">${USER_FULL_NAME}</option>`);
+
+            // Store full list for later use (e.g. on change)
+            $schoolSelect.data('fullList', partnerSchools);
+
+            // Remove duplicate schoolIds
+            const uniqueSchools = {};
+            partnerSchools.forEach(item => {
+                if (item.schoolId && !uniqueSchools[item.schoolId]) {
+                    uniqueSchools[item.schoolId] = item.schoolName;
+                }
+            });
+
+            // Append unique schools only
+            Object.keys(uniqueSchools).forEach(sId => {
+                $schoolSelect.append(
+                    `<option value="${sId}">${uniqueSchools[sId]}</option>`
+                );
+            });
         }
     });
 }
 
+
 function getPartnerOnSchoolId(src){
-    const selectedSchoolId = $(src).val();
+	const selectedSchoolId = $(src).val();
     const partnerSchools = $(src).data('fullList') || [];
     const $partnerSelect = $('#partnerName');
 
@@ -2227,6 +2257,9 @@ function getPartnerOnSchoolId(src){
         $partnerSelect.html(`<option value="ALL">Select Partner Name</option>`);
     }
 }
+
+
+
 
 async function getAllCoursesOnBasisOfSchool(){
     var payload = {};
@@ -2297,8 +2330,8 @@ function initializeCountryStateCity(formId, countryId, stateId, cityId){
 
     $("#" + formId + " #" + countryId).on("change", function() {
         if($(this).val()) {
-            callStates(formId, this.value, countryId, stateId);
-            $("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
+            callStates(formId, this.value, countryId, stateId, cityId);
+			$("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
         } else {
             $("#" + formId + " #" + stateId).html(`<option value="">Select State/Province*</option>`).prop("disabled", true);
             $("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);

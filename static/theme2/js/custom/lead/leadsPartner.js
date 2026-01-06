@@ -1,4 +1,5 @@
 let PROGRESS_INTERVAL = null;
+let PAYMENTGETWAY = [];
 function editRowPartner(src){
 	$(src).parent().closest("tr").find(".edit-value").hide();
 	$(src).parent().closest("tr").find(".edit-value-element").show();
@@ -45,6 +46,7 @@ function getRequestForSaveCommissionRate(formId){
 	commissionRate['bySchoolValue'] =  $("#"+formId+" #bySchoolValue").val();
 	commissionRate['bySchoolPartnerType'] =  $("#"+formId+" #bySchoolPartnerType").val();
 	commissionRate['bySchoolPartnerValue'] =  $("#"+formId+" #bySchoolPartnerValue").val();
+	commissionRate['commissionPayoutType'] =  $("#"+formId+" #commissionPayout").val();
 	
 	var learningPrograms=[];
 	learningPrograms.push($("#"+formId+" #learningProgram").val());
@@ -248,8 +250,8 @@ function saveCommissionRate(formId) {
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/save-commission-rate',
 		data : JSON.stringify(getRequestForSaveCommissionRate(formId)),
 		dataType : 'json',
-		async : false,
-		global : false,
+		// async : false,
+		// global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
@@ -259,7 +261,8 @@ function saveCommissionRate(formId) {
 				}
 			}else{
 				showMessageTheme2(1, data['message'], '', true);
-				getCommissionRate('filterCommissionRate')
+				getAllCommissionRate(formId);
+				// getCommissionRate('filterCommissionRate')
 			}
 		},
 		error: function(e){
@@ -294,6 +297,7 @@ function getRequestForUpdateCommissionRatePartner(formId, singleId){
 			var enrollRange = minEnrollRange+"-"+maxEnrollRange;
 			var startDate = tr.find('#startDate_'+id).val();
 			var endDate = tr.find('#endDate_'+id).val();
+			var commissionPayoutType = tr.find("#commissionPayoutEdit_"+id).val();
 			var commissionRate= {
 				id: id,
 				byPartnerType: byPartnerType,
@@ -304,7 +308,8 @@ function getRequestForUpdateCommissionRatePartner(formId, singleId){
 				bySchoolPartnerValue: bySchoolPartnerValue,
 				enrollRange: enrollRange,
 				startDate: startDate,
-				endDate: endDate
+				endDate: endDate,
+				commissionPayoutType: commissionPayoutType
 			}
 			commissionRates.push(commissionRate);
 		}
@@ -344,8 +349,8 @@ function updateCommissionRatePartner(formId, id) {
 		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/update-commission-rate',
 		data : JSON.stringify(getRequestForUpdateCommissionRatePartner(formId, id)),
 		dataType : 'json',
-		async : false,
-		global : false,
+		// async : false,
+		// global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
@@ -355,7 +360,8 @@ function updateCommissionRatePartner(formId, id) {
 				}
 			}else{
 				showMessageTheme2(1, data['message'], '', true);
-				getCommissionRate('filterCommissionRate', true);
+				// getCommissionRate('filterCommissionRate', true);
+				getAllCommissionRate("saveCommissionRateForm")
 				bulkEditPartner(false);
 			}
 		},
@@ -388,17 +394,22 @@ function getRequestForFilterCommissionRate(formId){
 	var filter = {};
 	filter['rawLeadId'] =  $("#partnerUserB2BSaveForm #rawLeadId").val();
 	var learningPrograms=[];
-	if($("#"+formId+" #learningProgramFilter").val() == null || $("#"+formId+" #learningProgramFilter").val().length == 0){
+	if($("#"+formId+" #learningProgramFilter").val() == null || $("#"+formId+" #learningProgramFilter").val() == undefined || $("#"+formId+" #learningProgramFilter").val().length == 0){
 		learningPrograms.push('A');
 	}else{
 		learningPrograms.push($("#"+formId+" #learningProgramFilter").val());
 	}
 	filter['learningPrograms'] = learningPrograms;
-	var isAllGrade=$("#"+formId+" #standardIdFilter").val().find((element) => element == 'A');
-	if(isAllGrade!= undefined || isAllGrade=='A' || isAllGrade==''){
+	var isAllGrade = '';
+	if($("#"+formId+" #standardIdFilter").val() == undefined || $("#"+formId+" #standardIdFilter").val() == null){
+		isAllGrade = 'A';
+	}else{
+		isAllGrade=$("#"+formId+" #standardIdFilter").val().find((element) => element == 'A');
+	}
+	if(isAllGrade=='A' || isAllGrade==''){
 		var learningProgramValue = $('#'+formId+' #learningProgramFilter').val();
 
-		if(learningProgramValue=='A'){
+		if(learningProgramValue == null || learningProgramValue == undefined || learningProgramValue=='A'){
 			filter['standardIds'] = [0];
 		}else{
 			if(learningProgramValue=='ONE_TO_ONE_FLEX'){
@@ -422,11 +433,24 @@ function getRequestForFilterCommissionRate(formId){
 	return filterRequest;
 }
 
+function addCommissionRate(formId){
+	var filterRequest = {};
+	var filter = {};
+	filter['rawLeadId'] =  $("#partnerUserB2BSaveForm #rawLeadId").val();
+	var authentication = {};
+	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = USER_ROLE;
+	authentication['userId'] = USER_ID;
+	filterRequest['authentication'] = authentication;
+	filterRequest['filter'] = filter;
+	return filterRequest;
+}
+
 function fetchCommissionRate(formId, isEdit) {
-	if($("#"+formId+" #learningProgramFilter").val().length==0){
-		showMessageTheme2(0, 'Select Learning program', '', true);
-		return false
-	}
+	// if($("#"+formId+" #learningProgramFilter").val().length==0){
+	// 	showMessageTheme2(0, 'Select Learning program', '', true);
+	// 	return false
+	// }
 	if ($("#"+formId+" #learningProgramFilter").val()=='A') {
 
 	}
@@ -468,6 +492,38 @@ function fetchCommissionRate(formId, isEdit) {
 	return responseData;
 }
 
+function getAllPartnerCommissionRate(formId, isEdit) {
+	var responseData={};
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/get-all-partner-commission',
+		data : JSON.stringify(addCommissionRate(formId)),
+		dataType : 'json',
+		async : false,
+		global : false,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(0, data['message'], '', true);
+				}
+			}else{
+				responseData=data;
+				if(!isEdit){
+					// showMessageTheme2(1, 'Commission rate based on filter criteria', '', true);
+				}
+			}
+		},
+		error: function(e){
+			if (checkonlineOfflineStatus()) {
+				return;
+			}
+		}
+	});
+	return responseData;
+}
 
 
 function getRequestForCommissionRateLogsPartner(parentId){
@@ -484,35 +540,36 @@ function getRequestForCommissionRateLogsPartner(parentId){
 }
 
 function commissionRateLogsPartner(parentId) {
-	var responseData={};
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/dashboard/commission-rate-logs',
-		data : JSON.stringify(getRequestForCommissionRateLogsPartner(parentId)),
-		dataType : 'json',
-		async : false,
-		global : false,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-				if (data['status'] == '3') {
-					redirectLoginPage();
-				} else {
-					showMessageTheme2(0, data['message'], '', true);
-				}
-			}else{
-				responseData=data;
-				showMessageTheme2(1, 'Commission rate log', '', true);
-			}
-		},
-		error: function(e){
-			if (checkonlineOfflineStatus()) {
-				return;
-			}
-		}
-	});
-	return responseData;
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: "POST",
+            contentType: APPLICATION_JSON_VALUE,
+            url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + '/dashboard/commission-rate-logs',
+            data: JSON.stringify(getRequestForCommissionRateLogsPartner(parentId)),
+            dataType: 'json',
+            success: function (data) {
+                if (data.status == '0' || data.status == '2' || data.status == '3') {
+                    if (data.status == '3') {
+                        redirectLoginPage();
+                    } else {
+                        showMessageTheme2(0, data.message, '', true);
+                    }
+                    reject(data); // ❌ logical failure
+                } else {
+                    showMessageTheme2(1, 'Commission rate log', '', true);
+                    resolve(data); // ✅ success
+                }
+            },
+            error: function (e) {
+                if (checkonlineOfflineStatus()) {
+                    return;
+                }
+                reject(e); // ❌ ajax error
+            }
+        });
+    });
 }
+
 
 // $(document).on('show.bs.modal', function (event) {
 // 	var modalEle = $(event.target);
@@ -588,7 +645,7 @@ function tempFunction(elementId){
 		if(!excludeList.some(sub => elementId.startsWith(sub))){
 			updatedFieldHeighLight(true, elementId.split('_')[1]);
 		}
-		$("#"+elementId).addClass('border border-success');
+		$("#"+elementId).addClass('border-width-2 border-success');
 	}else{
 		let [key2, key1] = elementId.split("_");
 		key1 = $("#id_"+key1).val();
@@ -599,7 +656,7 @@ function tempFunction(elementId){
 			}
 			updatedFieldHeighLight(false, elementId.split('_')[1]); 
 		}
-		$("#"+elementId).removeClass('border border-success');
+		$("#"+elementId).removeClass('border-width-2 border-success');
 	}
 }
 
@@ -660,8 +717,18 @@ function getStandardFee(callFrom) {
 			return;
 		}
 	}
+	let entityId = '';
+	let entityType = '';
+	if($("#originalPartnerType").val() == "WLP"){
+		entityId = $("#pSchoolId").val();
+		entityType = "SCHOOL";
+	}else{
+		entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+		entityType = "INDIVIDUAL";
+	}
 	var responseData={
-		"schoolId": $("#pSchoolId").val(),
+		"entityId": entityId,
+		"entityType": entityType,
 		"learningProgram":feeStructureLearningProgram,
 		"courseProvider": feeStructurecourseProvider
 	};
@@ -671,8 +738,8 @@ function getStandardFee(callFrom) {
 		url : getURLForHTML('dashboard','get-fee-structure'),
 		data : JSON.stringify(responseData),
 		dataType : 'json',
-		async : false,
-		global : false,
+		// async : false,
+		// global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
@@ -682,8 +749,14 @@ function getStandardFee(callFrom) {
 				}
 			}else{
 				$("#feeStructureTable tbody input, #feeStructureTable tbody select").val("");
-				var gradesArr = ["KG","1","2","3","4","5","6","7","8","9","10","11","12"]
-				$.each(gradesArr, function(index, grade){
+				
+				var gradesList =[];
+				$.each(data.feeDetailList, function(key, value){
+					gradesList.push(key);
+				});
+
+				$("#feeStructureWrapper").html(getFeeStructureContent(gradesList));
+				$.each(gradesList, function(index, grade){
 					// $.each(data.feeDetailList[grade], function (i, value){
 						if(data.feeDetailList[grade] != undefined){
 							let id = data.feeDetailList[grade].id;
@@ -724,25 +797,25 @@ function getStandardFee(callFrom) {
 						}
 					// })
 				});
-				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger border-success');
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border-width-2 border-danger border-success');
 				$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true)
 				currentFeeData = getData();
 			}
 		}
 	});
-	return responseData;
+	// return responseData;
 }
 
 function saveStandardFee() {
 	// if(Object.keys(mainObject).length == 0){
-	// 	$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger');
+	// 	$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border-width-2 border-danger');
 	// 	$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true);
 	// 	showMessageTheme2(1, 'No changes found', '', true);
 	// 	return;
 	// }else 
 	let updateFeeData = getDifferences(currentFeeData, getData());
 	if(Object.keys(updateFeeData).length == 0){
-		$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger');
+		$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border-width-2 border-danger');
 		$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true);
 		showMessageTheme2(1, 'No changes found', '', true);
 		return;
@@ -750,13 +823,24 @@ function saveStandardFee() {
 	if(validationForStandardFee()){
 		return;
 	}
+	let entityId = '';
+	let entityType = '';
+	if($("#originalPartnerType").val() != 'WLP'){
+		entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+		entityType = "INDIVIDUAL";
+	}else{
+		entityId = SCHOOL_ID;
+		entityType = "SCHOOL";
+	}
 	var requestData = {
 		"schoolId" : $("#pSchoolId").val(),
 		"learningProgram" : $("#feeStructureLearningProgram").val(),
 		"courseProviderId" : $("#feeStructurecourseProvider").val(),
 		"standardfeeDetails":Object.entries(updateFeeData),
 		"loginUser" : USER_ID,
-		"rowLeadId" : $("#partnerUserB2BSaveForm #rawLeadId").val()
+		"rowLeadId" : $("#partnerUserB2BSaveForm #rawLeadId").val(),
+		"logOf" : entityType,
+		"logOfId" : entityId
 	};
 	$.ajax({
 		type : "POST",
@@ -764,14 +848,14 @@ function saveStandardFee() {
 		url : getURLForHTML('dashboard','add-update-fee-structure'),
 		data : JSON.stringify(requestData),
 		dataType : 'json',
-		async : false,
-		global : false,
+		// async : false,
+		// global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
 				} else {
-					$('[data-id="'+data['notValid']+'"]').addClass('border border-danger');
+					$('[data-id="'+data['notValid']+'"]').addClass('border-width-2 border-danger');
 					showMessageTheme2(0, data['message'], '', true);
 				}
 			}else{
@@ -779,8 +863,8 @@ function saveStandardFee() {
 				mainObject = {};
 				updateFeeData = {};
 				currentFeeData = getData();
-				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-danger');
-				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border border-success');
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border-width-2 border-danger');
+				$("#feeStructureTable tbody input, #feeStructureTable tbody select").removeClass('border-width-2 border-success');
 				$("#feeStructureTable tbody input, #feeStructureTable tbody select").attr('disabled', true);
 				showMessageTheme2(1, data['message'], '', true);
 				updatePartnerProgressBar();
@@ -790,15 +874,24 @@ function saveStandardFee() {
 }
  
 function validationForStandardFee(){
+	 var learningProgram = $("#feeStructureLearningProgram").val();
 	var headArr = ['regFee_','bae_','progDisc_','courseFee_','annualDiscount_','minCredit_','ftFull_','ftHalf_','crFull_','crHalf_','advFull_','advHalf_','honFull_','honHalf_','apFull_','apHalf_'];
 	flag = false;
 	$.each(mainObject, function(key, value1) {
 		headArr.forEach(function(value2, index){
-			if($('[data-id="'+value2+key+'"]').val() == null || $('[data-id="'+value2+key+'"]').val() == undefined || $('[data-id="'+value2+key+'"]').val() == '' || $('[data-id="'+value2+key+'"]').val() == 0){
-				$('[data-id="'+value2+key+'"]').addClass('border border-danger')
-				flag = true;
+
+			if($('[data-id="'+value2+key+'"]').val() == null || $('[data-id="'+value2+key+'"]').val() == undefined){
+				if(learningProgram != 'ONE_TO_ONE_FLEX' && learningProgram != 'DUAL_DIPLOMA'){
+					$('[data-id="'+value2+key+'"]').addClass('border-width-2 border-danger')
+					flag = true;
+				}else{
+					if($('[data-id="'+value2+key+'"]').val() == '' || $('[data-id="'+value2+key+'"]').val() == 0){
+						$('[data-id="'+value2+key+'"]').addClass('border-width-2 border-danger')
+						flag = true;
+					}
+				}
 			}else{
-				$('[data-id="'+value2+key+'"]').removeClass('border border-danger')
+				$('[data-id="'+value2+key+'"]').removeClass('border-width-2 border-danger')
 			}
 		})
 	});
@@ -814,36 +907,49 @@ function getCity(){
 }
 
 function disabledEnableRow(rowId, index){
-	if($("#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+"").attr('disabled')){
-		$("#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+"").attr('disabled', false)
+	var learningProgram = $("#feeStructureLearningProgram").val();
+	var ids = '';
+	if(learningProgram == 'ONE_TO_ONE_FLEX' || learningProgram == 'DUAL_DIPLOMA'){
+		ids = "#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+", #ftFull_"+index+", #ftHalf_"+index+", #crFull_"+index+", #crHalf_"+index+", #advFull_"+index+", #advHalf_"+index+", #honFull_"+index+", #honHalf_"+index+", #apFull_"+index+", #apHalf_"+index;
 	}else{
-		$("#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index+"").attr('disabled', true)
+		ids = "#"+rowId+" td #regFee_"+index+", #bae_"+index+", #progDisc_"+index+", #courseFee_"+index+", #annualDiscount_"+index+", #minCredit_"+index;
+	}
+	if($(ids).attr('disabled')){
+		$(ids).attr('disabled', false);
+		if($("#originalPartnerType").val() != 'WLP' && (learningProgram != 'ONE_TO_ONE_FLEX' && learningProgram != 'DUAL_DIPLOMA')){
+			$("#"+rowId+" td #minCredit_"+index).attr('disabled', true);
+		}
+	}else{
+		$(ids).attr('disabled', true)
 	}
 }
 
 function calculateFee(indexValue){
-	var courseFee = $("#courseFee_"+indexValue).val();
-	var minCredit = $("#minCredit_"+indexValue).val();
-	var annualDisc = $("#annualDiscount_"+indexValue).val();
-	if(minCredit == null || minCredit == undefined || minCredit == ''){
-		var classText = ['ftFull_', 'ftHalf_', 'crFull_', 'crHalf_', 'advFull_', 'advHalf_', 'honFull_', 'honHalf_', 'apFull_', 'apHalf_'];
-		classText.forEach(function(value, index){
-			$("#"+value+indexValue).val(0);
-		});
-	}else{
-		const base = (courseFee - annualDisc) / minCredit;
-		const adv = base + 25;
-		const ap = base + 50;
-		$("#ftFull_" + indexValue).val(base.toFixed(2));
-		$("#ftHalf_" + indexValue).val((base / 2).toFixed(2));
-		$("#crFull_" + indexValue).val(base.toFixed(2));
-		$("#crHalf_" + indexValue).val((base / 2).toFixed(2));
-		$("#advFull_" + indexValue).val(adv.toFixed(2));
-		$("#advHalf_" + indexValue).val((adv / 2).toFixed(2));
-		$("#honFull_" + indexValue).val(adv.toFixed(2));
-		$("#honHalf_" + indexValue).val((adv / 2).toFixed(2));
-		$("#apFull_" + indexValue).val(ap.toFixed(2));
-		$("#apHalf_" + indexValue).val((ap / 2).toFixed(2));
+	var learningProgram = $("#feeStructureLearningProgram").val();
+	if(learningProgram != 'ONE_TO_ONE_FLEX' && learningProgram != 'DUAL_DIPLOMA'){
+		var courseFee = $("#courseFee_"+indexValue).val();
+		var minCredit = $("#minCredit_"+indexValue).val();
+		var annualDisc = $("#annualDiscount_"+indexValue).val();
+		if(minCredit == null || minCredit == undefined || minCredit == ''){
+			var classText = ['ftFull_', 'ftHalf_', 'crFull_', 'crHalf_', 'advFull_', 'advHalf_', 'honFull_', 'honHalf_', 'apFull_', 'apHalf_'];
+			classText.forEach(function(value, index){
+				$("#"+value+indexValue).val(0);
+			});
+		}else{
+			const base = (courseFee - annualDisc) / minCredit;
+			const adv = base + 25;
+			const ap = base + 50;
+			$("#ftFull_" + indexValue).val(base.toFixed(2));
+			$("#ftHalf_" + indexValue).val((base / 2).toFixed(2));
+			$("#crFull_" + indexValue).val(base.toFixed(2));
+			$("#crHalf_" + indexValue).val((base / 2).toFixed(2));
+			$("#advFull_" + indexValue).val(adv.toFixed(2));
+			$("#advHalf_" + indexValue).val((adv / 2).toFixed(2));
+			$("#honFull_" + indexValue).val(adv.toFixed(2));
+			$("#honHalf_" + indexValue).val((adv / 2).toFixed(2));
+			$("#apFull_" + indexValue).val(ap.toFixed(2));
+			$("#apHalf_" + indexValue).val((ap / 2).toFixed(2));
+		}
 	}
 }
 function updatedFieldHeighLight(update, indexValue) {
@@ -866,10 +972,10 @@ function updatedFieldHeighLight(update, indexValue) {
 }
 
 function updateFieldsBasedOnPartnerType() {
-    const partnerType = $('#originalPartnerType').val();
+	const partnerType = $('#originalPartnerType').val();
     if (partnerType === 'GP' || partnerType === 'EPER') {
       $('#whiteLabel').val('NWL').prop('disabled', true);
-      $('#commissionPayout').val('SWP').prop('disabled', true);
+      $('#commissionPayout').val('SWP').prop('disabled', false);
       $('#enrollingStudent').val('FIS').prop('disabled', true);
     } else if (partnerType === 'WLP') {
       $('#whiteLabel').val('WLWC').prop('disabled', true);
@@ -883,6 +989,7 @@ function updateFieldsBasedOnPartnerType() {
 	// updateTabsVisibility();
 }
 
+
 function updateTabsVisibility() {
     const partnerType = $('#originalPartnerType').val();
     const commissionValue = $('#commissionPayout').val();
@@ -891,21 +998,24 @@ function updateTabsVisibility() {
 	  $("#createPartnerTab").text("Update Partner");
 	  $("#createUserB2B").text("Next");
 	  $('#officeContactDetailsTab').tab('show');
-	  getOfficeContentsDetails('officeContactDetailsForm')
+	  getOfficeContentsDetails('officeContactDetailsForm');
+	  $("#commissionPayout").attr('disabled', true);
 	//   if(commissionValue === 'PWP'){
 	// 	$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
 	//   }
     }else if(partnerType === 'GP' || partnerType === "EPER") {
       $('#setCommissionRateTab').show();
+	  $('#feeStructureTab, #paymentOptionsTab').show();
+	  $('#setCommissionRateTab').tab('show');
 	  $("#createPartnerTab").text("Update Partner");
 	  $("#createUserB2B").text("Next");
-	  $('#setCommissionRateTab').tab('show');
-	  getCommissionRate("filterCommissionRate")
-	  if(commissionValue === 'PWP'){
-		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
-	  }else{
-		$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:flex !important");
-	  }
+	  $("#commissionPayout").attr('disabled', false);
+	  getAllCommissionRate("saveCommissionRateForm")
+		if(commissionValue === 'PWP'){
+			$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:none !important");
+		}else{
+			$('div:contains("Payment gateway")').closest('div.d-flex').attr("style","display:flex !important");
+		}
     }else{
 		$('#enrollRegTab').show();
 		$('#feeStructureTab').show();
@@ -917,8 +1027,14 @@ function updateTabsVisibility() {
 var activeLearningProgramStatusMap = {};
 async function initEnrollReg() {
     return new Promise((resolve, reject) => {
+		let schoolId = 0;
+		if($("#originalPartnerType").val() == 'WLP'){
+			schoolId = $("#pSchoolId").val();
+		}else{
+			schoolId = SCHOOL_ID;
+		}
         $.ajax({
-            url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/get-learning-programs-status?schoolId=${$("#pSchoolId").val()}`,
+            url: `${BASE_URL + CONTEXT_PATH + SCHOOL_UUID}/dashboard/get-learning-programs-status?schoolId=${schoolId}`,
             method: 'GET',
             success: function (response) {
                 try {
@@ -1008,12 +1124,30 @@ function updateLearningProgramsPartner() {
 		showMessageTheme2(2, 'No changes found.');
 		return;
 	}
+	let entityId = '';
+	let entityType = '';
+	let parentEntityId = '';
+	let parentEntityType = '';
+
+	if($("#originalPartnerType").val() == 'WLP'){
+		entityId = $("#pSchoolId").val();
+		entityType = "SCHOOL";
+	}else{
+		entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+		entityType = "INDIVIDUAL";
+	}
+	parentEntityType = "SCHOOL";
+	parentEntityId = SCHOOL_ID;
 	const payload = {
-	  schoolId: $("#pSchoolId").val(),
-	  parentSchoolId: SCHOOL_ID,
-	  actionType: 'u',
-	  loginUser:USER_ID,
-	  updateLearningProgramMap: updateLearningProgramMap
+		schoolId: $("#pSchoolId").val(),
+		parentSchoolId: SCHOOL_ID,
+		actionType: 'u',
+		loginUser:USER_ID,
+		updateLearningProgramMap: updateLearningProgramMap,
+		entityId,
+		entityType,
+		parentEntityId,
+		parentEntityType,
 	};
   
 	$.ajax({
@@ -1036,9 +1170,28 @@ function updateLearningProgramsPartner() {
 
 function saveLearningPrograms() {
 	return new Promise((resolve, reject) => {
+		let entityId = '';
+		let entityType = '';
+		let parentEntityId = '';
+		let parentEntityType = '';
+
+		if($("#originalPartnerType").val() == 'WLP'){
+			entityId = $("#pSchoolId").val();
+			entityType = "SCHOOL";
+		}else{
+			entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+			entityType = "INDIVIDUAL";
+		}
+		parentEntityType = "SCHOOL";
+		parentEntityId = SCHOOL_ID;
 		const payload = {
 			schoolId: $("#pSchoolId").val(),
 			parentSchoolId: SCHOOL_ID,
+			entityId,
+			entityType,
+			parentEntityId,
+			parentEntityType,
+			loginUser:USER_ID,
 		};
 
 		$.ajax({
@@ -1180,7 +1333,16 @@ function getDifferences(obj1, obj2) {
 }
 
 function getLogData(indexValue){
+	if($("#originalPartnerType").val() == "WLP"){
+		entityId = $("#pSchoolId").val();
+		entityType = "SCHOOL";
+	}else{
+		entityId = $("#partnerUserB2BSaveForm #rawLeadId").val();
+		entityType = "INDIVIDUAL";
+	}
 	let requestData = {
+		logOfId : entityId,
+		logOf : entityType,
 		standardFeeId : $("#id_"+indexValue).val(),
 		schoolId : $("#pSchoolId").val(),
 		userId : USER_ID
@@ -1203,8 +1365,12 @@ function getLogData(indexValue){
 					$("#feeStructureLogsModal").remove();
 				}
 				$("body").append(feeStructureLogsModal());
-				showLogCards(data.logList);
-				$("#feeStructureLogsModal").modal("show");
+				if(data.logList == null || data.logList == undefined || data.logList == ""){
+					showMessageTheme2(0, data['message'], '', false);
+				}else{
+					showLogCards(data.logList);
+					$("#feeStructureLogsModal").modal("show");
+				}
 			}
 		}
 	});
@@ -1383,7 +1549,7 @@ function updateProgress() {
 					PROGRESS_INTERVAL = null;
 					$("#syncCoursesAndSubjectsBtn").hide();
 					setTimeout(function(){
-						$("#feeStructureTab").tab("show");
+						$("#setCommissionRateTab").tab("show");
 						getStandardFee('fromTab');
 					},1000);
 					 if (Object.keys(activeLearningProgramStatusMap).length === 0) {
@@ -1400,4 +1566,35 @@ function updateProgress() {
 		}
 	});
 }
+
+// function getGradeBehalfLearningProgramForPartner(formId,learningProgram){
+// 	var html=`<option value="A" >ALL Grade</option>`;
+// 	html+= getStandardContent(SCHOOL_ID,true);
+// 	$("#"+formId+" #standardId").html(html);
+// }
+
+function getGradeBehalfLearningProgramForPartner(formId, learningProgram) {
+
+    var html=`<option value="A" >ALL Grade</option>`;
+    var gradesHtml = getStandardContent(SCHOOL_ID, true);
+    var grades = $(gradesHtml);
+
+    if (learningProgram === "DUAL_DIPLOMA") {
+	    var grade9to12Ids = ["4", "5", "6", "7"];
+		grades = grades.filter(function () {
+			return grade9to12Ids.includes($(this).val());
+		});
+	} else if (learningProgram === "ONE_TO_ONE_FLEX") {
+		var flexyGradeIds = ["19", "9", "10", "20", "21"];
+		grades = grades.filter(function () {
+            return flexyGradeIds.includes($(this).val());
+        });
+	}
+
+    html += grades.map(function () {
+        return this.outerHTML;
+    }).get().join("");
+	$("#" + formId + " #standardId").html(html).trigger("change.select2");
+}
+
 

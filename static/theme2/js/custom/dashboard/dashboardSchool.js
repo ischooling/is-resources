@@ -1152,6 +1152,10 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else if (pageNo == "user-screening-profiles") {
     getContent(moduleId, pageNo, replaceDiv, extraParam);
+  } else if (pageNo == "partner-fee-structure") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
+  } else if (pageNo == "add-sub-partner") {
+    getContent(moduleId, pageNo, replaceDiv, extraParam);
   } else {
     customLoader(false);
   }

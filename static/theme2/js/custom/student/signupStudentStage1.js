@@ -518,6 +518,7 @@ function setActiveStep(step){
 		$(".finish-btn").hide(); 
 	}
 }
+
 async function moveStep(moveType){
 	var courseProviderId=$('#courseProviderId').val();
 	var sectionLength = $(".step").length;

@@ -32929,6 +32929,8 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 
 /* B2B Lead CSS Start Here*/
 	.border-width-1{border-width:1px !important;}
+	.border-width-2{border-width:2px !important;}
+	.border-width-3{border-width:3px !important;}
 	.border-color-gray td{border-color:#eee !important}
 	.last-tr-fist-and-last-td-rounded tr:last-child td:first-child{border-bottom-left-radius:10px;}
 	.last-tr-fist-and-last-td-rounded tr:last-child td:last-child{border-bottom-right-radius:10px;}

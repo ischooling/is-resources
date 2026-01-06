@@ -361,7 +361,6 @@ async function verifyOTP(b2bLeadId, partnerEmail, contractId){
 
 
 
-
 async function verifyOTPAndGetAgreementDetails(b2bLeadId, contractId){
     var payload = {};
     payload['b2bleadId'] = b2bLeadId;

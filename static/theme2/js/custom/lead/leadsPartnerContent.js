@@ -2,8 +2,9 @@ var schoolContactNumber;
 var schoolSupportNumber;
 var itiSchoolContactNumber;
 var itiSchoolSupportNumber;
-function renderPartnerCotent(partnerTypeId){
-	$("#LeadPartnerUserFormB2BPopup").html(createPartnerAndSetCommissionModal(partnerTypeId));
+
+function renderPartnerCotent(partnerTypeId, partnerDefaultSettings, partnerType){
+	$("#LeadPartnerUserFormB2BPopup").html(createPartnerAndSetCommissionModal(partnerTypeId, partnerType));
 	$('#saveCommissionRateForm #learningProgram').val('ONE_TO_ONE');
 	$('#filterCommissionRate #learningProgramFilter').val('ONE_TO_ONE');
 	getAllCountryList('officeContactDetailsForm','officeCountryId');
@@ -12,6 +13,12 @@ function renderPartnerCotent(partnerTypeId){
 	$("#learningProgram").select2({
 		theme:"bootstrap4",
 		dropdownParent: "#leadPartnerUserB2B"
+	}).on("change",function(){
+		if(partnerType != "WLP"){
+			getGradeBehalfLearningProgramForPartner('saveCommissionRateForm',$(this).val())
+		}else{
+			$("#saveCommissionRateForm #standardId").html(`<option value="A" >ALL Grade</option>`)
+		}
 	});
 	// getGradesByLearningProgram('saveCommissionRateForm','learningProgram','standardId','leadPartnerUserB2B');
 	$("#standardId").select2({
@@ -45,7 +52,7 @@ function renderPartnerCotent(partnerTypeId){
 		dropdownParent: "#leadPartnerUserB2B"
 	});
 	callPCountries('partnerUserB2BSaveForm', 0, 'countryId');
-	getPartnerTypeList('partnerUserB2BSaveForm',0,'partnerType','');
+	getPartnerTypeList('partnerUserB2BSaveForm',0,'partnerType','', partnerTypeId, partnerDefaultSettings);
 	$("#createUserB2B").on('click', function(){ 
 		savePatnerWithReferralCode('partnerUserB2BSaveForm','leadPartnerUserB2B');
 	});
@@ -59,7 +66,13 @@ function renderPartnerCotent(partnerTypeId){
 		$("#standardId").val("A").trigger("change");
 		$("#standardIdFilter").val("A").trigger("change");
 		$('#setDiscount, #filterBy, #createPartner, #feeStructure, #officeContactDetails, #enrollReg, #paymentOptions, #theme').removeClass('active');
-		getCommissionRate("filterCommissionRate")
+		getAllCommissionRate("saveCommissionRateForm")
+		if($("#originalPartnerType").val() == 'WLP'){
+			$("#commissionPayout").val('PWP');
+			$("#commissionPayout").attr('disabled', true);
+		}else{
+			$("#commissionPayout").attr('disabled', false);
+		}
 		// let learningProgram = getLearningProgramAndCourseProviderMappingBySchoolId($("#pSchoolId").val(), "All Program", "A");
 		// $("#learningProgram").html(learningProgram);
 		// $("#learningProgramFilter").html(learningProgram);
@@ -131,7 +144,7 @@ function renderPartnerCotent(partnerTypeId){
 	});
 }
 
-function createPartnerAndSetCommissionModal(partnerTypeId){
+function createPartnerAndSetCommissionModal(partnerTypeId, partnerType){
 	var headTitle="Create Partner";
 	var buttonTitle="Create";
 	if(partnerTypeId!=null && partnerTypeId>0){
@@ -159,8 +172,8 @@ function createPartnerAndSetCommissionModal(partnerTypeId){
 							+'<li class="nav-item"><a data-toggle="tab" href="#createPartner" id="createPartnerTab" class="nav-link active">'+headTitle+'</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#officeContactDetails" onclick="getOfficeContentsDetails(\'officeContactDetailsForm \')" id="officeContactDetailsTab" class="nav-link">School Contact Details</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#enrollReg" id="enrollRegTab" onclick="initEnrollReg()" class="nav-link">Enrollment / Registration</a></li>'
-							+'<li class="nav-item"><a data-toggle="tab" href="#feeStructure" onclick="getStandardFee(\'fromTab\');" id="feeStructureTab" class="nav-link">School Fee Structure</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#setCommissionRate" id="setCommissionRateTab" class="nav-link">Set Commission Rate</a></li>'
+							+'<li class="nav-item"><a data-toggle="tab" href="#feeStructure" onclick="getStandardFee(\'fromTab\');" id="feeStructureTab" class="nav-link">Add Your Fee Structure</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#setDiscount" id="setDiscountTab" class="nav-link" style="display:none">Set Discount</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#paymentOptions" id="paymentOptionsTab" class="nav-link" onclick="getEnrollmentPartnerPaymentDetails();">Payment Options</a></li>'
 							+'<li class="nav-item"><a data-toggle="tab" href="#theme" id="themeTab" class="nav-link" onclick="getPartnerSchoolImages(\'partnerUserB2BSaveForm\',\'rawLeadId\')">Theme</a></li>'
@@ -172,14 +185,25 @@ function createPartnerAndSetCommissionModal(partnerTypeId){
 					+'<div class="modal-body p-0 overflow-auto">'
 						+'<div class="tab-content">'
 							+getCreatePartnerContent(buttonTitle)
-							+getSetCommissionRateContent()
+							+getSetCommissionRateContent(partnerType)
 							+getSetDiscountContent()
-							+getFeeStructureContent()
+							+'<div class="tab-pane p-4" id="feeStructure" role="tabpanel">'
+								+'<div class="d-flex align-items-center" style="gap: 10px;">'
+									+'<select class="p-2 rounded form-control mb-4" style="width:20%" id="feeStructureLearningProgram" onchange="selectCourseProvider();"></select>'
+									+'<select class="p-2 rounded form-control mb-4" style="width:20%" id="feeStructurecourseProvider"></select>'
+									+'<button class="btn btn-lg btn-primary d-flex ml-auto" style="font-size:16px;" onclick="getStandardFee(\'fromButton\');">Get data</button>'
+								+'</div>'
+								+'<div class="full" id="feeStructureWrapper">'
+									+getFeeStructureContent()
+								+'</div>'
+							+'</div>'
 							+getOfficeContactDetailsContent()
 							+'<div id="enrollReg" class="tab-pane p-4" role="tabpanel">'
 								// +enrollRegContent()
 							+'</div>'
-							+paymentOptionsContent()
+							+'<div class="tab-pane p-4" id="paymentOptions" role="tabpanel">'
+								+paymentOptionsContent('')
+							+'</div>'
 							+'<div class="tab-pane p-4" id="theme" role="tabpanel">'
 								+getSchoolSetupContent(true, true, true);
 							+'</div>'
@@ -211,8 +235,10 @@ function commissionRateLogsContentModal(partnerTypeId){
 									+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important">S.No.</th>'
 									+'<th class="text-white bold border-bottom-0">Grade</th>'
 									+'<th class="text-white bold border-bottom-0 text-center">Learning Program</th>'
+									+'<th class="text-white bold border-bottom-0 text-center">Commission Payout</th>'
 									+'<th class="text-white bold border-bottom-0 text-center" style="width: 270px;">Commission - Lead Provided By Partner</th>'
 									+'<th class="text-white bold border-bottom-0 text-center" style="width: 270px;">Commission - Lead Provided By Is</th>'
+									+'<th class="text-white bold border-bottom-0 text-center">Enrollment Min/Max Range</th>'
 									+'<th class="text-white bold border-bottom-0 text-center">Applicable From</th>'
 									+'<th class="text-white bold border-bottom-0 text-center">Applicable Till</th>'
 									+'<th class="text-white bold border-bottom-0 text-center">Update By</th>'
@@ -292,15 +318,15 @@ function getCreatePartnerContent(buttonTitle){
 								+'<label class="m-0">TimeZone<sub class="text-danger">*</sub></label>'
 								+'<select name="originalTimezone" id="originalTimezone" class="form-control">'
 								+'</select>'
-							+'</div>'
-							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Commision Payout</label>'
-								+'<select name="commissionPayout" id="commissionPayout" class="form-control">'
-									+'<option value="SWP">'+SCHOOL_NAME+' will be paying commission to Partner</option>'
-									+'<option value="PWP">Partner will be paying '+SCHOOL_NAME+'</option>'
-								+'</select>'
-							+'</div>'
-							+'<div class="col-12 mb-2">'
+							+'</div>';
+							// +'<div class="col-12 mb-2">'
+							// 	+'<label class="m-0">Commision Payout</label>'
+							// 	+'<select name="commissionPayout" id="commissionPayout" class="form-control">'
+							// 		+'<option value="SWP">'+SCHOOL_NAME+' will be paying commission to Partner</option>'
+							// 		+'<option value="PWP">Partner will be paying '+SCHOOL_NAME+'</option>'
+							// 	+'</select>'
+							// +'</div>'
+							html+='<div class="col-12 mb-2">'
 								+'<label class="m-0">White Label</label>'
 								+'<select name="whiteLabel" id="whiteLabel" class="form-control">'
 									+'<option value="NWL">No white - labeling '+SCHOOL_NAME+' Colors and Logo</option>'
@@ -332,7 +358,7 @@ function getCreatePartnerContent(buttonTitle){
 	return html;
 }
 
-function getSetCommissionRateContent(){
+function getSetCommissionRateContent(partnerType){
 	var html = 
 		'<div class="tab-pane" id="setCommissionRate" role="tabpanel">'
 			+'<div class="card-header card-header-tabe">'
@@ -342,14 +368,15 @@ function getSetCommissionRateContent(){
 				+'</ul>'
 			+'</div>'
 			+'<div class="tab-content p-4">'
-				+getAddFormContent()
+				+getAddFormContent(partnerType)
 				//+getFilterByContent()
 			+'</div>'
 		+'</div>';
 	return html;
 }
 
-function getAddFormContent(){
+function getAddFormContent(partnerType){
+	
 	var html = 
 		'<div class="tab-pane active" id="addForm" role="tabpanel">'
 			+'<div class="col-xl-5 mt-2 mb-2 mx-auto">'
@@ -389,15 +416,15 @@ function getAddFormContent(){
 								+'<select name="learningProgram" id="learningProgram" class="form-control"' 
 								// onchange="getGradesByLearningProgram(\'saveCommissionRateForm\',\'learningProgram\',\'standardId\',\'leadPartnerUserB2B\')"
 								+'>'
-									+'<option value="A" selected>All Program</option>'
-									// +getLearningProgramContent(SCHOOL_ID)
-								+'</select>'
+									+'<option value="A" selected>All Program</option>';
+									if(partnerType != "WLP"){
+										html+=getLearningProgramContent(SCHOOL_ID)
+									}
+								html+='</select>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
 								+'<label class="m-0">Select Grade</label>'
 								+'<select name="standardId" id="standardId" class="form-control" multiple="multiple">'
-									+'<option value="A" >ALL Grade</option>'
-									// +getStandardContent(SCHOOL_ID,true)
 								+'</select>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
@@ -428,6 +455,17 @@ function getAddFormContent(){
 								// 	+'<option value="50-0" >50+</option>'
 									
 								// +'</select>'
+							+'</div>'
+							+'<div class="col-12 mb-2">';
+								if(partnerType == "WLP"){
+									html +='<label class="m-0">Commission Payout</label>';
+								}else{
+									html +='<label class="m-0">Student Fee Payment</label>';
+								}
+								html +='<select name="commissionPayout" id="commissionPayout" class="form-control">'
+									+'<option value="SWP">'+SCHOOL_NAME+' will be paying commission to Partner</option>'
+									+'<option value="PWP">Partner will be paying '+SCHOOL_NAME+'</option>'
+								+'</select>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
 								+'<label class="m-0">Applicable From</label>'
@@ -484,8 +522,13 @@ function getAddFormContent(){
 								+'<tr>'
 									+'<th class="text-white bold rounded-top-left-10 border-bottom-0 border-primary" style="border-top-color:transparent;border-right-color:#fff !important">S.No.</th>'
 									+'<th class="text-white bold border-bottom-0">Grade</th>'
-									+'<th class="text-white bold border-bottom-0 text-center">Learning Program</th>'
-									+'<th class="text-white bold border-bottom-0 text-center" style="width: 270px;">Commission - Lead Provided By Partner</th>'
+									+'<th class="text-white bold border-bottom-0 text-center">Learning Program</th>';
+									if($("#originalPartnerType").val() == "WLP"){
+										html +='<th class="text-white bold border-bottom-0 text-center" style="width:160px;">Commission Payout</th>';
+									}else{
+										html +='<th class="text-white bold border-bottom-0 text-center" style="width:160px;">Student Fee Payment</th>';
+									}
+									html +='<th class="text-white bold border-bottom-0 text-center" style="width: 270px;">Commission - Lead Provided By Partner</th>'
 									+'<th class="text-white bold border-bottom-0 text-center" style="width: 270px;">Commission - Lead Provided By Is</th>'
 									+'<th class="text-white bold border-bottom-0 text-center" style="width:160px;">Enrollment Min/Max Range</th>'
 									+'<th class="text-white bold border-bottom-0 text-center">Applicable From</th>'
@@ -658,6 +701,23 @@ function getCommissionRate(formId, isEdit){
 		$(".bulk-update-and-cancel-btn").hide();
 	}
 }
+
+function getAllCommissionRate(formId, isEdit){
+	var data=getAllPartnerCommissionRate(formId, isEdit);
+	var html=getFilteredCommissionRateContent(formId, data);
+	$('#commissionRateFilteredData > tbody').html(html);
+	$(".datepicker").datepicker({
+		autoclose: true,
+		format: 'M d, yyyy',
+	});
+	$(".bulkEditBtn").show("show");
+	// if($("#learningProgramFilter").val() != null && $("#learningProgramFilter").val().length != null && $("#learningProgramFilter").val().length != undefined && $("#learningProgramFilter").val().length != 0 && $("#standardIdFilter").val() != null && $("#standardIdFilter").val().length != null && $("#standardIdFilter").val().length != undefined && $("#standardIdFilter").val().length != 0){
+	// 	$(".commissionTable thead > tr th:last-child, .commissionTable tbody > tr td:last-child").show();
+	// 	$(".commissionTable thead > tr th:nth-last-child(2)").removeClass("rounded-top-right-10");
+	// 	$(".bulk-update-and-cancel-btn").hide();
+	// }
+}
+
 function getFilteredCommissionRateContent(formId, data){
 	var html = '';
 	$.each(data.commissionRates, function(k,commissionRate){
@@ -670,6 +730,18 @@ function getFilteredCommissionRateContent(formId, data){
 			+'<td class="border-width-1">'+(k+1)+'</td>'
 			+'<td class="border-width-1">'+commissionRate.standardName+'</td>'
 			+'<td class="border-width-1">'+commissionRate.learningProgramValue+'</td>'
+			+'<td class="border-width-1">'
+				+'<div class="edit-value">'+commissionRate.commisionPayType+'</div>'
+					+'<div class="edit-value-element" style="display: none;">'
+						+'<div class="full d-flex gap-5">'
+							+'<select name="commissionPayoutEdit_'+commissionRate.id+'" id="commissionPayoutEdit_'+commissionRate.id+'" class="form-control bySchoolType">'
+								+'<option value="SWP">International Schooling will be paying commission to Partner</option>'
+								+'<option value="PWP">Partner will be paying International Schooling</option>'
+							+'</select>'
+						+'</div>'
+					+'</div>'
+				+'</div>'
+			+'</td>'
 			+'<td class="p-0 border-width-1">'
 				+'<table class="table m-0" style="table-layout: fixed; max-width: 270px;">'
 					+'<tbody>'
@@ -772,12 +844,12 @@ function getFilteredCommissionRateContent(formId, data){
 }
 
 // commissionRateLogsContentModal()
-function getCommissionRateLogsPartner(id){
+async function getCommissionRateLogsPartner(id){
 	if($("#commissionRateLogs").length>0){
 		$("#commissionRateLogs").remove();
 	}
 	$("body").append(commissionRateLogsContentModal())
-	var data=commissionRateLogsPartner(id);
+	var data= await commissionRateLogsPartner(id);
 	var html=getCommissionRateLogsContentPartner(id, data);
 	$('#commissionRateLogsTable > tbody').html(html);
 	// $(".datepicker").datepicker({
@@ -794,6 +866,9 @@ function getCommissionRateLogsContentPartner(id, data){
 			+'<td class="border-width-1">'+(k+1)+'</td>'
 			+'<td class="border-width-1">'+(commissionRate.standardName == "" ? "All" : commissionRate.standardName)+'</td>'
 			+'<td class="border-width-1">'+(commissionRate.learningProgramValue == "" ? "All" : commissionRate.learningProgramValue)+'</td>'
+			+'<td class="text-center border-width-1">'
+				+commissionRate.commissionPayOut
+			+'</td>'
 			+'<td class="p-0 border-width-1">'
 				+'<table class="table m-0" style="table-layout: fixed; max-width: 270px;">'
 					+'<tbody>'
@@ -822,6 +897,9 @@ function getCommissionRateLogsContentPartner(id, data){
 					+'</tbody>'
 				+'</table>'
 			+'</td>'
+			+'<td class="text-center border-width-1">'
+				+commissionRate.minRange+'-'+commissionRate.maxRange
+			+'</td>'
 			+'<td class="border-width-1">'
 				+commissionRate.startDate
 			+'</td>'
@@ -839,25 +917,21 @@ function getCommissionRateLogsContentPartner(id, data){
 	return html;
 }
 
-function getFeeStructureContent(){
-	var gradesArr = ["KG","1","2","3","4","5","6","7","8","9","10","11","12"]
+function getFeeStructureContent(gradesArr){
+	if(!gradesArr){
+		 gradesArr = ["KG","1","2","3","4","5","6","7","8","9","10","11","12","Flexy - Advanced Placement","Flexy - Credit Recovery", "Flexy - Elementary School","Flexy - High School","Flexy - Middle School"]
+	}
 	var html =
-		`<div class="tab-pane p-4" id="feeStructure" role="tabpanel">
-			<div class="d-flex align-items-center" style="gap: 10px;">
-				<select class="p-2 rounded form-control mb-4" style="width:20%" id="feeStructureLearningProgram" onchange="selectCourseProvider();"></select>
-				<select class="p-2 rounded form-control mb-4" style="width:20%" id="feeStructurecourseProvider"></select>
-				<button class="btn btn-lg btn-primary d-flex ml-auto" style="font-size:16px;" onclick="getStandardFee(\'fromButton\');">Get data</button>
-			</div>
-			<div class="overflow-auto" style="height:70vh;">
-				<table id="feeStructureTable" class="table table-bordered">`
-					+feeStructureTableHead()
-					+feeStructureTableBody(gradesArr)
-				html+=`</table>
-			</div>
-			<div class="full text-right">
-				<button class="btn btn-lg btn-primary d-flex ml-auto mt-3" style="font-size:16px;" onclick="saveStandardFee();">Save</button>
-			</div>
-		</div>`
+		`<div class="overflow-auto" style="max-height:70vh;">
+			<table id="feeStructureTable" class="table table-bordered">`
+				+feeStructureTableHead()
+				+feeStructureTableBody(gradesArr)
+			html+=`</table>
+		</div>
+		<div class="full text-right">
+			<button class="btn btn-lg btn-primary d-flex ml-auto mt-3" style="font-size:16px;" onclick="saveStandardFee();">Save</button>
+		</div>
+	`
 	return html;
 }
 
@@ -889,105 +963,113 @@ function feeStructureTableHead(){
 }
 function feeStructureTableBody(gradesArr){
 	var html=
-		`<tbody>
-			<tr class="bg-light text-dark">
-				<td class="p-0" colspan="7"></td>
-				<td class="p-0">
-					<div class="w-50 text-center float-left border-right border-white">1</div>
-					<div class="w-50 text-center float-left">1/2</div>
-				</td>
-				<td class="p-0">
-					<div class="w-50 text-center float-left border-right border-white">1</div>
-					<div class="w-50 text-center float-left">1/2</div>
-				</td>
-				<td class="p-0">
-					<div class="w-50 text-center float-left border-right border-white">1</div>
-					<div class="w-50 text-center float-left">1/2</div>
-				</td>
-				<td class="p-0">
-					<div class="w-50 text-center float-left border-right border-white">1</div>
-					<div class="w-50 text-center float-left">1/2</div>
-				</td>
-				<td class="p-0">
-					<div class="w-50 text-center float-left border-right border-white">1</div>
-					<div class="w-50 text-center float-left">1/2</div>
-				</td>
-				<td class="p-0"></td>
-			</tr>`
-			$.each(gradesArr, function(index, grades){
-				html+=
-				`<tr id="tr_${grades}">
-					<td>${grades}</td>
-					<td>
-						<input type="hidden" id = "id_${index}" value="" />
-						<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('regFee_${index}')"  id = "regFee_${index}" />
+		`<tbody>`;
+			if(gradesArr.length>0){
+			html+=
+				`<tr class="bg-light text-dark">
+					<td class="p-0" colspan="7"></td>
+					<td class="p-0">
+						<div class="w-50 text-center float-left border-right border-white">1</div>
+						<div class="w-50 text-center float-left">1/2</div>
 					</td>
-					<td>
-						<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('bae_${index}')" id = "bae_${index}" />
+					<td class="p-0">
+						<div class="w-50 text-center float-left border-right border-white">1</div>
+						<div class="w-50 text-center float-left">1/2</div>
 					</td>
-					<td>
-						<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('progDisc_${index}')" id="progDisc_${index}" />
+					<td class="p-0">
+						<div class="w-50 text-center float-left border-right border-white">1</div>
+						<div class="w-50 text-center float-left">1/2</div>
 					</td>
-					<td>
-						<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onkeyup="calculateFee('${index}');" onblur="tempFunction('courseFee_${index}')" id="courseFee_${index}"/>
+					<td class="p-0">
+						<div class="w-50 text-center float-left border-right border-white">1</div>
+						<div class="w-50 text-center float-left">1/2</div>
 					</td>
-					<td>
-						<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onkeyup="calculateFee('${index}');" onblur="tempFunction('annualDiscount_${index}')" id="annualDiscount_${index}" /> 
+					<td class="p-0">
+						<div class="w-50 text-center float-left border-right border-white">1</div>
+						<div class="w-50 text-center float-left">1/2</div>
 					</td>
-					<td>
-						<select type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('minCredit_${index}')" onchange="calculateFee('${index}')" id="minCredit_${index}">
-							<option value="" selected>Credit</option>
-							<option value="1">1</option>
-							<option value="2">2</option>
-							<option value="3">3</option>
-							<option value="4">4</option>
-							<option value="5">5</option>
-							<option value="6">6</option>
-							<option value="7">7</option>
-							<option value="10">10</option>
-							<option value="20">20</option>
-							<!-- change in DB also if changing in the options-->
-						</select>
-					</td>
-					<td>
-						<div class="d-flex" style="gap:6px;">
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('ftFull_${index}');" id="ftFull_${index}" />
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('ftHalf_${index}')" id="ftHalf_${index}" />
-						</div>
-					</td> 
-					<td>
-						<div class="d-flex" style="gap:6px;">
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('crFull_${index}')" id="crFull_${index}" />
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('crHalf_${index}')" id="crHalf_${index}" />
-						</div>
-					</td>
-					<td>
-						<div class="d-flex" style="gap:6px;">
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('advFull_${index}')" id="advFull_${index}" />
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('advHalf_${index}')" id="advHalf_${index}" />
-						</div>
-					</td>
-					<td>
-						<div class="d-flex" style="gap:6px;">
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('honFull_${index}')" id="honFull_${index}" />
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('honHalf_${index}')" id="honHalf_${index}" />
-						</div>
-					</td>
-					<td>
-						<div class="d-flex" style="gap:6px;">
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('apFull_${index}')" id="apFull_${index}" />
-							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('apHalf_${index}')" id="apHalf_${index}" />
-						</div>
-					</td>
-					<td>
-						<div class="d-flex" style="gap:6px;">
-							<button class="btn btn-sm btn-primary" onclick="disabledEnableRow('tr_${grades}','${index}')">Edit</button>
-							<button class="btn btn-sm btn-outline-primary" onclick="getLogData('${index}')">Logs</button>
-							${/*<button class="btn btn-sm btn-outline-primary" onclick="openFeeStructureLogsModal()">Logs</button>*/''}
-						</div>
-					</td>
+					<td class="p-0"></td>
 				</tr>`
-			})
+				$.each(gradesArr, function(index, grades){
+					html+=
+					`<tr id="tr_${grades.replaceAll(" ","")}">
+						<td>${grades}</td>
+						<td>
+							<input type="hidden" id = "id_${index}" value="" />
+							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('regFee_${index}')"  id = "regFee_${index}" />
+						</td>
+						<td>
+							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('bae_${index}')" id = "bae_${index}" />
+						</td>
+						<td>
+							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('progDisc_${index}')" id="progDisc_${index}" />
+						</td>
+						<td>
+							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onkeyup="calculateFee('${index}');" onblur="tempFunction('courseFee_${index}')" id="courseFee_${index}"/>
+						</td>
+						<td>
+							<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onkeyup="calculateFee('${index}');" onblur="tempFunction('annualDiscount_${index}')" id="annualDiscount_${index}" /> 
+						</td>
+						<td>
+							<select type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('minCredit_${index}')" onchange="calculateFee('${index}')" id="minCredit_${index}">
+								<option value="" selected>Credit</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+								<option value="6">6</option>
+								<option value="7">7</option>
+								<option value="10">10</option>
+								<option value="20">20</option>
+								<!-- change in DB also if changing in the options-->
+							</select>
+						</td>
+						<td>
+							<div class="d-flex" style="gap:6px;">
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('ftFull_${index}');" id="ftFull_${index}" />
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('ftHalf_${index}')" id="ftHalf_${index}" />
+							</div>
+						</td> 
+						<td>
+							<div class="d-flex" style="gap:6px;">
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('crFull_${index}')" id="crFull_${index}" />
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('crHalf_${index}')" id="crHalf_${index}" />
+							</div>
+						</td>
+						<td>
+							<div class="d-flex" style="gap:6px;">
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('advFull_${index}')" id="advFull_${index}" />
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('advHalf_${index}')" id="advHalf_${index}" />
+							</div>
+						</td>
+						<td>
+							<div class="d-flex" style="gap:6px;">
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('honFull_${index}')" id="honFull_${index}" />
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('honHalf_${index}')" id="honHalf_${index}" />
+							</div>
+						</td>
+						<td>
+							<div class="d-flex" style="gap:6px;">
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('apFull_${index}')" id="apFull_${index}" />
+								<input type="text" class="p-0 text-center form-control" onclick="clickedOnThis(this);" oninput="allowOnlyNumbers(this)" onblur="tempFunction('apHalf_${index}')" id="apHalf_${index}" />
+							</div>
+						</td>
+						<td>
+							<div class="d-flex" style="gap:6px;">
+								<button class="btn btn-sm btn-primary" onclick="disabledEnableRow('tr_${grades.replaceAll(" ","")}','${index}')">Edit</button>
+								<button class="btn btn-sm btn-outline-primary" onclick="getLogData('${index}')">Logs</button>
+								${/*<button class="btn btn-sm btn-outline-primary" onclick="openFeeStructureLogsModal()">Logs</button>*/''}
+							</div>
+						</td>
+					</tr>`
+				});
+			}else{
+				html+=
+				`<tr>
+					<td colspan="13" class="text-center font-weight-semi-bold">No record found</td>
+				</tr>`;
+			}
 		html+=`</tbody>`
 	return html;
 }
@@ -1145,7 +1227,10 @@ var originalLearningProgramMap = {};
 var updateLearningProgramMap = {};
 function enrollRegContent(data) {
 	var html = `<div class="col-xl-5 mx-auto"> <div class="p-2 border border-primary rounded-10 card">`;
-
+	isDisabled = ''; 
+	if($("#originalPartnerType").val() != 'WLP'){
+		isDisabled = 'disabled'
+	}
 	$.each(data, function (index, item) {
 		const label = item.learningProgramLabel;
 		const key = item.learningProgram;
@@ -1185,6 +1270,7 @@ function enrollRegContent(data) {
 							data-enroll="${enrollmentFor}" 
 							${isChecked}
 							onchange="trackProgramChange(this)"
+							${isDisabled}
 						>
 						<span class="switch-label" data-on="Yes" data-off="No"></span>
 						<span class="switch-handle"></span>
@@ -1196,80 +1282,85 @@ function enrollRegContent(data) {
 	html += `
 		<div class="d-flex justify-content-end align-items-center ml-auto">
 			<button id="syncCoursesAndSubjectsBtn" type="button" class="btn btn-success btn-shadow w-max pr-4 pl-4 my-3 mr-2" style="display: none;" onclick="syncCoursesAndSubjects();">Sync Courses & Subjects</button>
-			<button id="updateLearningProgramsPartnerBtn" type="button" class="btn btn-primary btn-shadow w-max pr-4 pl-4 my-3" onclick="updateLearningProgramsPartner()">Save</button>
+			<button id="updateLearningProgramsPartnerBtn" type="button" class="btn btn-primary btn-shadow w-max pr-4 pl-4 my-3" onclick="updateLearningProgramsPartner()" ${isDisabled}>Save</button>
 		</div>
 	</div></div>`;
 	return html;
 }
 
-function paymentOptionsContent() {
-	const items = [
-		{ label: 'bank transfer', title: 'WIRETRANSFER' },
-		{ label: 'cash', title: 'CASH' },
-		{ label: 'payment gateway', title: 'PAYMENTGATEWAY' }
-	];
-	
-	var html = `
-		<div class="tab-pane p-4" id="paymentOptions" role="tabpanel">
-			<div class="col-xl-5 mx-auto">
-				<div class="p-2 border border-primary rounded-10 card">`;
-					$.each(items, function (index, item) {
-						const isEven = index % 2 !== 0;
-						const bgClass = isEven ? 'bg-light-primary' : '';
+function paymentOptionsContent(paymentOptList) {
+		$.each(paymentOptList, function(index, item) {
+			if (item.getwayName) {
+				PAYMENTGETWAY.push(item.getwayName);
+			}
+			if (item.paymentGatway) {
+				$.each(item.paymentGatway, function(i, pg) {
+					if (pg.getwayName) {
+						PAYMENTGETWAY.push(pg.getwayName);
+					}
+				});
+			}
+		});
+		var items = [
+			{ label: 'bank transfer', title: 'WIRETRANSFER' },
+			{ label: 'cash', title: 'CASH' },
+			{ label: 'payment gateway', title: 'PAYMENTGATEWAY' },
+			{ label: 'generate fee receipt from system', title: 'GENERATE_FEE' },
+			{ label: 'show payment at enrollment', title: 'ENROLLMENT_PAYMENT' }
+		];
+	var html = 
+		`<div class="col-xl-5 mx-auto">
+			<div class="p-2 border border-primary rounded-10 card">`;
+				$.each(paymentOptList, function (index, item) {
+					const isEven = index % 2 !== 0;
+					const bgClass = isEven ? 'bg-light-primary' : '';
+					if (!Array.isArray(item.paymentGatway)) {
 						html += 
 						`<div class="d-flex justify-content-between align-items-center p-2 rounded-10 ${bgClass}">
-							<h6 class="mb-0 font-weight-bold">${item.label.charAt(0).toUpperCase() + item.label.slice(1)}</h6>
+							<h6 class="mb-0 font-weight-bold">${item.getwayLabel.charAt(0).toUpperCase() + item.getwayLabel.slice(1)}</h6>
 							<div class="d-lg-inline-block">
 								<label class="switch">
-									<input class="switch-input classPayment${index}" id="${item.title}" type="checkbox" onchange="checkboxChecker(this);">
+									<input class="switch-input classPayment${index}" id="${item.getwayName}" type="checkbox" onchange="checkboxChecker(this);">
 									<span class="switch-label" data-on="Yes" data-off="No"></span>
 									<span class="switch-handle"></span>
 								</label>
 							</div>
 						</div>`;
-						if (item.title == 'PAYMENTGATEWAY') {
-							html += `
-							<div id="paymentGatewaysDiv" class="pl-2 mt-1 mb-3" style="display:none;">
-								<div class="bg-light-primary py-2 px-3 rounded-10 d-flex flex-column" style="gap:10px;">
-									
-									<div class="d-flex justify-content-between align-items-center">
-										<h6 class="m-0">Stripe</h6>
+					}
+					else{
+						html += `
+						<div class="d-flex justify-content-between align-items-center p-2 rounded-10 ${bgClass}">
+							<h6 class="mb-0 font-weight-bold">Payment Gatway</h6>
+							<div class="d-lg-inline-block">
+								<label class="switch">
+									<input class="switch-input classPayment${index}" id="PAYMENTGATEWAY" type="checkbox" onchange="checkboxChecker(this);">
+									<span class="switch-label" data-on="Yes" data-off="No"></span>
+									<span class="switch-handle"></span>
+								</label>
+							</div>
+						</div>
+						<div id="paymentGatewaysDiv" class="pl-2 mt-1 mb-3" style="display:none;">
+							<div class="bg-light-primary py-2 px-3 rounded-10 d-flex flex-column" style="gap:10px;">`;
+								$.each(item.paymentGatway, function(i,v){
+									html+=
+									`<div class="d-flex justify-content-between align-items-center">
+										<h6 class="m-0">${v.getwayLabel}</h6>
 										<label class="switch m-0">
-											<input class="switch-input" id="stripePaymentMode" type="checkbox">
+											<input class="switch-input" id="${v.getwayName}" type="checkbox">
 											<span class="switch-label" data-on="Yes" data-off="No"></span>
 											<span class="switch-handle"></span>
 										</label>
-									</div>
-
-									<div class="d-flex justify-content-between align-items-center">
-										<h6 class="m-0">Airwallex</h6>
-										<label class="switch m-0">
-											<input class="switch-input" id="airwallexPaymentMode" type="checkbox">
-											<span class="switch-label" data-on="Yes" data-off="No"></span>
-											<span class="switch-handle"></span>
-										</label>
-									</div>
-
-									<div class="d-flex justify-content-between align-items-center">
-										<h6 class="m-0">Other</h6>
-										<label class="switch m-0">
-											<input class="switch-input" id="otherPaymentMode" type="checkbox">
-											<span class="switch-label" data-on="Yes" data-off="No"></span>
-											<span class="switch-handle"></span>
-										</label>
-									</div>
-
-								</div>
-								<p id="textPayment" class="my-1 text-primary ml-2" style="display:none;">
-									Please Contact IT for additional payment gateway integration. Cost will be applicable.
-								</p>
-							</div>`;
-						}
-					});
-
-					html += 
-					`<button type="button" class="btn btn-primary btn-shadow w-max ml-auto pr-4 pl-4 my-3" id="updatePaymentOptions" onclick="updateEnrollmentPartnerPaymentDetails()">Save</button>
-				</div>
+									</div>`;
+								});
+							html+=`</div>
+							<p id="textPayment" class="my-1 text-primary ml-2" style="display:none;">
+								Please Contact IT for additional payment gateway integration. Cost will be applicable.
+							</p>
+						</div>`;
+					}
+				});
+				html += 
+				`<button type="button" class="btn btn-primary btn-shadow w-max ml-auto pr-4 pl-4 my-3" id="updatePaymentOptions" onclick="updateEnrollmentPartnerPaymentDetails()">Save</button>
 			</div>
 		</div>`;
 	return html;

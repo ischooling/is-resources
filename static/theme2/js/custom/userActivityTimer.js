@@ -214,7 +214,7 @@ async function getActivityTotalTimeByDate(trackerDate) {
 }
 
 // function getActivityTotalTimeByFilterRequest(formId){
-//     debugger;
+
 //     var payload = {}
 //     var trackerDateTo=$('#'+formId+' #trackerDateTo').val();
 //     var trackerDateFrom=$('#'+formId+' #trackerDateFrom').val();
@@ -238,7 +238,7 @@ async function getActivityTotalTimeByDate(trackerDate) {
 // }
 
 // async function getActivityTotalTimeByFilter(formId) {
-//     debugger;
+
 //     var payload = getActivityTotalTimeByFilterRequest(formId);
 //     var responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'get-activity-track-time-by-filter', payload);
 //     if(responseData.status == 1){

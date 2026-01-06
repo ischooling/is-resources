@@ -1119,7 +1119,7 @@ function disabledBankDeatils(flag) {
 	$("#swiftCode").prop("disabled", flag);
 	$("#routeNo").prop("disabled", flag);
 }
-function callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailStatus) {
+function callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailStatus, callback) {
 	var data = {};
 	data['userId'] = userId;
 	data['userPaymentDetailsId'] = userPaymentDetailsId;
@@ -1145,6 +1145,7 @@ function callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailSt
 				}
 				showMessageTheme2(1, stringMessage[1]);
 				DEFAULT_SEARCH_STATE = true; callDashboardPageSchool('2b', 'studentTab', '', '&schoolId=' + SCHOOL_ID);
+				if(callback){callback()};  
 				return false;
 			}
 		}

@@ -177,7 +177,7 @@ function callStudentListByPartnerWLP(formId) {
 				});
 				$("#totalCommissionDate").text(data.currentDate);
 				if(data.studentList.length != 0){
-					$("#enrollmentPartnerPaginationContainer").html(renderPaginationCommon(currentPagePartnerEnrollmentList, data.totalPages, "partnerEnrollment"));
+					$("#enrollmentPartnerPaginationContainer").html(renderPaginationCommon(currentPagePartnerEnrollmentList, data.totalPages, "partnerEnrollmentList"));
 				}
 			}
 		},

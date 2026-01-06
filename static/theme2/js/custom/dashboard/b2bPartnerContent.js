@@ -19,9 +19,10 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 		// }
 			
 	});
+	
 	var data = getPartnerDashboardDetailsData(userId);
 	console.log(data);
-	$("#chartContentDiv").html(partnerDashboardLPContent(data));
+	$("#chartContentDiv").html(partnerDashboardLPContent(data, commissionRate.isSubPartner));
 	var revenue=0.0;
 	var revenue_d=0.0;
 	var revenue_id=0.0;
@@ -99,20 +100,20 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 }
 
 function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, role){
+	var data = getPartnerDashboardDetailsData(userId);
 	var html =
 		'<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">'
 			+dashboardHeaderContent()
 			+'<div class="app-main p-0">'
 				+'<div class="col p-0">'
 					+'<div class="app-main__inner p-0">'
-						+partnerDashboardContent(title, roleAndModule, schoolId, userId, role)
+						+partnerDashboardContent(title, roleAndModule, schoolId, userId, role, data.allProgram, data.allStandard)
 					+'</div>'
 				+'</div>'
 			+'</div>'
 		+'</div>'
 		+dashboardFooterContent()
 		$('body').html(html);
-		var data = getPartnerDashboardDetailsData(userId);
 		$("#chartContentDiv").html(partnerDashboardLPContent(data));
 		$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
 			getPartnerStudentGrade('',learningProgram.learningProgramCode+'_id_chart_'+k,userId,learningProgram.learningProgramCode,learningProgram.enrollmentFor);
@@ -127,7 +128,7 @@ function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, ro
 		$(".hideRate").addClass('d-none');
 }
 
-function partnerDashboardLPContent(data){
+function partnerDashboardLPContent(data, isSubPartner){
 	if(USER_ID == "19321" || USER_ID == "14388" || USER_ID == "18636"){
 		data = [{
 			"schoolLPDetails": {
@@ -277,7 +278,7 @@ function partnerDashboardLPContent(data){
 					var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
 					revenue=revenue-revenue_pending;
 					html+=
-					'<div class="col-xl-4 col-4 col-md-6 col-sm-12 col-12 mb-4">'
+					'<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mb-4">'
 						+'<div class="w-100 card h-100">'
 							+'<div class="card-body">'
 								+'<h5 class="card-title">'
@@ -290,7 +291,7 @@ function partnerDashboardLPContent(data){
 									+'</div>'
 								+'</h5>'
 								+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
-							+'</div>  '
+							+'</div>'
 						+'</div>' 
 					+'</div>';
 				});
@@ -300,19 +301,21 @@ function partnerDashboardLPContent(data){
 					var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
 					revenue=revenue-revenue_pending;
 					html+=
-					'<div class="col-xl-4 col-4 col-md-6 col-sm-12 col-12 mb-4">'
+					'<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mb-4">'
 						+'<div class="w-100 card h-100">'
 							+'<div class="card-body">'
 								+'<h5 class="card-title">'
 									+'<div class="w-100 d-flex flex-wrap justify-content-between">'
 										+'<span class="d-inline-block mb-1">'
 											+learningProgram.label
-										+'</span>'
-										+'<span class="pull-right text-primary mb-1">'+(schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue: $' : 'Commission: $')+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>'
-									+'</div>'
+										+'</span>';
+										if(isSubPartner == "N"){
+											html+='<span class="pull-right text-primary mb-1">'+(schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue: $' : 'Commission: $')+(revenue == 0 && SCHOOL_ID == 2 ? (308*k):revenue)+'</span>';
+										}
+									html+='</div>'
 								+'</h5>'
 								+'<div id="'+learningProgram.learningProgramCode+'_id_chart_'+k+'"></div>'
-							+'</div>  '
+							+'</div>'
 						+'</div>' 
 					+'</div>';
 				});
@@ -370,17 +373,34 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 				html+=
 				`</div>
 			</div>
-			<div class="row" id="commissionRow">`
-			html+=`</div>`
-			+getRevenueContent(data.originalPartnerType)
-			+getEnrollmentStatisticsContent()
+			<div class="row" id="commissionRow">
+				<div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12 mb-2" id="partnerChartDiv"></div>				
+				<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2" id="enrollmentLinkDiv"></div>`				
+			html+=`</div>`;
+			if(commissionRate.isSubPartner !="Y"){
+				html+=getRevenueContent(data.originalPartnerType);
+			}
+			html+=getEnrollmentStatisticsContent();
 		html+=`</div>`;
 		getPartnerCommissionRateSchool('','partnerCommitionRate',userId, function(commissionData) {
-			$("#commissionRow").html(getChartContent(commissionData.commissionRates) + getEnrollmentLinksContent(data));
-			var chartIndexVal1= $("#commissionRatesTab_0").attr("data-tab-value");
-			var valueMin1=$("#commissionRatesTab_0").attr("data-school-value");
-			var valueMax1=$("#commissionRatesTab_0").attr("data-partner-value");
-			getCommissionRatesChart('chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
+			if(commissionData.isSubPartner == "N"){
+				$("#commissionRow #partnerChartDiv").html(getChartContent(commissionData.commissionRates, userId, "",  data.allProgram, data.allStandard));
+				$("#commissionRow #partnerChartDiv").show();
+				$("#commissionRow #enrollmentLinkDiv").removeClass("col-12 mb-2")
+				$("#commissionRow #enrollmentLinkDiv").addClass("col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2")
+			}else{
+				$("#commissionRow #partnerChartDiv").hide();
+				$("#commissionRow #enrollmentLinkDiv").removeClass("col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2")
+				$("#commissionRow #enrollmentLinkDiv").addClass("col-12 mb-2")
+			}
+			$("#commissionRow #enrollmentLinkDiv").html(getEnrollmentLinksContent(data));
+			if(commissionData.commissionRates.length>0){
+				var chartIndexVal1= $("#commissionRatesTab_0").attr("data-tab-value");
+				var valueMin1=$("#commissionRatesTab_0").attr("data-school-value");
+				var valueMax1=$("#commissionRatesTab_0").attr("data-partner-value");
+				getCommissionRatesChart('chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
+			}
+			
 		}).then(function(){
 			setTimeout(function() {
 				$('a[data-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function (e) {
@@ -400,7 +420,6 @@ function getAccountManagerDetailsContent(data){
 	var html=
 		`<div class="row align-items-center">
 			<div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 border-right text-dark mb-lg-0 mb-3">
-				
 				<div class="full px-3">
 					<div class="d-flex w-100">
 						<div class="icon-wrapper rounded-circle m-0" style="width:25px;height:25px">
@@ -448,71 +467,18 @@ function getAccountManagerDetailsContent(data){
 	return html;
 }
 
-function getEnrollmentRangeContent(commissionRate){
-	var html=
-		`<div class="d-flex flex-wrap align-items-center mb-1">
-			<span class="font-weight-semi-bold d-inline-block mr-2">Enrollment Range: </span>
-			<ul class="flex-grow-1 p-0 body-tabs body-tabs-layout tabs-animated body-tabs-animated nav" style="min-width:200px">`;
-				$.each(commissionRate, function(i, v){
-					var minmaxrange= v.min_range+'-'+v.max_range;
-					if(v.max_range==0){
-						minmaxrange= v.min_range+'+';
-					}
-					html+=
-					`<li class="nav-item float-left">
-						<a href="#commissionRatesTabContent_`+i+`" id="commissionRatesTab_`+i+`" data-tab-index="${i}" data-tab-value="${minmaxrange}" data-school-value="${v.bySchoolValue}" data-partner-value="${v.byPartnerValue}" class="px-2 py-1 nav-link ${i==0?'active':''}" role="tab" data-toggle="tab" aria-selected="false">
-							<span>${minmaxrange}</span>
-						</a>
-					</li>`;
-				})
-				
-			html+=`</ul>
-		</div>`;
-	return html;
-}
 
-function getChartContent(commissionRate){
+
+function getChartContent(commissionRate, userId, isSubPartner, allProgram, allStandard){
 	var html=
-		`<div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12 mb-2">
+		`<div class="full">
 			<h5 class="font-weight-semi-bold text-dark">${schoolSettingsOffice.schoolType == 'WLP' ? 'Total Revenue and Profit' : 'Your Commission Rates'}</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">`
-					+getEnrollmentRangeContent(commissionRate)
-					html+=
-					`<div class="tab-content">`;
-						$.each(commissionRate, function(i,v){
-							if(USER_ID == "19321" || USER_ID == "14388"){
-								v.bySchoolType='%';
-								var symbol=v.bySchoolType=='%'?'':'$';
-							}else{
-								var symbol=v.bySchoolType=='%'?'':'$';
-							}
-							html+=
-							`<div class="tab-pane tabs-animation fade ${i==0?'show active':''}" id="commissionRatesTabContent_`+i+`" role="tabpanel">
-								<div class="d-flex flex-wrap">
-									<div class="d-inline-flex flex-column flex-grow-1">
-										<div class="mb-3">
-											<span class="h-100 bg-primary rounded float-left mr-2" style="width:4px"></span>
-											<h5 class="font-weight-light m-0">${symbol} ${v.bySchoolValue} ${v.bySchoolType}</h5>
-											<p class="font-12 mb-2">${schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue-Through IS' : 'Commission-Through IS'}</p>
-										</div>
-										<div>
-											<span class="h-100 bg-alternate rounded float-left mr-2" style="width:4px"></span>
-											<h5 class="font-weight-light m-0">${symbol} ${v.byPartnerValue} ${v.byPartnerType}</h5>
-											<p class="font-12 m-0">${schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue-Direct Enrollment' : 'Commission-Direct Enrollment'}</p>
-										</div>
-									</div>
-									<div class="mx-auto overflow-hidden" style="position: relative; max-width:200px;max-height:101px;">
-										<div id="chart`+i+`" style="visibility:hidden;opacity:0"></div>
-										<div class="icon-wrapper rounded-circle m-0 position-absolute" style="width:25px;height:25px; top: calc(50% - 5px);left: 50%;width: 30px;height: 30px;transform: translate(-50%, -50%);z-index: 10;">
-											<div class="icon-wrapper-bg opacity-9 bg-light-primary"></div>
-											<i class="fa fa-users" style="font-size:14px;"></i>
-										</div>
-										
-									</div>
-								</div>
-							</div>`;
-						});
+					+getEnrollmentRangeContentByLeaningAndGradeContent(userId, allProgram, allStandard);
+					html+=`<div class="full" id="rangeAndCommissionRateDiv">`
+						+getEnrollmentRangeContent(commissionRate, userId)
+						+getEnrollmentRangeCommissionRateContent(commissionRate)
 					html+=`</div>
 				</div>
 			</div>    
@@ -520,9 +486,147 @@ function getChartContent(commissionRate){
 	return html;
 }
 
+function getEnrollmentRangeContent(commissionRate){
+	var html=``;
+		if(commissionRate.length>0){
+			html+=
+			`<div class="d-flex flex-wrap align-items-center mb-1">
+				<span class="font-weight-semi-bold d-inline-block mr-2">Enrollment Range: </span>
+				<ul class="flex-grow-1 p-0 body-tabs body-tabs-layout tabs-animated body-tabs-animated nav" style="min-width:200px">`;
+					$.each(commissionRate, function(i, v){
+						var minmaxrange= v.min_range+'-'+v.max_range;
+						if(v.max_range==0){
+							minmaxrange= v.min_range+'+';
+						}
+						html+=
+						`<li class="nav-item float-left">
+							<a href="#commissionRatesTabContent_`+i+`" id="commissionRatesTab_`+i+`" data-tab-index="${i}" data-tab-value="${minmaxrange}" data-school-value="${v.bySchoolValue}" data-partner-value="${v.byPartnerValue}" class="px-2 py-1 nav-link ${i==0?'active':''}" role="tab" data-toggle="tab" aria-selected="false">
+								<span>${minmaxrange}</span>
+							</a>
+						</li>`;
+					});
+				html+=`</ul>
+			</div>`;
+		}else{
+			html+=`<br/>`;
+		}
+	return html;
+}
+
+function getCommissionPayTypeLabel(index, commissionRate){
+	var commissionPayTypeColor='';
+	var commissionPayTypeName='';
+	if(commissionRate[index].commission_type=='SWP'){
+		commissionPayTypeColor="bg-success";
+		commissionPayTypeName="Commission Based Enrollment";
+	}else if(commissionRate[index].commission_type=='PWP') {
+		commissionPayTypeName='Seller Based Enrollment';
+		commissionPayTypeColor="bg-primary";
+	}
+	
+	var html=
+	`<div class="full mb-2" id="commissionTypeLabel">
+		<span class="${commissionPayTypeColor} p-1 text-white font-12">${commissionPayTypeName}</span>
+	</div>`;
+	return html;
+}
+
+function getEnrollmentRangeContentByLeaningAndGradeContent(userId, allProgram, allStandard){
+	var html=``;
+	if(USER_ROLE == "B2B_PARTNER"){
+		html+=
+		`<div class="d-flex flex-wrap align-items-center mb-1 gap-10">
+			<div class="flex-grow-1">
+				<select name="commissionlearningProgram" id="commissionlearningProgram" class="form-control form-control-sm">`;
+					if(allProgram > 0){
+						html += `<option value="A">All Program</option>`;
+					}
+					html+=getLearningProgramContent(SCHOOL_ID);
+				html+=`</select>
+			</div>
+			<div class="flex-grow-1">
+				<select name="commissionStandardId" id="commissionStandardId" class="form-control form-control-sm">`;
+					if(allStandard > 0){
+						html += `<option value="A">All Grade</option>`;
+					}
+					html+=getStandardContent(SCHOOL_ID, true);
+				html+=`</select>
+			</div>
+			<div class="flex-grow-1 ml-auto">
+				<a href="javascript:void(0)" class="btn btn-sm btn-primary w-100" onclick="getCommissionRatesByLearningAndGrade(${userId})">View</a>
+			</div>
+		</div>`;
+	}
+	return html;
+}
+
+function getEnrollmentRangeCommissionRateContent(commissionRate){
+	var html=
+		`<div class="tab-content">`;
+			if(commissionRate.length>0){
+				$.each(commissionRate, function(i,v){
+					if(USER_ID == "19321" || USER_ID == "14388"){
+						v.bySchoolType='%';
+						var symbol=v.bySchoolType=='%'?'':'$';
+					}else{
+						var symbol=v.bySchoolType=='%'?'':'$';
+					}
+					html+=
+					`<div class="tab-pane tabs-animation fade ${i==0?'show active':''}" id="commissionRatesTabContent_`+i+`" role="tabpanel">`
+						if(USER_ROLE == "B2B_PARTNER"){
+							html+=getCommissionPayTypeLabel(i, commissionRate);
+						}
+						html+=`<div class="d-flex flex-wrap">
+							<div class="d-inline-flex flex-column flex-grow-1">
+								<div class="mb-3">
+									<span class="h-100 bg-primary rounded float-left mr-2" style="width:4px"></span>
+									<h5 class="font-weight-light m-0">${symbol} ${v.bySchoolValue} ${v.bySchoolType}</h5>
+									<p class="font-12 mb-2">${schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue-Through IS' : 'Commission-Through IS'}</p>
+								</div>
+								<div>
+									<span class="h-100 bg-alternate rounded float-left mr-2" style="width:4px"></span>
+									<h5 class="font-weight-light m-0">${symbol} ${v.byPartnerValue} ${v.byPartnerType}</h5>
+									<p class="font-12 m-0">${schoolSettingsOffice.schoolType == 'WLP' ? 'Revenue-Direct Enrollment' : 'Commission-Direct Enrollment'}</p>
+								</div>
+							</div>
+							<div class="mx-auto overflow-hidden" style="position: relative; max-width:200px;max-height:101px;">
+								<div id="chart`+i+`" style="visibility:hidden;opacity:0"></div>
+								<div class="icon-wrapper rounded-circle m-0 position-absolute" style="width:25px;height:25px; top: calc(50% - 5px);left: 50%;width: 30px;height: 30px;transform: translate(-50%, -50%);z-index: 10;">
+									<div class="icon-wrapper-bg opacity-9 bg-light-primary"></div>
+									<i class="fa fa-users" style="font-size:14px;"></i>
+								</div>
+								
+							</div>
+						</div>
+					</div>`;
+				});
+			}else{
+				html+=
+				`<div class="tab-pane tabs-animation fade active show">
+					<div class="d-flex flex-wrap">
+						<div class="d-inline-flex flex-column flex-grow-1">
+							<div class="mb-3">
+								<span class="h-100 bg-primary rounded float-left mr-2" style="width:4px"></span>
+								<h5 class="font-weight-light m-0">00.0</h5>
+								<p class="font-12 mb-2">Commission-Through IS</p>
+							</div>
+							<div>
+								<span class="h-100 bg-alternate rounded float-left mr-2" style="width:4px"></span>
+								<h5 class="font-weight-light m-0">00.0</h5>
+								<p class="font-12 m-0">Commission-Direct Enrollment</p>
+							</div>
+						</div>
+					</div>
+				</div>`;
+			}
+		html+=`</div>`;
+	return html;
+}
+
+
 function getEnrollmentLinksContent(data){
 	var html=
-		`<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 mb-2">
+		`<div class="full">
 			<h5 class="font-weight-semi-bold text-dark invisible">Enrollments ${data.interestedFor == "B2B"?'':'& Seats Reservation'} Links</h5>
 			<div class="w-100 mb-3 card border rounded-10" style="height:calc(100% - 32px)">
 				<div class="card-body">
@@ -550,17 +654,30 @@ function getEnrollmentLinksContent(data){
 								lProgram="SCHOLARSHIP";
 							}else if(learningProgram.label=="Self Study Plus"){
 								lProgram="SSP";
-							}else if(learningProgram.label=="Connect To Impact"){
+							}else if(learningProgram.label=="Connect To Impact" ){
 								lProgram="CTI";
 							}
-							html+=
-							`<div>
-								<a href="javascript:void(0)" class="bg-light-primary text-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k}','${learningProgram.learningProgramCode}_class_${k}');saveCounselorDashboardCopyLink('${data.schoolServiceLinks.referralCode}', '${lProgram}');">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
-								<b class="${learningProgram.learningProgramCode}_class_${k} mx-1"></b>
-								<div style="top:18px;left:0;position:absolute;">
-									<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
-								</div>
-							</div>`;
+							if(USER_ROLE != "B2B_PARTNER"){
+								html+=
+								`<div>
+									<a href="javascript:void(0)" class="bg-light-primary text-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k}','${learningProgram.learningProgramCode}_class_${k}');saveCounselorDashboardCopyLink('${data.schoolServiceLinks.referralCode}', '${lProgram}');">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
+									<b class="${learningProgram.learningProgramCode}_class_${k} mx-1"></b>
+									<div style="top:18px;left:0;position:absolute;">
+										<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
+									</div>
+								</div>`;
+							}else{
+								if(learningProgram.label != "Connect To Impact"){
+									html+=
+									`<div>
+										<a href="javascript:void(0)" class="bg-light-primary text-primary border border-light-primary rounded font-weight-semi-bold p-1 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('${learningProgram.learningProgramCode}_id_${k}','${learningProgram.learningProgramCode}_class_${k}');saveCounselorDashboardCopyLink('${data.schoolServiceLinks.referralCode}', '${lProgram}');">${learningProgram.label} <i class="fa fa-copy float-right ml-3"></i></a>    
+										<b class="${learningProgram.learningProgramCode}_class_${k} mx-1"></b>
+										<div style="top:18px;left:0;position:absolute;">
+											<input class="tinyUrl" type="text" id="${learningProgram.learningProgramCode}_id_${k}" value="${learningProgram.link}" style="opacity:0;height:0px">
+										</div>
+									</div>`;
+								}
+							}
 						});
 					html+=`</div>
 					<div id="seatLinksSection" class="d-none flex-wrap" style="gap:5px;">`;
@@ -733,8 +850,12 @@ function loaderContent(){
 
 ///////Enrolled Page 
 async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
+	var payload = {};
+    payload['userId'] = USER_ID;
+    
+    var subPartnerList = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-sub-partner-list',payload,'dashboard');
 	if(role=='B2B_PARTNER'){
-		$("#dashboardContentInHTML").html(partnerListContent(title, localStorage.getItem('referralCode'+USER_ID), localStorage.getItem('originalPartnerType'+USER_ID) ));
+		$("#dashboardContentInHTML").html(partnerListContent(title, localStorage.getItem('referralCode'+USER_ID), localStorage.getItem('originalPartnerType'+USER_ID),subPartnerList.subPartnerList));
 	}else if(USER_ROLE=='STUDENT_COUNSELOR' || USER_ROLE=='B2B_LEAD' || USER_ROLE=='DIRECTOR'){
 		$("#dashboardContentInHTML").html(partnerListContent('Partner '+title, ''));
 	}else{
@@ -818,9 +939,9 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	});
 	getAllGrade(SCHOOL_ID);
 
-	callStudentListByPartner('partnerEnrollFilterForm','');
+	callStudentListByPartner('partnerEnrollFilterForm','default');
 	$("#searchEnrolled").on('click',function(){
-		callStudentListByPartner('partnerEnrollFilterForm');
+		callStudentListByPartner('partnerEnrollFilterForm','filter');
 	});
 
 	$("#bulkCommission").on('click',function(){
@@ -856,9 +977,9 @@ async function renderPartnerList(title, roleAndModule, schoolId, userId, role){
 	$('html, body').animate({ scrollTop: 0 }, 500);
 }
 
-function partnerListContent(title, referralCode, originalPartnerType){
+function partnerListContent(title, referralCode, originalPartnerType, subPartnerList){
 	var hmlt=pageTitleEnrolledContent(title, originalPartnerType)
-	hmlt+=mainCardEnrolled(referralCode)
+	hmlt+=mainCardEnrolled(referralCode, subPartnerList)
 	return hmlt;
 }
 
@@ -878,7 +999,7 @@ function pageTitleEnrolledContent(title, originalPartnerType){
 	return html;
 }
 
-function mainCardEnrolled(referralCode){
+function mainCardEnrolled(referralCode, subPartnerList){
 	var html= 
 	'<div class="main-card mb-3 card">'
 		+'<div class="card-body">'
@@ -892,7 +1013,7 @@ function mainCardEnrolled(referralCode){
 			// 		}
 			// 	html+='</div>'
 			// +'</div>'
-			+B2BStudentListfilterForm(referralCode)
+			+B2BStudentListfilterForm(referralCode, subPartnerList)
 			// +revenueThumbListContentSkeleton()
 			// +revenueThumbListContent()
 			+B2BStudentListDetailsSkeleton()
@@ -990,19 +1111,17 @@ function B2BStudentListfilterFormSkeleton(){
 	return html;
 }
 
-function B2BStudentListfilterForm(referralCode){
+function B2BStudentListfilterForm(referralCode, subPartnerList){
 	var html=
 	'<form id="partnerEnrollFilterForm" style="display:none">'
 		+'<div class="col-12 mb-2 border rounded-10 pb-1 pt-4 px-4  mb-4 bg-light-primary">'
 			+'<div class="row">'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
 					+'<label class="full text-primary">Select School</label>'
-					+'<select class="form-control" name="schoolName" id="schoolName">'
+					+'<select class="form-control" name="schoolName" id="schoolName" disabled>'
 						+'<option>Select School</option>'
+						+'<option selected>'+SCHOOL_NAME+'</option>'
 						+'<option>International School</option>'
-						+'<option>International School 1</option>'
-						+'<option>International School 2</option>'
-						+'<option>International School 3</option>'
 					+'</select>'
 				+'</div>';
 				if(referralCode==''){
@@ -1014,12 +1133,17 @@ function B2BStudentListfilterForm(referralCode){
 				}
 				html+='<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
 					+'<label class="full text-primary">Select Sub-Partner</label>'
-					+'<select class="form-control" name="subPartner" id="subPartner">'
-						+'<option>Select Sub-Partner</option>'
-						+'<option>Sub Partner1</option>'
-						+'<option>Sub Partner2</option>'
-						+'<option>Sub Partner3</option>'
-					+'</select>'
+					+'<select class="form-control" name="subPartner" id="subPartner">';
+						if(USER_ROLE == "B2B_PARTNER"){
+							html+='<option value="all">ALL</option>';
+						}
+						html+='<option value="">Select Sub-Partner</option>';
+						if(USER_ROLE == "B2B_PARTNER"){
+							$.each(subPartnerList, function(i, v){
+								html+='<option value="'+v.id+'">'+v.userName+'</option>';
+							});
+						}
+					html+='</select>'
 				+'</div>'
 				+'<input type="hidden" class="form-control" name="referralCode" id="referralCode" value="'+referralCode+'"/>'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
@@ -1042,7 +1166,7 @@ function B2BStudentListfilterForm(referralCode){
 					+'<select class="form-control" name="enrollmentBy" id="enrollmentBy">'
 					+ '<option value="">Select enrollment by</option>'
 					+ '<option value="D">Direct enrolled</option>'
-					+ '<option value="P">Added by partner</option>'
+					+ '<option value="P">Added by Myself</option>'
 					+'</select>'
 				+'</div>'
 				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
@@ -1196,7 +1320,7 @@ function B2BStudentListDetailsSkeleton(){
 	return html;
 }
 
-function B2BStudentListDetails(studentList, updateTransferMsg){
+function B2BStudentListDetails(studentList, updateTransferMsg, isSubPartner){
 	var html= 
 		'<table class="table table-bordered font-12 border-radius-table" style="min-width:1300px;width:100%;font-size:11px !important" id="studentDataList">'
 			+'<thead>'
@@ -1205,9 +1329,11 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 					+'<th class="bg-primary text-white bold border-bottom-0">Student Details</th>'
 					+'<th class="bg-primary text-white bold border-bottom-0">Enrollment Details</th>'
 					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Fee Details</th>'
-					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Fee Schedule</th>'
-					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Expected Commision</th>'
-					+'<th class="bg-primary text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Action</th>'
+					+'<th class="bg-primary text-white bold border-bottom-0 text-center">Fee Schedule</th>';
+					if(isSubPartner == 'N'){
+						html += '<th class="bg-primary text-white bold border-bottom-0 text-center">Expected Commision</th>';
+					}
+					html += '<th class="bg-primary text-white bold border-bottom-0 rounded-top-right-10" style="border-top-color:transparent;border-right-color:transparent">Action</th>'
 				+'</tr>'
 			+'</thead>'
 			+'<tbody class="student-table-css">';
@@ -1248,7 +1374,19 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 											+'<tr>'
 												+'<th class="border-0 p-1 font-weight-bold" style="width:148px">Learning Program:</th>'
 												+'<td class="border-0 p-1">'+stuList.learningMode+'</td>'
-											+'</tr>'
+											+'</tr>';
+											var commissionPayTypeColor="";
+											var commissionPayTypeName="";
+											if(stuList.commissionPayType=='SWP'){
+												commissionPayTypeColor="bg-success";
+												commissionPayTypeName="Commission Based Enrollment";
+											}else if(stuList.commissionPayType=='PWP') {
+												commissionPayTypeName='Seller Based Enrollment';
+												commissionPayTypeColor="bg-primary";
+											}
+											html+='<tr>'
+													+'<td class="border-0 p-1 font-weight-bold " colspan="2"><span class="'+commissionPayTypeColor+' p-1 text-white">'+commissionPayTypeName+'</span></td>'
+												+'</tr>'
 										+'</tbody>'
 									+'</table>'
 								+'</td>'
@@ -1275,13 +1413,28 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 																+'<th class="border-0 p-1 font-weight-bold" style="width:112px">Enrollment Type:</th>'
 																+'<td class="border-0 p-1">'+stuList.enrollType+'</td>'
 															+'</tr>';
-															if(stuList.counselorId!=USER_ID){
+															// if(stuList.counselorId!=USER_ID){
 																html+='<tr>'
 																	+'<th class="border-0 p-1 font-weight-bold" style="width:112px">Partner Name:</th>'
 																	+'<td class="border-0 p-1">'+stuList.counselorUsername+'</td>'
 																+'</tr>';
+															// }
+															var enrollColor="bg-primary";
+															var enrollType="Enrollment via IS";
+															if(stuList.studentEnrollBy=='P'){
+																if(stuList.referralCode == localStorage.getItem('referralCode'+USER_ID)){
+																	enrollType='Added by Myself';
+																}else{
+																	enrollType='Added by Partner';
+																}
+																enrollColor="bg-orange";
+															}else if(stuList.studentEnrollBy=='D'){
+																enrollType='Direct Enrollment';
+																enrollColor="bg-alternate";
 															}
-
+															html+='<tr>'
+																	+'<td class="border-0 p-1 font-weight-bold " colspan="2"><span class="'+enrollColor+' p-1 text-white">'+enrollType+'</span></td>'
+																+'</tr>';
 															html+='</tbody>'
 													+'</table>'
 												+'</td>'
@@ -1379,9 +1532,9 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 															+'<div class="bg-light-primary p-2 m-2 rounded text-left">'
 																+'<div class="full d-block mb-1">'
 																	+'<span><strong>Fee:</strong>'+stuSchedule.payAmount+'</span>';
-																	if(stuSchedule.status != "SUCCESS"){
-																		html+='<span class="float-right" id="payNowBtn'+stuSchedule.userPaymentDetailsId+'"><a href="javascript:void(0)" class="pay_now_btn btn btn-primary btn-sm py-0 px-1" onclick="getPaymentGatewaysOptions(\''+stuSchedule.schoolId+'\',\''+stuSchedule.schoolId+'\',\''+stuSchedule.userPaymentDetailsId+'\',\''+stuSchedule.entityType+'\',\''+stuSchedule.entityId+'\',\''+USER_ID+'\')">Pay Now</a></span>';
-																	}
+																	// if(stuSchedule.status != "SUCCESS"){
+																	// 	html+='<span class="float-right" id="payNowBtn'+stuSchedule.userPaymentDetailsId+'"><a href="javascript:void(0)" class="pay_now_btn btn btn-primary btn-sm py-0 px-1" onclick="getPaymentGatewaysOptions(\''+stuSchedule.schoolId+'\',\''+stuSchedule.schoolId+'\',\''+stuSchedule.userPaymentDetailsId+'\',\''+stuSchedule.entityType+'\',\''+stuSchedule.entityId+'\',\''+USER_ID+'\')">Pay Now</a></span>';
+																	// }
 																html+='</div>'
 																+'<div class="full d-block"><strong class="float-left">Payment Status:</strong> <span class="d-inline-block" id="paymentStatus'+stuSchedule.userPaymentDetailsId+'">'+stuSchedule.status+'</span></div>'
 																+'<div class="full d-block"><strong>Schedule Date:</strong> <span>'+stuSchedule.scheduleDate+'</span></div>';
@@ -1403,63 +1556,68 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 									}
 									
 								}
-
-								html+='<td class="p-0  vertical-align-top">'
-									+'<table class="w-100">'
-										+'<tbody>'
-											+'<tr>'
-												+'<td class="border-0">'
-													+'<table class="w-100">'
-														+'<tbody>'
-															+'<tr>'
-																+'<th class="border-0 p-1 font-weight-bold" style="width:80px">Commission:</th>'
-																+'<td class="border-0 p-1">'+stuList.commition+'</td>'
-															+'</tr>'
-															+'<tr>'
-																+'<th class="border-0 p-1 font-weight-bold" style="width:80px">Status:</th>'
-																+'<td class="border-0 p-1">'+stuList.transMessage+'</td>'
-															+'</tr>'
-															+'<tr>'
-																+'<th class="border-0 p-1 font-weight-bold" style="width:80px">Updated Date:</th>'
-																+'<td class="border-0 p-1">'+stuList.transDate+'</td>'
-															+'</tr>';
-														if((stuList.counselorId!=USER_ID) && stuList.paymentDue=="All Paid"){
-															html+='<tr>'
-																+'<td colspan="2" class="border-0 p-1 text-center">'
-																	+'<div class="dropdown d-inline-block">'
-																	 +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">Update</button>'
-																		+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 28px, 0px);">'
-																		+'<a href="javascript:void(0)" onclick="'+onclickTransfer+'" class="dropdown-item">Amount Transferred</a>'
-																		+'<a href="javascript:void(0)" onclick="'+onclickNone+'" class="dropdown-item">None</a>'
-																		+'</div>'
-																	+'</div>'
-																+'</td>'
-															+'</tr>';
-														}
-														var enrollColor="bg-primary";
-														var enrollType="Enrollment via IS";
-														if(stuList.studentEnrollBy=='P'){
-															if(stuList.referralCode == localStorage.getItem('referralCode'+USER_ID)){
-																enrollType='Added by Myself';
-															}else{
-																enrollType='Added by Partner';
-															}
-															enrollColor="bg-orange";
-														}else if(stuList.studentEnrollBy=='D'){
-															enrollType='Direct Enrollment';
-															enrollColor="bg-alternate";
-														}
-														html+='<tr>'
-																+'<td class="border-0 p-1 font-weight-bold " colspan="2"><span class="'+enrollColor+' p-1 text-white">'+enrollType+'</span></td>'
-															+'</tr>';
-														html+='</tbody>'
-													+'</table>'
-												+'</td>'
-											+'</tr>'
-										+'</tbody>'
-									+'</table>'
-								+'</td>'
-								+'<td>';
+								if(isSubPartner == 'N'){
+									html+='<td class="p-0  vertical-align-top">'
+											+'<table class="w-100">'
+											+'<tbody>'
+												+'<tr>'
+													+'<td class="border-0">'
+														+'<table class="w-100">'
+															+'<tbody>'
+																+'<tr>'
+																	+'<th class="border-0 p-1 font-weight-bold" style="width:80px">Commission:</th>'
+																	+'<td class="border-0 p-1">'+stuList.commition+'</td>'
+																+'</tr>'
+																+'<tr>';
+																	if(stuList.commissionPayType=='SWP'){
+																		html +='<th class="border-0 p-1 font-weight-bold" style="width:80px">Transfer Status:</th>'
+																		+'<td class="border-0 p-1">'+stuList.transMessage+'</td>';
+																	}else{
+																		html +='<th class="border-0 p-1 font-weight-bold" style="width:80px">Payout to IS: </th>'
+																		+'<td class="border-0 p-1">'+stuList.totalPayoutToIs+'</td>';
+																	}
+																html+='</tr>'
+																+'<tr>'
+																	if(stuList.commissionPayType=='SWP'){
+																		html +='<th class="border-0 p-1 font-weight-bold" style="width:80px">Transfer Date:</th>'
+																		+'<td class="border-0 p-1">'+stuList.transDate+'</td>';
+																	}else{
+																		html +='<th class="border-0 p-1 font-weight-bold" style="width:80px">Pending Amount: </th>'
+																		+'<td class="border-0 p-1">'+stuList.pendingAmount+'</td>';
+																	}
+																html+='</tr>';
+																if(stuList.commissionPayType=='PWP'){
+																	html+='<tr>'
+																		+'<th class="border-0 p-1 font-weight-bold" style="width:80px">Status:</th>'
+																		+'<td class="border-0 p-1">'+(stuList.pendingAmount == '$0.00' ? 'Success' : 'Pending')+ '</td>'
+																	+'</tr>'
+																	+'<tr>'
+																		+'<th class="border-0 p-1 font-weight-bold" style="width:80px">Payment Date:</th>'
+																		+'<td class="border-0 p-1">'+(stuList.lastPayDate != "N/A" ? changeDateFormat(new Date(stuList.lastPayDate), "MMM-dd-yyyy") : stuList.lastPayDate) +'</td>'
+																	+'</tr>';
+																}
+																if((USER_ROLE=="DIRECTOR") && (stuList.counselorId!=USER_ID) && stuList.paymentDue=="All Paid"){
+																	html+='<tr>'
+																		+'<td colspan="2" class="border-0 p-1 text-center">'
+																			+'<div class="dropdown d-inline-block">'
+																			+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">Update</button>'
+																				+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 28px, 0px);">'
+																				+'<a href="javascript:void(0)" onclick="'+onclickTransfer+'" class="dropdown-item">Amount Transferred</a>'
+																				+'<a href="javascript:void(0)" onclick="'+onclickNone+'" class="dropdown-item">None</a>'
+																				+'</div>'
+																			+'</div>'
+																		+'</td>'
+																	+'</tr>';
+																}
+															html+='</tbody>'
+														+'</table>'
+													+'</td>'
+												+'</tr>'
+											+'</tbody>'
+										+'</table>'
+									+'</td>';
+									}
+								html+='<td>';
 								let tickFlag = true;
 									if(stuList.studentEnrollBy=='P' && stuList.admissionType == "Partial Entry"){
 										html+='<a href="javascript:void(0);" onclick="enrollmentPartnerStudent('+stuList.stdUserId+')" data-toggle="tooltip" data-placement="top" data-original-title="Edit" class="text-primary">'
@@ -1473,6 +1631,12 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 										+'</a>';
 										tickFlag = false;
 									}
+									if(stuList.applicationStatus == 'Y' && stuList.paymentStatus != 'SUCCESS' && stuList.paymentType == 'One-time payment'){
+										tickFlag = false;
+										html+='<a id = "move_to_dashboard_'+stuList.stdUserId+'_'+stuList.stuStandardId+'" href="javascript:void(0);" onclick="showWarningMessage(\'Are you sure you want to approve payment witout sending mails?\',\'moveToStudentEnrollmentsDashboard('+stuList.stdUserId+','+stuList.userPaymentDetailsId+', \\\'N\\\')\');" data-toggle="tooltip" data-placement="top" data-original-title="Move to dashboard" class="text-primary">'
+												+'<svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M5.66667 13C4.0881 13 2.74914 12.4808 1.64981 11.4423C0.550476 10.4038 0.000539683 9.13875 0 7.64706C0 6.28333 0.47573 5.09473 1.42719 4.08124C2.37865 3.06774 3.56919 2.48478 4.99881 2.33235L3.72381 1.07059L4.85714 0L8.09524 3.05882L4.85714 6.11765L3.72381 5.02794L4.91786 3.9C3.95992 4.07843 3.17063 4.51814 2.55 5.21912C1.92937 5.9201 1.61905 6.72941 1.61905 7.64706C1.61905 8.7049 2.01356 9.60675 2.80257 10.3526C3.59159 11.0984 4.54629 11.4711 5.66667 11.4706H8.09524V13H5.66667ZM9.71429 6.11765V0.764706H17V6.11765H9.71429ZM9.71429 13V7.64706H17V13H9.71429ZM11.3333 11.4706H15.381V9.17647H11.3333V11.4706Z" fill="#0380FF"/> </svg>'
+											+'</a>'; 
+									}
 									if(tickFlag){
 										html+='<i class="fa fa-check text-success"></i>'; 
 									}
@@ -1484,7 +1648,8 @@ function B2BStudentListDetails(studentList, updateTransferMsg){
 					html+='<tr><td colspan="6" class="text-center bold font-16">No Record found</td></tr>';
 				}
 			html+='</tbody>'
-		+'</table>';
+		+'</table>'
+		// +'<div id="b2bPartnerEnrollmentPaginationContainer" class="text-center mt-4">';
 	return html;
 }
 

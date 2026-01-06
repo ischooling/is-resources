@@ -4,7 +4,8 @@ highSchoolGrade.push(5);
 highSchoolGrade.push(6);
 highSchoolGrade.push(7);
 const discountTimeLimitSettings = getSettingsByTypeAndKey('CONFIGURATION','DISCOUNT_TIME_LIMIT');
-var discountTimeLimitDays = JSON.parse(discountTimeLimitSettings).data.metaValue
+var discountTimeLimitDays = JSON.parse(discountTimeLimitSettings).data.metaValue;
+var SIGNUPTYPE;
 function showSkeleton (isShow, skeletonType){
 	if(isShow && skeletonType == "step1"){
 		$(".step-1-skeleton").html(skeletonStudent());
@@ -27,7 +28,22 @@ function showSkeleton (isShow, skeletonType){
 	}
 }
 
-function renderMigrationDetailsOptionContent(data) {
+async function renderMigrationDetailsOptionContent(data) {
+	var payload = {
+		'userId' : USER_ID
+	};  
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+	SIGNUPTYPE = responseData.signupType
+	// if(responseData.signupType == "Online"){
+	// 	if(responseData.commissionPayBy == "PWP" || responseData.commissionPayBy == ""){
+	// 		SHOW_PAYMENT_OPTION = "N";
+	// 	}else{
+	// 		SHOW_PAYMENT_OPTION = "Y";
+	// 	}
+	// }else{
+	// 	SHOW_PAYMENT_OPTION = "N";
+	// }
+	SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 	var html='';
 	if(data.customPaymentEnabled){
 		html+=
@@ -85,7 +101,7 @@ function renderMigrationDetailsOptionContent(data) {
 			getAllCourseDetails('N', '');
 		}
 		if(data.pageNumberToDisplay==3){
-			callForReviewAndPaymentSelection('N');
+			callForReviewAndPaymentSelection('N', responseData.enrollmentBy, SIGNUPTYPE);
 		}
 	}
 }
@@ -932,7 +948,7 @@ function getCourseSelectionContent(csr){
 				
 				+'<div class="full mt-2">'
 					+'<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(1);">Back</button>'
-					+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:var(--pc) !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse();">'
+					+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:var(--pc) !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse(\'' + csr.enrollmentBy + '\');">'
 				+'</div>'
 				+noTeacherAssistanceAvailableModal(csr)
 				+apCourseSelectionWarningModal()
@@ -1358,10 +1374,67 @@ function upgradeCorusesModal(){
 		return html;
 }
 
+function submitApplicationWarningModal(){
+	var html = 
+		'<div class="modal fade" id="submitApplicationWarning">'
+			+'<div class="modal-dialog modal-sm modal-dialog-centered" role="document" style="box-shadow: none; width: 450px; max-width: 100%;">'
+				+'<div class="modal-content text-center">'
+					+'<div class="modal-header bg-white justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
+						+'<div class="modal-body delete-modal">'
+							+'<i class="fa fa-info" style="color: #fff !important; background: #f44336; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
+							+'<p class="heading" style="color: #f44336; font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to submit your application form? Once you proceed, the details entered during the enrollment process will not be changed.</p>'
+						+'</div>'
+						+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
+							+'<div class="text-center" style="margin: 0 auto;">'
+								+'<button type="button" class="btn mr-2" style="color: #f44336 !important; border: 1px solid #f44336 !important; background: transparent !important;"onclick="callForApplicationSubmit()">Yes</button>'
+								+'<button type="button" class="btn btn-danger " data-dismiss="modal">No</button>'
+							+'</div>'
+						+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>';
+		return html;
+}
+
+function logoutModalLogout(data){
+	var html = '';
+	html='<div class="modal fade theme-modal fade-scale " id="logout_modal_logout" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">'
+		+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
+			+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
+				+'<div class="modal-header theme-header white-text" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
+					+'<h4 class="modal-title" style="color: #fff; margin-left: 10px;">Payment Under Review</h4>'
+				+'</div>'
+				+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
+					+'<div class="full text-center">'
+						+'<br/>'
+						+'<h2 class="modal-title  text-center fw-600 " style="margin-bottom: 15px;">Your payment is under review.</h2>'
+						+'<h4 class="modal-title  text-center">';
+							if(data.enrollmentType!='REGISTRATION_REGISTER'){
+								html+='You will be able to access the dashboard once the payment is received.';
+							}
+							html+=
+							'You can contact us at ' 
+							+'<b>'
+								+' <a href="mailto:'+data.contactEmail+'" target="_blank">'+data.contactEmail+'</a>'
+							+'</b> for more information'
+						+'</h4>'
+						+'<br/>'
+						+'<p class="text-center">'
+							+'<button type="button" class="btn bg-primary  text-white" onclick="logout();">Log out</button>'
+						+'</p>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;	
+}
 
 function renderPaymentMode(){
 	$('#payment-selection-details').html(getPaymentModeContent());
-	$("#studentPaymentModal").modal("show");
+	if(SHOW_PAYMENT_OPTION == 'Y'){
+		$("#studentPaymentModal").modal("show");
+	}
 }
 
 function getPaymentModeContent(cdrDTO){
@@ -1571,8 +1644,8 @@ function paymentModalContentWithData(cdrDTO){
 	$("#studentPaymentModal .modal-body").append(html);
 }
 
-function getReviewAndPayRendered(data){
-	$('#divNextSessionCourseReview').html(getReviewAndPayContent(data));
+function getReviewAndPayRendered(data, partnerEnrollmentFlag, signupType){
+	$('#divNextSessionCourseReview').html(getReviewAndPayContent(data, partnerEnrollmentFlag, signupType)+submitApplicationWarningModal());
     displaySection3();
 	$(".step-4-skeleton").html('');
 	$(".ReviewAndPayContent").show();
@@ -1583,6 +1656,7 @@ function getReviewAndPayRendered(data){
 		$(this).parent().closest('li').siblings().find('.plus-icon').addClass('fa-plus')
 		$(this).parent().closest('li').siblings().find('.a-content').slideUp();
 	});
+	
 
 	if(data.isOptedAlternetPaymentMethod==1){
 		$('#logout_modal_logout').modal('show');
@@ -1635,9 +1709,10 @@ function getReviewAndPayRendered(data){
 	}
 }
 
-function getReviewAndPayContent(data){
+function getReviewAndPayContent(data, partnerEnrollmentFlag, signupType){
 	var html=
     '<div class="mb-3 card">'
+		+'<input type="hidden" value="'+signupType+'" id="signupType"/>'
 		+'<div class="card-body">'
 			+'<div class="full step-4-skeleton skeleton-wrapper"></div>'
 			+'<section class="ReviewAndPayContent">'
@@ -1647,7 +1722,7 @@ function getReviewAndPayContent(data){
 						+'<div class="full">'
 							+'<ul class="accordion mob-scroll">'
 								+'<li>'
-									+courseDetailsPreview(data)
+									+courseDetailsPreview(data, partnerEnrollmentFlag)
 								+'</li>'
 							+'</ul>';
 							// if(data.returnUrl !=''){
@@ -1671,21 +1746,26 @@ function getReviewAndPayContent(data){
 				+'</div>'
 				+'</section>'
 				+' <div class="col-md-12 col-sm-12 p-0 mt-3">';
-					if(!data.customPaymentEnabled){
-						console.log("data", data)
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>';
-					}
-					var paynow=true
-					if(data.advanceFeeEnabled){
-						if(data.feePaymentDetailsResponse.advanceFeeDetails.payableFee<=0){
-							paynow=false;
+					if(partnerEnrollmentFlag != "P" && SHOW_PAYMENT_OPTION == 'Y'){
+						if(!data.customPaymentEnabled){
+							console.log("data", data)
+							html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>';
 						}
-					}
-					if(data.advanceFeeEnabled){
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right ml-2" onclick="callForProgressionToDashboard();">'+(paynow?'Pay Later':'Proceed to Dashboard')+'</button>';
-					}
-					if(paynow){
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions('+data.schoolId+','+data.schoolId+','+data.userPaymentDetailsId+',\''+data.entityType+'\','+data.entityId+','+USER_ID+');">Pay Now</button>';
+						var paynow=true
+						if(data.advanceFeeEnabled){
+							if(data.feePaymentDetailsResponse.advanceFeeDetails.payableFee<=0){
+								paynow=false;
+							}
+						}
+						if(data.advanceFeeEnabled){
+							html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right ml-2" onclick="callForProgressionToDashboard();">'+(paynow?'Pay Later':'Proceed to Dashboard')+'</button>';
+						}
+						if(paynow){
+							html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions('+data.schoolId+','+data.schoolId+','+data.userPaymentDetailsId+',\''+data.entityType+'\','+data.entityId+','+USER_ID+');">Pay Now</button>';
+						}
+					}else{
+						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>';
+						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="showPaymentModal();">Submit Application</button>';
 					}
 				html+=
 				'</div>'
@@ -1693,22 +1773,23 @@ function getReviewAndPayContent(data){
 	+'</div>'	
 
 	+wuPaymentWarningModal(data)
+	+logoutModalLogout(data)
 	+goToDashboardWarningMessageModal(data)
 	// +smoovPayContent(data);
 	return html;
 }
 
-function courseDetailsPreview(data){
+function courseDetailsPreview(data, partnerEnrollmentFlag){
 	var signupCourse=data.signupCourse;
 	var html =
 	'<div class="student-courses-info">'
 		+'<div class="full">'
-			+'<h4 class="a-title">Selected Courses <i class="fa fa-plus plus-icon"></i></h4>'
+			+'<h4 class="a-title">Selected Courses <i class="fa  plus-icon ' + (partnerEnrollmentFlag == "P" ? 'fa-minus' : 'fa-plus') + '"></i></h4>'
 			+'<div class="h_scroll primary-bg">'
 				+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			+'</div>'
 		+'</div>'
-		+'<div class="a-content">'
+		+'<div class="a-content" style="' + (partnerEnrollmentFlag == "P" ? 'display:block;' : '') + '">'
 			+'<div class="table-responsive course-selection-wrapper" style="display:block;">'
 				+'<h3 class="selected-grade font-weight-bold text-center" style="margin-bottom:15px; font-size:16px">'
 					+signupCourse.standardName
@@ -2521,22 +2602,24 @@ function recommendedCourseModalContent(data){
 
 function goToDashboardWarningMessageModal(data){
 	var html='<div class="modal fade theme-modal fade-scale" id="goToDashboardWarningMessage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-		+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
-			+'<div class="modal-content" style="border-radius: 0; border: 0; margin-top:0 !important;">'
-				+'<div class="modal-header theme-header white-text" style="width: 97%; margin: 0 auto; border-radius: 0;position:relative;top:-25px;">'
-					+'<h5 class="modal-title" style="color: #fff; margin-left: 10px;">Confirmation!</h5>'
+		+'<div class="modal-dialog modal-lg" role="document">'
+			+'<div class="modal-content">'
+				+'<div class="modal-header justify-content-center">'
+					+'<h5 class="modal-title text-white">Confirmation!</h5>'
 					+'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true" style="color: #fff;">×</span>'
+						+'<span aria-hidden="true" class="text-white">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div class="modal-body" style="height:auto; max-height:60vh; overflow:auto;">'
 					+'<div class="full form">'
-						+'<h5 class="modal-title fw-600" id="submitApplicationMsg"></h5>'
+						+'<h4 class="modal-title fw-600 text-center" id="submitApplicationMsg"></h4>'
 						+'<hr />'
-						+'<div class="full text-right">'
-							+'<button type="button" class="btn bg-primary  text-white" id="proceedStudentPayment" style="background: #5cb85c !important" onclick="callForSignupToDashboard();" >Yes</button>'
-							+'<button type="button" class="btn bg-primary  text-white" id="cancelStudentPayment" data-dismiss="modal" style="background: #da5652 !important">No</button>'
-						+'</div>'
+						
+					+'</div>'
+				+'</div>'
+				+'<div class="modal-foter">'
+					+'<div class="full text-center">'
+						+'<button type="button" class="btn theme-bg primary-hov-bg text-white mb-3" onclick="logoutConfimation(true, \''+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'\')" >Log out</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'

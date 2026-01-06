@@ -217,6 +217,14 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
 	const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	const schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var payload = {
+				'userId' : USER_ID
+			};	
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+	// if(responseData.commissionPayBy == "PWP" || responseData.commissionPayBy == ""){
+	// 	SHOW_PAYMENT_OPTION = "N";
+	// } 
+	SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 	var html = `
         <div class="wrapper-style">`
 			if(signupType == "Online" || studentUserId == USER_ID){
@@ -373,7 +381,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                             <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('next')">Next</a>
                         </li>
                         <li class="finish-btn" style="display: none;">
-                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('finish');showPaymentModal();">`;
+                            <a href="javascript:void(0)" id="finishBtnId" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('finish');showPaymentModal();">`;
 							if(signupType == 'Online' ){
 								if (SHOW_PAYMENT_OPTION == 'Y') {
 									html += 'Proceed';
@@ -3632,10 +3640,10 @@ function showMessageInPopup(){
 
 function documentPreviewModal(){
 	var html=
-		`<div id="documentPreviewModal" class="modal fade fade-scale" role="dialog">
+		`<div id="documentPreviewModal" class="modal fade fade-scale mohit" role="dialog">
 			<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
 				<div class="modal-content">
-					<div class="modal-header py-2 bg-primary text-white d-flex">
+					<div class="modal-header py-2 primary-bg text-white d-flex">
 						<h5 class="modal-title text-white" >Preview</h5>
 						<button type="button" class="close text-white ml-auto close-with-red-color" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>

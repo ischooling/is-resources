@@ -198,7 +198,7 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
     });
 }
 // function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag) {
-// 	debugger
+
 //     return new Promise((resolve, reject) => {
 //         $.ajax({
 //             type: "POST",
@@ -765,7 +765,7 @@ function scrollEvent(){
 function calendarEventBind(){
 	$(document).on('click', '.fc-day-header, .fc-next-button, .fc-prev-button, .fc-agendaDay-button, .fc-agendaWeek-button', function () {
 		// if(getSession()){
-		// 	debugger
+		
 		// 	var viewName = $('#schoolcalendar').fullCalendar('getView').name;
 		// 	var b = $('#schoolcalendar').fullCalendar('getDate');
 		// 	var startdate = b.format('YYYY-MM-DD');

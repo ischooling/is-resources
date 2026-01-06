@@ -1,4 +1,5 @@
-function callStudentListByPartner(formId) {
+// var currentPageB2bPartnerEnrollmentList = 1;
+function callStudentListByPartner(formId, callFrom) {
 	var updateTransferMsg =false;
 	if($("#"+formId+" #partnerName").val()!=undefined && $("#"+formId+" #partnerName").val()!=""){
 		updateTransferMsg=true;
@@ -8,7 +9,7 @@ function callStudentListByPartner(formId) {
 			type : "POST",
 			contentType : APPLICATION_JSON_VALUE,
 			url : getURLForHTML('dashboard', 'get-student-enrolled-partner'),
-			data : JSON.stringify(getRequestForPartnerEnrolledList(formId)),
+			data : JSON.stringify(getRequestForPartnerEnrolledList(formId,callFrom)),
 			dataType : 'json',
 			cache : false,
 			timeout : 600000,
@@ -22,7 +23,7 @@ function callStudentListByPartner(formId) {
 						var enrollArray=[{"count":data.enrolledCount, "label":"Enrollment", "enrollmentValue":"0"}, {"count":data.partailEntryCount, "label":"Incomplete enrollment","enrollmentValue":"2"}, {"count":data.reEnrolledCount, "label":"Re-Enrollment","enrollmentValue":"3"}]
 						var enrollmentCountThumHtml = getB2BStudentEnrollmentCount(enrollArray);
 						$("#B2BStudentEnrollmentCountThumb").html(enrollmentCountThumHtml);
-						var htmls = B2BStudentListDetails(data.studentList, updateTransferMsg);
+						var htmls = B2BStudentListDetails(data.studentList, updateTransferMsg, data.isSubPartner);
 						$("#enrolled-list").html(htmls);
 						$(".follow-up-no").click(function(){
 							$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
@@ -49,17 +50,23 @@ function callStudentListByPartner(formId) {
 						// $("#campaignlist").html(html);
 						// $('#tblCampaignList').dataTable();
 						$('[data-toggle="tooltip"]').tooltip();
+						// if(data.studentList.length != 0){
+						// 	$("#b2bPartnerEnrollmentPaginationContainer").html(renderPaginationCommon(currentPageB2bPartnerEnrollmentList, data.totalPages, "partnerEnrollmentList"));
+						// }
 				}
 			}
 	   });
    }
 
-function getRequestForPartnerEnrolledList(formId){
+function getRequestForPartnerEnrolledList(formId,callFrom){
+
 	var data={};
 	var enrollmentListFilterDTO = {};
+	
 	if($("#"+formId+" #partnerName").val()!=undefined && $("#"+formId+" #partnerName").val()!=""){
 		enrollmentListFilterDTO['counselorId']=$("#"+formId+" #partnerName").val();
-	}else{
+	}
+	else{
 		if($("#"+formId+" #referralCode").val()!=''){
 			enrollmentListFilterDTO['counselorId']=USER_ID;
 		}else{
@@ -67,6 +74,17 @@ function getRequestForPartnerEnrolledList(formId){
 		}
 	}
 	enrollmentListFilterDTO['userId']=USER_ID;
+	if($("#"+formId+" #subPartner").val()!=null && $("#"+formId+" #subPartner").val()!=undefined && $("#"+formId+" #subPartner").val()!=""){
+		if($("#"+formId+" #subPartner").val()=="all"){
+			enrollmentListFilterDTO['counselorId'] = USER_ID;
+			enrollmentListFilterDTO['userId']=USER_ID;
+		}else{
+			enrollmentListFilterDTO['counselorId'] = $("#"+formId+" #subPartner").val();
+			enrollmentListFilterDTO['userId']=$("#"+formId+" #subPartner").val();
+		}
+		
+	}
+	
 	enrollmentListFilterDTO['schoolId']=SCHOOL_ID;
     enrollmentListFilterDTO['referralCode']=$("#"+formId+" #referralCode").val();
     enrollmentListFilterDTO['academicYear']=$("#"+formId+" #academicYear option:selected").text();
@@ -96,8 +114,21 @@ function getRequestForPartnerEnrolledList(formId){
 	enrollmentListFilterDTO['paymentStatus']=$("#"+formId+" #paymentStatus").val();
 	enrollmentListFilterDTO['sortBy']=$("#"+formId+" #sortBy").val();
 	enrollmentListFilterDTO['feeStatus']=$("#"+formId+" #feeStatus").val();
-	enrollmentListFilterDTO['pageSize']=$("#"+formId+" #pageSize").val();
+	enrollmentListFilterDTO['pageSize']= $("#"+formId+" #pageSize").val();
+	if(callFrom == 'filter'){
+		if($("#"+formId+" #subPartner").val()=="all"){
+			enrollmentListFilterDTO['byFilter']= 'N';
+		}else{
+			enrollmentListFilterDTO['byFilter']= 'Y';
+		}
+		
+	}else{
+		enrollmentListFilterDTO['byFilter']= 'N';
+	}
+	// enrollmentListFilterDTO['pageSize']= $("#"+formId+" #pageSize").val() == "" ? 25 : parseInt($("#"+formId+" #pageSize").val());
+	// enrollmentListFilterDTO['pageNo']=currentPageB2bPartnerEnrollmentList;
 	data['enrollmentListFilterDTO']=enrollmentListFilterDTO;
+	console.log(data)
 	return data;
 }
 
@@ -140,6 +171,14 @@ function getRequestForPartnerCommissionRate(formId, userId, learningProgramCode,
 	authentication['learningProgram'] = learningProgramCode;
 	authentication['enrollmentFor'] = enrollmentFor;
 	filterRequest['authentication'] = authentication;
+	let standardId = $("#commissionStandardId").val()
+	if(standardId){
+		filterRequest['standardId'] = standardId;
+	}
+	let learningProgram = $("#commissionlearningProgram").val();
+	if(learningProgram){
+		filterRequest['learningProgram'] = learningProgram;
+	}
 	return filterRequest;
 }
 
@@ -267,6 +306,27 @@ function getPartnerCommissionRate(formId, elementId ,userId) {
 		});
 	});
 }
+
+async function getCommissionRatesByLearningAndGrade(userId){
+	var commissionRate = await getPartnerCommissionRate('','partnerCommitionRate',userId);
+	$("#commissionRow #partnerChartDiv #rangeAndCommissionRateDiv").html(getEnrollmentRangeContent(commissionRate.commissionRates, userId)+getEnrollmentRangeCommissionRateContent(commissionRate.commissionRates));
+	if(commissionRate.commissionRates.length>0){
+		var chartIndexVal1= $("#commissionRatesTab_0").attr("data-tab-value");
+		var valueMin1=$("#commissionRatesTab_0").attr("data-school-value");
+		var valueMax1=$("#commissionRatesTab_0").attr("data-partner-value");
+		getCommissionRatesChart('chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
+	}
+	setTimeout(function(commissionRate) {
+		$('a[data-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function (e) {
+			var chartIndex = $(e.target).data("tab-index");
+			var chartIndexVal = $(e.target).data("tab-value");
+			var valueMin1 = $(e.target).data("school-value");
+			var valueMax1 = $(e.target).data("partner-value");
+			getCommissionRatesChart('chart' + chartIndex, chartIndexVal, valueMin1, valueMax1);
+		});
+	}, 1000);
+}
+
 async function getPartnerCommissionRateSchool(formId, elementId, userId, callback) {
 	$.ajax({
 		type: "POST",
@@ -417,7 +477,7 @@ function updateStudentPartnerCommissionRate(studentStandardId, updateStatus, amo
 			}else{
 				showMessageTheme2(1, data['message']);
 				$("#updateTransferCommission").modal('hide');
-				callStudentListByPartner('partnerEnrollFilterForm');
+				callStudentListByPartner('partnerEnrollFilterForm', 'default');
 			}
 		},
 		error: function(e){
@@ -432,7 +492,7 @@ function updateStudentPartnerCommissionRate(studentStandardId, updateStatus, amo
 
 
 function resetEnrollmentForm(formID){
-	if(USER_ROLE != 'SCHOOL_ADMIN'){
+	if(USER_ROLE != 'SCHOOL_ADMIN' && USER_ROLE != "B2B_PARTNER"){
 		$("#"+formID+" #schoolName").val("").trigger("change");
 		$("#"+formID+" #partnerName").val("").trigger("change");
 	}
@@ -1320,7 +1380,7 @@ function filterRequestData(formId, enrollmentValue){
 	resetEnrollmentForm(formId);
 	$('#'+formId+' #academicYear').select2('val', $('#'+formId+' #academicYear option:last').val());
 	$('#'+formId+' #enrollmentStatus').val(enrollmentValue).trigger("change");
-	callStudentListByPartner(formId);
+	callStudentListByPartner(formId, 'filter');
 }
 
 
@@ -1336,4 +1396,10 @@ function changeRevenueType(eleID){
 	}else{
 		$(".date-range").show();
 	}
+}
+
+function moveToStudentEnrollmentsDashboard(userId, userPaymentDetailsId, sendMailStatus){
+	callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailStatus, function () {
+        renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+    });
 }

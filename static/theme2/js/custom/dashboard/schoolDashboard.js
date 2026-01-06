@@ -96,6 +96,13 @@ function getStudentYearChartData(eventid) {
 				showMessageTheme2(0, data['message']);
 			} else {
 				var userCountList= data.userCountList;
+				if(userCountList.length>0){
+					var currentYearStudent=userCountList[userCountList.length - 1];
+					$("#totalCurrentYear").text(currentYearStudent.totalStudent);
+					$("#freshCurrentYear").text(currentYearStudent.fresh_student);
+					$("#reEnrollCurrentYear").text(currentYearStudent.reenroll_student);
+					$("#withdrawnCurrentYear").text(currentYearStudent.withdraw);
+				} 
 				var totalStudent=[];
 				var activeStudent=[];
 				var withdrwanStudent=[];

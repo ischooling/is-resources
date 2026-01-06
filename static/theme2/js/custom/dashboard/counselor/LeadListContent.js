@@ -15,6 +15,11 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	ROLE_MODULE=roleAndModule;
 	var objRights = objRight.objectRights;
 	OBJECT_RIGHTS=objRights;
+	if(USER_ROLE == 'B2B_PARTNER'){
+		objRights.leadType = 'B2C';
+		objRights.b2bStatus = false
+		objRights.b2cStatus = true
+	}
 	LEAD_CATEGORY=objRights.leadType;
 	HASHTAGLIST = await getTggingMasterListPromise('');
     var html=await getLeadListMasterContent(roleAndModule, objRights);

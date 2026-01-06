@@ -549,7 +549,7 @@ function callForParentSelection(studentUserId) {
 		dataType : 'json',
 		async : false,
 		global : false,
-		success : function(data) {
+		success : async function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
@@ -561,6 +561,20 @@ function callForParentSelection(studentUserId) {
 					}
 				}
             	} else {
+					var payload = {
+						'userId' : USER_ID
+					};	
+					var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+					SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
+					if(responseData.signupType == 'Online' ){
+						if (SHOW_PAYMENT_OPTION == 'Y') {
+							$("#finishBtnId").text('Proceed');
+						} else {
+							$("#finishBtnId").text('Submit Application');
+						}
+					}else{
+						$("#finishBtnId").text('Submit Application');
+					}
 				renderParentDetails(data);
 				$(".step-2-skeleton").html('');
 				$(".step-2-skeleton").hide();

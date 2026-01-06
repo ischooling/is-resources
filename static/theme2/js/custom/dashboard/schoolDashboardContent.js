@@ -33,6 +33,7 @@ function getSchoolDashboardContent(title, userCountList){
 	<div class="row">`
 		+getUserCountHtml(userCountList)
 	html+=`</div>`;
+	html+=getCurrentUserCountHTML();
 	html+=getSchoolDashboardContent2();
 	
 	return html;
@@ -117,17 +118,104 @@ var html=''
 	return html;
 }
 
+function getCurrentUserCountHTML(){
+	var html='';
+	html+=`<div class="main-card mb-3 card">
+			<div class="no-gutters row">
+				<div class="col-md-3">
+					<div class="pt-0 pb-0 card-body">
+						<ul class="list-group list-group-flush border-right">
+							<li class="list-group-item">
+								<div class="widget-content p-0">
+									<div class="widget-content-outer">
+										<div class="widget-content-wrapper">
+											<div class="widget-content-left">
+												<div class="widget-heading">Total Enrollment</div>
+												<div class="widget-subheading">Current year</div>
+											</div>
+											<div class="widget-content-right">
+												<div class="widget-numbers text-primary" id="totalCurrentYear">0</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+							
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="pt-0 pb-0 card-body">
+						<ul class="list-group list-group-flush border-right">
+							<li class="list-group-item">
+								<div class="widget-content p-0">
+									<div class="widget-content-outer">
+										<div class="widget-content-wrapper">
+											<div class="widget-content-left">
+												<div class="widget-heading">Fresh Enrollment</div>
+												<div class="widget-subheading">Current year</div>
+											</div>
+											<div class="widget-content-right">
+												<div class="widget-numbers text-success" id="freshCurrentYear">0</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+							
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="pt-0 pb-0 card-body">
+						<ul class="list-group list-group-flush border-right">
+							<li class="list-group-item">
+								<div class="widget-content p-0">
+									<div class="widget-content-outer">
+										<div class="widget-content-wrapper">
+											<div class="widget-content-left">
+												<div class="widget-heading">Re-Enrollment</div>
+												<div class="widget-subheading">Current year</div>
+											</div>
+											<div class="widget-content-right">
+												<div class="widget-numbers text-warning" id="reEnrollCurrentYear">0</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+							
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="pt-0 pb-0 card-body">
+						<ul class="list-group list-group-flush ">
+							<li class="list-group-item">
+								<div class="widget-content p-0">
+									<div class="widget-content-outer">
+										<div class="widget-content-wrapper">
+											<div class="widget-content-left">
+												<div class="widget-heading">Withdrawn</div>
+												<div class="widget-subheading">Current year</div>
+											</div>
+											<div class="widget-content-right">
+												<div class="widget-numbers text-danger" id="withdrawnCurrentYear">0</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+							
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>`;
+		return html;
+}
+
 function getSchoolDashboardContent2(){
-	// <div class="row">
-	// 		<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-	// 			<div class="mb-3 card">
-	// 				<div class="card-body">
-	// 					<div id="regions_div" ></div>
-	// 				</div>
-	// 			</div>
-	// 		</div>
-	// 	</div>
-	// <div class="bold">Active Student: <span id="activeStudents">${active_student}</span></div>
 	var html=`
 		<div class="row">
 			<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">

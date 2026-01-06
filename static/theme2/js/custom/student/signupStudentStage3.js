@@ -173,6 +173,11 @@ async function showPaymentTermCondMode(src) {
 async function showPaymentModal() {
 	hideModalMessage('');
 	if($('#signupType').val() == 'Online' ){
+		var payload = {
+			'userId' : USER_ID
+		}; 
+		var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+		SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 		if(SHOW_PAYMENT_OPTION=='Y'){
 			await callLocationForPaymentPromise();
 			if ($("#payMode").val() == 'registration') {
@@ -370,6 +375,7 @@ function showSpecificContentNew(tabId, liId) {
 function validateRequestForPaymentOption(formId) {
 	return true;
 }
+
 
 function choosePaymentOption() {
 	var flag=true;

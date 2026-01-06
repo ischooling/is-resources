@@ -5,6 +5,7 @@ async function checkPayment(formId, userPaymentDetailsId, schoolId){
 		'userPaymentDetailsId' : userPaymentDetailsId,
 		'schoolId' : schoolId
 	};	
+	
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'check-payment',payload,'common');
 	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
 		if (responseData.status == '3') {
@@ -47,71 +48,95 @@ async function checkPayment(formId, userPaymentDetailsId, schoolId){
 		});
 	}
 }
+function isPopupBlocked() {
+	var popup = window.open('', '_blank');
 
-async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway,schoolIdOfPaymentGateway){
-	hideModalMessage('');
-	if(paymentGateway=='WELLSFARGO'){
-		$('#cardHolderNameError').hide();
-		$('#cardNumberError').hide();
-		$('#cardExpiryMonthError').hide();
-		$('#cardExpiryMonthError').hide();
-		$('#cardCodeError').hide();
-		if($('#cardHolderName').val()=='' || $('#cardHolderName').val()==undefined){
-			$('#cardHolderNameError').show();
-			return false;
-		}
-		if($('#cardNumber').val()=='' || $('#cardNumber').val()==undefined){
-			$('#cardNumberError').show();
-			return false;
-		}
-		if($('#cardExpiryYear').val()=='' || $('#cardExpiryYear').val()==undefined){
-			$('#cardExpiryMonthError').show();
-			return false;
-		}
-		if($('#cardExpiryMonth').val()=='' || $('#cardExpiryMonth').val()==undefined){
-			$('#cardExpiryMonthError').show();
-			return false;
-		}
-		if($('#cardCode').val()=='' || $('#cardCode').val()==undefined){
-			$('#cardCodeError').show();
-			return false;
-		}
+	if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+		return true;
 	}
-	var payload = {};
-	if($('#location').length>0){
-		payload['location'] = $('#location').val();
-	}else{
-		payload['location'] = '';
-	}
-	payload['browserDetails'] = userPaymentDetailsId;
-	payload['userPaymentDetailsId'] = userPaymentDetailsId;
-	payload['paidByUserId'] = paidByUserId;
-	payload['schoolId'] = schoolId;
-	payload['schoolIdOfPaymentGateway'] = schoolIdOfPaymentGateway;
-	payload['paymentGateway'] = paymentGateway;
-	payload['initiateVia'] = window.location.href.includes('fee-receipt') ? 'Link' : '';
 
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'invoke-payment-gateway',payload,'common');
-	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
-		showModalMessage(0, responseData['message']);
-		if(responseData.statusCode=='ELIGIBLE_CUSTOME_PLAN' || responseData.statusCode=='REDIRECT_TO_DASHBOOARD'){
-			window.location.reload();
-		}
-	} else {
-		showModalMessage(1, "Please wait while redirecting to payment gateway...");
-		if(responseData.details.openSelf){
-			window.location.replace(responseData.details.redirectUrl);
-		}else{
-			if($(".paymentUnderProcessOverlay").length>0){
-				$(".paymentUnderProcessOverlay").remove();
-			}
-			$("body").append(paymentUnderProcessOverlay());
-			CHECK_PAYMENT_INTERVAL_COUNT=0;
-			CHECK_PAYMENT_INTERVAL = setInterval(()=>getPaymentPaidStatus(userPaymentDetailsId, schoolId), 10000);
-			window.open(responseData.details.redirectUrl, '_blank');
-		}
-	}
+	popup.close();
+	return false;
 }
+async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway) {
+    hideModalMessage('');
+
+    if (paymentGateway == 'WELLSFARGO') {
+        $('#cardHolderNameError').hide();
+        $('#cardNumberError').hide();
+        $('#cardExpiryMonthError').hide();
+        $('#cardExpiryMonthError').hide();
+        $('#cardCodeError').hide();
+        if ($('#cardHolderName').val() == '' || $('#cardHolderName').val() == undefined) {
+            $('#cardHolderNameError').show();
+            return false;
+        }
+        if ($('#cardNumber').val() == '' || $('#cardNumber').val() == undefined) {
+            $('#cardNumberError').show();
+            return false;
+        }
+        if ($('#cardExpiryYear').val() == '' || $('#cardExpiryYear').val() == undefined) {
+            $('#cardExpiryMonthError').show();
+            return false;
+        }
+        if ($('#cardExpiryMonth').val() == '' || $('#cardExpiryMonth').val() == undefined) {
+            $('#cardExpiryMonthError').show();
+            return false;
+        }
+        if ($('#cardCode').val() == '' || $('#cardCode').val() == undefined) {
+            $('#cardCodeError').show();
+            return false;
+        }
+    }
+	var payload = {
+        location: $('#location').length > 0 ? $('#location').val() : '',
+        browserDetails: userPaymentDetailsId,
+        userPaymentDetailsId: userPaymentDetailsId,
+        paidByUserId: paidByUserId,
+        schoolId: schoolId,
+        schoolIdOfPaymentGateway: schoolIdOfPaymentGateway,
+        paymentGateway: paymentGateway,
+        initiateVia: window.location.href.includes('fee-receipt') ? 'Link' : ''
+    };
+
+    /* =========================
+       3. OPEN POPUP (SAFARI SAFE)
+    ========================== */
+    if (isPopupBlocked()) {
+        showModalMessage(0, 'Popup blocked. Please allow popups and try again.');
+        return;
+    }
+
+    var responseData;
+    try {
+        responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'invoke-payment-gateway',payload,'common');
+    }catch (error) {
+        console.error('Payment invoke failed:', error);
+        showModalMessage(0, 'Network error. Please try again.');
+        // newWindow.close();
+        return;
+    }
+	if(responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+        showModalMessage(0, responseData['message']);
+        if (responseData.statusCode == 'ELIGIBLE_CUSTOME_PLAN' || responseData.statusCode == 'REDIRECT_TO_DASHBOOARD') {
+            window.location.reload();
+        }
+    }else {
+        showModalMessage(1, "Please wait while redirecting to payment gateway...");
+        if (responseData.details.openSelf) {
+            window.location.replace(responseData.details.redirectUrl);
+        } else {
+            if ($(".paymentUnderProcessOverlay").length > 0) {
+                $(".paymentUnderProcessOverlay").remove();
+            }
+            $("body").append(paymentUnderProcessOverlay());
+            CHECK_PAYMENT_INTERVAL_COUNT = 0;
+            CHECK_PAYMENT_INTERVAL = setInterval(() => getPaymentPaidStatus(userPaymentDetailsId, schoolId), 10000);
+            window.location.href = responseData.details.redirectUrl;
+        }
+    }
+}
+
 
 function initiateOfflinePayment(formId, userPaymentDetailsId, callingFrom, paymentByUserId, gatewayName, schoolId, elementId){
 	hideModalMessage('');
@@ -250,7 +275,7 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 		'schoolIdOfPaymentGateway' : schoolIdOfPaymentGateway,
 		'schoolId' : schoolId
 	}
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'/payment-gateway/options',payload,'common');
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'payment-gateway/options',payload,'common');
 	if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
 		if (responseData['status'] == '3') {
 			redirectLoginPage();

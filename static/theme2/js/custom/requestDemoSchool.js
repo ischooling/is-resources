@@ -80,12 +80,12 @@ function callForRequestDemoForm(formId, moduleId, folderName) {
         			var url = '';
         			if(ENVIRONMENT=='uat'){
         				url = 'http://164.52.198.42:8070/istest/common/ppc-request-thank-you';
-        				url = 'https://www.internationalschooling.org/'+folderName+'/thank-you.html';
+        				url = schoolSettingsLinks.schoolWebsite+'/'+folderName+'/thank-you.html';
         			}else if(ENVIRONMENT=='dev'){
         				url = 'http://localhost:8080/istest/common/ppc-request-thank-you';
-        				url = 'https://www.internationalschooling.org/'+folderName+'/thank-you.html';
+        				url = schoolSettingsLinks.schoolWebsite+'/'+folderName+'/thank-you.html';
         			}else{
-        				url = 'https://www.internationalschooling.org/'+folderName+'/thank-you.html';
+        				url = schoolSettingsLinks.schoolWebsite+'/'+folderName+'/thank-you.html';
         			}
         			goAhead(url,'');
         		}
