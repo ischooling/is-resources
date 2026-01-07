@@ -168,7 +168,6 @@ function teacherAgreementView(data){
             <div class="contract-page" style="width: 21cm; margin: 0 auto; padding: 10px 10px 20px; page-break-after: always; ">
                 <div>
                     <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="300px;" />
-                    ${/*<img src="${PATH_FOLDER_IMAGE}letter-header.png${SCRIPT_VERSION}" width="300px;" />*/''}
                 </div>
                 <div class="text-editor-content" style="min-height: 250px; padding-top: 65px">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">

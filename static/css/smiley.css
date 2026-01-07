@@ -2,7 +2,7 @@
 *{margin:0;font-family:calibri;box-sizing:border-box;}
 ul li{list-style:none}
 .main-div{width: 100%;float: left;text-align: right;height: 100vh;overflow-y:;}
-.image-div{width:50%;float:left;height:100vh;background-image:url(../img/02.png);background-size:cover;background-position:center}
+.image-div{width:50%;float:left;height:100vh;background-image:url(../img/02.jpg);background-size:cover;background-position:center}
 .logo{width:35%;float:left}
 .form-buy-smile{width:50%;padding:35px;display: inline-block;background-color:#fff;height:100vh;float:right;overflow:hidden;overflow-y:auto;}
 .steps ul{width:100%;margin:0px auto;display:flex;align-items:center;counter-reset:step;list-style-type:none;padding: 0;}
