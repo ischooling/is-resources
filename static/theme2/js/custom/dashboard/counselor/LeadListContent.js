@@ -854,6 +854,8 @@ function getLeadListMasterContent(roleAndModule, objRights){
 	html+=getMoveLeadsPopup(objRights);
 	html+=getDiscardLeadModel();
 	html+=deleteWarning();
+	html+=getDemoDetailSummary();
+	
 	if($('#logData').length<1){
 		$("body").append(getWatiTemplatesHtml());
 	}
@@ -1373,4 +1375,13 @@ function showNewDiscardLeadModelFunction(functionName,leadSource,studentName,stu
 	$("#studentPhoneNo").html(studentPhoneNo);
 	$("#createdDate").html(createdDate);
 	$("#discardLeadModel").modal("show");
+}
+
+function formatOpenAIText(text) {
+    if (!text) return "";
+    return text
+        .replace(/### (.*)/g, "<h5>$1</h5>")
+        .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+        .replace(/\n\n/g, "<br/><br/>")
+        .replace(/\n/g, "<br/>");
 }

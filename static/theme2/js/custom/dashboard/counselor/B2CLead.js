@@ -1,4 +1,4 @@
-function callMeetingRecordingSummary(leadid) {
+function callMeetingRecordingSummary(leadid, leadno) {
 	data={};
 	data['leadid']=leadid;
 	data['userId']=USER_ID;
@@ -12,12 +12,13 @@ function callMeetingRecordingSummary(leadid) {
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-      console.log(data);
+        console.log(data);
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(true, data['message']);
 			} else {
-				//var html=getLeadCounselorReviewHtml(data.counselorReviewList);
-				//$("#"+eventId).html(html);
+				$("#demosummaryleadno").text(leadno)
+				$("#demosummarytxt").html(formatOpenAIText(data.demoDetailsummary))
+				$("#demodetailsummary").modal('show')
 			}
 		}
 	});

@@ -1774,7 +1774,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                 if(USER_ROLE=='DIRECTOR'){
                   if(leads.demoSummaryStatus){
                     html+='<tr>'
-                          +'<td class="border-0 p-1" colspan="2">'
+                          +'<td class="border-0 p-1">'
                             +'<div class="dropdown d-inline-block" style="position: inherit;">'
                               +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Demo Summary</button>'
                               +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px; max-height:350px; overflow: auto;">';
@@ -1796,6 +1796,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                             html+='</table>'
                               +'</div>'
                             +'</div>'
+                          +'</td>'
+                          +'<td class="border-0 p-1">'
+                              +'<button type="button" class="btn btn-sm btn-primary" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Detail Summary</button>'
                           +'</td>'
                         +'</tr>';
                   }
@@ -2180,3 +2183,24 @@ function getLeadStartTimer(leadstartDate, leadid){
     }, 1000);
 
 }
+
+function getDemoDetailSummary(){
+    var html=
+        `<div class="modal fade" id="demodetailsummary" tabindex="-1" role="dialog" aria-labelledby="userActivityModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Demo detail summary (<span id="demosummaryleadno"></span>)</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="demosummarytxt" style="max-height: 75vh; overflow: auto;">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>`
+    return html;
+}
+
