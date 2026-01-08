@@ -179,6 +179,15 @@ function validateRequestForEvaluationFormDetails(formId, otpType) {
     flag = false;
   }
 
+  if ($("#" + formId + " #additionalInfo").val().length > 500) {
+    showMessageErrorNew(
+      true,
+      "Maximum 500 character allowed.",
+      "additionalInfoError"
+    );
+    flag = false;
+  }
+
   //	if ($("#"+formId+" #isdCodeWtsp").val()=='' || $("#"+formId+" #isdCodeWtsp").val()==null) {
   //		showMessageErrorNew(true, 'ISD Whatsapp Code is required', 'wtspNumberError');
   //		flag=false;
@@ -746,6 +755,10 @@ function validateElement(formId, fieldId, fielderrorId) {
     ) {
     } else {
       hideMessageErrorNew("freeSlotListError");
+    }
+  } else if (fieldId == "additionalInfo") {
+    if($("#" + formId + " #additionalInfo").val().length < 500) {
+      hideMessageErrorNew("additionalInfoError");
     }
   } else if (fieldId == "countryTimezoneId") {
     if (

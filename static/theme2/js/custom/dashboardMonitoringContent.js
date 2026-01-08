@@ -1,3 +1,7 @@
+function getDashboardMonitoringContent(){
+    $("#dashboardContentInHTML").html(dashboardMonitoringContent());
+    dashboardMonitoringOnLoad("dashboardMonitoringFilterForm");
+}
 function dashboardMonitoringContent(){
     var html=
         `<div class="app-page-title mb-3 py-2">

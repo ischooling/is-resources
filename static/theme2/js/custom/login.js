@@ -558,7 +558,10 @@ function getURLForCommon(suffixUrl) {
   return BASE_URL + API_VERSION + "common" + "/" + suffixUrl;
 }
 function getURLFor(apiType, suffixUrl) {
-  return BASE_URL + API_VERSION + apiType + "/" + suffixUrl;
+	if(suffixUrl!=''){
+		suffixUrl= "/" + suffixUrl;
+	}
+	return BASE_URL + API_VERSION + apiType + suffixUrl;
 }
 function getDataBasedUrlAndPayload(url, payload){
 	return new Promise(function (resolve, reject) {

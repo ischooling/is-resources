@@ -44,33 +44,33 @@ $(document).ready(function () {
     }
 });
 
-let IS_USER_ACTIVE = false;
-let ACTIVE_SECONDS = 0;
-let TIMER = null;
-let IDLE_TIMER = null;
-let IDLE_TIME = 0;
-let START_TIME = null;
-let END_TIME = null;
-const getIdleTimeForTracker = getSettingsByTypeAndKey('CONFIGURATION','IDLE_TIME_FOR_TRACKER');
-let IDLE_LIMIT = parseInt(JSON.parse(getIdleTimeForTracker)?.data?.metaValue);
-// let IDLE_LIMIT = 10;
-let TAB_PRESS_EVENTS = [];
-let IS_SUSPICIOUS_ACTIVITY = false;
-let SUSPICIOUS_ACTIVITY_TIMEOUT = null;
-let KEY_PRESS_EVENTS = [];
-const SUSPICIOUS_THRESHOLD = 50;   // number of keypresses allowed
-const SUSPICIOUS_WINDOW = 5000; 
+var  IS_USER_ACTIVE = false;
+var ACTIVE_SECONDS = 0;
+var TIMER = null;
+var IDLE_TIMER = null;
+var IDLE_TIME = 0;
+var START_TIME = null;
+var END_TIME = null;
+var getIdleTimeForTracker = getSettingsByTypeAndKey('CONFIGURATION','IDLE_TIME_FOR_TRACKER');
+var IDLE_LIMIT = parseInt(JSON.parse(getIdleTimeForTracker)?.data?.metaValue);
+// var IDLE_LIMIT = 10;
+var TAB_PRESS_EVENTS = [];
+var IS_SUSPICIOUS_ACTIVITY = false;
+var SUSPICIOUS_ACTIVITY_TIMEOUT = null;
+var KEY_PRESS_EVENTS = [];
+var SUSPICIOUS_THRESHOLD = 50;   // number of keypresses allowed
+var SUSPICIOUS_WINDOW = 5000; 
 
-const sessionId = Date.now() + "-" + Math.floor(Math.random() * 1000);
-let timerUpdateInterval = null;
-let currentSessionTimer = null;
-let TOTAL_ACTIVE_TIME = "00:00:00";
+var sessionId = Date.now() + "-" + Math.floor(Math.random() * 1000);
+var timerUpdateInterval = null;
+var currentSessionTimer = null;
+var TOTAL_ACTIVE_TIME = "00:00:00";
 
 function startTimer() {
     if (!IS_USER_ACTIVE) {
         IS_USER_ACTIVE = true;
         START_TIME = new Date();
-        console.log("⏱ Activity started at:", START_TIME);
+        // console.log("⏱ Activity started at:", START_TIME);
         
         $('#pausedIndicator').hide();
         $('#liveIndicator').show();
@@ -89,7 +89,7 @@ async function stopTimer() {
         IS_USER_ACTIVE = false;
         END_TIME = new Date();
         clearInterval(TIMER);
-        console.log("🛑 Activity stopped at:", END_TIME);
+        // console.log("🛑 Activity stopped at:", END_TIME);
         
         $('#liveIndicator').hide();
         $('#pausedIndicator').show();
@@ -108,7 +108,7 @@ function resetIdleTimer() {
 function checkIdleStatus() {
     IDLE_TIME++;
     if (IDLE_TIME >= IDLE_LIMIT) {
-       console.log("💤 User idle for", IDLE_LIMIT, "seconds. Logging session...");
+    //    console.log("💤 User idle for", IDLE_LIMIT, "seconds. Logging session...");
         stopTimer();
     }
 }
@@ -137,14 +137,14 @@ function timeToSeconds(timeString) {
     if (!timeString || timeString === 'undefined' || timeString === 'null') {
         return 0;
     }
-    const timeParts = timeString.split(':');
+    var timeParts = timeString.split(':');
     if (timeParts.length !== 3) {
-        console.warn('Invalid time format:', timeString);
+        // console.warn('Invalid time format:', timeString);
         return 0;
     }
-    const hours = parseInt(timeParts[0]) || 0;
-    const minutes = parseInt(timeParts[1]) || 0;
-    const seconds = parseInt(timeParts[2]) || 0;
+    var hours = parseInt(timeParts[0]) || 0;
+    var minutes = parseInt(timeParts[1]) || 0;
+    var seconds = parseInt(timeParts[2]) || 0;
     return hours * 3600 + minutes * 60 + seconds;
 }
 
@@ -157,7 +157,7 @@ function formatTimeForActivityTimer(seconds) {
 
 function updateCurrentSessionDisplay() {
     if (IS_USER_ACTIVE && ACTIVE_SECONDS > 0) {
-        const totalSeconds = timeToSeconds(TOTAL_ACTIVE_TIME || "00:00:00") + ACTIVE_SECONDS;
+        var totalSeconds = timeToSeconds(TOTAL_ACTIVE_TIME || "00:00:00") + ACTIVE_SECONDS;
         $('#timerValue').text(formatTimeForActivityTimer(totalSeconds));
     }
 }
@@ -195,7 +195,7 @@ async function getActivityTotalTimeByDate(trackerDate) {
             TOTAL_ACTIVE_TIME = responseData.totalActiveTimeOfCurrentDate || "00:00:00";
             
             if (IS_USER_ACTIVE) {
-                const totalSeconds = timeToSeconds(TOTAL_ACTIVE_TIME) + ACTIVE_SECONDS;
+                var totalSeconds = timeToSeconds(TOTAL_ACTIVE_TIME) + ACTIVE_SECONDS;
                 $('#timerValue').text(formatTimeForActivityTimer(totalSeconds));
                 $('#liveIndicator').show();
                 $('#pausedIndicator').hide();
@@ -255,7 +255,7 @@ async function getActivityTotalTimeByDate(trackerDate) {
 
 document.addEventListener("keydown", function(event) {
 
-    const now = Date.now();
+    var now = Date.now();
 
     // Track all key presses
     KEY_PRESS_EVENTS.push(now);
@@ -266,7 +266,7 @@ document.addEventListener("keydown", function(event) {
     // Detect suspicious fast key spam
     if (KEY_PRESS_EVENTS.length > SUSPICIOUS_THRESHOLD) {
         
-        console.warn("🚨 Suspicious Key Spam Detected:", KEY_PRESS_EVENTS.length);
+        // console.warn("🚨 Suspicious Key Spam Detected:", KEY_PRESS_EVENTS.length);
 
         IS_SUSPICIOUS_ACTIVITY = true;
         stopTimer();
@@ -281,7 +281,7 @@ document.addEventListener("keydown", function(event) {
         SUSPICIOUS_ACTIVITY_TIMEOUT = setTimeout(() => {
             IS_SUSPICIOUS_ACTIVITY = false;
             KEY_PRESS_EVENTS = [];
-            console.log("✅ Suspicious activity cleared");
+            // console.log("✅ Suspicious activity cleared");
             getActivityTotalTimeByDate();
         }, 5000);
 
@@ -318,10 +318,10 @@ IDLE_TIMER = setInterval(checkIdleStatus, 1000);
 
 document.addEventListener("visibilitychange", function () {
     if (document.hidden) {
-        console.log("📴 Tab hidden / switched away");
+        // console.log("📴 Tab hidden / switched away");
         stopTimer();
     } else {
-        console.log("📱 Tab visible again");
+        // console.log("📱 Tab visible again");
         startTimer();
         getActivityTotalTimeByDate();
     }

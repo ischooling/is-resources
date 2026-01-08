@@ -1,0 +1,1 @@
+$(document).ready((()=>{new ClipboardJS(".clipboard-trigger")}));

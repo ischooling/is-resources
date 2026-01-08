@@ -1,0 +1,1 @@
+$(document).ready((()=>{$(".input-mask-trigger").inputmask()}));

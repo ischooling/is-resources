@@ -20,6 +20,7 @@
 	box-sizing: border-box;
 	
 }
+.ml{margin-left: 0 !important;}
 input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 
 /* server message css */

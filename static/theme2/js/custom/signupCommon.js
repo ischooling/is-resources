@@ -510,50 +510,6 @@ function showElementErrorMessage(show, elementId, message) {
 	}
 }
 
-function checkRequestIsEligibleForEnrollment(formId, moduleId, learningProgram, schoolId, timeZone, countryName, email) {
-	hideMessage('');
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('eligible-for-enrollment'),
-		data: JSON.stringify(checkRequestIsEligibleForEnrollmentPayload(formId, moduleId, learningProgram, schoolId, timeZone, countryName, email)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				window.location.replace(data['message']);
-				showMessage(true, 'The selected learning is not available in your region right now.');
-			} else {
-				$('#email').attr('disabled', false);
-				$('#confirmEmail').attr('disabled', false);
-			}
-			return false;
-		}
-	});
-}
-function checkRequestIsEligibleForEnrollmentPayload(formId, moduleId, learningProgram, schoolId, timeZone, countryName, email) {
-	var request = {};
-	var authentication = {};
-	var data = {};
-	data['requestKey'] = 'ELIGIBLE-FOR-ENROLLMENT';
-	data['learningProgram'] = learningProgram;
-	data['schoolId'] = schoolId;
-	data['timeZone'] = timeZone;
-	data['countryName'] = countryName;
-	data['SCHOOL_UUID'] = SCHOOL_UUID;
-	data['email'] = email;
-
-	authentication['hash'] = getHash();
-	authentication['schoolId'] = SCHOOL_ID;
-	authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = moduleId;
-
-	request['authentication'] = authentication;
-	request['data'] = data;
-	return request;
-}
-
 function validMailPermission(flag, elementID) {
 	if (flag) {
 		validEndInvalidField(true, "email");

@@ -79,10 +79,10 @@ function callForRequestDemoForm(formId, moduleId, folderName) {
         		} else {
         			var url = '';
         			if(ENVIRONMENT=='uat'){
-        				url = 'http://164.52.198.42:8070/istest/common/ppc-request-thank-you';
+        				url = 'http://164.52.198.42:8070/common/ppc-request-thank-you';
         				url = schoolSettingsLinks.schoolWebsite+'/'+folderName+'/thank-you.html';
         			}else if(ENVIRONMENT=='dev'){
-        				url = 'http://localhost:8080/istest/common/ppc-request-thank-you';
+        				url = 'http://localhost:8080/common/ppc-request-thank-you';
         				url = schoolSettingsLinks.schoolWebsite+'/'+folderName+'/thank-you.html';
         			}else{
         				url = schoolSettingsLinks.schoolWebsite+'/'+folderName+'/thank-you.html';

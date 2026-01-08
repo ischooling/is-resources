@@ -1190,3 +1190,11 @@ function paymentStatusResponseModal(){
 	</div>`;
 	return html;	
 }
+
+$(document).on("click","#chkvalBookSession", function(){
+	if($("#chkvalBookSession").is(":checked")){
+		$("#payTabBookingSessionModal #payBookingSessionTabData").removeAttr("disabled");
+	}else{
+		$("#payTabBookingSessionModal #payBookingSessionTabData").attr("disabled", true);
+	}
+});

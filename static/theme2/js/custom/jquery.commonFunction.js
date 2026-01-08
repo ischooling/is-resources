@@ -137,7 +137,10 @@ function getURLForHTMLWithPayload(apiType, suffixUrl) {
   return url;
 }
 function getURLFor(apiType, suffixUrl) {
-  return BASE_URL + API_VERSION + apiType + "/" + suffixUrl;
+	if(suffixUrl!=''){
+		suffixUrl= "/" + suffixUrl;
+	}
+	return BASE_URL + API_VERSION + apiType + suffixUrl;
 }
 function getURLForCommon(suffixUrl) {
   return BASE_URL + API_VERSION + "common" + "/" + suffixUrl;
@@ -447,7 +450,7 @@ function showMessageTheme2(messageType, message, id, msgHide, timer) {
     if (messageType == 0) {
       $("#msgTheme2").addClass("error");
       $("#msgTheme2").html(
-        '<i class="fa fa-exclamation-triangle"></i>&nbsp;' + message
+        '&nbsp;' + message
       );
     } else if (messageType == 1) {
       $("#msgTheme2").addClass("success");
@@ -5750,6 +5753,7 @@ function getDashboardDataBasedUrlAndPayload(globalflag,showMessage,url,payload) 
             }
           }
         } else {
+          
           resolve(data);
         }
       },
@@ -6675,7 +6679,6 @@ function formatLabel(str) {
     .replace(/^./, s => s.toUpperCase())
     .trim();
 }
-
 function formatTimeDisplay(timeInSeconds) {
   if (!timeInSeconds) return '0m';
   const minutes = Math.floor(timeInSeconds / 60);
@@ -6702,6 +6705,15 @@ function getRemainingDays(lastAnsweringDate) {
   var diffMs = lastDate - today;
   var remaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
   return remaining > 0 ? remaining : 0;
+}
+function selfModalHide(modalID){
+	$("#"+modalID).modal("hide");
+  if (typeof viewWatiTemplate === "function") {
+	  viewWatiTemplate(false);
+  }
+  if (typeof viewEmailTemplate === "function") {
+    viewEmailTemplate(false);
+  }
 }
 
 function checkAiSummaryAvailable(entityId, entityType) {

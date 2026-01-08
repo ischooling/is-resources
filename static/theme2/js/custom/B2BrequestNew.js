@@ -945,43 +945,6 @@ function callForB2BRequestForm(formId, moduleId, folderName, domainName) {
       } else {
          $("#b2bRequest").hide();
          $("#thankYou").show();
-        // var url = "";
-        // if (ENVIRONMENT == "uat") {
-        //   url = "https://internationalschooling.org/en/is-b2b-thankyou/";
-        //   url =
-        //     "https://www.internationalschooling.org/" +
-        //     folderName +
-        //     "/thank-you.html";
-        // } else if (ENVIRONMENT == "dev") {
-        //   url = "http://localhost:8080/istest/common/ppc-request-thank-you";
-        //   url = "https://internationalschooling.org/en/is-b2b-thankyou/";
-        // } else if (ENVIRONMENT == "uat2") {
-        //   url = BASE_URL + "istest/common/ppc-request-thank-you";
-        //   url = "https://internationalschooling.org/en/is-b2b-thankyou/";
-        // } else {
-        //   if (domainName == undefined) {
-        //     domainName = "https://internationalschooling.org";
-        //   }
-          // var payload = "";
-
-          // if (data.name) {
-          //   var name = base64Encode(data.name);
-          //   payload = "?dn=" + name;
-          // }
-
-          // if (data.email) {
-          //   var email = base64Encode(data.email);
-          //   payload = payload + "&de=" + email;
-          // }
-
-          // if (data.country) {
-          //   var country = base64Encode(data.country);
-          //   payload = payload + "&dc=" + country;
-          // }
-          // url = "https://internationalschooling.org/en/is-b2b-thankyou/";
-          // "https://internationalschooling.org/en/is-b2b-thankyou/" + payload;
-        // }
-        // window.location.href = url;
       }
     },
     complete: function () {

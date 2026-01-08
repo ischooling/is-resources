@@ -1,7 +1,5 @@
 
 var LEAD_CATEGORY="B2C";
-var ROLE_MODULE="";
-var OBJECT_RIGHTS="";
 async function renderSchoolReportDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE, LEAD_CATEGORY){
 	//var urlLead = "lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
   	var objRight= await getLeadReportData(roleAndModule.moduleId, USER_ID, 'report');

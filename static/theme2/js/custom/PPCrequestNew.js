@@ -958,12 +958,12 @@ function callForRequestDemoForm(formId, moduleId, folderName, domainName) {
       } else {
         var url = "";
         if (ENVIRONMENT == "uat") {
-          url = "http://164.52.198.42:8070/istest/common/book-a-demo-thank-you";
+          url = "http://164.52.198.42:8070/common/book-a-demo-thank-you";
         } else if (ENVIRONMENT == "uat2") {
           url =
-            "http://164.52.216.248:8080/istest/common/book-a-demo-thank-you";
+            "http://164.52.216.248:8080/common/book-a-demo-thank-you";
         } else if (ENVIRONMENT == "dev") {
-          url = "http://localhost:8080/istest/common/book-a-demo-thank-you";
+          url = "http://localhost:8080/common/book-a-demo-thank-you";
         } else {
           if (domainName == undefined) {
             domainName = "https://enroll.internationalschooling.org";
