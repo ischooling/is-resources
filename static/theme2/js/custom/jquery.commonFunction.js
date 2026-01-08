@@ -6362,7 +6362,7 @@ function getUploadInputBtn(inputId, uploadViewElementId, fileType, elem_id, btn_
         html+=
         `<div id="policeVeriProfile" class="file-btn  text-left w-fit-content float-left position-relative">
           <span id="fileName8" class="fileName" style="display: none;"></span> 
-          <input onchange="uploadDocsFun(this, 'verify', \'${uploadViewElementId}\', \'${viewAttachmentFlag}\');previewPoliceVerification(event);" class="file-input" type="file" name="${inputId}" id="${inputId}" fileType="${fileType}" elem-id="${elem_id}" value="Upload ${btn_label_name}"/> 
+          <input onchange="uploadDocsFun(this, 'verify', \'${uploadViewElementId}\', true);previewPoliceVerification(event);" class="file-input" type="file" name="${inputId}" id="${inputId}" fileType="${fileType}" elem-id="${elem_id}" value="Upload ${btn_label_name}"/> 
           <span class="btn primary-bg white-txt-color mt-1">Upload Police Verification</span>
         </div>`;
       }
