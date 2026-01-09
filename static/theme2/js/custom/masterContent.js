@@ -1830,68 +1830,36 @@ function getAllEventList(formId,elementId){
 
 }	
 
-// function getUserRights(schoolId, roleId, userId, moduleId){
-// 	var data={};
-//           data['schoolId']=schoolId;
-//           data['roleId']=roleId;
-//           data['userId']=userId;
-//           data['moduleId']=moduleId;
-// 	$.ajax({
-// 		type : "POST",
-// 		contentType : APPLICATION_JSON_VALUE,
-// 		url : getURLFor('module',''),
-// 		data : JSON.stringify(data),
-// 		dataType : 'json',
-// 		async: false,
-// 		global: false,
-// 		success : function(data) {
-// 			roleAndModule=data
-// 		},
-// 		error : function(e) {
-// 			if (checkonlineOfflineStatus()) {
-// 				return;
-// 			}else{
-// 				showMessage(true, e.responseText);
-// 			}
-// 		}
-// 	});
-// 	return roleAndModule;
-// }
-
 function getUserRights(schoolId, roleId, userId, moduleId) {
     return new Promise((resolve, reject) => {
-
-        const payload = {
-            schoolId: schoolId,
-            roleId: roleId,
-            userId: userId,
-            moduleId: moduleId
-        };
 
         $.ajax({
             type: "POST",
             contentType: APPLICATION_JSON_VALUE,
             url: getURLFor('module', ''),
-            data: JSON.stringify(payload),
+            data: JSON.stringify({ schoolId, roleId, userId, moduleId }),
             dataType: 'json',
             global: false,
 
             success: function (response) {
-                resolve(response);  // return result
+                if (!response || $.isEmptyObject(response)) {
+                    reject("Empty response");
+                    return;
+                }
+                resolve(response);
             },
 
             error: function (e) {
-                if (checkonlineOfflineStatus()) {
-                    reject("offline");  // force caller to handle
+                if (!navigator.onLine) {
+                    reject("offline");
                 } else {
-                    showMessageTheme2(0, e.responseText);
-                    reject(e.responseText);
+                    reject(e.responseText || "Server error");
                 }
             }
         });
-
     });
 }
+
 
 
 function callAllStudentList(formId, value, toElementId) {
