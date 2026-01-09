@@ -846,6 +846,11 @@ function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
     var urlSend ="/dashboard/counselor-daily-report?moduleId=" + moduleId +"&userId=" + USER_ID;
     getAsPost(urlSend);
   }
+  else if (pageNo == "lead-sales-research") {
+    //getContent(moduleId, pageNo, replaceDiv, extraParam);
+    var urlSend ="/dashboard/lead-sales-research?moduleId=" + moduleId +"&userId=" + USER_ID;
+    getAsPost(urlSend);
+  }
 
 
   //Student - left-side

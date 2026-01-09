@@ -6903,3 +6903,13 @@ function convertImageToBase64(imageUrl, callback) {
   };
   img.src = imageUrl;
 }
+
+
+function formatOpenAIText(text) {
+    if (!text) return "";
+    return text
+        .replace(/### (.*)/g, "<h5>$1</h5>")
+        .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+        .replace(/\n\n/g, "<br/><br/>")
+        .replace(/\n/g, "<br/>");
+}

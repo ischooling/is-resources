@@ -1376,11 +1376,3 @@ function showNewDiscardLeadModelFunction(functionName,leadSource,studentName,stu
 	$("#discardLeadModel").modal("show");
 }
 
-function formatOpenAIText(text) {
-    if (!text) return "";
-    return text
-        .replace(/### (.*)/g, "<h5>$1</h5>")
-        .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-        .replace(/\n\n/g, "<br/><br/>")
-        .replace(/\n/g, "<br/>");
-}
