@@ -1,8 +1,8 @@
 
 async function renderAutoProgressReportDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE){
   	
-	ROLE_MODULE=roleAndModule;
-	var html=await getAutoProgressReportListContent(title);
+	var ROLE_MODULE=roleAndModule;
+	var html= getAutoProgressReportListContent(title);
     $('#dashboardContentInHTML').html(html);
 	// callRoleDropdown("adminFilter",'','roleUser');
 	courseProviderList('autoStudentSearchForm','lmsPlatform');

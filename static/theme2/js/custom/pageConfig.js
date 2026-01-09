@@ -25,7 +25,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "extra-session-details":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-teacher-sessions":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}, {role:"",fileName:["dashboardCalendar.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-transcript":{url:"student-list?moduleId="+moduleId,file:[{role:"",fileName:["advanceTranscriptSearch.js"]}],type:"JSP",pageReqType:"IN"},
-        "bulk-transcript-print":{url:"bulk-transcript-print?moduleId="+moduleId,file:[{role:"",fileName:["copyCourseFilter.js",""]}],type:"JSP",pageReqType:"IN"},
+        "bulk-transcript-print":{url:"bulk-transcript-print?moduleId="+moduleId,file:[{role:"",fileName:["copyCourseFilter.js"]}],type:"JSP",pageReqType:"IN"},
         "flex-billing-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/get-lmsbuzz-billing?moduleId="+moduleId},
         "critical-students":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/get-critical-students?moduleId="+moduleId},
         "nongrading-students":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/get-nongrading-students?moduleId="+moduleId},
@@ -37,7 +37,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "pending-interview-remarks":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js","dashboardSchoolRemark.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-profile-pending-verification":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-profile-pending-bank-details":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "approved-teachers":{url:"",file:[{role:"",fileName:["approvedTeacherListContent.js","approvedTeacherList.js","dashboardExtraActivity.js","dashboardUserActivity.js","dashboardTeacherPayment.js","manageLMSContent.js","manageLMS.js","dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "approved-teachers":{url:"",file:[{role:"",fileName:["approvedTeacherListContent.js","approvedTeacherList.js","dashboardExtraActivity.js","dashboardUserActivity.js","dashboardTeacherPayment.js","manageLMSContent.js","manageLMS.js","dashboardStudent.js","manageTeacherProfile.js","manageTeacherProfileContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "rejected-teachers":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js","dashboardUserActivity.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "withdraw-teachers":{url:"",file:[{role:"",fileName:["approvedTeacherListContent.js","approvedTeacherList.js","dashboardExtraActivity.js","dashboardUserActivity.js","dashboardTeacherPayment.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-class-review":{url:"",file:[],funName:function(){},type:"JSP",init: function(){window.open(CONTEXT_PATH+UNIQUEUUID+"/dashboard/teacher-class-review/"+SCHOOL_UUID+"?moduleId="+moduleId, "_blank");},pageReqType:"EX",urlSend:""},
@@ -59,7 +59,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "holiday-list":{url:"school-holiday-list?moduleId="+moduleId,file:[{role:"",fileName:["dashboardCalendar.js","masterContent.js"]}],funName:function(){},type:"JSP",init: function(){getWaringContent1()},pageReqType:"IN"},
         "holiday-form":{url:"school-holiday-form?moduleId="+moduleId,file:[{role:"",fileName:["jquery.ckeditor.js","dashboardCalendar.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "lead-report-list":{url:"",file:[{role:"",fileName:["LeadReportListContent.js","CounselorDashboardContent.js","leads.js","LeadReportSearchPopup.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "lead-list":{url:"",file:[{role:"",fileName:["LeadListContent.js","B2CLeadListContent.js","B2CLead.js","B2BLeadListContent.js","leads.js","leadsContent.js","leadsPartnerContent.js","leadsPartner.js","schoolSetupContent.js","cropperImageChatSupportDocument.js","cropperImageLeadDocument.js", "schoolSetup.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "lead-list":{url:"",file:[{role:"",fileName:["LeadListContent.js","B2CLeadListContent.js","B2CLead.js","B2BLeadListContent.js","leads.js","leadsContent.js","leadsPartnerContent.js","leadsPartner.js","schoolSetupContent.js","cropperImageChatSupportDocument.js","cropperImageLeadDocument.js", "schoolSetup.js", "CounselorData.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-assign-form":{url:"",file:[{role:"",fileName:["leadAssignFormContent.js","leadAssignForm.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-calculation-chart":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-calculation-chart?moduleId="+moduleId+"&euid="+ENCRYPTED_USER_ID},
         "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -74,7 +74,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "wati-numbers":{url:"",file:[{role:"",fileName:["watiNumbersContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "partner-school-payment":{url:"",file:[{role:"",fileName:["partnerSchoolPaymentContent.js","partnerSchoolPayment.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "graduation-ceremony-attendees":{url:"",file:[{role:"",fileName:["graduationCeremonyAttendeesContent.js","graduationCeremonyAttendees.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "user-screening-profiles":{url:"",file:[{role:"",fileName:["userApplicationContent.js","userApplication.js", "teacherScreeningProfileContent.js", "teacherScreeningProfile.js","jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "user-screening-profiles":{url:"",file:[{role:"",fileName:["userApplicationContent.js","userApplication.js", "teacherScreeningProfileContent.js", "teacherScreeningProfile.js","jquery.ckeditor.js","cropperImageChatSupportDocument.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-weekly-progress":{url:"student-weekly-progress-report?moduleId="+moduleId,file:[{role:"",fileName:["dashboardWeeklyProgress.js"]}],type:"JSP",pageReqType:"IN"},
         "task":{url:"",file:[{role:"",fileName:["taskListContent.js","taskList.js","jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "dashboard-monitoring":{url:"",file:[{role:"",fileName:["dashboardMonitoringContent.js","dashboardMonitoring.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -191,7 +191,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
     if (requestType.type == "JSP") {
         try{
             if(requestType.file.length>0){
-                loadScript(requestType.file);
+              await  loadScript(requestType.file);
             }
             if(requestType.pageReqType != "EX"){
               await callForDashboardData("formIdIfAny", requestType.url, replaceDiv, extraParam);
@@ -204,7 +204,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         }
     } else if(requestType.type == "JS") {
         if(requestType.file.length>0){
-            loadScript(requestType.file);
+            await loadScript(requestType.file);
         }
         if(requestType.pageReqType == "IN"){
             getContent(moduleId, pageNo, replaceDiv, extraParam);
@@ -271,7 +271,7 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
     if (requestType.type == "JSP") {
         try{
             if(requestType.file.length>0){
-              loadScript(requestType.file);
+              await loadScript(requestType.file);
             }
             await callForDashboardData("formIdIfAny", requestType.url, replaceDiv, roleModuleId);
             if (requestType.init && typeof requestType.init === "function") {
@@ -282,7 +282,7 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
         }
     } else if(requestType.type == "JS") {
         if(requestType.file.length>0){
-            loadScript(requestType.file);
+            await loadScript(requestType.file);
         }
         if(typeof requestType.funName == "function"){
             requestType.funName();
@@ -307,7 +307,7 @@ async function callInneraction(actionType, arg0) {
             try{
                 await callForDashboardData("formIdIfAny", requestType.url);
                 if(requestType.file.length>0){
-                    loadScript(requestType.file);
+                    await  loadScript(requestType.file);
                 }
                 if (requestType.init && typeof requestType.init === "function") {
                 requestType.init();
@@ -317,7 +317,7 @@ async function callInneraction(actionType, arg0) {
             }
         } else if(requestType.type == "JS") {
             if(requestType.file.length>0){
-                loadScript(requestType.file);
+              await loadScript(requestType.file);
             }
             if(typeof requestType.funName == "function"){
                 requestType.funName();

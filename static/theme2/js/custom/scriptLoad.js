@@ -1,40 +1,98 @@
 var RESOURCE_PATH = PATH_FOLDER_JS2+RESOURCES_FROM_MIN_LOCATION;
-function loadScript(srcArray) {
-    $.each(srcArray, function(index, value){
-        $.each(value.fileName, function(index, fileName){
-            loadScriptCall(value.role, fileName)
-        })
-    });
-}
+// function loadScript(srcArray) {
+//     $.each(srcArray, function(index, value){
+//         $.each(value.fileName, function(index, fileName){
+//             loadScriptCall(value.role, fileName)
+//         })
+//     });
+// }
 
-function loadScriptCall(role, src){
-    if(src!=''){
-        var id = src.split(".");
-        id = id[0]+"JS";
-        if(role == "js"){
-            var cacheBustedSrc = RESOURCE_PATH+src + "?t=" + new Date().getTime();
-        }else{
-            var cacheBustedSrc = RESOURCE_PATH+"custom/"+src + "?t=" + new Date().getTime();
-        }
-        if($('head #'+ id).length <1){
-            if($("#" + src).length === 0 && $("#"+id).length<1) {  // Check if the script is already added
-                var script = $("<script>")
-                    .attr("type", "text/javascript")
-                    .attr("src", cacheBustedSrc)
-                    .attr("id", id)  // Add a unique ID to each script without .js
-                    .on("load", function() {  // Execute callback when script is loaded
-                        console.log(`Script ${cacheBustedSrc} loaded.`);
-                    })
-                    .on("error", function() {  // Handle script load error
-                        console.error(`Failed to load script: ${src}`);
-                    });
-                $("head").append(script);
-            } else {
-                console.log(`Script ${cacheBustedSrc} already loaded.`);
+
+
+// function loadScriptCall(role, src){
+//     if(src!=''){
+//         var id = src.split(".");
+//         id = id[0]+"JS";
+//         if(role == "js"){
+//             var cacheBustedSrc = RESOURCE_PATH+src + "?t=" + new Date().getTime();
+//         }else{
+//             var cacheBustedSrc = RESOURCE_PATH+"custom/"+src + "?t=" + new Date().getTime();
+//         }
+//         if($('head #'+ id).length <1){
+//             if($("#" + src).length === 0 && $("#"+id).length<1) {  // Check if the script is already added
+//                 var script = $("<script>")
+//                     .attr("type", "text/javascript")
+//                     .attr("src", cacheBustedSrc)
+//                     .attr("id", id)  // Add a unique ID to each script without .js
+//                     .on("load", function() {  // Execute callback when script is loaded
+//                         console.log(`Script ${cacheBustedSrc} loaded.`);
+//                     })
+//                     .on("error", function() {  // Handle script load error
+//                         console.error(`Failed to load script: ${src}`);
+//                     });
+//                 $("head").append(script);
+//             } else {
+//                 console.log(`Script ${cacheBustedSrc} already loaded.`);
+//             }
+//         }
+//     }
+// }
+
+async function loadScript(files) {
+    var promises = [];
+
+    for (var i = 0; i < files.length; i++) {
+        var role = files[i].role;
+        var fileNames = files[i].fileName;
+
+        for (var j = 0; j < fileNames.length; j++) {
+            if (fileNames[j]) {
+                promises.push(loadScriptCall(role, fileNames[j]));
             }
         }
     }
+
+    await Promise.all(promises); // wait till ALL scripts are loaded
 }
+
+
+function loadScriptCall(role, src) {
+    return new Promise((resolve, reject) => {
+        if (!src) {
+            resolve();
+            return;
+        }
+
+        var id = src.split(".")[0] + "JS";
+        var cacheBustedSrc = role === "js"
+            ? RESOURCE_PATH + src + "?t=" + Date.now()
+            : RESOURCE_PATH + "custom/" + src + "?t=" + Date.now();
+
+        // already loaded
+        if ($('#' + id).length > 0) {
+            resolve();
+            return;
+        }
+
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = cacheBustedSrc;
+        script.id = id;
+
+        script.onload = () => {
+            console.log(`Script loaded: ${src}`);
+            resolve();
+        };
+
+        script.onerror = () => {
+            console.error(`Failed to load script: ${src}`);
+            reject(`Failed to load script: ${src}`);
+        };
+
+        document.head.appendChild(script);
+    });
+}
+
 
 function callForDashboardData(formId, actionUrl, replaceDiv) {
 	return new Promise((resolve, reject) => {

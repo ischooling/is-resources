@@ -558,7 +558,7 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
     }
     var isContractFilled = data?.content && data.content.trim() !== "";
     var html =
-        `<div class="modal right-slide-modal fade show" id="addTeacherContractModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+        `<div class="modal right-slide-modal fade" id="addTeacherContractModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
