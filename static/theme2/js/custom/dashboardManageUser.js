@@ -396,8 +396,7 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 							  +'</a>'
 							: ''))
 				+'</td>'
-  
-				+'<td>'
+  				+'<td>'
 				  +'<div class="btn-group">'
 					+'<button type="button" class="btn btn-primary  dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Action"><i class="fa fa-ellipsis-v"></i></button>'
 					+'<div class="dropdown-menu" x-placement="bottom-start">'

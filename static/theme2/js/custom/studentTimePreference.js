@@ -1,3 +1,4 @@
+var ORIENTSTATUS;
 function studentTimepreferencePageOnLoadEvent(){
     $('.play-icon').click(function() {
         $(this).parent().fadeOut(); // Hide play button overlay
@@ -99,6 +100,7 @@ async function getStudentTimePreference(studentId, standardId, providerId){
 
 function studentSystemTrainingShowHide(data){
     $('#hideAllData').hide();
+    ORIENTSTATUS = data['orientStatus'];
     if(data.systemTrainingStatus == "Skipped") {
         isSkipped = true;
         return false;
@@ -147,6 +149,8 @@ function studentSystemTrainingShowHide(data){
                 if(data['orientStatus']!='COMPLETED'){
                     $("#timePreferencePopup").removeClass("d-none");
                     $("#timePreferencePopup").modal("show");
+                    // $("#profileFielddModal").modal("hide"); 
+                    // clearInterval(intervalId)
                 }else{
                     $("#timePreferencePopup").modal("hide");
                     $("#timePreferencePopup").addClass("d-none");

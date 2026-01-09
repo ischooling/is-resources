@@ -377,10 +377,24 @@ function getGrades(grades, selectOption){
 	return html;
 }
 
-function getAllGrade(schoolId, selectOption){
+
+ 
+function getAllGrade(schoolId, selectOption, elementId){
     var gradeAll= getGradesData(requiredGrades);
     var gradeOption = getGrades(gradeAll, selectOption);
-    $('#gradeId').append(gradeOption);
+	if(elementId == undefined){
+		elementId = "gradeId";
+	}
+    $('#'+elementId).append(gradeOption);
+}
+
+function getAllGradeWithFormId(schoolId, selectOption, formId, elementId){
+    var gradeAll= getGradesData(requiredGrades);
+    var gradeOption = getGrades(gradeAll, selectOption);
+	if(elementId == undefined){
+		elementId = "gradeId";
+	}
+    $("#"+formId+" #"+elementId).html(gradeOption);
 }
 
 function getAllGradeOnSelectId(elementId, selectOption){
@@ -404,7 +418,20 @@ function getRelationshipContent(){
 	html+='<option value="Mother">Mother</option>';
 	html+='<option value="Father">Father</option>';
 	html+='<option value="Guardian">Guardian</option>';
-	html+='<option value="Other">Other</option>';
+	// html+='<option value="Other">Other</option>';
+	return html;
+}
+
+function getBloodGroup(){
+	var html='<option value="">Select bloodgroup*</option>'
+	html+='<option value="A Positive">A Positive</option>';
+	html+='<option value="A Negative">A Negative</option>';
+	html+='<option value="B Positive">B Positive</option>';
+	html+='<option value="B Negative">B Negative</option>';
+	html+='<option value="O Positive">O Positive</option>';
+	html+='<option value="O Negative">O Negative</option>';
+	html+='<option value="A Positive">A Positive</option>';
+	html+='<option value="A Negative">A Negative</option>';
 	return html;
 }
 
@@ -2545,5 +2572,104 @@ function deleteWarning(warningMessage, callbackFunction) {
 				+'</div>'
 			+'</div>'
 		+'</div>';
+	return html;
+}
+
+function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,avalWhtsAppStatusID, index){
+	if(formId == ""){
+		var phoneNumber = document.querySelector("#"+eleId);
+	}else{
+		var phoneNumber = document.querySelector("#"+formId+" #"+eleId);
+	}
+    // var phoneNumber = document.querySelector("#"+formId+" #"+eleId);
+    // if (phoneNumber.intlTelInputInstance) {
+    //     phoneNumber.intlTelInputInstance.destroy();
+    //     phoneNumber.removeAttribute('data-intlTelInput-initialized');
+    // }
+    var itiInstances = window.intlTelInput(phoneNumber, {
+        separateDialCode: true,
+		utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
+    });
+    if(flagCode == null || flagCode == undefined || flagCode == ""){
+        itiInstances.setCountry("US");
+    }else{
+        itiInstances.setCountry(flagCode);   
+    }
+	$("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
+	$("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
+    phoneNumber.addEventListener('countrychange', function(e) {
+		if(saveType == "selfSave"){
+			phoneNumberDailCodeChange(phoneNumber.intlTelInputInstance.a.id,flagCode,phoneNumber.intlTelInputInstance.j, avalWhtsAppStatusID, index)
+		}
+        $("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
+        $("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
+    });
+    phoneNumber.intlTelInputInstance = itiInstances;
+    //phoneNumber.setAttribute('data-intlTelInput-initialized', 'true');
+}
+
+function validatePhoneNumber(eleId) {
+    var phoneNumber = document.getElementById(eleId);
+    if (phoneNumber && phoneNumber.intlTelInputInstance) {
+        var iti = phoneNumber.intlTelInputInstance;
+        if (iti.isValidNumber()) {
+            return {
+                valid: true,
+                number: iti.getNumber(),
+                dialCode: iti.getSelectedCountryData().dialCode,
+                countryCode: iti.getSelectedCountryData().iso2
+            };
+        } else {
+            return {
+                valid: false,
+                message: "Invalid phone number"
+            };
+        }
+    } else {
+        return {
+            valid: false,
+            message: "IntlTelInput instance not found"
+        };
+    }
+}
+
+function parseTimeToMinutes(timeStr) {
+	var [time, modifier] = timeStr.trim().split(' ');
+	var [hours, minutes] = time.split(':').map(Number);
+	if (modifier.toUpperCase() === 'PM' && hours !== 12) {
+		hours += 12;
+	} else if (modifier.toUpperCase() === 'AM' && hours === 12) {
+		hours = 0;
+	}
+	return hours * 60 + minutes;
+}
+
+function formatMinutesTo12Hour(mins) {
+	var hours = Math.floor(mins / 60);
+	var minutes = mins % 60;
+	var ampm = hours >= 12 ? 'PM' : 'AM';
+	hours = hours % 12;
+	if (hours === 0) hours = 12;
+	return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+}
+
+function generateTimeDropdown(startTime, endTime, gapMinutes) {
+    var start = parseTimeToMinutes(startTime);
+    var end = parseTimeToMinutes(endTime);
+    var html = `<option value="">Select Time*</option>`;
+
+    while (start < end) {
+        var timeStr = formatMinutesTo12Hour(start);
+        html += `<option value="${timeStr}">${timeStr}</option>`;
+        start += gapMinutes;
+    }
+
+    if (start === end) {
+        var timeStr = formatMinutesTo12Hour(end);
+        html += `<option value="${timeStr}">${timeStr}</option>`;
+    } else if (start > end && (end - (start - gapMinutes)) > 0) {
+        var timeStr = formatMinutesTo12Hour(end);
+        html += `<option value="${timeStr}">${timeStr}</option>`;
+    }
 	return html;
 }

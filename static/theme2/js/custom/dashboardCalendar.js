@@ -164,6 +164,7 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 					var finalEvents=[];
                     var events = data.event || [];
 					if(events.length>0){
+						console.log(data)
 						// events.sort((a, b) => new Date(a.start) - new Date(b.start));
 						events.forEach(obj => {
 							if(obj.id.startsWith("announce", 0) || obj.id.startsWith("holiday", 0)){
@@ -171,6 +172,7 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 							}else{
 								obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
 								obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
+								ACTIVITY_CLASS_START_TIME.push({"startTime":obj.start.replace("T", " "), "endTime":obj.end.replace("T", " "), "title":"class"});
 								var baseDate=obj.start.split('T')[0];
 								if($.inArray(baseDate,data.holidays)<0){
 									finalEvents.push(obj);
@@ -691,7 +693,7 @@ function scrollEvent(){
 	scrollEventInterval = setInterval(function(){
         let $target = $(".live-class-blink").length ? $(".live-class-blink") : $(".upcoming-class-blink");
 		if ($target.length > 0 && $target.offset()) {
-            const scrollTopValue = $target.offset().top - 65;
+            const scrollTopValue = $target.offset().top - 87;
             $('.fc-scroller.fc-time-grid-container').animate({ scrollTop: scrollTopValue }, 1000);
             clearInterval(scrollEventInterval);
         }

@@ -1,79 +1,79 @@
 
 async function loginContent(userName, fromSpoof){
     var html =``;
-            html+=marqueeContent();
-            html+=
-            `<div class="login-bg">
-                <div class="container" style="display: flex;justify-content: center;">
-                    ${/*<div class="row">
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+        html+=marqueeContent();
+        html+=
+        `<div class="login-bg">
+            <div class="container" style="display: flex;justify-content: center;">
+                ${/*<div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
 
-                        </div>
-                    </div>*/''}
-                    <div class="row">
-                        <div class="col-lg-6 col-md-12 col-sm-6 col-xs-12 text-center">
-                            ${/*<div class="login-logo eid_logo_align_2022">
-                                <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                                    <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="160" loding="lazy"/>
-                                </a>
-                            </div>*/''}
-                           ${/*<div class="new-year-img">
-                                <img src="${PATH_FOLDER_IMAGE}2022.png" loding="lazy"/>
-                            </div>*/''} 
-                        </div>`;
+                    </div>
+                </div>*/''}
+                <div class="row">
+                    <div class="col-lg-6 col-md-12 col-sm-6 col-xs-12 text-center">
+                        ${/*<div class="login-logo eid_logo_align_2022">
+                            <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                                <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="160" loding="lazy"/>
+                            </a>
+                        </div>*/''}
+                        ${/*<div class="new-year-img">
+                            <img src="${PATH_FOLDER_IMAGE}2022.png" loding="lazy"/>
+                        </div>*/''} 
+                    </div>`;
 
-                        +CommonLandingImageContent();
+                    +CommonLandingImageContent();
+                    html+=
+                    `<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">`;
+                        if(SCHOOL_ID === 1){
+                            html+=`<div class="login-wrapper">`;
+                        } else{
+                            html+=`<div class="login-wrapper" style="text-align: center;">`;
+                        }
                         html+=
-                        `<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">`;
-                            if(SCHOOL_ID === 1){
-                                html+=`<div class="login-wrapper">`;
-                            } else{
-                                html+=`<div class="login-wrapper" style="text-align: center;">`;
-                            }
-                            html+=
-                            `${/*<img src="${PATH_FOLDER_IMAGE2}happy_new_year_2025_text.jpg" class="christmas-text-img" loding="lazy"/>*/''}
-                            ${/*<img src="${PATH_FOLDER_IMAGE2}happy_new_year_2025_text.png" class="christmas-text-img" style="display: inline-block;float: none;" loding="lazy"/>*/''}
-                            <div class="login">
-                                <div class="login-logo eid_logo_align_2022" style="margin:0">
-                                    <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                                        <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="350" loding="lazy" />
-                                    </a>`;
-                                    // if(SCHOOL_ID == 1){
-                                    //     html+=`<h5 class="text-primary" style="margin-top:5px;font-size:14px;font-weight:500">My School, My Location, My Time</h5>`;
-                                    // }
-                                    html+=
-                                    `</div>
-                                    <hr style="margin:20px 0px 0px 0px;"/>`
-                                    if(SCHOOL_ID === 1){
-                                        html+=`<h4 class="sms"style="">School Management System</h4>`;
-                                    }else{
-                                        html+=`<h4 class="sms primary-txt-color"style="">School Management System</h4>`;
-                                    }
-                                    html+=
-                                    `<div>
-                                        <div class="user-circle">
-                                            <span class="circle-border primary-border-color">
-                                                <i class="fa fa fa-user-o user-icon primary-txt-color"></i>
-                                            </span>
-                                        </div>
+                        `${/*<img src="${PATH_FOLDER_IMAGE2}happy_new_year_2025_text.jpg" class="christmas-text-img" loding="lazy"/>*/''}
+                        ${/*<img src="${PATH_FOLDER_IMAGE2}happy_new_year_2025_text.png" class="christmas-text-img" style="display: inline-block;float: none;" loding="lazy"/>*/''}
+                        <div class="login">
+                            <div class="login-logo eid_logo_align_2022" style="margin:0">
+                                <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                                    <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="350" loding="lazy" />
+                                </a>`;
+                                // if(SCHOOL_ID == 1){
+                                //     html+=`<h5 class="text-primary" style="margin-top:5px;font-size:14px;font-weight:500">My School, My Location, My Time</h5>`;
+                                // }
+                                html+=
+                                `</div>
+                                <hr style="margin:20px 0px 0px 0px;"/>`
+                                if(SCHOOL_ID === 1){
+                                    html+=`<h4 class="sms"style="">School Management System</h4>`;
+                                }else{
+                                    html+=`<h4 class="sms primary-txt-color"style="">School Management System</h4>`;
+                                }
+                                html+=
+                                `<div>
+                                    <div class="user-circle">
+                                        <span class="circle-border primary-border-color">
+                                            <i class="fa fa fa-user-o user-icon primary-txt-color"></i>
+                                        </span>
                                     </div>
-                                    <h1 class="primary-txt-color">User Log In</h1>`;
-
-                                    html+=loginFormContent(userName, fromSpoof);
-                                    html+=
-                                    `<div class="form-group"></div>
                                 </div>
+                                <h1 class="primary-txt-color">User Log In</h1>`;
+
+                                html+=loginFormContent(userName, fromSpoof);
+                                html+=
+                                `<div class="form-group"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>`;
+            </div>
+        </div>`;
 
-            html+=serverErrorMessageContent()
-            +forgotPasswordContent()
-            +commonEmailAllreadyExistContent()
-            +emailLimitContent()
-            +getCookiesConsentContent();
+        html+=serverErrorMessageContent()
+        +forgotPasswordContent()
+        +commonEmailAllreadyExistContent()
+        +emailLimitContent()
+        +getCookiesConsentContent();
     return html;
 }
 

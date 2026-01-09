@@ -497,10 +497,9 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 			renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
 		}else if(pageNo=='partner-fee-structure'){
 			renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
+		}else if(pageNo=='profile-view'){
+			renderUserProfilePage(extraParam);
 		}
-		// else if(pageNo=='profile-view'){
-		// 	renderUserProfilePage(extraParam);
-		// }
 	}catch(err){
 		console.error("getContent error:", err);
 
@@ -776,3 +775,1496 @@ function callEvaluationFormDocs(evaluationId) {
   });
 }
 
+
+
+
+
+
+
+
+
+function submitSlot(formId, moduleId) {
+  hideMessageTheme2("");
+  if (!validateRequestForSubmitSlot(formId, moduleId)) {
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("dashboard", "slot-submit"),
+    data: JSON.stringify(getRequestForSubmitSlot(formId, moduleId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(1, data["message"]);
+        $("#" + formId)[0].reset();
+        $("#enabledDateModal").modal("toggle");
+        setTimeout(function () {
+          callDashboardPageSchool("18a");
+        }, 1000);
+      }
+      return false;
+    }
+  });
+}
+
+function getRequestForSubmitSlot(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var enabledDateDTO = {};
+  enabledDateDTO["status"] = $("#" + formId + " #status").val();
+  enabledDateDTO["slotId"] = $("#" + formId + " #slotId").val();
+  enabledDateDTO["publish"] = $(
+    "#" + formId + " #status option:selected"
+  ).val();
+  enabledDateDTO["reason"] = $("#" + formId + " #txtReason").val();
+  enabledDateDTO["timeZoneId"] = $(
+    "#" + formId + " #countryTimezoneId option:selected"
+  ).val();
+
+  requestData["enabledDateDTO"] = enabledDateDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  authentication["userId"] = $("#" + formId + " #userId").val();
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+function validateRequestForSubmitSlot(formId, moduleId) {
+  return true;
+}
+
+function submitTrvlSlot(formId, moduleId) {
+  hideMessageTheme2("");
+  if (!validateRequestForSubmitTrvlSlot(formId, moduleId)) {
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("school", "travel-Visit-detail-submit"),
+    data: JSON.stringify(getRequestForSubmitTrvlSlot(formId, moduleId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(1, data["message"]);
+        $("#" + formId)[0].reset();
+        callSchoolInneraction("6f", "2");
+      }
+      return false;
+    }
+  });
+}
+
+function getRequestForSubmitTrvlSlot(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var enabledDateDTO = {};
+
+  enabledDateDTO["slotId"] = $("#" + formId + " #slotId").val();
+  enabledDateDTO["travelDetail"] = $("#" + formId + " #txtTravelDetail").val();
+
+  requestData["enabledDateDTO"] = enabledDateDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  authentication["userId"] = $("#" + formId + " #userId").val();
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+function validateRequestForSubmitTrvlSlot(formId, moduleId) {
+  return true;
+}
+
+function getAllEmailsForStudentRole() {
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(getRequestForMaster("formId", "EMAIL_LIST", "asda")),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    async: false,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+        var data = data["mastersData"]["emailList"];
+        $.each(data, function (key, val) {
+          emailList.push(val.value);
+        });
+      }
+      return false;
+    }
+  });
+}
+ 
+
+
+function validateRequestForSubmitSyllabus(formId, moduleId) {
+  return true;
+}
+function callForLMSUserSignUp(formId, moduleId, roleModuleId) {
+  hideMessageTheme2("");
+  $("#lmsUserForm").prop("disabled", true);
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForSignup("create-lms-user", moduleId),
+    data: JSON.stringify(getRequestForLMSUserSignup(formId, moduleId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(0, data["message"]);
+        $("#lmsUserModal1").modal("hide");
+        setTimeout(function () {
+          callDashboardPageSchool(roleModuleId, "manage-lms-user");
+        }, 1000);
+      }
+      $("#lmsUserForm").prop("disabled", false);
+      return false;
+    }
+  });
+}
+function changeLmsUserPassword(formId, moduleId, roleModuleId) {
+  hideMessageTheme2("");
+  $("#lmsUserForm").prop("disabled", true);
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForSignup("change-lms-user-password", moduleId),
+    data: JSON.stringify(getRequestForLMSPasswordChange(formId, moduleId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(0, data["message"]);
+        $("#lmsChangePasswordModal1").modal("hide");
+        setTimeout(function () {
+          callDashboardPageSchool(roleModuleId, "manage-lms-user");
+        }, 1000);
+      }
+      $("#lmsUserForm").prop("disabled", false);
+      return false;
+    }
+  });
+}
+
+function getRequestForLMSUserSignup(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var lmsUserInfoDTO = {};
+  //lmsUserInfoDTO['userEmail'] = $("#"+formId+" #userEmail").val();
+  lmsUserInfoDTO["userId"] = $("#" + formId + " #userId1").val();
+  lmsUserInfoDTO["lmsUserName"] = escapeCharacters(
+    $("#" + formId + " #lmsUserName").val()
+  );
+  lmsUserInfoDTO["password"] = $("#" + formId + " #password").val();
+  lmsUserInfoDTO["confirmPassword"] = $(
+    "#" + formId + " #confirmPassword"
+  ).val();
+  lmsUserInfoDTO["lmsRegNumber"] = $("#" + formId + " #lmsRegNumber").val();
+  requestData["lmsUserInfoDTO"] = lmsUserInfoDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+function getRequestForLMSPasswordChange(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var lmsUserInfoDTO = {};
+  //lmsUserInfoDTO['userEmail'] = $("#"+formId+" #userEmail").val();
+  lmsUserInfoDTO["userId"] = $("#" + formId + " #userId1").val();
+  lmsUserInfoDTO["lmsRegNumber"] = $("#" + formId + " #lmsRegNumber").val();
+  lmsUserInfoDTO["password"] = $("#" + formId + " #password").val();
+  lmsUserInfoDTO["confirmPassword"] = $(
+    "#" + formId + " #confirmPassword"
+  ).val();
+
+  requestData["lmsUserInfoDTO"] = lmsUserInfoDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+
+
+function approveSubject(formId, moduleId, isApproved, subjectId) {
+  hideMessageTheme2("");
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("school", "approve-subjects"),
+    data: JSON.stringify(
+      getRequestForApproveSubject(formId, moduleId, isApproved, subjectId)
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(0, data["message"]);
+        callSchoolInneraction("22a", $("#schoolId").val());
+      }
+      return false;
+    }
+  });
+}
+function callForSubjectApproval(formId) {
+  hideMessageTheme2("");
+  if (!validateRequestForApprovalSubject(formId)) {
+    return false;
+  }
+  if (!validatePassengerDetails()) {
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    url: getURLForHTML("school", "admin-approve-subject"),
+    data: encodeURI(
+      "request=" + JSON.stringify(getRequestForAddTravelDetails(formId))
+    ),
+    dataType: "html",
+    cache: false,
+    timeout: 600000,
+    success: function (htmlContent) {
+      if (htmlContent != "") {
+        var stringMessage = [];
+        stringMessage = htmlContent.split("|");
+        if (
+          stringMessage[0] == "FAILED" ||
+          stringMessage[0] == "EXCEPTION" ||
+          stringMessage[0] == "SESSIONOUT"
+        ) {
+          //redirectLoginPage();
+         showMessageTheme2(0, stringMessage[1]);
+        } else {
+         showMessageTheme2(0, stringMessage[1]);
+          $("#travelDataModal").modal("hide");
+          //callSchoolInneraction('6f',$('#sortById').val());
+        }
+        return false;
+      }
+    }
+  });
+}
+
+function validateRequestForApprovalSubject() {
+  if ($("#status").val() == "0" || $("#status").val() == null) {
+   showMessageTheme2(1, "please select status");
+    return false;
+  }
+  if ($("#remarks").val() == "" || $("#remarks").val() == null) {
+   showMessageTheme2(1, "Remarks is required");
+    return false;
+  }
+  return true;
+}
+function getRequestForApproveSubject(formId, moduleId, isApproved, subjectId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+
+  var subjectListInfoDTO = {};
+  subjectListInfoDTO["subjectId"] = subjectId;
+  subjectListInfoDTO["schoolId"] = $("#schoolId").val();
+  subjectListInfoDTO["isApproved"] = isApproved;
+
+  requestData["subjectListInfoDTO"] = subjectListInfoDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  authentication["userId"] = $("#userId").val();
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+
+function savePlacementCourse(formId, moduleId, courseId, isForDelete) {
+  hideMessageTheme2("");
+  if (!validateRequestForAddPlacementCourse(formId, isForDelete)) {
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("school", "placement-save-course-details"),
+    data: JSON.stringify(
+      getRequestForSavePlacementCourse(formId, moduleId, courseId, isForDelete)
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(0, data["message"]);
+        $("#courseInfoModal").modal("hide");
+        setTimeout(function () {
+          return callDashboardPageSchool("30");
+        }, 1000);
+      }
+      return false;
+    }
+  });
+}
+
+function getRequestForSavePlacementCourse(
+  formId,
+  moduleId,
+  courseId,
+  isForDelete
+) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var placementCourseInfoDTO = {};
+
+  placementCourseInfoDTO["courseId"] = $("#" + formId + " #courseId").val();
+  placementCourseInfoDTO["courseName"] = $("#" + formId + " #courseName").val();
+  placementCourseInfoDTO["standardId"] = $("#" + formId + " #standardId").val();
+  placementCourseInfoDTO["controlType"] = $("#controlType").val();
+  placementCourseInfoDTO["order"] = $("#" + formId + " #orderId").val();
+  placementCourseInfoDTO["creditLimit"] = $("#" + formId + " #creditId").val();
+  if (isForDelete != "" && isForDelete != undefined && isForDelete == "Y") {
+    placementCourseInfoDTO["isForDelete"] = "Y";
+    placementCourseInfoDTO["courseId"] = courseId;
+    placementCourseInfoDTO["controlType"] = "delete";
+  }
+
+  requestData["placementCourseInfoDTO"] = placementCourseInfoDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  authentication["userId"] = $("#userId").val();
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+function validateRequestForAddPlacementCourse(formId, isForDelete) {
+  if (
+    $("#" + formId + " #standardId").val() == 0 ||
+    ($("#" + formId + " #standardId").val() == undefined && isForDelete != "Y")
+  ) {
+   showMessageTheme2(0, "Please choose grade.");
+    return false;
+  }
+  if ($("#" + formId + " #courseName").val() == "" && isForDelete != "Y") {
+   showMessageTheme2(0, "Please enter category name.");
+    return false;
+  }
+  if ($("#" + formId + " #orderId").val() == "" && isForDelete != "Y") {
+   showMessageTheme2(0, "Please set order.");
+    return false;
+  }
+  if ($("#" + formId + " #creditId").val() == "0.0" && isForDelete != "Y") {
+   showMessageTheme2(0, "Please set credit limit.");
+    return false;
+  }
+  return true;
+}
+
+
+function callCourseListBySubjectId(
+  formId,
+  value,
+  elementId,
+  toElementId,
+  requestExtra,
+  requestExtra1
+) {
+  hideMessageTheme2("");
+  resetDropdown($("#" + formId + " #" + toElementId), "Select course");
+  if (!validateRequestForMasterGrade(formId, elementId)) {
+    $("#" + formId + " #" + elementId).val(0);
+    //resetDropdown($("#"+formId+" #"+elementId), 'Select course');
+    return false;
+  }
+  //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(
+      getRequestForMaster(
+        formId,
+        "COURSE-LIST-BY-STANDARD-ID",
+        value,
+        requestExtra,
+        requestExtra1
+      )
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+        //buildDropdown(data['mastersData']['courseList'], $("#"+formId+" #"+toElementId), 'Select course');
+        var result = data["mastersData"]["courseList"];
+        var dropdown = $("#" + formId + " #" + toElementId);
+        dropdown.html("");
+        dropdown.append('<option value="0">Select course</option>');
+        $.each(result, function (k, v) {
+          dropdown.append(
+            '<option value="' +
+              v.key +
+              '" parentid="' +
+              v.extra +
+              '">' +
+              v.value +
+              "</option>"
+          );
+        });
+
+        $("#" + formId + " #courseId").prop("disabled", false);
+      }
+    }
+  });
+}
+
+function callPlacementCourseListByStandardId(
+  formId,
+  value,
+  elementId,
+  toElementId,
+  requestExtra
+) {
+  hideMessageTheme2("");
+  resetDropdown($("#" + formId + " #" + toElementId), "Select Category");
+  if (!validateRequestForMasterGrade(formId, elementId)) {
+    $("#" + formId + " #" + elementId).val(0);
+    //resetDropdown($("#"+formId+" #"+elementId), 'Select course');
+    return false;
+  }
+  //$("#"+formId+" #pastTaughtSubjectId").prop("disabled", true);
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(
+      getRequestForMaster(
+        formId,
+        "PLACEMENT-COURSE-LIST-BY-STANDARD-ID",
+        value,
+        requestExtra
+      )
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+        buildDropdown(
+          data["mastersData"]["courseList"],
+          $("#" + formId + " #" + toElementId),
+          "Select course"
+        );
+        $("#" + formId + " #courseId").prop("disabled", false);
+      }
+    }
+  });
+}
+
+
+
+
+function sendMailRequestDemo(formId, moduleId, roleModuleId) {
+  hideMessageTheme2("");
+  if (!validateRequestForRaiseRequestDemo(formId)) {
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("dashboard", "send-demo-request-mail"),
+    data: JSON.stringify(getRequestForRaiseDemoRequest(formId, moduleId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(1, data["message"]);
+        $("#requestContentModal").modal("hide");
+        setTimeout(function () {
+          callDashboardPageSchool(
+            roleModuleId,
+            "request-demo",
+            "",
+            "?requestRaisedBy=student&campaign=admin"
+          );
+        }, 1000);
+      }
+      $("#requestContentModal").prop("disabled", false);
+      return false;
+    }
+  });
+}
+function validateRequestForRaiseRequestDemo() {
+  if ($("#email").val() == "" || $("#email").val() == null) {
+   showMessageTheme2(0, "Email is required");
+    return false;
+  }
+  return true;
+}
+function getRequestForRaiseDemoRequest(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var requestDemoDTO = {};
+  requestDemoDTO["name"] = $("#" + formId + " #username").val();
+  requestDemoDTO["email"] = $("#" + formId + " #email").val();
+  requestDemoDTO["campaignName"] = "Request-demo";
+  requestData["requestDemoDTO"] = requestDemoDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+function callForLMSStudentPerformance(formId, moduleId, roleModuleId) {
+  hideMessageTheme2("");
+  if (!validateRequestForLMSStudentPerformance(formId)) {
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForSignup("save-lmsStudent-Performance", moduleId),
+    data: JSON.stringify(getRequestForLMSStudentPerformance(formId, moduleId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(1, data["message"]);
+        $("#lmsStudentContentModal").modal("hide");
+        setTimeout(function () {
+          callDashboardPageSchool(roleModuleId, "lms-student-performance");
+        }, 1000);
+      }
+      return false;
+    }
+  });
+}
+function validateRequestForLMSStudentPerformance() {
+  if ($("#studentName").val() == "" || $("#studentName").val() == null) {
+   showMessageTheme2(0, "Student Name  is required");
+    return false;
+  }
+  if ($("#studentEmail").val() == "" || $("#studentEmail").val() == null) {
+   showMessageTheme2(0, "Student Email is required");
+    return false;
+  }
+  if ($("#teacherName").val() == "" || $("#teacherName").val() == null) {
+   showMessageTheme2(0, "Teacher Name is required");
+    return false;
+  }
+  if ($("#teacherEmail").val() == "" || $("#teacherEmail").val() == null) {
+   showMessageTheme2(0, "Teacher Email is required");
+    return false;
+  }
+  if ($("#courseProvider").val() == "0" || $("#courseProvider").val() == null) {
+   showMessageTheme2(0, "Please select LMS Platform");
+    return false;
+  }
+  if ($("#subjectEventId").val() == "0" || $("#subjectEventId").val() == null) {
+   showMessageTheme2(0, "Please select course type");
+    return false;
+  }
+  if (
+    $("#subjectEventId").val() == "CR" ||
+    $("#subjectEventId").val() == "FT"
+  ) {
+    if ($("#standardId").val() == "0" || $("#standardId").val() == null) {
+     showMessageTheme2(0, "Grade is required");
+      return false;
+    }
+    if ($("#subjectId").val() == "0" || $("#subjectId").val() == null) {
+     showMessageTheme2(0, "Course is required");
+      return false;
+    }
+  }
+  if ($("#subjectEventId").val() == "AP") {
+    if (
+      $("#placementStandardId").val() == "0" ||
+      $("#placementStandardId").val() == null
+    ) {
+     showMessageTheme2(0, "Grade is required");
+      return false;
+    }
+    if (
+      $("#placementSubjectId").val() == "0" ||
+      $("#placementSubjectId").val() == null
+    ) {
+     showMessageTheme2(0, "Course is required");
+      return false;
+    }
+  }
+  if ($("#status").val() == "0" || $("#status").val() == null) {
+   showMessageTheme2(0, "Please select status");
+    return false;
+  }
+  return true;
+}
+
+function getRequestForLMSStudentPerformance(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var lmsStudentPerformanceTrackDTO = {};
+  lmsStudentPerformanceTrackDTO["studentName"] = $(
+    "#" + formId + " #studentName"
+  ).val();
+  lmsStudentPerformanceTrackDTO["studentEmail"] = $(
+    "#" + formId + " #studentEmail"
+  ).val();
+  lmsStudentPerformanceTrackDTO["teacherName"] = $(
+    "#" + formId + " #teacherName"
+  ).val();
+  lmsStudentPerformanceTrackDTO["teacherEmail"] = $(
+    "#" + formId + " #teacherEmail"
+  ).val();
+  lmsStudentPerformanceTrackDTO["courseProviderId"] = $(
+    "#" + formId + " #courseProvider"
+  ).val();
+  lmsStudentPerformanceTrackDTO["comments"] = $(
+    "#" + formId + " #idComments"
+  ).val();
+  if ($("#standardId").val() != 0 && $("#standardId").val() != null) {
+    lmsStudentPerformanceTrackDTO["standardId"] = $("#standardId").val();
+  }
+  if ($("#subjectId").val() != 0 && $("#subjectId").val() != null) {
+    lmsStudentPerformanceTrackDTO["subjectId"] = $("#subjectId").val();
+  }
+  if (
+    $("#placementStandardId").val() != 0 &&
+    $("#placementStandardId").val() != null
+  ) {
+    lmsStudentPerformanceTrackDTO["placementStandardId"] = $(
+      "#placementStandardId"
+    ).val();
+  }
+  if (
+    $("#placementSubjectId").val() != 0 &&
+    $("#placementSubjectId").val() != null
+  ) {
+    lmsStudentPerformanceTrackDTO["placementSubjectId"] = $(
+      "#placementSubjectId"
+    ).val();
+  }
+  lmsStudentPerformanceTrackDTO["status"] = $("#" + formId + " #status").val();
+
+  requestData["lmsStudentPerformanceTrackDTO"] = lmsStudentPerformanceTrackDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = moduleId;
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+
+
+function getCourseByGradeAndCourseId(formId) {
+  hideMessageTheme2("");
+  gradeId = $("#" + formId + " #standardId").val();
+  courseId = $("#" + formId + " #courseId option:selected").attr("parentid");
+  $.ajax({
+    type: "GET",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor(
+      "school",
+      "get-course-by-grade-and-course-id/" + gradeId + "/" + courseId
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+        $("#" + formId + " #parentId").html("");
+        $("#" + formId + " #selfPid").html("");
+        $("#" + formId + " #parentId").html(
+          '<option value="0"> Self </option>'
+        );
+        $("#" + formId + " #selfPid").html('<option value="0"> Self </option>');
+        $("#" + formId + " #selfPid").append(
+          '<option value="1"> None </option>'
+        );
+        $.each(data.courseByGradeAndCourseIdList, function (k, v) {
+          $("#" + formId + " #parentId").append(
+            '<option value="' +
+              v.subjectId +
+              '">' +
+              v.subjectCode +
+              " - " +
+              v.subjectName +
+              "</option>"
+          );
+          $("#" + formId + " #selfPid").append(
+            '<option value="' +
+              v.subjectId +
+              '">' +
+              v.subjectCode +
+              " - " +
+              v.subjectName +
+              "</option>"
+          );
+        });
+      }
+      return false;
+    }
+  });
+}
+function getCourseForPlacement(formId) {
+  hideMessageTheme2("");
+  courseId = $("#" + formId + " #courseId").val();
+  $.ajax({
+    type: "GET",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("school", "get-course-for-placement/" + courseId),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+        $("#" + formId + " #parentId").html("");
+        $("#" + formId + " #selfPid").html("");
+        $("#" + formId + " #parentId").html(
+          '<option value="0"> Self </option>'
+        );
+        $("#" + formId + " #selfPid").html('<option value="0"> Self </option>');
+        $("#" + formId + " #selfPid").append(
+          '<option value="1"> None </option>'
+        );
+        $.each(data.courseForPlacementList, function (k, v) {
+          $("#" + formId + " #parentId").append(
+            '<option value="' +
+              v.subjectId +
+              '">' +
+              v.subjectCode +
+              " - " +
+              v.subjectName +
+              "</option>"
+          );
+          $("#" + formId + " #selfPid").append(
+            '<option value="' +
+              v.subjectId +
+              '">' +
+              v.subjectCode +
+              " - " +
+              v.subjectName +
+              "</option>"
+          );
+        });
+      }
+      return false;
+    }
+  });
+}
+
+function callCommentModel(meetingId, meetingResult, requestDemoId, comment) {
+  $("#addComentsModal").modal("show");
+  $("#addComentsId #requestDemoId").val(requestDemoId);
+  $("#addComentsId #meetingId").val(meetingId);
+  $("#addComentsId #comment").val(comment);
+  $("#addComentsId #meetingResult").val(meetingResult);
+  $("#addComentsId #meetingResult").removeAttr("disabled");
+  $("#addComentsId #comment").removeAttr("disabled");
+  $("#addComentsId #sendCommentMail").show();
+  $("#addComentsId #note").show();
+  if (meetingResult != "") {
+    $("#addComentsId #note").hide();
+    $("#addComentsId #meetingResult").attr("disabled", true);
+    $("#addComentsId #comment").attr("disabled", true);
+    $("#addComentsId #sendCommentMail").hide();
+  }
+}
+function sendMailForMeetCounselor(formId, roleModuleId) {
+  if (
+    $("#" + formId + " #meetingResult").val() == undefined ||
+    $("#" + formId + " #meetingResult").val() == ""
+  ) {
+   showMessageTheme2(0, "Please select meeting status.");
+    return false;
+  }
+
+  if (
+    $("#" + formId + " #comment").val() == undefined ||
+    $("#" + formId + " #comment").val() == ""
+  ) {
+   showMessageTheme2(0, "Comment is required");
+    return false;
+  }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("dashboard", "send-mail-for-meet-counselor"),
+    data: JSON.stringify(getRequestForsendMailForMeetCounselor(formId)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(1, data["message"]);
+        $("#addComentsModal").modal("hide");
+        $("#" + formId)[0].reset();
+        setTimeout(function () {
+          callDashboardPageSchool(roleModuleId, "request-demo");
+        }, 1000);
+      }
+      return false;
+    }
+  });
+}
+function getRequestForsendMailForMeetCounselor(formId) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var meetCounselorMailDTO = {};
+
+  meetCounselorMailDTO["meetingId"] = $("#" + formId + " #meetingId").val();
+  meetCounselorMailDTO["requestDemoId"] = $(
+    "#" + formId + " #requestDemoId"
+  ).val();
+  meetCounselorMailDTO["comment"] = escapeCharacters(
+    $("#" + formId + " #comment").val()
+  );
+  meetCounselorMailDTO["meetingResult"] = $(
+    "#" + formId + " #meetingResult"
+  ).val();
+
+  requestData["meetCounselorMailDTO"] = meetCounselorMailDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = "SCHOOL";
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+function saveCourseProvider(
+  formId,
+  controllType,
+  providerId,
+  status,
+  roleModuleId
+) {
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor("school", "save-courseProvider-details"),
+    data: JSON.stringify(
+      getRequestForSaveCourseProvider(formId, controllType, providerId, status)
+    ),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+       showMessageTheme2(0, data["message"]);
+      } else {
+       showMessageTheme2(1, data["message"]);
+        setTimeout(function () {
+          callDashboardPageSchool(roleModuleId, "manage-course-provider");
+        }, 1000);
+      }
+      return false;
+    }
+  });
+}
+function getRequestForSaveCourseProvider(
+  formId,
+  controllType,
+  providerId,
+  status
+) {
+  var request = {};
+  var authentication = {};
+  var requestData = {};
+  var courseProviderDTO = {};
+
+  courseProviderDTO["courseProviderId"] = providerId;
+  courseProviderDTO["controllType"] = controllType;
+  courseProviderDTO["status"] = status;
+
+  requestData["courseProviderDTO"] = courseProviderDTO;
+  authentication["hash"] = getHash();
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  authentication["userType"] = "SCHOOL_ADMIN";
+  authentication["userId"] = $("#userId").val();
+  request["authentication"] = authentication;
+  request["requestData"] = requestData;
+  return request;
+}
+
+
+
+
+
+
+
+
+
+
+function saveUpdateGotomeetingUser(callFrom, moduleId) {
+  var userId = $("#userIdforGoto").val();
+  var gotoMeetingId = $("#gotoId").val();
+  var meetingVendor = "LENS";
+  var data = {};
+  data["meetingVendor"] = meetingVendor;
+  data["userId"] = userId;
+  data["UNIQUEUUID"] = UNIQUEUUID;
+  if (gotoMeetingId == "" || gotoMeetingId == "0") {
+    $.ajax({
+      type: "POST",
+      contentType: APPLICATION_JSON_VALUE,
+      url: getURLForHTML("gotomeeting", "createUser"),
+      data: JSON.stringify(data),
+      dataType: "json",
+      success: function (data) {
+         if (data["status"] == "0" || data["status"] == "2") {
+            showMessageTheme2(0, data["message"]);
+         }else{
+            showMessageTheme2(1, data["message"]);
+            if ("teacherPage" == callFrom) {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "approved-teachers");
+              }, 1000);
+            } else {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "user-list");
+              }, 1000);
+            }
+         }
+        
+      }
+    });
+  } else {
+    $.ajax({
+      type: "POST",
+      contentType: APPLICATION_JSON_VALUE,
+      url: getURLForHTML("gotomeeting", "update-goto-meeting-user"),
+      data: JSON.stringify({ gotoMeetingUserId: gotoMeetingId }),
+      dataType: "json",
+      success: function (data) {
+
+        if (data["status"] == "0" || data["status"] == "2") {
+            showMessageTheme2(0, data["message"]);
+         }else{
+            showMessageTheme2(1, data["message"]);
+            if ("teacherPage" == callFrom) {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "approved-teachers");
+              }, 1000);
+            } else {
+              setTimeout(function () {
+                callDashboardPageSchool(moduleId, "user-list");
+              }, 1000);
+            }
+          }
+      }
+    });
+  }
+}
+
+
+
+
+function getSchoolTourData(formId) {
+  $("#errMsg").text("");
+  var reportStartDate = $("#startDate").val();
+  var reportEndDate = $("#endDate").val();
+  if (reportStartDate == "") {
+   showMessageTheme2(0, "Report start date required");
+    return false;
+  }
+  if (reportEndDate == "") {
+   showMessageTheme2(0, "Report end date required");
+    return false;
+  }
+
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML("dashboard", "/report/live-online-school-tour"),
+    data: JSON.stringify({
+      reportStartDate: reportStartDate,
+      reportEndDate: reportEndDate,
+    }),
+    dataType: "json",
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+        $("#errMsg").text(data["message"]);
+        $("body,html").animate(
+          { scrollTop: $("#errMsg").offset().top - 70 },
+          800
+        );
+      } else {
+        $("#errMsg").text(data["message"]);
+        $("body,html").animate(
+          { scrollTop: $("#errMsg").offset().top - 70 },
+          800
+        );
+      }
+      return false;
+    },
+  });
+}
+
+function dashboardRequestDemo() {
+  var strDate = "";
+  dateFrom = $("#formdate").val();
+  dateto = $("#todate").val();
+  if (dateFrom != "" && dateFrom != undefined) {
+    strDate =
+      dateFrom.split("-")[2] +
+      "-" +
+      dateFrom.split("-")[0] +
+      "-" +
+      dateFrom.split("-")[1];
+  } else {
+    strDate = "";
+  }
+  var strDateTo = "";
+  if (dateto != "" && dateto != undefined) {
+    strDateTo =
+      dateto.split("-")[2] +
+      "-" +
+      dateto.split("-")[0] +
+      "-" +
+      dateto.split("-")[1];
+  } else {
+    strDateTo = "";
+  }
+  var data = {};
+  data["todayDate"] = strDate;
+  data["toDate"] = strDateTo;
+  data["userId"] = USER_ID;
+  $.ajax({
+    global: false,
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML("dashboard", "get-request-demo-user"),
+    data: JSON.stringify(data),
+    dataType: "html",
+    cache: false,
+    timeout: 600000,
+    success: function (htmlContent) {
+      if (htmlContent != "") {
+        var stringMessage = [];
+        stringMessage = htmlContent.split("|");
+        if (
+          stringMessage[0] == "FAILED" ||
+          stringMessage[0] == "EXCEPTION" ||
+          stringMessage[0] == "SESSIONOUT"
+        ) {
+          if (stringMessage[0] == "SESSIONOUT") {
+            redirectLoginPage();
+          } else {
+            showMessageTheme2(1, stringMessage[1], "", false);
+          }
+        } else {
+          $("#dashboardRequestDemo").html(htmlContent);
+        }
+        return false;
+      }
+    },
+    error: function (e) {
+      if (checkonlineOfflineStatus()) {
+        return;
+      }else{
+        customLoaderDashBoard(6, false);
+        showMessageTheme2(0, e.responseText, "", false);
+      }
+    },
+  });
+}
+
+function dashboardRequestDemoDateWise(strDate) {
+  var dateStr = strDate;
+  dateStr =
+    dateStr.split("-")[2] +
+    "-" +
+    dateStr.split("-")[0] +
+    "-" +
+    dateStr.split("-")[1];
+  var data = {};
+  data["todayDate"] = dateStr;
+  data["userId"] = USER_ID;
+  $.ajax({
+    global: false,
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML("dashboard", "get-request-demo-datewise"),
+    data: JSON.stringify(data),
+    dataType: "html",
+    cache: false,
+    timeout: 600000,
+    success: function (htmlContent) {
+      if (htmlContent != "") {
+        var stringMessage = [];
+        stringMessage = htmlContent.split("|");
+        if (
+          stringMessage[0] == "FAILED" ||
+          stringMessage[0] == "EXCEPTION" ||
+          stringMessage[0] == "SESSIONOUT"
+        ) {
+          if (stringMessage[0] == "SESSIONOUT") {
+            redirectLoginPage();
+          } else {
+            showMessageTheme2(0, stringMessage[1], "", false);
+          }
+        } else {
+          $("#daywiseDemo").html(htmlContent);
+        }
+        return false;
+      }
+    },
+    error: function (e) {
+      if (checkonlineOfflineStatus()) {
+        return;
+      }else{
+        customLoaderDashBoard(6, false);
+        showMessageTheme2(0, e.responseText, "", false);
+      }
+    },
+  });
+}
+
+function advanceRequestDemoSearch(formId, moduleId) {
+  hideMessageTheme2("");
+
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML("dashboard", "advance-request-demo-search"),
+    data: JSON.stringify(
+      getCallRequestForadvanceRequestDemoSearch(formId, moduleId)
+    ),
+    dataType: "html",
+    async: false,
+    success: function (htmlContent) {
+      if (htmlContent != "") {
+        var stringMessage = [];
+        stringMessage = htmlContent.split("|");
+        if (
+          stringMessage[0] == "FAILED" ||
+          stringMessage[0] == "EXCEPTION" ||
+          stringMessage[0] == "SESSIONOUT"
+        ) {
+          if (stringMessage[0] == "SESSIONOUT") {
+            redirectLoginPage();
+          } else {
+            showMessageTheme2(0, stringMessage[1], "", false);
+          }
+        } else {
+          $(".filter-fields").stop();
+          $("#demoRequestAdvance").html(htmlContent);
+        }
+        return false;
+      }
+    },
+  });
+}
+
+function getCallRequestForadvanceRequestDemoSearch(formId, moduleId) {
+  var request = {};
+  var authentication = {};
+  var requestDemoDTO = {};
+  requestDemoDTO["moduleId"] = moduleId;
+  requestDemoDTO["requestRaisedBy"] = "student";
+  requestDemoDTO["demotype"] = $("#" + formId + " #filterDemoType").val();
+  requestDemoDTO["campaign"] = "admin";
+  requestDemoDTO["name"] = $("#" + formId + " #studName").val();
+  requestDemoDTO["lastName"] = $("#" + formId + " #lastName").val();
+  requestDemoDTO["standardId"] = $("#" + formId + " #filterStandardId").val();
+  requestDemoDTO["schoolId"] = 1;
+  requestDemoDTO["email"] = $("#" + formId + " #emailId").val();
+  requestDemoDTO["contactNumber"] = $("#" + formId + " #mobileNo").val();
+  requestDemoDTO["countryId"] = $("#" + formId + " #countryId").val();
+  requestDemoDTO["sortBy"] = $("#" + formId + " #sortFilter").val();
+  requestDemoDTO["orderBy"] = $("#" + formId + " #orderFilter").val();
+  if ($("#" + formId + " #demoStartDate").val() != "") {
+    var demoStart = $("#" + formId + " #demoStartDate").val();
+    requestDemoDTO["demoStartDate"] =
+      demoStart.split("-")[2] +
+      "-" +
+      demoStart.split("-")[0] +
+      "-" +
+      demoStart.split("-")[1];
+  }
+  if ($("#" + formId + " #demoEndDate").val() != "") {
+    var demoEnd = $("#" + formId + " #demoEndDate").val();
+    requestDemoDTO["demoEndDate"] =
+      demoEnd.split("-")[2] +
+      "-" +
+      demoEnd.split("-")[0] +
+      "-" +
+      demoEnd.split("-")[1];
+  }
+  if ($("#" + formId + " #demoMeetingStartDate").val() != "") {
+    var demoMeetingStart = $("#" + formId + " #demoMeetingStartDate").val();
+    requestDemoDTO["demoMeetingStartDate"] =
+      demoMeetingStart.split("-")[2] +
+      "-" +
+      demoMeetingStart.split("-")[0] +
+      "-" +
+      demoMeetingStart.split("-")[1];
+  }
+  if ($("#" + formId + " #demoMeetingEndDate").val() != "") {
+    var demoMeetingEnd = $("#" + formId + " #demoMeetingEndDate").val();
+    requestDemoDTO["demoMeetingEndDate"] =
+      demoMeetingEnd.split("-")[2] +
+      "-" +
+      demoMeetingEnd.split("-")[0] +
+      "-" +
+      demoMeetingEnd.split("-")[1];
+  }
+
+  requestDemoDTO["demoClickFrom"] = $("#" + formId + " #demoClickFrom").val();
+
+  requestDemoDTO["schoolUUID"] = SCHOOL_UUID;
+  //requestData['requestDemoDTO'] = requestDemoDTO;
+  request["requestDemoDTO"] = requestDemoDTO;
+  authentication["hash"] = getHash();
+  authentication["userType"] = "SCHOOL";
+  authentication["schoolId"] = SCHOOL_ID;
+  authentication["schoolUUID"] = SCHOOL_UUID;
+  request["authentication"] = authentication;
+  return request;
+}
+
+function advanceStudentSearchReset(formId) {
+  $("#" + formId)[0].reset();
+  $("#" + formId + " #schoolId")
+    .val(SCHOOL_ID)
+    .trigger("change");
+  $("#" + formId + " #filterEnrollStatus")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #countryTimezoneFromId")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #countryTimezoneToId")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #filterStandardId")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #studName").val("");
+  $("#" + formId + " #emailId").val("");
+  $("#" + formId + " #mobileNo").val("");
+  $("#" + formId + " #countryId")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #filterStateId")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #filterCityId")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #sortFilter")
+    .val("")
+    .trigger("change");
+  $("#" + formId + " #orderFilter")
+    .val("")
+    .trigger("change");
+}
+
+function sendGotoMettingLinkForAcceptingDemo(meetingLogsId, requestDemoId) {
+  hideMessageTheme2("");
+  $.ajax({
+    type: "GET",
+    url: getURLForHTML(
+      "dashboard",
+      "send-gotomeetinglink-mail-on-accepting-demo"
+    ),
+    data: "meetingLogsId=" + meetingLogsId + "&requestDemoId=" + requestDemoId,
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (
+        data["status"] == "0" ||
+        data["status"] == "2" ||
+        data["status"] == "3"
+      ) {
+        showMessageTheme2(0, data["message"], "", false);
+      } else {
+        showMessageTheme2(1, data["message"], "", false);
+      }
+      return false;
+    }
+  });
+}
+
+function callCommentModel2(
+  meetingId,
+  requestDemoId,
+  comment,
+  userId,
+  meetingUrl,
+  meetingUrlRem
+) {
+  $("#demoMeetingUrlModal").modal("show");
+  $("#demoMeetingUrlForm #note").show();
+  $("#demoMeetingUrlForm #meetingId").val(meetingId);
+  $("#demoMeetingUrlForm #requestDemoId").val(requestDemoId);
+  $("#demoMeetingUrlForm #meetingUrl").val(meetingUrl);
+  $("#demoMeetingUrlForm #remarks").val(meetingUrlRem);
+}
+
+
+
+function getStateWiseData(moduleId, schoolId, countryName, year) {
+  hideMessageTheme2("");
+
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML(
+      "dashboard",
+      "statewise-data-reports?moduleId=" +
+        moduleId +
+        "&schoolId=" +
+        schoolId +
+        "&countryName=" +
+        countryName +
+        "&year=" +
+        year
+    ),
+    data: "",
+    dataType: "html",
+    async: false,
+    success: function (htmlContent) {
+      if (htmlContent != "") {
+        var stringMessage = [];
+        stringMessage = htmlContent.split("|");
+        if (
+          stringMessage[0] == "FAILED" ||
+          stringMessage[0] == "EXCEPTION" ||
+          stringMessage[0] == "SESSIONOUT"
+        ) {
+          if (stringMessage[0] == "SESSIONOUT") {
+            redirectLoginPage();
+          } else {
+            showMessageTheme2(0, stringMessage[1], "", false);
+          }
+        } else {
+          $("#modalStateReportMsg").html(htmlContent);
+          $("#modalStateReport").show();
+        }
+        return false;
+      }
+    },
+  });
+}
+
+
+
+
+
+function changeJoiningType(formId, toElement) {
+  if ($("#" + formId + " #joiningType").val() == "Multiple") {
+    $("#" + formId + " #" + toElement).val("");
+  }
+}
+
+
+
+
+function createIframe(soruceUrl){
+	var iframe = document.createElement('iframe');
+	iframe.src = soruceUrl;
+	return iframe;
+}
+
+
+
+//  <div class="full text-center mt-2">
+// 			<button type="button" class="btn btn-outline-dark font-size-lg" data-dismiss="modal">Close</button>
+// 	</div>
+
+ 
+
+function AdminTaskModalWarnings(response){
+	var html=`<div id="classJoinWaringDiv">
+		<div id="classWaringMessage" class="full text-center my-4">
+			<h5>You can start your admin task now...</h5><br/>`
+           if(response.meetingId && response.meetingPasscode && response.meetingId!='' && response.meetingPasscode!=''){
+            html+=`<h6>If you are having issues with redirection to the class, please join with the credentials given below. </h6>
+            <h5> Meeting ID : ` + response.meetingId + '<br/>  Meeting Passcode : ' + response.meetingPasscode + `</h6>
+            <div class="copy-msg font-size-lg mb-2"></div>`;
+           }
+             html+=`<b class="copy-msg-0 text-success"></b></br>
+             <a target="_blank" id="classJoinWaring" href="`+response.canJoindateStart+`" onclick="autodiposeModel('classJoinInSameWindowModal')" class="btn btn-primary font-size-lg">Join Now</a>
+             <button class="btn btn-success font-size-lg" onclick="copyURL('copyURL0','copy-msg-0')"><i class="fa fa-copy"></i>&nbsp;Copy Link</button>
+		  </div>
+    <div class="position-absolute" style="top:0;left:0;">
+      <input type="text" id="copyURL0" value="`+response.canJoindateStart+`" style="opacity:0;height:0px">
+    </div>
+		<div class="full text-center mt-2">
+			<button type="button" class="btn btn-outline-dark font-size-lg" data-dismiss="modal">Close</button>
+		</div>
+	</div>`;
+	return html;
+ }

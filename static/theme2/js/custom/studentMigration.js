@@ -125,7 +125,10 @@ function callForStudentNextSession(nextGradeId, nextGradeName, enrollmentType, r
 			} else {
 				$("#choiceForStudentModelRepeaters").modal("hide");
 				showMessageTheme2(1, data['message'], '', true);
-				$("#pageHeading").html(getStudentMigrationHeader(data));
+				if(data.enrollmentType != "REGISTRATION_FRESH"){
+					$("#pageHeading").html(getStudentMigratinonHeader(data));
+				}
+				
 				$('#gradeId').val(data.standardId)
 				displaySection2();
 				getAllCourseDetails('N', '');

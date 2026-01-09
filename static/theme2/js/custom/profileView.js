@@ -1242,7 +1242,6 @@ function saveDocs(userId, studentStandardId, docType){
 			}
 		}
 	});
-
 }
 
 function removeUploadImage(src, inputId, thumbId, type, studentStandardId){

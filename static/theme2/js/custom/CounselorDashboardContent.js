@@ -107,9 +107,10 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 		var chartIndexVal1= $("#c_commissionRatesTab_0").attr("data-tab-value");
 		var valueMin1=$("#c_commissionRatesTab_0").attr("data-school-value");
 		var valueMax1=$("#c_commissionRatesTab_0").attr("data-partner-value");
-		
 		getCounselorCommissionRatesChart('c_chart0',''+chartIndexVal1+'', valueMin1, valueMax1);
-		getCounselorPartnerCommissionRatesChart('c_chart_school0',''+chartIndexVal1+'', valueMin1, valueMax1);
+		if(commissionRate.leadsB2B){
+			getCounselorPartnerCommissionRatesChart('c_chart_school0',''+chartIndexVal1+'', valueMin1, valueMax1);
+		}
 		
 		$('a[data-tab="counselor"]').on('shown.bs.tab', function (e) {
 			var chartIndex = $(e.target).attr("data-tab-index");

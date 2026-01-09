@@ -2685,7 +2685,7 @@ function closeMaxLimitsWariningModal(){
 }
 
 
-function saveTeacherTimePreference(callFrom, modalID, newTheme) {
+function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, endTimeId) {
 	$(".academit-step, #decideLater, #chooseAcademicDateBtnToCountinue").hide();
 	$(".school-system-training-step, #skipTraining, #moveToDashboardProcess").show();
 	$(".modal-save-btn").attr("disabled","disabled");
@@ -2708,11 +2708,11 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 			}
 			
 		}else if(saveType=='STUDENT_PROFILE'){
-			if ($("#preferedStartTime").val() == null || $("#preferedStartTime").val() == '' || $("#preferedStartTime").val() == undefined) {
+			if ($("#"+startTimeId).val() == null || $("#"+startTimeId).val() == '' || $("#"+startTimeId).val() == undefined) {
 				showMessageTheme2(0, "Please select your live classes start time.", '', true);
 				return false;
 			}
-			if ( $("#preferedEndTime").val() == null || $("#preferedEndTime").val() == '' || $("#preferedEndTime").val() == undefined) {
+			if ( $("#"+endTimeId).val() == null || $("#"+endTimeId).val() == '' || $("#"+endTimeId).val() == undefined) {
 				showMessageTheme2(0, "Please select your live classes end time.", '', true);
 				return false;
 			}
@@ -2756,7 +2756,7 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'save-time-preference'),
-		data: JSON.stringify(getRequestForTeacherTimePreference(callFrom, timeTeacherUserId, modalID)),
+		data: JSON.stringify(getRequestForTeacherTimePreference(callFrom, timeTeacherUserId, modalID, startTimeId, endTimeId)),
 		dataType: 'json',
 		cache: false,
 		timeout: 600000,
@@ -2779,7 +2779,8 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme) {
 					setTimeout(function () {
 						if (saveType == 'STUDENT_PROFILE') {
 							showMessageTheme2(1, data['message'], '', true);
-							location.reload();
+							$("#class-preferred-time-wrapper ul li:last-child").attr("data-slot-id", data.timePrefId)
+							//location.reload();
 						} else {
 							//$("#" + modalID).modal('hide');
 							if (submitFrom == 'teacher-profile') {
@@ -2918,7 +2919,7 @@ $(function () {
 	}
 });
 
-   function getRequestForTeacherTimePreference(callFrom,  teacherUserId,  modalID){
+   function getRequestForTeacherTimePreference(callFrom,  teacherUserId,  modalID, startTimeId, endTimeId){
 		var teacherAssign = {};
 		var teacherTimeList = [];
 		var teacherLeaveDateList =[];
@@ -2937,14 +2938,13 @@ $(function () {
 				var startDate=changeDateFormat(new Date($('#chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
 				teacherAssignTime['startDate']=$('#chooseDateSystemTrainingDate').val();
 				teacherAssign['semesterStartDate']=startDate;
-				
 			}
 			if($("#saveType").val()=='SKIP' || $("#saveType").val()=='STUDENT_PROFILE'){
 				var strTime;
 				var endTime;
 				if( $("#saveType").val()=='STUDENT_PROFILE'){
-					strTime = $("#preferedStartTime").val();
-					endTime = $("#preferedEndTime").val();
+					strTime = $("#"+startTimeId).val();
+					endTime = $("#"+endTimeId).val().replace(" ","_");
 				}else{
 					strTime = $("#startTime"+USER_ID).val();
 					endTime = $("#endTime"+USER_ID).val();

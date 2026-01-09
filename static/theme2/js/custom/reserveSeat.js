@@ -1,3 +1,4 @@
+var CAN_SHOW_ENROLL_RESERVE_MODAL = true;
 $(document).on("click", "#dashboardPayment #chkval", function () {
 	if ($("#chkval").is(":checked")) {
 		$("#payTabData").removeAttr("disabled");

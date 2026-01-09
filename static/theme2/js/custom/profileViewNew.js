@@ -1,0 +1,3548 @@
+var MODAL_SHOW_FLAG=true;
+var PROFILE_DATA_INTERVAL;
+var HOBBIES_CHANGES_COUNT=[];
+
+var COMMUNICATION_CHANGES_COUNT=[];
+var SPORTS_AND_CLUB_COUNT=[];
+var OVER_ALL_TOTAL=0;
+var OVER_ALL_COUNT=0;
+var COUNT=0;
+var TOTAL_COUNT=0;
+var PERCENT=0;
+var intervalId;
+var COMMUNICATION_APPEND_ROW="";
+
+
+
+
+function addmoreHobbies(src, showElement){
+    $(src).hide();
+    $("."+showElement).show();
+}
+
+function addOtherHobbiesfun(hideElement, showElement){
+    $("."+hideElement).hide();
+    $("."+showElement).show();
+    hobbies = $("#addOtherHobbies").val();
+    if(hobbies.length>2){
+        if(hobbies !== $(".hobbies-wrapper .added-hobbie-wrapper:last-child .custom-control-label").text()){
+            $('.hobbies-wrapper').append(
+                `<div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align mr-3 mb-2 cursor hobbie-wrapper added-hobbie-wrapper" id="`+hobbies+`_wrapper">
+                    <input type="checkbox" id="H_`+hobbies.toLowerCase()+`" class="custom-control-input added-hobbie" data-hobbie-keyId="0" data-hobbie-label="${hobbies}" checked onchange="controlEditField(this,true,'hobbies')">
+                    <label class="custom-control-label cursor" for="H_`+hobbies.toLowerCase()+`">`+hobbies+`</label>
+                </div>`
+            );
+            $("#addOtherHobbies").val("");
+            $("#saveHobbiesWrapper").show();
+            HOBBIES_CHANGES_COUNT.push(hobbies);
+        }else{
+            showMessageTheme2(0, "already added");
+        }
+    }else{
+        showMessageTheme2(0, "Invalid Hobbie");
+    }
+}
+
+function cancelOtherHobbiesfun(hideElement, showElement){
+    $("."+hideElement).hide();
+    $("."+showElement).show();
+    $("#addOtherHobbies").val("");
+}
+
+
+function removeHobbies(hobbie){
+    $("#"+hobbie+"_wrapper").remove();
+}
+function addmoreSocialLinks(src, showElement){
+    $(src).hide();
+    $("."+showElement).show();
+}
+
+function removeSocialLinks(socialLinksTitle){
+    $("#"+socialLinksTitle+"_wrapper").remove();
+}
+
+function addOtherSocialLinks(hideElement, showElement){
+    var addFlag = true;
+    socialLinksTitle = $("#addOtherSocialMediaLinksTitle").val();
+    socialLinks = $("#addOtherSocialMediaLinksUrl").val();
+    if(socialLinksTitle != ""){
+        if(isValidUrl(socialLinks)){
+            $.each($(".social-links-wrapper .social-links-list-wrapper"), function(){
+                if($(this).find(".social-links-title").text() == socialLinksTitle){
+                    addFlag = false;
+                    return;
+                }
+            });
+            if(addFlag){
+                $.each($(".social-links-wrapper .social-links-list-wrapper"), function(){
+                    if($(this).find(".social-Links-url").val() == socialLinks){
+                        addFlag = false;
+                        return;
+                    }
+                });
+                if(addFlag){
+                    $('.social-links-wrapper').append(
+                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 social-links-list-wrapper social-links-list-wrapper" id="`+socialLinksTitle+`_wrapper">
+                            <div class="form-group mb-2 p-0">
+                                <label for="`+socialLinksTitle+`URL" class="font-weight-semi-bold social-links-title" data-title="${socialLinksTitle}">`+socialLinksTitle+`</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-sm social-Links-url group-append-hide-input" data-social-media-id="0" name="`+socialLinksTitle+`URL" id="`+socialLinksTitle+`URL" value="`+socialLinks+`" autocomplete="off" onkeyup="controlEditField(\'${socialLinksTitle}URL\',\'${socialLinks}\','input')">
+                                    <div class="input-group-append input-group-append-hide">
+                                        <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges(\'${socialLinksTitle}URL\', \'socialMedia\',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false')">
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges(\'${socialLinksTitle}URL\',\'${socialLinks}\','input')">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                        <button class="btn btn-primary btn-sm" onclick="removeSocialLinks('`+socialLinksTitle+`')">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`
+                    );
+                    $("."+hideElement).hide();
+                    $("."+showElement).show();
+                    $("#addOtherSocialMediaLinksTitle").val('');
+                    $("#addOtherSocialMediaLinksUrl").val('');
+                }else{
+                    showMessageTheme2(0, "URL already added.");
+                }
+            }else{
+                showMessageTheme2(0, "Link title already added.");
+            }
+        }else{
+            showMessageTheme2(0, "Invalid URL.");
+        }
+    }else{
+        showMessageTheme2(0, "Link title is required.");
+    }
+}
+
+function addClasscommunicationPreferredTime(src, showElement){
+    if($(".ul_Student li").length >=3){
+        showMessageTheme2(0, "A maximum of three Communication Preferred Timing can be added for Student");
+        return false; 
+    }else if($(".ul_Mother li").length >=3){
+        showMessageTheme2(0, "A maximum of three Communication Preferred Timing can be added for Mother");
+        return false; 
+    }else if($(".ul_Father li").length >=3){
+        showMessageTheme2(0, "A maximum of three Communication Preferred Timing can be added for Father");
+        return false; 
+    }else if($(".ul_Guardian li").length >=3){
+        showMessageTheme2(0, "A maximum of three Communication Preferred Timing can be added for Guardian");
+        return false; 
+    }else if($(".ul_Student li").length >=3 && $(".ul_Mother li").length >= 3 && $(".ul_Father li").length >= 3 && $(".ul_Guardian li").length >= 3){
+        showMessageTheme2(0, "A maximum of three preferred live class timings can be added.");
+        return false;   
+    }else{
+        $(src).hide();
+        $("#communication-preferred-time-dropdown-wrapper").show();
+    }
+    
+    
+}
+
+async function removeCommunicationPreferredTime(slotWrapperClass, slotEleId){
+    $("#"+slotEleId).remove();
+    $("#communicationPreferredSlotSave, #communication-preferred-time-dropdown-wrapper").show();
+    if($("."+slotWrapperClass+" li").length < 1 && PORFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length > 0 ){
+        if($(".communication-preferred-time-wrapper-ul li").length==0){
+            $("#communicationRoleType").prop("disabled",false);
+        }
+        // if($(".communication-preferred-time-wrapper-ul li").length < 3 && $(".communication-preferred-time-wrapper-ul li").length < 1 ){
+        //     $("#communicationPreferredSlotAdd").show();
+        //     $("#communicationPreferredSlotSave").hide();
+        // }
+        
+        // $("#communicationPreferredSlotAdd").show();
+        // $("#communicationPreferredSlotSave").hide();
+        $("#communicationPreferredSlotSave").show();
+    }else{
+        if($("."+slotWrapperClass+" li").length < 1 && PORFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length < 1){
+            $("."+slotWrapperClass).parent().closest("ul").remove();
+            $("#communicationPreferredSlotSave").hide();
+        }
+    }
+    
+    
+
+}
+
+function getCommunicationRoleType(src){
+    if($(src).val() != ""){
+        $("#addcommunicationPreferredTime, #communicationPreferredSlotAdd").show();
+        $("#preferedCommunicationStartTime, #preferedCommunicationEndTime").val("").prop("disabled",false);
+    }else{
+        $("#addcommunicationPreferredTime").hide();
+        $("#preferedCommunicationStartTime, #preferedCommunicationEndTime").prop("disabled",true);
+    }
+}
+
+    
+function addcommunicationPreferredTime(){
+        
+        if($(".ul_Student li").length >=3 && $("#communicationRoleType").val() == "Student"){
+            showMessageTheme2(0, "A maximum of three preferred live class timings can be added. Student");
+            $("#preferedCommunicationStartTime").val('').trigger("change");
+            return false; 
+        }else if($(".ul_Mother li").length >=3 && $("#communicationRoleType").val() == "Mother"){
+            showMessageTheme2(0, "A maximum of three preferred live class timings can be added. Mother");
+            $("#preferedCommunicationStartTime").val('').trigger("change");
+            return false; 
+        }else if($(".ul_Father li").length >=3 && $("#communicationRoleType").val() == "Father"){
+            showMessageTheme2(0, "A maximum of three preferred live class timings can be added. Father");
+            $("#preferedCommunicationStartTime").val('').trigger("change");
+            return false; 
+        }else if($(".ul_Guardian li").length >=3 && $("#communicationRoleType").val() == "Guardian"){
+            showMessageTheme2(0, "A maximum of three preferred live class timings can be added. Guardian");
+            $("#preferedCommunicationStartTime").val('').trigger("change");
+            return false; 
+        }else if($(".ul_Student li").length >=3 && $(".ul_Mother li").length >= 3 && $(".ul_Father li").length >= 3 && $(".ul_Guardian li").length >= 3){
+            showMessageTheme2(0, "Maximum number of communication preferred slots reached.");
+            $("#preferedCommunicationStartTime").val('').trigger("change");
+            return false;   
+        }
+        var index;
+        var st = $("#preferedCommunicationStartTime").val();
+        var et = $("#preferedCommunicationEndTime").val();
+        if($(`#communication-preferred-time-wrapper ul .communication-preferred-timing .ul_${$("#communicationRoleType").val()}`).length>0){
+            var lastSlotIdIndex = parseInt($(`#communication-preferred-time-wrapper ul .communication-preferred-timing .ul_${$("#communicationRoleType").val()} li:last-child`).attr("id").split("_")[2]);
+        }else{
+            var lastSlotIdIndex=1;
+        }
+        if($(`#communication-preferred-time-wrapper ul .communication-preferred-timing .ul_${$("#communicationRoleType").val()} li`).length >=3){
+            showMessageTheme2(0, "Maximum number of communication preferred slots reached.");
+            return false;
+        }
+        if($("#communicationRoleType").val()== "Student"){index=0;}
+        else if($("#communicationRoleType").val()== "Mother"){index=1;}
+        else if($("#communicationRoleType").val()== "Father"){index=2;}
+        else if($("#communicationRoleType").val()== "Guardian"){index=3;}
+        var isDuplicateSlot = false;
+        if(st==""){
+            showMessageTheme2(0, "Please select the start time of communication preferred timing.");
+            return false;
+        }
+        if(et==""){
+            showMessageTheme2(0, "Please select the end time of communication preferred timing.");
+            return false;
+        }
+        $(`#communication-preferred-time-wrapper ul .communication-preferred-timing .ul_${$("#communicationRoleType").val()}`).each(function(){
+            var selected_st = $(this).attr("data-slot-st");
+            var selected_et = $(this).attr("data-slot-et");
+            if(selected_st+" - "+selected_et === st+" - "+et){
+                isDuplicateSlot=true;
+                return false;
+            }
+        });
+        if(isDuplicateSlot){
+            showMessageTheme2(0, "Live classes preferred timing already selected");
+            return false;
+        }
+        
+        if(validateCommunicationPreferredTimes('communication-preferred-time-wrapper')){
+            // saveTeacherTimePreference('STUDENT','STUDENT',true, 'preferedCommunicationStartTime','preferedCommunicationEndTime');
+            var appendFlag =false;;
+            if($(".ul_Student").length<1 && $("#communicationRoleType").val() == "Student"){
+                appendFlag = true;
+            }
+            if($(".ul_Mother").length<1 && $("#communicationRoleType").val() == "Mother"){
+                appendFlag = true;
+            }
+            if($(".ul_Father").length<1 && $("#communicationRoleType").val() == "Father"){
+                appendFlag = true;
+            }
+            if($(".ul_Guardian").length<1 && $("#communicationRoleType").val() == "Guardian"){
+                appendFlag = true;
+            }
+            if(appendFlag){
+                if(COMMUNICATION_APPEND_ROW == "" || COMMUNICATION_APPEND_ROW != $("#communicationRoleType").val()){
+                    if($("#communication-preferred-time-wrapper .communication-preferred-time-wrapper-ul").length ==0){
+                        $("#communication-preferred-time-wrapper").append(`<ul class="p-0 communication-preferred-time-wrapper-ul bar_count"></ul>`)
+                    }
+                    $("#communication-preferred-time-wrapper .communication-preferred-time-wrapper-ul").append(
+                        `<li style="list-style:none">
+                            <div class="w-100 d-flex flex-wrap communication-preferred-timing align-items-center mb-2">
+                                <span class="font-weight-bold">${$("#communicationRoleType").val()}:&nbsp;</span>
+                                <ul class="d-flex ul_${$("#communicationRoleType").val()} communication_slot_ul" data-communicationRoleType-ul="${$("#communicationRoleType").val()}"></ul>
+                            </div>
+                        </li>
+                        `
+                    );
+                    COMMUNICATION_APPEND_ROW = $("#communicationRoleType").val();
+            
+                }
+            }
+            $(`#communication-preferred-time-wrapper ul .communication-preferred-timing .ul_${$("#communicationRoleType").val()}`).append(
+                `<li class="mr-2" id="communication_slot_`+(lastSlotIdIndex+1)+`_${index}" data-slot-st="`+st+`" data-slot-et="`+et+`" data-communicationRoleType="${$("#communicationRoleType").val()}">
+                    <div class="d-inline-flex">
+                        <span class="d-inline-flex align-items-center border btn-dashed border-primary py-1 px-2 rounded flex-grow-1 mr-1 text-primary">
+                            <i class="fa fa-clock mr-1"></i>
+                            <span class="font-weight-semi-bold">(`+st+` - `+et+`)</span>   
+                        </span>    
+                        <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="removeCommunicationPreferredTime('ul_${$("#communicationRoleType").val()}', 'communication_slot_`+(lastSlotIdIndex+1)+`_${index}')">
+                            <i class="fa fa-trash"></i>    
+                        </a>    
+                    </div>    
+                </li>`
+            );
+            $("#class-preferred-time-dropdown-wrapper").hide();
+            $(".fromTime, .toTime").val("").trigger("change");
+            $(".addCommunicationPreferredTimeBtn").show();
+            // $("#communicationRoleType").prop("disabled",true);
+            if($("#communication-preferred-time-wrapper ul li").length >0){
+                $("#communicationPreferredSlotSave").show();
+            }
+        } 
+}
+
+
+function addClassPreferredTime(src, showElement){
+    if($("#class-preferred-time-wrapper ul li").length>=3){
+        showMessageTheme2(0, "A maximum of three preferred live class timings can be added.");
+        return false;   
+    }else{
+        $(src).hide();
+        $("#class-preferred-time-dropdown-wrapper").show();
+    }
+    
+}
+
+function saveClassPreferredTime(){
+    
+        var st = $("#preferedStartTime").val();
+        var et = $("#preferedEndTime").val();
+        var isDuplicateSlot = false;
+        if($("#class-preferred-time-wrapper ul li").length>0){
+            var lastSlotIdIndex = parseInt($("#class-preferred-time-wrapper ul li:last-child").attr("id").split("_")[1]);
+        }else{
+            var lastSlotIdIndex=1;
+        }
+        if(st==""){
+            showMessageTheme2(0, "Please select the start time of live Classes Preferred Timing.");
+            return false;
+        }
+        if(et==""){
+            showMessageTheme2(0, "Please select the end time of live Classes Preferred Timing.");
+            return false;
+        }
+        $("#class-preferred-time-wrapper ul li").each(function(){
+            var selected_st = $(this).attr("data-slot-st");
+            var selected_et = $(this).attr("data-slot-et");
+            if(selected_st+" - "+selected_et === st+" - "+et){
+                isDuplicateSlot=true;
+                return false;
+            }
+        });
+        if(isDuplicateSlot){
+            showMessageTheme2(0, "Live classes preferred timing already selected");
+            return false;
+        }
+        
+        if(validateClassPreferredTimes('class-preferred-time-wrapper')){
+            saveTeacherTimePreference('STUDENT','STUDENT',true, 'preferedStartTime','preferedEndTime');
+            $("#class-preferred-time-wrapper ul").append(
+                `<li class="mr-2 mb-2" id="slot_`+(lastSlotIdIndex+1)+`" data-slot-st="`+st+`" data-slot-et="`+et+`">
+                    <div class="d-inline-flex">
+                        <span class="d-inline-flex align-items-center border btn-dashed border-primary py-1 px-2 rounded flex-grow-1 mr-1 text-primary">
+                            <i class="fa fa-clock mr-1"></i>
+                            <span class="font-weight-semi-bold">(`+st+` - `+et+`)</span>   
+                        </span>    
+                        <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="removeClassPreferredTime('slot_`+(lastSlotIdIndex+1)+`')">
+                            <i class="fa fa-trash"></i>    
+                        </a>    
+                    </div>    
+                </li>`
+            );
+            $("#class-preferred-time-dropdown-wrapper").hide();
+            $(".fromTime, .toTime").val("").trigger("change");
+            $(".addClassPreferredTimeBtn").show()
+        } 
+}
+
+function validateCommunicationPreferredTimes(wrapperId){
+    var times = [];
+    var status = true;
+    $(`#`+wrapperId+` ul .communication-preferred-timing .ul_${$("#communicationRoleType").val()} li`).each(function(){
+        var selected_st = $(this).attr("data-slot-st");
+        var selected_et = $(this).attr("data-slot-et");
+        var startTime = convertTo24Hour(selected_st);
+        var endTime = convertTo24Hour(selected_et);
+        times.push({ start: startTime, end: endTime});
+    });
+    var startTime = convertTo24Hour($("#communication-preferred-time-dropdown-wrapper .fromTime").val());
+    var endTime = convertTo24Hour($("#communication-preferred-time-dropdown-wrapper .toTime").val());
+    times.push({ start: startTime, end: endTime});
+    for (var i = 0; i < times.length; i++) {
+		for (var j = i + 1; j < times.length; j++) {
+			if (timesOverlap(times[i], times[j])) {
+				showMessageTheme2(0, 'Please check that one of your time slots is overlapping with another time slot.', '', true);
+				status=false;
+				
+			}
+		}
+	}
+    return status;
+}
+
+
+function validateClassPreferredTimes(wrapperId){
+    var times = [];
+    var status = true;
+    $("#"+wrapperId+" ul li").each(function(){
+        var selected_st = $(this).attr("data-slot-st");
+        var selected_et = $(this).attr("data-slot-et");
+        var startTime = convertTo24Hour(selected_st);
+        var endTime = convertTo24Hour(selected_et);
+        times.push({ start: startTime, end: endTime});
+    });
+    var startTime = convertTo24Hour($("#class-preferred-time-dropdown-wrapper .fromTime").val());
+    var endTime = convertTo24Hour($("#class-preferred-time-dropdown-wrapper .toTime").val());
+    times.push({ start: startTime, end: endTime});
+    for (var i = 0; i < times.length; i++) {
+		for (var j = i + 1; j < times.length; j++) {
+			if (timesOverlap(times[i], times[j])) {
+				showMessageTheme2(0, 'Please check that one of your time slots is overlapping with another time slot.', '', true);
+				status=false;
+				
+			}
+		}
+	}
+    return status;
+}
+
+function timesOverlap(slot1, slot2, slotBufferLimit, userRoleId) {
+	console.log(slot1.start+" "+slot2.end);
+	if(slot1.start < slot2.end && slot1.end > slot2.start){
+        return true;
+    }
+}
+
+async function removeClassPreferredTime(slotEleId){
+    var requestData = {};
+    requestData['timePrefId']=$("#"+slotEleId).attr("data-slot-id");
+    requestData['sessionUserId']=USER_ID;
+    await getDashboardDataBasedUrlAndPayload(true, true, 'inactivate-time-preference', requestData)
+    $("#"+slotEleId).remove();
+
+}
+
+function confirmParticipateExtraCurricularActivity(src){
+    if($(src).prop("checked")){
+        $("#participateEventFormWrapper").show();
+    }else{
+        $("#participateEventFormWrapper").hide();
+    }
+}
+
+function getAddParticipateExtraCurricularActivity(formId, studentStandardId){
+    var requestData = {};
+	requestData['title'] = $("#"+formId+" #eventTitle").val();    
+    requestData['startDate'] = $("#"+formId+" #eventStartDate").val();    
+    requestData['endDate'] = $("#"+formId+" #eventEndDate").val();    
+    requestData['address'] = $("#"+formId+" #eventAddress").val();  
+    requestData['sesssionUserId'] = USER_ID;
+    requestData['studentStandardId'] = studentStandardId;
+	return requestData;
+}
+
+async function addParticipateExtraCurricularActivity(formId, studentStandardId){
+    if($("#"+formId+" #eventTitle").val() == null || $("#"+formId+" #eventTitle").val() == undefined || $("#"+formId+" #eventTitle").val() == ''){
+        showMessageTheme2(0, "Sport & event tilte is required");
+        return false;
+    }
+    if($("#"+formId+" #eventStartDate").val() == null || $("#"+formId+" #eventStartDate").val() == undefined || $("#"+formId+" #eventStartDate").val() == ''){
+        showMessageTheme2(0, "Sport & event start date is required");
+        return false;
+    }
+    if($("#"+formId+" #eventEndDate").val() == null || $("#"+formId+" #eventEndDate").val() == undefined || $("#"+formId+" #eventEndDate").val() == ''){
+        showMessageTheme2(0, "Sport & event end date is required");
+        return false;
+    }
+    if($("#"+formId+" #eventAddress").val() == null || $("#"+formId+" #eventAddress").val() == undefined || $("#"+formId+" #eventAddress").val() == ''){
+        showMessageTheme2(0, "Sport & event address is required");
+        return false;
+    }
+    var eventTitle = $("#"+formId+" #eventTitle").val();    
+    var eventStartDate = $("#"+formId+" #eventStartDate").val();    
+    var eventEndDate = $("#"+formId+" #eventEndDate").val();    
+    var eventAddress = $("#"+formId+" #eventAddress").val();  
+    var S_No = parseInt($("#"+formId+" #eventTableListWrapper table tbody tr").length)+1;
+    var data = await getDashboardDataBasedUrlAndPayload(true, true, 'save-joined-sports-ec-club', getAddParticipateExtraCurricularActivity(formId, studentStandardId));
+    $("#eventTableListWrapper table tbody").append(
+        `<tr id="event_tr_${S_No}" data-row-id="${data.joinedECId}">
+            <td>${S_No}</td>
+            <td>${eventTitle}</td>
+            <td>${eventStartDate}</td>
+            <td>${eventEndDate}</td>
+            <td>${eventAddress}</td>
+            <td>
+                <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="removeEvent(\'event_tr_${S_No}\')">
+                    <i class="fa fa-trash"></i>
+                </a>
+            </td>
+        </tr>`
+    );
+    if($("#eventTableListWrapper table tbody tr").length>0){
+        $("#"+formId+" #eventTableListWrapper").show();
+        $("#"+formId+" #eventTitle").val('');    
+        $("#"+formId+" #eventStartDate").val('');    
+        $("#"+formId+" #eventEndDate").val('');    
+        $("#"+formId+" #eventAddress").val('');  
+    }
+}
+
+async function removeEvent(rowId){
+    var requestData = {};
+	requestData['joinedExtraCurricularId'] = $("#"+rowId).attr("data-row-id"); 
+    requestData['sesssionUserId'] = USER_ID;
+    $("#eventTableListWrapper table tbody #"+rowId).remove();
+    await getDashboardDataBasedUrlAndPayload(true, true, 'inactivate-joined-extra-curricular', requestData);
+    if($("#eventTableListWrapper table tbody tr").length<1){
+        $("#eventTableListWrapper").hide();
+    }
+    $("#extraCurriculars tbody tr").each(function(i) {
+        $(this).find("td").first().text(i+1);
+    });
+
+}
+
+function circleBar(elementID, barSize, per, colorCode, thickness, customPlacement){
+    colorCode = getColorCodeAccordingToPercentage(per, 0.55, 0.95);
+    $("."+elementID).circleProgress({
+        value: per,
+        size: barSize,
+        lineCap: "round",
+        startAngle: 0.5 * Math.PI,
+        thickness: thickness,
+        fill: {
+            color: colorCode
+        }
+    }).on("circle-animation-progress", (function(e, i, n) {
+        if(customPlacement){
+            $(this).closest(".circle-percentage").find("#circle-percentage-text").html("<span>" + parseInt(n * 100) + "%<span>")
+        }else{
+            $(this).find("small").html("<span>" + parseInt(n * 100) + "%</span>")
+        }
+    }));
+}
+
+function getColorCodeAccordingToPercentage(per, low, medium){
+    return low == "" || low == undefined?"red": per<low? "red":medium == "" || medium == undefined?"orange": per<medium? "orange":"green";
+}
+
+var resizeTimer;
+$(window).on('resize', function() {
+    if($(window).outerWidth() > 991){
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if ($("#dashboardContentInHTML").css("display") == "none" && $("#profilePageView").length > 0) {
+                var windowWidth = $(window).outerWidth();
+
+                if (windowWidth > 991) {
+                    var padding = parseInt($(".app-main__inner").css("padding-top")) || 0;
+                    var headerHeight = ($(".sticky-header").height() || 0) + ($(".app-footer").height() || 0);
+                    var pageTitleHeight = $("#dashboardContentInHTMLAdditional .app-page-title").outerHeight() || 0;
+
+                    $(".profile-right-section")
+                        .css({"height":"calc(100vh - " + (padding + headerHeight + pageTitleHeight) + "px)"})
+                        .removeClass("mb-4");
+
+                    $(".fixed-btn-wrapper")
+                        .css({"bottom":"0px"})
+                        .removeClass('position-fixed')
+                        .addClass('position-sticky');
+
+                    $('html, body').animate({scrollTop: 0}, 600);
+                } else {
+                    $(".fixed-btn-wrapper")
+                        .css({"bottom":"60px"})
+                        .removeClass('position-sticky')
+                        .addClass('position-fixed');
+
+                    $(".profile-right-section")
+                        .css({"height":"inherit"})
+                        .addClass("mb-4");
+
+                    $('html, body').animate({scrollTop: 0}, 600);
+                }
+            }
+        }, 200); // run after 200ms of no further resize
+    }else{
+        return false;
+    }
+});
+
+
+function profileViewPageLoadEvent(data){
+    setTimeout(function(){
+        $("head").append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/cropperImage.js?v=1.1.26">`)
+    },1000);
+    initializeIntelInput('profileForm', 'phoneNumber','itiphoneNumber', data[0].phoneNumberCountryCode, 'selfSave', "phoneNumberWhatsAppStatus",0)
+    initializeIntelInput('profileForm', 'altPhoneNumber','itialtPhoneNumber', data[0].altPhoneNumberCountryCode, 'selfSave',"altPhoneNumberWhatsAppStatus",0)
+    initializeIntelInput('profileForm', 'motherPhoneNumber','itimotherPhoneNumber', data[1].motherPhoneNumberCountryCode, 'selfSave',"motherPhoneNumberWhatsAppStatus",1)
+    initializeIntelInput('profileForm', 'fatherPhoneNumber','itifatherPhoneNumber', data[1].fatherPhoneNumberCountryCode, 'selfSave',"fatherPhoneNumberWhatsAppStatus",1)
+    initializeIntelInput('profileForm', 'guardianPhoneNumber','itiguardianPhoneNumber', data[1].guardianPhoneNumberCountryCode, 'selfSave',"guardianPhoneNumberWhatsAppStatus",1)
+    var windowWidth = $(window).outerWidth();
+    if(windowWidth > 991){
+        var padding = parseInt($(".app-main__inner").css("padding-top").split("p")[0]);
+        var headerHeight = parseInt($(".sticky-header").height()+$(".app-footer").height());
+        var pageTitleHeight = parseInt($("#dashboardContentInHTMLAdditional .app-page-title").outerHeight());
+        $(".profile-right-section").css({"height":"calc(100vh - "+(padding+headerHeight+pageTitleHeight)+"px)"}).removeClass("mb-4");
+        $(".fixed-btn-wrapper").css({"bottom":"0px"});
+        $(".fixed-btn-wrapper").removeClass('position-fixed').addClass('position-sticky');
+        $('html, body').animate({scrollTop: 0}, 600);
+    }else{
+        $(".fixed-btn-wrapper").css({"bottom":"60px"});
+        $(".fixed-btn-wrapper").removeClass('position-sticky').addClass('position-fixed');
+        $(".profile-right-section").css({"height":"inherit"}).addClass("mb-4");
+        $('html, body').animate({scrollTop: 0}, 600);
+    }
+    $('.profile-selection-list-anchor').on('click', function(e) {
+        e.preventDefault(); 
+        $(".bg-light-hover").removeClass('bg-light');
+        $(".profile-selection-list-anchor").removeClass('bg-light');
+        $(this).addClass('bg-light');
+        var target = this.hash;
+        var section = $(target);
+        if($(window).outerWidth() > 991){
+            var container = $('.profile-right-section');
+            var scrollTopValue = container.scrollTop() + section.position().top;
+        }else{
+            var container = $('html, body');
+            var scrollTopValue = section.offset().top - 60;
+        }
+        if (section.length) {
+            container.stop().animate({
+                scrollTop: scrollTopValue,
+            }, 600);
+        }
+    });
+    var originalToTimeOptions = $('.toTime option').clone();
+    $('.fromTime').on('change', function () {
+        var selectedTime = $(this).val();
+        var selectedFound = false;
+        $('.toTime').empty().append('<option value="">End Time</option>');
+        originalToTimeOptions.each(function () {
+            var optionTime = $(this).val();
+            if (optionTime === "") return;
+            if (selectedFound) {
+                $('.toTime').append($(this).clone());
+            }
+            if (optionTime === selectedTime) {
+                selectedFound = true;
+            }
+        });
+    });
+
+    $("#gender").val(data[0].gender).trigger("change");
+    $("#dob").datepicker({
+        format:'M dd, yyyy',
+        autoclose:true,
+    });
+    $('#dob').datepicker('update', new Date(data[0].dob));
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "motherCountry", '');
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "fatherCountry", '');
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "guardianCountry", '');
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "pCountryId", '');
+    getTimeZones("profileForm", "timezone", "timezoneInput", "");
+    callCountriesOption("profileForm", '', "nationality", '', "Select Nationality*")
+    $("#country").unbind().bind("change", function () {
+		callStates('profileForm', this.value, 'country','state','city');
+		$("#city").html("<option value=''>Select City*</option>");
+	});
+	$("#state").unbind().bind("change", function () {
+		callCities('profileForm', this.value, 'state','city');
+	});
+    $("#pCountryId").unbind().bind("change", function () {
+		callStates('profileForm', this.value, 'pCountryId','pStateId','pCityId');
+		$("#pCityId").html("<option value=''>Select City*</option>");
+	});
+	$("#pStateId").unbind().bind("change", function () {
+		callCities('profileForm', this.value, 'pStateId','pCityId');
+	});
+    
+
+    $("#country").select2({
+        theme:"bootstrap4",
+    });
+    $("#state").select2({
+        theme:"bootstrap4",
+    });
+    $("#city").select2({
+        theme:"bootstrap4",
+    });
+    $("#timezone").select2({
+        theme:"bootstrap4",
+    });
+    $("#nationality").select2({
+        theme:"bootstrap4",
+    });
+
+    $("#motherCountry").select2({
+        theme:"bootstrap4",
+    });
+    $("#fatherCountry").select2({
+        theme:"bootstrap4",
+    });
+    $("#guardianCountry").select2({
+        theme:"bootstrap4",
+    });
+
+    $("#guardianCountry").select2({
+        theme:"bootstrap4",
+    });
+    $("#preferedCommunicationStartTime").select2({
+        theme:"bootstrap4",
+    });
+    $("#preferedCommunicationEndTime").select2({
+        theme:"bootstrap4",
+    });
+    $("#preferedStartTime").select2({
+        theme:"bootstrap4",
+    });
+    $("#preferedEndTime").select2({
+        theme:"bootstrap4",
+    });
+
+    $("#country").val(data[0].country).trigger("change");
+    $("#state").val(data[0].state).trigger("change");
+    $("#city").val(data[0].city).trigger("change");
+    $("#nationality").val(data[0].nationalityId).trigger("change");
+    
+    $("#relationType").select2({
+        theme:"bootstrap4",
+    });
+    $("#relationType").val(data[1].relationType).trigger("change");
+    $("#pCountryId").select2({
+        theme:"bootstrap4",
+    });
+    $("#pStateId").select2({
+        theme:"bootstrap4",
+    });
+    $("#pCityId").select2({
+        theme:"bootstrap4",
+    });
+    $("#motherCountry").val(data[1].motherCountry == 0? '' : data[1].motherCountry).trigger("change");
+    $("#fatherCountry").val(data[1].fatherCountry == 0? '' : data[1].fatherCountry).trigger("change");
+    // $("#pCountryId").val(data[1].pCountryId == 0? '' : data[1].pCountryId).trigger("change");
+    // $("#pStateId").val(data[1].pStateId == 0? '' : data[1].pStateId).trigger("change");
+    // $("#pCityId").val(data[1].pCityId == 0? '' : data[1].pCityId).trigger("change");
+    
+    
+
+    // Academic Information Event Start Here //
+    getAllGrade(SCHOOL_ID,true, "grade");
+    getAllGradeWithFormId(SCHOOL_ID,true, "changeLearingProgramGradeForm", "standardId");
+    getAllGrade(SCHOOL_ID,true, "previousCurrentGradeName");
+    $("#learningProgram").select2({
+        theme:"bootstrap4",
+    });
+    $("#learningProgram").val(data[2].learningProgramValue).trigger("change");
+    $("#registrationType").val(data[2].learningProgramValue).trigger("change");
+    $("#grade").select2({
+        theme:"bootstrap4",
+    });
+    $("#grade").val(data[2].gradeId).trigger("change");
+    $("#changeLearingProgramGradeModal #standardId").val(data[2].gradeId).trigger("change");
+    $("#academicYearStartDate").datepicker({
+        format:'M dd, yyyy',
+        autoclose:true,
+    });
+    $("#enrollmentDate").datepicker({
+        format:'M dd, yyyy',
+        autoclose:true,
+    });
+    $('#academicYearStartDate').datepicker('update', new Date(data[2].academicYearStartDate));
+    $('#enrollmentDate').datepicker('update', new Date(data[2].enrollmentDate));
+    $("#courseProviderId").select2({
+        theme:"bootstrap4",
+    });
+    if(data[2].courseProviderId !=""){
+        $("#courseProviderId").val(data[2].courseProviderId).trigger("change");
+        $("#lmsPlatform").val(data[2].courseProviderId).trigger("change");
+    }else{
+        $("#courseProviderId").val("").trigger("change");
+        $("#lmsPlatform").val(data[2].courseProviderId).trigger("change");
+    }
+    $("#registrationType").select2({
+        theme:"bootstrap4",
+        dropdowParent:$('#changeLearingProgramGradeModal body')
+    });
+    $("#changeLearingProgramGradeModal #standardId").select2({
+        theme:"bootstrap4",
+        dropdowParent:$('#changeLearingProgramGradeModal body')
+    });
+    $("#lmsPlatform").select2({
+        theme:"bootstrap4",
+        dropdowParent:$('#changeLearingProgramGradeModal body')
+    });
+    $("#previousCurrentGradeName").select2({
+        theme:"bootstrap4",
+    });
+    $("#previousCurrentGradeName").val(data[2].previousCurrentGradeId).trigger("change");
+    var currentYear = new Date().getFullYear();
+    $("#previousCurrentSchoolGraduationYear").datepicker({
+        format: "yyyy",
+        viewMode: "years",
+        minViewMode: "years",
+        autoclose: true,
+        endDate: new Date(currentYear, 11, 31) 
+    });
+    callCountriesOption("profileForm", '', "previousCurrentSchoolCountry", '', "Select Country*");
+    $("#previousCurrentSchoolCountry").select2({
+        theme:"bootstrap4",
+    });
+    $("#previousCurrentSchoolCountry").val(data[2].previousCurrentSchoolCountry).trigger("change");
+    // Academic Information Event End Here //
+
+    // Sport & Extra Curriculars Start Here //
+    $("#eventStartDate").datepicker({
+        format:'M dd, yyyy',
+        autoclose:true,
+        startDate : new Date()
+    }).on("change", function(){
+        if($(this).val() != ""){
+            var startDate = new Date($(this).val());
+            $("#eventEndDate").datepicker("remove");
+            $('#eventEndDate').val('');
+            $("#eventEndDate").datepicker({
+                startDate : startDate,
+                format : 'M dd, yyyy',
+                autoclose: true,
+            });
+        }
+    });
+
+    $("#eventEndDate").datepicker({
+        format:'M dd, yyyy',
+        autoclose:true,
+        startDate : new Date()
+    });
+    // Sport & Extra Curriculars End Here //
+
+    // Communication Log Start Here //
+    $("#communicationLogDIV").append(communicationLogInformation());
+    initEditor(1, 'commentEditor','Enter comments', false);
+    // bindFileUploadNew1('1', '33',USER_ID,6);
+    $("#fileuploadLog6").on("change",function(){
+        var attachment = $("#fileuploadLog6").val().split("\\")[2]
+        $("#fileuploadLog6Span").text(attachment);
+    });
+    loadContentFlag=1;
+    callProfileEnrollStatusList('profileForm','RE-EN','reLeadStatus', false);
+    // $('#communicationLogForm #reLeadStatus').select2({
+    // 	theme:'bootstrap4',
+    // })
+    getCommunicationLogData('communicationLogTable',PORFILE_RESPONSE_DATA.userId,PORFILE_RESPONSE_DATA.userRole);
+    $("#reLeadStatus").select2({
+        theme:"bootstrap4"
+    });
+    // Communication Log End Here //
+    $('.select2-selection').addClass('form-select-sm group-append-hide-input');
+    
+    
+    PERCENT = personalInformationFieldFilledCount();
+    circleBar('personal-info-bar', '55', PERCENT, '#007fff', '4',false);
+
+    PERCENT = guardianInformationFieldFilledCount();
+    circleBar('guardian-info-bar', '55', PERCENT, '#007fff', '4',false);
+    
+    PERCENT = academicInformationFieldFilledCount();
+    circleBar('academic-info-bar', '55', PERCENT, '#007fff', '4',false);
+    
+    PERCENT = liveClassesPreferredTimingFieldFilledCount();
+    circleBar('live-classes-bar', '55', PERCENT, '#007fff', '4',false);
+    
+    PERCENT = sportAndExtraCurricularsInformationFieldFilledCount();
+    circleBar('sport-curriculars-bar', '55', PERCENT, '#007fff', '4',false);
+    PERCENT = calculatePercentage(OVER_ALL_COUNT,OVER_ALL_TOTAL)
+    circleBar('profile-progress-bar', '112', PERCENT, '#fff', '5',true);
+}
+
+function timeToMinutes(time) {
+  if (!time) return null;
+
+  time = time.trim();
+
+  // 12-hour format
+  if (time.includes("AM") || time.includes("PM")) {
+    time = convertTo24Hour(time); // your existing function
+  }
+
+  const [h, m] = time.split(":");
+  return parseInt(h, 10) * 60 + parseInt(m, 10);
+}
+
+
+function calculatePercentage(part, total) {
+    
+    var percentage=0;
+    if (total === 0) {
+        return 0;
+    }
+    percentage = part / total;
+    return percentage.toFixed(2)
+}
+
+function personalInformationFieldFilledCount(){
+    
+    COUNT=0;
+    TOTAL_COUNT=0;
+    $("#personal_information input:not([type='checkbox']).bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+        } 
+    });
+    $("#personal_information select.bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+        } 
+    });
+    $("#personal_information .hobbies-wrapper.bar_count input[type='checkbox']").each(function(){ 
+        if($(this).prop("checked")){
+            COUNT++;
+            return false;
+        } 
+    });
+    $("#personal_information .social-links-wrapper.bar_count input").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            return false;
+        } 
+    });
+    TOTAL_COUNT =  parseInt($("#personal_information .bar_count").length)
+    OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
+    OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
+    return calculatePercentage(COUNT, TOTAL_COUNT);
+}
+
+function guardianInformationFieldFilledCount(){
+    COUNT=0;
+    TOTAL_COUNT=0;
+    var motherCount=0;
+    var parentCount=0;
+    var guardianCount=0;
+    $("#guardian_information .mother-section input:not([type='checkbox']).bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            motherCount++;
+        } 
+    });
+    $("#guardian_information .mother-section select.bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            motherCount++;
+        } 
+    });
+
+    $("#guardian_information .father-section input:not([type='checkbox']).bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            guardianCount++;
+        } 
+    });
+    $("#guardian_information .father-section select.bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            guardianCount++;
+        } 
+    });
+    
+
+    $("#guardian_information .guardian-section input:not([type='checkbox']).bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            motherCount++;
+        } 
+    });
+    $("#guardian_information .guardian-section select.bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            motherCount++;
+        } 
+    });
+    if(motherCount == 5){
+        COUNT=5;
+    }else if(motherCount<parentCount){
+        COUNT=parentCount;
+    }else if(parentCount != 5 && parentCount < guardianCount){
+        COUNT =guardianCount;
+    }
+    $("#guardian_information .communication-wrapper input[type='checkbox']").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+            return false;
+        } 
+    });
+    $("#guardian_information #communication-preferred-time-wrapper .communication-preferred-time-wrapper-ul.bar_count .communication_slot_ul li").each(function(){ 
+        if($(this).length>0){
+            COUNT++;
+            return false;
+        } 
+    });
+    
+    
+    TOTAL_COUNT =  parseInt($("#guardian_information").attr("data-section-count"));
+    OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
+    OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
+    return calculatePercentage(COUNT, TOTAL_COUNT);
+}
+
+function academicInformationFieldFilledCount(){
+    
+    var data = PORFILE_RESPONSE_DATA.profileData.studentProfile[2];
+    COUNT=0;
+    TOTAL_COUNT=0;
+    $("#academic_information input.bar_count").each(function(){ 
+        if($(this).val() != ""){
+            COUNT++;
+        } 
+    });
+    // $("#academic_information select.group-append-hide-input").each(function(){ 
+    //     if($(this).val() != ""){
+    //         COUNT++;
+    //     } 
+    // });
+    if(data.ageProof !=""){
+        COUNT++;
+    }
+    if(data.addressProof !=""){
+        COUNT++;
+    }
+    if(data.parentPassportProof !=""){
+        COUNT++;
+    }
+    if(data.lastAcademicProof !=""){
+        COUNT++;
+    }
+    
+    TOTAL_COUNT =  parseInt($("#academic_information input.bar_count").length)
+    OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
+    OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
+    return calculatePercentage(COUNT, TOTAL_COUNT);
+}
+
+function liveClassesPreferredTimingFieldFilledCount(){
+    COUNT=0;
+    TOTAL_COUNT=0;
+    $("#classes_Preferred_Timing_information #class-preferred-time-wrapper .bar_count").each(function(){ 
+        if($(this).length>0){
+            COUNT++;
+            return false;
+        } 
+    });
+    TOTAL_COUNT =  parseInt($("#classes_Preferred_Timing_information").attr("data-section-count"));
+    OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
+    OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
+    return calculatePercentage(COUNT, TOTAL_COUNT);
+}
+
+function sportAndExtraCurricularsInformationFieldFilledCount(){
+    COUNT=0;
+    TOTAL_COUNT=0;
+    // $("#sport_and_Extra_curriculars_information input[type='checkbox'].group-append-hide-input").each(function(){ 
+    //     if($(this).prop("checked")){
+    //         COUNT++;
+    //         return false;
+    //     } 
+    // });
+    if($("#participateActivities").prop("checked") && $("#sport_and_Extra_curriculars_information #extraCurriculars tbody tr").length>0){
+        COUNT++;
+    }
+    TOTAL_COUNT=parseInt($("#sport_and_Extra_curriculars_information").attr("data-section-count"));
+    // if($("#participateActivities").prop("checked") && $("#sport_and_Extra_curriculars_information #extraCurriculars tbody tr")>0){TOTAL_COUNT++}
+    OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
+    OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
+    return calculatePercentage(COUNT, TOTAL_COUNT);
+}
+
+
+
+
+
+function getSocialIcon(iconRequest){
+    var icon={
+            "LinkedIn":
+            `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 400 400">
+                <rect width="400" height="400" rx="64" ry="64" fill="#0077B5"/>
+                <path fill="#FFFFFF" d="M123.8 146.6H82.5v154.9h41.3V146.6zm-20.6-20.2c14.2 0 23-9.5 23-21.5-.3-12.2-8.8-21.5-22.7-21.5-13.9 0-23 9.3-23 21.5 0 12 8.8 21.5 22.5 21.5h.2zm48.6 175.1h41.3v-86.4c0-4.6.3-9.3 1.7-12.6 3.8-9.3 12.4-19 26.9-19 19 0 26.6 14.3 26.6 35.1v83h41.3v-88.8c0-47.6-25.4-69.7-59.2-69.7-27.5 0-39.6 15.2-46.3 25.9h.3v-22.2h-41.3c.5 14.5 0 154.9 0 154.9z"/>
+            </svg>`,
+            "YouTube":
+            `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 576 512">
+                <path fill="#FF0000" d="M549.7 124.1c-6.3-24-25.1-42.7-49-49C458.1 64 288 64 288 64s-170.1 0-212.7 11.1c-23.9 6.3-42.7 25-49 49C16 167.7 16 256 16 256s0 88.3 10.3 131.9c6.3 24 25.1 42.7 49 49C117.9 448 288 448 288 448s170.1 0 212.7-11.1c23.9-6.3 42.7-25 49-49C560 344.3 560 256 560 256s0-88.3-10.3-131.9z"/>
+                <path fill="#FFF" d="M232 334.7V177.3L361.8 256 232 334.7z"/>
+            </svg>`,
+            "Instagram":
+            `<svg xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 32 32" fill="none">
+                <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#radient1)"/>
+                <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#radient2)"/>
+                <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#radient3)"/>
+                <path d="M23 10.5C23 11.3284 22.3284 12 21.5 12C20.6716 12 20 11.3284 20 10.5C20 9.67157 20.6716 9 21.5 9C22.3284 9 23 9.67157 23 10.5Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21ZM16 19C17.6569 19 19 17.6569 19 16C19 14.3431 17.6569 13 16 13C14.3431 13 13 14.3431 13 16C13 17.6569 14.3431 19 16 19Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M6 15.6C6 12.2397 6 10.5595 6.65396 9.27606C7.2292 8.14708 8.14708 7.2292 9.27606 6.65396C10.5595 6 12.2397 6 15.6 6H16.4C19.7603 6 21.4405 6 22.7239 6.65396C23.8529 7.2292 24.7708 8.14708 25.346 9.27606C26 10.5595 26 12.2397 26 15.6V16.4C26 19.7603 26 21.4405 25.346 22.7239C24.7708 23.8529 23.8529 24.7708 22.7239 25.346C21.4405 26 19.7603 26 16.4 26H15.6C12.2397 26 10.5595 26 9.27606 25.346C8.14708 24.7708 7.2292 23.8529 6.65396 22.7239C6 21.4405 6 19.7603 6 16.4V15.6ZM15.6 8H16.4C18.1132 8 19.2777 8.00156 20.1779 8.0751C21.0548 8.14674 21.5032 8.27659 21.816 8.43597C22.5686 8.81947 23.1805 9.43139 23.564 10.184C23.7234 10.4968 23.8533 10.9452 23.9249 11.8221C23.9984 12.7223 24 13.8868 24 15.6V16.4C24 18.1132 23.9984 19.2777 23.9249 20.1779C23.8533 21.0548 23.7234 21.5032 23.564 21.816C23.1805 22.5686 22.5686 23.1805 21.816 23.564C21.5032 23.7234 21.0548 23.8533 20.1779 23.9249C19.2777 23.9984 18.1132 24 16.4 24H15.6C13.8868 24 12.7223 23.9984 11.8221 23.9249C10.9452 23.8533 10.4968 23.7234 10.184 23.564C9.43139 23.1805 8.81947 22.5686 8.43597 21.816C8.27659 21.5032 8.14674 21.0548 8.0751 20.1779C8.00156 19.2777 8 18.1132 8 16.4V15.6C8 13.8868 8.00156 12.7223 8.0751 11.8221C8.14674 10.9452 8.27659 10.4968 8.43597 10.184C8.81947 9.43139 9.43139 8.81947 10.184 8.43597C10.4968 8.27659 10.9452 8.14674 11.8221 8.0751C12.7223 8.00156 13.8868 8 15.6 8Z" fill="white"/>
+                <defs>
+                    <radialGradient id="radient1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 23) rotate(-55.3758) scale(25.5196)">
+                        <stop stop-color="#B13589"/>
+                        <stop offset="0.79309" stop-color="#C62F94"/>
+                        <stop offset="1" stop-color="#8A3AC8"/>
+                    </radialGradient>
+                    <radialGradient id="radient2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11 31) rotate(-65.1363) scale(22.5942)">
+                        <stop stop-color="#E0E8B7"/>
+                        <stop offset="0.444662" stop-color="#FB8A2E"/>
+                        <stop offset="0.71474" stop-color="#E2425C"/>
+                        <stop offset="1" stop-color="#E2425C" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="radient3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0.500002 3) rotate(-8.1301) scale(38.8909 8.31836)">
+                        <stop offset="0.156701" stop-color="#406ADC"/>
+                        <stop offset="0.467799" stop-color="#6A45BE"/>
+                        <stop offset="1" stop-color="#6A45BE" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+            </svg>`,
+            "Facebook":
+            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15px" height="15px" viewBox="0 0 48 48" version="1.1">
+                <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0">
+                        <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,208 Z" id="Facebook"></path>
+                    </g>
+                </g>
+            </svg>`,
+            "Twitter":
+            `<svg viewBox="0 0 24 24" width="15" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-lrvibr r-m6rgpd r-1kihuf0 r-18jsvk2 r-1im9597 r-qn3fzs">
+                <g>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                </g>
+            </svg>`,
+            "TikTok":
+            `<svg xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 250 250">
+                <g clip-rule="evenodd" fill-rule="evenodd">
+                    <path d="M25 0h200c13.808 0 25 11.192 25 25v200c0 13.808-11.192 25-25 25H25c-13.808 0-25-11.192-25-25V25C0 11.192 11.192 0 25 0z" fill="#010101"/>
+                    <path d="M156.98 230c7.607 0 13.774-6.117 13.774-13.662s-6.167-13.663-13.774-13.663h-2.075c7.607 0 13.774 6.118 13.774 13.663S162.512 230 154.905 230z" fill="#ee1d51"/>
+                    <path d="M154.717 202.675h-2.075c-7.607 0-13.775 6.118-13.775 13.663S145.035 230 152.642 230h2.075c-7.608 0-13.775-6.117-13.775-13.662s6.167-13.663 13.775-13.663z" fill="#66c8cf"/>
+                    <ellipse cx="154.811" cy="216.338" fill="#010101" rx="6.699" ry="6.643"/>
+                    <path d="M50 196.5v6.925h8.112v26.388h8.115v-26.201h6.603l2.264-7.112zm66.415 0v6.925h8.112v26.388h8.115v-26.201h6.603l2.264-7.112zm-39.81 3.93c0-2.17 1.771-3.93 3.959-3.93 2.19 0 3.963 1.76 3.963 3.93s-1.772 3.93-3.963 3.93c-2.188-.001-3.959-1.76-3.959-3.93zm0 6.738h7.922v22.645h-7.922zM87.924 196.5v33.313h7.925v-8.608l2.453-2.248L106.037 230h8.49l-11.133-16.095 10-9.733h-9.622l-7.923 7.86V196.5zm85.47 0v33.313h7.926v-8.608l2.452-2.248L191.509 230H200l-11.133-16.095 10-9.733h-9.622l-7.925 7.86V196.5z" fill="#ffffff"/>
+                    <path d="M161.167 81.186c10.944 7.819 24.352 12.42 38.832 12.42V65.755a39.26 39.26 0 0 1-8.155-.853v21.923c-14.479 0-27.885-4.601-38.832-12.42v56.835c0 28.432-23.06 51.479-51.505 51.479-10.613 0-20.478-3.207-28.673-8.707C82.187 183.57 95.23 189.5 109.66 189.5c28.447 0 51.508-23.047 51.508-51.48V81.186zm10.06-28.098c-5.593-6.107-9.265-14-10.06-22.726V26.78h-7.728c1.945 11.09 8.58 20.565 17.788 26.308zm-80.402 99.107a23.445 23.445 0 0 1-4.806-14.256c0-13.004 10.548-23.547 23.561-23.547a23.6 23.6 0 0 1 7.147 1.103V87.022a51.97 51.97 0 0 0-8.152-.469v22.162a23.619 23.619 0 0 0-7.15-1.103c-13.013 0-23.56 10.543-23.56 23.548 0 9.195 5.272 17.157 12.96 21.035z" fill="#ee1d52"/>
+                    <path d="M153.012 74.405c10.947 7.819 24.353 12.42 38.832 12.42V64.902c-8.082-1.72-15.237-5.942-20.617-11.814-9.208-5.743-15.843-15.218-17.788-26.308H133.14v111.239c-.046 12.968-10.576 23.468-23.561 23.468-7.652 0-14.45-3.645-18.755-9.292-7.688-3.878-12.96-11.84-12.96-21.035 0-13.005 10.547-23.548 23.56-23.548 2.493 0 4.896.388 7.15 1.103V86.553c-27.945.577-50.42 23.399-50.42 51.467 0 14.011 5.597 26.713 14.68 35.993 8.195 5.5 18.06 8.707 28.673 8.707 28.445 0 51.505-23.048 51.505-51.479z" fill="#ffffff"/>
+                    <path d="M191.844 64.902v-5.928a38.84 38.84 0 0 1-20.617-5.887 38.948 38.948 0 0 0 20.617 11.815zM153.439 26.78a39.524 39.524 0 0 1-.427-3.198V20h-28.028v111.24c-.045 12.967-10.574 23.467-23.56 23.467-3.813 0-7.412-.904-10.6-2.512 4.305 5.647 11.103 9.292 18.755 9.292 12.984 0 23.515-10.5 23.561-23.468V26.78zm-44.864 59.773v-6.311a51.97 51.97 0 0 0-7.067-.479C73.06 79.763 50 102.811 50 131.24c0 17.824 9.063 33.532 22.835 42.772-9.083-9.28-14.68-21.982-14.68-35.993 0-28.067 22.474-50.889 50.42-51.466z" fill="#69c9d0"/>
+                    <path d="M154.904 230c7.607 0 13.775-6.117 13.775-13.662s-6.168-13.663-13.775-13.663h-.188c-7.607 0-13.774 6.118-13.774 13.663S147.109 230 154.716 230zm-6.792-13.662c0-3.67 3-6.643 6.7-6.643 3.697 0 6.697 2.973 6.697 6.643s-3 6.645-6.697 6.645c-3.7-.001-6.7-2.975-6.7-6.645z" fill="#ffffff"/>
+                </g>
+            </svg>`,
+
+        
+        };
+    return icon[iconRequest];
+}
+
+function getAllDataAndRecords(userId, studentStandardId){
+	var uploadRequestDTO = {};
+	var documentUploads = STUDENT_UPLOAD_DOCUMENTS;
+
+	uploadRequestDTO['userId'] = userId;
+	uploadRequestDTO['studentStandardId'] = studentStandardId;
+	uploadRequestDTO['documentUploads'] = documentUploads;
+	return uploadRequestDTO;
+}
+
+function saveDocs(userId, studentStandardId, docType){
+    if(docType != "Profile Image"){
+        if($("#ageProofFileName").text() == "" && $("#addressProofFileName").text() == "" && $("#parentPassportProofFileName").text() == "" && $("#lastAcademicProofFileName").text() == ""){
+            showMessageTheme2(0, 'No attachment file is selected','',true);
+            return false;
+        }
+    }
+    $.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard','save-docs'),
+		data : JSON.stringify(getAllDataAndRecords(userId, studentStandardId)),
+		dataType : 'json',
+		async : true,
+		success : function(data) {
+            console.log(data)
+            if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					showMessageTheme2(0, data['MESSAGE'],'',true);
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, data['MESSAGE'],'',true);
+				}
+			} else {
+				var doctype = "";
+				$.each(data['LIST_OF_DOC'], function(key,value){
+					var doctype = value.DOCUMENT_PATH.split(".").pop();
+					if(data['LIST_OF_DOC'][key].DOCUMENT_PATH.split(".").pop() != "pdf"){
+						//$("#"+data['LIST_OF_DOC'][key].IMG_ID).attr("src",data['LIST_OF_DOC'][key].DOCUMENT_PATH);
+						$("#"+value['IMG_ID']).parent().parent().find(".upload-btn-wrapper").hide();
+						if(USER_ROLE != 'STUDENT'){
+							$("#"+value['IMG_ID']).parent().parent().find(".removeDocBtn").hide();
+						}
+					}else{
+						$("#uploadFile .upload_pdf .pre_upload_pdf").remove();
+						$("#uploadFile .upload_pdf#pre_upload_pdf_div").append('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data="'+data['LIST_OF_DOC'][key].DOCUMENT_PATH+'"></object>');
+
+						$("#uploadFile .upload_pdf a.download-pdf-btn").attr("href",base64URL);
+						$("#uploadFile .upload_pdf").removeClass("d-none");
+						$("#uploadFile .upload_img").addClass("d-none");
+						$("#"+value['IMG_ID']).parent().parent().find(".upload-btn-wrapper").hide();
+						if(USER_ROLE == 'STUDENT'){
+							$("#"+value['IMG_ID']).parent().parent().find(".removeDocBtn").hide();
+						}
+					}
+				});
+				$('.removeDocBtn').each(function(){
+					if($(this).attr('style').replace(/\s/g, '') != 'display:none' && $(this).attr('style').replace(/\s/g, '') != 'display:none;'){
+					  $("#allDocsNotUploaded").hide();
+					  $("#allDocsUploaded").show();
+					}else{
+					  $("#allDocsNotUploaded").show();
+					  $("#allDocsUploaded").hide();
+					  return false;
+					}
+				});
+				if(docType == "Profile Image"){
+					showMessageTheme2(1, 'Profile image uploaded successfully','',true);
+				}else{
+					showMessageTheme2(1, 'Document(s) uploaded','',true);
+					// setTimeout(function(){customLoader(true); window.location.reload();},2000);
+				}
+			}
+		}
+	});
+}
+
+function removeUploadImage(src, inputId, thumbId, type, userId, studentStandardId, removeType){
+    if($("#"+thumbId).attr("src").split(":")[0]=="https" || $("#"+thumbId).attr("src").split(":")[0]=="http"){
+        var data={};
+        data['userId']=userId;
+        data['studentStandardId']=studentStandardId;
+        data['type']=type;
+        $.ajax({
+            type : "POST",
+            contentType : APPLICATION_JSON_VALUE,
+            url : getURLForHTML('dashboard','delete-uploaded-docs'),
+            data : JSON.stringify(data),
+            dataType : 'json',
+            async : false,
+            success : function(data) {
+                if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+                    if(data['status'] == '3'){
+                        redirectLoginPage();
+                    }else{
+                        if(tt=='theme1'){
+                            showMessage(false, data['MESSAGE']);
+                        }else{
+                            showMessageTheme2(0, data['MESSAGE'],'',true);
+                        }
+                    }
+                } else {
+                    // Do here 
+                    showMessageTheme2(1, 'Document(s) removed','',true);
+                }
+            }
+        });
+    }
+    for (var i=0; i < STUDENT_UPLOAD_DOCUMENTS.length; i++) {
+        if (STUDENT_UPLOAD_DOCUMENTS[i].docType === type) {
+            STUDENT_UPLOAD_DOCUMENTS.splice(i, 1);
+            console.log(STUDENT_UPLOAD_DOCUMENTS);
+        }
+    }
+    $("#"+inputId).val("");
+    $("#"+thumbId).attr("src", PATH_FOLDER_IMAGE2+'no-image.jpg'+SCRIPT_VERSION);
+    $("#"+thumbId).attr("thumbtype","img")
+    $("#"+inputId+"div").attr("data-base64url",PATH_FOLDER_IMAGE2+'no-image.jpg'+SCRIPT_VERSION);
+    $("#"+inputId+"div").show();
+    $('#' + inputId+'Remove').hide();
+    if(removeType == "new"){
+        $('#' + inputId+'ViewBtn').hide();
+    }
+    $('.removeDocBtn').each(function(index){
+        if($(this).attr('style') == 'display: none'){
+            $("#allDocsNotUploaded").show();
+            $("#allDocsUploaded").hide();
+        }else{
+            $("#allDocsNotUploaded").show();
+            $("#allDocsUploaded").hide();
+        }
+    });
+}
+
+function viewAttachmentProfile(src, modalId, attachmentType, baseUrlEleID) {
+  var thumbImgType = $(src).find("img").attr("thumbType");
+  var base64URL;
+
+  // Get the base64 PDF or image URL
+  if (attachmentType == 'I' && thumbImgType == "pdf") {
+    base64URL = $("#" + baseUrlEleID).attr('data-PDFURL');
+  } else if (attachmentType == 'P' && thumbImgType == "") {
+    base64URL = $("#" + baseUrlEleID).attr('data-PDFURL');
+  } else {
+    base64URL = $("#" + baseUrlEleID).attr('data-PDFURL');
+  }
+
+  console.log(base64URL);
+
+  // --- 🖼️ IMAGE HANDLING ---
+  if (attachmentType == 'I' && thumbImgType != 'pdf') {
+    $("#" + modalId + " .upload_img img").attr('src', base64URL);
+    $("#" + modalId + ' .upload_img').removeClass("d-none");
+    $("#" + modalId + " .upload_pdf").addClass("d-none");
+  } 
+  
+  // --- 📄 PDF HANDLING ---
+  else {
+    // Remove existing PDF preview
+    $("#" + modalId + " .upload_pdf .pre_upload_pdf").remove();
+
+    // ✅ Chrome-safe PDF rendering via Blob URL
+    let pdfUrl = base64URL;
+    if (base64URL && base64URL.startsWith("data:application/pdf;base64,")) {
+      try {
+        const byteCharacters = atob(base64URL.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        pdfUrl = URL.createObjectURL(blob);
+      } catch (e) {
+        console.error("PDF Blob conversion failed:", e);
+      }
+    }
+
+    // Append Chrome-safe PDF viewer
+    $("#" + modalId + " .upload_pdf#pre_upload_pdf_div").append(
+      `<object type="application/pdf" class="pre_upload_pdf full" style="height:400px;width:100%;" data="${pdfUrl}"></object>`
+    );
+
+    // Set download link to the original Base64 URL
+    $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", base64URL);
+
+    $("#" + modalId + " .upload_pdf").removeClass("d-none");
+    $("#" + modalId + ' .upload_img').addClass("d-none");
+
+    // Revoke blob URL when modal closes (clean memory)
+    $("#" + modalId).one("hidden.bs.modal", function () {
+      if (pdfUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    });
+  }
+
+  // Show source and modal
+  $(src).show();
+  $("#" + modalId).modal("show");
+}
+
+function showLearningProgamGradePlatformModal() {
+	$("#changeLearingProgramGradeModal").modal('show');
+}
+function openConfirmSaveModal(){
+	$("#confirmSaveModal").modal('show');
+}
+
+function changeLearningProgamGradePlatformModal(studentStandardId, currentLearningProgram, currentStandardId, currentLmsPlatform){
+	var newLearningProgram=$('#registrationType').val();
+	var newStandardId=$('#changeLearingProgramGradeModal #standardId').val();
+	var newCourseProviderId=$('#lmsPlatform').val();
+	// if(currentLearningProgram==newLearningProgram && currentStandardId==newStandardId && currentLmsPlatform==newLmsPlatform){
+	// 	showMessageTheme2(0,"To proceed this request, please change Learning Progam or Grade or LMS Platform",'',false);
+	// 	return false;
+	// }
+	var data = {};
+	data['schoolId'] = SCHOOL_ID;
+	data['userId'] = USER_ID;
+	data['studentStandardId'] = studentStandardId;
+	data['learningProgram'] = newLearningProgram;
+	data['standardId'] = newStandardId;
+	data['courseProviderId'] = newCourseProviderId;
+	var currentEnrollmentFor='enrollment';
+	if(newCourseProviderId==39){
+		currentEnrollmentFor='exact-path-enrollment';
+	}
+	data['enrollmentFor'] = currentEnrollmentFor;
+
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', 'change-learning-program-grade-platform'),
+		data: JSON.stringify(data),
+		dataType: 'json',
+		success: function (data) {
+            if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(false, data['message'], '', true);
+				}
+			} else {
+				$("#confirmSaveModal").modal('hide');
+				$("#changeLearingProgramGradeModal").modal('hide');
+                $("#grade").val($("#changeLearingProgramGradeModal #standardId").val()).trigger("change");
+                $("#learningProgram").val($("#registrationType").val()).trigger("change");
+                $("#courseProviderId").val($("#lmsPlatform").val()).trigger("change");
+				// $("#lmsPlatformText").text($('#lmsPlatform option:selected').text());
+				// $("#learningProgramText").text($('#registrationType option:selected').text());
+				// $("#standardIdText").text($('#standardId option:selected').text());
+				// if($('#lmsPlatform option:selected').val()==39){
+				// 	$(".standardViewName").html($('#lmsPlatform option:selected').text()+' | '+$('#registrationType option:selected').text());
+				// }else{
+				// 	$(".standardViewName").html($('#standardId option:selected').text()+' | '+$('#registrationType option:selected').text());
+				// }
+				$(".compulsorySubjectsdiv").html(courseDetails(data.details.subjects, $('#changeLearingProgramGradeModal #standardId option:selected').text()))
+				if($('#registrationType').val()=='DUAL_DIPLOMA'){
+					$("#dualDiplomaAdditionalDetails").show();
+				}else if($('#registrationType').val()=='ONE_TO_ONE_FLEX'){
+					$("#dualDiplomaAdditionalDetails").hide();
+				}else{
+					$("#dualDiplomaAdditionalDetails").hide();
+				}
+				showMessageTheme2(true, 'Profile updated successfully', '', true);
+			}
+		}
+	});
+}
+
+function courseDetails(subjectsList, grade){
+    var html=
+        `<span class="font-weight-semi-bold text-dark">Course (${grade})</span>
+        <ul class="p-0 mt-2">`;
+            if(subjectsList.length>0){
+                $.each(subjectsList, function(i, v){
+                    html+=`<li class="d-inline-block p-1 px-2 mr-1 rounded bg-primary text-white font-11 mb-1">${v}</li>`;
+                });
+            }
+        html+=`</ul>`;
+	return html;
+}
+
+// function validateUserProfile(formId){
+//     if($("#"+formId+" #firstName").val() == null || $("#"+formId+" #firstName").val() == undefined || $("#"+formId+" #firstName").val() == ''){
+//         showMessageTheme2(0, "First name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #middleName").val() == null || $("#"+formId+" #middleName").val() == undefined || $("#"+formId+" #middleName").val() == ''){
+//         showMessageTheme2(0, "Middle name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #lastName").val() == null || $("#"+formId+" #lastName").val() == undefined || $("#"+formId+" #lastName").val() == ''){
+//         showMessageTheme2(0, "Last name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #gender").val() == null || $("#"+formId+" #gender").val() == undefined || $("#"+formId+" #gender").val() == ''){
+//         showMessageTheme2(0, "Gender is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #dob").val() == null || $("#"+formId+" #dob").val() == undefined || $("#"+formId+" #dob").val() == ''){
+//         showMessageTheme2(0, "Date of birth is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #phoneNumber").val() == null || $("#"+formId+" #phoneNumber").val() == undefined || $("#"+formId+" #phoneNumber").val() == ''){
+//         showMessageTheme2(0, "Phone number is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #altPhoneNumber").val() == null || $("#"+formId+" #altPhoneNumber").val() == undefined || $("#"+formId+" #altPhoneNumber").val() == ''){
+//         showMessageTheme2(0, "Alternate Phone number is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #emailId").val() == null || $("#"+formId+" #emailId").val() == undefined || $("#"+formId+" #emailId").val() == ''){
+//         showMessageTheme2(0, "Email is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #altEmailId").val() == null || $("#"+formId+" #altEmailId").val() == undefined || $("#"+formId+" #altEmailId").val() == ''){
+//         showMessageTheme2(0, "Alternate email is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #country").val() == null || $("#"+formId+" #country").val() == undefined || $("#"+formId+" #country").val() == ''){
+//         showMessageTheme2(0, "Country is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #state").val() == null || $("#"+formId+" #state").val() == undefined || $("#"+formId+" #state").val() == ''){
+//         showMessageTheme2(0, "State is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #city").val() == null || $("#"+formId+" #city").val() == undefined || $("#"+formId+" #city").val() == ''){
+//         showMessageTheme2(0, "City is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #timezone").val() == null || $("#"+formId+" #timezone").val() == undefined || $("#"+formId+" #timezone").val() == ''){
+//         showMessageTheme2(0, "Timezone is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #nationality").val() == null || $("#"+formId+" #nationality").val() == undefined || $("#"+formId+" #nationality").val() == ''){
+//         showMessageTheme2(0, "Nationality is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #address").val() == null || $("#"+formId+" #address").val() == undefined || $("#"+formId+" #address").val() == ''){
+//         showMessageTheme2(0, "Address is required");
+//         return false;
+//     }
+//     if($("#"+formId+" .hobbies-wrapper .custom-checkbox .custom-control-input:checked").length < 1){
+//         showMessageTheme2(0, "Hobbies is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #address").val() == null || $("#"+formId+" #address").val() == undefined || $("#"+formId+" #address").val() == ''){
+//         showMessageTheme2(0, "Address is required");
+//         return false;
+//     }
+// // Parent/Guardian Information Validation Start Here //
+//     if($("#"+formId+" #motherName").val() == null || $("#"+formId+" #motherName").val() == undefined || $("#"+formId+" #motherName").val() == ''){
+//         showMessageTheme2(0, "Mother name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #motherName").val() == null || $("#"+formId+" #motherName").val() == undefined || $("#"+formId+" #motherName").val() == ''){
+//         showMessageTheme2(0, "Mother name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #motherName").val() == null || $("#"+formId+" #motherName").val() == undefined || $("#"+formId+" #motherName").val() == ''){
+//         showMessageTheme2(0, "Mother name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #motherPhoneNumber").val() == null || $("#"+formId+" #motherPhoneNumber").val() == undefined || $("#"+formId+" #motherPhoneNumber").val() == ''){
+//         showMessageTheme2(0, "Mother phone number is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #motherEmail").val() == null || $("#"+formId+" #motherEmail").val() == undefined || $("#"+formId+" #motherEmail").val() == ''){
+//         showMessageTheme2(0, "Mother email is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #fatherFirstName").val() == null || $("#"+formId+" #fatherFirstName").val() == undefined || $("#"+formId+" #fatherFirstName").val() == ''){
+//         showMessageTheme2(0, "Father name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #fatherPhoneNumber").val() == null || $("#"+formId+" #fatherPhoneNumber").val() == undefined || $("#"+formId+" #fatherPhoneNumber").val() == ''){
+//         showMessageTheme2(0, "Father phone number is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #fatherEmail").val() == null || $("#"+formId+" #fatherEmail").val() == undefined || $("#"+formId+" #fatherEmail").val() == ''){
+//         showMessageTheme2(0, "Father email is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #guardianFirstName").val() == null || $("#"+formId+" #guardianFirstName").val() == undefined || $("#"+formId+" #guardianFirstName").val() == ''){
+//         showMessageTheme2(0, "Guardian name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #guardianPhoneNumber").val() == null || $("#"+formId+" #guardianPhoneNumber").val() == undefined || $("#"+formId+" #guardianPhoneNumber").val() == ''){
+//         showMessageTheme2(0, "Guardian phone number is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #guardianEmail").val() == null || $("#"+formId+" #guardianEmail").val() == undefined || $("#"+formId+" #guardianEmail").val() == ''){
+//         showMessageTheme2(0, "Guardian email is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #relationType").val() == null || $("#"+formId+" #relationType").val() == undefined || $("#"+formId+" #relationType").val() == ''){
+//         showMessageTheme2(0, "Type of relation is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #pCountryId").val() == null || $("#"+formId+" #pCountryId").val() == undefined || $("#"+formId+" #pCountryId").val() == ''){
+//         showMessageTheme2(0, "Parent/Guardian country is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #pStateId").val() == null || $("#"+formId+" #pStateId").val() == undefined || $("#"+formId+" #pStateId").val() == ''){
+//         showMessageTheme2(0, "Parent/Guardian state is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #pCityId").val() == null || $("#"+formId+" #pCityId").val() == undefined || $("#"+formId+" #pCityId").val() == ''){
+//         showMessageTheme2(0, "Parent/Guardian city is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #pCityId").val() == null || $("#"+formId+" #pCityId").val() == undefined || $("#"+formId+" #pCityId").val() == ''){
+//         showMessageTheme2(0, "Parent/Guardian city is required");
+//         return false;
+//     }
+//     if($("#"+formId+" .communication-wrapper .custom-checkbox .custom-control-input:checked").length < 1){
+//         showMessageTheme2(0, "Communication is required");
+//         return false;
+//     }
+    
+// // Parent/Guardian Information Validation End Here //
+// // Academic Information Validation End Here //
+//     if($("#"+formId+" #studentID").val() == null || $("#"+formId+" #studentID").val() == undefined || $("#"+formId+" #studentID").val() == ''){
+//         showMessageTheme2(0, "Student ID is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #learningProgram").val() == null || $("#"+formId+" #learningProgram").val() == undefined || $("#"+formId+" #learningProgram").val() == ''){
+//         showMessageTheme2(0, "Learning program is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #grade").val() == null || $("#"+formId+" #grade").val() == undefined || $("#"+formId+" #grade").val() == ''){
+//         showMessageTheme2(0, "Grade is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #academicYearStartDate").val() == null || $("#"+formId+" #academicYearStartDate").val() == undefined || $("#"+formId+" #academicYearStartDate").val() == ''){
+//         showMessageTheme2(0, "Academic year start date is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #enrollmentDate").val() == null || $("#"+formId+" #enrollmentDate").val() == undefined || $("#"+formId+" #enrollmentDate").val() == ''){
+//         showMessageTheme2(0, "Enrollment date is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #courseProviderId").val() == null || $("#"+formId+" #courseProviderId").val() == undefined || $("#"+formId+" #courseProviderId").val() == ''){
+//         showMessageTheme2(0, "LMS Platform is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #previousCurrentSchoolName").val() == null || $("#"+formId+" #previousCurrentSchoolName").val() == undefined || $("#"+formId+" #previousCurrentSchoolName").val() == ''){
+//         showMessageTheme2(0, "Previous/Current school name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #previousCurrentGradeName").val() == null || $("#"+formId+" #previousCurrentGradeName").val() == undefined || $("#"+formId+" #previousCurrentGradeName").val() == ''){
+//         showMessageTheme2(0, "Previous/Current grade name is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #previousCurrentSchoolGraduationYear").val() == null || $("#"+formId+" #previousCurrentSchoolGraduationYear").val() == undefined || $("#"+formId+" #previousCurrentSchoolGraduationYear").val() == ''){
+//         showMessageTheme2(0, "Previous/Current school graduation year is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #previousCurrentSchoolCountry").val() == null || $("#"+formId+" #previousCurrentSchoolCountry").val() == undefined || $("#"+formId+" #previousCurrentSchoolCountry").val() == ''){
+//         showMessageTheme2(0, "Previous/Current school country is required");
+//         return false;
+//     }
+//     if($("#"+formId+" #ctiTakenRecommendedGrade").val() == null || $("#"+formId+" #ctiTakenRecommendedGrade").val() == undefined || $("#"+formId+" #ctiTakenRecommendedGrade").val() == ''){
+//         showMessageTheme2(0, "CTI taken recommended grade is required");
+//         return false;
+//     }
+// // Academic Information Validation End Here //
+// }
+
+
+// function saveProfileDetails(formId){
+//     var validationStatus = validateUserProfile(formId);
+//     if(validationStatus){
+//         changeLearningProgamGradePlatformModal()
+//     }
+// }
+
+
+
+// function validateProfileDetails(formId, eleId, errorMsg, requiredFlag){
+//     if(requiredFlag){
+//         if($("#"+formId+" #"+eleId).val() == null || $("#"+formId+" #"+eleId).val() == undefined || $("#"+formId+" #"+eleId).val() == ''){
+//             showMessageTheme2(0, errorMsg+" is required");
+//             return false;
+//         }else{
+//             var elementValue = 
+//             var data={} 
+//             saveProfileDetails(data)
+//         }
+//     }
+//     else{
+//        showMessageTheme2(1, errorMsg+" save successfully"); 
+//     }
+// }
+
+
+function getRequestForUpdateProfile(eleID,keyId,userId,studentStandardId,moduleId){
+    var requestProfile = {};
+	var authentication = {};
+	var requestProfileData = {};
+	requestProfileData['studentStandardId']=studentStandardId;
+	requestProfileData['keyId']=keyId;
+	if(keyId=='employeeType'){
+		if($('#employeeTypeStartDate').val()==''){
+			showMessageTheme2(0,"Please enter employee Type Start Date.",'',false);
+			return false;
+		}
+        requestProfileData['employeeStartDate'] = $('#employeeTypeStartDate').val();
+		
+	}
+	else if(keyId=='phoneNumber' || keyId=='altPhoneNumber' || keyId=='motherPhoneNumber' || keyId=='fatherPhoneNumber' || keyId=='guardianPhoneNumber' || keyId=='payPalPhoneNumber' ){
+		var valId ="";
+		var lent=$('#'+keyId).val().indexOf("-")
+		if(lent>0){
+			var valPhoneId = $('#'+keyId).val().split("-")[1];
+		}else{
+			var valPhoneId = $('#'+keyId).val();
+			if(valPhoneId==""){
+				showMessageTheme2(2,' Either field value is invalid or empty.','',false);
+				return false;
+			}
+		}
+        valPhoneId = valPhoneId.replace(/\s+/g, '')
+        requestProfileData['fieldValue']=escapeCharacters(valPhoneId);
+	}
+	else if(keyId=='alternateEmail'){
+		var valEmailId = $('#'+keyId).val();
+		if(valEmailId=="" || !validateEmail(valEmailId)){
+			showMessageTheme2(2,' Either field value is invalid or empty.','',false);
+			return false;
+		}
+		requestProfileData['fieldValue']=valEmailId;
+	}
+    else if(keyId=='hobbies'){
+        var hobbiesArr=[];
+		$(".hobbie-wrapper input[type='checkbox']:checked").each(function(){
+            hobbiesArr.push($(this).attr("data-hobbie-keyId")+"~"+$(this).attr("data-hobbie-label"))
+        });
+        requestProfileData['hobbiesList'] = hobbiesArr;
+        $("#saveHobbiesWrapper").hide();
+        HOBBIES_CHANGES_COUNT=[];
+    }
+    else if(keyId=='socialMedia'){
+       requestProfileData['fieldValue']=$('#'+eleID).attr("data-social-media-id")+"~"+$('#'+eleID).val()+"~"+$(`[for=${eleID}]`).attr("data-title");
+        //requestProfileData['fieldValue']=
+    }
+    else if(keyId=='specialization' || keyId=='preferredSubjectName' || keyId=='lastsubTaught'){
+		requestProfileData['fieldValue']=$('#'+keyId).val().toString();
+	}else if(keyId=='educationSpecialization'){
+		requestProfileData['fieldValue']=$('#educationSpecialization').val();//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
+	}
+    else if(keyId=='countrySection'){
+		requestProfileData['countryId']=$('#country').val();
+		requestProfileData['stateId']=$('#state').val();
+		requestProfileData['cityId']=$('#city').val();
+	}else if(keyId=='nationality'){
+        requestProfileData['fieldValue']=$("#"+eleID+" option:selected").text().trim();;
+    }else if(keyId=='motherName' || keyId == "motherMiddleName" || keyId == "motherLastName"){
+		requestProfileData['firstName']=$('#motherName').val();
+		requestProfileData['middleName']=$('#motherMiddleName').val();
+		requestProfileData['lastName']=$('#motherLastName').val();
+        requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+        requestProfileData['parentType']="Mother";
+	}else if(keyId=='motherCountry'){
+		requestProfileData['parentType']="Mother";
+        requestProfileData['fieldValue']=$("#motherCountry").val();
+	}
+    else if(keyId=='fatherCountry'){
+		requestProfileData['parentType']="Father";
+        requestProfileData['fieldValue']=$("#fatherCountry").val();
+	}
+    else if(keyId=='guardianCountry'){
+		requestProfileData['parentType']="Guardian";
+        requestProfileData['fieldValue']=$("#guardianCountry").val();
+	}
+    else if(keyId=='fatherFirstName' || keyId == "fatherMiddleName" || keyId == "fatherLastName"){
+		requestProfileData['firstName']=$('#fatherFirstName').val();
+		requestProfileData['middleName']=$('#fatherMiddleName').val();
+		requestProfileData['lastName']=$('#fatherLastName').val();
+        requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Father";
+	}else if(keyId=='guardianFirstName' || keyId == "guardianMiddleName" || keyId == "guardianLastName"){
+		requestProfileData['firstName']=$('#guardianFirstName').val();
+		requestProfileData['middleName']=$('#guardianMiddleName').val();
+		requestProfileData['lastName']=$('#guardianLastName').val();
+        requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Guardian";
+	}else if(keyId=='countrySectionParent'){
+		requestProfileData['countryId']=$('#pCountryId').val();
+		requestProfileData['stateId']=$('#pStateId').val();
+		requestProfileData['cityId']=$('#pCityId').val();
+	}else if(keyId=='totalTeacheingExperience'){
+		requestProfileData['yearValue']=$("#yearExp").val();
+		requestProfileData['monthValue']=$("#monthExp").val();
+	}else if(keyId=='lastOrgGradeName'){
+		if($('#lastGradeK').val().length>0){
+			requestProfileData['fieldValue']=$('#lastGradeK').val().toString();
+		}else if($('#lastGradeM').val().length>0){
+			requestProfileData['fieldValue']=$('#lastGradeM').val().toString();
+		}else if($('#lastGradeH').val().length>0){
+			requestProfileData['fieldValue']=$('#lastGradeH').val().toString();
+		}
+	}else if(keyId=='preferredGradeName'){
+		if($('#prefGradeK').val().length>0){
+			requestProfileData['fieldValue']=$('#prefGradeK').val().toString();
+		}else if($('#prefGradeM').val().length>0){
+			requestProfileData['fieldValue']=$('#prefGradeM').val().toString();
+		}else if($('#prefGradeH').val().length>0){
+			requestProfileData['fieldValue']=$('#prefGradeH').val().toString();
+		}
+	}else if(keyId=='otherRelation'|| keyId=='relationType'){
+		requestProfileData['fieldValue']=$("#relationType").val();
+        if($("#otherRelation").length>0){
+            requestProfileData['fieldValue1']=toTitleCase($("#otherRelation").val());
+        }
+	}else if(keyId=='parentEmailSmsLmsCreation'){
+		requestProfileData['fieldValue']=encode($("#parentPassword").val());
+	}else if(keyId=='pEmailOtp'){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+	}else if(keyId=='pEmailOtpVerify'){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+		requestProfileData['fieldValue1']=$("#otp").val();
+	}else if(keyId=='pStudEmailMappedVerify'){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+		requestProfileData['fieldValue1']=$("#verifyMailId").val().trim();
+	}else if(keyId=="parentEmailLmsCreation"){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+	}else if(keyId=='switchParentStudEmailId'){
+		requestProfileData['fieldValue']=$('#swipeParentId').val().trim();
+		requestProfileData['fieldValue1']= $('#studID option:selected ').attr('attrStudentEmail').trim();
+		requestProfileData['studUserId']=$('#studID').val();
+		requestProfileData['parentId']=$('#swipeParentId').attr("attrparentid");
+	}else if(keyId=="forcefulRepeatOrImprove"){
+		requestProfileData['forcefulRepeatOrImprove']=$("#forcefulRepeatOrImprove").val().trim();
+	}else if(keyId == "occupation"){
+        requestProfileData['fieldValue']=$('#'+eleID).val()
+		requestProfileData['parentType']=$('#'+eleID).attr("data-Occupationparent");
+    }
+    else if(keyId == 'communicationPreferredSlots'){
+        var callingPreference = [];
+        $(".communication-preferred-time-wrapper-ul > li").each(function () {
+
+            var callPref = {};
+            var timings = [];
+
+            var $slotUl = $(this).find(".communication_slot_ul");
+            var roleType = $slotUl.attr("data-communicationroletype-ul");
+
+            callPref.communicationRoleType = roleType;
+
+            var $slots = $slotUl.find("li");
+
+            if ($slots.length === 0) {
+                callPref.timings = [];
+            } else {
+                $slots.each(function () {
+                    var selected_st = convertTo24Hour($(this).attr("data-slot-st"));
+                    var selected_et = convertTo24Hour($(this).attr("data-slot-et"));
+                    timings.push(selected_st + "-" + selected_et);
+                });
+                callPref.timings = timings;
+            }
+
+            callingPreference.push(callPref);
+        });
+
+        requestProfileData["callingPreferences"] = callingPreference;
+
+    }else if(keyId=='extracurricular'){
+        var sportsAndEcList=[];
+		$(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function(){
+            sportsAndEcList.push($(this).attr("data-Id"));
+        });
+        requestProfileData['sportsAndEcList'] = sportsAndEcList;
+        $("#saveSportsAndEcClubWrapper").hide();
+        SPORTS_AND_CLUB_COUNT=[];
+    }
+    else{
+		if(keyId=='firstName' || keyId=='middleName' || keyId=='lastName'
+		|| keyId=='motherEmail' || keyId=='fatherEmail' || keyId=='guardianEmail'
+		|| keyId=='lastOrgName' || keyId=='lastJobTitle' || keyId=='address' || keyId=='otherSkills'
+		|| keyId=='designation' || keyId=='departmentId' || keyId=='acPersonName' || keyId=='bankName'
+		|| keyId=='bankBranchName' || keyId=='bankBranchAddress' || keyId=='otherBankDetails' || keyId=='otherProfessionalCourse'
+		|| keyId=='otherSpecialization' || keyId=='anyOtherLanguages' || keyId=='references1' || keyId=='references2'
+		|| keyId=='specialization' || keyId=='postGraduationSubjects' || keyId=='graduationSubjects'){
+			requestProfileData['fieldValue']=escapeCharacters($('#'+keyId).val());
+            if(keyId=='motherEmail' || keyId=='fatherEmail' || keyId=='guardianEmail'){
+                requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+                if(keyId=='motherEmail'){
+                    requestProfileData['parentType']="Mother";
+                }else if(keyId=='fatherEmail'){
+                    requestProfileData['parentType']="Father";
+                }else{
+                    requestProfileData['parentType']="Guardian";
+                }
+            }
+		}else if(keyId=='describeYourself' || keyId=='lastOrgJobDiscription'){
+			requestProfileData['fieldValue']=escapeCharacters(toSentenceCase($('#'+keyId).val()));
+		}else{
+			requestProfileData['fieldValue']=escapeCharacters($('#'+keyId).val());
+		}
+	}
+    if(keyId=='phoneNumber'){
+		requestProfileData['countryCode']=$('#'+eleID).attr('data-countrycode');//$(".stuPhoneNumber .iti__active").last().attr("data-country-code");
+		requestProfileData['countryIsdCode']=$('#'+eleID).attr('data-isd-code');//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
+        requestProfileData['contactWhatsAppStatus']=$('#phoneNumberWhatsAppStatus').prop('checked')?'Y':'N';
+	}if(keyId=='altPhoneNumber'){
+		requestProfileData['countryCode']= $('#'+eleID).attr('data-countrycode');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-country-code");
+		requestProfileData['countryIsdCode']=$('#'+eleID).attr('data-isd-code');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code");
+        requestProfileData['contactWhatsAppStatus']=$('#altPhoneNumberWhatsAppStatus').prop('checked')?'Y':'N';
+	}if(keyId=='motherPhoneNumber'){
+		requestProfileData['countryCode']=$('#'+eleID).attr('data-countrycode');//$(".stuParentPhoneNumber .iti__active").last().attr("data-country-code");
+		requestProfileData['countryIsdCode']=$('#'+eleID).attr('data-isd-code');//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code");
+        requestProfileData['contactWhatsAppStatus']=$('#motherPhoneNumberWhatsAppStatus').prop('checked')?'Y':'N';
+         requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Mother";
+	}if(keyId=='fatherPhoneNumber'){
+		requestProfileData['countryCode']=$('#'+eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
+		requestProfileData['countryIsdCode']=$('#'+eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
+        requestProfileData['contactWhatsAppStatus']=$('#fatherPhoneNumberWhatsAppStatus').prop('checked')?'Y':'N';
+         requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Father";
+	}if(keyId=='guardianPhoneNumber'){
+		requestProfileData['countryCode']=$('#'+eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
+		requestProfileData['countryIsdCode']=$('#'+eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
+        requestProfileData['contactWhatsAppStatus']=$('#guardianPhoneNumberWhatsAppStatus').prop('checked')?'Y':'N';
+         requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Guardian";
+	}
+    if(keyId=='payPalPhoneNumber'){
+		requestProfileData['countryCode']=$('#'+eleID).attr('data-countrycode');
+		requestProfileData['countryIsdCode']=$('#'+eleID).attr('data-isd-code');
+	}
+    // if(keyId=='timeToCall'){
+    //     var timeList =[];
+    //     var startTime = convertTo24Hour('09:00 AM');
+    //     var endTime = convertTo24Hour('05:00 PM');
+	// 	timeList.push(startTime + "-" + endTime);
+	// 	requestProfileData['timeToCallList']=timeList;
+    //     requestProfileData['parentType']="Student";
+    // }
+	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = moduleId;
+	authentication['userId'] = userId;
+	requestProfile['authentication'] = authentication;
+	requestProfile['requestProfileData'] = requestProfileData;
+    
+    return requestProfile;
+}
+
+function validateFields(keyId, fieldValue){
+    var flag=true;
+    if(keyId=='phoneNumber' || keyId=='altPhoneNumber' || keyId=='motherPhoneNumber' || keyId=='fatherPhoneNumber' || keyId=='guardianPhoneNumber' || keyId=='payPalPhoneNumber' ){
+		var valId ="";
+		var lent=$('#'+keyId).val().indexOf("-")
+		if(lent>0){
+			var valPhoneId = $('#'+keyId).val().split("-")[1];
+		}else{
+			var valPhoneId = $('#'+keyId).val();
+			if(valPhoneId==""){
+				showMessageTheme2(0,' Either field value is invalid or empty.','',false);
+				flag= false;
+			}else{
+                var result = validatePhoneNumber(keyId);
+                // if (!result.valid) {
+                //     flag= false;
+                //     showMessageTheme2(0,result.message,'',false);
+                // }
+                flag=true
+            }
+		}
+        if(!flag){
+            return flag;
+        }
+	}
+	else if(keyId=='gender' || keyId=='parentGender'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Please choose gender.",'',false);
+			return false;
+		}
+	}else if(fieldValue=='' && keyId == 'nationality'){
+		showMessageTheme2(0," Please choose nationality to proceed.",'',false);
+		return false;
+	}else if(keyId == 'socialMedia'){
+        if(fieldValue != "" && fieldValue != undefined && fieldValue != null){
+            if(!isValidUrl(fieldValue)){
+                showMessageTheme2(0," Invaild URL.",'',false);
+                return false;
+            }
+        }
+	}
+    else if(keyId=='admissonDate' || keyId=='joiningDate'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='dob'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='countrySection'){
+		if( $("#country").val()==undefined ||$("#country").val()==0 || $("#country").val()==''){
+			showMessageTheme2(0," Please choose country to proceed.",'',false);
+			return false;
+		}else if( $("#state").val()==undefined ||$("#state").val()==0 || $("#state").val()==''){
+			showMessageTheme2(0,"Please choose state to proceed.",'',false);
+			return false;
+		}else if( $("#city").val()==undefined ||$("#city").val()==0 || $("#city").val()==''){
+			showMessageTheme2(0,"Please choose city to proceed.",'',false);
+			return false;
+		}
+	}else if(keyId=='motherName' || keyId=='motherLastName'){
+		// if( $("#motherName").val()==undefined ||$("#motherName").val()==0 || $("#motherName").val()==''){
+		// 	showMessageTheme2(0," Please enter mother name to proceed.",'',false);
+		// 	return false;
+		// }
+        // else if( $("#motherLastName").val()==undefined ||$("#motherLastName").val()==0 || $("#motherLastName").val()==''){
+		// 	showMessageTheme2(0,"Please enter mother last name to proceed.",'',false);
+		// 	return false;
+		// }
+	}
+    else if(keyId=='fatherFirstName' || keyId=='fatherLastName'){
+		// if( $("#fatherFirstName").val()==undefined ||$("#fatherFirstName").val()==0 || $("#fatherFirstName").val()==''){
+		// 	showMessageTheme2(0," Please enter father name to proceed.",'',false);
+		// 	return false;
+		// }else if( $("#fatherLastName").val()==undefined ||$("#fatherLastName").val()==0 || $("#fatherLastName").val()==''){
+		// 	showMessageTheme2(0,"Please enter father last name to proceed.",'',false);
+		// 	return false;
+		// }
+	}
+    else if(keyId=='guardianFirstName' || keyId=='guardianLastName'){
+		// if( $("#guardianFirstName").val()==undefined ||$("#guardianFirstName").val()==0 || $("#guardianFirstName").val()==''){
+		// 	showMessageTheme2(0," Please enter guardian name to proceed.",'',false);
+		// 	return false;
+		// }else if( $("#guardianLastName").val()==undefined ||$("#guardianLastName").val()==0 || $("#guardianLastName").val()==''){
+		// 	showMessageTheme2(0,"Please enter guardian last name to proceed.",'',false);
+		// 	return false;
+		// }
+	}
+    else if(keyId=='timezone'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='countrySectionParent'){
+		if( $("#pCountryId").val()==undefined ||$("#pCountryId").val()==0 || $("#pCountryId").val()==''){
+			showMessageTheme2(0," Please choose country to proceed.",'',false);
+			return false;
+		}else if( $("#pStateId").val()==undefined ||$("#pStateId").val()==0 || $("#pStateId").val()==''){
+			showMessageTheme2(0,"Please choose state to proceed.",'',false);
+			return false;
+		}else if( $("#pCityId").val()==undefined ||$("#pCityId").val()==0 || $("#pCityId").val()==''){
+			showMessageTheme2(0,"Please choose city to proceed.",'',false);
+			return false;
+		}
+	}else if(keyId=="totalTeacheingExperience"){
+		if($("#yearExp").val()==undefined || $("#yearExp").val()=='' || $("#yearExp").val()==0){
+			// if( $("#monthExp").val()==undefined || $("#monthExp").val()=='' || $("#monthExp").val()==0){
+				showMessageTheme2(0,"Please select total teaching experience in month.",'',false);
+				return false;
+			// }
+		}
+	}else if(keyId=="preferredGradeName"){
+		if($('#prefGradeK').val().length==0 && $('#prefGradeM').val().length==0 && $('#prefGradeH').val().length==0){
+			showMessageTheme2(0,"Please select preferred grades.",'',false);
+			return false;
+		}
+	}else if(keyId=="lastOrgGradeName"){
+		if($('#lastGradeK').val().length==0 && $('#lastGradeM').val().length==0 && $('#lastGradeH').val().length==0){
+			showMessageTheme2(0,"Please select current/Last Organization grades.",'',false);
+			return false;
+		}
+	}else if(keyId=="specialization"){
+		if($('#specialization').val().length==0){
+			showMessageTheme2(0,"Please select specialization subjects.",'',false);
+			return false;
+		}
+	}else if(keyId=="preferredSubjectName"){
+		if($('#preferredSubjectName').val().length==0){
+			showMessageTheme2(0,"Please select Preferred Courses.",'',false);
+			return false;
+		}
+	}else if(keyId=="lastsubTaught"){
+		if($('#lastsubTaught').val().length==0){
+			showMessageTheme2(0,"Please select Courses Taught.",'',false);
+			return false;
+		}
+	}else if(keyId=="emailId" || keyId=="altEmailId" || keyId=="motherEmail" ||keyId=="fatherEmail" || keyId== "guardianEmail" || keyId=="offEmailId" || keyId=="payPalEmail"){
+		if (!validateEmail($('#'+keyId).val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+	}else if(keyId=='otherRelation'|| keyId=='relationType'){
+		var viewValue='';
+		if('Other'== $('#relationType').val()){
+			if($('#otherRelation').val()=='' || $('#otherRelation').val()==undefined){
+				showMessageTheme2(0,"Please Enter relation type.",'',false);
+				return false;
+			}
+		}
+	}else if(keyId=='sendUserVerificationEmail' || keyId=='verifyUserEmail' || keyId=='middleName' || keyId=='lastName' || keyId=='switchParentStudEmailId' || keyId=='reserveASeat' || keyId=='bookASeatNextGradeOpted' || keyId=='advanceGradeOpted' || "motherMiddleName" || "fatherMiddleName" || "guardianMiddleName"){
+
+	}else if(keyId=="parentEmailSmsLmsCreation"){
+		if (!validPassword($("#parentPassword").val())) {
+			showMessageTheme2(0,"Please Enter parent password.",'',false);
+			return false;
+		}
+		if (!validPassword($("#confirmPassword").val())) {
+			showMessageTheme2(0,"Please Enter parent confirm password.",'',false);
+			return false;
+		}
+		if($('#parentPassword').val().trim()!= $('#confirmPassword').val().trim()){
+				showMessageTheme2(0,"Password and Confirm Password do not match.",'',false);
+				return false;
+		}
+
+		var pass=$("#parentPassword").val();
+		if(pass != undefined){
+			if (!(pattern.test(pass))) {
+				showMessageTheme2(0,"Passwords must match all requirements.",'',false);
+				return false
+			}
+		}
+	}else if(keyId=="parentEmailLmsCreation"){
+		if (!validateEmail($('#parentEmailId').val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+	}else  if(keyId=='pEmailOtp'){
+		if (!validateEmail($('#parentEmailId').val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+	}else  if(keyId=='pEmailOtpVerify'){
+		if (!validateEmail($('#parentEmailId').val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+		if($('#otp').val()==undefined || $('#otp').val()==''){
+			showMessageTheme2(0,"Either Otp value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='pStudEmailMappedVerify'){
+		if (!validateEmail($('#parentEmailId').val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+		if (!validateEmail($('#verifyMailId').val())){
+			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
+			return false;
+		}
+	}else{
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}
+
+ 	return true;
+}
+
+function applyChanges(eleID,keyId,userId,studentStandardId,roleModuleId,moduleId, showWarning, index){
+	if(!getSession()){
+		showMessageTheme2(0, "Your session has been timed out, please login again",'',false);
+		redirectLoginPage();
+		return false;
+	}
+    if(eleID != "hobbies" || eleID != "extracurricular"){
+        var fieldValue = $("#"+eleID).val();
+    }
+	if(keyId=='firstName' || keyId=='middleName' || keyId=='lastName'
+		|| keyId=='motherName' || keyId=='fatherFirstName' || keyId=='guardianFirstName' || keyId=='motherEmail' || keyId=='fatherEmail' || keyId=='guardianEmail'
+		|| keyId=='lastOrgName' || keyId=='lastJobTitle' || keyId=='address' || keyId=='otherSkills'
+		|| keyId=='designation' || keyId=='departmentId' || keyId=='acPersonName' || keyId=='bankName'
+		|| keyId=='bankBranchName' || keyId=='bankBranchAddress' || keyId=='otherBankDetails' || keyId=='otherProfessionalCourse'
+		|| keyId=='otherSpecialization' || keyId=='anyOtherLanguages' || keyId=='references1' || keyId=='references2'
+		|| keyId=='specialization' || keyId=='postGraduationSubjects' || keyId=='graduationSubjects' || keyId=='educationSpecialization' || keyId == 'forcefulRepeatOrImprove'){
+			/*fieldValue = toTitleCase(fieldValue);*/
+	}else if(keyId=='describeYourself' || keyId=='lastOrgJobDiscription'){
+		fieldValue = fieldValue;
+	}else if(keyId=='timezone' && !showWarning ){
+		fieldValue = fieldValue;
+	}else if(keyId=='nationality' && showWarning ){
+        if($("#"+eleID+" option:selected").val() !=""){
+            fieldValue = $("#"+eleID+" option:selected").text().trim();
+        }else{
+            fieldValue = "";
+        }
+	}
+    else if(keyId == 'preferredcommunication'){
+		var pcWhatsapp=$('#pcWhatsappView').is(':checked')?'Y':'N';
+		var pcCall=$('#pcCallView').is(':checked')?'Y':'N';
+		var pcEmail=$('#pcEmailView').is(':checked')?'Y':'N';
+		if(pcWhatsapp == "Y" || pcCall == "Y" || pcEmail == "Y"){
+			fieldValue='W='+pcWhatsapp+'|'+'C='+pcCall+'|'+'E='+pcEmail;
+		}else{
+			showMessageTheme2(0, 'Your preferred communication is required','',false);
+			return false
+		}
+	}
+    if(showWarning) {
+		if(keyId=='timezone' && moduleId=='student' ){
+			showWarningMessageShow('You are about to change the timezone of the user. Please note that all future booked classes of the user will be updated to the new timezone.','applyChanges(\''+eleID+'\',\''+keyId+'\',\''+userId+'\',\''+studentStandardId+'\',\''+roleModuleId+'\',\''+moduleId+'\',false)',false);
+			return false;
+		}else if(keyId=='timezone' && moduleId=='teacher' ){
+			showWarningMessageShow('You are about to change the timezone of the teacher. Please note that all future classes of the teacher (recurring and normal) in the old time zone will be updated to the new timezone.','applyChanges(\''+eleID+'\',\''+keyId+'\',\''+userId+'\',\''+roleModuleId+'\',\''+moduleId+'\',false)',false);
+			return false;
+		}
+	}
+	console.log("Field Value",fieldValue)
+	hideMessageTheme2('');
+	if(eleID != "hobbies"){
+        if(!validateFields(eleID, keyId,fieldValue)){
+            return false;
+        }
+    }
+    $.ajax({
+        type : "POST",
+        contentType : APPLICATION_JSON_VALUE,
+        url : getURLForHTML('dashboard','update-user-profile-content'),
+        data : JSON.stringify(getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId,moduleId)),
+        dataType : 'json',
+        success : function(data) {
+            console.log("response data is:", data);
+            if (data['status'] == '0' || data['status'] == '2') {
+                showMessageTheme2(0, data['message'],'',false);
+            } else {
+                if(keyId=='phoneNumber' || keyId=='alternatePhoneNumber' ||  keyId=='motherPhoneNumber' ||keyId=='alternateParentPhoneNumber' ||keyId=='payPalPhoneNumber'){
+                    var isdCode="";
+                    if(keyId=='phoneNumber'){
+                        isdCode=$('#phoneDailCode').val()+'-';//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='alternatePhoneNumber'){
+                        isdCode=$('#alternateDailCode').val()+'-';//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='motherPhoneNumber'){
+                        isdCode=$('#parentPhoneDailCode').val()+'-';//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='alternateParentPhoneNumber'){
+                        isdCode=$('#alternateParentPhoneDailCode').val()+'-';//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='payPalPhoneNumber'){
+                        isdCode=$('#payPalDailCode').val()+'-';//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }
+                    console.log("Isd Code",isdCode);
+                    $("#"+eleID).closest(".input-group").find(".input-group-append-hide").hide();
+                }else if(keyId=='preferredcommunication'){
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='gender' || keyId=='parentGender'){
+                    if(fieldValue=='DONOTWANTTOSPECIFY'){
+                        fieldValue="Don't want to specify";
+                    }
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                    $("#"+eleID).val(fieldValue).trigger("change");
+                    $("#"+eleID).parent().find('.input-group-append-hide').hide();
+                    //$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    if($('#isProfileUplaoded').val()==0 && keyId=='gender'){
+                        var profilePic="Profile-picture.jpg"
+                        if(fieldValue=='DONOTWANTTOSPECIFY'){
+                            fieldValue="Don't want to specify";
+                            profilePic="Profile-picture.jpg"
+                        }else if(fieldValue=='MALE'){
+                                profilePic="male-profile.png"
+                        }else if(fieldValue=='FEMALE'){
+                            profilePic="female-profile.png"
+                        }
+                        $('.profile-pic').attr('src', PATH_FOLDER_IMAGE2+profilePic);
+                        $('#dropDownProfileImage').attr('src', PATH_FOLDER_IMAGE2+profilePic);
+                        $('#topProfileImage').attr('src', PATH_FOLDER_IMAGE2+profilePic);
+                    }
+                }else if(keyId=='countrySection' || keyId=='countrySectionParent'){
+                    var elementIDs = $("#"+eleID).attr("data-country").split("_");
+                    $.each(elementIDs, function(i,v){
+                        $("#"+v).closest(".input-group").find(".input-group-append-hide").hide();
+                    });
+                }else if(keyId=='socialMedia'){
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='motherName' || keyId=='motherLastName'){
+                    $("#motherName, #motherLastName").parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='fatherFirstName' || keyId=='fatherLastName'){
+                    $("#fatherFirstName, #fatherLastName").parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='guardianFirstName' || keyId=='guardianLastName'){
+                    $("#guardianFirstName, #guardianLastName").parent().find(".input-group-append-hide").hide();
+                }
+                else if(keyId=='studyingGradeId'){
+                    $('.studyingGradeName').text($('#studyingGradeId option:selected').text()).removeClass('hide-value');
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='countryIdOfSchool'){
+                    $('.countryNameOfSchool').text($('#countryIdOfSchool option:selected').text()).removeClass('hide-value');
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='countrySectionParent'){
+                    $('.countryNameParent').text($('#pCountryId option:selected').text()).removeClass('hide-value');
+                    $('.cityNameParent').text($('#pCityId option:selected').text()).removeClass('hide-value');
+                    $('.stateNameParent').text($('#pStateId option:selected').text()).removeClass('hide-value');
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                    $('.save-country-Parent').addClass('d-none');
+                }else if(keyId=='admissonDate'){
+                    var adDate=$('#admissonDate').val();
+                    // adDate=adDate.split('-');
+                    // var selectedDate=new Date(adDate[0]+'/'+adDate[1]+'/'+adDate[2]);
+                    // var selectedDate2 = selectedDate.toString().split(" ");
+                    $('.admissionViewDate').text(adDate).removeClass('hide-value');
+                    // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    // $(src).parent().find('.field-input').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='dob'){
+                    var adDate=$('#dob').val();
+                    // adDate=adDate.split('-');
+                    // var selectedDate=new Date(adDate[0]+'/'+adDate[1]+'/'+adDate[2]);
+                    // var selectedDate2 = selectedDate.toString().split(" ");
+                    $('.dobViewDate').text(adDate).removeClass('hide-value');
+                    // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    // $(src).parent().find('.field-input').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='reserveASeat'){
+                    $('.reserveASeatName').text($('#reserveASeat option:selected').text()).removeClass('hide-value');
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+keyId).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='bookASeatNextGradeOpted'){
+                    hidePermissionAndApprovalModal('bookASeatNextGradeOpted','save');
+                    $('.reserveASeatNextGradeName').text($('#bookASeatNextGradeOpted option:selected').text()).removeClass('hide-value');
+                    // $("#"+src).parent().find('.cancel-field-btn').removeClass('visible');
+                    // $("#"+src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    // $("#"+src).removeClass('visible').parent().find('.edit-field-btn').show();
+                    if($('#bookASeatNextGradeOpted option:selected').text()=='Yes'){
+                        $('.advanceNextGradeName').html('No');
+                        $('#advanceGradeOpted').val('0')
+                    }else if($('#bookASeatNextGradeOpted option:selected').text()=='No'){
+                        // $('.advanceNextGradeName').html('No');
+                        // $('#advanceGradeOpted').val('0')
+                    }
+                }else if(keyId=='advanceGradeOpted'){
+                    hidePermissionAndApprovalModal('advanceGradeOpted','save');
+                    $('.advanceNextGradeName').text($('#advanceGradeOpted option:selected').text()).removeClass('hide-value');
+                    // $("#"+src).parent().find('.cancel-field-btn').removeClass('visible');
+                    // $("#"+src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    // $("#"+src).removeClass('visible').parent().find('.edit-field-btn').show();
+                    if($('#bookASeatNextGradeOpted option:selected').text()=='Yes'){
+                        $('.reserveASeatNextGradeName').html('No');
+                        $('#bookASeatNextGradeOpted').val('0')
+                    }else if($('#bookASeatNextGradeOpted option:selected').text()=='No'){
+                        // $('.reserveASeatNextGradeName').html('No');
+                        // $('#bookASeatNextGradeOpted').val('0')
+                    }
+                }else if(keyId=='specialization'){
+                    $('.specilZViewSubject').text(data['extra']).removeClass('hide-value');
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='totalTeacheingExperience'){
+                    $('.totalTeacheingExpView').text(data['extra']).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='preferredSubjectName'){
+                    $('.preferredSubjectNameView').text(data['extra']).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='lastsubTaught'){
+                    $('.lastsubTaughtView').text(data['extra']).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='lastOrgGradeName'){
+                    $('.lastOrgGradeNameView').text(data['extra']).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='preferredGradeName'){
+                    $('.prefGradeNameView').text(data['extra']).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='departmentId'){
+                    $('.departmentNameView').text($('#'+keyId).val()).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='timezone'){
+                    $('.countryTimezoneView').text(data['extra']).removeClass('hide-value');
+                    $('.timeZoneSavedStatus').text("");
+                    // $('.cancel-field-btn').removeClass('visible');
+                    // $('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    // $('.save-field-btn').removeClass('visible').parent().find('.edit-field-btn').show();
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='designation'){
+                    $('.designationView').text($('#'+keyId).val()).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='otherRelation'|| keyId=='relationType'){
+                    var viewValue='';
+                    if('Other'== $('#relationType').val()){
+                        viewValue=toTitleCase($('#otherRelation').val());
+                    }else{
+                        viewValue=$('#relationType').val();
+                    }
+                    $('.relationTypeView').text(viewValue).removeClass('hide-value');
+                    //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                    $(".otherRelationDiv").hide();
+                }else if(keyId=='joiningDate'){
+                    var adDate=$('#joiningDate').val();
+                    adDate=adDate.split('-');
+                    var selectedDate=new Date(adDate[0]+'/'+adDate[1]+'/'+adDate[2]);
+                    var selectedDate2 = selectedDate.toString().split(" ");
+                    $('.joiningDateView').text(selectedDate2[1]+", "+selectedDate2[2]+" "+selectedDate2[3]).removeClass('hide-value');
+                    // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    // $(src).parent().find('.field-input').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='employeeType'){
+                    var conversionDate = $("#employeeTypeStartDate").val();
+                    conversionDate=conversionDate.split('-');
+                    var selectedDate=new Date(conversionDate[0]+'/'+conversionDate[1]+'/'+conversionDate[2]);
+                    var selectedDate2 = selectedDate.toString().split(" ");
+                    var employeeType = $("#employeeType").val();
+                    $('.employee_type').text(employeeType).removeClass('hide-value');
+                    $('.employee_type_start_date').text(selectedDate2[1]+", "+selectedDate2[2]+" "+selectedDate2[3]);
+                    // $(src).parent().find('.field-value').removeClass('hide-value');
+                    // //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+                    // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                }else if(keyId=='parentEmailId'){
+                    if (data['statusCode'] == 'ST001') {
+                        $('.stu-confirmation').show();
+                        $("#studentEmailId").html(data['extra']);
+                        $('.parentCreationCheck').css("display","none");
+                        $('.parentLmsCreationCheck').css("display","none");
+                        $('.parentOtpcheck').css("display","none");
+                        //$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
+                        // //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+                        // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                        // $(src).parent().find('.save-field-btn').removeClass('visible');
+                        // $(src).parent().find('.edit-field-btn').removeClass('visible');
+                    }else if (data['statusCode'] == 'ST002') {
+                        $('.parentCreationCheck').css("display","none");
+                        $('.parentLmsCreationCheck').css("display","none");
+                        $('.parentEmailswipe').css("display","none");
+                        $('.parentOtpcheck').css("display","none");
+                        $('.parentOtpcheck').css("display","block");
+                        //$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
+                        // //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+                        // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                        // $(src).parent().find('.save-field-btn').removeClass('visible');
+                        // $(src).parent().find('.edit-field-btn').removeClass('visible');
+                    }else{
+                        $('.parentOtpcheck').css("display","none");
+                        $('.parentCreationCheck').css("display","none");
+                        $('.parentLmsCreationCheck').css("display","none");
+                        $('.parentEmailswipe').css("display","none");
+                        if (data['extra'] == 'N') {
+                            $('.parentCreationCheck').css("display","block");
+                        }else if (data['extra1'] == 'N') {
+                            $('.parentLmsCreationCheck').css("display","block");
+                        }
+                        $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                        //$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
+                        ////$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+                        ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                    }
+                }else if(keyId=='parentEmailSmsLmsCreation'){
+                    $('.parentSmsCreatedView').text('Yes').removeClass('hide-value');
+                    $('.parentLmsCreatedView ').text('Yes').removeClass('hide-value');
+                    if (data['extra'] == 'Y') {
+                        $('.parentLmsStatusView').text('Active').removeClass('hide-value');
+                    }else{
+                        $('.parentLmsStatusView').text('Inactive').removeClass('hide-value');
+                    }
+                    $('.parentCreationCheck').css("display","none");
+                    $('.separate-user-for-parent').slideUp()
+                }else if(keyId=='parentEmailLmsCreation'){
+                    $('.parentSmsCreatedView').text('Yes').removeClass('hide-value');
+                    $('.parentLmsCreatedView ').text('Yes').removeClass('hide-value');
+                    if (data['extra'] == 'Y') {
+                        $('.parentLmsStatusView').text('Active').removeClass('hide-value');
+                    }else{
+                        $('.parentLmsStatusView').text('Inactive').removeClass('hide-value');
+                    }
+                    $('.parentLmsCreationCheck').css("display","none");
+                    $('.separate-lms-user-for-parent').css("display","none");
+                }else if(keyId=='pEmailOtp'){
+
+                }else if(keyId=='pEmailOtpVerify'){
+                    $('.parentOtpcheck').css("display","none");
+                    $('.parentCreationCheck').css("display","block");
+                }else if(keyId=='pStudEmailMappedVerify'){
+                    $('.stu-confirmation').hide();
+                    $('.parentOtpcheck').css("display","none");
+                    $('.parentCreationCheck').css("display","none");
+                    $('.parentLmsCreationCheck').css("display","none");
+                    $('.parentEmailswipe').css("display","none");
+                    if (data['extra'] == 'N') {
+                        $('.parentCreationCheck').css("display","block");
+                    }else if (data['extra1'] == 'N') {
+                        $('.parentLmsCreationCheck').css("display","block");
+                    }
+                }else if(keyId=='switchParentStudEmailId'){
+                    $('#studID').prop('disabled', false);
+                    $('#updatedStudEmail').text('');
+                    $('#updatedParentEmail').text('');
+                    $('.swap-Id-Wrapper').addClass('d-none');
+                    $('.studParntswipedata').css("display","none");
+                    $('#switchParentEmail').prop('checked', false);
+                    $('#parentEmailId').removeClass('visible').parent().find('.edit-field-btn').show();
+                    if (data['statusCode'] == '1') {
+                        $('.emailIdView').text(data['extra']).removeClass('hide-value');
+                    }
+                    $('#swipeParentId').val(data['extra1']);
+                    $('.parentEmailswipe').css("display","none");
+                    $('.parentEmailIdView').text(data['extra1']).removeClass('hide-value');
+                }else if(keyId == "communicationPreferredSlots"){
+                    $("#communication-preferred-time-dropdown-wrapper").hide();
+                    $(".addcommunicationPreferredTimeBtn").show();
+                }
+                else{
+                    $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+                    if(keyId=='sendUserVerificationEmail' || keyId=='verifyUserEmail'){
+                        //$(src).parent().find('.field-value').removeClass('hide-value').html(fieldValue+'<i class="fa fa-check text-success ml-2"></i>');
+                        window.location.reload();
+                    }else{
+                        //$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
+                    }
+                    ////$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+                    ////$(src).parent().find('.cancel-field-btn').removeClass('visible');
+                }
+                if (data['statusCode'] == 'ST001') {
+                }else{
+                    showMessageTheme2(1, data['message'],'',false);
+                }
+                console.log("not updated",PORFILE_RESPONSE_UPDATED_DATA);
+                
+                overWriteProfileData(eleID, keyId)
+                console.log("updated",PORFILE_RESPONSE_UPDATED_DATA);
+            }
+            return false;
+        }
+    });
+}
+function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, countryCode, index){
+    if(saveType == 'input'){
+        if($("#"+eleID).val()!=PORFILE_RESPONSE_UPDATED_DATA[index][eleID]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            // if(eleID == "motherName" || eleID == "motherLastName"){
+            //     if(eleID == "motherName" && $("#motherLastName").val()==""){
+            //         $("#motherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            //     }
+            //     if(eleID == "motherLastName" && $("#motherName").val()==""){
+            //         $("#motherName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            //     }
+            // }
+            // if(eleID == "fatherFirstName" || eleID == "fatherLastName"){
+            //     if(eleID == "fatherFirstName" && $("#fatherLastName").val()==""){
+            //         $("#fatherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            //     }
+            //     if(eleID == "fatherLastName" && $("#fatherFirstName").val()==""){
+            //         $("#fatherFirstName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            //     }
+            // }
+            // if(eleID == "guardianFirstName" || eleID == "guardianLastName"){
+            //     if(eleID == "guardianFirstName" && $("#guardianLastName").val()==""){
+            //         $("#guardianLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            //     }
+            //     if(eleID == "guardianLastName" && $("#guardianFirstName").val()==""){
+            //         $("#guardianFirstName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            //     }
+            // }
+        }else{
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+            if(eleID == "motherName" || eleID == "motherLastName"){
+                if(eleID == "motherName" && $("#motherLastName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['motherLastName']){
+                    $("#motherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+                }else{
+                    $("#motherLastName").closest(".input-group").find(".input-group-append-hide").hide();
+                }
+                if(eleID == "motherLastName" && $("#motherName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['motherName']){
+                    $("#motherName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+                }else{
+                    $("#motherName").closest(".input-group").find(".input-group-append-hide").hide();
+                }
+            }
+            if(eleID == "fatherFirstName" || eleID == "fatherLastName"){
+                if(eleID == "fatherFirstName" && $("#fatherLastName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['fatherLastName']){
+                    $("#fatherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+                }else{
+                    $("#fatherLastName").closest(".input-group").find(".input-group-append-hide").hide();
+                }
+                if(eleID == "fatherLastName" && $("#fatherFirstName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['fatherFirstName']){
+                    $("#fatherFirstName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+                }else{
+                    $("#fatherFirstName").closest(".input-group").find(".input-group-append-hide").hide();
+                }
+            }
+            if(eleID == "guardianFirstName" || eleID == "guardianLastName"){
+                if(eleID == "guardianFirstName" && $("#guardianLastName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['guardianLastName']){
+                    $("#guardianLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+                }else{
+                    $("#guardianLastName").closest(".input-group").find(".input-group-append-hide").hide();
+                }
+                if(eleID == "guardianLastName" && $("#guardianFirstName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['guardianFirstName']){
+                    $("#guardianFirstName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+                }else{
+                    $("#guardianFirstName").closest(".input-group").find(".input-group-append-hide").hide();
+                }
+            }
+        }
+    }else if(saveType == "select"){
+        if($("#"+eleID).val()!=PORFILE_RESPONSE_UPDATED_DATA[index][eleID=="nationality"?"nationalityId":eleID=="previousCurrentGradeName"?"previousCurrentGradeId":eleID]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            
+            if(eleID == "reserveASeat" &&  (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#"+eleID).val() == "1")){
+                $("#reserveASeat").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }else if(eleID == "reserveASeat" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#"+eleID).val() == "0")){
+                $("#reserveASeat").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }
+            else{
+                $("#reserveASeat").closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+            }
+            if(eleID == "bookASeatNextGradeOpted" && eleID != "advanceGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#"+eleID).val() == "1")){
+                $("#bookASeatNextGradeOpted").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }else if(eleID == "bookASeatNextGradeOpted" && eleID != "advanceGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#"+eleID).val() == "0")){
+                $("#bookASeatNextGradeOpted").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }
+            else{
+                $("#bookASeatNextGradeOpted").closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+            }
+            if(eleID == "advanceGradeOpted" && eleID != "bookASeatNextGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#"+eleID).val() == "1")){
+                $("#advanceGradeOpted").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }else if(eleID == "advanceGradeOpted" && eleID != "bookASeatNextGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#"+eleID).val() == "0")){
+                $("#advanceGradeOpted").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }
+            else{
+
+                $("#advanceGradeOpted").closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+            }
+            
+            
+            if(eleID == "country"){
+                $("#state, #city").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }
+            if(eleID == "pCountryId"){
+                $("#pStateId, #pCityId").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            }
+        }else{
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+        }
+       
+    }else if(saveType == "hobbies"){
+        var indexNum = PORFILE_RESPONSE_UPDATED_DATA[index][saveType].findIndex(item => item.id === $(eleID).attr("id")); 
+        if(($(eleID).prop("checked")?"Y":"N")!=PORFILE_RESPONSE_UPDATED_DATA[index][saveType][parseInt(indexNum)]["status"]){
+            HOBBIES_CHANGES_COUNT.push($(eleID).attr("data-hobbie-label"))
+            $("#saveHobbiesWrapper").show();
+            if($(eleID).parent().hasClass('added-hobbie-wrapper')){
+                $(eleID).parent().remove();
+                HOBBIES_CHANGES_COUNT = HOBBIES_CHANGES_COUNT.filter(function(item) {
+                    return item !== $(eleID).attr("data-hobbie-label");
+                });
+                if(HOBBIES_CHANGES_COUNT.length == 0){
+                    $("#saveHobbiesWrapper").hide();
+                }
+            }
+        }else{
+            HOBBIES_CHANGES_COUNT = HOBBIES_CHANGES_COUNT.filter(function(item) {
+                return item !== $(eleID).attr("data-hobbie-label");
+            });
+            if(HOBBIES_CHANGES_COUNT.length == 0){
+                $("#saveHobbiesWrapper").hide();
+            }
+        }
+    }else if(saveType == "communication"){
+        if(($(eleID).prop("checked")?"Y":"N")!=PORFILE_RESPONSE_UPDATED_DATA[index][$(eleID).attr("id")]){
+            COMMUNICATION_CHANGES_COUNT.push($(eleID).attr("data-communication-label"));
+            $("#saveCommunicationWrapper").show();
+        }else{
+            COMMUNICATION_CHANGES_COUNT = COMMUNICATION_CHANGES_COUNT.filter(function(item) {
+                return item !== $(eleID).attr("data-communication-label");
+            });
+            if(COMMUNICATION_CHANGES_COUNT.length == 0){
+                $("#saveCommunicationWrapper").hide();
+            }
+        }
+    }else if(saveType == "extracurricular"){
+        
+        if(($(eleID).prop("checked")?"Y":"N")!=PORFILE_RESPONSE_UPDATED_DATA[index]["sportsAndECList"][parseInt($(eleID).attr("data-index-id"))]["value"]){
+            SPORTS_AND_CLUB_COUNT.push($(eleID).attr("data-Id"));
+            $("#saveSportsAndEcClubWrapper").show();
+        }else{
+            SPORTS_AND_CLUB_COUNT = SPORTS_AND_CLUB_COUNT.filter(function(item) {
+                return item !== $(eleID).attr("data-Id");
+            });
+            if(SPORTS_AND_CLUB_COUNT.length == 0){
+                $("#saveSportsAndEcClubWrapper").hide();
+            }
+        }
+    }
+    else if(saveType == "inputPhone"){
+        if($("#"+eleID).val().replace(/\s+/g, '')!=PORFILE_RESPONSE_UPDATED_DATA[index][eleID]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else if(($("#"+avalWhtsAppStatusID).prop("checked")?"Y":"N") != PORFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else if($("#"+eleID).attr("data-countrycode") != PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]] && PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]] != ""){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else{
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+        }
+        
+    }else if(saveType == "socialMedia"){
+        var elementLabel = eleID.split("URL");
+        elementLabel = elementLabel[0];
+        var indexNum = PORFILE_RESPONSE_UPDATED_DATA[index][saveType].findIndex(item => item.socMedLabel === elementLabel); 
+        if($("#"+eleID).val()!=PORFILE_RESPONSE_UPDATED_DATA[index][saveType][(parseInt(indexNum))][$("[for='"+eleID+"']").attr("data-title")+"_URL"]){
+            // if($("#"+eleID).val()!=PORFILE_RESPONSE_UPDATED_DATA[index][saveType][(parseInt($("#"+eleID).attr("data-social-media-id"))-1)][$("[for='"+eleID+"']").attr("data-title")+"_URL"]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else{
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").hide();
+        }
+    }
+}
+function cancelChanges(eleID, eleValue, saveType){
+    if(saveType == 'input'){
+        $("#"+eleID).val(eleValue);
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+    }else if(saveType == "select"){
+        $("#"+eleID).val(eleValue).trigger("change");
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+    }else if(saveType == "countrySection"){
+        var elementIDs = $("#"+eleID).attr("data-country").split("_");
+        $.each(elementIDs, function(i, v) {
+            var targetValue = PORFILE_RESPONSE_DATA.profileData.studentProfile[0][v];
+            var found = false;
+            $("#"+v+" option").each(function(key, value) {
+                if ($(this).val() == targetValue) {
+                    $("#"+v).val(targetValue).trigger("change");
+                    found = true;
+                    return false;
+                }
+            });
+            if(!found) {
+                $("#"+v).val("").trigger("change");
+                $("#"+v).val("").closest(".input-group").find(".input-group-append-hide").hide();
+            }
+        });
+    }
+}
+
+function cancelHobbies(){
+    $(".added-hobbie-wrapper input[type='checkbox']:checked").each(function(){
+        HOBBIES_CHANGES_COUNT.splice(HOBBIES_CHANGES_COUNT.indexOf($(this).attr("data-hobbie-label")),1)
+    });
+    $(".hobbie-wrapper input[type='checkbox']").each(function(){
+        HOBBIES_CHANGES_COUNT.splice(HOBBIES_CHANGES_COUNT.indexOf($(this).attr("data-hobbie-label")),1);
+        if($(this).attr("check-status") == "true"){
+            $(this).prop("checked",true);
+        }else{
+            $(this).prop("checked",false);
+        }
+    });
+    $(".added-hobbie-wrapper").remove();
+    if(HOBBIES_CHANGES_COUNT.length<1){
+        $("#saveHobbiesWrapper").hide();
+    }
+}
+
+function extraCurricularHobbies(){
+    $(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function(){
+        SPORTS_AND_CLUB_COUNT.splice(SPORTS_AND_CLUB_COUNT.indexOf($(this).attr("data-Id")),1);
+        if($(this).attr("check-status") == "true"){
+            $(this).prop("checked",true);
+        }else{
+            $(this).prop("checked",false);
+        }
+    });
+    $(".added-hobbie-wrapper").remove();
+    if(SPORTS_AND_CLUB_COUNT.length<1){
+        $("#saveHobbiesWrapper").hide();
+    }
+}
+
+function cancelCommunication(){
+    $(".communication-wrapper input[type='checkbox']").each(function(){
+        COMMUNICATION_CHANGES_COUNT.splice(COMMUNICATION_CHANGES_COUNT.indexOf($(this).attr("data-communication-label")),1);
+        if($(this).attr("check-status") == "true"){
+            $(this).prop("checked",true);
+        }else{
+            $(this).prop("checked",false);
+        }
+    });
+    if(COMMUNICATION_CHANGES_COUNT.length<1){
+        $("#saveCommunicationWrapper").hide();
+    }
+}
+
+
+function availableOnWhatsApp(src, eleID, eleValue, saveType, countryCode,index){
+    if(saveType == 'input'){
+        if($("#"+eleID).val().replace(/\s+/g, '')!=PORFILE_RESPONSE_UPDATED_DATA[index][eleID]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else if(($(src).prop("checked")?"Y":"N") != PORFILE_RESPONSE_UPDATED_DATA[index][$(src).attr("id")]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else if(countryCode.toLowerCase() != PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]].toLowerCase() && PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]] != ""){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+        }else{
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+        }
+    }
+}
+
+function phoneNumberDailCodeChange(eleID,eleValue, eleCurrentValue, avalWhtsAppStatusID, index){
+    PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]] == ""?PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]]="us":PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]];
+    if($("#"+eleID).val().replace(/\s+/g, '')!=PORFILE_RESPONSE_UPDATED_DATA[index][eleID]){
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+    }else if(($("#"+avalWhtsAppStatusID).prop("checked")?"Y":"N") != PORFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]){
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+    }else if(eleCurrentValue.toLowerCase()!=PORFILE_RESPONSE_UPDATED_DATA[index][$("#"+eleID).attr("data-idlist").split("_")[2]].toLowerCase()){
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+    }else{
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+    }
+}
+
+function renderAndPermissionForAproval(src, keyId,userId,studentStandardId,roleModuleId,moduleId, showWarning){
+	if($('#'+keyId).val()==1){
+		var html=permissionForAprovalModal(src, keyId,userId,studentStandardId,roleModuleId,moduleId, showWarning);
+		$('body').append(html);
+		$('#permissionModal').modal({ backdrop: 'static', keyboard: false });
+	}else{
+		applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId, showWarning)
+	}
+}
+function hidePermissionAndApprovalModal(eleID, callFrom){
+	$('#permissionModal').modal('hide');
+	window.setTimeout(function () { $('#permissionModal').remove(); }, 1000);
+    if(callFrom == "cancel"){
+        var value = PORFILE_RESPONSE_DATA.profileData.studentProfile[5][eleID] == "N"?"0":"1"
+        $("#"+eleID).val(value).trigger("change");
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
+    }else{
+        $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});   
+    }
+    
+}
+
+
+function checkJoinedSports(data){
+    if(data.joinedSportsAndECList.length>0){
+        $("#eventTableListWrapper, #participateEventFormWrapper").show();
+        $("#participateActivities").prop("checked",true);
+    }
+    else{
+        $("#eventTableListWrapper, #participateEventFormWrapper").hide();
+        $("#participateActivities").prop("checked",false);
+    }
+}
+
+
+// var loadContentFlag = 0;
+// function communicationLog(){
+//     if(loadContentFlag  == 0){
+//         $("#communicationLogDIV").append(getCommunicationLogContent());
+//         initEditor(1, 'commentEditor','Enter comments', false);
+//         // bindFileUploadNew1('1', '33',USER_ID,6);
+// 		$("#fileuploadLog6").on("change",function(){
+// 			var attachment = $("#fileuploadLog6").val().split("\\")[2]
+// 			$("#fileuploadLog6Span").text(attachment);
+// 		});
+//         loadContentFlag=1;
+// 		callProfileEnrollStatusList('communicationLogForm','RE-EN','reLeadStatus', false);
+// 		// $('#communicationLogForm #reLeadStatus').select2({
+// 		// 	theme:'bootstrap4',
+// 		// })
+//     }
+//     getCommunicationLogData('communicationLogTable',USER_ID,USER_ROLE);
+// }
+
+function getCommunicationLogData(elementId,userId,role){
+    customLoader(true);
+	var data={};
+	data['userId']=userId;
+	data['role']=role; 
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : CONTEXT_PATH+UNIQUEUUID+"/api/v1/dashboard/get-user-communication-log",
+		data: JSON.stringify(data),
+		dataType : 'json',
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					if(tt=='theme1'){
+						showMessage(false, data['message']);
+					}else{
+						showMessageTheme2(0, data['message'],'',true);
+					}
+				}
+			} else {
+				var isDataTable = $.fn.dataTable.isDataTable('#'+elementId);
+				if(isDataTable){
+					$('#'+elementId).dataTable().fnDestroy();
+				}
+				$('#'+elementId+' > tbody').html(getAddCommunicationLogTablebody(data));
+				$('#'+elementId).DataTable({
+					"drawCallback": function( settings ) {
+						$('#'+elementId+' tbody tr td:first-child').addClass('dtr-control');
+					}
+				});
+			}
+			customLoader(false);
+			return false;
+		}
+	});
+}
+
+function getRequestForCommunicationLog(formId){
+    var commonCommentsRequest = {};
+	var authentication = {};
+	var commonCommentsDTO = {};
+	var documentUploads = STUDENT_UPLOAD_DOCUMENTS;
+	commonCommentsDTO['entityId']=PORFILE_RESPONSE_DATA.userId;
+	if(USER_ROLE == 'TEACHER'){
+		commonCommentsDTO['entityName']='TEACHER';
+	}else{
+		commonCommentsDTO['entityName']='STUDENT';
+	}
+	commonCommentsDTO['title']=$("#"+formId+" #logTitle").val();
+	commonCommentsDTO['status']=$("#"+formId+" #reLeadStatus").val();
+	
+	if($("#" + formId + " #fileuploadLog6Span").text()=='No file chosen...'){
+		commonCommentsDTO['uploadFile'] = '';
+		documentUploads = STUDENT_UPLOAD_DOCUMENTS = [];
+	}else{
+		commonCommentsDTO['uploadFile'] = $("#" + formId +" #fileuploadLog6Span").text();
+	}
+    if(editor1!=undefined){
+        commonCommentsDTO['comments']=escapeCharacters(editor1.getData());
+    }
+	commonCommentsDTO['documentUploads']=documentUploads;
+	commonCommentsRequest['commonCommentsDTO'] = commonCommentsDTO
+	
+	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = moduleId;
+	authentication['userId'] = $("#"+formId+" #userId").val();
+	commonCommentsRequest['authentication'] = authentication;
+	return commonCommentsRequest;
+}
+
+function saveCommunicationLog(formId) {
+    hideMessageTheme2('');
+    if(editor1.getData()==null || editor1.getData()=='' || editor1.getData()=='undefined'){
+        showMessageTheme2(0,"Comments mandatory",'',true);
+		return false;
+    }
+	if(editor1.getData().length>2999){
+		showMessageTheme2(0,"Comments can not be more than 3000 characters.",'',true);
+		return false;
+	}
+    $.ajax({
+        type : "POST",
+        contentType : APPLICATION_JSON_VALUE,
+        url : getURLFor('dashboard','save-user-communication-log'),
+        data : JSON.stringify(getRequestForCommunicationLog(formId)),
+        dataType : 'json',
+        cache : false,
+        timeout : 600000,
+        success : function(data) {
+			
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					if(tt=='theme1'){
+						showMessage(false, data['message']);
+					}else{
+						showMessageTheme2(0, data['message'],'',true);
+					}
+				}
+			} else{
+				showMessageTheme2(1, data['message'],'',true);
+				$('#' + formId)[0].reset();
+				$('#' + formId+' #fileuploadLog6').val('');
+				$('#' + formId+ " #fileuploadLog6Span").text("No file chosen...");
+				initEditor(1, 'commentEditor','Enter comments', true);
+				getCommunicationLogData('communicationLogTable',PORFILE_RESPONSE_DATA.userId,PORFILE_RESPONSE_DATA.userRole);
+			}
+            
+            return false;
+        }
+    });
+}
+
+function callProfileEnrollStatusList(formId, value, elementId, keyStatus) {
+	hideMessageTheme2('');
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForCommon('masters'),
+		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-STATUS-LIST', value)),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(true, data['message']);
+			} else {
+				result = data['mastersData']['data'];
+				dropdown = $("#"+formId+" #"+elementId);
+				dropdown.html('');
+				dropdown.append('<option value="0">Select Status</option>');
+				$.each(result, function (k, v) {
+					if(keyStatus){
+						dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
+					}else{
+						dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
+					}
+				});
+			}
+		}
+	});
+}
+
+function overWriteProfileData(eleID, keyId){
+    if(keyId != "hobbies" && keyId != "socialMedia" && keyId != "extracurricular" ){
+        if(keyId == "preferredcommunication"){
+            var communicationArry = []
+            $(".communication-wrapper input[type='checkbox']").each(function(){
+                if($(this).prop("checked")){
+                    var label = $(this).attr("data-communication-label");
+                    communicationArry.push({[label]:"Y"});
+                }else{
+                    var label = $(this).attr("data-communication-label");
+                    communicationArry.push({[label]:"N"});
+                }
+            });
+            $.each(communicationArry,function(i,v){
+                var key = Object.keys(v);
+                PORFILE_RESPONSE_UPDATED_DATA[1][key]=v[key]
+            });
+            $("#saveCommunicationWrapper").hide();
+        }
+        else{
+            if(keyId == "countrySectionParent" || keyId == "countrySection"){
+                var elements_ID =[];
+                elements_ID=$("#"+eleID).attr("data-country").split("_");
+                $.each(elements_ID, function(i,v){
+                    PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, v,parseInt($("#"+v).val()));
+                })
+            }else if(keyId == "bookASeatNextGradeOpted" || keyId == "advanceGradeOpted" || keyId == "reserveASeat"){
+                var value = $("#"+keyId).val() == '0'? 'N':'Y';
+                PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyId,value);
+            }
+            else{
+                if(keyId == "timezone" || keyId == "nationality"){
+                    PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyId,parseInt($("#"+keyId).val()));
+                }
+                else if(keyId=='phoneNumber' || keyId=='altPhoneNumber' || keyId=='motherPhoneNumber' || keyId=='fatherPhoneNumber' || keyId=='guardianPhoneNumber' || keyId=='payPalPhoneNumber' ){
+                    var keyList = $("#"+keyId).attr("data-idList").split("_");
+                    var requestProfileData = [];
+                    requestProfileData.push({[keyList[0]]:$("#"+eleID).val().replace(/\s+/g, '')});
+                    requestProfileData.push({[keyList[1]]:$('#'+keyList[1]).prop('checked')?'Y':'N'});
+                    requestProfileData.push({[keyList[2]]:$('#'+eleID).attr('data-countrycode')});
+                    console.log(requestProfileData);
+                    $.each(requestProfileData,function(i,v){
+                        var key = Object.keys(v);
+                        PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyList[i],v[key]);
+                    });
+                }else{
+                    PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyId,$("#"+keyId).val());
+                }
+                console.log("updated",PORFILE_RESPONSE_UPDATED_DATA);
+            }
+        }
+        
+    }
+    else if(keyId == "hobbies"){
+        var hobbieLable=[];
+        $(".hobbie-wrapper input[type='checkbox']:checked").each(function(){
+            hobbieLable.push($(this).attr("data-hobbie-label"))
+        });
+        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {
+            hobbiesToKeep: hobbieLable,
+        });
+    }else if(keyId == "socialMedia"){
+        var label = $("[for='"+eleID+"']").attr("data-title");
+        var socialMediaUpdatesObj = {[label]:$("#"+eleID).val()}
+        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {
+            socialMediaUpdates: socialMediaUpdatesObj,
+        });
+    }else if(keyId == "extracurricular"){
+        var sportsToKeepLable=[];
+        $(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function(){
+            sportsToKeepLable.push($(this).attr("data-title"))
+        });
+        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {
+            sportsToKeep: sportsToKeepLable,
+        });
+    }
+}
+
+
+function updateValueByKey(data, keyToUpdate, newValue) {
+    if (Array.isArray(data)) {
+        return data.map(item => updateValueByKey(item, keyToUpdate, newValue));
+    } else if (typeof data === 'object' && data !== null) {
+        var updatedObj = {};
+        for (var key in data) {
+            if (key === keyToUpdate) {
+                updatedObj[key] = newValue;
+            } else {
+                updatedObj[key] = updateValueByKey(data[key], keyToUpdate, newValue);
+            }
+        }
+        return updatedObj;
+    }
+    return data;
+}
+
+function updateStudentData(data, {  hobbiesToKeep = [], socialMediaUpdates = {}, sportsToKeep = []} = {}) {
+
+  data[0].hobbies = data[0].hobbies.map(hobby => ({
+    ...hobby,
+    status: hobbiesToKeep.includes(hobby.hobbiesLabel) ? 'Y' : 'N'
+  }));
+
+  data[0].socialMedia = data[0].socialMedia.map(media => {
+    var label = media.socMedLabel;
+    var newUrl = socialMediaUpdates[label];
+
+    if (newUrl) {
+      var key = Object.keys(media).find(k => k.endsWith('_URL'));
+      return {
+        ...media,
+        [key]: newUrl
+      };
+    }
+
+    return media;
+  });
+
+  data[4].sportsAndECList = data[4].sportsAndECList.map(sport => ({
+    ...sport,
+    value: sportsToKeep.includes(sport.sEclabel) ? 'Y' : 'N',
+    assignActiveStudent: sportsToKeep.includes(sport.sEclabel) ? 'Y' : 'N'
+  }));
+
+  return data;
+}
+
+
+
+
+
+function checkAndOrganizeFields(objectA, objectB) {
+    const result = {};
+    
+    // Process each section from objectB
+    objectB.forEach(section => {
+        const sectionLabel = section.labelName;
+        const sectionFieldId = section.fieldId;
+        
+        // Check if this section has fields to process
+        if (section.parentChildList && section.parentChildList.length > 0) {
+            const groupedFields = {};
+            const groupsWithMissingFields = new Set();
+            
+            // First pass: Identify groups that have at least one missing field
+            section.parentChildList.forEach(field => {
+                const groupId = field.groupId;
+                
+                
+                
+                // Special handling for hobbies and social media
+                if (field.fieldId === 'hobbies') {
+                    const hasAllActiveHobbies = checkAllActiveHobbies(objectA);
+                    // Only include if ALL hobbies are inactive (status "N")
+                    if (!hasAllActiveHobbies) {
+                        groupsWithMissingFields.add(groupId);
+                    }
+                } else if (field.fieldId === 'socialMedia') {
+                    const hasAnySocialMediaLink = checkAnySocialMediaLink(objectA);
+                    // Only include if NO social media has links (all URLs are empty)
+                    if (!hasAnySocialMediaLink) {
+                        groupsWithMissingFields.add(groupId);
+                    }
+                }else if(field.fieldId == "extracurricularActivities"){
+                    const hasAllExtracurricularActivities = checkAllExtracurricularActivities(objectA,parseInt(section.index));
+                    if (!hasAllExtracurricularActivities) {
+                        groupsWithMissingFields.add(groupId);
+                    }
+                } else {
+                    // Regular field checking
+                    const fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                    const isEmpty = fieldValue === '' || fieldValue === null || fieldValue === undefined;
+                    
+                    if (isEmpty) {
+                        groupsWithMissingFields.add(groupId);
+                    }
+                }
+            });
+            
+            // Second pass: Add all fields from groups that have missing fields
+            section.parentChildList.forEach(field => {
+                const groupId = field.groupId;
+                if (groupsWithMissingFields.has(groupId)) {
+                    if (!groupedFields[groupId]) {
+                        groupedFields[groupId] = [];
+                    }
+                    
+                    // Special handling for hobbies and social media
+                    if (field.fieldId === 'hobbies') {
+                        const hobbiesData = getHobbiesData(objectA);
+                        groupedFields[groupId].push({
+                            fieldId: field.fieldId,
+                            orderId: field.orderId,
+                            groupId: groupId,
+                            labelName: field.labelName,
+                            value: hobbiesData
+                        });
+                    } else if (field.fieldId === 'socialMedia') {
+                        const socialMediaData = getSocialMediaData(objectA);
+                        groupedFields[groupId].push({
+                            fieldId: field.fieldId,
+                            orderId: field.orderId,
+                            groupId: groupId,
+                            labelName: field.labelName,
+                            value: socialMediaData
+                        });
+                    }else if (field.fieldId === 'extracurricularActivities') {
+                        const extracurricularActivitiesData = getExtracurricularActivitiesData(objectA, parseInt(section.index));
+                        groupedFields[groupId].push({
+                            fieldId: field.fieldId,
+                            orderId: field.orderId,
+                            groupId: groupId,
+                            labelName: field.labelName,
+                            value: extracurricularActivitiesData
+                        });
+                    }else if (field.fieldId === 'phoneNumber' || field.fieldId === 'altPhoneNumber' || field.fieldId === 'motherPhoneNumber' || field.fieldId === 'fatherPhoneNumber' || field.fieldId === 'guardianPhoneNumber') {
+                        const fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                            groupedFields[groupId].push({
+                                fieldId: field.fieldId,
+                                orderId: field.orderId,
+                                groupId: groupId,
+                                elementType:"phoneNumber",
+                                labelName: field.labelName,
+                                value: fieldValue
+                            });
+                        
+                    } else {
+                        // Regular field
+                        const fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                        groupedFields[groupId].push({
+                            fieldId: field.fieldId,
+                            orderId: field.orderId,
+                            groupId: groupId,
+                            labelName: field.labelName,
+                            value: fieldValue
+                        });
+                    }
+                }
+            });
+            
+            // Add to result if there are any groups with missing fields
+            if (Object.keys(groupedFields).length > 0) {
+                if (!result[sectionLabel]) {
+                    result[sectionLabel] = {};
+                }
+                Object.assign(result[sectionLabel], groupedFields);
+            }
+        }
+    });
+    
+    return result;
+}
+
+// Helper function to get field value from nested objectA
+function getFieldValue(objectA, fieldId, index) {
+    const studentProfile = objectA.studentProfile[index];
+    // Check personal information fields
+    if (studentProfile.hasOwnProperty(fieldId)) {
+        return studentProfile[fieldId];
+    }
+    
+    // Check parent information fields (second object in studentProfile array)
+    if (objectA.studentProfile[index] && objectA.studentProfile[index].hasOwnProperty(fieldId)) {
+        return objectA.studentProfile[index][fieldId];
+    }
+    
+    return "";
+}
+
+// Check if ALL hobbies have status "N" (all inactive)
+function checkAllActiveHobbies(objectA) {
+    const hobbies = objectA.studentProfile[0]?.hobbies || [];
+    if (hobbies.length === 0) return false;
+    return hobbies.some(hobby => hobby.status === "Y");
+}
+
+
+
+// Check if ANY social media has non-empty URL
+function checkAnySocialMediaLink(objectA) {
+    const socialMedia = objectA.studentProfile[0]?.socialMedia || [];
+    return socialMedia.some(social => {
+        // Check all URL fields that end with _URL
+        const urlFields = Object.keys(social).filter(key => key.endsWith('_URL'));
+        return urlFields.some(urlField => {
+            const urlValue = social[urlField];
+            return urlValue !== '' && urlValue !== null && urlValue !== undefined;
+        });
+    });
+}
+
+// Get hobbies data with status
+function getHobbiesData(objectA) {
+    return objectA.studentProfile[0]?.hobbies || [];
+}
+
+// Get social media data
+function getSocialMediaData(objectA) {
+    return objectA.studentProfile[0]?.socialMedia || [];
+}
+
+// Check if ALL extracurricular activities have status "N" (all inactive)
+function checkAllExtracurricularActivities(objectA, index) {
+    const extracurricularActivities = objectA.studentProfile[index]?.sportsAndECList || [];
+    if (extracurricularActivities.length === 0) return false;
+    return extracurricularActivities.some(hobby => hobby.assignActiveStudent === "Y");
+}
+
+// Get extracurricular activities data
+function getExtracurricularActivitiesData(objectA, index) {
+    return objectA.studentProfile[index]?.sportsAndECList || [];
+}
+var missingFields;
+var inputPhoneNumberArray;
+var previousSchoolElementArray;
+var sportEventDatepickerFlag;
+async function getMissingDataByUser(payload){
+    if(MODAL_SHOW_FLAG){
+        $("body").append(cropperImageModalContent()+viewUploadFileModal())
+        var fieldId;
+        var fieldValue;
+        var html='';
+        PORFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, `profile-view-content-new?payload=${payload}`, '');
+        var data = PORFILE_RESPONSE_DATA.profileData.studentProfile;
+        PORFILE_RESPONSE_UPDATED_DATA = data;
+        inputPhoneNumberArray = [];
+        sportEventDatepickerFlag = false;
+        previousSchoolElementArray =[];
+        var GET_FILED_DATA =  await getProfileFields();
+        console.log(GET_FILED_DATA)
+        missingFields = checkAndOrganizeFields(PORFILE_RESPONSE_DATA.profileData, GET_FILED_DATA.profileData);
+        console.log("missingFields", missingFields);
+        
+        $.each(missingFields, function(index,value){
+            // var keysList = Object.keys(missingFields);
+            html += 
+            `<div class="form-row mb-2">
+                <div class="col-12 mb-2">${profileFormSectionTile(index)}</div>
+                <hr/>
+            `;
+            $.each(value, function(key, val){
+                $.each(val, function(i, v){
+                    var sectionTitle=index;
+                    if(sectionTitle)
+                    fieldId = v['fieldId'];
+                    fieldValue = v['value'];
+                    if(fieldId != "extracurricularActivities" && (fieldId !== 'phoneNumber' && fieldId !== 'altPhoneNumber' && fieldId !== 'motherPhoneNumber' && fieldId !== 'fatherPhoneNumber' && fieldId !== 'guardianPhoneNumber' && fieldId !== "previousCurrentGradeName" && fieldId !== "previousCurrentSchoolGraduationYear" && fieldId !== "previousCurrentSchoolCountry")){
+                        if (typeof window[fieldId + 'Element'] === 'function') {
+                            html += 
+                            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                                ${window[fieldId + 'Element'](fieldValue)}
+                            </div>`;
+                            
+                        }else{
+                            console.warn([fieldId + 'Element'] + " not a function")
+                        }
+                    }else if (fieldId === "previousCurrentGradeName" || fieldId === "previousCurrentSchoolGraduationYear" || fieldId === "previousCurrentSchoolCountry"){
+                        html += 
+                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                            ${window[fieldId + 'Element'](fieldValue)}
+                        </div>`;
+                        previousSchoolElementArray.push(fieldId)
+                    }else if(fieldValue == "" && (fieldId === 'phoneNumber' || fieldId === 'altPhoneNumber' || fieldId === 'motherPhoneNumber' || fieldId === 'fatherPhoneNumber' || fieldId === 'guardianPhoneNumber')){
+                        html +=`<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                                ${window[fieldId + 'Element'](fieldValue)}
+                            </div>`;
+                        const fatherPhoneIndex = PORFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
+                        inputPhoneNumberArray.push({"fieldId":fieldId, "index":fatherPhoneIndex});
+                        
+                    }else if(fieldValue != "" && fieldId == "hobbies"){
+                        html += 
+                        `<div class="col-12">
+                            ${window['hobbiesContent'](fieldValue)}
+                        </div>`;
+                    }
+                });
+            });
+            if(fieldId === 'ageProof' || fieldId === 'addressProof' || fieldId === 'parentPassportProof' || fieldId === 'lastAcademicProof'){
+                html+=
+                `<div class="col-12 text-right mt-3">
+                    <a href="javascript:void(0)" class="btn btn-success btn-sm" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
+                </div>`
+            }
+            if(index == "Sport & Extra Curriculars"){
+                var indexNum = PORFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty('joinedSportsAndECList'));
+                if(PORFILE_RESPONSE_UPDATED_DATA[indexNum].joinedSportsAndECList.length<3){
+                    html+=
+                    `<div class="col-12">
+                        ${participateSportActivitiesElement(PORFILE_RESPONSE_UPDATED_DATA[indexNum],PORFILE_RESPONSE_DATA.studentStandardId, "requestProfileForm")}
+                    </div>`;
+                    sportEventDatepickerFlag=true;
+                }
+                if(fieldValue != "" && fieldId == "extracurricularActivities"){
+                    html += 
+                    `<div class="col-12">
+                        ${window['extracurricularActivities'+ 'Thums'](fieldValue)}
+                    </div>`;
+                }
+            }
+            html+=`</div>`;
+        });
+        if($("#profileFielddModal").length>0){
+            $("#profileFielddModal").remove();
+        }
+        $("body").append(getChunkProfileDataByUserModalContent());
+        $("#profileFielddModal .modal-body #requestProfileForm").html(html);
+        
+    }
+}
+
+function profileFormSectionTile(sectionName) {
+    var titleMap = {
+        "Personal Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                <i class="fa fa-user font-12"></i>    
+            </span>
+            <span>Personal Information</span>
+        </h5>`,
+
+        "Parent Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                <i class="fa fa-users font-12"></i>    
+            </span>
+            <span>Parent/Guardian Information</span>
+        </h5>`,
+
+        "Academic Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                <i class="fa fa-graduation-cap font-12"></i>    
+            </span>
+            <span>Academic Information</span>
+        </h5>`,
+
+        "Sport & Extra Curriculars": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                <i class="fa fa-calendar font-12"></i>    
+            </span>
+            <span>Sport &amp; Extra Curriculars</span>
+        </h5>`
+    };
+
+    return titleMap[sectionName] || ""; // Return empty string if not found
+}
+
+
+function getInputIntel(InputIntelList){
+    if(InputIntelList.length>0){
+        $.each(InputIntelList, function(i,v){
+            initializeIntelInput('requestProfileForm', `${v.fieldId}`,`iti${v.fieldId}`, '', 'selfSave', `${v.fieldId}WhatsAppStatus`,parseInt(v.index))
+        });
+    }
+}
+
+function buindProfileElementEvent(buindProfileElementEvent){
+    if(buindProfileElementEvent.length>0){
+        $.each(buindProfileElementEvent, function(i,v){
+            if(v == "previousCurrentGradeName"){
+                getAllGrade(SCHOOL_ID,true, v);
+                $("#"+v).select2({
+                    theme:"bootstrap4",
+		            dropdownParent: "#profileFielddModal #requestProfileForm"
+                });
+            }else if(v == "previousCurrentSchoolGraduationYear"){
+                var currentYear = new Date().getFullYear();
+                $("#"+v).datepicker({
+                    format: "yyyy",
+                    viewMode: "years",
+                    minViewMode: "years",
+                    autoclose: true,
+                    endDate: new Date(currentYear, 11, 31) 
+                });
+            }else if(v == "previousCurrentSchoolCountry"){
+                callCountriesOption("requestProfileForm", '', `${v}`, '', "Select Country*");
+                $("#"+v).select2({
+                    theme:"bootstrap4",
+		            dropdownParent: "#profileFielddModal #requestProfileForm"
+                });
+            }
+            $('.select2-selection').addClass('form-select-sm group-append-hide-input');
+        });
+    }
+    if(sportEventDatepickerFlag){
+        $("#eventStartDate").datepicker({
+            format:'M dd, yyyy',
+            autoclose:true,
+            startDate : new Date()
+        }).on("change", function(){
+            if($(this).val() != ""){
+                var startDate = new Date($(this).val());
+                $("#eventEndDate").datepicker("remove");
+                $('#eventEndDate').val('');
+                $("#eventEndDate").datepicker({
+                    startDate : startDate,
+                    format : 'M dd, yyyy',
+                    autoclose: true,
+                });
+            }
+        });
+
+        $("#eventEndDate").datepicker({
+            format:'M dd, yyyy',
+            autoclose:true,
+            startDate : new Date()
+        });
+    }
+    checkJoinedSports(PORFILE_RESPONSE_UPDATED_DATA[4])
+}
+
+var getProfileDateInterVal = function () {
+    console.log("ACTIVITY_CLASS_START_TIME", ACTIVITY_CLASS_START_TIME);
+    intervalId = setInterval(function () {
+        if (ACTIVITY_CLASS_START_TIME.length > 0) {
+            if(getFlag()){
+                if(!$('#profileFielddModal').hasClass("show")){
+                    $("#profileFielddModal").modal("show");   
+                }
+                var now = new Date().getTime();
+                for (var v of ACTIVITY_CLASS_START_TIME) {
+                    var start = new Date(v.startTime.replace(" ", "T")).getTime();
+                    var end   = new Date(v.endTime.replace(" ", "T")).getTime();
+                    var timeDiff  = start - now;
+                    if(timeDiff <= 60000 && timeDiff > 0){
+                        if ($("#classAndActivityStartWarningModal").length > 0) {
+                            $("#classAndActivityStartWarningModal").remove();
+                        }
+                        $("body").append(getClassAndActivityStartWarningModalContent());
+
+                        if ($("#profileFielddModal").hasClass("show")) {
+                            $("#classAndActivityStartWarningModal .modal-body").html(
+                                `<h4>Your ${v.title} is about to start, would you like to continue filling details?</h4>`
+                            );
+                            $("#classAndActivityStartWarningModal").modal("show");
+                        }
+                        MODAL_SHOW_FLAG = false;
+                        clearInterval(intervalId);
+                        return; 
+                    }
+                }
+            }
+        }
+    }, 1000);
+    return intervalId;
+};
+
+function getFlag() {
+    // console.log("ACTIVITY_CLASS_START_TIME", ACTIVITY_CLASS_START_TIME);
+    if (ACTIVITY_CLASS_START_TIME.length > 0) {
+        var now = new Date().getTime();
+        // Loop through all the time ranges
+        for (var v of ACTIVITY_CLASS_START_TIME) {
+            var start = new Date(v.startTime.replace(" ", "T")).getTime();
+            var end = new Date(v.endTime.replace(" ", "T")).getTime();
+
+            // Check if current time is within this range
+            if (now >= start && now <= end) {
+                console.log("isBetween", v.startTime + " " + v.endTime);
+                return false;  // If within range, return false immediately
+            }
+        }
+    }
+    return true;  // If no time ranges match, return true
+}
+
+function stopProfileDataInterval(modalID){
+    clearInterval(intervalId);
+    $("#"+modalID).modal("hide");
+}
+
+
+
+function closeProfileModal(){
+    $("#profileFielddModal, #classAndActivityStartWarningModal").modal("hide");
+}
+

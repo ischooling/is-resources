@@ -34,6 +34,9 @@ function dashboardActivityListContent(data){
                         +'<ul class="mm-collapse">';
                             if(data.activities!=null && data.activities.length>0){
                                 $.each(data.activities, function(i, ead) {
+                                    if(k==0){
+                                        ACTIVITY_CLASS_START_TIME.push({"startTime":convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER),"endTime":convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER), "title":"activity"})
+                                    }
                                     var functionName='renderViewActitifyDetails('+ead.id+','+ead.meetingId+')';
                                     if(ead.subActivityTypeId==0 && ead.activityTypeId==activityType.id){
                                         // console.log('ead.startDateTime1 '+ead.startDateTime);

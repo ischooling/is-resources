@@ -19,6 +19,8 @@ async function initiateSetting(){
 }
 initiateSetting();
 function getContent(moduleId, pageNo, replaceDiv, extraParam){
+	$("#dashboardContentInHTMLAdditional").html('');
+	$('#dashboardContentInHTML').show();
 	customLoader(false);
 	roleAndModule = getUserRights(SCHOOL_ID_OF_USER, USER_ROLE_ID, USER_ID, moduleId);
 	ROLE_MODULE=roleAndModule;
@@ -561,6 +563,8 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 			LEAD_CATEGORY = "B2B";
 		}
 		renderLeadSettingDashboard('Lead Settings',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
+	}else if(pageNo=='profile-view'){
+		renderUserProfilePage(extraParam);
 	}else if(pageNo=='user-screening-profiles'){
 		$('#dashboardContentInHTML').html(renderUserApplicationContent("Job Applicants", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
 		userApplicationProfileOnloadFunction();
@@ -641,8 +645,14 @@ function backToDedicatedModule(moduleUrl){
 	callDashboardPageSchool('194','partner-enrollment-students-wlp');
   }
 }
-function backToMain(){
-  $("#dashboardContentInHTML").show();
-  $("#dashboardContentInHTMLAdditional").hide();
-  $('html, body').animate({ scrollTop: 0 }, 500);
+function backToMain(tableId){
+	$("#dashboardContentInHTML").show();
+	$("#dashboardContentInHTMLAdditional").hide();
+	$('html, body').animate({ scrollTop: 0 }, 500);
+	if(tableId != "" && tableId != undefined){
+		if($.fn.DataTable.isDataTable('#'+tableId)) {
+			$('#'+tableId).DataTable().destroy();
+		}
+		$('#'+tableId).DataTable();
+	}
 }

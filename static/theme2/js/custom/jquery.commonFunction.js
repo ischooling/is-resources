@@ -21,6 +21,7 @@ var IGNORECOUNTRYARRAY = [
   "tf",
   "um",
 ];
+var ACTIVITY_CLASS_START_TIME=[];
 var globalEntityId = "";
 var reviewDone = false;
 var submitted = false;
@@ -44,7 +45,6 @@ var AJAXREQUESTCOUNT=0;
 var date = new Date();
 var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-var CAN_SHOW_ENROLL_RESERVE_MODAL = true;
 function copyToClipboardText(originalValue) {
   var $tempInput = $("<input>");
   $("body").append($tempInput);
@@ -1103,7 +1103,7 @@ function callCountries(formId, value, elementId, eventBinder) {
   });
   return true;
 }
-function callCountriesOption(formId, value, elementId, preSelected) {
+function callCountriesOption(formId, value, elementId, preSelected, msg) {
   $("#" + formId + " #" + elementId).html(
     '<option value="">Select country*</option>'
   );
@@ -1118,10 +1118,13 @@ function callCountriesOption(formId, value, elementId, preSelected) {
       if (data["status"] == "0" || data["status"] == "2") {
         showMessageTheme2(1, data["message"]);
       } else {
+        if(msg == undefined || msg == ""){
+          msg = "Select Country";
+        }
         buildDropdownCountry(
           data["mastersData"]["countries"],
           $("#" + formId + " #" + elementId),
-          "Select Country*"
+          msg
         );
         // var html='';
         // html += '<option value="" disabled selected>Select Country</option>';
@@ -1134,6 +1137,33 @@ function callCountriesOption(formId, value, elementId, preSelected) {
     },
   });
 }
+
+function buildDropdownCountry(result, dropdown, emptyMessage) {
+    dropdown.html('');
+	if (result != '') {
+		dropdown.append('<option value>' + emptyMessage + '</option>');
+		$.each(result, function (k, v) {
+            if (v.extra != null && v.extra1 != null) {
+				dropdown.append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="' + v.key + '"> ' + v.value + '</option>');
+			} else if (v.extra != null) {
+				if (v.extra == 'selected') {
+					dropdown.append('<option disabled selected value="' + v.key + '">' + v.value + '</option>');
+				} else if (v.extra == 'non-selected') {
+					dropdown.append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="' + v.key + '"> ' + v.value + '</option>');
+				} else {
+					dropdown.append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="' + v.key + '"> ' + v.value + '</option>');
+				}
+
+			} else {
+				dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
+			}
+		});
+	} else {
+		dropdown.append('<option value="0">' + emptyMessage + '</option>');
+	}
+}
+
+
 function callStates(formId, value, countryId, stateId, cityId) {
   hideMessage("");
   if (stateId == undefined) {
@@ -5561,6 +5591,22 @@ function convertTo24Hour(time) {
 
   return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
+function convertTo12Hour(time) {
+  if (!time) return "";
+
+  // remove seconds if present
+  const [h, m] = time.trim().split(":");
+  let hours = parseInt(h, 10);
+  const minutes = m.padStart(2, "0");
+
+  const modifier = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours === 0 ? 12 : hours;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes} ${modifier}`;
+}
+
 
 function inputNumberValidation(event) {
   event.target.value = event.target.value.replace(/\D/g, "");

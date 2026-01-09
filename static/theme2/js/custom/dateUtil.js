@@ -209,3 +209,13 @@ function isExpired(expiredDate) {
     exp.setHours(0,0,0,0);
     return exp < today;
 }
+
+function minutesTo12Hr(mins) {
+    mins = mins % 1440;
+    let h = Math.floor(mins / 60);
+    let m = mins % 60;
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} ${ampm}`;
+}

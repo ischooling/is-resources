@@ -8,7 +8,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "rolerights":{url:"get-module-rights?moduleId="+moduleId+"&themeType=theme2"+extraParam,file:[{role:"",fileName:[]}],type:"JSP",pageReqType:"IN"},
         "create-user":{url:"create-user-content?moduleId="+moduleId+"&themeType=theme2"+extraParam,file:[{role:"",fileName:["adminManageuserListContent.js","adminManageuserList.js"]}],type:"JSP",pageReqType:"IN"},
         "user-list":{url:"",file:[{role:"",fileName:["adminManageuserListContent.js","adminManageuserList.js","roleList.js","dashboardUserActivity.js","dashboardStudent.js","agilixbuzzApi.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "manage-user-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=common"+extraParam,file:[{role:"",fileName:["dashboardManageUser.js","dashboardUserActivity.js"]},{role:"",fileName:["dashboardStudent.js"]}],type:"JSP",pageReqType:"IN"},
+        "manage-user-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=common"+extraParam,file:[{role:"",fileName:["dashboardManageUser.js","dashboardUserActivity.js","dashboardStudentTeacherSession.js"]},{role:"",fileName:["dashboardStudent.js"]}],type:"JSP",pageReqType:"IN"},
         "student-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=student&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2",file:[],type:"JSP",init: function () {$("#studentTab").show();$("#teacherTab").hide();$("#parentsTab").hide();$("#flexStudentTab").hide();$("#batchStudentTab").hide();},pageReqType:"IN"},
         "teacher-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=teacher&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2",file:[],type:"JSP",init: function () {$("#studentTab").hide();$("#teacherTab").show();$("#parentsTab").hide();$("#flexStudentTab").hide();$("#batchStudentTab").hide();},pageReqType:"IN"},
         "parent-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=parent&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2",file:[],type:"JSP",init: function () {$("#studentTab").hide();$("#teacherTab").hide();$("#parentsTab").show();$("#flexStudentTab").hide();$("#batchStudentTab").hide();},pageReqType:"IN"},
@@ -236,24 +236,24 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
 
 
 
-function callSchoolInneractionOld(actionType, arg0, replaceDiv, roleModuleId) {
-    var innerPageMap = {
-        "teacher-3syllabus":"teacher-syllabus-content"+arg0+"&moduleId="+roleModuleId,
-        "attendance":"attendance-content"+arg0,
-        "1a":"profile-view-content?userId="+arg0+"&actionType="+actionType+"&moduleId="+roleModuleId,
-        "edit-user":"create-user-edit?userId="+arg0,
-        "19a":"delete-user-content?u="+arg0,
-        "edit-courseDetails":"edit-course-content"+arg0,replaceDiv,
-        "edit-teacher-comp":"edit-teacher-compensation"+arg0,replaceDiv,
-        "teacher-agreement":"view-teacher-agreement-content"+arg0,replaceDiv
-    };
-    var url = innerPageMap[actionType];
-    if (url) {
-        callForDashboardData("formIdIfAny", url);
-    } else {
-        console.error("Invalid pageNo: " + actionType);
-    }
-}
+// function callSchoolInneractionOld(actionType, arg0, replaceDiv, roleModuleId) {
+//     var innerPageMap = {
+//         "teacher-3syllabus":"teacher-syllabus-content"+arg0+"&moduleId="+roleModuleId,
+//         "attendance":"attendance-content"+arg0,
+//         "1a":"profile-view-content?userId="+arg0+"&actionType="+actionType+"&moduleId="+roleModuleId,
+//         "edit-user":"create-user-edit?userId="+arg0,
+//         "19a":"delete-user-content?u="+arg0,
+//         "edit-courseDetails":"edit-course-content"+arg0,replaceDiv,
+//         "edit-teacher-comp":"edit-teacher-compensation"+arg0,replaceDiv,
+//         "teacher-agreement":"view-teacher-agreement-content"+arg0,replaceDiv
+//     };
+//     var url = innerPageMap[actionType];
+//     if (url) {
+//         callForDashboardData("formIdIfAny", url);
+//     } else {
+//         console.error("Invalid pageNo: " + actionType);
+//     }
+// }
 
 
 async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId) {
@@ -266,6 +266,7 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
       "extention":{url:"student-acacdemic-year-extention?subjectId="+arg0+"&moduleId="+roleModuleId+"&extraSubjStatus="+replaceDiv,file:[],type:"JSP",pageReqType:"IN"},
       "edit-user":{url:"create-user-edit?userId="+arg0,file:[],type:"JSP",pageReqType:"IN"},
       "1a":{url:"profile-view-content?userId="+arg0+"&actionType="+actionType+"&moduleId="+roleModuleId+"&themeType=theme2",file:[],type:"JSP",pageReqType:"IN"},
+      "profile-view":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js", "jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"}
     };
     var requestType = pageRequest[actionType];
     if (requestType.type == "JSP") {
@@ -283,6 +284,13 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
     } else if(requestType.type == "JS") {
         if(requestType.file.length>0){
             await loadScript(requestType.file);
+        }
+        if(requestType.pageReqType == "IN"){
+            getContent(roleModuleId, actionType, replaceDiv, arg0);
+        }else if(requestType.pageReqType == "EX"){
+            getAsPost(requestType.urlSend);
+        }else{
+            console.error("Invalid pageNo: " + pageNo);
         }
         if(typeof requestType.funName == "function"){
             requestType.funName();

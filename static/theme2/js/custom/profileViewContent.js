@@ -328,7 +328,6 @@ function renderAndPermissionForAproval(src, keyId,userId,studentStandardId,roleM
 function hidePermissionAndApprovalModal(){
 	$('#permissionModal').modal('hide');
 	window.setTimeout(function () { $('#permissionModal').remove(); }, 1000)
-	
 }
 
 function permissionForAprovalModal(elementFor, keyId,userId,studentStandardId,roleModuleId,moduleId,showWarning){

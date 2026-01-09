@@ -129,3 +129,20 @@ function escapeCharactersForSyllabus(inputString) {
 	}
 	return inputString;
 }
+
+function isValidUrl(url) {
+  const regex = /^(https?:\/\/)?(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
+
+  if (!regex.test(url)) {
+    return false;
+  }
+
+  try {
+    // Use URL constructor to parse URL
+    // If protocol is missing, prepend 'http://' to parse correctly
+    const parsedUrl = new URL(url.startsWith('http') ? url : 'http://' + url);
+    return (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') && parsedUrl.hostname !== '';
+  } catch {
+    return false;
+  }
+}

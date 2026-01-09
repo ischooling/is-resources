@@ -289,7 +289,6 @@ function setSteps(step){
 }
 
 function base64ImageFileAsURL(f, fileType, src, uploadType, viewAttachmentEleID, fileExtension, viewAttachmentFlag) {
-    debugger
     var reader = new FileReader();
 	var elemId = $(src).attr('elem-id');
     reader.onload = function (e) {

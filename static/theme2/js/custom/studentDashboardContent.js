@@ -2,7 +2,12 @@ var flagWatchVideo = false;
 var isSkipped = false;
 var videoUrl="N";
 
-function rendereDashboardContent(isParent){
+
+async function rendereDashboardContent(isParent){
+    if($("#cropModal").length>0){
+        $("#cropModal").remove();
+    }
+    $("body").append(cropperImageModalContent());
     customLoader(true);
     $("body").append(batchImpAnnouncementModal())
     var data = getStudentDashboardOrMigrationSection();
@@ -48,12 +53,11 @@ function rendereDashboardContent(isParent){
         renderActitify(dashboardData.userId)
         getCartCount(dashboardData.userId);
         // setTimeout(function () {
-            getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
+        getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
         // }, 10000);
-        
         $("#timeStuStandardId").val(dashboardData.studentStandardId);
         if(data.showStudentCourseSelectionModel=='Y'){
-            getStudentTimePreference(data.studentId, data.standardId, data.providerId);
+           await getStudentTimePreference(data.studentId, data.standardId, data.providerId);
         }
         
 	}else if(data.studentGraduate == 'Y'){
@@ -528,4 +532,13 @@ function batchReEnrollmentModal(){
             </div>
         </div>`;
     return html;
+}
+
+function renderProfileDataInModal(dashboardData){
+    getMissingDataByUser(dashboardData.payload).then(function(){
+        $('#profileFielddModal').on('shown.bs.modal', function() {
+        getInputIntel(inputPhoneNumberArray);
+        buindProfileElementEvent(previousSchoolElementArray);
+        });
+    });
 }

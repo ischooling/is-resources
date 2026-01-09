@@ -92,7 +92,9 @@ async function renderMigrationDetailsOptionContent(data) {
 			// '</div>'
 		'</div>';
 		$('#dashboardContentInHTML').html(html);
-		$("#pageHeading").html(getStudentMigrationHeader(data));
+		if(data.pageNumberToDisplay==2){
+			$("#pageHeading").html(getStudentMigrationHeader(data));
+		}
 		$("#grade").select2({
 			theme:"bootstrap4",
 		})

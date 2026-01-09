@@ -1,5 +1,4 @@
 async function renderActitify(userId) {
-
 	try {
 		var payload = {};
 		payload['userId'] = userId;
@@ -7,7 +6,7 @@ async function renderActitify(userId) {
 		payload['startDatetime'] = convertLocalToUTCWithFormat(getBeforeAndAfterDate(localDatetime, -24), USER_TIMEZONE, DATETIME_UTC_FORMATTER);
 		payload['endDatetime'] = convertLocalToUTCWithFormat(getBeforeAndAfterDate(localDatetime, 24), USER_TIMEZONE, DATETIME_UTC_FORMATTER);
 		responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'get-acivity-details', payload);
-		if (responseData.status == 1) { //console.log("ACT DATA :: " + JSON.stringify(responseData));
+		if(responseData.status == 1) { //console.log("ACT DATA :: " + JSON.stringify(responseData));
 			$('#activityDiv').html(await getActivityContent(responseData));
 			$("#activity-nav").metisMenu({
 				toggle: false // disable the auto collapse. Default: true.
