@@ -126,7 +126,7 @@ function callForStudentNextSession(nextGradeId, nextGradeName, enrollmentType, r
 				$("#choiceForStudentModelRepeaters").modal("hide");
 				showMessageTheme2(1, data['message'], '', true);
 				if(data.enrollmentType != "REGISTRATION_FRESH"){
-					$("#pageHeading").html(getStudentMigratinonHeader(data));
+					$("#pageHeading").html(getStudentMigrationHeader(data));
 				}
 				
 				$('#gradeId').val(data.standardId)
