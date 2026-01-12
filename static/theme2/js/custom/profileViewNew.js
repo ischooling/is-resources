@@ -11,6 +11,7 @@ var TOTAL_COUNT=0;
 var PERCENT=0;
 var intervalId;
 var COMMUNICATION_APPEND_ROW="";
+var STUDENT_PROFILE_CHANGED_FIELDS = {};
 
 
 
@@ -732,6 +733,8 @@ function profileViewPageLoadEvent(data){
     });
     $("#motherCountry").val(data[1].motherCountry == 0? '' : data[1].motherCountry).trigger("change");
     $("#fatherCountry").val(data[1].fatherCountry == 0? '' : data[1].fatherCountry).trigger("change");
+    $("#guardianCountry").val(data[1].guardianCountry == 0? '' : data[1].guardianCountry).trigger("change");
+    
     // $("#pCountryId").val(data[1].pCountryId == 0? '' : data[1].pCountryId).trigger("change");
     // $("#pStateId").val(data[1].pStateId == 0? '' : data[1].pStateId).trigger("change");
     // $("#pCityId").val(data[1].pCityId == 0? '' : data[1].pCityId).trigger("change");
@@ -3541,8 +3544,6 @@ function stopProfileDataInterval(modalID){
 }
 
 
-
 function closeProfileModal(){
     $("#profileFielddModal, #classAndActivityStartWarningModal").modal("hide");
 }
-
