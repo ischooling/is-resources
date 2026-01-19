@@ -207,11 +207,13 @@ function bindUserApplicationData(responseData) {
                                         </a>
                                     </li>
                                 </ul>
-                            </div>
-                            <div data-toggle="tooltip" data-placement="top" title="Discard">
-                                <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${user.id}, 'Discard')&quot;)"></i>
-                            </div>
-                        </div>
+                            </div>`
+                            if(user.status != "Approved for Selection Process"){
+                                row += `<div data-toggle="tooltip" data-placement="top" title="Discard">
+                                    <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${user.id}, 'Discard')&quot;)"></i>
+                                </div>`
+                            }
+                        row +=`</div>
                     </td>
                 </tr>`;
             tableBody.append(row);
