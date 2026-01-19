@@ -872,10 +872,16 @@ function callTeacherTimeScheduleBatch(batchId, subjectId, teacherId) {
 		newStartDate.setDate(newStartDate.getDate() + 1);
 		var batchEndDate = $("#batchEndDate").val();
 	}
+	let request = {
+		"batchId": batchId,
+		"subjectId": subjectId,
+		"teacherId": teacherId
+	}
 	$.ajax({
 		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('dashboard', 'batch-subject-teacher-timeschedule-content'),
-		data: "batchId=" + batchId + "&subjectId=" + subjectId + "&teacherId=" + teacherId,
+		data: JSON.stringify(request),
 		dataType: 'html',
 		cache: false,
 		timeout: 600000,
