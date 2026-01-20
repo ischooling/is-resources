@@ -15,6 +15,9 @@ async function renderUserProfilePage(extraParam){
         if($("#cropModal").length<1){
             $("body").append(cropperImageModalContent());
         }
+        if($("#confirmSaveModal").length>0){
+            $("#confirmSaveModal").remove();
+        }
         $("body").append(viewUploadFileModal()+changeLearingProgramGradeModalContent(data[2])+confirmSaveModalContent(PORFILE_RESPONSE_DATA)+getCommunicationAttchFileModal());
         // if(USER_ROLE == "STUDENT"){
 
@@ -253,7 +256,7 @@ function personalInformation(data){
                         html+=altPhoneNumberElement(data)
                     html+=`</div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-                        html+=emailIdElement(data.emailId)
+                        html+=studentEmailIdElement(data.studentEmailId)
                     html+=`</div>    
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
                         html+=altEmailIdElement(data.altEmailId)
@@ -441,16 +444,16 @@ function altPhoneNumberElement(data){
     return html;
 }
 
-function emailIdElement(data){
+function studentEmailIdElement(data){
     var html=
-    `<label for="emailId" class="font-weight-semi-bold text-dark">Email</label>
+    `<label for="studentEmailId" class="font-weight-semi-bold text-dark">Email</label>
     <div class="input-group mb-2 p-0">
-        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="emailId" id="emailId" value="${data != "" && data != undefined ?data:""}" ${USER_ROLE == "DIRECTOR"?'':'disabled'} autocomplete="off" onkeyup="controlEditField(this,'emailId',\'${data != "" && data != undefined ?data:""}\','input', '','', 0)">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="studentEmailId" id="studentEmailId" value="${data != "" && data != undefined ?data:""}" ${USER_ROLE == "DIRECTOR"?'':'disabled'} autocomplete="off" onkeyup="controlEditField(this,'studentEmailId',\'${data != "" && data != undefined ?data:""}\','input', '','', 0)">
         <div class="input-group-append input-group-append-hide" style="display:none">
-            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('emailId', 'emailId', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('studentEmailId', 'studentEmailId', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('emailId',\'${data != "" && data != undefined ?data:""}\','input')">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('studentEmailId',\'${data != "" && data != undefined ?data:""}\','input')">
                 <i class="fa fa-times"></i>
             </a>
         </div>

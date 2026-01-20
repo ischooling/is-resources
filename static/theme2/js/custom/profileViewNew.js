@@ -2035,7 +2035,7 @@ function validateFields(keyId, fieldValue){
 			showMessageTheme2(0,"Please select Courses Taught.",'',false);
 			return false;
 		}
-	}else if(keyId=="emailId" || keyId=="altEmailId" || keyId=="motherEmail" ||keyId=="fatherEmail" || keyId== "guardianEmail" || keyId=="offEmailId" || keyId=="payPalEmail"){
+	}else if(keyId=="studentEmailId" || keyId=="altEmailId" || keyId=="motherEmail" ||keyId=="fatherEmail" || keyId== "guardianEmail" || keyId=="offEmailId" || keyId=="payPalEmail"){
 		if (!validateEmail($('#'+keyId).val())){
 			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
 			return false;
