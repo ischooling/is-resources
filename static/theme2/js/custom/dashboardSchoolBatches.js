@@ -1367,6 +1367,7 @@ function sendMailCancelClass(status, batchTeacherMappingId, classDate){
 	
 	data.status = status;
 	data.classCancelDate = classDate
+	data.userId = USER_ID
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
