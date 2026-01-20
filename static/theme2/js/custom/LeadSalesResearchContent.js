@@ -87,7 +87,7 @@ function getMainSalesCard(objRight){
 					<div class="tab-content p-3 border">
 						<div class="tab-pane tabs-animation fade show active" id="tab-content-1" role="tabpanel">
 							`;
-						html+=getLeadSalesResearchSection();
+						html+=getLeadSalesResearchSection(objRight);
 						html+=`</div>
 					</div>
 				</div>
@@ -96,9 +96,23 @@ function getMainSalesCard(objRight){
 	return html;
 }
 
-function getLeadSalesResearchSection(){
+function getLeadSalesResearchSection(objRight){
+	//console.log("objRight", objRight.userquerylist);
+	var userQueryList=objRight.userquerylist;
 	var html=`<div class="row" id="lead-sales-research">
-		<div class="col-3 border-right" >	</div>
+		<div class="col-3 border-right" >
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">User Queries</h5>
+					<ul class="list-group" id="lead-sales-research-query-list">
+					${userQueryList.map(query=>`
+						<li class="list-group-item" onclick="getSalesQueryResponse('${query.id}')">${query.userQuery}</li>
+					`).join('')}
+						
+					</ul>
+				</div>
+			</div>
+		</div>
 		<div class="col-9">
 			<div class="chat-wrapper" id="lead-sales-research-text"></div>
 			<hr>
