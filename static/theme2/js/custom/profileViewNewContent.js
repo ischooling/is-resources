@@ -43,7 +43,7 @@ function getProfilePageHeader(){
                     <div>Profile</div>
                 </div>
                 <div class="page-title-actions">
-                    <a href="javascript:void(0);" onclick="backToMain(\'manageAdvanceStudentContent\');" class="btn btn-dark rounded"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>${USER_ROLE == "DIRECTOR" ? 'Back Manage User List':'Back'}</a>
+                    <a href="javascript:void(0);" onclick="backToMain(\'manageAdvanceStudentContent\');" class="btn btn-dark rounded"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>${USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA.rightToEdit ? 'Back Manage User List':'Back'}</a>
                 </div>
             </div>
         </div>`;
@@ -371,7 +371,7 @@ function dobElement(data){
     var html=
     `<label for="dob" class="font-weight-semi-bold text-dark">Date of Birth</label>
     <div class="input-group mb-2 p-0">
-        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="dob" id="dob" value="${data != "" && data != undefined ?data:''}" autocomplete="off" readonly keydown="return false" ${USER_ROLE == "DIRECTOR"?'':'disabled'} onchange="controlEditField(this,'dob',\'${data != "" && data != undefined ?data:''}\','input', '','', 0)">`;
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="dob" id="dob" value="${data != "" && data != undefined ?data:''}" autocomplete="off" readonly keydown="return false" ${USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA.rightToEdit ?'':'disabled'} onchange="controlEditField(this,'dob',\'${data != "" && data != undefined ?data:''}\','input', '','', 0)">`;
         if(USER_ROLE != "STUDENT"){
             html+=
             `<div class="input-group-append input-group-append-hide" style="display:none">
