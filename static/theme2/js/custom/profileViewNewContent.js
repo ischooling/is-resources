@@ -448,7 +448,7 @@ function studentEmailIdElement(data){
     var html=
     `<label for="studentEmailId" class="font-weight-semi-bold text-dark">Email</label>
     <div class="input-group mb-2 p-0">
-        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="studentEmailId" id="studentEmailId" value="${data != "" && data != undefined ?data:""}" ${USER_ROLE == "DIRECTOR"?'':'disabled'} autocomplete="off" onkeyup="controlEditField(this,'studentEmailId',\'${data != "" && data != undefined ?data:""}\','input', '','', 0)">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="studentEmailId" id="studentEmailId" value="${data != "" && data != undefined ?data:""}" ${USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA.rightToEdit?'':'disabled'} autocomplete="off" onkeyup="controlEditField(this,'studentEmailId',\'${data != "" && data != undefined ?data:""}\','input', '','', 0)">
         <div class="input-group-append input-group-append-hide" style="display:none">
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('studentEmailId', 'studentEmailId', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
                 <i class="fa fa-check"></i>
