@@ -592,24 +592,16 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<label class="m-0">Lead Tagging</label>' +
     '<select name="leadTagSearch" id="leadTagSearch" class="form-control" multiple ></select>' +
     "</div>" +
-    "</div>" +
-    '<div class="row">' +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
-    '	<label class="m-0">Lead No.</label>' +
-    '	<input type="text" name="leadNoSearch" id="leadNoSearch"  class="form-control" maxlength="50" /> ' +
-    "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">' +
     '	<label class="m-0">Lead Type</label>' +
-    '	<select name="leadType" id="leadType" class="form-control">' +
+    '	<select name="leadType" id="leadType" class="form-control" disabled>' +
     '		<option value="">Select Type</option>' +
-    '		<option value="B2C" ' +
-    (objRights.leadType == "B2C" ? "selected" : "") +
-    ">B2C</option>" +
-    '		<option value="B2B" ' +
-    (objRights.leadType == "B2B" ? "selected" : "") +
-    ">B2B</option>" +
+    '		<option value="B2C" ' +(objRights.leadType == "B2C" ? "selected" : "") +">B2C</option>" +
+    '		<option value="B2B" ' +(objRights.leadType == "B2B" ? "selected" : "") +">B2B</option>" +
     "	</select>" +
     "</div>" +
+    "</div>" +
+    '<div class="row">' +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadSource">' +
     '	<label class="m-0">Lead Source</label>' +
     '	<select	name="leadSourceSearch" id="leadSourceSearch" class="form-control" multiple ></select>' +
@@ -617,18 +609,6 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">' +
     '	<label class="m-0">Lead Status</label>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="checkLeadStatus" name="checkLeadStatus" /> With Status' +
     '	<select name="leadStatusSearch" id="leadStatusSearch" class="form-control" multiple ></select>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
-    '	<label class="m-0">Email</label>' +
-    '	<input type="email" name="leademailIdSearch" id="leademailIdSearch" class="form-control"  maxlength="100">' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
-    '	<label class="m-0">Phone No.</label>' +
-    '	<input type="text" name="phoneNoSearch" id="phoneNoSearch" class="form-control" maxlength="15"/>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
-    '	<label class="m-0">Student Name</label>' +
-    '	<input type="text" name="leadstdfnameSearch" id="leadstdfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">' +
     "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">' +
     '	<label class="m-0">Grade</label>' +
@@ -646,56 +626,28 @@ function getLeadAdvanceSearchPopup(objRights) {
     '	<label class="m-0">Select Campaign</label>' +
     '	<select  name="leadSearchCampaign" id="leadSearchCampaign" class="form-control leadSearchCampaign" multiple ></select>' +
     "</div>" +
-    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">' +
-    // '	<label class="m-0">State</label>' +
-    // '	<select name="stateId" id="stateId" class="form-control" >' +
-    // '		<option value="0">Select state</option>' +
-    // "	</select>" +
-    // "</div>" +
-    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">' +
-    // '	<label class="m-0">City</label>' +
-    // '	<select name="cityId" id="cityId" class="form-control" >' +
-    // '		<option value="0">Select city</option>' +
-    // "	</select>" +
-    // "</div>	" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 callWith">' +
-    '	<label class="m-0">Connected With</label>' +
-    '	<select name="callWithSearch" id="callWithSearch" class="form-control">' +
-    '			<option value="">Select</option>' +
-    '			<option value="father" >Father</option>' +
-    '			<option value="father with child" >Father With Child</option>' +
-    '			<option value="mother">Mother</option>' +
-    '			<option value="mother with child" >Mother With Child</option>' +
-    '			<option value="father mother with child" >Father Mother With Child</option>' +
-    '			<option value="guardian/ relative" >Guardian/ Relative</option>' +
-    '			<option value="none">None</option>' +
-    "		</select>" +
-    "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign">' +
-    '	<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;' +
+    '<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;' +
     '<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead&nbsp;' +
     '<input type="checkbox" id="checkByLeadDemo" name="checkByLeadDemo" /> Lead With Demo';
   if (objRights.leadHideRights) {
-    html +=
-      '<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple disabled></select>';
+    html +='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple disabled></select>';
   } else {
-    html +=
-      '<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple></select>';
+    html +='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple></select>';
   }
-  html += "</div>";
-  html +=
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
+  html += '</div>';
+  html +='<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
     '<label class="m-0">Lead Added by</label>' +
     '<select	name="leadCreatedBy" id="leadCreatedBy" class="form-control" >' +
     '<option value="0">Select Assign</option>' +
-    "</select>" +
-    "</div>" +
+    '</select>' +
+    '</div>' +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
     '	<label class="m-0">Demo Assign</label>' +
     '	<select	name="leadDemoAssignSearch" id="leadDemoAssignSearch" class="form-control" >' +
     '		<option value="0">Select Assign</option>' +
-    "	</select>" +
-    "</div>" +
+    '	</select>' +
+    '</div>' +
     '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadstatus">' +
     '							<label class="m-0">Lead Support To</label>' +
     '							<select name="leadSupportTo" id="leadSupportTo" class="form-control"  >' +
@@ -710,13 +662,24 @@ function getLeadAdvanceSearchPopup(objRights) {
     '								<option value="LWOC">Lead Without Callback</option>' +
     "							</select>" +
     "						</div>" +
-    // '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    // '	<label class="m-0">UTM Source</label>' +
-    // '	<select name="utmSourceSearch" id="utmSourceSearch" class="form-control"  >' +
-    // '		<option value="">Select UTM Source</option>' +
-    // "	</select>" +
-    // "</div>" +
-     '				<div class="col-xl-3 col-lg-4 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
+    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
+    '							<label class="m-0">Demo Book type</label>' +
+    '							<select name="leadDemoBookType" id="leadDemoBookType" class="form-control"  >' +
+    '								<option value="">Select Demo Book Type</option>' +
+    '								<option value="AB">Demo By Website</option>' +
+    '								<option value="A">Demo By Link</option>' +
+    '								<option value="AG">Demo By Agent</option>' +
+    "							</select>" +
+    "						</div>" +
+    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
+    '							<label class="m-0">Lead Call By Agent</label>' +
+    '							<select name="leadCallByAgent" id="leadCallByAgent" class="form-control"  >' +
+    '								<option value="">Select Call Agent</option>' +
+    '								<option value="Y">Yes</option>' +
+    '								<option value="N">No</option>' +
+    "							</select>" +
+    "						</div>" +
+    '				<div class="col-xl-3 col-lg-4 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
     '							<label class="m-0">Priority</label>' +
     '							<select name="leadPriority" id="leadPriority" class="form-control" >' +
     '								<option value="" ></option> ' +

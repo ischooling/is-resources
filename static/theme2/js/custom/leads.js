@@ -1512,6 +1512,8 @@ leadModifyDetailDTO['leadTemplate'] = $("#"+formId+" #leadSearchTemplate").val()
 leadModifyDetailDTO['deliveredStatus'] = $("#"+formId+" #leadSearchDeliveredStatus").val()!=undefined?$("#"+formId+" #leadSearchDeliveredStatus").val():'';
 
 leadDemoInfo['demoAssignTo'] = $("#"+formId+" #leadDemoAssignSearch option:selected").val()!=undefined?$("#"+formId+" #leadDemoAssignSearch option:selected").val():'';
+leadDemoInfo['demoBookedType'] = $("#"+formId+" #leadDemoBookType option:selected").val()!=undefined?$("#"+formId+" #leadDemoBookType option:selected").val():'';
+leadDemoInfo['callAgent'] = $("#"+formId+" #leadCallByAgent option:selected").val()!=undefined?$("#"+formId+" #leadCallByAgent option:selected").val():'';
 
 leadModifyDTO['leadStartDate'] = $("#"+formId+" #leadStartDateSearch").val()!=undefined?$("#"+formId+" #leadStartDateSearch").val():'';
 leadModifyDTO['leadEndDate'] = $("#"+formId+" #leadEndDateSearch").val()!=undefined?$("#"+formId+" #leadEndDateSearch").val():'';
