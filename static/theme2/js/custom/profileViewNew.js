@@ -12,6 +12,7 @@ var PERCENT=0;
 var intervalId;
 var COMMUNICATION_APPEND_ROW="";
 var STUDENT_PROFILE_CHANGED_FIELDS = {};
+var RENDER_FLAG=false;
 
 
 
@@ -579,6 +580,7 @@ $(window).on('resize', function() {
 
 
 function profileViewPageLoadEvent(data){
+    RENDER_FLAG=false;
     setTimeout(function(){
         $("head").append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/cropperImage.js?v=1.1.26">`)
     },1000);
@@ -2670,6 +2672,10 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
         }else{
             $("#"+eleID).closest(".input-group").find(".input-group-append-hide").hide();
         }
+    }
+    if(!RENDER_FLAG){
+        $(".input-group-append.input-group-append-hide").hide();
+        RENDER_FLAG=true;
     }
 }
 function cancelChanges(eleID, eleValue, saveType){

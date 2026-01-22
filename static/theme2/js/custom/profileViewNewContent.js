@@ -1,6 +1,6 @@
 var PORFILE_RESPONSE_DATA;
 var PORFILE_RESPONSE_UPDATED_DATA;
-async function renderUserProfilePage(extraParam){
+async function renderStudentProfilePage(extraParam){
     if($("#profileFielddModal").length>0){
         $("#profileFielddModal").remove();
     }
@@ -24,7 +24,7 @@ async function renderUserProfilePage(extraParam){
         // }else{
 
         // }
-        var html= getProfilePageContent(data);
+        var html= getStudentProfilePageContent(data);
         $("#dashboardContentInHTML").hide();
         $("#dashboardContentInHTMLAdditional").html(getProfilePageHeader()+html).show();
         checkJoinedSports(data[4]);
@@ -50,7 +50,7 @@ function getProfilePageHeader(){
     return html;
 }
 
-function getProfilePageContent(data){
+function getStudentProfilePageContent(data){
     var html=
         `<div class="main-card" id="profilePageView">
             <div class="full">

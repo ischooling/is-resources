@@ -10,6 +10,9 @@ async function renderProfilePage(arg0){
 
 	//console.log(arg1);
     $("#cropModal").remove();
+    if($("#adminImgCropModal").length>0){
+        $("#adminImgCropModal").remove();
+    }
     $("body").append(cropperImageModalContent())
     var payload = {
         userId: userId,
@@ -17,7 +20,8 @@ async function renderProfilePage(arg0){
     };
     var responseData = await getDashboardDataBasedUrlAndPayload(true, false, 'get-common-profile-details', payload);
     var html= getProfilePageContent(responseData.details, callFrom, arg0);
-    $("#dashboardContentInHTML").html(html);
+    $("#dashboardContentInHTML").hide();
+    $("#dashboardContentInHTMLAdditional").html(html).show();
     if(USER_ROLE == "B2B_PARTNER"){
         var payloadBank = {
         userId: USER_ID,
@@ -92,7 +96,7 @@ function getProfilePageContent(data, callFrom, arg0){
                 <div class="card-body p-0 pb-4">
                     <div class="profile-head bg-primary p-4 rounded-top">`;
                         if(callFrom=='callFrom=admin'){
-                            html+= `<a href="javascript:void(0)" onClick="return callDashboardPageSchool('87','user-list');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
+                            html+= `<a href="javascript:void(0)" onClick="backToMain(\'manageProfileParentContent\');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
                         }
                    html+= `</div>
                     <form class="full admin-profile-wrapper px-4 position-relative" id="profilePageFromTag" style="margin-top:-95px">

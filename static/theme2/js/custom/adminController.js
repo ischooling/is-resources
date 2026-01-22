@@ -498,7 +498,7 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 		}else if(pageNo=='partner-fee-structure'){
 			renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
 		}else if(pageNo=='profile-view'){
-			renderUserProfilePage(extraParam);
+			renderStudentProfilePage(extraParam);
 		}
 	}catch(err){
 		console.error("getContent error:", err);

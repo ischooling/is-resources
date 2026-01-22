@@ -265,7 +265,7 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
       "attendance":{url:"attendance-content"+arg0,file:[],type:"JSP",pageReqType:"IN"},
       "extention":{url:"student-acacdemic-year-extention?subjectId="+arg0+"&moduleId="+roleModuleId+"&extraSubjStatus="+replaceDiv,file:[],type:"JSP",pageReqType:"IN"},
       "edit-user":{url:"create-user-edit?userId="+arg0,file:[],type:"JSP",pageReqType:"IN"},
-      "1a":{url:"profile-view-content?userId="+arg0+"&actionType="+actionType+"&moduleId="+roleModuleId+"&themeType=theme2",file:[],type:"JSP",pageReqType:"IN"},
+      "1a":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js", "jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
       "profile-view":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js", "jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"}
     };
     var requestType = pageRequest[actionType];
