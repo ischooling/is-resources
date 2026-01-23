@@ -645,14 +645,4 @@ function backToDedicatedModule(moduleUrl){
 	callDashboardPageSchool('194','partner-enrollment-students-wlp');
   }
 }
-function backToMain(tableId){
-	$("#dashboardContentInHTML").show();
-	$("#dashboardContentInHTMLAdditional").hide();
-	$('html, body').animate({ scrollTop: 0 }, 500);
-	if(tableId != "" && tableId != undefined){
-		if($.fn.DataTable.isDataTable('#'+tableId)) {
-			$('#'+tableId).DataTable().destroy();
-		}
-		$('#'+tableId).DataTable();
-	}
-}
+

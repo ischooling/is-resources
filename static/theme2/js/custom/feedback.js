@@ -43,57 +43,61 @@ function getFeedbackQuestion(eventid, questiontype, parentId, start, end, feedba
               $(".main-heading").text("We Would like to know your Feedback.");
               //$("#feedbackbtn").html("<div class=\"col-12 text-right\"><button class=\"btn btn-success\" id=\"saveFeedback\">Submit</button></div>");
               $("#feedbackbtn").css({"display": "block"});
-              for(i=0; i<data.questionList.length; i++){
-                  var htmlQuest = "";
-                  var htmlQuestAns = "";
-                  if(data.questionList[i].elementName.toUpperCase()=='TEXTAREA'){
-                      htmlQuest = "";
-                      htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div> </div></div>";
-                      htmlQuest = htmlQuest + " <div class=\"row\"><div class=\"col-12\"><textarea rows=\"3\" cols=\"\" class=\"form-control\" name=\"answer-"+data.questionList[i].questionId+"\"></textarea></div></div><hr />";
-                      $(".textarea").append(htmlQuest);
-                  }  
-                  if(data.questionList[i].elementName.toUpperCase()=='RADIO'){
-                      htmlQuest = "";
-                      htmlQuestAns = "";
-                      htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div></div>";
-                      htmlQuest = htmlQuest + "<div class=\"row\"><div class=\"col-12\">";
-                      for(r=0; r<data.questionList[i].questionContentDTO.length; r++){
-                        htmlQuestAns = htmlQuestAns + " <div class=\"radio\"><input id=\"radio-"+data.questionList[i].questionContentDTO[r].questionContentId+"\" name=\"radio-answer-"+data.questionList[i].questionId+"\" value=\""+data.questionList[i].questionContentDTO[r].questionContentId+"\" type=\"radio\" ><label for=\"radio-"+data.questionList[i].questionContentDTO[r].questionContentId+"\" class=\"radio-label\">"+data.questionList[i].questionContentDTO[r].questionLable+"</label></div>";
-                      }
-                      htmlQuest = htmlQuest + htmlQuestAns + "</div></div><hr />";
-                      $(".radio-buttons").append(htmlQuest);
-                  }
-                  if(data.questionList[i].elementName.toUpperCase()=='CHECKBOX'){
-                      htmlQuest = "";
-                      htmlQuestAns = "";
-                      htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div></div>";
-                      htmlQuest = htmlQuest + " <div class=\"row\"><div class=\"col-12\"><div class=\"checkbox-block\"> ";
-                      for(r=0; r<data.questionList[i].questionContentDTO.length; r++){
-                        htmlQuestAns = htmlQuestAns + " <input class=\"checkbox-effect checkbox-effect-6\" id=\"get-up-"+data.questionList[i].questionContentDTO[r].questionContentId+"\" type=\"checkbox\" value=\""+data.questionList[i].questionContentDTO[r].questionContentId+"\" name=\"checkbox-answer-"+data.questionList[i].questionId+"\"/><label for=\"get-up-"+data.questionList[i].questionContentDTO[r].questionContentId+"\">"+data.questionList[i].questionContentDTO[r].questionLable+"</label>";
-                      }
-                      htmlQuest = htmlQuest + htmlQuestAns +  " </div></div></div><hr /> ";
-                      $(".checkbox").append(htmlQuest);
-                  }
-                  if(data.questionList[i].elementName.toUpperCase()=='RATING'){
-                      htmlQuest = "";
-                      htmlQuestAns = "";
-                      htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div>";
-                      htmlQuest = htmlQuest + " <div class=\"row align-items-center\"><div class=\"col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 d-flex align-items-center justify-content-end\">"
-                      htmlQuest = htmlQuest + " <div class=\"rate pr-0\">";
-                      htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star5-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"5\" onClick=\"selectRate('star5-"+data.questionList[i].questionId+"')\" />";
-                      htmlQuest = htmlQuest + " <label for=\"star5-"+data.questionList[i].questionId+"\" title=\"5 Stars\">5 stars</label>";
-                      htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star4-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"4\" onClick=\"selectRate('star4-"+data.questionList[i].questionId+"')\" />";
-                      htmlQuest = htmlQuest + " <label for=\"star4-"+data.questionList[i].questionId+"\" title=\"4 Stars\">4 stars</label>";
-                      htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star3-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"3\" onClick=\"selectRate('star3-"+data.questionList[i].questionId+"')\" />";
-                      htmlQuest = htmlQuest + " <label for=\"star3-"+data.questionList[i].questionId+"\" title=\"3 Stars\">3 stars</label>";
-                      htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star2-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"2\" onClick=\"selectRate('star2-"+data.questionList[i].questionId+"')\" />";
-                      htmlQuest = htmlQuest + " <label for=\"star2-"+data.questionList[i].questionId+"\" title=\"2 Stars\">2 stars</label>";
-                      htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star1-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"1\" onClick=\"selectRate('star1-"+data.questionList[i].questionId+"')\" />";
-                      htmlQuest = htmlQuest + " <label for=\"star1-"+data.questionList[i].questionId+"\" title=\"1 Star\">1 star</label>";
-                      htmlQuest = htmlQuest + " </div>&nbsp;<b class=\"selectedStar-"+data.questionList[i].questionId+"\">0</b>&nbsp;<span><b>Rating</b><span></div></div></div>";
-                      $(".rating").append(htmlQuest);
-                  }
-              } 
+              if(data.questionList!=null){
+                for(i=0; i<data.questionList.length; i++){
+                    var htmlQuest = "";
+                    var htmlQuestAns = "";
+                    if(data.questionList[i].elementName.toUpperCase()=='TEXTAREA'){
+                        htmlQuest = "";
+                        htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div> </div></div>";
+                        htmlQuest = htmlQuest + " <div class=\"row\"><div class=\"col-12\"><textarea rows=\"3\" cols=\"\" class=\"form-control\" name=\"answer-"+data.questionList[i].questionId+"\"></textarea></div></div><hr />";
+                        $(".textarea").append(htmlQuest);
+                    }  
+                    if(data.questionList[i].elementName.toUpperCase()=='RADIO'){
+                        htmlQuest = "";
+                        htmlQuestAns = "";
+                        htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div></div>";
+                        htmlQuest = htmlQuest + "<div class=\"row\"><div class=\"col-12\">";
+                        for(r=0; r<data.questionList[i].questionContentDTO.length; r++){
+                          htmlQuestAns = htmlQuestAns + " <div class=\"radio\"><input id=\"radio-"+data.questionList[i].questionContentDTO[r].questionContentId+"\" name=\"radio-answer-"+data.questionList[i].questionId+"\" value=\""+data.questionList[i].questionContentDTO[r].questionContentId+"\" type=\"radio\" ><label for=\"radio-"+data.questionList[i].questionContentDTO[r].questionContentId+"\" class=\"radio-label\">"+data.questionList[i].questionContentDTO[r].questionLable+"</label></div>";
+                        }
+                        htmlQuest = htmlQuest + htmlQuestAns + "</div></div><hr />";
+                        $(".radio-buttons").append(htmlQuest);
+                    }
+                    if(data.questionList[i].elementName.toUpperCase()=='CHECKBOX'){
+                        htmlQuest = "";
+                        htmlQuestAns = "";
+                        htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div></div>";
+                        htmlQuest = htmlQuest + " <div class=\"row\"><div class=\"col-12\"><div class=\"checkbox-block\"> ";
+                        for(r=0; r<data.questionList[i].questionContentDTO.length; r++){
+                          htmlQuestAns = htmlQuestAns + " <input class=\"checkbox-effect checkbox-effect-6\" id=\"get-up-"+data.questionList[i].questionContentDTO[r].questionContentId+"\" type=\"checkbox\" value=\""+data.questionList[i].questionContentDTO[r].questionContentId+"\" name=\"checkbox-answer-"+data.questionList[i].questionId+"\"/><label for=\"get-up-"+data.questionList[i].questionContentDTO[r].questionContentId+"\">"+data.questionList[i].questionContentDTO[r].questionLable+"</label>";
+                        }
+                        htmlQuest = htmlQuest + htmlQuestAns +  " </div></div></div><hr /> ";
+                        $(".checkbox").append(htmlQuest);
+                    }
+                    if(data.questionList[i].elementName.toUpperCase()=='RATING'){
+                        htmlQuest = "";
+                        htmlQuestAns = "";
+                        htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div>";
+                        htmlQuest = htmlQuest + " <div class=\"row align-items-center\"><div class=\"col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 d-flex align-items-center justify-content-end\">"
+                        htmlQuest = htmlQuest + " <div class=\"rate pr-0\">";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star5-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"5\" onClick=\"selectRate('star5-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <label for=\"star5-"+data.questionList[i].questionId+"\" title=\"5 Stars\">5 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star4-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"4\" onClick=\"selectRate('star4-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <label for=\"star4-"+data.questionList[i].questionId+"\" title=\"4 Stars\">4 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star3-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"3\" onClick=\"selectRate('star3-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <label for=\"star3-"+data.questionList[i].questionId+"\" title=\"3 Stars\">3 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star2-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"2\" onClick=\"selectRate('star2-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <label for=\"star2-"+data.questionList[i].questionId+"\" title=\"2 Stars\">2 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star1-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"1\" onClick=\"selectRate('star1-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <label for=\"star1-"+data.questionList[i].questionId+"\" title=\"1 Star\">1 star</label>";
+                        htmlQuest = htmlQuest + " </div>&nbsp;<b class=\"selectedStar-"+data.questionList[i].questionId+"\">0</b>&nbsp;<span><b>Rating</b><span></div></div></div>";
+                        $(".rating").append(htmlQuest);
+                    }
+                } 
+              }
+
+
 				
 			}
 			return false;
