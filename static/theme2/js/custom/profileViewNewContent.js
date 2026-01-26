@@ -2393,7 +2393,7 @@ function changeLearingProgramGradeModalContent(data){
                     <div class="row">
                         <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 registrationTypeWrapper">
                             <label class="m-0">Learning Program</label>
-                            <select id="registrationType" class="title-select-dropdown-register form-control">
+                            <select id="studentRegistrationType" class="title-select-dropdown-register form-control">
                                 ${getLearningProgramContent(SCHOOL_ID)}
                             </select>
                         </div>
@@ -2433,7 +2433,7 @@ function confirmSaveModalContent(data){
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" id="confirmSaveBtn" onclick="changeLearningProgamGradePlatformModal('${data.studentStandardId}','${data.profileData.studentProfile[2].learningProgramValue}','${data.profileData.studentProfile[2].gradeId}','${data.profileData.studentProfile[2].learningPlatformId}')">Yes, Save</button>
+                    <button type="button" class="btn btn-success" id="confirmSaveBtn" onclick="changeLearningProgamGradePlatformModal('${data.studentStandardId}')">Yes, Save</button>
                 </div>
             </div>
         </div>

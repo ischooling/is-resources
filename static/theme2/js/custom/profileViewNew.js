@@ -258,7 +258,7 @@ function addOtherSocialLinks(hideElement, showElement){
 async function removeCommunicationPreferredTime(slotWrapperClass, slotEleId){
     $("#"+slotEleId).remove();
     $("#communicationPreferredSlotSave, #communication-preferred-time-dropdown-wrapper").show();
-    if($("."+slotWrapperClass+" li").length < 1 && PORFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length > 0 ){
+    if($("."+slotWrapperClass+" li").length < 1 && (PORFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length > 0 || PORFILE_RESPONSE_UPDATED_DATA[1].callingTimePrefArray.length>0)){
         if($(".communication-preferred-time-wrapper-ul li").length==0){
             $("#communicationRoleType").prop("disabled",false);
         }
@@ -954,7 +954,7 @@ function profileViewPageLoadEvent(data){
         theme:"bootstrap4",
     });
     $("#learningProgram").val(data[2].learningProgramValue).trigger("change");
-    $("#registrationType").val(data[2].learningProgramValue).trigger("change");
+    $("#studentRegistrationType").val(data[2].learningProgramValue).trigger("change");
     $("#grade").select2({
         theme:"bootstrap4",
     });
@@ -980,7 +980,7 @@ function profileViewPageLoadEvent(data){
         $("#studentCourseProviderId").val("").trigger("change");
         $("#lmsPlatform").val(data[2].studentCourseProviderId).trigger("change");
     }
-    $("#registrationType").select2({
+    $("#studentRegistrationType").select2({
         theme:"bootstrap4",
         dropdowParent:$('#changeLearingProgramGradeModal body')
     });
@@ -1224,13 +1224,7 @@ function guardianInformationFieldFilledCount(){
             guardianCount++;
         } 
     });
-    if(motherCount == 5){
-        COUNT=5;
-    }else if(motherCount<parentCount){
-        COUNT=parentCount;
-    }else if(parentCount != 5 && parentCount < guardianCount){
-        COUNT =guardianCount;
-    }
+    COUNT = Math.max(motherCount, parentCount, guardianCount);
     $("#guardian_information .communication-wrapper input[type='checkbox']").each(function(){ 
         if($(this).attr("check-status") != "false"){
             COUNT++;
@@ -1249,8 +1243,6 @@ function guardianInformationFieldFilledCount(){
             return false;
         }
     });
-    
-    
     TOTAL_COUNT =  parseInt($("#guardian_information").attr("data-section-count"));
     OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
     OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
@@ -1612,8 +1604,8 @@ function openConfirmSaveModal(){
 	$("#confirmSaveModal").modal('show');
 }
 
-function changeLearningProgamGradePlatformModal(studentStandardId, currentLearningProgram, currentStandardId, currentLmsPlatform){
-	var newLearningProgram=$('#registrationType').val();
+function changeLearningProgamGradePlatformModal(studentStandardId){
+	var newLearningProgram=$('#studentRegistrationType').val();
 	var newStandardId=$('#changeLearingProgramGradeModal #standardId').val();
 	var newCourseProviderId=$('#lmsPlatform').val();
 	// if(currentLearningProgram==newLearningProgram && currentStandardId==newStandardId && currentLmsPlatform==newLmsPlatform){
@@ -1650,20 +1642,20 @@ function changeLearningProgamGradePlatformModal(studentStandardId, currentLearni
 				$("#confirmSaveModal").modal('hide');
 				$("#changeLearingProgramGradeModal").modal('hide');
                 $("#grade").val($("#changeLearingProgramGradeModal #standardId").val()).trigger("change");
-                $("#learningProgram").val($("#registrationType").val()).trigger("change");
+                $("#learningProgram").val($("#studentRegistrationType").val()).trigger("change");
                 $("#studentCourseProviderId").val($("#lmsPlatform").val()).trigger("change");
 				// $("#lmsPlatformText").text($('#lmsPlatform option:selected').text());
-				// $("#learningProgramText").text($('#registrationType option:selected').text());
+				// $("#learningProgramText").text($('#studentRegistrationType option:selected').text());
 				// $("#standardIdText").text($('#standardId option:selected').text());
 				// if($('#lmsPlatform option:selected').val()==39){
-				// 	$(".standardViewName").html($('#lmsPlatform option:selected').text()+' | '+$('#registrationType option:selected').text());
+				// 	$(".standardViewName").html($('#lmsPlatform option:selected').text()+' | '+$('#studentRegistrationType option:selected').text());
 				// }else{
-				// 	$(".standardViewName").html($('#standardId option:selected').text()+' | '+$('#registrationType option:selected').text());
+				// 	$(".standardViewName").html($('#standardId option:selected').text()+' | '+$('#studentRegistrationType option:selected').text());
 				// }
 				$(".compulsorySubjectsdiv").html(courseDetails(data.details.subjects, $('#changeLearingProgramGradeModal #standardId option:selected').text()))
-				if($('#registrationType').val()=='DUAL_DIPLOMA'){
+				if($('#studentRegistrationType').val()=='DUAL_DIPLOMA'){
 					$("#dualDiplomaAdditionalDetails").show();
-				}else if($('#registrationType').val()=='ONE_TO_ONE_FLEX'){
+				}else if($('#studentRegistrationType').val()=='ONE_TO_ONE_FLEX'){
 					$("#dualDiplomaAdditionalDetails").hide();
 				}else{
 					$("#dualDiplomaAdditionalDetails").hide();
@@ -3451,7 +3443,7 @@ function overWriteProfileData(eleID, keyId){
             });
             $("#saveCommunicationWrapper").hide();
         }else if(keyId == "communicationPreferredSlots"){
-            PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {callingPreferenceToKeep: getCallingPreference(),});
+            PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {callingPreferenceToKeep: getCallingPreference(),}, "communicationPreferredSlots");
         }
         else{
             if(keyId == "countrySectionParent" || keyId == "countrySection"){
@@ -3515,9 +3507,7 @@ function overWriteProfileData(eleID, keyId){
         $(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function(){
             sportsToKeepLable.push($(this).attr("data-title"))
         });
-        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {
-            sportsToKeep: sportsToKeepLable,
-        });
+        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {sportsToKeep: sportsToKeepLable,}, "extracurricular");
     }
     
 }
@@ -3587,7 +3577,7 @@ function updateStudentData(data, options, callFrom) {
             data[0].hobbies[i].status = hobby.status;
         }
     }
-    if(data[1].callingTimePrefArray){
+    if(data[1].callingTimePrefArray && callFrom == "communicationPreferredSlots"){
         data[1].callingTimePrefArray.length = 0;
         data[1].callingTimePrefArray=callingPreferenceToKeep;
     }
@@ -3631,7 +3621,7 @@ function updateStudentData(data, options, callFrom) {
     }
 
     /* ---------- SPORTS ---------- */
-    if (data[4].sportsAndECList) {
+    if (data[4].sportsAndECList && callFrom == "extracurricular") {
         for (var k = 0; k < data[4].sportsAndECList.length; k++) {
             var sport = data[4].sportsAndECList[k];
             var active = sportsToKeep.indexOf(sport.sEclabel) !== -1 ? 'Y' : 'N';

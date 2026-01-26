@@ -383,6 +383,7 @@ function migrationDetailsOptionContent(data) {
 	return html;
 }
 
+
 function getStudentMigrationHeader(csr){
 	var html=
 	'<input type="hidden" id="userId" name="userId" value="'+csr.userId+'">'
