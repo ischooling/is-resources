@@ -255,6 +255,9 @@ function getRequestForNewUser(formId) {
   signupStudentDTO["referralCode"] = $(
     "#" + formId + " #referralCodeCheckbox"
   ).prop("checked");
+  signupStudentDTO["createInternalChatUser"] = $(
+    "#" + formId + " #internalChatCheckbox"
+  ).prop("checked");
   signupStudentDTO["referralCodeText"] = $( "#" + formId + " #updateReferralCode").val();
   signupStudentDTO["countryTimezone"] = $("#" + formId + " #userTimeZone option:selected").attr("data-timezone");
   signupStudentDTO["countryTimezoneId"] = $("#" + formId + " #userTimeZone").val();
