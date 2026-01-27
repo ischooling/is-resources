@@ -3,6 +3,14 @@ async function renderReceivedTeachedProfileListDashboard(title,roleAndModule, SC
 	var html=await getReceivedTeachedProfileTitle(title);
     $('#dashboardContentInHTML').html(html);
     getReceivedTeachedProfileListRequestApi('receivedTeachedProfile',ROLE_MODULE.moduleId);
+	if($("#cropModalChatSuport").length == 1){
+        $("#cropModalChatSuport").remove();
+    }
+    $("body").append(getChatImageCropContentJA());
+    if($("#uploadFile").length == 1){
+        $("#uploadFile").remove();
+    }
+    $("body").append(pdfPreviewJA());
 }
 
 async function renderPendingTeachedTrainingListDashboard(title,roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE){

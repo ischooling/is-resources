@@ -188,21 +188,28 @@ function bindUserApplicationData(responseData) {
                                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
                                         </a>
                                     </li>`;
-                                    if((user.status == "Another Round of Interview" || user.status == "Approved For Interview" || user.status == "Approved for Selection Process") && user.interviewStatus == 'NA'){
+                                    if((user.status == "Another Round of Interview" || user.status == "Approved For Interview") && user.interviewStatus == 'NA'){
                                         row+=`<li>
                                             <a class="dropdown-item" href="javascript:void(0);" onclick="openResendTeacherInterviewModal(${user.id}, 'InterviewLink', '${user.interviewBookLinkExpireDate}')">
                                                 <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
                                             </a>
                                         </li>`
-                                    }else if((user.status == "Another Round of Interview" || user.status == "Approved For Interview" || user.status == "Approved for Selection Process") && user.interviewStatus == 'Booked'){
+                                    }else if((user.status == "Another Round of Interview" || user.status == "Approved For Interview") && user.interviewStatus == 'Booked'){
                                          row+=`<li>
                                             <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLinkJA(${user.id},'ConfirmationLink')">
                                                 <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Confirmation Link
                                             </a>
                                         </li>`
                                     }
+                                    if(user.status == "Approved for Selection Process"){
+                                        row+=`<li>
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="showWarningMessageShow('Are you sure you want to resend invitation link?', 'resendTeacherInvitationLink(${user.id})')">
+                                                <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Invitation Link
+                                            </a>
+                                        </li>`
+                                    }
                                     row+=`<li>
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING')">
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING', 'USER_SCREENING')">
                                             <i class="fas fa-comment me-2"></i>&nbsp;Communication Log
                                         </a>
                                     </li>
@@ -735,11 +742,11 @@ async function urlToBlobUrl(url, attachmentType) {
     return URL.createObjectURL(blob);
 }
 
-function openCommunicationLogsModalForUserApplication(userId, userRole){
+function openCommunicationLogsModalForUserApplication(userId, userRole, callFrom){
     if($("#userApplicationCommunicationLogsModal").length == 1){
         $("#userApplicationCommunicationLogsModal").remove();
     }
-    $("body").append(communicationLogsContentForUserApplication(userId, userRole));
+    $("body").append(communicationLogsContentForUserApplication(userId, userRole, callFrom));
     initEditor(1, 'commentEditorJA','Enter comments', false, ckEditorCountValidate);
     $("#fileuploadLog7").on("change",function(){
         var attachment = $("#fileuploadLog7").val().split("\\")[2]
@@ -798,7 +805,7 @@ function getRequestForCommunicationLogJA(formId, userId, userRole) {
     return commonCommentsRequest;
 }
 
-async function saveCommunicationLogJA(formId, userId, userRole){
+async function saveCommunicationLogJA(formId, userId, userRole, callFrom){
     if(editor1.getData()==null || editor1.getData()=='' || editor1.getData()=='undefined'){
         showMessageTheme2(0,"Comments mandatory",'',true);
 		return false;
@@ -826,8 +833,10 @@ async function saveCommunicationLogJA(formId, userId, userRole){
         showMessageTheme2(1, responseData.message);
         resetCommunicationLogFormJA(formId);
         getCommunicationLogDataJA('communicationLogTableJA', userId, userRole);
-        $("#newApplicationText"+userId).remove();
-        loadUserApplicationData(false, "filter");
+        if(callFrom == "USER_SCREENING"){
+            $("#newApplicationText"+userId).remove();
+            loadUserApplicationData(false, "filter");
+        }
     }else{
         showMessageTheme2(0, responseData.message)
     }
@@ -1342,5 +1351,26 @@ function toggleExpiredIcon(dateValue) {
         $("#resendTeacherInterviewForm .fa-exclamation-triangle").removeClass("d-none");
     } else {
         $("#resendTeacherInterviewForm .fa-exclamation-triangle").addClass("d-none");
+    }
+}
+
+async function resendTeacherInvitationLink(id){
+    var payload = {}
+    payload["entityId"] = id;
+    payload["entityType"] = "USER_SCREENING";
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/resend-invitation-mail",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        showMessageTheme2(1, responseData.message);
+    }else{
+        showMessageTheme2(0, responseData.message);
     }
 }

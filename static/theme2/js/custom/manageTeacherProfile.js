@@ -209,6 +209,9 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 							<a class="dropdown-item" href="javascript:void(0);" onclick="addTeacherContract('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.name}', '${receivedTeachedProfile.userName}', '${receivedTeachedProfile.contractId}');">
 								<i class="fas fa-file-contract mr-2"></i> <span id="addContractSpan${receivedTeachedProfile.userId}">${receivedTeachedProfile.contractId > 0 ? "Add/Edit Contract" : "Add Contract"}</span>
 							</a>
+							<a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication('${receivedTeachedProfile.userScreeningId}', 'USER_SCREENING', 'TEACHER_PROFILE');">
+								<i class="fas fa-comment me-2"></i>&nbsp;Communication Log
+							</a>
 						</div>
 					</div>
 					`

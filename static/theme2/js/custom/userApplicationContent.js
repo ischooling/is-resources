@@ -405,7 +405,7 @@ function viewApplicantsAttachementModalContent(){
 	return html;
 }
 
-function communicationLogsContentForUserApplication(userId, useRole){
+function communicationLogsContentForUserApplication(userId, useRole, callFrom){
     var html=
         `<div class="modal fade show" id="userApplicationCommunicationLogsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog modal-xl" role="document">
@@ -472,7 +472,7 @@ function communicationLogsContentForUserApplication(userId, useRole){
                                 <small id="commentEditorJACounter" class="text-muted">0 / 25</small>
                             </div>
                             <div class="position-relative form-group text-right mb-0">
-                                <a href="javascript:void(0)" class="btn btn-sm btn-primary px-4" onclick="saveCommunicationLogJA('userScreeningProfileStatusForm', '${userId}', '${useRole}')">Add</a>
+                                <a href="javascript:void(0)" class="btn btn-sm btn-primary px-4" onclick="saveCommunicationLogJA('userScreeningProfileStatusForm', '${userId}', '${useRole}', '${callFrom}')">Add</a>
                             </div>
                         </form>`
                         +getAddCommunicationLogTableJA()
