@@ -54,8 +54,6 @@ function paymentReport(){
 		+deleteWarning();
 	return html;
 }
-
-
 function cardDetails(data){
 	//(l==0?'fa-angle-up':'fa-angle-down')
 	var html = '';
@@ -75,7 +73,6 @@ function cardDetails(data){
 								}else{
 									html+=`<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${item.updateProfileStudentDTO.profileImage}" alt="image" title="Profile Image" thumbType=""/>`;
 								}
-								
 								html+=`<div class="px-2 mb-0 w-100 rounded" style="background:#f0f9ff">
 									<h6 class="full">
 										<span class="text-uppercase font-weight-semi-bold d-inline-block" style="font-size:11px">
@@ -95,8 +92,7 @@ function cardDetails(data){
 								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-5${item.studentStandardId}" class="nav-link show">Payment</a></li>
 								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-6${item.studentStandardId}" class="nav-link show ">Communication Log</a></li>
 								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-7${item.studentStandardId}" class="nav-link show ">Log Reports</a></li>
-							</ul>
-							
+							</ul>							
 						</div>
 						<div class="card-body">
 							<div class="tab-content">
@@ -113,6 +109,9 @@ function cardDetails(data){
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Enrollment Date:</label>
 											<span class="field-value trans5s">${item.semesterStartDate}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+										  <label class="label bold">Overall Progress Report:</label>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Enrolled Status:</label>
@@ -171,8 +170,10 @@ function cardDetails(data){
 									</div>	
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">System Orientation:</label>
-											<span class="field-value trans5s ${item.systemOrientStatus!='COMPLETED'?'text-danger':'text-success'}"><br/>${item.systemOrientStatus} - ${item.systemOrientDate==''?'No seleted':item.systemOrientDate}</span>
+											<label class="label bold">System Orientation:
+												<span class="ml-2">${item.assignUserName=='' || item.assignUserName==null ? 'N/A' : item.assignUserName}</span>
+											</label><br/>
+											<span class="field-value trans5s ${item.systemOrientStatus!='COMPLETED' ? 'text-danger' : 'text-success'}">${item.systemOrientStatus} - ${item.systemOrientDate=='' ? 'Not selected' : item.systemOrientDate}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Teacher Mapping:</label>
@@ -334,6 +335,10 @@ function cardDetails(data){
 											<label class="label bold">Parent LMS Status:</label>
 											<span class="field-value trans5s ">${item.updateProfileStudentDTO.parentLmsStatus!=''?item.updateProfileStudentDTO.parentLmsStatus:'N/A'}</span>
 										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Overall Progress Report:</label>
+											<span class="field-value trans5s ">${item.updateProfileStudentDTO.parentLmsStatus!=''?item.updateProfileStudentDTO.parentLmsStatus:'N/A'}</span>
+										</div>
 									</div>	
 								</div>
 								<div class="tab-pane p-2 show" id="tab-eg5-3${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
@@ -459,8 +464,7 @@ function cardDetails(data){
 																html+=`</tbody>	
 															</table>
 													</div>
-												</div>
-												
+												</div>							
 											</div>
 
 										</div>
@@ -560,8 +564,7 @@ function cardDetails(data){
 												html+='</ul>';
 											}
 										html+=`</div>
-									</div>	
-									
+									</div>		
 								</div>
 								<div class="tab-pane show " id="tab-eg5-6${item.studentStandardId}" role="tabpanel">
 									<div class="row">
@@ -641,11 +644,8 @@ function cardDetails(data){
 				</td>
 			</tr>`;
 	});	
-
-	
 	return html;
 }
-
 function filterStudentPaymentReportForm(){
 	var html = 
 	'<div class="filterStudentPaymentReportForm" style="display:block">'
@@ -713,7 +713,7 @@ function filterStudentPaymentReportForm(){
 							+'<select id="gradeId" class="form-control selectReset multiple-select-option" multiple="multiple">'
 							+'</select>'
 						+'</div>'
-						
+			
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Enroll Status</label>'
 							+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
@@ -739,9 +739,49 @@ function filterStudentPaymentReportForm(){
 								+'<option value="ONGOING">Ongoing</option>'
 							+'</select>'
 						+'</div>'
+
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Re-Enroll Remaining (Days in Numbers)</label>'
 							+'<input type="text" id="remainingDueBy" class="form-control" placeholder="Enter days count" value="">'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<label>Overall Progress Report</label>'
+						+'<div class="row">'
+							+'<div class="col-6">'
+							+'<select id="progressMin" class="form-control">'
+								+'<option value="200">Min</option>'
+								+'<option value="">N/A</option>'
+								+'<option value="0.00">0</option>'
+								+'<option value="10.00">10</option>'
+								+'<option value="20.00">20</option>'
+								+'<option value="30.00">30</option>'
+								+'<option value="40.00">40</option>'
+								+'<option value="50.00">50</option>'
+								+'<option value="60.00">60</option>'
+								+'<option value="70.00">70</option>'
+								+'<option value="80.00">80</option>'
+								+'<option value="90.00">90</option>'
+								+'<option value="100.00">100</option>'
+							+'</select>'
+							+'</div>'
+							+'<div class="col-6">'
+							+'<select id="progressMax" class="form-control">'
+								+'<option value="200">Max</option>'
+								+'<option value="">N/A</option>'
+								+'<option value="0.00">0</option>'
+								+'<option value="10.00">10</option>'
+								+'<option value="20.00">20</option>'
+								+'<option value="30.00">30</option>'
+								+'<option value="40.00">40</option>'
+								+'<option value="50.00">50</option>'
+								+'<option value="60.00">60</option>'
+								+'<option value="70.00">70</option>'
+								+'<option value="80.00">80</option>'
+								+'<option value="90.00">90</option>'
+								+'<option value="100.00">100</option>'
+							+'</select>'
+							+'</div>'
+						+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>LMS Status</label>'
@@ -788,6 +828,8 @@ function filterStudentPaymentReportForm(){
 										+'<option value="25">25</option>'
 										+'<option value="50">50</option>'
 										+'<option value="100">100</option>'
+										+'<option value="150">150</option>'
+										+'<option value="200">200</option>'
 									+'</select>'
 								+'</div>'
 							+'</div>'
@@ -862,7 +904,6 @@ function consolidateContent(data, count){
 		// +'</div>';
 	return html;
 }
-
 function updateRefferelCode(){
 	var html=`<div class="modal fade bd-example-modal-lg fade-scale" id="updateReferralCodeModal" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-md" role="document">
@@ -889,10 +930,6 @@ function updateRefferelCode(){
 	</div>`;
 	return html
 }
-
-
-
-
 function swatiBroadcastContentModal(data){
 	//console.log('all data : ' + JSON.stringify(data));
 	var html=`<style>
@@ -1766,6 +1803,35 @@ function gotoBackWatiModal(){
 	$("#mcustomWatiTemplatesList").modal("show");
 	viewWatiTemplate(false);
 }
+
+function selfModalHide(modalID){
+	$("#"+modalID).modal("hide");
+	viewWatiTemplate(false);
+}
+function deleteWarning(warningMessage, callbackFunction) {
+	var html =
+		'<div class="modal fade fade-scale mt-3" id="remarksresetDelete2" tabindex="-1" aria-hidden="true" >'
+			+'<div class="modal-dialog modal-sm" role="document">'
+				+'<div class="modal-content shadow-lg">'
+					+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-center">'
+						+'<h5 class="heading text-white text-center" id="warningMessage2">' + warningMessage + '</h5>'
+					+'</div>'
+					+'<div id="statusMessage-2" class="modal-body delete-modal text-center">'
+						+'<i class="fas fa-sync fa-4x text-primary"></i>'
+					+'</div>'
+					+'<div class="modal-footer">'
+						+'<div class="m-auto">'
+							+'<button id="resetDeleteErrorWarningYes2" type="button" class="btn btn-outline-primary mr-2" onclick="' + callbackFunction + '">Yes</button>'
+							+'<button id="resetDeleteErrorWarningNo2" type="button" class="btn btn-primary mr-1" data-dismiss="modal">No</button>'
+							+'<button id="resetDeleteErrorWarningCancel2" type="button" class="btn btn-success mr-1" data-dismiss="modal" style="display: none;">Close</button>'
+						+'</div>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>';
+	return html;
+}
+
 
 function getWatiLogsRecordsFilterModal(){
 	var html=

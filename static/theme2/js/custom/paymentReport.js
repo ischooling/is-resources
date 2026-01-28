@@ -3,6 +3,15 @@ var successfulEmails = [];
 var failedOrOtherEmails = [];
 
 function getPaymentReportData(formId, forCountOnly, type, callFrom){
+	var min = $('#progressMin').val();
+	var max = $('#progressMax').val();
+
+	if(min !== '' && max !== ''){
+		if(parseInt(min) > parseInt(max)){
+			showMessageTheme2(0, 'Min cannot be greater Max','',true);
+			return false;
+		}
+	}
 	if($('#paymentStatus').val()!=''){
 		if($('#paymentStatus').val()!='ABS' && $('#paymentStatus').val()!='AP'){
 			if($('#startDate').val()=='' && $('#endDate').val()==''){
@@ -54,11 +63,9 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 							getCommunicationLogList(item.studentStandardId, item.userId);
 							
 						});
-
 						$(".re-leadstatus").select2({
 							theme:'bootstrap4',
 						});
-						
 						// if(lRStatus!=""){
 						// 	$("#studentPaymentForm #reLeadStatus").val(lRStatus).trigger("change");
 						// }
@@ -80,9 +87,7 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 					// $('#studentPaymentReportTable').dataTable({});
 				}
 			}
-
 			$("body").append(getWatiTemplatesHtml());
-		
 			$("#selectStudentAllDiv").attr("class","block")
 			$("#selectStudentAll").off('click').on('click', function () {
 				var studentnew = $("#studentIdMove").val();
@@ -92,14 +97,12 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 					$(this)[0].checked = chkAll.checked;
 				});
 				var studentNo='';
-
 				$.each($("input[name='student-move-another']:checked"), function(){
 					if(studentnew.indexOf($(this).val()) != -1){
 					}else{
 						studentNo = studentNo+','+$(this).val();
 					}
 				});
-
 				studentnew = studentnew + studentNo;
 				$("#studentIdMove").val(studentnew);
 				if($("#selectStudentAll").is(":checked")){}
@@ -107,7 +110,6 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 					$("#studentIdMove").val('');
 				}
 			});
-
 			$(".checkStudent").off('click').on('click', function () {
 				var studentnew = $("#studentIdMove").val();
 				var chkAll = $("#selectStudentAll");
@@ -140,7 +142,6 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 		}
 	});
 }
-
 function getRequestForPaymentReport(formId, type, forDownload){
 	var request={};
 	var PaymentReportRequestDTO={};
@@ -174,8 +175,7 @@ function getRequestForPaymentReport(formId, type, forDownload){
 		PaymentReportRequestDTO['userId'] = [];
 	}
 	if($('#sessionId').val()!=''){
-		PaymentReportRequestDTO['sessionId'] = $('#sessionId').val();
-		
+		PaymentReportRequestDTO['sessionId'] = $('#sessionId').val();	
 	}
 	if($('#reLeadStatus').val()!=''){
 		PaymentReportRequestDTO['status'] =$('#reLeadStatus').select2('val');
@@ -186,6 +186,12 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	if($('#remainingDueBy').val()!=''){
 		PaymentReportRequestDTO['remainingDueBy'] = $('#remainingDueBy').val();
 	}
+    if ($('#progressMin').val() != ''){
+        PaymentReportRequestDTO['progressMin'] = $('#progressMin').val();
+    }
+    if ($('#progressMax').val() != ''){
+        PaymentReportRequestDTO['progressMax'] = $('#progressMax').val();
+    }
 	if($('#lmsStatus').val()!=''){
 		PaymentReportRequestDTO['lmsStatus'] = $('#lmsStatus').val();
 	}
@@ -201,8 +207,6 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	if($('#transcriptStatus').val()!=''){
 		PaymentReportRequestDTO['transcriptStatus'] = $('#transcriptStatus').val();
 	}
-	
-	
 	if(type==1){
 		$('#pageNumber').val(1)
 	}
@@ -223,11 +227,11 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	request['paymentReportRequestDTO']=PaymentReportRequestDTO;
 	return request;
 }
-
 function pageCount(records){
 	var pageNo = records / parseInt($("#pageSize").val())
 	var checkDecimalValue = Number.isInteger(pageNo)
 	if(!checkDecimalValue){
+
 		pageNo = pageNo.toString().split(".");
 		pageNo = parseInt(pageNo[0])+1
 	}
@@ -248,8 +252,6 @@ function pageCount(records){
 		}  
 	});  
 }
-
-
 function resetStudentPaymentForm(formID){
 	// Get the current date
 	// var currentDate = new Date();
@@ -274,22 +276,11 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #academicYearStatus").val('');
 	$('#'+formID+" #teacherMapStaus").val('');
 	$('#'+formID+" #systemTrainStatus").val('');
-
 	$('#'+formID+" #pageSize").val("10").trigger("change");
 	//getPaymentReportData('',false,1,'');
 	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');
 	// $('#'+formID+' #pageSize').val($('#'+formID+' #pageSize option:first-child').val()).trigger('change');
-
-
-	
-
-	
-
-
-
-
 }
-
 function downloadStudentPaymentReport(formId, forCountOnly, type){
 	customLoader(true);
 	$.ajax({
@@ -315,9 +306,6 @@ function downloadStudentPaymentReport(formId, forCountOnly, type){
 		}
 	});
 }
-
-
-
 function submitCommunicationLog(studentStandardId, userId) {
 	hideMessageTheme2('');
 	if ($('#leadStatus-'+studentStandardId).val()==undefined || $('#leadStatus-'+studentStandardId).val()=='') {
@@ -333,15 +321,12 @@ function submitCommunicationLog(studentStandardId, userId) {
 	if($('#followupRemarks-'+studentStandardId).val()!=''){
 		remark=escapeCharacters($('#followupRemarks-'+studentStandardId).val());
 	}
-
 	var data={};
 	data['leadStatus']=leadStatus;
 	data['comments']=remark;
 	data['entityId']=userId;
 	data['entityName']='STUDENT';
 	data['userId']=USER_ID;
-
-	
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -385,8 +370,7 @@ function getCommunicationLogList(studentStandardId, userId){
 			} else {
 				var html='';
 				if(data.commonCommentsDTO!=null){
-					var incS=1;
-					
+					var incS=1;					
 					for(var l=0;l<data.commonCommentsDTO.length;l++){
 							var leadCall = data.commonCommentsDTO[l];
 							html+='<li class=" '+(l==0?'follow-up-accordian-active':'')+'">'
@@ -435,7 +419,6 @@ function getCommunicationLogList(studentStandardId, userId){
 		}
 	});
 }
-
 
 function callReEnrollStatusList(formId, value, elementId, keyStatus) {
 	hideMessageTheme2('');
@@ -517,7 +500,6 @@ function saveReferralCodeFromPaymentWindow() {
     }
   });
 }
-
 function getWatiBroadcastTemplates(){
 	$("#allWatiBroadcastTemplatesList").html('');
 	$("#allWatiBroadcastTemplatesList").html('');
@@ -797,8 +779,6 @@ function getMailLogsRecords(formId, pageNo){
 		}
 	});
 }
-
-
 function getWatiLogsRecords(formId, pageNo){
 	let startTime = '';
 	let endTime = '';
@@ -877,8 +857,6 @@ function getWatiLogsRecords(formId, pageNo){
 		}
 	});
 }
-
-
 async function showWatiLogDetails(broadCastId,watiContactNo, templateName){
 	if(watiContactNo == null || watiContactNo == undefined || watiContactNo == ""){
 		showMessageTheme2(0, "Contact Number invalid");
