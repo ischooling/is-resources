@@ -2673,3 +2673,39 @@ function generateTimeDropdown(startTime, endTime, gapMinutes) {
     }
 	return html;
 }
+
+function getRequestForMasterForHiring(key) {
+	var request = {};
+	var authentication = {};
+	var requestData = {};
+	requestData['requestKey'] = key;
+	requestData['requestExtra1'] = "Y";
+	requestData['requestExtra2'] = "N";
+	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = 'COMMON';
+	request['authentication'] = authentication;
+	request['requestData'] = requestData;
+	return request;
+}
+
+function getAllHiringRoles(key){
+	var html = '';
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMasterForHiring(key)),
+		dataType : 'json',
+		async: false,
+		success : function(data) {
+		   if (data.status == '0' || data.status == '2') {
+			   showMessageTheme2(0, data.message);
+		   } else {
+				$.each(data.mastersData.data, function(k, v) {
+					html+='<option value="'+v.key+'" data-extra="'+v.extra+'">'+v.value+'</option>';
+				});
+			}
+	   }
+   });
+   return html;
+}

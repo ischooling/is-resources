@@ -455,6 +455,10 @@ function getCommunicationLogList(studentStandardId, userId){
 					var incS=1;					
 					for(var l=0;l<data.commonCommentsDTO.length;l++){
 							var leadCall = data.commonCommentsDTO[l];
+							var aicallSummary="";
+							if(leadCall.aicallSummary!=null && leadCall.aicallSummary!=''){
+								aicallSummary=JSON.parse(leadCall.aicallSummary);
+							}
 							html+='<li class=" '+(l==0?'follow-up-accordian-active':'')+'">'
 							+'<span class="cursor follow-up-no text-primary p-2 text-center border-primary full bold"><label class="float-left">'+(incS++)+'</label> '+(leadCall.status)+'<br/><span style="font-size:10px">'+(leadCall.createdAt)+'</span> <i class="fa '+(l==0?'fa-angle-up':'fa-angle-down')+' float-right" style="line-height: 20px;"></i></span>'
 							+'<div class="follow-up-content text-center" style="'+(l==0?'display: block':'display: block')+'">'
@@ -464,8 +468,32 @@ function getCommunicationLogList(studentStandardId, userId){
 											+'<source src="'+leadCall.uploadFile+'">'
 											+'Your browser does not support the audio element.'
 										+'</audio>':'N/A')
-								+'</div>'
-								+'<div class="dropdown d-inline-block text-center my-2" style="position: inherit;">'
+								+'</div>';
+								if(aicallSummary!=""){
+									html+='<div>'
+									 +'<table class="table table-bordered font-11 mt-2">';
+									 var skipKeys = ["status", "event","call_summary", "phone_number", "phone_number", "child_name", "recording_url", "call_back_time"];
+
+										$.each(aicallSummary, function(i, obj) {
+											if ($.inArray(obj.key, skipKeys) === -1) {
+
+												html += '<tr>';
+												html += '<td class="bold">' + obj.key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) + '</td>';  // Pretty key name
+												
+												if ($.isArray(obj.value)) {
+													html += '<td class="array">[' + obj.value.join(', ') + ']</td>';
+												} else if (typeof value === 'object') {
+													html += '<td class="nested">' + JSON.stringify(obj.value, null, 2) + '</td>';
+												} else {
+													html += '<td>' + obj.value + '</td>';
+												}
+												html += '</tr>';
+											}
+										});
+										html+='</table>'
+									+'</div>';
+								}
+								html+='<div class="dropdown d-inline-block text-center my-2" style="position: inherit;">'
 									+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remark</button>'
 									+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="font-size:11px;">'
 										+'<table class="w-100">'

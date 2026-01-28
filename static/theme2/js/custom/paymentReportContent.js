@@ -4,7 +4,7 @@ function getPaymentReportContent(){
 }
 function paymentReport(){
 	var html =
-	'<div class="col-md-12 mt-4">'
+	'<div class="w-100">'
 		+'<div class="main-card mb-3">'
 			+'<div class="full">'
 				+'<div class="d-flex justify-content-between align-items-center mb-3">'
@@ -34,7 +34,7 @@ function paymentReport(){
 				
 			+'</div>'
 			+updateRefferelCode()
-			+'<div class="full mt-2" id="studentPaymentReport">'
+			+'<div class="full mt-2 overflow-x-auto" id="studentPaymentReport">'
 			+'<div id="selectStudentAllDiv" class="hidden"><input type="checkbox" id="selectStudentAll" class="ml-2">&nbsp; All</div>'
 			+'<input type="hidden" name="studentIdMove" id="studentIdMove" value="">'
 				+'<table id="studentPaymentReportTable" class="table table-hover table-striped table-bordered">'
@@ -64,12 +64,11 @@ function cardDetails(data){
 	$.each(data.reports, function(key, item) {
 		
 		var param = btoa(`{"actionType":"1a","studentStandardId":'${item.studentStandardId}',"moduleId":8,"userId":'${item.userId}'}`);
-		console.log(param)
 		var sprogress =0;
 		sprogress=item.progressReport=='N/A'?0.0:item.progressReport.replace("%","");
 		html+=`<tr>
 				<td class="p-0">
-					<div class="mb-3 card">
+					<div class="mb-3 card" style="min-width:1600px">
 						<div class="card-header-tab card-header">
 							<div class="card-header-title">
 								<input type="checkbox" class="checkStudent" id="student-${item.userId}" name="student-move-another" value="${item.userId}" /> 

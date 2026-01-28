@@ -49,45 +49,9 @@ function userScreeningFilter(){
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Applied User Role</label>
                     <select name="filterAppliedUserRole" id="filterAppliedUserRole" class="form-control">
-                        <option value=""></option>
-                        <option value="Teacher">Teacher</option>
-                        <option value="Admissions Manager">Admissions Manager</option>
-                        <option value="Enrollment Manager">Enrollment Manager</option>
-                        <option value="Enrollment Success Manager">Enrollment Success Manager</option>
-                        <option value="Business Development Manager">Business Development Manager</option>
-                        <option value="Business Development Associate">Business Development Associate</option>
-                        <option value="Business Associate">Business Associate</option>
-                        <option value="School Admin">School Admin</option>
-                        <option value="Administration Head">Administration Head</option>
-                        <option value="Administration Associate">Administration Associate</option>
-                        <option value="Head of School">Head of School</option>
-                        <option value="Associate Head of School">Associate Head of School</option>
-                        <option value="Principal">Principal</option>
-                        <option value="Associate Principal">Associate Principal</option>
-                        <option value="Operations Manager">Operations Manager</option>
-                        <option value="Academic Coordinator">Academic Coordinator</option>
-                        <option value="Admissions Counselor">Admissions Counselor</option>
-                        <option value="Teacher Coordinator">Teacher Coordinator</option>
-                        <option value="Human Resources Manager">Human Resources Manager</option>
-                        <option value="IT Administrator">IT Administrator</option>
-                        <option value="Office Assistant">Office Assistant</option>
-                        <option value="Special Educators">Special Educators</option>
-                        <option value="Activity Teacher">Activity Teacher</option>
-                        <option value="Art Teacher">Art Teacher</option>
-                        <option value="Music Teacher">Music Teacher</option>
-                        <option value="Drama Teacher">Drama Teacher</option>
-                        <option value="Career Counselor">Career Counselor</option>
-                        <option value="College / University Counselor">College / University Counselor</option>
-                        <option value="Accountant">Accountant</option>
-                        <option value="Student Admission Advisor">Student Admission Advisor</option>
-                        <option value="Student Engagement Officer">Student Engagement Officer</option>
-                        <option value="Psychologist">Psychologist</option>
-                        <option value="Content Writer">Content Writer</option>
-                        <option value="Digital Marketing Executive">Digital Marketing Executive</option>
-                        <option value="Social Media Manager">Social Media Manager</option>
-                        <option value="Community Engagement Officer">Community Engagement Officer</option>
-                        <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
-                    </select>
+                        <option value=""></option>`
+                        +getAllHiringRoles('GET-ALL-HIRING-ROLES')
+                    html+=`</select>
                 </div>
                 ${/*<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>No. of records</label>
@@ -132,7 +96,7 @@ function userScreeningFilter(){
     return html;
 }
 
-function userApplicationTableContent(status){
+function userApplicationTableContent(){
     var html=
         `<div class="d-flex flex-column">
             <div class="d-flex align-items-center gap-10">
@@ -229,7 +193,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                 <label for="userApplicationProfileStatus" class="control-label">Application Status:</label>
                                 <select class="form-control" name="userApplicationProfileStatus" id="userApplicationProfileStatus" onchange="applicantsViewAssignToListForInterview('${role}');">
                                     <option value="0">Select Status</option>`
-                                    if(role == "Teacher"){
+                                    if(TEACHER_SUB_ROLES.includes(role)){
                                         if(status == "Applied"){
                                             html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                                             <option value="On Hold">On Hold</option>
@@ -634,45 +598,9 @@ function addQuestionsModal(){
                                     <label>Filter Role</label>
                                     <select name="filterRoleType" onchange="getAllQuestions();" id="filterRoleType" class="form-control">
                                         <option value="">All</option>
-                                        <option value="Common">Common</option>
-                                        <option value="Teacher">Teacher</option>
-                                        <option value="Admissions Manager">Admissions Manager</option>
-                                        <option value="Enrollment Manager">Enrollment Manager</option>
-                                        <option value="Enrollment Success Manager">Enrollment Success Manager</option>
-                                        <option value="Business Development Manager">Business Development Manager</option>
-                                        <option value="Business Development Associate">Business Development Associate</option>
-                                        <option value="Business Associate">Business Associate</option>
-                                        <option value="School Admin">School Admin</option>
-                                        <option value="Administration Head">Administration Head</option>
-                                        <option value="Administration Associate">Administration Associate</option>
-                                        <option value="Head of School">Head of School</option>
-                                        <option value="Associate Head of School">Associate Head of School</option>
-                                        <option value="Principal">Principal</option>
-                                        <option value="Associate Principal">Associate Principal</option>
-                                        <option value="Operations Manager">Operations Manager</option>
-                                        <option value="Academic Coordinator">Academic Coordinator</option>
-                                        <option value="Admissions Counselor">Admissions Counselor</option>
-                                        <option value="Teacher Coordinator">Teacher Coordinator</option>
-                                        <option value="Human Resources Manager">Human Resources Manager</option>
-                                        <option value="IT Administrator">IT Administrator</option>
-                                        <option value="Office Assistant">Office Assistant</option>
-                                        <option value="Special Educators">Special Educators</option>
-                                        <option value="Activity Teacher">Activity Teacher</option>
-                                        <option value="Art Teacher">Art Teacher</option>
-                                        <option value="Music Teacher">Music Teacher</option>
-                                        <option value="Drama Teacher">Drama Teacher</option>
-                                        <option value="Career Counselor">Career Counselor</option>
-                                        <option value="College / University Counselor">College / University Counselor</option>
-                                        <option value="Accountant">Accountant</option>
-                                        <option value="Student Admission Advisor">Student Admission Advisor</option>
-                                        <option value="Student Engagement Officer">Student Engagement Officer</option>
-                                        <option value="Psychologist">Psychologist</option>
-                                        <option value="Content Writer">Content Writer</option>
-                                        <option value="Digital Marketing Executive">Digital Marketing Executive</option>
-                                        <option value="Social Media Manager">Social Media Manager</option>
-                                        <option value="Community Engagement Officer">Community Engagement Officer</option>
-                                        <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
-                                    </select>
+                                        <option value="Common">Common</option>`
+                                            +getAllHiringRoles('GET-ALL-HIRING-ROLES')
+                                    html+=`</select>
                                 </div>
                                 <p class="mt-2 mb-0 text-danger font-weight-semi-bold text-left px-2 py-1 rounded font-12">Note: <span class="font-weight-bold">*</span> are mandatory questions</p>
                                 <div id="allQuestionsWrapper" style="max-height: 60vh; overflow-y: auto;"></div>
@@ -687,45 +615,9 @@ function addQuestionsModal(){
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
                                         <label>User Role</label>
                                         <select name="roleType" id="roleType" class="form-control">
-                                            <option value="Common">Common</option>
-                                            <option value="Teacher">Teacher</option>
-                                            <option value="Admissions Manager">Admissions Manager</option>
-                                            <option value="Enrollment Manager">Enrollment Manager</option>
-                                            <option value="Enrollment Success Manager">Enrollment Success Manager</option>
-                                            <option value="Business Development Manager">Business Development Manager</option>
-                                            <option value="Business Development Associate">Business Development Associate</option>
-                                            <option value="Business Associate">Business Associate</option>
-                                            <option value="School Admin">School Admin</option>
-                                            <option value="Administration Head">Administration Head</option>
-                                            <option value="Administration Associate">Administration Associate</option>
-                                            <option value="Head of School">Head of School</option>
-                                            <option value="Associate Head of School">Associate Head of School</option>
-                                            <option value="Principal">Principal</option>
-                                            <option value="Associate Principal">Associate Principal</option>
-                                            <option value="Operations Manager">Operations Manager</option>
-                                            <option value="Academic Coordinator">Academic Coordinator</option>
-                                            <option value="Admissions Counselor">Admissions Counselor</option>
-                                            <option value="Teacher Coordinator">Teacher Coordinator</option>
-                                            <option value="Human Resources Manager">Human Resources Manager</option>
-                                            <option value="IT Administrator">IT Administrator</option>
-                                            <option value="Office Assistant">Office Assistant</option>
-                                            <option value="Special Educators">Special Educators</option>
-                                            <option value="Activity Teacher">Activity Teacher</option>
-                                            <option value="Art Teacher">Art Teacher</option>
-                                            <option value="Music Teacher">Music Teacher</option>
-                                            <option value="Drama Teacher">Drama Teacher</option>
-                                            <option value="Career Counselor">Career Counselor</option>
-                                            <option value="College / University Counselor">College / University Counselor</option>
-                                            <option value="Accountant">Accountant</option>
-                                            <option value="Student Admission Advisor">Student Admission Advisor</option>
-                                            <option value="Student Engagement Officer">Student Engagement Officer</option>
-                                            <option value="Psychologist">Psychologist</option>
-                                            <option value="Content Writer">Content Writer</option>
-                                            <option value="Digital Marketing Executive">Digital Marketing Executive</option>
-                                            <option value="Social Media Manager">Social Media Manager</option>
-                                            <option value="Community Engagement Officer">Community Engagement Officer</option>
-                                            <option value="Parent Relations Coordinator">Parent Relations Coordinator</option>
-                                        </select>
+                                            <option value="Common">Common</option>`
+                                                +getAllHiringRoles('GET-ALL-HIRING-ROLES')
+                                        html+=`</select>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
                                         <label>Question Type</label><br>

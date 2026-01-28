@@ -9,15 +9,13 @@ var USER_APPLICATION_PAGINATION_STATE = {
 };
 var ORIGINAL_ORDER_BACKUP = {};
 var sortableInstances = {};
+var TEACHER_SUB_ROLES;
 async function userApplicationProfileOnloadFunction(){
     CURRENT_PAGE_USER_APPLICATION = 1;
     USER_APPLICATION_FILTER_STATE = {
         filterValues: {}
     };
     getAllCountryList('userScreeningFilterForm','filterCountryId');
-    // let payload = {}
-    // var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
-    // bindAssignTo('userScreeningFilterForm', 'filterAssignedTo', responseData);
     $("#userScreeningFilterForm #filterCountryId").select2({
         placeholder: "Select Country",
         theme:"bootstrap4"
@@ -34,37 +32,29 @@ async function userApplicationProfileOnloadFunction(){
     // $("#filterStartDate, #filterEndDate").prop("disabled", true)
     $("#userScreeningFilterForm #filterAppliedUserRole").select2({
         placeholder: "Select Applied User Role",
-        theme:"bootstrap4"
-    }).on("change", function(){
-        if($(this).val()=="Teacher"){
-            var html=`<option value="">Select Status</option>
-                <option value="Applied">Applied</option>
-                <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
-                <option value="Few Questions Submitted">Few Questions Submitted</option> 
-                <option value="New Applications">New Applications</option>
-                <option value="Approved For Interview">Approved For Interview</option>
-                <option value="Accepted for Contract">Accepted for Contract</option>
-                <option value="Another Round of Interview">Another Round of Interview</option>
-                <option value="Final Round of Interview">Final Round of Interview</option>
-                <option value="Approved for Selection Process">Approved for Selection Process</option>
-                <option value="Hired">Hired</option>
-                <option value="On Hold">On Hold</option>`;
-            $("#applicantsStatus").html(html);
-        }else{
-            var html=`<option value="">Select Status</option>
-                <option value="Applied">Applied</option>
-                <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
-                <option value="Few Questions Submitted">Few Questions Submitted</option>
-                <option value="New Applications">New Applications</option>
-                <option value="Approved For Interview">Approved For Interview</option>
-                <option value="Accepted for Contract">Accepted for Contract</option>
-                <option value="Another Round of Interview">Another Round of Interview</option>
-                <option value="Final Round of Interview">Final Round of Interview</option>
-                <option value="Hired">Hired</option>
-                <option value="Reject">Rejected</option>
-                <option value="On Hold">On Hold</option>`;
-            $("#applicantsStatus").html(html);
+        theme: "bootstrap4",
+    }).on("change", function () {
+        var extra = $(this).find(":selected").data("extra");
+        var html = `<option value="">Select Status</option>
+        <option value="Applied">Applied</option>
+        <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
+        <option value="Few Questions Submitted">Few Questions Submitted</option>
+        <option value="New Applications">New Applications</option>
+        <option value="Approved For Interview">Approved For Interview</option>
+        <option value="Accepted for Contract">Accepted for Contract</option>
+        <option value="Another Round of Interview">Another Round of Interview</option>
+        <option value="Final Round of Interview">Another Round of Interview</option>
+        <option value="Final Round of Interview">Final Round of Interview</option>`;
+        if (extra == "TEACHER") {
+            html+=`<option value="Approved for Selection Process">Approved for Selection Process</option>
+            <option value="Hired">Hired</option>
+            <option value="On Hold">On Hold</option>`;
+        } else {
+            html+=`<option value="Hired">Hired</option>
+            <option value="Reject">Rejected</option>
+            <option value="On Hold">On Hold</option>`;
         }
+        $("#applicantsStatus").html(html).trigger("change");
     });
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
@@ -77,6 +67,7 @@ async function userApplicationProfileOnloadFunction(){
         $("#uploadFile").remove();
     }
     $("body").append(pdfPreviewJA());
+    TEACHER_SUB_ROLES = await getHiringSubRoleByRoleName('TEACHER');
 }
 
 function showFilterUserApplication(){
@@ -254,11 +245,11 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
         if (lastIsToday) {
             payload['startDate'] = changeDateFormat(new Date(), "yyyy-mm-dd") + " 00:00:00";
             payload['endDate'] = changeDateFormat(new Date(), "yyyy-mm-dd") + " 23:59:59";
-        } 
+        }
         else if (!lastIsToday && lastCallFrom === "card") {
             payload['startDate'] = "";
             payload['endDate'] = "";
-        } 
+        }
         else {
             payload['startDate'] = USER_APPLICATION_FILTER_STATE.filterValues.startDate
                 ? changeDateFormat(new Date(USER_APPLICATION_FILTER_STATE.filterValues.startDate), "yyyy-mm-dd") + " 00:00:00"
@@ -271,10 +262,11 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
         payload['phoneNumber'] = USER_APPLICATION_FILTER_STATE.filterValues.phoneNumber || "";
         payload['email'] = USER_APPLICATION_FILTER_STATE.filterValues.email || "";
         if (lastCallFrom === "teachingCard") {
-            payload['appliedUserRole'] = lastIsTeaching ? "Teacher" : "Not Teacher";
+            var teacherRolesString = `${TEACHER_SUB_ROLES.map(r => `'${r}'`).join(",")}`;
+            payload['appliedUserRole'] = lastIsTeaching ? teacherRolesString : `${teacherRolesString},'Not Teacher'`;
         } else {
-            payload['appliedUserRole'] =
-                USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole || "";
+            var role = USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole;
+            payload['appliedUserRole'] = role ? (role.startsWith("'") ? role : `'${role}'`): "";
         }
         payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
         payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
@@ -656,47 +648,6 @@ function bindQuestionsToJA(formId, responseData) {
     enableDualSortable();
 }
 
-// function updateTableRowDirectly(userId, newStatus, assignedTo) {
-//     var row = $('#tr_' + userId);
-//     if(row.length) {
-//         if(newStatus == "Step 2 | Few Questions" || newStatus == "On Hold" || newStatus == "Accepted"){
-//         }else if(USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole == "Teacher" && newStatus == "Reject"){
-//             row.remove();
-//         }else if(newStatus != "Approved for Selection Process"){
-//             row.find('td:eq(10)').text(assignedTo || 'N/A');
-//         }
-//         row.find('td:eq(11)').text(newStatus || 'N/A');
-        
-//         var dropdownHtml = `
-//         <div class="d-flex align-items-center gap-5">
-//             <div class="dropdown">
-//                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-//                     <i class="fas fa-ellipsis-v"></i>
-//                 </button>
-//                 <ul class="dropdown-menu">
-//                     <li>
-//                         <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${userId}, '${newStatus || ''}')">
-//                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
-//                         </a>
-//                     </li>`;
-//         if(newStatus && newStatus !== "" && newStatus !== "N/A") {
-//             dropdownHtml += `<li>
-//                         <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${userId})">
-//                             <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
-//                         </a>
-//                     </li>`;
-//         }
-        
-//         dropdownHtml += `</ul>
-//             </div>
-//             <div data-toggle="tooltip" data-placement="top" title="Discard">
-//                 <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${userId}, 'Discard')&quot;)"></i>
-//             </div>
-//         </div>`;
-//         row.find('td:eq(12)').html(dropdownHtml);
-//     }
-// }
-
 async function viewResumeAndPhoto(url, modalId){
     
     var attachmentType = getExtension(url);
@@ -752,7 +703,6 @@ function openCommunicationLogsModalForUserApplication(userId, userRole, callFrom
         var attachment = $("#fileuploadLog7").val().split("\\")[2]
         $("#fileuploadLog7Span").text(attachment);
     });
-    // callProfileEnrollStatusListTA('teacherScreeningProfileStatusForm','RE-EN','reLeadStatus', false);
     getCommunicationLogDataJA('communicationLogTableJA', userId, userRole);
     setTimeout(() => {
         $("#userApplicationCommunicationLogsModal").modal("show");
@@ -1372,5 +1322,25 @@ async function resendTeacherInvitationLink(id){
         showMessageTheme2(1, responseData.message);
     }else{
         showMessageTheme2(0, responseData.message);
+    }
+}
+
+async function getHiringSubRoleByRoleName(roleName){
+    var payload = {}
+    payload["roleName"] = roleName;
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/get-hiring-sub-role-by-role-name",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        return responseData.hiringSubRole;
+    }else{
+        showMessageTheme2(0, responseData.message)
     }
 }
