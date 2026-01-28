@@ -2,6 +2,83 @@ var scriptRun = false;
 var successfulEmails = [];
 var failedOrOtherEmails = [];
 
+function paymentReportEventLoad(){
+	const getUserRoleForMonitoring = getSettingsByTypeAndKey('CONFIGURATION','DONT_SHOW_ACTIVITY_TRACKER_ROLE');
+	const metaValue = JSON.parse(getUserRoleForMonitoring)?.data?.metaValue;
+	const rolesToSkip = metaValue.split(',').map(r => $.trim(r));
+	if (!rolesToSkip.includes(USER_ROLE)) {
+		if($("#userActivityTimer").length == 0){
+			$("head").append(`<script id="userActivityTimer" type="text/javascript" src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/userActivityTimer.js${SCRIPT_VERSION}">`)
+		}
+	}
+	callReEnrollStatusList('studentPaymentForm','RE-EN','reLeadStatus', false);
+	getAllGrade(SCHOOL_ID, false);
+	getSessionMasterList('studentPaymentForm', 'sessionId', false);
+	$("#learningPlatform option:first-child").remove()
+	// $("#sessionId option:first-child").remove()
+	$(".multiple-select-option").select2({
+		theme:'bootstrap4',
+	});
+	
+	$("#enrollStatus").val(["0"]).trigger("change");
+	//$("#paymentStatus").val(["ODUE","DUE"]).trigger("change");
+	
+	// $("#studentName").on("keyup", function() {
+	// 	var value = this.value.toLowerCase().trim();
+	// 	$("#studentPaymentReport .card").show().filter(function() {
+	// 		return $(this).text().toLowerCase().trim().indexOf(value) == -1;
+	// 	}).hide();
+	// });
+
+
+	// $("#gradeId, #learningProgram").select2({
+	// 	theme:"bootstrap4"
+	// });
+	$(".showFilterForm").click(function(){
+		$(".filterStudentPaymentReportForm").slideToggle();
+	});
+	$('#startDate').datepicker({
+		autoclose: true,
+		format: 'M d, yyyy',
+		todayHighlight: true,
+		autoclose: true,
+		
+	}).on('changeDate', function(){
+		$('#endDate').val("").datepicker("update");
+		$('#endDate').datepicker('setStartDate', new Date($(this).val()));
+	}); 
+	$('#endDate').datepicker({
+		autoclose: true,
+		format: 'M d, yyyy',
+	}); 
+	
+	// var d = new Date();
+	// var currMonth = d.getMonth();
+	// var currYear = d.getFullYear();
+	// var startDate = new Date(currYear,currMonth,1);
+	// var endDate = new Date(currYear,currMonth+1,0);
+	// $('#startDate').datepicker('setDate',startDate);
+	// $('#endDate').datepicker('setDate',endDate);
+	
+	//getPaymentReportData('',false,1,'');
+
+	//$("#studentPaymentReportTable").DataTable({});
+	// $("#pageSize").on("change", function(){
+	// 	getPaymentReportData('',false,1);
+	// })
+
+	// $("#studentName").on('keyup', function (e) {
+	// 	if($("#studentName").val().length>3){
+	// 		getPaymentReportData('',false,1);
+	// 	}else if($("#studentName").val().length==0){
+	// 		getPaymentReportData('',false,1);
+	// 	}
+	// });
+	$('[data-toggle="tooltip"]').tooltip({
+		html: true
+	});
+}
+
 function getPaymentReportData(formId, forCountOnly, type, callFrom){
 	var min = $('#progressMin').val();
 	var max = $('#progressMax').val();
@@ -69,7 +146,8 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 						// if(lRStatus!=""){
 						// 	$("#studentPaymentForm #reLeadStatus").val(lRStatus).trigger("change");
 						// }
-						$('.perfectScroll').perfectScrollbar();
+						// new PerfectScrollbar('.perfectScroll');
+
 						$(".follow-up-no").click(function(){
 							$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
 							$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
@@ -206,6 +284,10 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	}
 	if($('#transcriptStatus').val()!=''){
 		PaymentReportRequestDTO['transcriptStatus'] = $('#transcriptStatus').val();
+	}
+
+	if($('#recordingStatus').val()!=''){
+		PaymentReportRequestDTO['recordingStatus'] = $('#recordingStatus').val();
 	}
 	if(type==1){
 		$('#pageNumber').val(1)
@@ -376,6 +458,13 @@ function getCommunicationLogList(studentStandardId, userId){
 							html+='<li class=" '+(l==0?'follow-up-accordian-active':'')+'">'
 							+'<span class="cursor follow-up-no text-primary p-2 text-center border-primary full bold"><label class="float-left">'+(incS++)+'</label> '+(leadCall.status)+'<br/><span style="font-size:10px">'+(leadCall.createdAt)+'</span> <i class="fa '+(l==0?'fa-angle-up':'fa-angle-down')+' float-right" style="line-height: 20px;"></i></span>'
 							+'<div class="follow-up-content text-center" style="'+(l==0?'display: block':'display: block')+'">'
+							+'<div>'
+									+(leadCall.uploadFile!=''?
+										'<audio controls style="height:40px; transform:scale(0.9);">'
+											+'<source src="'+leadCall.uploadFile+'">'
+											+'Your browser does not support the audio element.'
+										+'</audio>':'N/A')
+								+'</div>'
 								+'<div class="dropdown d-inline-block text-center my-2" style="position: inherit;">'
 									+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remark</button>'
 									+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="font-size:11px;">'
@@ -384,6 +473,7 @@ function getCommunicationLogList(studentStandardId, userId){
 												+'<th class="p-1 border-0">Remarks:</th>'
 												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.comments!=''?leadCall.comments:'N/A')+'</td>'
 											+'</tr>'
+											
 											+'<tr>'
 												+'<th class="p-1 border-0">Follow by:</th>'
 												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.addedByName!=''?leadCall.addedByName:'N/A')+'</td>'

@@ -1,3 +1,7 @@
+function getPaymentReportContent(){
+	$('#dashboardContentInHTML').html(paymentReport());
+	paymentReportEventLoad()
+}
 function paymentReport(){
 	var html =
 	'<div class="col-md-12 mt-4">'
@@ -59,6 +63,8 @@ function cardDetails(data){
 	var html = '';
 	$.each(data.reports, function(key, item) {
 		
+		var param = btoa(`{"actionType":"1a","studentStandardId":'${item.studentStandardId}',"moduleId":8,"userId":'${item.userId}'}`);
+		console.log(param)
 		var sprogress =0;
 		sprogress=item.progressReport=='N/A'?0.0:item.progressReport.replace("%","");
 		html+=`<tr>
@@ -79,8 +85,12 @@ function cardDetails(data){
 											${item.rollNumber} | ${item.enrolledStatus} | ${item.gradeName} | ${item.learningPlan} | ${item.lmsPlatform}
 										</span>
 									</h6>
-									<h5 class="mb-1"><span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>
-									</span></h5>
+									<h5 class="mb-1 font-16">
+										<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;
+											${/*<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>*/''}
+											<a href='javascript:void(0)' onclick="callSchoolInneraction('profile-view', '${param}', '', '8')" data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>
+										</span>
+									</h5>
 								</div>
 							</div>
 							<ul class="nav">
@@ -800,6 +810,14 @@ function filterStudentPaymentReportForm(){
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Recording Status</label>'
+							+'<select name="recordingStatus" id="recordingStatus" class="form-control">'
+								+'<option value="">Select Status</option>'
+								+'<option value="Y">Yes</option>'
+								+'<option value="N">No</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Enrolled By</label>'
 							+'<select id="userId" class="form-control selectReset multiple-select-option">'
 								+'<option value="">ALL</option>'
@@ -850,43 +868,43 @@ function consolidateContent(data, count){
 	html =  
 		'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Total Count</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">Total Count</h5>'
 				+'<div class="opacity-7 font-size-sm">'+count+'</div>'
 			+'</div>'
 		+'</div>'
 		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">One-to-One Learning</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">One-to-One Learning</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.oneToOneCount+'</div>'
 			+'</div>'
 		+'</div>'
 		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Group Learning</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">Group Learning</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.groupCount+'</div>'
 			+'</div>'
 		+'</div>'
 		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Self Study Learning</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">Self Study Learning</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.scholarshipCount+'</div>'
 			+'</div>'
 		+'</div>'
 		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Flexy Learning Program</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">Flexy Learning Program</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.flexyCount+'</div>'
 			+'</div>'
 		+'</div>'
 		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Self Study Plus</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">Self Study Plus</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.sspCount+'</div>'
 			+'</div>'
 		+'</div>'
 		+'<div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 px-1 mt-2">'
 			+'<div class="full p-2 mb-2 rounded" style="background:#f0f9ff">'
-				+'<h5 class="font-weight-semi-bold">Total Call | Today Call</h5>'
+				+'<h5 class="font-weight-semi-bold font-16">Total Call | Today Call</h5>'
 				+'<div class="opacity-7 font-size-sm">'+data.totalCall+' | '+data.todayCall+'</div>'
 			+'</div>'
 		+'</div>';

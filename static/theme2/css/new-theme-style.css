@@ -33982,3 +33982,11 @@ input:checked + .small-switch-slider:before {
 .email_logs_slide_popup.viewSlideContent{transform: translateX(0%);-webkit-transform: translateX(0px);-moz-transform: translateX(0px);}
 .iframe-content{position: relative;}
 .iframe-content:after{content: '';width:100%;height: 100%;background: rgba(255, 255, 255, 0.0);position: absolute;left: 0;top:0}
+#studentName::placeholder {
+color: var(--pc);
+opacity: 1; /* Firefox */
+}
+
+#studentName::-ms-input-placeholder { /* Edge 12-18 */
+color: var(--pc);
+}

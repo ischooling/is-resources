@@ -728,7 +728,7 @@ $(window).on('resize', function() {
 });
 
 
-function profileViewPageLoadEvent(data){
+async function profileViewPageLoadEvent(data){
     RENDER_FLAG=false;
     setTimeout(function(){
         $("head").append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/cropperImage.js?v=1.1.26">`)
@@ -811,15 +811,7 @@ function profileViewPageLoadEvent(data){
             studentProfileTabs.filter('[href="#' + activeSectionId + '"]').addClass('bg-light');
         }
     });
-
-
-
-
-
-
-
-
-
+    
     var originalToTimeOptions = $('.toTime option').clone();
     $('.fromTime').on('change', function () {
         var selectedTime = $(this).val();
@@ -855,7 +847,7 @@ function profileViewPageLoadEvent(data){
     callCountriesOption("profileForm", '', "guardianCountry", '');
     callCountriesOption("profileForm", '', "country", '', "Select Country*");
     callCountriesOption("profileForm", '', "pCountryId", '');
-    getTimeZones("profileForm", "timezone", "timezoneInput", "");
+    await getTimeZones("profileForm", "timezone", "timezoneInput", "");
     callCountriesOption("profileForm", '', "nationality", '', "Select Nationality*")
     $("#country").unbind().bind("change", function () {
 		callStates('profileForm', this.value, 'country','state','city');
@@ -921,6 +913,7 @@ function profileViewPageLoadEvent(data){
     $("#country").val(data[0].country).trigger("change");
     $("#state").val(data[0].state).trigger("change");
     $("#city").val(data[0].city).trigger("change");
+    $("#timezone").val(data[0].timezone).trigger("change");
     $("#nationality").val(data[0].nationalityId).trigger("change");
     
     $("#relationType").select2({

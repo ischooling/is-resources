@@ -2,6 +2,41 @@ var scriptRun = false;
 var successfulEmails = [];
 var failedOrOtherEmails = [];
 
+function onboardedTeacherEventLoad(){
+	const getUserRoleForMonitoring = getSettingsByTypeAndKey('CONFIGURATION','DONT_SHOW_ACTIVITY_TRACKER_ROLE');
+	const metaValue = JSON.parse(getUserRoleForMonitoring)?.data?.metaValue;
+	const rolesToSkip = metaValue.split(',').map(r => $.trim(r));
+	if (!rolesToSkip.includes(USER_ROLE)) {
+		if($("#userActivityTimer").length == 0){
+			$("head").append(`<script id="userActivityTimer" type="text/javascript" src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/userActivityTimer.js${SCRIPT_VERSION}">`)
+		}
+	}
+	getAllGrade(SCHOOL_ID, false);
+	$("#learningPlatform option:first-child").remove()
+	$(".multiple-select-option").select2({
+		theme:'bootstrap4',
+	});
+	$(".showFilterForm").click(function(){
+		$(".filterOnboardedTeacherListForm").slideToggle();
+	});
+	$("#learningPlatform").on("change", function(e){
+		if(e.target.value === "" || e.target.value == undefined){
+			$('#gradeId').val("").trigger('change').prop('disabled', true);
+		}else{
+			$('#gradeId').prop('disabled', false);
+		}
+	})
+	$("#gradeId").on("change", function(e){
+		if(e.target.value === "" || e.target.value == undefined){
+			$('#subjectId').html('');
+		}else{
+			let lp = $('#learningPlatform').val()
+			let courses = getCourseContent(e.target.value,lp);
+			$('#subjectId').html(courses);
+		}
+	})
+}
+
 function getOnboardedTeacherListData(type,callFrom){
 	url=CONTEXT_PATH+UNIQUEUUID+"/dashboard/onboarded-teacher-list-data";
     customLoader(true);

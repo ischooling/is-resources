@@ -104,7 +104,7 @@ function getLeadSalesResearchSection(objRight){
 			<div class="card">
 				<div class="card-body">
 					<h5 class="card-title">User Queries</h5>
-					<ul class="list-group" id="lead-sales-research-query-list">
+					<ul class="list-group" id="lead-sales-research-query-list" style="max-height: 400px; overflow: auto;">
 					${userQueryList.map(query=>`
 						<li class="list-group-item" onclick="getSalesQueryResponse('${query.id}')">${query.userQuery}</li>
 					`).join('')}

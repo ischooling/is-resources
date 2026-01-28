@@ -479,7 +479,7 @@ function getCounselorChartContent(commissionRate){
 									</div>
 									<div class="mx-auto overflow-hidden" style="position: relative; max-width:200px;max-height:101px;">
 										<div id="c_chart`+i+`" style="visibility:hidden;opacity:0"></div>
-										<i class="fa fa-users position-absolute" style="font-size:20px; top: 50%;left: 50%;width: 30px;height: 30px;transform: translate(-50%, -50%);z-index: 10;"></i>
+										<i class="fa fa-users position-absolute" style="font-size:20px; top: 50%;left: 50%;width: 30px;height: 30px;transform: translate(-50%, -50%);z-index: 1;"></i>
 									</div>
 								</div>
 							</div>`;
@@ -549,7 +549,7 @@ function getCounselorPartnerChartContent(commissionRate){
 									</div>
 									<div class="mx-auto overflow-hidden" style="position: relative; max-width:200px;max-height:101px;">
 										<div id="c_chart_school`+i+`" style="visibility:hidden;opacity:0"></div>
-										<i class="fa fa-users position-absolute" style="font-size:20px; top: 50%;left: 50%;width: 30px;height: 30px;transform: translate(-50%, -50%);z-index: 10;"></i>
+										<i class="fa fa-users position-absolute" style="font-size:20px; top: 50%;left: 50%;width: 30px;height: 30px;transform: translate(-50%, -50%);z-index: 1;"></i>
 									</div>
 								</div>
 							</div>`;

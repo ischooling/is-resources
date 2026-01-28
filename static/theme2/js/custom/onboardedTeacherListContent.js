@@ -1,3 +1,7 @@
+function getOnboardedTeacherContent(){
+	$('#dashboardContentInHTML').html(onboardedTeacher());
+	onboardedTeacherEventLoad()
+}
 function onboardedTeacher(){
 	var html =
 	'<div class="col-md-12 mt-4">'
@@ -70,7 +74,7 @@ function cardDetails(data){
 											${item.applicationNo} | ${item.employmentType} | ${item.phoneNo}
 										</span>
 									</h6>
-									<h5 class="mb-1"><span class="font-weight-bold text-primary teacher-name-${item.userId}"  teachername="${item.name}" phoneno="${item.phoneNo}">${item.name}&nbsp;</h5></div>
+									<h5 class="mb-1"><span class="font-weight-bold text-primary teacher-name-${item.userId} font-16"  teachername="${item.name}" phoneno="${item.phoneNo}">${item.name}&nbsp;</h5></div>
 							</div>
 							<div>
 							${item.watibroadcast?`<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Wati Logs"  id="wati_logs_link" onclick="showWatiLogDetailsByTeacherUserId('${item.userId}')">

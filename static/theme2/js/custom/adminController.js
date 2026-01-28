@@ -499,6 +499,11 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 			renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
 		}else if(pageNo=='profile-view'){
 			renderStudentProfilePage(extraParam);
+		}else if(pageNo=='payment-reports'){
+      getPaymentReportContent()
+		}
+    else if(pageNo=='onboarded-teacher-list'){
+      getOnboardedTeacherContent()
 		}
 	}catch(err){
 		console.error("getContent error:", err);
