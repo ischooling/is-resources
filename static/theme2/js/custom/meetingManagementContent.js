@@ -562,152 +562,6 @@ function showStartMeetingPopup(meetingName, meetingDate, meetingStartTime, url) 
   });
 }
 
-function populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body,message,status) {
-  const titles = {
-    "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
-    "active_speaker.mp4": "Active Speaker",
-    "shared_screen_with_gallery_view.mp4": "Shared Screen With Gallery View",
-    "gallery_view.mp4": "Gallery View",
-    "shared_screen.mp4": "Shared Screen",
-    "shared_screen_with_speaker_view_CC.mp4": "Shared Screen With Speaker View CC",
-    "-1.1.mp4": "Recording",
-    "-1.2.mp4": "Recording 2",
-    "audio_only": "Audio File",
-  };
-  var entityId = body.entityId;
-	var entityName = body.entityName;
-
-  var meetingStartDateFormatted = changeDateFormat(new Date(meetingStartDate), "MMM-dd-yyyy");
-
-  var modalContent = `
-    <div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
-      <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%;margin: auto; margin-top:50px;">
-        <div class="">
-          <div class="d-flex justify-content-between align-items-center" style="padding: 15px 10px; background: #027FFF;">
-            <h5 class="text-white mb-0" style="font-size: 18px; font-weight: bold;">Available Recordings | ${title} | ${meetingStartDateFormatted} ${startTime} | ${hostName}</h5>
-            <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
-          </div>
-          <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
-          if(status === "UnAuthorized" || status === "Pending" || status === "Denied" ){
-           modalContent += `<div class="alert ${status === 'Denied'?'alert-danger':'alert-warning'}  mt-3 py-2 d-flex justify-content-between align-items-center" id="request-status-containt">
-                            <span id="request-status-message">${message}</span>
-                             <button type="button" class="btn btn-sm btn-outline-dark ms-3 ${status === 'Pending'?'':'d-none'}" id="refreshBtn">Refresh</button>
-                            </div>
-                            <div class="alert alert-success mt-3 py-2 d-none" id="successMsg"> Request sent successfully </div>
-                            `;
-          }
-          if(status === "UnAuthorized"){
-          modalContent += ` <div class="card" id="request-permission-card">
-                                <div class="card-body">
-                                  <h5 class="card-title mb-3">Request for Recordings</h5>
-                                  <div class="d-flex gap-2 align-items-start flex-wrap">
-                                    <div class="flex-grow-1">
-                                      <textarea
-                                        class="form-control"
-                                        id="remark"
-                                        rows="1"
-                                        maxlength="500"
-                                        placeholder="Enter your remark (max 500 characters)..."
-                                      ></textarea>
-                                      <div class="form-text text-end">
-                                        <span id="charCount">0</span>/500
-                                      </div>
-                                    </div>
-
-                                    <div class="mx-2">
-                                      <button class="btn btn-primary px-4" id="sendBtn" disabled>
-                                        Send Request
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>`;         
-          }
-  recordings.forEach(record => {
-    const meetingId = record.meetingId;
-    const sessionUrls = record.urls
-      .map(urlData => {
-        for (const key in titles) {
-          if (urlData.url.includes(key)) {
-            return { url: urlData.url, title: titles[key] };
-          }
-        }
-      })
-
-    const transcriptUrl = record.urls[record.urls.length - 1]?.url;
-
-    if (sessionUrls.length > 0) {
-      modalContent += `
-        <div class="session-block pb-4">
-          <h5 class="mb-3 mt-0">Meeting ID: ${meetingId}</h5>
-          ${sessionUrls.map((recording, index) => `
-            <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-              <h6>${index + 1}. ${recording.title}</h6>
-              <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
-                <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
-                  <i class="fa fa-clone" style="font-size:20px;"></i>
-                </button>
-              </div>
-              <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
-            </div>
-          `).join("")}
-          ${
-          transcriptUrl
-              ? `
-              <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                <h6>${sessionUrls.length + 1}. Transcript</h6>
-                <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
-              </div>`
-              : ""
-          }
-        </div>`;
-    }
-    const summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
-        if (summaryAvailable) {
-            modalContent += `
-                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
-                    style="border-bottom:1px solid #eee;">
-                    <h4>${sessionUrls.length + 2}. Ai Summary</h4>
-                    <button class="btn btn-sm bg-white rounded" 
-                            style="border:1px solid #000; color:#000;" 
-                            onclick="showAiSummary('${entityId}', '${entityName}')">
-                        Summary
-                    </button>
-                </div>
-            `;
-        }
-        if (!summaryAvailable) {
-            modalContent += `
-                <div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" 
-                    style="border-bottom:1px solid #eee;">
-                    <h4>${sessionUrls.length + 2}. Generate Ai Summary</h4>
-                    <button class="btn btn-sm bg-white rounded" 
-                            style="border:1px solid #000; color:#000;" 
-                            onclick="generateAiSummary('${meetingId}', '${entityId}', '${entityName}')">
-                        Generate Summary
-                    </button>
-                </div>
-            `;
-        }
-  });
-
-  modalContent += `
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  var modalElement = $("#recordingModal");
-  if (modalElement.length > 0) {
-    modalElement.remove();
-  }
-
-  $("body").append(modalContent);
-  $("#recordingModal").modal("show");
-}
-
 function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId, startOfWeek, endOfWeek){
   startOfWeek = changeDateFormat(new Date(startOfWeek), "MMM-dd-yyyy");
   endOfWeek = changeDateFormat(new Date(endOfWeek), "MMM-dd-yyyy");
@@ -858,9 +712,6 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
             <tbody id="recurringRecordingsTableBody">
             ${data
             .map((session, index) => {
-              var id = session.entityId;
-              var type = "GENERAL_MEETINGS";
-              var summaryAvailable = checkAiSummaryAvailable(id, type);
               var sessionDate = new Date(session.startTime);
               var showRecordingButton = sessionDate >= pastDateLimit || USER_ROLE == "DIRECTOR";
               return`
@@ -903,40 +754,21 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
 
                           ${session.recordings.length > 0 ? (() => {
                             const transcriptUrl = session.recordings[session.recordings.length - 1];
-                            return transcriptUrl
-                              ? `
-                              <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                                <h6 style="font-size:13px;font-weight:700;">${session.recordings.length + 1}. Transcript</h6>
-                                <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
-                              </div>`
-                              : "";
-                          })() : ""}
-                          ${(() => {
-                              return `
-                                <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center"
-                                    style="border-bottom:1px solid #eee;">
-                                  
-                                  <h6 style="font-size:13px;font-weight:700;">
-                                    ${session.recordings.length + 2}. 
-                                    ${summaryAvailable ? "AI Summary" : "Generate AI Summary"}
-                                  </h6>
 
-                                  ${
-                                    summaryAvailable
-                                      ? `<button class="btn btn-sm bg-white rounded"
-                                                style="border:1px solid #000;color:#000;"
-                                                onclick="showAiSummary('${entityId}', 'GENERAL_MEETINGS')">
-                                            Summary
-                                        </button>`
-                                      : `<button class="btn btn-sm bg-white rounded"
-                                                style="border:1px solid #000;color:#000;"
-                                                onclick="generateAiSummary('${session.meetingId}','${entityId}', 'GENERAL_MEETINGS')">
-                                            Generate Summary
-                                        </button>`
-                                  }
-                                </div>
-                              `;
-                          })()}
+                            return transcriptUrl ? `
+                              <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center"
+                                  style="border-bottom:1px solid #eee;">
+                                <h6 style="font-size:13px;font-weight:700;">
+                                  ${session.recordings.length + 1}. Transcript / AI Summaries
+                                </h6>
+                                <button class="btn btn-sm bg-white rounded"
+                                        style="border:1px solid #000;color:#000;"
+                                        onclick="openTranscriptAndSummaryModal('${session.meetingId}','${entityId}','GENERAL_MEETINGS')">
+                                  Read
+                                </button>
+                              </div>
+                            ` : "";
+                          })() : ""}
                         </div>
                       </div>
                     </td>
@@ -993,7 +825,7 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
   });
 }
 
-function updateRecordingsTable(data, body) {
+function updateRecordingsTable(data, entityId) {
   var pastDateLimit = new Date();
   pastDateLimit.setDate(pastDateLimit.getDate() - recordingLimit);
   if (!data || data.length === 0) {
@@ -1056,43 +888,21 @@ function updateRecordingsTable(data, body) {
 
               ${session.recordings.length > 0 ? (() => {
                 const transcriptUrl = session.recordings[session.recordings.length - 1];
-                return transcriptUrl
-                  ? `
-                  <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                    <h6 style="font-size:13px;font-weight:700;">${session.recordings.length + 1}. Transcript</h6>
-                    <button class="btn btn-sm bg-white rounded" style="border: 1px solid #000; color: #000;" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
-                  </div>`
-                  : "";
-              })() : ""}
-              ${(() => {
-                var entityId = body.entityId;
-                var entityName = body.entityName;
-                var summaryAvailable = checkAiSummaryAvailable(entityId, entityName);
-                    return `
-                      <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center"
-                          style="border-bottom:1px solid #eee;">
-                        
-                        <h6 style="font-size:13px;font-weight:700;">
-                          ${session.recordings.length + 2}. 
-                          ${summaryAvailable ? "AI Summary" : "Generate AI Summary"}
-                        </h6>
 
-                        ${
-                          summaryAvailable
-                            ? `<button class="btn btn-sm bg-white rounded"
-                                      style="border:1px solid #000;color:#000;"
-                                      onclick="showAiSummary('${entityId}', '${entityName}')">
-                                  Summary
-                              </button>`
-                            : `<button class="btn btn-sm bg-white rounded"
-                                      style="border:1px solid #000;color:#000;"
-                                      onclick="generateAiSummary('${session.meetingId}','${entityId}', '${entityName}')">
-                                  Generate Summary
-                              </button>`
-                        }
-                      </div>
-                    `;
-                })()}
+                return transcriptUrl ? `
+                  <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center"
+                      style="border-bottom:1px solid #eee;">
+                    <h6 style="font-size:13px;font-weight:700;">
+                      ${session.recordings.length + 1}. Transcript / AI Summaries
+                    </h6>
+                    <button class="btn btn-sm bg-white rounded"
+                            style="border:1px solid #000;color:#000;"
+                            onclick="openTranscriptAndSummaryModal('${session.meetingId}','${entityId}','GENERAL_MEETINGS')">
+                      Read
+                    </button>
+                  </div>
+                ` : "";
+              })() : ""}
             </div>
           </div>
         </td>

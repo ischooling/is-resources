@@ -1144,21 +1144,17 @@ function approvedDemoRecording() {
 
 function openDemoRecordingModal(recordings, title) {
 	if (recordings && recordings.length > 0) {
-		populateRecordingModal(recordings, title);
+		populateRecordingModalForSignup(recordings, title);
 	} else {
 		showMessageTheme2(0, "No recordings available.");
 	}
-}
-
-function closeAllVideoModal(){
-	$("#recordingModal").modal("hide");
 }
 
 function closeTranscriptModal(){
 	$("#transcriptModal").modal("hide");
 }
 
-function playRecording(videoUrl, title) {
+function playRecordingSignup(videoUrl, title) {
 	var videoModal = $("#videoModal");
 	$.ajax({
 	  type: "GET",
@@ -1168,14 +1164,14 @@ function playRecording(videoUrl, title) {
 	  success: function (responseData) {
 		if (responseData.status == 0) {
 		  const signedUrl = responseData.url;
-		  if (videoModal.length == 0) {
+		  videoModal.remove();
 			$("body").append(`
-				<div id="videoModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;">
-					<div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%;margin: auto; margin-top:50px;">
-						<div class="">
+				<div id="videoModal" class="modal fade" tabindex="-1">
+					<div class="modal-dialog" style="max-width:70%; width: 100%;">
+						<div class="modal-content">
 							<div class="" style="padding: 15px 10px; background: #027FFF; display:flex; justify-content: space-between; align-items: center;">
 								<h5 class="mb-0" style="font-size: 18px; font-weight: bold; color: white;">Demo Video | ${title}</h5>
-								<button onclick="closeVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
+								<button onclick="closeVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
 							</div>
 							<div class="" style="padding: 20px;padding: 20px;display: flex;justify-content: center;">
 								<video class="videoTag w-100" style="height: 70vh; overflow-y: auto;" controls>
@@ -1187,17 +1183,10 @@ function playRecording(videoUrl, title) {
 					</div>
 				</div>
 			`);
-		  } else {
-			videoModal.find(".modal-title").text(title);
-			videoModal.find(".videoTag source").attr("src", signedUrl);
-			videoModal.find(".videoTag")[0]?.load();
-		  }
-  
-		  $("#videoModal").modal("show");
+		  	$("#videoModal").modal("show");
 		} else {
 		  showMessageTheme2(0, responseData.message || "Failed to fetch video URL");
 		}
-  
 		customLoader(false);
 	  },
 	  error: function (e) {
@@ -1205,104 +1194,6 @@ function playRecording(videoUrl, title) {
 		showMessageTheme2(0, "Error fetching video.");
 		customLoader(false);
 	  }
-	});
-}
-
-function closeVideoModal(){
-	const videoElement = $("#videoModal .videoTag")[0];
-	if (videoElement) {
-		videoElement.pause();
-		videoElement.currentTime = 0;
-	}
-	$("#videoModal").modal("hide");
-	$("#videoModal").remove();
-}
-
-function getURLForSignVideo(videoUrl) {
-	const payload = JSON.stringify({ url: videoUrl });
-	const encodePayload = window.btoa(payload);
-	return BASE_URL + CONTEXT_PATH + "videos/signed-url?payload=" + encodePayload;
-}
-  
-function getURLForTranscriptContent(transcriptUrl) {
-	var payload = JSON.stringify({ url: transcriptUrl });
-	var encodePayload = window.btoa(payload);
-	return BASE_URL + CONTEXT_PATH + "transcript/show-content?payload=" + encodePayload;
-}
-  
-function convertToVTT(videoUrl) {
-	if (!videoUrl.endsWith(".mp4")) {
-		return null;
-	}
-	const urlParts = new URL(videoUrl);
-	const filePath = urlParts.pathname.replace(
-		/\/([^\/]+)-(\d+\.\d+)\.mp4$/,
-		"/$1-transcript-$2.vtt"
-	);
-	let transcriptUrl = urlParts.origin + filePath;
-
-	if (transcriptUrl === videoUrl) {
-		const prefixUrl = "https://ischoolingwise.s3.us-east-1.amazonaws.com/recordings/";
-		const sessionId = videoUrl.split(prefixUrl)[1].split("-")[0];
-		transcriptUrl = `${prefixUrl}${sessionId}-transcript-1.1.vtt`;
-	}
-	return transcriptUrl;
-}
-  
-function displayVTT(content, title) {
-	const output = $("#transcript-modal-body");
-	output.empty();
-
-	if(content.includes("<Error><Code>")){
-		output.append(`<p style="font-size: 18px;">No Transcript Available</p>`)
-	} else {
-		var lines = content.split("\n");
-		lines.forEach(line => {
-		var p = $("<p></p>").text(line);
-		output.append(p);
-		});
-	}
-
-	$("#transcriptModalTitle").html(title);
-	$("#transcriptModal").modal("show");
-}
-  
-function showVTTFile(url, title) {
-	let transcriptModal = $("#transcriptModal");
-
-	if (transcriptModal.length === 0) {
-		$("body").append(`
-		<div id="transcriptModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;">
-			<div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%;margin: auto; margin-top:50px;">
-			<div class="" style="height: 100%; display: flex; flex-direction: column;">
-				<div style="padding: 15px 10px; background: #027FFF; display: flex; justify-content: space-between; align-items: center;">
-				<h5 id="transcriptModalTitle" style="font-size: 18px; font-weight: bold; color: #FFF; margin-bottom: 0px;">${title}</h5>
-				<button type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;" onclick="closeTranscriptModal();">&times;</button>
-				</div>
-				<div id="transcript-modal-body" class="text-left" style="flex-grow: 1; padding: 20px; height: 70vh; overflow-y: auto;">
-				<!-- Transcript content will be populated here -->
-				</div>
-			</div>
-			</div>
-		</div>
-		`);
-	}
-
-	customLoader(true);
-	const vttFile = convertToVTT(url);
-	$.ajax({
-		type: "GET",
-		contentType: APPLICATION_JSON_VALUE,
-		dataType: 'json',
-		url: getURLForTranscriptContent(vttFile),
-		success: function(responseData) {
-		customLoader(false);
-		displayVTT(responseData.content, title);
-		},
-		error: function() {
-		customLoader(false);
-		showMessageTheme2(0, "Failed to load transcript.");
-		}
 	});
 }
 

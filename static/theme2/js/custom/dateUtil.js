@@ -219,3 +219,17 @@ function minutesTo12Hr(mins) {
     if (h === 0) h = 12;
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} ${ampm}`;
 }
+
+function formatDateToYYYYMMDDHH(dateStr) {
+    if (!dateStr) return null;
+    
+    const date = new Date(dateStr);
+    if (isNaN(date)) return null;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const finalDate = year + '-' + month + '-' + day + " " + hours;
+    return finalDate;
+}

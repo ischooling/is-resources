@@ -2035,7 +2035,7 @@ function showSkeleton (isShow, skeletonType){
 }
 
 
-function populateRecordingModal(recordings, title) {
+function populateRecordingModalForSignup(recordings, title) {
     const titles = {
         "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
         "active_speaker.mp4": "Active Speaker",
@@ -2049,12 +2049,12 @@ function populateRecordingModal(recordings, title) {
     };
 
     let modalContent = `
-        <div id="recordingModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
-            <div style="background: white; border-radius: 12px; overflow: hidden; width: 70%; max-width: 70%; margin: auto; margin-top:50px;">
-                <div class="">
+        <div id="recordingModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog" style="max-width:70%; width: 100%;">
+                <div class="modal-content">
                     <div style="padding: 15px 10px; background: var(--pc); display: flex; justify-content: space-between; align-items: center;">
                         <h5 style="font-size: 18px; font-weight: bold; color: #FFF; margin-bottom: 0px;">Available Recordings | ${title}</h5>
-                        <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-bs-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
+                        <button onclick="closeAllVideoModal();" type="button" class="text-white btn btn-sm btn-danger" data-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
                     </div>
                     <div class="" style="padding: 20px; height: 70vh; overflow-y: auto">`;
                     const filteredRecordings = recordings.filter(urlObj => !urlObj.url.toLowerCase().endsWith('.json'));
@@ -2075,7 +2075,7 @@ function populateRecordingModal(recordings, title) {
             modalContent += `
                 <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
                     <h4>${index + 1}. ${label}</h4>
-                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="playRecording('${urlObj.url}', '${label}')">Play</button>
+                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="playRecordingSignup('${urlObj.url}', '${label}')">Play</button>
                 </div>
             `;
         });

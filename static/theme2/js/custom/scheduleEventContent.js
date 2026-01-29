@@ -446,7 +446,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 										+'<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="sendMailToInviteeForDemo(\''+item.meetingId+'\')">Send Mail</a>'
 										if(item.recordingCount != 0 && (USER_ROLE == "DIRECTOR" || meetingStartDateTime > pastDateLimit)){
 											html+='<br>'
-											+'<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openRecordingModal(\''+item.meetingId+'\',\'MEETINGS\',\''+item.inviteeName+'\',\''+item.meetingFor+'\',\''+item.meetingDate+'\',\''+item.meetingStartTime+'\',\''+item.name+'\',\''+item.meetingDateSingapore+'\',\''+item.meetingStartTimeSingapore+'\')">Recording <i class="fa fa-eye mt-2"><i/></a>'
+											+'<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openRecordingModal(\''+item.meetingId+'\',\'MEETINGS\',\''+item.inviteeName+'\',\''+item.meetingFor+'\',\''+item.meetingDate+'\',\''+item.meetingStartTime+'\',\''+item.name+'\',\''+item.meetingDateSingapore+'\',\''+item.meetingStartTimeSingapore+'\', \'SCHEDULE_EVENTS\')">Recording <i class="fa fa-eye mt-2"><i/></a>'
 										}
 									html+='</td>'
 								+'</tr>'

@@ -294,8 +294,9 @@ function openCourseDetailModal(courseDescriptionUrl, subjectName) {
         data: JSON.stringify(requestBody),
         success: function (response) {
             const data = JSON.parse(response);
+			const overview = data.data  || "No overview available.";
             modalContent.html(`
-                <p>${data.data.OVERVIEW || "No overview available."}</p>
+                <p>${overview}</p>
             `);
         }
     });

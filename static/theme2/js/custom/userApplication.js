@@ -349,7 +349,7 @@ function openUpdateStatusModalUserApplication(id, status, role, interviewStatus,
                 <td>`
                     if(interviewStatus== "Completed" || interviewStatus == "No Show"){
                         trRow+=
-                        `<a href="javascript:void(0)" class="btn btn-sm" title="Play Recording" onclick="openRecordingModal('${meetingId}', 'MEETINGS','', 'Interview', '', '')">
+                        `<a href="javascript:void(0)" class="btn btn-sm" title="Play Recording" onclick="openRecordingModal('${meetingId}', 'MEETINGS', '', 'Interview', '', '', '', '', '', 'USER_APPLICATIONS', '')">
                             <i class="fa fa-video-camera fa-2x text-danger"></i>
                         </a>`;
                     }else{
@@ -1249,35 +1249,6 @@ function ckEditorCountValidate(editor, elementId, counterEleId) {
         $(counterId).removeClass("text-red text-muted").addClass("text-success");
         return true;
     }
-}
-
-
-function openRecordingModal(entityId, entityType, meetingStartDate, title, startTime, hostName) {
-  const body = {
-    entityId: entityId,
-    entityName: entityType,
-    meetingDate: changeDateFormat(new Date(meetingStartDate), "yyyy-mm-dd"),
-    meetingType: entityType,
-  };
-  $.ajax({
-    type: "POST",
-    url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/leads/get-event-recordings",
-    data: JSON.stringify(body),
-    contentType: APPLICATION_JSON_VALUE,
-    success: function (response) {
-      const res = JSON.parse(response);
-      if (res.statusCode === 0 && res.status === "success") {
-        const recordings = res.data.recordingUrls;
-        if (recordings && recordings.length > 0) {
-          populateRecordingModal(recordings, meetingStartDate, title, startTime, hostName, body);
-        } else {
-          showMessageTheme2(0, "No recordings available.", '', true);
-        }
-      } else {
-        showMessageTheme2(0, `Error: ${res.message}`, '', true);
-      }
-    }
-  });
 }
 
 function openResendTeacherInterviewModal(userId, mailName, expiredDate){
