@@ -42,7 +42,7 @@ function paymentReportEventLoad(){
 		format: 'M d, yyyy',
 		todayHighlight: true,
 		autoclose: true,
-		
+		orientation: "bottom"
 	}).on('changeDate', function(){
 		$('#endDate').val("").datepicker("update");
 		$('#endDate').datepicker('setStartDate', new Date($(this).val()));
@@ -50,6 +50,7 @@ function paymentReportEventLoad(){
 	$('#endDate').datepicker({
 		autoclose: true,
 		format: 'M d, yyyy',
+		orientation: "bottom"
 	}); 
 	
 	// var d = new Date();
@@ -358,6 +359,10 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #academicYearStatus").val('');
 	$('#'+formID+" #teacherMapStaus").val('');
 	$('#'+formID+" #systemTrainStatus").val('');
+	$('#'+formID+" #progressMin").val('200');
+	$('#'+formID+" #progressMax").val('200');
+	$('#'+formID+" #transcriptStatus").val('');
+	$('#'+formID+" #recordingStatus").val('');
 	$('#'+formID+" #pageSize").val("10").trigger("change");
 	//getPaymentReportData('',false,1,'');
 	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');

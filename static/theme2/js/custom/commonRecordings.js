@@ -19,6 +19,9 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
     }else if(callFrom == "MEETING_MANAGEMENT" || callFrom == "USER_APPLICATIONS"){
         payload["meetingDate"] = changeDateFormat(new Date(meetingStartDate), "yyyy-mm-dd")
         payload["meetingType"] = entityType;
+    }else if(callFrom == "EXTRA_ACTIVITY"){
+        payload["meetingDate"] = changeDateFormat(new Date(meetingStartDate), "yyyy-mm-dd")
+        payload["meetingType"] = "CLASS";
     }
     $.ajax({
         type: "POST",

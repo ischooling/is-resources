@@ -69,7 +69,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "lead-setting":{url:"",file:[{role:"",fileName:["LeadSettingListContent.js","LeadSettings.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-daily-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/counselor-daily-report?moduleId="+moduleId+"&userId="+USER_ID},
         "lead-sales-research":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-sales-research?moduleId="+moduleId+"&userId="+USER_ID},
-        "extra-activity":{url:"add-extra-activity?moduleId="+moduleId,file:[{role:"",fileName:["dashboardExtraActivity.js","commonActivityModel.js","scheduleEventContent.js","scheduleEvent.js"]}],type:"JSP",pageReqType:"IN"},
+        "extra-activity":{url:"add-extra-activity?moduleId="+moduleId,file:[{role:"",fileName:["dashboardExtraActivity.js","commonActivityModel.js","scheduleEventContent.js","scheduleEvent.js", "commonRecordingsContent.js", "commonRecordings.js"]}],type:"JSP",pageReqType:"IN"},
         "email-status":{url:"",file:[{role:"",fileName:["emailLogsContent.js","emailLogs.js","emailVerifyContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "email-logs":{url:"",file:[{role:"",fileName:["emailLogsContent.js","emailLogs.js","emailVerifyContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "meeting-management":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/meeting-management-request?moduleId="+moduleId+"&schoolId="+SCHOOL_ID},

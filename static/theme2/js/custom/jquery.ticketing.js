@@ -1,12 +1,11 @@
 //ENVIRONMENT = 'dev';
 TICKET_BASE_URL = '';
 if (ENVIRONMENT == 'dev') {
-	TICKET_BASE_URL = 'http://localhost:8127/service-ticketing/';
-	TICKET_BASE_URL = 'http://164.52.216.248:8080/service-ticketing/';
+	TICKET_BASE_URL = 'http://164.52.203.90:8080/service-ticketing/';
 }else if (ENVIRONMENT == 'uat') {
-	TICKET_BASE_URL = 'http://164.52.198.42:8080/service-ticketing/';
+	TICKET_BASE_URL = 'http://164.52.203.90:8080/service-ticketing/';
 }else if (ENVIRONMENT == 'uat2') {
-	TICKET_BASE_URL = 'http://164.52.216.248:8080/service-ticketing/';
+	TICKET_BASE_URL = 'http://164.52.203.90:8080/service-ticketing/';
 }else if (ENVIRONMENT == 'prod') {
 	TICKET_BASE_URL = 'https://help.internationalschooling.org/';
 } else {
