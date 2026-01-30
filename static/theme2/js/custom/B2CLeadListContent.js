@@ -1733,8 +1733,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'<tr  class="" >'
 									+'<th class="border-0 p-1">Assigned To:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoAssignName!=''?leads.demoAssignName:'N/A')+'</td>'
-								+'</tr>'
-                if(USER_ROLE=='DIRECTOR'){
+								+'</tr>';
+                if(USER_ROLE=='DIRECTOR' || objectRights.searchUser){
                   if(leads.demoSummaryStatus){
                     html+='<tr>'
                           +'<td class="border-0 p-1">'
