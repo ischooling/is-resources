@@ -171,8 +171,8 @@ function convertToVTT(videoUrl) {
     return transcriptUrl;
 }
 
-function displayVTT(content) {
-    const output = $("#transcript-modal-body");
+function displayVTT(content, modalId) {
+    const output = $("#" + modalId + " #transcript-modal-body");
     output.empty();
     if (!content || content.includes("<Error><Code>")) {
         output.append(`<p style="font-size:16px;">No Transcript Available</p>`);
@@ -206,7 +206,7 @@ function showVTTFile(url, title) {
                 <div class="modal-content">
                     <div style="padding: 15px 10px; background: #027FFF; display: flex; justify-content: space-between; align-items: center;">
                         <h5 id="transcriptModalTitle" style="font-size: 18px; font-weight: bold; color: #FFF; margin-bottom: 0px;">${title}</h5>
-                        <button type="button" class="text-white btn btn-sm btn-danger" data-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;" onclick="closeTranscriptModal();">&times;</button>
+                        <button type="button" class="text-white btn btn-sm btn-danger" data-dismiss="modal" aria-label="Close" style="font-size: 20px !important; margin: 0; padding: 0px 8px;">&times;</button>
                     </div>
                     <div id="transcript-modal-body" class="text-left" style="flex-grow: 1; padding: 20px; height: 70vh; overflow-y: auto;">
                         <!-- Transcript content will be populated here -->
@@ -225,7 +225,7 @@ function showVTTFile(url, title) {
 		url: getURLForTranscriptContent(vttFile),
 		success: function(responseData) {
             customLoader(false);
-            displayVTT(responseData.content, title);
+            displayVTT(responseData.content, "transcriptModal");
             $("#transcriptModal").modal("show");
 		},
 		error: function() {
@@ -258,7 +258,7 @@ function formatOllamaText(text) {
 }
 
 function showTranscriptAndSummaryFromApi(apiResponse, meetingId, entityId, entityName) {
-    displayVTT(apiResponse.details.transcript);
+    displayVTT(apiResponse.details.transcript, "transcriptAndSummaryModal");
 
     if (apiResponse.details.zoomSummary) {
         var zoom = apiResponse.details.zoomSummary;

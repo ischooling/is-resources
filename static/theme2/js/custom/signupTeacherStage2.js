@@ -1150,10 +1150,6 @@ function openDemoRecordingModal(recordings, title) {
 	}
 }
 
-function closeTranscriptModal(){
-	$("#transcriptModal").modal("hide");
-}
-
 function playRecordingSignup(videoUrl, title) {
 	var videoModal = $("#videoModal");
 	$.ajax({
