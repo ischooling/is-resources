@@ -177,23 +177,30 @@ function displayVTT(content, modalId) {
     if (!content || content.includes("<Error><Code>")) {
         output.append(`<p style="font-size:16px;">No Transcript Available</p>`);
     } else {
-        const lines = content.split("\n");
-        lines.forEach(line => {
-            line = line.trim();
-            if (
-                line === "WEBVTT" ||
-                /^\d+$/.test(line) ||
-                line.includes("-->")
-            ) {
-                return;
-            }
+        var lines = content.split("\n");
+        if(modalId == "transcriptModal"){
+            lines.forEach(line => {
+                var p = $("<p></p>").text(line);
+                output.append(p);
+            });
+        }else{
+            lines.forEach(line => {
+                line = line.trim();
+                if (
+                    line === "WEBVTT" ||
+                    /^\d+$/.test(line) ||
+                    line.includes("-->")
+                ) {
+                    return;
+                }
 
-            if (line.length) {
-                output.append(
-                    `<p style="font-size:14px; margin-bottom:6px;">${line}</p>`
-                );
-            }
-        });
+                if (line.length) {
+                    output.append(
+                        `<p style="font-size:14px; margin-bottom:6px;">${line}</p>`
+                    );
+                }
+            });
+        }
     }
 }
 
