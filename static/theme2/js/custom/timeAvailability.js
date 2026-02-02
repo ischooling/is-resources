@@ -3508,7 +3508,6 @@ function callFreeSlotsToBookEvent(visitDate,dayId) {
 
 
 function getCalendarForMeeting(elementId,  startDate, slotType, timeZone) {
-	
 	var userId=$('#userId').val();
 	var eventId=$('#eventId').val();
 	var request = {userId:userId, eventId: eventId, startDate: startDate, slotType:slotType, timeZone:timeZone};
@@ -3572,6 +3571,33 @@ function getCalendarForMeeting(elementId,  startDate, slotType, timeZone) {
 					customLoader(false);
                 }
 				return false;
+		}
+	});
+}
+
+function getFinalSlotsToBook(elementId, timeZone, timezoneId) {
+	var userId=$('#userId').val();
+	var eventId=$('#eventId').val();
+	var userScreeningId=$('#userScreeningId').val();
+	var request = {userId:userId, eventId: eventId, timeZone: timeZone, userScreeningId: userScreeningId};
+	$.ajax({
+		type: "POST",
+		url: getURLFor('timeavailability', 'get-final-interview-slots-to-book'),
+		contentType: APPLICATION_JSON_VALUE,
+		data: JSON.stringify(request),
+		dataType: 'json',
+		cache: false,
+		async: true,
+		timeout: 600000,
+		success: function (data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessage(true, data['message']);
+			} else {
+				$("."+elementId).html('');
+				var html = renderSlotsList(data.finalSlotList, userId, timeZone, timezoneId);
+				$("."+elementId).html(html);
+			}
+			return false;
 		}
 	});
 }

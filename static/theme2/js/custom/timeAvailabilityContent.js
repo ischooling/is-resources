@@ -30,7 +30,13 @@ async function renderCounselorCotent(data){
 		$(".slot-wrapper").hide();
 		$("#bookSlotForEventForm #meetingZoneId").val($(this).val());
 		var selectDate=$("#meetingTodayDate").val();
-		 getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Month", ""+$(this).val()+"");
+		var timezone = $(this).val();
+		var timezoneId = $(this).find(":selected").attr("custom_timezone_id");
+		if($("#applicationStatus").val() == "Final Round of Interview"){
+			getFinalSlotsToBook("bookMeetingCalendar", timezone, timezoneId)
+		}else{
+			getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Month", timezone);
+		}
 		// if($("#meetingFor").val() == "Interview" || $("#meetingFor").val() == "Initial-Interview"){
 		// 	selectDate = new Date()
 		// 	getCalendarForMeeting("bookMeetingCalendar",""+selectDate+"","Week", ""+$(this).val()+"");
@@ -107,7 +113,6 @@ function getLocationAndSelectCountry() {
 }
 
 function getLocationAndSelectCountryFill(formId, locationData, uiData) {
-	console.log('locationData '+locationData)
 	if (locationData != undefined && locationData != '') {
 		if ($("#" + formId + " #countryTimezoneId").length) {
 			if(uiData.sendUserEmail){
@@ -268,7 +273,6 @@ function thankyouPageSkeleton(){
 
 
 function getCounselorCotent(data){
-	console.log(data);
 	var html = 
 		'<div class="app-container">'
 			+'<div class="app-main">'
@@ -707,5 +711,33 @@ function renderExpiredInterviewContent(){
 				</div>
 			</div>
 		</div>`
+	return html;
+}
+
+function renderSlotsList(finalSlotList, userId, timezone, timezoneId){
+	var meetingType = $("#meetingFor").val();
+	var html=``;
+	if (!finalSlotList || finalSlotList.length === 0) {
+        html = `<p class="text-muted">No slots available</p>`;
+        $("#finalSlotsContainer").html(html);
+        return;
+    }
+	html+=`<div class="d-flex justify-content-center align-items-center flex-column">
+		<p class="mb-0 col-8 text-left pl-0 font-16"><strong>Available Time Slots: </strong><p>`
+		finalSlotList.forEach((slot, index) => {
+			var displayDate = convertDatetimeWithFormat(slot.slotDate + " " + slot.startTime, 'UTC', timezone, DISPLAY_DATE_FORMATTER)
+			var startTime = convertDatetimeWithFormat(slot.slotDate + " " + slot.startTime, 'UTC', timezone, DISPLAY_TIME_FORMATTER);
+			var endTime = convertDatetimeWithFormat(slot.slotEndDate + " " + slot.endTime, 'UTC', timezone, DISPLAY_TIME_FORMATTER);
+			var displayLongDate = convertDatetimeWithFormat(slot.slotDate + " " + slot.startTime, 'UTC', timezone, DISPLAY_DATE_FORMATTER_COMPLETE);
+			html += `
+			<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 col-8">
+				<div>
+					<strong>${displayDate}</strong>
+					&nbsp; ${startTime} - ${endTime}
+				</div>
+				<a href="javascript:void(0);" class="btn btn-primary btn-sm rounded-10" onclick="scheduleEvent('${userId}', '${meetingType}', '${slot.slotDate}', '${slot.startTime}', '${slot.endTime}', '${startTime}', '${endTime}', '${timezone}', '${timezoneId}', '${displayLongDate}')">SELECT</a>
+			</div>`;
+		});
+	html+=`</div>`;
 	return html;
 }

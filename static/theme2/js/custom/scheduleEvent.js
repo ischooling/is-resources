@@ -179,15 +179,67 @@ function sendMailToInviteeForDemo(meetingId) {
 	 });
 }
 
-function updateMeetingStatus(meetingId, leadId) {
+function validateFinalRoundBeforeConfirmScheduleEvent() {
+    var eventStatus = $('#applicationStatus').val();
+    if (!eventStatus) {
+        showMessageTheme2(2, "Please select status");
+        return false;
+    }
+
+    if (!$("#assignedToInterview").val()) {
+        showMessageTheme2(2, "Please select assign to");
+        return false;
+    }
+
+    const slots = buildFinalSlotArray("scheduleEventMeetingStatus");
+    if (!slots) return false;
+
+    const remarks = $("#remarks").val()?.trim();
+    if (!remarks || remarks.length < 25) {
+        showMessageTheme2(2, "Remarks can not be less than 25 characters.");
+        return false;
+    }
+
+    return true;
+}
+
+async function updateMeetingStatus(meetingId, leadId) {
+    var eventStatus = $('#applicationStatus').val();
+    if (eventStatus == "Final Round of Interview") {
+        if (!validateFinalRoundBeforeConfirmScheduleEvent()) {
+            return;
+        }
+        if($("#finalSlotConfirmModal").length){
+            $("#finalSlotConfirmModal").remove();
+        }
+        $("body").append(finalSlotConfirmationModal());
+        $("#finalSlotConfirmModal").modal("show");
+        $("#finalSlotYesBtn").off("click").on("click", async function () {
+            $("#finalSlotConfirmModal").modal("hide");
+            await proceedUpdateMeetingStatus(meetingId, leadId);
+        });
+        $("#finalSlotNoBtn").off("click").on("click", function () {
+            $("#finalSlotConfirmModal").modal("hide");
+        });
+        return;
+    }
+    await proceedUpdateMeetingStatus(meetingId, leadId);
+}
+
+async function proceedUpdateMeetingStatus(meetingId, leadId) {
 	var status = $('#status').val();
     var userId = $('#userId').val();
     var eventStatus = $('#applicationStatus').val();
     var duration=0;
     var assignToUserId=0;
-    if(eventStatus!='' && eventStatus!=undefined && (eventStatus=='Another Round of Interview')){
+    var slotArray = [];
+    if(eventStatus!='' && eventStatus!=undefined && (eventStatus=='Another Round of Interview' || eventStatus=='Final Round of Interview')){
         duration=$('#duration').val();
         assignToUserId=$('#assignedToInterview').val();
+        if(eventStatus=='Final Round of Interview'){
+            slotArray = buildFinalSlotArray("scheduleEventMeetingStatus");
+            if (!slotArray) return false;
+        }
     }
     if(status=='COMPLETED'){
         if($("#meetingType").val()=='Initial-Interview' || $("#meetingType").val()=='Interview' ){
@@ -221,7 +273,7 @@ function updateMeetingStatus(meetingId, leadId) {
             return false;
         }
         if(remarks.length < minMendatoryCount){
-             showMessageTheme2(0, "Minimum " + minMendatoryCount+ " character required.",'',true);
+            showMessageTheme2(0, "Minimum " + minMendatoryCount+ " character required.",'',true);
             return false;
         }
     }
@@ -235,7 +287,6 @@ function updateMeetingStatus(meetingId, leadId) {
 		$('#confirmeUpdateSystemTraningModal').modal('show');
 		return false;
 	}
-
 	var data={};
 	data['meetingId']=meetingId;
 	data['leadId']=leadId;
@@ -248,15 +299,16 @@ function updateMeetingStatus(meetingId, leadId) {
     data['eventStatus']=eventStatus;
     data['duration']=duration;
     data['assignToUserId']=assignToUserId;
+    data["slotsList"] = slotArray;
 	customLoader(true);
-	 $.ajax({
-		 type : "POST",
-		 contentType : APPLICATION_JSON_VALUE,
-		 url : getURLForHTML('timeavailability','update-meeting-status'),
-		 data : JSON.stringify(data),
-		 dataType : 'json',
-		 async:true,
-		 success : function(data) {
+	$.ajax({
+        type : "POST",
+        contentType : APPLICATION_JSON_VALUE,
+        url : getURLForHTML('timeavailability','update-meeting-status'),
+        data : JSON.stringify(data),
+        dataType : 'json',
+        async:true,
+        success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if(data['status'] == '3'){
 					redirectLoginPage();
@@ -265,7 +317,7 @@ function updateMeetingStatus(meetingId, leadId) {
 				}
 			} else {
                 if(eventStatus!='' && eventStatus!=undefined && (eventStatus=='Another Round of Interview' || eventStatus=='Final Round of Interview') && assignToUserId!=userId){
-                     $('#confirmeUpdateSystemTraningModal').modal('hide');
+                    $('#confirmeUpdateSystemTraningModal').modal('hide');
                     $('#updateSystemTraningModal').modal('hide');					
                     showMessageTheme2(1, data['message'],'',true);
                     customLoader(false);
@@ -280,8 +332,8 @@ function updateMeetingStatus(meetingId, leadId) {
                     customLoader(false);
                 }
 			}
-		 }
-	 });
+		}
+	});
 }
 
 
@@ -383,21 +435,34 @@ function callScheduleLeadSourceList(formId, value, elementId, keyStatus) {
 }
 
 function showAndHideDuration(formId){
-    if($("#"+formId+ " #applicationStatus").val() == "Another Round of Interview"){
+    if($("#"+formId+ " #applicationStatus").val() == "Another Round of Interview" || $("#"+formId+ " #applicationStatus").val() == "Final Round of Interview"){
         $("#"+formId+ " #durationDiv").show();
         $("#"+formId+ " #assignedToInterviewDiv").show();
         $("#"+formId+ " #interviewValidDateDiv").show();
-        // if($("#"+formId+ " #applicationStatus").val() == "Final Round of Interview"){
-        //     $("#"+formId+ " #duration option[value='15']").remove(); 
-        // }else{
-        //     if($("#"+formId+ " #duration option[value='15']").length === 0) {
-        //         $("#"+formId+ " #duration option[value='30']").before('<option value="15">15 Min</option>');
-        //     }
-        // }
+        if($("#"+formId+ " #applicationStatus").val() == "Final Round of Interview"){
+            $("#"+formId+ " #duration option[value='15']").remove();
+            var slotsCountSetting = getSettingsByTypeAndKey('CONFIGURATION','FINAL_INTERVIEW_SLOTS_COUNT');
+            FINAL_INTERVIEW_SLOTS_COUNT = parseInt(JSON.parse(slotsCountSetting).data.metaValue);
+            var slotsIntervalSetting = getSettingsByTypeAndKey('CONFIGURATION','FINAL_INTERVIEW_SLOTS_INTERVAL');
+            FINAL_INTERVIEW_SLOTS_INTERVAL = parseInt(JSON.parse(slotsIntervalSetting).data.metaValue);
+            renderFinalInterviewSlots(formId);
+            // $(".slot-date").datepicker({
+            //     format: "M dd, yyyy",
+            //     autoclose: true,
+            //     startDate: new Date()
+            // })
+            $("#"+formId + " #finalInterviewSlotsWrapper").show();
+        }else{
+            if($("#"+formId+ " #duration option[value='15']").length === 0) {
+                $("#"+formId+ " #duration option[value='30']").before('<option value="15">15 Min</option>');
+            }
+            $("#"+formId + " #finalInterviewSlotsWrapper").hide();
+        }
     }else{
         $("#"+formId+ " #durationDiv").hide();
         $("#"+formId+ " #assignedToInterviewDiv").hide();
         $("#"+formId+ " #interviewValidDateDiv").hide();
+        $("#"+formId + " #finalInterviewSlotsWrapper").hide();
     }
 }
 

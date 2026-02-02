@@ -294,6 +294,9 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                     <option value="30">30 Min</option>
                                 </select>
                             </div>
+
+                            <div id="finalInterviewSlotsWrapper" style="display: none;"></div>
+                            
                             <div id="questionsDiv" class="form-group" style="display:none;">
                                 <label>Questions</label>
 
@@ -720,8 +723,8 @@ function allQuestionsContent(data) {
 
 function resendTeacherInterviewModalContent(userId, mailName){
     var html=
-        `<div class="modal fade show" id="resendTeacherInterviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
-            <div class="modal-dialog" style="max-width: 500px;" role="document">
+        `<div class="modal fade show" id="resendInterviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+            <div class="modal-dialog" style="max-width: ${status == 'Final Round of Interview' ? '768px;' : '500px;'}" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
                         <h5 class="modal-title">Resend Interview Link</h5>
@@ -730,17 +733,40 @@ function resendTeacherInterviewModalContent(userId, mailName){
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="row justify-content-center" id="resendTeacherInterviewForm">
-                            <div class="col-12 text-center">
-                                <label>Interview Link is valid till:</label>
-                            </div>
-                            <div class="col-12 d-flex justify-content-center align-items-center">
-                                <input type="text" class="form-control col-4" id="interviewBookLinkExpireDate" readonly onkeydown="return false"/>
-                                <i class="fa fa-exclamation-triangle text-danger ml-2 font-26 d-none" aria-hidden="true"></i>
-                            </div>
-                        </div>
+
+                        <form class="row ${status == 'Final Round of Interview' ? '' : 'justify-content-center'}" id="resendInterviewForm">`
+                            if(status == "Final Round of Interview"){
+                                html+=
+                                `<div class="col-md-6 col-12">
+                                    <label>Assigned To</label>
+                                    <select id="assignedToInterview" class="form-control"></select>
+                                </div>
+                                <div class="col-md-6 col-12">
+                                    <label>Interview Link is valid till <i class="fa fa-exclamation-triangle text-danger ml-2 font-20 d-none" aria-hidden="true"></i></label>
+                                    <input type="text" class="form-control" id="interviewBookLinkExpireDate" readonly onkeydown="return false"/>
+                                </div>
+                                <div class="col-md-6 col-12 mt-1">
+                                    <label>Duration</label>
+                                    <select id="duration" class="form-control" disabled>
+                                        <option value="30">30 Min</option>
+                                    </select>
+                                </div>
+
+                                <div id="finalInterviewSlotsWrapper" style="display: none;" class="col-12 mt-1"></div>`
+                            }else{
+                                html+=
+                                `<div class="col-12 text-center">
+                                    <label>Interview Link is valid till:</label>
+                                </div>
+                                
+                                <div class="col-12 d-flex justify-content-center align-items-center">
+                                    <input type="text" class="form-control col-4" id="interviewBookLinkExpireDate" readonly onkeydown="return false"/>
+                                    <i class="fa fa-exclamation-triangle text-danger ml-2 font-26 d-none" aria-hidden="true"></i>
+                                </div>`
+                            }
+                        html+=`</form>
                         <div class="float-right mt-3">
-                            <a href="javascript:void(0);" class="btn btn-primary" onclick="resendTeacherInterviewLinkJA('${userId}', '${mailName}')">Resend Link</a>
+                            <a href="javascript:void(0);" class="btn btn-primary" onclick="resendInterviewLinkJA('${userId}', '${mailName}', '${status}')">Resend Link</a>
                         </div>
                     </div>
                 </div>

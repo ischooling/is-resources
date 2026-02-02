@@ -210,6 +210,23 @@ function isExpired(expiredDate) {
     return exp < today;
 }
 
+function generateTimeOptions(interval, selectedTime) {
+    let html = `<option value="">Select time</option>`;
+    let selectedMinutes = null;
+    if (selectedTime) {
+        const parts = selectedTime.split(":");
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        selectedMinutes = (h * 60) + m;
+    }
+    for (let i = 0; i <= 1410; i += interval) {
+        html+=`<option value="${i}" ${i === selectedMinutes ? "selected" : ""}>
+            ${minutesTo12Hr(i)}
+        </option>`;
+    }
+    return html;
+}
+
 function minutesTo12Hr(mins) {
     mins = mins % 1440;
     let h = Math.floor(mins / 60);
@@ -232,4 +249,22 @@ function formatDateToYYYYMMDDHH(dateStr) {
     const hours = String(date.getHours()).padStart(2, '0');
     const finalDate = year + '-' + month + '-' + day + " " + hours;
     return finalDate;
+}
+
+
+function minutesTo24Hrs(min) {
+    min = min % 1440;
+    const h = String(Math.floor(min / 60)).padStart(2, "0");
+    const m = String(min % 60).padStart(2, "0");
+    return `${h}:${m}:00`;
+}
+
+function minutesToAmPm(totalMinutes) {
+    const hour24 = Math.floor(totalMinutes / 60);
+    const minute = totalMinutes % 60;
+
+    const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+    const ampm = hour24 < 12 ? "AM" : "PM";
+
+    return `${String(hour12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${ampm}`;
 }

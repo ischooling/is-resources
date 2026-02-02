@@ -557,6 +557,7 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 											+'<label for="interviewValidDate" class="control-label">Interview link is valid till</label>'
 											+'<input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled />'
 										+'</div>'
+										+'<div id="finalInterviewSlotsWrapper" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2" style="display: none;"></div>'
 									}
 									html+='<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
 										+'<label class="mb-0">Tentative Date</label>'
