@@ -1822,7 +1822,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								}	
 								html+='<tr>'
 									+'<th class="border-0 p-1" style="width:165px">Last Remarks:</th>'
-									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">';
+									+'<td class="border-0 p-1 leadlist-remark-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-leadno-bg':'')+'">'
+                  +'<div style="max-height: 100px; overflow-y: auto;">'
                   if (leads.followupRemark.includes("Lead already exists.")) {
                       console.log("Contains jQuery!");
                       var arrf = leads.followupRemark.split("-"); 
@@ -1857,6 +1858,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										// 		+'<p class="m-0 leadlist-remark-'+leads.leadId+'">'+(leads.followupRemark!=''?leads.followupRemark:'N/A')+'</p>'
 										// 	+'</div>'
 										// +'</div>'
+                    +'</div>'
 									+'</td>'
 								+'</tr>';
 								if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo  || USER_ID == leads.leadSupportTo){
