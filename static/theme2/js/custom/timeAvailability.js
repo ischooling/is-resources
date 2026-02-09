@@ -3911,7 +3911,7 @@ function scheduleMeetingForEvent(formId){
 
 function getRequestForSubmitMeetingForEvent(formId){
 	var meetingSlotDTO= {};
-	
+	meetingSlotDTO['leadId'] = $('#leadId').val();
 	meetingSlotDTO['timezone'] = $('#'+formId+' #meetingTimzoneId').val();
 	meetingSlotDTO['timeZoneCheck'] = $("#" + formId + " #userTimeZone").val();
 	meetingSlotDTO['meetingPersoneId'] = 0;
