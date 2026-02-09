@@ -1681,43 +1681,57 @@ function validateRequestForsaveBuzzSemester(formId){
 
 //	return status;
 }
-function saveBuzzSemester(formId, moduleId, studentStandardId) {
+function saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag) {
 	hideModalMessage();
 	if(!validateRequestForsaveBuzzSemester(formId)){
 		return false;
 	}
+	var flag=false;
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','save-student-buzz-semester'),
 		data : JSON.stringify(getRequestForSaveBuzzSemester(formId)),
 		dataType : 'json',
-		cache : false,
-		timeout : 600000,
+		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0, data['message']);
+				return false;
 			} else {
 				showMessageTheme2(1, data['message']);
-				setTimeout(function(){ 
-					$('#studentBuzzSemesterModel').modal('hide'); 
-					$('.modal-backdrop').remove();
-					$('body').removeClass('modal-open');
-					$('body').css({"padding":"0"});
-				}, 800);
-				setTimeout(function(){ callForBuzzSession('EDIT', moduleId,studentStandardId); }, 800);
+				if(saveAndSyncFlag=='SAVE'){
+					setTimeout(function(){ 
+						$('#studentBuzzSemesterModel').modal('hide'); 
+						$('.modal-backdrop').remove();
+						$('body').removeClass('modal-open');
+						$('body').css({"padding":"0"});
+					}, 800);
+				
+					setTimeout(function(){ callForBuzzSession('EDIT', moduleId,studentStandardId); }, 800);
+				}
 //				$("#sessionAddNew").show();
 //    			$("#sessionSave").hide();
 //				callSemesterStartDateEntry(studentId);
 				/*$('#studentSemesterStartDateEntryModel').modal('hide');
 				setTimeout(function(){ callDashboardPageSchool('2b','studentTab','','&schoolId='+SCHOOL_ID); }, 1000);*/
 			}
-			return false;
+			flag= true;
 		},
 		error : function(e) {
 			console.log("ERROR : ", e);
 		}
 	});
+	return flag;
+}
+
+function saveAndSyncBuzzSemester(formId, moduleId, studentStandardId, courseProviderId, saveAndSyncFlag) {
+	let status = saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag);
+	if(status){
+		let syncFunc = 'syncAll("'+formId+'", "STUDENT", '+courseProviderId+')';
+		showWarningMessageShow('Are you sure you want to sync this data? Syncing this data will create a new enrollment/update the enrollment for the student in the LMS?', syncFunc);
+	}
+	
 }
 function getRequestForSaveBuzzSemester(formId){
 	var request = {};

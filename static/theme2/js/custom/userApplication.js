@@ -45,7 +45,6 @@ async function userApplicationProfileOnloadFunction(){
         <option value="Approved For Interview">Approved For Interview</option>
         <option value="Accepted for Contract">Accepted for Contract</option>
         <option value="Another Round of Interview">Another Round of Interview</option>
-        <option value="Final Round of Interview">Another Round of Interview</option>
         <option value="Final Round of Interview">Final Round of Interview</option>`;
         if (extra == "TEACHER") {
             html+=`<option value="Approved for Selection Process">Approved for Selection Process</option>
@@ -74,6 +73,9 @@ async function userApplicationProfileOnloadFunction(){
     FINAL_INTERVIEW_SLOTS_COUNT = parseInt(JSON.parse(slotsCountSetting).data.metaValue);
     var slotsIntervalSetting = getSettingsByTypeAndKey('CONFIGURATION','FINAL_INTERVIEW_SLOTS_INTERVAL');
     FINAL_INTERVIEW_SLOTS_INTERVAL = parseInt(JSON.parse(slotsIntervalSetting).data.metaValue);
+    let payload = {}
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
+    bindAssignToJA('userScreeningFilterForm', 'filterAssignedTo', responseData);
 }
 
 function showFilterUserApplication(){
@@ -274,6 +276,7 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
             var role = USER_APPLICATION_FILTER_STATE.filterValues.appliedUserRole;
             payload['appliedUserRole'] = role ? (role.startsWith("'") ? role : `'${role}'`): "";
         }
+        payload['assignTo'] = USER_APPLICATION_FILTER_STATE.filterValues.assignTo || "";
         payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
         payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-user-screening-data', payload, '/teacher/signup');
@@ -325,6 +328,7 @@ function updateFormState() {
         status: $("#userScreeningFilterForm #applicantsStatus").val().trim(),
         startDate: $("#userScreeningFilterForm #filterStartDate").val(),
         endDate:  $("#userScreeningFilterForm #filterEndDate").val(),
+        assignTo:  $("#userScreeningFilterForm #filterAssignedTo").val(),
     };
 }
 

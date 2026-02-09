@@ -47,6 +47,12 @@ function userScreeningFilter(){
             </div>
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                    <label>Assigned To</label>
+                    <select id="filterAssignedTo" class="form-control">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>Applied User Role</label>
                     <select name="filterAppliedUserRole" id="filterAppliedUserRole" class="form-control">
                         <option value=""></option>`

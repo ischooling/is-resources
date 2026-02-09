@@ -120,7 +120,7 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 			$("#filterCourses").select2({
 				theme:"bootstrap4",
 			});
-			
+			teacherScreeningProfileOnloadFunction();
 		}else if(pageNo == "teacher-profile"){
 			renderReceivedTeachedProfileListDashboard('Received Teacher Profile', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE);
 		}else if(pageNo == "pending-interview-remarks"){
