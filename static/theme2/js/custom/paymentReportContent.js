@@ -185,7 +185,7 @@ function cardDetails(data){
 											<span class="field-value trans5s ${item.systemOrientStatus!='COMPLETED' ? 'text-danger' : 'text-success'}">${item.systemOrientStatus} - ${item.systemOrientDate=='' ? 'Not selected' : item.systemOrientDate}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Teacher Mapping:</label>
+											<label class="label bold">Teacher / Batch Mapping:</label>
 											<span class="field-value trans5s ">${item.teacherMapStaus>0?'Completed':'Pending'}`;
 											// if(item.teacherMapStaus==0){
 											// 	html+=`&nbsp;&nbsp;<a href="javascript:void(0);" class="" onclick="return callAssignStudentTeacher('formId','${item.studentId}','true','true','true','${item.updateProfileStudentDTO.standardId}');"><i class="fa fa-eye"></i></a>`;
@@ -704,7 +704,7 @@ function filterStudentPaymentReportForm(){
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Teacher Mapping</label>'
+							+'<label>Teacher / Batch Mapping</label>'
 							+'<select name="teacherMapStaus" id="teacherMapStaus" class="form-control">'
 								+'<option value="">Select Teacher Mapping</option>'
 								+'<option value="1">Completed</option>'
@@ -726,7 +726,8 @@ function filterStudentPaymentReportForm(){
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Enroll Status</label>'
 							+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								+'<option value="0">Completed</option>'
+								+'<option value="0">Completed- New enrollment</option>'
+								+'<option value="4">Completed- Re enrollment</option>'
 								+'<option value="1">Withdrawn</option>'
 								+'<option value="2">Partial entry - New enrollment</option>'
 								+'<option value="3">Partial entry - Re-enrollment</option>'
@@ -793,6 +794,14 @@ function filterStudentPaymentReportForm(){
 						+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Student Status</label>'
+							+'<select name="studentStatus" id="studentStatus" class="form-control">'
+								+'<option value="">Select Student Status</option>'
+								+'<option value="1">Active</option>'
+								+'<option value="0">Inactive</option>'
+							+'</select>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>LMS Status</label>'
 							+'<select name="lmsStatus" id="lmsStatus" class="form-control">'
 								+'<option value="">Select LMS Status</option>'
@@ -809,7 +818,7 @@ function filterStudentPaymentReportForm(){
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Recording Status</label>'
+							+'<label>Call Recording Status</label>'
 							+'<select name="recordingStatus" id="recordingStatus" class="form-control">'
 								+'<option value="">Select Status</option>'
 								+'<option value="Y">Yes</option>'

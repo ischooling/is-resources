@@ -5654,7 +5654,11 @@ function getSession() {
 function callWithSession(url, isSelf) {
   if (getSession()) {
     if (isSelf) {
-      goAheadGet(url);
+      if (url.includes('/show-additional-layer')) {
+        window.open(url,'_self');
+      }else{
+        goAheadGet(url,"");
+      }
     } else {
       window.open(url);
     }

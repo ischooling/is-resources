@@ -20,7 +20,7 @@ function paymentReportEventLoad(){
 		theme:'bootstrap4',
 	});
 	
-	$("#enrollStatus").val(["0"]).trigger("change");
+	$("#enrollStatus").val(["0","4"]).trigger("change");
 	//$("#paymentStatus").val(["ODUE","DUE"]).trigger("change");
 	
 	// $("#studentName").on("keyup", function() {
@@ -121,7 +121,11 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 				if(data['status'] == '3'){
 					redirectLoginPage();
 				}else{
-					showMessageTheme2(0, data['message'],'',true);
+					if(forCountOnly){
+						showMessageTheme2(0, data['message'],'',true);
+					}else{
+						showMessageTheme2(0, 'Data not found','',true);
+					}
 				}
 				$('#pagination').twbsPagination('destroy');
 				$('#consolidate').html('');
@@ -226,7 +230,9 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	var PaymentReportRequestDTO={};
 	PaymentReportRequestDTO['schoolId'] = SCHOOL_ID;
 	PaymentReportRequestDTO['loginUserId'] = USER_ID;
-	PaymentReportRequestDTO['studentName'] = $('#studentName').val();
+	PaymentReportRequestDTO['studentName'] = $('#studentName').val()
+    ? $('#studentName').val().replace(/\s+/g, ' ').trim()
+    : '';
 	if($('#startDate').val()!=''){
 		PaymentReportRequestDTO['startDate'] = changeDateFormat(new Date($('#startDate').val()), 'yyyy-mm-ddd')+' 00:00:00';
 	}
@@ -271,6 +277,9 @@ function getRequestForPaymentReport(formId, type, forDownload){
     if ($('#progressMax').val() != ''){
         PaymentReportRequestDTO['progressMax'] = $('#progressMax').val();
     }
+	if ($('#studentStatus').val() !=''){
+		PaymentReportRequestDTO['studentStatus'] =$('#studentStatus').val();
+	}
 	if($('#lmsStatus').val()!=''){
 		PaymentReportRequestDTO['lmsStatus'] = $('#lmsStatus').val();
 	}
@@ -326,9 +335,10 @@ function pageCount(records){
 		prev: "Prev",  
 		onPageClick: function (event, page) {
 			$("#pageNumber").val(page);
-			if(page>1){
-				getPaymentReportData('',false,2,'')
-			}
+			getPaymentReportData('', false, 2, '');
+			// if(page>1){
+			// 	getPaymentReportData('',false,2,'')
+			// }
 			//$(".getPaymentReportData")[0].onclick();
 			//fetch content and render here
 			//$("#page-content").text ("Page? + page) + ?content here";
@@ -349,6 +359,7 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #learningPlatform").val("").trigger("change");
 	$('#'+formID+" #learningProgram").val("").trigger("change");
 	$('#'+formID+" #gradeId").val("").trigger("change");
+	$('#'+formID+" #enrollStatus").val(["0","4"]).trigger("change");
 	$('#'+formID+" #paymentStatus").val('').trigger("change");//["ODUE","DUE"]
 	$('#'+formID+" #userId").val("").trigger("change");
 	$('#'+formID+" #overDueBy").val("0");
@@ -361,6 +372,7 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #systemTrainStatus").val('');
 	$('#'+formID+" #progressMin").val('200');
 	$('#'+formID+" #progressMax").val('200');
+	$('#'+formID+" #studentStatus").val('');
 	$('#'+formID+" #transcriptStatus").val('');
 	$('#'+formID+" #recordingStatus").val('');
 	$('#'+formID+" #pageSize").val("10").trigger("change");

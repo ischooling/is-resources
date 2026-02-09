@@ -36,14 +36,23 @@ async function rendereDashboardContent(isParent){
         }
         var dashboardData=getStudentDashboardDetails();
         if(dashboardData.showGraduationCeremonyPopup == "Y"){
-            if($("#graduationCeremonyModal").length >= 1){
-                $("#graduationCeremonyModal").remove();
+            if($("#enrollPaymentModal").length >= 1){
+                $("#enrollPaymentModal").remove();
             }
-            $("body").append(studentGraduationCeremontPopup());
-            setTimeout(() => {
-                $("#graduationCeremonyModal").modal("show");
-            }, 2000);
+            // $("body").append(enrollPaymentModalContent());
+            // setTimeout(() => {
+            //     $("#enrollPaymentModal").modal("show");
+            // }, 2000);
         }
+        // if (dashboardData.inactiveFlag) {
+        //     if($("#enrollPaymentModal").length >= 1){
+        //         $("#enrollPaymentModal").remove();
+        //     }
+        //     $("body").append(enrollPaymentModalContent());
+        //     setTimeout(() => {
+        //         $("#enrollPaymentModal").modal("show");
+        //     }, 2000);
+        // }
         videoUrl=dashboardData.videoUrl;
         if (isParent!=="false") {
             dashboardData ['isParent'] = true;
