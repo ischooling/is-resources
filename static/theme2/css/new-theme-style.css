@@ -9755,7 +9755,7 @@ transition-duration:.25s;
 	text-indent:-99rem;
 	transition:all .3s ease;
 }
-.nav-foot-fixed{max-width:280px;width:280px; text-indent:0rem;position: fixed;bottom: 22px;left: 0;background: #fff;border-top:1px solid #ededed;padding-top:8px;transition:all .3s ease;}
+.nav-foot-fixed{max-width:280px;width:280px; text-indent:0rem;position: fixed;bottom: 0px;left: 0;background: #fff;border-top:1px solid #ededed;padding-top:8px;transition:all .3s ease;}
 .vertical-nav-menu li .without-cursor-nav {
 	display:block;
 	/*line-height:2.4rem;*/
@@ -9895,11 +9895,13 @@ transition-duration:.25s;
 	border: 1px solid #e0f3ff
 }
 /* EXTRA ACTIVITY COUNTER CSS START */ 
+.join-activity-disabled.bg-success.join-activity-btn{pointer-events: none;background-color:#ddd !important}
 .count-div {
 	display: inline-block;
 	line-height: 1;
 	padding: 0px 12px;
 	font-size: 40px;
+	margin-right:5px
   }
 .counter-div > .counter-wrapper-div{
 	display:flex;
@@ -9921,14 +9923,14 @@ transition-duration:.25s;
 	text-align:center;
 	display:inline-block;
 	margin-left:3px;
-	font-size:14px;
+	/* font-size:14px; */
 }
   .count-span {
 	display: block;
 	font-size: 11px;
 	color: #0179ff;
-	font-weight:700;
-	margin-top:4xp;
+	font-weight:400;
+	margin-top:4px;
 	
   }
   
@@ -31172,7 +31174,7 @@ display:block
 }
 }
 @media (max-width: 991.98px) {
-.app-page-title .page-title-icon, .ui-theme-settings {
+.app-page-title .page-title-icon, .ui-theme-settings:not(.custome-ui-theme-settings) {
 display:none
 }
 .card-header.responsive-center {
@@ -31279,16 +31281,16 @@ right:15px
 }
 }
 @media only screen and (min-width: 1200px) and (max-width: 1500px) {
-.profile-responsive .dropdown-menu-header .menu-header-content.btn-pane-right {
-display:block;
-text-align:center
-}
-.profile-responsive .dropdown-menu-header .menu-header-content.btn-pane-right .avatar-icon-wrapper {
-margin-right:0 !important
-}
-.profile-responsive .dropdown-menu-header .menu-header-content.btn-pane-right .menu-header-btn-pane {
-margin-top:1rem
-}
+	.profile-responsive .dropdown-menu-header .menu-header-content.btn-pane-right {
+	display:block;
+	text-align:center
+	}
+	.profile-responsive .dropdown-menu-header .menu-header-content.btn-pane-right .avatar-icon-wrapper {
+	margin-right:0 !important
+	}
+	.profile-responsive .dropdown-menu-header .menu-header-content.btn-pane-right .menu-header-btn-pane {
+	margin-top:1rem
+	}
 }
 .ui-theme-settings {
 	position:fixed;
@@ -31297,26 +31299,13 @@ margin-top:1rem
 	top:0;
 	height:100vh;
 	transform:translate(500px);
-transition:all .2s;
+	transition:all .2s;
 	box-shadow:-0.46875rem 0 2.1875rem rgba(4, 9, 20, 0.03), -0.9375rem 0 1.40625rem rgba(4, 9, 20, 0.03), -0.25rem 0 0.53125rem rgba(4, 9, 20, 0.05), -0.125rem 0 0.1875rem rgba(4, 9, 20, 0.03)
 }
-.custome-ui-theme-settings.ui-theme-settings{max-width: 500px;background-color: #fff;max-height: calc(100vh -  80px);top:73px !important}
-/* #TooltipDemo:hover  .custome-ui-theme-settings.ui-theme-settings{transform:translate(0px);right:0} */
 
-.custome-ui-theme-settings{padding-bottom:60px}
-#annoucement-news-oppner{position: absolute;right:0;bottom:0;height:60px;z-index: 999;}
-#annoucement-news-oppner button{left:inherit !important;bottom:0 !important}
-.custome-ui-theme-settings.ui-theme-settings{max-width:500px;transform:translate(410px);background-color: #fff;}
- 
-.custome-ui-theme-settings .ui-theme-settings-opacity-0{opacity: 0;}
-.custome-ui-theme-settings:hover .ui-theme-settings-opacity-0{opacity: 1;}
-
-
-body:has(.ui-theme-settings.custome-ui-theme-settings:hover) {
-    overflow: hidden;
-}
-
-
+.right_fixed_action{width:50px;padding:10px 5px;background:#fff; border-top-left-radius:5px;border-bottom-left-radius:5px;position:fixed;top:73px; right:0 }
+.close-right-slide-bar-btn{display:none !important}
+.settings-open .close-right-slide-bar-btn{display:inline-block !important }
 .ui-theme-settings .btn-open-options {
 	border-radius:50px;
 	position:absolute;
@@ -31331,6 +31320,28 @@ body:has(.ui-theme-settings.custome-ui-theme-settings:hover) {
 	box-shadow:0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03), 0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03), 0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05), 0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
 	margin-top:-27px
 }
+.custom-btn-open-options {
+	border-radius:50px;
+	padding:0;
+	height:35px;
+	line-height:35px;
+	width:35px;
+	text-align:center;
+	display:block;
+	box-shadow:0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03), 0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03), 0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05), 0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
+	margin-top:0px;
+	border-radius:50%;
+	margin-bottom: 20px;
+
+}
+.custom-btn-open-options:last-child {
+	margin-bottom: 0;
+}
+
+
+
+.custome-ui-theme-settings.ui-theme-settings{max-width:500px;width:95%; background-color: #fff;right:0}
+.custom-btn-open-options .counts-badge{position: absolute;right:-8px;top:-8px;width:fit-content;font-size:10px;background:red;color:#fff;display: inline-block;padding: 5px;}
 .ui-theme-settings .btn-open-options svg {
 	top:50%;
 	left:50%;
@@ -31343,9 +31354,11 @@ body:has(.ui-theme-settings.custome-ui-theme-settings:hover) {
 	height:100vh;
 	padding:0
 }
+
 .ui-theme-settings.settings-open {
 	transform:translate(0);
-	right:0
+	right:0;
+	display:block !important
 }
 .ui-theme-settings .theme-settings-swatches {
 	text-align:center
@@ -34445,8 +34458,29 @@ to { background-color: rgb(6, 145, 6); }
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
-	background-image: url(../images/Icon/sidebar/) !important;
+	background-image: url(../images/Icon/sidebar/Manage_Attendance.png) !important;
 }
+.fa-user-friends{
+	content: none !important;
+}
+.fa-user-friends{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Enrollement.png) !important;
+}
+.fa-users{
+	content: none !important;
+}
+.fa-users{
+		font-size: 0 !important;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: contain;         
+		background-image: url(../images/Icon/sidebar/Manage_club_icon.png) !important;
+	}
+
 /* DASHBOARD-NAVIGATION-ICONS-CSS ENDS HERE */
 
 @keyframes scaleAnimation {
@@ -34463,4 +34497,9 @@ to { background-color: rgb(6, 145, 6); }
 
 .scale-animate {
   animation: scaleAnimation 1s infinite;
+}
+
+.club-cards:hover{
+	transform: translateY(-3px);
+    transition: 0.2s ease-in-out;
 }

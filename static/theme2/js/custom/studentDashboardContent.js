@@ -60,7 +60,7 @@ async function rendereDashboardContent(isParent){
         renderStudentDashboard(dashboardData);
         renderAnnouncement(dashboardData.userId);
         renderNews(dashboardData.userId)
-        // renderActitify(dashboardData.userId)
+        // renderActivity(dashboardData.userId)
         getCartCount(dashboardData.userId);
         setTimeout(function () {
             getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
@@ -105,36 +105,7 @@ async function rendereDashboardContent(isParent){
         }
     }
     getChat(data.email, USER_ROLE);
-    $("#TooltipDemo").on('click', function(){
-		$(".ui-theme-settings").toggleClass("settings-open");
-		$(this).find("i").toggleClass("fa-angle-right fa-angle-left")
-	});
-    $("#TooltipDemo, .ui-theme-settings").hover(
-        function () {
-            $(".ui-theme-settings")
-                .stop(true, true)
-                .addClass("settings-open");
-
-            $("body").addClass("no-scroll");
-
-            $("#TooltipDemo").find("i")
-                .removeClass("fa-angle-right")
-                .addClass("fa-angle-left");
-        },
-        function () {
-            $(".ui-theme-settings")
-                .stop(true, true)
-                .removeClass("settings-open");
-
-            $("body").removeClass("no-scroll");
-
-            $("#TooltipDemo").find("i")
-                .removeClass("fa-angle-left")
-                .addClass("fa-angle-right");
-        }
-    );
-
-    $(".app-main__outer").css({"padding-right":"60px"});
+    $("body").append(calendarActivityModal()+viewActivityAttachmentModal());
 }
 
 async function renderStudentDashboard(data){
@@ -281,12 +252,12 @@ function dashboardAnnouncement(data) {
 
 function dashboardSchoolCalendar(data) {
     var html=`
-    <div class="main-card mb-3">
+    <div class="main-card mb-3 pr-4">
         <div class="full">
             <div class="card-body px-0 pb-0 pt-0">
                 <div class="row">
                     ${data.userRole === 'STUDENT' || data.userRole === 'TEACHER' ? `
-                    <div class="col-lg-12 col-md-8 col-sm-12 col-12 pt-2">` : `
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-12 pt-2">` : `
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">`}
                         <div class="full mt-1">
                             <div class="card rounded-15">
@@ -346,16 +317,48 @@ function dashboardSchoolCalendar(data) {
                             <div class="full mt-3" id="newsyDiv"></div>
                         </div>    
                         */''}
-                        <div class="custome-ui-theme-settings ui-theme-settings">
-                            <div class="full" id="announcementDiv"></div>
-                            <div class="full mt-3" id="newsyDiv"></div>
-                        </div>
                         ` : ``}
                 </div>
             </div>
         </div>
     </div>
-    <div id="announceDataId" class="full"></div>
+    ${/*<div id="announceDataId" class="full"></div>*/''}
+    <div class="right_fixed_action">
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')">
+            <i class="fa fa-bullhorn fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
+        </button>
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'news_side_wrapper\')">
+            <i class="fa fa-newspaper-o fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
+        </button>`;
+        if(CHAT_URL != ''){
+            const data = {
+                u: UNIQUEUUID,
+                e: DEPLOYMENT_MODE,
+                d: new Date().getTime()
+            };
+            const jsonString = JSON.stringify(data);
+            const chatPayload = btoa(jsonString);
+            const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
+            html+=
+            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary">
+                <i class="fa fa-comments fa-w-16"></i>
+            </a>`;					
+        }
+    html+=`</div>
+    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper">
+        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="full" id="announcementDiv"></div>
+    </div>
+    <div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper">
+        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="full mt-3" id="newsyDiv"></div>
+    </div>
     ${holidayOne()}
     ${onBordingMandotryVideo()}`;
     // +feedbackPop(data.schoolLogo); // optional call if needed
@@ -603,4 +606,41 @@ function renderProfileDataInModal(dashboardData){
         buindProfileElementEvent(previousSchoolElementArray);
         });
     });
+}
+function calendarActivityModal(data){
+	var html=
+	`<div class="modal fade" id="calendarActivityModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-md modal-dialog-centered shadow-none" role="document" style="max-width: 450px;">
+			<div class="modal-content">
+				<div class="modal-body">
+                    <button type="button" class="close text-white bg-primary position-absolute circle" style="width:30px;height:30px;right:10px;top:5px;opacity:1;z-index:1" data-dismiss="modal" aria-label="Close">
+					    <span aria-hidden="true" style="line-height:24px;font-size:24px">&times;</span>
+				    </button>
+                    <div class="full" id="calendarActivityWrapper"></div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
+
+function viewActivityAttachmentModal(){
+	var html=
+	`<div class="modal fade" id="viewActivityAttachmentModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-xl modal-dialog-centered shadow-none" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+                    <button type="button" class="close text-white bg-primary position-absolute circle" style="width:30px;height:30px;right:10px;top:5px;opacity:1;z-index:1" data-dismiss="modal" aria-label="Close">
+					    <span aria-hidden="true" style="line-height:24px;font-size:24px">&times;</span>
+				    </button>
+                    <div class="full" id="viewActivityAttachmentModalWrapper"></div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
+function openRightSideBar(eleId){
+	$("#"+eleId).toggleClass("settings-open");
+    $(".tooltip").remove();
 }

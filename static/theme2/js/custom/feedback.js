@@ -132,7 +132,7 @@ function selectRate(ratingid, callFrom){
 }
 
 
-
+const saveFeebackRequest = debouncing(saveFeedbackQuestion, 300);
 
 function saveFeedbackQuestion() {
 	$.ajax({

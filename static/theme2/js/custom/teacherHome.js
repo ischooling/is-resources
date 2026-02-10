@@ -52,3 +52,8 @@ function slideMenu(val){
 		toggle: false // disable the auto collapse. Default: true.
 	});
 }
+
+function openRightSideBar(eleId){
+	$("#"+eleId).toggleClass("settings-open");
+	$(".tooltip").remove();
+}

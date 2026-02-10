@@ -23,7 +23,7 @@ function headerContent(){
        `<div class="app-page-title">
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
-                    <div class="page-title-icon"> <i class="fa fa-calendar-plus text-primary"> </i> </div>
+                    <div class="page-title-icon"><img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Buy_Extra_Classes.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i></div>
                     <div>Buy Extra Classes</div>
                 </div>
             </div>

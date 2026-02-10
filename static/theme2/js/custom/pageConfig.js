@@ -80,6 +80,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "student-weekly-progress":{url:"student-weekly-progress-report?moduleId="+moduleId,file:[{role:"",fileName:["dashboardWeeklyProgress.js"]}],type:"JSP",pageReqType:"IN"},
         "task":{url:"",file:[{role:"",fileName:["taskListContent.js","taskList.js","jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "dashboard-monitoring":{url:"",file:[{role:"",fileName:["dashboardMonitoringContent.js","dashboardMonitoring.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "manage-club":{url:"",file:[{role:"",fileName:["manageClubsContent.js","manageClubs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         
         // STUDENT PAGE CONFIG
         "batch-schedule":{url:"teacher-batch-time-schedule?moduleId="+moduleId+"&userId="+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},

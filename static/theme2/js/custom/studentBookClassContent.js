@@ -78,7 +78,7 @@ function pageTitleContent(data, moduleId, backBtnFlag) {
   var html = `<div class="app-page-title">
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
-                    <div class="page-title-icon"><i class="pe-7s-notebook text-primary"></i></div>
+			             <div class="page-title-icon"><img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/View_Booked_Class.webp" style="max-width:90px; width: 90%; margin-right: auto; display: flex;"></i></div>
 
                     <div>${
                       data.registerType != "BATCH"
@@ -107,7 +107,7 @@ function pageTitleContentForClassError() {
   var html = `<div class="app-page-title">
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
-                    <div class="page-title-icon"><i class="pe-7s-notebook text-primary"></i></div>
+			             <div class="page-title-icon"><img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/View_Booked_Class.webp" style="max-width:90px; width: 90%; margin-right: auto; display: flex;"></div>
                     <div>Book a Class</div>
                 </div>
             </div>

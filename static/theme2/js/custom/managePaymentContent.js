@@ -307,9 +307,9 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
     <div class="app-page-title mb-3 py-2">
 		<div class="page-title-wrapper">
 			<div class="page-title-heading">
-			<div class="page-title-icon"> 
-				<i class="fa fa-user-plus text-primary"> </i> 
-			</div>
+			<div class="page-title-icon">
+				<img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Payment_Management 1.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;">
+				</div>
 			<div>${title}</div>
 			</div>
 			<div class="page-title-actions">`;

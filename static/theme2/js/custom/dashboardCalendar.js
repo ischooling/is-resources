@@ -439,13 +439,14 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					var startTime = event.start.format('h:mm A');
 					var endTime   = event.end.format('h:mm A');
 					var customTimeHtml =``;
-					
 					if(!event.id.startsWith("activity", 0)){
 						customTimeHtml=`<div class="d-inline-block py-1 px-2 rounded class-time class-start-Time event-start-Time">${startTime}</div>
 						<div class="d-inline-block py-1 px-2 rounded class-time class-end-Time ml-1 event-end-Time">${endTime}</div>`;
 					}else if(event.id.startsWith("activity", 0)){
+						var activityId = event.id.split("activity");
+						activityId=activityId[1];
 						customTimeHtml=`<div class="d-inline-block py-1 px-2 rounded activety-time activety-start-Time event-start-Time">${startTime}</div>
-            			<div class="d-inline-block py-1 px-2 rounded activety-time activety-end-Time ml-1 event-end-Time">${endTime}</div>`;
+            			<div class="d-inline-block py-1 px-2 rounded activety-time activety-end-Time ml-1 event-end-Time" id="activity-end-time-${activityId}" data-endtimedate="${event.end.toISOString().replace("T", " ").replace("Z", "")}">${endTime}</div>`;
 					}
 					element.find('.fc-time').html(customTimeHtml);
 					var customEventTitleHtml =``;
@@ -553,41 +554,20 @@ function checkIfAnyClassRunning(todayClassArray) {
     return false;
 }
 
-function getEventsInCurrentView(allEvents) {
 
-    var view = $('#schoolcalendar').fullCalendar('getView');
-    if (!view || !view.start || !view.end) return [];
 
-    var viewName = view.name;
-    var start, end;
 
-    // ✅ Day views (agendaDay / listDay)
-    if (viewName === 'agendaDay' || viewName === 'listDay') {
 
-        start = moment(view.start).startOf('day');
-        end   = moment(view.start).endOf('day');
 
-    } 
-    // ✅ Week / Month views
-    else {
-
-        start = moment(view.start).startOf('day');
-        end   = moment(view.end).subtract(1, 'seconds');
-
-    }
-
-    return allEvents.filter(function (e) {
-        var eventStart = moment(e.start);
-        return eventStart.isBetween(start, end, null, '[]');
-    });
-}
 
 
 
 
 function updateTabCounts(allEvents) {
-	var filteredEvents = getEventsInCurrentView(allEvents);
+    var filteredEvents = getEventsInCurrentView(allEvents);
+
     $(".over_All_Class_Activity_Count").text(filteredEvents.length);
+
     $(".activity_Count").text(
         filteredEvents.filter(e => e.category === 'ACTIVITY').length
     );
@@ -605,6 +585,90 @@ function updateTabCounts(allEvents) {
         );
     }
 }
+// function getEventsInCurrentView(allEvents) {
+//     var view = $('#schoolcalendar').fullCalendar('getView');
+//     if (!view || !view.start || !view.end) return [];
+
+//     var viewName = view.name;
+//     var start, end;
+
+//     // ✅ Calendar boundaries → USER_TIMEZONE
+//     if (viewName === 'agendaDay' || viewName === 'listDay') {
+//         start = view.start.clone().tz(USER_TIMEZONE).startOf('day');
+//         end   = view.start.clone().tz(USER_TIMEZONE).endOf('day');
+//     } 
+//     else {
+//         start = view.start.clone().tz(USER_TIMEZONE).startOf('day');
+//         end   = view.end.clone().tz(USER_TIMEZONE).subtract(1, 'seconds');
+//     }
+
+//     return allEvents.filter(function (e) {
+//         // ✅ Convert both start and end times to USER_TIMEZONE
+//         var eventStart = moment
+//             .tz(e.start, e.timezone || USER_TIMEZONE)
+//             .tz(USER_TIMEZONE);
+            
+//         var eventEnd = moment
+//             .tz(e.end, e.timezone || USER_TIMEZONE)
+//             .tz(USER_TIMEZONE);
+
+//         // ✅ Check if event overlaps with view boundaries
+//         // Event is in view if:
+//         // 1. Event starts during the view period, OR
+//         // 2. Event ends during the view period, OR  
+//         // 3. Event starts before and ends after the view period
+//         return (
+//             (eventStart.isBetween(start, end, null, '[]')) ||  // Start time in range
+//             (eventEnd.isBetween(start, end, null, '[]')) ||    // End time in range
+//             (eventStart.isBefore(start) && eventEnd.isAfter(end)) // Event spans the entire range
+//         );
+//     });
+// }
+
+function getEventsInCurrentView(allEvents) {
+
+    var view = $('#schoolcalendar').fullCalendar('getView');
+    if (!view || !view.start || !view.end) return [];
+
+    var viewName = view.name;
+
+    // ✅ Calendar boundaries in USER_TIMEZONE
+    var start = view.start.clone().tz(USER_TIMEZONE).startOf('day');
+    var end;
+
+    if (viewName === 'agendaDay' || viewName === 'listDay') {
+        end = view.start.clone().tz(USER_TIMEZONE).endOf('day');
+    } else {
+        end = view.end.clone().tz(USER_TIMEZONE).subtract(1, 'seconds');
+    }
+
+    return allEvents.filter(function (e) {
+
+        if (!e.start) return false;
+
+        // ✅ IMPORTANT: Already converted to USER_TIMEZONE
+        var eventStart = moment(e.start);
+
+        return eventStart.isBetween(start, end, null, '[]');
+    });
+}
+
+
+
+// function getEventsForToday(allEvents) {
+//     var todayStart = moment().tz(USER_TIMEZONE).startOf('day');
+//     var todayEnd   = moment().tz(USER_TIMEZONE).endOf('day');
+
+//     return allEvents.filter(function (e) {
+// 		var eventStart = moment
+//             .tz(e.start, e.timezone || USER_TIMEZONE)
+//             .tz(USER_TIMEZONE);
+
+//         return eventStart.isBetween(todayStart, todayEnd, null, '[]');
+//     });
+// }
+
+
 
 
 
@@ -726,7 +790,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 	if (updateEventIconsStyle) {
 		$("head").append(`
 		<style>
-			.tooltip-inner{max-width:500px;width:fit-content;background-color:transparent;padding:0}
+			.calendar-tooltip .tooltip-inner{max-width:500px;width:fit-content;background-color:transparent;padding:0}
 			.calendar-tooltip .arrow:before{border-top-color:#d1cbcb !important}
 			.fc-scroller.fc-time-grid-container[style]{height:425px !important}
 		</style>
@@ -787,7 +851,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				${element.find(".event-end-Time").text()}
 				</div>
 			</div>
-			<div>`
+			<div>`;
 				if(info.id.startsWith("activity", 0)){
 					var activitiesList = await dashboardCalendarActivityListContent(info);
 					tooltipHTML+=

@@ -68,8 +68,8 @@ function dashboardAnnouncementContent(data){
                                                     html+=
                                                 `</span>
                                             </h6>
-                                            <div class="font-10 text-gray">${timeAgoText}</div>
-                                            <div>
+                                            <div class="font-10 text-gray text-left">${timeAgoText}</div>
+                                            <div class="text-left">
                                                 <a href="javascript:void(0)" class="font-14 font-weight-semi-bold text-primary">
                                                     Learn More<i class="fa fa-arrow-right ml-2"></i>
                                                 </a>

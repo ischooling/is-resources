@@ -11,11 +11,11 @@ async function rendereTeacherHomeContent(){
     payload['userId'] = USER_ID;
     var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'get-teacher-dashboard', payload);
     renderTeacherDashboard(responseData);
-    getTeacherTimePreference();
+    // getTeacherTimePreference();
 	renderAnnouncement(responseData.userId);
     renderNews(USER_ID)
-    // renderActitify(responseData.userId)
-    callTeacherLastAttendance('', responseData.userId, '', '');
+    //renderActivity(responseData.userId)
+    //callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);
     if(commonProfileDTO.declarecheckshow == 'show' && commonProfileDTO.isAgreementUpdated){
         $('head').append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/signupTeacherStage6.js${SCRIPT_VERSION}">`)
@@ -29,39 +29,9 @@ async function rendereTeacherHomeContent(){
             callLocationDetails('teacherAgreementModal');
         }
     }
-    $("body").append(newsAllListWithDetailsModalCotent());
-    callTeacherClassesToUpdateStatus()
-    $("#TooltipDemo").on('click', function(){
-		$(".ui-theme-settings").toggleClass("settings-open");
-		$(this).find("i").toggleClass("fa-angle-right fa-angle-left")
-	});
-    $("#TooltipDemo, .ui-theme-settings").hover(
-        function () {
-            $(".ui-theme-settings")
-                .stop(true, true)
-                .addClass("settings-open");
-
-            $("body").addClass("no-scroll");
-
-            $("#TooltipDemo").find("i")
-                .removeClass("fa-angle-right")
-                .addClass("fa-angle-left");
-        },
-        function () {
-            $(".ui-theme-settings")
-                .stop(true, true)
-                .removeClass("settings-open");
-
-            $("body").removeClass("no-scroll");
-
-            $("#TooltipDemo").find("i")
-                .removeClass("fa-angle-left")
-                .addClass("fa-angle-right");
-        }
-    );
-    $(".app-main__outer").css({"padding-right":"60px"});
-
-
+    $("body").append(newsAllListWithDetailsModalCotent()+calendarActivityModal()+viewActivityAttachmentModal());
+    // callTeacherClassesToUpdateStatus();
+    $('[data-toggle="tooltip"]').tooltip();
 }
 
 async function renderTeacherDashboard(data){
@@ -264,7 +234,7 @@ function teacherAgreementView(data){
 
 function dashboardSchoolCalendar(data) {
     var html = `
-    <div class="main-card mb-3">
+    <div class="main-card mb-3 pr-4">
         <div class="full">
             <div class="card-body pt-0 px-0">
                 <!-- <div class="full home-page-skeleton-wrapper"> -->
@@ -327,22 +297,63 @@ function dashboardSchoolCalendar(data) {
                                 </div>
                             </div>
                         </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                            <div class="full mt-3" id="activityDiv"></div>
+                        </div>
                         ${/*<div class="col-lg-4 col-md-12 col-sm-12 col-12">*/''}
                             ${/*<div class="full" id="announcementDiv"></div>*/''}
                             ${/*<div class="full mt-3" id="activityDiv"></div> */''}
                             ${/*<div class="full mt-3" id="newsyDiv"></div>*/''}
                         ${/*</div>*/''}
-                        <div class="custome-ui-theme-settings ui-theme-settings">
-                            <div class="full" id="announcementDiv"></div>
-                            <div class="full mt-3" id="newsyDiv"></div>
-                        </div>
+                        ${/*
+                            <div class="custome-ui-theme-settings ui-theme-settings col-lg-4 col-md-12 col-sm-12 col-12">
+                                <div class="full" id="announcementDiv"></div>
+                                <div class="full mt-3" id="newsyDiv"></div>
+                            </div>    
+                        */''}
                         
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="announceDataId" class="full"></div>
+    ${/*<div id="announceDataId" class="full"></div>*/''}
+    <div class="right_fixed_action">
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
+            <i class="fa fa-bullhorn fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge"></span>
+        </button>
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
+            <i class="fa fa-newspaper-o fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
+        </button>`;
+        if(CHAT_URL != ''){
+            const data = {
+                u: UNIQUEUUID,
+                e: DEPLOYMENT_MODE,
+                d: new Date().getTime()
+            };
+            const jsonString = JSON.stringify(data);
+            const chatPayload = btoa(jsonString);
+            const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
+            html+=
+            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Chat">
+                <i class="fa fa-comments fa-w-16"></i>
+            </a>`;					
+        }
+    html+=`</div>
+    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper">
+        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="full" id="announcementDiv"></div>
+    </div>
+    <div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper">
+        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="full mt-3" id="newsyDiv"></div>
+    </div>
     ${holidayOne()}
     ${onBordingMandotryVideo()}
     ${/*feedbackPop(data.schoolLogo)*/''}
@@ -373,7 +384,7 @@ function holidayOne(){
 function onBordingMandotryVideo(){
     var html = `
             <div class="modal fade fade-scale" id="mandatoryVideoModal" data-backdrop="static">
-            <div class="modal-dialog modal-lg modal-dialog-centered box-shadow-none" role="document">
+            <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none" role="document">
                 <div class="modal-content text-center">
                     <div class="modal-header pt-2 pb-2 bg-primary text-white justify-content-center">
                         <h5 class="heading">Welcome! `+USER_FULL_NAME+`</h5>
@@ -407,7 +418,7 @@ function onBordingMandotryVideo(){
     return html;
 }
 
-// async function renderActitify(userId){
+// async function renderActivity(userId){
 //     try{
 // 		var payload = {};
 // 		payload['userId'] = userId;
@@ -606,5 +617,39 @@ function meetingStatusUpdateModalBodyContent(data){
             </tr>`;
 		});
 	}
+	return html;
+}
+
+function calendarActivityModal(data){
+	var html=
+	`<div class="modal fade" id="calendarActivityModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-md modal-dialog-centered shadow-none" role="document" style="max-width: 450px;">
+			<div class="modal-content">
+				<div class="modal-body">
+                    <button type="button" class="close text-white bg-primary position-absolute circle" style="width:30px;height:30px;right:10px;top:5px;opacity:1;z-index:1" data-dismiss="modal" aria-label="Close">
+					    <span aria-hidden="true" style="line-height:24px;font-size:24px">&times;</span>
+				    </button>
+                    <div class="full" id="calendarActivityWrapper"></div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
+
+function viewActivityAttachmentModal(){
+	var html=
+	`<div class="modal fade" id="viewActivityAttachmentModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered shadow-none" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+                    <button type="button" class="close text-white bg-primary position-absolute circle" style="width:30px;height:30px;right:10px;top:5px;opacity:1;z-index:1" data-dismiss="modal" aria-label="Close">
+					    <span aria-hidden="true" style="line-height:24px;font-size:24px">&times;</span>
+				    </button>
+                    <div class="full" id="viewActivityAttachmentModalWrapper"></div>
+				</div>
+			</div>
+		</div>
+	</div>`;
 	return html;
 }

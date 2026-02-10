@@ -284,55 +284,127 @@ function dashboardCalendarActivityListContent(info){
     });
 }
 
-function viewActivityContent(data){
+// function viewActivityContent(data){
+//     var pdfClass=(data.uploadFile.endsWith('.pdf')?'pdf-view':'');
+//     var html=
+//     `<div class="main-card mb-0 card check-activity-page-load">
+//         <div class="card-header theme-bg card-header-primary" style="margin:0 !important">
+//             <h5 class="modal-title" style="font-size:18px !important;color:#fff">${data.activityTitle}</h5>
+//         </div>
+//         <div class="card-body" id="activitiesType">
+//             <div class="activity-wrapper `+pdfClass+`" id="zoomMeetingCard">
+//                 <div class="activity-box"  id="zoomMeetingCardBox">
+//                     <div class="pdf-down text-center `+pdfClass+`">
+//                         <div class="pt-2" style="font-size:16px;font-weight:600;margin-bottom:35px;">${data.activityPurpose!=''?data.activityPurpose:''}</div>`;
+//                         html+=
+//                         `<div id="3434displayJoinLinkDiv${data.activityId}" class="mb-4" style="">`
+//                             if(data.uploadFile!='' && data.uploadFile !='No file chosen...'){
+//                                 if(data.uploadFile.endsWith('.pdf')?'pdf-view':''){
+//                                     html+=`<iframe src="${data.filePath}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>`;
+//                                 }else{
+//                                     html+=`<img src="${data.filePath}" style="width:100%;" class="activity-upload-img"/>`;
+//                                 }
+//                             }
+//                         html+=
+//                         `</div>
+//                         <div id="displayJoinLinkInfoDiv${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">
+//                             <span class="activity-block col-lg-12 col-md-12 col-sm-12 col-12 card">
+//                                 <h6>Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the scheduled time.</h6>
+//                                 <ul>
+//                                     <li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-timeid="`+data.activityId+`" data-starttimedate="`+convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-endtimedate="`+convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-joiningBefore="${data.showLinkBeforeMinutes}">
+//                                         <div class="counter-div">
+//                                             <div id="timer${data.activityId}">
+//                                                 <div id="days${data.activityId}" class="count-div days"></div>
+//                                                 <div id="hours${data.activityId}" class="count-div hours"></div>
+//                                                 <div id="minutes${data.activityId}" class="count-div minutes"></div>
+//                                                 <div id="seconds${data.activityId}" class="count-div seconds"></div>
+//                                             </div>
+//                                         </div>
+//                                     </li>
+//                                 </ul>
+//                             </span>
+//                         </div>
+//                         <div class="pt-4 text-center" id="joinButton${data.activityId}" style="${USER_ROLE == 'TEACHER'?'':'display:none'}">`;
+//                             if(USER_ROLE == 'TEACHER'){
+//                                 html+=`<a href="javascript:void(0);" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="display: inline-block; padding: 8px 25px; font-size: 13px; background: green; color: #fff !important; border-radius: 4px;">Now you can join</a>`;
+//                             }else{
+//                                 html+=`<a href="javascript:void(0);" onclick="classDetailsOnModalActivity('${data.joiningLink}')"  id="joinZoomMeeting" style="display: inline-block; padding: 8px 25px; font-size: 13px; background: green; color: #fff !important; border-radius: 4px;">Now you can join</a>`;
+//                             }
+//                             html+=
+//                         `</div>
+//                         <br>`;
+//                         // if(data.message!=''){
+//                         //     html+=data.message;
+//                         // }
+//                         html+=
+//                     `</div>
+//                 </div>
+//             </div>
+//             <iframe id="activity-zoom-meeting-iframe" width="100%" height="650" frameborder="0" style="display: none;"></iframe>
+//             </div>
+//         </div>
+//     </div>`;
+//     return html;
+// }
+function viewActivityContentModal(data){
     var pdfClass=(data.uploadFile.endsWith('.pdf')?'pdf-view':'');
     var html=
-    `<div class="main-card mb-0 card check-activity-page-load">
-        <div class="card-header theme-bg card-header-primary" style="margin:0 !important">
-            <h5 class="modal-title" style="font-size:18px !important;color:#fff">${data.activityTitle}</h5>
-        </div>
-        <div class="card-body" id="activitiesType">
+    `<div class="w-100 check-activity-page-load">
+        <div class="full" id="activitiesType">
+            <h4 class="px-3 font-weight-semi-bold text-dark text-center font-20">${data.categoryName}</h4>
+            <h6 class="text-center mt-1">${data.activityTitle}</h6>
+            <h6 class="font-12 mt-2 text-center" style="${USER_ROLE == 'TEACHER'?'display:none':''}">Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the <br/> scheduled time.</h6>
             <div class="activity-wrapper `+pdfClass+`" id="zoomMeetingCard">
                 <div class="activity-box"  id="zoomMeetingCardBox">
                     <div class="pdf-down text-center `+pdfClass+`">
-                        <div class="pt-2" style="font-size:16px;font-weight:600;margin-bottom:35px;">${data.activityPurpose!=''?data.activityPurpose:''}</div>`;
+                        <div class="pt-2" style="font-size:16px;font-weight:600;margin-bottom:35px; ${data.activityPurpose==""?'display:none':''}">${data.activityPurpose!=''?data.activityPurpose:''}</div>`;
+                        var startTime = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_TIME_FORMATTER);
+                        var endTime = convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_TIME_FORMATTER);
+                        var activityDate = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DAY_NAME_AND_MONTH_FULL_NAME_DATE_YEAR);
                         html+=
-                        `<div id="3434displayJoinLinkDiv${data.activityId}" class="mb-4" style="">`
-                            if(data.uploadFile!='' && data.uploadFile !='No file chosen...'){
-                                if(data.uploadFile.endsWith('.pdf')?'pdf-view':''){
-                                    html+=`<iframe src="${data.filePath}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>`;
-                                }else{
-                                    html+=`<img src="${data.filePath}" style="width:100%;" class="activity-upload-img"/>`;
-                                }
-                            }
-                        html+=
-                        `</div>
-                        <div id="displayJoinLinkInfoDiv${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">
-                            <span class="activity-block col-lg-12 col-md-12 col-sm-12 col-12 card">
-                                <h6>Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the scheduled time.</h6>
-                                <ul>
+                            `<div class="p-2 w-100 bg-light-primary rounded-5 py-3 px-2 my-2 flex-row">
+                                <div class="d-flex mx-auto gap-5 w-100 justify-content-center">
+                                    <div class="d-inline-block py-1 px-2 rounded bg-primary text-white font-12">${startTime}</div>
+            			            <div class="d-inline-block py-1 px-2 rounded bg-primary text-white font-12">${endTime}</div>
+                                </div>
+                                <div class="full text-center mt-1 font-weight-semi-bold font-13">
+                                    <i class="fa fa-calendar"></i>&nbsp;${activityDate}
+                                </div>
+                                
+                            </div>
+                            <div id="3434displayJoinLinkDiv${data.activityId}" class="mb-4" style="${(data.uploadFile == "" || data.uploadFile == "No file chosen...") && data.filePath == "" ? 'display:none':''}">`
+                                
+                            html+=`</div>
+                        ${/*<div id="displayJoinLinkInfoDiv${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">*/''}
+                        <div id="displayJoinLinkInfoDiv${data.activityId}" class="my-4">
+                            <p class="text-center mb-1">Time Remaining</p>
+                            <span class="activity-block full">
+                                <ul class="m-0 full">
                                     <li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-timeid="`+data.activityId+`" data-starttimedate="`+convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-endtimedate="`+convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-joiningBefore="${data.showLinkBeforeMinutes}">
                                         <div class="counter-div">
                                             <div id="timer${data.activityId}">
-                                                <div id="days${data.activityId}" class="count-div days"></div>
-                                                <div id="hours${data.activityId}" class="count-div hours"></div>
-                                                <div id="minutes${data.activityId}" class="count-div minutes"></div>
-                                                <div id="seconds${data.activityId}" class="count-div seconds"></div>
+                                                <div id="days${data.activityId}" class="count-div days card bg-light-primary p-2 font-22 text-dark"></div>
+                                                <div id="hours${data.activityId}" class="count-div hours card bg-light-primary p-2 font-22 text-dark"></div>
+                                                <div id="minutes${data.activityId}" class="count-div minutes card bg-light-primary p-2 font-22 text-dark"></div>
+                                                <div id="seconds${data.activityId}" class="count-div seconds card bg-light-primary p-2 font-22 text-dark"></div>
                                             </div>
                                         </div>
                                     </li>
                                 </ul>
                             </span>
                         </div>
-                        <div class="pt-4 text-center" id="joinButton${data.activityId}" style="${USER_ROLE == 'TEACHER'?'':'display:none'}">`;
+                        <div class="text-center d-flex flex-wrap gap-5" style="${USER_ROLE == 'TEACHER'?'':'display:none'}">`;
                             if(USER_ROLE == 'TEACHER'){
-                                html+=`<a href="javascript:void(0);" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="display: inline-block; padding: 8px 25px; font-size: 13px; background: green; color: #fff !important; border-radius: 4px;">Now you can join</a>`;
+                                html+=
+                                    `<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>
+                                    <a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn" id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="font-size: 13px; border-radius: 4px;">Join</a>`;
                             }else{
-                                html+=`<a href="javascript:void(0);" onclick="classDetailsOnModalActivity('${data.joiningLink}')"  id="joinZoomMeeting" style="display: inline-block; padding: 8px 25px; font-size: 13px; background: green; color: #fff !important; border-radius: 4px;">Now you can join</a>`;
+                                html+=
+                                    `<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>
+                                    <a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn"  id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')"  style="font-size: 13px; border-radius: 4px;">Join</a>`;
                             }
                             html+=
-                        `</div>
-                        <br>`;
+                        `</div>`;
                         // if(data.message!=''){
                         //     html+=data.message;
                         // }
@@ -348,18 +420,18 @@ function viewActivityContent(data){
 }
 
 function activityPageStyle(){
-    var html=
-    `<style id="activityPageStyle">
-            .activity-wrapper.pdf-view, .pdf-view{width:100% !important;max-width:100% !important;}
-            .pdf-down{}
-            .pdf-down p{ margin-top:50px;}
-            .pdf-down p a{ background:#007fff; padding:15px 25px; text-decoration:none; color:#fff; border-radius:40px; margin-top:50px;}
-            .pdf-down p a:hover{ background:#004ff;}
-            .activity-wrapper{max-width: 450px;width:100%;padding:8px;margin: 0px auto;background:#fff;box-shadow: 0 0 2px 3px rgb(211 211 211 / 30%);}
-            .activity-box{width: 100%;text-align: center;border-radius: 0px;padding:10px 12px;border: 4px solid #0081ff;display: flex;justify-content: center;flex-wrap: wrap;align-items: flex-start;position:relative;}
-            .activity-title{font-size:14px;width:100%;}
-            .activity-block{display:inline-block;border:2px solid #001272;padding:8px;}
-        </style>`;
-    return html;
+    // var html=
+    // `<style id="activityPageStyle">
+    //         .activity-wrapper.pdf-view, .pdf-view{width:100% !important;max-width:100% !important;}
+    //         .pdf-down{}
+    //         .pdf-down p{ margin-top:50px;}
+    //         .pdf-down p a{ background:#007fff; padding:15px 25px; text-decoration:none; color:#fff; border-radius:40px; margin-top:50px;}
+    //         .pdf-down p a:hover{ background:#004ff;}
+    //         .activity-wrapper{max-width: 450px;width:100%;padding:8px;margin: 0px auto;background:#fff;box-shadow: 0 0 2px 3px rgb(211 211 211 / 30%);}
+    //         .activity-box{width: 100%;text-align: center;border-radius: 0px;padding:10px 12px;border: 4px solid #0081ff;display: flex;justify-content: center;flex-wrap: wrap;align-items: flex-start;position:relative;}
+    //         .activity-title{font-size:14px;width:100%;}
+    //         .activity-block{display:inline-block;border:2px solid #001272;padding:8px;}
+    //     </style>`;
+    // return html;
 }
 window.getActivityContent = getActivityContent;

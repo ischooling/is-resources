@@ -1,4 +1,4 @@
-async function renderActitify(userId) {
+async function renderActivity(userId) {
 	try {
 		var payload = {};
 		payload['userId'] = userId;
@@ -64,7 +64,7 @@ function makeTimer(myActId, activityStartDateTimeByUserTimezone, currentDate) {
 }
 
 
-function getHomePageActivityCounter(){
+function getHomePageActivityCounter(activityID){
 	var userCurrentTime = convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, USER_TIMEZONE).format('MMM DD, YYYY hh:mm:ss a');
 	setInterval(function(){
         userCurrentTime = convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, USER_TIMEZONE).format('MMM DD, YYYY hh:mm:ss a');
@@ -81,70 +81,88 @@ function getHomePageActivityCounter(){
 			if($("#currentTimeForUser").text() == ""){
 				currentDateTimeByUserTimeZone = new Date(userCurrentTime);
 			}
-			if (activityStartTime > currentDateTimeByUserTimeZone) {
-				$(this).find('.counter-div').show();
-				$(this).find('.ongoing-div').hide();
-				$(this).find('.joinLBtn' + timerId).hide().removeClass('d-inline-block');
-				$('#displayJoinLinkDiv' + timerId).show();
-				if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
-					$('#joinButton' + timerId).show();
-				} else {
-					if(USER_ROLE=='STUDENT'){
-						$('#joinButton' + timerId).hide();
+			if(activityEndTime >  currentDateTimeByUserTimeZone){
+				if (activityStartTime > currentDateTimeByUserTimeZone) {
+					$(this).find('.counter-div').show();
+					$(this).find('.ongoing-div').hide();
+					$(this).find('.joinLBtn' + timerId).hide().removeClass('d-inline-block');
+					$('#displayJoinLinkDiv' + timerId).show();
+					if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
+						$('#joinButton' + timerId).show().removeClass('join-activity-disabled');
+					} else {
+						if(USER_ROLE=='STUDENT'){
+							$('#joinButton' + timerId).addClass('join-activity-disabled');
+						}
 					}
-				}
-			} else {
-				$(this).find('.joinLBtn' + timerId).show().addClass('d-inline-block');
-				$(this).find('.counter-div').hide();
-				$(this).find('.ongoing-div').show();
-				$(this).find('.activity-btn').hide();
-				if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
-					$('#joinButton' + timerId).show();
-					$('#displayJoinLinkInfoDiv'+timerId).hide();
+				} else {
 					$(this).find('.joinLBtn' + timerId).show().addClass('d-inline-block');
-				} else {
-					if(USER_ROLE=='STUDENT'){
-						$('#joinButton' + timerId).hide();
+					$(this).find('.counter-div').hide();
+					$(this).find('.ongoing-div').show();
+					$(this).find('.activity-btn').hide();
+					if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
+						$('#joinButton' + timerId).show().removeClass('join-activity-disabled');
+						$('#joinButton' + timerId)
+						$('#displayJoinLinkInfoDiv'+timerId).hide();
+						$(this).find('.joinLBtn' + timerId).show().addClass('d-inline-block');
+					} else {
+						if(USER_ROLE=='STUDENT'){
+							$('#joinButton' + timerId).addClass('join-activity-disabled');
+						}
+						$('#displayJoinLinkInfoDiv'+timerId).show();
 					}
-					$('#displayJoinLinkInfoDiv'+timerId).show();
+					
+					// Activity Remove if acvity end time is over 
+					if(currentDateTimeByUserTimeZone > activityEndTime){
+						if(USER_ROLE=='STUDENT'){
+							$('#joinButton' + timerId).addClass('join-activity-disabled');
+						}
+						if($("#activity-li-"+acivityIndex+" > ul.mm-collapse > li > ul.mm-collapse").length>0){
+							$(this).parent().closest("li").remove();
+						}else{
+							$(this).remove();
+						}
+						if($("#activity-li-"+acivityIndex+" > ul.mm-collapse > li").length<1){
+							$("#activity-li-"+acivityIndex+" > ul.mm-collapse").html('').removeClass("mm-show");
+							$("#activity-li-"+acivityIndex).removeClass("mm-active");
+							$("#activity-li-"+acivityIndex+" #parent-"+acivityIndex).addClass("disable-activity");
+						}
+						if($(".myActivityLoop").length<1){
+							clearInterval(intervalId);
+						}
+					}
+					// Activity Remove if acvity end time is over 
 				}
-				
-				// Activity Remove if acvity end time is over 
-				if(currentDateTimeByUserTimeZone > activityEndTime){
-					if(USER_ROLE=='STUDENT'){
-						$('#joinButton' + timerId).hide();
-					}
-					if($("#activity-li-"+acivityIndex+" > ul.mm-collapse > li > ul.mm-collapse").length>0){
-						$(this).parent().closest("li").remove();
-					}else{
-						$(this).remove();
-					}
-					if($("#activity-li-"+acivityIndex+" > ul.mm-collapse > li").length<1){
-						$("#activity-li-"+acivityIndex+" > ul.mm-collapse").html('').removeClass("mm-show");
-						$("#activity-li-"+acivityIndex).removeClass("mm-active");
-						$("#activity-li-"+acivityIndex+" #parent-"+acivityIndex).addClass("disable-activity");
-					}
-					if($(".myActivityLoop").length<1){
-						clearInterval(intervalId);
-					}
-				}
-				// Activity Remove if acvity end time is over 
+				makeTimer(timerId, activityStartTime, currentDateTimeByUserTimeZone);
+			}else{
+				$('#joinButton' + timerId).addClass('join-activity-disabled');
+				// $(this).remove();
+				// $("#displayJoinLinkInfoDiv"+timerId).hide();
 			}
-			makeTimer(timerId, activityStartTime, currentDateTimeByUserTimeZone);
+			
+			
 		}.bind(this), 1000);
 	});
 }
 //EXTRA ACTIVITY COUNTER SCRIPT END HERE//
 
 async function renderViewActitifyDetails(activityId, meetingId) {
+	var userCurrentTime = new Date($("#currentTimeForUser").text());
+	var userActivityEndTime = new Date($("#activity-end-time-"+activityId).attr('data-endtimedate'));
+	if(userActivityEndTime < userCurrentTime){
+		showMessageTheme2(0, "Your activity has been completed.")
+		return false;
+	}
 	try {
 		var payload = {};
 		payload['activityId'] = activityId;
 		payload['meetingId'] = meetingId;
 		payload['userId'] = USER_ID;
 		responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'view-extra-activity', payload);
+		console.log("acivity modal", responseData)
 		if (responseData.status == 1) {
-			$('#dashboardContentInHTML').html(viewActivityContent(responseData));
+			$("#calendarActivityWrapper").html(viewActivityContentModal(responseData))
+			// $('#dashboardContentInHTML').html(viewActivityContent(responseData));
+			$("#calendarActivityModal").modal("show");
 			await studentExtraActivityOnLoadEvent(responseData);
 			$("head #activityPageStyle").remove();
 			$("head").append(activityPageStyle());
@@ -187,4 +205,19 @@ function joinZoomMeeting(src) {
 	setTimeout(function () {
 		customLoader(false);
 	}, 3000);
+}
+
+function viewActivityAttachmentSource(uploadFile, filePath){
+	var html=``;
+	if(uploadFile!='' && uploadFile !='No file chosen...'){
+		if(uploadFile.endsWith('.pdf')?'pdf-view':''){
+			$("#viewActivityAttachmentModal .modal-dialog").addClass("modal-xl").removeClass("modal-lg");
+			html+=`<iframe src="${filePath}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>`;
+		}else{
+			$("#viewActivityAttachmentModal .modal-dialog").addClass("modal-lg").removeClass("modal-xl");
+			html+=`<img src="${filePath}" style="width:100%;" class="activity-upload-img"/>`;
+		}
+	}
+	$("#viewActivityAttachmentModal #viewActivityAttachmentModalWrapper").html(html);
+	$("#viewActivityAttachmentModal").modal("show");
 }

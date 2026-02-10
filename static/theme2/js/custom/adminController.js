@@ -500,17 +500,18 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 		}else if(pageNo=='profile-view'){
 			renderStudentProfilePage(extraParam);
 		}else if(pageNo=='payment-reports'){
-      		getPaymentReportContent()
+      getPaymentReportContent()
 		}else if(pageNo=='onboarded-teacher-list'){
-      		getOnboardedTeacherContent()
+      getOnboardedTeacherContent()
 		}else if(pageNo=='user-feedback'){
-      		getReviewDashboardContent('User Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-    	}else if(pageNo=='question-list'){
-      		getQuestionDashboardContent('Question List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-    	}else if(pageNo=='clubs'){
-      		renderClubsPage("Clubs");
-      		clubsOnLoad();
-		}
+      	getReviewDashboardContent('User Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+    }else if(pageNo=='question-list'){
+      getQuestionDashboardContent('Question List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+    }else if(pageNo=='clubs'){
+      renderClubsPage("Clubs");
+		}else if(pageNo=='manage-club'){
+      renderManageClubsPage("Manage Clubs");
+    }
 	}catch(err){
 		console.error("getContent error:", err);
 

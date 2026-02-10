@@ -6,6 +6,12 @@ async function renderAnnouncement(userId){
         $(this).parent().find(".horizontal-scroll-table").slideToggle();
         $(this).parent().closest("li").siblings().find(".horizontal-scroll-table").slideUp();
     });
+	if(parseInt(data.newAnnouncementCount) > 0){
+		$("#announcementBadge").show();
+		$("#announcementBadge").text(data.newAnnouncementCount);
+	}else{
+		$("#announcementBadge").hide();
+	}
 }
 async function showAnnounceDataById(announceId, moduleId){
 	try{
@@ -42,9 +48,15 @@ async function saveAnnouncementAcknowledge(announceId, userId, roleModuleId) {
         if(responseData.status==1){
             $('#announcementbyIdData').modal('hide');
             $('.accepted-announcement'+announceId).addClass('d-none');
+			if((parseInt($("#newAnnouncementCount").text()) - 1) > 0){
+				$("#announcementBadge").show();
+				$("#announcementBadge").text(parseInt($("#newAnnouncementCount").text()) - 1);
+			}else{
+				$("#announcementBadge").hide();
+			}
 			$("#newAnnouncementCount").text(parseInt($("#newAnnouncementCount").text()) - 1);
-
-            if(tt=='theme1'){
+			
+			if(tt=='theme1'){
                 showMessage(true, responseData.message);
             }else{
                 showMessageTheme2(1, responseData.message,'',true);
