@@ -23,12 +23,12 @@ function getFeedbackQuestion(eventid, questiontype, parentId, start, end, feedba
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			if (data.responseStatus.status == 'SUBMITTED') {
+			if (data.responseStatus.statusCode == 'SUBMITTED') {
 				  var htmlPage = "";
           htmlPage = htmlPage + " <section class=\"center-content\"> <div class=\"row\"><div class=\"col-12 text-center\"><p class=\"thanku-emoji\"><i class=\"em em-thumbsup\"></i></p>";
           htmlPage = htmlPage + "   <p class=\"thanks-reaction\">"+data.responseStatus.message+"!</p></div> </div></section> ";
           $(".main-div").html(htmlPage);
-			}else if (data.responseStatus.status == 'FAILED') {
+			}else if (data.responseStatus.statusCode == 'FAILED') {
 				
 			} else {
         if(callfrom=='student-feedback'){
@@ -81,15 +81,15 @@ function getFeedbackQuestion(eventid, questiontype, parentId, start, end, feedba
                         htmlQuest = htmlQuest + " <div class=\"question\" id=\""+data.questionList[i].questionId+"-"+data.questionList[i].elementName.toUpperCase()+"\"><div class=\"row\"><div class=\"col-12\"><p class='mb-1'><strong>"+data.questionList[i].question+"</strong></p></div></div>";
                         htmlQuest = htmlQuest + " <div class=\"row align-items-center\"><div class=\"col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 d-flex align-items-center justify-content-end\">"
                         htmlQuest = htmlQuest + " <div class=\"rate pr-0\">";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star5-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"5\" onClick=\"selectRate('star5-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star5-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"5\" onClick=\"selectRate('star5-"+data.questionList[i].questionId+"', '')\" />";
                         htmlQuest = htmlQuest + " <label for=\"star5-"+data.questionList[i].questionId+"\" title=\"5 Stars\">5 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star4-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"4\" onClick=\"selectRate('star4-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star4-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"4\" onClick=\"selectRate('star4-"+data.questionList[i].questionId+"', '')\" />";
                         htmlQuest = htmlQuest + " <label for=\"star4-"+data.questionList[i].questionId+"\" title=\"4 Stars\">4 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star3-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"3\" onClick=\"selectRate('star3-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star3-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"3\" onClick=\"selectRate('star3-"+data.questionList[i].questionId+"', '')\" />";
                         htmlQuest = htmlQuest + " <label for=\"star3-"+data.questionList[i].questionId+"\" title=\"3 Stars\">3 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star2-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"2\" onClick=\"selectRate('star2-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star2-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"2\" onClick=\"selectRate('star2-"+data.questionList[i].questionId+"', '')\" />";
                         htmlQuest = htmlQuest + " <label for=\"star2-"+data.questionList[i].questionId+"\" title=\"2 Stars\">2 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star1-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"1\" onClick=\"selectRate('star1-"+data.questionList[i].questionId+"')\" />";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star1-"+data.questionList[i].questionId+"\" name=\"rate-"+data.questionList[i].questionId+"\" value=\"1\" onClick=\"selectRate('star1-"+data.questionList[i].questionId+"', '')\" />";
                         htmlQuest = htmlQuest + " <label for=\"star1-"+data.questionList[i].questionId+"\" title=\"1 Star\">1 star</label>";
                         htmlQuest = htmlQuest + " </div>&nbsp;<b class=\"selectedStar-"+data.questionList[i].questionId+"\">0</b>&nbsp;<span><b>Rating</b><span></div></div></div>";
                         $(".rating").append(htmlQuest);
@@ -120,13 +120,15 @@ function getRequestForFeedbackQuestion(eventid, questiontype, parentId, start, e
 	
 	return questionRequest;
 }
-function selectRate(ratingid){
+function selectRate(ratingid, callFrom){
   console.log(ratingid);
   var ratings = $("#"+ratingid).val();
-  console.log(ratings);
+  if(callFrom=='SUMMARY'){
+    $("#"+ratingid).prop('checked', true)
+  }
   var qstid=0;
   var ratingids = ratingid.split("-");
-  $(".selectedStar-"+ratingids[1]).text(ratings);
+  $(".selectedStar-"+ratingids[1]+"-"+ratingids[2]).text(ratings);
 }
 
 
@@ -143,7 +145,7 @@ function saveFeedbackQuestion() {
 		timeout : 600000,
 		success : function(response) {
 			//console.log(JSON.stringify(response));
-            if(response.responseStatus.status=='SUCCESS'){
+            if(response.responseStatus.statusCode=='SUCCESS'){
                 var htmlPage = "";
                 htmlPage = htmlPage + " <section class=\"center-content\"> <div class=\"row\"><div class=\"col-12 text-center\"><p class=\"thanku-emoji\"><i class=\"em em-thumbsup\"></i></p>";
                 htmlPage = htmlPage + "   <p class=\"thanks-reaction\">"+response.responseStatus.message+"!</p></div> </div></section> ";

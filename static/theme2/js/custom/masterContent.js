@@ -2709,3 +2709,45 @@ function getAllHiringRoles(key){
    });
    return html;
 }
+
+function timeAgo(dateString) {
+    var pastDate = new Date(dateString.replace(" ", "T"));
+    var now = new Date();
+	var diffMs = now - pastDate;
+	var minute = 1000 * 60;
+    var hour   = minute * 60;
+    var day    = hour * 24;
+    var month  = day * 30;   // approx
+    var year   = day * 365;  // approx
+	if (diffMs < minute) {
+        return "Just now";
+    }
+	if (diffMs < hour) {
+        var mins = Math.floor(diffMs / minute);
+        return mins + " min" + (mins > 1 ? "s" : "") + " ago";
+    }
+	if (diffMs < day) {
+        var hrs = Math.floor(diffMs / hour);
+        return hrs + " hour" + (hrs > 1 ? "s" : "") + " ago";
+    }
+	if (diffMs < month) {
+        var days = Math.floor(diffMs / day);
+        var hrs = Math.floor((diffMs % day) / hour);
+		return days + " day" + (days > 1 ? "s" : "") +
+               (hrs > 0 ? " " + hrs + " hour" + (hrs > 1 ? "s" : "") : "") +
+               " ago";
+    }
+	if (diffMs < year) {
+        var months = Math.floor(diffMs / month);
+        var days = Math.floor((diffMs % month) / day);
+		return months + " month" + (months > 1 ? "s" : "") +
+               (days > 0 ? " " + days + " day" + (days > 1 ? "s" : "") : "") +
+               " ago";
+    }
+	debugger
+	var years = Math.floor(diffMs / year);
+    var months = Math.floor((diffMs % year) / month);
+	return years + " year" + (years > 1 ? "s" : "") +
+           (months > 0 ? " " + months + " month" + (months > 1 ? "s" : "") : "") +
+           " ago";
+}

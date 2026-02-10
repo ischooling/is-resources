@@ -179,10 +179,11 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 								}
 							}
 						});
-					}
-					$('#schoolcalendar').fullCalendar('removeEvents')
+					};
+					CALENDAR_EVENT_DATA = finalEvents;
+					$('#schoolcalendar').fullCalendar('removeEvents');
 					//$('#schoolcalendar').fullCalendar('destroy');
-					getFullCalendar(finalEvents, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag);
+					getFullCalendar(finalEvents, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, data.activityTypes);
 					if(flag){
 						$("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
 					}
@@ -194,8 +195,9 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 						$(".upcoming-icon").removeClass("upcoming-week-view-icon");
 						$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
 					}
+					
 					ISCALENDARLOAD=false;
-                }
+				}
             }
         });
     });
@@ -275,7 +277,7 @@ $(document).ready(function() {
 	// 		$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
 	// 	}
 	// },1000);
-	calendarTimeInterval()
+	
 });
 
 
@@ -311,16 +313,16 @@ function calendarTimeInterval() {
 
 // var data1=getStudentDashboardDetails();
 var scrollEventTriggered = false;
-function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate) {
-    todayClassArray = [];
+function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, activityTypes) {
+	todayClassArray = [];
     var initialView = window.innerWidth < 768 ? 'listDay' : 'agendaDay';
-
-    $("#schoolcalendar").fullCalendar({
+	$("#schoolcalendar").fullCalendar({
+		firstDay: 1,
         header: {
-            left: "prev,next today",
-            center: "title",
-            right: "agendaDay,agendaWeek"
-        },
+            left: "today",
+            center: "prev,next, title",
+            right: "agendaDay,agendaWeek",
+		},
         buttonText: {
             today: 'Today',
             month: 'Monthly',
@@ -341,7 +343,7 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUU
         minTime: '00:00:00',
         maxTime: '24:00:00',
         slotDuration: '00:30:00',
-        events: CALENDAR_EVENT_DATA,
+        events: CALENDAR_EVENT_ARRAY,
         
         // Add these callbacks for v3.10.1 to handle view changes
         viewRender: function(view, element) {
@@ -353,12 +355,55 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUU
 					// Reload events for the new date range
 					callSchoolCalendar(formId, userId, UNIQUEUUID, currentView, start, end, true);
 				}
+				var legentHtml=
+					`<div class="d-flex w-100 flex-wrap justify-content-center mt-1 gap-5 legent_wrapper">
+						<div class="d-inline-flex align-items-center mr-2">
+							<label class="d-inline-block rounded-circle m-0" style="width:10px;height:10px;background:#bfbebe"></label>
+							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Expired Classes & Activities</span>
+						</div>
+						<div class="d-inline-flex align-items-center mr-2">
+							<label class="d-inline-block rounded-circle m-0" style="width:10px;height:10px;background:#007c00"></label>
+							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Live Class & Activity</span>
+						</div>
+						<div class="d-inline-flex align-items-center mr-2">
+							<label class="d-inline-block rounded-circle m-0" style="width:10px;height:10px;background:#433a11"></label>
+							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Upcoming Classes & Activities</span>
+						</div>
+						<div class="d-inline-flex align-items-center mr-2">
+							<label class="d-inline-block rounded-circle bg-primary m-0" style="width:10px;height:10px;"></label>
+							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Classes</span>
+						</div>
+						<div class="d-inline-flex align-items-center">
+							<label class="d-inline-block rounded-circle bg-danger m-0" style="width:10px;height:10px;"></label>
+							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Activities</span>
+						</div>
+					</div>`;
+					if($(".legent_wrapper").length<1){
+						$("#schoolcalendar .fc-header-toolbar").after(legentHtml);
+					}
 			}else{
 				redirectLoginPage();
 			}
+			// 🟢 ADD "Week of" TEXT
+			if (view.name === "agendaWeek") {
+				$('.fc-scroller .fc-unselectable .fc-bg .fc-day.fc-sat, .fc-scroller .fc-unselectable .fc-day.fc-sun').each(function () {
+					$(this).append('<div class="font-weight-bold text-center mt-3">Day Off</div>');
+				});
+			}
+
+			if (view.name === "agendaDay") {
+				$(".fc-center h2").text(view.start.format("dddd, MMM D, YYYY"));
+			}
+
+			$('.fc-head-container  .fc-axis').each(function () {
+				if (!$(this).find('.axis-icon').length) {
+					$(this).prepend('<i class="fa fa-clock-o axis-icon fa-2x"></i>');
+				}
+			});
+			updateTabCounts(CALENDAR_EVENT_DATA);
 		},
         eventClick: function(info) {
-            if (info.url) {
+			if(info.url) {
                 if (getSession()) {
                     classDetailsOnModal(info.url);
                     return false;
@@ -366,44 +411,93 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUU
                     redirectLoginPage();
                 }
                 return false;
-            } else {
-                eventDetailsOnModal(info.id, info.title, info.activities);
+            } else if(!info.id.startsWith("activity", 0)) {
+                eventDetailsOnModal(info.id, info.eventType, info.activities);
             }
         },
         
         eventRender: function(event, element) {
-            if (!event.id.startsWith("announce", 0) && !event.id.startsWith("holiday", 0)) {
+			if(!event.id.startsWith("announce", 0) && !event.id.startsWith("holiday", 0)) {
                 if (event.start && event.end) {
                     const startStr = event.start.format();
                     const endStr = event.end.format();
-
-                    const eventExists = todayClassArray.some(e =>
+					const eventExists = todayClassArray.some(e =>
                         e.start === startStr &&
                         e.endTime === endStr &&
-                        e.title === event.title
+                        e.eventType === event.eventType
                     );
-
-                    if (!eventExists) {
+					
+					if(!eventExists) {
                         todayClassArray.push({
-                            start: startStr,
-                            endTime: endStr,
-                            title: event.title
-                        });
-                    }
-                }
-            }
-            updateEventIcons(event, element, todayClassArray, viewName);
-        },
+							start: startStr,
+							end: endStr,
+							eventId: event.id,
+							eventTitle: event.eventTitle,
+							eventType: event.eventType
+						});
+					}
+					var startTime = event.start.format('h:mm A');
+					var endTime   = event.end.format('h:mm A');
+					var customTimeHtml =``;
+					
+					if(!event.id.startsWith("activity", 0)){
+						customTimeHtml=`<div class="d-inline-block py-1 px-2 rounded class-time class-start-Time event-start-Time">${startTime}</div>
+						<div class="d-inline-block py-1 px-2 rounded class-time class-end-Time ml-1 event-end-Time">${endTime}</div>`;
+					}else if(event.id.startsWith("activity", 0)){
+						customTimeHtml=`<div class="d-inline-block py-1 px-2 rounded activety-time activety-start-Time event-start-Time">${startTime}</div>
+            			<div class="d-inline-block py-1 px-2 rounded activety-time activety-end-Time ml-1 event-end-Time">${endTime}</div>`;
+					}
+					element.find('.fc-time').html(customTimeHtml);
+					var customEventTitleHtml =``;
+					if(!event.id.startsWith("activity", 0)){
+						if(event.category.startsWith("BATCH", 0)){
+							customEventTitleHtml+=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.title}</div>`;
+						}else{
+							customEventTitleHtml=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.eventTitle}</div>`;
+						}
+						if(!event.category.startsWith("BATCH", 0)){
+							customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
+								<div>
+									<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</span><span class="assign-teacher-name">${event.name}</span>
+								</div>
+							</div>`;
+						}
+						
+						customEventTitleHtml+=`<div class="class-indicator position-absolute w-100"></div>`;
+					}else if(event.id.startsWith("activity", 0)){
+						var activityTitle = event.title.split("~");
+						var subActivityTitle = activityTitle[1];
+						activityTitle = activityTitle[0];
+						customEventTitleHtml=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${activityTitle}</div>
+						<div class="text-dark pt-4 font-weight-semi-bold text-center  assign-teacher-wrapper w-100">
+							${subActivityTitle != null && subActivityTitle != undefined && subActivityTitle != "" ? `<div class="font-14 font-weight-semi-bold text-dark w-100 text-center sub-activity-title">${subActivityTitle}</div>`:``}
+							<span class="font-weight-normal sub-activity-label">${event.eventTitle}</span>
+						</div>
+						<div class="class-indicator position-absolute w-100"></div>`;
+					}
+					
+					element.find('.fc-title').html(customEventTitleHtml);
+				}
+				updateEventIcons(event, element, todayClassArray, viewName, activityTypes);
+			}
+		},
 
         eventAfterAllRender: function() {
-            if (!scrollEventTriggered) {
+			if (!scrollEventTriggered) {
                 scrollEventTriggered = true;
 				scrollEvent();
                 setTimeout(function() {
                     scrollEventTriggered = false;
                 }, 1500);
             }
-        },
+			$('.fc-today-button, .fc-agendaDay-button, .fc-agendaWeek-button').removeClass('btn-primary').addClass('btn-light btn-pill');
+			// label bhi yahin set karo
+			if ($('#schoolcalendar').fullCalendar('getView').name === "agendaWeek" || $('#schoolcalendar').fullCalendar('getView').name === "listDay") {
+				$(".over_All_Class_Activity_Label").text("Total Weekly Classes & Activities");
+			} else {
+				$(".over_All_Class_Activity_Label").text("Total Daily Classes & Activities");
+			}
+		},
 
         windowResize: function() {
             updateCalendarView();
@@ -412,6 +506,7 @@ function getFullCalendar(CALENDAR_EVENT_DATA, viewName, formId, userId, UNIQUEUU
 
     CALENDAR_EVENT = true;
     updateCalendarView();
+	console.log(todayClassArray)
 }
 
 $(window).off('resize').on('resize', function() {
@@ -420,21 +515,24 @@ $(window).off('resize').on('resize', function() {
 	}
 });
 function updateCalendarView() {
+	var currentView = $('#schoolcalendar').fullCalendar('getView');
 	if(window.innerWidth < 768) {
-		var currentView = $('#schoolcalendar').fullCalendar('getView');
 		if(currentView.name == "agendaDay" || currentView.name == "listDay"){
 			$('#schoolcalendar').fullCalendar('changeView', 'listDay');
+			$('.over_All_Class_Activity_Label').text("Total Daily Classes & Activities");
 		}
 		if(currentView.name == "agendaWeek" || currentView.name == "listWeek"){
 			$('#schoolcalendar').fullCalendar('changeView', 'listWeek');
+			$('.over_All_Class_Activity_Label').text("Total Weekly Classes & Activities");
 		}
 	}else{
-		var currentView = $('#schoolcalendar').fullCalendar('getView');
 		if(currentView.name == "agendaDay" || currentView.name == "listDay"){
 			$('#schoolcalendar').fullCalendar('changeView', 'agendaDay');
+			$('.over_All_Class_Activity_Label').text("Total Daily Classes & Activities");
 		}
 		if(currentView.name == "agendaWeek" || currentView.name == "listWeek"){
 			$('#schoolcalendar').fullCalendar('changeView', 'agendaWeek');
+			$('.over_All_Class_Activity_Label').text("Total Weekly Classes & Activities");
 		}
 		$("#legentCalendar").remove();
 	}
@@ -455,79 +553,338 @@ function checkIfAnyClassRunning(todayClassArray) {
     return false;
 }
 
+function getEventsInCurrentView(allEvents) {
+
+    var view = $('#schoolcalendar').fullCalendar('getView');
+    if (!view || !view.start || !view.end) return [];
+
+    var viewName = view.name;
+    var start, end;
+
+    // ✅ Day views (agendaDay / listDay)
+    if (viewName === 'agendaDay' || viewName === 'listDay') {
+
+        start = moment(view.start).startOf('day');
+        end   = moment(view.start).endOf('day');
+
+    } 
+    // ✅ Week / Month views
+    else {
+
+        start = moment(view.start).startOf('day');
+        end   = moment(view.end).subtract(1, 'seconds');
+
+    }
+
+    return allEvents.filter(function (e) {
+        var eventStart = moment(e.start);
+        return eventStart.isBetween(start, end, null, '[]');
+    });
+}
+
+
+
+
+function updateTabCounts(allEvents) {
+	var filteredEvents = getEventsInCurrentView(allEvents);
+    $(".over_All_Class_Activity_Count").text(filteredEvents.length);
+    $(".activity_Count").text(
+        filteredEvents.filter(e => e.category === 'ACTIVITY').length
+    );
+
+    if (USER_ROLE === "STUDENT") {
+        $(".class_Count").text(
+            filteredEvents.filter(e => e.category === 'CLASS').length
+        );
+    } else if (USER_ROLE === "TEACHER") {
+        $(".one_to_one_class_Count").text(
+            filteredEvents.filter(e => e.category === 'ONE_TO_ONE').length
+        );
+        $(".group_class_Count").text(
+            filteredEvents.filter(e => e.category === 'BATCH').length
+        );
+    }
+}
+
+
+
 var updateEventIconsStyle = true;
-function updateEventIcons(info, element, todayClassArray, viewName) {
-	if(updateEventIconsStyle){
-		$("head").append('<style>.tooltip-inner{max-width:500px;width:fit-content}.fc-scroller.fc-time-grid-container[style]{height:425px !important}</style>');
-		updateEventIconsStyle=false;
+// function updateEventIcons(info, element, todayClassArray, viewName) {
+
+// 	if(updateEventIconsStyle){
+// 		$("head").append('<style>.tooltip-inner{max-width:500px;width:fit-content}.fc-scroller.fc-time-grid-container[style]{height:425px !important}</style>');
+// 		updateEventIconsStyle=false;
+// 	}
+// 	if(todayClassArray.length>0){
+// 		var date = new Date(todayClassArray.start);
+// 		var formattedDate = date.toLocaleDateString("en-US", {
+// 			weekday: "short",
+// 			month: "short",
+// 			day: "2-digit",
+// 			year: "numeric"
+// 		});
+
+// 		element.attr("data-toggle","tooltip");
+// 		element.attr("data-container","body");
+// 		element.attr("data-html",true);
+// 		element.attr(`data-original-title`,
+// 			// `Class Start Time: ${element.find(".fc-time .class-end-Time").text()}</br>${element.find(".fc-title").text()}`
+// 			`<div class="card">
+// 				<div class="card-body">
+// 					<div class="full">
+// 						<img src="https://www.kindpng.com/picc/m/154-1546828_transparent-chemistry-icon-png-chemical-effects-of-electric.png" width="30px" />
+// 					</div>
+// 					<div>
+// 						<h5>Course Name</h5>
+// 						<p>${formattedDate}</p>
+// 						<p>Grade</p>
+// 					</div>
+// 					<div class="d-flex my-2">
+// 						<div class="d-inline-flex py-1 px-2 rounded bg-dark text-white">${element.find(".fc-time .class-start-Time").text()}</div>
+// 						<div class="d-inline-flex py-1 px-2 rounded bg-dark text-white">${element.find(".fc-time .class-end-Time").text()}</div>
+// 					</div>
+// 					<div class="full">
+// 						<p>Teacher Name: </p>
+// 						<h5 class="font-weight-bold">${element.find(".fc-title .assign-teacher-name").text()}</h5>
+// 					</div>
+// 				</div>
+// 			</div>`
+// 		)
+// 		setInterval(function() {
+// 			var currentTime = new Date($("#currentTimeForUser").text());
+// 			// console.log(info.start._i + info.end);
+// 			if(info.start!=null && info.end!=null){
+// 				var startTime = new Date(info.start._i);
+// 				var endTime = new Date(info.end._i);
+// 				var currentDate = currentTime.getDate();
+// 				var currentMilliseconds = currentTime.getTime()
+// 				var eventDate = startTime.getDate();
+// 				var eventStartMilliseconds = startTime.getTime();
+// 				var eventEndMilliseconds = endTime.getTime();
+// 				element.find(".live-symbol").remove();
+// 				element.removeClass("live-class-blink");
+// 				element.removeClass("upcoming-class-blink");
+// 				element.find('.live-symbol').remove(); // Remove existing icons
+// 				element.find('.upcoming-icon').remove(); // Remove existing icons
+// 				if(currentMilliseconds > eventEndMilliseconds && currentMilliseconds > eventStartMilliseconds) {
+// 					// element.find(".fc-time span").find(".upcoming-symbol").remove();
+// 					// var liveIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
+// 					//orignalClassBg = element.css("background-color");
+// 					//orignalClassborderColor = element.css("border-color");
+// 					//element.find(".fc-time span").append(liveIcon);
+// 					element.addClass("past-class");
+// 				}else 
+// 					if(currentMilliseconds >= eventStartMilliseconds && currentMilliseconds <= eventEndMilliseconds) {
+// 					element.find(".fc-title .class-indicator").find(".upcoming-symbol").remove();
+// 					var liveIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
+// 					orignalClassBg = element.css("background-color");
+// 					orignalClassborderColor = element.css("border-color");
+// 					element.find(".fc-title .class-indicator").append(liveIcon);
+// 					element.addClass("live-class-blink");
+// 				}else if (currentMilliseconds < eventEndMilliseconds && currentMilliseconds < eventStartMilliseconds) {
+// 					if($(".upcoming-class-blink").length < 1){
+// 						var closestEvent = getClosestUpcomingEvent(todayClassArray);
+// 						if (closestEvent && closestEvent.eventType === info.eventType) {
+// 							var upcomingIcon=$('<b class="d-flex w-100 flex-row-reverse align-itmes-center upcoming-icon upcoming-week-view-icon"> <img style="filter:brightness(0) invert(1);" class="timer-img position-relative"  src="'+PATH_FOLDER_IMAGE2+'timer.gif"/> Upcoming</b>'); 
+// 							element.addClass("upcoming-class-blink");
+// 							element.find(".fc-title .class-indicator").append(upcomingIcon);
+// 						}
+// 					}
+// 				}
+// 				CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(todayClassArray);
+// 				$('[data-toggle="tooltip"]').tooltip();
+// 				if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
+// 					$(".upcoming-icon").addClass("upcoming-week-view-icon");
+// 					$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
+// 				}else{
+// 					$(".upcoming-icon").removeClass("upcoming-week-view-icon");
+// 					$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
+// 				}
+// 			}
+// 		}, 1000);
+		
+// 		//console.log(todayClassArray);
+// 		if($("#legentCalendar").length<1 && window.innerWidth < 768){
+// 			$("#schoolcalendar .fc-header-toolbar").prepend(
+// 				`<div class="d-flex w-100 flex-wrap justify-content-center mb-1" id="legentCalendar">
+// 					<div class="mb-1 d-inline-flex align-items-center">
+// 						<span class="d-inline-block mr-1" style="width:13px;height:13px;background:green"></span>
+// 						Live Class
+// 					</div>
+// 					<div class="mb-1 d-inline-flex align-items-center">
+// 						<span class="d-inline-block mr-1" style="width:13px;height:13px;background:#453900"></span>
+// 						Upcoming class
+// 					</div>
+// 				</div>`
+// 			);
+// 		}
+		
+// 	}	
+// }
+async function updateEventIcons(info, element, todayClassArray, viewName, activityTypes) {
+	updateTabCounts(CALENDAR_EVENT_DATA);
+	if (updateEventIconsStyle) {
+		$("head").append(`
+		<style>
+			.tooltip-inner{max-width:500px;width:fit-content;background-color:transparent;padding:0}
+			.calendar-tooltip .arrow:before{border-top-color:#d1cbcb !important}
+			.fc-scroller.fc-time-grid-container[style]{height:425px !important}
+		</style>
+		`);
+		updateEventIconsStyle = false;
 	}
-	if(todayClassArray.length>0){
-		element.attr("data-toggle","tooltip");
-		element.attr("data-container","body");
-		element.attr("data-html",true);
-		element.attr("data-original-title","Class Start Time: "+element.find(".fc-time span").text()+"</br>"+element.find(".fc-title").text());
-		setInterval(function() {
+
+	if (todayClassArray.length > 0) {
+		// ✅ DATE FORMAT SAFE
+		var date = new Date(info.start);
+		var formattedDate = isNaN(date)
+		? ""
+		: date.toLocaleDateString("en-US", {
+			weekday: "short",
+			month: "short",
+			day: "2-digit",
+			year: "numeric"
+			});
+
+		// ✅ TOOLTIP HTML
+		var tooltipHTML = `
+		<div class="card bg-light text-dark">
+			<div class="card-body">
+			<div class="mb-2">
+				<img src='${info.icon}' width="30" />
+			</div>
+			<div>
+				<h5 class="font-weight-bold font-16">${element.find(".fc-title .class-title").text()}</h5>`;
+				if(info.id.startsWith("activity", 0)){
+					
+					tooltipHTML+=
+					`${element.find(".sub-activity-title").length>0?`<p class="mb-0 font-weight-semi-bold font-14">${element.find(".sub-activity-title").text()}</p>`:``}
+					<p class="mb-0">${element.find(".sub-activity-label").text()}</p>`;
+				}
+				if(info.grade != null && info.grade != undefined && info.grade != '' && info.session != null && info.session != undefined && info.session != ''){
+					tooltipHTML+=`<p class="mb-0">${info.grade}|Batch ${info.session}</p>`;
+				}
+				tooltipHTML+=`<p class="mb-0">${formattedDate}</p>
+			</div>
+			<div class="d-flex my-2 justify-content-around w-fit-content gap-5 mx-auto">
+				<div class="py-1 px-2 rounded bg-dark text-white">
+				${element.find(".event-start-Time").text()}
+				</div>
+				<div class="py-1 px-2 rounded bg-dark text-white">
+				${element.find(".event-end-Time").text()}
+				</div>
+			</div>
+			<div>`
+				if(info.id.startsWith("activity", 0)){
+					var activitiesList = await dashboardCalendarActivityListContent(info);
+					tooltipHTML+=
+					`<ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul>`;
+				}else{
+					if(!info.category.startsWith("BATCH", 0)){
+						tooltipHTML+=
+						`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</p>
+						<strong>${element.find(".assign-teacher-name").text()}</strong>`;
+					}
+					
+				}
+			tooltipHTML+=`</div>
+			</div>
+		</div>`;
+
+		// ❌ REMOVE OLD TOOLTIP
+		element.removeAttr("data-original-title title");
+
+		// ✅ INIT TOOLTIP ONLY ONCE
+		if(!element.data('bs.tooltip')) {
+		element.tooltip({
+			container: 'body',
+			html: true,
+			title: tooltipHTML,
+			placement: 'auto',
+			boundary: 'window',
+			trigger: 'hover'
+		});
+		element.on('shown.bs.tooltip', function () {
+			$('.tooltip').last().addClass('calendar-tooltip');
+			});
+		}
+
+		// ============================
+		// ⏱ LIVE / UPCOMING LOGIC
+		// ============================
+		setInterval(function () {
 			var currentTime = new Date($("#currentTimeForUser").text());
-			// console.log(info.start._i + info.end);
-			if(info.start!=null && info.end!=null){
-				var startTime = new Date(info.start._i);
-				var endTime = new Date(info.end._i);
-				var currentDate = currentTime.getDate();
-				var currentMilliseconds = currentTime.getTime()
-				var eventDate = startTime.getDate();
-				var eventStartMilliseconds = startTime.getTime();
-				var eventEndMilliseconds = endTime.getTime();
-				element.find(".live-symbol").remove();
-				element.removeClass("live-class-blink");
-				element.removeClass("upcoming-class-blink");
-				element.find('.live-symbol').remove(); // Remove existing icons
-				element.find('.upcoming-icon').remove(); // Remove existing icons
-				if(currentMilliseconds >= eventStartMilliseconds && currentMilliseconds <= eventEndMilliseconds) {
-					element.find(".fc-time span").find(".upcoming-symbol").remove();
-					var liveIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
-					orignalClassBg = element.css("background-color");
-					orignalClassborderColor = element.css("border-color");
-					element.find(".fc-time span").append(liveIcon);
+			if (!info.start || !info.end) return;
+
+			var startTime = new Date(info.start._i);
+			var endTime = new Date(info.end._i);
+			var now = currentTime.getTime();
+			element.find(".live-symbol, .upcoming-icon").remove();
+			element.removeClass("live-class-blink upcoming-class-blink past-class");
+			if(info.category.startsWith("ONE_TO_ONE", 0)){
+				element.addClass("ONE_TO_ONE");
+			}
+			if(info.category.startsWith("BATCH", 0)){
+				element.addClass("BATCH");
+			}
+			if(info.category.startsWith("CLASS", 0)){
+				element.addClass("CLASS");
+			}
+			if(info.category.startsWith("ACTIVITY", 0)){
+				element.addClass("ACTIVITY");
+			}
+			if(info.id.startsWith("activity", 0)){
+				element.addClass("activity-wrapper-div");
+				var activityId = info.id.split("activity");
+				activityId=activityId[1];
+				element.attr("onclick","renderViewActitifyDetails('" + activityId + "', '')");
+
+			}
+			if (now > endTime.getTime()) {
+				element.addClass("past-class");
+				element.removeClass("activity-wrapper-div");
+			}else if (now >= startTime.getTime() && now <= endTime.getTime()) {
+				var liveIcon = $('<b class="d-flex flex-row-reverse live-symbol">🔴 Live Class</b>');
+				element.find(".fc-title .class-indicator").append(liveIcon);
+				element.removeClass("activity-wrapper-div");
+				if(info.id.startsWith("activity", 0)){
+					element.addClass("live-activity-blink live-class-blink");
+				}else{
 					element.addClass("live-class-blink");
-				}else if (currentMilliseconds < eventEndMilliseconds && currentMilliseconds < eventStartMilliseconds) {
-					if($(".upcoming-class-blink").length < 1){
-						var closestEvent = getClosestUpcomingEvent(todayClassArray);
-						if (closestEvent && closestEvent.title === info.title) {
-							var upcomingIcon=$('<b class="d-inline-block pull-right live-symbol font-size-lg upcoming-icon"> <img style="width:34px;filter:brightness(0) invert(1);left:10px" class="timer-img position-relative"  src="'+PATH_FOLDER_IMAGE2+'timer.gif"/> Upcoming</b>'); 
+				}
+			} else {
+				if ($(".upcoming-class-blink").length < 1) {
+					var closestEvent = getClosestUpcomingEvent(todayClassArray);
+					if (closestEvent && closestEvent.eventId === info.id) {
+						var upcomingIcon = $(`
+						<b class="d-flex flex-row-reverse upcoming-icon upcoming-week-view-icon">
+							<img class="timer-img" src="${PATH_FOLDER_IMAGE2}timer.gif" style="filter:brightness(0) invert(1);"/> Upcoming
+						</b>
+						`);
+						element.find(".fc-title .class-indicator").append(upcomingIcon);
+						element.removeClass("activity-wrapper-div");
+						if(info.id.startsWith("activity", 0)){
+							element.addClass("upcoming-activity-blink upcoming-class-blink");
+						}else{
 							element.addClass("upcoming-class-blink");
-							element.find(".fc-time span").append(upcomingIcon);
 						}
 					}
-				}
-				CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(todayClassArray);
-				$('[data-toggle="tooltip"]').tooltip();
-				if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
-					$(".upcoming-icon").addClass("upcoming-week-view-icon");
-					$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
 				}else{
-					$(".upcoming-icon").removeClass("upcoming-week-view-icon");
-					$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
+					element.addClass("future-class");
 				}
 			}
+
+			CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(todayClassArray);
+
+			if ($('#schoolcalendar').fullCalendar('getView').name === "agendaWeek") {
+				$(".upcoming-icon").addClass("upcoming-week-view-icon");
+				$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
+			}
+
 		}, 1000);
-		//console.log(todayClassArray);
-		if($("#legentCalendar").length<1 && window.innerWidth < 768){
-			$("#schoolcalendar .fc-header-toolbar").prepend(
-				`<div class="d-flex w-100 flex-wrap justify-content-center mb-1" id="legentCalendar">
-					<div class="mb-1 d-inline-flex align-items-center">
-						<span class="d-inline-block mr-1" style="width:13px;height:13px;background:green"></span>
-						Live Class
-					</div>
-					<div class="mb-1 d-inline-flex align-items-center">
-						<span class="d-inline-block mr-1" style="width:13px;height:13px;background:#453900"></span>
-						Upcoming class
-					</div>
-				</div>`
-			);
-		}
-		
-	}	
+	}
 }
+
 
 function getClosestUpcomingEvent(events) {
 	var currentTime = new Date($("#currentTimeForUser").text());
@@ -691,14 +1048,30 @@ function scrollEvent(){
 		scrollEventInterval = null;
 	}
 	scrollEventInterval = setInterval(function(){
-        let $target = $(".live-class-blink").length ? $(".live-class-blink") : $(".upcoming-class-blink");
-		if ($target.length > 0 && $target.offset()) {
-            const scrollTopValue = $target.offset().top - 87;
-            $('.fc-scroller.fc-time-grid-container').animate({ scrollTop: scrollTopValue }, 1000);
+		var calendarContainer = $('.fc-scroller.fc-time-grid-container');
+
+        var target = $(".live-class-blink").length ? $(".live-class-blink") : $(".upcoming-class-blink");
+		if($(".live-class-blink:visible").length>0){
+			var target = $(".live-class-blink:visible").first()
+		}else if($(".upcoming-class-blink:visible").length>0){
+			var target = $(".upcoming-class-blink:visible").first()
+		}else if($(".future-class:visible").length>0){
+			var category = $(".active_calendar_catergory").attr("data-category");
+			var target = $(".fc-event-container ."+category+".future-class").first();
+			
+		}else{
+			var target = $(".fc-event-container .past-class").first();
+		}
+		// var target = $(".live-class-blink:visible").length ? $(".live-class-blink:visible").first() : $(".upcoming-class-blink:visible").first();
+		if (target.length > 0 && calendarContainer.length) {
+			calendarContainer.animate({ scrollTop: target.position().top }, 700);
             clearInterval(scrollEventInterval);
         }
-    }, 100);
+    },1500);
 }
+
+
+
 
 async function classDetailsOnModal(url) {
 	try {
@@ -755,8 +1128,36 @@ function calendarEventBind(){
 		// }else{
 		// 	redirectLoginPage();
 		// }
+		// if(getSession()){
+			
+		// }else{
+		// 	redirectLoginPage();
+		// }
 	});
 }
+
+function calendarRequestByFilter(src){
+	$(".calendar_request_button").removeClass("active_calendar_catergory")
+	$(src).addClass("active_calendar_catergory");
+	var category = $(".active_calendar_catergory").attr("data-category");
+	if(category == "ALL"){
+		$("#schoolcalendar .fc-event-container .fc-time-grid-event").show();
+	}else if(category == "BATCH"){
+		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
+		$("#schoolcalendar .fc-event-container .BATCH").show();
+	}else if(category == "ONE_TO_ONE"){
+		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
+		$("#schoolcalendar .fc-event-container .ONE_TO_ONE").show();
+	}else if(category == "CLASS"){
+		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
+		$("#schoolcalendar .fc-event-container .CLASS").show();
+	}else if(category == "ACTIVITY"){
+		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
+		$("#schoolcalendar .fc-event-container .ACTIVITY").show();
+	}
+	scrollEvent();
+}
+
 
 function proceedwithControll(url, response){
 	if (response['status'] == '0' || response['status'] == '2' || response['status'] == '3') {

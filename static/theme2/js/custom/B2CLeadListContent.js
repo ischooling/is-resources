@@ -562,7 +562,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     "            </button>" +
     "        </div>" +
     '        <div class="modal-body">' +
-    '<form action="javascript:void(0);" id="advanceLeadNewSearchForm" name="advanceLeadNewSearchForm" autocomplete=\'off\'>' +
+    '       <form action="javascript:void(0);" id="advanceLeadNewSearchForm" name="advanceLeadNewSearchForm" autocomplete=\'off\'>' +
     '			<input type="hidden" name="restrictedDataShow" id="restrictedDataShow" value="YES">' +
     '			<input type="hidden" name="advancedformclick" id="advancedformclick" value="YES">' +
     '			<input type="hidden" name="currentPageSearch" id="currentPageSearch" value="' +objRights.currentPage +'">' +

@@ -1,7 +1,7 @@
 var APPLICATION_JSON_VALUE = "application/json";
 var BASE_TIMEZONE = "Asia/Singapore";
 var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";
-var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "/" + "api/v1/";
+var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "api/v1/";
 var GLOBAL_EMAIL = "";
 var GRADE_CAL_RULE = {};
 var DEFAULT_SEARCH_STATE = true;

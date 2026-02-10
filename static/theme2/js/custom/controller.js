@@ -248,10 +248,11 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 			
 		});
 		getMeetingVendorUserStatus(SCHOOL_ID,USER_ID,'LENS');
-	}else if(pageNo=='user-review'){
-		$('#dashboardContentInHTML').html(getReviewContent('User Review',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-		getReview(USER_ID);
-	}else if(pageNo=='partner-dashboard'){
+	}else if(pageNo=='user-feedback'){
+		getReviewDashboardContent('User Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+	}else if(pageNo=='question-list'){
+      getQuestionDashboardContent('Question List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+    }else if(pageNo=='partner-dashboard'){
 		renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
 	}else if(pageNo=='counselor-dashboard'){
 		renderCounselorDashboard('Counselor Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)

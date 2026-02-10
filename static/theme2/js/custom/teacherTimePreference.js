@@ -1,7 +1,7 @@
 function teacherTimepreferencePageOnLoadEvent(details){
-    $("#saveFeedbackPop").on("click", function(){
-		saveFeedbackQuestion();
-	});
+    // $("#saveFeedbackPop").on("click", function(){
+	// 	saveFeedbackQuestion();
+	// });
 	$("#btnAvailability").on('click',function(){
 		$("#warningMsgPopup").modal("hide");
 		callDashboardPageSchool(moduleId,'teacher-manage-slot');

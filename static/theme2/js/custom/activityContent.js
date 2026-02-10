@@ -16,7 +16,10 @@ function dashboardActivityHeader(){
     return html;
 }
 
-async function dashboardActivityContent(data){var activitiesList = await dashboardActivityListContent(data);var html = `<div class="card-body card-activity"><ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul></div>`;return html;}
+async function dashboardActivityContent(data){
+        var activitiesList = await dashboardActivityListContent(data);
+        var html = `<div class="card-body card-activity"><ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul></div>`;return html;
+}
 function dashboardActivityListContent(data){
     return new Promise((resolve, reject) => {
         try {
@@ -149,6 +152,131 @@ function dashboardActivityListContent(data){
                     }
                 html+'</li>'; // Correctly close the <li> tag here
             });
+            resolve(html);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+function dashboardCalendarActivityListContent(info){
+    return new Promise((resolve, reject) => {
+        try {
+            var html = '';
+            if(info!=null && info.length>0){
+                $.each(info, function(i, ead) {
+                    var activityTitle = info.title.split("~");
+                    activityTitle = activityTitle[0];
+                    if(activityTitle=="Meet Your Classmates"){
+                        ACTIVITY_CLASS_START_TIME.push({"startTime":convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER),"endTime":convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER), "title":"activity"})
+                    }
+                    var functionName='renderViewActitifyDetails('+ead.id+','+ead.meetingId+')';
+                    if(ead.subActivityTypeId==0 && ead.activityTypeId==activityType.id){
+                        // console.log('ead.startDateTime1 '+ead.startDateTime);
+                        // console.log('ead.startDateTime1 '+new Date(convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)));
+                        // console.log('ead.startDateTime1 '+new Date($("#currentTimeForUser").text()));
+                        if(new Date(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime()>new Date($("#currentTimeForUser").text()).getTime()){
+                            html+=
+                                '<li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-activity-index="'+activityType.id+'" data-starttimedate="'+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)+'" data-endtimedate="'+convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)+'" data-timeid="'+ead.id+'" data-joiningBefore="'+ead.joiningBefore+'">'
+                                    +'<div class="ongoing-div" style="display:none">'
+                                        +'<h4 class="text-center font-size-lg text-success-custom without-cursor-nav"><b>'+(ead.activityTypeId!=4?'Join Ongoing Activity':'Join Ongoing Assessment')+'</b></h4>'
+                                        +'<div class="px-1">'
+                                            +'<a style="background-color:#007bfe;color:#fff;padding:5px 5px 5px 5px !important; text-align:center; border-radius:4px;margin-bottom:5px" class="waves-effect font-weight-bold" onclick="'+functionName+'" href="javascript:void(0);"><span >'+ead.activityTitle+' </span> </a>'
+                                        +'</div>'
+                                    +'</div>'
+                                    +'<div>'
+                                        +'<h4 class="without-cursor-nav counter-div text-center font-size-lg text-success-custom">'
+                                            +'<b>'+(ead.activityTypeId!=4?'Upcoming Activity':'Upcoming Assessment')+' </b>'
+                                        +'</h4>'
+                                        +'<div class="counter-div mb-1 px-1">'
+                                            +'<div class="activity-date-and-time">'
+                                                +'<span><b>on '+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_FORMATTER)+'</b></span>'
+                                                +'<span><b>at '+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_TIME_FORMATTER)+'</b></span>'
+                                            +'</div>'
+                                        +'</div>'
+                                        +'<div class="px-1 ">'
+                                            +'<a class="activity-btn disable-btn-color text-white font-weight-bold text-center waves-effect" style="padding: 5px !important " onclick="'+functionName+'" href="javascript:void(0);"><span>'+ead.activityTitle+'</span></a>'
+                                        +'</div>'
+                                        +'<div class="counter-div">'
+                                            +'<div class="px-1 text-center font-size-md text-success-custom"><b>Time Remaining</b></div>'
+                                            +'<div id="timer'+ead.id+'" class="counter-wrapper-div">'
+                                            +'<div id="days'+ead.id+'" class="count-div days"></div>'
+                                            +'<div id="hours'+ead.id+'" class="count-div hours"></div>'
+                                            +'<div id="minutes'+ead.id+'" class="count-div minutes"></div>'
+                                            +'<div id="seconds'+ead.id+'" class="count-div seconds"></div>'
+                                            +'</div>'
+                                        +' </div>'
+                                        +'<div class="join-div px-4 my-2 text-center">'
+                                            +'<a class="btn join-activity-btn animated-button joinLBtn'+ead.id+'" onclick="'+functionName+'"  href="javascript:void(0);" style="padding:7px 10px !important;border-radius:3px;display:none">'
+                                            +'<span></span>'
+                                            +'<span></span>'
+                                            +'<span></span>'
+                                            +'<span></span>'
+                                            +'Join Now'
+                                        +'</a>'
+                                    +'</div>'
+                                +'</div>'
+                            +'</li>';
+                        }
+                    }else if(ead.subActivityTypeId!=0 && ead.activityTypeId==activityType.id){
+                        // console.log('ead.startDateTime2 '+ead.startDateTime);
+                        // console.log('ead.startDateTime2 '+new Date(convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)));
+                        // console.log('ead.startDateTime2 '+new Date($("#currentTimeForUser").text()));
+                        if(new Date(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime()>new Date($("#currentTimeForUser").text()).getTime()){
+                            html+=
+                            '<li class="sub-menu">'
+                                +'<a href="javascript:void(0);" class="waves-effect custom-rounded-sub-btn text-white">'+ead.subActivityName
+                                    +'<i class="metismenu-state-icon pe-7s-angle-down caret-left text-white"></i>'
+                                +'</a>'
+                                +'<ul class="mm-collapse">'
+                                    +'<li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-activity-index="'+activityType.id+'" data-starttimedate="'+convertDatetimeWithFormat(ead.startDateTime,BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+'" data-endtimedate="'+convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+'" data-timeid="'+ead.id+'" data-joiningBefore="'+ead.joiningBefore+'">'
+                                        +'<div class="ongoing-div" style="display:none">'
+                                            +'<h4 class="without-cursor-nav text-center font-size-lg text-success-custom">'
+                                                +'<span><b>'+(ead.activityTypeId!=4?'Join Ongoing Activity':'Join Ongoing Assessment')+'</b></span>'
+                                            +'</h4>'
+                                            +'<div class="px-1">'
+                                                +'<a style="background-color:#007bfe;color:#fff;padding:5px 5px 5px 5px !important; text-align:center; border-radius:4px;margin-bottom:5px" class="waves-effect font-weight-bold" onclick="'+functionName+'" href="javascript:void(0);">'
+                                                    +'<span>'+ead.activityTitle+'</span>'
+                                                +'</a>'
+                                            +'</div>'
+                                        +'</div>'
+                                        +'<div>'
+                                            +'<h4 class="without-cursor-nav counter-div text-center font-size-lg text-success-custom"><span ><b>'+(ead.activityTypeId!=4?'Upcoming Activity':'Upcoming Assessment')+'</b> </span> </h4>'
+                                            +'<div class="counter-div mb-1 px-1">'
+                                                +'<div class="activity-date-and-time">'
+                                                    +'<span><b>on '+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_FORMATTER)+'</b></span>'
+                                                    +'<span><b>at '+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_TIME_FORMATTER)+'</b></span>'
+                                                +'</div>'
+                                            +'</div>'
+                                            +'<div class="px-1">'
+                                                +'<a class="activity-btn disable-btn-color font-weight-bold text-center" onclick="'+functionName+'" href="javascript:void(0);">'+ead.activityTitle+'</span></a>'
+                                            +'</div>'
+                                            +'<div class="counter-div text-center">'
+                                                +'<div class="px-1 text-center font-size-md text-success-custom"><b>Time Remaining</b></div>'
+                                                    +'<div id="timer'+ead.id+'" class="counter-wrapper-div">'
+                                                    +'<div id="days'+ead.id+'" class="count-div days"></div>'
+                                                    +'<div id="hours'+ead.id+'" class="count-div hours"></div>'
+                                                    +'<div id="minutes'+ead.id+'" class="count-div minutes"></div>'
+                                                    +'<div id="seconds'+ead.id+'" class="count-div seconds"></div>'
+                                                    +'</div>'
+                                                +' </div>'
+                                                +'<div class="join-div px-4 my-2 text-center">'
+                                                    +'<a class="btn join-activity-btn animated-button joinLBtn'+ead.id+'" onclick="'+functionName+'"  href="javascript:void(0);" style="padding:7px 10px !important;border-radius:3px;display:none">'
+                                                    +'<span></span>'
+                                                    +'<span></span>'
+                                                    +'<span></span>'
+                                                    +'<span></span>'
+                                                    +'Join Now'
+                                                +'</a>'
+                                            +'</div>'
+                                        +'</div>'
+                                    +'</li>'
+                                +'</ul>'
+                            +'</li>';
+                        }
+                    }
+                });
+            }
             resolve(html);
         } catch (error) {
             reject(error);

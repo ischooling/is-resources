@@ -500,10 +500,16 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 		}else if(pageNo=='profile-view'){
 			renderStudentProfilePage(extraParam);
 		}else if(pageNo=='payment-reports'){
-      getPaymentReportContent()
-		}
-    else if(pageNo=='onboarded-teacher-list'){
-      getOnboardedTeacherContent()
+      		getPaymentReportContent()
+		}else if(pageNo=='onboarded-teacher-list'){
+      		getOnboardedTeacherContent()
+		}else if(pageNo=='user-feedback'){
+      		getReviewDashboardContent('User Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+    	}else if(pageNo=='question-list'){
+      		getQuestionDashboardContent('Question List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+    	}else if(pageNo=='clubs'){
+      		renderClubsPage("Clubs");
+      		clubsOnLoad();
 		}
 	}catch(err){
 		console.error("getContent error:", err);
@@ -2184,6 +2190,7 @@ function callCommentModel2(
   $("#demoMeetingUrlForm #meetingUrl").val(meetingUrl);
   $("#demoMeetingUrlForm #remarks").val(meetingUrlRem);
 }
+
 
 
 

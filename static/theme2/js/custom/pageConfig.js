@@ -98,6 +98,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "student-home":{url:"",file:[],type:"JS",pageReqType:"IN"},
         "student-addon":{url:"buy-extra-class",file:[{role:"",fileName:["buyExtraClassContent.js","buyExtraClass.js"]}],funName:function(){},init: function(){buyExtraClassOnLoadEvent()},type:"JS",pageReqType:"IN"},
         "book-a-session":{url:"book-a-session",file:[{role:"",fileName:["studentBookClassContent.js","studentBookClass.js","manageTeacherAvailability.js"]}],funName:function(){},init: function(){studentBookClassOnLoad()},type:"JS",pageReqType:"IN"},
+        "clubs":{url:"clubs",file:[{role:"",fileName:["clubsContent.js","clubs.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         
         // TEACHER //
         "teacher-home":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -154,6 +155,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "ppc-student":"ppc-request-content?moduleId="+moduleId,
         "ppc-school":"raise-demo-request-content?moduleId="+moduleId+"&requestRaisedBy=school&demoClickFrom=list",
         "accelerated-mode":"accelerated-mode-students-details?moduleId="+moduleId,
+        "user-feedback":{url:"",file:[{role:"",fileName:["reviewContent.js","review.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "question-list":{url:"",file:[{role:"",fileName:["feedbackQuestionContent.js","feedbackQuestion.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+
     };
     
     var pageMapJSPWithFun = {

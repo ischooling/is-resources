@@ -147,7 +147,8 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 			$('#dashboardContentInHTML').html(viewActivityContent(responseData));
 			await studentExtraActivityOnLoadEvent(responseData);
 			$("head #activityPageStyle").remove();
-			$("head").append(activityPageStyle())
+			$("head").append(activityPageStyle());
+			$(".tooltip.calendar-tooltip").remove();
 		}
 	} catch (e) {
 		if (tt == 'theme1') {

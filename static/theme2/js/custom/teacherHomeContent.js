@@ -11,10 +11,11 @@ async function rendereTeacherHomeContent(){
     payload['userId'] = USER_ID;
     var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'get-teacher-dashboard', payload);
     renderTeacherDashboard(responseData);
-    getTeacherTimePreference();
-	renderAnnouncement(responseData.userId)
-    renderActitify(responseData.userId)
-    callTeacherLastAttendance('', responseData.userId, '', '');
+    // getTeacherTimePreference();
+	renderAnnouncement(responseData.userId);
+    renderNews(USER_ID)
+    // renderActitify(responseData.userId)
+    // callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);
     if(commonProfileDTO.declarecheckshow == 'show' && commonProfileDTO.isAgreementUpdated){
         $('head').append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/signupTeacherStage6.js${SCRIPT_VERSION}">`)
@@ -28,9 +29,39 @@ async function rendereTeacherHomeContent(){
             callLocationDetails('teacherAgreementModal');
         }
     }
-    callTeacherClassesToUpdateStatus()
-    
-    
+    $("body").append(newsAllListWithDetailsModalCotent());
+    // callTeacherClassesToUpdateStatus()
+    $("#TooltipDemo").on('click', function(){
+		$(".ui-theme-settings").toggleClass("settings-open");
+		$(this).find("i").toggleClass("fa-angle-right fa-angle-left")
+	});
+    $("#TooltipDemo, .ui-theme-settings").hover(
+        function () {
+            $(".ui-theme-settings")
+                .stop(true, true)
+                .addClass("settings-open");
+
+            $("body").addClass("no-scroll");
+
+            $("#TooltipDemo").find("i")
+                .removeClass("fa-angle-right")
+                .addClass("fa-angle-left");
+        },
+        function () {
+            $(".ui-theme-settings")
+                .stop(true, true)
+                .removeClass("settings-open");
+
+            $("body").removeClass("no-scroll");
+
+            $("#TooltipDemo").find("i")
+                .removeClass("fa-angle-left")
+                .addClass("fa-angle-right");
+        }
+    );
+    $(".app-main__outer").css({"padding-right":"60px"});
+
+
 }
 
 async function renderTeacherDashboard(data){
@@ -44,6 +75,7 @@ async function renderTeacherDashboard(data){
     var endDate = moment(startDate).add(1, 'days');
     var endFormatted = endDate.format('YYYY-MM-DD');
     callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
+    calendarTimeInterval();
     setTimeout(function(){
         $('button.fc-today-button').unbind("click").bind("click", function() {
             $('#schoolcalendar').fullCalendar('today');
@@ -234,39 +266,59 @@ function dashboardSchoolCalendar(data) {
     var html = `
     <div class="main-card mb-3">
         <div class="full">
-            <div class="card-body pt-lg-3 pt-0 px-0 pb-0">
+            <div class="card-body pt-0 px-0">
                 <!-- <div class="full home-page-skeleton-wrapper"> -->
                 <!--     ${getDashboardSkeleton()} -->
                 <!-- </div> -->
                 <div class="home-page-wrapper">
                     <div class="row">
-                        <div class="col-lg-8 col-md-12 col-sm-12 col-12 pt-2">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-12 pb-2">
                             <div class="full mt-1">
                                 <div class="card">
                                     <div class="card-body">
                                         <span id="currentTimeForUser" class="d-none"></span>
-                                        <div class="text-left d-flex align-items-center">
-                                            <span class="d-inline-block country-flag mr-2">
-                                                <img src="${PATH_FOLDER_FONT2}${data.countryISOCode}.svg" class="rounded" width="45px" alt="Flag"/>
-                                            </span>
-                                            <span class="user_timezone d-inline-block font-size-lg font-weight-semi-bold text-dark">
-                                                <label>${data.userTimezone}&nbsp;</label>
-                                            </span>
-                                            <!--<span class="clock-box ml-1">
-                                                <label class="user_current_day bg-primary text-white clock-bg font-size-lg time-label"></label>
-                                            </span>
-                                            <span class="clock-box ml-1">
-                                                <label class="user_current_hour bg-primary text-white clock-bg font-size-lg time-label"></label>
-                                            </span>
-                                            <span class="clock-box ml-1 position-relative mr-3">
-                                                <label class="user_current_mins bg-primary text-white clock-bg font-size-lg time-label"></label>
-                                                <label class="user_current_second bg-primary text-white clock-bg time-label"></label>
-                                            </span>
-                                            <span class="clock-box ml-2">
-                                                <label class="user_current_am_pm bg-primary text-white clock-bg font-size-lg time-label"></label>
-                                            </span>-->
-                                            <div class="clock-box">
-                                                <span class="user_current_time clock-bg font-30 text-primary font-weight-semi-bold time-label"></span>
+                                        <div class="text-left d-flex align-items-center flex-wrap">
+                                            <div>
+                                                <span class="d-inline-block country-flag mr-2">
+                                                    <img src="${PATH_FOLDER_FONT2}${data.countryISOCode}.svg" class="rounded" width="30px" alt="Flag"/>
+                                                </span>
+                                                <span class="user_timezone d-inline-block font-size-lg font-weight-semi-bold text-dark">
+                                                    <label>${data.userTimezone}&nbsp;</label>
+                                                </span>
+                                                <!--<span class="clock-box ml-1">
+                                                    <label class="user_current_day bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                                </span>
+                                                <span class="clock-box ml-1">
+                                                    <label class="user_current_hour bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                                </span>
+                                                <span class="clock-box ml-1 position-relative mr-3">
+                                                    <label class="user_current_mins bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                                    <label class="user_current_second bg-primary text-white clock-bg time-label"></label>
+                                                </span>
+                                                <span class="clock-box ml-2">
+                                                    <label class="user_current_am_pm bg-primary text-white clock-bg font-size-lg time-label"></label>
+                                                </span>-->
+                                                <div class="clock-box">
+                                                    <span class="user_current_time clock-bg font-18 text-primary font-weight-semi-bold time-label"></span>
+                                                </div>
+                                            </div>
+                                            <div class="tabs ml-auto text-right">
+                                                <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
+                                                    <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
+                                                    <div class="font-12 text-dark line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
+                                                </button>
+                                                <button class="btn-wide btn ml-2  border border-secondary bg-lihgt-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="BATCH" onclick="calendarRequestByFilter(this)">
+                                                    <div class="font-16 font-weight-bold line-height-1 group_class_Count">0</div>
+                                                    <div class="font-12 text-dark line-height-1 font-weight-light">Group Classes</div>
+                                                </button>
+                                                <button class="btn-wide btn ml-2  border border-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="ONE_TO_ONE" onclick="calendarRequestByFilter(this)">
+                                                    <div class="font-16 font-weight-bold line-height-1 one_to_one_class_Count">0</div>
+                                                    <div class="font-12 text-dark line-height-1 font-weight-light">One-To-One Classes</div>
+                                                </button>
+                                                <button class="btn-wide btn ml-2 btn-outline-danger bg-light-danger btn-sm rounded text-danger calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
+                                                    <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
+                                                    <div class="font-12 text-dark line-height-1 font-weight-light">Activity</div>
+                                                </button>
                                             </div>
                                         </div>
                                         <hr/>
@@ -275,10 +327,16 @@ function dashboardSchoolCalendar(data) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-12 col-sm-12 pt-2 col-12">
+                        ${/*<div class="col-lg-4 col-md-12 col-sm-12 col-12">*/''}
+                            ${/*<div class="full" id="announcementDiv"></div>*/''}
+                            ${/*<div class="full mt-3" id="activityDiv"></div> */''}
+                            ${/*<div class="full mt-3" id="newsyDiv"></div>*/''}
+                        ${/*</div>*/''}
+                        <div class="custome-ui-theme-settings ui-theme-settings">
                             <div class="full" id="announcementDiv"></div>
-                            <div class="full mt-3" id="activityDiv"></div>
+                            <div class="full mt-3" id="newsyDiv"></div>
                         </div>
+                        
                     </div>
                 </div>
             </div>

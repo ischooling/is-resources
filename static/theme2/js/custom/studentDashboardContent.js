@@ -9,7 +9,7 @@ async function rendereDashboardContent(isParent){
     }
     $("body").append(cropperImageModalContent());
     customLoader(true);
-    $("body").append(batchImpAnnouncementModal())
+    $("body").append(batchImpAnnouncementModal()+newsAllListWithDetailsModalCotent());
     var data = getStudentDashboardOrMigrationSection();
     // console.log(data)
     if(data.showBatchReEnrollmentPopUp == "Y"){
@@ -58,12 +58,13 @@ async function rendereDashboardContent(isParent){
             dashboardData ['isParent'] = true;
         }
         renderStudentDashboard(dashboardData);
-        renderAnnouncement(dashboardData.userId)
-        renderActitify(dashboardData.userId)
+        renderAnnouncement(dashboardData.userId);
+        renderNews(dashboardData.userId)
+        // renderActitify(dashboardData.userId)
         getCartCount(dashboardData.userId);
-        // setTimeout(function () {
-        getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
-        // }, 10000);
+        setTimeout(function () {
+            getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
+        }, 10000);
         $("#timeStuStandardId").val(dashboardData.studentStandardId);
         if(data.showStudentCourseSelectionModel=='Y'){
            await getStudentTimePreference(data.studentId, data.standardId, data.providerId);
@@ -104,12 +105,44 @@ async function rendereDashboardContent(isParent){
         }
     }
     getChat(data.email, USER_ROLE);
-    
+    $("#TooltipDemo").on('click', function(){
+		$(".ui-theme-settings").toggleClass("settings-open");
+		$(this).find("i").toggleClass("fa-angle-right fa-angle-left")
+	});
+    $("#TooltipDemo, .ui-theme-settings").hover(
+        function () {
+            $(".ui-theme-settings")
+                .stop(true, true)
+                .addClass("settings-open");
+
+            $("body").addClass("no-scroll");
+
+            $("#TooltipDemo").find("i")
+                .removeClass("fa-angle-right")
+                .addClass("fa-angle-left");
+        },
+        function () {
+            $(".ui-theme-settings")
+                .stop(true, true)
+                .removeClass("settings-open");
+
+            $("body").removeClass("no-scroll");
+
+            $("#TooltipDemo").find("i")
+                .removeClass("fa-angle-left")
+                .addClass("fa-angle-right");
+        }
+    );
+
+    $(".app-main__outer").css({"padding-right":"60px"});
+
+
 }
 
 async function renderStudentDashboard(data){
     var html=dashboardContent(data);
     $('#dashboardContentInHTML').html(html);
+    $(".app-main__inner").addClass("pt-0")
     $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
     setInterval(function(){
         $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
@@ -140,6 +173,7 @@ async function renderStudentDashboard(data){
     var endDate = moment(startDate).add(1, 'days');
     var endFormatted = endDate.format('YYYY-MM-DD');
     callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
+    calendarTimeInterval();
     setTimeout(function(){
         $('button.fc-today-button').unbind("click").bind("click", function() {
             $('#schoolcalendar').fullCalendar('today');
@@ -161,7 +195,7 @@ async function renderStudentDashboard(data){
         });
     },1000);
     if(data.schoolId==1){
-        //getFeedbackQuestion(data.eventId, [0,1], 0, 0, 100, data.feedbackId, data.email, 'feedback_review', 'student-feedback');
+        getFeedbackQuestion(data.eventId, [0,1], 0, 0, 100, data.feedbackId, data.email, 'feedback_review', 'student-feedback');
         // if(data.registrationType!='BATCH'){
         //     callStudentTimePreference('STUDENT',data.studentStandardId);
         // }
@@ -184,12 +218,9 @@ function slideMenu(val){
 
 function dashboardContent(data) {
     let html = `
-    <div class="app-page-title mb-3 py-2">
+    <div class="app-page-title mb-3 py-2 d-lg-none">
         <div class="page-title-wrapper">
-            <div class="page-title-heading w-100">
-                <!-- Optional code can go here, like the user dashboard observation -->
-            </div>
-            <div class="page-title-actions mt-0 mb-1 d-lg-none pt-4">
+            <div class="page-title-actions mt-0 mb-1">
                 <div class="d-inline-block">
                     <label class="switch">
                         <input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, '${data.isPayLmsPaymentPending}');" changeUrl="${data.lmsProviderURL}" />
@@ -211,7 +242,7 @@ function dashboardContent(data) {
 function dashboardAnnouncement(data) {
     let html = `
     <div class="card box-shadow-none">
-        <div class="card-header theme-bg text-white justify-content-between card-header-primary d-flex">
+        <div class="card-header bg-white text-dark justify-content-between card-header-primary d-flex">
             <h6 class="pull-left m-0 font-size-md">
                 ${data.schoolAnnouncements != null && data.schoolAnnouncements.newAnnouncementCount > 0 
                     ? `${data.schoolAnnouncements.newAnnouncementCount} New Announcement(s)` 
@@ -254,37 +285,53 @@ function dashboardSchoolCalendar(data) {
     var html=`
     <div class="main-card mb-3">
         <div class="full">
-            <div class="card-body px-0 pb-0">
+            <div class="card-body px-0 pb-0 pt-0">
                 <div class="row">
                     ${data.userRole === 'STUDENT' || data.userRole === 'TEACHER' ? `
-                    <div class="col-lg-8 col-md-8 col-sm-12 col-12 pt-2">` : `
+                    <div class="col-lg-12 col-md-8 col-sm-12 col-12 pt-2">` : `
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">`}
                         <div class="full mt-1">
-                            <div class="card">
+                            <div class="card rounded-15">
                                 <div class="card-body">
                                     <span id="currentTimeForUser" class="d-none"></span>
-                                    <div class="text-left d-flex align-items-center">
-                                        <span class="d-inline-block country-flag mr-2">
-                                            <img src="${PATH_FOLDER_FONT2}${data.countryISOCode}.svg" class="rounded" width="45px" alt="Flag"/>
-                                        </span>
-                                        <span class="user_timezone d-inline-block font-size-lg font-weight-semi-bold text-dark">
-                                            <label>${data.userTimezone}&nbsp;</label>
-                                        </span>
-                                        <!--<span class="clock-box">
-                                            <label class="user_current_day clock-bg font-size-lg time-label"></label>
-                                        </span>
-                                        <span class="clock-box">
-                                            <label class="user_current_hour clock-bg font-size-lg time-label"></label>
-                                        </span>
-                                        <span class="clock-box position-relative">
-                                            <label class="user_current_mins clock-bg font-size-lg time-label"></label>
-                                            <label class="user_current_second clock-bg font-size-lg time-label"></label>
-                                        </span>
-                                        <span class="clock-box">
-                                            <label class="user_current_am_pm clock-bg font-size-lg time-label"></label>
-                                        </span>-->
-                                        <div class="clock-box">
-                                            <span class="user_current_time clock-bg font-30 text-primary font-weight-semi-bold time-label"></span>
+                                    <div class="text-left d-flex align-items-center flex-wrap">
+                                        <div>
+                                            <span class="d-inline-block country-flag mr-2">
+                                                <img src="${PATH_FOLDER_FONT2}${data.countryISOCode}.svg" class="rounded" width="30px" alt="Flag"/>
+                                            </span>
+                                            <span class="user_timezone d-inline-block font-size-lg font-weight-semi-bold text-dark">
+                                                <label>${data.userTimezone}&nbsp;</label>
+                                            </span>
+                                            <!--<span class="clock-box">
+                                                <label class="user_current_day clock-bg font-size-lg time-label"></label>
+                                            </span>
+                                            <span class="clock-box">
+                                                <label class="user_current_hour clock-bg font-size-lg time-label"></label>
+                                            </span>
+                                            <span class="clock-box position-relative">
+                                                <label class="user_current_mins clock-bg font-size-lg time-label"></label>
+                                                <label class="user_current_second clock-bg font-size-lg time-label"></label>
+                                            </span>
+                                            <span class="clock-box">
+                                                <label class="user_current_am_pm clock-bg font-size-lg time-label"></label>
+                                            </span>-->
+                                            <div class="clock-box">
+                                                <span class="user_current_time clock-bg font-18 text-primary font-weight-semi-bold time-label"></span>
+                                            </div>
+                                        </div>
+                                        <div class="tabs ml-auto text-right">
+                                            <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
+                                                <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
+                                                <div class="font-12 text-white line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
+                                            </button>
+                                            <button class="btn-wide btn ml-2  border border-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="CLASS" onclick="calendarRequestByFilter(this)">
+                                                <div class="font-16 font-weight-bold line-height-1 class_Count">0</div>
+                                                <div class="font-12 text-dark line-height-1 font-weight-light">Classes</div>
+                                            </button>
+                                            <button class="btn-wide btn ml-2 btn-outline-danger bg-light-danger btn-sm rounded text-danger calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
+                                                <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
+                                                <div class="font-12 text-dark line-height-1 font-weight-light">Activity</div>
+                                            </button>
                                         </div>
                                     </div>
                                     <hr/>
@@ -294,10 +341,18 @@ function dashboardSchoolCalendar(data) {
                         </div>
                     </div>
                     ${data.userRole === 'STUDENT' || data.userRole === 'TEACHER' ? `
-                    <div class="col-lg-4 col-md-4 col-sm-12 pt-2 col-12 animated zoomIn">
-                        <div class="full" id="announcementDiv"></div>
-                        <div class="full mt-3" id="activityDiv"></div>
-                    </div>` : ``}
+                        ${/* 
+                            <div class="col-lg-4 col-md-4 col-sm-12 pt-2 col-12 animated zoomIn">
+                            <div class="full" id="announcementDiv"></div>
+                            <div class="full mt-3" id="activityDiv"></div>
+                            <div class="full mt-3" id="newsyDiv"></div>
+                        </div>    
+                        */''}
+                        <div class="custome-ui-theme-settings ui-theme-settings">
+                            <div class="full" id="announcementDiv"></div>
+                            <div class="full mt-3" id="newsyDiv"></div>
+                        </div>
+                        ` : ``}
                 </div>
             </div>
         </div>

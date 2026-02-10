@@ -1022,7 +1022,7 @@
 //     getContent(moduleId, pageNo, replaceDiv, extraParam);
 //   } else if (pageNo == "manage-leave") {
 //     getContent(moduleId, pageNo, replaceDiv, extraParam);
-//   } else if (pageNo == "user-review") {
+//   } else if (pageNo == "user-feedback") {
 //     getContent(moduleId, pageNo, replaceDiv, extraParam);
 //   } else if (pageNo == "admin-task") {
 //     getContent(moduleId, pageNo, replaceDiv, extraParam);
