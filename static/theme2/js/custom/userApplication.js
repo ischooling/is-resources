@@ -1341,12 +1341,24 @@ function ckEditorCountValidate(editor, elementId, counterEleId) {
     }
 }
 
-function openResendTeacherInterviewModal(userId, mailName, expiredDate){
-    $("#resendTeacherInterviewModal").remove();
-    $("body").append(resendTeacherInterviewModalContent(userId, mailName));
-    $("#resendTeacherInterviewModal").modal("show");
-    toggleExpiredIcon(expiredDate)
-    $("#resendTeacherInterviewForm #interviewBookLinkExpireDate").datepicker({
+async function openResendInterviewModal(userId, mailName, expiredDate, status, assignToUserId, finalSlots){
+    $("#resendInterviewModal").remove();
+    $("body").append(resendInterviewModalContent(userId, mailName, status));
+    $("#resendInterviewModal").modal("show");
+    if(status == "Final Round of Interview"){
+        var payload = {}
+        var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
+        bindAssignToJA('resendInterviewForm', 'assignedToInterview', responseData);
+        $("#resendInterviewForm #assignedToInterview").select2({
+            placeholder: "Select Assign To",
+            theme:"bootstrap4"
+        });
+        $("#resendInterviewForm #assignedToInterview").val(assignToUserId).trigger("change");
+        renderFinalInterviewSlots("resendInterviewForm", finalSlots);
+        $("#resendInterviewForm #finalInterviewSlotsWrapper").show();
+    }
+    toggleExpiredIcon(expiredDate);
+    $("#resendInterviewForm #interviewBookLinkExpireDate").datepicker({
         format: "M dd, yyyy",
         autoclose: true,
         startDate: new Date(expiredDate)

@@ -727,7 +727,7 @@ function allQuestionsContent(data) {
     return html;
 }
 
-function resendTeacherInterviewModalContent(userId, mailName){
+function resendInterviewModalContent(userId, mailName, status){
     var html=
         `<div class="modal fade show" id="resendInterviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog" style="max-width: ${status == 'Final Round of Interview' ? '768px;' : '500px;'}" role="document">
