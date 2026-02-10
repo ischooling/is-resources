@@ -90,6 +90,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		$("#b2c-lead-list").html("");
 		//localStorage.setItem("needToPaging", false);
 		$("#b2c-lead-list").html('');
+		$("#advancedformclick").val("YES");
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
     });
@@ -430,17 +431,8 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			$("#advanceLeadNewSearchForm #leadAcadmicYear" ).val("all");
 		}
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-		//getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
 		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
 		generateTinyUrls();
-		
-		
-		
-		// callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-		// getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
-		
-
-
 		
 		$("#btnClickLeadMove").on('click',function() {
 			moveLeadsData(''+USER_ID+'',''+objRights.moduleId +'','new-leadmove',''+objRights.currentPage +'', true, objRights, roleAndModule);
@@ -1305,16 +1297,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 
 }
 function getTotalLead(leadType){
-	// var urlSend = '/dashboard/lead-data-list?moduleId=${moduleId}&leadFrom=LEAD&clickFrom=list&currentPage=0&euid=${ENCRYPTED_USER_ID}&leadType='+leadType;
-	// getAsPost(urlSend,"_self");
-	// customLoader(false)
-	// advanceLeadSearchStudentReset('advanceLeadNewSearchForm',''+leadType+'');
-	// if(OBJECT_RIGHTS.discardPermission){}
-	// else{
-	// 	$("#advanceLeadNewSearchForm #leadAssignToSearch").val(USER_ID).trigger('change');
-	// }
-	
-	//callTotalCountLeads('advanceLeadNewSearchForm',''+ROLE_MODULE.moduleId+'', 'LEAD','list', '0', 'new', true,'',''+OBJECT_RIGHTS.leadType+'', 'Y','0','new-lead');
+	$("#advancedformclick").val("")
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', OBJECT_RIGHTS, ROLE_MODULE);
 }
 function nextPage(currentPage){
@@ -1328,6 +1311,7 @@ function nextPage(currentPage){
 }
 
 function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
+	$("#advancedformclick").val("")
 	leadfrom=leadfrom==undefined?'advance-search':leadfrom;
 	//console.log(leadfrom);
 	getLeadDataList('advanceLeadNewSearchForm',leadfrom, clickFrom, currentPage, 'new', true, callbadge, OBJECT_RIGHTS, ROLE_MODULE);

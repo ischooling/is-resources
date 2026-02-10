@@ -162,7 +162,12 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 			<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #f8ece5;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #ff9433">
 				<p class="mb-0">Normal</p>
 				<p id="normalLeads" class="mb-0 px-2 rounded bg-orange">-</p>
-			</div>`;
+			</div>
+      <div class="d-flex justify-content-between align-items-center w-100" style="background-color: #edf3ee;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #619e70">
+        <p class="mb-0" style="color:#686868">Direct Entry</p>
+        <p id="directEntryCount" class="mb-0 text-white px-2 rounded" style="background-color:#619e70;">-</p>
+      </div>
+      `;
       if(USER_ID != "19321" && USER_ID != "14388"){
         html+=
         `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
@@ -170,6 +175,7 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
           <p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
         </div>`;
       }
+       
   html += "</div>";
 
   html += '<hr class="w-100">';
@@ -564,7 +570,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     '        <div class="modal-body">' +
     '       <form action="javascript:void(0);" id="advanceLeadNewSearchForm" name="advanceLeadNewSearchForm" autocomplete=\'off\'>' +
     '			<input type="hidden" name="restrictedDataShow" id="restrictedDataShow" value="YES">' +
-    '			<input type="hidden" name="advancedformclick" id="advancedformclick" value="YES">' +
+    '			<input type="hidden" name="advancedformclick" id="advancedformclick" value="">' +
     '			<input type="hidden" name="currentPageSearch" id="currentPageSearch" value="' +objRights.currentPage +'">' +
     '			<input type="hidden" name="clickFromSearch" id="clickFromSearch" value="' +objRights.clickFrom +'">' +
     '			<input type="hidden" name="leadFromSearch" id="leadFromSearch" value="' +objRights.leadFrom +'">' +
@@ -1196,6 +1202,12 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalNormalLead','${leadTotalData.leadFrom}')">${leadTotalData.normalLead}</a>`
       : "-";
   $("#normalLeads").html(`${normalLead}`);
+
+  var directEntry =
+    leadTotalData.totalDirectEntry > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDirectEntry','${leadTotalData.leadFrom}')">${leadTotalData.totalDirectEntry}</a>`
+      : "-";
+  $("#directEntryCount").html(`${directEntry}`);
 
 }
 function getB2cLeadList(leaddata, objRights, roleModule){

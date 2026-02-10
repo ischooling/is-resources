@@ -753,17 +753,30 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			<div class="mb-2">
 				<img src='${info.icon}' width="30" />
 			</div>
-			<div>
-				<h5 class="font-weight-bold font-16">${element.find(".fc-title .class-title").text()}</h5>`;
+			<div>`;
+				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0))){
+					tooltipHTML+=`<h5 class="font-weight-bold font-16">${info.title}</h5>`;
+				}else{
+					tooltipHTML+=`<h5 class="font-weight-bold font-16">${element.find(".fc-title .class-title").text()}</h5>`;
+				}
+				
 				if(info.id.startsWith("activity", 0)){
 					
 					tooltipHTML+=
 					`${element.find(".sub-activity-title").length>0?`<p class="mb-0 font-weight-semi-bold font-14">${element.find(".sub-activity-title").text()}</p>`:``}
 					<p class="mb-0">${element.find(".sub-activity-label").text()}</p>`;
 				}
-				if(info.grade != null && info.grade != undefined && info.grade != '' && info.session != null && info.session != undefined && info.session != ''){
-					tooltipHTML+=`<p class="mb-0">${info.grade}|Batch ${info.session}</p>`;
-				}
+				
+					if(info.grade != null && info.grade != undefined && info.grade != '' && info.session != null && info.session != undefined && info.session != ''){
+						// if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0))){
+						// 	// tooltipHTML+=`<p class="mb-0">${info.grade}|Batch ${info.session}</p>`;
+						// 	// tooltipHTML+=`<p class="mb-0">${info.title}</p>`;
+						// }
+						if(info.category.startsWith("ONE_TO_ONE", 0)){
+							tooltipHTML+=`<p class="mb-0">${info.grade}</p>`;
+						}
+						
+					}
 				tooltipHTML+=`<p class="mb-0">${formattedDate}</p>
 			</div>
 			<div class="d-flex my-2 justify-content-around w-fit-content gap-5 mx-auto">
@@ -832,6 +845,9 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			}
 			if(info.category.startsWith("ACTIVITY", 0)){
 				element.addClass("ACTIVITY");
+				var liveLabel="Activity";
+			}else{
+				var liveLabel="Class";
 			}
 			if(info.id.startsWith("activity", 0)){
 				element.addClass("activity-wrapper-div");
@@ -844,7 +860,8 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				element.addClass("past-class");
 				element.removeClass("activity-wrapper-div");
 			}else if (now >= startTime.getTime() && now <= endTime.getTime()) {
-				var liveIcon = $('<b class="d-flex flex-row-reverse live-symbol">🔴 Live Class</b>');
+				
+				var liveIcon = $(`<b class="d-flex flex-row-reverse live-symbol">🔴 Live ${liveLabel}</b>`);
 				element.find(".fc-title .class-indicator").append(liveIcon);
 				element.removeClass("activity-wrapper-div");
 				if(info.id.startsWith("activity", 0)){

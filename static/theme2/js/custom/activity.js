@@ -149,6 +149,8 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 			$("head #activityPageStyle").remove();
 			$("head").append(activityPageStyle());
 			$(".tooltip.calendar-tooltip").remove();
+			getHomePageActivityCounter();
+			console.log('getHomePageActivityCounter code for testing');
 		}
 	} catch (e) {
 		if (tt == 'theme1') {

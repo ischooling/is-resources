@@ -34427,7 +34427,7 @@ to { background-color: rgb(6, 145, 6); }
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Dashboard.png) !important;
 }
-.fa-tasks{
+/* .fa-tasks{
 	content: none !important;	
 }
 .fa-tasks{
@@ -34436,7 +34436,7 @@ to { background-color: rgb(6, 145, 6); }
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Admin_Tasks.webp) !important;
-}
+} */
 .pe-7s-clock{
 	content: none !important;
 }

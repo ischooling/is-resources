@@ -133,7 +133,6 @@ function isExactStartConflict(currentIndex, date, startMin) {
 }
 
 function buildFinalSlotArray(formId) {
-    debugger;
     let slots = [];
     const totalSlots = $("#" + formId + " .slot-row").length;
 

@@ -135,8 +135,6 @@ async function rendereDashboardContent(isParent){
     );
 
     $(".app-main__outer").css({"padding-right":"60px"});
-
-
 }
 
 async function renderStudentDashboard(data){

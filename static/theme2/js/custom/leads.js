@@ -1442,7 +1442,7 @@ var leadCountDetailDTO={};
  if(leadType==''){
 	leadType=$("#"+formId+" #leadType").val()
  }
- 
+ leadModifyDTO['directEntryStatus']=$("#"+formId+" #advancedformclick").val();
  leadModifyDTO['leadType']=leadType;
  //leadModifyDTO['leadSource'] = $("#"+formId+" #leadSourceSearch").val();
  leadModifyDTO['leadSources'] = $("#"+formId+" #leadSourceSearch").val()!=undefined?$("#"+formId+" #leadSourceSearch").val():'';
@@ -1646,14 +1646,8 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
 	 timeout : 600000,
 	 success : function(data) {
 		 if (data['statusCode'] == '0' || data['statusCode'] == '2') {
-			 if(newTheme){
-				 showMessageTheme2(0, data['message'],'',true);
-			 }else{
-				 showMessage(true, data['message']);
-			 }
-			 
+			showMessageTheme2(0, data['message'],'',true);
 		 } else {
-			if(newTheme){
 				showMessageTheme2(1, data['message'],'',false);
 				$("#leadNoMove").val('')
 				$('#moveLeads').modal('hide');
@@ -1665,13 +1659,7 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
 						location.reload();
 					}, 1000);
 				}
-			}else{
-				showMessage(true, data['message']);
-				$('#moveLeads').modal('hide');
-				setTimeout(function(){
-					callForDashboardData('formIdIfAny','lead-list?moduleId='+roleModuleId+'&leadFrom='+leadFrom+'&clickFrom=list&currentPage='+currentPage);
-				}, 1500);
-			}
+			
 			 $("#leadDemoSchoolMove").val("1").trigger("change");
 			 $("#moveRemarks").val("");
 		 }

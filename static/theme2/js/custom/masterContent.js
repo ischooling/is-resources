@@ -2744,7 +2744,6 @@ function timeAgo(dateString) {
                (days > 0 ? " " + days + " day" + (days > 1 ? "s" : "") : "") +
                " ago";
     }
-	debugger
 	var years = Math.floor(diffMs / year);
     var months = Math.floor((diffMs % year) / month);
 	return years + " year" + (years > 1 ? "s" : "") +
