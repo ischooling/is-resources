@@ -7,7 +7,7 @@ function getB2BPartnerFeeStructureContent(title){
 	`<div class="app-page-title mb-3 py-2">
 		<div class="page-title-wrapper">
 			<div class="page-title-heading">
-				<div class="page-title-icon"><i class="pe-7s-cash text-primary"></i></div>
+			  <div class="page-title-icon"><img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Payment_Management 1.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i></div>
 				<div>
 					<span class="text-primary welcome-name-text">${title}</span>
 				</div>

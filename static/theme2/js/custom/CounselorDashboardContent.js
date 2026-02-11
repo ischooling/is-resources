@@ -209,7 +209,10 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 			`<div class="app-page-title mb-3 py-2">
 				<div class="page-title-wrapper">
 					<div class="page-title-heading">
-						<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
+					  <div class="page-title-icon">
+					    <img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Dashboard.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i>
+						</div>
+
 						<div>
 							<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
 						</div>

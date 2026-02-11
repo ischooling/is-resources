@@ -21,8 +21,8 @@ function getSchoolDashboardContent(title, userCountList){
 		<div class="page-title-wrapper">
 			<div class="page-title-heading">
 				<div class="page-title-icon">
-					<i class="fas fa-university text-primary"></i>
-				</div>
+				 <img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Dashboard.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i>
+				 </div>
 				<div>${title}</div>
 			</div>
 			<div class="page-title-actions"></div>

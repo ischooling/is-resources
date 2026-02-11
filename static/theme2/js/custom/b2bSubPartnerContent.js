@@ -22,7 +22,7 @@ function getB2BSubPartnerContent(title, subPartList){
 	`<div class="app-page-title mb-3 py-2">
 		<div class="page-title-wrapper d-flex justify-content-between align-items-center">
 			<div class="page-title-heading">
-				<div class="page-title-icon"><i class="pe-7s-user text-primary"></i></div>
+			  <div class="page-title-icon"><img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Buy_Extra_Classes.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i></div>
 				<div>
 					<span class="text-primary welcome-name-text">${title}</span>
 				</div>

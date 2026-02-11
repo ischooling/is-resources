@@ -11,11 +11,11 @@ async function rendereTeacherHomeContent(){
     payload['userId'] = USER_ID;
     var responseData = await getDashboardDataBasedUrlAndPayload(true, true,'get-teacher-dashboard', payload);
     renderTeacherDashboard(responseData);
-    // getTeacherTimePreference();
+    getTeacherTimePreference();
 	renderAnnouncement(responseData.userId);
     renderNews(USER_ID)
     //renderActivity(responseData.userId)
-    //callTeacherLastAttendance('', responseData.userId, '', '');
+    callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);
     if(commonProfileDTO.declarecheckshow == 'show' && commonProfileDTO.isAgreementUpdated){
         $('head').append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/signupTeacherStage6.js${SCRIPT_VERSION}">`)
@@ -30,7 +30,7 @@ async function rendereTeacherHomeContent(){
         }
     }
     $("body").append(newsAllListWithDetailsModalCotent()+calendarActivityModal()+viewActivityAttachmentModal());
-    // callTeacherClassesToUpdateStatus();
+    callTeacherClassesToUpdateStatus();
     $('[data-toggle="tooltip"]').tooltip();
 }
 
