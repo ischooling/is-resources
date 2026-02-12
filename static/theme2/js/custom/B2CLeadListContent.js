@@ -1288,6 +1288,18 @@ function getB2cLeadList(leaddata, objRights, roleModule){
         childAge=leads.age;
       }
 
+      var facebookBadge='';
+      if(leads.facebookStatus=='Enrolled'){
+        facebookBadge='green';
+      }else if(leads.facebookStatus=='Positive'){
+        facebookBadge='#aeae64';
+      }else if(leads.facebookStatus=='Demo'){
+        facebookBadge='orange';
+      }else if(leads.facebookStatus=='Lead'){
+        facebookBadge='blue';
+      }
+      
+
 		var bgColorDemo="";
 		html+='<div class="lead-table-wrapper">'
 		+'<table class="table table-bordered font-12 border-radius-table mt-2 leadDataList" style="min-width:1450px;width:100%" id="leadDataList">'
@@ -1354,6 +1366,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'<tr>'
 									+'<th class="border-0 p-1">Source:</th>'
 									+'<td class="border-0 p-1" >'+(leads.LeadSourceName)
+
+                    +((leads.LeadSourceName=='Facebook' && objRights.discardPermission) ?'<span style="color: '+facebookBadge+';font-size:15px;"><i class="fa fa-check-circle"></i></span>':'')
+                    
                     if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
                       html+='<span class="float-right">'
                         +'<a href="javascript:void(0);" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
