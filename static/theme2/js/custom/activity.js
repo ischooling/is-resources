@@ -89,6 +89,9 @@ function getHomePageActivityCounter(activityID){
 					$('#displayJoinLinkDiv' + timerId).show();
 					if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
 						$('#joinButton' + timerId).show().removeClass('join-activity-disabled');
+						if(USER_ROLE =="STUDENT"){
+							$("#join-btn-message-"+timerId).hide();
+						}
 					} else {
 						if(USER_ROLE=='STUDENT'){
 							$('#joinButton' + timerId).addClass('join-activity-disabled');
@@ -101,6 +104,9 @@ function getHomePageActivityCounter(activityID){
 					$(this).find('.activity-btn').hide();
 					if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
 						$('#joinButton' + timerId).show().removeClass('join-activity-disabled');
+						if(USER_ROLE =="STUDENT"){
+							$("#join-btn-message-"+timerId).hide();
+						}
 						$('#joinButton' + timerId)
 						$('#displayJoinLinkInfoDiv'+timerId).hide();
 						$(this).find('.joinLBtn' + timerId).show().addClass('d-inline-block');

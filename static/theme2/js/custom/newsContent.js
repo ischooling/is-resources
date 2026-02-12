@@ -1,35 +1,32 @@
-function getNewsContent(data, userId, index){
-    console.log(data);
-    var html=
-        `<div class="full">
-            <div class="card box-shadow-none rounded-15">`
-                +dashboardNewsHeader(data, userId, index)
-                +dashboardNewsContent(data)
-            html+=`</div>
+function getNewsContent(data, userId, index) {
+  console.log(data);
+  var html =
+    `<div class="full">
+            <div class="card box-shadow-none rounded-15">` +
+    dashboardNewsHeader(data, userId, index) +
+    dashboardNewsContent(data);
+  html += `</div>
         </div>`;
-    return html;
+  return html;
 }
-function dashboardNewsHeader(data, userId, index){
-    var html=
-        `<div class="card-header bg-white text-dark justify-content-between card-header-primary d-flex rounded-top-left-15 rounded-top-right-15 border-0 h-auto pt-2">
+function dashboardNewsHeader(data, userId, index) {
+  var html = `<div class="card-header bg-white text-dark justify-content-between card-header-primary d-flex rounded-top-left-15 rounded-top-right-15 border-0 h-auto pt-2">
             <h6 class="pull-left m-0 font-size-md text-capitalize w-100 d-flex flex-wrap align-items-center font-weight-bold" id="newCardTitle">
                 <img src="${PATH_FOLDER_IMAGE2}news_Icon.png"  class="mr-1" width="25px" /><span class="ui-theme-settings-opacity-0">News</span>
             </h6>
         </div>`;
-    return html;
+  return html;
 }
 
-function dashboardNewsContent(data){
-    var IDs = [];
-    var html=
-        `<div class="card-body announcement-card-scroll pb-0 pt-2 ui-theme-settings-opacity-0">
+function dashboardNewsContent(data) {
+  var IDs = [];
+  var html = `<div class="card-body announcement-card-scroll pb-0 pt-2 ui-theme-settings-opacity-0">
             <div class="full">
                 <ul class="news-list">`;
-                    if(data.list!=null && data.list.length>0){
-                        $.each(data.list, function(k, schoolNews) {
-                            IDs.push(schoolNews.id);
-                            html+=
-                            `<li class="col-md-12 col-sm-12 col-12 py-2 px-0 border-bottom">
+  if (data.list != null && data.list.length > 0) {
+    $.each(data.list, function (k, schoolNews) {
+      IDs.push(schoolNews.id);
+      html += `<li class="col-md-12 col-sm-12 col-12 py-2 px-0 border-bottom">
                                 <div class="w-100">
                                     <div class="d-flex w-100 cursor flex-sm-nowrap flex-wrap gap-10" onclick="showNewsDataById(${schoolNews.id});">
                                         <div class="d-inline-flex mr-2">
@@ -38,7 +35,7 @@ function dashboardNewsContent(data){
                                         <div class="d-inline-flex align-items-start text-left">
                                             <div>
                                                 <h6 class="font-14 pl-0 text-dark font-weight-bold">${schoolNews.title}</h6>
-                                                <div class="font-12 text-gray mt-1">${convertDatetimeWithFormat(schoolNews.publishDate,BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_ONLY)}</div>
+                                                <div class="font-12 text-gray mt-1">${convertDatetimeWithFormat(schoolNews.publishDate, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</div>
                                                 <div>
                                                     <a href="javascript:void(0)" class="font-14 font-weight-semi-bold text-primary">
                                                         Learn More<i class="fa fa-arrow-right ml-2"></i>
@@ -49,26 +46,25 @@ function dashboardNewsContent(data){
                                     </div>
                                 </div>
                             </li>`;
-                        });
-                    }else{
-                        html+=`<li class="col-12 text-center">No News</li>`;
-                    }
-                html+=`</ul>
+    });
+  } else {
+    html += `<li class="col-12 text-center">No News</li>`;
+  }
+  html += `</ul>
             </div>
            
         </div>
         <div class="card-footer ui-theme-settings-opacity-0">
             <div class="w-100">
-                <button class="btn btn-primary w-100" onclick="showNewsDataById('${IDs.join(",")}');">View All News</button>
+                <button class="btn btn-primary w-100" onclick="showNewsDataByIds('${IDs.join(",")}');">View All News</button>
             </div>
         </div>`;
-    return html;
+  return html;
 }
 
-function newsModalContent(data){
-    var timeAgoText = timeAgo(data.publishDate);
-    var  html=
-        `<div class="modal fade" id="newsDetailsModal" tabindex="-1" role="dialog">
+function newsModalContent(data) {
+  var timeAgoText = timeAgo(data.publishDate);
+  var html = `<div class="modal fade" id="newsDetailsModal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content rounded-15">
                     <div class="modal-body pt-0">
@@ -83,7 +79,7 @@ function newsModalContent(data){
                         <div class="w-100 my-2">
                             <span class="text-gray font-weight-semi-bold mr-3">
                                 <i class="fa fa-calendar mr-1 text-primary"></i>
-                                ${convertDatetimeWithFormat(data.publishDate,BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_ONLY)}
+                                ${convertDatetimeWithFormat(data.publishDate, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY)}
                             </span>
                             <span class="text-gray font-weight-semi-bold">
                                 <i class="fa fa-clock mr-1 text-primary"></i>
@@ -114,13 +110,11 @@ function newsModalContent(data){
                 </div>	
             </div>		
         </div>`;
-    return html;
+  return html;
 }
 
-function newsAllListWithDetailsModalCotent(){
-    
-    var html=
-        `<div class="modal right-slide-modal fade" id="newsAllListWithDetailsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+function newsAllListWithDetailsModalCotent() {
+  var html = `<div class="modal right-slide-modal fade" id="newsAllListWithDetailsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
@@ -136,16 +130,15 @@ function newsAllListWithDetailsModalCotent(){
                     </div>
                 </div>
             </div>
-        </div>`
-    return html;
+        </div>`;
+  return html;
 }
 
-function getListNewsDetails(resData){
-    var html=``;
-    $.each(resData, function(index, data){
-        var timeAgoText = timeAgo(data.publishDate);
-        html+=
-        `<div class="card mb-2">
+function getListNewsDetails(resData) {
+  var html = ``;
+  $.each(resData, function (index, data) {
+    var timeAgoText = timeAgo(data.publishDate);
+    html += `<div class="card mb-2">
             <div class="card-body pt-0">
                 <div class="d-flex flex-lg-nowrap flex-wrap w-100 align-items-center">
                     <h4 class="font-24 font-weight-bold text-dark mb-2">${data.title}</h4>
@@ -160,7 +153,7 @@ function getListNewsDetails(resData){
                     <div class="d-inline-flex flex-wrap">
                         <span class="text-gray font-weight-semi-bold mr-3">
                             <i class="fa fa-calendar mr-1 text-primary"></i>
-                            ${convertDatetimeWithFormat(data.publishDate,BASE_TIMEZONE, USER_TIMEZONE,DISPLAY_DATE_ONLY)}
+                            ${convertDatetimeWithFormat(data.publishDate, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY)}
                         </span>
                         <span class="text-gray font-weight-semi-bold">
                             <i class="fa fa-clock mr-1 text-primary"></i>
@@ -191,8 +184,7 @@ function getListNewsDetails(resData){
                     </a>
                 </div>
             </div>
-        </div>`
-    });
-    return html;
+        </div>`;
+  });
+  return html;
 }
-

@@ -353,7 +353,7 @@ function viewActivityContentModal(data){
         <div class="full" id="activitiesType">
             <h4 class="px-3 font-weight-semi-bold text-dark text-center font-20">${data.categoryName}</h4>
             <h6 class="text-center mt-1">${data.activityTitle}</h6>
-            <h6 class="font-12 mt-2 text-center" style="${USER_ROLE == 'TEACHER'?'display:none':''}">Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the <br/> scheduled time.</h6>
+            <h6 class="font-12 mt-2 text-center" id="join-btn-message-${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the <br/> scheduled time.</h6>
             <div class="activity-wrapper `+pdfClass+`" id="zoomMeetingCard">
                 <div class="activity-box"  id="zoomMeetingCardBox">
                     <div class="pdf-down text-center `+pdfClass+`">
@@ -393,18 +393,25 @@ function viewActivityContentModal(data){
                                 </ul>
                             </span>
                         </div>
-                        <div class="text-center d-flex flex-wrap gap-5" style="${USER_ROLE == 'TEACHER'?'':'display:none'}">`;
-                            if(USER_ROLE == 'TEACHER'){
-                                html+=
-                                    `<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>
-                                    <a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn" id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="font-size: 13px; border-radius: 4px;">Join</a>`;
-                            }else{
-                                html+=
-                                    `<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>
-                                    <a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn"  id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')"  style="font-size: 13px; border-radius: 4px;">Join</a>`;
+                        <div class="text-center d-flex flex-wrap gap-5">`;
+                            // if(USER_ROLE == 'TEACHER'){
+                            //     html+=``;
+                            //         if(data.filePath != null && data.filePath != undefined && data.filePath != ""){
+                            //             html+=`<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>`;
+                            //         }
+                            //         html+=`<a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn" id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="font-size: 13px; border-radius: 4px;">Join</a>`;
+                            // }else{
+                            //     html+=
+                            //         `<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>
+                            //         <a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn"  id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')"  style="font-size: 13px; border-radius: 4px;">Join</a>`;
+                            // }
+                            // html+=
+                            
+                            if(data.filePath != null && data.filePath != undefined && data.filePath != ""){
+                                html+=`<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>`;
                             }
-                            html+=
-                        `</div>`;
+                            html+=`<a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn" id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="font-size: 13px; border-radius: 4px;">Join</a>
+                        </div>`;
                         // if(data.message!=''){
                         //     html+=data.message;
                         // }

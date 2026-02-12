@@ -34088,7 +34088,8 @@ to { background-color: rgb(6, 145, 6); }
 #schoolcalendar .fc-agendaWeek-view .upcoming-class-blink, #schoolcalendar .fc-agendaWeek-view .fc-time-grid-event.past-class, #schoolcalendar .fc-agendaWeek-view .fc-time-grid-event:not(.past-class){padding:2px;}
 
 .active_calendar_catergory.bg-light-dark{background-color: #343a40 !important;}
-.active_calendar_catergory .over_All_Class_Activity_Count, .active_calendar_catergory div.over_All_Class_Activity_Label{color:#fff !important}
+
+.active_calendar_catergory .over_All_Class_Activity_Count, .active_calendar_catergory .over_All_Class_Activity_Label{color:#fff !important}
 
 .active_calendar_catergory.bg-lihgt-secondary{background-color: var(--sc) !important;}
 .active_calendar_catergory.text-secondary{color:#fff !important}

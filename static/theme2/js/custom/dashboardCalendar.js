@@ -400,7 +400,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					$(this).prepend('<i class="fa fa-clock-o axis-icon fa-2x"></i>');
 				}
 			});
-			updateTabCounts(CALENDAR_EVENT_DATA);
+			
 		},
         eventClick: function(info) {
 			if(info.url) {
@@ -433,7 +433,8 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 							end: endStr,
 							eventId: event.id,
 							eventTitle: event.eventTitle,
-							eventType: event.eventType
+							eventType: event.eventType,
+							category:event.category
 						});
 					}
 					var startTime = event.start.format('h:mm A');
@@ -451,17 +452,19 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					element.find('.fc-time').html(customTimeHtml);
 					var customEventTitleHtml =``;
 					if(!event.id.startsWith("activity", 0)){
-						if(event.category.startsWith("BATCH", 0)){
+						if(event.category.startsWith("BATCH", 0) || event.eventType.startsWith("CUSTOM", 0) || event.eventType.startsWith("PTM", 0)){
 							customEventTitleHtml+=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.title}</div>`;
 						}else{
 							customEventTitleHtml=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.eventTitle}</div>`;
 						}
-						if(!event.category.startsWith("BATCH", 0)){
-							customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
-								<div>
-									<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</span><span class="assign-teacher-name">${event.name}</span>
-								</div>
-							</div>`;
+						if(event.name != ""){
+							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0)){
+								customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
+									<div>
+										<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</span><span class="assign-teacher-name">${event.name}</span>
+									</div>
+								</div>`;
+							}
 						}
 						
 						customEventTitleHtml+=`<div class="class-indicator position-absolute w-100"></div>`;
@@ -633,13 +636,13 @@ function getEventsInCurrentView(allEvents) {
     var viewName = view.name;
 
     // ✅ Calendar boundaries in USER_TIMEZONE
-    var start = view.start.clone().tz(USER_TIMEZONE).startOf('day');
+    var start = view.start.clone().startOf('day');
     var end;
 
     if (viewName === 'agendaDay' || viewName === 'listDay') {
-        end = view.start.clone().tz(USER_TIMEZONE).endOf('day');
+        end = view.start.clone().endOf('day');
     } else {
-        end = view.end.clone().tz(USER_TIMEZONE).subtract(1, 'seconds');
+        end = view.end.clone().subtract(1, 'seconds');
     }
 
     return allEvents.filter(function (e) {
@@ -786,7 +789,7 @@ var updateEventIconsStyle = true;
 // 	}	
 // }
 async function updateEventIcons(info, element, todayClassArray, viewName, activityTypes) {
-	updateTabCounts(CALENDAR_EVENT_DATA);
+	updateTabCounts(todayClassArray);
 	if (updateEventIconsStyle) {
 		$("head").append(`
 		<style>
@@ -818,7 +821,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				<img src='${info.icon}' width="30" />
 			</div>
 			<div>`;
-				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0))){
+				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0)) ||  info.eventType.startsWith("CUSTOM", 0) || info.eventType.startsWith("PTM", 0)){
 					tooltipHTML+=`<h5 class="font-weight-bold font-16">${info.title}</h5>`;
 				}else{
 					tooltipHTML+=`<h5 class="font-weight-bold font-16">${element.find(".fc-title .class-title").text()}</h5>`;
@@ -857,12 +860,13 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					tooltipHTML+=
 					`<ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul>`;
 				}else{
-					if(!info.category.startsWith("BATCH", 0)){
-						tooltipHTML+=
-						`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</p>
-						<strong>${element.find(".assign-teacher-name").text()}</strong>`;
+					if(info.name != ""){
+						if(!info.category.startsWith("BATCH", 0) && !info.eventType.startsWith("PTM", 0)){
+							tooltipHTML+=
+							`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</p>
+							<strong>${element.find(".assign-teacher-name").text()}</strong>`;
+						}
 					}
-					
 				}
 			tooltipHTML+=`</div>
 			</div>
@@ -1250,7 +1254,7 @@ function proceedwithControll(url, response){
                 if('Too many attempts. Please try after some time'==message){
                     message='Please click on the class again'
                 }
-               showMessageTheme2(1, message);
+               showMessageTheme2(0, message);
             }else{
                 if(response['dateStatus']=='past' || response['dateStatus']=='future'){
                     $('#classJoinInSameWindowModal').modal({backdrop: 'static', keyboard: false});

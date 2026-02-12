@@ -294,7 +294,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 						+'<label>Select Class For</label>'
 						+'<select name="classCreateFor" id="classCreateFor" class="form-control">'
 							+'<option value="ALL" selected>ALL</option>'
-							+'<option value="STUDENT_DOUBT_SESSION">Student</option>'
+							+'<option value="STUDENT_DOUBT_SESSION">One Day Class</option>'
 							+'<option value="PTM">PTM</option>'
 							+'<option value="CUSTOM">CUSTOM</option>'
 						+'</select>'

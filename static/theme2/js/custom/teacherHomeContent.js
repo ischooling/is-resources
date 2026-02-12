@@ -275,7 +275,7 @@ function dashboardSchoolCalendar(data) {
                                             <div class="tabs ml-auto text-right">
                                                 <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
-                                                    <div class="font-12 text-dark line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
+                                                    <div class="font-12 line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
                                                 </button>
                                                 <button class="btn-wide btn ml-2  border border-secondary bg-lihgt-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="BATCH" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 group_class_Count">0</div>
