@@ -37,11 +37,6 @@ async function showNewsDataById(newsId) {
     };
     var responseData = await callCommonAjax(ajaxReqDetails);
     if (responseData.code == 200) {
-      if (typeof newsId === "string" && newsId.includes(",")) {
-        getNewsListData("fresh");
-        $("#newsBadge").hide();
-        return;
-      }
       if ($("#newsDetailsModal").length > 0) {
         $("#newsDetailsModal").remove();
       }
