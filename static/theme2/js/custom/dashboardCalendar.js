@@ -357,30 +357,31 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 				}
 				var legentHtml=
 					`<div class="d-flex w-100 flex-wrap justify-content-center mt-1 gap-5 legent_wrapper">
-						<div class="d-inline-flex align-items-center mr-2">
-							<label class="d-inline-block rounded-circle m-0" style="width:10px;height:10px;background:#bfbebe"></label>
-							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Expired Classes & Activities</span>
+						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
+							<label class="d-inline-block m-0" style="width:15px;height:15px;background:#bfbebe"></label>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Expired Classes & Activities</span>
 						</div>
-						<div class="d-inline-flex align-items-center mr-2">
-							<label class="d-inline-block rounded-circle m-0" style="width:10px;height:10px;background:#007c00"></label>
-							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Live Class & Activity</span>
+						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
+							<label class="d-inline-block m-0" style="width:15px;height:15px;background:#007c00"></label>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Live Class & Activity</span>
 						</div>
-						<div class="d-inline-flex align-items-center mr-2">
-							<label class="d-inline-block rounded-circle m-0" style="width:10px;height:10px;background:#433a11"></label>
-							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Upcoming Classes & Activities</span>
+						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
+							<label class="d-inline-block m-0" style="width:15px;height:15px;background:#433a11"></label>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Upcoming Classes & Activities</span>
 						</div>
-						<div class="d-inline-flex align-items-center mr-2">
-							<label class="d-inline-block rounded-circle bg-primary m-0" style="width:10px;height:10px;"></label>
-							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Classes</span>
+						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
+							<label class="d-inline-block bg-primary m-0" style="width:15px;height:15px;"></label>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Classes</span>
 						</div>
-						<div class="d-inline-flex align-items-center">
-							<label class="d-inline-block rounded-circle bg-danger m-0" style="width:10px;height:10px;"></label>
-							<span class="d-inline-block ml-1 font-12 font-weight-semi-bold">Activities</span>
+						<div class="d-inline-flex align-items-center" data-toggle="tooltip" title="legend">
+							<label class="d-inline-block bg-danger m-0" style="width:15px;height:15px;"></label>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Activities</span>
 						</div>
 					</div>`;
 					if($(".legent_wrapper").length<1){
 						$("#schoolcalendar .fc-header-toolbar").after(legentHtml);
 					}
+					$('[data-toggle="tooltip"]').tooltip();
 			}else{
 				redirectLoginPage();
 			}
@@ -556,14 +557,6 @@ function checkIfAnyClassRunning(todayClassArray) {
     }
     return false;
 }
-
-
-
-
-
-
-
-
 
 
 function updateTabCounts(allEvents) {

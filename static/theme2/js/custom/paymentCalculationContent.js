@@ -634,8 +634,8 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 			</div>
 		</div>
 	</div>
-	<div id="messageDiv" class="server-error-message" style="display:none">
-		<span id="messageDiv1" class="msg error"><i class="fa fa-times"></i> Error Message </span>
+	<div class="server-message" style="display:none">
+		<span id="msgTheme2" class="msg error"><i class="fa fa-times"></i> Error Message </span>
 	</div>`;
 	return html;
 }

@@ -31,7 +31,7 @@ async function rendereTeacherHomeContent(){
     }
     $("body").append(newsAllListWithDetailsModalCotent()+calendarActivityModal()+viewActivityAttachmentModal());
     callTeacherClassesToUpdateStatus();
-    $('[data-toggle="tooltip"]').tooltip();
+    //$('[data-toggle="tooltip"]').tooltip();
 }
 
 async function renderTeacherDashboard(data){
@@ -354,6 +354,7 @@ function dashboardSchoolCalendar(data) {
         </button>
         <div class="full mt-3" id="newsyDiv"></div>
     </div>
+    <div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>
     ${holidayOne()}
     ${onBordingMandotryVideo()}
     ${/*feedbackPop(data.schoolLogo)*/''}

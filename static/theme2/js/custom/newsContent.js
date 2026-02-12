@@ -125,8 +125,8 @@ function newsAllListWithDetailsModalCotent() {
                     </div>
                     <div class="modal-body overflow-y-auto" id="newsAllListWithDetailsModalBody"></div>
                     <div class="modal-footer justify-content-between" id="newsAllListWithDetailsModalFooter">
-                        <button class="btn btn-outline-primary" onclick="getNewsListData('prev')">Previous</button>
-                        <button class="btn btn-primary" onclick="getNewsListData('next')">Next</button>
+                        <button class="btn btn-outline-primary" id="getNextNewsBtn" onclick="getNewsListData('prev')">Previous</button>
+                        <button class="btn btn-primary" id="getPrevNewsBtn" onclick="getNewsListData('next')">Next</button>
                     </div>
                 </div>
             </div>

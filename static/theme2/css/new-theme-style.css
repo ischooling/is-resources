@@ -10174,6 +10174,9 @@ display:none
 	flex:0 0 280px !important;
 	width:280px !important
 }
+.closed-sidebar .mm-collapse.mm-show{height: 0px;visibility: hidden;}
+.closed-sidebar .app-sidebar:hover .mm-collapse.mm-show{height:auto;visibility: visible}
+
 .closed-sidebar .app-sidebar:hover .app-sidebar__inner .app-sidebar__heading {
 	text-indent:initial
 }
@@ -31340,7 +31343,9 @@ right:15px
 
 
 
-.custome-ui-theme-settings.ui-theme-settings{max-width:500px;width:95%; background-color: #fff;right:0}
+.custome-ui-theme-settings.ui-theme-settings{max-width:500px;width:95%; background-color: #fff;right:0;z-index:1000}
+.custome-ui-theme-settings-overlay{position:fixed;left:0;top:0;width:100%;height:100vh;z-index:999;background: rgba(0, 0, 0, 0.5);display:none}
+.custome-ui-theme-settings-overlay.show-custom-overlay{display:block}
 .custom-btn-open-options .counts-badge{position: absolute;right:-8px;top:-8px;width:fit-content;font-size:10px;background:red;color:#fff;display: inline-block;padding: 5px;}
 .ui-theme-settings .btn-open-options svg {
 	top:50%;
@@ -31899,13 +31904,13 @@ table td.child ul li{white-space: normal;}
 .server-message{width: 100%;text-align: center;position: fixed;top:0px;right:0px;z-index: 99999999;display: none;
 	transform: translateY(-100%);-webkit-transform: translateY(-100%);-ms-transform: translateY(-100%);
 	-moz-transform: translateY(-100%);transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;
-	-ms-transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out}
-.server-message.show{transform: translateY(0%);display: block;}
+	-ms-transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;width: 100%;height: 100vh;align-items: center;background: rgba(0, 0, 0, 0.7);} 
+.server-message.show{transform: translateY(0%);display: flex;}
 .overlay{position: fixed;left: 0;top:0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.6);z-index: 999999}
-.server-message .msg{font-size: 18px;font-weight: 600;padding:17px 5px;color:#fff;width: 100%;display: inline-block;position: relative;}
-.server-message .error{background:red;}
-.server-message .notification{background:#ff7100;}
-.server-message .success{background:green;}
+.server-message .msg{background-color: #fff; font-size: 18px;font-weight: 600;padding: 17px 5px;color: #fff;width: 100%;display: inline-block;position: relative;max-width: 500px;margin: 0 auto;border-radius: 5px;}
+.server-message .error{color:red;}
+.server-message .notification{color:#ff7100;}
+.server-message .success{color:green;}
 
 /* server message css end  */
 
@@ -34519,6 +34524,245 @@ to { background-color: rgb(6, 145, 6); }
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Assigned_Course_Teachers.webp) !important;
+}
+.emoji-globe{
+	content: none !important;
+}
+.emoji-globe{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/earth.webp) !important;
+}
+.emoji-handshake{
+	content: none !important;
+}
+.emoji-handshake{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/handshake.webp) !important;
+}
+.emoji-video-game{
+	content: none !important;
+}
+.emoji-video-game{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/video-game.webp) !important;
+}
+.emoji-china-flag {
+    display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/China.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;   
+}
+.emoji-united-kingdom-flag{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/uk.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-germany-flag{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/german.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-france-flag{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/france.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-spanish{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/spanish.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-speech-bubble{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/speech_bubble.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-theater-masks{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/theater.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-brain{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/brain.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-seedling{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/seedling.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-party-popper{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/party-pooper.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-party-popper{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/party-pooper.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-team-building{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/handshake.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-target{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/target.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-lightning-bolt{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/volt.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px; 
+}
+.emoji-headphones{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/headphones.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-trophy{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/trophy.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-joystick{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/joystick.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-video-game{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url('../images/Icon/sidebar/video-game.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-globe-sub{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url(../images/Icon/sidebar/earth.webp);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
 }
 /* DASHBOARD-NAVIGATION-ICONS-CSS ENDS HERE */
 

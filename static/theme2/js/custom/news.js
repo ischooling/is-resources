@@ -69,35 +69,33 @@ async function showNewsDataByIds(newsIds) {
   }
 }
 
-var NEW_LIST_PAGE_NO = 1;
-async function getNewsListData(reqFlag) {
-  if (reqFlag == "next") {
-    NEW_LIST_PAGE_NO++;
-  } else if (reqFlag == "prev") {
-    NEW_LIST_PAGE_NO--;
-  }
-  var ajaxReqDetails = {
-    method: "GET",
-    url:
-      APP_BASE_URL +
-      `api/v1/website/get-all-articles?page=${NEW_LIST_PAGE_NO}&size=10`,
-    body: "",
-    global: true,
-    showMessage: false,
-    onFaildResolved: true,
-    onSuccessResolved: true,
-  };
-  var responseData = await callCommonAjax(ajaxReqDetails);
-  if (responseData.totalNews < 10) {
-    $("#newsAllListWithDetailsModalFooter").hide();
-  }
-  if (responseData.code == 200) {
-    $("#newsAllListWithDetailsModal #newsAllListWithDetailsModalBody").append(
-      getListNewsDetails(responseData.list),
-    );
-    $("#newsAllListWithDetailsModal").modal({
-      backdrop: "static",
-      keyboard: false,
-    });
-  }
+var NEW_LIST_PAGE_NO=1
+async function getNewsListData(reqFlag){
+	if(reqFlag == "next"){
+		NEW_LIST_PAGE_NO++;
+	}else if(reqFlag == "prev"){
+		NEW_LIST_PAGE_NO--
+	}
+	var ajaxReqDetails = {
+        method: "GET",
+        url: APP_BASE_URL + `api/v1/website/get-all-articles?page=${NEW_LIST_PAGE_NO}&size=10`,
+        body: "",
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+	if(responseData.totalNews<10){
+		$("#newsAllListWithDetailsModalFooter").hide();
+	}
+	if(responseData.code==200){
+		$('#newsAllListWithDetailsModal #newsAllListWithDetailsModalBody').append(getListNewsDetails(responseData.list));
+		$('#newsAllListWithDetailsModal').modal({backdrop: 'static', keyboard: false});
+	}
+	if(responseData.list.length<10){
+		$("#getNextNewsBtn").hide();
+	}else{
+		$("#getNextNewsBtn").show();
+	}
 }

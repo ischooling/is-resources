@@ -106,6 +106,7 @@ async function rendereDashboardContent(isParent){
     }
     getChat(data.email, USER_ROLE);
     $("body").append(calendarActivityModal()+viewActivityAttachmentModal());
+    
 }
 
 async function renderStudentDashboard(data){
@@ -324,11 +325,11 @@ function dashboardSchoolCalendar(data) {
     </div>
     ${/*<div id="announceDataId" class="full"></div>*/''}
     <div class="right_fixed_action">
-        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')">
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
             <i class="fa fa-bullhorn fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
         </button>
-        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'news_side_wrapper\')">
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
             <i class="fa fa-newspaper-o fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
         </button>`;
@@ -342,12 +343,12 @@ function dashboardSchoolCalendar(data) {
             const chatPayload = btoa(jsonString);
             const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
             html+=
-            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary">
+            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Chat">
                 <i class="fa fa-comments fa-w-16"></i>
             </a>`;					
         }
     html+=`</div>
-    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper">
+    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
         <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
             <i class="fa fa-times"></i>
         </button>
@@ -359,6 +360,7 @@ function dashboardSchoolCalendar(data) {
         </button>
         <div class="full mt-3" id="newsyDiv"></div>
     </div>
+    <div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>
     ${holidayOne()}
     ${onBordingMandotryVideo()}`;
     // +feedbackPop(data.schoolLogo); // optional call if needed
@@ -641,6 +643,12 @@ function viewActivityAttachmentModal(){
 	return html;
 }
 function openRightSideBar(eleId){
-	$("#"+eleId).toggleClass("settings-open");
-    $(".tooltip").remove();
+    if(eleId == "settings-overlay"){
+        $(".custome-ui-theme-settings").removeClass("settings-open");
+    }else{
+        $("#"+eleId).toggleClass("settings-open");
+        $(".tooltip").remove();
+    }
+    $("body").toggleClass("overflow-hidden");
+    $(".custome-ui-theme-settings-overlay").toggleClass("show-custom-overlay");    
 }

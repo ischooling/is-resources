@@ -54,6 +54,12 @@ function slideMenu(val){
 }
 
 function openRightSideBar(eleId){
-	$("#"+eleId).toggleClass("settings-open");
-	$(".tooltip").remove();
+    if(eleId == "settings-overlay"){
+        $(".custome-ui-theme-settings").removeClass("settings-open");
+    }else{
+        $("#"+eleId).toggleClass("settings-open");
+        $(".tooltip").remove();
+    }
+    $("body").toggleClass("overflow-hidden");
+    $(".custome-ui-theme-settings-overlay").toggleClass("show-custom-overlay");    
 }

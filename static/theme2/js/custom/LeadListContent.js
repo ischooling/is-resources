@@ -430,6 +430,7 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			$("#advanceLeadNewSearchForm #leadFullSearch" ).val(OBJECT_RIGHTS.leadId);
 			$("#advanceLeadNewSearchForm #leadAcadmicYear" ).val("all");
 		}
+		$("#advanceLeadNewSearchForm #advancedformclick" ).val("YES");
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 		getLeadDataList('advanceLeadNewSearchForm','LEAD', clickfrom,'0', 'new', true,''+objRights.clickByLead+'', objRights, roleAndModule);
 		generateTinyUrls();

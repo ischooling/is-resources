@@ -22,48 +22,73 @@ function getManageClubsContent(title){
     return html;   
 }
 
-function getManageClubsCards(countObj){
-    var colors = [
-        'bg-primary',
-        'bg-success',
-        'bg-info',
-        'bg-warning',
-        'bg-danger',
-        'bg-secondary',
-        'bg-dark'
-    ];
-    var html='<div class="row">';
-    var i = 1;
+function getManageClubsFilter(countObj){
     var totalCount = 0;
     $.each(countObj, function(clubName, count){
         totalCount += count;
     });
-    html+=`<div class="col-md-2 mb-3 px-1">
-        <div class="card text-white ${colors[0]} shadow-sm cursor club-cards"
-                style="border-radius:14px;"
-                onclick="getAllClubsData('')">
-            <div class="card-body d-flex justify-content-between align-items-center py-2 px-4">
-                <p class="mb-1 font-14 font-weight-bold">All Clubs</p>
-                <p class="mb-0 font-weight-bold font-14">${totalCount}</p>
-            </div>
-        </div>
-    </div>`;
-    $.each(countObj, function(clubName, count){
-        var colorClass = colors[i % colors.length];
-        html+=`<div class="col-md-2 mb-3 px-1">
-            <div class="card text-white ${colorClass} shadow-sm cursor club-cards" style="border-radius:14px;" onclick="getAllClubsData('${clubName}')">
-                <div class="card-body d-flex justify-content-between align-items-center py-2 px-4">
-                    <p class="mb-1 font-weight-bold font-14">${clubName}</p>
-                    <p class="mb-0 font-weight-bold font-14">${count}</p>
-                </div>
+    var html = `
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="font-weight-bold mb-1">Filter by Club</label>
+            <select class="form-control shadow-sm" 
+                    style="border-radius:10px;"
+                    onchange="getAllClubsData(this.value)">
+                <option value="">All Clubs (${totalCount})</option>`;
+                $.each(countObj, function(clubName, count){
+                    html+=
+                    `<option value="${clubName}">
+                        ${clubName} (${count})
+                    </option>`;
+                });
+                html+=`</select>
             </div>
         </div>`;
-        i++;
-    });
-    html += '</div>';
-
     return html;
 }
+
+// function getManageClubsCards(countObj){
+//     var colors = [
+//         'bg-primary',
+//         'bg-success',
+//         'bg-info',
+//         'bg-warning',
+//         'bg-danger',
+//         'bg-secondary',
+//         'bg-dark'
+//     ];
+//     var html='<div class="row">';
+//     var i = 1;
+//     var totalCount = 0;
+//     $.each(countObj, function(clubName, count){
+//         totalCount += count;
+//     });
+//     html+=`<div class="col-md-2 mb-3 px-1">
+//         <div class="card text-white ${colors[0]} shadow-sm cursor club-cards"
+//                 style="border-radius:14px;"
+//                 onclick="getAllClubsData('')">
+//             <div class="card-body d-flex justify-content-between align-items-center py-2 px-4">
+//                 <p class="mb-1 font-14 font-weight-bold">All Clubs</p>
+//                 <p class="mb-0 font-weight-bold font-14">${totalCount}</p>
+//             </div>
+//         </div>
+//     </div>`;
+//     $.each(countObj, function(clubName, count){
+//         var colorClass = colors[i % colors.length];
+//         html+=`<div class="col-md-2 mb-3 px-1">
+//             <div class="card text-white ${colorClass} shadow-sm cursor club-cards" style="border-radius:14px;" onclick="getAllClubsData('${clubName}')">
+//                 <div class="card-body d-flex justify-content-between align-items-center py-2 px-4">
+//                     <p class="mb-1 font-weight-bold font-14">${clubName}</p>
+//                     <p class="mb-0 font-weight-bold font-14">${count}</p>
+//                 </div>
+//             </div>
+//         </div>`;
+//         i++;
+//     });
+//     html += '</div>';
+
+//     return html;
+// }
 
 function getManageClubsTable(){
     var html=

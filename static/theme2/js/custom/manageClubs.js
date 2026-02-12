@@ -39,8 +39,8 @@ async function getAllClubsCount(){
     }
     var responseData = await callCommonAjax(ajaxReqDetails);
     if(responseData.status == 1){
-        var cardsHtml = getManageClubsCards(responseData.countObj);
-        $('#manageClubsCardsWrapper').html(cardsHtml);
+        var filterHtml = getManageClubsFilter(responseData.countObj);
+        $('#manageClubsCardsWrapper').html(filterHtml);
     }else{
         showMessageTheme2(0, responseData.message);
     }

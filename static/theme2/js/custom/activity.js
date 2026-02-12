@@ -31,11 +31,7 @@ async function renderActivity(userId) {
 			}
 		}
 	} catch (e) {
-		if (tt == 'theme1') {
-			showMessage(true, e);
-		} else {
-			showMessageTheme2(0, e, '', true);
-		}
+		showMessageTheme2(0, e, '', true);
 	}
 }
 
@@ -107,7 +103,6 @@ function getHomePageActivityCounter(activityID){
 						if(USER_ROLE =="STUDENT"){
 							$("#join-btn-message-"+timerId).hide();
 						}
-						$('#joinButton' + timerId)
 						$('#displayJoinLinkInfoDiv'+timerId).hide();
 						$(this).find('.joinLBtn' + timerId).show().addClass('d-inline-block');
 					} else {
@@ -177,11 +172,7 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 			console.log('getHomePageActivityCounter code for testing');
 		}
 	} catch (e) {
-		if (tt == 'theme1') {
-			showMessage(true, e);
-		} else {
-			showMessageTheme2(0, e, '', true);
-		}
+		showMessageTheme2(0, e, '', true);
 	}
 }
 

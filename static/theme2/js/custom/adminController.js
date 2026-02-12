@@ -511,6 +511,44 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderClubsPage("Clubs");
 		}else if(pageNo=='manage-club'){
       renderManageClubsPage("Manage Clubs");
+    }else if(pageNo=='spanish-club'){
+      renderClubsCommonPage("Spanish Club");
+    }else if(pageNo=='french-club'){
+      renderClubsCommonPage("French Club");
+    }else if(pageNo=='german-club'){
+      renderClubsCommonPage("German Club");
+    }else if(pageNo=='english-club'){
+      renderClubsCommonPage("English Club");
+    }else if(pageNo=='chinese-club'){
+      renderClubsCommonPage("Chinese Club");
+    }else if(pageNo=='team-building-club'){
+      renderClubsCommonPage("Team Building Club");
+    }else if(pageNo=='cultural-exchange-club'){
+      renderClubsCommonPage("Cultural Exchange Club");
+    }else if(pageNo=='leadership-skills-club'){
+      renderClubsCommonPage("Leadership Skills Club");
+    }else if(pageNo=='debate-club'){
+      renderClubsCommonPage("Debate Club");
+    }else if(pageNo=='drama-expression-club'){
+      renderClubsCommonPage("Drama & Expression Club");
+    }else if(pageNo=='public-speaking-club'){
+      renderClubsCommonPage("Public Speaking Club");
+    }else if(pageNo=='focus-reaction-training-club'){
+      renderClubsCommonPage("Focus & Reaction Training Club");
+    }else if(pageNo=='skill-development-club'){
+      renderClubsCommonPage("Skill Development Club");
+    }else if(pageNo=='team-communication-club'){
+      renderClubsCommonPage("Team Communication Club");
+    }else if(pageNo=='online-tournaments-club'){
+      renderClubsCommonPage("Online Tournaments Club");
+    }else if(pageNo=='strategy-games-club'){
+      renderClubsCommonPage("Strategy Games Club");
+    }else if(pageNo=='competitive-gaming'){
+      renderClubsCommonPage("Competitive Gaming Club");
+    }else if(pageNo=='global-competitions-club'){
+      renderClubsCommonPage("Global Competitions Club");
+    }else if(pageNo=='game-strategy-analysis-club'){
+      renderClubsCommonPage("Game Strategy & Analysis Club");
     }
 	}catch(err){
 		console.error("getContent error:", err);

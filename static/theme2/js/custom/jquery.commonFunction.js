@@ -343,45 +343,45 @@ function showMessageTheme2BankDetails(isWarnig, message, id) {
     $("#modalMessageBD").hide();
   }, 5000);
 }
-function showMessageTheme2(messageType, message, id, msgHide) {
-  if (message == "") {
-    return false;
-  } else {
-    $("#messageDiv1").removeClass("error");
-    $("#messageDiv1").removeClass("success");
-    $("#messageDiv1").removeClass("notification");
-    $("#messageDiv").show();
-    if (messageType == 0 || messageType == false) {
-      $("#messageDiv1").addClass("error");
-      $("#messageDiv1").html(
-        '<i class="fa fa-times-circle"></i>&nbsp;' + message
-      );
-    } else if (messageType == 1 || messageType == true) {
-      $("#messageDiv1").addClass("success");
-      $("#messageDiv1").html(
-        // '<i class="fa fa-check-circle"></i>&nbsp;' + 
-        message
-      );
-    } else if (messageType == 2) {
-      $("#messageDiv1").addClass("notification");
-      $("#messageDiv1").html(
-        '<i class="fa fa-info-circle"></i>&nbsp;' + message
-      );
-    }
-    $(".server-error-message").addClass("show");
-    setTimeout(function () {
-      if ($(".server-error-message").hasClass("show")) {
-        $(".server-error-message").removeClass("show");
-      }
-    }, 5000);
+// function showMessageTheme2(messageType, message, id, msgHide) {
+//   if (message == "") {
+//     return false;
+//   } else {
+//     $("#messageDiv1").removeClass("error");
+//     $("#messageDiv1").removeClass("success");
+//     $("#messageDiv1").removeClass("notification");
+//     $("#messageDiv").show();
+//     if (messageType == 0 || messageType == false) {
+//       $("#messageDiv1").addClass("error");
+//       $("#messageDiv1").html(
+//         '<i class="fa fa-times-circle"></i>&nbsp;' + message
+//       );
+//     } else if (messageType == 1 || messageType == true) {
+//       $("#messageDiv1").addClass("success");
+//       $("#messageDiv1").html(
+//         // '<i class="fa fa-check-circle"></i>&nbsp;' + 
+//         message
+//       );
+//     } else if (messageType == 2) {
+//       $("#messageDiv1").addClass("notification");
+//       $("#messageDiv1").html(
+//         '<i class="fa fa-info-circle"></i>&nbsp;' + message
+//       );
+//     }
+//     $(".server-error-message").addClass("show");
+//     setTimeout(function () {
+//       if ($(".server-error-message").hasClass("show")) {
+//         $(".server-error-message").removeClass("show");
+//       }
+//     }, 5000);
 
-    if (msgHide) {
-      setTimeout(function () {
-        $(".server-error-message").removeClass("show");
-      }, 3000);
-    }
-  }
-}
+//     if (msgHide) {
+//       setTimeout(function () {
+//         $(".server-error-message").removeClass("show");
+//       }, 3000);
+//     }
+//   }
+// }
 
 function showMessage(messageType, message, id, msgHide) {
   if (message == "") {
@@ -437,6 +437,14 @@ function hideMessageTheme2(){
 }
 
 function showMessageTheme2(messageType, message, id, msgHide, timer) {
+  $(document).on("click", ".server-message", function () {
+      $(this).removeClass("show");
+  });
+
+  // .msg pe click - event bubble stop
+  $(document).on("click", ".server-message .msg", function (e) {
+      e.stopPropagation();
+  });
   if (timer == undefined || timer == null || timer == "") {
     timer = 6000;
   }
