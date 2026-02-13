@@ -10693,6 +10693,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			getLeadStatusLog(leadsd.leadNo, 'new-lead', objRights.adminStatus);
 			getLeadStartTimer(leadsd.assignLeadDatetime, leadsd.leadId);
 			getUpdateLeadCurrentTime(leadsd, leadsd.leadId);
+			getLeadStatusLogHistory(leadsd.leadId);
 		  }
 		  curentTimeStamp(data.objectRights.timeZoneOffset);
 		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
@@ -12768,4 +12769,61 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 			}
 		}
 	});
+
+}
+	async function getLeadStatusLogHistory(leadId) {
+    try {
+        var request = {
+            leadId: leadId
+        };
+        var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'lead-status-log-history', request, 'api/v1/leads');
+
+        if (!data) return;
+
+		console.log(data);
+
+        // var leadTagging = "<b>" + data.leadTagging + "</b>";
+        // $(".leadtagstatus_" + leadno).html(leadTagging);
+
+        if (data.status === '0' || data.status === '2') {
+            // showMessageTheme2(0, data.message, '', true);
+            return;
+        }
+        if(data.data.length>1){
+
+			var html=''
+			html+=`<div class="dropdown d-inline-block">
+					<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">Multiple time apply (${data.data.length})</button>
+					<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl dropdown-menu" x-placement="top-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-111px, -384px, 0px);">
+					<table style="font-size:11px !important; width:1300px;"><tbody>
+					<tr><th class="text-center bg-primary text-white">Sr. No.</th>
+					<th class="text-center bg-primary text-white">Lead No</th>
+					<th class="text-center bg-primary text-white">Source</th>
+					<th class="text-center bg-primary text-white">Campaign</th>
+					<th class="text-center bg-primary text-white">Ad</th>
+					<th class="text-center bg-primary text-white">Ad Set</th>
+					<th class="text-center bg-primary text-white">Lead Date</th>
+					<th class="text-center bg-primary text-white">Active</th>
+					<th class="text-center bg-primary text-white">Added Type</th></tr>`;
+				for (let i = 1; i < data.data.length; i++) {
+					const leadDatass = data.data[i];
+					html+=`<tr><td class="text-center">${i}</td>
+					<td>${leadDatass.leadNo}</td>
+					<td>${leadDatass.sourceName}</td>
+					<td>${leadDatass.utmCampaign}</td>
+					<td>${leadDatass.utmMedium}</td>
+					<td>${leadDatass.utmDescription}</td>
+					<td>${leadDatass.edate}</td>
+					<td>${leadDatass.activeStatus}</td>
+					<td>${leadDatass.addedType}</td></tr>`;
+				}
+					html+=`</tbody></table></div>`;
+
+			$(".leadMultipletimes_" + leadId).html(html);
+		}
+
+
+    } catch (error) {
+        console.error("Error in getLeadStatusLog:", error);
+    }
 }

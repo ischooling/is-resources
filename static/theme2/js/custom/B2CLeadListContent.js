@@ -1557,6 +1557,12 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 											html+='</tbody></table></div>'
 									+'</td>'
 								+'</tr>';
+
+                html+='<tr>'
+									+'<th class="border-0 p-1">&nbsp;</th><td class="border-0 p-1 leadMultipletimes_'+leads.leadId+'">'
+										
+									+'</td>'
+								+'</tr>';
 								
                 html+='<tr><td class="border-0 p-1 bold font-14" colspan="2" id="timerLeadDisplay_'+leads.leadId+'"></td></tr>';
 									if(objRights.discardPermission || USER_ID==leads.assignTo){
