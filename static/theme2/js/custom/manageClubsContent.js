@@ -17,31 +17,64 @@ function getManageClubsContent(title){
                 </div>
             </div>
         </div>
-        <div id="manageClubsCardsWrapper"></div>`
-        +getManageClubsTable()
+        <div id="manageClubsFilterWrapper"></div>`
+        +getManageClubsTable();
+        html+=`<div id="manageClubsPagination"></div>`
     return html;   
 }
 
-function getManageClubsFilter(countObj){
+function getManageClubsFilter(countObj) {
     var totalCount = 0;
     $.each(countObj, function(clubName, count){
         totalCount += count;
     });
-    var html = `
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <label class="font-weight-bold mb-1">Filter by Club</label>
-            <select class="form-control shadow-sm" 
-                    style="border-radius:10px;"
-                    onchange="getAllClubsData(this.value)">
-                <option value="">All Clubs (${totalCount})</option>`;
-                $.each(countObj, function(clubName, count){
-                    html+=
-                    `<option value="${clubName}">
-                        ${clubName} (${count})
-                    </option>`;
-                });
-                html+=`</select>
+    var html=`
+        <div class="card shadow-sm mb-3" style="border-radius:12px;">
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-md-3 mb-2">
+                        <label class="font-weight-bold mb-1">Student Name</label>
+                        <input type="text" class="form-control" id="filterClubStudentName">
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                        <label class="font-weight-bold mb-1">Student Email</label>
+                        <input type="text" class="form-control" id="filterClubStudentEmail">
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                        <label class="font-weight-bold mb-1">Club</label>
+                        <select class="form-control" id="filterClubName">
+                            <option value="">All Clubs</option>`;
+                            $.each(countObj, function(clubName, count){
+                            html+=`<option value="${clubName}">
+                                ${clubName}
+                            </option>`;
+                            });
+                        html+=`</select>
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                        <label class="font-weight-bold mb-1">Country</label>
+                        <select class="form-control" id="filterClubCountryId"></select>
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                        <label class="font-weight-bold mb-1">Grade</label>
+                        <select class="form-control" id="filterClubStandardId">
+                            <option value="0">Select Grade</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-2 d-flex align-items-end">
+                        <button class="btn btn-primary mr-2 w-100" onclick="applyClubFilter();">Apply Filter</button>
+                    </div>
+
+                    <div class="col-md-3 mb-2 d-flex align-items-end">
+                        <button class="btn btn-danger w-100" onclick="resetClubFilters();">Reset</button>
+                    </div>
+                </div>
             </div>
         </div>`;
     return html;
@@ -98,41 +131,41 @@ function getManageClubsTable(){
                     <tr>
                         <th>S.No.</th>
                         <th>Name</th>
+                        <th>Email</th>
+                        <th>Country</th>
                         <th>Grade</th>
                         <th>Club Name</th>
                         <th>Registration Date</th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody class="bg-white"></tbody>
             </table>
         </div>`
     return html;
 }
 
 function getManageClubsTbody(data){
-    if ($.fn.DataTable.isDataTable('#manageClubsTable')) {
-        $('#manageClubsTable').DataTable().clear().destroy();
-    }
     var tbodyHtml = '';
     if (data && data.length > 0) {
         $.each(data, function(index, item){
             tbodyHtml+=`<tr>
-                <td>${index + 1}</td>
+                <td>${(CURRENT_PAGE_MANAGE_CLUBS - 1) * 20 + index + 1}</td>
                 <td>${item.studentName}</td>
+                <td>${item.email}</td>
+                <td>${item.countryName}</td>
                 <td>${item.standard}</td>
                 <td>${item.clubName}</td>
                 <td>${changeDateFormat(new Date(item.createdDate), "MMM dd, yyyy hh:mm:ss A")}</td>
             </tr>`;
         });
+        $("#manageClubsPagination").show()
     } else {
         tbodyHtml=`<tr>
-            <td colspan="5" class="text-center text-muted">
+            <td colspan="7" class="text-center text-muted">
                 No records found
             </td>
         </tr>`;
+        $("#manageClubsPagination").hide();
     }
     $('#manageClubsTable tbody').html(tbodyHtml);
-    $('#manageClubsTable').DataTable({
-        theme: "bootstrap4"
-    });
 }

@@ -6726,6 +6726,10 @@ function goToPageCommon(page, context) {
       CURRENT_PAGE_USER_APPLICATION = page;
 			loadUserApplicationData();
 			break;
+    case 'manageClubs':
+      CURRENT_PAGE_MANAGE_CLUBS = page;
+      getAllClubsData();
+			break;
 		default:
 			console.warn('Unknown pagination context:', context);
 	}

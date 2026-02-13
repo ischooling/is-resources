@@ -42,33 +42,42 @@ function getReview(userId, eventId, evSrno, callType, questionId, currentPage, r
                         tableHtml='';
                         var htmlQuest = " <div class=\"row align-items-center\"><div class=\"col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 d-flex align-items-center justify-content-end\">"
                         htmlQuest = htmlQuest + " <div class=\"rate pr-0\">";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star5-"+value.userId+"-"+value.questionId+"\" name=\"rate-"+value.userId+"-"+value.questionId+"\" value=\"5\"  disabled=\"true\"/>";
-                        htmlQuest = htmlQuest + " <label for=\"star5-"+value.userId+"-"+value.questionId+"\" title=\"5 Stars\">5 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star4-"+value.userId+"-"+value.questionId+"\" name=\"rate-"+value.userId+"-"+value.questionId+"\" value=\"4\"  disabled=\"true\"  />";
-                        htmlQuest = htmlQuest + " <label for=\"star4-"+value.userId+"-"+value.questionId+"\" title=\"4 Stars\">4 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star3-"+value.userId+"-"+value.questionId+"\" name=\"rate-"+value.userId+"-"+value.questionId+"\" value=\"3\"  disabled=\"true\"  />";
-                        htmlQuest = htmlQuest + " <label for=\"star3-"+value.userId+"-"+value.questionId+"\" title=\"3 Stars\">3 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star2-"+value.userId+"-"+value.questionId+"\" name=\"rate-"+value.userId+"-"+value.questionId+"\" value=\"2\"  disabled=\"true\"  />";
-                        htmlQuest = htmlQuest + " <label for=\"star2-"+value.userId+"-"+value.questionId+"\" title=\"2 Stars\">2 stars</label>";
-                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star1-"+value.userId+"-"+value.questionId+"\" name=\"rate-"+value.userId+"-"+value.questionId+"\" value=\"1\"  disabled=\"true\"  />";
-                        htmlQuest = htmlQuest + " <label for=\"star1-"+value.userId+"-"+value.questionId+"\" title=\"1 Star\">1 star</label>";
-                        htmlQuest = htmlQuest + " </div>&nbsp;<b class=\"selectedStar-"+value.userId+"-"+value.questionId+"\">0</b>&nbsp;<span><b>Rating</b><span></div></div></div>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star5-"+value.userId+"-"+value.questionId+"-"+value.id+"\" name=\"rate-"+value.userId+"-"+value.questionId+"-"+value.id+"\" value=\"5\"  disabled=\"true\"/>";
+                        htmlQuest = htmlQuest + " <label for=\"star5-"+value.userId+"-"+value.questionId+"-"+value.id+"\" title=\"5 Stars\">5 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star4-"+value.userId+"-"+value.questionId+"-"+value.id+"\" name=\"rate-"+value.userId+"-"+value.questionId+"-"+value.id+"\" value=\"4\"  disabled=\"true\"  />";
+                        htmlQuest = htmlQuest + " <label for=\"star4-"+value.userId+"-"+value.questionId+"-"+value.id+"\" title=\"4 Stars\">4 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star3-"+value.userId+"-"+value.questionId+"-"+value.id+"\" name=\"rate-"+value.userId+"-"+value.questionId+"-"+value.id+"\" value=\"3\"  disabled=\"true\"  />";
+                        htmlQuest = htmlQuest + " <label for=\"star3-"+value.userId+"-"+value.questionId+"-"+value.id+"\" title=\"3 Stars\">3 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star2-"+value.userId+"-"+value.questionId+"-"+value.id+"\" name=\"rate-"+value.userId+"-"+value.questionId+"-"+value.id+"\" value=\"2\"  disabled=\"true\"  />";
+                        htmlQuest = htmlQuest + " <label for=\"star2-"+value.userId+"-"+value.questionId+"-"+value.id+"\" title=\"2 Stars\">2 stars</label>";
+                        htmlQuest = htmlQuest + " <input type=\"radio\" id=\"star1-"+value.userId+"-"+value.questionId+"-"+value.id+"\" name=\"rate-"+value.userId+"-"+value.questionId+"-"+value.id+"\" value=\"1\"  disabled=\"true\"  />";
+                        htmlQuest = htmlQuest + " <label for=\"star1-"+value.userId+"-"+value.questionId+"-"+value.id+"\" title=\"1 Star\">1 star</label>";
+                        htmlQuest = htmlQuest + " </div>&nbsp;<b class=\"selectedStar-"+value.userId+"-"+value.questionId+"-"+value.id+"\">0</b>&nbsp;<span><b>Rating</b><span></div></div></div>";
 
                       tableHtml+=`<tr>
                         <td>${(index + 1)}</td>
                         <td>${value.userName}</td>
-                        <td>${htmlQuest}</td>
-                      `;
-                      $("#answerReviewTbody").append(tableHtml);
-                      selectRate("star"+value.answerKey+"-"+value.userId+"-"+value.questionId+"", "SUMMARY" );
+                    <td> ${htmlQuest}<br/>
+                        <span style="cursor:pointer;" 
+                            onclick="toggleRemark(this)" 
+                            data-full-remark="${value.remark}" 
+                            data-state="short">
+                            ${value.remark.split(" ").slice(0,15).join(" ")}${value.remark.split(" ").length > 15 ? '... Read more' : ''}
+                        </span>
+                    </td>
+`;
+                         $("#answerReviewTbody").append(tableHtml);
+                      selectRate("star"+value.answerKey+"-"+value.userId+"-"+value.questionId+"-"+value.id+"", "SUMMARY" );
                     }else{
                         tableHtml='';
                         tableHtml+=`<tr>
                             <td>${(index + 1)}</td>
-                            <td>${value.question}</td>
-                            <td>${value.totalSent}</td>
-                            <td>${value.totalAnswer}</td>
-                            <td><a href="javascript:void(0)" onclick="showReviewModel('${value.questionId}','${eventId}','${evSrno}')">View Detail</a></td>
+                            <td>${value.question}</td>`;
+                            if(eventId != 2){
+                    tableHtml+=`<td>${value.totalSent}</td>
+                                <td>${value.totalAnswer}</td>`;
+                            }
+                tableHtml+=`<td><a href="javascript:void(0)" onclick="showReviewModel('${value.questionId}','${eventId}','${evSrno}')">View Detail</a></td>
                            </tr> 
                           `;
                         $("#teacherReviewTbody"+evSrno).append(tableHtml);
@@ -150,10 +159,15 @@ function callForFeedbackQuestionViewList(userId, currentPage, recordsPerPage) {
                         tableHtml+=`<tr>
                             <td>${(index + 1)}</td>
                             <td><a href="javascript:void(0)" data-target="#collapseOne${sr}" data-toggle="collapse" aria-expanded="false" aria-controls="collapse${sr}" class="collapsed" onclick="getEventReviewList('${value.eventId}','${sr}','0')"  >${value.eventName}</a></span></td>
-                            <td>${value.totalQuestion}</td>
-                            <td>${value.sendEmailIdCount}</td>
-                            <td>${value.isMailSendCount}</td>
-                            <td>${value.isClickedCount}</td>
+                            <td>${value.totalQuestion}</td>`;
+                            if(value.eventId == 2){
+                    tableHtml+=`<td>0</td>
+                                <td>0</td>`;
+                            }else{
+                    tableHtml+=`<td>${value.sendEmailIdCount}</td>
+                                <td>${value.isMailSendCount}</td>`;
+                            }
+                tableHtml+=`<td>${value.isClickedCount}</td>
                             <td>${value.isRepliedCount}</td>
                         </tr> 
                         <tr data-parent="#accordion" id="collapseOne${sr}" class="collapse feedback-tr-${sr}"><td colspan="7" >
@@ -161,10 +175,12 @@ function callForFeedbackQuestionViewList(userId, currentPage, recordsPerPage) {
                                 <thead>
                                     <tr>
                                         <th class="bg-primary text-white">S.No.</th>
-                                        <th class="bg-primary text-white">Question</th>
-                                        <th class="bg-primary text-white">Sent Feedback</th>
-                                        <th class="bg-primary text-white">Reply Feedback</th>
-                                        <th class="bg-primary text-white">Action</th>
+                                        <th class="bg-primary text-white">Question</th>`
+                                        if(value.eventId != 2){
+                                        tableHtml+=`<th class="bg-primary text-white">Sent Feedback</th>
+                                            <th class="bg-primary text-white">Reply Feedback</th>`
+                                        }
+                            tableHtml+=`<th class="bg-primary text-white">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="teacherReviewTbody${sr}"></tbody>
@@ -187,5 +203,20 @@ function callForFeedbackQuestionViewList(userId, currentPage, recordsPerPage) {
 
 function getEventReviewList(eventId, evSrno, questionId){
     getReview(USER_ID, eventId,evSrno, "", questionId, 0, 50);
+}
+
+function toggleRemark(el) {
+    var fullText = el.getAttribute('data-full-remark');
+    var words = fullText.split(" ");
+    var shortText = words.slice(0, 15).join(" ") + (words.length > 15 ? "..." : "");
+    if (el.getAttribute('data-state') === 'full') {
+        el.innerHTML = shortText +
+            (words.length > 15 ? ' <span style="color:blue; margin-left:5px; cursor:pointer;">Read more</span>' : '');
+        el.setAttribute('data-state', 'short');
+    } else {
+        el.innerHTML = fullText +
+            ' <span style="color:blue; margin-left:5px; cursor:pointer;">Less</span>';
+        el.setAttribute('data-state', 'full');
+    }
 }
 

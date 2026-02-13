@@ -31,13 +31,16 @@ function getFeedbackQuestion(eventid, questiontype, parentId, start, end, feedba
 			}else if (data.responseStatus.statusCode == 'FAILED') {
 				
 			} else {
-        if(callfrom=='student-feedback'){
-          window.setTimeout(function(){$("#"+popupId).modal('show');},8020);
+        if(data.questionList != null && data.questionList != undefined && data.questionList.length > 0){
+          if(callfrom=='student-feedback'){
+            window.setTimeout(function(){$("#"+popupId).modal('show');},8020);
+          }
         }
         if(data.feedbackSubject!='' && data.feedbackSubject!=null){
           $("#feedback_title").text(data.feedbackSubject);
         }
         $("#feedbackId").val(feedbackid);
+        $("#hiddenEventId").val(eventid);
         $("#userName").val(userId);
         
               $(".main-heading").text("We Would like to know your Feedback.");
@@ -128,7 +131,7 @@ function selectRate(ratingid, callFrom){
   }
   var qstid=0;
   var ratingids = ratingid.split("-");
-  $(".selectedStar-"+ratingids[1]+"-"+ratingids[2]).text(ratings);
+  $(".selectedStar-"+ratingids[1]+"-"+ratingids[2]+"-"+ratingids[3]).text(ratings);
 }
 
 
@@ -171,6 +174,7 @@ function getRequestForSaveFeedback(){
   answersRequest['userId']= $("#userName").val();
   answersRequest['feedbackId']= $("#feedbackId").val();
   answersRequest['callfrom']= $("#callfrom").val();
+  answersRequest['eventId']= $("#hiddenEventId").val();
   $( ".question" ).each(function( index ) {
     ansW = {};
     questionId = $(this).attr('id').split("-");

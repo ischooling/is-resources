@@ -63,6 +63,7 @@ function getQuestionList(userId, currentPage, recordsPerPage) {
 function showQuestionFormModel(questionId) {
 	if($("#questionFormModal").length){
 		$("#questionFormModal").remove();
+		$("#questionForm")[0].reset()
 	}
 	$("body").append(questionSaveModal());
     $('#questionFormModal').modal('show');
@@ -82,7 +83,7 @@ function showQuestionFormModel(questionId) {
             return false;
         });
         
-        $("#questionSubmit").on('click', function(e){
+        $("#questionSubmit").unbind().bind('click', function(e){
             callForGetSubmitQuestion('questionForm');
         });
 

@@ -34448,7 +34448,16 @@ to { background-color: rgb(6, 145, 6); }
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Feedback\ 1.png) !important;
 }
-
+.emoji-student-feedback{
+	content: none !important;	
+}
+.emoji-student-feedback{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Feedback\ 1.png) !important;
+}
 .fa-home{
 	content: none !important;	
 }
@@ -34800,3 +34809,4 @@ to { background-color: rgb(6, 145, 6); }
 	transform: translateY(-3px);
     transition: 0.2s ease-in-out;
 }
+

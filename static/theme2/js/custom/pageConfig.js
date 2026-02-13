@@ -119,6 +119,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "competitive-gaming":{url:"competitive-gaming",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "global-competitions-club":{url:"global-competitions-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "game-strategy-analysis-club":{url:"game-strategy-analysis-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
+        "student-feedback":{url:"student-feedback",file:[{role:"",fileName:["studentfeedbackContent.js","studentfeedback.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         
         // TEACHER //
         "teacher-home":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"IN"},

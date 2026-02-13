@@ -549,7 +549,9 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderClubsCommonPage("Global Competitions Club");
     }else if(pageNo=='game-strategy-analysis-club'){
       renderClubsCommonPage("Game Strategy & Analysis Club");
-    }
+     }else if(pageNo=='student-feedback'){
+      renderStudentFeedbackPage('Student Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+     }
 	}catch(err){
 		console.error("getContent error:", err);
 

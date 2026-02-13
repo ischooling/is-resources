@@ -207,12 +207,9 @@ main > .header {
   -webkit-animation: logoAnim 9s cubic-bezier(0.54, -0.24, 0.46, 1.28) infinite;
           animation: logoAnim 9s cubic-bezier(0.54, -0.24, 0.46, 1.28) infinite;
 }
-.question{
-  background: #ebf5ff;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 12px;
-    box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.1);
+.question {
+  padding: 2px;
+  border-radius: 10px;
 }
 
 .svg-bg {
