@@ -45,6 +45,7 @@ var AJAXREQUESTCOUNT=0;
 var date = new Date();
 var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+var CHAT_BOT_OPEN_FLAG = true;
 function copyToClipboardText(originalValue) {
   var $tempInput = $("<input>");
   $("body").append($tempInput);

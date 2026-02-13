@@ -1447,7 +1447,9 @@ function academicInformation(data){
                             </span>
                             <span>3. Academic Information</span>
                             <div class="ml-auto">
-                                <a href='javascript:void(0)' onclick ="callWithSession('${data.studentIdCardDownloadUrl}')" class="btn btn-sm btn-success mr-1">Download Student ID Card</a>
+                                ${data.standardStatus==0?
+                                    `<a href="javascript:void(0)" onclick ="callWithSession("${data.studentIdCardDownloadUrl}")" class="btn btn-sm btn-success mr-1">Download Student ID Card</a>`:``
+                                }
                                 ${USER_ROLE != "STUDENT" && data.rightToEdit?
                                     `<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="showLearningProgamGradePlatformModal()"><i class="fa fa-edit"></i>&nbsp;Edit</a>`:``
                                 }

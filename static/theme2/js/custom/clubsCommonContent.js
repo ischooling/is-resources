@@ -4,27 +4,27 @@ function renderClubsCommonPage(title){
 
 function getClubsCommonCard(title){
     var clubImages = {
-        "Spanish Club": "spanish.png",
-        "French Club": "French.png",
-        "German Club": "german.png",
-        "English Club": "English.png",
-        "Chinese Club": "chinese.png",
+        "Spanish Club": "spanish.webp",
+        "French Club": "French.webp",
+        "German Club": "german.webp",
+        "English Club": "English.webp",
+        "Chinese Club": "chinese.webp",
 
-        "Team Building Club": "Team_Building.png",
-        "Cultural Exchange Club": "Cultural_Exchange.png",
-        "Leadership Skills Club": "Leadership_Skills.png",
-        "Debate Club": "Debate_Club.png",
-        "Drama & Expression Club": "Drama_Expression.png",
-        "Public Speaking Club": "Public_speaking.png",
+        "Team Building Club": "Team_Building.webp",
+        "Cultural Exchange Club": "Cultural_Exchange.webp",
+        "Leadership Skills Club": "Leadership_Skills.webp",
+        "Debate Club": "Debate_Club.webp",
+        "Drama & Expression Club": "Drama_Expression.webp",
+        "Public Speaking Club": "Public_speaking.webp",
 
-        "Focus & Reaction Training Club": "Focus_Reaction_Training.png",
-        "Skill Development Club": "Skill_Development.png",
-        "Team Communication Club": "Team_Communication.png",
-        "Online Tournaments Club": "Online_Tournaments.png",
-        "Strategy Games Club": "Strategy_Games.png",
-        "Competitive Gaming Club": "Competitive_Gaming.png",
-        "Global Competitions Club": "Global_Competitions.png",
-        "Game Strategy & Analysis Club": "Game_Strategy_Analysis.png",
+        "Focus & Reaction Training Club": "Focus_Reaction_Training.webp",
+        "Skill Development Club": "Skill_Development.webp",
+        "Team Communication Club": "Team_Communication.webp",
+        "Online Tournaments Club": "Online_Tournaments.webp",
+        "Strategy Games Club": "Strategy_Games.webp",
+        "Competitive Gaming Club": "Competitive_Gaming.webp",
+        "Global Competitions Club": "Global_Competitions.webp",
+        "Game Strategy & Analysis Club": "Game_Strategy_Analysis.webp",
     };
     const imageName = clubImages[title]
     var html=

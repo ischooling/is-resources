@@ -356,7 +356,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					callSchoolCalendar(formId, userId, UNIQUEUUID, currentView, start, end, true);
 				}
 				var legentHtml=
-					`<div class="d-flex w-100 flex-wrap justify-content-center mt-1 gap-5 legent_wrapper">
+					`<div class="d-flex w-100 flex-wrap justify-content-sm-center justify-content-start mt-1 gap-5 legent_wrapper">
 						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
 							<label class="d-inline-block m-0" style="width:15px;height:15px;background:#bfbebe"></label>
 							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Expired Classes & Activities</span>
@@ -386,11 +386,11 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 				redirectLoginPage();
 			}
 			// 🟢 ADD "Week of" TEXT
-			if (view.name === "agendaWeek") {
-				$('.fc-scroller .fc-unselectable .fc-bg .fc-day.fc-sat, .fc-scroller .fc-unselectable .fc-day.fc-sun').each(function () {
-					$(this).append('<div class="font-weight-bold text-center mt-3">Day Off</div>');
-				});
-			}
+			// if (view.name === "agendaWeek") {
+			// 	$('.fc-scroller .fc-unselectable .fc-bg .fc-day.fc-sat, .fc-scroller .fc-unselectable .fc-day.fc-sun').each(function () {
+			// 		$(this).append('<div class="font-weight-bold text-center mt-3">Day Off</div>');
+			// 	});
+			// }
 
 			if (view.name === "agendaDay") {
 				$(".fc-center h2").text(view.start.format("dddd, MMM D, YYYY"));
@@ -1126,7 +1126,12 @@ function scrollEvent(){
 		scrollEventInterval = null;
 	}
 	scrollEventInterval = setInterval(function(){
-		var calendarContainer = $('.fc-scroller.fc-time-grid-container');
+		if($(window).width()<=767){
+			var calendarContainer = $('.fc-list-view .fc-scroller');
+		}else{
+			var calendarContainer = $('.fc-scroller.fc-time-grid-container');
+		}
+		
 
         var target = $(".live-class-blink").length ? $(".live-class-blink") : $(".upcoming-class-blink");
 		if($(".live-class-blink:visible").length>0){
@@ -1215,23 +1220,28 @@ function calendarEventBind(){
 }
 
 function calendarRequestByFilter(src){
+	if($(window).width()<=767){
+		var elementClass = ".fc-list-item";
+	}else{
+		var elementClass = ".fc-time-grid-event";
+	}
 	$(".calendar_request_button").removeClass("active_calendar_catergory")
 	$(src).addClass("active_calendar_catergory");
 	var category = $(".active_calendar_catergory").attr("data-category");
 	if(category == "ALL"){
-		$("#schoolcalendar .fc-event-container .fc-time-grid-event").show();
+		$("#schoolcalendar .fc-view-container "+elementClass).show();
 	}else if(category == "BATCH"){
-		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
-		$("#schoolcalendar .fc-event-container .BATCH").show();
+		$("#schoolcalendar .fc-view-container "+elementClass).hide();
+		$("#schoolcalendar .fc-view-container .BATCH").show();
 	}else if(category == "ONE_TO_ONE"){
-		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
-		$("#schoolcalendar .fc-event-container .ONE_TO_ONE").show();
+		$("#schoolcalendar .fc-view-container "+elementClass).hide();
+		$("#schoolcalendar .fc-view-container .ONE_TO_ONE").show();
 	}else if(category == "CLASS"){
-		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
-		$("#schoolcalendar .fc-event-container .CLASS").show();
+		$("#schoolcalendar .fc-view-container "+elementClass).hide();
+		$("#schoolcalendar .fc-view-container .CLASS").show();
 	}else if(category == "ACTIVITY"){
-		$("#schoolcalendar .fc-event-container .fc-time-grid-event").hide();
-		$("#schoolcalendar .fc-event-container .ACTIVITY").show();
+		$("#schoolcalendar .fc-view-container "+elementClass).hide();
+		$("#schoolcalendar .fc-view-container .ACTIVITY").show();
 	}
 	scrollEvent();
 }

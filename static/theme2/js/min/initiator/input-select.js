@@ -1,1 +1,0 @@
-$(document).ready((()=>{setTimeout((function(){$("#example-single").multiselect({inheritClass:!0}),$("#example-multi").multiselect({inheritClass:!0}),$("#example-multi-check").multiselect({inheritClass:!0})}),2e3)}));

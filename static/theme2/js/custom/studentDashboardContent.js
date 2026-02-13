@@ -289,7 +289,7 @@ function dashboardSchoolCalendar(data) {
                                                 <span class="user_current_time clock-bg font-18 text-primary font-weight-semi-bold time-label"></span>
                                             </div>
                                         </div>
-                                        <div class="tabs ml-auto text-right">
+                                        <div class="school-calender-tabs tabs  ml-auto text-right">
                                             <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
                                                 <div class="font-12 line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
@@ -343,7 +343,7 @@ function dashboardSchoolCalendar(data) {
             const chatPayload = btoa(jsonString);
             const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
             html+=
-            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Chat">
+            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
                 <i class="fa fa-comments fa-w-16"></i>
             </a>`;					
         }

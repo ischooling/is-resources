@@ -34010,9 +34010,11 @@ color: var(--pc);
 }
 
 
-#schoolcalendar .fc-time-grid-event.past-class{background-color: #fff !important;border-color:#bfbebe !important;color:#343a40;border:2px solid;padding:16px 8px;}
+#schoolcalendar .fc-time-grid-event.past-class, #schoolcalendar .fc-list-item.past-class{background-color: #fff !important;border-color:#bfbebe !important;color:#343a40;border:2px solid;padding:16px 8px;}
+.fc-list-view .fc-scroller{min-height:320px !important;padding:5px;}
+.past-class .fc-event-dot[style]{background-color: #bfbebe !important;}
 #schoolcalendar .fc-time-grid-event.activity-wrapper-div{background-color: #ffecf0 !important;border-color:#d92550 !important;color:#343a40;border:2px solid;padding:16px 8px;}
-#schoolcalendar .fc-time-grid-event:not(.past-class, .activity-wrapper-div){background-color: var(--plc) !important;border-color:var(--pc) !important;color:#fff;border:2px solid;padding:16px 8px;}
+#schoolcalendar .fc-time-grid-event:not(.past-class, .activity-wrapper-div), #schoolcalendar  .fc-list-item.future-class:not(.past-class, .activity-wrapper-div){background-color: var(--plc) !important;border-color:var(--pc) !important;border:2px solid;padding:16px 8px;}
 #schoolcalendar .fc-time-grid-event .fc-content .class-time{background-color: var(--pc);color:#fff;}
 #schoolcalendar .fc-time-grid-event .fc-content .activety-time{background-color: #d92550;color:#fff;}
 #schoolcalendar .live-class-blink .fc-content .activety-time{background-color: #007c00 !important;color:#fff;}
@@ -34024,7 +34026,7 @@ color: var(--pc);
 #schoolcalendar .fc-header-toolbar .fc-center .btn-group .fc-prev-button.btn-primary:hover, #schoolcalendar .fc-header-toolbar .fc-center .btn-group .fc-next-button.btn-primary:hover, #schoolcalendar .fc-header-toolbar .fc-center .btn-group .fc-prev-button.btn-primary:focus, #schoolcalendar .fc-header-toolbar .fc-center .btn-group .fc-next-button.btn-primary:focus{color:#343a40 !important}
 #schoolcalendar .fc-header-toolbar .fc-center h2{font-size:18px;padding: 0px 55px;margin-top: 3px;margin-left:0px;font-weight: bold;}
 /* #schoolcalendar .fc-time-grid table tbody{background-color: #fff;} */
-.fc-sat,.fc-sun {background-color: #f2f2f2 !important;}
+/* .fc-sat,.fc-sun {background-color: #f2f2f2 !important;} */
 .fc-head-container .table-bordered thead tr th{height:55px;}
 .fc-head-container .table-bordered thead tr th.fc-day-header{vertical-align: middle;font-weight: 600;}
 .fc-head-container .table-bordered thead tr .fc-axis{color:#d5d5d5;text-align:center}
@@ -34080,9 +34082,11 @@ color: var(--pc);
 from { background-color: rgb(0 192 0); }
 to { background-color: rgb(6, 145, 6); }
 }
-
-.upcoming-class-blink[style], #schoolcalendar .fc-time-grid-event.upcoming-class-blink{background-color: #fff8e8 !important;border-color:#f7b924 !important;color:#fff;border:2px solid;padding:16px 8px;}
+.upcoming-class-blink .fc-event-dot[style]{background-color: #433a11 !important;}
+.upcoming-class-blink, .upcoming-class-blink[style], #schoolcalendar .fc-time-grid-event.upcoming-class-blink{background-color: #fff8e8 !important;border-color:#f7b924 !important;color:#090909;border:2px solid;padding:16px 8px;display: inline-block;}
 #schoolcalendar .fc-time-grid-event.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#fff;border:2px solid;padding:16px 8px;}
+#schoolcalendar .fc-list-item.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#343a40;border:2px solid;width: 100%;}
+.live-class-blink .fc-event-dot[style]{background-color: #007c00  !important;}
 #schoolcalendar .fc-time-grid-event.past-class .fc-content .class-time, #schoolcalendar .fc-time-grid-event.past-class .fc-content .activety-time{background-color: #bfbebe !important;color:#fff;}
 #schoolcalendar .fc-time-grid-event.upcoming-class-blink .fc-content .class-time{background-color: #f7b924;color:#343a40;}
 #schoolcalendar .fc-time-grid-event.live-class-blink .fc-content .class-time{background-color: #007c00;color:#fff;}
@@ -34104,11 +34108,21 @@ to { background-color: rgb(6, 145, 6); }
 
 .active_calendar_catergory.bg-light-danger{background-color: #d92550 !important;}
 .active_calendar_catergory.text-danger, .active_calendar_catergory div.text-dark{color:#fff !important}
+.fc-list-view .fc-scroller .fc-list-table, .fc-list-view .fc-scroller .fc-list-table tbody, .fc-list-view .fc-scroller .fc-list-table tbody tr, .fc-list-view .fc-scroller .fc-list-table tbody tr td, .fc-list-view .fc-scroller .fc-list-table tbody tr td a{display: table;width:100%}
+.fc-list-view .fc-scroller .fc-list-table tbody tr{margin-top: 5px;}
+.fc-list-view .fc-scroller .fc-list-table tbody tr td{margin:5px;}
+
 
 
 @media(max-width:530px){
 	#schoolcalendar .fc-header-toolbar .fc-center{margin-top: 15px;width:100%;}
-	#schoolcalendar .fc-header-toolbar .fc-center h2{width:100%;text-align: center;}
+	#schoolcalendar .fc-header-toolbar .fc-center h2{width:100%;text-align: center;font-size:15px;padding:0px;}
+}
+@media(max-width:350px){
+	#schoolcalendar .fc-header-toolbar .btn-group{justify-content: space-between;}
+	#schoolcalendar .fc-header-toolbar .btn-group button{position:relative !important;flex:inherit}
+	.fc-header-toolbar button{padding:2px 4px}
+	.school-calender-tabs button{width:100%;padding:5px !important;margin-left:0px !important}
 }
 
 
