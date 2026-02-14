@@ -12790,7 +12790,7 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
             return;
         }
         if(data.data.length>1){
-
+			var sr=1;
 			var html=''
 			html+=`<div class="dropdown d-inline-block">
 					<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">Multiple time apply (${data.data.length})</button>
@@ -12805,9 +12805,9 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 					<th class="text-center bg-primary text-white">Lead Date</th>
 					<th class="text-center bg-primary text-white">Active</th>
 					<th class="text-center bg-primary text-white">Added Type</th></tr>`;
-				for (let i = 1; i < data.data.length; i++) {
+				for (let i = 0; i < data.data.length; i++) {
 					const leadDatass = data.data[i];
-					html+=`<tr><td class="text-center">${i}</td>
+					html+=`<tr><td class="text-center">${sr}</td>
 					<td>${leadDatass.leadNo}</td>
 					<td>${leadDatass.sourceName}</td>
 					<td>${leadDatass.utmCampaign}</td>
@@ -12816,6 +12816,7 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 					<td>${leadDatass.edate}</td>
 					<td>${leadDatass.activeStatus}</td>
 					<td>${leadDatass.addedType}</td></tr>`;
+					sr=sr+1;
 				}
 					html+=`</tbody></table></div>`;
 
