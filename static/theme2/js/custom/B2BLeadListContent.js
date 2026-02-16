@@ -1131,7 +1131,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 							{
 								html+='<tr>'
 									+'<td colspan="2" class="border-0 p-1">'
-										+'<a href="javascript:void(0)" onclick="createPartnerUser(\'partnerUserB2BSaveForm\',\''+leads.leadId+'\',\'leadPartnerUserB2B\',\''+leads.partnerTypeId+'\',\''+leads.epdetailStatus+'\', \''+leads.partnerDefaultSettings+'\', \''+leads.partnerType+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-user text-primary"></i>&nbsp;'+((leads.partnerTypeId==undefined || leads.partnerTypeId=='' || leads.partnerTypeId==0)?'Create Partner':'Update Partner')+'</a>'
+										+'<a href="javascript:void(0)" onclick="createPartnerUser(\'partnerUserB2BSaveForm\',\''+leads.leadId+'\',\'leadPartnerUserB2B\',\''+leads.partnerTypeId+'\',\''+leads.epdetailStatus+'\', \''+leads.partnerDefaultSettings+'\', \''+leads.partnerType+'\');" class="text-dark py-1 d-inline-block"><i class="fa fa-edit text-primary"></i>&nbsp;'+((leads.partnerTypeId==undefined || leads.partnerTypeId=='' || leads.partnerTypeId==0)?'Create Partner':'Update Partner')+'</a>'
 									+'</td>'
 								+'</tr>';
 							}

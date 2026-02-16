@@ -66,7 +66,7 @@ async function cardContent(data){
                         }
                         html+=`<div class="page-title-wrapper">
                             <div class="page-title-heading full my-4">
-                                <h5 class="text-center full font-weight-semi-bold">
+                                <h5 class="text-center full font-weight-semi-bold font-22">
                                     <p class="mb-1">${welcomeMessage} <span class="text-primary">${USER_FULL_NAME}!</span></p>
                                     <p class="mb-1">Great to see you again</p>
                                     <p class="m-0">We are just a message away! Keep Learning, Keep Smiling.</p>

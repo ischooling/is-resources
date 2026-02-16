@@ -1312,7 +1312,15 @@ function nextPage(currentPage){
 }
 
 function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
-	$("#advancedformclick").val("")
+	if($("#leadSourceSearch").val().length>0){
+		if($("#leadSourceSearch").val()[0]==18){}
+		else{
+			$("#advancedformclick").val("")
+		}
+	}else{
+		$("#advancedformclick").val("")
+	}
+
 	leadfrom=leadfrom==undefined?'advance-search':leadfrom;
 	//console.log(leadfrom);
 	getLeadDataList('advanceLeadNewSearchForm',leadfrom, clickFrom, currentPage, 'new', true, callbadge, OBJECT_RIGHTS, ROLE_MODULE);
