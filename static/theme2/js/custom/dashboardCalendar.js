@@ -419,7 +419,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
         
         eventRender: function(event, element) {
 			if(!event.id.startsWith("announce", 0) && !event.id.startsWith("holiday", 0)) {
-                if (event.start && event.end) {
+				if (event.start && event.end) {
                     const startStr = event.start.format();
                     const endStr = event.end.format();
 					const eventExists = todayClassArray.some(e =>
@@ -511,7 +511,10 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 
     CALENDAR_EVENT = true;
     updateCalendarView();
-	console.log(todayClassArray)
+	console.log(todayClassArray);
+	if(todayClassArray.length < 1){
+		updateTabCounts(todayClassArray);
+	}
 }
 
 $(window).off('resize').on('resize', function() {
