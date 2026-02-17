@@ -15,7 +15,6 @@ $(document).ready(function(){
 				}
 			}
 		}
-		// end
 		// for remark lead update
 		var data2 = getAllLeadForUpdateRemark(USER_ID);
 		if(data2.status==1){
@@ -62,8 +61,6 @@ $(document).ready(function(){
 				}
 			}
 		}
-		// end
-		
 	}
 	
 	$(".status").on("change", function(){
