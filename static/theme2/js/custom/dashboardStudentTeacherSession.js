@@ -575,6 +575,10 @@ function submitStudentTeacherAssign(formId, moduleId, subjectId, standardId, stu
 			showWarningMessageShow('You are about to end mapping between ' + studentName + ' and ' + teacherName + ' for ' + subjectName + '. Please note that any recurring class created for this mapping will be deactivated after the enrollment end date. If for any reason the class is not deactivated, kindly do the same from the Recurring Class menu', 'submitStudentTeacherAssign(\'teacherForm\',\'' + moduleId + '\',' + subjectId + ',' + standardId + ',' + studentId + ',' + oldTeacherId + ',\'' + courseType + '\',false)', false);
 			return false;
 		}
+		if($("#check"+subjectId).is(":checked")){
+			showWarningMessageShow('Please note that any class created for this mapping will be deactivated after the enrollment end date. If for any reason the class is not deactivated, kindly do the same from the Recurring Class menu', 'submitStudentTeacherAssign(\'teacherForm\',\'' + moduleId + '\',' + subjectId + ',' + standardId + ',' + studentId + ',' + oldTeacherId + ',\'' + courseType + '\',false)', false);
+			return false;
+		}
 	}
 	hideMessage('');
 	if (!validateRequestStudentTeacherAssign(formId, moduleId, subjectId)) {
@@ -621,9 +625,14 @@ function getRequestForStudentTeacherAssign(formId, moduleId, subjectId, standard
 	var studentTeacherSavedMappingDTOArray = [];
 	//	$("#assigTeacherLink tbody tr").each(function(){
 	var studentTeacherSavedMappingDTO = {};
+	var inactiveFutureClass='N';
 	//		var subjectId= $(this).find("td.subjectIdcls").attr("data-subjectId");
 	//		var standardId= $(this).find("td.subjectIdcls").attr("data-standardId");
 	var teacherId = $("#teacherId" + subjectId).val();
+	if($("#check"+subjectId).is(":checked")){
+		inactiveFutureClass= "Y";
+	}
+	studentTeacherSavedMappingDTO['inactiveFutureClass']=inactiveFutureClass;
 	studentTeacherSavedMappingDTO['subjectId'] = subjectId;
 	studentTeacherSavedMappingDTO['teacherId'] = teacherId;
 	studentTeacherSavedMappingDTO['standardId'] = standardId;

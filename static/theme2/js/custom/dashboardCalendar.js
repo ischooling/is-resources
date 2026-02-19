@@ -371,7 +371,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 						</div>
 						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
 							<label class="d-inline-block bg-primary m-0" style="width:15px;height:15px;"></label>
-							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Classes</span>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Classes ${USER_ROLE == `STUDENT`?`& System Training`:``}</span>
 						</div>
 						<div class="d-inline-flex align-items-center" data-toggle="tooltip" title="legend">
 							<label class="d-inline-block bg-danger m-0" style="width:15px;height:15px;"></label>
@@ -420,7 +420,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
         eventRender: function(event, element) {
 			if(!event.id.startsWith("announce", 0) && !event.id.startsWith("holiday", 0)) {
 				if (event.start && event.end) {
-                    const startStr = event.start.format();
+					const startStr = event.start.format();
                     const endStr = event.end.format();
 					const eventExists = todayClassArray.some(e =>
                         e.start === startStr &&
@@ -453,13 +453,13 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					element.find('.fc-time').html(customTimeHtml);
 					var customEventTitleHtml =``;
 					if(!event.id.startsWith("activity", 0)){
-						if(event.category.startsWith("BATCH", 0) || event.eventType.startsWith("CUSTOM", 0) || event.eventType.startsWith("PTM", 0)){
+						if(event.category.startsWith("BATCH", 0) || event.eventType.startsWith("CUSTOM", 0) || event.eventType.startsWith("PTM", 0) || event.eventType.startsWith("SYS-TRAINING", 0)){
 							customEventTitleHtml+=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.title}</div>`;
 						}else{
 							customEventTitleHtml=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.eventTitle}</div>`;
 						}
 						if(event.name != ""){
-							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0)){
+							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0) && !event.eventType.startsWith("SYS-TRAINING", 0)){
 								customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
 									<div>
 										<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</span><span class="assign-teacher-name">${event.name}</span>
@@ -483,6 +483,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					
 					element.find('.fc-title').html(customEventTitleHtml);
 				}
+
 				updateEventIcons(event, element, todayClassArray, viewName, activityTypes);
 			}
 		},
@@ -563,8 +564,10 @@ function checkIfAnyClassRunning(todayClassArray) {
 
 
 function updateTabCounts(allEvents) {
-    var filteredEvents = getEventsInCurrentView(allEvents);
-
+    var filteredEvents = getEventsInCurrentView(allEvents).filter(function (e) {
+        return e.eventType !== "SYS-TRAINING";
+    });
+	
     $(".over_All_Class_Activity_Count").text(filteredEvents.length);
 
     $(".activity_Count").text(
@@ -632,13 +635,13 @@ function getEventsInCurrentView(allEvents) {
     var viewName = view.name;
 
     // ✅ Calendar boundaries in USER_TIMEZONE
-    var start = view.start.clone().startOf('day');
+    var start = view.start.clone().local().startOf('day');
     var end;
 
     if (viewName === 'agendaDay' || viewName === 'listDay') {
-        end = view.start.clone().endOf('day');
+        end = view.start.clone().local().endOf('day');
     } else {
-        end = view.end.clone().subtract(1, 'seconds');
+        end = view.end.clone().local().subtract(1, 'seconds');
     }
 
     return allEvents.filter(function (e) {
@@ -646,9 +649,16 @@ function getEventsInCurrentView(allEvents) {
         if (!e.start) return false;
 
         // ✅ IMPORTANT: Already converted to USER_TIMEZONE
-        var eventStart = moment(e.start);
+        var eventStart = moment(e.start).local();
+        var eventEnd = e.end ? moment(e.end).local() : eventStart.clone();
 
-        return eventStart.isBetween(start, end, null, '[]');
+        if (!eventStart.isValid()) return false;
+        if (!eventEnd.isValid()) {
+            eventEnd = eventStart.clone();
+        }
+
+        // Include events that overlap the current view window.
+        return eventStart.isSameOrBefore(end) && eventEnd.isSameOrAfter(start);
     });
 }
 
@@ -817,7 +827,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				<img src='${info.icon}' width="30" />
 			</div>
 			<div>`;
-				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0)) ||  info.eventType.startsWith("CUSTOM", 0) || info.eventType.startsWith("PTM", 0)){
+				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0)) ||  info.eventType.startsWith("CUSTOM", 0) || info.eventType.startsWith("PTM", 0) || info.eventType.startsWith("SYS-TRAINING", 0)){
 					tooltipHTML+=`<h5 class="font-weight-bold font-16">${info.title}</h5>`;
 				}else{
 					tooltipHTML+=`<h5 class="font-weight-bold font-16">${element.find(".fc-title .class-title").text()}</h5>`;
@@ -857,7 +867,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					`<ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul>`;
 				}else{
 					if(info.name != ""){
-						if(!info.category.startsWith("BATCH", 0) && !info.eventType.startsWith("PTM", 0)){
+						if(!info.category.startsWith("BATCH", 0) && !info.eventType.startsWith("PTM", 0) && !info.eventType.startsWith("SYS-TRAINING", 0)){
 							tooltipHTML+=
 							`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</p>
 							<strong>${element.find(".assign-teacher-name").text()}</strong>`;
@@ -885,6 +895,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			$('.tooltip').last().addClass('calendar-tooltip');
 			});
 		}
+		var isSysTrainingEvent = (info.eventType || "").startsWith("SYS-TRAINING", 0);
 
 		// ============================
 		// ⏱ LIVE / UPCOMING LOGIC
@@ -897,15 +908,18 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			var endTime = new Date(info.end._i);
 			var now = currentTime.getTime();
 			element.find(".live-symbol, .upcoming-icon").remove();
-			element.removeClass("live-class-blink upcoming-class-blink past-class");
+			element.removeClass("live-class-blink upcoming-class-blink past-class future-class");
 			if(info.category.startsWith("ONE_TO_ONE", 0)){
 				element.addClass("ONE_TO_ONE");
 			}
 			if(info.category.startsWith("BATCH", 0)){
 				element.addClass("BATCH");
 			}
-			if(info.category.startsWith("CLASS", 0)){
+			if(info.category.startsWith("CLASS", 0) && !info.eventType.startsWith("SYS-TRAINING", 0)){
 				element.addClass("CLASS");
+			}
+			if(info.category.startsWith("CLASS", 0) && info.eventType.startsWith("SYS-TRAINING", 0)){
+				element.addClass("SYS-TRAINING");
 			}
 			if(info.category.startsWith("ACTIVITY", 0)){
 				element.addClass("ACTIVITY");
@@ -923,6 +937,8 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			if (now > endTime.getTime()) {
 				element.addClass("past-class");
 				element.removeClass("activity-wrapper-div");
+			}else if (isSysTrainingEvent) {
+				element.addClass("future-class");
 			}else if (now >= startTime.getTime() && now <= endTime.getTime()) {
 				
 				var liveIcon = $(`<b class="d-flex flex-row-reverse live-symbol">🔴 Live ${liveLabel}</b>`);
@@ -1142,9 +1158,12 @@ function scrollEvent(){
 		}else if($(".upcoming-class-blink:visible").length>0){
 			var target = $(".upcoming-class-blink:visible").first()
 		}else if($(".future-class:visible").length>0){
-			var category = $(".active_calendar_catergory").attr("data-category");
-			var target = $(".fc-event-container ."+category+".future-class").first();
-			
+			if(USER_ROLE == "STUDENT" && $(".future-class:visible").hasClass("SYS-TRAINING")){
+				var target = $(".fc-event-container .SYS-TRAINING.future-class").first();
+			}else{
+				var category = $(".active_calendar_catergory").attr("data-category");
+				var target = $(".fc-event-container ."+category+".future-class").first();
+			}
 		}else{
 			var target = $(".fc-event-container .past-class").first();
 		}
@@ -1435,3 +1454,4 @@ function calendarMeetingLinkValidate(){
 		</div>`;
   	return html;
 }
+
