@@ -238,6 +238,8 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 			renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 		}else if(pageNo=='lead-demo-list'){
 			renderMeetingTimeDashboard('Lead Demo Calendar',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+		}else if(pageNo=='lead-predict-list'){
+			renderLeadPredictListDashboard('Lead Predict List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 		}else if(pageNo=='lead-setting'){
 			LEAD_CATEGORY="B2C";
 			if (USER_ROLE == "B2B_LEAD") {

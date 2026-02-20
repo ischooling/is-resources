@@ -66,6 +66,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "lead-calculation-chart":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-calculation-chart?moduleId="+moduleId+"&euid="+ENCRYPTED_USER_ID},
         "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-list":{url:"",file:[{role:"",fileName:["leadDemoContent.js","leads.js","LeadSettingListContent.js","LeadSettings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        
         "lead-setting":{url:"",file:[{role:"",fileName:["LeadSettingListContent.js","LeadSettings.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-daily-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/counselor-daily-report?moduleId="+moduleId+"&userId="+USER_ID},
         "lead-sales-research":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-sales-research?moduleId="+moduleId+"&userId="+USER_ID},
@@ -178,7 +179,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "accelerated-mode":"accelerated-mode-students-details?moduleId="+moduleId,
         "user-feedback":{url:"",file:[{role:"",fileName:["reviewContent.js","review.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "question-list":{url:"",file:[{role:"",fileName:["feedbackQuestionContent.js","feedbackQuestion.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-
+        "lead-predict-list":{url:"",file:[{role:"",fileName:["leadPredictListContent.js","leadPredictList.js","B2CLead.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {
