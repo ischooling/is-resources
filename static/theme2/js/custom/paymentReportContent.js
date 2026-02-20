@@ -52,9 +52,6 @@ function paymentReport(){
 			+'</div>'
 		+'</div>'
 	+'</div>'
-	+'<div class="server-message">'
-			+'<span class="msg" id="msgTheme2"></span>'
-		+'</div>'
 		+deleteWarning();
 	return html;
 }
