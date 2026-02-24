@@ -167,6 +167,10 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
         <p class="mb-0" style="color:#686868">Direct Entry</p>
         <p id="directEntryCount" class="mb-0 text-white px-2 rounded" style="background-color:#619e70;">-</p>
       </div>
+      <div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #B85C00;padding: 5px 10px;font-weight: bold;">
+        <p class="mb-0" style="color:#B85C00">Pending Followup</p>
+        <p id="pendingFollowupCount" class="mb-0 text-white px-2 rounded" style="background-color:#B85C00;">-</p>
+      </div>
       `;
       if(USER_ID != "19321" && USER_ID != "14388"){
         html+=
@@ -752,6 +756,10 @@ function getLeadAdvanceSearchPopup(objRights) {
   html +=
     "</div>" +
     '<div class="row">' +
+    // '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
+    // '	<label class="m-0">Last Followup Days</label>' +
+    // '	<input type="text" name="leadFollwoupDays" id="leadFollwoupDays"  class="form-control"/> ' +
+    // "</div>" +
     '<div class="col-xl-2 col-lg-2 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">' +
     '<label class="m-0">Sort by</label>' +
     '<select name="leadsShortBy" id="leadsShortBy" class="form-control">' +
@@ -784,6 +792,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     "</select>" +
     "</div>" +
     "</div>" +
+    
     "			</form>" +
     "        </div>" +
     '        <div class="modal-footer">' +
@@ -1208,6 +1217,13 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDirectEntry','${leadTotalData.leadFrom}')">${leadTotalData.totalDirectEntry}</a>`
       : "-";
   $("#directEntryCount").html(`${directEntry}`);
+
+  
+  var pendingFollowup =
+    leadTotalData.pendingFollowup > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'pendingFollowup','${leadTotalData.leadFrom}')">${leadTotalData.pendingFollowup}</a>`
+      : "-";
+  $("#pendingFollowupCount").html(`${pendingFollowup}`);
 
 }
 function getB2cLeadList(leaddata, objRights, roleModule){
@@ -1870,6 +1886,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   }else{
                     html+=(leads.followupRemark!=''?leads.followupRemark:'N/A');
                   }
+                  html+='</div>'
+									+'</td>'
+								+'</tr>';
 
                   if(objRights.discardPermission ){
                     if(USER_ROLE=='DIRECTOR'){
@@ -1883,17 +1902,20 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                       +'<td class="border-0 p-1">'+(leads.curentStage!=''?leads.curentStage:'N/A')+'</td>'
                     +'</tr>';
                   }
-                  html+='<tr>'
-                  
+                  if(leads.pendingFollowupCount>0){
+                    html+='<tr>'
+                        +'<th class="border-0 p-1">Last Followup days:</th>'
+                        +'<td class="border-0 p-1">'+(leads.pendingFollowupCount>0?leads.pendingFollowupCount:'')+'</td>'
+                      +'</tr>';
+                  }
+                 // html+='<tr>'
 										// +'<div class="dropdown d-inline-block" style="position: inherit;">'
 										// 	+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Remarks</button>'
 										// 	+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px;">'
 										// 		+'<p class="m-0 leadlist-remark-'+leads.leadId+'">'+(leads.followupRemark!=''?leads.followupRemark:'N/A')+'</p>'
 										// 	+'</div>'
 										// +'</div>'
-                    +'</div>'
-									+'</td>'
-								+'</tr>';
+                    
 								if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo  || USER_ID == leads.leadSupportTo){
 									let isRemarkMandatory = (leaddata.remarkMendatory && ( leaddata.minRemarkCount > 0))
 									html+='<tr>'
@@ -2031,9 +2053,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								if(objRights.discardPermission){
 									var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
 									var discardFun ="return showNewDiscardLeadModelFunction(\'"+disFun+"\','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
+                  var disPingPup = "openPopupAssignToCounselor('"+leads.leadId+"', '"+leads.assignTo+"','"+USER_ID+"','1','true','B2C')";
 									html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-									// html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Ping to counselor" onclick="return openPopupAssignToCounselor(\''+leads.leadId+'\', \''+leads.assignTo+'\',\''+USER_ID+'\',\'1\',true,\'B2C\'); ">'
-									// +'<i class="fa fa-trash text-danger"></i></a><br/>';
+									html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Ping to counselor" onclick="'+disPingPup+'"><i class="fa fa-map-pin" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 								}
 							}
 							html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
@@ -2201,4 +2223,3 @@ function getDemoDetailSummary(){
         </div>`
     return html;
 }
-

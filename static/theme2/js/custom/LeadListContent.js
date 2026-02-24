@@ -37,6 +37,12 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
 	generateTinyUrls();
+	// setInterval(() => {
+	// 	if(!objRights.discardPermission){
+	// 		getPingPopupScheduleCall(USER_ID);
+	// 	}
+	// }, 2000);
+	
 	
 	$("#btnClickLeadMove").on('click',function() {
 		
@@ -445,7 +451,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			}
 		}
 	}
-
+	
 
 }
 
@@ -848,6 +854,56 @@ async function dashboardFooterContent(){
 	return html;
 }
 
+function getLeadPingPopupContent(pingdata, objRights){
+	var html = '';
+	if(!pingdata || !Array.isArray(pingdata.leadCommonDTO) || pingdata.leadCommonDTO.length === 0){
+		return html;
+	}
+	var currentPage = (objRights && objRights.currentPage != null) ? objRights.currentPage : '0';
+	var leadType = (objRights && objRights.leadType) ? objRights.leadType : 'B2C';
+	var followupFormId = leadType === 'B2B' ? 'followupB2BSaveForm' : 'followupSaveForm';
+	var followupModalId = leadType === 'B2B' ? 'leadFollowupB2BForm' : 'leadFollowupForm';
+	var escapeHtml = function(value){
+		if(value === null || value === undefined){
+			return '';
+		}
+		return String(value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	};
+
+	for(var i = 0; i < pingdata.leadCommonDTO.length; i++){
+		var lead = pingdata.leadCommonDTO[i] || {};
+		var notificationClass = i + 1;
+		var leadId = lead.leadId || '';
+		var leadNo = escapeHtml(lead.leadNo || 'N/A');
+		var leadSourceName = escapeHtml(lead.leadSourceName || 'N/A');
+		var standardName = escapeHtml(lead.standardName || 'N/A');
+		var stdFname = escapeHtml(lead.stdFname || 'N/A');
+		var isdCode = escapeHtml(lead.isdCode || '');
+		var phoneNo = escapeHtml(lead.phoneNo || 'N/A');
+		var nextCall = escapeHtml(lead.notSureCallscheduleDateString || 'N/A');
+		var updateAction = "callGetOpenFollowup('"+followupFormId+"','"+leadId+"','"+USER_ID+"','edit','"+currentPage+"','"+followupModalId+"','"+leadType+"','Y')";
+
+		html += '<div class="card notification-message '+notificationClass+' mb-1 ">';
+		html += '	<div class="card-body p-3">';
+		html += '		<div class="full">';
+		html += '			<div class="d-flex justify-content-between">';
+		html += '				<h5 class="mb-1">'+leadNo+'</h5>';
+		//html += '				<button class="cursor pr-2 pl-2 close-notification btn pt-0" value="'+notificationClass+'" onclick="closeNotification(this.value)"><i class="fa fa-times"></i></button>';
+		html += '			</div>';
+		html += '			<p>Lead Source: '+leadSourceName+'<br/>Grade: '+standardName+'<br/>Student name: '+stdFname+'<br/>Phone No: '+isdCode+' '+phoneNo+'<br/>Next Call: '+nextCall+'<br/></p>';
+		html += '			<a href="javascript:void(0);" onclick="'+updateAction+'" class="btn btn-primary mb-0">Update</a>';
+		html += '		</div>';
+		html += '	</div>';
+		html += '</div>';
+	}
+	return html;
+}
+
 function getLeadListMasterContent(roleAndModule, objRights){
 
 	var b2clead=objRights.b2cStatus;
@@ -908,11 +964,33 @@ function getLeadListMasterContent(roleAndModule, objRights){
 	html+=getDiscardLeadModel();
 	html+=deleteWarning();
 	html+=getDemoDetailSummary();
+	html+=getLeadPingShowPopup();
 	
 	if($('#logData').length<1){
 		$("body").append(getWatiTemplatesHtml());
 	}
 	return html;
+}
+
+
+function getLeadPingShowPopup(){
+    var html=`
+        <div id="leadPingShowPopup" class="modal right-slide-modal fade" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content border-0">
+                <div class="modal-header py-2 h-auto text-white">
+                    <h5 class="text-white modal-title">Add Sub Partner</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0 overflow-auto" id="schedulePingMessageContent">
+                    
+                </div>
+            </div>
+        </div>
+    </div>`;
+    return html;
 }
 
 function getWatiTemplatesHtml(){
@@ -1429,4 +1507,3 @@ function showNewDiscardLeadModelFunction(functionName,leadSource,studentName,stu
 	$("#createdDate").html(createdDate);
 	$("#discardLeadModel").modal("show");
 }
-

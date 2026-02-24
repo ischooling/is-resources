@@ -1486,6 +1486,7 @@ var leadCountDetailDTO={};
  leadCallFollowupDTO['followupBy'] =$("#"+formId+" #followMedSearch option:selected").val();
  leadCallFollowupDTO['toCall'] = $("#"+formId+" #callWithSearch").val();
  leadCallFollowupDTO['leadTagging'] = $("#"+formId+" #leadTagSearch").val();
+
  let selectedValues = $("#"+formId+" #leadTagSearch option:selected").map(function() {
   return $(this).attr('data-shorttag');
 }).get();
@@ -1536,7 +1537,7 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  }else{
 	leadModifyDTO['activeStatus'] = "N";
  }
-	
+//leadModifyDTO['totalFollowupPendingCount'] = $("#"+formId+" #leadFollwoupDays").val()!=undefined?$("#"+formId+" #leadFollwoupDays").val():'';	
  
  if(currentPage==undefined){
 	 currentPage=0;
@@ -1774,36 +1775,6 @@ function getCounselorReportData(assignTo) {
  });
 }
 
-function getScheduleCall(assignTo){
- customLoader(false);
- $.ajax({
-	 type : "POST",
-	 url : getURLForHTML('dashboard','counselor-lead-schedule'),
-	 data : "assignTo="+assignTo,
-	 dataType : 'html',
-	 cache : false,
-	 timeout : 600000,
-	 async:false,
-	 success : function(htmlContent) {
-		 if(htmlContent!=""){
-			 var stringMessage = [];
-			 stringMessage = htmlContent.split("|");
-			 if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-				 if(stringMessage[0] == "SESSIONOUT"){
-					 redirectLoginPage();
-				 }else{
-					 showMessage(true, stringMessage[1]);
-				 }
-			 } else {
-				 $('#scheduleMessageContent').html(htmlContent);
-				 //$("body").addClass("position-fixed");
-				 $(".custom-overlay, .fixed-message-card").show();
-			 }
-			 return false;
-		 }
-	 }
- });
-}
 
 function dashboardRequestDemo(newTheme) {
  var strDate ="";
@@ -2850,38 +2821,58 @@ function getRequestForLeadDemoCountDetails(formId, userId) {
 
 function getPingPopupScheduleCall(assignTo){
  customLoader(false);
- //"assignTo="+assignTo,
+ var requestData = {};
+ requestData['schoolId'] = SCHOOL_ID;
+ requestData['assignTo'] = assignTo;
+
  $.ajax({
 	 type : "POST",
 	 contentType : APPLICATION_JSON_VALUE,
 	 url : getURLForHTML('dashboard','counselor-ping-lead-schedule'),
-	 data : JSON.stringify({"assignTo":assignTo}),
-	 dataType : 'html',
+	 data : JSON.stringify(requestData),
+	 dataType : 'json',
 	 cache : false,
 	 timeout : 600000,
 	 async:false,
-	 success : function(htmlContent) {
-		if(htmlContent=='\n\n'){
-			htmlContent = htmlContent.replace("\n\n","");
-		}
-		 if(htmlContent!=""){
-			 var stringMessage = [];
-			 stringMessage = htmlContent.split("|");
-			 if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-				 if(stringMessage[0] == "SESSIONOUT"){
-					 redirectLoginPage();
-				 }else{
-					 showMessage(true, stringMessage[1]);
-				 }
-			 } else {
-				 $('#schedulePingMessageContent').html(htmlContent);
-				 //$("body").addClass("position-fixed");
-				 $(".custom-overlay, .fixed-message-card").show();
-			 }
+	 success : function(response) {
+		console.log(response)
+		 if (!response) {
 			 return false;
 		 }
+		 if(response.status == '3'){
+			 redirectLoginPage();
+			 return false;
+		 }
+		 if(response.status == '0' || response.status == '2'){
+			 showMessage(true, response.message || 'Unable to fetch ping lead schedule.');
+			 return false;
+		 }
+
+		 var htmlContent = '';
+		 if(typeof getLeadPingPopupContent === 'function'){
+			 htmlContent = getLeadPingPopupContent(response, OBJECT_RIGHTS);
+		 }
+		 if(htmlContent && htmlContent !== ''){
+			 $('#schedulePingMessageContent').html(htmlContent);
+			// $(".custom-overlay, .fixed-message-card").show();
+			$("#leadPingShowPopup").modal('show')
+		 }else{
+			 $('#schedulePingMessageContent').html('');
+			// $(".custom-overlay, .fixed-message-card").hide();
+			$("#leadPingShowPopup").modal('hide')
+		 }
+		 return false;
 	 }
  });
+}
+
+function closeNotification(clicked_id){
+	var notificationLength = $('.notification-message').length;
+	$("."+clicked_id).remove();
+	if(notificationLength < 2){
+		$('.custom-overlay').hide();
+		$("body").removeClass("position-fixed");
+	}
 }
 
 
