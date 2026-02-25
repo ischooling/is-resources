@@ -756,10 +756,10 @@ function getLeadAdvanceSearchPopup(objRights) {
   html +=
     "</div>" +
     '<div class="row">' +
-    // '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    // '	<label class="m-0">Last Followup Days</label>' +
-    // '	<input type="text" name="leadFollwoupDays" id="leadFollwoupDays"  class="form-control"/> ' +
-    // "</div>" +
+    '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
+    '	<label class="m-0">Last Followup Days</label>' +
+    '	<input type="text" name="leadFollwoupDays" id="leadFollwoupDays"  class="form-control"/> ' +
+    "</div>" +
     '<div class="col-xl-2 col-lg-2 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">' +
     '<label class="m-0">Sort by</label>' +
     '<select name="leadsShortBy" id="leadsShortBy" class="form-control">' +
@@ -1904,8 +1904,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   }
                   if(leads.pendingFollowupCount>0){
                     html+='<tr>'
-                        +'<th class="border-0 p-1">Last Followup days:</th>'
-                        +'<td class="border-0 p-1">'+(leads.pendingFollowupCount>0?leads.pendingFollowupCount:'')+'</td>'
+                        +'<th class="border-0 p-1" >Last Followup days:</th>'
+                        +'<td class="border-0 p-1 text-white bold" style="background-color:#B85C00;">'+(leads.pendingFollowupCount>0?leads.pendingFollowupCount:'')+'</td>'
                       +'</tr>';
                   }
                  // html+='<tr>'

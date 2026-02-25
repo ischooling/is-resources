@@ -1537,7 +1537,7 @@ leadModifyDTO['searchDateType'] = $("#"+formId+" #searchDateType option:selected
  }else{
 	leadModifyDTO['activeStatus'] = "N";
  }
-//leadModifyDTO['totalFollowupPendingCount'] = $("#"+formId+" #leadFollwoupDays").val()!=undefined?$("#"+formId+" #leadFollwoupDays").val():'';	
+leadModifyDTO['totalFollowupPendingCount'] = $("#"+formId+" #leadFollwoupDays").val()!=undefined?$("#"+formId+" #leadFollwoupDays").val():'0';	
  
  if(currentPage==undefined){
 	 currentPage=0;
@@ -1581,6 +1581,10 @@ function advanceLeadSearchStudentReset(formId, leadType){
 	$("#"+formId+" #leadSourceSearch").val('').trigger('change');
 	$("#"+formId+" #leadStatusSearch").val('').trigger('change');
 	$("#"+formId+" #leadFullSearch").val('');
+	$("#"+formId+" #leadFollwoupDays").val('');
+	$("#"+formId+" #leadDemoBookType").val('');
+	$("#"+formId+" #leadCallByAgent").val('');
+	
 	$('#'+formId+' input[name="checkLeadForZCall"]').prop('checked', false);
  
 	if(leadType=='B2B'){
