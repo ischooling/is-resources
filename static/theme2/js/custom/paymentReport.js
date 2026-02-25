@@ -314,7 +314,7 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	if($('#overDueBy').val()!='' && $('#overDueBy').val()!=0){
 		PaymentReportRequestDTO['overDueBy'] = $('#overDueBy').val();
 	}else{
-		PaymentReportRequestDTO['overDueBy'] = 45;
+		PaymentReportRequestDTO['overDueBy'] = 0;
 	}
 	request['paymentReportRequestDTO']=PaymentReportRequestDTO;
 	return request;
