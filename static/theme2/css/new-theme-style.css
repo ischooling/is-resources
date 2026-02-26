@@ -34127,300 +34127,300 @@ to { background-color: rgb(6, 145, 6); }
 
 
 /* DASHBOARD-NAVIGATION-ICONS-CSS STARTS HERE */
-.pe-7s-rocket::before {
+.side-bar-icon .pe-7s-rocket::before {
     content: none !important;
 }
-.pe-7s-rocket{
+.side-bar-icon .pe-7s-rocket{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Dashboard.png) !important;
 } 
-.pe-7s-timer::before {
+.side-bar-icon .pe-7s-timer::before {
     content: none !important;
 }
-.pe-7s-timer{
+.side-bar-icon .pe-7s-timer{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/View_Booked_Class.webp) !important;
 }
-.pe-7s-plus{
+.side-bar-icon .pe-7s-plus{
 	content: none !important;
 }
-.pe-7s-plus{
+.side-bar-icon .pe-7s-plus{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Buy_Extra_Classes.png) !important;
 }
-.pe-7s-browser{
+.side-bar-icon .pe-7s-browser{
 	content: none !important;
 }
-.pe-7s-browser{
+.side-bar-icon .pe-7s-browser{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Login_History.png) !important;
 }
-.pe-7s-news-paper{
+.side-bar-icon .pe-7s-news-paper{
 	content: none !important;
 }
-.pe-7s-news-paper{
+.side-bar-icon .pe-7s-news-paper{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Assigned_Course_Teachers.webp) !important;
 }
-.pe-7s-notebook{
+.side-bar-icon .pe-7s-notebook{
 	content: none !important;
 }
-.pe-7s-notebook{
+.side-bar-icon .pe-7s-notebook{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Child_Handbook.png) !important;
 }
-.pe-7s-user{
+.side-bar-icon .pe-7s-user{
 	content: none !important;
 }
-.pe-7s-user{
+.side-bar-icon .pe-7s-user{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Fee_Details.webp) !important;
 }
-.pe-7s-bell{
+.side-bar-icon .pe-7s-bell{
 	content: none !important;
 }
-.pe-7s-bell{
+.side-bar-icon .pe-7s-bell{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Notifications.png) !important;
 }
-.pe-7s-note2{
+.side-bar-icon .pe-7s-note2{
 	content: none !important;
 }
-.pe-7s-note2{
+.side-bar-icon .pe-7s-note2{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Child_performance_Report.webp) !important;
 }
-.pe-7s-wristwatch{
+.side-bar-icon .pe-7s-wristwatch{
 	content: none !important;
 }
-.pe-7s-wristwatch{
+.side-bar-icon .pe-7s-wristwatch{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/My_Availability.png) !important;
 }
-.pe-7s-graph2{
+.side-bar-icon .pe-7s-graph2{
 	content: none !important;
 }
-.pe-7s-graph2{
+.side-bar-icon .pe-7s-graph2{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/My_Availability.webp) !important;
 }
-.pe-7s-users{
+.side-bar-icon .pe-7s-users{
 	content: none !important;
 }
-.pe-7s-users{
+.side-bar-icon .pe-7s-users{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Assigned_Student.webp) !important;
 }
-.pe-7s-id{
+.side-bar-icon .pe-7s-id{
 	content: none !important;
 }
-.pe-7s-id{
+.side-bar-icon .pe-7s-id{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Login_Details.webp) !important;	
 }
-.pe-7s-wallet{
+.side-bar-icon .pe-7s-wallet{
 	content: none !important;
 }
-.pe-7s-wallet{
+.side-bar-icon .pe-7s-wallet{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Salary.webp) !important;
 }
-.pe-7s-network{
+.side-bar-icon .pe-7s-network{
 	content: none !important;
 }
-.pe-7s-network{
+.side-bar-icon .pe-7s-network{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Class_Status.webp) !important;
 }
-.pe-7s-date{
+.side-bar-icon .pe-7s-date{
 	content: none !important;
 }
-.pe-7s-date{
+.side-bar-icon .pe-7s-date{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Book_a_Class.webp) !important;	
 }
-.pe-7s-graph2{
+.side-bar-icon .pe-7s-graph2{
 	content: none !important;
 }
-.pe-7s-graph2{
+.side-bar-icon .pe-7s-graph2{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Performance.webp) !important;	
 }
-.pe-7s-medal{
+.side-bar-icon .pe-7s-medal{
 	content: none !important;
 }
-.pe-7s-medal{
+.side-bar-icon .pe-7s-medal{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Child_Transcript.webp) !important;	
 }
-.fa-lightbulb-o{
+.side-bar-icon .fa-lightbulb-o{
 	content: none !important;
 }
-.fa-lightbulb-o{
+.side-bar-icon .fa-lightbulb-o{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Manage_club_icon.png) !important;	
 }
-.pe-7s-home{
+.side-bar-icon .pe-7s-home{
 	content: none !important;
 }
-.pe-7s-home{
+.side-bar-icon .pe-7s-home{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Dashboard.png) !important;	
 }
-.pe-7s-config{
+.side-bar-icon .pe-7s-config{
 	content: none !important;
 }
-.pe-7s-config{
+.side-bar-icon .pe-7s-config{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Administrator\ 1.png) !important;	
 }
-.pe-7s-add-user{
+.side-bar-icon .pe-7s-add-user{
 	content: none !important;
 }
-.pe-7s-add-user{
+.side-bar-icon .pe-7s-add-user{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Student_System_Training.png) !important;	
 }
-.pe-7s-study{
+.side-bar-icon .pe-7s-study{
 	content: none !important;
 }
-.pe-7s-study{
+.side-bar-icon .pe-7s-study{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Scholarship\ 1.png) !important;	
 }
-.pe-7s-link{
+.side-bar-icon .pe-7s-link{
 	content: none !important;
 }
-.pe-7s-link{
+.side-bar-icon .pe-7s-link{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Connect_To_Impact_Program\ 1.png) !important;	
 }
-.pe-7s-cash{
+.side-bar-icon .pe-7s-cash{
 	content: none !important;
 }
-.pe-7s-cash{
+.side-bar-icon .pe-7s-cash{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Payment_Management\ 1.png) !important;	
 }
-.pe-7s-magnet{
+.side-bar-icon .pe-7s-magnet{
 	content: none !important;
 }
-.pe-7s-magnet{
+.side-bar-icon .pe-7s-magnet{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Lead_Management_System\ 1.png) !important;	
 }
-.pe-7s-mail{
+.side-bar-icon .pe-7s-mail{
 	content: none !important;
 }
-.pe-7s-mail{
+.side-bar-icon .pe-7s-mail{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Communications\ 1.png) !important;	
 }
-.pe-7s-airplay{
+.side-bar-icon .pe-7s-airplay{
 	content: none !important;
 }
-.pe-7s-airplay{
+.side-bar-icon .pe-7s-airplay{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Meetings_Management\ 1.png) !important;
 }
-.pe-7s-paper-plane{
+.side-bar-icon .pe-7s-paper-plane{
 	content: none !important;
 }
-.pe-7s-paper-plane{
+.side-bar-icon .pe-7s-paper-plane{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Wati.png) !important;
 }
-.fa-user{
+.side-bar-icon .fa-user{
 	content: none !important;
 }
-.fa-user{
+.side-bar-icon .fa-user{
 	content: "";
 	font-size: 0 !important;
     background-repeat: no-repeat;
@@ -34428,120 +34428,120 @@ to { background-color: rgb(6, 145, 6); }
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/School_Payments1.png) !important;
 }
-.pe-7s-monitor{
+.side-bar-icon .pe-7s-monitor{
 	content: none !important;	
 }
-.pe-7s-monitor{
+.side-bar-icon .pe-7s-monitor{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Dashboard_Monitoring\ 1.png) !important;
 }
-.pe-7s-display2{	
+.side-bar-icon .pe-7s-display2{	
 	content: none !important;	
 }
-.pe-7s-display2{
+.side-bar-icon .pe-7s-display2{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Feedback\ 1.png) !important;
 }
-.emoji-student-feedback{
+.side-bar-icon .emoji-student-feedback{
 	content: none !important;	
 }
-.emoji-student-feedback{
+.side-bar-icon .emoji-student-feedback{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Feedback\ 1.png) !important;
 }
-.fa-home{
+.side-bar-icon .fa-home{
 	content: none !important;	
 }
-.fa-home{
+.side-bar-icon .fa-home{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Dashboard.png) !important;
 }
-.pe-7s-admin{
+.side-bar-icon .pe-7s-admin{
 	content: none !important;	
 }
-.pe-7s-admin{
+.side-bar-icon .pe-7s-admin{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Admin_Tasks.webp) !important;
 }
-.pe-7s-clock{
+.side-bar-icon .pe-7s-clock{
 	content: none !important;
 }
-.pe-7s-clock{
+.side-bar-icon .pe-7s-clock{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Manage_Attendance.png) !important;
 }
-.fa-user-friends{
+.side-bar-icon .fa-user-friends{
 	content: none !important;
 }
-.fa-user-friends{
+.side-bar-icon .fa-user-friends{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Enrollement.png) !important;
 }
-.fa-users{
+.side-bar-icon .fa-users{
 	content: none !important;
 }
-.fa-users{
+.side-bar-icon .fa-users{
 		font-size: 0 !important;
 		background-repeat: no-repeat;
 		background-position: center;
 		background-size: contain;         
 		background-image: url(../images/Icon/sidebar/Manage_club_icon.png) !important;
 }
-.fa-calendar{
+.side-bar-icon .fa-calendar{
 	content: none !important;
 }
-.fa-calendar{
+.side-bar-icon .fa-calendar{
 	font-size: 0 !important;
 	background-repeat: no-repeat;
 	background-position: center;
 	background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Examination_Schedule_icon.png) !important;
 }
-.pe-7s-staff{
+.side-bar-icon .pe-7s-staff{
 	content: none !important;
 }
-.pe-7s-staff{
+.side-bar-icon .pe-7s-staff{
 	font-size: 0 !important;
 	background-repeat: no-repeat;
 	background-position: center;
 	background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Staff_Management.png) !important;
 }
-.pe-7s-student{
+.side-bar-icon .pe-7s-student{
 	content: none !important;
 }
-.pe-7s-student{
+.side-bar-icon .pe-7s-student{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Student_Management.png) !important;
 }
-.pe-7s-assign-course{
+.side-bar-icon .pe-7s-assign-course{
 	content: none !important;
 }
-.pe-7s-assign-course{
+.side-bar-icon .pe-7s-assign-course{
 	font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
