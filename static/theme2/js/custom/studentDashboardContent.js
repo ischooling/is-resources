@@ -345,6 +345,7 @@ function dashboardSchoolCalendar(data) {
             html+=
             `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
                 <i class="fa fa-comments fa-w-16"></i>
+                 <span class="UNSEEN counts-badge badge badge-pill badge-danger ml-0 mr-2" id="UNSEEN"></span>
             </a>`;					
         }
     html+=`</div>

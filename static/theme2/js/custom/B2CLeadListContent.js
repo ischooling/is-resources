@@ -163,10 +163,18 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 				<p class="mb-0">Normal</p>
 				<p id="normalLeads" class="mb-0 px-2 rounded bg-orange">-</p>
 			</div>
-      <div class="d-flex justify-content-between align-items-center w-100" style="background-color: #edf3ee;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #619e70">
-        <p class="mb-0" style="color:#686868">Direct Entry</p>
-        <p id="directEntryCount" class="mb-0 text-white px-2 rounded" style="background-color:#619e70;">-</p>
-      </div>
+      <div class="d-flex flex-column align-items-stretch w-100" style="background-color:#edf3ee;border-radius:5px;padding:10px;font-weight:bold;border:1.5px solid #619e70;gap:3px;">
+        <div class="d-flex justify-content-between align-items-center w-100" style="gap:2px;">
+          <p class="mb-0" style="color:#686868;">Direct Entry</p>
+          <p id="directEntryCount" class="mb-0 text-white px-3 rounded" style="background-color:#619e70;min-width:60px;text-align:center;">-</p>
+        </div>`;
+    if (objRights.discardPermission) {
+            html += `<div class="d-flex justify-content-between align-items-center w-100" style="gap:2px;">
+              <p class="mb-0" style="color:#686868;">Payment Step</p>
+              <p id="directPaySchedule" class="mb-0 text-white px-3 rounded" style="background-color:#619e70;min-width:60px;text-align:center;">-</p>
+            </div>`;
+    }
+      html += `</div>
       <div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #B85C00;padding: 5px 10px;font-weight: bold;">
         <p class="mb-0" style="color:#B85C00">Pending Followup</p>
         <p id="pendingFollowupCount" class="mb-0 text-white px-2 rounded" style="background-color:#B85C00;">-</p>
@@ -1217,6 +1225,12 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDirectEntry','${leadTotalData.leadFrom}')">${leadTotalData.totalDirectEntry}</a>`
       : "-";
   $("#directEntryCount").html(`${directEntry}`);
+
+  var totalPaymentSchedule =
+    leadTotalData.totalPaymentSchedule > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDirectPaySchedule','${leadTotalData.leadFrom}')">${leadTotalData.totalPaymentSchedule}</a>`
+      : "-";
+  $("#directPaySchedule").html(`${totalPaymentSchedule}`);
 
   
   var pendingFollowup =

@@ -891,7 +891,6 @@ function removeTimeDiv(divid, dayid, prestartTime, preendTime, userRoleId, min, 
 				teacherTime['endTime']=preendTime;
 				teacherTime['dayCheck']='N';
 				timeSlotAvailability.push(teacherTime);
-
 			saveTimeCalendarWeekWise(userid,dayid,timeSlotAvailability, 'add','remove-time',prestartTime, preendTime, userRoleId, min, max);
 		}
 		
@@ -1256,7 +1255,7 @@ function getFromTime(obj, prestartTime, preendTime, userRoleId, min, max, slotBu
 				$(".total-minutes-"+days).text(getTimeWithFormat(totalDuration));
 				
 				//console.log("getFromTime");
-				if(userRoleId!=3){
+				if(userRoleId!=3 && timeclass != "calday-hours"){
 					saveTimeCalendarWeekWise(userid,days,timeSlotAvailability, 'add','from-time',prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit);
 				}
 			}
@@ -1355,7 +1354,7 @@ function getToTime(obj,prestartTime, preendTime, userRoleId, min, max, slotBuffe
 			}
 			
 			
-			if(userRoleId!=3){
+			if(userRoleId!=3 && timeclass != "calday-hours"){
 				saveTimeCalendarWeekWise(userid,days,timeSlotAvailability, 'add','to-time',prestartTime, preendTime, userRoleId, min, max, slotBufferLimit, slotDateLimit,  slotDayLimit);
 			}
 		}
