@@ -1,12 +1,9 @@
 function getNewsContent(data, userId, index) {
-  console.log(data);
+//   console.log(data);
   var html =
     `<div class="full">
-            <div class="card box-shadow-none rounded-15">` +
-    dashboardNewsHeader(data, userId, index) +
-    dashboardNewsContent(data);
-  html += `</div>
-        </div>`;
+        <div class="card box-shadow-none rounded-15">${dashboardNewsHeader(data, userId, index) + dashboardNewsContent(data)}</div>
+    </div>`;
   return html;
 }
 function dashboardNewsHeader(data, userId, index) {
@@ -23,36 +20,35 @@ function dashboardNewsContent(data) {
   var html = `<div class="card-body announcement-card-scroll pb-0 pt-2 ui-theme-settings-opacity-0">
             <div class="full">
                 <ul class="news-list">`;
-  if (data.list != null && data.list.length > 0) {
-    $.each(data.list, function (k, schoolNews) {
-      IDs.push(schoolNews.id);
-      html += `<li class="col-md-12 col-sm-12 col-12 py-2 px-0 border-bottom">
-                                <div class="w-100">
-                                    <div class="d-flex w-100 cursor flex-sm-nowrap flex-wrap gap-10" onclick="showNewsDataById(${schoolNews.id});">
-                                        <div class="d-inline-flex mr-2">
-                                            <img src="${schoolNews.image}" class="rounded-10" width="113px" height="113px" style="object-fit:cover"/>
-                                        </div>
-                                        <div class="d-inline-flex align-items-start text-left">
-                                            <div>
-                                                <h6 class="font-14 pl-0 text-dark font-weight-bold">${schoolNews.title}</h6>
-                                                <div class="font-12 text-gray mt-1">${convertDatetimeWithFormat(schoolNews.publishDate, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</div>
+                    if (data.list != null && data.list.length > 0) {
+                        $.each(data.list, function (k, schoolNews) {
+                        IDs.push(schoolNews.id);
+                        html += `<li class="col-md-12 col-sm-12 col-12 py-2 px-0 border-bottom">
+                                    <div class="w-100">
+                                        <div class="d-flex w-100 cursor flex-sm-nowrap flex-wrap gap-10" onclick="showNewsDataById(${schoolNews.id});">
+                                            <div class="d-inline-flex mr-2">
+                                                <img src="${schoolNews.image}" class="rounded-10" width="113px" height="113px" style="object-fit:cover"/>
+                                            </div>
+                                            <div class="d-inline-flex align-items-start text-left">
                                                 <div>
-                                                    <a href="javascript:void(0)" class="font-14 font-weight-semi-bold text-primary">
-                                                        Learn More<i class="fa fa-arrow-right ml-2"></i>
-                                                    </a>
+                                                    <h6 class="font-14 pl-0 text-dark font-weight-bold">${schoolNews.title}</h6>
+                                                    <div class="font-12 text-gray mt-1">${convertDatetimeWithFormat(schoolNews.publishDate, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY)}</div>
+                                                    <div>
+                                                        <a href="javascript:void(0)" class="font-14 font-weight-semi-bold text-primary">
+                                                            Learn More<i class="fa fa-arrow-right ml-2"></i>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </li>`;
-    });
-  } else {
-    html += `<li class="col-12 text-center">No News</li>`;
-  }
-  html += `</ul>
+                                </li>`;
+                        });
+                    } else {
+                        html += `<li class="col-12 text-center">No News</li>`;
+                    }
+                html += `</ul>
             </div>
-           
         </div>
         <div class="card-footer ui-theme-settings-opacity-0">
             <div class="w-100">

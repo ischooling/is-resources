@@ -280,37 +280,6 @@ $(document).ready(function() {
 	
 });
 
-
-function calendarTimeInterval() {
-	var userTimeInterval = setInterval(function () {
-        if($("#currentTimeForUser").length>0){
-			var userTime = new Date($("#currentTimeForUser").text());
-			var year = userTime.getFullYear();
-			var month = userTime.toLocaleString('en-US', {month: 'short'});
-			var day = userTime.getDate();
-			var hours = userTime.getHours();
-			var minutes = userTime.getMinutes();
-			var seconds = userTime.getSeconds();
-			var ampm = hours >= 12 ? 'PM' : 'AM';
-			minutes = minutes<=9 ? '0'+minutes:minutes;
-			seconds = seconds<=9 ? '0'+seconds:seconds;
-			// Convert hours from 24-hour to 12-hour format
-			hours = hours % 12;
-			hours = hours ? hours : 12; // The hour '0' should be '12'
-			hours = hours<=9 ? '0'+hours:hours;
-			$(".user_current_day").text(month+" "+day+","+" "+year);
-			// $(".user_current_hour").text(hours);
-			// $(".user_current_mins").text(minutes);
-			// $(".user_current_second").text(seconds);
-			// $(".user_current_am_pm").text(ampm);
-			$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
-		} else {
-			clearInterval(userTimeInterval);
-        }
-    }, 1000);
-}
-
-
 // var data1=getStudentDashboardDetails();
 var scrollEventTriggered = false;
 function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, activityTypes) {
@@ -374,7 +343,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Classes ${USER_ROLE == `STUDENT`?`& System Training`:``}</span>
 						</div>
 						<div class="d-inline-flex align-items-center" data-toggle="tooltip" title="legend">
-							<label class="d-inline-block bg-danger m-0" style="width:15px;height:15px;"></label>
+							<label class="d-inline-block bg-secondary m-0" style="width:15px;height:15px;"></label>
 							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Activities</span>
 						</div>
 					</div>`;
@@ -682,118 +651,6 @@ function getEventsInCurrentView(allEvents) {
 
 
 var updateEventIconsStyle = true;
-// function updateEventIcons(info, element, todayClassArray, viewName) {
-
-// 	if(updateEventIconsStyle){
-// 		$("head").append('<style>.tooltip-inner{max-width:500px;width:fit-content}.fc-scroller.fc-time-grid-container[style]{height:425px !important}</style>');
-// 		updateEventIconsStyle=false;
-// 	}
-// 	if(todayClassArray.length>0){
-// 		var date = new Date(todayClassArray.start);
-// 		var formattedDate = date.toLocaleDateString("en-US", {
-// 			weekday: "short",
-// 			month: "short",
-// 			day: "2-digit",
-// 			year: "numeric"
-// 		});
-
-// 		element.attr("data-toggle","tooltip");
-// 		element.attr("data-container","body");
-// 		element.attr("data-html",true);
-// 		element.attr(`data-original-title`,
-// 			// `Class Start Time: ${element.find(".fc-time .class-end-Time").text()}</br>${element.find(".fc-title").text()}`
-// 			`<div class="card">
-// 				<div class="card-body">
-// 					<div class="full">
-// 						<img src="https://www.kindpng.com/picc/m/154-1546828_transparent-chemistry-icon-png-chemical-effects-of-electric.png" width="30px" />
-// 					</div>
-// 					<div>
-// 						<h5>Course Name</h5>
-// 						<p>${formattedDate}</p>
-// 						<p>Grade</p>
-// 					</div>
-// 					<div class="d-flex my-2">
-// 						<div class="d-inline-flex py-1 px-2 rounded bg-dark text-white">${element.find(".fc-time .class-start-Time").text()}</div>
-// 						<div class="d-inline-flex py-1 px-2 rounded bg-dark text-white">${element.find(".fc-time .class-end-Time").text()}</div>
-// 					</div>
-// 					<div class="full">
-// 						<p>Teacher Name: </p>
-// 						<h5 class="font-weight-bold">${element.find(".fc-title .assign-teacher-name").text()}</h5>
-// 					</div>
-// 				</div>
-// 			</div>`
-// 		)
-// 		setInterval(function() {
-// 			var currentTime = new Date($("#currentTimeForUser").text());
-// 			// console.log(info.start._i + info.end);
-// 			if(info.start!=null && info.end!=null){
-// 				var startTime = new Date(info.start._i);
-// 				var endTime = new Date(info.end._i);
-// 				var currentDate = currentTime.getDate();
-// 				var currentMilliseconds = currentTime.getTime()
-// 				var eventDate = startTime.getDate();
-// 				var eventStartMilliseconds = startTime.getTime();
-// 				var eventEndMilliseconds = endTime.getTime();
-// 				element.find(".live-symbol").remove();
-// 				element.removeClass("live-class-blink");
-// 				element.removeClass("upcoming-class-blink");
-// 				element.find('.live-symbol').remove(); // Remove existing icons
-// 				element.find('.upcoming-icon').remove(); // Remove existing icons
-// 				if(currentMilliseconds > eventEndMilliseconds && currentMilliseconds > eventStartMilliseconds) {
-// 					// element.find(".fc-time span").find(".upcoming-symbol").remove();
-// 					// var liveIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
-// 					//orignalClassBg = element.css("background-color");
-// 					//orignalClassborderColor = element.css("border-color");
-// 					//element.find(".fc-time span").append(liveIcon);
-// 					element.addClass("past-class");
-// 				}else 
-// 					if(currentMilliseconds >= eventStartMilliseconds && currentMilliseconds <= eventEndMilliseconds) {
-// 					element.find(".fc-title .class-indicator").find(".upcoming-symbol").remove();
-// 					var liveIcon = $('<b class="d-inline-block pull-right live-symbol font-size-lg">🔴 Live Class</b>'); 
-// 					orignalClassBg = element.css("background-color");
-// 					orignalClassborderColor = element.css("border-color");
-// 					element.find(".fc-title .class-indicator").append(liveIcon);
-// 					element.addClass("live-class-blink");
-// 				}else if (currentMilliseconds < eventEndMilliseconds && currentMilliseconds < eventStartMilliseconds) {
-// 					if($(".upcoming-class-blink").length < 1){
-// 						var closestEvent = getClosestUpcomingEvent(todayClassArray);
-// 						if (closestEvent && closestEvent.eventType === info.eventType) {
-// 							var upcomingIcon=$('<b class="d-flex w-100 flex-row-reverse align-itmes-center upcoming-icon upcoming-week-view-icon"> <img style="filter:brightness(0) invert(1);" class="timer-img position-relative"  src="'+PATH_FOLDER_IMAGE2+'timer.gif"/> Upcoming</b>'); 
-// 							element.addClass("upcoming-class-blink");
-// 							element.find(".fc-title .class-indicator").append(upcomingIcon);
-// 						}
-// 					}
-// 				}
-// 				CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(todayClassArray);
-// 				$('[data-toggle="tooltip"]').tooltip();
-// 				if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
-// 					$(".upcoming-icon").addClass("upcoming-week-view-icon");
-// 					$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
-// 				}else{
-// 					$(".upcoming-icon").removeClass("upcoming-week-view-icon");
-// 					$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
-// 				}
-// 			}
-// 		}, 1000);
-		
-// 		//console.log(todayClassArray);
-// 		if($("#legentCalendar").length<1 && window.innerWidth < 768){
-// 			$("#schoolcalendar .fc-header-toolbar").prepend(
-// 				`<div class="d-flex w-100 flex-wrap justify-content-center mb-1" id="legentCalendar">
-// 					<div class="mb-1 d-inline-flex align-items-center">
-// 						<span class="d-inline-block mr-1" style="width:13px;height:13px;background:green"></span>
-// 						Live Class
-// 					</div>
-// 					<div class="mb-1 d-inline-flex align-items-center">
-// 						<span class="d-inline-block mr-1" style="width:13px;height:13px;background:#453900"></span>
-// 						Upcoming class
-// 					</div>
-// 				</div>`
-// 			);
-// 		}
-		
-// 	}	
-// }
 async function updateEventIcons(info, element, todayClassArray, viewName, activityTypes) {
 	updateTabCounts(todayClassArray);
 	if (updateEventIconsStyle) {

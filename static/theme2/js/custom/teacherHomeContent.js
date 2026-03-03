@@ -285,9 +285,9 @@ function dashboardSchoolCalendar(data) {
                                                     <div class="font-16 font-weight-bold line-height-1 one_to_one_class_Count">0</div>
                                                     <div class="font-12 text-dark line-height-1 font-weight-light">One-To-One Classes</div>
                                                 </button>
-                                                <button class="btn-wide btn ml-2 btn-outline-danger bg-light-danger btn-sm rounded text-danger calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
+                                                <button class="btn-wide btn ml-2 btn-outline-secondary bg-light-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
-                                                    <div class="font-12 text-dark line-height-1 font-weight-light">Activity</div>
+                                                    <div class="font-12 text-secondary line-height-1 font-weight-light">Activity</div>
                                                 </button>
                                             </div>
                                         </div>

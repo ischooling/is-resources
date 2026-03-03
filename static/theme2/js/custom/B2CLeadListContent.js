@@ -466,12 +466,7 @@ function getLeadFollowupFormPopup(objRights) {
     '								<select class="form-control dropdownFontSize" id="notSureHours" name="notSureHours">' +
     '									<option value="00">00</option>';
   for (var i = 1; i <= 12; i++) {
-    html +=
-      '<option value="' +
-      (i > 9 ? i : "0" + i) +
-      '" >' +
-      (i > 9 ? i : "0" + i) +
-      "</option>";
+    html +='<option value="' +(i > 9 ? i : "0" + i) +'" >' + (i > 9 ? i : "0" + i) + "</option>";
   }
   html +=
     "								</select> " +
@@ -481,12 +476,7 @@ function getLeadFollowupFormPopup(objRights) {
     '								<select class="form-control dropdownFontSize" id="notSureMins" name="notSureMins">' +
     '									<option value="00">00</option>';
   for (var j = 1; j <= 59; j++) {
-    html +=
-      '<option value="' +
-      (j > 9 ? i : "0" + i) +
-      '" >' +
-      (j > 9 ? j : "0" + j) +
-      "</option>";
+    html +='<option value="' +(j > 9 ? j : "0" + j) +'" >' +(j > 9 ? j : "0" + j) +"</option>";
   }
   html +=
     "							</select> " +

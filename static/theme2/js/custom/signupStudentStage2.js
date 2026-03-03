@@ -44,7 +44,7 @@ function callForSignUpParents() {
 					if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
 						window.location.reload();
 					}else{	
-						showMessage(false, data['message']);
+						showMessageTheme2(false, data['message']);
 						setActiveStep(2);
 					}
 				}
@@ -65,7 +65,7 @@ function callForSignUpParents() {
 					msg = windowWidth>580?" Wow! Parent details completed. (✓)":"Wow! Parent details completed"
 				}
 				if(windowWidth >580){
-					showMessage(1, msg, '', true);
+					showMessageTheme2(1, msg, '', true);
 				}else{
 					$("#showMessageInPopup #msgText").text(msg);
 					$("#showMessageInPopup").modal("show");
@@ -87,20 +87,20 @@ function validateRequestForSignupParent(){
 	hideMessage('');
 	
 	// if (!validateFormAscii()) {
-	// 	showMessage(0, 'Please use the English Keyboard while providing information');
+	// 	showMessageTheme2(0, 'Please use the English Keyboard while providing information');
 	// 	return false
 	// }
 	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		if ($("#signupStage2 #workingProfession").val()==0 || $("#signupStage2 #workingProfession").val() == '' || $("#signupStage2 #workingProfession").val()==null) {
-			showMessage(0, 'Student or a working professional is required');
+			showMessageTheme2(0, 'Student or a working professional is required');
 			return false
 		}
 		if ($("#signupStage2 #institutionName").val()=="") {
-			showMessage(0, 'Name of the School/College/Organization is required.');
+			showMessageTheme2(0, 'Name of the School/College/Organization is required.');
 			return false
 		}
 		if ($("#signupStage2 #institutionCountryId").val()==0 || $("#signupStage2 #institutionCountryId").val()=='' || $("#signupStage2 #institutionCountryId").val()==null) {
-			showMessage(0, 'Country of the School/College/Organization is required');
+			showMessageTheme2(0, 'Country of the School/College/Organization is required');
 			return false
 		}
 	}else{
@@ -109,35 +109,35 @@ function validateRequestForSignupParent(){
 	
 		}else{
 			if ($("#signupStage2 #parentFirstName").val()=="") {
-				showMessage(0, 'First name is required.');
+				showMessageTheme2(0, 'First name is required.');
 				return false
 			}
 			if ($("#signupStage2 #parentlastName").val()=="") {
-				showMessage(0, 'Last name is required.');
+				showMessageTheme2(0, 'Last name is required.');
 				return false
 			}
 			if ($("#signupStage2 #relation").val()==0 || $("#signupStage2 #relation").val()==null) {
-				showMessage(0, 'Relation with student is required');
+				showMessageTheme2(0, 'Relation with student is required');
 				return false
 			}
 			if ($("#signupStage2 #parentPhoneNumber").val().length <= 2 && $("#signupStage2 #parentPhoneNumber").val().length > 0) {
-				showMessage(0, 'Invalid Phone Number');
+				showMessageTheme2(0, 'Invalid Phone Number');
 				return false
 			}
 			if ($("#signupStage2 #pCountryId").val()==0 || $("#signupStage2 #pCountryId").val()=='') {
-				showMessage(0, 'Country is required');
+				showMessageTheme2(0, 'Country is required');
 				return false
 			}
 			if ($("#signupStage2 #pStateId").val()==0 || $("#signupStage2 #pStateId").val()=='') {
-				showMessage(0, 'State/Province is required');
+				showMessageTheme2(0, 'State/Province is required');
 				return false
 			}
 			if ($("#signupStage2 #pCityId").val()==0 || $("#signupStage2 #pCityId").val()=='') {
-				showMessage(0, 'City is required');
+				showMessageTheme2(0, 'City is required');
 				return false
 			}
 			if ($("#signupStage2 #referralCode").val()=="") {
-				// showMessage(0, 'Referral Code is required.');
+				// showMessageTheme2(0, 'Referral Code is required.');
 				// return false
 			}
 		}
@@ -148,24 +148,24 @@ function validateRequestForSignupParent(){
 	if(pcModeWhatsapp == "Y" || pcModeCall == "Y" || pcModeEmail == "Y"){
 		
 	}else{
-		showMessage(0, 'Your preferred communication is required');
+		showMessageTheme2(0, 'Your preferred communication is required');
 		return false
 	}
 //	if ($("#signupStage2 #countryCodeParent").val()==null) {
-//		showMessage(0, 'ISD code is required');
+//		showMessageTheme2(0, 'ISD code is required');
 //		return false
 //	}
 //	if ($("#signupStage2 #parentPhoneNumber").val()=="") {
-//		showMessage(0, 'Phone No is required.');
+//		showMessageTheme2(0, 'Phone No is required.');
 //		return false
 //	}
 
 //	if ($("#signupStage2 #contactNumberAlternate").val()!="" ){
 //		if ($("#signupStage2 #countryCodeAlternateParent").val()=="" ){
-//			showMessage(0, 'Alternate ISD Code is required.');
+//			showMessageTheme2(0, 'Alternate ISD Code is required.');
 //			return false
 //		}else if ($("#signupStage2 #countryCodeAlternateParent").val()==null ){
-//			showMessage(0, 'Alternate ISD Code is required.');
+//			showMessageTheme2(0, 'Alternate ISD Code is required.');
 //			return false
 //		}
 //	}
@@ -233,7 +233,7 @@ function emailCheckForParent(parentEmail, module, userId, studentId, parentName)
 	var result="";
 	hideMessage('');
 		if (!validateEmail(parentEmail)) {
-			showMessage(0, 'Parent email is either empty or invalid');
+			showMessageTheme2(0, 'Parent email is either empty or invalid');
 			return false;
 		}
 	$.ajax({
@@ -246,12 +246,12 @@ function emailCheckForParent(parentEmail, module, userId, studentId, parentName)
 		global : false,
 		success : function(data) {
 			if (data['statusCode'] == '0003') {
-				showMessage(1, data['message']);
+				showMessageTheme2(1, data['message']);
 				result = false;
 			}else if (data['status'] == '0' || data['status'] == '2') {
 				result = data['extra']+'|'+data['extra2'];
 			}else if (data['status'] == '3') {
-				showMessage(0, data['message']);
+				showMessageTheme2(0, data['message']);
 				result = false;
 			}else{
 				result=true;
@@ -285,7 +285,7 @@ function emailCheckForParentUser(parentEmail, module, userId, studentId, parentN
 	var result="";
 	hideMessage('');
 		if (!validateEmail(parentEmail)) {
-			showMessage(0, 'Parent email is either empty or invalid');
+			showMessageTheme2(0, 'Parent email is either empty or invalid');
 			return false;
 		}
 	$.ajax({
@@ -303,7 +303,7 @@ function emailCheckForParentUser(parentEmail, module, userId, studentId, parentN
 					result = data['extra']+'|'+ data['extra2'];
 				}
 			}else if (data['status'] == '3') {
-				showMessage(0, data['message']);
+				showMessageTheme2(0, data['message']);
 				result = false;
 			}else{
 				result=true;
@@ -329,11 +329,11 @@ function getCallRequestForEmailCheckForParentUser(parentEmail, module, userId, s
 
 function mapParentAndAlreadyExistStudent(){
 	if (!validateEmail($("#signupStage2 #parentEmailId").val())) {
-		showMessage(0, 'Parent email is empty or invalid');
+		showMessageTheme2(0, 'Parent email is empty or invalid');
 		return false
 	}
 	if (!validateEmail($("#signupStage2 #verifyMailId").val())) {
-		showMessage(0, 'Existing student email is empty or invalid');
+		showMessageTheme2(0, 'Existing student email is empty or invalid');
 		return false
 	}
 	$.ajax({
@@ -344,9 +344,9 @@ function mapParentAndAlreadyExistStudent(){
 		contentType : APPLICATION_JSON_VALUE,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
-				showMessage(0, data['message']);
+				showMessageTheme2(0, data['message']);
 			}else{
-				showMessage(1, data['message']);
+				showMessageTheme2(1, data['message']);
 				$('#verifyStudentName').val(data['extra']);
 				$('#parentEmailVerifyStatus').val(1);
 				$('#parentSwitchIntput').attr("disabled",false);
@@ -423,7 +423,7 @@ function disabledParentData(flag){
 
 function sendOtpForParentUser(parentEmail, parentName, userId) {
 	if (!validateEmail(parentEmail)) {
-		showMessage(0, 'Parent email is empty or invalid');
+		showMessageTheme2(0, 'Parent email is empty or invalid');
 		return false
 	}
 	$.ajax({
@@ -435,13 +435,13 @@ function sendOtpForParentUser(parentEmail, parentName, userId) {
 		async:false,
 		success : function(data) {
 			 if(data['statusCode']=="1"){
-				showMessage(1, data['message'], "", true);
+				showMessageTheme2(1, data['message'], "", true);
 			}else if(data['statusCode']=="4"){
-				showMessage(2, data['message'], "", true);
+				showMessageTheme2(2, data['message'], "", true);
 			}else if(data['statusCode']=="0"){
-				showMessage(0, data['message'], "", true);
+				showMessageTheme2(0, data['message'], "", true);
 			}else{
-				showMessage(0, data['statusCode'], "", true);
+				showMessageTheme2(0, data['statusCode'], "", true);
 			}
 		}
 	});
@@ -465,7 +465,7 @@ function getDataForParentOTPVerification(parentEmail, parentName, userId){
 
 function verifyOtp(){
 	if($('#otp').val()=="" ||$('#otp').val()==undefined ){
-		showMessage(0, " Invalid Otp ", "",true);
+		showMessageTheme2(0, " Invalid Otp ", "",true);
 		return false;
 	}
 	$.ajax({
@@ -479,13 +479,13 @@ function verifyOtp(){
 			if(data['statusCode'] == "2"){
 				$(".otp-process").hide();
 				$('#parentUserCreateRequest').show();
-				showMessage(1, data['message'], "",true);
+				showMessageTheme2(1, data['message'], "",true);
 			}else if(data['statusCode'] == "0"){
-				showMessage(0, data['message'], "",true);
+				showMessageTheme2(0, data['message'], "",true);
 			}else if(data['statusCode'] == "3"){
-				showMessage(2, data['message'], "",true);
+				showMessageTheme2(2, data['message'], "",true);
 			}else{
-				showMessage(0, data['message'], "",true);
+				showMessageTheme2(0, data['message'], "",true);
 			}
 		}
 	});
@@ -557,7 +557,7 @@ function callForParentSelection(studentUserId) {
 					if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
 						window.location.reload();
 					}else{
-						showMessage(false, data['message']);
+						showMessageTheme2(false, data['message']);
 					}
 				}
             	} else {

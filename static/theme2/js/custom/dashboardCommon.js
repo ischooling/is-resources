@@ -179,11 +179,11 @@ function callCommonDashboardPage(pageNo) {
 }
 
 function callCommonDashboardPageForPasswordChange(pageNo, show) {
-	if (show == 'No') {
-		callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'No');
-	} else {
-		callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'Yes');
-	}
+	// if (show == 'No') {
+	// 	callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'No');
+	// } else {
+	// 	callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'Yes');
+	// }
 }
 
 function callInneraction(actionType, arg0) {

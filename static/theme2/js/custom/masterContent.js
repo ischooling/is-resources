@@ -2750,3 +2750,110 @@ function timeAgo(dateString) {
            (months > 0 ? " " + months + " month" + (months > 1 ? "s" : "") : "") +
            " ago";
 }
+
+function calendarTimeInterval(timeZone) {
+	var userTimeInterval = setInterval(function () {
+        if($("#currentTimeForUser").length>0){
+			if(timeZone == "Asia/Singapore"){
+				var studentTimezone = STUDENT_LIST?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID) ?.studentTimezone || moment.tz.guess();
+				var userTime = new Date(convertDatetimeWithFormat(new Date(), timeZone, studentTimezone, DATE_UTC+'T'+TIME_UTC))
+			}else{
+				var userTime = new Date($("#currentTimeForUser").text())
+			}
+			var year = userTime.getFullYear();
+			var month = userTime.toLocaleString('en-US', {month: 'short'});
+			var day = userTime.getDate();
+			var hours = userTime.getHours();
+			var minutes = userTime.getMinutes();
+			var seconds = userTime.getSeconds();
+			var ampm = hours >= 12 ? 'PM' : 'AM';
+			minutes = minutes<=9 ? '0'+minutes:minutes;
+			seconds = seconds<=9 ? '0'+seconds:seconds;
+			// Convert hours from 24-hour to 12-hour format
+			hours = hours % 12;
+			hours = hours ? hours : 12; // The hour '0' should be '12'
+			hours = hours<=9 ? '0'+hours:hours;
+			$(".user_current_day").text(month+" "+day+","+" "+year);
+			// $(".user_current_hour").text(hours);
+			// $(".user_current_mins").text(minutes);
+			// $(".user_current_second").text(seconds);
+			// $(".user_current_am_pm").text(ampm);
+			$(".user_current_time").html(hours+":"+minutes+":"+seconds+" "+`<span class="user_current_am_pm clock-bg time-label">${ampm}</span>`);
+		} else {
+			clearInterval(userTimeInterval);
+        }
+    }, 1000);
+}
+
+function getLearningProgramLabel(registrationType) {
+    if (!registrationType || registrationType.trim() === "") {
+        return "";
+    }
+
+    var key = registrationType.trim().toUpperCase();
+
+    const programMap = {
+        "BATCH": "Group Learning",
+        "DUAL_DIPLOMA": "Dual Diploma",
+        "ONE_TO_ONE": "One-to-One Learning",
+        "ONE_TO_ONE_FLEX": "Flexy Program",
+        "SCHOLARSHIP": "Self Study",
+        "SSP": "Self Study Plus"
+    };
+
+    return programMap[key] || registrationType;
+}
+
+
+function getAnnouncementAndNewsContent(){
+	var html=
+	`<div class="right_fixed_action">
+        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
+            <i class="fa fa-bullhorn fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
+        </button>
+        <button type="button" class="custom-btn-open-options btn btn-primary" id="newsBtn" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
+            <i class="fa fa-newspaper-o fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
+        </button>`;
+        if(CHAT_URL != ''){
+			const data = {
+                u: UNIQUEUUID,
+                e: DEPLOYMENT_MODE,
+                d: new Date().getTime()
+            };
+            const jsonString = JSON.stringify(data);
+            const chatPayload = btoa(jsonString);
+            const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
+            html+=
+            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
+                <i class="fa fa-comments fa-w-16"></i>
+            </a>`;					
+        }
+    html+=`</div>
+    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
+        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="full" id="announcementDiv"></div>
+    </div>
+    <div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper">
+        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="full mt-3" id="newsyDiv"></div>
+    </div>
+    <div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>`;
+	return html;
+}
+
+function openRightSideBar(eleId){
+    if(eleId == "settings-overlay"){
+        $(".custome-ui-theme-settings").removeClass("settings-open");
+    }else{
+        $("#"+eleId).toggleClass("settings-open");
+        $(".tooltip").remove();
+    }
+    $("body").toggleClass("overflow-hidden");
+    $(".custome-ui-theme-settings-overlay").toggleClass("show-custom-overlay");    
+}

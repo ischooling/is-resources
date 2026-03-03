@@ -551,9 +551,34 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderClubsCommonPage("Global Competitions Club");
     }else if(pageNo=='game-strategy-analysis-club'){
       renderClubsCommonPage("Game Strategy & Analysis Club");
+     }else if(pageNo=='parent-student-login-details'){
+      await renderStudentParentLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='parent-syllabus-assigned-teacher'){
+      await renderParentSyllabusAssignedTeacherPage('Assigned Course Teachers',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='parent-fee-details'){
+      await renderParentFeeDetailsPage('Fee Details',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='parent-download-academic-docs'){
+      await renderParentAcademicDocsPage('Academic Documents',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='parent-academic-performance'){
+      await renderParentAcademicPerformancePage('Academic Performance',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='parent-progress'){
+      await renderParentProgressPage('Progress Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='student-login-details'){
+      await renderStudentLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='syllabus-assigned-teacher'){
+      await renderStudentSyllabusAssignedTeacherPage('Assigned Course Teachers',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='student-feedback'){
       renderStudentFeedbackPage('Student Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+     }else if(pageNo=='Parent-dashboard'){
+      renderParentDashboardContent()
+     }else if(pageNo=='parent-class-schedule'){
+      renderParentStudentClassScheduleContent()
+     }else if(pageNo=='parent-attendance'){
+      renderAtendaceByStudentIdContent()
      }
+     
+
+     
 	}catch(err){
 		console.error("getContent error:", err);
 

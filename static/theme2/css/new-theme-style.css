@@ -1176,6 +1176,9 @@ table.fancytree-ext-table.fancytree-treefocus tbody tr.fancytree-selected {
 	background-color:#3f2848;
 	border-color:#3f2848
 }
+.bg-review {
+	background-color:#000088 !important
+}
 .bg-orange{
 	background-color:orange
 }
@@ -1187,6 +1190,9 @@ table.fancytree-ext-table.fancytree-treefocus tbody tr.fancytree-selected {
 }
 .bg-light-pink {
 	background-color:#fff0f3 !important
+}
+.bg-primary-green-gradient {
+	background:linear-gradient(135deg, var(--pc) 0%, #00C2C6 100%);
 }
 .bg-primary {
 	background-color:var(--pc) !important
@@ -1239,6 +1245,9 @@ a.bg-warning:hover, a.bg-warning:focus, button.bg-warning:hover, button.bg-warni
 .bg-light-danger {
 	background-color:#ffecf0 !important
 }
+.bg-light-review {
+	background-color:#dbeafe !important
+}
 a.bg-danger:hover, a.bg-danger:focus, button.bg-danger:hover, button.bg-danger:focus {
 	background-color:#ad1e40 !important
 }
@@ -1247,6 +1256,9 @@ a.bg-danger:hover, a.bg-danger:focus, button.bg-danger:hover, button.bg-danger:f
 }
 a.bg-light:hover, a.bg-light:focus, button.bg-light:hover, button.bg-light:focus {
 	background-color:#d5d5d5 !important
+}
+.bg-gray {
+	background-color:#737373 !important
 }
 .bg-dark {
 	background-color:#343a40 !important
@@ -1648,6 +1660,7 @@ margin-bottom:.5rem;
 	font-size:90%;
 	color:#6c757d
 }
+
 code {
 	font-size:87.5%;
 	color:#e83e8c;
@@ -1663,6 +1676,7 @@ padding:.2rem .4rem;
 	background-color:#212529;
 border-radius:.2rem
 }
+
 kbd kbd {
 	padding:0;
 	font-size:100%;
@@ -3419,9 +3433,9 @@ box-shadow:0 0 0 0 rgba(63, 106, 216, 0.5)
 	border-color:var(--sc)
 }
 .btn-outline-secondary:hover {
-	color:#fff;
-	background-color:var(--sc);
-	border-color:var(--sc)
+	color:#fff !important;
+	background-color:var(--sc) !important;
+	border-color:var(--sc) !important
 }
 .btn-outline-secondary:focus, .btn-outline-secondary.focus {
 	box-shadow:var(--sc)
@@ -4539,6 +4553,9 @@ border-radius:.25rem
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
 	color:#fff;
 	background-color:var(--pc) !important
+}
+.nav-pills .nav-link.active.attendance-tab, .nav-pills .show>.nav-link {
+	background:#409f5b !important;color:#fff !important
 }
 .nav-fill .nav-item {
 	flex:1 1 auto;
@@ -8936,6 +8953,10 @@ text-align:center !important
 }
 .text-capitalize {
 	text-transform:capitalize !important
+}
+
+.text-transform-none {
+	text-transform:none !important
 }
 .font-weight-light {
 	font-weight:300 !important
@@ -14598,6 +14619,9 @@ margin:.5rem 0;
 .nav-pills .nav-link:hover {
 	color:#495057 !important
 }
+.nav-pills .nav-link.attendance-tab:hover {
+	color:#409f5b !important
+}
 .nav-justified .nav-link .nav-text {
 	display:block;
 	width:100%;
@@ -14699,6 +14723,9 @@ a.badge-light:hover, a.badge-light:focus {
 .badge-dark {
 	color:#fff;
 	background-color:#343a40
+}
+.badge-gray {
+	background-color:#737373
 }
 a.badge-dark:hover, a.badge-dark:focus {
 	color:#fff;
@@ -34083,6 +34110,7 @@ from { background-color: rgb(0 192 0); }
 to { background-color: rgb(6, 145, 6); }
 }
 .upcoming-class-blink .fc-event-dot[style]{background-color: #433a11 !important;}
+.calendar_request_button:hover .text-secondary{color:#fff !important}
 .upcoming-class-blink, .upcoming-class-blink[style], #schoolcalendar .fc-time-grid-event.upcoming-class-blink{background-color: #fff8e8 !important;border-color:#f7b924 !important;color:#090909;border:2px solid;padding:16px 8px;display: inline-block;}
 #schoolcalendar .fc-time-grid-event.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#fff;border:2px solid;padding:16px 8px;}
 #schoolcalendar .fc-list-item.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#343a40;border:2px solid;width: 100%;}
@@ -34190,7 +34218,7 @@ to { background-color: rgb(6, 145, 6); }
 .side-bar-icon .pe-7s-user{
 	content: none !important;
 }
-.side-bar-icon .pe-7s-user{
+.side-bar-icon .pe-7s-user, .doller-icon{
     font-size: 0 !important;
     background-repeat: no-repeat;
     background-position: center;
@@ -34215,7 +34243,7 @@ to { background-color: rgb(6, 145, 6); }
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;         
-	background-image: url(../images/Icon/sidebar/Child_performance_Report.webp) !important;
+	background-image: url(../images/Icon/sidebar/Progress_Report.png) !important;
 }
 .side-bar-icon .pe-7s-wristwatch{
 	content: none !important;
@@ -34387,6 +34415,16 @@ to { background-color: rgb(6, 145, 6); }
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Lead_Management_System\ 1.png) !important;	
 }
+.side-bar-icon .pe-progress{
+	content: none !important;
+}
+.side-bar-icon .pe-progress{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Progress_Report.png) !important;	
+}
 .side-bar-icon .pe-7s-mail{
 	content: none !important;
 }
@@ -34538,6 +34576,36 @@ to { background-color: rgb(6, 145, 6); }
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Student_Management.png) !important;
 }
+.side-bar-icon .pe-academic-student{
+	content: none !important;
+}
+.side-bar-icon .pe-academic-student{
+    font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Academic_Performance.png) !important;
+}
+.side-bar-icon .pe-attendance{
+	content: none !important;
+}
+.side-bar-icon .pe-attendance{
+    font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Attendance.png) !important;
+}
+.side-bar-icon .pe-acadmic-download{
+	content: none !important;
+}
+.side-bar-icon .pe-acadmic-download{
+    font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Download_Academic_Docs.png) !important;
+}
 .side-bar-icon .pe-7s-assign-course{
 	content: none !important;
 }
@@ -34547,6 +34615,16 @@ to { background-color: rgb(6, 145, 6); }
     background-position: center;
     background-size: contain;         
 	background-image: url(../images/Icon/sidebar/Assigned_Course_Teachers.webp) !important;
+}
+.side-bar-icon .pe-progress-rprt{
+	content: none !important;
+}
+.side-bar-icon .pe-progress-rprt{
+    font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/Download_Academic_Docs.png) !important;
 }
 .emoji-globe{
 	content: none !important;
@@ -34810,3 +34888,23 @@ to { background-color: rgb(6, 145, 6); }
     transition: 0.2s ease-in-out;
 }
 
+/* parent dashboard css */
+.parent-tab-slider-wrapper .slick-track{display: flex;}
+.parent-tab-slider-wrapper .slick-slide{height: inherit;}
+.parent-tab-slider-wrapper .slick-track .nav-item .nav-link{height: 100%;}
+.parent-tab-slider-wrapper .slick-track .nav-item .nav-link.active-student{background-color: #eef3ff !important;font-weight: 600;border-bottom: 3px solid var(--pc);}
+.parent-tab-slider-wrapper .slick-prev,
+.parent-tab-slider-wrapper .slick-next{
+    width: 28px;
+    height: 28px;
+	top: 50%;
+    transform: translateY(-50%);
+}
+.parent-tab-slider-wrapper .slick-prev:before,
+.parent-tab-slider-wrapper .slick-next:before{
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+}
+    

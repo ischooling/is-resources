@@ -82,7 +82,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "task":{url:"",file:[{role:"",fileName:["taskListContent.js","taskList.js","jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "dashboard-monitoring":{url:"",file:[{role:"",fileName:["dashboardMonitoringContent.js","dashboardMonitoring.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "manage-club":{url:"",file:[{role:"",fileName:["manageClubsContent.js","manageClubs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        
+        "Parent-dashboard":{url:"",file:[{role:"",fileName:[""]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-class-schedule":{url:"",file:[{role:"",fileName:["parentStudentClassScheduleContent.js","parentStudentClassSchedule.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-attendance":{url:"",file:[{role:"",fileName:["attendaceByStudentIdContent.js","attendaceByStudentId.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // STUDENT PAGE CONFIG
         "batch-schedule":{url:"teacher-batch-time-schedule?moduleId="+moduleId+"&userId="+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "student-handbook":{url:"studenthandbook?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
@@ -90,8 +92,8 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "parent-notifications":{url:"notifications"+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "syllabus-assigned-batch-teacher":{url:"student-batch-teacher-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "academic-year-extention":{url:"academic-year-extention-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "student-login-details":{url:"attendance-content"+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "syllabus-assigned-teacher":{url:"student-task-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
+        "student-login-details":{url:"",file:[{role:"",fileName:["studentLoginHistoryContent.js","studentLoginHistory.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "syllabus-assigned-teacher":{url:"",file:[{role:"",fileName:["studentSyllabusAssignedTeacherContent.js","studentSyllabusAssignedTeacher.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "fee-details":{url:"student-due-fees-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "student-progress-report":{url: extraParam != undefined ? "student-progress-report/" + UNIQUEUUID +"?moduleId=" +moduleId +extraParam : "student-progress-report/" + UNIQUEUUID + "?moduleId=" + moduleId ,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "progress-detail":{url:"weekly-progress-detail?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
@@ -121,6 +123,14 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "global-competitions-club":{url:"global-competitions-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "game-strategy-analysis-club":{url:"game-strategy-analysis-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "student-feedback":{url:"student-feedback",file:[{role:"",fileName:["studentfeedbackContent.js","studentfeedback.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
+
+        // PARENT //
+        "parent-student-login-details":{url:"",file:[{role:"",fileName:["studentParentLoginHistoryContent.js","studentParentLoginHistory.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-syllabus-assigned-teacher":{url:"",file:[{role:"",fileName:["parentSyllabusAssignedTeacherContent.js","parentSyllabusAssignedTeacher.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-fee-details":{url:"",file:[{role:"",fileName:["parentFeeDetailsContent.js","parentFeeDetails.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-download-academic-docs":{url:"",file:[{role:"",fileName:["parentAcademicDocsContent.js","parentAcademicDocs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-academic-performance":{url:"",file:[{role:"",fileName:["parentAcademicPerformanceContent.js","parentAcademicPerformance.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-progress":{url:"",file:[{role:"",fileName:["parentProgressContent.js","parentProgress.js","dashboardWeeklyProgress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         
         // TEACHER //
         "teacher-home":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"IN"},

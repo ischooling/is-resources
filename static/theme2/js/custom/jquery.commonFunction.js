@@ -6976,3 +6976,34 @@ function formatOpenAIText(text) {
         .replace(/\n\n/g, "<br/><br/>")
         .replace(/\n/g, "<br/>");
 }
+
+function getUserInitialsCommon(name, fallback) {
+  var defaultValue = fallback || "ST";
+  var safeName = $.trim(name || "");
+  if (!safeName) {
+    return defaultValue;
+  }
+  var words = safeName.split(/\s+/);
+  var initials = "";
+  if (words.length > 0 && words[0]) {
+    initials += words[0].charAt(0).toUpperCase();
+  }
+  if (words.length > 1 && words[1]) {
+    initials += words[1].charAt(0).toUpperCase();
+  }
+  return initials || defaultValue;
+}
+
+function getSalutationByGender(gender) {
+  if (gender == null || gender === undefined) {
+    return "";
+  }
+  var normalizedGender = String(gender).trim().toLowerCase();
+  if (normalizedGender === "male") {
+    return "Mr.";
+  }
+  if (normalizedGender === "female") {
+    return "Ms.";
+  }
+  return "";
+}

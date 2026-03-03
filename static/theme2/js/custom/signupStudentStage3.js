@@ -42,7 +42,7 @@ function creditLimitOver(standardId, totalCredit){
 
 function assignEvent(indexPosition, subjectId, courseId, tabActive, userReachedMaxLimit, courseCreditLimit, courseSelectedCredit, subjectCredit, remarks, courseType, flagType, standardId, totalCredit,courseFee) {
 	if (subjectId == '') {
-		showMessage(2, 'Please select a course then click on the add button.');
+		showMessageTheme2(2, 'Please select a course then click on the add button.');
 		return false;
 	}
 	var creditLimitWarning=false;
@@ -50,7 +50,7 @@ function assignEvent(indexPosition, subjectId, courseId, tabActive, userReachedM
 	// var creditsLimitsOver=creditLimitOver(standardId, totalCredit);
 	if(flagType == 'add'){
 		if(parseFloat($('#totalCreditInput').val())>=parseFloat($('#signupStage3 #standardId').attr('upper_band'))){
-			showMessage(2, 'You can select a maximum of '+$('#signupStage3 #standardId').attr('upper_band')+' credits.');
+			showMessageTheme2(2, 'You can select a maximum of '+$('#signupStage3 #standardId').attr('upper_band')+' credits.');
 			return false;
 		}
 		if(parseFloat($('#totalCreditInput').val())>=parseFloat($('#signupStage3 #standardId').attr('max_limit'))){
@@ -99,7 +99,7 @@ function addCourseLimits(indexPosition, subjectId, courseId, tabActive, userReac
 
 function addCourse(subjectId, courseId, tabActive, userReachedMaxLimit, courseCreditLimit, courseSelectedCredit, subjectCredit, remarks, courseType,courseFee) {
 	if (subjectId == '') {
-		showMessage(2, 'Please select a course then click on the add button.');
+		showMessageTheme2(2, 'Please select a course then click on the add button.');
 		return false;
 	}
 	if (SCHOOL_ID == 1) {
@@ -232,12 +232,12 @@ function getAllCourseDetails(isGradeChange, courseId) {
 					if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 						window.location.reload();
 					} else {
-						showMessage(false, data['message']);
+						showMessageTheme2(false, data['message']);
 					}
 				}
 			} else {
 				$("#creditsLimitsModal, #creditsLimitsOverModal").modal("hide");
-				showMessage(true, data['message']);
+				showMessageTheme2(true, data['message']);
 				$(".step-3-skeleton").html('');
 				$(".step-3-skeleton").hide('');
 				$("#signupStage3").show();
@@ -383,7 +383,7 @@ function choosePaymentOption() {
 		if ($("#pay-one").prop("checked") == true || $("#pay-three").prop("checked") == true || $("#pay-registration").prop("checked") == true || $("#pay-custom").prop("checked") == true) {
 			hideModalMessage('');
 		} else {
-			showMessage(0, 'Please choose payment mode');
+			showMessageTheme2(0, 'Please choose payment mode');
 			flag=false;
 		}
 	}
@@ -405,7 +405,7 @@ function choosePaymentOption() {
 						if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 							window.location.reload();
 						} else {
-							showMessage(false, data['message']);
+							showMessageTheme2(false, data['message']);
 							//setActiveStep(3);
 						}
 					}
@@ -419,7 +419,7 @@ function choosePaymentOption() {
 					
 					if(SHOW_PAYMENT_OPTION=='Y'){
 						if(windowWidth >580){
-							showMessage(1, ' Superb! Just one step left. (✓)', '', true);
+							showMessageTheme2(1, ' Superb! Just one step left. (✓)', '', true);
 						}else{
 							$("#showMessageInPopup #msgText").text('Superb! Just one step left');
 							$("#showMessageInPopup").modal("show");
@@ -430,7 +430,7 @@ function choosePaymentOption() {
 						hideModalMessage();
 					}else{
 						if(windowWidth >580){
-							showMessage(1, ' Superb! Just one step left. (✓)', '', true);
+							showMessageTheme2(1, ' Superb! Just one step left. (✓)', '', true);
 						}else{
 							$("#showMessageInPopup #msgText").text('Superb! Just one step left');
 							$("#showMessageInPopup").modal("show");
@@ -583,7 +583,7 @@ function callForProgressionToDashboard() {
 							} else if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 								window.location.reload();
 							} else {
-								showMessage(false, data['message']);
+								showMessageTheme2(false, data['message']);
 							}
 						}
 
@@ -599,7 +599,7 @@ function callForProgressionToDashboard() {
 						applicationSubmittedModalOffline();
 					}else{
 						$('#submitApplicationWarning').modal("hide");
-						showMessage(true, 'Student has been successfully enrolled');
+						showMessageTheme2(true, 'Student has been successfully enrolled');
 						window.setTimeout(function(){
 							if(schoolSettingsOffice.schoolType == "WLP"){
 								backToDedicatedModule('partner-enrollment-students-wlp');
@@ -697,10 +697,10 @@ function validateRequestForPaymentModeSelection(formId, callForm) {
 	var upper_band=$('#signupStage3 #standardId').attr('upper_band');
 	var totalCredit = parseFloat($('#totalCredit').attr('totalCredit'));
 	if (parseFloat(totalCredit) < parseFloat(MIN_LIMIT)) {
-		showMessage(0, 'Please select a minimum of ' + MIN_LIMIT + ' credits.');
+		showMessageTheme2(0, 'Please select a minimum of ' + MIN_LIMIT + ' credits.');
 		return false;
 	} else if (parseFloat(totalCredit) > parseFloat(upper_band)) {
-		showMessage(0, 'You can select a maximum of ' + upper_band + ' credits.');
+		showMessageTheme2(0, 'You can select a maximum of ' + upper_band + ' credits.');
 		return false;
 	}
 	return true;
@@ -744,7 +744,7 @@ function callForPaymentModeSelection(formId, callFrom) {
 					if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 						window.location.reload();
 					} else {
-						showMessage(false, data['message']);
+						showMessageTheme2(false, data['message']);
 						window.setTimeout(function () {
 							$('#studentPaymentModal').modal('hide');
 						}, 1000);
@@ -834,7 +834,7 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 						if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 							window.location.reload();
 						} else {
-							showMessage(false, data['message']);
+							showMessageTheme2(false, data['message']);
 							setActiveStep(3);
 							$("#studentPaymentModal").modal("show");
 						}
@@ -1023,7 +1023,7 @@ function recommendedCourse() {
 					// 	if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 					// 		window.location.reload();
 					// 	} else {
-					// 		showMessage(false, data['message']);
+					// 		showMessageTheme2(false, data['message']);
 					// 	}
 					// }
 				}
@@ -1126,10 +1126,10 @@ function callForApplicationSubmit() {
 					if (data['status'] == '3') {
 						redirectLoginPage();
 					} else {
-						showMessage(false, data['message']);
+						showMessageTheme2(false, data['message']);
 					}
 				} else {
-					showMessage(true, 'Thank you! Your application has been successfully submitted');
+					showMessageTheme2(true, 'Thank you! Your application has been successfully submitted');
 					if($('#signupType').val() == 'Online' ){
 						applicationSubmittedModal(data.details.contactEmail);
 					}

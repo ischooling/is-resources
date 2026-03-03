@@ -186,7 +186,7 @@ async function callForDashboardJsonData(formId, actionUrl, replaceDiv) {
             if (replaceDiv == 'section-linebox') {
                 flag = false;
             }
-           // responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'select-student-by-parent', payload);
+           // responseData = await getDashboardDataBasedUrlAndPayload(false, false, 'parent/select-student-by-parent', payload);
             $.ajax({
                 global: flag,
                 type: "POST",

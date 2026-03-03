@@ -298,9 +298,9 @@ function dashboardSchoolCalendar(data) {
                                                 <div class="font-16 font-weight-bold line-height-1 class_Count">0</div>
                                                 <div class="font-12 text-dark line-height-1 font-weight-light">Classes</div>
                                             </button>
-                                            <button class="btn-wide btn ml-2 btn-outline-danger bg-light-danger btn-sm rounded text-danger calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
+                                            <button class="btn-wide btn ml-2 btn-outline-secondary bg-light-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
-                                                <div class="font-12 text-dark line-height-1 font-weight-light">Activity</div>
+                                                <div class="font-12 text-secondary line-height-1 font-weight-light">Activity</div>
                                             </button>
                                         </div>
                                     </div>
@@ -324,44 +324,7 @@ function dashboardSchoolCalendar(data) {
         </div>
     </div>
     ${/*<div id="announceDataId" class="full"></div>*/''}
-    <div class="right_fixed_action">
-        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
-            <i class="fa fa-bullhorn fa-w-16"></i>
-            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
-        </button>
-        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
-            <i class="fa fa-newspaper-o fa-w-16"></i>
-            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
-        </button>`;
-        if(CHAT_URL != ''){
-            const data = {
-                u: UNIQUEUUID,
-                e: DEPLOYMENT_MODE,
-                d: new Date().getTime()
-            };
-            const jsonString = JSON.stringify(data);
-            const chatPayload = btoa(jsonString);
-            const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
-            html+=
-            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
-                <i class="fa fa-comments fa-w-16"></i>
-                 <span class="UNSEEN counts-badge badge badge-pill badge-danger ml-0 mr-2" id="UNSEEN"></span>
-            </a>`;					
-        }
-    html+=`</div>
-    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
-        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-            <i class="fa fa-times"></i>
-        </button>
-        <div class="full" id="announcementDiv"></div>
-    </div>
-    <div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper">
-        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-            <i class="fa fa-times"></i>
-        </button>
-        <div class="full mt-3" id="newsyDiv"></div>
-    </div>
-    <div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>
+    ${getAnnouncementAndNewsContent()}
     ${holidayOne()}
     ${onBordingMandotryVideo()}`;
     // +feedbackPop(data.schoolLogo); // optional call if needed
@@ -642,14 +605,4 @@ function viewActivityAttachmentModal(){
 		</div>
 	</div>`;
 	return html;
-}
-function openRightSideBar(eleId){
-    if(eleId == "settings-overlay"){
-        $(".custome-ui-theme-settings").removeClass("settings-open");
-    }else{
-        $("#"+eleId).toggleClass("settings-open");
-        $(".tooltip").remove();
-    }
-    $("body").toggleClass("overflow-hidden");
-    $(".custome-ui-theme-settings-overlay").toggleClass("show-custom-overlay");    
 }

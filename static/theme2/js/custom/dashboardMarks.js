@@ -721,6 +721,40 @@ function getSemesterGrade(tableId, courseType, percentage, position, courseProvi
 	return grade;
 }
 
+// Percentage-only grade helper (uses FT/CR/CTE threshold mapping).
+function getGradeFromPercentage(percentage) {
+	var score = parseFloat(percentage);
+	if (isNaN(score)) {
+		return "F";
+	}
+	if (score > 100 || score >= 95.1) {
+		return "A+";
+	} else if (score >= 92.1) {
+		return "A";
+	} else if (score >= 88.1) {
+		return "A-";
+	} else if (score >= 85.1) {
+		return "B+";
+	} else if (score >= 82.1) {
+		return "B";
+	} else if (score >= 78.1) {
+		return "B-";
+	} else if (score >= 75.1) {
+		return "C+";
+	} else if (score >= 72.1) {
+		return "C";
+	} else if (score >= 68.1) {
+		return "C-";
+	} else if (score >= 65.1) {
+		return "D+";
+	} else if (score >= 62.1) {
+		return "D";
+	} else if (score >= 59.1) {
+		return "D-";
+	}
+	return "F";
+}
+
 function getCumulativeGrade(){
 	var cumulativeGpa=0.0;
 	var sumPreCgpa=0.0;

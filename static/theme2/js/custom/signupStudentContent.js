@@ -301,9 +301,9 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 					</div>`;
 			}
     		html += `
-            <div class="server-message" style="display:none">
+            ${/*<div class="server-message" style="display:none">
 				<span id="msgTheme2" class="msg error"><i class="fa fa-times"></i> Error Message </span>
-			</div>
+			</div>*/''}
             <div id="formSteps">
                 <div class="steps clearfix">
                     <ul role="tablist">
