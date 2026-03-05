@@ -42,19 +42,19 @@ $(document).ready(function(){
 
 function validateRequestForSignupStudent(){
 	/*if (!validateFormAscii()) {
-		showMessage(0, 'Please use the English Keyboard while providing information');
+		showMessageTheme2(0, 'Please use the English Keyboard while providing information');
 		return false
 	}*/
 	if ($("#signupStage1 #firstName").val()=="") {
-		showMessage(0, 'First Name is required');
+		showMessageTheme2(0, 'First Name is required');
 		return false
 	}
 	if ($("#signupStage1 #lastName").val().trim()=="") {
-		showMessage(0, 'Last Name is required');
+		showMessageTheme2(0, 'Last Name is required');
 		return false
 	}
 	if ($("#signupStage1 #applyStandardId").val().trim()=="") {
-		showMessage(0, 'Grade is required');
+		showMessageTheme2(0, 'Grade is required');
 		return false
 	}
 	if($('#signupStage1 #dob').val()!=""){
@@ -63,7 +63,7 @@ function validateRequestForSignupStudent(){
 		var dob1=dobd.split("-");
 		dobd = dobd.split("-").length;
 		if(parseInt(dobd)!=3 || parseInt(dob1[1])>31 || parseInt(dob1[0])>12){
-			showMessage(0, 'Date of Birth is not valid');
+			showMessageTheme2(0, 'Date of Birth is not valid');
 			return false;
 		}
 		var age = M.countAgeNew(dob1[1], dob1[0], dob1[2]);
@@ -71,7 +71,7 @@ function validateRequestForSignupStudent(){
 //			if ($("#signupStage1 #checkAge").is(':checked')){
 //
 //			}else{
-//				showMessage(1, 'Please confirm that your age is less than 13 years by selecting the checkbox');
+//				showMessageTheme2(1, 'Please confirm that your age is less than 13 years by selecting the checkbox');
 //				$('#signupStage1 #ageOfThirteen').show();
 //				return false
 //			}
@@ -79,60 +79,60 @@ function validateRequestForSignupStudent(){
 			$('#signupStage1 #checkAge').prop("checked",false);
 		}
 	}else{
-		showMessage(0, 'Please choose your Date of Birth.');
+		showMessageTheme2(0, 'Please choose your Date of Birth.');
 		return false
 	}
 	if ($("#signupStage1 #gender").val()==0  || $("#signupStage1 #gender").val()=='') {
-		showMessage(0, 'Gender is required');
+		showMessageTheme2(0, 'Gender is required');
 		return false
 	}
 	if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 		if ($("#signupStage1 #studyingSchoolName").val()=="") {
-			showMessage(0, 'Student\'s School Name is required');
+			showMessageTheme2(0, 'Student\'s School Name is required');
 			return false
 		}
 		if ($("#signupStage1 #studyingGradeId").val()==0 || $("#signupStage1 #studyingGradeId").val()=='') {
-			showMessage(0, 'Student Current Grade is required');
+			showMessageTheme2(0, 'Student Current Grade is required');
 			return false
 		}
 		if ($("#signupStage1 #countryIdOfSchool").val()==0 || $("#signupStage1 #countryIdOfSchool").val()=='') {
-			showMessage(0, 'Country of School is required');
+			showMessageTheme2(0, 'Country of School is required');
 			return false
 		}
 	}else{
 		if($('#courseProviderId').val()==39){
 			if ($("#signupStage1 #learningLabel").val()==0 || $("#signupStage1 #learningLabel").val()=='') {
-				showMessage(0, 'Learning Label is required');
+				showMessageTheme2(0, 'Learning Label is required');
 				return false
 			}
 		}
 		if ($("#signupStage1 #communicationEmail").val()=="") {
-			showMessage(0, 'Email is required');
+			showMessageTheme2(0, 'Email is required');
 			return false
 		}
 		if ($("#signupStage1 #contactNumber").val()=="") {
-			showMessage(0, 'Phone No is required');
+			showMessageTheme2(0, 'Phone No is required');
 			return false
 		}
 		if ($("#signupStage1 #nationality").val()==0 || $("#signupStage1 #nationality").val()=='') {
-			showMessage(0, 'Nationality is required');
+			showMessageTheme2(0, 'Nationality is required');
 			return false
 		}
 	}
 	if ($("#signupStage1 #countryId").val()==0 || $("#signupStage1 #countryId").val()=='') {
-		showMessage(0, 'Country is required');
+		showMessageTheme2(0, 'Country is required');
 		return false
 	}
 	if ($("#signupStage1 #stateId").val()==0 || $("#signupStage1 #stateId").val()=='') {
-		showMessage(0, 'State/Province is required');
+		showMessageTheme2(0, 'State/Province is required');
 		return false
 	}
 	if ($("#signupStage1 #cityId").val()==0 || $("#signupStage1 #cityId").val()=='') {
-		showMessage(0, 'City is required');
+		showMessageTheme2(0, 'City is required');
 		return false
 	}
 //	if ($("#signupStage1 #countryCodeStudent").val()==null) {
-//		showMessage(1, 'ISD code is required');
+//		showMessageTheme2(1, 'ISD code is required');
 //		return false
 //	}
 	return true;
@@ -148,7 +148,7 @@ function callForSignupStudentDetails() {
 	var dob1=dobd.split("-");
 	dobd = dobd.split("-").length;
 	if(parseInt(dobd)!=3 || parseInt(dob1[1])>31 || parseInt(dob1[0])>12){
-		showMessage(0, 'Date of Birth is not valid');
+		showMessageTheme2(0, 'Date of Birth is not valid');
 		return false;
 	}
 	var MAX_AGE_LIMIT=29.941173;
@@ -159,7 +159,7 @@ function callForSignupStudentDetails() {
 	}
 	var age = M.countAgeNew(dob1[1], dob1[0], dob1[2]);
 	if (age > MAX_AGE_LIMIT) {
-		showMessage(false, 'Age of student should not be more then '+MAX_AGE_LIMIT+' years');
+		showMessageTheme2(0, 'Age of student should not be more then '+MAX_AGE_LIMIT+' years');
 		return false;
 	}
 	setActiveStep(2);
@@ -181,7 +181,7 @@ function callForSignupStudentDetails() {
 					if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
 						window.location.reload();
 					}else{
-						showMessage(false, data['message']);
+						showMessageTheme2(0, data['message']);
 						setActiveStep(1);
 						$(".next-btn").removeClass("disabled")
 					}
@@ -189,7 +189,7 @@ function callForSignupStudentDetails() {
 			} else {
 				var windowWidth = $(window).width();
 				if(windowWidth >580){
-					showMessage(1, ' Great! Student details completed (✓)', '', true);
+					showMessageTheme2(1, ' Great! Student details completed (✓)', '', true);
 				}else{
 					$("#showMessageInPopup #msgText").text('Great! Student details completed');
 					$("#showMessageInPopup").modal("show");
@@ -270,7 +270,7 @@ function calculateAge(){
 	var studentDOB = $('#signupStage1 #dob').val().split("-");
 	var age = M.countAgeNew(studentDOB[1], studentDOB[0], studentDOB[2]);
 	if(age>29.941173){
-	showMessage(false, 'Age of student should not be more then 30 years');
+	showMessageTheme2(0, 'Age of student should not be more then 30 years');
 		return true;
 	}
 	return true;
@@ -384,7 +384,7 @@ async function callForStudentSelection(signupType, studentUserId) {
 			if (responseData['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || responseData['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 				window.location.reload();
 			} else {
-				showMessage(false, responseData['message']);
+				showMessageTheme2(0, responseData['message']);
 			}
 		}
 	} else {
@@ -392,7 +392,7 @@ async function callForStudentSelection(signupType, studentUserId) {
 		callLocationForPayment("signupStage1");
 		$(".step-1-skeleton").hide();
 		$("#signupStage1").show();
-		// showMessage(1, 'Student Details Updated.', '', true);
+		// showMessageTheme2(1, 'Student Details Updated.', '', true);
 	}
 }
 
