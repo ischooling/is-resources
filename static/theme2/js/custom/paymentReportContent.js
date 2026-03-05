@@ -1672,7 +1672,7 @@ function getViewTemplate(data){ //console.log("inside getViewTemplate data :: " 
         $.each(jsonData, function(index, value){ //console.log('value : '+ JSON.stringify(value.header));
             html+='<div class="main-card card mx-auto mb-3" style="max-width:300px;">'
             +'<div class="card-body p-2">'
-				if(value.header.mediaFromPC!=null && value.header.mediaFromPC!=''){
+				if(value.header != null && value.header.mediaFromPC!=null && value.header.mediaFromPC!=''){
 					html+='<img src="/'+ imgURL+value.header.mediaFromPC+'" class="w-100 mb-3" style="max-width:250px">'	
 				}
                 html+='<ul class="p-0">';
