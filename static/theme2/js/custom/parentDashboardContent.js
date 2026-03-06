@@ -284,7 +284,7 @@ function getStudentPerformanceDetailsCard(data){
                         <div class="card-body py-2">
                             <a href="javascript:void(0)" class="d-inline-block text-center text-decoration-none w-100" onclick="callDashboardPageSchool(254,'parent-academic-performance')">
                                 <h4 class="text-primart font-weight-bold font-26 mb-1">${getGradeFromPercentage(data.summary.avgGradeThisMonth)}</h4>
-                                <p class="m-0 text-primart">Average Grade</p>
+                                <p class="m-0 text-primart">Performance</p>
                                 <div class="text-dark d-flex align-items-center justify-content-center mt-1" id="gradeCompare">`;
                                     
                                 html+=`</div>

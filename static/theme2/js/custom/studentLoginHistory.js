@@ -10,8 +10,10 @@ async function studentLoginHistoryBuildPageData(){
     var firstLoginParts = (attendanceDTO.firstLogin || "").split(" ");
     var firstLoginDate = firstLoginParts.length > 0 ? firstLoginParts.slice(0, 3).join(" ") : "N/A";
     var firstLoginTime = firstLoginParts.length > 3 ? firstLoginParts.slice(3).join(" ") : (attendanceDTO.firstLogin || "N/A");
+    var studentName = studentLoginHistoryResolveStudentName(attendanceDTO, attendanceApiResponse);
 
     return {
+        studentName: studentName,
         summary: {
             firstLoginDate: firstLoginDate || "N/A",
             firstLoginTime: firstLoginTime || "N/A",
@@ -60,6 +62,20 @@ function studentLoginHistoryResolveAttendanceDTO(apiResponse){
         return apiResponse;
     }
     return {};
+}
+
+function studentLoginHistoryResolveStudentName(attendanceDTO, apiResponse){
+    var studentName = attendanceDTO.studentName
+        || attendanceDTO.studentFullName
+        || attendanceDTO.fullName
+        || attendanceDTO.userFullName
+        || attendanceDTO.name
+        || attendanceDTO.userName
+        || (apiResponse && apiResponse.studentName)
+        || (apiResponse && apiResponse.details && (apiResponse.details.studentName || apiResponse.details.studentFullName || apiResponse.details.fullName))
+        || (apiResponse && apiResponse.data && (apiResponse.data.studentName || apiResponse.data.studentFullName || apiResponse.data.fullName))
+        || (typeof USER_FULL_NAME !== "undefined" ? USER_FULL_NAME : "");
+    return $.trim(studentName || "");
 }
 
 function studentLoginHistoryMapSessions(list){
