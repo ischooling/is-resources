@@ -285,6 +285,8 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		renderCounselorLeadReportDashboard('Lead Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
 	}else if(pageNo=='lead-demo-list'){
 		renderMeetingTimeDashboard('Lead Demo Calendar',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+	}else if(pageNo=='lead-demo-report'){
+		renderLeadDemoReportDashboard('Lead Demo Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 	}else if(pageNo=='lead-assign-form'){
 		renderLeadAssignDashboard('Lead Assign Form',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 	}else if(pageNo=='referral-and-links'){
@@ -646,4 +648,3 @@ function backToDedicatedModule(moduleUrl){
 	callDashboardPageSchool('194','partner-enrollment-students-wlp');
   }
 }
-

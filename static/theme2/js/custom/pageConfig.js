@@ -66,6 +66,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "lead-calculation-chart":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-calculation-chart?moduleId="+moduleId+"&euid="+ENCRYPTED_USER_ID},
         "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-list":{url:"",file:[{role:"",fileName:["leadDemoContent.js","leads.js","LeadSettingListContent.js","LeadSettings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "lead-demo-report":{url:"",file:[{role:"",fileName:["leadDemoReportContent.js","leadDemoReport.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         
         "lead-setting":{url:"",file:[{role:"",fileName:["LeadSettingListContent.js","LeadSettings.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-daily-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/counselor-daily-report?moduleId="+moduleId+"&userId="+USER_ID},
