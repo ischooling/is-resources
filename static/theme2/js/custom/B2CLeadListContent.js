@@ -806,6 +806,8 @@ function getLeadAdvanceSearchPopup(objRights) {
   return html;
 }
 
+
+
 function getLeadMergeFormPopup(objRights) {
   var html = "";
   html +=
@@ -1901,11 +1903,19 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                         +'<td class="border-0 p-1">'+(leads.zadarmaCallCount>0?'<i class="fa fa-check-circle fa-lg text-primary"></i>':'<i class="fa fa-times fa-lg text-danger" aria-hidden="true"></i>')+' ('+leads.zadarmaCallSecond+'/ '+leads.zadarmaCallCount+')</td>'
                       +'</tr>';
                     }
-                    html+='<tr>'
-                      +'<th class="border-0 p-1">Step:</th>'
-                      +'<td class="border-0 p-1">'+(leads.curentStage!=''?leads.curentStage:'N/A')+'</td>'
-                    +'</tr>';
-                  }
+	                    html+='<tr>'
+	                      +'<th class="border-0 p-1">Step:</th>'
+	                      +'<td class="border-0 p-1">'+(leads.curentStage!=''?leads.curentStage:'N/A')+'</td>'
+	                    +'</tr>';
+						if (parseInt(leads.reminderCount || 0, 10) > 0) {
+							html+='<tr>'
+							  +'<th class="border-0 p-1">Reminder:</th>'
+							  +'<td class="border-0 p-1">'
+								+'<button type="button" class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" data-original-title="View Reminders" onclick="openLeadReminderListPopup(\''+leads.leadId+'\', \''+leads.leadNo+'\')">View Reminder</button>'
+							  +'</td>'
+							+'</tr>';
+						}
+	                  }
                   if(leads.pendingFollowupCount>0){
                     html+='<tr>'
                         +'<th class="border-0 p-1" >Last Followup days:</th>'
@@ -2019,7 +2029,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							}	
 						html+='</ul>'
 					+'</td>'
-					+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;">';
+						+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;color:#027FFF;">';
 					if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
 						if(leads.leadStatus=='Unassigned'){
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" ><i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
@@ -2047,6 +2057,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<i class="fa fa-tasks" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update chat support" onclick="renderChatContent(\''+objRights.discardPermission+'\',\''+USER_ID+'\',\''+leads.leadId+'\')">'
 									+'<i class="fa fa-comment" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';	
+							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Set Reminder" onclick="openLeadReminderPopup(\''+leads.leadId+'\',\''+leads.leadNo+'\')">'
+									+'<i class="fa fa-bell" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleAndModule.updated=='Y'){
 								//var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
 								var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
@@ -2100,6 +2112,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	return html;
 
 }
+
+function openLeadReminderPopup(leadId, leadNo) {
+  $("#leadReminderForm")[0].reset();
+  $("#leadReminderLeadId").val(leadId || "");
+  $("#leadReminderLeadNo").text(leadNo || "N/A");
+  $("#saveLeadReminder").prop("disabled", false).text("Save reminder");
+  $("#leadReminderPopupForm").modal("show");
+}
+
 
 function b2cleadsPagging(leaddata, objRights){
 	var recordsPerPage = leaddata.recordsPerPage;
@@ -2226,4 +2247,83 @@ function getDemoDetailSummary(){
             </div>
         </div>`
     return html;
+}
+
+
+function getLeadReminderPopup() {
+  var html =
+    '<div id="leadReminderPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadReminderTitle" aria-hidden="true">' +
+    '<div class="modal-dialog modal-md">' +
+    '    <div class="modal-content border-0">' +
+    '        <div class="modal-header py-2 bg-primary text-white">' +
+    '            <h5 class="modal-title" id="leadReminderTitle">Set Reminder (<span id="leadReminderLeadNo">N/A</span>)</h5>' +
+    '            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">' +
+    '                <span aria-hidden="true">&times;</span>' +
+    "            </button>" +
+    "        </div>" +
+    '        <div class="modal-body">' +
+    '            <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-2 pb-2" method="post" id="leadReminderForm" action="javascript:void(0);">' +
+    '              <input type="hidden" name="leadId" id="leadReminderLeadId" value="" />' +
+    '              <div class="row">' +
+    '                <div class="col-12 mb-2">' +
+    '                  <label class="m-0">Reminder Title</label>' +
+    '                  <input type="text" class="form-control" name="reminderTitle" id="reminderTitle" maxlength="255" autocomplete="off" />' +
+    "                </div>" +
+    '                <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">' +
+    '                  <label class="text-primary m-0">Date</label>' +
+    '                  <input type="text" class="form-control datepicker" name="reminderDate" id="reminderDate" readonly onkeydown="return false" />' +
+    "                </div>" +
+    '                <div class="col-lg-3 col-md-6 col-sm-12 col-12 mb-2">' +
+    '                  <label class="text-primary m-0">Time</label>' +
+    '                  <input type="text" class="form-control timepicker" name="reminderTime" id="reminderTime" autocomplete="off" placeholder="Select time" />' +
+    "                </div>" +
+    "              </div>" +
+    "            </form>" +
+    "        </div>" +
+    '        <div class="modal-footer">' +
+    '          <button type="button" class="btn btn-info float-right pr-4 pl-4 ml-2" data-dismiss="modal">Cancel</button>' +
+    '          <button type="button" class="btn btn-success float-right pr-4 pl-4" id="saveLeadReminder">Save reminder</button>' +
+    "        </div>" +
+    "    </div>" +
+    "</div>" +
+    "</div>";
+  return html;
+}
+
+function getLeadReminderListPopup() {
+  var html =
+    '<div id="leadReminderListPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadReminderListTitle" aria-hidden="true">' +
+    '<div class="modal-dialog modal-lg">' +
+    '    <div class="modal-content border-0">' +
+    '        <div class="modal-header py-2 bg-primary text-white">' +
+    '            <h5 class="modal-title" id="leadReminderListTitle">Reminders (<span id="leadReminderListLeadNo">N/A</span>)</h5>' +
+    '            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">' +
+    '                <span aria-hidden="true">&times;</span>' +
+    "            </button>" +
+    "        </div>" +
+    '        <div class="modal-body">' +
+    '            <input type="hidden" id="leadReminderListLeadId" value="0" />' +
+    '            <div class="table-responsive" id="leadReminderListTableWrapper">' +
+    '              <table class="table table-bordered table-striped font-12 mb-0">' +
+    '                <thead class="bg-primary text-white">' +
+    "                  <tr>" +
+    "                    <th>Reminder Title</th>" +
+    "                    <th>DateTime</th>" +
+    "                    <th>Status</th>" +
+    "                    <th>Created By</th>" +
+    "                  </tr>" +
+    "                </thead>" +
+    '                <tbody id="leadReminderListBody">' +
+    '                  <tr><td colspan="4" class="text-center">No reminders set for this lead</td></tr>' +
+    "                </tbody>" +
+    "              </table>" +
+    "            </div>" +
+    "        </div>" +
+    '        <div class="modal-footer">' +
+    '          <button type="button" class="btn btn-info float-right pr-4 pl-4" data-dismiss="modal">Close</button>' +
+    "        </div>" +
+    "    </div>" +
+    "</div>" +
+    "</div>";
+  return html;
 }

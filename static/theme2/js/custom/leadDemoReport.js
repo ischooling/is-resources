@@ -72,8 +72,8 @@ function bindLeadDemoReportEvents() {
 }
 
 function getLeadDemoReportRequestParams(page) {
-    var startTime =  '00:00';//$('#leadDemoReportStartTime').val() ||
-    var endTime =  '23:59';//$('#leadDemoReportEndTime').val() ||
+    var startTime =  $('#leadDemoReportStartTime').val() ||'00:00';
+    var endTime =  $('#leadDemoReportEndTime').val() || '23:59';
     var startDate = ($('#leadDemoReportStartDate').val() || '') + ' ' + startTime;
     var endDate = ($('#leadDemoReportEndDate').val() || '') + ' ' + endTime;
     var params = {

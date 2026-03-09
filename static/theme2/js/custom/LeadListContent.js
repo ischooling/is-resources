@@ -58,6 +58,9 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		submitLeadFollowupSave('followupSaveForm',''+objRights.moduleId +'', 'new-lead-list', true, 'leadFollowupForm', objRights, roleAndModule);
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	});
+	$("#saveLeadReminder").unbind().bind("click", function(){
+		submitLeadReminder();
+	});
 
 	$("#saveB2BFollowup").unbind().bind("click", function(){
 		submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule);
@@ -516,6 +519,9 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 			submitLeadFollowupSave('followupSaveForm',''+objRights.moduleId +'', 'new-lead-list', true, 'leadFollowupForm', objRights, roleAndModule);
 			callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 		});
+		$("#saveLeadReminder").unbind().bind("click", function(){
+			submitLeadReminder();
+		});
 
 		$("#saveB2BFollowup").unbind().bind("click", function(){
 			submitLeadFollowupSave('followupB2BSaveForm',''+objRights.moduleId +'', 'new-lead-list', true,'leadFollowupB2BForm', objRights, roleAndModule);
@@ -951,10 +957,12 @@ function getLeadListMasterContent(roleAndModule, objRights){
 		
 		
 	}else{
-		html+=getLeadAdvanceSearchPopup(objRights);
-		html+=getLeadFollowupFormPopup(objRights);
-		html+=getLeadFormB2BPopup(objRights);
-		html+=getLeadFormPopup(objRights);
+			html+=getLeadAdvanceSearchPopup(objRights);
+			html+=getLeadFollowupFormPopup(objRights);
+			html+=getLeadReminderPopup();
+			html+=getLeadReminderListPopup();
+			html+=getLeadFormB2BPopup(objRights);
+			html+=getLeadFormPopup(objRights);
 		html+=getLeadMergeFormPopup(objRights);
 		html+=getLeadCampaignListPopup();
 		html+=getLeadWatsApp();
@@ -1191,6 +1199,27 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 		autoclose: true,
 		format: 'mm-dd-yyyy',
 	});
+	$('#reminderDate').datepicker({
+		container: '#leadReminderPopupForm',
+		autoclose: true,
+		format: 'dd-mm-yyyy',
+		startDate: new Date(),
+	});
+	if($('#reminderTime').length > 0){
+		if(typeof $.fn.timepicker === "function"){
+			if(!$('#reminderTime').data('timepicker')){
+				$('#reminderTime').timepicker({
+					format:'hh:mm p',
+				});
+			}
+			$('#reminderTime').off('click.reminderTime').on("click.reminderTime",function(){
+				var zIndex = parseInt($(this).closest(".modal.fade.show").css("z-index")) + 1999;
+				$(".popover.timepicker-popover").css({"z-index":zIndex});
+			});
+		}else{
+			$('#reminderTime').attr('type', 'time').attr('step', '60').removeClass('timepicker');
+		}
+	}
 
 	$('#campaignStartDate').datepicker({
 			autoclose: true,
