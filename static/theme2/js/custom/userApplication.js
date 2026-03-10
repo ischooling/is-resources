@@ -129,8 +129,8 @@ function bindUserApplicationData(responseData) {
                     <td>${user.appliedUserRole || ''}</td>
                     <td>
                         ${user?.attachments?.uploadDocumentUserResumeURL ? 
-                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewResumeAndPhoto(\'${user?.attachments?.uploadDocumentUserResumeURL}\','viewApplicantsAttachementModal')">View Resume</a>` : 
-                            '<span class="text-muted">N/A</span>'
+                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewResumeAndPhoto(\'${user?.attachments?.uploadDocumentUserResumeURL}\','viewApplicantsAttachementModal')">View Resume</a>`
+                            : '<span class="text-muted">N/A</span>'
                         }
                     </td>
                     <td>
@@ -738,50 +738,99 @@ function bindQuestionsToJA(formId, responseData) {
     enableDualSortable();
 }
 
+let activeApplicantAttachmentBlobUrl = null;
+
 async function viewResumeAndPhoto(url, modalId){
-    
+
     var attachmentType = getExtension(url);
-    var blobUrl = await urlToBlobUrl(url, attachmentType); 
+    var attachmentData = await urlToBlobUrl(url, attachmentType);
 
-    if (attachmentType != 'pdf') {
+    if (!attachmentData) {
+        return;
+    }
 
-        $("#" + modalId + " .upload_img img").attr('src', blobUrl);
+    releaseApplicantAttachmentBlobUrl();
+    activeApplicantAttachmentBlobUrl = attachmentData.blobUrl;
+
+    if (attachmentData.attachmentType != 'pdf') {
+
+        $("#" + modalId + " .upload_img img").attr('src', attachmentData.blobUrl);
         $("#" + modalId + ' .upload_img').removeClass("d-none");
         $("#" + modalId + " .upload_pdf").addClass("d-none");
-        customLoader(false);
     } else {
 
         $("#" + modalId + " .upload_pdf .pre_upload_pdf").remove();
-        var objectTag = $('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data="' + blobUrl + '"></object>');
-        objectTag.on("load", function () {
-            customLoader(false);
-           
-        });
-        $("#"+modalId+" #pre_upload_pdf_div").append(objectTag);
-        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", blobUrl);
+
+        var iframeTag = $("<iframe class=\"pre_upload_pdf full border-0\" style=\"height: 400px; width: 100%;\" referrerpolicy=\"no-referrer\" allowfullscreen></iframe>");
+        iframeTag.attr("src", attachmentData.blobUrl + "#toolbar=0&navpanes=0&scrollbar=1");
+
+        $("#"+modalId+" #pre_upload_pdf_div").append(iframeTag);
+        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", url);
+        $("#" + modalId + " .upload_pdf a.open-pdf-btn").attr("href", url);
         $("#" + modalId + " .upload_pdf").removeClass("d-none");
         $("#" + modalId + ' .upload_img').addClass("d-none");
     }
+
     customLoader(false);
     $("#" + modalId).modal("show");
 }
 
 function getExtension(url) {
     if (!url) return "";
-    return url.split('.').pop().split('?')[0];
+
+    var cleanUrl = url.split('?')[0].split('#')[0];
+    var fileName = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+
+    if (fileName.indexOf('.') === -1) {
+        return "";
+    }
+
+    return fileName.split('.').pop().toLowerCase();
+}
+
+function releaseApplicantAttachmentBlobUrl() {
+    if (activeApplicantAttachmentBlobUrl) {
+        URL.revokeObjectURL(activeApplicantAttachmentBlobUrl);
+        activeApplicantAttachmentBlobUrl = null;
+    }
 }
 
 async function urlToBlobUrl(url, attachmentType) {
     customLoader(true);
-    var response = await fetch(url);
-    if (!response.ok) {
+
+    try {
+        var response = await fetch(url, { method: "GET" });
+        if (!response.ok) {
+            throw new Error("Failed to fetch attachment");
+        }
+
+        var contentType = (response.headers.get("content-type") || "").toLowerCase();
+        var resolvedAttachmentType = contentType.indexOf("pdf") !== -1 ? "pdf" : attachmentType;
+        var blob = await response.blob();
+
+        if (resolvedAttachmentType === "pdf" && blob.type !== "application/pdf") {
+            blob = new Blob([blob], { type: "application/pdf" });
+        }
+
+        return {
+            attachmentType: resolvedAttachmentType,
+            blobUrl: URL.createObjectURL(blob)
+        };
+    } catch (error) {
+        showMessageTheme2(0, "Unable to preview this file. Please use download/open instead.");
+        return null;
+    } finally {
         customLoader(false);
-        showMessageTheme2(0, "Failed to fetch "+(attachmentType!="PDF"?"Image":attachmentType));
     }
-    var blob = await response.blob();
-    customLoader(false);
-    return URL.createObjectURL(blob);
 }
+
+$(document).off("hidden.bs.modal.userApplicationAttachment", "#viewApplicantsAttachementModal").on("hidden.bs.modal.userApplicationAttachment", "#viewApplicantsAttachementModal", function () {
+    releaseApplicantAttachmentBlobUrl();
+    $(this).find(".upload_img img").attr("src", "");
+    $(this).find(".upload_pdf .pre_upload_pdf").remove();
+    $(this).find(".upload_pdf").addClass("d-none");
+    $(this).find(".upload_img").addClass("d-none");
+});
 
 function openCommunicationLogsModalForUserApplication(userId, userRole, callFrom){
     if($("#userApplicationCommunicationLogsModal").length == 1){
