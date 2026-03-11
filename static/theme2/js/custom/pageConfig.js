@@ -88,17 +88,17 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "parent-attendance":{url:"",file:[{role:"",fileName:["attendaceByStudentIdContent.js","attendaceByStudentId.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // STUDENT PAGE CONFIG
         "batch-schedule":{url:"teacher-batch-time-schedule?moduleId="+moduleId+"&userId="+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "student-handbook":{url:"studenthandbook?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "notifications":{url:"notifications"+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
+        "student-handbook":{url:"",file:[{role:"",fileName:["studentHandbookContent.js","studentHandbook.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        // "notifications":{url:"notifications"+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "parent-notifications":{url:"notifications"+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "syllabus-assigned-batch-teacher":{url:"student-batch-teacher-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "academic-year-extention":{url:"academic-year-extention-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
+        "academic-year-extention":{url:"",file:[{role:"",fileName:["studentAcademicYearExtentionContent.js","studentAcademicYearExtention.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-login-details":{url:"",file:[{role:"",fileName:["studentLoginHistoryContent.js","studentLoginHistory.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "syllabus-assigned-teacher":{url:"",file:[{role:"",fileName:["studentSyllabusAssignedTeacherContent.js","studentSyllabusAssignedTeacher.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "fee-details":{url:"student-due-fees-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "student-progress-report":{url: extraParam != undefined ? "student-progress-report/" + UNIQUEUUID +"?moduleId=" +moduleId +extraParam : "student-progress-report/" + UNIQUEUUID + "?moduleId=" + moduleId ,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "progress-detail":{url:"weekly-progress-detail?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "batch-student-examination-sheet":{url:"batch-student-examination-sheet?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
+        "fee-details":{url:"",file:[{role:"",fileName:["studentFeeDetailsContent.js","studentFeeDetails.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "student-progress-report":{url:"",file:[{role:"",fileName:["studentAcademicPerformanceContent.js","studentAcademicPerformance.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "progress-detail":{url:"",file:[{role:"",fileName:["studentProgressDetailContent.js","studentProgressDetail.js","dashboardWeeklyProgress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "batch-student-examination-sheet":{url:"",file:[{role:"",fileName:["studentExaminationSheetContent.js","studentExaminationSheet.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         //JS
         "student-home":{url:"",file:[],type:"JS",pageReqType:"IN"},
         "student-addon":{url:"buy-extra-class",file:[{role:"",fileName:["buyExtraClassContent.js","buyExtraClass.js"]}],funName:function(){},init: function(){buyExtraClassOnLoadEvent()},type:"JS",pageReqType:"IN"},
@@ -1518,3 +1518,4 @@ function getRequestForSpecificUserScholarship(
 
   return request;
 }
+

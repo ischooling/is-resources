@@ -203,10 +203,42 @@ function getParentRightCardSkeletonRows(totalRows){
     return html;
 }
 
+function getParentGreetingIconByMessage(welcomeMessage){
+    var normalizedMessage = (welcomeMessage || "").toLowerCase();
+    var timeOfDay = new Date().getHours();
+    var iconPath = PATH_FOLDER_IMAGE2 + "good_morning_good_evening.svg";
+    var extraClass = "";
+
+    if(normalizedMessage.indexOf("afternoon") > -1){
+        iconPath = PATH_FOLDER_IMAGE2 + "good_afternoon.svg";
+    }else if(timeOfDay >= 21 && timeOfDay < 24){
+        iconPath = PATH_FOLDER_IMAGE2 + "good_evening.svg";
+    }else if((timeOfDay >= 0 && timeOfDay < 12) || (timeOfDay >= 16 && timeOfDay < 21)){
+        extraClass = "mb-2";
+    }
+    return `<img src="${iconPath}" alt="Greeting Icon" class="${extraClass}" style="width:20px;height:20px;object-fit:contain;">`;
+}
+
 function getStudentPerformanceDetailsCard(data){
+    var parentName = (typeof USER_FULL_NAME !== "undefined" && USER_FULL_NAME) ? USER_FULL_NAME : "Parent";
+    var welcomeMessage = getWelcomeMessage();
+    var showGreetingBanner = !(typeof window !== "undefined" && window.PARENT_DASHBOARD_GREETING_SHOWN_ONCE === true);
+    var salutation = getSalutationByGender(GENDER) 
     var html=
-    `<div class="card rounded-10"data>
-        <div class="card-body">
+    `<div class="card rounded-10 overflow-hidden"data>
+        ${showGreetingBanner ? `
+        <div class="js-parent-greeting-banner-wrap" style="overflow:hidden;max-height:260px;opacity:1;transform:translateY(0);margin-bottom:0;transition:max-height 0.55s ease,opacity 0.45s ease,transform 0.55s ease,margin 0.55s ease;">
+            <div class="bg-primary-green-gradient text-center text-white py-3 px-2">
+                <div class="d-inline-flex align-items-center px-3 py-1 rounded-pill mb-2" style="background:rgba(0,0,0,0.15);">
+                    <span class="font-22 mr-1 d-inline-flex align-items-center" style="line-height:1;">${getParentGreetingIconByMessage(welcomeMessage)}</span>
+                    <span class="font-weight-semi-bold font-16">${welcomeMessage}</span>
+                </div>
+                <h4 class="font-weight-bold m-0 text-white">${salutation} ${parentName}</h4>
+                <p class="m-0 text-white">Thank you for standing strong in your child&#39;s journey.</p>
+            </div>
+        </div>
+        ` : ""}
+        <div class="card-body pt-3">
             <div class="position-absolute text-gray font-12" style="right:1.25rem">
                 <span class="bg-gray d-inline-block rounded-circle" style="width:10px;height:10px;"></span>&nbsp; Last active: ${data.student.lastActive}
             </div>

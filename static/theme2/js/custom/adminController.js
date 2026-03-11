@@ -569,8 +569,20 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       await renderStudentLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='syllabus-assigned-teacher'){
       await renderStudentSyllabusAssignedTeacherPage('Assigned Course Teachers',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='academic-year-extention'){
+      await renderStudentAcademicYearExtentionPage('Academic Year Extension',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='fee-details'){
+      await renderStudentFeeDetailsPage('Fee Details',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='student-progress-report'){
+      await renderStudentAcademicPerformancePage('Academic Performance',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='progress-detail'){
+      await renderStudentProgressDetailPage('Progress Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='student-feedback'){
       renderStudentFeedbackPage('Student Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
+     }else if(pageNo=='student-handbook'){
+      await renderStudentHandbookPage('Student Handbook',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+     }else if(pageNo=='batch-student-examination-sheet'){
+      await renderStudentExaminationSheetPage("Student's Examination Schedule",roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='Parent-dashboard'){
       renderParentDashboardContent()
      }else if(pageNo=='parent-class-schedule'){
@@ -2357,3 +2369,4 @@ function AdminTaskModalWarnings(response){
 	</div>`;
 	return html;
  }
+

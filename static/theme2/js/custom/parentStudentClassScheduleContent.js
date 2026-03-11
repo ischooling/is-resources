@@ -170,7 +170,7 @@ function renderClassScheduleTable(events, startDate, endDate) {
                 html += `
                 <tr class="${event.category}-row even-row" data-event-id="${event.id}">
                     <td class="py-2">${serial++}</td>
-                    <td class="py-2">${event.courseName.split("Grade")[0]}</td>
+                    <td class="py-2">${event.courseName}</td>
                     <td class="py-2">${formatTimeRange(event.start, event.end)}</td>
                     <td class="py-2">${getSalutationByGender(event.teacherGender)} ${event.teacherName || 'N/A'}</td>
                     <td class="py-2">${typeBadge}</td>

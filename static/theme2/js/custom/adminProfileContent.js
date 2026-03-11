@@ -89,7 +89,6 @@ async function renderProfilePage(arg0){
 }
 
 function getProfilePageContent(data, callFrom, arg0){
-    console.log(data)
     var html=
         `<div class="main-card mb-3 p-3">
             <div class="card">
@@ -122,7 +121,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                 <i class="fa fa-user font-24 bg-light-primary text-primary rounded p-1 mr-2" aria-hidden="true"></i>
                                 <h5 class="font-weight-bold text-dark">Personal Details</h5>
                             </div>`
-                            if(callFrom==''){
+                            if(callFrom=='' || callFrom=='callFrom=admin'){
                                 html+=`<a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right editProfileBtn" onclick="editProfilePage()">
                                     <i class="fa fa-edit"></i>&nbsp; Edit
                                 </a>`;

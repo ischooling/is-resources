@@ -1466,54 +1466,6 @@ function getRequestForsubmitForTeacherInterviewSlots(formId, moduleId, controllT
 	return request;
 }
 
-
-function notificationContentListingWithQueries(elementId, argument) {
-	$('#' + elementId).DataTable({
-		"processing": false,
-		"serverSide": true,
-		"searching": true,
-		"pageLength": 10,
-		"ajax": {
-			"url": CONTEXT_PATH + UNIQUEUUID + "/" + "dashboard/notifications-1" + argument,
-			"data": function (data) {
-				//	            	console.log('data '+data)
-			}
-		},
-		"fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-			/*$('.dt-responsive tbody tr td:first-child').addClass('dtr-control');*/
-		},
-		"columns": [
-			{ "data": "sno", "name": "sno", "title": "S.No" },
-			{ "data": "createdAt", "name": "createdAt", "title": "Date" },
-			{ "data": "notificationTitle", "name": "notificationTitle", "title": "Title" },
-			// { "data": "notificationDescription", "name" : "notificationDescription" , "title" : "Description"},
-			{ "data": "action", "name": "action", "title": "View Details" },
-
-		],
-
-	});
-	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
-
-}
-
-// function showOtherReason(id) {
-// 	if ($("#reasonEnrollEnd" + id).val() == 'Other') {
-// 		$("#otherReason" + id).show();
-// 	} else {
-// 		$("#otherReason" + id).val('');
-// 		$("#otherReason" + id).hide();
-// 	}
-// }
-
-// function changeTeacher(id, teacherId, standardId) {
-// 	//getTeacherCompensationStandard("", "steachAmount"+id, teacherId, standardId);
-// 	//$("#stdEnrollDate"+id).val('');
-// 	$("#steachEnrollStartDate" + id).val('');
-// 	$("#steachEnrollEndDate" + id).val('');
-// 	$("#reasonEnrollEnd" + id).val('');
-// 	$("#otherReason" + id).val('');
-// }
-
 function showOtherReason(formId, moduleId, subjectId, standardId, studentId, oldTeacherId, courseType) {
     $("#assigTeacherLinkList" + subjectId).show();
     if ($("#reasonEnrollEnd" + subjectId).val() == 'Other') {

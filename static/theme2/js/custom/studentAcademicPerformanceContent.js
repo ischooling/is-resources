@@ -1,18 +1,13 @@
-function getParentAcademicPerformanceContent(pageData){
-    var backupStudentList = STUDENT_LIST;
-    var sliderHtml = getStudentTabSliderContent(pageData.tabData, 'parentAcademicPerformanceOnStudentTabClick');
-    STUDENT_LIST = backupStudentList;
-    var html = `
-        <div class="full">
-            ${sliderHtml}
-
+function getStudentAcademicPerformanceContent(pageData){
+    return `
+        <div class="full mt-3">
             <div class="main-card mb-3 card rounded-10 border py-3">
                 <div class="card-body p-0">
                     <div class="d-flex flex-wrap align-items-center justify-content-between">
                         <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Academic Performance</h4>
                     </div>
                     <div class="table-responsive">
-                        <table class="table font-12 nowrap dt-responsive" id="parentAcademicPerformanceTable" style="width:100%;">
+                        <table class="table font-12 nowrap dt-responsive" id="studentAcademicPerformanceTable" style="width:100%;">
                             <thead class="bg-primary text-white">
                                 <tr>
                                     <th class="pl-3">Course Name</th>
@@ -27,34 +22,33 @@ function getParentAcademicPerformanceContent(pageData){
                                 </tr>
                             </thead>
                             <tbody>
-                                ${getParentAcademicPerformanceRowsHtml(pageData.rows)}
+                                ${getStudentAcademicPerformanceRowsHtml(pageData.rows)}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>`;
-    return html;
 }
 
-function getParentAcademicPerformanceRowsHtml(rows){
+function getStudentAcademicPerformanceRowsHtml(rows){
     var rowsHtml = "";
     $.each(rows || [], function(index, row){
         var courseHtml = row.courseName;
         if(row.lmsEnrollmentId && row.lmsCourseId){
-            courseHtml = `<a href="javascript:void(0)" class="text-primary" onclick="parentAcademicPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseHtml}</a>`;
+            courseHtml = `<a href="javascript:void(0)" class="text-primary" onclick="studentAcademicPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseHtml}</a>`;
         }
         rowsHtml += `
             <tr>
                 <td class="pl-3">${courseHtml}</td>
                 <td>${row.scoreText}</td>
-                <td>${getParentAcademicPerformancePaceHtml(row.pace)}</td>
+                <td>${getStudentAcademicPerformancePaceHtml(row.pace)}</td>
                 <td>${getSalutationByGender(row.teacherGender)} ${row.teacherName}</td>
                 <td>${row.endDate}</td>
                 <td>${row.remainingDays}</td>
                 <td>${row.pendingAssignment}</td>
-                <td>${getParentAcademicPerformanceProgressHtml(row.progressGradable)}</td>
-                <td>${getParentAcademicPerformanceProgressHtml(row.progressAllActivity)}</td>
+                <td>${getStudentAcademicPerformanceProgressHtml(row.progressGradable)}</td>
+                <td>${getStudentAcademicPerformanceProgressHtml(row.progressAllActivity)}</td>
             </tr>`;
     });
     if(!rowsHtml){
@@ -63,7 +57,7 @@ function getParentAcademicPerformanceRowsHtml(rows){
     return rowsHtml;
 }
 
-function getParentAcademicPerformancePaceHtml(pace){
+function getStudentAcademicPerformancePaceHtml(pace){
     var value = (pace || "N/A").toUpperCase();
     var textClass = "text-dark";
     var label = pace || "N/A";
@@ -74,19 +68,16 @@ function getParentAcademicPerformancePaceHtml(pace){
         textClass = "text-success";
         label = "Ahead";
         imageName = "forward.gif";
-        imageStyle="width:27px;height:27px;object-fit:contain;";
+        imageStyle = "width:27px;height:27px;object-fit:contain;";
     }else if(value === "YELLOW"){
         textClass = "text-primary";
         label = "On Track";
         imageName = "still.png";
-        imageStyle="width:24px;height:24px;object-fit:contain;";
     }else if(value === "RED"){
         textClass = "text-danger";
         label = "Behind";
         imageName = "behind.gif";
-        imageStyle="width:24px;height:24px;object-fit:contain;";
     }
-
     var imageUrl = PATH_FOLDER_IMAGE2 + imageName;
     return `<div class="d-flex align-items-center ${textClass}">
         <img src="${imageUrl}" alt="${label}" style="${imageStyle}">
@@ -94,17 +85,11 @@ function getParentAcademicPerformancePaceHtml(pace){
     </div>`;
 }
 
-function getParentAcademicPerformanceProgressHtml(value){
+function getStudentAcademicPerformanceProgressHtml(value){
     var progressValue = parseFloat(value || 0);
-    if(isNaN(progressValue)){
-        progressValue = 0;
-    }
-    if(progressValue < 0){
-        progressValue = 0;
-    }
-    if(progressValue > 100){
-        progressValue = 100;
-    }
+    if(isNaN(progressValue)){ progressValue = 0; }
+    if(progressValue < 0){ progressValue = 0; }
+    if(progressValue > 100){ progressValue = 100; }
     return `<div class="d-flex align-items-center">
         <div class="progress mr-1" style="height:18px;min-width:130px;">
             <div class="progress-bar bg-primary" role="progressbar" style="width:${progressValue}%;" aria-valuenow="${progressValue}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -113,21 +98,19 @@ function getParentAcademicPerformanceProgressHtml(value){
     </div>`;
 }
 
-function getParentAcademicPerformanceDetailContent(){
-    var gradeByTeacherHeaderHtml = USER_ROLE !== "STUDENT" ? `<th>Grade By Teacher</th>` : "";
-    var gradeByTeacherCellHtml = USER_ROLE !== "STUDENT" ? `<td><span id="gradeByTeacher">0</span></td>` : "";
-    return `<div class="full mb-2 d-flex justify-content-end">
+function getStudentAcademicPerformanceDetailContent(){
+    return `<div class="full my-2 d-flex justify-content-end">
             <a href="javascript:void(0)" onclick="showAndHideDashboardAndAdditionalContent('main')" class="btn btn-dark rounded">
                 <i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>Back
             </a>
         </div>
         <div class="main-card mb-3 card body-tabs-shadow">
             <div class="card-body">
-                <div class="mb-2"><b>Course:</b> <span id="parentAcademicPerformanceCourseName">N/A</span></div>
-                <div class="mb-2"><b>Current Overall Score:</b> <span id="parentAcademicPerformanceScore">N/A</span></div>
-                <div class="mb-2"><b>Current Overall Grade:</b> <span id="parentAcademicPerformanceGradeLetter">N/A</span></div>
-                <div class="mb-2"><b>Duration:</b> <span id="parentAcademicPerformanceScheduleDate">N/A</span></div>
-                <div id="parentAcademicPerformancePercentActivity" class="mb-3"></div>
+                <div class="mb-2"><b>Course:</b> <span id="studentAcademicPerformanceCourseName">N/A</span></div>
+                <div class="mb-2"><b>Current Overall Score:</b> <span id="studentAcademicPerformanceScore">N/A</span></div>
+                <div class="mb-2"><b>Current Overall Grade:</b> <span id="studentAcademicPerformanceGradeLetter">N/A</span></div>
+                <div class="mb-2"><b>Duration:</b> <span id="studentAcademicPerformanceScheduleDate">N/A</span></div>
+                <div id="studentAcademicPerformancePercentActivity" class="mb-3"></div>
                 <div class="main-card mb-3" style="overflow-x:auto;">
                     <table class="details-table table table-striped table-bordered dt-responsive" style="min-width:980px;width:100%;">
                         <thead>
@@ -141,7 +124,6 @@ function getParentAcademicPerformanceDetailContent(){
                                 <th>Submitted BEFORE TIME</th>
                                 <th>Submitted ON TIME</th>
                                 <th>Submitted LATE</th>
-                                ${gradeByTeacherHeaderHtml}
                             </tr>
                         </thead>
                         <tbody>
@@ -155,7 +137,6 @@ function getParentAcademicPerformanceDetailContent(){
                                 <td><span id="submitBeforeTimeAssign">0</span></td>
                                 <td><span id="submitOntimeAssign">0</span></td>
                                 <td><span id="submitLateAssign">0</span></td>
-                                ${gradeByTeacherCellHtml}
                             </tr>
                         </tbody>
                     </table>
@@ -171,7 +152,6 @@ function getParentAcademicPerformanceDetailContent(){
                                 <th>Submited Status</th>
                                 <th>Score</th>
                                 <th>Grade</th>
-                                ${gradeByTeacherHeaderHtml}
                                 <th>Detailed Assignment Status</th>
                             </tr>
                         </thead>
@@ -208,7 +188,7 @@ function getParentAcademicPerformanceDetailContent(){
         </div>`;
 }
 
-function getParentAcademicPerformancePercentActivityHtml(gradablePercent, gradableDone, gradableTotal, allPercent, allDone, allTotal){
+function getStudentAcademicPerformancePercentActivityHtml(gradablePercent, gradableDone, gradableTotal, allPercent, allDone, allTotal){
     return `<div class="text-center d-flex align-items-start mb-1">
             <div class="mb-0 progress col-2 pl-0 mt-1">
                 <div class="progress-bar bg-primary" role="progressbar" style="width:${gradablePercent}%;" aria-valuenow="${gradablePercent}" aria-valuemin="0" aria-valuemax="100"></div>

@@ -2816,7 +2816,7 @@ function getAnnouncementAndNewsContent(){
             <i class="fa fa-newspaper-o fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
         </button>`;
-		if(USER_ROLE !== 'PARENT'){
+		// if(USER_ROLE !== 'PARENT'){
 			if(CHAT_URL != ''){
 				const data = {
 					u: UNIQUEUUID,
@@ -2829,9 +2829,10 @@ function getAnnouncementAndNewsContent(){
 				html+=
 				`<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
 					<i class="fa fa-comments fa-w-16"></i>
-				</a>`;					
+					<span class="UNSEEN counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
+				</a>`;	
 			}
-		}
+		// }
 		html+=`</div>
 		<div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
 			<button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">

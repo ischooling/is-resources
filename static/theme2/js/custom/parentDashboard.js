@@ -2,6 +2,9 @@ var STUDENT_LIST=[];
 var ACTIVE_STUDENT_ID;
 var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var CLASS_STATUS_INTERVAL = null;
+if(typeof window.PARENT_DASHBOARD_GREETING_SHOWN_ONCE === "undefined"){
+    window.PARENT_DASHBOARD_GREETING_SHOWN_ONCE = false;
+}
 function getClassesAttendanceCircleValue(monthStat) {
     var normalized = normalizeMonthStat(monthStat);
     if (normalized.daysInMonth === 0) {
@@ -116,6 +119,7 @@ async function getStudentDetailsByStudentID(studentId){
     $(".student-"+studentId).addClass("active-student");
     var studentPerformanceData =  await getStudentPerformanceData(studentId);
     $("#studentPerformanceDetails").html(getStudentPerformanceDetailsCard(studentPerformanceData.details));
+    initParentGreetingBannerAutoHide();
     renderAvgGrade(studentPerformanceData.details.summary.avgGradeLastMonth, studentPerformanceData.details.summary.avgGradeThisMonth);
     initializeAttendanceChart(studentPerformanceData.details.attendanceOverview);
 
@@ -417,6 +421,7 @@ async function getStudentPerformanceData(studentId){
         onFaildResolved: true,
         onSuccessResolved: true
     }
+    getChat("", "PARENT");
     return await callCommonAjax(ajaxReqDetails);
 }
 
@@ -546,4 +551,29 @@ function getStudentFirstfName(studentName){
     }else{
         showMessageTheme2(0, "Student first name not found.")
     }
+}
+
+function initParentGreetingBannerAutoHide(){
+    var $greetingWrap = $('#studentPerformanceDetails .js-parent-greeting-banner-wrap:visible').first();
+    if($greetingWrap.length === 0){
+        return;
+    }
+    window.PARENT_DASHBOARD_GREETING_SHOWN_ONCE = true;
+
+    if($greetingWrap.data('hideScheduled')){
+        return;
+    }
+    $greetingWrap.data('hideScheduled', true);
+
+    setTimeout(function(){
+        $greetingWrap.css({
+            maxHeight: '0px',
+            opacity: '0',
+            transform: 'translateY(-18px)',
+            marginBottom: '0px'
+        });
+        setTimeout(function(){
+            $greetingWrap.remove();
+        }, 650);
+    }, 6000);
 }

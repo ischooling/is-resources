@@ -54,7 +54,7 @@ function getParentLoginHistoryTabSliderContent(studentList, selectedStudentUserI
     var isParentActive = String(selectedStudentUserId) === String(USER_ID);
     var parentAvatar = `<div class="circle d-flex align-items-center justify-content-center font-weight-semi-bold font-12 text-white bg-primary" style="width:25px;height:25px;">${getUserInitialsCommon(USER_FULL_NAME || "Parent", "PA")}</div>`;
     var parentTabHtml = `<li class="nav-item">
-            <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb student-${USER_ID} parent-login-student-tab-btn ${isParentActive ? "active-student active" : ""}" onclick="parentLoginHistoryOnStudentTabClick('${USER_ID}')">
+            <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb student-${USER_ID} parent-login-student-tab-btn ${isParentActive ? "active-student active" : ""}" onclick="parentLoginHistoryOnStudentTabClick('${USER_ID}')" style="padding-left: 30px !important;">
                 ${parentAvatar}
                 <span>Parent Log in History</span>
             </a>

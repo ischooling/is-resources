@@ -58,7 +58,7 @@ function getParentAcademicDocsRowsHtml(rows){
 
 function getParentAcademicDocsDownloadBtn(url, showFlag){
     if(showFlag === "N" || !url){
-        return `NA`;
+        return `--`;
     }
     return `<a href="${url}" target="_blank" class="btn btn-outline-primary btn-sm">Download <i class="fa fa-download ml-1"></i></a>`;
 }

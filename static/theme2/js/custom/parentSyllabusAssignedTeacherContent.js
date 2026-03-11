@@ -38,7 +38,7 @@ function getParentSyllabusAssignedTeacherContent(pageData){
 function getParentSyllabusTeacherRowsHtml(rows){
     var rowsHtml = "";
     $.each(rows || [], function(index, row){
-        var courseName = row.courseName.split("Grade")[0]
+        var courseName = row.courseName;
         rowsHtml += `
             <tr>
                 <td class="pl-3">${index + 1}</td>

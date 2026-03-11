@@ -397,7 +397,7 @@ function parentStudentClassScheduleSummaryBodyHTML(details, eventMeta){
     var studentImage = parentStudentClassScheduleSafe(details.profilePic || details.studentProfilePic || activeStudent.profilePic, PATH_FOLDER_FONT2 + "dummy-user.png");
     var attendanceStatus = parentStudentClassScheduleSafe(details.attendanceStatus || details.classAttendanceStatus || "Present", "Present");
 
-    var subject = parentStudentClassScheduleSafe(eventMeta.subjectName.split("Grade")[0] || details.subjectName.split("Grade")[0] || details.courseName.split("Grade")[0], "N/A");
+    var subject = parentStudentClassScheduleSafe((eventMeta.subjectName || details.subjectName || details.courseName || ""),"N/A");
     var teacher = parentStudentClassScheduleSafe(eventMeta.teacherName || details.teacherName || details.hostName, "N/A");
     var classDate = parentStudentClassScheduleSafe(eventMeta.classDate || details.classDate || details.date, "N/A");
     var classTime = parentStudentClassScheduleSafe(eventMeta.classTime || details.classTime || details.time || details.classTiming, "N/A");
