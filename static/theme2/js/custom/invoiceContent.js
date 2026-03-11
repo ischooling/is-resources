@@ -197,7 +197,7 @@ function renderInvoicePreview(data) {
     var html=`
         <div class="invoice-preview padding-print" style="max-width:900px;margin:auto;font-family:Arial;">
            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start mb-2">
-                <img src="${PATH_FOLDER_IMAGE2}is_logo_2025_blue.png" alt="Logo" style="max-width:250px;width: 100%; margin-right: auto; display: flex;">
+                <img src="${PATH_FOLDER_IMAGE2}is_logo_2026_blue.png" alt="Logo" style="max-width:250px;width: 100%; margin-right: auto; display: flex;">
                 <div class="text-center text-md-right mt-2 mt-md-0">
                     <p>Date : ${data.invoiceDate}</p>
                     <p>Invoice No.: ${data.invoiceNo}</p>

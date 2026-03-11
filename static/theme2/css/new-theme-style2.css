@@ -8900,7 +8900,7 @@ transition:width .2s
 .app-header__logo .logo-src {
 	height:50px;
 	width:225px;
-	background:url(../images/is_logo_2025_blue.png)
+	background:url(../images/is_logo_2026_blue.png)
 }
 @media(max-width: 400px){
 	.app-header__logo .logo-src{width: 175px;background-position: top center;}

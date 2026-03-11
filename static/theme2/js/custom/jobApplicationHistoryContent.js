@@ -438,7 +438,7 @@ function getApplicationDocumentsDetailsCard(){
 					<button class="btn btn-outline-primary font-16" onclick="viewResumeAndPhoto(\'https://s3.amazonaws.com/testseri/test/biMHaLPIoUBtCL81_2mb.pdf\',\'viewApplicantsAttachementModal\')">
 						<i class="fa fa-file-pdf-o mr-2 font-18"></i>View Resume
 					</button>
-					<button class="btn btn-outline-primary font-16" onclick="viewResumeAndPhoto(\'https://cdn.jsdelivr.net/gh/ischooling/is-resources@v1.0.11/static/theme2/images/is_logo_2025_blue.webp\',\'viewApplicantsAttachementModal\')">
+					<button class="btn btn-outline-primary font-16" onclick="viewResumeAndPhoto('${schoolSettingsLinks.logoUrl}',\'viewApplicantsAttachementModal\')">
 						<i class="fa fa-file-image-o mr-2 font-18"></i>View Photos
 					</button>
 					<a href="https://www.linkedin.com/in/joaquin-rosales-26581641/" target="_blank" class="btn btn-outline-primary font-16">
