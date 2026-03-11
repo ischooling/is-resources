@@ -294,8 +294,8 @@ function getStudentOrientAdvanceSearchPopup(){
 							</select>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Email</label>
-							<input type="email" name="emailIdSearch" id="emailIdSearch" class="form-control"  maxlength="100">
+							<label class="m-0">Student ID</label>
+							<input type="text" name="studentIdSearch" id="studentIdSearch" class="form-control" maxlength="100">
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<label class="m-0">Phone No.</label>
@@ -539,7 +539,6 @@ function getOrientationMovePopup(){
 </div>`;
 return html;
 }
-
 
 
 

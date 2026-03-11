@@ -109,6 +109,7 @@ function getStudentProfilePageContent(data){
                                 html+=reserveAnEnrollmentSeatAdvCourseInformation(data[5], PORFILE_RESPONSE_DATA.standardStatus, PORFILE_RESPONSE_DATA.enrollmentDetails)
                             }
                             html+=`<div class="full profile-section" id="communicationLogDIV"></div>`
+                            html+=`<div class="full profile-section" id="studentEmailDIV"></div>`
                             // html+=communicationLogInformation(data)
                         html+=`
                     </div>
@@ -122,7 +123,7 @@ function profileSectionTabs(){
     var html=
     `<div class="full mt-3">
         <ul class="m-0 p-0">
-            <li class="bg-white border border-top-left-rounded rounded-top-left-10 rounded-top-right-10 overflow-hidden">
+            <li class="bg-white border border-top-left-rounded  overflow-hidden">
                 <a href="#personal_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light  profile-selection-list-anchor">
                     <div class="text-dark font-weight-bold flex-grow-1">1. Personal Information</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -210,8 +211,8 @@ function profileSectionTabs(){
                 </li>`:``
             }
             
-            <li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
-                <a href="#communication_Log_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+            <li class="bg-white border border-top-left-rounded overflow-hidden">
+                <a href="#communicationLogDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                     <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6':'7'}. Communication Log</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
                         <div class="widget-content-left">
@@ -223,7 +224,22 @@ function profileSectionTabs(){
                         </div>
                     </div>    
                 </a>
-            </li>    
+            </li>
+            <li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
+                <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                    <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" || USER_ROLE == "STUDENT" ? '7':'8'}. Student School Email Account</div>
+                    <div class="widget-content-wrapper flex-fill circle-percentage text-right">
+                        <div class="widget-content-left">
+                            <div class="progress-circle-wrapper">
+                                <div class="circle-progress circle-progress-primary d-inline-block">
+                                    <small class="font-size-md text-dark"></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            
         </ul>   
     </div>`;
     return html;
@@ -454,7 +470,7 @@ function altPhoneNumberElement(data){
 
 function studentEmailIdElement(data){
     var html=
-    `<label for="studentEmailId" class="font-weight-semi-bold text-dark">Email</label>
+    `<label for="studentEmailId" class="font-weight-semi-bold text-dark">Email:</label>
     <div class="input-group mb-2 p-0">
         <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="studentEmailId" id="studentEmailId" value="${data != "" && data != undefined ?data:""}" ${USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA.rightToEdit ?'':'disabled'} autocomplete="off" onkeyup="controlEditField(this,'studentEmailId',\'${data != "" && data != undefined ?data:""}\','input', '','', 0,'studentEmailId')">
         <div class="input-group-append input-group-append-hide" style="display:none">
@@ -2345,6 +2361,135 @@ function getCommunicationAttchFileModal(){
 	return html;
 }
 // Communication Log Form Elements End Here
+
+// Student School Email Information Starts Here
+function studentEmailInformation(data){
+    if (!PORFILE_RESPONSE_DATA || (USER_ROLE !== "STUDENT" && USER_ROLE == "ADMIN")) {
+        return "";
+    }
+
+    var azureUserStatus = data && data.azureUserStatus ? data.azureUserStatus : "N";
+    var email = "";
+    var password = "";
+    var actionButtonHtml = "";
+
+    if (azureUserStatus === "Y") {
+        email = data && data.email ? data.email : "";
+        password = data && data.password ? data.password : "";
+        actionButtonHtml = `<button type="button" class="btn btn-sm btn-warning" onclick="resetStudentSchoolEmailPassword(this)" ${email ? "" : "disabled"}>Password Reset</button>`;
+    } else {
+        actionButtonHtml = `<button type="button" class="btn btn-sm btn-primary" onclick="showWarningMessageShow('Are you sure you want to activate your school User ID?', 'confirmActivateSchoolUserId()');">Activate your school user ID</button>`;
+    }
+
+    var html =
+        `<div class="card mt-3 mb-4" id="student_Email_Information">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-12 mb-2 d-flex align-items-center justify-content-between">
+                        <h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
+                            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                                <i class="fa fa-envelope font-12"></i>
+                            </span>
+                            <span>${USER_ROLE == "STUDENT" ? '7':'8'}. Student School Email Account</span>
+                        </h5>
+                        <div class="d-flex align-items-center ml-auto">
+                            ${actionButtonHtml}
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                        <div class="position-relative form-group">
+                            <label>Email</label>
+                            <div class="position-relative">
+                                <input type="text" id="studentSchoolEmail" class="form-control form-control-sm pr-5" value="${email}" disabled>
+                                <button type="button" class="btn btn-sm p-0 bg-transparent border-0 position-absolute d-flex align-items-center" style="right:8px;top:50%;transform:translateY(-50%);" onclick="copyStudentCredentialValue('studentSchoolEmail', this)" ${email ? "" : "disabled"}>
+                                    <span class="copy-status-msg d-none mr-1 text-success font-weight-bold">Copied!</span>
+                                    <i class="fa fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                        <div class="position-relative form-group">
+                            <label>Password:</label>
+                            <div class="position-relative">
+                                <input type="text" id="studentSchoolPassword" class="form-control form-control-sm pr-5" value="${password}" disabled>
+                                <button type="button" class="btn btn-sm p-0 bg-transparent border-0 position-absolute d-flex align-items-center" style="right:8px;top:50%;transform:translateY(-50%);" onclick="copyStudentCredentialValue('studentSchoolPassword', this)" ${password ? "" : "disabled"}>
+                                    <span class="copy-status-msg d-none mr-1 text-success font-weight-bold">Copied!</span>
+                                    <i class="fa fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>       
+                </div>
+            </div>
+        </div>`;
+
+    return html;
+}
+
+
+// Student School Email Information Ends Here
+function confirmActivateSchoolUserId(){
+    activateYourSchoolEmail();
+    window.open('http://outlook.office.com', '_blank');
+}
+
+
+function copyStudentCredentialValue(inputId, buttonElement){
+    var value = $("#" + inputId).val();
+    if (!value || value === "N/A") {
+        return;
+    }
+
+    var showCopiedMessage = function () {
+        var $button = $(buttonElement);
+        var $message = $button.find(".copy-status-msg");
+        $("#student_Email_Information .copy-status-msg").addClass("d-none");
+        $message.removeClass("d-none");
+        setTimeout(function () {
+            $message.addClass("d-none");
+        }, 1500);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(showCopiedMessage);
+    } else {
+        var tempInput = document.createElement("input");
+        tempInput.value = value;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        showCopiedMessage();
+    }
+}
+
+async function resetStudentSchoolEmailPassword(buttonElement){
+    if (!PORFILE_RESPONSE_DATA || !PORFILE_RESPONSE_DATA.userId) {
+        return;
+    }
+    $(buttonElement).prop("disabled", true);
+    var payload = {
+      userId: PORFILE_RESPONSE_DATA.userId,     
+    };
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/reset-azure-password-notify-primary-mail",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData && responseData.status == 1){
+        showMessageTheme2(1, responseData.message || "Password reset request sent successfully.");
+    }else{
+        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to reset student school email password.");
+    }
+    $(buttonElement).prop("disabled", false);
+}
 
 function cropperImageModalContent(){
     var html=

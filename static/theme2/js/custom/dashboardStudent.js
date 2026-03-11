@@ -1099,13 +1099,13 @@ function saveTeacherTimePreferenceStudent(stepFlag) {
 				}else if(stepFlag == "systemtraining"){
 					var academicYearSelectedType = "Y";
 					var systemTrainingSelectedType = "Y";
-					var systemTrainingDate = $("#chooseDateSystemTrainingDate").val();
+					var systemTrainingDate = getSystemTrainingDateDisplayValue();
 					var bookStTime = $(".meeting-time input[name='slotTime']:checked").attr("slottime");
 					var stdt = systemTrainingDate + " " + bookStTime;
 					showMessageTheme2(1, data['message'], '', true);
 				}
 				// if((enrollmentType =='REGISTRATION_FRESH' || enrollmentType=='REGISTRATION_FLEX_COURSE')){
-					showContentByStep(academicYearSelectedType, systemTrainingSelectedType, startSemsterStartDate == "" ? $("#chooseDateSystemTrainingDate").val() : startSemsterStartDate, stdt)
+					showContentByStep(academicYearSelectedType, systemTrainingSelectedType, startSemsterStartDate == "" ? getSystemTrainingDateDisplayValue() : startSemsterStartDate, stdt)
 				// }else{
 				// 	// window.location.href=redirectUrl;
 				// 	showContentByStep(academicYearSelectedType, "Skipped", startSemsterStartDate == "" ? $("#chooseDateSystemTrainingDate").val() : startSemsterStartDate, '')
@@ -1130,8 +1130,8 @@ function getRequestForStudentTimePreference(){
 	teacherAssign['studentStandardId']=$("#studentStandardId").val();
 	teacherAssign['userRole'] = 'STUDENT';
 	teacherAssign['saveType'] =$("#saveType").val();
-	var startDate=changeDateFormat(new Date($('#chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
-	teacherAssignTime['startDate']=$('#chooseDateSystemTrainingDate').val();
+	var startDate=changeDateFormat(new Date(getSystemTrainingDateApiValue()),"mm-dd-yyyy");
+	teacherAssignTime['startDate']=getSystemTrainingDateApiValue();
 	var enrollmentType = $("#enrollmentType").val();
 	if(enrollmentType !='REGISTRATION_FRESH' && enrollmentType !='REGISTRATION_FLEX_COURSE'){
 		if($("#saveType").val()=='SKIP'){
@@ -1147,7 +1147,7 @@ function getRequestForStudentTimePreference(){
 	}
 	
 	if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
-		var userbookDate = $('#chooseDateSystemTrainingDate').val();
+		var userbookDate = getSystemTrainingDateApiValue();
 		var bookStTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotsttime");
 		var bookEnTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime");
 		var duration = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotduration");
@@ -1197,7 +1197,7 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 				$(".academic-step, .moveToDashboard-step").hide();
 			}
 			
-			$("#pageHeading").text("let's set up your dashboard");
+			$("#pageHeading").text("let's get started!");
 			var academicYearBlockDate = $('#academicYearBlockDate').val();
 			var daysCount = $('#daysCount').val();
 			var daysCountMax = $('#daysCountMax').val();
@@ -1211,7 +1211,7 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			$('#chooseDateToStartSemster').datepicker('destroy').datepicker({
 				autoclose: true,
 				container: '#datepickerModalView',
-				format: 'M dd, yyyy',
+				format: 'D, M dd, yyyy',
 				startDate: startDate,
 				endDate:endDate,
 				beforeShowDay: function (currentDate) {
@@ -1230,7 +1230,7 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 				$("#datepickerModal").modal("hide");
 				$("#chooseAcademicDateBtnToCountinue").removeClass("disabled btn-light");
 				$("#chooseAcademicDateBtnToCountinue").addClass("btn-success");
-				$("#chooseAcademicDateBtnToCountinue").text("Confirm");
+				$("#chooseAcademicDateBtnToCountinue").text("Continue");
 			});
 			if(startSemsterStartDate == ""){
 				var semesterStartDate = changeDateFormat(new Date(),"mm-dd-yyyy");
@@ -1244,7 +1244,7 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			systrainingEndDate.setDate(systrainingEndDate.getDate()+(activeNumberOfDaysForSystemTraining-1));
 			$("#chooseDateSystemTrainingDate").datepicker({
 				autoclose:true,
-				format: 'M dd, yyyy',
+				format: 'D, M dd, yyyy',
 				container: 'div#datepickerModalView',
 				// startDate: systrainingStartDate,
 				//endDate:systrainingEndDate,
@@ -1263,8 +1263,11 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 					return true;
 				}
 			}).on("change", function(){
+				syncSystemTrainingDateInput($("#chooseDateSystemTrainingDate").datepicker("getDate"));
 				$("#datepickerModal").modal("hide");
-				$("#moveToDashboardProcess").text("Choose Slot");
+				$("#moveToDashboardProcess").removeClass("disabled btn-light d-none");
+				$("#moveToDashboardProcess").addClass("btn-success");
+				$("#moveToDashboardProcess").text("Continue");
 				callOrientationtime();
 			});
 		}
@@ -1284,7 +1287,7 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 	
 		}else{
 			$("#confirmationAcademicYearModal").modal("hide");
-			$("#pageHeading").text("let's set up your dashboard");
+			$("#pageHeading").text("let's get started!");
 			$("#saveType").val("ORIENT")
 			$(".school-system-training-step").show()
 			$(".academic-step, .moveToDashboard-step").hide()
@@ -1296,14 +1299,17 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			systrainingEndDate.setDate(systrainingEndDate.getDate()+(activeNumberOfDaysForSystemTraining-1));
 			$("#chooseDateSystemTrainingDate").datepicker({
 				autoclose:true,
-				format: 'M dd, yyyy',
+				format: 'D, M dd, yyyy',
 				container: 'div#datepickerModalView',
 				startDate: systrainingStartDate,
 				endDate:systrainingEndDate,
 	
 			}).on("change", function(){
+				syncSystemTrainingDateInput($("#chooseDateSystemTrainingDate").datepicker("getDate"));
 				$("#datepickerModal").modal("hide");
-				$("#moveToDashboardProcess").text("Choose Slot");
+				$("#moveToDashboardProcess").removeClass("disabled btn-light d-none");
+				$("#moveToDashboardProcess").addClass("btn-success");
+				$("#moveToDashboardProcess").text("Continue");
 				callOrientationtime();
 			});
 		}
@@ -1864,4 +1870,3 @@ function callLmsSubjectBySubject(formId, subjectId, toElementId, toElementIdAlte
 		}
 	});
 }
-

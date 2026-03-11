@@ -410,8 +410,8 @@ function filterTeacherReportModal(schoolId){
 								+'</div>'
 								+'<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">'
 									+'<div class="form-group mb-2 p-0">'
-										+'<label class="mb-0">Student Email</label>'
-										+'<input id="studentEmail" name="studentEmail" type="text" class="form-control" autocomplete="off">'
+									+'<label class="mb-0">Student ID</label>'
+									+'<input id="studentId" name="studentId" type="text" class="form-control" autocomplete="off">'
 									+'</div>'
 								+'</div>'
 								+'<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">'
@@ -476,7 +476,7 @@ function filterTeacherReportModal(schoolId){
 }
 
 function getStudentAssigneHeader(role){
-	html='<th class="text-center"><b>Student Name/Email</b></th><th class="text-center"><b>LP/Grade/Batch/Course</b></th><th class="text-center"><b>Mapping (Start Date - End Date)</b></th><th class="text-center"><b>Last Class Booked Date (Days since last class booked)</b></th><th class="text-center"><b>Last Activity Submitted Date (Days since last assignment submitted)</b></th>';
+	html='<th class="text-center"><b>Student Name/ID</b></th><th class="text-center"><b>LP/Grade/Batch/Course</b></th><th class="text-center"><b>Mapping (Start Date - End Date)</b></th><th class="text-center"><b>Last Class Booked Date (Days since last class booked)</b></th><th class="text-center"><b>Last Activity Submitted Date (Days since last assignment submitted)</b></th>';
 	return '<thead><tr>'+html+'</tr></thead><tbody></tbody>';
 }
 
@@ -503,9 +503,10 @@ function getStudentAssignedReportWithFilterBody(result, userId, role){
 			customClass='bg-danger text-white';
 		}
 
+		var studentIdValue = v.studentStringId ? v.studentStringId : v.studentId;
 		html+=
 			'<tr id="sar'+v.meetingId+'" class="'+customClass+'">'
-				+'<td>'+v.studentName+' ('+v.studentEmail+')</td>'
+				+'<td>'+v.studentName+' ('+studentIdValue+')</td>'
 				+'<td>'+v.larningProgram+'/'+v.grade+'/'+v.batch+'/'+v.course+'</td>'
 				+'<td>'+v.mappingStartDate+' - '+v.mappingEndDate+'</td>'
 				+'<td>'+v.lastClassBookedDate+' ('+v.daysSinceBooked+')</td>'

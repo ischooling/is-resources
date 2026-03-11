@@ -234,7 +234,7 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 		if('TEACHER'==role){
 			studentTeacher=v.studentName;//+'<br>'+v.teacherName;
 		}else{
-			studentTeacher=(USER_ROLE=='DIRECTOR'?v.meetingId+' | '+v.meetingIdVendor+'<br><br>':'') +v.studentStringId+"<br/>" +v.studentName+'<br>'+(USER_ROLE=='DIRECTOR'?v.studentEmail:'')+'<br><br>'+v.applicationNo+"<br/>"+v.teacherName+'<br>'+v.teacherOfficialEmail+'<br>'+(USER_ROLE=='DIRECTOR'?v.teacherEmail:'')+'<br>';
+			studentTeacher=(USER_ROLE=='DIRECTOR'?v.meetingId+' | '+v.meetingIdVendor+'<br><br>':'') +v.studentStringId+"<br/>" +v.studentName+'<br><br>'+v.applicationNo+"<br/>"+v.teacherName+'<br>'+v.teacherOfficialEmail+'<br>'+(USER_ROLE=='DIRECTOR'?v.teacherEmail:'')+'<br>';
 		}
 		courseStandard=v.subjectName+'<br>'+v.standardName;
 		//'/'+v.meetingId+'/'+v.bookedDate+
@@ -322,10 +322,6 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 					html+='<div class="col-md-3 col-sm-6 col-xs-12">'
 						+'<label>Student ID</label>'
 						+'<input type="text" name="studentId" id="studentId" class="form-control" value="" maxlength="100">'
-					+'</div>'
-					+'<div class="col-md-3 col-sm-6 col-xs-12">'
-								+'<label>Student Email</label>'
-								+'<input type="text" name="studentEmail" id="studentEmail" class="form-control" value="" maxlength="100" onkeydown="return M.isEmail(event);"/>'
 					+'</div>';
 				}
 				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
@@ -726,7 +722,6 @@ function getExtraClassTblHtml(data){
 						<td style="text-align: center;">${extraSession.sno}</td>
 						<td>${extraSession.studentName}</td>
 						<td>${extraSession.studentStringId}</td>
-						<td>${extraSession.email}</td>
 						<td>${extraSession.grade}</td>
 						<td>${extraSession.referenceNo}</td>
 						<td>${extraSession.paymentDate}</td>

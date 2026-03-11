@@ -127,7 +127,7 @@ function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchTyp
 		&& $("#"+formId+" #stateId option:selected").val()=="0"
 		&& $("#"+formId+" #cityId option:selected").val()=="0"
 		&& $("#"+formId+" #gradeSearch option:selected").val()=="0"
-		&& $("#"+formId+" #emailIdSearch").val()==""
+		&& $("#"+formId+" #studentIdSearch").val()==""
 		&& $("#"+formId+" #phoneNoSearch").val()==""
 		&& $("#"+formId+" #startDateSearch").val()==""
 		&& $("#"+formId+" #endDateSearch").val()==""
@@ -144,7 +144,7 @@ function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchTyp
 	studentOrientAssignReqest['state'] = $("#"+formId+" #stateId option:selected").val();
 	studentOrientAssignReqest['city'] = $("#"+formId+" #cityId option:selected").val();
 	studentOrientAssignReqest['standardId'] = $("#"+formId+" #gradeSearch option:selected").val();
-	studentOrientAssignReqest['email'] = $("#"+formId+" #emailIdSearch").val().trim();
+	studentOrientAssignReqest['studentStringId'] = $("#"+formId+" #studentIdSearch").val().trim();
 	studentOrientAssignReqest['phoneNo'] = $("#"+formId+" #phoneNoSearch").val();
 	studentOrientAssignReqest['bookStartDate'] = $("#"+formId+" #startDateSearch").val();
 	studentOrientAssignReqest['bookEndDate'] = $("#"+formId+" #endDateSearch").val();
@@ -259,7 +259,7 @@ function advanceOrientationSearchStudentReset(formId){
 	$("#"+formId+" #assignToSearch").val('').trigger('change');
 	$("#"+formId+" #followMedSearch").val('').trigger('change');
 	$("#"+formId+" #gradeSearch").val('').trigger('change');
-	$("#"+formId+" #emailIdSearch").val('');
+	$("#"+formId+" #studentIdSearch").val('');
 	$("#"+formId+" #phoneNoSearch").val('');
 	$("#"+formId+" #stdfnameSearch").val('');
 	$("#"+formId+" #parentfnameSearch").val('');

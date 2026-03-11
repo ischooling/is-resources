@@ -73,6 +73,7 @@ function getAdminManageUserList(){
 								<th class="font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10">S.No</th>
 								<th class="font-weight-normal border-bottom-0 vertical-align-middle">Name</th>
 								<th class="font-weight-normal border-bottom-0 vertical-align-middle">User Name</th>
+								<th class="font-weight-normal border-bottom-0 vertical-align-middle">One Time Password</th>
 								<th class="font-weight-normal border-bottom-0 vertical-align-middle">Role</th>
 								<th class="font-weight-normal border-bottom-0 vertical-align-middle text-center">Go To Meeting User</th>
 								<th class="font-weight-normal border-bottom-0 vertical-align-middle">Referral Code</th>

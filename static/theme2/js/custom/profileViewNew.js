@@ -799,9 +799,6 @@ async function profileViewPageLoadEvent(data){
             // ✅ Activate ONLY when section actually reaches top
             if (sectionTop <= threshold && sectionBottom > threshold) {
                 activeSectionId = section.attr('id');
-                if("communicationLogDIV" == activeSectionId){
-                    activeSectionId = "communication_Log_information";
-                }
                 break;
             }
         }
@@ -1031,6 +1028,7 @@ async function profileViewPageLoadEvent(data){
 
     // Communication Log Start Here //
     $("#communicationLogDIV").append(communicationLogInformation());
+    $("#studentEmailDIV").append(studentEmailInformation(data[6] || {}));
     initEditor(1, 'commentEditor','Enter comments', false);
     // bindFileUploadNew1('1', '33',USER_ID,6);
     $("#fileuploadLog6").on("change",function(){
@@ -3952,6 +3950,36 @@ function getInputIntel(InputIntelList){
         });
     }
 }
+async function activateYourSchoolEmail(){
+    var userId = (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.userId) || USER_ID;
+
+    var payload = {
+        userId: userId
+    };
+
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/create-azure-user",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData && responseData.status == 1){
+        var details = responseData.details || {};
+        var html = studentEmailInformation(details);
+        $("#student_Email_Information").replaceWith(html);
+        showMessageTheme2(1, responseData.message || "Student school user ID activated successfully.");
+    }else{
+        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to activate school user ID.");
+    }
+
+    return false;
+}
+    
 
 function buindProfileElementEvent(buindProfileElementEvent){
     if(buindProfileElementEvent.length>0){

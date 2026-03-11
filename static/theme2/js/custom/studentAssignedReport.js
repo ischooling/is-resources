@@ -198,7 +198,7 @@ function getStudentAssignedRequestWithFilter(formId,callingFrom){
 		studentAssignRequestWithFilter['endDateFilter'] = endDate;
 	
 		studentAssignRequestWithFilter['studentName'] = $('#'+formId+' #studentName').val();
-		studentAssignRequestWithFilter['studentEmail'] = $('#'+formId+' #studentEmail').val();
+		studentAssignRequestWithFilter['studentId'] = $('#'+formId+' #studentId').val();
 		studentAssignRequestWithFilter['learningProgram'] = $('#'+formId+' #learningProgram').val();
 		studentAssignRequestWithFilter['standardId'] = $('#'+formId+' #standardId').val();
 		studentAssignRequestWithFilter['batchId'] = $('#'+formId+' #batchId').val();
@@ -234,7 +234,7 @@ function studentAssginedReportSearchReset(formId){
 function studentAssgineFilterReset(formId){
 	// $('#' + formId)[0].reset();
 	$('#' + formId+' #studentName').val('');
-	$('#' + formId+' #studentEmail').val('');
+	$('#' + formId+' #studentId').val('');
 	$('#' + formId+' #learningProgram').val(-1).trigger('change');
 	$('#' + formId+' #standardId').val(-1).trigger('change');
 	$('#' + formId+' #batchId').val(-1).trigger('change');
@@ -343,7 +343,7 @@ function getStudentAssignedReportFromChart(callingFrom,teacherId,learningProgram
 					htmlc+="<tr>";
 					htmlc+="<td>"+(icn++)+"</td>";
 					htmlc+="<td>"+value.studentName+"</td> ";
-					htmlc+="<td>"+value.studentEmail+"</td> ";
+					htmlc+="<td>"+(value.studentStringId ? value.studentStringId : value.studentId)+"</td> ";
 					htmlc+="<td>"+value.grade+"</td> ";
 					if(value.color=='RED'){
 						htmlc+="<td class=\"text-danger\">Inactive</td> ";

@@ -132,10 +132,10 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 			`<tr>
 				<td style="text-align:center;">${teacherRequest.srNo}</td>`;
 				if(OBJECT_RIGHTS.withDraw=='N'){
-					html+=`<td>${teacherRequest.name}<br/>${teacherRequest.userName}<br/>${teacherRequest.timeZone}</td>`;
+					html+=`<td>${teacherRequest.name}<br/>${teacherRequest.email}<br/>${teacherRequest.timeZone}</td>`;
 				}else{
 					html+=`<td>${teacherRequest.name}<br/>${teacherRequest.timeZone}</td>
-						<td>${teacherRequest.userName}</td>`;
+						<td>${teacherRequest.email}</td>`;
 				}
 
 				html+=`<td>${teacherRequest.applicationNo}</td>
@@ -184,7 +184,7 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 										if(SCHOOL_ID != 4){
 											html+=`<a class="dropdown-item" onclick="showAddPaymentForm('addNewPayment', 'add', '${teacherRequest.teacherId}','TEACHER','${teacherRequest.name}');" href="javascript:void(0);"><i class="fa fa-dollar-sign"></i>&nbsp; Add Payment Entry</a>`;
 										}
-										html+=`<a class="dropdown-item" onclick="callTeacherOfficialEmailModal('${teacherRequest.teacherId}','${teacherRequest.userId}','${teacherRequest.officialEmail}','${teacherRequest.gotoMeetingIdT}','${teacherRequest.gotoMeetingPasswordT}','${teacherRequest.zoomMeetingPassword}','${teacherRequest.teamMeetingUserStatus}' );" href="javascript:void(0);"><i class="fa fa-envelope"></i>&nbsp; Add/Edit Official Email</a>`;
+										html+=`<a class="dropdown-item" onclick="return intializeTeacherAzureUser('${teacherRequest.teacherOfficialEmail}','${teacherRequest.teacherOfficialEmailPass}','${teacherRequest.userId}','${teacherRequest.isAzureUserCreated}');" href="javascript:void(0);"><i class="fa fa-envelope"></i>&nbsp;Generate School Email Id</a>`;
 										if(teacherRequest.officialEmail!=''){
 											html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to delete?','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'DELETE\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\') '); " href="javascript:void(0);"><i class="fa fa-trash"></i>&nbsp; Remove Official Email</a>`;
 										}

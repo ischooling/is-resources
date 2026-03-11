@@ -11053,6 +11053,9 @@ background-position:0% 50%
 .bg-primary-gradient {
 	background:var(--pgc);
 }
+.bg-primary-card-gradient {
+	background:linear-gradient(135deg, var(--pc) 0%, #00C2C6 100%);
+}
 .bg-success-gradient {
 	background-image:linear-gradient(41deg, #02b13b 25%, #11ff5e 100%) !important
 }
@@ -34907,4 +34910,24 @@ to { background-color: rgb(6, 145, 6); }
     line-height: 28px;
     font-size: 14px;
 }
-    
+
+/*ADDITIONAL LAYER CSSS STARTS HERE */
+.success{color:green}
+	.error{color:red}
+	.texture-bg{background: white!important;background-size: cover;}
+	body{background-image: none;}
+	.datepickerContainer .relative{position: relative !important;top: 0 !important;margin: 0 auto !important;}
+			/* @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap'); */
+	body{font-weight: 400;color:#090909;font-size: 14px;}
+	input {outline: 0;}
+	textarea{font-family: 'Open Sans', sans-serif;}
+	h1, h2, h3, h4, h5, h6{margin: 0;}
+	ul{padding: 0;list-style: none;}
+	a, a:hover, a:focus{text-decoration: none;color:#090909;}
+		.fw-600{font-weight: 600;display: inline-block;}
+		.text-right{text-align: right;}
+		.anchor-color{color:green !important}
+.text-dark-warning{
+	color:#92400E !important;
+}		
+/*ADDITIONAL LAYER CSSS ENDS HERE */

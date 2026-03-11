@@ -76,9 +76,8 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 				redirectLoginPage();
 			} else {
 				customLoader(false);
-				var redirectUrl=$("#ssoUrl").val();
-				goAhead(redirectUrl, $("#hash").val());
 				$("#proceed").prop("disabled", false);
+				window.location = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/common/login";
 			}
 		}
 	});
@@ -151,11 +150,6 @@ function callUserLoginFun(formId, moduleId, loginType) {
 						goAhead(redirectUrl, data['userLoginHash']);
 						//sync one by one all static contents
 						// getCommonCustomScript(data['userId'],SCHOOL_ID);
-						// setTimeout(function(){
-						// 	alert("called")
-						// 	$("#ssoUrl").val(redirectUrlSSO);
-						// 	$("#hash").val(['userLoginHash']);
-						// }, 10000)
 					}else if(loginType=='CONTINUE'){
 						customLoader(false)
 						if(moduleId=='STUDENT'){

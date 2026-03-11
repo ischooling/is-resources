@@ -2,7 +2,7 @@
 function getManageSessionTableHeader(role) {
 	var html = ''
 
-	html = '<th>S.No.</th><th>LMS Platform</th><th>Learning Program</th><th>Student Name/User Name</th><th>Grade</th><th>Student ID</th><th>Enroll Status</th>';
+	html = '<th>S.No.</th><th>LMS Platform</th><th>Learning Program</th><th>Student Name</th><th>Grade</th><th>Student ID</th><th>Enroll Status</th>';
 	if (SCHOOL_ID == 1) {
 		html += '<th>Default Enrollment Status</th>';
 	}
@@ -21,7 +21,7 @@ function getManageSessionTableBody(result, userId, role) {
 			+ '<td>' + v.sno + '</td>'
 			+ '<td>' + v.courseProviderName + '</td>'
 			+ '<td>' + v.learningProgram + '</td>'
-			+ '<td>' + v.studentName + '<br/>' + v.userName + '</td>'
+			+ '<td>' + v.studentName + '</td>'
 			// + '<td>'
 			// + zoomCommand
 			// + '</td>'
@@ -89,10 +89,6 @@ function getManageSessionFilter(roleAndModule, schoolId, userId, role) {
 		+ '<div class="col-md-3 col-sm-6 col-12">'
 		+ '<label>Student ID</label>'
 		+ '<input type="text" name="studentId" id="studentId" class="form-control" value="" maxlength="100""/>'
-		+ '</div>'
-		+ '<div class="col-md-3 col-sm-6 col-12">'
-		+ '<label>Student Email</label>'
-		+ '<input type="text" name="studentEmail" id="studentEmail" class="form-control" value="" maxlength="100" onkeydown="return M.isEmail(event);"/>'
 		+ '</div>'
 		+ '<div class="col-md-3 col-sm-3 col-12" style="display:' + (role == 'TEACHER' ? 'none' : 'block') + ';">'
 		+ '<label>Profile Status</label>'

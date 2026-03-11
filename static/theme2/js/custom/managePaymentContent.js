@@ -13,11 +13,10 @@ function getAddPaymentSearchResult(data) {
 		`<tr>
 			<td class="${rowClass}">${v.fullName}</td>
 			<td>${v.studentStringId}</td>
-			<td>${v.email}</td>
 			<td>${v.standard}</td>
 			<td class="${lastColumnClass}">`;
 				if(v.fullName !== '' && v.standard != null) {
-					html += `<a id="addPaymentId" class="btn btn-primary btn-sm m-0 text-white mr-2" onClick="addPayment('addStudentPaymentForm','${v.email}',${v.studentStandardId},'${v.advanceOrCustom}', true, '${v.eligibleForAdvance}')">&nbsp;Add Payment</a>`;
+					html += `<a id="addPaymentId" class="btn btn-primary btn-sm m-0 text-white mr-2" onClick="addPayment('addStudentPaymentForm','${v.studentStringId}',${v.studentStandardId},'${v.advanceOrCustom}', true, '${v.eligibleForAdvance}')">&nbsp;Add Payment</a>`;
 					if(v.advanceOrCustom == 'C') {
 						var url = `/dashboard/fee-calculation?type=C&studentStandardId=${v.studentStandardId}`;
 						html += `<a class="btn btn-primary btn-sm m-0 text-white mr-2" href="javascript:void(0)" onClick="getAsPost('${url}')">&nbsp;Custom Payment Details</a>`;
@@ -86,7 +85,6 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 					<span>
 						<strong>Student ID:</strong> ${apsrSingle.studentRollNumber}<br>
 						<strong>Name:</strong> ${apsrSingle.studentName}<br>
-						<strong>Email:</strong> ${apsrSingle.studentEmail}<br>
 						<strong>Grade:</strong> ${apsrSingle.gradeName}<br>
 						<strong>Learning Program:</strong> ${apsrSingle.registrationType}<br>
 						<strong>LMS Platform:</strong> ${apsrSingle.lmsPlatform}<br>
@@ -363,10 +361,6 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 						<label>Student ID</label>
 						<input type="text" name="studentId" id="studentId" style="text-transform:capitalize" class="form-control">
 						</div>
-						<div class="col-md-3 col-sm-12 col-12">
-						<label>Email</label>
-						<input type="text" name="firstName" id="searchEmail" class="form-control">
-						</div>
 						<div class="col-md-12 col-sm-12 col-12 mt-2">
 						<a href="javascript:void(0)" class="btn btn-success pull-right mt-2" onclick="searchStudentByNameAndEmail();">
 							<i class="fa fa-search"></i>&nbsp;Search
@@ -379,14 +373,13 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 							<tr>
 							<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10">Name</th>
 							<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Student ID</th>
-							<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Email</th>
 							<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Grade</th>
 							<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-right-10">Action</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-							<td colspan="5" class="text-center font-weight-semi-bold rounded-bottom-left-10 rounded-bottom-right-10">No Record</td>
+							<td colspan="4" class="text-center font-weight-semi-bold rounded-bottom-left-10 rounded-bottom-right-10">No Record</td>
 							</tr>
 						</tbody>
 						</table>
@@ -403,7 +396,7 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 						Copy link.<br>Transaction Reference No.<br>User Reference No.
 					</th>
 					<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">
-						Student ID/Name/Email/Grade/Learning Program/LMS Platform
+						Student ID/Name/Grade/Learning Program/LMS Platform
 					</th>
 					<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">
 						Payment Name<br>Payment Title<br>Scheduled Payment Date<br>Payment Date
@@ -459,8 +452,8 @@ function getAddPaymentModal(schoolId, moduleId) {
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Student Email<sup class="text-danger">*</sup></label>
-                                            <input id="studentEmail1" name="studentEmail1" type="text" class="form-control" style="padding-right:22px">
+                                            <label class="mb-0">Student ID<sup class="text-danger">*</sup></label>
+                                            <input id="studentId1" name="studentId1" type="text" class="form-control" style="padding-right:22px">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
@@ -711,12 +704,6 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                   <div class="form-group mb-2 p-0">
                     <label class="mb-0">Student Id</label>
                     <input id="studentId" name="studentId" type="text" class="form-control" autocomplete="off">
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Email</label>
-                    <input id="studentEmail" name="studentEmail" type="email" class="form-control">
                   </div>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-12">

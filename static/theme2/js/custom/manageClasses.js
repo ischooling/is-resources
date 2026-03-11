@@ -17,7 +17,7 @@ function renderManageClassContent(title, roleAndModule, schoolId, userId, role){
 				<div class="row">
 					<div class="col-lg-12 col-md-12">
 						<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-							<input type="text" name="extraDetailSearch" id="extraDetailSearch" class="width:fit-content" />
+							<input type="text" name="extraDetailSearch" id="extraDetailSearch" class="width:fit-content" placeholder="Search by Student ID" />
 						</div>
 						<table class="table table-bordered table-striped responsive nowrap" id="extraClassListTbl" style="width:100%">
 						<thead>
@@ -25,7 +25,6 @@ function renderManageClassContent(title, roleAndModule, schoolId, userId, role){
 							<th>S.No</th>
 							<th>Student Name</th>
 							<th>Student ID</th>
-							<th>Email</th>
 							<th>Grade</th>
 							<th>Transaction Reference no</th>
 							<th>Payment Date</th>
@@ -114,7 +113,6 @@ function getRequestForClassroomSessionsData(formId, moduleId){
 	data["studentName"]=$('#'+formId+' #studentName').val();
 	data["studentId"]=$('#'+formId+' #studentId').val();
 	data["applicationNo"]=$('#'+formId+' #applicationNo').val();
-	data["studentEmail"]=$('#'+formId+' #studentEmail').val();
 	data["teacherName"]=$('#'+formId+' #teacherName').val();
 	data["teacherEmail"]=$('#'+formId+' #teacherEmail').val();
 	data["classStatus"]=$('#'+formId+' #classStatus').val();
@@ -248,6 +246,7 @@ function getExtraSessionDetails(elementId, startLimit,  moduleId) {
 	data['userId']=USER_ID;
 	data['currentPage']=startLimit;
 	data['classSearch']=$("#extraDetailSearch").val();
+	data['studentId']=$("#extraDetailSearch").val();
 	$.ajax({
 		type : "POST",
 		contentType: APPLICATION_JSON_VALUE,

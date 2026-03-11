@@ -2860,11 +2860,12 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, end
 											$('#chooseDateSystemTrainingDate').datepicker('destroy').datepicker({
 												autoclose: true,
 												container: '#timePreferencePopup .modal-body',
-												format: 'M dd, yyyy',
+												format: 'D, M dd, yyyy',
 												startDate: systrainingStartDate,
 												endDate:systrainingEndDate,
 												
-											}).on('changeDate',function(){
+											}).on('changeDate',function(e){
+												syncSystemTrainingDateInput(e.date || $('#chooseDateSystemTrainingDate').datepicker('getDate'));
 												if($("#saveType").val() == 'ORIENT'){
 													$("#timePreferencePopup .modal-body").css({"max-height":"500px","overflow-y":"auto"});
 													if(data['enrollmentType']=='REGISTRATION_FRESH' || data['enrollmentType']=='REGISTRATION_FLEX_COURSE'){
@@ -2991,7 +2992,7 @@ $(function () {
 			var enrollmentType = $("#enrollmentType").val();
 			
 			if($("#saveType").val()=='ORIENT' || $("#saveType").val()=='RESH'){
-				var userbookDate = $('#chooseDateSystemTrainingDate').val();
+				var userbookDate = getSystemTrainingDateApiValue();
 				var bookStTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotsttime");
 				var bookEnTime = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotedtime");
 				var duration = $(".viewOrientFreeSlot input[name='slotTime']:checked").attr("slotduration");
@@ -3591,7 +3592,7 @@ function callOrientationtime(){
 						$(this).parent().closest(".time-slot").siblings().find(".form-check").addClass("text-primary").removeClass("bg-primary text-white");
 						$("#moveToDashboardProcess").removeClass("disabled btn-light");
 						$("#moveToDashboardProcess").addClass("btn-success");
-						$("#moveToDashboardProcess").text("Confirm")
+						$("#moveToDashboardProcess").text("Submit")
 					}
 				});
 			}
@@ -3600,13 +3601,54 @@ function callOrientationtime(){
 	});
   }
 
+  function syncSystemTrainingDateInput(dateValue) {
+	var $input = $('#chooseDateSystemTrainingDate');
+	if ($input.length < 1) {
+		return '';
+	}
+	var normalizedDate = dateValue instanceof Date ? dateValue : new Date(dateValue);
+	if (!(normalizedDate instanceof Date) || isNaN(normalizedDate.getTime())) {
+		$input.attr('data-request-date', '');
+		return '';
+	}
+	var formattedDate = changeDateFormat(normalizedDate, "MMM-dd-yyyy");
+	if (formattedDate) {
+		$input.attr('data-request-date', formattedDate);
+	}
+	return formattedDate;
+  }
+
+  function getSystemTrainingDateApiValue() {
+	var $input = $('#chooseDateSystemTrainingDate');
+	if ($input.length < 1) {
+		return '';
+	}
+	var requestDate = $input.attr('data-request-date');
+	if (requestDate) {
+		return requestDate;
+	}
+	var pickerDate = $input.datepicker ? $input.datepicker('getDate') : null;
+	if (pickerDate) {
+		return syncSystemTrainingDateInput(pickerDate);
+	}
+	var inputValue = ($input.val() || '').trim();
+	if (!inputValue) {
+		return '';
+	}
+	var normalizedInputDate = new Date(inputValue);
+	if (!(normalizedInputDate instanceof Date) || isNaN(normalizedInputDate.getTime())) {
+		return inputValue.replace(/^[A-Za-z]{3},\s*/, '');
+	}
+	return changeDateFormat(normalizedInputDate, "MMM-dd-yyyy");
+  }
+
   function getRequestForOrientationTime() {
 	var teacherAssignRequest = {};
 	teacherAssignRequest['userId'] = USER_ID;	
 	teacherAssignRequest['userRole'] = USER_ROLE;
 	teacherAssignRequest['schoolId'] = SCHOOL_ID;	
 	teacherAssignRequest['slotType'] = 'SYS-TRAINING';	
-	teacherAssignRequest['bookDate'] = $('#chooseDateSystemTrainingDate').val();	
+	teacherAssignRequest['bookDate'] = getSystemTrainingDateApiValue();
 	return teacherAssignRequest;
 }
 
@@ -3621,11 +3663,11 @@ function getOrientSlot(data){
 		if(data.length>0){
 			for (let i = 0; i < data.length; i++) {
 				const element = data[i];
-				html+="<div class=\"time-slot col-lg-6 col-md-6 col-sm-12\"> ";
+				html+="<div class=\"time-slot col-lg-4 col-md-4 col-sm-12\"> ";
 				html+="<div class=\"form-check border-primary text-primary p-0\"> ";
 				html+="<label class=\"meeting-time full d-inline-flex justify-content-flex-start align-items-center pl-4 ml-2\" for=\""+ind+"\"> ";
 				//html+="<input class=\"form-check-input time-radio orient_time\" type=\"radio\" name=\"slotTime\" id=\""+ind+"\"  slotsttime=\""+element.stTime+"\" slotedtime=\""+element.edTime+"\" slotmeetdate=\""+element.meetDate+"\"  />"+element.meetingDate+" ("+element.startTime+"-"+element.endTime+") ";
-				html+="<input class=\"form-check-input time-radio orient_time\" type=\"radio\" name=\"slotTime\" id=\""+ind+"\"  slotsttime=\""+element.stTime+"\" slotedtime=\""+element.edTime+"\" slotmeetdate=\""+element.meetDate+"\" slotTime=\""+element.startTime+"\" slotDuration=\""+element.meetingDuration+"\"  />"+element.meetingDate+" "+element.startTime+" ";
+				html+="<input class=\"form-check-input time-radio orient_time\" type=\"radio\" name=\"slotTime\" id=\""+ind+"\"  slotsttime=\""+element.stTime+"\" slotedtime=\""+element.edTime+"\" slotmeetdate=\""+element.meetDate+"\" slotTime=\""+element.startTime+"\" slotDuration=\""+element.meetingDuration+"\"  />"+element.startTime+" ";
 				html+="</label> ";
 				html+="</div> ";
 				html+="</div> ";

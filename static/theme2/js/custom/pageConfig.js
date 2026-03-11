@@ -38,7 +38,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "pending-interview-remarks":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js","dashboardSchoolRemark.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-profile-pending-verification":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-profile-pending-bank-details":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "approved-teachers":{url:"",file:[{role:"",fileName:["approvedTeacherListContent.js","approvedTeacherList.js","dashboardExtraActivity.js","dashboardUserActivity.js","dashboardTeacherPayment.js","manageLMSContent.js","manageLMS.js","dashboardStudent.js","manageTeacherProfile.js","manageTeacherProfileContent.js","adminManageuserListContent.js","adminManageuserList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "approved-teachers":{url:"",file:[{role:"",fileName:["approvedTeacherListContent.js","approvedTeacherList.js","dashboardExtraActivity.js","dashboardUserActivity.js","dashboardTeacherPayment.js","manageLMSContent.js","manageLMS.js","dashboardStudent.js","manageTeacherProfile.js","manageTeacherProfileContent.js","adminManageuserListContent.js","adminManageuserList.js","additionalLayer.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "rejected-teachers":{url:"",file:[{role:"",fileName:["manageTeacherProfileContent.js","manageTeacherProfile.js","dashboardUserActivity.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "withdraw-teachers":{url:"",file:[{role:"",fileName:["approvedTeacherListContent.js","approvedTeacherList.js","dashboardExtraActivity.js","dashboardUserActivity.js","dashboardTeacherPayment.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-class-review":{url:"",file:[],funName:function(){},type:"JSP",init: function(){window.open(CONTEXT_PATH+UNIQUEUUID+"/dashboard/teacher-class-review/"+SCHOOL_UUID+"?moduleId="+moduleId, "_blank");},pageReqType:"EX",urlSend:""},
@@ -1454,8 +1454,8 @@ function callScholarshipAssignedUserList(scholarId, scholarCode) {
 }
 
 function sendToSpecificUser(formId, moduleId, isForSpecificUser, roleModuleId) {
-  if ($("#" + formId + " #userEmailId").val() == "") {
-   showMessageTheme2(0, "Please enter student email");
+  if ($("#" + formId + " #userStudentId").val() == "") {
+   showMessageTheme2(0, "Please enter student id");
     return false;
   }
   if ($("#" + formId + " #scholarshipApplicableFor").val() == "") {
@@ -1502,7 +1502,7 @@ function getRequestForSpecificUserScholarship(
   scholarShipCodeDTO["scholarCodeName"] = $(
     "#" + formId + " #scholarCode option:selected"
   ).attr("codeName");
-  scholarShipCodeDTO["userEmailId"] = $("#" + formId + " #userEmailId").val();
+  scholarShipCodeDTO["userEmailId"] = $("#" + formId + " #userStudentId").val();
   scholarShipCodeDTO["isForSpecificUser"] = isForSpecificUser;
   scholarShipCodeDTO["scholarshipApplicableFor"] = $(
     "#" + formId + " #scholarshipApplicableFor"

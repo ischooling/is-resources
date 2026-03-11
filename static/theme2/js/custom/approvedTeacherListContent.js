@@ -88,7 +88,14 @@ async function renderApprovedTeacherDashboard(title, roleAndModule, SCHOOL_ID, U
 		}else{
 			getApprovedTeacherList(roleAndModule.moduleId, USER_ID, SCHOOL_ID, ids, types, 0) ;
 		}
-	});	
+	});
+
+	$('#teacherOfficialMailForm #officialEmailId').off('input.resetEmailBtn').on('input.resetEmailBtn', function(){
+		toggleResetEmailBtnVisibility();
+	});
+	$('#teacherOfficialModel').off('hidden.bs.modal.teacherOfficial').on('hidden.bs.modal.teacherOfficial', function(){
+		resetTeacherOfficialModalForm();
+	});
 }
 
 function getApprovedTeacherListContent(title, moduleId){
@@ -451,38 +458,28 @@ function getTeacherAddBufferAvailaibilityModel(){
 	return html;
 }
 
-function getTeacherOfficialModel(){
+function getTeacherOfficialModel(officialEmail){
 	var html=`<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" id="teacherOfficialModel">
 	<div class="modal-dialog modal-md">
 		<div class="modal-content" style="border: none; border-radius: 1px;">
 			<form name="teacherOfficialMailForm" id="teacherOfficialMailForm">
 				<input type="hidden" class="form-control" id="userId" name="userId" value="">
+				<input type="hidden" class="form-control" id="azureCreateStatus" name="azureCreateStatus" value="N">
 				<input type="hidden" class="form-control" id="teacherId" name="teacherId" value="">
 				<input type="hidden" class="form-control" id="teamMeetingId" name="teamMeetingId" value="">
 				<div class="modal-header py-2 bg-primary text-center text-white">
-					<h5 class="modal-title" id="myLargeModalLabel">Add/Edit Official Email</h5>
+					<h5 class="modal-title" id="myLargeModalLabel">Generate School Email Id</h5>
 					<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
 				</div>
 				<div class="modal-body">
 					<div class="form-group col-md-12">
-						<label>Email/Team/Zoom User Name</label>
-						<input type="text" class="form-control" id="officialEmailId" name="officialEmailId" pattern="^([A-Za-z0-9_\-\.])+@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$" maxlength="100" value="">
+						<label>Official Email</label>
+						<input type="hidden" class="form-control" id="userId" name="userId" maxlength="100">
+						<input type="text" class="form-control" id="officialEmailId" name="officialEmailId" maxlength="100">
 					</div>
 					<div class="form-group col-md-12">
-						<label>Confirm Email/Team/Zoom User Name</label>
-						<input type="text" class="form-control" id="confirmOfficialEmailId" name="confirmOfficialEmailId" pattern="^([A-Za-z0-9_\-\.])+@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$" maxlength="100" value="">
-					</div>
-					<div class="form-group col-md-12">
-						<label>Zoom Password</label>
-						<input type="text" class="form-control" id="zoomPassword" name="zoomPassword" maxlength="100" value="">
-					</div>
-					<div class="form-group col-md-12" id="teamUserCreationDiv">
-						<strong style="margin-top: 5px; display: inline-block;">Do you want to create a TEAM user for Teacher?</strong>
-							<label class="switch ml-2">
-							<input id="teamUserCheck" class="switch-input" type="checkbox" value="No">
-							<span class="switch-label" data-on="YES" data-off="No"></span>
-							<span class="switch-handle"></span>
-						</label>
+						<label>Current Password</label>
+						<input type="text" class="form-control" id="zoomPassword" name="zoomPassword" maxlength="100"readonly>
 					</div>
 					<div class="form-group col-md-12 paswrd" style="display:none">
 						<label>Team Password</label>
@@ -492,11 +489,13 @@ function getTeacherOfficialModel(){
 						<label>Team Confirm Password</label>
 						<input type="text" class="form-control" id="confirmTeamPassword" name="confirmTeamPassword" maxlength="100" value="">
 					</div>
-					<div class="col-md-12">`;
-						if(roleAndModule.added=='Y'){
-							html+=`<button type="button" class="send btn btn-success " id="submit" onclick="return saveTeacherOfficialMail('teacherOfficialMailForm','TEACHER','ADD','','${moduleId}');"><i class="fa fa-envelope"></i>&nbsp;Save </button>`;
-						}
-						html+=`<button type="button" class="btn btn-danger ml-2" data-dismiss="modal">Close</button>
+					<div class="col-md-12">
+						<button type="button" id="createOfficialEmailBtn" class="send btn btn-success" onclick="return createTeacherOfficialEmail()">
+							<i class="fa fa-envelope"></i>&nbsp;Create Official Email
+						</button>
+						<button type="button" id="resetEmailBtn" class="send btn btn-warning" style="display:none;" onclick="return resetTeacherSchoolEmailPassword(this)">
+							Reset
+						</button>
 					</div>
 				</div>
 			</form>
@@ -628,4 +627,140 @@ function dataWithdrawTeacherListPagging(datalimit, moduleId,  userId, schoolId, 
 		html+='</ul>';
 	}
 	return html;
+}
+
+async function createTeacherOfficialEmail(){
+	var userId = $('#teacherOfficialMailForm #userId').val();
+	var officialEmailId = $('#teacherOfficialMailForm #officialEmailId').val().trim();
+	if (!validateEmail(officialEmailId)) {
+		showMessageTheme2(0, 'Email is invalid');
+		return false;
+	}
+	if(!officialEmailId.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
+		showMessageTheme2(0, 'Domain is invalid');
+		return;
+	}
+    var payload = {
+		userId: userId,
+		email: officialEmailId
+    };
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/create-azure-user-for-teacher",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+	if(responseData && responseData.status == 1){
+        showMessageTheme2(1, responseData.message || "Teacher Official Email Created");
+		$('#teacherOfficialModel').modal('hide');
+    } else {
+        showMessageTheme2(0, responseData ? responseData.message : "Something went wrong");
+	}
+}
+async function intializeTeacherAzureUser(email, pass, userId, isUserCreated){
+	resetTeacherOfficialModalForm();
+	$('#teacherOfficialMailForm #userId').val(userId);
+    var payload = {
+		userId: userId
+    };
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/initialize-teacher-for-azure-user",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+	if(responseData && responseData.status == 1){
+		$('#teacherOfficialModel').modal('show');
+		var officialEmail = (responseData.officialEmail || '').trim().toLowerCase();
+		var createdStatus = (responseData.isAzureUserCreated || isUserCreated || '').toUpperCase();
+		$('#teacherOfficialMailForm #azureCreateStatus').val(createdStatus === 'Y' ? 'Y' : 'N');
+		$('#teacherOfficialMailForm #officialEmailId').val(officialEmail);
+		$('#teacherOfficialMailForm #zoomPassword').val((responseData.password || '').trim());
+		applyTeacherOfficialModalState(createdStatus);
+    } else {
+        showMessageTheme2(0, responseData ? responseData.message : "Something went wrong");
+	}
+}
+
+function callTeacherOfficialEmailModalApproved(teacherId, userId, officialEmailId, gotoMeetingIdT, gotoMeetingPasswordT, zoomPassword, teamStatus, isAzureUserCreated){
+	callTeacherOfficialEmailModal(teacherId, userId, officialEmailId, gotoMeetingIdT, gotoMeetingPasswordT, zoomPassword, teamStatus);
+	var isCreated = (isAzureUserCreated || '').toUpperCase() === 'Y';
+	if(isCreated){
+		$('#teacherOfficialMailForm #azureCreateStatus').val('Y');
+		$('#teacherOfficialMailForm #officialEmailId').val(officialEmailId || '');
+		$('#teacherOfficialMailForm #zoomPassword').val(zoomPassword || '');
+		applyTeacherOfficialModalState('Y');
+		return;
+	}
+	$('#teacherOfficialMailForm #azureCreateStatus').val('N');
+	$('#teacherOfficialMailForm #officialEmailId').val('');
+	$('#teacherOfficialMailForm #zoomPassword').val(zoomPassword || '');
+	applyTeacherOfficialModalState('N');
+}
+function toggleResetEmailBtnVisibility(isAzureUserCreated){
+	var status = (isAzureUserCreated || $('#teacherOfficialMailForm #azureCreateStatus').val() || '').toUpperCase();
+	applyTeacherOfficialModalState(status);
+}
+
+function applyTeacherOfficialModalState(isAzureUserCreated){
+	var status = (isAzureUserCreated || '').toUpperCase() === 'Y' ? 'Y' : 'N';
+	$('#teacherOfficialMailForm #azureCreateStatus').val(status);
+	var isOfficialEmailCreated = status === 'Y';
+	$('#teacherOfficialMailForm #officialEmailId').prop('disabled', isOfficialEmailCreated);
+	$('#teacherOfficialMailForm #zoomPassword').prop('disabled', true);
+	$('#teacherOfficialMailForm #resetEmailBtn').toggle(isOfficialEmailCreated);
+	$('#teacherOfficialMailForm #createOfficialEmailBtn').toggle(!isOfficialEmailCreated);
+}
+
+function resetTeacherOfficialModalForm(){
+	$('#teacherOfficialMailForm #azureCreateStatus').val('N');
+	$('#teacherOfficialMailForm #officialEmailId').val('').prop('disabled', false);
+	$('#teacherOfficialMailForm #zoomPassword').val('').prop('disabled', true);
+	$('#teacherOfficialMailForm #teamPassword').val('');
+	$('#teacherOfficialMailForm #confirmTeamPassword').val('');
+	$('#teacherOfficialMailForm #createOfficialEmailBtn').show();
+	$('#teacherOfficialMailForm #resetEmailBtn').hide();
+}
+async function resetTeacherSchoolEmailPassword(buttonElement){
+	var userId = ($('#teacherOfficialMailForm input[name="userId"]').first().val() || '').trim();
+	if(!userId && typeof PORFILE_RESPONSE_DATA !== "undefined" && PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.userId){
+		userId = PORFILE_RESPONSE_DATA.userId;
+	}
+	if(!userId){
+		showMessageTheme2(0, "Invalid user id");
+		return false;
+	}
+	if(buttonElement){
+		$(buttonElement).prop("disabled", true);
+	}
+	var payload = {
+		userId: userId
+	};
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/reset-azure-password-notify-primary-mail",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData && responseData.status == 1){
+        showMessageTheme2(1, responseData.message || "Password reset request sent successfully.");
+    }else{
+        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to reset student school email password.");
+    }
+	if(buttonElement){
+		$(buttonElement).prop("disabled", false);
+	}
+	return false;
 }

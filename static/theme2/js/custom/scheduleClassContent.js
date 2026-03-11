@@ -446,7 +446,7 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 		if(meetingType!="CUSTOM"){
 			if(userNameOrEmail==undefined  || userNameOrEmail==null || userNameOrEmail==0 || userNameOrEmail==''){
 				$(".meetingSlotAdd").prop("disabled", false);
-				showMessageTheme2(0, "Student Email is required");
+				showMessageTheme2(0, "Student ID is required");
 				return false;
 			}
 			var sName = $('#recurringClass #studentName').val();
@@ -691,12 +691,12 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 									html+='<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);">';
 								}
 					html+='</div>';
-					if(role!='TEACHER'){
-						html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3">'
-									+'<label>Student Email</label>'
-									+'<input type="text" name="studentEmail" id="studentEmail" class="form-control" value="" maxlength="100" onkeydown="return M.isEmail(event);"/>'
-								+'</div>';
-					}
+						if(role!='TEACHER'){
+							html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3">'
+										+'<label>Student ID</label>'
+										+'<input type="text" name="studentIdSearch" id="studentIdSearch" class="form-control" value="" maxlength="100"/>'
+									+'</div>';
+						}
 					html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3"  id="courseNameDiv">'
 						+'<label>Course Name</label>';
 						if(role=='TEACHER'){

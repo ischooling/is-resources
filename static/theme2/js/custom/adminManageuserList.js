@@ -67,20 +67,75 @@ function getAdminUserListHtml(userList){
 	if(userList.length>0){
 		for (let iu = 0; iu < userList.length; iu++) {
 			const adminUsr = userList[iu];
+			var actionHtml = appendResetActionForAdminUser(adminUsr.action, adminUsr.userId);
 			html+=`<tr>	
              <td>${(adminUsr.sno)}</td>
              <td>${adminUsr.name}</td>
              <td>${adminUsr.userName}</td>
+             <td>${adminUsr.officialEmailPass}</td>
              <td>${adminUsr.roleName}</td>
              <td class="text-center">${adminUsr.gotoMeetingStatus}</td>
              <td>${adminUsr.referralCode}</td>
              <td>${adminUsr.profileStatus}</td>
              <td>${adminUsr.addedDate}</td>
-			 <td class="text-center">${adminUsr.action}</td>
+			 <td class="text-center">${actionHtml}</td>
          </tr>`;
 		}
 	}
 	return html;
+}
+
+function appendResetActionForAdminUser(actionHtml, userId){
+	if(!actionHtml || !userId){
+		return actionHtml;
+	}
+	if(actionHtml.indexOf("dropdown-menu") === -1 || actionHtml.indexOf("showAdminResetAzurePasswordConfirm") > -1){
+		return actionHtml;
+	}
+	var resetAction = `<a href="javascript:void(0);" class="dropdown-item" onclick="return showAdminResetAzurePasswordConfirm('${userId}');">&nbsp;Reset</a>`;
+	var closingTags = "</div></div>";
+	var actionCloseIdx = actionHtml.lastIndexOf(closingTags);
+	if(actionCloseIdx === -1){
+		return actionHtml;
+	}
+	return actionHtml.substring(0, actionCloseIdx) + resetAction + actionHtml.substring(actionCloseIdx);
+}
+
+function showAdminResetAzurePasswordConfirm(userId){
+	if(!userId){
+		showMessageTheme2(0, "Invalid user id");
+		return false;
+	}
+	return showWarningMessageShow(
+		'Are you sure you want to reset password?',
+		'resetAdminAzurePasswordAndNotifyPrimaryMail('+ userId +')'
+	);
+}
+
+async function resetAdminAzurePasswordAndNotifyPrimaryMail(userId){
+	if(!userId){
+		showMessageTheme2(0, "Invalid user id");
+		return false;
+	}
+	var payload = {
+		userId: userId
+	};
+	var ajaxReqDetails = {
+		method: "POST",
+		url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/reset-azure-password-notify-primary-mail",
+		body: payload,
+		global: true,
+		showMessage: false,
+		onFaildResolved: true,
+		onSuccessResolved: true
+	};
+	var responseData = await callCommonAjax(ajaxReqDetails);
+	if(responseData && responseData.status == 1){
+		showMessageTheme2(1, responseData.message || "Password reset request sent successfully.");
+	}else{
+		showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to reset azure password.");
+	}
+	return false;
 }
 
 function callManageAdminLmsPasswordModal(userId){
@@ -157,6 +212,11 @@ function callManageAdminLmsPasswordModal(userId){
 
 function callForNewUser(formId, moduleId) {
   hideMessage("");
+  let email = $("#" + formId + " #emailId").val();
+  if(!email.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
+	showMessageTheme2(0, 'Domain is invalid');
+	return;
+  }
   if (!validateRequestForNewUser(formId)) {
     //refreshCaptcha('captchaImage');
     return false;
@@ -224,10 +284,15 @@ function validateRequestForNewUser(formId) {
     return false;
   }
 
-  if (!validateEmail($("#" + formId + " #emailId").val())) {
+  let email = $("#" + formId + " #emailId").val();
+  if (!validateEmail(email)) {
     showMessageTheme2(0, "Email is either empty or invalid");
     return false;
   }
+  if(!email.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
+		showMessageTheme2(0, 'Domain is invalid');
+		return;
+   }
   if ($("#" + formId + " #noOfWorkingHours").val() == "") {
     showMessageTheme2(0, "Please fill working hours in a day.");
     return false;
@@ -381,4 +446,3 @@ function callForAdminLMSContent(userId,controllType,courseProId,lmsId){
 		}
 	});
 }
-

@@ -85,7 +85,6 @@ function bodyCreate(formId,moduleId, schoolId, UNIQUEUUID){
 	request['standardId'] = $("#"+formId+" #standardId").val();
 	request['courseProviderId'] = $("#"+formId+" #courseProviderId").val();
 	request['studentName'] = $("#"+formId+" #studentName").val().trim();
-	request['studentEmail'] = $("#"+formId+" #studentEmail").val().trim();
 	request['academicYearStatus'] = $("#"+formId+" #academicYearStatus").val();
 	request['lmsStatus'] = $("#"+formId+" #lmsStatus").val();
 	request['profileStatus'] = $("#"+formId+" #profileStatus").val();
