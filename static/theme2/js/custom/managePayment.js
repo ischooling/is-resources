@@ -5,7 +5,7 @@ function setpaymentDateFrom() {
         autoclose: true,
         format: 'mm-dd-yyyy',
     });
-    $('#paymentDateFrom').datepicker('setDate', today);
+    // $('#paymentDateFrom').datepicker('setDate', today);
 }
 function setpaymentDateTo() {
     $('#paymentDateTo').prop('disabled', false);
@@ -13,7 +13,7 @@ function setpaymentDateTo() {
         autoclose: true,
         format: 'mm-dd-yyyy',
     });
-    $('#paymentDateTo').datepicker('setDate', today);
+    // $('#paymentDateTo').datepicker('setDate', today);
 }
 
 function addCustomPayment() {

@@ -566,7 +566,9 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
      }else if(pageNo=='parent-progress'){
       await renderParentProgressPage('Progress Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='student-login-details'){
-      await renderStudentLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+      await renderStudentLoginHistoryPage(extraParam);
+     }else if(pageNo=='teacher-login-details'){
+      await renderTeacherLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='syllabus-assigned-teacher'){
       await renderStudentSyllabusAssignedTeacherPage('Assigned Course Teachers',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
      }else if(pageNo=='academic-year-extention'){
@@ -2369,4 +2371,6 @@ function AdminTaskModalWarnings(response){
 	</div>`;
 	return html;
  }
+
+
 

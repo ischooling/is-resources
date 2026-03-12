@@ -1,11 +1,12 @@
-async function renderStudentLoginHistoryPage(){
-    var pageData = await studentLoginHistoryBuildPageData();
+async function renderStudentLoginHistoryPage(extraParam){
+    var pageData = await studentLoginHistoryBuildPageData(extraParam);
     $("#dashboardContentInHTML").html(getStudentLoginHistoryContent(pageData));
     studentLoginHistoryInitDataTable();
 }
 
-async function studentLoginHistoryBuildPageData(){
-    var attendanceApiResponse = await studentLoginHistoryFetchAttendance();
+async function studentLoginHistoryBuildPageData(extraParam){
+    var context = studentLoginHistoryGetContext(extraParam);
+    var attendanceApiResponse = await studentLoginHistoryFetchAttendance(context);
     var attendanceDTO = studentLoginHistoryResolveAttendanceDTO(attendanceApiResponse);
     var firstLoginParts = (attendanceDTO.firstLogin || "").split(" ");
     var firstLoginDate = firstLoginParts.length > 0 ? firstLoginParts.slice(0, 3).join(" ") : "N/A";
@@ -13,7 +14,8 @@ async function studentLoginHistoryBuildPageData(){
     var studentName = studentLoginHistoryResolveStudentName(attendanceDTO, attendanceApiResponse);
 
     return {
-        studentName: studentName,
+        studentName: context.studentName || studentName,
+        backAction: context.requiredBack || "",
         summary: {
             firstLoginDate: firstLoginDate || "N/A",
             firstLoginTime: firstLoginTime || "N/A",
@@ -25,8 +27,11 @@ async function studentLoginHistoryBuildPageData(){
     };
 }
 
-async function studentLoginHistoryFetchAttendance(){
-    var payload = { userId: USER_ID + "", studentUserId: USER_ID + "" };
+async function studentLoginHistoryFetchAttendance(context){
+    var payload = {
+        userId: USER_ID + "",
+        studentUserId: (context && context.studentUserId) ? context.studentUserId : (USER_ID + "")
+    };
     var ajaxReqDetails = {
         method: "POST",
         url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/parent/student-attendance",
@@ -60,6 +65,22 @@ function studentLoginHistoryResolveAttendanceDTO(apiResponse){
     }
     if(apiResponse.loginHistoryDTOList){
         return apiResponse;
+    }
+    return {};
+}
+
+function studentLoginHistoryGetContext(extraParam){
+    var queryString = extraParam || "";
+    if(queryString && queryString.charAt(0) == "?"){
+        queryString = queryString.substring(1);
+    }
+    if(queryString){
+        var queryParams = new URLSearchParams(queryString);
+        return {
+            studentUserId: queryParams.get("userId") || "",
+            studentName: queryParams.get("studentName") || "",
+            requiredBack: queryParams.get("requiredBack") || ""
+        };
     }
     return {};
 }
@@ -121,3 +142,5 @@ function studentLoginHistoryInitDataTable(){
         studentLoginHistoryTable.search($(this).val()).draw();
     });
 }
+
+

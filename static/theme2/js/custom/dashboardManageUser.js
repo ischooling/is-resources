@@ -637,7 +637,10 @@ function studentStatusUpdateWithdrawn(userId,status,rolemoduleId){
 		}
 	});
 }
-function openManageUserStudentPerformanceModal(moduleId, studentUserId){
+function openTeacherStudentPerformanceModal(moduleId, studentUserId, studentName){
+    return openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName);
+}
+function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName){
     if(!moduleId || !studentUserId){
         showMessageTheme2(0, "Invalid student performance request.");
         return false;
@@ -649,7 +652,8 @@ function openManageUserStudentPerformanceModal(moduleId, studentUserId){
 
     $("#manageUserStudentPerformanceModal")
         .attr("data-module-id", moduleId)
-        .attr("data-student-user-id", studentUserId);
+        .attr("data-student-user-id", studentUserId)
+        .attr("data-student-name", studentName || "");
     $("#manageUserStudentPerformanceModal")
         .off("hidden.bs.modal.manageUserPerformance")
         .on("hidden.bs.modal.manageUserPerformance", function(){
@@ -657,6 +661,7 @@ function openManageUserStudentPerformanceModal(moduleId, studentUserId){
             $("#manageUserStudentGradeHistoryPopup").remove();
             $("#manageUserStudentPerformanceBody").html("");
         });
+    $("#manageUserStudentPerformanceModal .modal-title").text(studentName ? ("Student Performance - " + studentName) : "Student Performance");
     $("#manageUserStudentPerformanceModal").modal("show");
     manageUserStudentPerformanceRenderMain(studentUserId);
     return false;
@@ -807,7 +812,7 @@ function getManageUserStudentPerformanceRowsHtml(rows){
     $.each(rows || [], function(_, row){
         var courseText = manageUserStudentPerformanceEscapeHtml(row.courseName || "N/A");
         if(row.lmsEnrollmentId && row.lmsCourseId){
-            courseText = `<a href="javascript:void(0)" onclick="manageUserStudentPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseText}</a>`;
+            courseText = `<a href="javascript:void(0)" class="text-primary" onclick="manageUserStudentPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseText}</a>`;
         }
         html += `<tr>
             <td class="pl-3">${courseText}</td>
@@ -1041,6 +1046,8 @@ function manageUserStudentPerformanceEscapeHtml(value){
     if(value === undefined || value === null){ return ""; }
     return (value + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
 }
+
+
 
 
 

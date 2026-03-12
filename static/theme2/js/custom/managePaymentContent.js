@@ -736,8 +736,8 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                   <div class="form-group mb-2 p-0 paymentStatus">
                     <label class="mb-0">Payment Status</label>
                     <select id="paymentStatus" name="paymentStatus" multiple="multiple" class="multiselect-dropdown form-control">
-                      <option value="SUCCESS" selected>SUCCESS</option>
-                      <option value="INITIATED" selected>INITIATED</option>
+                      <option value="SUCCESS">SUCCESS</option>
+                      <option value="INITIATED">INITIATED</option>
                       <option value="SCHEDULED">SCHEDULED</option>
                       <option value="REJECTED">REJECTED</option>
                     </select>
@@ -782,7 +782,7 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                 <div class="col-lg-1 col-md-2 col-sm-12 col-12">
                   <div class="form-group mb-2 p-0">
                     <label class="mb-0">No of Records</label>
-                    <input type="text" id="numberOfRecords" name="numberOfRecords" class="form-control" value="10" onkeydown="return M.digit(event);">
+                    <input type="text" id="numberOfRecords" name="numberOfRecords" class="form-control" value="25" onkeydown="return M.digit(event);">
                   </div>
                 </div>
               </div>

@@ -1,29 +1,24 @@
-function getStudentLoginHistoryContent(pageData){
-    var studentName = pageData.studentName ? pageData.studentName : "";
+function getTeacherLoginHistoryContent(pageData){
+    var teacherName = pageData.teacherName ? pageData.teacherName : "";
     return `
     <div class="app-page-title mb-3 py-2">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
                 <div class="page-title-icon"><img src="https://staging.internationalschooling.org/static/theme2/images//Icon/sidebar/Login_History.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></div>
-                <div>Login History - ${studentName || "N/A"}</div> 
+                <div>Login History - ${teacherName || "N/A"}</div>
             </div>
         </div>
     </div>
-    ${pageData.backAction ? `<div class="full my-2 d-flex justify-content-end">
-        <a href="javascript:void(0)" onclick="${pageData.backAction}" class="btn btn-dark rounded">
-            <i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>Back
-        </a>
-    </div>` : ""}
     <div class="full">
         <div class="row mb-3">
             <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
-                ${getStudentLoginSummaryCard("First Login", pageData.summary.firstLoginDate, pageData.summary.firstLoginTime, "calendar-check-o", "success")}
+                ${getTeacherLoginSummaryCard("First Login", pageData.summary.firstLoginDate, pageData.summary.firstLoginTime, "calendar-check-o", "success")}
             </div>
             <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
-                ${getStudentLoginSummaryCard("Last Login | Duration", pageData.summary.lastLogin, pageData.summary.lastLoginDuration, "clock-o", "warning")}
+                ${getTeacherLoginSummaryCard("Last Login | Duration", pageData.summary.lastLogin, pageData.summary.lastLoginDuration, "clock-o", "warning")}
             </div>
             <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
-                ${getStudentLoginSummaryCard("Total Login | Duration", "Till Now", pageData.summary.totalLoginDuration, "line-chart", "primary")}
+                ${getTeacherLoginSummaryCard("Total Login | Duration", "Till Now", pageData.summary.totalLoginDuration, "line-chart", "primary")}
             </div>
         </div>
 
@@ -32,11 +27,11 @@ function getStudentLoginHistoryContent(pageData){
                 <div class="d-flex flex-wrap align-items-center justify-content-between">
                     <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Login Sessions</h4>
                     <div class="mr-3" style="width:260px;max-width:100%;">
-                        <input type="text" id="studentLoginHistorySearch" class="form-control" placeholder="Search sessions...">
+                        <input type="text" id="teacherLoginHistorySearch" class="form-control" placeholder="Search sessions...">
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table font-12 nowrap dt-responsive" id="studentLoginHistoryTable" style="width:100%;">
+                    <table class="table font-12 nowrap dt-responsive" id="teacherLoginHistoryTable" style="width:100%;">
                         <thead class="bg-primary text-white">
                             <tr>
                                 <th class="pl-3">S.No</th>
@@ -47,7 +42,7 @@ function getStudentLoginHistoryContent(pageData){
                             </tr>
                         </thead>
                         <tbody>
-                            ${getStudentLoginHistoryRowsHtml(pageData.sessions)}
+                            ${getTeacherLoginHistoryRowsHtml(pageData.sessions)}
                         </tbody>
                     </table>
                 </div>
@@ -66,7 +61,7 @@ function getStudentLoginHistoryContent(pageData){
     </div>`;
 }
 
-function getStudentLoginSummaryCard(label, mainValue, subValue, icon, iconClass){
+function getTeacherLoginSummaryCard(label, mainValue, subValue, icon, iconClass){
     var iconStyle = "bg-light-primary text-primary";
     if(iconClass == "success"){
         iconStyle = "bg-light-success text-success";
@@ -85,7 +80,7 @@ function getStudentLoginSummaryCard(label, mainValue, subValue, icon, iconClass)
         </div>`;
 }
 
-function getStudentLoginHistoryRowsHtml(sessions){
+function getTeacherLoginHistoryRowsHtml(sessions){
     var rowsHtml = "";
     $.each(sessions || [], function(index, row){
         var durationValue = row.duration || "N/A";

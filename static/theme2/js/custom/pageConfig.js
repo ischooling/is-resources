@@ -137,10 +137,10 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "teacher-home":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-manage-slot":{url:"teacher-manage-class-time?moduleId="+moduleId,file:[{role:"",fileName:["timeAvailability.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "teacher-my-performance":{url:"teacher-my-performance?moduleId="+moduleId,file:[{role:"",fileName:["studentAssignedReportContent.js","studentAssignedReport.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "teacher-student-performance":{url:"teacher-student-performance?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
+        "teacher-student-performance":{url:"teacher-student-performance?moduleId="+moduleId,file:[{role:"",fileName:["dashboardManageUser.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "assigned-courses":{url:"teacher-subject-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "assigned-student":{url:"assigned-students-content?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
-        "teacher-login-details":{url:"attendance-content"+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
+        "teacher-login-details":{url:"",file:[{role:"",fileName:["teacherLoginHistoryContent.js","teacherLoginHistory.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-attendance":{url:"student-attendance-list?moduleId="+moduleId,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "class-management":{url:"teacher-class-management?moduleId="+moduleId,file:[{role:"",fileName:["studentAssignedReportContent.js","studentAssignedReport.js", "liveClassroomContent.js", "liveClassroom.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "monthly-pay-slip":{url:"teacher-monthly-pay-slip/"+UNIQUEUUID+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
@@ -1518,4 +1518,5 @@ function getRequestForSpecificUserScholarship(
 
   return request;
 }
+
 
