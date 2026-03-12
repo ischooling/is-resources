@@ -39,7 +39,6 @@ function getRecurringClassesData(formId, elementId) {
 			}
 		}
 	});
-	bindHover();
 }
 
 function getActiveSessionReset(formId) {

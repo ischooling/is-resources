@@ -234,7 +234,6 @@ function classroomSessionsForOther(elementId, argument) {
 		],
 	});
 	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
-	bindHover();
 }
 
 
@@ -322,7 +321,6 @@ function getExtraSessionDetails(elementId, startLimit,  moduleId) {
 	// 	],
 	// });
 	// $('#' + elementId).dataTable().fnSetFilteringEnterPress();
-	// bindHover();
 }
 
 function toggleFilter(elementID) {

@@ -159,7 +159,6 @@ function advanceofflineClassSearch(formId, elementId, moduleId,userId, role){
 			return false;
 		}
 	});
-	bindHover();
 }
 function getRequestForOfflineClassFilter(formId){
 	var ZoomOfflineMeetingFilterRequest={};

@@ -36,7 +36,6 @@ function advanceLMSUSerSearch(formId,moduleId, userId, role){
 			return false;
 		}
 	});
-	bindHover();
 }
 
 function advanceLMSUSerSearchPost(formId,moduleId, userId, role){

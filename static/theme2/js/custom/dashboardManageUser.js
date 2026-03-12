@@ -43,7 +43,6 @@ function showManageProfileParentContentListingWithQueries(elementId, argument){
          ],
 	});
 	$('#'+elementId).dataTable().fnSetFilteringEnterPress();
-	bindHover();
 }
 
 
@@ -189,7 +188,6 @@ function showManageProfileTeacherContentListingWithQueries(elementId, argument){
          ],
 	});
 	$('#'+elementId).dataTable().fnSetFilteringEnterPress();
-	bindHover();
 }
 
 function showManageProfileCommonContentListingWithQueriesWithoutGoto(elementId, argument){

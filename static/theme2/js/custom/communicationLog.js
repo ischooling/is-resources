@@ -58,7 +58,6 @@ function getCommunicationLogData(elementId,userId,role){
 			return false;
 		}
 	});
-	// bindHover();
 }
 
 function viewCommunicationattach(modalID, filePath){

@@ -56,7 +56,6 @@ function classroomSessionsForOther(elementId, argument){
 	          ],
 	});
 	$('#'+elementId).dataTable().fnSetFilteringEnterPress();
-	bindHover();
 }
 
 function extraSessionDetails(elementId, argument){
@@ -111,7 +110,6 @@ function extraSessionDetails(elementId, argument){
 	          ],
 	});
 	$('#'+elementId).dataTable().fnSetFilteringEnterPress();
-	bindHover();
 }
 
 function toggleFilter(elementID){
