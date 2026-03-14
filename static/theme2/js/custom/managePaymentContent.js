@@ -354,12 +354,12 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 						</select>
 						</div>
 						<div class="col-md-3 col-sm-6 col-12">
-						<label>Name</label>
-						<input type="text" name="firstName" id="searchName" style="text-transform:capitalize" class="form-control">
-						</div>
-						<div class="col-md-3 col-sm-6 col-12">
 						<label>Student ID</label>
 						<input type="text" name="studentId" id="studentId" style="text-transform:capitalize" class="form-control">
+						</div>
+						<div class="col-md-3 col-sm-6 col-12">
+						<label>Name</label>
+						<input type="text" name="firstName" id="searchName" style="text-transform:capitalize" class="form-control">
 						</div>
 						<div class="col-md-12 col-sm-12 col-12 mt-2">
 						<a href="javascript:void(0)" class="btn btn-success pull-right mt-2" onclick="searchStudentByNameAndEmail();">
@@ -696,14 +696,14 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-12">
                   <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Name</label>
-                    <input id="studentName" name="studentName" type="text" class="form-control" autocomplete="off">
+                    <label class="mb-0">Student Id</label>
+                    <input id="studentId" name="studentId" type="text" class="form-control" autocomplete="off">
                   </div>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-12">
                   <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Student Id</label>
-                    <input id="studentId" name="studentId" type="text" class="form-control" autocomplete="off">
+                    <label class="mb-0">Name</label>
+                    <input id="studentName" name="studentName" type="text" class="form-control" autocomplete="off">
                   </div>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-12">

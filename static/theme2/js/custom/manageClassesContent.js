@@ -314,16 +314,16 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 								+'</select>'
 						+'</div>';
 				}
-				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
-						+'<label>Student Name</label>'
-						+'<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);">'
-					+'</div>';
 				if(role!='TEACHER'){
 					html+='<div class="col-md-3 col-sm-6 col-xs-12">'
 						+'<label>Student ID</label>'
 						+'<input type="text" name="studentId" id="studentId" class="form-control" value="" maxlength="100">'
 					+'</div>';
 				}
+				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
+						+'<label>Student Name</label>'
+						+'<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);">'
+					+'</div>';
 				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
 					+'<label>Course Name</label>'
 					+'<input type="text" name="subjectIds" id="subjectIds" class="form-control" value="" maxlength="40" onkeydown="return M.isChars(event);">'

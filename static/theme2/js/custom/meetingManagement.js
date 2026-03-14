@@ -1311,11 +1311,13 @@ function copyJoinUrl(entityId) {
   let url = joinLensUrl(entityId);
   if (!url) {
     showMessageTheme2(0, "Url Invalid");
-  } else {
-    navigator.clipboard.writeText(url).then(function(){
-      showMessageTheme2(1, "URL copied successfully!")
-    });
+    return;
   }
+  getShortTinyUrlForJoinUrl(url).then(function(shortUrl){
+    navigator.clipboard.writeText(shortUrl).then(function(){
+      showMessageTheme2(1, "URL copied successfully!");
+    });
+  });
 }
 
 function startLensRecording(meetingId) {
@@ -1696,4 +1698,34 @@ function getGeneralMeetingTypeList(id){
       });
     }
   });
+}
+
+function getShortTinyUrlForJoinUrl(url) {
+  const isTinyUrlEnabled = getTinyUrlService();
+
+  if (!isTinyUrlEnabled || !url) {
+    return Promise.resolve(url);
+  }
+
+  return fetch("https://internationalschooling.org/api/create-short-urls", {
+    method: "POST",
+    headers: {
+      "Content-Type": APPLICATION_JSON_VALUE,
+    },
+    body: JSON.stringify({ urls: [url] }),
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+    })
+    .then((data) => {
+      if (data.urls && data.urls.length) {
+        return data.urls[0].short || url;
+      }
+      return url;
+    })
+    .catch((error) => {
+      console.error("TinyURL error:", error);
+      return url;
+    });
 }
