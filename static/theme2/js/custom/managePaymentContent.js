@@ -16,7 +16,7 @@ function getAddPaymentSearchResult(data) {
 			<td>${v.standard}</td>
 			<td class="${lastColumnClass}">`;
 				if(v.fullName !== '' && v.standard != null) {
-					html += `<a id="addPaymentId" class="btn btn-primary btn-sm m-0 text-white mr-2" onClick="addPayment('addStudentPaymentForm','${v.studentStringId}',${v.studentStandardId},'${v.advanceOrCustom}', true, '${v.eligibleForAdvance}')">&nbsp;Add Payment</a>`;
+					html += `<a id="addPaymentId" class="btn btn-primary btn-sm m-0 text-white mr-2" onClick="addPayment('addStudentPaymentForm','${v.studentStringId}',${v.studentStandardId},'${v.advanceOrCustom}', true, '${v.eligibleForAdvance}', '${v.email}')">&nbsp;Add Payment</a>`;
 					if(v.advanceOrCustom == 'C') {
 						var url = `/dashboard/fee-calculation?type=C&studentStandardId=${v.studentStandardId}`;
 						html += `<a class="btn btn-primary btn-sm m-0 text-white mr-2" href="javascript:void(0)" onClick="getAsPost('${url}')">&nbsp;Custom Payment Details</a>`;
@@ -361,6 +361,10 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 						<label>Name</label>
 						<input type="text" name="firstName" id="searchName" style="text-transform:capitalize" class="form-control">
 						</div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                        <label>Student Email</label>
+						<input type="text" name="searchEmail" id="searchEmail" style="text-transform:capitalize" class="form-control">
+						</div>
 						<div class="col-md-12 col-sm-12 col-12 mt-2">
 						<a href="javascript:void(0)" class="btn btn-success pull-right mt-2" onclick="searchStudentByNameAndEmail();">
 							<i class="fa fa-search"></i>&nbsp;Search
@@ -450,10 +454,16 @@ function getAddPaymentModal(schoolId, moduleId) {
                                             <input id="studentStandardId" name="studentStandardId" type="text" class="form-control">
                                         </div>
                                     </div>
-                                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12" id="studentIdDiv">
                                         <div class="form-group mb-2 p-0">
                                             <label class="mb-0">Student ID<sup class="text-danger">*</sup></label>
                                             <input id="studentId1" name="studentId1" type="text" class="form-control" style="padding-right:22px">
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12" id="studentEmailDiv">
+                                        <div class="form-group mb-2 p-0">
+                                            <label class="mb-0">Student Email<sup class="text-danger">*</sup></label>
+                                            <input id="studentEmail" name="studentEmail" type="text" class="form-control" style="padding-right:22px">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
@@ -704,6 +714,12 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                   <div class="form-group mb-2 p-0">
                     <label class="mb-0">Name</label>
                     <input id="studentName" name="studentName" type="text" class="form-control" autocomplete="off">
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
+                  <div class="form-group mb-2 p-0">
+                    <label class="mb-0">Email</label>
+                    <input id="studentEmail" name="studentEmail" type="text" class="form-control" autocomplete="off">
                   </div>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-12">

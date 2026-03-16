@@ -1,17 +1,28 @@
 var CHECK_PAYMENT_INTERVAL;
 var CHECK_PAYMENT_INTERVAL_COUNT=0;
+
+function getSchoolAdminChatButton() {
+	return `<a target="_blank" href="${CHAT_URL}/onboarding-support?uuid=${UNIQUEUUID}" class="btn btn-success btn-lg btn-block btn-shadow rounded-10 mb-3 scale-animate" style="width:92%;margin:0 auto 1rem auto;font-size:15px;">
+								<i class="fa fa-comments mr-2"></i>Live Chat with School Administration
+							</a>`;
+}
+
 async function checkPayment(formId, userPaymentDetailsId, schoolId){
 	var payload = {
 		'userPaymentDetailsId' : userPaymentDetailsId,
 		'schoolId' : schoolId
 	};	
 	
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'check-payment',payload,'common');
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'check-payment',payload,'common');
 	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
 		if (responseData.status == '3') {
 			redirectLoginPage();
 		} else {
-			showMessageTheme2(false, responseData['message']);
+			if (responseData.statusCode == 'OLD_FEE') {
+				renderOldFeeCard(responseData);
+			}else{
+				showMessageTheme2(false, responseData['message']);
+			}
 		}
 	}else{
 		if(responseData.details.type == "BOOKSESSION_FEE" || responseData.details.type == "EXTENSION_FEE"){
@@ -109,7 +120,7 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
 
     var responseData;
     try {
-        responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'invoke-payment-gateway',payload,'common');
+        responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'invoke-payment-gateway',payload,'common');
     }catch (error) {
         console.error('Payment invoke failed:', error);
         showModalMessage(0, 'Network error. Please try again.');
@@ -117,9 +128,13 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
         return;
     }
 	if(responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
-        showModalMessage(0, responseData['message']);
-        if (responseData.statusCode == 'ELIGIBLE_CUSTOME_PLAN' || responseData.statusCode == 'REDIRECT_TO_DASHBOOARD') {
-            window.location.reload();
+		if (responseData.statusCode == 'OLD_FEE') {
+			renderFeeCard(responseData);
+		}else{
+			showModalMessage(0, responseData['message']);
+		if (responseData.statusCode == 'ELIGIBLE_CUSTOME_PLAN' || responseData.statusCode == 'REDIRECT_TO_DASHBOOARD') {
+			window.location.reload();
+		}
         }
     }else {
         showModalMessage(1, "Please wait while redirecting to payment gateway...");
@@ -1198,3 +1213,271 @@ $(document).on("click","#chkvalBookSession", function(){
 		$("#payTabBookingSessionModal #payBookingSessionTabData").attr("disabled", true);
 	}
 });
+function renderOldFeeCard(responseData){
+	if($("#oldFeePaymentModal").length > 0){
+		$("#oldFeePaymentModal").remove();
+	}
+
+	var modalHtml =
+	`<div id="oldFeePaymentModal" class="modal fade theme-modal" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered box-shadow-none" role="document" style="max-width:460px">
+			<div class="modal-content border-0 rounded-20 overflow-hidden">
+				<div class="card-header bg-primary text-white d-flex align-items-center justify-content-center py-3 px-3 border-0">
+					<div class="d-flex align-items-center justify-content-center">
+						<div class="text-white text-center" style="font-size:18px;text-transform:none;">
+							School Payment Update
+						</div>
+					</div>
+				</div>
+				<div class="modal-body bg-white px-4 py-4">
+					<div class="border border-warning bg-light-warning rounded-15 px-3 py-3 mb-4">
+						<div class="d-flex align-items-center mb-2" style="color: #92400E;">
+							<i class="fa fa-info-circle mr-2"></i>
+							<p class="mb-0 font-weight-semi-bold">Important Notice</p>
+						</div>
+						<p class="mb-0" style="color: #92400E;">` + (responseData.message || '') + `</p>
+					</div>
+					<div class="mb-4" style="font-size:14px;">`
+					    if(CHAT_URL != ""){
+							modalHtml+=`<div class="d-flex align-items-center text-dark mb-3">
+								<i class="fa fa-headphones text-primary mr-2" style="font-size:18px;"></i>
+								<p class="mb-0 font-weight-semi-bold" style="font-size:16px;">Need Any Support?</p>
+							</div>`;
+							modalHtml+=getSchoolAdminChatButton();
+						}
+						modalHtml+=`<div class="bg-light rounded-15 px-3 py-3 mb-3" style="width:92%;margin:0 auto 1rem auto;">
+							<div class="d-flex align-items-center">
+								<div class="mr-3 text-primary" style="font-size:18px;">
+									<i class="fa fa-phone"></i>
+								</div>
+								<div>
+									<p class="mb-0 text-muted" style="font-size:13px;">Phone Support</p>
+									<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">+1(585) 499-0662</p>
+								</div>
+							</div>
+						</div>
+						<div class="bg-light rounded-15 px-3 py-3" style="width:92%;margin:0 auto;">
+							<div class="d-flex align-items-center">
+								<div class="mr-3 text-success" style="font-size:18px;">
+									<i class="fa fa-envelope"></i>
+								</div>
+								<div>
+									<p class="mb-0 text-muted" style="font-size:13px;">Email Support</p>
+									<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;"><a href="mailto:admin.support@internationalschooling.org" style="color:inherit;text-decoration:none;">admin.support@internationalschooling.org</a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="text-center">
+		               <button type="button" class="btn btn-primary btn-lg btn-shadow rounded-10 text-bold" style="font-size:18px;" data-dismiss="modal">Close</button>
+	                </div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+
+	$("body").append(modalHtml);
+	$("#oldFeePaymentModal").modal("show");
+}
+
+function renderFeeCard(responseData){
+	if($("#oldFeePaymentModal").length > 0){
+		$("#oldFeePaymentModal").remove();
+	}
+
+	var modalHtml = `
+	<style>
+:root{
+	--pc:#007fff;
+}
+
+.modal.fade .modal-dialog {
+	transform: translate(0px, -50px);
+	transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+	transform: none;
+}
+
+.modal-dialog-centered {
+	display: flex;
+	align-items: center;
+	min-height: calc(100% - 1rem);
+}
+
+@media (min-width:576px){
+	.modal-dialog-centered{
+		min-height: calc(100% - 3.5rem);
+	}
+}
+
+#oldFeePaymentModal .modal-dialog{
+	max-width:520px;
+	width:95%;
+}
+
+.modal-content{
+	position:relative;
+	display:flex;
+	flex-direction:column;
+	width:100%;
+	background:#fff;
+	border:1px solid rgba(0,0,0,0.2);
+	border-radius:12px;
+}
+
+.modal-body{
+	position:relative;
+	flex:1 1 auto;
+	padding:20px;
+}
+
+.px-4{padding-left:1.5rem !important;padding-right:1.5rem !important;}
+.py-4{padding-top:1.5rem !important;padding-bottom:1.5rem !important;}
+.mb-3{margin-bottom:1rem !important;}
+.mb-4{margin-bottom:1.5rem !important;}
+.d-flex{display:flex !important;}
+.align-items-center{align-items:center !important;}
+.text-center{text-align:center;}
+
+.bg-white{background:#fff !important;}
+.bg-light{background:#f8f9fa !important;}
+.bg-light-warning{background:#fff8e8 !important;}
+.text-dark{color:#343a40 !important;}
+.text-muted{color:#6c757d !important;}
+.text-primary{color:#007fff !important;}
+.text-success{color:#1fc747 !important;}
+
+.border{border:1px solid #dee2e6 !important;}
+.border-warning{border-color:#f7b924 !important;}
+
+.rounded-10{border-radius:10px;}
+.rounded-15{border-radius:15px;}
+.rounded-20{border-radius:20px;}
+
+.btn{
+	position:relative;
+	transition:0.15s;
+}
+
+.btn-primary{
+	color:#fff;
+	background:var(--pc);
+	border-color:var(--pc);
+}
+
+.btn-primary:hover{
+	background:var(--pc);
+	border-color:var(--pc);
+	opacity:0.9;
+}
+
+.btn-success{
+	color:#fff;
+	background:#1fc747;
+	border-color:#1fc747;
+}
+
+.btn-lg{
+	padding:6px 18px;
+	font-size:16px;
+}
+
+.btn-shadow{
+	box-shadow:0 0.125rem 0.625rem rgba(58,196,125,0.4),
+			   0 0.0625rem 0.125rem rgba(58,196,125,0.5);
+}
+
+.scale-animate{
+	animation:scaleAnimation 1s ease infinite;
+	width:85%;
+	margin:0 auto 0.8rem auto;
+	display:block;
+	font-size:14px;
+	padding:6px 14px;
+}
+
+@keyframes scaleAnimation{
+	0%{transform:scale(1);}
+	50%{transform:scale(1.05);}
+	100%{transform:scale(1);}
+}
+
+.font-weight-semi-bold{font-weight:600;}
+.text-bold{font-weight:bold;}
+
+</style>
+
+<div id="oldFeePaymentModal" class="modal fade theme-modal" role="dialog" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog modal-dialog-centered box-shadow-none" role="document">
+		<div class="modal-content border-0 rounded-20 overflow-hidden">
+
+			<div class="card-header bg-primary text-white d-flex align-items-center justify-content-center py-3 px-3 border-0">
+				<div class="text-white text-center" style="font-size:18px;text-transform:none;">
+					School Payment Update
+				</div>
+			</div>
+
+			<div class="modal-body bg-white px-4 py-4">
+
+				<div class="border border-warning bg-light-warning rounded-15 px-3 py-3 mb-4">
+					<div class="d-flex align-items-center mb-2" style="color:#92400E;">
+						<i class="fa fa-info-circle mr-2"></i>
+						<p class="mb-0 font-weight-semi-bold">Important Notice</p>
+					</div>
+					<p class="mb-0" style="color:#92400E;">${responseData.message || ''}</p>
+				</div>
+
+				<div class="mb-4" style="font-size:14px;">`
+					if(CHAT_URL != ""){
+						modalHtml+=`<div class="d-flex align-items-center text-dark mb-3">
+							<i class="fa fa-headphones text-primary mr-2" style="font-size:18px;"></i>
+							<p class="mb-0 font-weight-semi-bold" style="font-size:16px;">Need Any Support?</p>
+						</div>`;
+						modalHtml+=getSchoolAdminChatButton();
+						}
+					modalHtml+=`<div class="bg-light rounded-15 px-3 py-3 mb-3" style="width:92%;margin:0 auto 1rem auto;">
+						<div class="d-flex align-items-center">
+							<div class="mr-3 text-primary" style="font-size:18px;">
+								<i class="fa fa-phone"></i>
+							</div>
+							<div>
+								<p class="mb-0 text-muted" style="font-size:13px;">Phone Support</p>
+								<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">+1(585) 499-0662</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="bg-light rounded-15 px-3 py-3" style="width:92%;margin:0 auto;">
+						<div class="d-flex align-items-center">
+							<div class="mr-3 text-success" style="font-size:18px;">
+								<i class="fa fa-envelope"></i>
+							</div>
+							<div>
+								<p class="mb-0 text-muted" style="font-size:13px;">Email Support</p>
+								<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">
+									<a href="mailto:admin.support@internationalschooling.org" style="color:inherit;text-decoration:none;">
+										admin.support@internationalschooling.org
+									</a>
+								</p>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="text-center">
+					<button type="button" class="btn btn-primary btn-lg btn-shadow rounded-10 text-bold" data-dismiss="modal">
+						Close
+					</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>`;
+
+	$("body").append(modalHtml);
+	$("#oldFeePaymentModal").modal("show");
+}

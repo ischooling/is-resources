@@ -5842,6 +5842,8 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage
                   }else{
                       if(showMessage){
                         showMessageTheme2(0, data.message,'',true);
+                      }else{
+                        resolve(data);
                       }
                   }
               } else {

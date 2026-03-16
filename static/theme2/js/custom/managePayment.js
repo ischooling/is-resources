@@ -146,6 +146,7 @@ function getCallRequestForAdvancePaymentSearchStudent(formId, moduleId) {
     advancePaymentSearchDTO['numberOfRecords'] = $("#" + formId + " #numberOfRecords").val().trim();
 
     advancePaymentSearchDTO['schoolId'] = $("#" + formId + " #schoolId").select2('val');
+    advancePaymentSearchDTO['studentEmail'] = $("#" + formId + " #studentEmail").val().trim();
     advancePaymentSearchDTO['studentStringId'] = $("#" + formId + " #studentId").val().trim();
     advancePaymentSearchDTO['schoolUUID'] = SCHOOL_UUID;
 
@@ -169,6 +170,7 @@ function advancePaymentSearchStudentReset(formId) {
     $("#" + formId + " #registrationType").val('').trigger('change');
     $("#" + formId + " #enrollStatus").val('').trigger('change');
     $("#" + formId + " #studentName").val('');
+    $("#" + formId + " #studentEmail").val('');
     $("#" + formId + " #studentId").val('');
     $("#" + formId + " #countryId").val('-1').trigger('change');
     $("#" + formId + " #paymentMode").val('').trigger('change');
@@ -193,17 +195,18 @@ function searchStudentByNameAndEmail() {
         schoolId=$('#allSchoolId').val();
     }
     var studentId = $('#studentId').val()
+    var searchEmail = $('#searchEmail').val()
 
+    hideMessageTheme2('');
+    if (searchName == '' && studentId == '' && searchEmail == '') {
+        showMessageTheme2(0, 'To search desired user, required either name or student id');
+        return false;
+    }
     var data = {
         'searchName': searchName,
         'schoolId': schoolId,
-        'studentId' : studentId
-    }
-
-    hideMessageTheme2('');
-    if (searchName == '' && studentId == '' ) {
-        showMessageTheme2(0, 'To search desired user, required either name or student id');
-        return false;
+        'studentId' : studentId,
+        'searchEmail' : searchEmail
     }
     $.ajax({
         type: "POST",
@@ -241,6 +244,9 @@ function addExternalPayment(formId, paymentTitle) {
     hideMessageTheme2('');
     $('#addPaymentModal').modal('show');
     $('.hideWhenlearningProgramFlexy').show();
+    $("#studentEmailDiv").removeClass('d-none')
+    $("#studentIdDiv").addClass('d-none')
+    $("#studentStandardId").val('')
     $('#copyViewPaymentUrlElement, #viewPaymentUrlElementWrapper').hide();
     $('#' + formId + ' #studentDetailsForPaymentId').show();
     $('#' + formId + ' #studentId1').prop('disabled', false);
@@ -262,6 +268,8 @@ function addExternalPayment(formId, paymentTitle) {
     if(paymentTitle == "REGISTRATION_FEE"){
         $('#' + formId + ' #paymentName1').val('Reserve an Enrollment Seat');
         $('#' + formId + ' #paymentName1').prop('disabled',true);
+        $('#' + formId + ' #studentEmail').val('');
+        $('#' + formId + ' #studentEmail').prop('disabled',false);
     }else{
         $('#' + formId + ' #paymentName1').val('');
         $('#' + formId + ' #paymentName1').prop('disabled',false);
@@ -284,7 +292,7 @@ function addExternalPayment(formId, paymentTitle) {
         $("#countryWrapper").hide();
         $("#stateWrapper").hide();
         $("#cityWrapper").hide();
-        $("#studentId1").attr("onblur", "getStudentDetailsForPayment('addStudentPaymentForm', 'true')");
+        $("#studentEmail").attr("onblur", "getStudentDetailsForPayment('addStudentPaymentForm', 'true')");
         $("#userReferenceNoWrapper").addClass("col-xl-2").removeClass("col-xl-3");
     }else{
         $("#learningProgramWrapper").hide();
@@ -299,17 +307,21 @@ function addExternalPayment(formId, paymentTitle) {
     }
 }
 
-function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, paymentNameFlag, marksPublished) {
+function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, paymentNameFlag, marksPublished, email) {
     hideMessageTheme2('');
     $('#addPaymentModal').modal('show');
     $("#addStudentPaymentbtn").show();
     $("#closePaymentModal").show();
     $("#copyViewPaymentUrlElement").hide();
     $("#viewPaymentUrlElementWrapper").hide();
+    $("#studentEmailDiv").addClass('d-none')
+    $("#studentIdDiv").removeClass('d-none')
     $('#' + formId + ' #studentId1').val(userNameOrEmail);
+    $('#' + formId + ' #studentEmail').val(email);
     $('#' + formId + ' #studentStandardId').val(studentStandardId);
     $('#' + formId + ' #studentDetailsForPaymentId').hide();
     $('#' + formId + ' #studentId1').prop('disabled', true);
+    $('#' + formId + ' #studentEmail').prop('disabled', true);
     $('#' + formId + ' #studentName1').prop('disabled', true);
     $('#' + formId + ' #learningProgram1').prop('disabled', true);
     $('#' + formId + ' #standardId1').prop('disabled', true);
@@ -331,7 +343,7 @@ function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, pay
 }
 function getStudentDetailsForPayment(formId, needToShowMessage) {
     hideMessageTheme2('');
-    var userNameOrEmail = $('#' + formId + ' #studentId1').val().trim();
+    var userNameOrEmail = $('#' + formId + ' #studentEmail').val().trim();
     if (userNameOrEmail == '') {
         return false;
     }
@@ -394,10 +406,24 @@ function getStudentDetailsForPayment(formId, needToShowMessage) {
 }
 
 function addStudentPayment(formId, moduleId) {
-    var studentId = $("#" + formId + " #studentId1").val();
-    if (studentId == null || studentId == undefined || studentId == '') {
-        showMessageTheme2(0, "Student ID is mandatory.");
+    var paymentTitle = $("#" + formId + " #paymentType1").val();
+    if (paymentTitle == null || paymentTitle == undefined || paymentTitle == '') {
+        showMessageTheme2(0, "Payment Title is mandatory.");
         return false;
+    }
+
+    if(paymentTitle == "REGISTRATION_FEE"){
+        var studentEmail = $("#" + formId + " #studentEmail").val();
+        if (studentEmail == null || studentEmail == undefined || studentEmail == '') {
+            showMessageTheme2(0, "Student Email is mandatory.");
+            return false;
+        }
+    }else{
+        var studentId = $("#" + formId + " #studentId1").val();
+        if (studentId == null || studentId == undefined || studentId == '') {
+            showMessageTheme2(0, "Student ID is mandatory.");
+            return false;
+        }
     }
     var studentName = $("#" + formId + " #studentName1").val();
     if (studentName == null || studentName == undefined || studentName == '') {
@@ -417,11 +443,6 @@ function addStudentPayment(formId, moduleId) {
                 return false;
             }
         }
-    }
-    var paymentTitle = $("#" + formId + " #paymentType1").val();
-    if (paymentTitle == null || paymentTitle == undefined || paymentTitle == '') {
-        showMessageTheme2(0, "Payment Title is mandatory.");
-        return false;
     }
     var paymentName1 = $("#" + formId + " #paymentName1").val();
     if (paymentName1 == '') {
@@ -548,7 +569,7 @@ function getRequestDataForAddPaymentDetails(formId, moduleId) {
     //	addPaymentDTO['userId'] = $("#"+formId+" #userIdSearch").val().trim();
     //	addPaymentDTO['standardId'] = $("#"+formId+" #standardIdSearch").val().trim();
     if ($("#" + formId + " #studentStandardId").val() == '') {
-        addPaymentDTO['studentEmail'] = $("#" + formId + " #studentId1").val();
+        addPaymentDTO['studentEmail'] = $("#" + formId + " #studentEmail").val();
         addPaymentDTO['studentName'] = $("#" + formId + " #studentName1").val();
         if($("#paymentType1").val() == "REGISTRATION_FEE"){
             addPaymentDTO['learningProgram'] = $("#" + formId + " #learningProgram1").select2('val');

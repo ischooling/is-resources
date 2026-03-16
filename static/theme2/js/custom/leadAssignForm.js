@@ -108,9 +108,9 @@ function getLeadAssignUser(objectRights) {
 			html+=`<tr class="assignItem"  >	
 				 <td class="text-left" style="vertical-align:top"><input type="hidden" class="assignto"  value="${assignUser.assignTo}">
 				<b>${assignUser.assignName!='Dr. Angie' ? assignUser.assignName.split(" ")[0] : assignUser.assignName} | ${assignUser.countryName}</b>`;
-				if(assignUser.counselorActivate == 'Y'){
-					html+=`<span class="${bgColorStype} text-center badge font-10 float-right">${assignUser.rating}</span>`;
-				}
+				// if(assignUser.counselorActivate == 'Y'){
+				// 	html+=`<span class="${bgColorStype} text-center badge font-10 float-right">${assignUser.rating}</span>`;
+				// }
 				html+=`${assignUser.workingtime!=''?'<br/>'+assignUser.workingtime+'':''}`;
 				html+=`<br/>`;
 					var assignRoles=assignUser.assignRole;

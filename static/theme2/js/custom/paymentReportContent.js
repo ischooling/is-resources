@@ -162,7 +162,7 @@ function cardDetails(data){
 											<label class="label bold">Overall Progress Report:</label>
 											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}`;
 											if(item.updateProfileStudentDTO.lmsUserStatus==1){
-												html+=`&nbsp;&nbsp;<a href='javascript:void(0)'  data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report"  onclick='getAsPost(\"/dashboard/student-progress-report?moduleId=18&linkType=externalLink-${item.userId}\")' class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
+												html+=`&nbsp;&nbsp;<a href='javascript:void(0)' data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report" onclick="openManageUserStudentPerformanceModal('18','${item.userId}','${paymentReportEscapeSingleQuote(item.studentName || "")}')" class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
 											}
 										html+=`</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
@@ -3147,3 +3147,8 @@ function viewCallRecording(url) {
     $("body").append(html);
     $("#" + modalId).modal("show");
 }
+
+function paymentReportEscapeSingleQuote(value){
+    return (value || "").toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
