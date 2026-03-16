@@ -212,8 +212,9 @@ function callManageAdminLmsPasswordModal(userId){
 
 function callForNewUser(formId, moduleId) {
   hideMessage("");
+  let isCreateMode = $("#" + formId + " #userId").val() == "";
   let email = $("#" + formId + " #emailId").val();
-  if(!email.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
+  if(isCreateMode && !email.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
 	showMessageTheme2(0, 'Domain is invalid');
 	return;
   }
@@ -284,14 +285,15 @@ function validateRequestForNewUser(formId) {
     return false;
   }
 
+  let isCreateMode = $("#" + formId + " #userId").val() == "";
   let email = $("#" + formId + " #emailId").val();
   if (!validateEmail(email)) {
     showMessageTheme2(0, "Email is either empty or invalid");
     return false;
   }
-  if(!email.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
+  if(isCreateMode && !email.endsWith("@"+schoolSettingsTechnical.schoolEmailDomain)){
 		showMessageTheme2(0, 'Domain is invalid');
-		return;
+		return false;
    }
   if ($("#" + formId + " #noOfWorkingHours").val() == "") {
     showMessageTheme2(0, "Please fill working hours in a day.");
