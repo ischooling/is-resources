@@ -254,6 +254,11 @@ async function loginPageOnLoadEvent(){
 	$('[data-toggle="tooltip"]').tooltip();
 	$("#marqueeDiv").css({"color":"red"});
 	$("#loginButton").click(function(event) {
+
+		var u = new SpeechSynthesisUtterance("");
+		u.volume = 0;
+		speechSynthesis.speak(u);
+
 		event.preventDefault();
 		callUserLogin('loginForm', moduleId, 'FRESH');
 	});

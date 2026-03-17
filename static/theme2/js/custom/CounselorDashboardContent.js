@@ -2,9 +2,11 @@
 var LEAD_CATEGORY="B2C";
 async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, role){
 	customLoader(true);
+	
 	var commissionRate = await getCounselorCommissionRate('','counselorCommitionRate',userId);
     var html=dashboardCounselorContent(title, roleAndModule, schoolId, userId, role, commissionRate);
     $('#dashboardContentInHTML').html(html);
+	
 	generateTinyUrls();
 	if(USER_ROLE=='B2B_LEAD'){
 		callB2BDashboardLead(moduleId,'B2B');
@@ -258,6 +260,31 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 			html+=getRatingPopup();
 			html+=getSelfCounselorReport();
 			html+=getCounselorAddTask(data.timeslotlist);
+			if(data.smsNotificationStatus){
+				var u = new SpeechSynthesisUtterance("");
+					u.volume = 0;
+					speechSynthesis.speak(u);
+				var roleUSER = (data.userRoleStatus)?'ADMIN':'COUNSELOR';
+				CRMNotify.initByRole({ userId: USER_ID, role: roleUSER, apiUrl: '/api/crm/alerts',
+					times: CRMNotify.generateTimes(data.notifySecond, data.startNotiFyTime, data.endNotiFyTime)
+				});
+
+				// New lead polling — ye initByRole ke baad lagao
+				setInterval(function() {
+					fetch('/api/crm/new-leads?userId=' + USER_ID)
+						.then(function(r) { return r.json(); })
+						.then(function(data) {
+							(data.leads || []).forEach(function(lead) {
+								CRMNotify.newLead(lead.leadNo, lead.leadName, lead.source);
+							});
+							if ((data.leads || []).length > 0) {
+								_lastCheck = new Date().toISOString();
+							}
+						});
+				}, 10000);
+			}
+
+
 	}
 	
 	return html;

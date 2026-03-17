@@ -9,6 +9,12 @@ async function renderLeadSettingDashboard(title, roleAndModule, SCHOOL_ID, USER_
     $('#dashboardContentInHTML').html(html);
 	
 	getCountryRightTimeList(objectRights);
+	if (window.CRMNotify && typeof window.CRMNotify.initSettingsPanel === 'function') {
+		window.CRMNotify.initSettingsPanel({
+			userId: USER_ID,
+			usersApiUrl: '/api/crm/notification-settings/users'
+		});
+	}
 	
 
 }
@@ -56,6 +62,10 @@ function getSettingTab(objRight){
 				<a role="tab" class="nav-link" id="tab-2" data-toggle="tab" href="#tab-content-2">
 					<span>Lead Category</span>
 				</a>
+			</li><li class="nav-item">
+				<a role="tab" class="nav-link" id="tab-3" data-toggle="tab" href="#tab-content-3">
+					<span>Notification Control</span>
+				</a>
 			</li>
 		</ul>
 		<div class="tab-content p-3 border">`;
@@ -66,6 +76,10 @@ function getSettingTab(objRight){
 				<div class="tab-pane tabs-animation fade" id="tab-content-2" role="tabpanel">
 					<div class="tabs-animation">`;
 						html+=getLeadCategoryPriority(objRight)
+					html+=`</div></div>
+				<div class="tab-pane tabs-animation fade" id="tab-content-3" role="tabpanel">
+					<div class="tabs-animation">`;
+						html+=getNotificationControlContent()
 					html+=`</div></div>		
 			</div>
 		</form>	`;
@@ -163,6 +177,13 @@ function getDiscardCountryRightTimeModel() {
 	return html;
 }
 
+function getNotificationControlContent() {
+	if (window.CRMNotify && typeof window.CRMNotify.getSettingsPanelMarkup === 'function') {
+		return window.CRMNotify.getSettingsPanelMarkup(USER_ID);
+	}
+	return '<div class="alert alert-warning mb-0">Notification controls are unavailable right now.</div>';
+}
+
 function leadConvertTo24Hour(time12) {
     let [time, modifier] = time12.split(' ');
     let [hours, minutes] = time.split(':');
@@ -174,7 +195,6 @@ function leadConvertTo24Hour(time12) {
     }
     return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
 }
-
 
 
 

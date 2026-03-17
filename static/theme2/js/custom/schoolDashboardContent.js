@@ -1,16 +1,32 @@
 
 var active_student=0;
 async function renderSchoolDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE){
+	
+
   	var objRight= await getShoolDashboardData(roleAndModule.moduleId, USER_ID);
 	var objectRights=objRight.objectRights;
 	OBJECT_RIGHTS=objectRights;
 	var userCountList= await getSchoolUserCountData();
-	//console.log(OBJECT_RIGHTS);
-	// ROLE_MODULE=roleAndModule;
+	
 	
 	$('#dashboardContentInHTML').html(getSchoolDashboardContent(title, userCountList.userCountList));
 	getStudentYearChartData('student-year-chart');
 	getStudentGradeChartData('student-grade-chart');
+	if(objectRights.smsNotificationStatus){
+		
+			CRMNotify.initByRole({ 
+				userId: USER_ID, 
+				role: 'ADMIN', 
+				apiUrl: '/api/crm/alerts',
+				times: CRMNotify.generateTimes(
+					objectRights.notifySecond, 
+					objectRights.startNotiFyTime, 
+					objectRights.endNotiFyTime
+				)
+			});
+	}
+		
+
 	
 }
 
