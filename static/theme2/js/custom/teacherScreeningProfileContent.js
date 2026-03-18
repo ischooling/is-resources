@@ -259,10 +259,10 @@ function communicationLogsContentForTeacherApplication(teacherId, useRole){
                                 </div>*/''}
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">
                                     <label class="m-0 full">&nbsp;Attachment (if any)</label>
-                                    <div class="full position-relative" 
-                                        id="fileuploadLog6div" 
-                                        uploaded="" 
-                                        fileName="" 
+	                                    <div class="full position-relative" style="max-width: 160px;" 
+	                                        id="fileuploadLog6div" 
+	                                        uploaded="" 
+	                                        fileName="" 
                                         docType="communicationLog" 
                                         thumbType="" 
                                         data-PDFURL="">

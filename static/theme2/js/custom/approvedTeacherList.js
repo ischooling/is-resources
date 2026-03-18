@@ -181,9 +181,9 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 										}
 									}
 									if(ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y'){
-										if(SCHOOL_ID != 4){
-											html+=`<a class="dropdown-item" onclick="showAddPaymentForm('addNewPayment', 'add', '${teacherRequest.teacherId}','TEACHER','${teacherRequest.name}');" href="javascript:void(0);"><i class="fa fa-dollar-sign"></i>&nbsp; Add Payment Entry</a>`;
-										}
+										// if(SCHOOL_ID != 4){
+										// 	html+=`<a class="dropdown-item" onclick="showAddPaymentForm('addNewPayment', 'add', '${teacherRequest.teacherId}','TEACHER','${teacherRequest.name}');" href="javascript:void(0);"><i class="fa fa-dollar-sign"></i>&nbsp; Add Payment Entry</a>`;
+										// }
 										html+=`<a class="dropdown-item" onclick="return intializeTeacherAzureUser('${teacherRequest.teacherOfficialEmail}','${teacherRequest.teacherOfficialEmailPass}','${teacherRequest.userId}','${teacherRequest.isAzureUserCreated}');" href="javascript:void(0);"><i class="fa fa-envelope"></i>&nbsp;Generate School Email Id</a>`;
 										if(teacherRequest.officialEmail!=''){
 											html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to delete?','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'DELETE\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\') '); " href="javascript:void(0);"><i class="fa fa-trash"></i>&nbsp; Remove Official Email</a>`;

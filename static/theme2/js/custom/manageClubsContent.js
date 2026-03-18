@@ -67,13 +67,13 @@ function getManageClubsFilter(countObj) {
                         </select>
                     </div>
 
-                    <div class="col-md-3 mb-2 d-flex align-items-end">
-                        <button class="btn btn-primary mr-2 w-100" onclick="applyClubFilter();">Apply Filter</button>
-                    </div>
+	                    <div class="col-12 col-md-auto mb-2 d-flex align-items-end px-1">
+	                        <button class="btn btn-primary mr-2" style="width: 100px !important; max-width: 100% !important;" onclick="applyClubFilter();">Apply Filter</button>
+	                    </div>
 
-                    <div class="col-md-3 mb-2 d-flex align-items-end">
-                        <button class="btn btn-danger w-100" onclick="resetClubFilters();">Reset</button>
-                    </div>
+	                    <div class="col-12 col-md-auto mb-2 d-flex align-items-end px-1">
+	                        <button class="btn btn-danger" style="width: 80px !important; max-width: 100% !important;" onclick="resetClubFilters();">Reset</button>
+	                    </div>
                 </div>
             </div>
         </div>`;

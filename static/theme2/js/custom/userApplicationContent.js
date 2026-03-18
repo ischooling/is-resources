@@ -418,7 +418,7 @@ function communicationLogsContentForUserApplication(userId, useRole, callFrom){
                                         <input type="file" id="fileuploadLog7" class="upload-input form-control"
                                             onchange="cropImageChatSupport(event,'fileuploadLog7','fileuploadLog7Icon','fileuploadLog7div','communicationLog','','fileuploadLog7ViewAndRemoveBtn',3)">
                                         
-                                        <label class="upload-label form-control mb-0 btn btn-primary">
+                                        <label class="upload-label form-control mb-0 btn btn-primary px-2">
                                             <i class="fa fa-upload mr-2"></i>Upload
                                         </label>
                                     </div>
