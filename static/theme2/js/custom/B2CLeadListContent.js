@@ -1789,38 +1789,38 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Assigned To:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoAssignName!=''?leads.demoAssignName:'N/A')+'</td>'
 								+'</tr>';
-                if(USER_ROLE=='DIRECTOR' || objectRights.searchUser){
+                //if(USER_ROLE=='DIRECTOR' || objectRights.searchUser){
                   if(leads.demoSummaryStatus){
                     html+='<tr>'
-                          +'<td class="border-0 p-1">'
-                            +'<div class="dropdown d-inline-block" style="position: inherit;">'
-                              +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Demo Summary</button>'
-                              +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px; max-height:350px; overflow: auto;">';
-                            demoSummary=JSON.parse(leads.demoSummary);
-                            html+='<table class="table table-bordered font-11 mt-2">';
-                            $.each(demoSummary.reply, function(key, value) {
-                                html += '<tr>';
-                                html += '<td class="bold">' + key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) + '</td>';  // Pretty key name
+                           +'<td class="border-0 p-1">'
+                          //   +'<div class="dropdown d-inline-block" style="position: inherit;">'
+                          //     +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Demo Summary</button>'
+                          //     +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px; max-height:350px; overflow: auto;">';
+                          //   demoSummary=JSON.parse(leads.demoSummary);
+                          //   html+='<table class="table table-bordered font-11 mt-2">';
+                          //   $.each(demoSummary.reply, function(key, value) {
+                          //       html += '<tr>';
+                          //       html += '<td class="bold">' + key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) + '</td>';  // Pretty key name
                                 
-                                if ($.isArray(value)) {
-                                    html += '<td class="array">[' + value.join(', ') + ']</td>';
-                                } else if (typeof value === 'object') {
-                                    html += '<td class="nested">' + JSON.stringify(value, null, 2) + '</td>';
-                                } else {
-                                    html += '<td>' + value + '</td>';
-                                }
-                                html += '</tr>';
-                            });
-                            html+='</table>'
-                              +'</div>'
-                            +'</div>'
-                          +'</td>'
+                          //       if ($.isArray(value)) {
+                          //           html += '<td class="array">[' + value.join(', ') + ']</td>';
+                          //       } else if (typeof value === 'object') {
+                          //           html += '<td class="nested">' + JSON.stringify(value, null, 2) + '</td>';
+                          //       } else {
+                          //           html += '<td>' + value + '</td>';
+                          //       }
+                          //       html += '</tr>';
+                          //   });
+                          //   html+='</table>'
+                          //     +'</div>'
+                          //   +'</div>'
+                           +'</td>'
                           +'<td class="border-0 p-1">'
-                              +'<button type="button" class="btn btn-sm btn-primary" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Detail Summary</button>'
+                              +'<button type="button" class="btn btn-sm btn-primary" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Demo Summary</button>'
                           +'</td>'
                         +'</tr>';
                   }
-                }
+                //}
                     
 								html+='</tbody>'
 							+'</table>'
@@ -2232,7 +2232,7 @@ function getLeadStartTimer(leadstartDate, leadid){
 function getDemoDetailSummary(){
     var html=
         `<div class="modal fade" id="demodetailsummary" tabindex="-1" role="dialog" aria-labelledby="userActivityModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Demo detail summary (<span id="demosummaryleadno"></span>)</h5>
