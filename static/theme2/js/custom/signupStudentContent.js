@@ -375,13 +375,13 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                 <div class="actions clearfix">
                     <ul role="menu" aria-label="Pagination">
                         <li class="prev-btn" style="opacity:0;visibility: hidden;">
-                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('prev')">Back</a>
+                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('prev')">Back</a>
                         </li>
                         <li class="next-btn">
-                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('next')">Next</a>
+                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('next')">Next</a>
                         </li>
                         <li class="finish-btn" style="display: none;">
-                            <a href="javascript:void(0)" id="finishBtnId" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" role="menuitem" onclick="moveStep('finish');showPaymentModal();">`;
+                            <a href="javascript:void(0)" id="finishBtnId" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('finish');showPaymentModal();">`;
 							if(signupType == 'Online' ){
 								if (SHOW_PAYMENT_OPTION == 'Y') {
 									html += 'Proceed';
@@ -2308,7 +2308,7 @@ function paymentModalContentWithData(cdrDTO){
 						+'<div class="row">'
 							+'<div class="col-md-10"></div>'
 							+'<div class="col-md-2 text-right">'
-								+'<button type="button" class="btn theme-bg primary-bg white-txt-color" onclick="choosePaymentOption();">Next</button>'
+								+'<button type="button" class="btn theme-bg primary-bg white-txt-color" style="width:auto;padding-left:16px;padding-right:16px;" onclick="choosePaymentOption();">Next</button>'
 							+'</div>'
 						+'</div>'
 					+'</div>'

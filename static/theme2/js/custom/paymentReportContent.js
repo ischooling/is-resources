@@ -2,6 +2,36 @@ function getPaymentReportContent(){
 	$('#dashboardContentInHTML').html(paymentReport());
 	paymentReportEventLoad()
 }
+
+function paymentFeeMode(){
+	try{
+		var ps = $('#paymentStatus').val() || [];
+		var hasODUE = ps.indexOf('ODUE') !== -1;
+		var hasDUE = ps.indexOf('DUE') !== -1;
+		if(hasODUE && !hasDUE){ return 'ODUE'; }
+		if(hasDUE && !hasODUE){ return 'DUE'; }
+		return '';
+	}catch(e){
+		return '';
+	}
+}
+
+function paymentFeeClass(overDue){
+	var od = Number(overDue || 0);
+	var mode = paymentFeeMode();
+	if(mode === 'ODUE'){ return 'text-danger'; }
+	if(mode === 'DUE'){ return 'text-success'; }
+	return (od < 0 ? 'text-success' : 'text-danger');
+}
+
+function paymentFeeText(overDue){
+	var od = Number(overDue || 0);
+	var mode = paymentFeeMode();
+	if(mode === 'ODUE'){ return 'Overdue by ' + Math.abs(od); }
+	if(mode === 'DUE'){ return 'Scheduled in ' + Math.abs(od); }
+	return (od < 0 ? ('Scheduled in ' + Math.abs(od)) : ('Overdue by ' + od));
+}
+
 function paymentReport(){
 	var html =
 	'<div class="w-100">'
@@ -171,7 +201,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Fee Details:</label>
-											<span class="field-value trans5s "><span class="font-weight-semi-bold  d-inline-block float-right font-size-md ${(item.overDue <0? 'text-danger':'text-success')} ">${(item.overDue <0? 'Overdue by ':'Scheduled in ')+item.overDue} days</span></span>
+											<span class="field-value trans5s "><span class="font-weight-semi-bold  d-inline-block float-right font-size-md ${paymentFeeClass(item.overDue)} ">${paymentFeeText(item.overDue)} days</span></span>
 										</div>
 									</div>	
 									<div class="row">
@@ -183,7 +213,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Teacher / Batch Mapping:</label>
-											<span class="field-value trans5s ">${item.teacherMapStaus>0?'Completed':'Pending'}`;
+											<span class="field-value trans5s ">${item.teacherMapStaus==2?'Ended':(item.teacherMapStaus==1?'Completed':'Pending')}`;
 											// if(item.teacherMapStaus==0){
 											// 	html+=`&nbsp;&nbsp;<a href="javascript:void(0);" class="" onclick="return callAssignStudentTeacher('formId','${item.studentId}','true','true','true','${item.updateProfileStudentDTO.standardId}');"><i class="fa fa-eye"></i></a>`;
 											// }
@@ -459,7 +489,7 @@ function cardDetails(data){
 																		const element = item.creditDetails[index];
 																		html+=`<tr>
 																			<td>${element.subjectName}</td>
-																			<td>${element.teacherName}</td>
+																			<td>${(element.teacherName==null || element.teacherName=='')?'N/A':element.teacherName}</td>
 																			<td>${item.enrollmentStartDate}</td>
 																			<td>${item.enrollmentEndDate=='Dec 31,2999'?'On Going':item.enrollmentEndDate}</td>
 																			<td class="text-center">${element.progress}%</td>
@@ -494,7 +524,7 @@ function cardDetails(data){
 												</div>
 											</div>
 											<div class="p-2 mb-2" style="background:#f0f9ff">
-												<h5 class="font-weight-semi-bold">Fee Details <span class="font-weight-semi-bold  d-inline-block float-right font-size-md ${(item.overDue <0? 'text-danger':'text-success')} ">${(item.overDue <0? 'Overdue by ':'Scheduled in ')+item.overDue} days</span></h5>
+												<h5 class="font-weight-semi-bold">Fee Details <span class="font-weight-semi-bold  d-inline-block float-right font-size-md ${paymentFeeClass(item.overDue)} ">${paymentFeeText(item.overDue)} days</span></h5>
  												<div>
  													<span class="font-weight-semi-bold opacity-7 font-size-sm">Total -&nbsp;</span>
  													<span class="opacity-7 font-size-sm">${item.totalFee} | Pending - ${item.pendingFee}</span>
@@ -587,7 +617,13 @@ function cardDetails(data){
 																for (let s = 0; s < item.leadStatusList.length; s++) {
 																	const statusL = item.leadStatusList[s];
 																	html+='<option value="'+statusL.value+'">'+statusL.value+'</option>';
-																}	
+																}
+																const hasInactiveStatus = item.leadStatusList.some(function(statusL){
+																	return statusL.value === 'Inactive';
+																});
+																if (!hasInactiveStatus) {
+																	html+='<option value="Inactive">Inactive</option>';
+																}
 															html+=`</select>
 														</div>
 														<div class="position-relative form-group">
@@ -659,19 +695,26 @@ function filterStudentPaymentReportForm(){
 			+'<div class="card-body">'
 				+'<form id="studentPaymentForm">'
 					+'<div class="row">'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Academic Session</label>'
-							+'<select id="sessionId" class="form-control selectReset">'
-							+'</select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Payment Start Date</label>'
-							+'<input type="text" id="startDate" class="form-control" placeholder="Select Start Date" readonly onkeydown="return false" >'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Payment End Date</label>'
-							+'<input type="text" id="endDate" class="form-control" placeholder="Select End Date" readonly onkeydown="return false" >'
-						+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<label>Academic Session</label>'
+								+'<select id="sessionId" class="form-control selectReset">'
+								+'</select>'
+							+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<label>Date Type</label>'
+								+'<select id="dateType" class="form-control">'
+									+'<option value="PAYMENT_DATE" selected>Payment Date</option>'
+									+'<option value="ACADEMIC_YEAR">Academic Year</option>'
+								+'</select>'
+							+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<label id="startDateLabel">Payment Start Date</label>'
+								+'<input type="text" id="startDate" class="form-control" placeholder="Select Start Date" readonly onkeydown="return false" >'
+							+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<label id="endDateLabel">Payment End Date</label>'
+								+'<input type="text" id="endDate" class="form-control" placeholder="Select End Date" readonly onkeydown="return false" >'
+							+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<label>Payment Status</label>'
 							+'<select id="paymentStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
@@ -704,6 +747,7 @@ function filterStudentPaymentReportForm(){
 							+'<label>Teacher / Batch Mapping</label>'
 							+'<select name="teacherMapStaus" id="teacherMapStaus" class="form-control">'
 								+'<option value="">Select Teacher Mapping</option>'
+								+'<option value="2">Mapping End</option>'
 								+'<option value="1">Completed</option>'
 								+'<option value="0">Pending</option>'
 							+'</select>'
@@ -856,6 +900,13 @@ function filterStudentPaymentReportForm(){
 									+'</select>'
 								+'</div>'
 							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<label>Communication Log Status</label>'
+							+'<select id="communicationLogStatus" class="form-control">'
+								+'<option value="">Select Status</option>'
+								+'<option value="Inactive">Inactive</option>'
+							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 text-right ml-auto">'
 							+'<label class="full">&nbsp;</label>'
@@ -3151,4 +3202,3 @@ function viewCallRecording(url) {
 function paymentReportEscapeSingleQuote(value){
     return (value || "").toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
-
