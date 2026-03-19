@@ -108,7 +108,9 @@ function getStudentProfilePageContent(data){
                             if(USER_ROLE != "PARENT" && USER_ROLE != "STUDENT"){
                                 html+=reserveAnEnrollmentSeatAdvCourseInformation(data[5], PORFILE_RESPONSE_DATA.standardStatus, PORFILE_RESPONSE_DATA.enrollmentDetails)
                             }
-                            html+=`<div class="full profile-section" id="communicationLogDIV"></div>`
+                            if(USER_ROLE != "STUDENT"){
+                                html+=`<div class="full profile-section" id="communicationLogDIV"></div>`
+                            }
                             html+=`<div class="full profile-section" id="studentEmailDIV"></div>`
                             // html+=communicationLogInformation(data)
                         html+=`
@@ -210,24 +212,26 @@ function profileSectionTabs(){
                     </a>
                 </li>`:``
             }
-            
-            <li class="bg-white border border-top-left-rounded overflow-hidden">
-                <a href="#communicationLogDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
-                    <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6':'7'}. Communication Log</div>
-                    <div class="widget-content-wrapper flex-fill circle-percentage text-right">
-                        <div class="widget-content-left">
-                            <div class="progress-circle-wrapper">
-                                <div class="circle-progress circle-progress-primary d-inline-block">
-                                    <small class="font-size-md text-dark"></small>
+             ${
+                USER_ROLE != "STUDENT" ? 
+                `<li class="bg-white border border-top-left-rounded overflow-hidden">
+                    <a href="#communicationLogDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                        <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6':'7'}. Communication Log</div>
+                        <div class="widget-content-wrapper flex-fill circle-percentage text-right">
+                            <div class="widget-content-left">
+                                <div class="progress-circle-wrapper">
+                                    <div class="circle-progress circle-progress-primary d-inline-block">
+                                        <small class="font-size-md text-dark"></small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>    
-                </a>
-            </li>
+                        </div>    
+                    </a>
+                </li>`:``
+            }
             <li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
                 <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
-                    <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" || USER_ROLE == "STUDENT" ? '7':'8'}. Student School Email Account</div>
+                    <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" || USER_ROLE == "STUDENT" ? '6':'8'}. Student School Email Account</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
                         <div class="widget-content-left">
                             <div class="progress-circle-wrapper">
@@ -2390,7 +2394,7 @@ function studentEmailInformation(data){
                             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
                                 <i class="fa fa-envelope font-12"></i>
                             </span>
-                            <span>${USER_ROLE == "STUDENT" ? '7':'8'}. Student School Email Account</span>
+                            <span>${USER_ROLE == "STUDENT" ? '6':'8'}. Student School Email Account</span>
                         </h5>
                         <div class="d-flex align-items-center ml-auto">
                             ${actionButtonHtml}
