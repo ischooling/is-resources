@@ -210,9 +210,9 @@ function getParentStudentClassSummaryRightSlideModal(){
                 </button>
                 <div class="modal-header border-0 px-4 py-3" style="background:linear-gradient(90deg,#007FFF 0%,#02b9cc 100%);">
                     <div class="d-flex align-items-center">
-                        <div class="mr-1 d-flex align-items-center justify-content-center text-white" style="width: 60px;height: 40px;">
-                            <img src="${PATH_FOLDER_IMAGE2}class-schedule-calender-icon.png" alt="icon" style="width: 100%;" />
-                        </div>
+	                        <div class="mr-1 d-flex align-items-center justify-content-center text-white" style="width: 40px;height: 28px;">
+	                            <img src="${PATH_FOLDER_IMAGE2}class-schedule-calender-icon.png" alt="icon" style="height: 100%; width: auto;" />
+	                        </div>
                         <div>
                             <h4 class="text-white font-weight-bold mb-0">Student Class Summary</h4>
                             <p class="text-white-50 mb-0 font-13">Detailed attendance and session report</p>
@@ -240,6 +240,5 @@ function getParentStudentClassSummaryNoDataHtml(message){
         <p class="mb-0 text-muted">${message || "No class summary found."}</p>
     </div>`;
 }
-
 
 

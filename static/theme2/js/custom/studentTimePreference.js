@@ -1,6 +1,9 @@
 var ORIENTSTATUS;
 
 function getStudentDashboardWelcomePopupStorageKey(){
+    if(USER_ID == null || USER_ID == undefined || USER_ID === ""){
+        return null;
+    }
     return "student_dashboard_welcome_popup_shown_" + USER_ID;
 }
 
@@ -84,7 +87,21 @@ function hideStudentDashboardWelcomeOverlay(){
 
 function showStudentDashboardWelcomeThenSystemTraining(){
     var storageKey = getStudentDashboardWelcomePopupStorageKey();
-    if(localStorage.getItem(storageKey)){
+    if(!storageKey){
+        openStudentSystemTrainingPopupSafe();
+        return;
+    }
+    var alreadyShown = null;
+    try{
+        alreadyShown = localStorage.getItem(storageKey);
+    }catch(e){}
+    if(!alreadyShown){
+        try{
+            var cookieMatch = document.cookie.match("(^|;) ?" + storageKey + "=([^;]*)(;|$)");
+            alreadyShown = cookieMatch ? cookieMatch[2] : null;
+        }catch(e){}
+    }
+    if(alreadyShown){
         hideStudentDashboardWelcomeOverlay();
         $("#studentDashboardWelcomePopup").modal("hide");
         window.__studentWelcomePopupFlowActive = false;
@@ -127,13 +144,25 @@ function showStudentDashboardWelcomeThenSystemTraining(){
             window.clearTimeout(runningTimerId);
             $welcomePopup.removeData("timerId");
         }
-        localStorage.setItem(storageKey, "Y");
+        try{
+            localStorage.setItem(storageKey, "Y");
+        }catch(e){}
+        try{
+            document.cookie = storageKey + "=Y; Max-Age=" + (365 * 24 * 60 * 60) + "; Path=/; SameSite=Lax";
+        }catch(e){}
         window.__studentWelcomePopupFlowActive = false;
         openStudentSystemTrainingPopupSafe();
     });
 
     function showWelcome(){
         syncWelcomeDialogWidth();
+        // Mark as shown as soon as we decide to show it (prevents repeat on logout/refresh).
+        try{
+            localStorage.setItem(storageKey, "Y");
+        }catch(e){}
+        try{
+            document.cookie = storageKey + "=Y; Max-Age=" + (365 * 24 * 60 * 60) + "; Path=/; SameSite=Lax";
+        }catch(e){}
         $welcomePopup.modal("show");
         if($welcomePopup.data("timerId")){
             return;
