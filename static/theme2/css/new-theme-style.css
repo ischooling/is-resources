@@ -54,6 +54,7 @@ input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 	src: url("../fonts/yesteryear-regular.ttf");
 }
 .font-style-yesteryear{font-family: yesteryear !important}
+.font-style-salsa{font-family: Salsa, cursive !important}
 *[disabled]{cursor:not-allowed;}
 *::selection{
 	background: #320b7e;

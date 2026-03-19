@@ -1,4 +1,166 @@
 var ORIENTSTATUS;
+
+function getStudentDashboardWelcomePopupStorageKey(){
+    return "student_dashboard_welcome_popup_shown_" + USER_ID;
+}
+
+function ensureStudentDashboardWelcomePopup(){
+    if($("#studentDashboardWelcomePopup").length < 1 && typeof getStudentDashboardWelcomePopupContent === "function"){
+        $("body").append(getStudentDashboardWelcomePopupContent());
+    }
+}
+
+function openStudentSystemTrainingPopup(){
+    if(window.__studentWelcomePopupFlowActive || $("#studentDashboardWelcomePopup").hasClass("show")){
+        return;
+    }
+    $("#timePreferencePopup").removeClass("d-none");
+    $("#timePreferencePopup").modal("show");
+}
+
+function openStudentSystemTrainingPopupSafe(){
+    var maxAttempts = 50;
+    var attempt = 0;
+    function tryOpen(){
+        attempt++;
+        if(window.__studentWelcomePopupFlowActive || $("#studentDashboardWelcomePopup").hasClass("show")){
+            if(attempt < maxAttempts){
+                window.setTimeout(tryOpen, 200);
+            }
+            return;
+        }
+        if($("#timePreferencePopup").length > 0){
+            openStudentSystemTrainingPopup();
+            return;
+        }
+        if(attempt < maxAttempts){
+            window.setTimeout(tryOpen, 200);
+        }
+    }
+    tryOpen();
+}
+
+function getStudentWelcomeOverlayName(){
+    var studentName = USER_FULL_NAME != null && USER_FULL_NAME != undefined && USER_FULL_NAME != '' ? USER_FULL_NAME.split(' ')[0] : 'Student';
+    return studentName;
+}
+
+function ensureStudentDashboardWelcomeOverlay(){
+    if($("#studentDashboardWelcomeOverlay").length > 0){
+        return true;
+    }
+    if($("#timePreferencePopup").length < 1){
+        return false;
+    }
+    var studentName = getStudentWelcomeOverlayName();
+    var welcomeBg = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "welcome-bg.png" + (typeof SCRIPT_VERSION !== "undefined" ? SCRIPT_VERSION : "");
+    var welcomeGif = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "MascotAlpha.gif" + (typeof SCRIPT_VERSION !== "undefined" ? SCRIPT_VERSION : "");
+    var html =
+        `<div id="studentDashboardWelcomeOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;padding:16px;">
+            <div class="card w-100 border-0 rounded-10 overflow-hidden" style="max-width:640px;box-shadow:0 0.75rem 2rem rgba(0,0,0,.35);">
+                <div class="p-2" style="border:2px solid rgba(0,123,255,.35);border-radius:14px;">
+                    <div class="card-body text-center p-4 p-md-5" style="background:url(${welcomeBg}) center center / cover no-repeat;border:2px solid rgba(255,255,255,.85);border-radius:12px;">
+                    <h3 class="text-dark font-weight-semi-bold mb-3" style="letter-spacing:0.2px;">Hello ${studentName}!</h3>
+                    <div class="my-3">
+                        <img src="${welcomeGif}" alt="Welcome" class="img-fluid" style="max-height:240px;" />
+                    </div>
+                    <h3 class="text-dark font-weight-semi-bold mb-0" style="letter-spacing:0.2px;">
+                        Welcome to the<br/>International Schooling Family!
+                    </h3>
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary px-4" id="studentDashboardWelcomeOverlayContinue">Continue</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    $("#timePreferencePopup .modal-content").css({"position":"relative"}).append(html);
+    return true;
+}
+
+function hideStudentDashboardWelcomeOverlay(){
+    $("#studentDashboardWelcomeOverlay").remove();
+}
+
+function showStudentDashboardWelcomeThenSystemTraining(){
+    var storageKey = getStudentDashboardWelcomePopupStorageKey();
+    if(localStorage.getItem(storageKey)){
+        hideStudentDashboardWelcomeOverlay();
+        $("#studentDashboardWelcomePopup").modal("hide");
+        window.__studentWelcomePopupFlowActive = false;
+        openStudentSystemTrainingPopupSafe();
+        return;
+    }
+
+    ensureStudentDashboardWelcomePopup();
+    var $welcomePopup = $("#studentDashboardWelcomePopup");
+    if($welcomePopup.length < 1){
+        openStudentSystemTrainingPopupSafe();
+        return;
+    }
+
+    window.__studentWelcomePopupFlowActive = true;
+
+    function syncWelcomeDialogWidth(){
+        var $trainingDialog = $("#timePreferencePopup .modal-dialog").first();
+        var $welcomeDialog = $("#studentDashboardWelcomePopup .modal-dialog").first();
+        if($trainingDialog.length < 1 || $welcomeDialog.length < 1){
+            return;
+        }
+        var trainingMaxWidth = ($trainingDialog[0] && $trainingDialog[0].style ? $trainingDialog[0].style.maxWidth : "") || $trainingDialog.css("max-width");
+        if(trainingMaxWidth && trainingMaxWidth !== "none"){
+            $welcomeDialog.css("max-width", trainingMaxWidth);
+        }
+        if($trainingDialog.hasClass("modal-sm")){
+            $welcomeDialog.addClass("modal-sm");
+        }else if($trainingDialog.hasClass("modal-lg")){
+            $welcomeDialog.addClass("modal-lg");
+        }else if($trainingDialog.hasClass("modal-xl")){
+            $welcomeDialog.addClass("modal-xl");
+        }
+    }
+
+    $welcomePopup.off(".studentDashboardWelcomeFlow");
+    $welcomePopup.on("hidden.bs.modal.studentDashboardWelcomeFlow", function(){
+        var runningTimerId = $welcomePopup.data("timerId");
+        if(runningTimerId){
+            window.clearTimeout(runningTimerId);
+            $welcomePopup.removeData("timerId");
+        }
+        localStorage.setItem(storageKey, "Y");
+        window.__studentWelcomePopupFlowActive = false;
+        openStudentSystemTrainingPopupSafe();
+    });
+
+    function showWelcome(){
+        syncWelcomeDialogWidth();
+        $welcomePopup.modal("show");
+        if($welcomePopup.data("timerId")){
+            return;
+        }
+        var timerId = window.setTimeout(function(){
+            $welcomePopup.modal("hide");
+        }, 10000);
+        $welcomePopup.data("timerId", timerId);
+        $("#studentDashboardWelcomePopupContinue").off("click.studentDashboardWelcomeFlow").on("click.studentDashboardWelcomeFlow", function(){
+            var runningTimerId = $welcomePopup.data("timerId");
+            if(runningTimerId){
+                window.clearTimeout(runningTimerId);
+                $welcomePopup.removeData("timerId");
+            }
+        });
+    }
+
+    if($("#timePreferencePopup").hasClass("show")){
+        $("#timePreferencePopup").one("hidden.bs.modal.studentDashboardWelcomeFlow", function(){
+            showWelcome();
+        });
+        $("#timePreferencePopup").modal("hide");
+        return;
+    }
+    showWelcome();
+}
+
 function studentTimepreferencePageOnLoadEvent(){
     $('.play-icon').click(function() {
         $(this).parent().fadeOut(); // Hide play button overlay
@@ -148,7 +310,6 @@ function studentSystemTrainingShowHide(data){
                 var msgHtml ="";
                 if(data['orientStatus']!='COMPLETED'){
                     $("#timePreferencePopup").removeClass("d-none");
-                    $("#timePreferencePopup").modal("show");
                     // $("#profileFielddModal").modal("hide"); 
                     // clearInterval(intervalId)
                 }else{
@@ -249,8 +410,7 @@ function studentSystemTrainingShowHide(data){
                 
             });
         }
-        $("#timePreferencePopup").removeClass("d-none");
-        $("#timePreferencePopup").modal("show");
+        showStudentDashboardWelcomeThenSystemTraining();
     }		
 				
 			

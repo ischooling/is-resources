@@ -197,7 +197,7 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 										}
 									}
 									if(ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y'){
-										html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to withdraw?','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'WITHDRAW\\\', \\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'approved\\\') '); " href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Withdraw Teacher</a>`;
+										html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to withdraw the teacher and reset the Outlook account password?','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'WITHDRAW\\\', \\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'approved\\\') '); " href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Withdraw Teacher</a>`;
 									}
 									if(teacherRequest.blockUnblockStatus == 'N' && (ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y')){
 										html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to Block','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'BLOCK\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'approved\\\') '); " href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Block Teacher</a>`;

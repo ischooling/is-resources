@@ -172,8 +172,12 @@ async function renderStudentDashboard(data){
     };
     $("#moveToTimePreferencePopup").click(function(){
         $("#mandatoryVideoModal").modal("hide");
-        $("#timePreferencePopup").removeClass("d-none");
-        $("#timePreferencePopup").modal("show");
+        if(typeof showStudentDashboardWelcomeThenSystemTraining === "function"){
+            showStudentDashboardWelcomeThenSystemTraining();
+        }else{
+            $("#timePreferencePopup").removeClass("d-none");
+            $("#timePreferencePopup").modal("show");
+        }
     });
     if(data.videoUrl !='N'){
         onYouTubeIframeAPIReady(data.videoUrl)

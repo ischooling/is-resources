@@ -2588,6 +2588,7 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
     // }
     var itiInstances = window.intlTelInput(phoneNumber, {
         separateDialCode: true,
+        autoPlaceholder: "off",
 		utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
     });
     if(flagCode == null || flagCode == undefined || flagCode == ""){
@@ -2595,6 +2596,7 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
     }else{
         itiInstances.setCountry(flagCode);   
     }
+    $(phoneNumber).attr("placeholder", "xxx-xxx-xxxx");
 	$("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
 	$("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
     phoneNumber.addEventListener('countrychange', function(e) {
@@ -2603,6 +2605,7 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 		}
         $("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
         $("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
+        $(phoneNumber).attr("placeholder", "xxx-xxx-xxxx");
     });
     phoneNumber.intlTelInputInstance = itiInstances;
     //phoneNumber.setAttribute('data-intlTelInput-initialized', 'true');

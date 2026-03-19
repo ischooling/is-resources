@@ -1,14 +1,46 @@
 function renderStudentTimepreferenceContent(details){
     var html=``;
-    html+=getStudentTimePreferencePopupContent(details)
+    html+=getStudentDashboardWelcomePopupContent()
+    +getStudentTimePreferencePopupContent(details)
     +getStudentMobileViewSystemTrainingInfoContent()
+    return html;
+}
+
+function getStudentDashboardWelcomePopupContent(){
+    var studentName = USER_FULL_NAME != null && USER_FULL_NAME != undefined && USER_FULL_NAME != '' ? USER_FULL_NAME.split(' ')[0] : 'Student';
+    var html =
+        `<div class="modal fade" id="studentDashboardWelcomePopup" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered box-shadow-none" role="document" style="max-width:480px;width:calc(100% - 32px);">
+                <div class="modal-content p-2 bg-white border rounded-20 shadow-lg overflow-hidden">
+                    <div class="text-center px-3 py-4 border border-primary rounded-20 position-relative" style="background:url(${PATH_FOLDER_IMAGE2}welcome-bg.png${SCRIPT_VERSION}) center center / cover no-repeat;">
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <h2 class="text-dark font-weight-semi-bold mb-3 animated zoomIn font-30 font-style-salsa" style="letter-spacing:0.2px;">Hello ${studentName}!</h2>
+                        <div class="mb-3">
+                            <img src="${PATH_FOLDER_IMAGE2}MascotAlpha.gif${SCRIPT_VERSION}" alt="Welcome" class="img-fluid animated zoomIn" style="max-height:260px;" />
+                        </div>
+                        <div class="text-dark font-weight-bold font-26 line-height-1 font-style-salsa">
+                            <span class="animated zoomIn d-inline-block" style="animation-delay:0.00s;">Welcome</span>&nbsp;
+                            <span class="animated zoomIn d-inline-block" style="animation-delay:0.12s;">to</span>&nbsp;
+                            <span class="animated zoomIn d-inline-block" style="animation-delay:0.24s;">the</span><br/>
+                            <span class="animated zoomIn d-inline-block" style="animation-delay:0.36s;">International</span>&nbsp;
+                            <span class="animated zoomIn d-inline-block" style="animation-delay:0.48s;">Schooling</span>&nbsp;
+                            <span class="animated zoomIn d-inline-block" style="animation-delay:0.60s;">Family!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
     return html;
 }
 
 function getStudentTimePreferencePopupContent(details){
     var html=
         `<div class="modal fade d-none" id="timePreferencePopup" data-backdrop="static">
-            <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none" role="document" style="max-width:600px">
+            <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none" role="document" style="max-width:480px;width:calc(100% - 32px);">
                 <div class="modal-content text-center">
                     <div class="modal-header pt-2 pb-2 bg-primary text-white justify-content-center">
                         <h5 class="text-white m-0 mr-auto" style="text-transform: none;" id="orientAndSemesterChangeSpanHeading"></h5>

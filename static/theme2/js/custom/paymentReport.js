@@ -101,48 +101,6 @@ function paymentReportEventLoad(){
 	});
 }
 
-function updateCommunicationLogStatusFilter(reports){
-	const $ddl = $('#communicationLogStatus');
-	if(!$ddl.length){
-		return;
-	}
-
-	// Important: Do not rebuild/clear the dropdown on every search.
-	// It is the filter master list, so it must stay available even when "No records found".
-	const optionCount = $ddl.find('option').length;
-	if(optionCount > 1){
-		if($ddl.find('option[value="Inactive"]').length === 0){
-			$ddl.append('<option value="Inactive">Inactive</option>');
-		}
-		if(!$ddl.data('select2')){
-			$ddl.select2({theme:'bootstrap4'});
-		}
-		return;
-	}
-
-	// Fallback: if master list is not loaded yet, derive the list from current response.
-	const uniqueStatuses = new Set();
-	(reports || []).forEach(function(item){
-		(item.leadStatusList || []).forEach(function(statusObj){
-			if(statusObj && statusObj.value){
-				uniqueStatuses.add(statusObj.value);
-			}
-		});
-	});
-	uniqueStatuses.add('Inactive');
-
-	const current = $ddl.val();
-	$ddl.empty();
-	$ddl.append('<option value="">Select Status</option>');
-	Array.from(uniqueStatuses).forEach(function(v){
-		$ddl.append('<option value="'+v+'">'+v+'</option>');
-	});
-	if(!$ddl.data('select2')){
-		$ddl.select2({theme:'bootstrap4'});
-	}
-	$ddl.val(current || '').trigger('change');
-}
-
 function getPaymentReportData(formId, forCountOnly, type, callFrom){
 	var min = $('#progressMin').val();
 	var max = $('#progressMax').val();
@@ -205,12 +163,10 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 				$('#consolidate').html('');
 				$('#studentPaymentReportTable tbody').empty();
 				$("#studentPaymentReport #studentPaymentReportTable tbody").html('<tr><td class="text-center">No records found</td></tr>');
-				updateCommunicationLogStatusFilter([]);
 			} else {
 				//BIND DATA HERE
 				if(forCountOnly){
 					pageCount(data.count)
-					updateCommunicationLogStatusFilter(data.reports);
 				}else{
 					if(type==1){
 						pageCount(data.count)
@@ -224,7 +180,6 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 						$(".re-leadstatus").select2({
 							theme:'bootstrap4',
 						});
-						updateCommunicationLogStatusFilter(data.reports);
 						// if(lRStatus!=""){
 						// 	$("#studentPaymentForm #reLeadStatus").val(lRStatus).trigger("change");
 						// }
@@ -343,16 +298,6 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	if($('#reLeadStatus').val()!=''){
 		PaymentReportRequestDTO['status'] =$('#reLeadStatus').select2('val');
 	}
-	var statusFilters = [];
-	if($('#reLeadStatus').val()!=''){
-		statusFilters = statusFilters.concat($('#reLeadStatus').select2('val'));
-	}
-	if($('#communicationLogStatus').val()!=''){
-		PaymentReportRequestDTO['communicationLogStatus'] = $('#communicationLogStatus').val();
-	}
-	if(statusFilters.length > 0){
-		PaymentReportRequestDTO['status'] = [...new Set(statusFilters)];
-	}
 	if($('#reEnrollStatus').val()!=''){
 		PaymentReportRequestDTO['reEnrollStatus'] = $('#reEnrollStatus').val();
 	}
@@ -452,7 +397,6 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #userId").val("").trigger("change");
 	$('#'+formID+" #overDueBy").val("0");
 	$('#'+formID+" #reLeadStatus").val("").trigger("change");
-	$('#'+formID+" #communicationLogStatus").val('').trigger('change');
 	$('#'+formID+" #reEnrollStatus").val("").trigger("change");
 	$('#'+formID+" #dateType").val('PAYMENT_DATE');
 	if($('#startDateLabel').length){
@@ -677,26 +621,8 @@ function callReEnrollStatusList(formId, value, elementId, keyStatus) {
 						dropdown.append('<option value="' + v.value + '">' + v.value + '</option>');
 					}
 				});
-
-				if(elementId === 'reLeadStatus'){
-					const commDropdown = $("#"+formId+" #communicationLogStatus");
-					if(commDropdown.length){
-						commDropdown.html('');
-						commDropdown.append('<option value="">Select Status</option>');
-						$.each(result, function (k, v) {
-							const val = keyStatus ? v.key : v.value;
-							const label = v.value;
-							commDropdown.append('<option value="' + val + '">' + label + '</option>');
-						});
-						if(commDropdown.find('option[value="Inactive"]').length === 0){
-							commDropdown.append('<option value="Inactive">Inactive</option>');
-						}
-						if(!commDropdown.data('select2')){
-							commDropdown.select2({theme:'bootstrap4'});
-						}else{
-							commDropdown.trigger('change.select2');
-						}
-					}
+				if(elementId === 'reLeadStatus' && dropdown.find('option[value=\"Inactive\"]').length === 0){
+					dropdown.append('<option value=\"Inactive\">Inactive</option>');
 				}
 			}
 		}

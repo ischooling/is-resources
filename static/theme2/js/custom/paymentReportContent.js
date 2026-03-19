@@ -21,7 +21,7 @@ function paymentFeeClass(overDue){
 	var mode = paymentFeeMode();
 	if(mode === 'ODUE'){ return 'text-danger'; }
 	if(mode === 'DUE'){ return 'text-success'; }
-	return (od < 0 ? 'text-success' : 'text-danger');
+	return (od > 0 ? 'text-success' : 'text-danger');
 }
 
 function paymentFeeText(overDue){
@@ -29,7 +29,7 @@ function paymentFeeText(overDue){
 	var mode = paymentFeeMode();
 	if(mode === 'ODUE'){ return 'Overdue by ' + Math.abs(od); }
 	if(mode === 'DUE'){ return 'Scheduled in ' + Math.abs(od); }
-	return (od < 0 ? ('Scheduled in ' + Math.abs(od)) : ('Overdue by ' + od));
+	return (od > 0 ? ('Scheduled in ' + Math.abs(od)) : ('Overdue by ' + od));
 }
 
 function paymentReport(){
@@ -213,11 +213,15 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Teacher / Batch Mapping:</label>
-											<span class="field-value trans5s ">${item.teacherMapStaus==2?'Ended':(item.teacherMapStaus==1?'Completed':'Pending')}`;
+											<span class="field-value trans5s ">${(item.teacherMapStaus==0 && (item.learningPlan=='SelfStudy' || item.learningPlan=='Flexy' || item.learningPlan=='Dual Diploma')) ? 'N/A' : (item.teacherMapStaus==2?'Ended':(item.teacherMapStaus==1?'Completed':'Pending'))}`;
 											// if(item.teacherMapStaus==0){
 											// 	html+=`&nbsp;&nbsp;<a href="javascript:void(0);" class="" onclick="return callAssignStudentTeacher('formId','${item.studentId}','true','true','true','${item.updateProfileStudentDTO.standardId}');"><i class="fa fa-eye"></i></a>`;
 											// }
 											html+=`</span>
+											<div class="mt-1">
+												<label class="label bold">Last Active Time:</label>
+												<span class="field-value trans5s ">${item.lastLoginDateTime==null?'N/A': item.lastLoginDateTime}</span>
+											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Transcript Publish:</label>
@@ -874,7 +878,7 @@ function filterStudentPaymentReportForm(){
 							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Select Status</label>'
+							+'<label>Communication Log Status</label>'
 							+'<select id="reLeadStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
 								
 							+'</select>'
@@ -900,13 +904,6 @@ function filterStudentPaymentReportForm(){
 									+'</select>'
 								+'</div>'
 							+'</div>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Communication Log Status</label>'
-							+'<select id="communicationLogStatus" class="form-control">'
-								+'<option value="">Select Status</option>'
-								+'<option value="Inactive">Inactive</option>'
-							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 text-right ml-auto">'
 							+'<label class="full">&nbsp;</label>'

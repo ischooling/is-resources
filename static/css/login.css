@@ -423,3 +423,12 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
     color: var(--pc) !important;
     border: 2px solid var(--pc) !important;
 }
+@media (max-width: 356px) {
+  #captchaImage {
+    width: auto !important;
+    max-width: 100%;
+  }
+  #captcha {
+    width: 50% !important;
+  }
+}

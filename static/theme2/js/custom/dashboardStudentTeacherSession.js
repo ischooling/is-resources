@@ -2658,8 +2658,12 @@ function callStudentTimePreference(callfrom, studentStandardId) {
 							if(videoUrl!='N'){
 								if(flagWatchVideo){
 									$("#mandatoryVideoModal").hide("hide");
-									$("#timePreferencePopup").removeClass("d-none");
-									$("#timePreferencePopup").modal("show");
+									if(typeof showStudentDashboardWelcomeThenSystemTraining === "function"){
+										showStudentDashboardWelcomeThenSystemTraining();
+									}else{
+										$("#timePreferencePopup").removeClass("d-none");
+										$("#timePreferencePopup").modal("show");
+									}
 								}else{
 									$("#mandatoryVideoModal").modal("show");
 									$("#timePreferencePopup").addClass("d-none");
@@ -2672,8 +2676,12 @@ function callStudentTimePreference(callfrom, studentStandardId) {
 							$("#timePreferencePopup .modal-dialog").addClass("modal-lg");
 							$("#timePreferenceDiv").removeClass("col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12");
 							$("#timePreferenceDiv").addClass("col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12");
-							$("#timePreferencePopup").removeClass("d-none");
-							$("#timePreferencePopup").modal("show");
+							if(typeof showStudentDashboardWelcomeThenSystemTraining === "function"){
+								showStudentDashboardWelcomeThenSystemTraining();
+							}else{
+								$("#timePreferencePopup").removeClass("d-none");
+								$("#timePreferencePopup").modal("show");
+							}
 							$("#mandatoryVideoModal").modal("hide");	
 						}
 							
