@@ -2550,6 +2550,9 @@ function getEventWiseWeekHours(data){
 
 function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, preendTime, slotTypeId, userRoleId, min, max,callTime, slotBufferLimit, slotDateLimit,  slotDayLimit, endTimeDorpdownobj, discardPermission){
 	console.log(userRoleId);
+	if(!discardPermission){
+		discardPermission = $("#discardPermission").val();
+	}
 	//console.log(USER_ROLE_ID);
 	var htmlw = "";
 	var timeDropdown =data.timeAvailabilityList;
@@ -2604,7 +2607,8 @@ function getWeekDaysAvailabilityHtml(userId, data, elementId, prestartTime, pree
 					htmlw=htmlw+'</div>';
 					htmlw=htmlw+'<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12 text-right mt-2 mt-sm-0 p-0">';
 						// htmlw=htmlw+'<h5 class="font-weight-semi-bold" style="font-size:14px">Action</h5>';
-						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"" + ((isDayAllowed || USER_ROLE_ID==2) ? "addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );" : "") + "\" style='line-height:0;" + (((!isDayAllowed && USER_ROLE_ID != 2) || (discardPermission && discardPermission === "false" && userRoleId != 3)) ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
+						var canAddWeekTime = isDayAllowed || USER_ROLE_ID==2 || discardPermission === true || discardPermission === "true";
+						htmlw = htmlw + "<a href=\"javascript:void(0)\" class='btn btn-lg btn-outline-primary btn-sm mr-2 addWeekTimeBtn' onclick=\"" + (canAddWeekTime ? "addNewRowTime('" + days.dayName + "','" + days.dayId + "','" + prestartTime + "','" + preendTime + "','" + userRoleId + "', '" + min + "', '" + max + "','" + slotBufferLimit + "', '" + slotDateLimit + "', '" + slotDayLimit + "','' );" : "") + "\" style='line-height:0;" + ((!canAddWeekTime || (discardPermission && discardPermission === "false" && userRoleId != 3)) ? "pointer-events:none;cursor:not-allowed;opacity:0.6;" : "") + "'><i class=\"icon ion-android-add\" style=\"font-size:15px;line-height:13px\"></i><span class=\"d-md-none\">&nbsp; Add</span></a>";
 						if(slotTypeId>0){}else{
 							
 							var ddclass="";
