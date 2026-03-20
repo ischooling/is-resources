@@ -1166,6 +1166,10 @@ function openPopup(formId, leadType){
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});
+	$("#advanceLeadNewSearchForm #leadSearchAdSet").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#advanceLeadNewSearchForm"
+	});
 
 	$('#leadStartDateSearch').datepicker({
 			autoclose: true,
@@ -1242,6 +1246,10 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
 	});
+	$("#advanceLeadNewSearchForm .leadSearchAdSet").select2({
+		theme:"bootstrap4",
+		dropdownParent:"#advanceLeadNewSearchForm"
+	});
 	$("#advanceLeadNewSearchForm .leadSearchTemplate").select2({
 		theme:"bootstrap4",
 		dropdownParent:"#advanceLeadNewSearchForm"
@@ -1278,6 +1286,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	//callTemplateList(true, 'leadSearchTemplate', $("#leadAssignToSearch").val());
 	//callCampainList(true,'advanceLeadNewSearchForm');
 	callMasterCampainList('advanceLeadNewSearchForm','','leadSearchCampaign');
+	callMasterAdSetList('advanceLeadNewSearchForm','','leadSearchAdSet');
 	setTimeout(function() {
 		if(objectRights.discardPermission){
 			if(objectRights.clickUserid>0){

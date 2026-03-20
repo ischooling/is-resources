@@ -1461,6 +1461,31 @@ function callMasterCampainList(formId, value, elementId) {
   });
 }
 
+function callMasterAdSetList(formId, value, elementId) {
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForCommon("masters"),
+    data: JSON.stringify(getRequestForMaster(formId, "AD-SET-LIST", value)),
+    dataType: "json",
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data["status"] == "0" || data["status"] == "2") {
+        showMessageTheme2(0, stringMessage[1], "serverError", "");
+      } else {
+        var adSetList = data.mastersData.data;
+        $("#" + formId + " #" + elementId).html("");
+        var dropdown = $("#" + formId + " #" + elementId);
+        $.each(adSetList, function (k, v) {
+          dropdown.append('<option value="' + v.value + '">' + v.value + " (" + v.extra + ")" + "</option>");
+        });
+      }
+      return false;
+    }
+  });
+}
+
 
 function getCounselorReviewDetails(modeSearch, eventId, startDate, endDate, userId) {
 	var responseData={};

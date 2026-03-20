@@ -1509,6 +1509,7 @@ if($("#"+formId+" #campaignName").val()!=undefined && $("#campaignName").val()!=
 }else{
 	leadModifyDetailDTO['utmCampaigns'] = $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val():[];
 }
+leadModifyDetailDTO['utmDescriptions'] = $("#"+formId+" #leadSearchAdSet").val()!=undefined?$("#"+formId+" #leadSearchAdSet").val():[];
 leadModifyDetailDTO['leadTemplate'] = $("#"+formId+" #leadSearchTemplate").val()!=undefined?$("#"+formId+" #leadSearchTemplate").val():[];
 leadModifyDetailDTO['deliveredStatus'] = $("#"+formId+" #leadSearchDeliveredStatus").val()!=undefined?$("#"+formId+" #leadSearchDeliveredStatus").val():'';
 
@@ -1619,6 +1620,7 @@ function advanceLeadSearchStudentReset(formId, leadType){
 	$("#"+formId+" #leadSearchTemplate").val('').trigger('change');
 	$("#"+formId+" #leadSearchDeliveredStatus").val('ALL').trigger('change');
 	$("#"+formId+" #leadSearchCampaign").val(0).trigger('change');
+	$("#"+formId+" #leadSearchAdSet").val('').trigger('change');
 	$("#"+formId+" #leadCallback").val("").trigger('change');
 }
 

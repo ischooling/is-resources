@@ -634,6 +634,10 @@ function getLeadAdvanceSearchPopup(objRights) {
     '	<label class="m-0">Select Campaign</label>' +
     '	<select  name="leadSearchCampaign" id="leadSearchCampaign" class="form-control leadSearchCampaign" multiple ></select>' +
     "</div>" +
+    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
+    '	<label class="m-0">Ad Set</label>' +
+    '	<select  name="leadSearchAdSet" id="leadSearchAdSet" class="form-control leadSearchAdSet" multiple ></select>' +
+    "</div>" +
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign">' +
     '<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;' +
     '<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead&nbsp;' +
