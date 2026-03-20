@@ -56,13 +56,13 @@ function ensureStudentDashboardWelcomeOverlay(){
         return false;
     }
     var studentName = getStudentWelcomeOverlayName();
-    var welcomeBg = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "welcome-bg.png" + (typeof SCRIPT_VERSION !== "undefined" ? SCRIPT_VERSION : "");
+    var welcomeBg = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "welcome-bg-tile.png" + (typeof SCRIPT_VERSION !== "undefined" ? SCRIPT_VERSION : "");
     var welcomeGif = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "MascotAlpha.gif" + (typeof SCRIPT_VERSION !== "undefined" ? SCRIPT_VERSION : "");
     var html =
         `<div id="studentDashboardWelcomeOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;padding:16px;">
             <div class="card w-100 border-0 rounded-10 overflow-hidden" style="max-width:640px;box-shadow:0 0.75rem 2rem rgba(0,0,0,.35);">
                 <div class="p-2" style="border:2px solid rgba(0,123,255,.35);border-radius:14px;">
-                    <div class="card-body text-center p-4 p-md-5" style="background:url(${welcomeBg}) center center / cover no-repeat;border:2px solid rgba(255,255,255,.85);border-radius:12px;">
+                    <div class="card-body text-center p-4 p-md-5" style="background-image:url(${welcomeBg});background-repeat:repeat;background-position:0 0;background-size:auto;border:2px solid rgba(255,255,255,.85);border-radius:12px;">
                     <h3 class="text-dark font-weight-semi-bold mb-3" style="letter-spacing:0.2px;">Hello ${studentName}!</h3>
                     <div class="my-3">
                         <img src="${welcomeGif}" alt="Welcome" class="img-fluid" style="max-height:240px;" />

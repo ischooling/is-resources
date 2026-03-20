@@ -12,7 +12,7 @@ function getStudentDashboardWelcomePopupContent(){
         `<div class="modal fade" id="studentDashboardWelcomePopup" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered box-shadow-none" role="document" style="max-width:480px;width:calc(100% - 32px);">
                 <div class="modal-content p-2 bg-white border rounded-20 shadow-lg overflow-hidden">
-                    <div class="text-center px-3 py-4 border border-primary rounded-20 position-relative" style="background:url(${PATH_FOLDER_IMAGE2}welcome-bg.png${SCRIPT_VERSION}) center center / cover no-repeat;">
+                    <div class="text-center px-3 py-4 border border-primary rounded-20 position-relative" style="background-image:url(${PATH_FOLDER_IMAGE2}welcome-bg-tile.png${SCRIPT_VERSION});background-repeat:repeat;background-position:0 0;background-size:auto;">
                         <div class="d-flex justify-content-end">
                             <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
