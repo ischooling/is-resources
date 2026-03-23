@@ -2833,14 +2833,23 @@ function getAnnouncementAndNewsContent(){
 				`<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
 					<i class="fa fa-comments fa-w-16"></i>
 					<span class="UNSEEN counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
-				</a>`;	
+					</a>`;	
 			}
+				html+=
+					`<button type="button" class="custom-btn-open-options btn btn-primary" id="internationalSchoolingBtn" onclick="toggleInternationalSchoolingPopover(true)" onmouseenter="toggleInternationalSchoolingPopover(true)" onmouseleave="toggleInternationalSchoolingPopover(false)" data-toggle="tooltip" title="Download App">
+						<i class="fa fa-mobile" style="font-size:18px;line-height:18px;"></i>
+					</button>`;
 		// }
-		html+=`</div>
-		<div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
-			<button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-				<i class="fa fa-times"></i>
-			</button>
+				html+=`</div>
+					<a id="internationalSchoolingSlideBtn" href="https://internationalschooling.org/app" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill py-2 px-3 d-flex align-items-center shadow right-slide-download-btn" onmouseenter="toggleInternationalSchoolingPopover(true)" onmouseleave="toggleInternationalSchoolingPopover(false)">
+						<i class="fa fa-mobile mr-2" style="font-size:18px;line-height:18px;"></i>
+						<span class="font-weight-semi-bold text-nowrap">Download App</span>
+						<img src="/static/img/downloadApp.png" width="16" height="16" class="d-block ml-2" alt=""/>
+					</a>
+			<div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
+				<button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+					<i class="fa fa-times"></i>
+				</button>
 			<div class="full" id="announcementDiv"></div>
 		</div>
 		<div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper">
@@ -2862,4 +2871,25 @@ function openRightSideBar(eleId){
     }
     $("body").toggleClass("overflow-hidden");
     $(".custome-ui-theme-settings-overlay").toggleClass("show-custom-overlay");    
+}
+
+var INTERNATIONAL_SCHOOLING_POPOVER_TIMER;
+
+function toggleInternationalSchoolingPopover(show){
+	clearTimeout(INTERNATIONAL_SCHOOLING_POPOVER_TIMER);
+	var btn=$("#internationalSchoolingBtn"), pop=$("#internationalSchoolingSlideBtn");
+	if(btn.length<1 || pop.length<1) return;
+
+	if(show){
+		$(".tooltip").remove();
+		var btnOffset=btn.offset()||{top:0};
+		var popHeight=pop.outerHeight()||0;
+		var top=(btnOffset.top-$(window).scrollTop())+(btn.outerHeight()/2)-(popHeight/2);
+		top=Math.max(10,Math.min(top,$(window).height()-popHeight-10));
+		pop.css("top",top+"px").addClass("show");
+	}else{
+		INTERNATIONAL_SCHOOLING_POPOVER_TIMER=setTimeout(function(){
+			pop.removeClass("show");
+		},150);
+	}
 }

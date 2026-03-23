@@ -63,7 +63,7 @@ function getParentDashboardPageSkeleton(){
                     <div class="card rounded-10">
                         <div class="card-header rounded-top-left-10 rounded-top-right-10">
                             <div class=""> 
-                                <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0">Upcoming Classes & Activities</h4>
+                                <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0" class="upcommingClassesActivites">Upcoming ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities</h4>
                             </div>
                         </div>
                         <div class="card-body py-3 overflow-y-auto" style="max-height:250px">
@@ -123,7 +123,7 @@ function getStudentDetailsByIDWrapper(){
                     <div class="card rounded-10">
                         <div class="card-header rounded-top-left-10 rounded-top-right-10">
                             <div class=""> 
-                                <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0">Upcoming Classes & Activities</h4>
+                                <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0" class="upcommingClassesActivites">Upcoming ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities</h4>
                             </div>
                         </div>
                         <div class="card-body py-3 overflow-y-auto" id="studentUpcomingClassActivityWrapper" style="max-height:250px">
@@ -277,7 +277,7 @@ function getStudentPerformanceDetailsCard(data){
                         <div class="card-body py-2">
                             <a href="javascript:void(0)" class="d-inline-block text-center text-decoration-none w-100" onclick="callDashboardPageSchool(251,'parent-class-schedule')">
                                 <h4 class="text-review-dark font-weight-bold font-26 mb-1">${data.summary.totalClassesThisMonth}</h4>
-                                <p class="m-0 text-review-dark">No. of Classes & Activities ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().getFullYear().toString()}</p>
+                                <p class="m-0 text-review-dark">No. of ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().getFullYear().toString()}</p>
                             </a>
                         </div>
                     </div>

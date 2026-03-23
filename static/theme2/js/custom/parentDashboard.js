@@ -1,5 +1,6 @@
 var STUDENT_LIST=[];
 var ACTIVE_STUDENT_ID;
+var ACTIVITIES_WITH_CLASS = true;
 var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var CLASS_STATUS_INTERVAL = null;
 if(typeof window.PARENT_DASHBOARD_GREETING_SHOWN_ONCE === "undefined"){
@@ -118,6 +119,8 @@ async function getStudentDetailsByStudentID(studentId){
     $(".student-thumb").removeClass("active-student");
     $(".student-"+studentId).addClass("active-student");
     var studentPerformanceData =  await getStudentPerformanceData(studentId);
+    ACTIVITIES_WITH_CLASS = studentPerformanceData.details.activitiesWithClass;
+    $(".upcommingClassesActivites").html(ACTIVITIES_WITH_CLASS?"Upcoming Classes & Activities":"Upcoming Activities")
     $("#studentPerformanceDetails").html(getStudentPerformanceDetailsCard(studentPerformanceData.details));
     initParentGreetingBannerAutoHide();
     renderAvgGrade(studentPerformanceData.details.summary.avgGradeLastMonth, studentPerformanceData.details.summary.avgGradeThisMonth);
@@ -127,6 +130,7 @@ async function getStudentDetailsByStudentID(studentId){
     var classAndActivityList = await getUpcomingClassesAndActivityData(studentId);
     // console.log("class and activity list", classAndActivityList)
     $("#studentUpcomingClassActivityWrapper").html(getStudentUpcomingClassActivityListing(classAndActivityList));
+    
     if (CLASS_STATUS_INTERVAL) {
         clearInterval(CLASS_STATUS_INTERVAL);
     }

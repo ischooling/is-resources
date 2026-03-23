@@ -31340,6 +31340,8 @@ right:15px
 .right_fixed_action{width:50px;padding:10px 5px;background:#fff; border-top-left-radius:5px;border-bottom-left-radius:5px;position:fixed;top:73px; right:0 }
 .close-right-slide-bar-btn{display:none !important}
 .settings-open .close-right-slide-bar-btn{display:inline-block !important }
+.right-slide-download-btn{position:fixed;right:55px;top:0;transform:translateX(120%);opacity:0;pointer-events:none;transition:transform .2s ease, opacity .2s ease;z-index:160}
+.right-slide-download-btn.show{transform:translateX(0);opacity:1;pointer-events:auto}
 .ui-theme-settings .btn-open-options {
 	border-radius:50px;
 	position:absolute;

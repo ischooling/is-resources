@@ -1,4 +1,5 @@
 var ISCALENDARLOAD = true;
+var ACTIVITIES_WITH_CLASS = true;
 function validateRequestForSchoolHoliday(formId){
 	if($("#"+formId+" #holidayFor").val()==''){
 		showMessageTheme2(0, "Please select holiday for");
@@ -180,6 +181,7 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 							}
 						});
 					};
+					ACTIVITIES_WITH_CLASS = data.activitiesWithClass;
 					CALENDAR_EVENT_DATA = finalEvents;
 					$('#schoolcalendar').fullCalendar('removeEvents');
 					//$('#schoolcalendar').fullCalendar('destroy');
@@ -336,7 +338,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 						</div>
 						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
 							<label class="d-inline-block m-0" style="width:15px;height:15px;background:#433a11"></label>
-							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold">Upcoming Classes & Activities</span>
+							<span class="d-inline-block ml-1 font-14 font-weight-semi-bold" class="upcommingClassesActivites">Upcoming ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities</span>
 						</div>
 						<div class="d-inline-flex align-items-center mr-2" data-toggle="tooltip" title="legend">
 							<label class="d-inline-block bg-primary m-0" style="width:15px;height:15px;"></label>
@@ -468,9 +470,9 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 			$('.fc-today-button, .fc-agendaDay-button, .fc-agendaWeek-button').removeClass('btn-primary').addClass('btn-light btn-pill');
 			// label bhi yahin set karo
 			if ($('#schoolcalendar').fullCalendar('getView').name === "agendaWeek" || $('#schoolcalendar').fullCalendar('getView').name === "listDay") {
-				$(".over_All_Class_Activity_Label").text("Total Weekly Classes & Activities");
+				$(".over_All_Class_Activity_Label").text(ACTIVITIES_WITH_CLASS?"Total Weekly Classes & Activities":"Total Weekly Activities");
 			} else {
-				$(".over_All_Class_Activity_Label").text("Total Daily Classes & Activities");
+				$(".over_All_Class_Activity_Label").text(ACTIVITIES_WITH_CLASS?"Total Daily Classes & Activities" : "Total Daily Activities");
 			}
 		},
 
@@ -497,20 +499,20 @@ function updateCalendarView() {
 	if(window.innerWidth < 768) {
 		if(currentView.name == "agendaDay" || currentView.name == "listDay"){
 			$('#schoolcalendar').fullCalendar('changeView', 'listDay');
-			$('.over_All_Class_Activity_Label').text("Total Daily Classes & Activities");
+			$('.over_All_Class_Activity_Label').text(ACTIVITIES_WITH_CLASS?"Total Daily Classes & Activities":"Total Daily Activities");
 		}
 		if(currentView.name == "agendaWeek" || currentView.name == "listWeek"){
 			$('#schoolcalendar').fullCalendar('changeView', 'listWeek');
-			$('.over_All_Class_Activity_Label').text("Total Weekly Classes & Activities");
+			$('.over_All_Class_Activity_Label').text(ACTIVITIES_WITH_CLASS?"Total Weekly Classes & Activities":"Total Weekly Activities");
 		}
 	}else{
 		if(currentView.name == "agendaDay" || currentView.name == "listDay"){
 			$('#schoolcalendar').fullCalendar('changeView', 'agendaDay');
-			$('.over_All_Class_Activity_Label').text("Total Daily Classes & Activities");
+			$('.over_All_Class_Activity_Label').text(ACTIVITIES_WITH_CLASS?"Total Daily Classes & Activities":"Total Daily Activities");
 		}
 		if(currentView.name == "agendaWeek" || currentView.name == "listWeek"){
 			$('#schoolcalendar').fullCalendar('changeView', 'agendaWeek');
-			$('.over_All_Class_Activity_Label').text("Total Weekly Classes & Activities");
+			$('.over_All_Class_Activity_Label').text(ACTIVITIES_WITH_CLASS?"Total Weekly Classes & Activities":"Total Weekly Activities");
 		}
 		$("#legentCalendar").remove();
 	}
