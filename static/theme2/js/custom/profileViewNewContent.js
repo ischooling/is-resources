@@ -728,7 +728,7 @@ function socialMedaiLinksContent(data){
 // Guardian Information Form Elements Start Here
 function guardianInformation(data){
     var html=
-        `<div class="card mt-3 profile-section" id="guardian_information" data-section-count="7">
+        `<div class="card mt-3 profile-section" id="guardian_information" data-section-count="11">
             <div class="card-body">
                 <div class="form-row mother-section">
                     <div class="col-12">
@@ -760,6 +760,9 @@ function guardianInformation(data){
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${motherOccupationElement(data.motherOccupation)}
                     </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherDobElement(data.motherDob)}
+                    </div>
                 </div>
                 <hr/>
                 <div class="form-row father-section">
@@ -783,6 +786,9 @@ function guardianInformation(data){
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${fatherOccupationElement(data.fatherOccupation)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherDobElement(data.fatherDob)}
                     </div>
                 </div>
                 <hr/>
@@ -808,8 +814,15 @@ function guardianInformation(data){
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${guardianOccupationElement(data.guardianOccupation)}
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianDobElement(data.guardianDob)}
+                    </div>
+                    <div class="w-100"></div>`;
+                    html+=`<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
                         html+=relationTypeElement(data.relationType)
+                    html+=`</div>`;
+                    html+=`<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
+                        html+=weddingAnniversaryElement(data.weddingAnniversaryDate)
                     html+=`</div>`;
                     // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
                     //     html+=pCountryIdElement(data.pCountryId)
@@ -963,6 +976,23 @@ function motherOccupationElement(data){
     </div>`;
     return html;
 }
+
+function motherDobElement(data){
+    var html=
+    `<label for="motherDob" class="font-weight-semi-bold text-dark">Date of Birth</label>
+    <div class="input-group mb-2 p-0">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" data-dobparent="Mother" name="motherDob" id="motherDob" value="${data != "" && data != undefined ?data:''}" autocomplete="off" readonly keydown="return false" onchange="controlEditField(this,'motherDob',\'${data != "" && data != undefined ?data:''}\','input', '','', 1,'parentDob')">
+        <div class="input-group-append input-group-append-hide" style="display:none">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('motherDob', 'parentDob', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('motherDob',\'${data != "" && data != undefined ?data:''}\','input','parentDob')">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>`;
+    return html;
+}
 function fatherFirstNameElement(data){
     var html=
     `<label for="fatherFirstName" class="font-weight-semi-bold text-dark">Father's Name</label>
@@ -1090,6 +1120,23 @@ function fatherOccupationElement(data){
                 <i class="fa fa-check"></i>
             </a>
             <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('fatherOccupation',\'${data != "" && data != undefined ?data:""}\','input','occupation')">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>`;
+    return html;
+}
+
+function fatherDobElement(data){
+    var html=
+    `<label for="fatherDob" class="font-weight-semi-bold text-dark">Date of Birth</label>
+    <div class="input-group mb-2 p-0">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" data-dobparent="Father" name="fatherDob" id="fatherDob" value="${data != "" && data != undefined ?data:''}" autocomplete="off" readonly keydown="return false" onchange="controlEditField(this,'fatherDob',\'${data != "" && data != undefined ?data:''}\','input', '','', 1,'parentDob')">
+        <div class="input-group-append input-group-append-hide" style="display:none">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('fatherDob', 'parentDob', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('fatherDob',\'${data != "" && data != undefined ?data:''}\','input','parentDob')">
                 <i class="fa fa-times"></i>
             </a>
         </div>
@@ -1231,10 +1278,27 @@ function guardianOccupationElement(data){
     return html;
 }
 
+function guardianDobElement(data){
+    var html=
+    `<label for="guardianDob" class="font-weight-semi-bold text-dark">Date of Birth</label>
+    <div class="input-group mb-2 p-0">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" data-dobparent="Guardian" name="guardianDob" id="guardianDob" value="${data != "" && data != undefined ?data:''}" autocomplete="off" readonly keydown="return false" onchange="controlEditField(this,'guardianDob',\'${data != "" && data != undefined ?data:''}\','input', '','', 1,'parentDob')">
+        <div class="input-group-append input-group-append-hide" style="display:none">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('guardianDob', 'parentDob', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('guardianDob',\'${data != "" && data != undefined ?data:''}\','input','parentDob')">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>`;
+    return html;
+}
+
 function relationTypeElement(data){
     var html=
     `<label for="relationType" class="font-weight-semi-bold text-dark">Type of Relation (Primary Parent)</label>
-    <div class="input-group mb-2 p-0">
+    <div class="input-group mb-2 p-0" style="max-width: 320px;">
         <select id="relationType" name="relationType" class="form-control form-control-sm group-append-hide-input" onchange="controlEditField(this,'relationType',\'${data != "" && data != undefined ?data:""}\','select', '','', 1,'relationType')">
             ${getRelationshipContent()}
         </select>
@@ -1243,6 +1307,23 @@ function relationTypeElement(data){
                 <i class="fa fa-check"></i>
             </a>
             <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('relationType',\'${data != "" && data != undefined ?data:""}\','select','relationType')">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>`;
+    return html;
+}
+
+function weddingAnniversaryElement(data){
+    var html=
+    `<label for="weddingAnniversaryDate" class="font-weight-semi-bold text-dark">Wedding Anniversary Date</label>
+    <div class="input-group mb-2 p-0" style="max-width: 320px;">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="weddingAnniversaryDate" id="weddingAnniversaryDate" value="${data != "" && data != undefined ?data:''}" autocomplete="off" readonly keydown="return false" onchange="controlEditField(this,'weddingAnniversaryDate',\'${data != "" && data != undefined ?data:''}\','input', '','', 1,'weddingAnniversaryDate')">
+        <div class="input-group-append input-group-append-hide" style="display:none">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('weddingAnniversaryDate', 'weddingAnniversaryDate', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('weddingAnniversaryDate',\'${data != "" && data != undefined ?data:''}\','input','weddingAnniversaryDate')">
                 <i class="fa fa-times"></i>
             </a>
         </div>

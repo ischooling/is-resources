@@ -836,6 +836,22 @@ async function profileViewPageLoadEvent(data){
         autoclose:true,
     });
     $('#dob').datepicker('update', new Date(data[0].dob));
+    $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate").datepicker({
+        format:'M dd, yyyy',
+        autoclose:true,
+    });
+    if(data[1].motherDob){
+        $('#motherDob').datepicker('update', new Date(data[1].motherDob));
+    }
+    if(data[1].fatherDob){
+        $('#fatherDob').datepicker('update', new Date(data[1].fatherDob));
+    }
+    if(data[1].guardianDob){
+        $('#guardianDob').datepicker('update', new Date(data[1].guardianDob));
+    }
+    if(data[1].weddingAnniversaryDate){
+        $('#weddingAnniversaryDate').datepicker('update', new Date(data[1].weddingAnniversaryDate));
+    }
     callCountriesOption("profileForm", '', "country", '', "Select Country*");
     callCountriesOption("profileForm", '', "motherCountry", '');
     callCountriesOption("profileForm", '', "country", '', "Select Country*");
@@ -2145,6 +2161,13 @@ function getRequestForUpdateProfile(eleID,keyId,userId,studentStandardId,moduleI
         requestProfileData['fieldValue']=$('#'+eleID).val()
 		requestProfileData['parentType']=$('#'+eleID).attr("data-Occupationparent");
     }
+    else if(keyId == "parentDob"){
+        requestProfileData['fieldValue']=$('#'+eleID).val();
+        requestProfileData['parentType']=$('#'+eleID).attr("data-dobparent");
+    }
+    else if(keyId == "weddingAnniversaryDate"){
+        requestProfileData['fieldValue']=$('#'+eleID).val();
+    }
     else if(keyId == 'communicationPreferredSlots'){
         requestProfileData["callingPreferences"] = getCallingPreference();
     }else if(keyId=='extracurricular'){
@@ -2285,6 +2308,16 @@ function validateFields(eleID, keyId, fieldValue){
 			return false;
 		}
 	}else if(keyId=='dob'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='parentDob'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='weddingAnniversaryDate'){
 		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
 			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
 			return false;
