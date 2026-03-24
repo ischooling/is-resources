@@ -7,16 +7,25 @@ function advanceManageSessionSearchReset(formId){
 function advanceManageSessionSearch(formId,moduleId, userId, userRole){
 	checkTextBox(formId);
 	var argument='?moduleId='+moduleId+'&schoolId='+SCHOOL_ID+'&'+decodeURIComponent($('#'+formId).serialize());
-	manageSessionData('manageStudentSession',argument, userId, userRole);
+	manageSessionData('manageStudentSession',argument, userId, userRole, formId);
 }
 
-function manageSessionData(elementId, argument, userId, role){
+function manageSessionData(elementId, argument, userId, role, formId){
 	var url="/dashboard/student-manage-session-content"+argument;
+	var payloadObj = parseUrlToJson(url);
+	if(formId && $("#"+formId+" #standardId").length){
+		var grades = $("#"+formId+" #standardId").val();
+		if(Array.isArray(grades)){
+			payloadObj["standardId"] = grades.join(",");
+		}else if(grades != null && grades != undefined){
+			payloadObj["standardId"] = grades;
+		}
+	}
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : CONTEXT_PATH+UNIQUEUUID+url.split('?')[0],
-		data : JSON.stringify(parseUrlToJson(url)),
+		data : JSON.stringify(payloadObj),
 		dataType : 'json',
 		success : function(data) {
 			$('#'+elementId+' > tbody').html('');
@@ -43,5 +52,3 @@ function manageSessionData(elementId, argument, userId, role){
 		}
 	});
 }
-
-

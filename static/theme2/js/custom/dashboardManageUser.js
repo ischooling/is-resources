@@ -475,9 +475,11 @@ function advanceStudentSearch(formId, moduleId, themetype) {
 	studentDetailDTO["countryId"] = $("#" + formId + " #countryId").val();
 	studentDetailDTO["stateId"] = $("#" + formId + " #filterStateId").val();
 	studentDetailDTO["cityId"] = $("#" + formId + " #filterCityId").val();
-	studentDetailDTO["enrollStatus"] = $(
-	  "#" + formId + " #filterEnrollStatus"
-	).val();
+	var enrollStatus = $("#" + formId + " #filterEnrollStatus").val();
+	if (Array.isArray(enrollStatus)) {
+	  enrollStatus = enrollStatus.join(",");
+	}
+	studentDetailDTO["enrollStatus"] = enrollStatus;
 	studentDetailDTO["userClickFrom"] = $("#" + formId + " #userClickFrom").val();
 	studentDetailDTO["lmsPlatform"] = $("#" + formId + " #filterLmsPlatform").val();
 	studentDetailDTO["bookAnEnrollmentStatus"] = $("#" + formId + " #filterBookEnrollment").val();
