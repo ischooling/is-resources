@@ -882,7 +882,7 @@ function motherLastNameElement(data){
     var html=
     `<label for="motherLastName" class="font-weight-semi-bold text-dark">Mother's Last Name</label>
     <div class="input-group mb-2 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="motherLastName" id="motherLastName" value="${data != "" && data != undefined ?data:""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'motherLastName',\'${data != "" && data != undefined ?data:""}\','input', '','', 1,'motherLastName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherLastName" id="motherLastName" value="${data != "" && data != undefined ?data:""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'motherLastName',\'${data != "" && data != undefined ?data:""}\','input', '','', 1,'motherLastName')">
         <div class="input-group-append input-group-append-hide" style="display:none">
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('motherLastName', 'motherLastName', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
                 <i class="fa fa-check"></i>
@@ -1030,7 +1030,7 @@ function fatherLastNameElement(data){
     var html=
     `<label for="fatherLastName" class="font-weight-semi-bold text-dark">Father's Last Name</label>
     <div class="input-group mb-2 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="fatherLastName" id="fatherLastName" value="${data !="" && data != undefined ?data:""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'fatherLastName',\'${data !="" && data != undefined ?data:""}\','input', '','', 1,'fatherLastName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherLastName" id="fatherLastName" value="${data !="" && data != undefined ?data:""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'fatherLastName',\'${data !="" && data != undefined ?data:""}\','input', '','', 1,'fatherLastName')">
         <div class="input-group-append input-group-append-hide" style="display:none">
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('fatherLastName', 'fatherLastName', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
                 <i class="fa fa-check"></i>
@@ -1181,7 +1181,7 @@ function guardianLastNameElement(data){
     var html=
     `<label for="guardianLastName" class="font-weight-semi-bold text-dark">Guardian's Last Name</label>
     <div class="input-group mb-2 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="guardianLastName" id="guardianLastName" value="${data != "" && data != undefined ?data:""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'guardianLastName',\'${data != "" && data != undefined ?data:""}\','input', '','', 1,'guardianLastName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianLastName" id="guardianLastName" value="${data != "" && data != undefined ?data:""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'guardianLastName',\'${data != "" && data != undefined ?data:""}\','input', '','', 1,'guardianLastName')">
         <div class="input-group-append input-group-append-hide" style="display:none">
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('guardianLastName', 'guardianLastName', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
                 <i class="fa fa-check"></i>
@@ -1299,7 +1299,7 @@ function relationTypeElement(data){
     var html=
     `<label for="relationType" class="font-weight-semi-bold text-dark">Type of Relation (Primary Parent)</label>
     <div class="input-group mb-2 p-0" style="max-width: 320px;">
-        <select id="relationType" name="relationType" class="form-control form-control-sm group-append-hide-input" onchange="controlEditField(this,'relationType',\'${data != "" && data != undefined ?data:""}\','select', '','', 1,'relationType')">
+        <select id="relationType" name="relationType" class="form-control form-control-sm group-append-hide-input bar_count" onchange="controlEditField(this,'relationType',\'${data != "" && data != undefined ?data:""}\','select', '','', 1,'relationType')">
             ${getRelationshipContent()}
         </select>
         <div class="input-group-append input-group-append-hide" style="display:none">

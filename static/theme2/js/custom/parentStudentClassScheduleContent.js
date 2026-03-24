@@ -70,17 +70,17 @@ function parentStudentClassScheduleContent() {
                                             </div> 
                                         </div>
                                         <div class="school-calender-tabs tabs text-right">
-                                            <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="parentStudentCalendarRequestByFilter(this)">
+                                            <button class="btn-wide btn btn-sm bg-light-dark text-dark btn-outline-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="parentStudentCalendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
                                                 <div class="font-12 line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
                                             </button>
-                                            <button class="btn-wide btn ml-2 border border-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="CLASS" onclick="parentStudentCalendarRequestByFilter(this)">
+                                            <button class="btn-wide btn ml-2 btn-outline-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="CLASS" onclick="parentStudentCalendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 class_Count">0</div>
                                                 <div class="font-12 text-dark line-height-1 font-weight-light">Classes</div>
                                             </button>
                                             <button class="btn-wide btn ml-2 btn-outline-secondary bg-light-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="parentStudentCalendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
-                                                <div class="font-12 text-secondary line-height-1 font-weight-light">Activity</div>
+                                                <div class="font-12 line-height-1 font-weight-light">Activity</div>
                                             </button>
                                         </div>
                                     </div>
@@ -160,7 +160,7 @@ function renderClassScheduleTable(events, startDate, endDate) {
 
                 var typeBadge = event.category === "CLASS"
                 ? `<span class="badge badge-pill bg-light-primary text-primary ml-auto font-12 font-weight-semi-bold w-fit-content text-transform-none">Class</span>`
-                : `<span class="badge badge-pill bg-lihgt-secondary text-secondary ml-auto font-12 font-weight-semi-bold w-fit-content text-transform-none">Activity</span>`;
+                : `<span class="badge badge-pill bg-light-secondary text-secondary ml-auto font-12 font-weight-semi-bold w-fit-content text-transform-none">Activity</span>`;
 
                 if(event.category === "CLASS"){
                     CLASS_COUNT++;

@@ -14,15 +14,15 @@ async function renderParentDashboardContent(){
     // console.log(getStudentList);
     $('#dashboardContentInHTML').html(getParentDashboardContent(getStudentList,'getStudentDetailsByStudentID'));
     if(STUDENT_LIST.studentBasicDetails.length>0){
-        getStudentDetailsByStudentID(STUDENT_LIST.studentBasicDetails[0].userId);
+        await getStudentDetailsByStudentID(STUDENT_LIST.studentBasicDetails[0].userId);
     }
     parentDashbaordOnLoadEvent();
 }
 
 function getParentDashboardContent(studentList, funName){
     var html= 
-    `<div class="main-card mb-3 pr-4">
-        ${getStudentTabSliderContent(studentList, funName)+getStudentDetailsByIDWrapper()+getAnnouncementAndNewsContent()}
+    `<div class="main-card mb-3 pr-4 parent-dashboard">
+        ${getStudentTabSliderContent(studentList, funName)+getStudentDetailsByIDWrapper()+getAnnouncementAndNewsContent()+getMobileBottomControlViewContent()}
     </div>`;
     
     return html;
@@ -59,7 +59,7 @@ function getParentDashboardPageSkeleton(){
         </div>
         <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
             <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12">
+                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3 mt-lg-0">
                     <div class="card rounded-10">
                         <div class="card-header rounded-top-left-10 rounded-top-right-10">
                             <div class=""> 
@@ -119,7 +119,7 @@ function getStudentDetailsByIDWrapper(){
         </div>
         <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
             <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12">
+                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-lg-0 mt-3 mobile-slide-up upcoming-classess-mobile-view">
                     <div class="card rounded-10">
                         <div class="card-header rounded-top-left-10 rounded-top-right-10">
                             <div class=""> 
@@ -131,7 +131,7 @@ function getStudentDetailsByIDWrapper(){
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3">
+                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3 mobile-slide-up payment-mobile-view">
                     <div class="card rounded-10">
                         <div class="card-header rounded-top-left-10 rounded-top-right-10">
                             <div class=""> 
@@ -239,13 +239,13 @@ function getStudentPerformanceDetailsCard(data){
         </div>
         ` : ""}
         <div class="card-body pt-3">
-            <div class="position-absolute text-gray font-12" style="right:1.25rem">
+            <div class="position-absolute text-gray font-12 last-active" style="right:1.25rem">
                 <span class="bg-gray d-inline-block rounded-circle" style="width:10px;height:10px;"></span>&nbsp; Last active: ${data.student.lastActive}
             </div>
             <div class="d-flex">
                 <div class="avatar-icon-wrapper mr-2 avatar-icon-xl">
                     <div class="avatar-icon">
-                        <img src="${data.student.profilePic}" alt="Avatar 5">
+                        <img src="${data.student.profilePic}" alt="Profile Image">
                     </div>
                 </div>
                 <div>
@@ -448,7 +448,7 @@ function getStudentUpcomingClassActivityListing(data){
 // attendance page content //
 
 function getStudentPaymentListing(data) {
-    
+    var feebadgeCount=0;
     var html = "";
     var today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -467,7 +467,7 @@ function getStudentPaymentListing(data) {
 
                 var scheduledDate = new Date(v.scheduledPayDate);
                 scheduledDate.setHours(0, 0, 0, 0);
-
+                feebadgeCount++;
                 var badgeHtml = "";
 
                 if (scheduledDate <= today) {
@@ -481,7 +481,7 @@ function getStudentPaymentListing(data) {
                             <span class="badge badge-dot badge-dot-lg badge-warning mr-1"></span>Upcoming
                         </div>`;
                 }
-
+                
                 html += `
                 <div class="card rounded-10 mb-2">
                     <a href="javascript:void(0)" class="card-body p-2">
@@ -545,6 +545,44 @@ function getStudentPaymentListing(data) {
                     No upcoming or due payments
                 </div>`;
     }
+    $(".feeBadge").text(feebadgeCount);
+    return html;
+}
 
+
+function getMobileBottomControlViewContent(){
+    var html=
+    `<div class="mobileBottomNav justify-content-around">
+        <a href="javascript:void(0)" class="position-relative" onclick="slideUp(\'upcoming-classess-mobile-view\')">
+            <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Examination_Schedule_icon.png" style="width:30px"/>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 upcomingClasessBadge" id="">0</span>
+        </a>
+        <a href="javascript:void(0)" class="position-relative" onclick="slideUp(\'payment-mobile-view\')">
+            <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Fee_Details.webp" style="width:30px"/>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 feeBadge" id="">0</span>
+        </a>
+        <a href="javascript:void(0)" class="position-relative" onclick="openRightSideBar('announcement_side_wrapper')">
+            <img src="${PATH_FOLDER_IMAGE2}announcements_Icon.png" style="width:30px"/>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 announcementBadge">0</span>
+        </a>
+        <a href="javascript:void(0)" class="position-relative" onclick="openRightSideBar('schoolDiary_side_wrapper')">
+            <img src="${PATH_FOLDER_IMAGE2}diary.png" style="width:30px"/>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 schoolDiaryBadge">0</span>
+        </a>`;
+        if(CHAT_URL != "") {
+                const data = {
+                u: UNIQUEUUID,
+                e: DEPLOYMENT_MODE,
+                d: new Date().getTime(),
+                };
+                const jsonString = JSON.stringify(data);
+                const chatPayload = btoa(jsonString);
+                const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=` + chatPayload;
+                html += `<a href="${chatUrl}" type="button" target="_blank" class="position-relative">
+                            <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Wati.png" style="width:30px"/>
+                        </a>`;
+            }
+        
+    html+=`</div>`;
     return html;
 }

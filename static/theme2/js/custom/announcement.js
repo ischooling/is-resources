@@ -8,7 +8,7 @@ async function renderAnnouncement(userId){
     });
 	if(parseInt(data.newAnnouncementCount) > 0){
 		$("#announcementBadge").show();
-		$("#announcementBadge").text(data.newAnnouncementCount);
+		$("#announcementBadge, .announcementBadge").text(data.newAnnouncementCount);
 	}else{
 		$("#announcementBadge").hide();
 	}

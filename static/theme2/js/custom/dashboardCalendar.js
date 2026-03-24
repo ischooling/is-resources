@@ -1,5 +1,13 @@
 var ISCALENDARLOAD = true;
 var ACTIVITIES_WITH_CLASS = true;
+var UPCOMING_CLASS_TIMER_IMG = PATH_FOLDER_IMAGE2 + "timer.gif";
+var PRELOAD_TIMER_IMG = new Image();
+PRELOAD_TIMER_IMG.src = UPCOMING_CLASS_TIMER_IMG;
+const UPCOMING_ICON_HTML = `
+<b class="d-flex flex-row-reverse upcoming-icon upcoming-week-view-icon">
+    <img class="timer-img" src="${UPCOMING_CLASS_TIMER_IMG}" style="filter:brightness(0) invert(1);"/> Upcoming
+</b>`;
+
 function validateRequestForSchoolHoliday(formId){
 	if($("#"+formId+" #holidayFor").val()==''){
 		showMessageTheme2(0, "Please select holiday for");
@@ -766,7 +774,10 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			var startTime = new Date(info.start._i);
 			var endTime = new Date(info.end._i);
 			var now = currentTime.getTime();
-			element.find(".live-symbol, .upcoming-icon").remove();
+			if (now > startTime.getTime()) {
+				element.find(".upcoming-icon").remove();
+			}
+			element.find(".live-symbol").remove();
 			element.removeClass("live-class-blink upcoming-class-blink past-class future-class");
 			if(info.category.startsWith("ONE_TO_ONE", 0)){
 				element.addClass("ONE_TO_ONE");
@@ -812,12 +823,16 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				if ($(".upcoming-class-blink").length < 1) {
 					var closestEvent = getClosestUpcomingEvent(todayClassArray);
 					if (closestEvent && closestEvent.eventId === info.id) {
-						var upcomingIcon = $(`
-						<b class="d-flex flex-row-reverse upcoming-icon upcoming-week-view-icon">
-							<img class="timer-img" src="${PATH_FOLDER_IMAGE2}timer.gif" style="filter:brightness(0) invert(1);"/> Upcoming
-						</b>
-						`);
-						element.find(".fc-title .class-indicator").append(upcomingIcon);
+						// var upcomingIcon = $(`
+						// <b class="d-flex flex-row-reverse upcoming-icon upcoming-week-view-icon">
+						// 	<img class="timer-img" src="${UPCOMING_CLASS_TIMER_IMG}" style="filter:brightness(0) invert(1);"/> Upcoming
+						// </b>
+						// `);
+						if (element.find(".upcoming-icon").length === 0) {
+							var upcomingIcon = $(UPCOMING_ICON_HTML);
+							element.find(".fc-title .class-indicator").append(upcomingIcon);
+						}
+						// element.find(".fc-title .class-indicator").append(upcomingIcon);
 						element.removeClass("activity-wrapper-div");
 						if(info.id.startsWith("activity", 0)){
 							element.addClass("upcoming-activity-blink upcoming-class-blink");

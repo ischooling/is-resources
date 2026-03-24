@@ -839,6 +839,12 @@ async function profileViewPageLoadEvent(data){
     $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate").datepicker({
         format:'M dd, yyyy',
         autoclose:true,
+    }).on('changeDate', function (e) {
+        // Fire `onchange="controlEditField(...)"` only for user selection
+        // (avoid triggering during initial `datepicker('update', ...)` on page load)
+        if(e && e.originalEvent){
+            $(this).trigger('change');
+        }
     });
     if(data[1].motherDob){
         $('#motherDob').datepicker('update', new Date(data[1].motherDob));
@@ -1062,6 +1068,10 @@ async function profileViewPageLoadEvent(data){
     });
     // Communication Log End Here //
     $('.select2-selection').addClass('form-select-sm group-append-hide-input');
+    // Ensure total section count reflects the common fields added in Parent/Guardian section
+    if($("#guardian_information").length > 0 && $("#relationType").length > 0 && $("#weddingAnniversaryDate").length > 0){
+        $("#guardian_information").attr("data-section-count", "11");
+    }
     calculateSectionPercentage();
     
     
@@ -1192,6 +1202,7 @@ function guardianInformationFieldFilledCount(){
     var motherCount=0;
     var parentCount=0;
     var guardianCount=0;
+    var commonCount=0;
     $("#guardian_information .mother-section input:not([type='checkbox']).bar_count").each(function(){ 
         if($(this).val() != "" && $(this).parent().find(".input-group-append-hide").attr("style") != "display: flex;"){
             COUNT++;
@@ -1219,19 +1230,35 @@ function guardianInformationFieldFilledCount(){
     });
     
 
-    $("#guardian_information .guardian-section input:not([type='checkbox']).bar_count").each(function(){ 
+    // Count core guardian fields only; keep common fields (relationType, weddingAnniversaryDate) separate
+    $("#guardian_information .guardian-section input:not([type='checkbox']).bar_count").not("#weddingAnniversaryDate").each(function(){ 
         if($(this).val() != "" && $(this).parent().find(".input-group-append-hide").attr("style") != "display: flex;"){
             COUNT++;
             guardianCount++;
         } 
     });
-    $("#guardian_information .guardian-section select.bar_count").each(function(){ 
+    $("#guardian_information .guardian-section select.bar_count").not("#relationType").each(function(){ 
         if($(this).val() != "" && $(this).parent().find(".input-group-append-hide").attr("style") != "display: flex;"){
             COUNT++;
             guardianCount++;
         } 
     });
-    COUNT = Math.max(motherCount, parentCount, guardianCount);
+
+    // Common fields should count regardless of whether Mother/Father/Guardian is the most-filled block
+    // Count common fields based on filled value (even if not saved yet),
+    // so user sees immediate percentage update on selection.
+    if($("#relationType").length > 0){
+        if($("#relationType").val() != ""){
+            commonCount++;
+        }
+    }
+    if($("#weddingAnniversaryDate").length > 0){
+        if($("#weddingAnniversaryDate").val() != ""){
+            commonCount++;
+        }
+    }
+
+    COUNT = Math.max(motherCount, parentCount, guardianCount) + commonCount;
     $("#guardian_information .communication-wrapper input[type='checkbox']").each(function(){ 
         if($(this).attr("check-status") != "false"){
             COUNT++;
@@ -1244,12 +1271,22 @@ function guardianInformationFieldFilledCount(){
     //         return false;
     //     } 
     // });
+    var slotCounted = false;
     $.each(PORFILE_RESPONSE_UPDATED_DATA[1].callingTimePrefArray, function(i,v){
-        if(v.timings.length>0){
+        if(v.timings && v.timings.length>0){
             COUNT++;
+            slotCounted = true;
             return false;
         }
     });
+    // Fallback: if UI has slots and save button is hidden, consider it saved for counting
+    if(!slotCounted){
+        if($("#communicationPreferredSlotSave").length > 0 && $("#communicationPreferredSlotSave").is(":hidden")){
+            if($("#communication-preferred-time-wrapper .communication_slot_ul li").length > 0){
+                COUNT++;
+            }
+        }
+    }
     TOTAL_COUNT =  parseInt($("#guardian_information").attr("data-section-count"));
     OVER_ALL_COUNT = OVER_ALL_COUNT+COUNT;
     OVER_ALL_TOTAL = OVER_ALL_TOTAL+TOTAL_COUNT;
@@ -2586,6 +2623,10 @@ function applyChanges(eleID,keyId,userId,studentStandardId,roleModuleId,moduleId
                     $("#"+eleID).closest(".input-group").find(".input-group-append-hide").hide();
                 }else if(keyId=='preferredcommunication'){
                     $("#"+eleID).parent().find(".input-group-append-hide").hide();
+                    // keep UI `check-status` in sync with saved state so percentage reflects immediately
+                    $(".communication-wrapper input[type='checkbox']").each(function(){
+                        $(this).attr("check-status", $(this).prop("checked") ? "true" : "false");
+                    });
                 }else if(keyId=='gender' || keyId=='parentGender'){
                     if(fieldValue=='DONOTWANTTOSPECIFY'){
                         fieldValue="Don't want to specify";
@@ -2861,6 +2902,7 @@ function applyChanges(eleID,keyId,userId,studentStandardId,roleModuleId,moduleId
                     $('.parentEmailIdView').text(data['extra1']).removeClass('hide-value');
                 }else if(keyId == "communicationPreferredSlots"){
                     $("#communication-preferred-time-dropdown-wrapper").hide();
+                    $("#communicationPreferredSlotSave").hide();
                     $(".addcommunicationPreferredTimeBtn").show();
                 }
                 else{

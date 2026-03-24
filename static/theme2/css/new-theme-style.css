@@ -1207,7 +1207,7 @@ a.bg-primary:hover, a.bg-primary:focus, button.bg-primary:hover, button.bg-prima
 .bg-secondary {
 	background-color:var(--sc) !important
 }
-.bg-lihgt-secondary {
+.bg-light-secondary {
 	background-color:#e6eef5 !important
 }
 a.bg-secondary:hover, a.bg-secondary:focus, button.bg-secondary:hover, button.bg-secondary:focus {
@@ -3626,9 +3626,9 @@ box-shadow:0 0 0 0 rgba(68, 64, 84, 0.5)
 	border-color:#794c8a
 }
 .btn-outline-alternate:hover {
-	color:#fff;
-	background-color:#794c8a;
-	border-color:#794c8a
+	color:#fff !important;
+	background-color:#794c8a !important;
+	border-color:#794c8a !important
 }
 .btn-outline-alternate:focus, .btn-outline-alternate.focus {
 	box-shadow:0 0 0 0 rgba(121, 76, 138, 0.5)
@@ -14264,9 +14264,9 @@ box-shadow:0 0 0 0 rgba(238, 238, 238, 0.5)
 	border-color:#343a40
 }
 .btn-outline-dark:hover {
-	color:#fff;
-	background-color:#343a40;
-	border-color:#343a40
+	color:#fff !important;
+	background-color:#343a40 !important;
+	border-color:#343a40 !important
 }
 .btn-outline-dark:focus, .btn-outline-dark.focus {
 	box-shadow:0 0 0 0 rgba(52, 58, 64, 0.5)
@@ -31332,7 +31332,7 @@ right:15px
 	right:-30px;
 	top:0;
 	height:100vh;
-	transform:translate(500px);
+	transform:translate(700px);
 	transition:all .2s;
 	box-shadow:-0.46875rem 0 2.1875rem rgba(4, 9, 20, 0.03), -0.9375rem 0 1.40625rem rgba(4, 9, 20, 0.03), -0.25rem 0 0.53125rem rgba(4, 9, 20, 0.05), -0.125rem 0 0.1875rem rgba(4, 9, 20, 0.03)
 }
@@ -31377,9 +31377,10 @@ right:15px
 
 
 .custome-ui-theme-settings.ui-theme-settings{max-width:500px;width:95%; background-color: #fff;right:0;z-index:1000}
+.custome-ui-theme-settings.ui-theme-settings#schoolDiary_side_wrapper{max-width:650px;}
 .custome-ui-theme-settings-overlay{position:fixed;left:0;top:0;width:100%;height:100vh;z-index:999;background: rgba(0, 0, 0, 0.5);display:none}
 .custome-ui-theme-settings-overlay.show-custom-overlay{display:block}
-.custom-btn-open-options .counts-badge{position: absolute;right:-8px;top:-8px;width:fit-content;font-size:10px;background:red;color:#fff;display: inline-block;padding: 5px;}
+.counts-badge{position: absolute!important;right:-8px;top:-8px !important;width:fit-content;font-size:10px;background:red;color:#fff;display: inline-block;padding: 5px;}
 .ui-theme-settings .btn-open-options svg {
 	top:50%;
 	left:50%;
@@ -31414,7 +31415,7 @@ right:15px
 	color:#495057;
 	margin:0;
 	background:#f8f9fa;
-padding:.75rem 1.5rem;
+	padding:.75rem 1.5rem;
 	border-bottom:#dee2e6 solid 1px;
 	border-top:#dee2e6 solid 1px;
 	display:flex;
@@ -31426,7 +31427,7 @@ padding:.75rem 1.5rem;
 }
 .ui-theme-settings .list-group-item h5 {
 	color:var(--pc) !important;
-font-size:.968rem;
+	font-size:.968rem;
 	text-transform:uppercase;
 	margin:0;
 	text-align:center
@@ -34116,7 +34117,7 @@ from { background-color: rgb(0 192 0); }
 to { background-color: rgb(6, 145, 6); }
 }
 .upcoming-class-blink .fc-event-dot[style]{background-color: #433a11 !important;}
-.calendar_request_button:hover .text-secondary{color:#fff !important}
+.calendar_request_button:hover .text-dark{color:#fff !important}
 .upcoming-class-blink, .upcoming-class-blink[style], #schoolcalendar .fc-time-grid-event.upcoming-class-blink{background-color: #fff8e8 !important;border-color:#f7b924 !important;color:#090909;border:2px solid;padding:16px 8px;display: inline-block;}
 #schoolcalendar .fc-time-grid-event.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#fff;border:2px solid;padding:16px 8px;}
 #schoolcalendar .fc-list-item.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#343a40;border:2px solid;width: 100%;}
@@ -34134,11 +34135,14 @@ to { background-color: rgb(6, 145, 6); }
 
 .active_calendar_catergory .over_All_Class_Activity_Count, .active_calendar_catergory .over_All_Class_Activity_Label{color:#fff !important}
 
-.active_calendar_catergory.bg-lihgt-secondary{background-color: var(--sc) !important;}
-.active_calendar_catergory.text-secondary{color:#fff !important}
+.active_calendar_catergory.bg-light-secondary{background-color: var(--sc) !important;}
+.active_calendar_catergory.text-secondary, .active_calendar_catergory .text-secondary{color:#fff !important}
 
 .active_calendar_catergory.bg-light-primary{background-color: var(--pc) !important;}
 .active_calendar_catergory.text-primary{color:#fff !important}
+
+.active_calendar_catergory.bg-light-alternate{background-color: #794c8a !important;}
+.active_calendar_catergory.text-alternate{color:#fff !important}
 
 .active_calendar_catergory.bg-light-danger{background-color: #d92550 !important;}
 .active_calendar_catergory.text-danger, .active_calendar_catergory div.text-dark{color:#fff !important}
@@ -34900,18 +34904,22 @@ to { background-color: rgb(6, 145, 6); }
 .parent-tab-slider-wrapper .slick-track .nav-item .nav-link{height: 100%;}
 .parent-tab-slider-wrapper .slick-track .nav-item .nav-link.active-student{background-color: #eef3ff !important;font-weight: 600;border-bottom: 3px solid var(--pc);}
 .parent-tab-slider-wrapper .slick-prev,
-.parent-tab-slider-wrapper .slick-next{
-    width: 28px;
-    height: 28px;
-	top: 50%;
-    transform: translateY(-50%);
+.parent-tab-slider-wrapper .slick-next{width: 28px;height: 28px;top: 50%;transform: translateY(-50%);}
+.parent-tab-slider-wrapper .slick-prev:before, .parent-tab-slider-wrapper .slick-next:before{width: 28px;height: 28px;line-height: 28px;font-size: 14px;}
+.mobileBottomNav{display:none;background-color: #e6ecef;border-top:1px solid #d8dee1;padding:15px 10px}
+.school-diary-unread-msg{height: 25px;overflow: hidden;-webkit-line-clamp: 1;display: -webkit-box;white-space: normal;text-overflow: ellipsis;-webkit-box-orient: vertical;}
+.unread-chat .unread-chat-count{position: relative !important;top: 4px !important;right: 0;}
+/* parent dashboard responsive css */
+@media(max-width:768px){
+	.last-active{top:0px}
 }
-.parent-tab-slider-wrapper .slick-prev:before,
-.parent-tab-slider-wrapper .slick-next:before{
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    font-size: 14px;
+@media(max-width:480px){
+	.parent-dashboard-nav.app-footer{position:relative !important}
+	.parent-dashboard .upcoming-classess-mobile-view, .parent-dashboard .payment-mobile-view{position: fixed;bottom:-100%;left:0;right:0;transition:all 0.5s ease-in-out;padding:0 !important}
+	.mobileBottomNav{position: fixed;display:flex;bottom:0px;z-index:9999999;left:0;width:100%}
+	.mobile-slide-up.slideUp{bottom: 70px;z-index: 99999;}
+	.school-diary-item-editor{bottom: 11% !important; width:calc(100% - 45px) !important}
+	.school-diary-notebook{padding-bottom: 135px !important;}
 }
 
 /*ADDITIONAL LAYER CSSS STARTS HERE */

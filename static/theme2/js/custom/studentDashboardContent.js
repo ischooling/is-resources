@@ -59,7 +59,8 @@ async function rendereDashboardContent(isParent){
         }
         renderStudentDashboard(dashboardData);
         renderAnnouncement(dashboardData.userId);
-        renderNews(dashboardData.userId)
+        renderNews(dashboardData.userId);
+        renderSchoolDaiaryBtnCount(USER_ID);
         // renderActivity(dashboardData.userId)
         getCartCount(dashboardData.userId);
         setTimeout(function () {
@@ -294,17 +295,17 @@ function dashboardSchoolCalendar(data) {
                                             </div>
                                         </div>
                                         <div class="school-calender-tabs tabs  ml-auto text-right">
-                                            <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
+                                            <button class="btn-wide btn btn-sm btn-outline-dark bg-light-dark text-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
                                                 <div class="font-12 line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
                                             </button>
-                                            <button class="btn-wide btn ml-2  border border-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="CLASS" onclick="calendarRequestByFilter(this)">
+                                            <button class="btn-wide btn ml-2 btn-outline-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="CLASS" onclick="calendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 class_Count">0</div>
                                                 <div class="font-12 text-dark line-height-1 font-weight-light">Classes</div>
                                             </button>
                                             <button class="btn-wide btn ml-2 btn-outline-secondary bg-light-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
                                                 <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
-                                                <div class="font-12 text-secondary line-height-1 font-weight-light">Activity</div>
+                                                <div class="font-12 line-height-1 font-weight-light">Activity</div>
                                             </button>
                                         </div>
                                     </div>

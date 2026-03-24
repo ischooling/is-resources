@@ -13,7 +13,8 @@ async function rendereTeacherHomeContent(){
     renderTeacherDashboard(responseData);
     getTeacherTimePreference();
 	renderAnnouncement(responseData.userId);
-    renderNews(USER_ID)
+    renderNews(USER_ID);
+    renderSchoolDaiaryBtnCount(USER_ID);
     //renderActivity(responseData.userId)
     callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);
@@ -35,7 +36,7 @@ async function rendereTeacherHomeContent(){
 }
 
 async function renderTeacherDashboard(data){
-    $('#dashboardContentInHTML').html(dashboardContentTeacher(data));
+    $('#dashboardContentInHTML').html(dashboardContentTeacher(data)+getAnnouncementAndNewsContent());
     $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
     setInterval(function(){
         $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
@@ -273,21 +274,21 @@ function dashboardSchoolCalendar(data) {
                                                 </div>
                                             </div>
                                             <div class="school-calender-tabs tabs ml-auto text-right">
-                                                <button class="btn-wide btn btn-sm bg-light-dark text-dark border border-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
+                                                <button class="btn-wide btn btn-outline-dark btn-sm bg-light-dark text-dark rounded px-4 calendar_request_button active_calendar_catergory mb-sm-0 mb-2" data-category="ALL" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 over_All_Class_Activity_Count">0</div>
                                                     <div class="font-12 line-height-1 font-weight-light over_All_Class_Activity_Label">All</div>
                                                 </button>
-                                                <button class="btn-wide btn ml-2  border border-secondary bg-lihgt-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="BATCH" onclick="calendarRequestByFilter(this)">
+                                                <button class="btn-wide btn ml-2 btn-outline-alternate bg-light-alternate btn-sm rounded text-alternate calendar_request_button mb-sm-0 mb-2" data-category="BATCH" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 group_class_Count">0</div>
                                                     <div class="font-12 text-dark line-height-1 font-weight-light">Group Classes</div>
                                                 </button>
-                                                <button class="btn-wide btn ml-2  border border-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="ONE_TO_ONE" onclick="calendarRequestByFilter(this)">
+                                                <button class="btn-wide btn ml-2 btn-outline-primary bg-light-primary btn-sm rounded text-primary calendar_request_button mb-sm-0 mb-2" data-category="ONE_TO_ONE" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 one_to_one_class_Count">0</div>
                                                     <div class="font-12 text-dark line-height-1 font-weight-light">One-To-One Classes</div>
                                                 </button>
                                                 <button class="btn-wide btn ml-2 btn-outline-secondary bg-light-secondary btn-sm rounded text-secondary calendar_request_button mb-sm-0 mb-2" data-category="ACTIVITY" onclick="calendarRequestByFilter(this)">
                                                     <div class="font-16 font-weight-bold line-height-1 activity_Count">0</div>
-                                                    <div class="font-12 text-secondary line-height-1 font-weight-light">Activity</div>
+                                                    <div class="font-12 line-height-1 font-weight-light">Activity</div>
                                                 </button>
                                             </div>
                                         </div>
@@ -318,53 +319,8 @@ function dashboardSchoolCalendar(data) {
         </div>
     </div>
     ${/*<div id="announceDataId" class="full"></div>*/''}
-    <div class="right_fixed_action">
-        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
-            <i class="fa fa-bullhorn fa-w-16"></i>
-            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge"></span>
-        </button>
-        <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
-            <i class="fa fa-newspaper-o fa-w-16"></i>
-            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
-        </button>`;
-        if(CHAT_URL != ''){
-            const data = {
-                u: UNIQUEUUID,
-                e: DEPLOYMENT_MODE,
-                d: new Date().getTime()
-            };
-            const jsonString = JSON.stringify(data);
-            const chatPayload = btoa(jsonString);
-            const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=`+chatPayload;
-            html+=
-            `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
-                <i class="fa fa-comments fa-w-16"></i>
-                 <span class="UNSEEN counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
-            </a>`;					
-        }
-	        html+=
-	        `<button type="button" class="custom-btn-open-options btn btn-primary" id="internationalSchoolingBtn" onclick="toggleInternationalSchoolingPopover(true)" onmouseenter="toggleInternationalSchoolingPopover(true)" onmouseleave="toggleInternationalSchoolingPopover(false)" data-toggle="tooltip" title="Download App">
-	            <i class="fa fa-mobile" style="font-size:18px;line-height:18px;"></i>
-	        </button>`;
-	    html+=`</div>
-	    <a id="internationalSchoolingSlideBtn" href="https://internationalschooling.org/app" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill py-2 px-3 d-flex align-items-center shadow right-slide-download-btn" onmouseenter="toggleInternationalSchoolingPopover(true)" onmouseleave="toggleInternationalSchoolingPopover(false)">
-	        <i class="fa fa-mobile mr-2" style="font-size:18px;line-height:18px;"></i>
-	        <span class="font-weight-semi-bold text-nowrap">Download App</span>
-	        <img src="/static/img/downloadApp.png" width="16" height="16" class="d-block ml-2" alt=""/>
-	    </a>
-    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper">
-        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-            <i class="fa fa-times"></i>
-        </button>
-        <div class="full" id="announcementDiv"></div>
-    </div>
-    <div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper">
-        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-            <i class="fa fa-times"></i>
-        </button>
-        <div class="full mt-3" id="newsyDiv"></div>
-    </div>
-    <div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>
+
+    
     ${holidayOne()}
     ${onBordingMandotryVideo()}
     ${/*feedbackPop(data.schoolLogo)*/''}

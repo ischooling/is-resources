@@ -108,17 +108,33 @@ async function parentDashbaordOnLoadEvent(){
         $(this).addClass('active');
     });
     $("#news_side_wrapper, #newsBtn").hide();
+    $(".app-wrapper-footer .app-footer").addClass("parent-dashboard-nav");
+    if($(window).width()<=480){
+        $(".right_fixed_action").hide();
+    }
+    suggestionList();
+    $('[data-toggle="tooltip"]').tooltip();
 }
+$(window).resize(function(){
+    if($(window).width()>480){
+        $(".right_fixed_action").show();
+         $(".school-diary-notebook").css({"height":"calc(100vh - 50px)"});
+    }else{
+        $(".right_fixed_action").hide();
+         $(".school-diary-notebook").css({"height":"calc(100vh - 120px)"});
+    }
+});
 function getSlidesToShow() {
     var containerWidth = $('.parent-tab-slider-wrapper').width();
     var itemWidth = 220; // approx width of one tab
     return Math.floor(containerWidth / itemWidth);
 }
-async function getStudentDetailsByStudentID(studentId){
-    ACTIVE_STUDENT_ID=studentId;
+async function getStudentDetailsByStudentID(studentUserId){
+    
+    ACTIVE_STUDENT_ID=studentUserId;
     $(".student-thumb").removeClass("active-student");
-    $(".student-"+studentId).addClass("active-student");
-    var studentPerformanceData =  await getStudentPerformanceData(studentId);
+    $(".student-"+studentUserId).addClass("active-student");
+    var studentPerformanceData =  await getStudentPerformanceData(studentUserId);
     ACTIVITIES_WITH_CLASS = studentPerformanceData.details.activitiesWithClass;
     $(".upcommingClassesActivites").html(ACTIVITIES_WITH_CLASS?"Upcoming Classes & Activities":"Upcoming Activities")
     $("#studentPerformanceDetails").html(getStudentPerformanceDetailsCard(studentPerformanceData.details));
@@ -127,8 +143,7 @@ async function getStudentDetailsByStudentID(studentId){
     initializeAttendanceChart(studentPerformanceData.details.attendanceOverview);
 
     initializeGradeChartCurrentYear(studentPerformanceData.details.gradeOverview);
-    var classAndActivityList = await getUpcomingClassesAndActivityData(studentId);
-    // console.log("class and activity list", classAndActivityList)
+    var classAndActivityList = await getUpcomingClassesAndActivityData(studentUserId);
     $("#studentUpcomingClassActivityWrapper").html(getStudentUpcomingClassActivityListing(classAndActivityList));
     
     if (CLASS_STATUS_INTERVAL) {
@@ -137,10 +152,15 @@ async function getStudentDetailsByStudentID(studentId){
     CLASS_STATUS_INTERVAL = setInterval(function () {
         updateClassStatusBadges('studentUpcomingClassActivityWrapper');
     }, 1000);
-    var paymentList =  await getStudentFeeData(studentId);
+    var paymentList =  await getStudentFeeData(studentUserId);
     $("#studentPaymentListingWrapper").html(getStudentPaymentListing(paymentList.details.userPaymentDetailsList));
-    renderNews(STUDENT_LIST.studentBasicDetails[0].userId);
+    
     renderAnnouncement(STUDENT_LIST.studentBasicDetails[0].userId);
+    renderSchoolDaiaryBtnCount(USER_ID, studentUserId);
+    
+    if($(window).width()<=480){
+        $(".school-diary-notebook").css({"height":"calc(100vh - 120px)"});
+    }
 }
 
 function initializeAttendanceChart(data) {
@@ -580,4 +600,19 @@ function initParentGreetingBannerAutoHide(){
             $greetingWrap.remove();
         }, 650);
     }, 6000);
+}
+
+function slideUp(element){
+    $(".ui-theme-settings").removeClass("settings-open");
+    $(".mobile-slide-up").removeClass("slideUp");
+    $("."+element).addClass("slideUp");
+    $("#studentUpcomingClassActivityWrapper, #studentPaymentListingWrapper").css({"max-height":($(window).height()/2)+"px"});
+    if($(".slide-down-btn").length<1){
+        $(".parent-dashboard .upcoming-classess-mobile-view, .parent-dashboard .payment-mobile-view").append(`<span class="d-flex circle p-1 border align-items-center justify-content-around font-12 position-absolute mx-auto cursor align-items-center slide-down-btn" onclick="slidedown()" style="right:0;left:0;top:-15px"><i class="fa fa-times"></i></span>`);
+    }
+    $(".custome-ui-theme-settings-overlay").addClass("show-custom-overlay");
+}
+function slidedown(){
+    $(".mobile-slide-up").removeClass("slideUp");
+    $(".custome-ui-theme-settings-overlay").removeClass("show-custom-overlay");
 }

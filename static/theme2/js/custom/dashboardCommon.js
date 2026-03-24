@@ -1930,9 +1930,9 @@ function getChat(email, role) {
 	  dataType: "json",
 	  success: function (data) {
 		if (data["status"] == "0" || data["status"] == "2") {
-		  $(".UNSEEN").html("0");
+		  $(".UNSEEN, #chatUnseenCoutn").html("0");
 		} else {
-		  $(".UNSEEN").html(data["sumUnseen"]);
+		  $(".UNSEEN, #chatUnseenCoutn").html(data["sumUnseen"]);
 		  sumUnseen = data["sumUnseen"];
 		}
 	  }

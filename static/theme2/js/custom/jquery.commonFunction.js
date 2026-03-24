@@ -6982,18 +6982,15 @@ function formatOpenAIText(text) {
 function getUserInitialsCommon(name, fallback) {
   var defaultValue = fallback || "ST";
   var safeName = $.trim(name || "");
-  if (!safeName) {
-    return defaultValue;
-  }
+
+  if (!safeName) return defaultValue;
+
   var words = safeName.split(/\s+/);
-  var initials = "";
-  if (words.length > 0 && words[0]) {
-    initials += words[0].charAt(0).toUpperCase();
-  }
-  if (words.length > 1 && words[1]) {
-    initials += words[1].charAt(0).toUpperCase();
-  }
-  return initials || defaultValue;
+
+  var first = words[0].charAt(0).toUpperCase();
+  var last = words.length > 1 ? words[words.length - 1].charAt(0).toUpperCase() : "";
+
+  return first + last || defaultValue;
 }
 
 function getSalutationByGender(gender) {
@@ -7003,9 +7000,10 @@ function getSalutationByGender(gender) {
   var normalizedGender = String(gender).trim().toLowerCase();
   if (normalizedGender === "male") {
     return "Mr.";
-  }
-  if (normalizedGender === "female") {
+  }else if (normalizedGender === "female") {
     return "Ms.";
+  }else if(normalizedGender == "DONOTWANTTOSPECIFY"){
+    return "";
   }
   return "";
 }

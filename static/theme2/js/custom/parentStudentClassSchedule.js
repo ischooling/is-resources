@@ -337,6 +337,8 @@ function getStatusBadge(status) {
 }
 
 function parentStudentCalendarRequestByFilter(src){
+    $(".calendar_request_button").removeClass("active_calendar_catergory")
+	$(src).addClass("active_calendar_catergory");
     var filterType = $(src).attr("data-category");
     if(filterType == "CLASS"){
         $(".even-row").hide();
