@@ -100,6 +100,68 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		//localStorage.setItem("needToPaging", false);
 		$("#b2c-lead-list").html('');
 		$("#advancedformclick").val("YES");
+		if($.inArray(USER_ROLE, ['STUDENT','TEACHER','PARENT','DIRECTOR']) == -1) {
+			// for remark Demo update
+			var data3 = getAllDemosForUpdateRemark(USER_ID);
+			if(data3.status==1){
+				var demoDetails=data3.details.demoDetails.demoDetails;
+				if(demoDetails!=undefined){
+					if(demoDetails.length>0){
+						if($("#demo2DetailsModal").length>0){
+							$("#demo2DetailsModal").remove();
+						}
+						$('body').append(forceDemo2UpdateModalContent(data3));
+						$("#demo2DetailsModal").modal("show");
+					}
+				}
+			}
+			// for remark lead update
+			var data2 = getAllLeadForUpdateRemark(USER_ID);
+			if(data2.status==1){
+				var leadDetails=data2.details.leadDetails.leadDetails;
+				if(leadDetails!=undefined){
+					if(leadDetails.length>0){
+						if($("#leadDetailsModal").length>0){
+							$("#leadDetailsModal").remove();
+						}
+						$('body').append(forceLeadUpdateModalContent(data2));
+						$("#leadDetailsModal").modal("show");
+					}
+				}
+			}
+			// end
+			var data = getAllDemoForUpdateStatus(USER_ID);
+			if(data.status==1){
+				var demoDetails=data.details.demoDetails.demoDetails;
+				if(demoDetails!=undefined){
+					if(demoDetails.length>0){
+						if($("#demoDetailsModal").length>0){
+							$("#demoDetailsModal").remove();
+						}
+						$('body').append(forceDemoUpdateModalContent(data));
+						$("#demoDetailsModal").modal("show");
+					}
+				}
+			}
+			// for remark callback update
+			var data4 = getAllCallbackForUpdateRemark(USER_ID);
+			if(data4.status==1){
+				if(data4.details.callbackDetails != undefined){
+					var callbackDetails=data4.details.callbackDetails.callbackDetails;
+					if(callbackDetails!=undefined){
+						if(callbackDetails.length>0){
+							if($("#callbackDetailsModal").length>0){
+								$("#callbackDetailsModal").remove();
+							}
+							$('body').append(forceCallbackUpdateModalContent(data4));
+							setTimeout(() => {
+								$("#callbackDetailsModal").modal("show");
+							}, 200);
+						}
+					}
+				}
+			}
+		}
 		getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
 		callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'advance-search','list', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
     });
@@ -1477,6 +1539,68 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 }
 function getTotalLead(leadType){
 	$("#advancedformclick").val("")
+	if($.inArray(USER_ROLE, ['STUDENT','TEACHER','PARENT','DIRECTOR']) == -1) {
+		// for remark Demo update
+		var data3 = getAllDemosForUpdateRemark(USER_ID);
+		if(data3.status==1){
+			var demoDetails=data3.details.demoDetails.demoDetails;
+			if(demoDetails!=undefined){
+				if(demoDetails.length>0){
+					if($("#demo2DetailsModal").length>0){
+						$("#demo2DetailsModal").remove();
+					}
+					$('body').append(forceDemo2UpdateModalContent(data3));
+					$("#demo2DetailsModal").modal("show");
+				}
+			}
+		}
+		// for remark lead update
+		var data2 = getAllLeadForUpdateRemark(USER_ID);
+		if(data2.status==1){
+			var leadDetails=data2.details.leadDetails.leadDetails;
+			if(leadDetails!=undefined){
+				if(leadDetails.length>0){
+					if($("#leadDetailsModal").length>0){
+						$("#leadDetailsModal").remove();
+					}
+					$('body').append(forceLeadUpdateModalContent(data2));
+					$("#leadDetailsModal").modal("show");
+				}
+			}
+		}
+		// end
+		var data = getAllDemoForUpdateStatus(USER_ID);
+		if(data.status==1){
+			var demoDetails=data.details.demoDetails.demoDetails;
+			if(demoDetails!=undefined){
+				if(demoDetails.length>0){
+					if($("#demoDetailsModal").length>0){
+						$("#demoDetailsModal").remove();
+					}
+					$('body').append(forceDemoUpdateModalContent(data));
+					$("#demoDetailsModal").modal("show");
+				}
+			}
+		}
+		// for remark callback update
+		var data4 = getAllCallbackForUpdateRemark(USER_ID);
+		if(data4.status==1){
+			if(data4.details.callbackDetails != undefined){
+				var callbackDetails=data4.details.callbackDetails.callbackDetails;
+				if(callbackDetails!=undefined){
+					if(callbackDetails.length>0){
+						if($("#callbackDetailsModal").length>0){
+							$("#callbackDetailsModal").remove();
+						}
+						$('body').append(forceCallbackUpdateModalContent(data4));
+						setTimeout(() => {
+							$("#callbackDetailsModal").modal("show");
+						}, 200);
+					}
+				}
+			}
+		}
+	}
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', 'list','0', 'new', true,'', OBJECT_RIGHTS, ROLE_MODULE);
 }
 function nextPage(currentPage){
@@ -1501,6 +1625,70 @@ function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
 
 	leadfrom=leadfrom==undefined?'advance-search':leadfrom;
 	//console.log(leadfrom);
+	if(callbadge == "unattendedLead" || callbadge == "totalWebsiteDemo" || callbadge == "freshLead" || callbadge == "demoLead" || callbadge == "tdyDemo"){
+		if($.inArray(USER_ROLE, ['STUDENT','TEACHER','PARENT','DIRECTOR']) == -1) {
+			// for remark Demo update
+			var data3 = getAllDemosForUpdateRemark(USER_ID);
+			if(data3.status==1){
+				var demoDetails=data3.details.demoDetails.demoDetails;
+				if(demoDetails!=undefined){
+					if(demoDetails.length>0){
+						if($("#demo2DetailsModal").length>0){
+							$("#demo2DetailsModal").remove();
+						}
+						$('body').append(forceDemo2UpdateModalContent(data3));
+						$("#demo2DetailsModal").modal("show");
+					}
+				}
+			}
+			// for remark lead update
+			var data2 = getAllLeadForUpdateRemark(USER_ID);
+			if(data2.status==1){
+				var leadDetails=data2.details.leadDetails.leadDetails;
+				if(leadDetails!=undefined){
+					if(leadDetails.length>0){
+						if($("#leadDetailsModal").length>0){
+							$("#leadDetailsModal").remove();
+						}
+						$('body').append(forceLeadUpdateModalContent(data2));
+						$("#leadDetailsModal").modal("show");
+					}
+				}
+			}
+			// end
+			var data = getAllDemoForUpdateStatus(USER_ID);
+			if(data.status==1){
+				var demoDetails=data.details.demoDetails.demoDetails;
+				if(demoDetails!=undefined){
+					if(demoDetails.length>0){
+						if($("#demoDetailsModal").length>0){
+							$("#demoDetailsModal").remove();
+						}
+						$('body').append(forceDemoUpdateModalContent(data));
+						$("#demoDetailsModal").modal("show");
+					}
+				}
+			}
+			// for remark callback update
+			var data4 = getAllCallbackForUpdateRemark(USER_ID);
+			if(data4.status==1){
+				if(data4.details.callbackDetails != undefined){
+					var callbackDetails=data4.details.callbackDetails.callbackDetails;
+					if(callbackDetails!=undefined){
+						if(callbackDetails.length>0){
+							if($("#callbackDetailsModal").length>0){
+								$("#callbackDetailsModal").remove();
+							}
+							$('body').append(forceCallbackUpdateModalContent(data4));
+							setTimeout(() => {
+								$("#callbackDetailsModal").modal("show");
+							}, 200);
+						}
+					}
+				}
+			}
+		}
+	}
 	getLeadDataList('advanceLeadNewSearchForm',leadfrom, clickFrom, currentPage, 'new', true, callbadge, OBJECT_RIGHTS, ROLE_MODULE);
 }
 
