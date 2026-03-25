@@ -793,7 +793,7 @@ function getManageUserStudentPerformanceContent(rows){
                         <tr>
                             <th class="pl-3">Course Name</th>
                             <th>Score</th>
-                            <th>Pace</th>
+                            <!--<th>Pace</th>-->
                             <th>Teacher Name</th>
                             <th>End Date</th>
                             <th>Remaining Days</th>
@@ -818,9 +818,9 @@ function getManageUserStudentPerformanceRowsHtml(rows){
         }
         html += `<tr>
             <td class="pl-3">${courseText}</td>
-            <td>${row.scoreText}</td>
-            <td>${manageUserStudentPerformancePaceHtml(row.pace)}</td>
-            <td>${getSalutationByGender(row.teacherGender)} ${manageUserStudentPerformanceEscapeHtml(row.teacherName)}</td>
+            <td>${row.scoreText}</td>`;
+            // <td>${manageUserStudentPerformancePaceHtml(row.pace)}</td>
+	html += `<td>${getSalutationByGender(row.teacherGender)} ${manageUserStudentPerformanceEscapeHtml(row.teacherName)}</td>
             <td>${manageUserStudentPerformanceEscapeHtml(row.endDate)}</td>
             <td>${manageUserStudentPerformanceEscapeHtml(row.remainingDays)}</td>
             <td>${manageUserStudentPerformanceEscapeHtml(row.pendingAssignment + "")}</td>

@@ -12,7 +12,7 @@ function getStudentAcademicPerformanceContent(pageData){
                                 <tr>
                                     <th class="pl-3">Course Name</th>
                                     <th>Score</th>
-                                    <th>Pace</th>
+                                    <!--<th>Pace</th>-->
                                     <th>Teacher Name</th>
                                     <th>End Date</th>
                                     <th>Remaining Days</th>
@@ -42,7 +42,7 @@ function getStudentAcademicPerformanceRowsHtml(rows){
             <tr>
                 <td class="pl-3">${courseHtml}</td>
                 <td>${row.scoreText}</td>
-                <td>${getStudentAcademicPerformancePaceHtml(row.pace)}</td>
+                <!--<td>${getStudentAcademicPerformancePaceHtml(row.pace)}</td>-->
                 <td>${getSalutationByGender(row.teacherGender)} ${row.teacherName}</td>
                 <td>${row.endDate}</td>
                 <td>${row.remainingDays}</td>
