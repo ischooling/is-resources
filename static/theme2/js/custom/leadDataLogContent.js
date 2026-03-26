@@ -309,7 +309,7 @@ function renderLeadDataLogContent(rootId, leadData) {
         + '<h5 class="timeline-title mb-1"><i class="fa fa-calendar-alt mr-1"></i>' + safe(f.at) + '</h5>'
         + '<span class="bold">' + safe(f.title) + '</span>'
         + '<p class="mb-1">' + safe(f.remarks) + '</p>'
-        + '<small class="text-muted">' + safe(f.by) + '</small>'
+        // + '<small class="text-muted">' + safe(f.by) + '</small>'
         + '</div></div></div>';
     }
   } else {

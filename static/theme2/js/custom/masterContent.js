@@ -2582,6 +2582,12 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 	}else{
 		var phoneNumber = document.querySelector("#"+formId+" #"+eleId);
 	}
+	var placeholderValue = "xxx-xxx-xxxx";
+	var formatOnDisplay = true;
+	if(formId == "meetingBookSlotForm" && eleId == "phoneNo"){
+		placeholderValue = "";
+		formatOnDisplay = false;
+	}
     // var phoneNumber = document.querySelector("#"+formId+" #"+eleId);
     // if (phoneNumber.intlTelInputInstance) {
     //     phoneNumber.intlTelInputInstance.destroy();
@@ -2590,6 +2596,7 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
     var itiInstances = window.intlTelInput(phoneNumber, {
         separateDialCode: true,
         autoPlaceholder: "off",
+		formatOnDisplay: formatOnDisplay,
 		utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
     });
     if(flagCode == null || flagCode == undefined || flagCode == ""){
@@ -2597,7 +2604,7 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
     }else{
         itiInstances.setCountry(flagCode);   
     }
-    $(phoneNumber).attr("placeholder", "xxx-xxx-xxxx");
+    $(phoneNumber).attr("placeholder", placeholderValue);
 	$("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
 	$("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
     phoneNumber.addEventListener('countrychange', function(e) {
@@ -2606,7 +2613,7 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 		}
         $("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
         $("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
-        $(phoneNumber).attr("placeholder", "xxx-xxx-xxxx");
+        $(phoneNumber).attr("placeholder", placeholderValue);
     });
     phoneNumber.intlTelInputInstance = itiInstances;
     //phoneNumber.setAttribute('data-intlTelInput-initialized', 'true');
@@ -2930,4 +2937,3 @@ function toggleInternationalSchoolingPopover(show){
 		},150);
 	}
 }
-

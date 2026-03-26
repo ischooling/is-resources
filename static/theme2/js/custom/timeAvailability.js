@@ -13,9 +13,27 @@ var daysNum = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 var eventsBasedOnRole={};
 function getMinutesFromTime(time) {
-    var timeParts = time.split(":");
+    if (!time) {
+        return 0;
+    }
+    var normalizedTime = String(time).trim();
+    var meridiemMatch = normalizedTime.match(/\s*(AM|PM)$/i);
+    if (meridiemMatch) {
+        normalizedTime = normalizedTime.replace(/\s*(AM|PM)$/i, '');
+    }
+    var timeParts = normalizedTime.split(":");
     var hours = parseInt(timeParts[0], 10);
     var minutes = parseInt(timeParts[1], 10);
+
+    if (meridiemMatch) {
+        var meridiem = meridiemMatch[1].toUpperCase();
+        if (meridiem === 'AM' && hours === 12) {
+            hours = 0;
+        } else if (meridiem === 'PM' && hours !== 12) {
+            hours += 12;
+        }
+    }
+
     return hours * 60 + minutes;
 }
 
@@ -3381,6 +3399,8 @@ function dataForBookAnEventSlot() {
 	data['sendToEmail']=$('#sendToEmail').val();
 	data['sendUserName']=$('#sendUserName').val();
 	data['sendToPhone']=$('#sendToPhone').val();
+	data['isdCode']=$('#isdCode').val();
+	data['isdCodeIso']=$('#isdCodeIso').val();
 	data['schoolId']=SCHOOL_ID;
 	data['meetingId']=$('#meetingId').val();;
 	customLoader(true);
@@ -3849,6 +3869,27 @@ function scheduleMeetingForEvent(formId){
 			return false;
 		}
 	}
+	
+	// if($('#'+formId+' #communicationWhatsApp').length && !$('#'+formId+' #communicationWhatsApp').is(':checked') && !$('#'+formId+' #communicationCall').is(':checked')){
+	// 	showMessageTheme2(0,"Please select at least one preferred contact option",'',true);
+	// 	return false;
+	// }
+	if($('#'+formId+' #preferredStartTime').length){
+		var preferredStartTime = $('#'+formId+' #preferredStartTime').val();
+		var preferredEndTime = $('#'+formId+' #preferredEndTime').val();
+		if((preferredStartTime && !preferredEndTime) || (!preferredStartTime && preferredEndTime)){
+			showMessageTheme2(0,"Please select both preferred start time and end time",'',true);
+			return false;
+		}
+		if(preferredStartTime && preferredEndTime){
+			var preferredStartMinutes = getMinutesFromTime(preferredStartTime);
+			var preferredEndMinutes = getMinutesFromTime(preferredEndTime);
+			if(preferredEndMinutes <= preferredStartMinutes){
+				showMessageTheme2(0,"Please choose an end time greater than start time",'',true);
+				return false;
+			}
+		}
+	}
 	customLoader(true);
 
 	$("#meetingScheduleform").hide();
@@ -3886,6 +3927,23 @@ function scheduleMeetingForEvent(formId){
 				var selectTimeZone=$('#countryTimezoneId option:selected').text();
 				var grade=$('#gradeId option:selected').text();
 				var meetingFor=$('#meetingFor').val();
+				var communicationWhatsApp = $('#communicationWhatsApp').is(':checked') ? 'WhatsApp' : '';
+				var communicationCall = $('#communicationCall').is(':checked') ? 'Call' : '';
+				var preferredStartTime = '' ;
+				if($('#preferredStartTime').val()!='' && $('#preferredStartTime').val()!=undefined){
+					preferredStartTime = $('#preferredStartTime').val() +' - '+ $('#preferredEndTime').val() ;
+				}
+				
+				var preferenceTime='';
+				if(preferredStartTime!=''){
+					if(communicationWhatsApp!='' && communicationCall!=''){
+						preferenceTime = preferredStartTime+ ' ('+communicationWhatsApp+', '+communicationCall+')';
+					}else if (communicationWhatsApp!=''){
+						preferenceTime = preferredStartTime+ ' ('+communicationWhatsApp+')';
+					}else if (communicationCall!=''){
+						preferenceTime = preferredStartTime+ ' ('+communicationCall+')';
+					}
+				}
 				var urlSend = '/timeavailability/send-thank-you-page?'
 					+'moduleId=' +moduleId
 					+ '&schoolId=' + SCHOOL_ID 
@@ -3899,7 +3957,8 @@ function scheduleMeetingForEvent(formId){
 					+'&forAllCounselor='+$("#forAllCounselor").val()
 					+'&counselorAutoSelect='+$("#counselorAutoSelect").val()
 					+'&counselorName='+$("#counselorName :selected").text()
-					+'&meetingFor='+meetingFor;
+					+'&meetingFor='+meetingFor
+					+'&preferenceTime='+preferenceTime;
 				console.log(urlSend);
 				getAsPostWithoutUUID(urlSend,'_self');
 				customLoader(false)
@@ -3917,6 +3976,7 @@ function getRequestForSubmitMeetingForEvent(formId){
 	meetingSlotDTO['leadId'] = $('#leadId').val();
 	meetingSlotDTO['timezone'] = $('#'+formId+' #meetingTimzoneId').val();
 	meetingSlotDTO['timeZoneCheck'] = $("#" + formId + " #userTimeZone").val();
+	
 	meetingSlotDTO['meetingPersoneId'] = 0;
 	var userId = '';
 	var leadSource='';
@@ -3966,6 +4026,10 @@ function getRequestForSubmitMeetingForEvent(formId){
 	meetingSlotDTO['isdCode'] = $('#'+formId+' #isdCode').val();
 	meetingSlotDTO['countryCode'] = $('#'+formId+' #pCountryCode').val();
 	meetingSlotDTO['phoneNo'] = $('#'+formId+' #phoneNo').val();
+	meetingSlotDTO['communicationWhatsApp'] = $('#'+formId+' #communicationWhatsApp').is(':checked') ? 'Y' : 'N';
+	meetingSlotDTO['communicationCall'] = $('#'+formId+' #communicationCall').is(':checked') ? 'Y' : 'N';
+	meetingSlotDTO['preferredStartTime'] = $('#'+formId+' #preferredStartTime').val();
+	meetingSlotDTO['preferredEndTime'] = $('#'+formId+' #preferredEndTime').val();
 
 	console.log(meetingSlotDTO);
 	return meetingSlotDTO;

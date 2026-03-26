@@ -1,8 +1,45 @@
 
 var schoolSettingsLinks;
+var meetingPhoneInputObserver = null;
 // (async function() {
     
 // })();
+
+function sanitizeMeetingPhoneValue(phoneValue) {
+	if (phoneValue == undefined || phoneValue == null) {
+		return '';
+	}
+	return String(phoneValue).replace(/\D/g, '');
+}
+
+function applySanitizedMeetingPhoneValue(phoneInput, phoneValue) {
+	var sanitizedPhoneValue = sanitizeMeetingPhoneValue(phoneValue);
+	if (!phoneInput) {
+		return sanitizedPhoneValue;
+	}
+	$(phoneInput).val(sanitizedPhoneValue);
+	$(phoneInput).attr('value', sanitizedPhoneValue);
+	return sanitizedPhoneValue;
+}
+
+function getPreferredTimeOptions() {
+	var html = '<option value="">Start Time</option>';
+	for (var hour = 0; hour < 24; hour++) {
+		for (var minute = 0; minute < 60; minute += 30) {
+			var currentHour = hour % 12 === 0 ? 12 : hour % 12;
+			var currentMinute = minute.toString().padStart(2, '0');
+			var meridiem = hour >= 12 ? 'PM' : 'AM';
+			var valueTime = hour.toString().padStart(2, '0') + ':' + currentMinute;
+			var displayTime = currentHour + ':' + currentMinute + ' ' + meridiem;
+			html += '<option value="' + displayTime + '">' + displayTime + '</option>';
+		}
+	}
+	return html;
+}
+
+function getPreferredTimeEndOptions() {
+	return getPreferredTimeOptions().replace('Start Time', 'End Time');
+}
 
 
 async function renderCounselorCotent(data){
@@ -56,6 +93,16 @@ async function renderCounselorCotent(data){
 	$("#meetingBookSlotForm #countryId").select2({
 		theme:"bootstrap4"
 	});
+	$("#meetingBookSlotForm #preferredStartTime").select2({
+		theme:"bootstrap4",
+		placeholder:"Start Time",
+		width:"100%"
+	});
+	$("#meetingBookSlotForm #preferredEndTime").select2({
+		theme:"bootstrap4",
+		placeholder:"End Time",
+		width:"100%"
+	});
 	$('.scrollbar-container').each(function () {
 		const ps = new PerfectScrollbar($(this)[0], {
 			wheelSpeed: 2,
@@ -66,6 +113,19 @@ async function renderCounselorCotent(data){
 	$('#phoneNo').on('input', function(e) {
 		inputNumberValidation(e)
 	});
+	$('#sendToPhone').val(sanitizeMeetingPhoneValue($('#sendToPhone').val()));
+
+	// var phoneNumber = document.querySelector("#meetingBookSlotForm #phoneNo");
+	// phoneNumber.addEventListener('countrychange', function(e) {
+	// 	$('#meetingBookSlotForm  #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
+	// 	$('#meetingBookSlotForm  #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
+	// });
+	
+	$('#meetingBookSlotForm  #pCountryCode').val((data.isdCodeIso || '').toLowerCase());
+	$('#meetingBookSlotForm  #isdCode').val(data.isdCode);
+	applySanitizedMeetingPhoneValue(document.querySelector("#meetingBookSlotForm #phoneNo"), $('#meetingBookSlotForm #phoneNo').val());
+	
+	initializeMeetingPhoneInput((data.isdCodeIso || '').toLowerCase());
 	var windowWidth = $(window).width();
 	if(windowWidth < 990 && $("#meetingBookSlotForm").css("display") == "none"){
 		$(".meeting-details").addClass("order-2");
@@ -91,6 +151,70 @@ async function renderCounselorCotent(data){
 	if(data.thanksStaus == "Y"){
 		$("#thankyouContent").show();
 	}
+}
+
+function initializeMeetingPhoneInput(defaultIsoCode, retryCount) {
+	var formElement = $("#meetingBookSlotForm");
+	var phoneNumber = document.querySelector("#meetingBookSlotForm #phoneNo");
+	if (!phoneNumber) {
+		return;
+	}
+	retryCount = retryCount || 0;
+	if (!formElement.is(":visible")) {
+		watchMeetingPhoneInputVisibility(defaultIsoCode);
+		if (retryCount < 20) {
+			setTimeout(function() {
+				initializeMeetingPhoneInput(defaultIsoCode, retryCount + 1);
+			}, 150);
+		}
+		return;
+	}
+
+	var existingPhoneValue = sanitizeMeetingPhoneValue($("#sendToPhone").val() || $(phoneNumber).val());
+	var existingItiInstance = null;
+	if (window.intlTelInputGlobals && typeof window.intlTelInputGlobals.getInstance === 'function') {
+		existingItiInstance = window.intlTelInputGlobals.getInstance(phoneNumber);
+	}
+	if (!existingItiInstance && phoneNumber.intlTelInputInstance && typeof phoneNumber.intlTelInputInstance.destroy === 'function') {
+		existingItiInstance = phoneNumber.intlTelInputInstance;
+	}
+	if (existingItiInstance && typeof existingItiInstance.destroy === 'function') {
+		existingItiInstance.destroy();
+	}
+	while ($(phoneNumber).parent().hasClass('iti')) {
+		$(phoneNumber).unwrap();
+	}
+
+	initializeIntelInput('meetingBookSlotForm', 'phoneNo', null, (defaultIsoCode || '').toLowerCase(), '', '', '');
+	applySanitizedMeetingPhoneValue(phoneNumber, existingPhoneValue);
+	setTimeout(function() {
+		applySanitizedMeetingPhoneValue(phoneNumber, existingPhoneValue);
+	}, 0);
+	setTimeout(function() {
+		applySanitizedMeetingPhoneValue(phoneNumber, existingPhoneValue);
+	}, 300);
+	$(phoneNumber).css('width', '100%');
+	$(phoneNumber).closest('.iti').css('width', '100%');
+	if (meetingPhoneInputObserver) {
+		meetingPhoneInputObserver.disconnect();
+		meetingPhoneInputObserver = null;
+	}
+}
+
+function watchMeetingPhoneInputVisibility(defaultIsoCode) {
+	var formNode = document.querySelector("#meetingBookSlotForm");
+	if (!formNode || meetingPhoneInputObserver || typeof MutationObserver === 'undefined') {
+		return;
+	}
+	meetingPhoneInputObserver = new MutationObserver(function() {
+		if ($("#meetingBookSlotForm").is(":visible")) {
+			initializeMeetingPhoneInput(defaultIsoCode);
+		}
+	});
+	meetingPhoneInputObserver.observe(formNode, {
+		attributes: true,
+		attributeFilter: ['style', 'class']
+	});
 }
 function getLocationAndSelectCountry() {
 	return new Promise(function (resolve, reject) {
@@ -283,6 +407,8 @@ function getCounselorCotent(data){
 					}else{
 						if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){
 							html+='';
+						}else if(data.timePreferenceSlotName == 'Follow-up Meeting'){
+							html+='<h4 class="text-center font-weight-bold px-3 bg-primary-gradient text-white py-3">Book Your '+data.timePreferenceSlotName+'</h4>';
 						}else{
 							html+='<h4 class="text-center font-weight-bold px-3 bg-primary-gradient text-white py-3">Book Your FREE Live School Demo</h4>';
 						}
@@ -363,7 +489,8 @@ function getCounselorMeetingDetailsCotent(data){
 							+'<span><i class="fa fa-globe mr-1" style="line-height:22px"></i>Selected Time Zone: </span>'
 							+'<label class="m-0 ml-1" id="meetingSelectTimeZone"></label>'
 						+'</div>'
-					+'</span>';
+					+'</span>'
+					;
 					if(data.leadType!=undefined && data.leadType=='B2B'){}
 					else if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){}
 					else{
@@ -432,10 +559,12 @@ function getCounselorDatePickerCotent(data){
 							html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the Partnership Discussion</h5>';
 						}else{
 							if(data.timePreferenceSlotName == 'Interview' || data.timePreferenceSlotName == 'Initial-Interview'){
-							html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the Interview</h5>';
-						}else{
-							html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the School Demo</h5>';
-						}
+								html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the Interview</h5>';
+							}else if(data.timePreferenceSlotName == 'Follow-up Meeting'){
+								html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the '+data.timePreferenceSlotName+'</h5>';
+							}else{
+								html += '<h5 class="text-black font-weight-bold">Select the Date & Time for the School Demo</h5>';
+							}
 						}
 						
 					}else{
@@ -536,9 +665,8 @@ function getCounselorScheduleEventCotent(data){
 			+'<input type="hidden" name="userTimeZone" id="userTimeZone" value="" />'
 			+'<input type="hidden" name="schoolPersonId" id="schoolPersonId" value="" />'
 			+'<input type="hidden" name="slotTypeId" id="slotTypeId" value="'+data.slotTypeId+'" />'
-			
-			+'<input type="hidden" name="isdCode" id="isdCode" value="" />'
 			+'<input type="hidden" name="pCountryCode" id="pCountryCode" value="" />'
+			+'<input type="hidden" name="isdCode" id="isdCode" value="" />'
 			+'<div class="full px-4 mt-3">'
 				+'<div class="full mb-3">'
 					+'<label class="font-weight-bold text-black">Name*</label>'
@@ -548,46 +676,86 @@ function getCounselorScheduleEventCotent(data){
 					+'<label class="font-weight-bold text-black">Email*</label>'
 					+'<input type="text" name="email" id="email" value="'+data.sendUserEmail+'" class="form-control" '+(data.sendUserEmail != ""?"disabled":"")+' pattern="^([A-Za-z0-9_\-\.])+@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$">'
 				+'</div>';
-					if(data.userFindStatus=='N'){
-						if(data.leadType!=undefined && data.leadType=='B2B'){
-							html+='<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black" for="">Country*</label>'
-								+'<select class="form-control" name="countryId" id="countryId">'
+				if(data.timePreferenceSlotName == 'Follow-up Meeting' && data.userFindStatus!='N'){
+					html+='<div class="full mb-3">'
+						+'<label class="font-weight-bold text-black">Phone No.*</label>'
+						+'<input type="text" name="phoneNo" id="phoneNo"  value="'+sanitizeMeetingPhoneValue(data.sendUserPhone)+'" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+					+'</div>';
+					html+='<div class="full mb-4">'
+						+'<label class="font-weight-bold text-black d-block mb-2">Connect with </label>'
+						+'<div class="d-flex flex-wrap align-items-center">'
+							+'<label for="communicationWhatsApp" class="d-inline-flex align-items-center mr-4 mb-2 cursor-pointer">'
+								+'<input type="checkbox" id="communicationWhatsApp" name="communicationWhatsApp" class="mr-2" value="Y">'
+								+'<span class="text-primary font-weight-bold"><img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /> Whatsapp</span>'
+							+'</label>'
+							+'<label for="communicationCall" class="d-inline-flex align-items-center mb-2 cursor-pointer">'
+								+'<input type="checkbox" id="communicationCall" name="communicationCall" class="mr-2" value="Y">'
+								+'<span class="text-primary font-weight-bold"><i class="fa fa-phone-alt mr-1"></i>Call</span>'
+							+'</label>'
+						+'</div>'
+					+'</div>';
+					html+='<div class="full mb-4">'
+						+'<label class="font-weight-bold text-black d-block mb-2">Preferred Time</label>'
+						+'<div class="row mx-n2 align-items-center">'
+							+'<div class="col-12 col-md-4 px-2 mb-2">'
+								+'<select class="form-control" name="preferredStartTime" id="preferredStartTime">'
+									+getPreferredTimeOptions()
 								+'</select>'
 							+'</div>'
-							+'<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black">Phone No.*</label>'
-								+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
-							+'</div>';
-						}else if(data.timePreferenceSlotName == 'Interview'){
-							html+='<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black" for="">Country*</label>'
-								+'<select class="form-control" name="countryId" id="countryId">'
+							+'<div class="col-12 col-md-1 px-2 mb-2 text-center font-weight-bold text-black">-</div>'
+							+'<div class="col-12 col-md-4 px-2 mb-2">'
+								+'<select class="form-control" name="preferredEndTime" id="preferredEndTime">'
+									+getPreferredTimeEndOptions()
 								+'</select>'
 							+'</div>'
-							+'<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black">Phone No.*</label>'
-								+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
-							+'</div>';
-						}else{
-							html+='<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black">Grade*</label>'
-								+'<select class="form-control" name="gradeId" id="gradeId">'+getStandardContent(SCHOOL_ID, false, true)+'</select>'
-							+'</div>'
-							+'<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black" for="">Country*</label>'
-								+'<select class="form-control" name="countryId" id="countryId">'
-								+'</select>'
-							+'</div>'
-							+'<div class="full mb-3">'
-								+'<label class="font-weight-bold text-black">Phone No.*</label>'
-								+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
-							+'</div>';
-						}
+						+'</div>'
+					+'</div>';
+				}
+
+				if(data.userFindStatus=='N'){
+					if(data.leadType!=undefined && data.leadType=='B2B'){
+						html+='<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black" for="">Country*</label>'
+							+'<select class="form-control" name="countryId" id="countryId">'
+							+'</select>'
+						+'</div>'
+						+'<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black">Phone No.*</label>'
+							+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+						+'</div>';
+					}else if(data.timePreferenceSlotName == 'Interview'){
+						html+='<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black" for="">Country*</label>'
+							+'<select class="form-control" name="countryId" id="countryId">'
+							+'</select>'
+						+'</div>'
+						+'<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black">Phone No.*</label>'
+							+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+						+'</div>';
+					}else{
+						html+='<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black">Grade*</label>'
+							+'<select class="form-control" name="gradeId" id="gradeId">'+getStandardContent(SCHOOL_ID, false, true)+'</select>'
+						+'</div>'
+						+'<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black" for="">Country*</label>'
+							+'<select class="form-control" name="countryId" id="countryId">'
+							+'</select>'
+						+'</div>'
+						+'<div class="full mb-3">'
+							+'<label class="font-weight-bold text-black">Phone No.*</label>'
+							+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+						+'</div>';
 					}
+				}
 				
+				var slotname=data.timePreferenceSlotName;
+				if(data.timePreferenceSlotName=='Follow-up Meeting'){
+					slotname='Now';
+				}
 				html+='<div class="full mt-4 text-right">'
-					+'<a href="javascript:void(0)" class="btn btn-primary btn-pill py-2 px-4 font-size-lg scheduleMeeting" onclick="scheduleMeetingForEvent(\'meetingBookSlotForm\');" >Book '+data.timePreferenceSlotName+'</a>'
+					+'<a href="javascript:void(0)" class="btn btn-primary btn-pill py-2 px-4 font-size-lg scheduleMeeting" onclick="scheduleMeetingForEvent(\'meetingBookSlotForm\');" >Book '+slotname+'</a>'
 				+'</div>'
 			+'</div>'
 		+'</div>';
@@ -683,8 +851,21 @@ function thankyouPageContent(data){
 										<label class="m-0 ml-1" id="thankSelectTimeZone">${data.selectTimeZone.replaceAll('  ','+')}</label>
 									</div>
 								</span>
-							</li>
-						</ul>
+							</li>`;
+							if(data.preferenceTime!=''){
+
+							html+=`<li class="mb-0">
+								<span class="text-gray font-weight-semi-bold full mb-3">
+									<div class="d-flex align-items-top flex-wrap">	
+										<span>
+											<i class="fa fa-globe mr-1" style="line-height:22px"></i>Communication Prefrence Time::
+										</span>	
+										<label class="m-0 ml-1" id="thankpreferenceTime">${data.preferenceTime}</label>
+									</div>
+								</span>
+							</li>`;
+							}
+						html+=`</ul>
 						<p class="full font-size-lg mt-2 mb-0 text-center"> Please check your email to join the ${data.meetingFor == 'Initial-Interview' ? 'Interview' : data.meetingFor}.</p>
 					</div>
 				</div>

@@ -180,13 +180,24 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
         <p id="pendingFollowupCount" class="mb-0 text-white px-2 rounded" style="background-color:#B85C00;">-</p>
       </div>
       `;
-      if(USER_ID != "19321" && USER_ID != "14388"){
-        html+=
-        `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
-          <p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
-          <p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
-        </div>`;
-      }
+      // if(USER_ID != "19321" && USER_ID != "14388"){
+      //   html+=
+      //   `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #686868;padding: 5px 10px;font-weight: bold;">
+      //     <p class="mb-0" style="color:#686868">Assigned to Lead Manager</p>
+      //     <p id="assignedToLeadManagerCount" class="mb-0 text-white px-2 rounded" style="background-color:#686868;">-</p>
+      //   </div>`;
+      // }
+      html+=
+      `<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #6C2BD9;padding: 5px 10px;font-weight: bold;">
+        <p class="mb-0" style="color:#6C2BD9">Reminder Count</p>
+        <p id="reminderCount" class="mb-0 text-white px-2 rounded" style="background-color:#6C2BD9;">-</p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0E7490;padding: 5px 10px;font-weight: bold;">
+        <p class="mb-0" style="color:#0E7490">Ping Popup Count</p>
+        <p id="pingPopupCount" class="mb-0 text-white px-2 rounded" style="background-color:#0E7490;">-</p>
+      </div>`
+      
+      ;
        
   html += "</div>";
 
@@ -1235,6 +1246,25 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       : "-";
   $("#pendingFollowupCount").html(`${pendingFollowup}`);
 
+  var reminderTotal = parseInt((leadTotalData.reminder_total !== undefined ? leadTotalData.reminder_total:0));
+  var reminder_followup_total = parseInt((leadTotalData.reminder_followup_total !== undefined ? leadTotalData.reminder_followup_total : 0));
+  var reminderCountBadge =
+    reminderTotal > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'reminderCallTotal','${leadTotalData.leadFrom}')">${reminderTotal}</a> | 
+      <a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'reminderFollowupTotal','${leadTotalData.leadFrom}')">${reminder_followup_total}</a>`
+      : "-";
+  $("#reminderCount").html(`${reminderCountBadge}`);
+
+  var pingTotal = parseInt((leadTotalData.ping_total !== undefined ? leadTotalData.ping_total : 0) || 0, 10);
+  var pingFollowupTotal = parseInt((leadTotalData.ping_followup_total !== undefined ? leadTotalData.ping_followup_total : 0) || 0, 10);
+  var pingPopupCountBadge =
+    pingTotal > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'pingPopupTotal','${leadTotalData.leadFrom}')">${pingTotal}</a> | 
+      <a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'pingPopupFollowupTotal','${leadTotalData.leadFrom}')">${pingFollowupTotal}</a>`
+      : "-";
+  $("#pingPopupCount").html(`${pingPopupCountBadge}`);
+  //$("#pingPopupFollowupCount").html(`${pingFollowupTotal > 0 ? pingFollowupTotal : "-"}`);
+
 }
 function getB2cLeadList(leaddata, objRights, roleModule){
 	//console.log(objRights);
@@ -1834,11 +1864,29 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                 +'<th class="border-0 p-1">Demo confirmation:</th>'
                 +'<td class="border-0 p-1">'+(leads.demoConfirmation=='Y'?'Yes':'No')+'</td>'
               +'</tr>';
+              if (leads.followupMeetingDate!==""){
+                //html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Follow-up Meeting</td></tr>';
+                html += '<tr class="bg-info p-1 text-white">'
+                  +'<th class="border-0 p-1">Follow-up Meeting Time:</th>'
+                  +'<td class="border-0 p-1" >'+leads.followupMeetingDate+' ('+USER_TIMEZONE+')'+'</td>'
+                +'</tr>';
+                 html += '<tr class="bg-info p-1 text-white">'
+                  +'<th class="border-0 p-1">Assign to:</th>'
+                  +'<td class="border-0 p-1" >'+leads.followupAssignName+'</td>'
+                +'</tr>';
+                if(leads.communicationTime!=''){
+                  html += '<tr class="bg-info p-1 text-white">'
+                   +'<th class="border-0 p-1" style="width:165px">Communication Prefrence Time: </th>'
+                   +'<td class="border-0 p-1">'+leads.communicationTime + (leads.pref!=''?' ('+(leads.pref!=''?leads.pref+')':''):'')+'</td>'
+                 +'</tr>';
+                }
+                
+              }
               if (leads.callbackConvertedDate!=="N/A"){
                 html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Callback</td></tr>';
                 html += '<tr class="bg-primary p-1 text-white">'
                   +'<th class="border-0 p-1">Callback Time:</th>'
-                  +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+'('+USER_TIMEZONE+')'+'</td>'
+                  +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+' ('+USER_TIMEZONE+')'+'</td>'
                 +'</tr>';
               }
 							html+='<tr>'
@@ -1934,7 +1982,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										// 	+'</div>'
 										// +'</div>'
                     
-								if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo  || USER_ID == leads.leadSupportTo){
+								if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo  || USER_ID == leads.leadSupportTo || USER_ID==leads.followupAssignTo){
 									let isRemarkMandatory = (leaddata.remarkMendatory && ( leaddata.minRemarkCount > 0))
 									html+='<tr>'
 									+'<td colspan="2" class="border-0 p-0 pr-1">'
@@ -2079,10 +2127,14 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								}
 							}
 							html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+							
 							if(USER_ROLE != "B2B_PARTNER"){
                 html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                html+='<a href="'+leads.followupSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Follow-up Meeting with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-users" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                html+='<a href="'+leads.followupSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Follow-up Meeting for other counselor" target="_blank"><i class="fa fa-users" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
                 html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="WhatsApp chat log" onclick="callOpenWatsAppMessage(\'watsAppMsgModal\',\''+leads.leadId+'\');"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/WhatsApp.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
               }
+
 							if(leads.whatsAppVerifiedStatus == 'NA'){
 							}else{
 								var displayCss='none';

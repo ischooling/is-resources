@@ -5401,7 +5401,11 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				$(".nextFollow-"+leadId).html("<b>NO FOLLOWUP</b>");
 				$(".leadlist-status-"+leadId).html("<b>"+$('#leadStatus-'+leadId+' option:selected').text()+"</b>")
 				$(".leadlist-remark-"+leadId).html("<b>"+data['extra3']+"</b>");
-				$(".demo-status-row-"+leadId).html(data['extra4']);
+				if(leadStatus=='Follow-up Meeting Booked' || leadStatus=='Follow-up Meeting Completed' || leadStatus=='Follow-up Meeting Reschedule' || leadStatus=='Follow-up Meeting cancelled'){}
+				else{
+					$(".demo-status-row-"+leadId).html(data['extra4']);
+				}
+
 				var lType=leadType.toString().toLowerCase();
 				$(".nextSchedule-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
 				$(".nextFollow-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
@@ -12768,6 +12772,27 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 	});
 
 }
+	function ensureMultipleTimeApplyBlinkStyle() {
+		if (document.getElementById('multiple-time-apply-blink-style')) {
+			return;
+		}
+		var style = document.createElement('style');
+		style.id = 'multiple-time-apply-blink-style';
+		style.textContent =
+			'@keyframes multipleTimeApplyBlink {' +
+				'0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(190, 24, 93, 0.20); transform: scale(1); }' +
+				'50% { opacity: 0.9; box-shadow: 0 0 0 10px rgba(217, 70, 239, 0.32); transform: scale(1.05); }' +
+			'}' +
+			'.multiple-time-apply-blink {' +
+				'animation: multipleTimeApplyBlink 1.1s ease-in-out infinite;' +
+				'background: linear-gradient(135deg, #c026d3, #a21caf) !important;' +
+				'border-color: #86198f !important;' +
+				'color: #fff !important;' +
+				'font-weight: 700;' +
+			'}';
+		document.head.appendChild(style);
+	}
+
 	async function getLeadStatusLogHistory(leadId) {
     try {
         var request = {
@@ -12787,14 +12812,16 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
             return;
         }
         if(data.data.length>1){
+			ensureMultipleTimeApplyBlinkStyle();
 			var sr=1;
 			var html=''
 			html+=`<div class="dropdown d-inline-block">
-					<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">Multiple time apply (${data.data.length})</button>
+					<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary multiple-time-apply-blink">Multiple time apply (${data.data.length})</button>
 					<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl dropdown-menu" x-placement="top-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-111px, -384px, 0px);">
 					<table style="font-size:11px !important; width:1300px;"><tbody>
 					<tr><th class="text-center bg-primary text-white">Sr. No.</th>
 					<th class="text-center bg-primary text-white">Lead No</th>
+					<th class="text-center bg-primary text-white">Lead Name</th>
 					<th class="text-center bg-primary text-white">Source</th>
 					<th class="text-center bg-primary text-white">Campaign</th>
 					<th class="text-center bg-primary text-white">Ad</th>
@@ -12806,6 +12833,7 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 					const leadDatass = data.data[i];
 					html+=`<tr><td class="text-center">${sr}</td>
 					<td>${leadDatass.leadNo}</td>
+					<td>${leadDatass.leadName}</td>
 					<td>${leadDatass.sourceName}</td>
 					<td>${leadDatass.utmCampaign}</td>
 					<td>${leadDatass.utmMedium}</td>

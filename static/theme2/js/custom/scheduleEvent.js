@@ -293,6 +293,7 @@ async function proceedUpdateMeetingStatus(meetingId, leadId) {
 	data['userId']=USER_ID;
 	data['schoolId']=SCHOOL_ID;
 	data['status']=status;
+	data['meetingType']=$("#meetingType").val();
 	data['remarks']=remarks;
     data['tentativeDate']=tentativeDate;
     data['leadSource']=leadSource;
