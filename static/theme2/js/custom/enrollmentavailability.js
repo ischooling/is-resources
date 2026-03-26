@@ -2523,7 +2523,7 @@ function enrAvailRenderCounselorPreview(opts) {
 							'<td class="text-left" style="min-width:200px;">' +
 							'<div class="d-inline-flex flex-column align-items-start justify-content-start">' +
 							'<div class="d-inline-flex align-items-center justify-content-start" style="gap:12px;">' +
-							'<span class="text-muted font-12 font-weight-semi-bold" style="width:46px;text-align:right;line-height:1;">' +
+							'<span class="text-muted font-12 font-weight-semi-bold" style="width:46px;text-align:center;line-height:1;">' +
 							enrAvailEsc(pct) +
 							'%</span>' +
 							'<div class="progress progress-bar-xs progress-bar-rounded" style="width:160px;height:6px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;">' +

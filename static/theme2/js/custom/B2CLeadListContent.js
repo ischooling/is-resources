@@ -2612,7 +2612,7 @@ function openLeadEnrollmentHoldPopup(lead) {
     autoclose: true,
     todayHighlight: true,
     startDate: new Date(),
-    orientation: 'bottom auto'
+    orientation: 'top'
   });
 
   // Show modal
