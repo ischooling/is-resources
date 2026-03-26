@@ -34875,6 +34875,17 @@ to { background-color: rgb(6, 145, 6); }
     position: relative;
     top: 4px;
 }
+.enrollment-icon{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url(../images/Icon/sidebar/enrollment.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
 /* DASHBOARD-NAVIGATION-ICONS-CSS ENDS HERE */
 
 @keyframes scaleAnimation {
@@ -34940,5 +34951,4 @@ to { background-color: rgb(6, 145, 6); }
 		.anchor-color{color:green !important}
 .text-dark-warning{
 	color:#92400E !important;
-}		
-/*ADDITIONAL LAYER CSSS ENDS HERE */
+}

@@ -537,3 +537,406 @@ function renderLeadReminderListRows(reminderList) {
     $("#leadReminderListTableWrapper").removeAttr("style");
   }
 }
+
+// =============================================
+// LEAD ENROLLMENT HOLD — AJAX Functions
+// =============================================
+
+/**
+ * Fetch existing hold data for a lead (called when modal opens)
+ */
+function fetchLeadEnrollmentHold(leadId) {
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor('leads', 'get-enrollment-hold'),
+    data: JSON.stringify({ leadId: parseInt(leadId) }),
+    dataType: 'json',
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data && data.statusCode == '1' && data.holdData) {
+        var holdData = data.holdData;
+        var ah = holdData.activeHold;
+
+        $("#holdEnrollBestTimeDate").val(holdData.bestTimeDate || '');
+        $("#holdEnrollBestTimeHH").val(holdData.bestTimeHH || '00');
+        $("#holdEnrollBestTimeMM").val(holdData.bestTimeMM || '00');
+        $("#holdEnrollBestTimeAMPM").val(holdData.bestTimeAMPM || 'AM');
+        try {
+          $("#holdEnrollBestTimeDate").datepicker("update", holdData.bestTimeDate || '');
+        } catch (e) {}
+
+        if (ah && ah.lockHours) {
+          // Show lock details section
+          var statusBadge = '';
+          if (ah.holdStatus === 'ACTIVE') statusBadge = '<span class="badge badge-success">ACTIVE</span>';
+          else if (ah.holdStatus === 'EXPIRED') statusBadge = '<span class="badge badge-secondary">EXPIRED</span>';
+          else if (ah.holdStatus === 'RELEASED') statusBadge = '<span class="badge badge-warning">RELEASED</span>';
+          else statusBadge = ah.holdStatus || '-';
+
+          $("#holdLockStatusDisplay").html(statusBadge);
+          $("#holdLockHoursDisplay").text(ah.lockHours + ' hrs');
+          $("#holdLockDateDisplay").text(ah.holdDate || '-');
+          $("#holdLockExpiryDisplay").text(ah.expiryDate || '-');
+          $("#holdLockInfoSection").removeClass("d-none");
+
+          if (holdData.hasActiveHold) {
+            renderActiveHoldBanner(holdData, ah, false);
+            $("#holdActiveInfoBanner").removeClass("d-none");
+            $("#saveEnrollmentHoldBtn").prop("disabled", true).text("Hold Already Active");
+            $("#holdEnrollLockHours").val(ah.lockHours);
+          }
+        }
+      }
+    },
+    error: function () {
+      console.error("Error fetching enrollment hold data");
+    }
+  });
+}
+
+/**
+ * Save enrollment hold
+ */
+function saveLeadEnrollmentHold() {
+  var leadId = $("#holdEnrollLeadId").val();
+  if (!leadId || leadId == '0') {
+    showMessageTheme2(0, "Lead ID is missing", "", true);
+    return;
+  }
+
+  var bestTimeDate = $("#holdEnrollBestTimeDate").val() || '';
+  if (!bestTimeDate) {
+    showMessageTheme2(0, "Best time to connect date is required", "", true);
+    return;
+  }
+
+  var bestTimeMoment = getHoldBestTimeMomentFromForm();
+  if (!bestTimeMoment) {
+    showMessageTheme2(0, "Best time to connect is invalid", "", true);
+    return;
+  }
+  if (!bestTimeMoment.isAfter(moment())) {
+    showMessageTheme2(0, "Best time to connect should be a future date and time", "", true);
+    return;
+  }
+
+  var lockHours = $("#holdEnrollLockHours").val() || '72';
+  var standard = $("#holdEnrollGrade").val() || '';
+
+  $("#saveEnrollmentHoldBtn").prop("disabled", true).text("Saving...");
+
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor('leads', 'save-enrollment-hold'),
+    data: JSON.stringify({
+      leadId: parseInt(leadId),
+      lockHours: parseInt(lockHours),
+      fName: $("#holdEnrollFname").val() || '',
+      mName: $("#holdEnrollMname").val() || '',
+      lName: $("#holdEnrollLname").val() || '',
+      standard: standard ? parseInt(standard) : 0,
+      email: $("#holdEnrollEmail").val() || '',
+      isdCode: $("#holdEnrollIsdCode").val() || '',
+      isdCodeIso: $("#holdEnrollIsdCodeIso").val() || '',
+      phoneNo: $("#holdEnrollPhone").val() || '',
+      alterEmail: $("#holdEnrollAltEmail").val() || '',
+      alterIsdCode: $("#holdEnrollAltIsdCode").val() || '',
+      alterIsdCodeIso: $("#holdEnrollAltIsdCodeIso").val() || '',
+      alterPhoneNo: $("#holdEnrollAltPhone").val() || '',
+      bestTimeDate: bestTimeDate,
+      bestTimeHH: $("#holdEnrollBestTimeHH").val() || '00',
+      bestTimeMM: $("#holdEnrollBestTimeMM").val() || '00',
+      bestTimeAMPM: $("#holdEnrollBestTimeAMPM").val() || 'AM'
+    }),
+    dataType: 'json',
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      $("#saveEnrollmentHoldBtn").prop("disabled", false).text("Hold Enrollment");
+      if (data && (data.statusCode == '1')) {
+        var createdHold = data.hold || {
+          lockHours: data.lockHours || lockHours,
+          expiryDate: data.lockExpiryDate || '',
+          bestTimeDisplay: getHoldBestTimeDisplayFromForm()
+        };
+        showMessageTheme2(1, data.message || "Enrollment held successfully", "", true);
+        setHoldEnrollmentTimerOnlyMode(true);
+        renderActiveHoldBanner(createdHold, createdHold, true);
+        $("#holdActiveInfoBanner").removeClass("d-none");
+        // Add hold indicator to the lead row
+        updateLeadHoldIndicator(leadId, true, createdHold);
+        updateLeadHoldLeadSummary(leadId);
+      } else {
+        showMessageTheme2(0, data.message || "Failed to save hold", "", true);
+        // If there's existing hold info, show it
+        if (data.existingHold) {
+          fetchLeadEnrollmentHold(leadId);
+        }
+      }
+    },
+    error: function () {
+      $("#saveEnrollmentHoldBtn").prop("disabled", false).text("Hold Enrollment");
+      showMessageTheme2(0, typeof TECHNICAL_GLITCH !== 'undefined' ? TECHNICAL_GLITCH : "Technical error occurred", "", true);
+    }
+  });
+}
+
+/**
+ * Release active enrollment hold
+ */
+function releaseEnrollmentHoldAction() {
+  var leadId = $("#holdEnrollLeadId").val();
+  if (!leadId || leadId == '0') {
+    showMessageTheme2(0, "No active hold to release", "", true);
+    return;
+  }
+  if (!confirm("Are you sure you want to release this enrollment hold?")) return;
+
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLFor('leads', 'release-enrollment-hold'),
+    data: JSON.stringify({
+      leadId: parseInt(leadId)
+    }),
+    dataType: 'json',
+    cache: false,
+    timeout: 600000,
+    success: function (data) {
+      if (data && data.statusCode == '1') {
+        showMessageTheme2(1, data.message || "Hold released", "", true);
+        // Re-enable form
+        $("#holdActiveInfoBanner").addClass("d-none");
+        setHoldEnrollmentTimerOnlyMode(false);
+        clearLeadHoldTimer("modalActiveHold");
+        $("#saveEnrollmentHoldBtn").prop("disabled", false).text("Hold Enrollment");
+        // Remove hold indicator from lead row
+        updateLeadHoldIndicator(leadId, false);
+      } else {
+        showMessageTheme2(0, data.message || "Failed to release hold", "", true);
+      }
+    },
+    error: function () {
+      showMessageTheme2(0, typeof TECHNICAL_GLITCH !== 'undefined' ? TECHNICAL_GLITCH : "Technical error occurred", "", true);
+    }
+  });
+}
+
+/**
+ * Update hold indicator on lead row (purple lock badge beside lead number)
+ */
+function updateLeadHoldIndicator(leadId, hasHold, lockHours, lockExpiryDate) {
+  var holdData = {};
+  if (typeof lockHours === "object" && lockHours !== null) {
+    holdData = lockHours;
+  } else {
+    holdData = {
+      lockHours: lockHours || "",
+      expiryDate: lockExpiryDate || ""
+    };
+  }
+
+  if (hasHold) {
+    renderLeadHoldIndicator(leadId, holdData);
+  } else {
+    clearLeadHoldIndicator(leadId);
+  }
+}
+
+var leadHoldTimerMap = {};
+
+function clearLeadHoldTimer(timerKey) {
+  if (leadHoldTimerMap[timerKey]) {
+    clearInterval(leadHoldTimerMap[timerKey]);
+    delete leadHoldTimerMap[timerKey];
+  }
+}
+
+function getLeadHoldExpiryMoment(holdData) {
+  var expiryText = (holdData && (holdData.expiryDate || holdData.lockExpiryDate)) || "";
+  return moment(expiryText, [
+    "MMM DD, YYYY hh:mm A",
+    "MMM DD, YYYY hh:mm a",
+    "DD MMM YYYY hh:mm A",
+    "DD MMM YYYY hh:mm a"
+  ], true);
+}
+
+function formatLeadHoldCountdown(totalSeconds) {
+  var days = Math.floor(totalSeconds / 86400);
+  var hours = Math.floor((totalSeconds % 86400) / 3600);
+  var minutes = Math.floor((totalSeconds % 3600) / 60);
+  var seconds = totalSeconds % 60;
+  var parts = [];
+  if (days > 0) {
+    parts.push(days + (days === 1 ? " day" : " days"));
+  }
+  parts.push(hours + " hrs");
+  parts.push(minutes + " mins");
+  parts.push(seconds + " secs");
+  return parts.join(" ");
+}
+
+function startLeadHoldCountdownForTarget(timerKey, target, holdData) {
+  if (!target || !target.length) {
+    return;
+  }
+
+  clearLeadHoldTimer(timerKey);
+
+  var expiryMoment = getLeadHoldExpiryMoment(holdData);
+  if (!expiryMoment.isValid()) {
+    target.text(holdData && holdData.timeRemaining ? holdData.timeRemaining : "N/A");
+    return;
+  }
+
+  var updateCountdown = function() {
+    var diffMs = expiryMoment.valueOf() - moment().valueOf();
+    if (diffMs <= 0) {
+      target.text("Expired");
+      target.removeClass("text-danger text-success").addClass("text-danger");
+      clearLeadHoldTimer(timerKey);
+      return;
+    }
+
+    var totalSeconds = Math.floor(diffMs / 1000);
+    var totalHours = Math.floor(totalSeconds / 3600);
+    target.text(formatLeadHoldCountdown(totalSeconds));
+    target.removeClass("text-danger text-success")
+      .addClass(totalHours < 6 ? "text-danger" : "text-success");
+  };
+
+  updateCountdown();
+  leadHoldTimerMap[timerKey] = setInterval(updateCountdown, 1000);
+}
+
+function getHoldBestTimeDisplay(holdData) {
+  if (!holdData) {
+    return "";
+  }
+  return holdData.bestTimeDisplay || holdData.holdBestTimeDisplay || holdData.nextFollowupDate || "";
+}
+
+function getHoldBestTimeMomentFromForm() {
+  var dateValue = $("#holdEnrollBestTimeDate").val() || "";
+  if (!dateValue) {
+    return null;
+  }
+
+  var hh = $("#holdEnrollBestTimeHH").val() || "00";
+  var mm = $("#holdEnrollBestTimeMM").val() || "00";
+  var ampm = $("#holdEnrollBestTimeAMPM").val() || "AM";
+  var bestTimeMoment = moment(dateValue + " " + hh + ":" + mm + " " + ampm, "MM-DD-YYYY hh:mm A", true);
+  return bestTimeMoment.isValid() ? bestTimeMoment : null;
+}
+
+function getHoldBestTimeDisplayFromForm() {
+  var bestTimeMoment = getHoldBestTimeMomentFromForm();
+  if (!bestTimeMoment) {
+    return "";
+  }
+  return bestTimeMoment.format("MMM DD, YYYY hh:mm A");
+}
+
+function getHoldChildNameFromForm() {
+  var nameParts = [
+    $.trim($("#holdEnrollFname").val() || ""),
+    $.trim($("#holdEnrollMname").val() || ""),
+    $.trim($("#holdEnrollLname").val() || "")
+  ].filter(function (value) {
+    return value !== "";
+  });
+  return nameParts.length ? nameParts.join(" ") : "N/A";
+}
+
+function getHoldGradeDisplayFromForm() {
+  var selectedValue = $("#holdEnrollGrade").val() || "";
+  var selectedText = $.trim($("#holdEnrollGrade option:selected").text() || "");
+  if (!selectedValue || !selectedText) {
+    return "N/A";
+  }
+  return $.trim(selectedText.replace(/^Grade\s*/i, "")) || selectedText;
+}
+
+function updateLeadHoldLeadSummary(leadId) {
+  $(".lead-child-name-" + leadId).text(getHoldChildNameFromForm());
+  $(".lead-child-grade-" + leadId).text(getHoldGradeDisplayFromForm());
+  $(".lead-summary-grade-" + leadId).text(getHoldGradeDisplayFromForm());
+}
+
+function setHoldEnrollmentTimerOnlyMode(enableTimerOnly) {
+  $("#holdEnrollmentFormSection").toggleClass("d-none", !!enableTimerOnly);
+  $("#saveEnrollmentHoldBtn").toggleClass("d-none", !!enableTimerOnly);
+  $("#holdReleaseBtn").toggleClass("d-none", !!enableTimerOnly);
+  $("#holdActiveInfoHeading").toggleClass("d-none", !!enableTimerOnly);
+  $("#holdActiveInfoBanner").toggleClass("alert-warning", !enableTimerOnly);
+  $("#holdActiveInfoBanner").toggleClass("alert-light border", !!enableTimerOnly);
+  $("#holdEnrollmentCloseBtn").text(enableTimerOnly ? "Close" : "Cancel");
+}
+
+function renderActiveHoldBanner(holdData, activeHold, timerOnly) {
+  var bestTimeDisplay = getHoldBestTimeDisplay(holdData);
+  var timerId = "holdActiveInfoTimer";
+  var details = '';
+  if (timerOnly) {
+    details = ''
+      + '<div class="text-center py-2">'
+      +   '<div class="d-inline-block px-4 py-3" style="background:#ffffff;border-radius:16px;box-shadow:0 10px 24px rgba(2, 127, 254, 0.18);min-width:320px;">'
+      +     '<div class="small font-weight-bold text-uppercase mb-2" style="letter-spacing:0.6px;color:#5f6b7a;">Time Remaining</div>'
+      +     '<div id="' + timerId + '" class="font-weight-bold text-danger" style="font-size:28px;line-height:1.35;"></div>'
+      +   '</div>'
+      + '</div>';
+  } else {
+    details = ''
+      + '<div class="mb-2"><strong>Hold enrollment for ' + (activeHold.lockHours || 0) + ' hrs</strong></div>'
+      + '<div class="mb-2"><span id="' + timerId + '" class="d-inline-block px-3 py-2 font-weight-bold text-danger" style="background:#ffffff;border-radius:12px;box-shadow:0 8px 18px rgba(2, 127, 254, 0.15);font-size:16px;"></span></div>';
+
+    if (bestTimeDisplay) {
+      details += '<div><strong>Best time to connect with you:</strong> ' + bestTimeDisplay + '</div>';
+    }
+  }
+
+  $("#holdActiveInfoDetails").html(details);
+  startLeadHoldCountdownForTarget("modalActiveHold", $("#" + timerId), activeHold);
+}
+
+function renderLeadHoldIndicator(leadId, holdData) {
+  var wrapper = $(".hold-enrollment-wrapper-" + leadId);
+  if (!wrapper.length) {
+    return;
+  }
+
+  var lockHours = holdData && holdData.lockHours ? holdData.lockHours : "";
+  var bestTimeDisplay = getHoldBestTimeDisplay(holdData);
+  var remainingId = "leadHoldRemaining_" + leadId;
+  var html = ''
+    + '<div class="mt-2 font-12 hold-enrollment-panel hold-enrollment-panel-' + leadId + '" style="background:#f7fbff;border:1px solid #d7e8fb;border-radius:12px;padding:10px 12px;">'
+    +   '<div class="d-flex mb-2" style="gap:10px;">'
+    +     '<div style="width:190px;min-width:190px;">Hold enrollment:</div>'
+    +     '<div class="font-weight-bold">' + lockHours + ' hrs</div>'
+    +   '</div>'
+    +   '<div class="d-flex align-items-center mb-2" style="gap:10px;">'
+    +     '<div style="width:190px;min-width:190px;">Auto Expired in:</div>'
+    +     '<div><span id="' + remainingId + '" class="d-inline-block px-3 py-2 font-weight-bold text-danger" style="background:#ffffff;border:1px solid #dcecff;border-radius:12px;box-shadow:0 8px 18px rgba(2, 127, 254, 0.12);"></span></div>'
+    +   '</div>'
+    +   (bestTimeDisplay ? '<div class="d-flex" style="gap:10px;"><div style="width:190px;min-width:190px;">Best time to connect with you:</div><div class="font-weight-bold">' + bestTimeDisplay + '</div></div>' : '')
+    + '</div>';
+  wrapper.html(html);
+  startLeadHoldCountdown(leadId, holdData);
+}
+
+function clearLeadHoldIndicator(leadId) {
+  var wrapper = $(".hold-enrollment-wrapper-" + leadId);
+  if (wrapper.length) {
+    wrapper.html("");
+  }
+  clearLeadHoldTimer(leadId);
+}
+
+function startLeadHoldCountdown(leadId, holdData) {
+  var target = $("#leadHoldRemaining_" + leadId);
+  startLeadHoldCountdownForTarget(leadId, target, holdData);
+}

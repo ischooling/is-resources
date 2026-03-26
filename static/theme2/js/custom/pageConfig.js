@@ -191,6 +191,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "user-feedback":{url:"",file:[{role:"",fileName:["reviewContent.js","review.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "question-list":{url:"",file:[{role:"",fileName:["feedbackQuestionContent.js","feedbackQuestion.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-predict-list":{url:"",file:[{role:"",fileName:["leadPredictListContent.js","leadPredictList.js","B2CLead.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "enrollment-availability":{url:"",file:[{role:"",fileName:["enrollmentavailabilityContent.js","enrollmentavailability.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {

@@ -591,6 +591,8 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderParentStudentClassScheduleContent()
      }else if(pageNo=='parent-attendance'){
       renderAtendaceByStudentIdContent()
+     }else if(pageNo=='enrollment-availability'){
+      renderEnrollmentAvalabilityContent()
      }
      
 

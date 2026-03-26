@@ -814,7 +814,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 									+'<td class="border-0 p-1">'
 										+'<div class="dropdown d-inline-block">'
 											+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View More Details</button>'
-											+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">';
+											+'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="top-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">';
 												if(leads.leadSourceId==4){
 													html+='<table class="w-100"><tbody>'
 															+'<tr>'

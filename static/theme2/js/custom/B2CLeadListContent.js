@@ -1371,7 +1371,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
         // +objRights.countryOffsetTimezone
         // <span class="leadInfoTime"></span>
         // '+objRights.countryOffsetTimezone+'
-				html+=''+leads.srNo+'.&nbsp;Filled details &nbsp;<span class="font-weight-bold">'+leads.leadNo+'</span> | Lead Score: <span class="'+lScoreColor+' text-white bold p-1 rounded">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span><br><div class="d-flex justify-content-center"><p class="bold font-12 p-1 bg-white text-dark w-fit-content mt-1 mb-0 rounded" id="timerLeadDisplay_'+leads.leadId+'"></p></div>'
+				html+='<span class="lead-no-cell lead-no-cell-'+leads.leadId+'">'+leads.srNo+'.&nbsp;Filled details &nbsp;<span class="font-weight-bold">'+leads.leadNo+'</span></span> | Lead Score: <span class="'+lScoreColor+' text-white bold p-1 rounded">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span>'
+				html+='<br><div class="d-flex justify-content-center"><p class="bold font-12 p-1 bg-white text-dark w-fit-content mt-1 mb-0 rounded" id="timerLeadDisplay_'+leads.leadId+'"></p></div>'
             var priorityColor='bg-warning text-dark';
             if(leads.priority=='Urgent'){
                 priorityColor='bg-success';
@@ -1450,7 +1451,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tr>'
                 +'<tr>'
                   +'<th class="border-0 p-1">Grade: </th>'
-                  +'<td class="border-0 p-1">'+(leads.standardName!=''?leads.standardName.replace('Grade',''):'N/A')+'</td>'
+                  +'<td class="border-0 p-1"><span class="lead-summary-grade-'+leads.leadId+'">'+(leads.standardName!=''?leads.standardName.replace('Grade',''):'N/A')+'</span></td>'
                 +'</tr>'
                 +'<tr>'
                   +'<th class="border-0 p-1">Email:</th>'
@@ -1670,7 +1671,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 											+'<tbody>'
 												+'<tr>'
 													+'<th class="border-0 p-1" style="width:165px">Child Name: </th>'
-													+'<td class="border-0 p-1">'+(childName)
+													+'<td class="border-0 p-1"><span class="lead-child-name-'+leads.leadId+'">'+(childName)+'</span>'
                             if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
 														  html+='<span class="float-right">'
                                 +'<a href="javascript:void(0);" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
@@ -1686,7 +1687,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                         +'</tr>'
                         +'<tr>'
                           +'<th class="border-0 p-1">Grade: </th>'
-                          +'<td class="border-0 p-1">'+childGrade+'</td>'
+                          +'<td class="border-0 p-1"><span class="lead-child-grade-'+leads.leadId+'">'+childGrade+'</span></td>'
                         +'</tr>'
                         +'<tr>'
                           +'<th class="border-0 p-1">Current Curriculum: </th>'
@@ -1790,6 +1791,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                             : '<span style="margin-left: 22%;">N/A</span>'
                         )
                     +'</div>'
+                    +'<div class="hold-enrollment-wrapper hold-enrollment-wrapper-'+leads.leadId+'"></div>'
 									+'</td>'
 								+'</tr>'
 							+'</tbody>'
@@ -2153,6 +2155,17 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							if(leads.emailBroadcastCount>0){
 								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
 							}
+              // Hold Enrollment button
+							var _hld = {
+								leadId: leads.leadId, leadNo: leads.leadNo,
+								fname: leads.fname, mname: leads.mname, lname: leads.lname,
+								standard: leads.standard,
+								email: leads.email, emailAlt: leads.emailAlternet,
+								isdCode: leads.isdCode, isdCodeIso: (leads.isdCodeIso||''), phone: leads.phone,
+								isdCodeAlter: leads.isdCodeAlter, isdCodeAlterIso: (leads.isdCodeAlterIso||''), phoneNoAlter: leads.phoneNoAlter
+							};
+							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Hold Enrollment" onclick="openLeadEnrollmentHoldPopup('+JSON.stringify(_hld).replace(/"/g,'&quot;')+')">'
+									+'<i class="fa fa-lock" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;color:#764ba2;"></i></a><br/>';
 						}
 						
 					}else{
@@ -2382,4 +2395,229 @@ function getLeadReminderListPopup() {
     "</div>" +
     "</div>";
   return html;
+}
+
+// =============================================
+// LEAD ENROLLMENT HOLD — Modal & Functions
+// =============================================
+
+function getLeadEnrollmentHoldPopup() {
+  // Build HH options (00-12)
+  var hhOptions = '<option value="00">00</option>';
+  for (var i = 1; i <= 12; i++) {
+    hhOptions += '<option value="' + (i > 9 ? i : '0' + i) + '">' + (i > 9 ? i : '0' + i) + '</option>';
+  }
+  // Build MM options (00-59)
+  var mmOptions = '<option value="00">00</option>';
+  for (var j = 1; j <= 59; j++) {
+    mmOptions += '<option value="' + (j > 9 ? j : '0' + j) + '">' + (j > 9 ? j : '0' + j) + '</option>';
+  }
+  // Grade dropdown from masterContent.js
+  var gradeOptions = getStandardContent(SCHOOL_ID, true, true);
+
+  var html =
+    `<div id="leadEnrollmentHoldPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadEnrollmentHoldTitle" aria-hidden="true">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content border-0">
+          <div class="modal-header py-2 bg-primary text-white">
+            <h5 class="modal-title" id="leadEnrollmentHoldTitle">Holding Enrollment (<span id="holdEnrollLeadNo">N/A</span>)</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="holdActiveInfoBanner" class="alert alert-warning d-none mb-3" style="font-size:13px;">
+              <div id="holdActiveInfoHeading"><i class="fa fa-exclamation-triangle"></i> <strong>Active Hold Exists</strong></div>
+              <div id="holdActiveInfoDetails" class="mt-1"></div>
+              <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="holdReleaseBtn" onclick="releaseEnrollmentHoldAction()"><i class="fa fa-unlock"></i> Release Hold</button>
+            </div>
+            <div id="holdEnrollmentFormSection">
+              <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-2 pb-2" method="post" id="leadEnrollmentHoldForm" action="javascript:void(0);">
+                <input type="hidden" name="leadId" id="holdEnrollLeadId" value="" />
+                <input type="hidden" name="holdIsdCode" id="holdEnrollIsdCode" value="" />
+                <input type="hidden" name="holdIsdCodeIso" id="holdEnrollIsdCodeIso" value="" />
+                <input type="hidden" name="holdAltIsdCode" id="holdEnrollAltIsdCode" value="" />
+                <input type="hidden" name="holdAltIsdCodeIso" id="holdEnrollAltIsdCodeIso" value="" />
+                <div class="row">
+                  <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Child First Name</label>
+                    <input type="text" class="form-control" name="holdFname" id="holdEnrollFname" maxlength="100" autocomplete="off" />
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Child Middle Name</label>
+                    <input type="text" class="form-control" name="holdMname" id="holdEnrollMname" maxlength="100" autocomplete="off" />
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Child Last Name</label>
+                    <input type="text" class="form-control" name="holdLname" id="holdEnrollLname" maxlength="100" autocomplete="off" />
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Grade</label>
+                    <select class="form-control" name="holdGrade" id="holdEnrollGrade">
+                      ${gradeOptions}
+                    </select>
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Email</label>
+                    <input type="email" class="form-control" name="holdEmail" id="holdEnrollEmail" maxlength="200" autocomplete="off" />
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Phone No</label>
+                    <input type="text" class="form-control" name="holdPhone" id="holdEnrollPhone" maxlength="15" autocomplete="off" />
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Alternate Email</label>
+                    <input type="email" class="form-control" name="holdAltEmail" id="holdEnrollAltEmail" maxlength="200" autocomplete="off" />
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Alt Phone No</label>
+                    <input type="text" class="form-control" name="holdAltPhone" id="holdEnrollAltPhone" maxlength="15" autocomplete="off" />
+                  </div>
+                </div>
+                <div id="holdLockInfoSection" class="d-none mb-2">
+                  <table class="table table-sm table-bordered font-12 mb-0">
+                    <tbody>
+                      <tr><th class="border-0 p-1" style="width:130px;">Lock Status</th><td class="border-0 p-1" id="holdLockStatusDisplay">-</td></tr>
+                      <tr><th class="border-0 p-1">Lock Duration</th><td class="border-0 p-1" id="holdLockHoursDisplay">-</td></tr>
+                      <tr><th class="border-0 p-1">Hold Date</th><td class="border-0 p-1" id="holdLockDateDisplay">-</td></tr>
+                      <tr><th class="border-0 p-1">Expiry Date</th><td class="border-0 p-1" id="holdLockExpiryDisplay">-</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="row">
+                  <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Holding For</label>
+                    <select class="form-control" name="lockHours" id="holdEnrollLockHours">
+                      <option value="24">24 hrs</option>
+                      <option value="48">48 hrs</option>
+                      <option value="72" selected>72 hrs</option>
+                    </select>
+                  </div>
+                </div>
+                <hr class="mt-1 mb-2"/>
+                <label class="m-0 font-weight-bold">Best time to connect with you</label>
+                <div class="row mt-1">
+                  <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
+                    <label class="m-0">Date</label>
+                    <input type="text" class="form-control datepicker" name="holdBestTimeDate" id="holdEnrollBestTimeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" placeholder="MM-DD-YYYY" />
+                  </div>
+                  <div class="col-lg-2 col-md-2 col-sm-3 col-3 mb-2">
+                    <label class="m-0">HH</label>
+                    <select class="form-control" id="holdEnrollBestTimeHH" name="holdBestTimeHH">
+                      ${hhOptions}
+                    </select>
+                  </div>
+                  <div class="col-lg-2 col-md-2 col-sm-3 col-3 mb-2">
+                    <label class="m-0">MM</label>
+                    <select class="form-control" id="holdEnrollBestTimeMM" name="holdBestTimeMM">
+                      ${mmOptions}
+                    </select>
+                  </div>
+                  <div class="col-lg-2 col-md-2 col-sm-3 col-3 mb-2">
+                    <label class="m-0">AM/PM</label>
+                    <select class="form-control" id="holdEnrollBestTimeAMPM" name="holdBestTimeAMPM">
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-info float-right pr-4 pl-4 ml-2" id="holdEnrollmentCloseBtn" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success float-right pr-4 pl-4" id="saveEnrollmentHoldBtn" onclick="saveLeadEnrollmentHold()">Hold Enrollment</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  return html;
+}
+
+var itiHoldPhone;
+var itiHoldAltPhone;
+
+/**
+ * Open the Hold Enrollment popup — pre-fills from lead data passed inline
+ */
+function openLeadEnrollmentHoldPopup(lead) {
+  // Reset form
+  $("#leadEnrollmentHoldForm")[0].reset();
+  $("#holdEnrollLeadId").val(lead.leadId);
+  $("#holdEnrollLeadNo").text(lead.leadNo || "N/A");
+  $("#holdActiveInfoBanner").addClass("d-none");
+  $("#holdActiveInfoDetails").html("");
+  $("#holdLockInfoSection").addClass("d-none");
+  $("#saveEnrollmentHoldBtn").prop("disabled", false).text("Hold Enrollment");
+  $("#holdEnrollLockHours").val("72");
+  if (typeof setHoldEnrollmentTimerOnlyMode === "function") {
+    setHoldEnrollmentTimerOnlyMode(false);
+  }
+  if (typeof clearLeadHoldTimer === "function") {
+    clearLeadHoldTimer("modalActiveHold");
+  }
+
+  // Pre-fill name fields
+  $("#holdEnrollFname").val(lead.fname || '');
+  $("#holdEnrollMname").val(lead.mname || '');
+  $("#holdEnrollLname").val(lead.lname || '');
+  $("#holdEnrollGrade").val(lead.standard || '');
+
+  // Pre-fill email
+  $("#holdEnrollEmail").val(lead.email || '');
+  $("#holdEnrollAltEmail").val(lead.emailAlt || '');
+
+  // Pre-fill phone number
+  $("#holdEnrollPhone").val(lead.phone || '');
+  $("#holdEnrollAltPhone").val(lead.phoneNoAlter || '');
+
+  // Init intlTelInput for phone
+  if (itiHoldPhone && typeof itiHoldPhone.destroy === 'function') {
+    itiHoldPhone.destroy();
+  }
+  var phoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollPhone");
+  itiHoldPhone = window.intlTelInput(phoneEl, {
+    //separateDialCode: true,
+  });
+  itiHoldPhone.setCountry(lead.isdCodeIso || 'us');
+  phoneEl.addEventListener('countrychange', function() {
+    $('#holdEnrollIsdCodeIso').val(itiHoldPhone.getSelectedCountryData().iso2);
+    $('#holdEnrollIsdCode').val(itiHoldPhone.getSelectedCountryData().dialCode);
+  });
+  $('#holdEnrollIsdCodeIso').val(itiHoldPhone.getSelectedCountryData().iso2);
+  $('#holdEnrollIsdCode').val(itiHoldPhone.getSelectedCountryData().dialCode);
+
+  // Init intlTelInput for alt phone
+  if (itiHoldAltPhone && typeof itiHoldAltPhone.destroy === 'function') {
+    itiHoldAltPhone.destroy();
+  }
+  var altPhoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollAltPhone");
+  itiHoldAltPhone = window.intlTelInput(altPhoneEl, {
+    //separateDialCode: true,
+  });
+  itiHoldAltPhone.setCountry(lead.isdCodeAlterIso || 'us');
+  altPhoneEl.addEventListener('countrychange', function() {
+    $('#holdEnrollAltIsdCodeIso').val(itiHoldAltPhone.getSelectedCountryData().iso2);
+    $('#holdEnrollAltIsdCode').val(itiHoldAltPhone.getSelectedCountryData().dialCode);
+  });
+  $('#holdEnrollAltIsdCodeIso').val(itiHoldAltPhone.getSelectedCountryData().iso2);
+  $('#holdEnrollAltIsdCode').val(itiHoldAltPhone.getSelectedCountryData().dialCode);
+
+  var $bestTimeDate = $("#holdEnrollBestTimeDate");
+  try {
+    $bestTimeDate.datepicker("destroy");
+  } catch (e) {}
+  $bestTimeDate.datepicker({
+    format: 'mm-dd-yyyy',
+    autoclose: true,
+    todayHighlight: true,
+    startDate: new Date(),
+    orientation: 'bottom auto'
+  });
+
+  // Show modal
+  $("#leadEnrollmentHoldPopupForm").modal({ backdrop: 'static', keyboard: false });
+
+  // Fetch existing hold data for this lead
+  fetchLeadEnrollmentHold(lead.leadId);
 }

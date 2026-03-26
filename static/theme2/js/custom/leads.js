@@ -10693,6 +10693,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			var leadsd = leaddata[i];
 			getLeadStatusLog(leadsd.leadNo, 'new-lead', objRights.adminStatus);
 			getLeadStartTimer(leadsd.assignLeadDatetime, leadsd.leadId);
+			updateLeadHoldIndicator(leadsd.leadId, leadsd.lockStatus === 'ACTIVE', leadsd);
 			getUpdateLeadCurrentTime(leadsd, leadsd.leadId);
 			getLeadStatusLogHistory(leadsd.leadId);
 		  }
