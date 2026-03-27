@@ -1,3 +1,12 @@
+var SCHOOL_DIARY_ROLE = ["DIRECTOR", "SCHOOL", "ADMIN"];
+var TEACHER_MENTION_ROLE = ["PARENT", "STUDENT", "DIRECTOR", "SCHOOL", "ADMIN"];
+var PARENT_MENTION_ROLE = ["TEACHER", "DIRECTOR", "SCHOOL", "ADMIN"];
+var SCHOOL_MENTION_ROLE = ["TEACHER", "PARENT", "STUDENT"];
+var SCHOOL_DIARY_INITIATES_ROLE = false;
+let CHAT_LIST_PAGE = 0;
+let CHAT_LIST_SIZE = 20;
+let CHAT_LIST_LOADING = false;
+let CHAT_LIST_HAS_MORE = true;
 var PARENT_DIARY_ACTIVE_STUDENT_ID = null;
 var SCHOOL_DIARY_ACTIVE_CHAT = null;
 var LAST_MSG_ID;
@@ -16,6 +25,17 @@ var DIARY_BRIDGE_BADGE_REFRESH_IN_FLIGHT = false;
 var DIARY_BRIDGE_BADGE_REFRESH_QUEUED = false;
 var CHAT_STATUS;
 var CHAT_SESSION_END=false;
+try {
+    var DIARY_USER = getSettingsByTypeAndKey('CONFIGURATION', 'DIARY_ADMIN_ACCESS_USERS');
+    var DIARY_USER_META_VALUE = DIARY_USER ? JSON.parse(DIARY_USER)?.data?.metaValue : "";
+    var DIARY_USER_ID = DIARY_USER_META_VALUE ? DIARY_USER_META_VALUE.split(",").map(id => id.trim()) : [];
+    SCHOOL_DIARY_INITIATES_ROLE = DIARY_USER_ID.includes(USER_ID.toString());
+    } catch (error) {
+    SCHOOL_DIARY_INITIATES_ROLE = false;
+}
+if(USER_ROLE == "TEACHER" && !SCHOOL_DIARY_INITIATES_ROLE){
+    SCHOOL_DIARY_INITIATES_ROLE = true;
+}
 function diaryBridgeResolveChatOrigin(){
     try{
         if(typeof CHAT_URL === "undefined" || !CHAT_URL) return null;
@@ -117,10 +137,12 @@ async function refreshDiaryUserListingBadges(force){
         }
 
         DIARY_BRIDGE_BADGE_REFRESH_IN_FLIGHT = true;
-        var userListingBadgeCount = await getChatUserListRecodrs();
+        $("#chat-loader").show();
+        var userListingBadgeCount = await getChatUserListRecodrs(0, 20);
+        $("#chat-loader").hide();
         var threads = userListingBadgeCount && userListingBadgeCount.details ? userListingBadgeCount.details.threads : null;
         if(!threads || !$.isArray(threads)) return;
-
+        $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListing(userListingBadgeCount));
         $.each(threads, function(i,v){
             var $badge = $(`.badge-unread-count-${v.threadId}`);
             var $count = $badge.find(".unread-chat-count");
@@ -189,60 +211,158 @@ async function getUnreadChatCount(){
 
 
 
-async function getChatUserList(flag){
-    $(".school-diary-notebook, .back-diary-btn, .chat-user-name, .short-chat").hide();
-    if(USER_ROLE == "TEACHER"){
-        $("#gradeDropDown, #studentDropDown").val("").trigger("");
-    }
-    if(flag){
-        CHAT_LIST =  await getChatUserListRecodrs();
-    }
-    if(USER_ROLE == "PARENT"){
-        var filterStudent = CHAT_LIST.details.threads.filter(function(item){
-            return String(item.studentUserId) == ACTIVE_STUDENT_ID;
-        });
-    }else{
-        var filterStudent = CHAT_LIST.details.threads;
-    }
-    if(CHAT_LIST != null && CHAT_LIST != undefined && filterStudent.length>0 ){
-        $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
-        $(".short-chat").show();
-        $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListing(CHAT_LIST));
-    }else{
-        // if(nav != null && nav != undefined && nav != "back" && nav == ""){
-        //     $(".school-diary-notebook, .back-diary-btn, .chat-user-name").show();
-        //     $(".short-chat").hide();
-        //     $(".school-diary-notebook").html(getParentSchoolDiaryEmptyState());
-        // }else{
-        //     $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
-        //     $(".short-chat").show();
-        // }
-        if(USER_ROLE == "TEACHER" && filterStudent.length == 0){
-            $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
-            $(".short-chat").show();
-        }else{
-            if(USER_ROLE == "PARENT"){
-                $("#gradeDropDown, #studentDropDown").val(ACTIVE_STUDENT_ID).trigger("change"); 
-            }
+// async function getChatUserList(flag){
+//     $(".school-diary-notebook, .back-diary-btn, .chat-user-name, .short-chat").hide();
+//     if(SCHOOL_DIARY_INITIATES_ROLE){
+//         $("#gradeDropDown, #studentDropDown").val("").trigger("");
+//     }
+//     if(flag){
+//         CHAT_LIST =  await getChatUserListRecodrs();
+//     }
+//     if(USER_ROLE == "PARENT"){
+//         var filterStudent = CHAT_LIST.details.threads.filter(function(item){
+//             return String(item.studentUserId) == ACTIVE_STUDENT_ID;
+//         });
+//     }else{
+//         var filterStudent = CHAT_LIST.details.threads;
+//     }
+//     if(CHAT_LIST != null && CHAT_LIST != undefined && filterStudent.length>0 ){
+//         $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
+//         $(".short-chat").show();
+//         $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListing(CHAT_LIST));
+//     }else{
+//         // if(nav != null && nav != undefined && nav != "back" && nav == ""){
+//         //     $(".school-diary-notebook, .back-diary-btn, .chat-user-name").show();
+//         //     $(".short-chat").hide();
+//         //     $(".school-diary-notebook").html(getParentSchoolDiaryEmptyState());
+//         // }else{
+//         //     $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
+//         //     $(".short-chat").show();
+//         // }
+//         if(SCHOOL_DIARY_INITIATES_ROLE && filterStudent.length == 0){
+//             $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
+//             $(".short-chat").show();
+//         }else{
+//             if(USER_ROLE == "PARENT"){
+//                 $("#gradeDropDown, #studentDropDown").val(ACTIVE_STUDENT_ID).trigger("change"); 
+//             }
             
-            $(".school-diary-notebook").html(getParentSchoolDiaryEmptyState());
-            $(".school-diary-notebook, .back-diary-btn, .chat-user-name").show();
-            $(".short-chat").hide();
+//             $(".school-diary-notebook").html(getParentSchoolDiaryEmptyState());
+//             $(".school-diary-notebook, .back-diary-btn, .chat-user-name").show();
+//             $(".short-chat").hide();
+//         }
+//     }
+// }
+
+
+// async function getChatUserListRecodrs(){
+//     if(USER_ROLE == "PARENT"){
+//         var studentUserId = (typeof PARENT_DIARY_ACTIVE_STUDENT_ID !== "undefined" && PARENT_DIARY_ACTIVE_STUDENT_ID) ? PARENT_DIARY_ACTIVE_STUDENT_ID : ((typeof ACTIVE_STUDENT_ID !== "undefined" && ACTIVE_STUDENT_ID) ? ACTIVE_STUDENT_ID : null);
+//         var payload = {sessionUserId: USER_ID, page:"0",size:"20",unreadOnly:"false"};
+//         if(studentUserId){
+//             payload.studentUserId = studentUserId;
+//         }
+//     }else{
+//         var payload = {sessionUserId: USER_ID, page:"0",size:"20",unreadOnly:"false"};
+//     }
+//     var ajaxReqDetails = {
+//         method: "POST",
+//         url: APP_BASE_URL +  "api/diary/thread/my-list",
+//         body: payload,
+//         global: false,
+//         showMessage: false,
+//         onFaildResolved: true,
+//         onSuccessResolved: true
+//     }
+//     return await callCommonAjax(ajaxReqDetails);
+// }
+
+async function getChatUserList(flag){
+    var teacherCount = 0;
+    var schoolCount = 0;
+    $("#no-chat-available").remove();
+    $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListSkeletonContent())
+    $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
+    CHAT_LIST_PAGE = 0;
+    CHAT_LIST_SIZE = 20;
+    CHAT_LIST_HAS_MORE = true;
+    var chatWith = $("#chatWith").val();
+    try {
+        if(flag){
+            $("#chat-loader").show();   // 🔥 SHOW before API
+            CHAT_LIST = await getChatUserListRecodrs(CHAT_LIST_PAGE, CHAT_LIST_SIZE);
         }
+
+        let threads = CHAT_LIST?.details?.threads || [];
+
+        if(USER_ROLE == "PARENT" || USER_ROLE == "STUDENT"){
+            USER_ROLE == "STUDENT" ? (ACTIVE_STUDENT_ID = USER_ID) : ACTIVE_STUDENT_ID
+            threads = threads.filter(item => 
+                String(item.studentUserId) == ACTIVE_STUDENT_ID
+            );
+            teacherCount = threads.filter(item => item.chatWithRole === "TEACHER").length;
+            schoolCount  = threads.filter(item => item.chatWithRole === "SCHOOL").length;
+
+        }
+        if(threads.length > 0){
+            $(".short-chat").show();
+            $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListing({details:{threads}}));
+            if(USER_ROLE == "PARENT" || USER_ROLE == "STUDENT"){
+                if($("#no-chat-available").length<1 && ((teacherCount == "0" && chatWith == "TEACHER") || (schoolCount == "0" && chatWith == "SCHOOL"))){
+                    $(".user-list-body ul").before(`<h6 class="font-weight-semi-bold text-center" id="no-chat-available">No recent diary entries available with ${chatWith.toLowerCase()}</h6>`);
+                }
+                $("#schoolDiaryChatUserListWrapper li").hide();
+                var userId;
+                USER_ROLE == "STUDENT" ? userId = USER_ID : userId = $("#studentDropDown").val();
+                $("#schoolDiaryChatUserListWrapper li[id*='userid-" + userId + "'].parent-chat-with-" + chatWith).show(); 
+            }
+            CHAT_LIST_PAGE++;
+            CHAT_LIST_SIZE = 5; // next scroll me 5
+        }else{
+            if(USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" && $("#no-chat-available").length<1 && (teacherCount == "0" || schoolCount == "0")){
+                $(".user-list-body ul").before(`<h6 class="font-weight-semi-bold text-center" id="no-chat-available">No recent diary entries available with ${chatWith.toLowerCase()}</h6>`);
+            }
+            if(SCHOOL_DIARY_INITIATES_ROLE){
+                $(".user-list-body ul").before(`<h6 class="font-weight-semi-bold text-center" id="no-chat-available">No recent diary entries available</h6>`);
+            }
+            $(".short-chat").show();
+            $(".chat-list-skeleton").hide();
+        }
+
+    } catch(e){
+        console.error("Error loading chat list", e);
+    } finally {
+        $("#chat-loader").hide();   // 🔥 ALWAYS HIDE
     }
 }
 
-async function getChatUserListRecodrs(){
+
+async function getChatUserListRecodrs(page, size){
     if(USER_ROLE == "PARENT"){
-        var studentUserId = (typeof PARENT_DIARY_ACTIVE_STUDENT_ID !== "undefined" && PARENT_DIARY_ACTIVE_STUDENT_ID) ? PARENT_DIARY_ACTIVE_STUDENT_ID : ((typeof ACTIVE_STUDENT_ID !== "undefined" && ACTIVE_STUDENT_ID) ? ACTIVE_STUDENT_ID : null);
-        var payload = {sessionUserId: USER_ID, page:"0",size:"20",unreadOnly:"false"};
+        var studentUserId = (typeof PARENT_DIARY_ACTIVE_STUDENT_ID !== "undefined" && PARENT_DIARY_ACTIVE_STUDENT_ID) 
+            ? PARENT_DIARY_ACTIVE_STUDENT_ID 
+            : ((typeof ACTIVE_STUDENT_ID !== "undefined" && ACTIVE_STUDENT_ID) ? ACTIVE_STUDENT_ID : null);
+
+        var payload = {
+            sessionUserId: USER_ID,
+            page: page.toString(),
+            size: size.toString(),
+            unreadOnly: "false"
+        };
+
         if(studentUserId){
             payload.studentUserId = studentUserId;
         }
     }else{
-        var payload = {sessionUserId: USER_ID, page:"0",size:"20",unreadOnly:"false"};
+        var payload = {
+            sessionUserId: USER_ID,
+            page: page.toString(),
+            size: size.toString(),
+            unreadOnly: "false"
+        };
     }
-    var ajaxReqDetails = {
+
+    return await callCommonAjax({
         method: "POST",
         url: APP_BASE_URL +  "api/diary/thread/my-list",
         body: payload,
@@ -250,8 +370,7 @@ async function getChatUserListRecodrs(){
         showMessage: false,
         onFaildResolved: true,
         onSuccessResolved: true
-    }
-    return await callCommonAjax(ajaxReqDetails);
+    });
 }
 
 function parentSchoolDiarySetActiveStudentThumb(studentUserId) {
@@ -364,10 +483,24 @@ async function createUserDiary(userId) {
 }
 
 
+// async function updateChatUserList(){
+//     CHAT_LIST =  await getChatUserListRecodrs();
+//     if(CHAT_LIST != null && CHAT_LIST != undefined && CHAT_LIST != ""){
+//         $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListing(CHAT_LIST));
+//     }
+// }
+
 async function updateChatUserList(){
-    CHAT_LIST =  await getChatUserListRecodrs();
-    if(CHAT_LIST != null && CHAT_LIST != undefined && CHAT_LIST != ""){
+    CHAT_LIST_PAGE = 0;
+    CHAT_LIST_SIZE = 20;
+    CHAT_LIST_HAS_MORE = true;
+
+    CHAT_LIST = await getChatUserListRecodrs(CHAT_LIST_PAGE, CHAT_LIST_SIZE);
+
+    if(CHAT_LIST){
         $("#schoolDiaryChatUserListWrapper").html(schoolDiaryUserListing(CHAT_LIST));
+        CHAT_LIST_PAGE++;
+        CHAT_LIST_SIZE = 5;
     }
 }
 
@@ -478,7 +611,7 @@ function parentSchoolDiaryEscapeHtml(rawText) {
     return $("<div/>").text(rawText == null ? "" : rawText).html();
 }
 
-async function renderSchoolDaiaryBtnCount(userId, studentUserId){
+async function renderSchoolDaiaryBtnCount(studentUserId){
     var unreadChatCount = await getUnreadChatCount();
     var unreadThreadCount = unreadChatCount && unreadChatCount.details ? unreadChatCount.details.unreadThreadCount : null;
     if(unreadThreadCount == null){
@@ -589,7 +722,7 @@ async function renderSchoolDaiaryBtnCount(userId, studentUserId){
     $("#gradeDropDown").select2({
         theme:"bootstrap4"
     });
-    $("#studentDropDown").select2({
+    $("#studentDropDown, #chatWith").select2({
         theme:"bootstrap4"
     });
     // Exact WhatsApp Web style floating date
@@ -605,18 +738,18 @@ async function renderSchoolDaiaryBtnCount(userId, studentUserId){
         'will-change': 'opacity'
     });
 
+    let hideTimeout = null;
+
     function updateDateLabel() {
         let container = $(".school-diary-notebook")[0];
         let items = $(".school-diary-item").not(".school-diary-item-editor");
         let foundDate = null;
-        
-        // Find the first item that is at or above the viewport top
+
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
             let rect = item.getBoundingClientRect();
             let containerRect = container.getBoundingClientRect();
-            
-            // WhatsApp logic: show date of the item that's at the top
+
             if (rect.top <= containerRect.top + 60) {
                 let fullText = $(item).find("small.text-muted").text();
                 let cleanDate = fullText.replace(/\d{2}:\d{2}.*$/, "").trim();
@@ -625,20 +758,47 @@ async function renderSchoolDaiaryBtnCount(userId, studentUserId){
                 break;
             }
         }
-        
-        // Update if changed
+
+        // ✅ Agar date mil gayi → show immediately
         if (foundDate && foundDate !== currentDate) {
             currentDate = foundDate;
-            $("#floating-date").text(foundDate);
-            
-            // Show with smooth transition
-            if ($("#floating-date").css('opacity') !== '1') {
-                $("#floating-date").css('opacity', '1');
+
+            // cancel any pending hide
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
             }
-        } else if (!foundDate && currentDate) {
-            // Hide if no date found
-            $("#floating-date").css('opacity', '0');
-            currentDate = "";
+
+            $("#floating-date").text(foundDate);
+
+            if ($("#floating-date").css('opacity') !== '1') {
+                $("#floating-date").css({
+                    'opacity': '1',
+                    'display': 'block'
+                });
+            }
+        }
+
+        // ❌ Agar date nahi mili → delay hide (2 sec)
+        else if (!foundDate && currentDate) {
+
+            // clear previous timeout
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+            }
+
+            hideTimeout = setTimeout(() => {
+                $("#floating-date").css({
+                    'opacity': '0'
+                });
+
+                // optional: display none after fade
+                setTimeout(() => {
+                    $("#floating-date").css('display', 'none');
+                }, 300); // match CSS transition time
+
+                currentDate = "";
+            }, 2000); // ⏳ 2 seconds delay
         }
     }
 
@@ -668,6 +828,116 @@ async function renderSchoolDaiaryBtnCount(userId, studentUserId){
 
     // Initial update
     updateDateLabel();
+
+    if(SCHOOL_DIARY_ROLE.includes(USER_ROLE)){
+        initializeSchoolTypeahead('recommendedTeacherlistForm','courseName');
+        $('#schoolDiaryTypeahead').on('input', function () {
+            if ($(this).val().trim() !== "") {
+                $(this).addClass('has-value');
+                $(this).closest('.twitter-typeahead').find('.tt-hint').css({"background":"none"});
+            } else {
+                $(this).removeClass('has-value');
+                $(this).closest('.twitter-typeahead').find('.tt-hint').css({"background":"${PATH_FOLDER_IMAGE2}search_icon_40x40.png"});
+            }
+        });
+    }
+
+    $(".user-list-wrapper").off("scroll").on("scroll", async function () {
+
+        let chat_list_container = this;
+
+        let isNearBottom = chat_list_container.scrollTop + chat_list_container.clientHeight >= chat_list_container.scrollHeight - 50;
+
+        if(isNearBottom){
+
+            if(CHAT_LIST_LOADING || !CHAT_LIST_HAS_MORE) return;
+
+            CHAT_LIST_LOADING = true;
+
+            try {
+                $("#chat-loader").show(); // 🔥 SHOW
+
+                let resp = await getChatUserListRecodrs(CHAT_LIST_PAGE, CHAT_LIST_SIZE);
+
+                let newThreads = resp?.details?.threads || [];
+
+                if(newThreads.length === 0){
+                    CHAT_LIST_HAS_MORE = false;
+                }else{
+                    let html = schoolDiaryUserListing({details:{threads:newThreads}});
+                    $("#schoolDiaryChatUserListWrapper").append(html);
+                    CHAT_LIST_PAGE++;
+                }
+
+            } catch(e){
+                console.error("Scroll load error", e);
+            } finally {
+                $("#chat-loader").hide(); // 🔥 ALWAYS HIDE
+                CHAT_LIST_LOADING = false;
+            }
+        }
+    });
+    
+}
+
+function initializeSchoolTypeahead(formId, eleId){
+	$('#schoolDiaryTypeahead').typeahead(
+		{
+			hint: true,
+			highlight: true,
+			minLength: 3
+      	},
+	  	{
+			name: 'students',
+			//limit: 10,
+			source: function(query, syncResults, asyncResults) {
+				var data = {
+					searchWord: query,
+					userId: USER_ID,
+					schoolId: SCHOOL_ID
+				};
+				return $.ajax({
+					url: getURLForHTML("dashboard", "get-all-student-list-for-diary?payload=" + encode(JSON.stringify(data))),
+					global: false,
+					success: function(data) {
+						data = JSON.parse(data);
+						if(data.studentList) {
+							var matches = [];
+							$.each(data.studentList, function(index, item) {
+								matches.push({
+									display: item.studentName,
+									studentUserId: item.studentUserId,
+									standardId:item.standardId,
+									studentStandardId:item.studentStandardId,
+                                    standardName:item.standardName,
+                                    learningProgram:item.learningProgram,
+								});
+							});
+							asyncResults(matches);
+						} else {
+							console.warn('No studentList found in response');
+						}
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						if (checkonlineOfflineStatus()) {
+							return;
+						}
+						console.error('AJAX error: ' + textStatus + ' : ' + errorThrown);
+					}
+				});
+			},
+			display: function(item) {
+				return item.display;
+			},
+		}
+	).bind('typeahead:select', function(ev, item) {
+        $("#studentUserId").val(item.studentUserId);
+        var studentName = item.display;
+        studentName = studentName.split(" |")[0];studentName;
+        searchChatByStudent("studentUserId", studentName, item.studentUserId, getLearningProgramLabel(item.learningProgram));
+        $('#schoolDiaryTypeahead').typeahead('val', '');
+        $("#schoolDiaryTypeahead").removeClass("has-value");
+    });
 }
 
 function enterPressSubmitMsg(el, threadId, event) {
@@ -773,13 +1043,15 @@ async function renderSchoolDiary(data, chatStatus, userName, threadId) {
     SCHOOL_DIARY_ACTIVE_CHAT = data;
     
     if(!data || !data.details || data.details.messages.length<1 && !chatStatus){
-        $("#schoolDiaryDiv .school-diary-notebook").html(getParentSchoolDiaryEmptyState(PARENT_DIARY_ACTIVE_STUDENT_ID)+(USER_ROLE == "TEACHER" ? getParentSchoolDiaryReplyEditor('', PARENT_DIARY_ACTIVE_STUDENT_ID):""));
+        $("#schoolDiaryDiv .school-diary-notebook").html(getParentSchoolDiaryEmptyState(PARENT_DIARY_ACTIVE_STUDENT_ID)+(SCHOOL_DIARY_INITIATES_ROLE ? getParentSchoolDiaryReplyEditor('', PARENT_DIARY_ACTIVE_STUDENT_ID):""));
         var userNameLabel = `<label id="chatUserName">${userName}</label>`;
-        $(".chat-user-name").html( USER_ROLE === "TEACHER" ? ` - ${userNameLabel}` : `${userNameLabel} -`);
+        $(".chat-user-name").html(`- ${userNameLabel}`);
     }else{
         $("#schoolDiaryDiv .school-diary-notebook").attr("data-open-chat", threadId);
-        $("#schoolDiaryDiv .school-diary-notebook").html(`<div id="floating-date" class="floating-date"></div>`+chatDetailsConent(data, userName, false, data.details.threadStatus));
-        if(USER_ROLE == "TEACHER" && data.details.threadStatus != "CLOSED"){
+        $("#schoolDiaryDiv .school-diary-notebook").html(`<div id="floating-date" class="floating-date" style="display:none"></div>`+chatDetailsConent(data, userName, false, data.details.threadStatus));
+        var messagesList = data?.details?.messages || [];
+        var lastMessage = messagesList[messagesList.length - 1];
+        if(SCHOOL_DIARY_INITIATES_ROLE && data.details.threadStatus != "CLOSED" && lastMessage.senderRole == "PARENT"){
             $("#diaryReplyBtn"+threadId).after(`<div class="p-0 mx-2 cursor rounded-circle circle-btn bg-success" id="acknowledgeEndCloseBtn" style="display:none"  id="acknowledgeEndCloseBtn${threadId}" data-toggle="tooltip" title="Acknowledge & Close"  onclick="acknowledgeCloseChat(\'${threadId}\')">
                 <i class="fa fa-thumbs-up text-white"></i>
             </div>`);
@@ -787,11 +1059,13 @@ async function renderSchoolDiary(data, chatStatus, userName, threadId) {
             $('[data-toggle="tooltip"]').tooltip();
         }
         if(USER_ROLE == "PARENT" && data.details.threadStatus == "CLOSED"){
-            $("#schoolDiaryDiv .school-diary-notebook .school-diary-item").last().after(`
-                <div class="alert alert-warning chat-session-ended fade show" role="alert">
-                    <p class="mb-0 text-center">This conversation has been closed</p>
-                </div>
-            `);
+            if($(".chat-session-ended").length<1){
+                $("#schoolDiaryDiv .school-diary-notebook .school-diary-item").last().after(`
+                    <div class="alert alert-warning chat-session-ended fade show" role="alert">
+                        <p class="mb-0 text-center">This conversation has been closed</p>
+                    </div>
+                `);
+            }
         }else{
             if($(".chat-session-ended").length>0){
                 $(".chat-session-ended").remove();
@@ -801,7 +1075,7 @@ async function renderSchoolDiary(data, chatStatus, userName, threadId) {
 }
 
 function backSchoolChatList(src){
-    if(USER_ROLE == "TEACHER"){
+    if(SCHOOL_DIARY_INITIATES_ROLE){
         $("#gradeDropDown, #studentDropDown").val('').trigger("change");
     }
     $(".school-diary-notebook, .back-diary-btn, .chat-user-name").hide();
@@ -810,12 +1084,12 @@ function backSchoolChatList(src){
     
     if(LATEST_CHAT_FLAG){
         var threadId = $(src).attr("data-thread-id");
-        if(USER_ROLE == "TEACHER"){
-            if($(".list-group.list-group-flush .list-group-item").length>1){
+        if(SCHOOL_DIARY_INITIATES_ROLE){
+            if($(".chat_list_ul .list-group-item").length>1){
                 var selector = "#schoolDiaryChatUserListWrapper li[id*='chat-list-" + threadId + "']";
                 var latestChatItem = $(selector).prop("outerHTML");
                 $(selector).remove();
-                $(".list-group.list-group-flush .list-group-item").first().before(latestChatItem);
+                $(".chat_list_ul .list-group-item").first().before(latestChatItem);
             }
         }
         var last = $('.school-diary-item-parent .safeMessage').last().clone();
@@ -826,6 +1100,15 @@ function backSchoolChatList(src){
         LATEST_CHAT_FLAG=false;
     }
     PAGE_NO=0;
+    if(USER_ROLE == "PARENT" && CHAT_LIST.details.threads.length<1){
+        $("#schoolDiaryChatUserListWrapper").html("");   
+    }else if((USER_ROLE == "PARENT" || USER_ROLE == "STUDENT") && CHAT_LIST.details.threads.length>0){
+        $("#schoolDiaryChatUserListWrapper li").hide();
+        var chatWith = $("#chatWith").val();
+        var userId;
+        USER_ROLE == "STUDENT" ? userId = USER_ID : userId = $("#studentDropDown").val();
+        $("#schoolDiaryChatUserListWrapper li[id*='userid-" + userId + "'].parent-chat-with-" + chatWith).show();        
+    }
 }
 
 function chatDetailsConent(data, userName, reloadFlag, replyMsgFlag){
@@ -864,10 +1147,10 @@ function chatDetailsConent(data, userName, reloadFlag, replyMsgFlag){
     }
     if (otherPartyName) {
         var userNameLabel = `<label id="chatUserName">${userName}</label>`;
-        $(".chat-user-name").html( USER_ROLE === "TEACHER" ? ` - ${userNameLabel}` : `${userNameLabel} -`);
+        $(".chat-user-name").html(` - ${userNameLabel}`);
     }
     if(!reloadFlag && USER_ROLE != "STUDENT"){
-        if((replyMsgFlag != "CLOSED" && USER_ROLE == "PARENT") || USER_ROLE == "TEACHER"){
+        if((replyMsgFlag != "CLOSED" && USER_ROLE == "PARENT") || SCHOOL_DIARY_INITIATES_ROLE){
             html += getParentSchoolDiaryReplyEditor(data.details.threadId);
         }
     }
@@ -891,14 +1174,12 @@ async function suggestionList(threadId, globalFlag) {
     var mentionResp = await callCommonAjax(ajaxReqDetails);
     var details = mentionResp?.details || [];
     MENTION_LIST = details.filter(user => {
-        if (USER_ROLE === "PARENT") return user.roleType === "TEACHER";
-        if (USER_ROLE === "TEACHER") return ["PARENT", "STUDENT"].includes(user.roleType);
+        if (USER_ROLE === "PARENT") return user.roleType === PARENT_MENTION_ROLE.includes(user.roleType);
+        if (USER_ROLE === "TEACHER") return TEACHER_MENTION_ROLE.includes(user.roleType);
+        if (USER_ROLE === "DIRECTOR" || USER_ROLE === "SCHOOL" || USER_ROLE === "ADMIN") return SCHOOL_MENTION_ROLE.includes(user.roleType);
         return true;
     });
-    // MENTION_LIST = (mentionResp && $.isArray(mentionResp.details)) ? mentionResp.details : [];
-
     var suggestionBox = $(".mention-suggestion-box");
-
     function escapeRegex(value) {
         return (value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
@@ -1030,21 +1311,27 @@ function filterStudentByGrade(eleId){
 
 }
 
-async function searchChatByStudent(eleId){
-    var userId = $("#"+eleId).val();
-    var userName = $("#studentDropDown option:selected").text();
-    if(userName != null && userName != undefined && userName != "Select Student" && userName != "" && USER_ROLE == "TEACHER"){
-        var parts = userName.split('|');
-        userName = parts[0].trim() + ' | ' + parts[1].trim();
-       
+async function searchChatByStudent(eleId, studentName, studentUserId, learningProgram){
+    if(SCHOOL_DIARY_ROLE.includes(USER_ROLE)){
+        var userId = studentUserId;
+        var userName = learningProgram +" | "+studentName;
+    }else{
+        var userId = $("#"+eleId).val();
+        var userName = $("#studentDropDown option:selected").text();
+        if(userName != null && userName != undefined && userName != "Select Student" && userName != "" && SCHOOL_DIARY_INITIATES_ROLE){
+            var parts = userName.split('|');
+            userName = parts[0].trim() + ' | ' + parts[1].trim();
+        
+        }
     }
+    
     if(USER_ROLE == "PARENT" || USER_ROLE == "STUDENT"){
          userName = userName+`'s`;
     }
     if(userId != null && userId != undefined && userId != ""){
         PARENT_DIARY_ACTIVE_STUDENT_ID = userId;
         // check if user exists in list
-        if(USER_ROLE == "TEACHER"){
+        if(SCHOOL_DIARY_INITIATES_ROLE){
             var exists = $("#schoolDiaryChatUserListWrapper li[id*='userid-"+userId+"']").length > 0;
             if(exists){
                 $("#schoolDiaryChatUserListWrapper li").hide();
@@ -1055,20 +1342,32 @@ async function searchChatByStudent(eleId){
         }else{
             PARENT_DIARY_ACTIVE_STUDENT_ID=userId;
             ACTIVE_STUDENT_ID = PARENT_DIARY_ACTIVE_STUDENT_ID;
-            CHAT_LIST =  await getChatUserListRecodrs();
+            $("#chat-loader").show();
+            CHAT_LIST =  await getChatUserListRecodrs(0, 20);
+            $("#chat-loader").hide();
+
             var filterStudent = CHAT_LIST.details.threads.filter(function(item){
                 return String(item.studentUserId) == userId;
             });
             if(filterStudent.length>0){
-                // gotoChat(filterStudent[0].threadId, true);
                 getChatUserList(false);
                 $("#schoolDiaryChatUserListWrapper li").hide();
-                $("#schoolDiaryChatUserListWrapper li[id*='userid-"+userId+"']").show();
+                if(USER_ROLE == "PARENT"){
+                    var chatWith = $("#chatWith").val();
+                    $("#schoolDiaryChatUserListWrapper li[id*='userid-" + userId + "'].parent-chat-with-" + chatWith).show();
+                }else{
+                    $("#schoolDiaryChatUserListWrapper li[id*='userid-" + userId + "']").show();
+                }
             }else{
-                gotoChat('', false, userName, PARENT_DIARY_ACTIVE_STUDENT_ID)
+                if(USER_ROLE == "PARENT"){
+                    chatFilter('chatWith');
+                }else{
+                    gotoChat('', false, userName, PARENT_DIARY_ACTIVE_STUDENT_ID)
+                }
             }
         }
-        
+    }else{
+        $("#schoolDiaryChatUserListWrapper").html("");
     }
 }
 async function checkUnreadMessageCount(src){
@@ -1100,12 +1399,14 @@ async function showAndHideAcknowledge(src){
             CHAT_STATUS = JSON.parse($("#input-chat-status-alok-iitian").val());
             if(USER_ROLE == "PARENT"){
                 var filterStudent = CHAT_STATUS.filter(function(item){
-                    return String(item.chatId) == threadId;
+                    return String(item.chatId) == threadId && item.status  == false;
                 });
                 if(filterStudent.length>0){
-                    $("#schoolDiaryDiv .school-diary-notebook .school-diary-item-editor").before(`<div class="alert alert-warning fade show chat-session-ended" role="alert">
-                        <p class="mb-0 text-center">This conversation has been closed</p>
-                    </div>`);            
+                    if($(".chat-session-ended").length<1){
+                        $("#schoolDiaryDiv .school-diary-notebook .school-diary-item-editor").before(`<div class="alert alert-warning fade show chat-session-ended" role="alert">
+                            <p class="mb-0 text-center">This conversation has been closed</p>
+                        </div>`);    
+                    }        
                 }
             }
         }
@@ -1171,3 +1472,20 @@ function formatDiaryDate(dateInput) {
     });
 }
 
+function chatFilter(src){
+    var chatWith = $("#"+src).val();
+    var userId;
+    if(USER_ROLE == "PARENT"){ userId = $("#studentDropDown").val();}else if(USER_ROLE == "STUDENT"){userId = USER_ID}
+    $("#schoolDiaryChatUserListWrapper li").hide();
+    if($("#schoolDiaryChatUserListWrapper li[id*='userid-" + userId + "'].parent-chat-with-" + chatWith).length>0){
+        $("#schoolDiaryChatUserListWrapper li[id*='userid-" + userId + "'].parent-chat-with-" + chatWith).show();
+        $("#no-chat-available").remove();
+    }else{
+        if($("#no-chat-available").length<1){
+            $(".user-list-body ul").before(`<h6 class="font-weight-semi-bold text-center" id="no-chat-available">No recent diary entries available with ${chatWith.toLowerCase()}</h6>`);
+        }else{
+            $("#no-chat-available").remove();
+            $(".user-list-body ul").before(`<h6 class="font-weight-semi-bold text-center" id="no-chat-available">No recent diary entries available with ${chatWith.toLowerCase()}</h6>`);
+        }
+    }
+}

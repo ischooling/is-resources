@@ -34879,12 +34879,34 @@ to { background-color: rgb(6, 145, 6); }
 	display: inline-block;
     width: 20px;              
     height: 20px;  
-    background-image: url(../images/Icon/sidebar/enrollment.png);
+    background-image: url(../images/Icon/sidebar/enrollment_availability.png);
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
     position: relative;
     top: 4px;
+}
+.enrollment-icon{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url(../images/Icon/sidebar/enrollment_availability.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-enrollment{
+	display: inline-block;
+    width: 20px;              
+    height: 20px;  
+    background-image: url(../images/Icon/sidebar/enrollment_availability_set.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;	
 }
 /* DASHBOARD-NAVIGATION-ICONS-CSS ENDS HERE */
 

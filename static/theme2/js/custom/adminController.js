@@ -593,6 +593,8 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderAtendaceByStudentIdContent()
      }else if(pageNo=='enrollment-availability'){
       renderEnrollmentAvalabilityContent()
+     }else if(pageNo=='enrollment-reports'){
+      renderEnrollmentAvalabilityReportContent()
      }
      
 

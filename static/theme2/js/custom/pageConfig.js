@@ -192,6 +192,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "question-list":{url:"",file:[{role:"",fileName:["feedbackQuestionContent.js","feedbackQuestion.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-predict-list":{url:"",file:[{role:"",fileName:["leadPredictListContent.js","leadPredictList.js","B2CLead.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "enrollment-availability":{url:"",file:[{role:"",fileName:["enrollmentavailabilityContent.js","enrollmentavailability.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "enrollment-reports":{url:"",file:[],funName:function(){},type:"JS",init: function(){},pageReqType:"EX",urlSend:"/dashboard/enrollment-availability-view"},
     };
     
     var pageMapJSPWithFun = {
@@ -1519,6 +1520,4 @@ function getRequestForSpecificUserScholarship(
 
   return request;
 }
-
-
 

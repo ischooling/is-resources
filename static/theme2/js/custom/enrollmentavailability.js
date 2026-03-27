@@ -15,12 +15,10 @@ var enrAvailSummaryDrill = { kind: "", id: "" };
 var enrAvailSelectedIds = {};
 var ENR_AVAIL_EDIT_FROM_PREVIEW_KEY = "enrAvailEditFromPreviewId";
 var enrAvailEditCtx = null; 
-var enrAvailInlineEditKey = ""; // combo key: country::program::grade
-var enrAvailInlineLastEdited = {}; // key -> field (total|free|rsv|wait)
-var enrAvailLastLoadRequest = null; // {countryId, programId, gradeId}
+var enrAvailInlineEditKey = ""; 
+var enrAvailInlineLastEdited = {};
+var enrAvailLastLoadRequest = null; 
 
-// Called from View Records (new tab) to jump to a specific record editor in the opener window.
-// Uses record id (not filters) so user can edit the exact row directly.
 window.enrAvailJumpToEdit = async function (id) {
 	try {
 		var rid = String(id || "");
@@ -53,6 +51,7 @@ window.enrAvailJumpToEdit = async function (id) {
 			countryId: String(rec.countryId || ""),
 			programId: String(rec.programId || ""),
 			gradeId: String(rec.gradeId || ""),
+			userId: USER_ID,
 			q: "",
 		};
 		try {
@@ -92,6 +91,7 @@ window.enrAvailJumpToEdit = async function (id) {
 			countryId: String(rec.countryId || ""),
 			programId: String(rec.programId || ""),
 			gradeId: String(rec.gradeId || ""),
+			userId: USER_ID,
 			q: "",
 		};
 		try {
@@ -124,7 +124,6 @@ window.enrAvailJumpToEdit = async function (id) {
 				}) || null;
 			if (!rec) return false;
 
-			// Save current context so Cancel/Save can return user back.
 			if (!enrAvailEditCtx) {
 				enrAvailEditCtx = {
 					filters: Object.assign({}, enrAvailSavedFilters || {}),
@@ -132,12 +131,11 @@ window.enrAvailJumpToEdit = async function (id) {
 					viewMode: String(enrAvailSavedViewMode || "summary"),
 				};
 			}
-
-			// Force filters to the exact record so Saved records shows only this row.
 			enrAvailSavedFilters = {
 				countryId: String(rec.countryId || ""),
 				programId: String(rec.programId || ""),
 				gradeId: String(rec.gradeId || ""),
+				userId: USER_ID,
 				q: "",
 			};
 			try {
@@ -298,14 +296,81 @@ function enrAvailSetSavedViewMode(mode) {
 	$("#enrAvailSavedTable").toggleClass("d-none", isSummary);
 }
 
+function enrAvailFindProgramById(programId) {
+	return (enrAvailMasters.programs || []).find(function (x) {
+		return String(x && x.id) === String(programId || "");
+	});
+}
+
+function enrAvailIsFlexyProgramSelection(programId) {
+	var program = enrAvailFindProgramById(programId);
+	var label = String((program && program.label) || "").trim().toLowerCase();
+	return label === "flexy program";
+}
+
+function enrAvailIsDualDiplomaProgramSelection(programId) {
+	var program = enrAvailFindProgramById(programId);
+	var label = String((program && program.label) || "").trim().toLowerCase();
+	return label === "dual diploma";
+}
+
+function enrAvailAllowedSavedSummaryGrades(programId) {
+	var allGrades = enrAvailMasters.grades || [];
+	return allGrades.filter(function (g) {
+		var label = String((g && g.label) || "").trim();
+		if (!label) return false;
+		if (enrAvailIsDualDiplomaProgramSelection(programId)) {
+			return /^Grade (9|10|11|12)$/i.test(label);
+		}
+		if (enrAvailIsFlexyProgramSelection(programId)) {
+			return /^Flexy/i.test(label);
+		}
+		return /^Grade (K|[1-9]|1[0-2])$/i.test(label);
+	});
+}
+
+function enrAvailPopulateSavedSummaryGradeFilter() {
+	var $g = $("#enrAvailS_FGrade");
+	if (!$g.length) return;
+
+	if ($.fn && $.fn.select2) {
+		try {
+			if ($g.hasClass("select2-hidden-accessible")) $g.select2("destroy");
+		} catch (e) {}
+	}
+
+	var opt = function (label, value, selected) {
+		return '<option value="' + enrAvailEsc(value) + '" ' + (selected ? "selected" : "") + ">" + enrAvailEsc(label) + "</option>";
+	};
+	var allowedGrades = enrAvailAllowedSavedSummaryGrades(enrAvailSavedFilters.programId);
+	var hasSelectedGrade = allowedGrades.some(function (x) {
+		return String(x && x.id) === String(enrAvailSavedFilters.gradeId || "");
+	});
+	if (!hasSelectedGrade) {
+		enrAvailSavedFilters.gradeId = "";
+	}
+
+	var gHtml = opt("Any Grade", "", enrAvailSavedFilters.gradeId === "");
+	gHtml += allowedGrades
+		.map(function (x) {
+			return opt(x.label, x.id, String(enrAvailSavedFilters.gradeId) === String(x.id));
+		})
+		.join("");
+	$g.html(gHtml);
+
+	if ($.fn && $.fn.select2) {
+		try {
+			$g.select2({ width: "100%", minimumResultsForSearch: 0 });
+		} catch (e) {}
+	}
+}
+
 function enrAvailPopulateSavedSummaryFilters() {
-	// Populate dropdowns once masters are loaded
 	var $c = $("#enrAvailS_FCountry");
 	var $p = $("#enrAvailS_FProgram");
 	var $g = $("#enrAvailS_FGrade");
 	if (!$g.length || !$p.length || !$c.length) return;
 
-	// Make filters searchable (select2), but destroy before rewriting options
 	if ($.fn && $.fn.select2) {
 		try {
 			if ($c.hasClass("select2-hidden-accessible")) $c.select2("destroy");
@@ -333,14 +398,6 @@ function enrAvailPopulateSavedSummaryFilters() {
 		.join("");
 	$p.html(pHtml);
 
-	var gHtml = opt("Any Grade", "", enrAvailSavedFilters.gradeId === "");
-	gHtml += (enrAvailMasters.grades || [])
-		.map(function (x) {
-			return opt(x.label, x.id, String(enrAvailSavedFilters.gradeId) === String(x.id));
-		})
-		.join("");
-	$g.html(gHtml);
-
 	var cHtml = opt("Select Country", "", enrAvailSavedFilters.countryId === "");
 	cHtml += (enrAvailMasters.countries || [])
 		.map(function (x) {
@@ -353,16 +410,14 @@ function enrAvailPopulateSavedSummaryFilters() {
 		try {
 			$c.select2({ width: "100%", minimumResultsForSearch: 0 });
 			$p.select2({ width: "100%", minimumResultsForSearch: 0 });
-			$g.select2({ width: "100%", minimumResultsForSearch: 0 });
 		} catch (e) {}
 	}
+	enrAvailPopulateSavedSummaryGradeFilter();
 }
 
 function enrAvailUpdateSavedSummaryPills() {
-	// Month pill
 	if ($("#enrAvailS_Month").length) $("#enrAvailS_Month").text(enrAvailMonthLabel());
 
-	// Grade pill for program card
 	var gradeLabel = "Any Grade";
 	if (enrAvailSavedFilters.gradeId) {
 		var g = (enrAvailMasters.grades || []).find(function (x) {
@@ -372,7 +427,6 @@ function enrAvailUpdateSavedSummaryPills() {
 	}
 	if ($("#enrAvailS_GradePill").length) $("#enrAvailS_GradePill").text(gradeLabel);
 
-	// Country pill for both cards
 	var countryLabel = "Select Country";
 	if (enrAvailSavedFilters.countryId) {
 		var c = (enrAvailMasters.countries || []).find(function (x) {
@@ -385,22 +439,18 @@ function enrAvailUpdateSavedSummaryPills() {
 }
 
 	function enrAvailInitSavedSummaryUI() {
-	// Table view is hidden for now (keep summary only)
 	try {
 		enrAvailSavedViewMode = "summary";
 		if ($("#enrAvailSavedViewTable").length) $("#enrAvailSavedViewTable").addClass("d-none");
 		if ($("#enrAvailSavedTable").length) $("#enrAvailSavedTable").addClass("d-none");
 	} catch (e) {}
 
-	// View toggle
 	$("#enrAvailSavedViewSummary")
 		.off("click")
 		.on("click", function () {
 			enrAvailSetSavedViewMode("summary");
 		});
-	// no table view click handler (hidden)
 
-	// Filters
 	$("#enrAvailS_Clear")
 		.off("click")
 		.on("click", function () {
@@ -427,13 +477,14 @@ function enrAvailUpdateSavedSummaryPills() {
 		.off("change")
 		.on("change", function () {
 			enrAvailSavedFilters.programId = $(this).val() || "";
+			enrAvailPopulateSavedSummaryGradeFilter();
+			enrAvailUpdateSavedSummaryPills();
 			enrAvailRenderSavedSummary();
 		});
 	$("#enrAvailS_FCountry")
 		.off("change")
 		.on("change", function () {
 			enrAvailSavedFilters.countryId = $(this).val() || "";
-			// Avoid showing stale data from a different country; require explicit Load.
 			enrAvailRecords = [];
 			enrAvailLastLoadRequest = null;
 			try {
@@ -448,7 +499,6 @@ function enrAvailUpdateSavedSummaryPills() {
 			enrAvailRenderSavedSummary();
 		});
 
-		// Summary edit button (delegate)
 		$(document)
 			.off("click.enrAvailSummary", ".enrAvailSumEditBtn")
 			.on("click.enrAvailSummary", ".enrAvailSumEditBtn", function (e) {
@@ -504,11 +554,13 @@ function enrAvailUpdateSavedSummaryPills() {
 		$(document)
 			.off("input.enrAvailInlineSync change.enrAvailInlineSync", ".enrAvailInlineInput")
 			.on("input.enrAvailInlineSync change.enrAvailInlineSync", ".enrAvailInlineInput", function () {
-				// Track last edited field only (no auto-calculation while typing)
 				try {
 					var key = String($(this).attr("data-key") || "");
 					var field = String($(this).attr("data-field") || "");
-					if (key && field) enrAvailInlineLastEdited[key] = field;
+					if (key && field) {
+						enrAvailInlineLastEdited[key] = field;
+						enrAvailSyncInlineSeatFields(key);
+					}
 				} catch (e) {}
 			});
 
@@ -540,6 +592,7 @@ async function enrAvailLoadSeatsFromServer() {
 					countryId: String(payload.countryId || ""),
 					programId: String(payload.programId || ""),
 					gradeId: String(payload.gradeId || ""),
+					userId: USER_ID,
 				};
 			}
 		} catch (e) {}
@@ -551,11 +604,9 @@ async function enrAvailLoadSeatsFromServer() {
 					var total = r.total || 0;
 					var booked = r.booked || 0;
 					var about = r.about || 0; // reserved (pending)
-					var free = Math.max(0, total - booked - about);
-					// Waitlist may come from API (if supported); overbooking is derived.
 					var wait = r.waitlist !== undefined ? r.waitlist : r.wait;
 					if (wait === undefined || wait === null || wait === "") wait = 0;
-					var overbooked = Math.max(0, booked + about - total);
+					var seatMeta = enrAvailCalcSeatMeta(total, booked, about, wait);
 					return {
 						id: r.id,
 						countryId: r.countryId,
@@ -567,11 +618,11 @@ async function enrAvailLoadSeatsFromServer() {
 						total: total,
 						booked: booked,
 						about: about,
-						free: free,
-						wait: wait,
-						overbooked: overbooked,
+						free: seatMeta.free,
+						wait: seatMeta.wait,
+						overbooked: seatMeta.overbooked,
 						// backward compat: older UI expects remaining to be "Available/Free"
-						remaining: free,
+						remaining: seatMeta.free,
 					};
 				}) || [];
 		}
@@ -589,6 +640,7 @@ function enrAvailGetFilterRequestFromUI() {
 			countryId: String($("#enrAvailS_FCountry").val() || ""),
 			programId: String($("#enrAvailS_FProgram").val() || ""),
 			gradeId: String($("#enrAvailS_FGrade").val() || ""),
+			userId: USER_ID,
 		};
 	} catch (e) {
 		return {};
@@ -673,7 +725,7 @@ function enrAvailSeedDummyRecordsIfNeeded() {
 				var total = rnd(40, 140);
 				var booked = rnd(10, Math.max(10, total - 5));
 				var about = rnd(0, 40);
-				var remaining = Math.max(0, total - booked - about);
+				var seatMeta = enrAvailCalcSeatMeta(total, booked, about, 0);
 
 				var rec = {
 					id: enrAvailRecId(),
@@ -685,11 +737,11 @@ function enrAvailSeedDummyRecordsIfNeeded() {
 					grade: g.label,
 					total: total,
 					booked: booked,
-					remaining: remaining,
+					remaining: seatMeta.free,
 					about: about,
-					free: remaining,
-					wait: 0,
-					overbooked: Math.max(0, booked + about - total),
+					free: seatMeta.free,
+					wait: seatMeta.wait,
+					overbooked: seatMeta.overbooked,
 					__dummy: true,
 				};
 				var key = String(rec.countryId) + "|" + String(rec.programId) + "|" + String(rec.gradeId);
@@ -705,19 +757,19 @@ function enrAvailSeedDummyRecordsIfNeeded() {
 			recs[0].total = 20;
 			recs[0].booked = 21;
 			recs[0].about = 0;
-			recs[0].remaining = 0;
-			recs[0].free = 0;
 			recs[0].wait = 0;
-			recs[0].overbooked = Math.max(0, (recs[0].booked || 0) + (recs[0].about || 0) - (recs[0].total || 0));
+			recs[0].remaining = enrAvailCalcSeatMeta(recs[0].total, recs[0].booked, recs[0].about, recs[0].wait).free;
+			recs[0].free = recs[0].remaining;
+			recs[0].overbooked = enrAvailCalcSeatMeta(recs[0].total, recs[0].booked, recs[0].about, recs[0].wait).overbooked;
 		}
 		if (recs.length >= 2) {
 			recs[1].total = 50;
 			recs[1].booked = 45;
 			recs[1].about = 10;
-			recs[1].remaining = 0;
-			recs[1].free = 0;
 			recs[1].wait = 0;
-			recs[1].overbooked = Math.max(0, (recs[1].booked || 0) + (recs[1].about || 0) - (recs[1].total || 0));
+			recs[1].remaining = enrAvailCalcSeatMeta(recs[1].total, recs[1].booked, recs[1].about, recs[1].wait).free;
+			recs[1].free = recs[1].remaining;
+			recs[1].overbooked = enrAvailCalcSeatMeta(recs[1].total, recs[1].booked, recs[1].about, recs[1].wait).overbooked;
 		}
 
 		enrAvailRecords = (enrAvailRecords || []).concat(recs);
@@ -1013,11 +1065,81 @@ function enrAvailCalcRow(el) {
 	if (!$row.length) return;
 
 	var total = parseInt($row.find("[name=total]").val(), 10) || 0;
-	var booked = parseInt($row.find("[name=booked]").val(), 10) || 0;
 	var about = parseInt($row.find("[name=about]").val(), 10) || 0;
-	// Remaining here means "Free" (available after considering confirmed + reserved)
-	var remaining = total > 0 ? Math.max(0, total - booked - about) : "";
+	// Remaining/Free follows: total = reserved + wait + free.
+	// Entry form has no wait field, so remaining is derived from total - reserved.
+	var remaining = total > 0 ? Math.max(0, total - about) : "";
 	$row.find("[name=remaining]").val(remaining);
+}
+
+function enrAvailCalcSeatMeta(total, booked, reserved, wait) {
+	var t = parseInt(total, 10) || 0;
+	var bk = parseInt(booked, 10) || 0;
+	var rv = parseInt(reserved, 10) || 0;
+	var wt = parseInt(wait, 10) || 0;
+	if (bk < 0) bk = 0;
+	if (rv < 0) rv = 0;
+	if (wt < 0) wt = 0;
+
+	var used = bk + rv + wt;
+	var free = Math.max(0, t - used);
+	var overbooked = Math.max(0, used - t);
+	var filled = t ? Math.round((used / t) * 100) : 0;
+
+	var status = "Available";
+	var pill = { badgeClass: "bg-light-success text-success", barClass: "bg-success" };
+	if (overbooked > 0) {
+		status = "Overbooked";
+		pill = { badgeClass: "bg-light-danger text-danger", barClass: "bg-danger" };
+	} else if (free === 0) {
+		status = "Full";
+		pill = { badgeClass: "bg-light-danger text-danger", barClass: "bg-danger" };
+	} else if (free < 5) {
+		status = "Almost Full";
+		pill = { badgeClass: "bg-light-warning text-warning", barClass: "bg-warning" };
+	}
+
+	return {
+		t: t,
+		b: bk,
+		rv: rv,
+		wt: wt,
+		used: used,
+		filled: filled,
+		free: free,
+		overbooked: overbooked,
+		wait: wt,
+		status: status,
+		pill: pill,
+	};
+}
+
+function enrAvailSyncInlineSeatFields(key) {
+	try {
+		var k = String(key || "");
+		if (!k) return;
+		var px = "enrAvailInline_" + enrAvailSafeDomId(k);
+		var $total = $("#" + px + "_total");
+		var $confirm = $("#" + px + "_confirm");
+		var $rsv = $("#" + px + "_rsv");
+		var $wait = $("#" + px + "_wait");
+		var $free = $("#" + px + "_free");
+		if (!$total.length || !$confirm.length || !$rsv.length || !$wait.length || !$free.length) return;
+
+		var total = parseInt($total.val(), 10);
+		var confirm = parseInt($confirm.val(), 10);
+		var rsv = parseInt($rsv.val(), 10);
+		var wait = parseInt($wait.val(), 10);
+		if (isNaN(total) || total < 0) total = 0;
+		if (isNaN(confirm) || confirm < 0) confirm = 0;
+		if (isNaN(rsv) || rsv < 0) rsv = 0;
+		if (isNaN(wait) || wait < 0) wait = 0;
+
+		$confirm.val(confirm);
+		$rsv.val(rsv);
+		$wait.val(wait);
+		$free.val(Math.max(0, total - confirm - rsv - wait));
+	} catch (e) {}
 }
 
 async function enrAvailSaveAll() {
@@ -1095,8 +1217,10 @@ function enrAvailSetTabBtn($btn, isActive) {
 }
 
 function enrAvailGetPct(r) {
-	// Fill% considers both confirmed + reserved
-	return r && r.total ? Math.round(((enrAvailToInt(r.booked) + enrAvailToInt(r.about)) / enrAvailToInt(r.total)) * 100) : 0;
+	// Fill% follows seat distribution: total = confirmed + reserved + wait + free.
+	return r && r.total
+		? Math.round((((enrAvailToInt(r.booked) + enrAvailToInt(r.about) + enrAvailToInt(r.wait)) / enrAvailToInt(r.total))) * 100)
+		: 0;
 }
 
 function enrAvailBarColor(p) {
@@ -1380,30 +1504,8 @@ async function enrAvailDeleteSelected() {
 		}
 	}
 
-function enrAvailSummaryMeta(total, booked, reserved) {
-	var t = parseInt(total, 10) || 0;
-	var b = parseInt(booked, 10) || 0;
-	var rv = parseInt(reserved, 10) || 0;
-
-	var filled = t ? Math.round(((b + rv) / t) * 100) : 0;
-	var free = Math.max(0, t - b - rv);
-	var overbooked = Math.max(0, b + rv - t);
-
-	var status = "Available";
-	var pill = { badgeClass: "bg-light-success text-success", barClass: "bg-success" };
-	if (t > 0 && b + rv > t) {
-		status = "Overbooked";
-		pill = { badgeClass: "bg-light-danger text-danger", barClass: "bg-danger" };
-	} else if (free <= 0) {
-		status = "Full";
-		pill = { badgeClass: "bg-light-danger text-danger", barClass: "bg-danger" };
-	} else if (filled >= 90 || free <= 10) {
-		status = "Almost Full";
-		pill = { badgeClass: "bg-light-warning text-warning", barClass: "bg-warning" };
-	}
-
-	// `wait` kept for backward compatibility (historically used for overbooking).
-	return { t: t, b: b, rv: rv, filled: filled, free: free, overbooked: overbooked, wait: overbooked, status: status, pill: pill };
+function enrAvailSummaryMeta(total, booked, reserved, wait) {
+	return enrAvailCalcSeatMeta(total, booked, reserved, wait);
 }
 
 function enrAvailSummaryCloseDrill() {
@@ -1560,7 +1662,7 @@ function enrAvailRenderSummaryDrill(kind) {
 			'<td class="font-weight-bold border-0 py-2 px-2">' +
 			(r.total || 0) +
 			"</td>" +
-			'<td class="text-primary font-weight-bold border-0 py-2 px-2">' +
+			'<td class="text-info font-weight-bold border-0 py-2 px-2">' +
 			(r.booked || 0) +
 			"</td>" +
 			'<td class="text-success font-weight-bold border-0 py-2 px-2">' +
@@ -1604,7 +1706,7 @@ function enrAvailRenderSummaryDrill(kind) {
 		'<table class="table table-borderless table-hover mb-0">' +
 		"<thead>" +
 		"<tr>" +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2" style="width:32px;">' +
+		'<th class="text-muted font-12 border-0 py-2 px-2" style="width:32px;">' +
 		'<input type="checkbox" class="enrAvailSelAllDrill" id="' +
 		enrAvailEsc(selAllId) +
 		'" data-kind="' +
@@ -1613,14 +1715,14 @@ function enrAvailRenderSummaryDrill(kind) {
 		enrAvailEsc(groupId) +
 		'" />' +
 		"</th>" +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">#</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">Country</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">Program</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">Grade</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">Total</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">Booked</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2">Remaining</th>' +
-		'<th class="text-muted font-12 text-uppercase border-0 py-2 px-2 text-right">Actions</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">#</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">Country</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">Program</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">Grade</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">Total</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">Confirm</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2">Remaining</th>' +
+		'<th class="text-muted font-12 border-0 py-2 px-2 text-right">Actions</th>' +
 		"</tr>" +
 		"</thead>" +
 		"<tbody>" +
@@ -1636,7 +1738,7 @@ function enrAvailRenderSummaryDrill(kind) {
 
 		return items
 			.map(function (it, idx) {
-				var meta = enrAvailSummaryMeta(it.total, it.booked, it.reserved);
+				var meta = enrAvailSummaryMeta(it.total, it.booked, it.reserved, it.wait);
 				var p = meta.filled;
 				var pBar = Math.max(0, Math.min(100, p));
 				var barClass = meta.pill.barClass || enrAvailProgressClass(p);
@@ -1664,7 +1766,7 @@ function enrAvailRenderSummaryDrill(kind) {
 
 					var totalEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
-							'<div class="text-muted font-10 text-uppercase mb-1">Total</div>' +
+							'<div class="text-muted font-10 mb-1">Total</div>' +
 							'<input type="number" min="0" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
 							enrAvailEsc(px + "_total") +
 							'" data-key="' +
@@ -1680,9 +1782,25 @@ function enrAvailRenderSummaryDrill(kind) {
 							meta.t.toLocaleString() +
 							'</div><div class="text-muted font-10 text-uppercase">Total</div></div>';
 
+					var confirmEl = isEditing
+						? '<div class="text-right" style="width:90px;">' +
+							'<div class="text-muted font-10 mb-1">Confirm</div>' +
+							'<input type="number" min="0" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
+							enrAvailEsc(px + "_confirm") +
+							'" data-key="' +
+							enrAvailEsc(key) +
+							'" data-field="confirm" data-orig="' +
+							enrAvailEsc(meta.b) +
+							'" value="' +
+							enrAvailEsc(meta.b) +
+							'"/></div>'
+						: '<div class="text-right"><div class="text-info font-weight-bold" style="font-size:18px;line-height:1;">' +
+							meta.b.toLocaleString() +
+							'</div><div class="text-muted font-10 text-uppercase">Confirm</div></div>';
+
 					var rsvEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
-							'<div class="text-muted font-10 text-uppercase mb-1">Rsv</div>' +
+							'<div class="text-muted font-10 mb-1">Rsv</div>' +
 							'<input type="number" min="0" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
 							enrAvailEsc(px + "_rsv") +
 							'" data-key="' +
@@ -1698,7 +1816,7 @@ function enrAvailRenderSummaryDrill(kind) {
 
 					var waitEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
-							'<div class="text-muted font-10 text-uppercase mb-1">Wait</div>' +
+							'<div class="text-muted font-10 mb-1">Waiting</div>' +
 							'<input type="number" min="0" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
 							enrAvailEsc(px + "_wait") +
 							'" data-key="' +
@@ -1710,12 +1828,12 @@ function enrAvailRenderSummaryDrill(kind) {
 							'"/></div>'
 						: '<div class="text-right"><div class="text-primary font-weight-bold" style="font-size:18px;line-height:1;">' +
 							meta.wait.toLocaleString() +
-							'</div><div class="text-muted font-10 text-uppercase">Wait</div></div>';
+							'</div><div class="text-muted font-10 text-uppercase">Waiting</div></div>';
 					
 						var freeEl = isEditing
 							? '<div class="text-right" style="width:90px;">' +
-								'<div class="text-muted font-10 text-uppercase mb-1">Free</div>' +
-								'<input type="number" min="0" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
+								'<div class="text-muted font-10 mb-1">Free</div>' +
+								'<input type="number" min="0" class="form-control form-control-sm text-right bg-light" style="width:90px;" id="' +
 								enrAvailEsc(px + "_free") +
 								'" data-key="' +
 								enrAvailEsc(key) +
@@ -1723,7 +1841,7 @@ function enrAvailRenderSummaryDrill(kind) {
 								enrAvailEsc(meta.free) +
 								'" value="' +
 								enrAvailEsc(meta.free) +
-								'"/></div>'
+								'" readonly/></div>'
 							: '<div class="text-right"><div class="text-success font-weight-bold" style="font-size:18px;line-height:1;">' +
 								meta.free.toLocaleString() +
 								'</div><div class="text-muted font-10 text-uppercase">Free</div></div>';		
@@ -1748,9 +1866,11 @@ function enrAvailRenderSummaryDrill(kind) {
 					'%"></div></div>' +
 						'<div class="text-muted font-12">' +
 						meta.b.toLocaleString() +
-						" enrolled · " +
+						" confirmed · " +
 						meta.rv.toLocaleString() +
 						" reserved · " +
+						meta.wait.toLocaleString() +
+						" wait · " +
 						meta.t.toLocaleString() +
 						" total · " +
 						meta.filled +
@@ -1759,6 +1879,7 @@ function enrAvailRenderSummaryDrill(kind) {
 						'<div class="d-flex align-items-center" style="gap:12px;flex:0 0 auto;">' +
 						'<div class="d-flex align-items-end" style="gap:16px;">' +
 						totalEl +
+						confirmEl +
 						rsvEl +
 						waitEl +
 						freeEl +
@@ -1784,18 +1905,26 @@ function enrAvailRenderSummaryDrill(kind) {
 
 				var px = "enrAvailInline_" + enrAvailSafeDomId(k);
 				var $total = $("#" + px + "_total");
+				var $confirm = $("#" + px + "_confirm");
 				var $free = $("#" + px + "_free");
 				var $rsv = $("#" + px + "_rsv");
 				var $wait = $("#" + px + "_wait");
 
-				var total = parseInt($total.val(), 10);
+				var confirm = parseInt($confirm.val(), 10);
 				var free = parseInt($free.val(), 10);
 				var rsv = parseInt($rsv.val(), 10);
 				var wait = parseInt($wait.val(), 10);
+				var total = parseInt($total.val(), 10);
 				if (isNaN(total) || total < 0) total = 0;
-				if (isNaN(free) || free < 0) free = 0;
+				if (isNaN(confirm) || confirm < 0) confirm = 0;
 				if (isNaN(rsv) || rsv < 0) rsv = 0;
 				if (isNaN(wait) || wait < 0) wait = 0;
+				free = Math.max(0, total - confirm - rsv - wait);
+				$confirm.val(confirm);
+				$rsv.val(rsv);
+				$wait.val(wait);
+				$free.val(free);
+				$total.val(total);
 
 			var ids = enrAvailParseComboKey(k);
 			var countryId = parseInt(ids.countryId, 10) || 0;
@@ -1807,25 +1936,14 @@ function enrAvailRenderSummaryDrill(kind) {
 					return r && String(r.countryId) === String(ids.countryId) && String(r.programId) === String(ids.programId) && String(r.gradeId) === String(ids.gradeId);
 				}) || null;
 
-				var booked = (rec && (rec.booked || 0)) || 0;
-
-				// No auto-calc while typing: decide what Total to save based on the last field edited.
-				// This allows Free/Wait edits to persist (by mapping them back into Total) when user edits those fields.
-				var last = String(enrAvailInlineLastEdited[k] || "");
-				var totalToSave = total;
-				if (last === "free") {
-					totalToSave = booked + rsv + free;
-				} else if (last === "wait") {
-					totalToSave = Math.max(0, booked + rsv - wait);
-				}
-
 				var payloadRec = {
 					countryId: countryId,
 					programId: programId,
 					gradeId: gradeId,
-				total: totalToSave,
-				booked: booked,
+				total: total,
+				booked: confirm,
 				about: rsv,
+				wait: wait,
 			};
 			if (rec && enrAvailIsRealId(rec.id)) {
 				payloadRec.id = rec.id;
@@ -1894,6 +2012,7 @@ function enrAvailRenderSummaryDrill(kind) {
 					total: r.total || 0,
 					booked: r.booked || 0,
 					reserved: r.about || 0,
+					wait: r.wait || 0,
 				};
 			})
 			.sort(function (a, b) {
@@ -1920,6 +2039,7 @@ function enrAvailRenderSummaryDrill(kind) {
 					total: r.total || 0,
 					booked: r.booked || 0,
 					reserved: r.about || 0,
+					wait: r.wait || 0,
 				};
 			})
 				.sort(function (a, b) {
@@ -1983,6 +2103,9 @@ async function enrAvailSaveEdit(id, px) {
 	var total = parseInt($("#" + px + "-total").val(), 10) || 0;
 	var booked = parseInt($("#" + px + "-booked").val(), 10) || 0;
 	var about = parseInt($("#" + px + "-about").val(), 10) || 0;
+	var wait = parseInt($("#" + px + "-wait").val(), 10) || 0;
+	var remaining = Math.max(0, total - booked - about - wait);
+	$("#" + px + "-remaining").val(remaining);
 
 	try {
 		// Edit should update only the selected record (no "All" expansion)
@@ -2000,6 +2123,7 @@ async function enrAvailSaveEdit(id, px) {
 						total: total,
 						booked: booked,
 						about: about,
+						wait: wait,
 					},
 				],
 			},
@@ -2021,10 +2145,14 @@ async function enrAvailSaveEdit(id, px) {
 }
 
 function enrAvailLiveCalc(px) {
-	var t = parseInt($("#" + px + "-total").val(), 10) || 0;
-	var b = parseInt($("#" + px + "-booked").val(), 10) || 0;
+	var total = parseInt($("#" + px + "-total").val(), 10) || 0;
+	var c = parseInt($("#" + px + "-booked").val(), 10) || 0;
 	var a = parseInt($("#" + px + "-about").val(), 10) || 0;
-	$("#" + px + "-remaining").val(Math.max(0, t - b - a));
+	var w = parseInt($("#" + px + "-wait").val(), 10) || 0;
+	$("#" + px + "-booked").val(Math.max(0, c));
+	$("#" + px + "-about").val(Math.max(0, a));
+	$("#" + px + "-wait").val(Math.max(0, w));
+	$("#" + px + "-remaining").val(Math.max(0, total - Math.max(0, c) - Math.max(0, a) - Math.max(0, w)));
 }
 
 async function enrAvailDelRec(id) {
@@ -2064,22 +2192,29 @@ function enrAvailEditFields(r, px) {
 		'" oninput="enrAvailLiveCalc(\'' +
 		px +
 		'\')"/></div>' +
-		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">Booked</label><input class="form-control form-control-sm" type="number" id="' +
+		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">Confirm</label><input class="form-control form-control-sm" type="number" id="' +
 		px +
 		'-booked" value="' +
 		(r.booked || 0) +
 		'" oninput="enrAvailLiveCalc(\'' +
 		px +
 		'\')"/></div>' +
-		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">Remaining</label><input class="form-control form-control-sm" id="' +
+		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">Free</label><input class="form-control form-control-sm bg-light" type="number" id="' +
 		px +
-		'-remaining" readonly value="' +
+		'-remaining" value="' +
 		(r.remaining || 0) +
-		'"/></div>' +
-		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">About to book</label><input class="form-control form-control-sm" type="number" id="' +
+		'" readonly/></div>' +
+		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">Rsv</label><input class="form-control form-control-sm" type="number" id="' +
 		px +
 		'-about" value="' +
 		(r.about || 0) +
+		'" oninput="enrAvailLiveCalc(\'' +
+		px +
+		'\')"/></div>' +
+		'<div class="col-md-3 mb-2"><label class="font-12 text-muted mb-1">Waiting</label><input class="form-control form-control-sm" type="number" id="' +
+		px +
+		'-wait" value="' +
+		(r.wait || 0) +
 		'" oninput="enrAvailLiveCalc(\'' +
 		px +
 		'\')"/></div>' +
@@ -2148,7 +2283,7 @@ function enrAvailEditFields(r, px) {
 			'<td class="font-weight-bold border-0 py-2 px-2">' +
 			(r.total || 0) +
 			"</td>" +
-			'<td class="text-primary font-weight-bold border-0 py-2 px-2">' +
+			'<td class="text-info font-weight-bold border-0 py-2 px-2">' +
 			(r.booked || 0) +
 			"</td>" +
 			'<td class="text-success font-weight-bold border-0 py-2 px-2">' +
@@ -2372,21 +2507,21 @@ function enrAvailRenderCounselorPreview(opts) {
 		'<div class="card-body py-2">' +
 		'<div class="d-flex flex-wrap align-items-end">' +
 		'<div class="mr-2 mb-2" style="min-width:200px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Country</div>' +
+		'<div class="text-muted font-12 mb-1">Country</div>' +
 		'<select id="enrAvailF_Country" class="form-control form-control-sm rounded-10">' +
 		'<option value="">Select</option>' +
 		countryOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:200px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Program</div>' +
+		'<div class="text-muted font-12 mb-1">Program</div>' +
 		'<select id="enrAvailF_Program" class="form-control form-control-sm rounded-10">' +
 		'<option value="">Any</option>' +
 		programOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:160px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Grade</div>' +
+		'<div class="text-muted font-12 mb-1">Grade</div>' +
 		'<select id="enrAvailF_Grade" class="form-control form-control-sm rounded-10">' +
 		'<option value="">Any</option>' +
 		gradeOpts +
@@ -2407,7 +2542,7 @@ function enrAvailRenderCounselorPreview(opts) {
 	var sumWait = 0;
 	var sumOverbooked = 0;
 	(recs || []).forEach(function (r) {
-		var sm = enrAvailSummaryMeta(r && r.total, r && r.booked, r && r.about);
+		var sm = enrAvailSummaryMeta(r && r.total, r && r.booked, r && r.about, r && r.wait);
 		sumTotal += enrAvailToInt(r && r.total);
 		sumBooked += enrAvailToInt(r && r.booked);
 		sumAbout += enrAvailToInt(r && r.about);
@@ -2450,7 +2585,7 @@ function enrAvailRenderCounselorPreview(opts) {
 
 	var rowsHtml = (sortedRecs || [])
 		.map(function (r, idx) {
-			var sm = enrAvailSummaryMeta(r.total, r.booked, r.about);
+			var sm = enrAvailSummaryMeta(r.total, r.booked, r.about, r.wait);
 			var pct = sm.filled;
 			var pctBar = Math.max(0, Math.min(100, pct));
 			var free = enrAvailToInt(sm.free);
@@ -2549,25 +2684,25 @@ function enrAvailRenderCounselorPreview(opts) {
 		'<div class="card rounded-15">' +
 		'<div class="card-body py-3">' +
 		'<div class="d-flex align-items-center justify-content-between flex-wrap mb-2">' +
-		'<div class="font-weight-bold text-dark">Records</div>' +
-		'<div class="text-muted font-12">Filter by Country / Program / Grade</div>' +
+		'<div class="font-weight-bold text-dark">Data</div>' +
+		'<div class="text-muted font-12"></div>' +
 		"</div>" +
 		'<div class="table-responsive">' +
 		'<table class="table table-hover mb-0">' +
 				"<thead>" +
 				"<tr>" +
-				'<th class="text-muted font-12 text-uppercase text-center">#</th>' +
-				'<th class="text-muted font-12 text-uppercase text-center">Country</th>' +
-				'<th class="text-muted font-12 text-uppercase text-center">Program</th>' +
-				'<th class="text-muted font-12 text-uppercase text-center">Grade</th>' +
-				'<th class="text-muted font-12 text-uppercase text-center">Capacity</th>' +
-					'<th class="text-muted font-12 text-uppercase text-center">Confirmed</th>' +
-					'<th class="text-muted font-12 text-uppercase text-center">Reserved</th>' +
-					'<th class="text-muted font-12 text-uppercase text-center">Wait</th>' +
-					'<th class="text-muted font-12 text-uppercase text-center">Available</th>' +
-					'<th class="text-muted font-12 text-uppercase text-center">Overbooked</th>' +
-						'<th class="text-muted font-12 text-uppercase text-left" style="padding-left:20px;">Fill</th>' +
-					'<th class="text-muted font-12 text-uppercase text-center">Status</th>' +
+				'<th class="text-muted font-12 text-center">#</th>' +
+				'<th class="text-muted font-12 text-center">Country</th>' +
+				'<th class="text-muted font-12 text-center">Program</th>' +
+				'<th class="text-muted font-12 text-center">Grade</th>' +
+				'<th class="text-muted font-12 text-center">Capacity</th>' +
+					'<th class="text-muted font-12 text-center">Confirmed</th>' +
+					'<th class="text-muted font-12 text-center">Reserved</th>' +
+					'<th class="text-muted font-12 text-center">Waiting</th>' +
+					'<th class="text-muted font-12 text-center">Available</th>' +
+					'<th class="text-muted font-12 text-center">Overbooked</th>' +
+						'<th class="text-muted font-12 text-left" style="padding-left:20px;">Fill</th>' +
+					'<th class="text-muted font-12 text-center">Status</th>' +
 					"</tr>" +
 					"</thead>" +
 				"<tbody>" +
@@ -2645,40 +2780,40 @@ function enrAvailRenderCountryPreview() {
 		'<div class="card-body py-2">' +
 		'<div class="d-flex flex-wrap align-items-end">' +
 		'<div class="mr-2 mb-2" style="min-width:180px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Country</div>' +
+		'<div class="text-muted font-12 mb-1">Country</div>' +
 		'<select id="enrAvailF_Country" class="form-control form-control-sm rounded-10">' +
 		'<option value="">Any</option>' +
 		countryOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:180px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Program</div>' +
+		'<div class="text-muted font-12 mb-1">Program</div>' +
 		'<select id="enrAvailF_Program" class="form-control form-control-sm rounded-10">' +
 		'<option value="">Any</option>' +
 		programOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:160px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Grade</div>' +
+		'<div class="text-muted font-12 mb-1">Grade</div>' +
 		'<select id="enrAvailF_Grade" class="form-control form-control-sm rounded-10">' +
 		'<option value="">Any</option>' +
 		gradeOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:120px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Total seats</div>' +
+		'<div class="text-muted font-12 mb-1">Total seats</div>' +
 		'<input id="enrAvailF_TotalMin" type="number" min="0" step="1" class="form-control form-control-sm rounded-10" placeholder="Min" />' +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:120px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Booked</div>' +
+		'<div class="text-muted font-12 mb-1">Booked</div>' +
 		'<input id="enrAvailF_BookedMin" type="number" min="0" step="1" class="form-control form-control-sm rounded-10" placeholder="Min" />' +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:130px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">Remaining</div>' +
+		'<div class="text-muted font-12 mb-1">Remaining</div>' +
 		'<input id="enrAvailF_RemainingMin" type="number" min="0" step="1" class="form-control form-control-sm rounded-10" placeholder="Min" />' +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:150px;">' +
-		'<div class="text-muted font-12 text-uppercase mb-1">About to book</div>' +
+		'<div class="text-muted font-12 mb-1">About to book</div>' +
 		'<input id="enrAvailF_AboutMin" type="number" min="0" step="1" class="form-control form-control-sm rounded-10" placeholder="Min" />' +
 		"</div>" +
 		'<div class="d-flex align-items-center mb-2">' +
@@ -3186,7 +3321,10 @@ function enrAvailUpsertRecord(input) {
 		existing.total = input.total || 0;
 		existing.booked = input.booked || 0;
 		existing.about = input.about || 0;
-		existing.remaining = Math.max(0, (existing.total || 0) - (existing.booked || 0));
+		existing.wait = input.wait || 0;
+		existing.remaining = Math.max(0, (existing.total || 0) - (existing.booked || 0) - (existing.about || 0) - (existing.wait || 0));
+		existing.free = existing.remaining;
+		existing.overbooked = Math.max(0, ((existing.booked || 0) + (existing.about || 0) + (existing.wait || 0)) - (existing.total || 0));
 		existing.countryId = countryId;
 		existing.programId = programId;
 		existing.gradeId = gradeId;
@@ -3206,8 +3344,11 @@ function enrAvailUpsertRecord(input) {
 		grade: enrAvailLabelById(enrAvailMasters.grades, gradeId),
 		total: input.total || 0,
 		booked: input.booked || 0,
-		remaining: Math.max(0, (input.total || 0) - (input.booked || 0)),
+		remaining: Math.max(0, (input.total || 0) - (input.booked || 0) - (input.about || 0) - (input.wait || 0)),
 		about: input.about || 0,
+		wait: input.wait || 0,
+		free: Math.max(0, (input.total || 0) - (input.booked || 0) - (input.about || 0) - (input.wait || 0)),
+		overbooked: Math.max(0, ((input.booked || 0) + (input.about || 0) + (input.wait || 0)) - (input.total || 0)),
 	});
 	return true;
 }
