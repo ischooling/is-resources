@@ -1489,7 +1489,7 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 		var stdFname = $("#"+formId+" #leadstdfnameSearch").val()!=undefined?$("#"+formId+" #leadstdfnameSearch").val():"";
 		var gurdianFname = '';//$("#"+formId+" #leadParentfnameSearch").val();
 		var standard = $("#"+formId+" #leadGradeSearch option:selected").val()!=undefined?$("#"+formId+" #leadGradeSearch option:selected").val():"";
-		var country = $("#"+formId+" #countryId option:selected").val()!=undefined?$("#"+formId+" #countryId option:selected").val():"";
+		var country = $("#"+formId+" #countryIds").val()!=undefined?$("#"+formId+" #countryIds").val():'';
 		var state = $("#"+formId+" #stateId option:selected").val()!=undefined?$("#"+formId+" #stateId option:selected").val():"";
 		if(state==undefined){
 			state="";

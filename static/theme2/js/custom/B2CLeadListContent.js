@@ -1844,6 +1844,12 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'<th class="border-0 p-1">Assigned To:</th>'
 									+'<td class="border-0 p-1">'+(leads.demoAssignName!=''?leads.demoAssignName:'N/A')+'</td>'
 								+'</tr>';
+                 if(leads.demoConfirmMessage!=''){
+                    html+='<tr  class="" >'
+                      +'<th class="border-0 p-1">Demo Confirm Message:</th>'
+                      +'<td class="border-0 p-1">'+(leads.demoConfirmMessage!=''?leads.demoConfirmMessage:'N/A')+'</td>'
+                    +'</tr>';
+                 }
                 //if(USER_ROLE=='DIRECTOR' || objectRights.searchUser){
                   if(leads.demoSummaryStatus){
                     html+='<tr>'
@@ -1885,6 +1891,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                 +'<th class="border-0 p-1">Demo confirmation:</th>'
                 +'<td class="border-0 p-1">'+(leads.demoConfirmation=='Y'?'Yes':'No')+'</td>'
               +'</tr>';
+              
               if (leads.followupMeetingDate!==""){
                 //html += '<tr><th class="border-0 p-1">Type:</th><td class="border-0 p-1" >Follow-up Meeting</td></tr>';
                 html += '<tr class="bg-info p-1 text-white">'
@@ -1909,6 +1916,12 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   +'<th class="border-0 p-1">Callback Time:</th>'
                   +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+' ('+USER_TIMEZONE+')'+'</td>'
                 +'</tr>';
+                if (leads.callBackRemark!==""){
+                  html += '<tr class="bg-primary p-1 text-white">'
+                    +'<th class="border-0 p-1">Callback Time:</th>'
+                    +'<td class="border-0 p-1" >'+leads.callBackRemark+'</td>'
+                  +'</tr>';
+                }
               }
 							html+='<tr>'
 								if(objRights.discardPermission){
