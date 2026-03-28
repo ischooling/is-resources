@@ -60,7 +60,7 @@ async function rendereDashboardContent(isParent){
         renderStudentDashboard(dashboardData);
         renderAnnouncement(dashboardData.userId);
         renderNews(dashboardData.userId);
-        renderSchoolDaiaryBtnCount(USER_ID);
+        renderSchoolDaiaryBtnCount();
         // renderActivity(dashboardData.userId)
         getCartCount(dashboardData.userId);
         setTimeout(function () {

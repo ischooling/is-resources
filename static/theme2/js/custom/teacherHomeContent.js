@@ -14,7 +14,7 @@ async function rendereTeacherHomeContent(){
     getTeacherTimePreference();
 	renderAnnouncement(responseData.userId);
     renderNews(USER_ID);
-    renderSchoolDaiaryBtnCount(USER_ID);
+    renderSchoolDaiaryBtnCount();
     //renderActivity(responseData.userId)
     callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);

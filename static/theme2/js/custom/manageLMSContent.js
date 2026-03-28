@@ -65,6 +65,7 @@ function getManageLMSFilter(roleAndModule, schoolId, userId, role){
 		+'<div class="full">'
 			+'<button class="btn btn-sm btn-primary float-right show-filter" onClick="toggleFilter(\'lmsStudentFilter\')"><i class="fa fa-filter"></i>&nbsp;Filter</button>'
 		+'</div>'
+		
 		+'<form name="lmsStudentFilter" id="lmsStudentFilter" action="javascript:void(0)">'
 			+'<div class="filter-fields d-flex flex-wrap">'
 				html+='<div class="col-md-3 col-sm-3 col-xs-12">'

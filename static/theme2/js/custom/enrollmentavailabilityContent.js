@@ -23,7 +23,7 @@ function getEnrollmentAvailabilityContent() {
 								</div>
 
 							<div id="enrAvailSummaryEditor" class="mb-3">
-								<div class="text-muted text-center py-4" id="enrAvailLazyHint">Select a Country and click Load</div>
+								<div class="text-muted text-center py-4" id="enrAvailLazyHint">Select a Country and click Check</div>
 							</div>
 									<div class="card border rounded-10 h-100">
 										<div class="card-body p-3">

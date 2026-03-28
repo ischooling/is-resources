@@ -1494,12 +1494,31 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                               }
                             }
                         html+='</a>'
-                      +'</span>';
+                        html += '<a href="javascript:void(0);" ' +
+                                  'onclick="callLeadViaCallHippo(\'' + (leads.phoneIsd || '') + '\',\'' + (leads.isdCode || '') + '\',\'' + (leads.phone || '') + '\')" ' +
+                                  'data-toggle="tooltip" ' +
+                                  'data-placement="top" ' +
+                                  'data-original-title="Call via CallHippo" ' +
+                                  'class="btn btn-sm ml-1 d-inline-flex align-items-center rounded-pill py-1" style="font-size: 10px;background-color: #c3e4ff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">' +
+                                    '<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/CallHippo.svg'+SCRIPT_VERSION+'" style="width:16px; margin-right:5px"> Call' +
+                                  '</a>';
+                        +'</span>';
                     }
                     html+='<br/>';
                     if(leads.phoneNoAlter!=''){
                       html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
                       html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>';
+                      html += `
+                          <a href="javascript:void(0);" 
+                            onclick="callLeadViaCallHippo('${leads.phoneIsd || ''}','${leads.isdCode || ''}','${leads.phone || ''}')"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            data-original-title="Call via CallHippo"
+                            class="btn btn-sm ml-1 d-inline-flex align-items-center rounded-pill py-1" style="font-size: 10px;background-color: #c3e4ff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+
+                              <img src="${PATH_FOLDER_IMAGE2}leadlist_icons/CallHippo.svg${SCRIPT_VERSION}" style="width:16px;margin-right:5px;"> Call
+                          </a>
+                        `;
                     }
                   html+='</td>'
                 +'</tr>'
@@ -2180,6 +2199,433 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	html+=b2cleadsPagging(leaddata, objectRights);
 	return html;
 
+}
+
+var callHippoDialerConfigPromise = null;
+var callHippoDialerScriptPromise = null;
+var callHippoOriginalSdkCall = null;
+var callHippoWindowEventsBound = false;
+
+function styleCallHippoModalBackdrop() {
+  setTimeout(function() {
+    var backdrop = $(".modal-backdrop").last();
+    if (backdrop.length) {
+      backdrop.css({
+        background: "rgba(0, 0, 0, 0.55)",
+        opacity: "1",
+        backdropFilter: "blur(8px)",
+        webkitBackdropFilter: "blur(8px)"
+      });
+    }
+  }, 10);
+}
+
+function ensureCallHippoDialerContainer(showDialer) {
+  var dialerModal = document.getElementById("callHippoDialerModal");
+  if (!dialerModal) {
+    dialerModal = document.createElement("div");
+    dialerModal.id = "callHippoDialerModal";
+    dialerModal.className = "modal fade";
+    dialerModal.setAttribute("tabindex", "-1");
+    dialerModal.setAttribute("role", "dialog");
+    dialerModal.setAttribute("aria-hidden", "true");
+    dialerModal.setAttribute("data-backdrop", "static");
+    dialerModal.setAttribute("data-keyboard", "false");
+
+    dialerModal.innerHTML =
+      '<div class="modal-dialog modal-dialog-centered" role="document" style="width:calc(100vw - 16px);max-width:400px;margin:0.5rem auto;">'
+        +'<div class="modal-content border-0" style="overflow:visible;border-radius:16px;background:transparent;box-shadow:none;">'
+          +'<div style="position:relative;">'
+            +'<button type="button" class="close" aria-label="Close" style="position:absolute;right:0px;top:-40px;z-index:9999;width:32px;height:32px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.2);opacity:1;border:2px solid #fff;cursor:pointer;">'
+              +'<span aria-hidden="true" style="color:#fff;font-size:20px;line-height:1;">&times;</span>'
+            +'</button>'
+            +'<div class="modal-body" style="padding:0;background:transparent;">'
+              +'<div id="ch-dialer-container" style="width:100%;height:min(82vh,680px);min-height:540px;background:#fff;overflow:hidden;border-radius:16px;box-shadow:0 25px 60px rgba(0,0,0,0.35);"></div>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
+      +'</div>';
+
+    document.body.appendChild(dialerModal);
+
+    $(dialerModal).on("hidden.bs.modal", function() {
+      destroyCallHippoDialerModal();
+    });
+
+    $(dialerModal).on("shown.bs.modal", function() {
+      styleCallHippoModalBackdrop();
+      bindCallHippoDialerGlobals();
+    });
+
+    $(dialerModal).find(".close").on("click", function() {
+      hideCallHippoDialer();
+    });
+  }
+
+  if (showDialer) {
+    $("#callHippoDialerModal").modal("show");
+    styleCallHippoModalBackdrop();
+  }
+
+  return {
+    wrapper: dialerModal,
+    container: document.getElementById("ch-dialer-container")
+  };
+}
+
+function hideCallHippoDialer() {
+  var dialerModal = document.getElementById("callHippoDialerModal");
+  var dialerPopup = document.getElementById("chCallMePopup");
+  if (dialerPopup && dialerPopup.style) {
+    dialerPopup.style.display = "none";
+  }
+
+  if (dialerModal) {
+    $("#callHippoDialerModal").modal("hide");
+  }
+}
+
+function destroyCallHippoDialerModal() {
+  var dialerModal = document.getElementById("callHippoDialerModal");
+  var dialerContainer = document.getElementById("ch-dialer-container");
+
+  if (dialerContainer) {
+    dialerContainer.innerHTML = "";
+  }
+
+  if (dialerModal) {
+    $(dialerModal).off("hidden.bs.modal shown.bs.modal");
+    if (dialerModal.parentNode) {
+      dialerModal.parentNode.removeChild(dialerModal);
+    }
+  }
+
+  resetCallHippoDialerState();
+}
+
+function applyCallHippoDialerLayout() {
+  var dialerContainer = document.getElementById("ch-dialer-container");
+  var openButton = document.querySelector("#ch-dialer-container .ch-open-button");
+  var incomingPopup = document.getElementById("chPopup");
+  var popupCloseIcon = document.querySelector("#ch-dialer-container .ch-close_icon");
+  var dialerPopup = document.getElementById("chCallMePopup");
+  var dialerPopupForm = document.getElementById("chCallMePopupForm");
+  var dialerFrame = document.getElementById("chFrame");
+
+  if (dialerContainer && dialerContainer.style) {
+    dialerContainer.style.padding = "0";
+    dialerContainer.style.background = "#fff";
+  }
+
+  if (openButton) {
+    openButton.style.display = "none";
+    openButton.style.visibility = "hidden";
+    openButton.style.pointerEvents = "none";
+    openButton.style.width = "0";
+    openButton.style.height = "0";
+    openButton.style.overflow = "hidden";
+    openButton.style.position = "absolute";
+  }
+
+  if (incomingPopup) {
+    incomingPopup.style.display = "none";
+  }
+
+  if (popupCloseIcon) {
+    popupCloseIcon.setAttribute("onclick", "hideCallHippoDialer()");
+    popupCloseIcon.style.cursor = "pointer";
+  }
+
+  if (dialerPopup && dialerPopup.style) {
+    dialerPopup.style.display = "block";
+    dialerPopup.style.position = "relative";
+    dialerPopup.style.top = "0";
+    dialerPopup.style.left = "0";
+    dialerPopup.style.right = "0";
+    dialerPopup.style.bottom = "0";
+    dialerPopup.style.width = "100%";
+    dialerPopup.style.height = "100%";
+    dialerPopup.style.maxWidth = "100%";
+    dialerPopup.style.maxHeight = "100%";
+    dialerPopup.style.borderRadius = "0";
+    dialerPopup.style.boxShadow = "none";
+    dialerPopup.style.margin = "0";
+    dialerPopup.style.background = "#fff";
+    dialerPopup.style.overflow = "hidden";
+  }
+
+  if (dialerPopupForm && dialerPopupForm.style) {
+    dialerPopupForm.style.width = "100%";
+    dialerPopupForm.style.height = "100%";
+    dialerPopupForm.style.background = "#fff";
+  }
+
+  if (dialerFrame && dialerFrame.style) {
+    dialerFrame.style.width = "100%";
+    dialerFrame.style.height = "100%";
+    dialerFrame.style.minHeight = "100%";
+    dialerFrame.style.border = "0";
+    dialerFrame.style.background = "#fff";
+  }
+}
+
+function isCallHippoAutoCloseEvent(event) {
+  var eventData = event && event.data ? event.data : {};
+  var eventType = eventData.type ? eventData.type.toString() : "";
+  var dialerFrame = document.getElementById("chFrame");
+  var isFromDialerFrame = !!(dialerFrame && dialerFrame.contentWindow && event.source === dialerFrame.contentWindow);
+  var isFromCallHippoOrigin = !!(event.origin && event.origin.indexOf("callhippo.com") !== -1);
+
+  if (!isFromDialerFrame && !isFromCallHippoOrigin) {
+    return false;
+  }
+
+  return /CALL.*(END|ENDED|DISCONNECT|DISCONNECTED|HANGUP|HUNGUP|COMPLETE|COMPLETED|CLOSE|CLOSED)/i.test(eventType);
+}
+
+function bindCallHippoWindowEvents() {
+  if (callHippoWindowEventsBound) {
+    return;
+  }
+
+  window.addEventListener("message", function(event) {
+    var eventData = event && event.data ? event.data : {};
+    var eventType = eventData.type ? eventData.type.toString() : "";
+
+    if (eventType === "INCOMING_CALL_NOTIFICATION" || eventType === "CLICKTOCALL_MESSAGE_ACKNOWLEDGED") {
+      ensureCallHippoDialerContainer(true);
+      bindCallHippoDialerGlobals();
+      return;
+    }
+
+    if (isCallHippoAutoCloseEvent(event)) {
+      hideCallHippoDialer();
+    }
+  });
+
+  callHippoWindowEventsBound = true;
+}
+
+function bindCallHippoDialerGlobals() {
+  var dialerPopup = document.getElementById("chCallMePopup");
+  var dialerFrame = document.getElementById("chFrame");
+
+  applyCallHippoDialerLayout();
+  bindCallHippoWindowEvents();
+
+  if (dialerPopup) {
+    window.chCallMePopup = dialerPopup;
+    try {
+      chCallMePopup = dialerPopup;
+    } catch (ignore) {}
+  }
+
+  if (dialerFrame) {
+    window.chFrame = dialerFrame;
+    try {
+      chFrame = dialerFrame;
+    } catch (ignore) {}
+  }
+
+  return !!(dialerPopup && dialerPopup.style && dialerFrame);
+}
+
+function resetCallHippoDialerState() {
+  var existingScript = document.getElementById("callHippoDialerScript");
+
+  if (existingScript && existingScript.parentNode) {
+    existingScript.parentNode.removeChild(existingScript);
+  }
+
+  callHippoDialerScriptPromise = null;
+  callHippoOriginalSdkCall = null;
+  window.__callHippoSdkCallWrapped = false;
+  window.chCall = undefined;
+  window.chCallMePopup = null;
+  window.chFrame = null;
+
+  try {
+    chCallMePopup = null;
+  } catch (ignore) {}
+
+  try {
+    chFrame = null;
+  } catch (ignore) {}
+}
+
+function wrapCallHippoSdkCall() {
+  if (window.__callHippoSdkCallWrapped || typeof window.chCall !== "function") {
+    return;
+  }
+
+  callHippoOriginalSdkCall = window.chCall;
+  window.chCall = function(phoneNumber, customParams, isEncrypted) {
+    ensureCallHippoDialerContainer(true);
+    bindCallHippoDialerGlobals();
+
+    if (!window.chCallMePopup || !window.chCallMePopup.style || !document.getElementById("chFrame")) {
+      throw new Error("CallHippo dialer is not ready yet.");
+    }
+
+    return callHippoOriginalSdkCall(phoneNumber, customParams, isEncrypted);
+  };
+  window.__callHippoSdkCallWrapped = true;
+}
+
+function waitForCallHippoDialerReady(maxRetryCount, intervalMs) {
+  return new Promise(function(resolve, reject) {
+    var retryCount = 0;
+    var readyTimer = setInterval(function() {
+      if (bindCallHippoDialerGlobals()) {
+        wrapCallHippoSdkCall();
+        clearInterval(readyTimer);
+        resolve();
+        return;
+      }
+
+      retryCount++;
+      if (retryCount >= maxRetryCount) {
+        clearInterval(readyTimer);
+        reject("Unable to initialize CallHippo dialer.");
+      }
+    }, intervalMs);
+  });
+}
+
+function getCallHippoDialerConfig() {
+  if (window.callHippoDialerConfig && window.callHippoDialerConfig.apiToken && window.callHippoDialerConfig.agentEmail) {
+    return Promise.resolve(window.callHippoDialerConfig);
+  }
+
+  if (callHippoDialerConfigPromise) {
+    return callHippoDialerConfigPromise;
+  }
+
+  callHippoDialerConfigPromise = new Promise(function(resolve, reject) {
+    $.ajax({
+      type: "GET",
+      url: BASE_URL + CONTEXT_PATH + "callhippo/v1/get-dialer-config",
+      dataType: "json",
+      success: function(response) {
+        if (response.status === "success") {
+          window.callHippoDialerConfig = response;
+          resolve(response);
+          return;
+        }
+
+        if (response.status === "3") {
+          redirectLoginPage();
+          reject(response.message);
+          return;
+        }
+
+        reject(response.message || "Unable to load CallHippo dialer configuration.");
+      },
+      error: function() {
+        reject("Unable to load CallHippo dialer configuration.");
+      }
+    });
+  }).catch(function(error) {
+    callHippoDialerConfigPromise = null;
+    throw error;
+  });
+
+  return callHippoDialerConfigPromise;
+}
+
+function loadCallHippoDialer(config) {
+  window.TOKEN = config.apiToken;
+  window.EMAIL = config.agentEmail;
+  window.REGION = config.region || "global";
+  ensureCallHippoDialerContainer(true);
+
+  if (typeof window.chCall === "function") {
+    if (bindCallHippoDialerGlobals()) {
+      wrapCallHippoSdkCall();
+      return Promise.resolve();
+    }
+
+    resetCallHippoDialerState();
+  }
+
+  if (callHippoDialerScriptPromise) {
+    return callHippoDialerScriptPromise;
+  }
+
+  callHippoDialerScriptPromise = new Promise(function(resolve, reject) {
+    var existingScript = document.getElementById("callHippoDialerScript");
+    if (existingScript) {
+      waitForCallHippoDialerReady(20, 250)
+        .then(resolve)
+        .catch(reject);
+      return;
+    }
+
+    var script = document.createElement("script");
+    script.id = "callHippoDialerScript";
+    script.type = "text/javascript";
+    script.src = "https://d1x9dsge91xf6g.cloudfront.net/callhippo/files/ch-dialer.js";
+    script.async = true;
+    script.onload = function() {
+      waitForCallHippoDialerReady(20, 250)
+        .then(resolve)
+        .catch(reject);
+    };
+    script.onerror = function() {
+      reject("Unable to load CallHippo dialer.");
+    };
+    document.body.appendChild(script);
+  }).catch(function(error) {
+    callHippoDialerScriptPromise = null;
+    throw error;
+  });
+
+  return callHippoDialerScriptPromise;
+}
+
+function getCallHippoDialNumber(fullNumber, isdCode, phoneNumber) {
+  var dialNumber = (fullNumber || "").toString().replace(/[^0-9]/g, "");
+  if (dialNumber !== "") {
+    return dialNumber;
+  }
+
+  var sanitizedPhone = (phoneNumber || "").toString().replace(/[^0-9]/g, "");
+  var sanitizedIsd = (isdCode || "").toString().replace(/[^0-9]/g, "");
+
+  if (sanitizedPhone === "") {
+    return "";
+  }
+
+  if (sanitizedIsd !== "" && sanitizedPhone.indexOf(sanitizedIsd) === 0) {
+    return sanitizedPhone;
+  }
+
+  return sanitizedIsd + sanitizedPhone;
+}
+
+function callLeadViaCallHippo(fullNumber, isdCode, phoneNumber) {
+  var dialNumber = getCallHippoDialNumber(fullNumber, isdCode, phoneNumber);
+  if (dialNumber === "") {
+    showMessageTheme2(0, "Phone number is not available for calling.");
+    return;
+  }
+
+  ensureCallHippoDialerContainer(true);
+  getCallHippoDialerConfig()
+    .then(function(config) {
+      return loadCallHippoDialer(config);
+    })
+    .then(function() {
+      if (typeof window.chCall === "function") {
+        bindCallHippoDialerGlobals();
+        window.chCall(dialNumber);
+        return;
+      }
+      showMessageTheme2(0, "CallHippo dialer is not ready yet. Please try again.");
+    })
+    .catch(function(error) {
+      showMessageTheme2(0, error || "Unable to start the call right now.");
+    });
 }
 
 function openLeadReminderPopup(leadId, leadNo) {

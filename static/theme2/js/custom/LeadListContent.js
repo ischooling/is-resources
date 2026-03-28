@@ -1691,6 +1691,7 @@ function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
 		}
 	}
 	getLeadDataList('advanceLeadNewSearchForm',leadfrom, clickFrom, currentPage, 'new', true, callbadge, OBJECT_RIGHTS, ROLE_MODULE);
+	
 }
 
 

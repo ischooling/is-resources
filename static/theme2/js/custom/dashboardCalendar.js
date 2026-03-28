@@ -453,7 +453,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 						var subActivityTitle = activityTitle[1];
 						activityTitle = activityTitle[0];
 						customEventTitleHtml=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${activityTitle}</div>
-						<div class="text-dark pt-4 font-weight-semi-bold text-center  assign-teacher-wrapper w-100">
+						<div class="text-dark pt-2 font-weight-semi-bold text-center  assign-teacher-wrapper w-100">
 							${subActivityTitle != null && subActivityTitle != undefined && subActivityTitle != "" ? `<div class="font-14 font-weight-semi-bold text-dark w-100 text-center sub-activity-title">${subActivityTitle}</div>`:``}
 							<span class="font-weight-normal sub-activity-label">${event.eventTitle}</span>
 						</div>

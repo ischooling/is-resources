@@ -2819,103 +2819,93 @@ function getLearningProgramLabel(registrationType) {
 function getAnnouncementAndNewsContent() {
   var html = 
     `<div class="right_fixed_action">
-      <iframe src="https://is-chat-react.vercel.app/iframe/diary-bridge?userId=${USER_ID}"  style="height:0px"/>
-      <button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
+      <iframe src="https://is-chat-react.vercel.app/iframe/diary-bridge?userId=${USER_ID}"  style="height:0px"/>`;
+      if(USER_ROLE != "DIRECTOR"){
+        html+=
+        `<button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
           <i class="fa fa-bullhorn fa-w-16"></i>
           <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
-      </button>`;
-      if(USER_ROLE != "PARENT"){
+        </button>`;
+      }
+      if(USER_ROLE != "PARENT" && USER_ROLE != "DIRECTOR"){
           html+=
           `<button type="button" class="custom-btn-open-options btn btn-primary" id="newsBtn" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
             <i class="fa fa-newspaper-o fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
-        </button>`;
+          </button>`;
       }
-      if(CHAT_URL != "") {
+      if(CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
         var data = {u: UNIQUEUUID, e: DEPLOYMENT_MODE, d: new Date().getTime()};
         var jsonString = JSON.stringify(data);
         var chatPayload = btoa(jsonString);
         var chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=` + chatPayload;
         html += 
-        `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
-            <i class="fa fa-comments fa-w-16"></i>
-            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="chatUnseenCoutn"></span>
-        </a>`;
+          `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
+              <i class="fa fa-comments fa-w-16"></i>
+              <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="chatUnseenCoutn"></span>
+          </a>`;
       }
-      if(USER_ROLE == "PARENT" || USER_ROLE == "TEACHER" || USER_ROLE == "STUDENT"){
-        html += 
-        `<button type="button" class="custom-btn-open-options btn btn-primary" id="schoolDiaryBtn" onclick="openRightSideBar(\'schoolDiary_side_wrapper\')" data-toggle="tooltip" title="${USER_ROLE == "TEACHER" ? "Teacher Diary" : USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? "Student Diary" : "School Diary"}">
+      if (
+        USER_ROLE == "PARENT" ||
+        USER_ROLE == "TEACHER" ||
+        USER_ROLE == "STUDENT" ||
+        SCHOOL_DIARY_INITIATES_ROLE
+      ) {
+        html += `<button type="button" class="custom-btn-open-options btn btn-primary" id="schoolDiaryBtn" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', false)" data-toggle="tooltip" title="${USER_ROLE == "TEACHER" ? "Teacher Diary" : USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? "Student Diary" : "School Diary"}">
             <i class="fa fa-address-book fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="schoolDiaryBadge"></span>
           </button>`;
       }
-    html+=
-      `<button type="button" class="custom-btn-open-options btn btn-primary" id="internationalSchoolingBtn" onclick="toggleInternationalSchoolingPopover(true)" onmouseenter="toggleInternationalSchoolingPopover(true)" onmouseleave="toggleInternationalSchoolingPopover(false)" data-toggle="tooltip" title="Download App">
-        <i class="fa fa-mobile" style="font-size:18px;line-height:18px;"></i>
-      </button>
-      <a id="internationalSchoolingSlideBtn" href="https://internationalschooling.org/app" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill py-2 px-3 d-flex align-items-center shadow right-slide-download-btn" onmouseenter="toggleInternationalSchoolingPopover(true)" onmouseleave="toggleInternationalSchoolingPopover(false)">
-        <i class="fa fa-mobile mr-2" style="font-size:18px;line-height:18px;"></i>
-        <span class="font-weight-semi-bold text-nowrap">Download App</span>
-        <img src="/static/img/downloadApp.png" width="16" height="16" class="d-block ml-2" alt=""/>
-      </a>
-    </div>
-    <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
-        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+      html += `</div>
+        <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
+            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+                <i class="fa fa-times"></i>
+            </button>
+            <div class="full" id="announcementDiv"></div>
+        </div>`;
+        if(USER_ROLE != "PARENT"){
+        html+=`<div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper" ${USER_ROLE == "PARENT" ?  "displat:none":""}>
+            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+                <i class="fa fa-times"></i>
+            </button>
+            <div class="full mt-3" id="newsyDiv"></div>
+        </div>`;
+        }
+      if (
+        USER_ROLE == "PARENT" ||
+        USER_ROLE == "TEACHER" ||
+        USER_ROLE == "STUDENT" || 
+        SCHOOL_DIARY_INITIATES_ROLE
+      ) {
+        html += `<div class="ui-theme-settings custome-ui-theme-settings" id="schoolDiary_side_wrapper">
+          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', true)" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
             <i class="fa fa-times"></i>
-        </button>
-        <div class="full" id="announcementDiv"></div>
-    </div>`;
-    if(USER_ROLE != "PARENT"){
-      html+=`<div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper" ${USER_ROLE == "PARENT" ?  "displat:none":""}>
-          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-              <i class="fa fa-times"></i>
           </button>
-          <div class="full mt-3" id="newsyDiv"></div>
-      </div>`;
-    }
-    if(USER_ROLE == "PARENT" || USER_ROLE == "TEACHER" || USER_ROLE == "STUDENT"){
-      html += 
-      `<div class="ui-theme-settings custome-ui-theme-settings" id="schoolDiary_side_wrapper">
-        <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
-          <i class="fa fa-times"></i>
-        </button>
-        <div class="full" id="schoolDiaryDiv"></div>
-      </div>`;
-    }
-  html+= `<div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>`;
+          <div class="full" id="schoolDiaryDiv"></div>
+        </div>`;
+      }
+  html += `<div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>`;
   return html;
 }
 
-function openRightSideBar(eleId) {
+function openRightSideBar(eleId, closeFlag) {
   if ($(".mobile-slide-up").length > 0) {
     $(".mobile-slide-up").removeClass("slideUp");
   }
   if (eleId == "settings-overlay") {
     $(".custome-ui-theme-settings").removeClass("settings-open");
-    if (
-      USER_ROLE == "TEACHER" ||
-      USER_ROLE == "PARENT" ||
-      USER_ROLE == "STUDENT"
-    ) {
-      // startDiaryBadgeCountIntervals();
-    }
   } else {
     $("#" + eleId).toggleClass("settings-open");
     $(".tooltip").remove();
-    if (
-      USER_ROLE == "TEACHER" ||
-      USER_ROLE == "PARENT" ||
-      USER_ROLE == "STUDENT"
-    ) {
-      // startDiaryBadgeCountIntervals();
-    }
   }
   $("body").toggleClass("overflow-hidden");
   $(".custome-ui-theme-settings-overlay").toggleClass("show-custom-overlay");
   if (eleId == "schoolDiary_side_wrapper") {
     $(".school-diary-notebook").hide();
     $(".short-chat").show();
-    getChatUserList(true);
+	if(!closeFlag){
+    	getChatUserList(true);
+	}
   }
 }
 

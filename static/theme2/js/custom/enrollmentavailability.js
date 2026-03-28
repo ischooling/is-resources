@@ -11,6 +11,7 @@ var ENR_AVAIL_PREVIEW_KEY = "enrAvailPreviewPayload";
 
 var enrAvailSavedViewMode = "summary"; 
 var enrAvailSavedFilters = { countryId: "", programId: "", gradeId: "", q: "" };
+var enrAvailAppliedFilters = { countryId: "", programId: "", gradeId: "" };
 var enrAvailSummaryDrill = { kind: "", id: "" };
 var enrAvailSelectedIds = {};
 var ENR_AVAIL_EDIT_FROM_PREVIEW_KEY = "enrAvailEditFromPreviewId";
@@ -213,7 +214,17 @@ function enrAvailInitUI() {
 	});
 
 	$("#enrAvailS_Load").off("click").on("click", async function () {
-		await enrAvailLoadSeatsFromServer(enrAvailGetFilterRequestFromUI());
+		var request = enrAvailGetFilterRequestFromUI();
+		if (!enrAvailHasRequiredFilters(request)) {
+			enrAvailToast(0, "Please select Country first");
+			return;
+		}
+		enrAvailAppliedFilters = {
+			countryId: String(request.countryId || ""),
+			programId: String(request.programId || ""),
+			gradeId: String(request.gradeId || ""),
+		};
+		await enrAvailLoadSeatsFromServer(request);
 		try {
 			enrAvailUpdatePreviewCache();
 		} catch (e) {}
@@ -350,7 +361,7 @@ function enrAvailPopulateSavedSummaryGradeFilter() {
 		enrAvailSavedFilters.gradeId = "";
 	}
 
-	var gHtml = opt("Any Grade", "", enrAvailSavedFilters.gradeId === "");
+	var gHtml = opt("Select Grade", "", enrAvailSavedFilters.gradeId === "");
 	gHtml += allowedGrades
 		.map(function (x) {
 			return opt(x.label, x.id, String(enrAvailSavedFilters.gradeId) === String(x.id));
@@ -383,7 +394,7 @@ function enrAvailPopulateSavedSummaryFilters() {
 		return '<option value="' + enrAvailEsc(value) + '" ' + (selected ? "selected" : "") + ">" + enrAvailEsc(label) + "</option>";
 	};
 
-	var pHtml = opt("Any Program", "", enrAvailSavedFilters.programId === "");
+	var pHtml = opt("Select Program", "", enrAvailSavedFilters.programId === "");
 	pHtml += (enrAvailMasters.programs || [])
 		.slice(0)
 		.sort(function (a, b) {
@@ -418,7 +429,7 @@ function enrAvailPopulateSavedSummaryFilters() {
 function enrAvailUpdateSavedSummaryPills() {
 	if ($("#enrAvailS_Month").length) $("#enrAvailS_Month").text(enrAvailMonthLabel());
 
-	var gradeLabel = "Any Grade";
+	var gradeLabel = "Select Grade";
 	if (enrAvailSavedFilters.gradeId) {
 		var g = (enrAvailMasters.grades || []).find(function (x) {
 			return String(x.id) === String(enrAvailSavedFilters.gradeId);
@@ -438,6 +449,52 @@ function enrAvailUpdateSavedSummaryPills() {
 	if ($("#enrAvailS_CountryPill2").length) $("#enrAvailS_CountryPill2").text(countryLabel);
 }
 
+function enrAvailHasRequiredFilters(filters) {
+	try {
+		var data = filters || {};
+		return !!String(data.countryId || "");
+	} catch (e) {
+		return false;
+	}
+}
+
+function enrAvailResetLoadedData() {
+	enrAvailRecords = [];
+	enrAvailLastLoadRequest = null;
+	enrAvailEditingId = null;
+	enrAvailInlineEditKey = "";
+}
+
+function enrAvailUpdateLoadButtonState() {
+	var canLoad = enrAvailHasRequiredFilters(enrAvailSavedFilters);
+	if ($("#enrAvailS_Load").length) $("#enrAvailS_Load").prop("disabled", !canLoad);
+}
+
+function enrAvailFiltersMatchLoadRequest(filters, loadRequest) {
+	try {
+		var current = filters || {};
+		var applied = loadRequest || {};
+		return (
+			String(applied.countryId || "") === String(current.countryId || "") &&
+			String(applied.programId || "") === String(current.programId || "") &&
+			String(applied.gradeId || "") === String(current.gradeId || "")
+		);
+	} catch (e) {
+		return false;
+	}
+}
+
+function enrAvailHasAppliedSelection() {
+	try {
+		if (enrAvailEditingId) return true;
+		if (!enrAvailHasRequiredFilters(enrAvailAppliedFilters)) return false;
+		if (!enrAvailLastLoadRequest) return false;
+		return enrAvailFiltersMatchLoadRequest(enrAvailAppliedFilters, enrAvailLastLoadRequest);
+	} catch (e) {
+		return false;
+	}
+}
+
 	function enrAvailInitSavedSummaryUI() {
 	try {
 		enrAvailSavedViewMode = "summary";
@@ -455,11 +512,12 @@ function enrAvailUpdateSavedSummaryPills() {
 		.off("click")
 		.on("click", function () {
 			enrAvailSavedFilters = { countryId: "", programId: "", gradeId: "", q: "" };
+			enrAvailAppliedFilters = { countryId: "", programId: "", gradeId: "" };
 			$("#enrAvailS_Search").val("");
-			enrAvailRecords = [];
-			enrAvailLastLoadRequest = null;
+			enrAvailResetLoadedData();
 			enrAvailPopulateSavedSummaryFilters();
 			enrAvailUpdateSavedSummaryPills();
+			enrAvailUpdateLoadButtonState();
 			enrAvailRenderSavedSummary();
 			try {
 				enrAvailUpdatePreviewCache();
@@ -471,6 +529,7 @@ function enrAvailUpdateSavedSummaryPills() {
 		.on("change", function () {
 			enrAvailSavedFilters.gradeId = $(this).val() || "";
 			enrAvailUpdateSavedSummaryPills();
+			enrAvailUpdateLoadButtonState();
 			enrAvailRenderSavedSummary();
 		});
 	$("#enrAvailS_FProgram")
@@ -479,17 +538,17 @@ function enrAvailUpdateSavedSummaryPills() {
 			enrAvailSavedFilters.programId = $(this).val() || "";
 			enrAvailPopulateSavedSummaryGradeFilter();
 			enrAvailUpdateSavedSummaryPills();
+			enrAvailUpdateLoadButtonState();
 			enrAvailRenderSavedSummary();
 		});
 	$("#enrAvailS_FCountry")
 		.off("change")
 		.on("change", function () {
 			enrAvailSavedFilters.countryId = $(this).val() || "";
-			enrAvailRecords = [];
-			enrAvailLastLoadRequest = null;
 			try {
 				enrAvailUpdatePreviewCache();
 			} catch (e) {}
+			enrAvailUpdateLoadButtonState();
 			enrAvailRenderSavedSummary();
 		});
 	$("#enrAvailS_Search")
@@ -566,6 +625,7 @@ function enrAvailUpdateSavedSummaryPills() {
 
 			enrAvailPopulateSavedSummaryFilters();
 			enrAvailUpdateSavedSummaryPills();
+			enrAvailUpdateLoadButtonState();
 			enrAvailSetSavedViewMode(enrAvailSavedViewMode);
 		}
 
@@ -574,20 +634,18 @@ async function enrAvailLoadSeatsFromServer() {
 		var payload = arguments && arguments.length ? arguments[0] : {};
 		payload = payload || {};
 
-		// Require countryId for list loads (backend will also enforce); allow id-based fetch.
+		// Require country for list loads; program/grade remain optional. Allow id-based fetch.
 		try {
 			var hasId = payload && String(payload.id || "");
-			var hasCountry = payload && String(payload.countryId || "");
-			if (!hasId && !hasCountry) {
-				enrAvailRecords = [];
-				enrAvailLastLoadRequest = null;
+			if (!hasId && !enrAvailHasRequiredFilters(payload)) {
+				enrAvailResetLoadedData();
 				return;
 			}
 		} catch (e) {}
 
 		// remember last successful load context (for reload after save/delete)
 		try {
-			if (payload && payload.countryId) {
+			if (payload && enrAvailHasRequiredFilters(payload)) {
 				enrAvailLastLoadRequest = {
 					countryId: String(payload.countryId || ""),
 					programId: String(payload.programId || ""),
@@ -1250,6 +1308,7 @@ function enrAvailRenderSaved() {
 	enrAvailUpdateDrillSelectAllState();
 	enrAvailPopulateSavedSummaryFilters();
 	enrAvailUpdateSavedSummaryPills();
+	enrAvailUpdateLoadButtonState();
 	enrAvailRenderSavedSummary();
 	enrAvailSetSavedViewMode(enrAvailSavedViewMode);
 	enrAvailRenderTable();
@@ -1422,11 +1481,15 @@ async function enrAvailDeleteSelected() {
 	}
 
 	function enrAvailFilteredSavedRecords() {
-		var f = enrAvailSavedFilters || {};
+		var f = enrAvailAppliedFilters || {};
 		var countryId = String(f.countryId || "");
 		var programId = String(f.programId || "");
 		var gradeId = String(f.gradeId || "");
-		var q = String(f.q || "").trim();
+		var q = String((enrAvailSavedFilters || {}).q || "").trim();
+
+		if (!enrAvailHasAppliedSelection()) {
+			return [];
+		}
 
 		var base = (enrAvailRecords || []).filter(function (r) {
 			if (!r) return false;
@@ -1437,71 +1500,7 @@ async function enrAvailDeleteSelected() {
 			return true;
 		});
 
-		// Ensure every Country×Program×Grade combo exists (virtual records for missing combos).
-		// IMPORTANT: Only generate virtual combos when a Country filter is selected,
-		// otherwise the list can become extremely large and the UI will feel unclickable.
-		// Virtual rows become real once user edits/saves them.
-		try {
-			if (!enrAvailMasters || !enrAvailMasters.loaded) return base;
-			var countries = enrAvailMasters.countries || [];
-			var programs = enrAvailMasters.programs || [];
-			var grades = enrAvailMasters.grades || [];
-			if (!countries.length || !programs.length || !grades.length) return base;
-			if (!countryId) return base;
-
-			// Limit generation to current filters to avoid huge lists when user narrows down.
-			var cList = countryId
-				? countries.filter(function (c) {
-						return String(c.id) === countryId;
-					})
-				: countries;
-			var pList = programId
-				? programs.filter(function (p) {
-						return String(p.id) === programId;
-					})
-				: programs;
-			var gList = gradeId
-				? grades.filter(function (g) {
-						return String(g.id) === gradeId;
-					})
-				: grades;
-
-			var existing = {};
-			(base || []).forEach(function (r) {
-				var k = enrAvailComboKey(r.countryId, r.programId, r.gradeId);
-				existing[k] = true;
-			});
-
-			var virtuals = [];
-			cList.forEach(function (c) {
-				pList.forEach(function (p) {
-					gList.forEach(function (g) {
-						var ck = enrAvailComboKey(c.id, p.id, g.id);
-						if (existing[ck]) return;
-						var vr = {
-							id: "", // no id until saved
-							__virtual: true,
-							countryId: c.id,
-							country: c.label,
-							programId: String(p.id || ""),
-							program: p.label,
-							gradeId: g.id,
-							grade: g.label,
-							total: 0,
-							booked: 0,
-							about: 0,
-							remaining: 0,
-						};
-						if (q && !enrAvailMatchQ(vr, q)) return;
-						virtuals.push(vr);
-					});
-				});
-			});
-
-			return base.concat(virtuals);
-		} catch (e) {
-			return base;
-		}
+		return base;
 	}
 
 function enrAvailSummaryMeta(total, booked, reserved, wait) {
@@ -1778,9 +1777,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.t) +
 							'"/></div>'
-						: '<div class="text-right"><div class="text-dark font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center"><div class="text-dark font-weight-bold" style="font-size:18px;line-height:1;">' +
 							meta.t.toLocaleString() +
-							'</div><div class="text-muted font-10 text-uppercase">Total</div></div>';
+							'</div><div class="text-muted font-10">Total</div></div>';
 
 					var confirmEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
@@ -1794,13 +1793,13 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.b) +
 							'"/></div>'
-						: '<div class="text-right"><div class="text-info font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center"><div class="text-info font-weight-bold" style="font-size:18px;line-height:1;">' +
 							meta.b.toLocaleString() +
-							'</div><div class="text-muted font-10 text-uppercase">Confirm</div></div>';
+							'</div><div class="text-muted font-10">Confirm</div></div>';
 
 					var rsvEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
-							'<div class="text-muted font-10 mb-1">Rsv</div>' +
+							'<div class="text-muted font-10 mb-1">Reserve</div>' +
 							'<input type="number" min="0" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
 							enrAvailEsc(px + "_rsv") +
 							'" data-key="' +
@@ -1810,9 +1809,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.rv) +
 							'"/></div>'
-						: '<div class="text-right"><div class="text-warning font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center"><div class="text-warning font-weight-bold" style="font-size:18px;line-height:1;">' +
 							meta.rv.toLocaleString() +
-							'</div><div class="text-muted font-10 text-uppercase">Rsv</div></div>';
+							'</div><div class="text-muted font-10">Reserve</div></div>';
 
 					var waitEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
@@ -1826,9 +1825,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.wait) +
 							'"/></div>'
-						: '<div class="text-right"><div class="text-primary font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center"><div class="text-primary font-weight-bold" style="font-size:18px;line-height:1;">' +
 							meta.wait.toLocaleString() +
-							'</div><div class="text-muted font-10 text-uppercase">Waiting</div></div>';
+							'</div><div class="text-muted font-10">Waiting</div></div>';
 					
 						var freeEl = isEditing
 							? '<div class="text-right" style="width:90px;">' +
@@ -1842,9 +1841,9 @@ function enrAvailRenderSummaryDrill(kind) {
 								'" value="' +
 								enrAvailEsc(meta.free) +
 								'" readonly/></div>'
-							: '<div class="text-right"><div class="text-success font-weight-bold" style="font-size:18px;line-height:1;">' +
+							: '<div class="text-center"><div class="text-success font-weight-bold" style="font-size:18px;line-height:1;">' +
 								meta.free.toLocaleString() +
-								'</div><div class="text-muted font-10 text-uppercase">Free</div></div>';		
+								'</div><div class="text-muted font-10">Free</div></div>';		
 
 				return (
 					'<div class="py-2' +
@@ -1877,7 +1876,7 @@ function enrAvailRenderSummaryDrill(kind) {
 						"% filled</div>" +
 						"</div>" +
 						'<div class="d-flex align-items-center" style="gap:12px;flex:0 0 auto;">' +
-						'<div class="d-flex align-items-end" style="gap:16px;">' +
+						'<div class="d-flex align-items-center" style="gap:16px;">' +
 						totalEl +
 						confirmEl +
 						rsvEl +
@@ -1985,14 +1984,24 @@ function enrAvailRenderSummaryDrill(kind) {
 			if ($("#enrAvailSumByGrade").length) $("#enrAvailSumByGrade").html('<div class="text-center text-muted py-4">No records yet</div>');
 			if ($("#enrAvailSumByProgram").length) $("#enrAvailSumByProgram").html('<div class="text-center text-muted py-4">No records yet</div>');
 			if ($("#enrAvailSummaryEditor").length) {
-				var msg = "Select a Country and click Load";
+				var msg = "Select a Country and click Check";
 				try {
-					if (enrAvailSavedFilters && enrAvailSavedFilters.countryId) msg = "Click Load to fetch records for the selected country";
+					if (
+						enrAvailSavedFilters &&
+						(enrAvailSavedFilters.countryId || enrAvailSavedFilters.programId || enrAvailSavedFilters.gradeId) &&
+						!enrAvailHasRequiredFilters(enrAvailSavedFilters)
+					) {
+						msg = "Select a Country and click Check";
+					} else if (enrAvailHasRequiredFilters(enrAvailSavedFilters) && !enrAvailHasAppliedSelection()) {
+						msg = "Click Check to fetch records for the selected filters";
+					}
 					if (
 						enrAvailLastLoadRequest &&
-						enrAvailSavedFilters &&
-						enrAvailSavedFilters.countryId &&
-						String(enrAvailLastLoadRequest.countryId || "") === String(enrAvailSavedFilters.countryId || "")
+						enrAvailHasAppliedSelection() &&
+						enrAvailHasRequiredFilters(enrAvailAppliedFilters) &&
+						String(enrAvailLastLoadRequest.countryId || "") === String(enrAvailAppliedFilters.countryId || "") &&
+						String(enrAvailLastLoadRequest.programId || "") === String(enrAvailAppliedFilters.programId || "") &&
+						String(enrAvailLastLoadRequest.gradeId || "") === String(enrAvailAppliedFilters.gradeId || "")
 					) {
 						msg = "No records found for the selected filters";
 					}

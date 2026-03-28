@@ -156,7 +156,7 @@ async function getStudentDetailsByStudentID(studentUserId){
     $("#studentPaymentListingWrapper").html(getStudentPaymentListing(paymentList.details.userPaymentDetailsList));
     
     renderAnnouncement(STUDENT_LIST.studentBasicDetails[0].userId);
-    renderSchoolDaiaryBtnCount(USER_ID, studentUserId);
+    renderSchoolDaiaryBtnCount(studentUserId);
     
     if($(window).width()<=480){
         $(".school-diary-notebook").css({"height":"calc(100vh - 120px)"});

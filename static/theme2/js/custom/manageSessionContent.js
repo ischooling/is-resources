@@ -52,7 +52,7 @@ function getManageSessionFilter(roleAndModule, schoolId, userId, role) {
 		+ '<div class="filter-fields row">'
 		+ '<div class="col-md-3 col-sm-3 col-12">'
 		+ '<label>Select Academic Year</label>'
-		+ '<select name="sessionId" id="sessionId" class="form-control"></select>'
+		+ '<select name="sessionId" id="sessionId" class="form-control"></select>' 
 		+ '</div>'
 		+ '<div class="col-md-3 col-sm-6 col-12">'
 		+ '<label> Start Date</label>'

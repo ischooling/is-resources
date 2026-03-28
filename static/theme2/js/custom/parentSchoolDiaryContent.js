@@ -5,26 +5,316 @@ function getParentSchoolDiaryEmptyState() {
 
 function getParentSchoolDiaryEntriesHtml(data) {
     var html = `
-    <div>
-        <div class="d-flex py-2 pl-4 school-diary-head">
+    <div class="school-diary-head">
+        <div class="d-flex py-2 pl-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="25" class="cursor mr-2 back-diary-btn" data-thread-id="" onclick="backSchoolChatList(this)" style="display:none">
                 <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288 480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 105.4-105.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
             </svg>
-            <div class="font-20 text-dark font-weight-semi-bold">
+            <div class="font-14 text-dark font-weight-semi-bold">
                 <img src="${PATH_FOLDER_IMAGE2}diary.png" alt="School Diary" class="mr-2" style="width:30px;"/>
-                ${USER_ROLE == "TEACHER"?` Teacher Diary <span class="chat-user-name"></span>`:USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? `<span class="chat-user-name"></span> School Diary`:'School Diary'}
+                ${getDiaryTitle(USER_ROLE)}
             </div>
         </div>
-        ${USER_ROLE == "TEACHER" || USER_ROLE == "PARENT" ? schoolDiaryFilterUserContent(data):""}
+        ${USER_ROLE == "TEACHER" || USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? schoolDiaryFilterTeacherParentContent(data):""}
     </div>
-    ${schoolDiaryUserListContent()}
-    <form id="schoolDiaryForm" method="post" autocomplete="off">
+    ${getSchoolDiary()}`;
+    return html;
+}
+
+function getDiaryTitle(USER_ROLE) {
+    if (USER_ROLE === "TEACHER") {
+        return 'Teacher Diary <span class="chat-user-name"></span>';
+    } else if (USER_ROLE === "PARENT" || USER_ROLE === "STUDENT") {
+        return 'School Diary <span class="chat-user-name"></span>';
+    } else {
+        return 'School Diary <span class="chat-user-name"></span>';
+    }
+}
+
+
+
+function schoolDiaryFilterTeacherParentContent(data){
+    var html=
+    `<div class="full px-4 short-chat">
+        <div class="d-flex p-2 rounded-5 bg-light flex-wrap">`;
+            if(USER_ROLE == "TEACHER"){
+                html+=
+                `<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                    <select class="form-control form-control-sm" id="gradeDropDown" onchange="filterStudentByGrade(\'gradeDropDown\')">
+                        <option value="">Select Grade</option>`
+                        $.each(data.details.assignedGrades, function(i,v){
+                            html+=`<option value="${v.standardId}">${v.standardName}</option>`
+                        });
+                    html+=`</select>
+                </div>`;
+            } 
+            if(USER_ROLE == "PARENT" || USER_ROLE == "TEACHER"){   
+            html+=
+                `<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                    <select class="form-control form-control-sm" id="studentDropDown" ${USER_ROLE == "TEACHER" ? 'disabled':''} onchange="searchChatByStudent(\'studentDropDown\')"><option value="">Select Student</option></select>
+                </div>`;
+            }
+            if(USER_ROLE == "PARENT" || USER_ROLE == "STUDENT"){
+                html+=`<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                    <select class="form-control form-control-sm" id="chatWith"  onchange="chatFilter(\'chatWith\')">
+                        <option value="TEACHER">Teacher</option>
+                        <option value="SCHOOL">School</option>
+                    </select>
+                </div>`;
+            }
+        html+=`</div>
+    </div>
+    <div class="recent font-weight-semi-bold font-18 px-4 mt-3 short-chat">Recent</div>`;
+    return html;
+}
+
+function schoolDiaryFilterUserContent(){
+    var html=
+        `<div class="full px-3 short-chat">${/*
+            <div class="form-row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="position-relative form-group">
+                        <label for="schoolDiaryAcademicYear" class="">Academic Year</label>
+                        <select class="form-control form-control-sm selet2_dropdown" id="schoolDiaryAcademicYear">
+                            <option value="0">All</option>`
+                        html+=`</select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="position-relative form-group">
+                        <label for="schoolDiaryLearningProgram" class="">Learning Program</label>
+                        <select class="form-control form-control-sm selet2_dropdown" id="schoolDiaryLearningProgram">
+                            <option value="">Select Learning Program</option>
+                            ${getLearningProgramContent(SCHOOL_ID)}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="position-relative form-group">
+                        <label for="schoolDiaryGrade" class="">Grade</label>
+                        <select class="form-control form-control-sm selet2_dropdown" id="schoolDiaryGrade">
+                            <option value="">Select Grade</option>
+                            ${getStandardContent(SCHOOL_ID, true, false)}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="position-relative form-group">
+                        <label for="schoolDiaryCourseProviderId" class="">LMS Platform</label>
+                        <select class="form-control form-control-sm selet2_dropdown" id="schoolDiaryCourseProviderId">
+                            ${getLmsPlatformContent(SCHOOL_ID)}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="position-relative form-group">
+                        <label for="schoolDiaryStudentId" class="">Student ID</label>
+                        <input type="text" class="form-control" id="schoolDiaryStudentId" />
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="position-relative form-group">
+                        <label for="schoolDiaryStudentName" class="">Student Name</label>
+                        <input type="text" class="form-control" id="schoolDiaryStudentName" />
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="position-relative form-group">
+                        <button class="btn btn-sm btn-pill btn-primary float-right" id="filterSchoolDiaryBySchool">Search</button>
+                    </div>
+                </div>
+            </div>
+         */''}
+            <input type="hidden" id="studentUserId" name="studentUserId"/>
+            <input type="text" class="form-control" id="schoolDiaryTypeahead" name="schoolDiaryTypeahead" placeholder="Search by Student Name or student ID" />
+            <div class="recent font-weight-semi-bold font-18 px-2 mt-1">Recent</div>
+        </div>`;
+    return html;
+}
+
+function getSchoolDiary(){
+    var html=``;
+    if(SCHOOL_DIARY_ROLE.includes(USER_ROLE)){
+        html+=
+        `${schoolDiaryUserListContent()+schoolDiaryDetailsContent()}`;
+    }else{
+        html+=`${schoolDiaryUserListContent()+schoolDiaryDetailsContent()}`;
+    }
+    return html;
+}
+
+function schoolDiaryUserListContent(){
+    var html=
+    `${SCHOOL_DIARY_ROLE.includes(USER_ROLE) ? schoolDiaryFilterUserContent():""}
+    <div class="user-list-wrapper overflow-y-auto short-chat" style="height:calc(100vh - 140px);">
+        <div class="user-list-body">
+            <ul class="list-group list-group-flush chat_list_ul" id="schoolDiaryChatUserListWrapper"></ul>
+            <div id="chat-loader" class="skeleton" style="display:none;height:70px"></div>
+        </div>
+    </div>`;
+    return html;
+}
+
+function schoolDiaryUserListSkeletonContent(){
+    var html=
+    `<div class="skeleton chat-list-skeleton border-bottom" style="height: 70px;margin-bottom:1"></div>
+    <div class="skeleton chat-list-skeleton border-bottom" style="height: 70px;margin-bottom:1"></div>
+    <div class="skeleton chat-list-skeleton border-bottom" style="height: 70px;margin-bottom:1"></div>`;
+    return html;
+}
+
+function schoolDiaryDetailsContent(){
+    var html=
+    `<form id="schoolDiaryForm" method="post" autocomplete="off">
         <input type="hidden" id="input-count-alok-iitian" value="" onchange="checkUnreadMessageCount(this)"/>
         <input type="hidden" id="input-last-message-id-alok-iitian" value="" onchange="lastMsgIdUpdated(this)" />
         <input type="hidden" id="input-chat-id-alok-iitian" value="" onchange="refreshSchoolDiaryChat(this)"/>
         <input type="hidden" id="input-chat-status-alok-iitian" value="" onchange="showAndHideAcknowledge(this)" />
         <div class="school-diary-notebook overflow-y-auto pt-2" style="height:calc(100vh - 50px);display:none"></div>
     </form>`;
+    return html;
+}
+
+function schoolDiaryUserListing(data){
+    var html=``;
+    
+    if(data.details != null && data.details.threads.length>0){
+        $.each(data.details.threads, function(i,v){
+            html+=
+            `<li class="list-group-item text-left parent-chat-with-${v.chatWithRole}" id="chat-list-${v.threadId} userid-${v.studentUserId}">
+                <a href="javascript:void(0)" class="widget-content p-0 text-dark" onclick="gotoChat('${v.threadId}', true, '${SCHOOL_DIARY_INITIATES_ROLE ? ((v.learningProgram ? getLearningProgramLabel(v.learningProgram) + " | " : "") + v.studentName) : (v.studentName)}','${v.studentUserId}')">
+                    <div class="widget-content-wrapper align-items-start">
+                        <div class="avatar-icon-wrapper mr-2">
+                            <div class="avatar-icon ${(v.profilePic != null && v.profilePic != undefined && v.profilePic != "") ? 'align-items-center justify-content-center d-flex bg-primary':'' }">`
+                                if(v.profilePic != null && v.profilePic != undefined && v.profilePic != ""){
+                                    html+=`<img src="${v.profilePic}" alt="">`;
+                                }else{
+                                    html+=`<span class="text-white font-weight-semi-bold">${SCHOOL_DIARY_INITIATES_ROLE ? `${getUserInitialsCommon(v.studentName,'')}`:`${getUserInitialsCommon(v.teacherName,'')}`}</span>`
+                                }
+                            html+=`</div>
+                        </div>
+                        <div class="widget-content-left">
+                            <div class="widget-heading">${SCHOOL_DIARY_INITIATES_ROLE ? `${v.studentName}`:`${getSalutationByGender(v.teacherGender)} ${v.teacherName}`}</div>
+                            <p class="font-weight-semi-bold text-dark school-diary-unread-msg m-0 school-diary-unread-msg-${v.threadId}">${v.latestMessage}</p>
+                        </div>
+                        <div class="chat-time unread-chat text-primary ml-auto badge-unread-count-${v.threadId}" style="${v.unreadCount>0?'display:block':'display:none'}">
+                            ${/*<div class="font-12">15m</div>*/''}
+                            <span class="counts-badge badge badge-pill badge-primary ml-0 unread-chat-count">${v.unreadCount}</span>
+                        </div>
+                    </div>
+                </a>
+            </li>`
+        });
+    }
+    return html;
+}
+
+function getParentSchoolDiaryTeacherCard(entry, value, timezone, courseName) {
+    var createdAt = parentSchoolDiaryFormatDate(entry.createdAt, timezone);
+    var safeMessage = parentSchoolDiaryHighlightMentions(entry.message || "", entry.mentions);
+    var headerText = parentSchoolDiaryGetHeader(entry, false);
+    html=`
+        <div class="school-diary-item school-diary-item-teacher mb-3 pr-2">`;
+            html+=
+            `<div class="school-diary-card teacher-card text-left mr-auto">
+                <p class="mb-1 text-primary font-weight-bold">${entry.senderGender != "DONOTWANTTOSPECIFY" ?getSalutationByGender(entry.senderGender):""} ${headerText}</p>`;
+                
+                if(PARENT_MENTION_ROLE.includes(entry.senderRole)){
+                    html+=
+                    `<p class="mb-1 text-success">${courseName}</p>
+                    <div class="head">
+                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Parent</p>
+                        <p class="font-semi-bold text-primary mb-0 caveat-font">Greetings from ${SCHOOL_NAME}!</p>
+                        <p class="font-semi-bold mb-0 caveat-font">Hope you are doing well.</p>
+                    </div>`;
+                }else if(entry.senderRole == "PARENT"){
+                    html+=
+                    `<div class="head">
+                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear ${getChatLabel(USER_ROLE)}</p>
+                    </div>`;
+                }
+                html+=`<p class="font-20 mb-2 caveat-font my-3">${safeMessage.replace(/\n/g, "<br/>")}</p>`;
+                if(PARENT_MENTION_ROLE.includes(entry.senderRole)){
+                    html+=
+                    `<div class="foot mb-1">
+                        <p class="mb-0 caveat-font">Gratitude and prayers,</p>
+                        <p class="mb-0 caveat-font">${SCHOOL_NAME} Family</p>
+                    </div>`;
+                }
+                html+=`<small class="text-muted">${createdAt}</small>
+            </div>
+        </div>`;
+    return html;
+}
+
+function getChatLabel(role){
+    if (role === "TEACHER") {
+        return 'Teacher';
+    }else {
+        return 'School administration';
+    }
+}
+
+function getParentSchoolDiaryReplyCard(entry, value, timezone) {
+    var createdAt = parentSchoolDiaryFormatDate(entry.createdAt, timezone);
+    var safeMessage = parentSchoolDiaryHighlightMentions(entry.message || "", entry.mentions);
+    // var headerText = parentSchoolDiaryGetHeader(entry, true);
+    var html=
+        `<div class="school-diary-item school-diary-item-parent mb-3">
+            <div class="school-diary-card parent-card ml-auto text-left">`;
+                if(PARENT_MENTION_ROLE.includes(entry.senderRole)){
+                    html+=
+                    `<div class="head">
+                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Parent</p>
+                        <p class="font-semi-bold text-primary mb-0 caveat-font">Greetings from ${SCHOOL_NAME}!</p>
+                        <p class="font-semi-bold mb-0 caveat-font">Hope you are doing well.</p>
+                    </div>`;
+                }else if(USER_ROLE == "PARENT"){
+                    html+=
+                    `<div class="head">
+                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear ${getChatLabel(USER_ROLE)}</p>
+                    </div>`;
+                }
+                html+=`<p class="mb-2 caveat-font safeMessage ${USER_ROLE == "TEACHER"? 'my-4':''}">${safeMessage.replace(/\n/g, "<br/>")}</p>`;
+                if(PARENT_MENTION_ROLE.includes(entry.senderRole)){
+                    html+=
+                    `<div class="foot mb-1">
+                        <p class="mb-0 caveat-font">Gratitude and prayers,</p>
+                        <p class="mb-0 caveat-font">${SCHOOL_NAME} Family</p>
+                    </div>`;
+                }
+            html+=`<small class="text-muted">${createdAt}</small></div>
+        </div>`;
+    return html;
+}
+
+function getParentSchoolDiaryReplyEditor(threadId, userId) {
+    var html=``;
+    if (threadId != null && threadId != undefined && threadId != "") {
+        html+=`
+        <div class="school-diary-item school-diary-item-editor mb-0">
+            <div class="input-group">
+                <textarea class="form-control school-diary-reply-input" id="diaryReplyText${threadId}" onkeydown="enterPressSubmitMsg(this, \'${threadId}\', event)" placeholder="Write your response…" rows="1" data-threadId="${threadId}"></textarea>
+                <div class="p-0 mx-2 cursor rounded-circle circle-btn bg-primary" id="diaryReplyBtn${threadId}" onclick="schoolDiarySubmitReply(\'${threadId}\')">
+                    <i class="fa fa-paper-plane text-white"></i>
+                </div>
+                <div class="mention-suggestion-box d-none"></div>
+            </div>
+        </div>`;
+    }
+    if(SCHOOL_DIARY_INITIATES_ROLE && (threadId == null || threadId == undefined || threadId == "")){
+        html+= `
+            <div class="school-diary-item school-diary-item-editor mb-0">
+                <div class="input-group">
+                    <textarea class="form-control school-diary-reply-input create-chat" onkeydown="enterPressSubmitMsg(this, \'${userId}\', event)" placeholder="Write your response…" rows="1" data-userId="${userId}"></textarea>
+                    <div class="p-0 mx-2 cursor rounded-circle circle-btn bg-primary" onclick="createUserDiary(\'${userId}\')">
+                        <i class="fa fa-paper-plane text-white"></i>
+                    </div>
+                    <div class="mention-suggestion-box d-none"></div>
+                </div>
+            </div>
+        `;
+    }
     return html;
 }
 
@@ -200,179 +490,6 @@ function parentSchoolDiaryGetHeader(entry, isOutgoing) {
     // return safeSender + " to " + safeReceiver;
     return safeSender;
 }
-
-function getParentSchoolDiaryTeacherCard(entry, value, timezone, courseName) {
-    var createdAt = parentSchoolDiaryFormatDate(entry.createdAt, timezone);
-    var safeMessage = parentSchoolDiaryHighlightMentions(entry.message || "", entry.mentions);
-    var headerText = parentSchoolDiaryGetHeader(entry, false);
-    html=`
-        
-        <div class="school-diary-item school-diary-item-teacher mb-3 pr-2">`;
-            html+=
-            `<div class="school-diary-card teacher-card text-left mr-auto">
-                <p class="mb-1 text-primary font-weight-bold">${entry.senderGender != "DONOTWANTTOSPECIFY" ?getSalutationByGender(entry.senderGender):""} ${headerText}</p>`;
-                
-                if(entry.senderRole == "TEACHER"){
-                    html+=
-                    `<p class="mb-1 text-success">${courseName}</p>
-                    <div class="head">
-                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Parent</p>
-                        <p class="font-semi-bold text-primary mb-0 caveat-font">Greetings from ${SCHOOL_NAME}!</p>
-                        <p class="font-semi-bold mb-0 caveat-font">Hope you are doing well.</p>
-                    </div>`;
-                }else if(entry.senderRole == "PARENT"){
-                    html+=
-                    `<div class="head">
-                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Teacher</p>
-                    </div>`;
-                }
-                html+=`<p class="mb-2 caveat-font my-3">${safeMessage.replace(/\n/g, "<br/>")}</p>`;
-                if(entry.senderRole == "TEACHER"){
-                    html+=
-                    `<div class="foot mb-1">
-                        <p class="mb-0 caveat-font">Gratitude and prayers,</p>
-                        <p class="mb-0 caveat-font">${SCHOOL_NAME} Family</p>
-                    </div>`;
-                }
-                html+=`<small class="text-muted">${createdAt}</small>
-            </div>
-        </div>`;
-    return html;
-}
-
-function getParentSchoolDiaryReplyCard(entry, value, timezone) {
-    var createdAt = parentSchoolDiaryFormatDate(entry.createdAt, timezone);
-    var safeMessage = parentSchoolDiaryHighlightMentions(entry.message || "", entry.mentions);
-    // var headerText = parentSchoolDiaryGetHeader(entry, true);
-    var html=
-        `<div class="school-diary-item school-diary-item-parent mb-3">
-            <div class="school-diary-card parent-card ml-auto text-left">`;
-                if(USER_ROLE == "TEACHER"){
-                    html+=
-                    `<div class="head">
-                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Parent</p>
-                        <p class="font-semi-bold text-primary mb-0 caveat-font">Greetings from ${SCHOOL_NAME}!</p>
-                        <p class="font-semi-bold mb-0 caveat-font">Hope you are doing well.</p>
-                    </div>`;
-                }else if(USER_ROLE == "PARENT"){
-                    html+=
-                    `<div class="head">
-                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Teacher</p>
-                    </div>`;
-                }
-                html+=`<p class="mb-2 caveat-font safeMessage ${USER_ROLE == "TEACHER"? 'my-4':''}">${safeMessage.replace(/\n/g, "<br/>")}</p>`;
-                if(USER_ROLE == "TEACHER"){
-                    html+=
-                    `<div class="foot mb-1">
-                        <p class="mb-0 caveat-font">Gratitude and prayers,</p>
-                        <p class="mb-0 caveat-font">${SCHOOL_NAME} Family</p>
-                    </div>`;
-                }
-            html+=`<small class="text-muted">${createdAt}</small></div>
-        </div>`;
-    return html;
-}
-
-function getParentSchoolDiaryReplyEditor(threadId, userId) {
-    if (threadId != null && threadId != undefined && threadId != "") {
-        return `
-        <div class="school-diary-item school-diary-item-editor mb-0">
-            <div class="input-group">
-                <textarea class="form-control school-diary-reply-input" id="diaryReplyText${threadId}" onkeydown="enterPressSubmitMsg(this, \'${threadId}\', event)" placeholder="Write your response…" rows="1" data-threadId="${threadId}"></textarea>
-                <div class="p-0 mx-2 cursor rounded-circle circle-btn bg-primary" id="diaryReplyBtn${threadId}" onclick="schoolDiarySubmitReply(\'${threadId}\')">
-                    <i class="fa fa-paper-plane text-white"></i>
-                </div>
-                <div class="mention-suggestion-box d-none"></div>
-            </div>
-        </div>`;
-    }
-    if(USER_ROLE == "TEACHER"){
-        return `
-            <div class="school-diary-item school-diary-item-editor mb-0">
-                <div class="input-group">
-                    <textarea class="form-control school-diary-reply-input create-chat" onkeydown="enterPressSubmitMsg(this, \'${userId}\', event)" placeholder="Write your response…" rows="1" data-userId="${userId}"></textarea>
-                    <div class="p-0 mx-2 cursor rounded-circle circle-btn bg-primary" onclick="createUserDiary(\'${userId}\')">
-                        <i class="fa fa-paper-plane text-white"></i>
-                    </div>
-                    <div class="mention-suggestion-box d-none"></div>
-                </div>
-            </div>
-        `;
-    }
-}
-
-function schoolDiaryFilterUserContent(data){
-    var html=
-    `<div class="full px-4 short-chat">
-        <div class="d-flex p-2 rounded-5 bg-light">`;
-            if(USER_ROLE == "TEACHER"){
-                html+=
-                `<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                    <select class="form-control form-control-sm" id="gradeDropDown" onchange="filterStudentByGrade(\'gradeDropDown\')">
-                        <option value="">Select Grade</option>`
-                        $.each(data.details.assignedGrades, function(i,v){
-                            html+=`<option value="${v.standardId}">${v.standardName}</option>`
-                        });
-                    html+=`</select>
-                </div>`;
-            }    
-            html+=
-            `<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                <select class="form-control form-control-sm" id="studentDropDown" ${USER_ROLE == "TEACHER" ? 'disabled':''} onchange="searchChatByStudent(\'studentDropDown\')"><option>Select Student</option></select>
-            </div>
-        </div>
-    </div>
-    <div class="recent font-weight-semi-bold font-18 px-4 mt-3 short-chat">Recent</div>`;
-    return html;
-}
-
-function schoolDiaryUserListContent(){
-    var html=
-    `<div class="user-list-wrapper overflow-y-auto short-chat" style="height:calc(100vh - 140px);">
-        <div class="user-list-body">
-            <ul class="list-group list-group-flush" id="schoolDiaryChatUserListWrapper"></ul>
-        </div>
-    </div>`;
-    return html;
-}
-
-function schoolDiaryUserListing(data){
-    var html=``;
-    
-    if(data.details != null && data.details.threads.length>0){
-        $.each(data.details.threads, function(i,v){
-            html+=
-            `<li class="list-group-item text-left" id="chat-list-${v.threadId} userid-${v.studentUserId}">
-                <a href="javascript:void(0)" class="widget-content p-0 text-dark" onclick="gotoChat('${v.threadId}', true, '${USER_ROLE === "TEACHER" ? ((v.learningProgram ? getLearningProgramLabel(v.learningProgram) + " | " : "") + v.studentName) : (v.studentName + "\\'s")}')">
-                    <div class="widget-content-wrapper align-items-start">
-                        <div class="avatar-icon-wrapper mr-2">
-                            <div class="avatar-icon ${(v.profilePic != null && v.profilePic != undefined && v.profilePic != "") ? 'align-items-center justify-content-center d-flex bg-primary':'' }">`
-                                if(v.profilePic != null && v.profilePic != undefined && v.profilePic != ""){
-                                    html+=`<img src="${v.profilePic}" alt="">`;
-                                }else{
-                                    html+=`<span class="text-white font-weight-semi-bold">${USER_ROLE == "TEACHER" ? `${getUserInitialsCommon(v.studentName,'')}`:`${getUserInitialsCommon(v.teacherName,'')}`}</span>`
-                                }
-                            html+=`</div>
-                        </div>
-                        <div class="widget-content-left">
-                            <div class="widget-heading">${USER_ROLE == "TEACHER" ? `${v.studentName}`:`${getSalutationByGender(v.teacherGender)} ${v.teacherName}`}</div>
-                            <p class="font-weight-semi-bold text-dark school-diary-unread-msg m-0 school-diary-unread-msg-${v.threadId}">${v.latestMessage}</p>
-                        </div>
-                        <div class="chat-time unread-chat text-primary ml-auto badge-unread-count-${v.threadId}" style="${v.unreadCount>0?'display:block':'display:none'}">
-                            ${/*<div class="font-12">15m</div>*/''}
-                            <span class="counts-badge badge badge-pill badge-primary ml-0 unread-chat-count">${v.unreadCount}</span>
-                        </div>
-                    </div>
-                </a>
-            </li>`
-        });
-    }
-    
-    return html;
-}
-
-
-
 function parentSchoolDiaryGetStyles() {
     return `
         <style id="parentSchoolDiaryStyles">
@@ -380,7 +497,7 @@ function parentSchoolDiaryGetStyles() {
             .caveat-font{
                 font-family: "Caveat", cursive;
                 font-weight:bold;
-                font-size:16px;
+                font-size:20px;
                 word-break:break-all;
             }
             .parent-school-diary-wrap .card-body {
@@ -496,6 +613,17 @@ function parentSchoolDiaryGetStyles() {
                 font-size: 12px;
                 z-index: 999;
                 text-align: center;
+            }
+            #schoolDiaryTypeahead {
+                background: url('${PATH_FOLDER_IMAGE2}search_icon_40x40.png') no-repeat 10px center;
+                background-size: 16px;
+                padding-left: 35px;
+                transition: all 0.2s ease;
+            }
+
+            #schoolDiaryTypeahead.has-value {
+                background: none;
+                padding-left: 0.75rem; /* default bootstrap padding */
             }
             @media (max-width: 767px) {
                 
