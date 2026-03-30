@@ -2875,23 +2875,87 @@ function getLeadEnrollmentHoldPopup() {
   var gradeOptions = getStandardContent(SCHOOL_ID, true, true);
 
   var html =
-    `<div id="leadEnrollmentHoldPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadEnrollmentHoldTitle" aria-hidden="true">
-      <div class="modal-dialog modal-md">
-        <div class="modal-content border-0">
-          <div class="modal-header py-2 bg-primary text-white">
+    `<style id="leadEnrollmentHoldPopupStyles">
+      #leadEnrollmentHoldPopupForm .hold-enrollment-dialog{max-width:980px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-modal{border-radius:28px;overflow:hidden;box-shadow:0 28px 70px rgba(11,57,105,.24);background:#fff;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-header{border-bottom:0;padding:18px 28px;background:linear-gradient(135deg,#0b78f2 0%,#1fa2ff 100%);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:2.15rem;font-weight:600;line-height:1.1;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-close{padding:0;background:transparent;border:0;color:#fff;opacity:1;text-shadow:none;font-size:44px;line-height:1;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-body{padding:28px 34px 22px;background:linear-gradient(180deg,#f6fbff 0%,#ffffff 58%);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-footer{border-top:1px solid #e3edf8;padding:18px 34px 24px;background:#fff;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form{background:#fff;border:1px solid #dfebf8;border-radius:24px;padding:24px 22px 12px;box-shadow:0 18px 42px rgba(15,72,126,.09);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-section-title{font-size:28px;font-weight:700;color:#16324f;line-height:1.15;margin-bottom:6px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-subtitle{font-size:14px;color:#667b93;max-width:560px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-chip{display:inline-flex;align-items:center;padding:10px 16px;border-radius:999px;background:#edf6ff;color:#1463c2;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form label{margin-bottom:6px !important;color:#213349;font-weight:600;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .form-control{height:56px;border-radius:16px;border:1px solid #cfdced;box-shadow:none;font-size:15px;color:#22384d;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .form-control:focus{border-color:#69a8ff;box-shadow:0 0 0 4px rgba(10,120,242,.12);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti{width:100%;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti input{width:100%;height:56px;border-radius:16px;border:1px solid #cfdced;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form-divider{border-top:1px solid #e5eef8;margin:18px 0 22px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel{background:linear-gradient(135deg,#f8fbff 0%,#eef5ff 100%);border:1px solid #dbe8f9;border-radius:20px;padding:14px 18px;margin-bottom:18px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel table{margin-bottom:0;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel th,
+      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel td{border:0;padding:6px 4px;font-size:13px;vertical-align:middle;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-best-time-title{font-size:17px;font-weight:700;color:#16324f;margin-bottom:12px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-active-banner{display:block;border:1px solid #d8e7fb;border-radius:24px;padding:18px 20px;background:linear-gradient(135deg,#fffaf1 0%,#ffffff 100%);box-shadow:0 18px 44px rgba(15,72,126,.08);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-active-banner.timer-only{padding:0;border:0;background:transparent;box-shadow:none;margin-bottom:0;}
+      #leadEnrollmentHoldPopupForm.hold-timer-only-mode .hold-enrollment-body{padding:30px 34px 18px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-secondary{min-width:164px;height:52px;border-radius:16px;background:linear-gradient(135deg,#33a7f6 0%,#1e94e4 100%);border:0;color:#fff;font-size:18px;font-weight:600;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary{min-width:188px;height:52px;border-radius:16px;background:linear-gradient(135deg,#27cf47 0%,#1fbf45 100%);border:0;color:#fff;font-size:18px;font-weight:700;box-shadow:0 14px 30px rgba(31,191,69,.26);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary:hover,
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-secondary:hover{color:#fff;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-release{border-radius:12px;font-weight:600;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary:disabled{background:#94c6a1;box-shadow:none;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card{background:#fff;border:1px solid #dbe8f8;border-radius:18px;padding:16px 18px;text-align:left;box-shadow:0 12px 26px rgba(15,72,126,.06);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card span{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;color:#6d8197;text-transform:uppercase;margin-bottom:8px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card strong{display:block;font-size:18px;line-height:1.35;color:#19324d;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-shell{border:1px solid #dbe8fb;border-radius:30px;padding:32px 28px;background:linear-gradient(135deg,#f7fbff 0%,#ffffff 55%,#eaf4ff 100%);box-shadow:0 26px 54px rgba(13,78,141,.16);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-badge{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border-radius:999px;background:#e8f8ec;color:#149245;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-title{margin-top:16px;font-size:34px;font-weight:700;color:#17334d;line-height:1.2;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-subtitle{margin:10px auto 0;max-width:640px;font-size:15px;color:#627892;line-height:1.6;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-card{max-width:540px;margin:24px auto 0;background:#fff;border:1px solid #dbe8fb;border-radius:24px;padding:22px 26px;box-shadow:0 18px 38px rgba(15,72,126,.12);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-label{font-size:12px;font-weight:700;letter-spacing:.18em;color:#6b8096;text-transform:uppercase;margin-bottom:10px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value{font-size:48px;font-weight:800;line-height:1.14;color:#23c245;word-break:break-word;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value.is-expired{color:#d7263d;}
+      @media (max-width:991px){
+        #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:1.7rem;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-body{padding:22px 18px 18px;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-footer{padding:16px 18px 20px;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-form-head{display:block;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-chip{margin-top:10px;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-meta-grid{grid-template-columns:1fr;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-timer-title{font-size:28px;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value{font-size:34px;}
+      }
+    </style>
+    <div id="leadEnrollmentHoldPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadEnrollmentHoldTitle" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered hold-enrollment-dialog">
+        <div class="modal-content border-0 hold-enrollment-modal">
+          <div class="modal-header text-white hold-enrollment-header">
             <h5 class="modal-title" id="leadEnrollmentHoldTitle">Holding Enrollment (<span id="holdEnrollLeadNo">N/A</span>)</h5>
-            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close hold-enrollment-close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body">
-            <div id="holdActiveInfoBanner" class="alert alert-warning d-none mb-3" style="font-size:13px;">
+          <div class="modal-body hold-enrollment-body">
+            <div id="holdActiveInfoBanner" class="hold-enrollment-active-banner d-none mb-4">
               <div id="holdActiveInfoHeading"><i class="fa fa-exclamation-triangle"></i> <strong>Active Hold Exists</strong></div>
               <div id="holdActiveInfoDetails" class="mt-1"></div>
-              <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="holdReleaseBtn" onclick="releaseEnrollmentHoldAction()"><i class="fa fa-unlock"></i> Release Hold</button>
+              <button type="button" class="btn btn-sm btn-outline-danger mt-3 hold-enrollment-btn-release" id="holdReleaseBtn" onclick="releaseEnrollmentHoldAction()"><i class="fa fa-unlock"></i> Release Hold</button>
             </div>
             <div id="holdEnrollmentFormSection">
-              <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-2 pb-2" method="post" id="leadEnrollmentHoldForm" action="javascript:void(0);">
+              <div class="hold-enrollment-form">
+              <div class="hold-enrollment-form-head">
+                <div>
+                  <div class="hold-enrollment-section-title">Reserve This Lead Smartly</div>
+                  <div class="hold-enrollment-subtitle">Capture the child details, pick the holding duration, and lock the best connection time before the seat is offered elsewhere.</div>
+                </div>
+                <div class="hold-enrollment-chip">Sales Hold Workflow</div>
+              </div>
+              <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-2 pb-2 px-0" method="post" id="leadEnrollmentHoldForm" action="javascript:void(0);">
                 <input type="hidden" name="leadId" id="holdEnrollLeadId" value="" />
                 <input type="hidden" name="holdIsdCode" id="holdEnrollIsdCode" value="" />
                 <input type="hidden" name="holdIsdCodeIso" id="holdEnrollIsdCodeIso" value="" />
@@ -2933,7 +2997,7 @@ function getLeadEnrollmentHoldPopup() {
                     <input type="text" class="form-control" name="holdAltPhone" id="holdEnrollAltPhone" maxlength="15" autocomplete="off" />
                   </div>
                 </div>
-                <div id="holdLockInfoSection" class="d-none mb-2">
+                <div id="holdLockInfoSection" class="d-none hold-enrollment-lock-panel">
                   <table class="table table-sm table-bordered font-12 mb-0">
                     <tbody>
                       <tr><th class="border-0 p-1" style="width:130px;">Lock Status</th><td class="border-0 p-1" id="holdLockStatusDisplay">-</td></tr>
@@ -2953,8 +3017,8 @@ function getLeadEnrollmentHoldPopup() {
                     </select>
                   </div>
                 </div>
-                <hr class="mt-1 mb-2"/>
-                <label class="m-0 font-weight-bold">Best time to connect with you</label>
+                <div class="hold-enrollment-form-divider"></div>
+                <label class="m-0 hold-enrollment-best-time-title">Best time to connect with you</label>
                 <div class="row mt-1">
                   <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
                     <label class="m-0">Date</label>
@@ -2981,11 +3045,12 @@ function getLeadEnrollmentHoldPopup() {
                   </div>
                 </div>
               </form>
+              </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-info float-right pr-4 pl-4 ml-2" id="holdEnrollmentCloseBtn" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-success float-right pr-4 pl-4" id="saveEnrollmentHoldBtn" onclick="saveLeadEnrollmentHold()">Hold Enrollment</button>
+          <div class="modal-footer hold-enrollment-footer">
+            <button type="button" class="btn float-right pr-4 pl-4 ml-2 hold-enrollment-btn-secondary" id="holdEnrollmentCloseBtn" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn float-right pr-4 pl-4 hold-enrollment-btn-primary" id="saveEnrollmentHoldBtn" onclick="saveLeadEnrollmentHold()">Hold Enrollment</button>
           </div>
         </div>
       </div>
@@ -2995,6 +3060,36 @@ function getLeadEnrollmentHoldPopup() {
 
 var itiHoldPhone;
 var itiHoldAltPhone;
+
+function getHoldEnrollmentMinDateMoment(lockHours) {
+  var hours = parseInt(lockHours, 10);
+  if (isNaN(hours) || hours <= 0) {
+    hours = 72;
+  }
+  return moment().startOf("day").add(Math.max(1, Math.ceil(hours / 24)), "days");
+}
+
+function refreshHoldEnrollmentBestTimePicker(lockHours, preserveCurrentValue) {
+  var $bestTimeDate = $("#holdEnrollBestTimeDate");
+  if (!$bestTimeDate.length) {
+    return;
+  }
+
+  var minMoment = getHoldEnrollmentMinDateMoment(lockHours);
+  try {
+    $bestTimeDate.datepicker("setStartDate", minMoment.toDate());
+  } catch (e) {}
+
+  var currentMoment = moment($bestTimeDate.val() || "", "MM-DD-YYYY", true);
+  var shouldReplaceValue = !preserveCurrentValue || !currentMoment.isValid() || currentMoment.isBefore(minMoment, "day");
+  if (shouldReplaceValue) {
+    var defaultDate = minMoment.format("MM-DD-YYYY");
+    $bestTimeDate.val(defaultDate);
+    try {
+      $bestTimeDate.datepicker("update", defaultDate);
+    } catch (e) {}
+  }
+}
 
 /**
  * Open the Hold Enrollment popup — pre-fills from lead data passed inline
@@ -3070,9 +3165,10 @@ function openLeadEnrollmentHoldPopup(lead) {
     format: 'mm-dd-yyyy',
     autoclose: true,
     todayHighlight: true,
-    startDate: new Date(),
+    startDate: getHoldEnrollmentMinDateMoment($("#holdEnrollLockHours").val()).toDate(),
     orientation: 'top'
   });
+  refreshHoldEnrollmentBestTimePicker($("#holdEnrollLockHours").val(), false);
 
   // Show modal
   $("#leadEnrollmentHoldPopupForm").modal({ backdrop: 'static', keyboard: false });
@@ -3080,3 +3176,7 @@ function openLeadEnrollmentHoldPopup(lead) {
   // Fetch existing hold data for this lead
   fetchLeadEnrollmentHold(lead.leadId);
 }
+
+$(document).off("change.holdEnrollmentDuration", "#holdEnrollLockHours").on("change.holdEnrollmentDuration", "#holdEnrollLockHours", function () {
+  refreshHoldEnrollmentBestTimePicker($(this).val(), true);
+});

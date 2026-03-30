@@ -90,7 +90,7 @@ function cardDetails(data){
 	var html = '';
 	$.each(data.reports, function(key, item) {
 		
-		var param = btoa(`{"actionType":"1a","studentStandardId":'${item.studentStandardId}',"moduleId":8,"userId":'${item.userId}'}`);
+		var param = btoa(unescape(encodeURIComponent(`{"actionType":"1a","studentStandardId":'${item.studentStandardId}',"moduleId":8,"userId":'${item.userId}'}`)));
 		var sprogress =0;
 		sprogress=item.progressReport=='N/A'?0.0:item.progressReport.replace("%","");
 		html+=`<tr>

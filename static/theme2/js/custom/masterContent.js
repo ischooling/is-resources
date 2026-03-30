@@ -2837,7 +2837,7 @@ function getAnnouncementAndNewsContent() {
       if(CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
         var data = {u: UNIQUEUUID, e: DEPLOYMENT_MODE, d: new Date().getTime()};
         var jsonString = JSON.stringify(data);
-        var chatPayload = btoa(jsonString);
+        var chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
         var chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=` + chatPayload;
         html += 
           `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">

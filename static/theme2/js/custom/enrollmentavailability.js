@@ -679,8 +679,8 @@ async function enrAvailLoadSeatsFromServer() {
 						free: seatMeta.free,
 						wait: seatMeta.wait,
 						overbooked: seatMeta.overbooked,
-						// backward compat: older UI expects remaining to be "Available/Free"
 						remaining: seatMeta.free,
+						lastYearStrength: r.lastYearStrength || 0,
 					};
 				}) || [];
 		}
@@ -689,7 +689,7 @@ async function enrAvailLoadSeatsFromServer() {
 	}
 
 	// Dummy feed (for localhost/demo)
-	enrAvailSeedDummyRecordsIfNeeded();
+	// enrAvailSeedDummyRecordsIfNeeded();
 }
 
 function enrAvailGetFilterRequestFromUI() {
@@ -714,133 +714,133 @@ function enrAvailIsLocalhost() {
 	}
 }
 
-function enrAvailSeedDummyRecordsIfNeeded() {
-	try {
-		if (!enrAvailMasters || !enrAvailMasters.loaded) return;
-		if (!(enrAvailMasters.countries || []).length || !(enrAvailMasters.programs || []).length || !(enrAvailMasters.grades || []).length) return;
-		if (!enrAvailIsLocalhost()) return;
+// function enrAvailSeedDummyRecordsIfNeeded() {
+// 	try {
+// 		if (!enrAvailMasters || !enrAvailMasters.loaded) return;
+// 		if (!(enrAvailMasters.countries || []).length || !(enrAvailMasters.programs || []).length || !(enrAvailMasters.grades || []).length) return;
+// 		if (!enrAvailIsLocalhost()) return;
 
-		var realCount = (enrAvailRecords || []).filter(function (r) {
-			return r && !r.__dummy;
-		}).length;
-		// If you already have enough real data, don't pollute with dummy
-		if (realCount >= 10) return;
+// 		var realCount = (enrAvailRecords || []).filter(function (r) {
+// 			return r && !r.__dummy;
+// 		}).length;
+// 		// If you already have enough real data, don't pollute with dummy
+// 		if (realCount >= 10) return;
 
-		// Ensure at least 10 countries exist for dummy demo
-		var desiredCountries = ["India", "United States", "United Kingdom", "UAE", "Singapore", "Canada", "Australia", "Germany", "France", "Japan"];
-		var countriesList = enrAvailMasters.countries || [];
-		var countriesByLabel = {};
-		countriesList.forEach(function (x) {
-			countriesByLabel[String(x.label || "").toLowerCase()] = x;
-		});
+// 		// Ensure at least 10 countries exist for dummy demo
+// 		var desiredCountries = ["India", "United States", "United Kingdom", "UAE", "Singapore", "Canada", "Australia", "Germany", "France", "Japan"];
+// 		var countriesList = enrAvailMasters.countries || [];
+// 		var countriesByLabel = {};
+// 		countriesList.forEach(function (x) {
+// 			countriesByLabel[String(x.label || "").toLowerCase()] = x;
+// 		});
 
-		var countries = [];
-		desiredCountries.forEach(function (name, idx) {
-			var hit = null;
-			var lower = String(name).toLowerCase();
-			// try exact
-			if (countriesByLabel[lower]) hit = countriesByLabel[lower];
-			// try partial match
-			if (!hit) {
-				for (var i = 0; i < countriesList.length; i++) {
-					var lbl = String(countriesList[i].label || "").toLowerCase();
-					if (lbl && (lbl.indexOf(lower) >= 0 || lower.indexOf(lbl) >= 0)) {
-						hit = countriesList[i];
-						break;
-					}
-				}
-			}
-			if (!hit) {
-				hit = { id: "DUMMY_COUNTRY_" + (idx + 1), label: name };
-				countriesList.push(hit);
-			}
-			countries.push(hit);
-		});
+// 		var countries = [];
+// 		desiredCountries.forEach(function (name, idx) {
+// 			var hit = null;
+// 			var lower = String(name).toLowerCase();
+// 			// try exact
+// 			if (countriesByLabel[lower]) hit = countriesByLabel[lower];
+// 			// try partial match
+// 			if (!hit) {
+// 				for (var i = 0; i < countriesList.length; i++) {
+// 					var lbl = String(countriesList[i].label || "").toLowerCase();
+// 					if (lbl && (lbl.indexOf(lower) >= 0 || lower.indexOf(lbl) >= 0)) {
+// 						hit = countriesList[i];
+// 						break;
+// 					}
+// 				}
+// 			}
+// 			if (!hit) {
+// 				hit = { id: "DUMMY_COUNTRY_" + (idx + 1), label: name };
+// 				countriesList.push(hit);
+// 			}
+// 			countries.push(hit);
+// 		});
 
-		var programs = (enrAvailMasters.programs || []).slice(0, 4);
-		var grades = (enrAvailMasters.grades || []).slice(0, 12);
-		if (!countries.length || !programs.length || !grades.length) return;
+// 		var programs = (enrAvailMasters.programs || []).slice(0, 4);
+// 		var grades = (enrAvailMasters.grades || []).slice(0, 12);
+// 		if (!countries.length || !programs.length || !grades.length) return;
 
-		// Avoid duplicates with existing records
-		var existing = {};
-		(enrAvailRecords || []).forEach(function (r) {
-			if (!r) return;
-			var k = String(r.countryId) + "|" + String(r.programId) + "|" + String(r.gradeId);
-			existing[k] = true;
-		});
+// 		// Avoid duplicates with existing records
+// 		var existing = {};
+// 		(enrAvailRecords || []).forEach(function (r) {
+// 			if (!r) return;
+// 			var k = String(r.countryId) + "|" + String(r.programId) + "|" + String(r.gradeId);
+// 			existing[k] = true;
+// 		});
 
-		var recs = [];
-		var seed = 17;
-		function rnd(min, max) {
-			seed = (seed * 9301 + 49297) % 233280;
-			var r = seed / 233280;
-			return Math.floor(min + r * (max - min + 1));
-		}
+// 		var recs = [];
+// 		var seed = 17;
+// 		function rnd(min, max) {
+// 			seed = (seed * 9301 + 49297) % 233280;
+// 			var r = seed / 233280;
+// 			return Math.floor(min + r * (max - min + 1));
+// 		}
 
-		countries.forEach(function (c, ci) {
-			var g = grades[ci % grades.length];
-			programs.forEach(function (p, pi) {
-				var total = rnd(40, 140);
-				var booked = rnd(10, Math.max(10, total - 5));
-				var about = rnd(0, 40);
-				var seatMeta = enrAvailCalcSeatMeta(total, booked, about, 0);
+// 		countries.forEach(function (c, ci) {
+// 			var g = grades[ci % grades.length];
+// 			programs.forEach(function (p, pi) {
+// 				var total = rnd(40, 140);
+// 				var booked = rnd(10, Math.max(10, total - 5));
+// 				var about = rnd(0, 40);
+// 				var seatMeta = enrAvailCalcSeatMeta(total, booked, about, 0);
 
-				var rec = {
-					id: enrAvailRecId(),
-					countryId: c.id,
-					country: c.label,
-					programId: String(p.id || ""),
-					program: p.label,
-					gradeId: g.id,
-					grade: g.label,
-					total: total,
-					booked: booked,
-					remaining: seatMeta.free,
-					about: about,
-					free: seatMeta.free,
-					wait: seatMeta.wait,
-					overbooked: seatMeta.overbooked,
-					__dummy: true,
-				};
-				var key = String(rec.countryId) + "|" + String(rec.programId) + "|" + String(rec.gradeId);
-				if (!existing[key]) {
-					existing[key] = true;
-					recs.push(rec);
-				}
-			});
-		});
+// 				var rec = {
+// 					id: enrAvailRecId(),
+// 					countryId: c.id,
+// 					country: c.label,
+// 					programId: String(p.id || ""),
+// 					program: p.label,
+// 					gradeId: g.id,
+// 					grade: g.label,
+// 					total: total,
+// 					booked: booked,
+// 					remaining: seatMeta.free,
+// 					about: about,
+// 					free: seatMeta.free,
+// 					wait: seatMeta.wait,
+// 					overbooked: seatMeta.overbooked,
+// 					__dummy: true,
+// 				};
+// 				var key = String(rec.countryId) + "|" + String(rec.programId) + "|" + String(rec.gradeId);
+// 				if (!existing[key]) {
+// 					existing[key] = true;
+// 					recs.push(rec);
+// 				}
+// 			});
+// 		});
 
-		// Add a couple of overbooked examples for demo (e.g. 20 seats, 21 students)
-		if (recs.length >= 1) {
-			recs[0].total = 20;
-			recs[0].booked = 21;
-			recs[0].about = 0;
-			recs[0].wait = 0;
-			recs[0].remaining = enrAvailCalcSeatMeta(recs[0].total, recs[0].booked, recs[0].about, recs[0].wait).free;
-			recs[0].free = recs[0].remaining;
-			recs[0].overbooked = enrAvailCalcSeatMeta(recs[0].total, recs[0].booked, recs[0].about, recs[0].wait).overbooked;
-		}
-		if (recs.length >= 2) {
-			recs[1].total = 50;
-			recs[1].booked = 45;
-			recs[1].about = 10;
-			recs[1].wait = 0;
-			recs[1].remaining = enrAvailCalcSeatMeta(recs[1].total, recs[1].booked, recs[1].about, recs[1].wait).free;
-			recs[1].free = recs[1].remaining;
-			recs[1].overbooked = enrAvailCalcSeatMeta(recs[1].total, recs[1].booked, recs[1].about, recs[1].wait).overbooked;
-		}
+// 		// Add a couple of overbooked examples for demo (e.g. 20 seats, 21 students)
+// 		if (recs.length >= 1) {
+// 			recs[0].total = 20;
+// 			recs[0].booked = 21;
+// 			recs[0].about = 0;
+// 			recs[0].wait = 0;
+// 			recs[0].remaining = enrAvailCalcSeatMeta(recs[0].total, recs[0].booked, recs[0].about, recs[0].wait).free;
+// 			recs[0].free = recs[0].remaining;
+// 			recs[0].overbooked = enrAvailCalcSeatMeta(recs[0].total, recs[0].booked, recs[0].about, recs[0].wait).overbooked;
+// 		}
+// 		if (recs.length >= 2) {
+// 			recs[1].total = 50;
+// 			recs[1].booked = 45;
+// 			recs[1].about = 10;
+// 			recs[1].wait = 0;
+// 			recs[1].remaining = enrAvailCalcSeatMeta(recs[1].total, recs[1].booked, recs[1].about, recs[1].wait).free;
+// 			recs[1].free = recs[1].remaining;
+// 			recs[1].overbooked = enrAvailCalcSeatMeta(recs[1].total, recs[1].booked, recs[1].about, recs[1].wait).overbooked;
+// 		}
 
-		enrAvailRecords = (enrAvailRecords || []).concat(recs);
-	} catch (e) {
-		// ignore dummy seeding errors
-	}
-}
+// 		enrAvailRecords = (enrAvailRecords || []).concat(recs);
+// 	} catch (e) {
+// 		// ignore dummy seeding errors
+// 	}
+// }
 
 function enrAvailUpdatePreviewCache() {
 	try {
 		var html = enrAvailRecords.length ? enrAvailRenderCounselorPreview() : "";
 		if (!html) {
-			html = '<div class="text-muted text-center py-5">No records — go to Entry tab and save some data</div>';
+			html = '<div class="text-muted text-center py-5">no records - go to entry tab and save some data</div>';
 		}
 
 		localStorage.setItem(
@@ -866,7 +866,7 @@ function enrAvailOpenViewInNewTab() {
 		var ctx = typeof CONTEXT_PATH !== "undefined" ? String(CONTEXT_PATH || "") : "";
 		var school = typeof SCHOOL_UUID !== "undefined" ? String(SCHOOL_UUID || "") : "";
 		if (school) {
-			url = base + ctx + school + "/dashboard/enrollment-availability-view";
+			url = base + ctx + school + "/dashboard/enrollment-availability-view?hideActivityTimer=1";
 		}
 	} catch (e) {}
 	try {
@@ -1843,7 +1843,24 @@ function enrAvailRenderSummaryDrill(kind) {
 								'" readonly/></div>'
 							: '<div class="text-center"><div class="text-success font-weight-bold" style="font-size:18px;line-height:1;">' +
 								meta.free.toLocaleString() +
-								'</div><div class="text-muted font-10">Free</div></div>';		
+								'</div><div class="text-muted font-10">Free</div></div>';
+
+					var lysVal = it.lastYearStrength || 0;
+					var lysEl = isEditing
+						? '<div class="text-right" style="width:90px;">' +
+							'<div class="text-muted font-10 mb-1">Last Year Strength(%)</div>' +
+							'<input type="number" min="0" max="100" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
+							enrAvailEsc(px + "_lys") +
+							'" data-key="' +
+							enrAvailEsc(key) +
+							'" data-field="lys" data-orig="' +
+							enrAvailEsc(lysVal) +
+							'" value="' +
+							enrAvailEsc(lysVal) +
+							'"/></div>'
+						: '<div class="text-center"><div class="text-secondary font-weight-bold" style="font-size:18px;line-height:1;">' +
+							lysVal + '%' +
+							'</div><div class="text-muted font-10">Last Year Strength(%)</div></div>';
 
 				return (
 					'<div class="py-2' +
@@ -1882,10 +1899,11 @@ function enrAvailRenderSummaryDrill(kind) {
 						rsvEl +
 						waitEl +
 						freeEl +
+						lysEl +
 						"</div>" +
 						'<span class="badge badge-pill ' +
 					meta.pill.badgeClass +
-					' px-3 py-1 font-12">' +
+					' px-3 py-1 font-12" style="text-transform:none;">' +
 					enrAvailEsc(meta.status) +
 					"</span>" +
 					editBtn +
@@ -1935,6 +1953,12 @@ function enrAvailRenderSummaryDrill(kind) {
 					return r && String(r.countryId) === String(ids.countryId) && String(r.programId) === String(ids.programId) && String(r.gradeId) === String(ids.gradeId);
 				}) || null;
 
+				var $lys = $("#" + px + "_lys");
+				var lys = parseInt($lys.val(), 10);
+				if (isNaN(lys) || lys < 0) lys = 0;
+				if (lys > 100) lys = 100;
+				$lys.val(lys);
+
 				var payloadRec = {
 					countryId: countryId,
 					programId: programId,
@@ -1943,6 +1967,7 @@ function enrAvailRenderSummaryDrill(kind) {
 				booked: confirm,
 				about: rsv,
 				wait: wait,
+				lastYearStrength: lys,
 			};
 			if (rec && enrAvailIsRealId(rec.id)) {
 				payloadRec.id = rec.id;
@@ -1977,23 +2002,23 @@ function enrAvailRenderSummaryDrill(kind) {
 		var recs = enrAvailFilteredSavedRecords();
 
 		if ($("#enrAvailS_Count").length) {
-			$("#enrAvailS_Count").text(recs.length.toLocaleString() + " record" + (recs.length === 1 ? "" : "s"));
+			$("#enrAvailS_Count").text(recs.length.toLocaleString() + " Record" + (recs.length === 1 ? "" : "s"));
 		}
 
 		if (!recs.length) {
 			if ($("#enrAvailSumByGrade").length) $("#enrAvailSumByGrade").html('<div class="text-center text-muted py-4">No records yet</div>');
 			if ($("#enrAvailSumByProgram").length) $("#enrAvailSumByProgram").html('<div class="text-center text-muted py-4">No records yet</div>');
 			if ($("#enrAvailSummaryEditor").length) {
-				var msg = "Select a Country and click Check";
+				var msg = "select a country and click check";
 				try {
 					if (
 						enrAvailSavedFilters &&
 						(enrAvailSavedFilters.countryId || enrAvailSavedFilters.programId || enrAvailSavedFilters.gradeId) &&
 						!enrAvailHasRequiredFilters(enrAvailSavedFilters)
 					) {
-						msg = "Select a Country and click Check";
+						msg = "select a country and click check";
 					} else if (enrAvailHasRequiredFilters(enrAvailSavedFilters) && !enrAvailHasAppliedSelection()) {
-						msg = "Click Check to fetch records for the selected filters";
+						msg = "click check to fetch records for the selected filters";
 					}
 					if (
 						enrAvailLastLoadRequest &&
@@ -2003,7 +2028,7 @@ function enrAvailRenderSummaryDrill(kind) {
 						String(enrAvailLastLoadRequest.programId || "") === String(enrAvailAppliedFilters.programId || "") &&
 						String(enrAvailLastLoadRequest.gradeId || "") === String(enrAvailAppliedFilters.gradeId || "")
 					) {
-						msg = "No records found for the selected filters";
+						msg = "no records found for the selected filters";
 					}
 				} catch (e) {}
 				$("#enrAvailSummaryEditor").html('<div class="text-muted text-center py-4">' + enrAvailEsc(msg) + "</div>");
@@ -2022,6 +2047,7 @@ function enrAvailRenderSummaryDrill(kind) {
 					booked: r.booked || 0,
 					reserved: r.about || 0,
 					wait: r.wait || 0,
+					lastYearStrength: r.lastYearStrength || 0,
 				};
 			})
 			.sort(function (a, b) {
@@ -2049,6 +2075,7 @@ function enrAvailRenderSummaryDrill(kind) {
 					booked: r.booked || 0,
 					reserved: r.about || 0,
 					wait: r.wait || 0,
+					lastYearStrength: r.lastYearStrength || 0,
 				};
 			})
 				.sort(function (a, b) {
@@ -2405,23 +2432,17 @@ function enrAvailFmtInt(v) {
 
 function enrAvailBuildDemoCounselorRecords() {
 	return [
-		{ id: "DEMO_1", country: "India", program: "Self Learning", grade: "Grade 8", total: 20, booked: 7, about: 3, remaining: 10, programId: "SELF" },
-		{ id: "DEMO_2", country: "India", program: "Flexy", grade: "Grade 9", total: 15, booked: 14, about: 0, remaining: 1, programId: "FLEXY" },
-		{ id: "DEMO_3", country: "United States", program: "Flexy", grade: "Grade 6", total: 10, booked: 10, about: 0, remaining: 0, programId: "FLEXY" },
-		{ id: "DEMO_4", country: "United Kingdom", program: "Group", grade: "Grade 10", total: 25, booked: 12, about: 6, remaining: 13, programId: "GROUP" },
-		{ id: "DEMO_5", country: "UAE", program: "1:1 & Group", grade: "Grade 7", total: 12, booked: 11, about: 2, remaining: 1, programId: "ONEGROUP" },
+		{ id: "DEMO_1", country: "India", program: "Self Learning", grade: "Grade 8", total: 20, booked: 7, about: 3, remaining: 10, programId: "SELF", lastYearStrength: 65 },
+		{ id: "DEMO_2", country: "India", program: "Flexy", grade: "Grade 9", total: 15, booked: 14, about: 0, remaining: 1, programId: "FLEXY", lastYearStrength: 80 },
+		{ id: "DEMO_3", country: "United States", program: "Flexy", grade: "Grade 6", total: 10, booked: 10, about: 0, remaining: 0, programId: "FLEXY", lastYearStrength: 95 },
+		{ id: "DEMO_4", country: "United Kingdom", program: "Group", grade: "Grade 10", total: 25, booked: 12, about: 6, remaining: 13, programId: "GROUP", lastYearStrength: 48 },
+		{ id: "DEMO_5", country: "UAE", program: "1:1 & Group", grade: "Grade 7", total: 12, booked: 11, about: 2, remaining: 1, programId: "ONEGROUP", lastYearStrength: 72 },
 	];
 }
 
 function enrAvailCounselorPreviewRecords() {
 	var recs = Array.isArray(enrAvailRecords) ? enrAvailRecords : [];
-	if (!recs.length) return enrAvailBuildDemoCounselorRecords();
-
-	// If everything is 0/blank, show demo so Fill% + Full/Almost-full is visible
-	var hasAnyTotal = recs.some(function (r) {
-		return enrAvailToInt(r && r.total) > 0;
-	});
-	return hasAnyTotal ? recs : enrAvailBuildDemoCounselorRecords();
+	return recs.length ? recs : enrAvailBuildDemoCounselorRecords();
 }
 
 function enrAvailNormKey(v) {
@@ -2434,16 +2455,19 @@ function enrAvailProgramSequenceIndex(label) {
 	var k = enrAvailNormKey(label);
 	// tolerant matching: production labels may vary slightly
 	if (!k) return 999;
-	if (k.indexOf("onetotoone") >= 0) return 0;
-	// Self Study (default -> Plus unless explicitly Dual Diploma)
-	if (k.indexOf("selfstudy") >= 0 && k.indexOf("dual") < 0) return 1;
-	if (k.indexOf("plus") >= 0) return 1;
-	// Dual Diploma
-	if (k.indexOf("dual") >= 0) return 2;
-	// Group Learning
-	if (k.indexOf("group") >= 0) return 3;
-	// Flexy Program
+	// ONE_TO_ONE
+	if (k.indexOf("onetoone") >= 0 && k.indexOf("flex") < 0) return 0;
+	// BATCH
+	if (k.indexOf("batch") >= 0 || k.indexOf("group") >= 0) return 1;
+	// SCHOLARSHIP
+	if (k.indexOf("scholarship") >= 0) return 2;
+	// SSP
+	if (k.indexOf("ssp") >= 0 || k.indexOf("selfstudy") >= 0) return 3;
+	// ONE_TO_ONE_FLEX
+	if (k.indexOf("onetoone") >= 0 && k.indexOf("flex") >= 0) return 4;
 	if (k.indexOf("flexy") >= 0) return 4;
+	// DUAL_DIPLOMA
+	if (k.indexOf("dual") >= 0) return 5;
 	return 999;
 }
 
@@ -2518,27 +2542,27 @@ function enrAvailRenderCounselorPreview(opts) {
 		'<div class="mr-2 mb-2" style="min-width:200px;">' +
 		'<div class="text-muted font-12 mb-1">Country</div>' +
 		'<select id="enrAvailF_Country" class="form-control form-control-sm rounded-10">' +
-		'<option value="">Select</option>' +
+		'<option value="">Select Country</option>' +
 		countryOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:200px;">' +
 		'<div class="text-muted font-12 mb-1">Program</div>' +
 		'<select id="enrAvailF_Program" class="form-control form-control-sm rounded-10">' +
-		'<option value="">Any</option>' +
+		'<option value="">Select Program</option>' +
 		programOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:160px;">' +
 		'<div class="text-muted font-12 mb-1">Grade</div>' +
 		'<select id="enrAvailF_Grade" class="form-control form-control-sm rounded-10">' +
-		'<option value="">Any</option>' +
+		'<option value="">Select Grade</option>' +
 		gradeOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="d-flex align-items-center mb-2">' +
 		'<button type="button" class="btn btn-outline-secondary btn-sm rounded-10 mr-2 enrAvailClearBtn" id="enrAvailF_Clear">Clear</button>' +
-		'<span class="badge badge-pill bg-light-primary text-primary" id="enrAvailF_Count"></span>' +
+		'<span class="badge badge-pill bg-light-primary text-primary" id="enrAvailF_Count" style="text-transform:none;"></span>' +
 		"</div>" +
 		"</div>" +
 		"</div>" +
@@ -2627,6 +2651,8 @@ function enrAvailRenderCounselorPreview(opts) {
 				enrAvailEsc(overbooked) +
 					'" data-enr-remaining="' +
 					enrAvailEsc(free) +
+					'" data-enr-lys="' +
+					enrAvailEsc(enrAvailToInt(r.lastYearStrength)) +
 					'">' +
 					'<td class="text-muted font-12 font-weight-semi-bold text-center">' +
 					enrAvailEsc(idx + 1) +
@@ -2664,6 +2690,9 @@ function enrAvailRenderCounselorPreview(opts) {
 					'<td class="text-danger font-weight-semi-bold text-center">' +
 					enrAvailEsc(enrAvailFmtInt(overbooked)) +
 					"</td>" +
+					'<td class="font-weight-semi-bold text-center">' +
+					enrAvailEsc(enrAvailToInt(r.lastYearStrength)) +
+					'%</td>' +
 							'<td class="text-left" style="min-width:200px;">' +
 							'<div class="d-inline-flex flex-column align-items-start justify-content-start">' +
 							'<div class="d-inline-flex align-items-center justify-content-start" style="gap:12px;">' +
@@ -2681,7 +2710,7 @@ function enrAvailRenderCounselorPreview(opts) {
 							"</td>" +
 						'<td class="text-center"><span class="badge badge-pill ' +
 						badgeClass +
-						' px-3 py-1">' +
+						' px-3 py-1" style="text-transform:none;">' +
 						enrAvailEsc(sm.status) +
 						"</span></td>" +
 						"</tr>"
@@ -2710,13 +2739,14 @@ function enrAvailRenderCounselorPreview(opts) {
 					'<th class="text-muted font-12 text-center">Waiting</th>' +
 					'<th class="text-muted font-12 text-center">Available</th>' +
 					'<th class="text-muted font-12 text-center">Overbooked</th>' +
-						'<th class="text-muted font-12 text-left" style="padding-left:20px;">Fill</th>' +
+					'<th class="text-muted font-12 text-center">Last Year Strength(%)</th>' +
+						'<th class="text-muted font-12 text-left" style="padding-left:20px;">Current Year Strength(%)</th>' +
 					'<th class="text-muted font-12 text-center">Status</th>' +
 					"</tr>" +
 					"</thead>" +
 				"<tbody>" +
 				rowsHtml +
-				'<tr id="enrAvailCounselorEmpty" style="display:none;"><td colspan="12" class="text-muted text-center py-4">No records match these filters</td></tr>' +
+				'<tr id="enrAvailCounselorEmpty" style="display:none;"><td colspan="13" class="text-muted text-center py-4">No records match these filters</td></tr>' +
 				"</tbody>" +
 				"</table>" +
 			"</div>" +
@@ -2791,21 +2821,21 @@ function enrAvailRenderCountryPreview() {
 		'<div class="mr-2 mb-2" style="min-width:180px;">' +
 		'<div class="text-muted font-12 mb-1">Country</div>' +
 		'<select id="enrAvailF_Country" class="form-control form-control-sm rounded-10">' +
-		'<option value="">Any</option>' +
+		'<option value="">Select Country</option>' +
 		countryOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:180px;">' +
 		'<div class="text-muted font-12 mb-1">Program</div>' +
 		'<select id="enrAvailF_Program" class="form-control form-control-sm rounded-10">' +
-		'<option value="">Any</option>' +
+		'<option value="">Select Program</option>' +
 		programOpts +
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:160px;">' +
 		'<div class="text-muted font-12 mb-1">Grade</div>' +
 		'<select id="enrAvailF_Grade" class="form-control form-control-sm rounded-10">' +
-		'<option value="">Any</option>' +
+		'<option value="">Select Grade</option>' +
 		gradeOpts +
 		"</select>" +
 		"</div>" +
@@ -2827,7 +2857,7 @@ function enrAvailRenderCountryPreview() {
 		"</div>" +
 		'<div class="d-flex align-items-center mb-2">' +
 		'<button type="button" class="btn btn-outline-secondary btn-sm rounded-10 mr-2" id="enrAvailF_Clear">Clear</button>' +
-		'<span class="badge badge-pill bg-light-primary text-primary" id="enrAvailF_Count"></span>' +
+		'<span class="badge badge-pill bg-light-primary text-primary" id="enrAvailF_Count" style="text-transform:none;"></span>' +
 		"</div>" +
 		"</div>" +
 		"</div>" +

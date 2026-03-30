@@ -26,9 +26,9 @@ function studentProgressDetailMapRows(apiResponse){
     var rows = [];
     $.each(list || [], function(index, item){
         var reportType = "Weekly Progress Report";
-        if(item.daysType == 15){
-            reportType = "Fortnightly Progress Report";
-        }else if(item.daysType == 30){
+        if(item.daysType == 14 || item.daysType == 15){
+            reportType = "Biweekly Progress Report";
+        }else if(item.daysType == 28 || item.daysType == 30){
             reportType = "Monthly Progress Report";
         }
         rows.push({

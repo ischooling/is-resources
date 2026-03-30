@@ -558,6 +558,7 @@ function fetchLeadEnrollmentHold(leadId) {
       if (data && data.statusCode == '1' && data.holdData) {
         var holdData = data.holdData;
         var ah = holdData.activeHold;
+        var appliedLockHours = (ah && ah.lockHours) ? ah.lockHours : ($("#holdEnrollLockHours").val() || "72");
 
         $("#holdEnrollBestTimeDate").val(holdData.bestTimeDate || '');
         $("#holdEnrollBestTimeHH").val(holdData.bestTimeHH || '00');
@@ -587,6 +588,9 @@ function fetchLeadEnrollmentHold(leadId) {
             $("#saveEnrollmentHoldBtn").prop("disabled", true).text("Hold Already Active");
             $("#holdEnrollLockHours").val(ah.lockHours);
           }
+        }
+        if (typeof refreshHoldEnrollmentBestTimePicker === "function") {
+          refreshHoldEnrollmentBestTimePicker(appliedLockHours, true);
         }
       }
     },
@@ -662,7 +666,7 @@ function saveLeadEnrollmentHold() {
           expiryDate: data.lockExpiryDate || '',
           bestTimeDisplay: getHoldBestTimeDisplayFromForm()
         };
-        showMessageTheme2(1, data.message || "Enrollment held successfully", "", true);
+        // showMessageTheme2(1, data.message || "Enrollment held successfully", "", true);
         setHoldEnrollmentTimerOnlyMode(true);
         renderActiveHoldBanner(createdHold, createdHold, true);
         $("#holdActiveInfoBanner").removeClass("d-none");
@@ -796,8 +800,9 @@ function startLeadHoldCountdownForTarget(timerKey, target, holdData) {
   var updateCountdown = function() {
     var diffMs = expiryMoment.valueOf() - moment().valueOf();
     if (diffMs <= 0) {
-      target.text("Expired");
+      target.text("Hold expired");
       target.removeClass("text-danger text-success").addClass("text-danger");
+      target.addClass("is-expired");
       clearLeadHoldTimer(timerKey);
       return;
     }
@@ -805,6 +810,7 @@ function startLeadHoldCountdownForTarget(timerKey, target, holdData) {
     var totalSeconds = Math.floor(diffMs / 1000);
     var totalHours = Math.floor(totalSeconds / 3600);
     target.text(formatLeadHoldCountdown(totalSeconds));
+    target.removeClass("is-expired");
     target.removeClass("text-danger text-success")
       .addClass(totalHours < 6 ? "text-danger" : "text-success");
   };
@@ -868,35 +874,50 @@ function updateLeadHoldLeadSummary(leadId) {
 }
 
 function setHoldEnrollmentTimerOnlyMode(enableTimerOnly) {
+  $("#leadEnrollmentHoldPopupForm").toggleClass("hold-timer-only-mode", !!enableTimerOnly);
   $("#holdEnrollmentFormSection").toggleClass("d-none", !!enableTimerOnly);
   $("#saveEnrollmentHoldBtn").toggleClass("d-none", !!enableTimerOnly);
   $("#holdReleaseBtn").toggleClass("d-none", !!enableTimerOnly);
   $("#holdActiveInfoHeading").toggleClass("d-none", !!enableTimerOnly);
-  $("#holdActiveInfoBanner").toggleClass("alert-warning", !enableTimerOnly);
-  $("#holdActiveInfoBanner").toggleClass("alert-light border", !!enableTimerOnly);
+  $("#holdActiveInfoBanner").toggleClass("timer-only", !!enableTimerOnly);
   $("#holdEnrollmentCloseBtn").text(enableTimerOnly ? "Close" : "Cancel");
 }
 
 function renderActiveHoldBanner(holdData, activeHold, timerOnly) {
   var bestTimeDisplay = getHoldBestTimeDisplay(holdData);
   var timerId = "holdActiveInfoTimer";
+  var lockHours = activeHold && activeHold.lockHours ? activeHold.lockHours : 0;
+  var expiryDisplay = (activeHold && (activeHold.expiryDate || activeHold.lockExpiryDate)) || "-";
+  var holdDateDisplay = (activeHold && activeHold.holdDate) || "-";
   var details = '';
   if (timerOnly) {
     details = ''
-      + '<div class="text-center py-2">'
-      +   '<div class="d-inline-block px-4 py-3" style="background:#ffffff;border-radius:16px;box-shadow:0 10px 24px rgba(2, 127, 254, 0.18);min-width:320px;">'
-      +     '<div class="small font-weight-bold text-uppercase mb-2" style="letter-spacing:0.6px;color:#5f6b7a;">Time Remaining</div>'
-      +     '<div id="' + timerId + '" class="font-weight-bold text-danger" style="font-size:28px;line-height:1.35;"></div>'
+      + '<div class="hold-enrollment-timer-shell text-center">'
+      +   '<div class="hold-enrollment-timer-badge">Enrollment Locked</div>'
+      +   '<div class="hold-enrollment-timer-title">Seat reserved successfully</div>'
+      +   '<div class="hold-enrollment-timer-subtitle">The hold is active now. Share the next call window confidently and let the timer close it automatically when the reservation window ends.</div>'
+      +   '<div class="hold-enrollment-timer-card">'
+      +     '<div class="hold-enrollment-timer-label">Auto Expired in</div>'
+      +     '<div id="' + timerId + '" class="hold-enrollment-timer-value text-success"></div>'
+      +   '</div>'
+      +   '<div class="hold-enrollment-meta-grid">'
+      +     '<div class="hold-enrollment-meta-card"><span>Holding For</span><strong>' + lockHours + ' hrs</strong></div>'
+      +     '<div class="hold-enrollment-meta-card"><span>Best time to connect</span><strong>' + (bestTimeDisplay || 'Not set') + '</strong></div>'
+      +     '<div class="hold-enrollment-meta-card"><span>Expiry Date</span><strong>' + expiryDisplay + '</strong></div>'
       +   '</div>'
       + '</div>';
   } else {
     details = ''
-      + '<div class="mb-2"><strong>Hold enrollment for ' + (activeHold.lockHours || 0) + ' hrs</strong></div>'
-      + '<div class="mb-2"><span id="' + timerId + '" class="d-inline-block px-3 py-2 font-weight-bold text-danger" style="background:#ffffff;border-radius:12px;box-shadow:0 8px 18px rgba(2, 127, 254, 0.15);font-size:16px;"></span></div>';
-
-    if (bestTimeDisplay) {
-      details += '<div><strong>Best time to connect with you:</strong> ' + bestTimeDisplay + '</div>';
-    }
+      + '<div class="hold-enrollment-meta-grid" style="margin-top:0;">'
+      +   '<div class="hold-enrollment-meta-card"><span>Holding For</span><strong>' + lockHours + ' hrs</strong></div>'
+      +   '<div class="hold-enrollment-meta-card"><span>Hold Date</span><strong>' + holdDateDisplay + '</strong></div>'
+      +   '<div class="hold-enrollment-meta-card"><span>Expiry Date</span><strong>' + expiryDisplay + '</strong></div>'
+      + '</div>'
+      + '<div class="mt-3" style="padding:16px 18px;border-radius:18px;background:#fff;border:1px solid #dbe8fb;box-shadow:0 14px 28px rgba(15,72,126,.08);">'
+      +   '<div class="small font-weight-bold text-uppercase mb-2" style="letter-spacing:.12em;color:#6b8096;">Auto Expired in</div>'
+      +   '<div id="' + timerId + '" class="font-weight-bold text-success" style="font-size:26px;line-height:1.3;"></div>'
+      +   (bestTimeDisplay ? '<div class="mt-3 pt-3" style="border-top:1px solid #ecf2fb;"><div class="small font-weight-bold text-uppercase mb-1" style="letter-spacing:.1em;color:#6b8096;">Best time to connect with you</div><div class="font-weight-bold" style="font-size:18px;color:#19324d;">' + bestTimeDisplay + '</div></div>' : '')
+      + '</div>';
   }
 
   $("#holdActiveInfoDetails").html(details);

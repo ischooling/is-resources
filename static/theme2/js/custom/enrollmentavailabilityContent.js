@@ -19,7 +19,7 @@ function getEnrollmentAvailabilityContent() {
 									
 									<button type="button" class="btn btn-primary btn-shadow btn-sm rounded-10" id="enrAvailS_Load" style="flex:0 0 auto;">Check</button>
 									<button type="button" class="btn btn-outline-secondary btn-sm rounded-10" id="enrAvailS_Clear" style="flex:0 0 auto;">Clear</button>
-									<span class="badge badge-pill bg-light-primary text-primary" id="enrAvailS_Count" style="flex:0 0 auto;"></span>
+									<span class="badge badge-pill bg-light-primary text-primary" id="enrAvailS_Count" style="flex:0 0 auto; text-transform:none;"></span>
 								</div>
 
 							<div id="enrAvailSummaryEditor" class="mb-3">
@@ -67,7 +67,7 @@ function getEnrollmentAvailabilityContent() {
 			</div>
 
 		<div id="enrAvailPageView" class="d-none">
-			<div id="enrAvailCountryGrid" class="text-muted text-center py-4">No records — go to Entry tab and save some data</div>
+			<div id="enrAvailCountryGrid" class="text-muted text-center py-4">No records - go to Entry tab and save some data</div>
 		</div>
 	</div>
 	`;

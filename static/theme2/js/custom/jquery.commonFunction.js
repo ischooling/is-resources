@@ -6530,7 +6530,7 @@ async function copyToClipboardSignedUrl(videoUrl) {
 
 async function getSignedUrlForCopyClipboard(videoUrl) {
       const payload = JSON.stringify({ url: videoUrl });
-			const encodePayload = window.btoa(payload);
+			const encodePayload = window.btoa(unescape(encodeURIComponent(payload)));
     return new Promise((resolve, reject) => {
       $.ajax({
         url: BASE_URL + CONTEXT_PATH + "videos/signed-url?payload=" + encodePayload,

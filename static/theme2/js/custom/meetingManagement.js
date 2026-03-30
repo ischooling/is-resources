@@ -1282,7 +1282,7 @@ function startLensResponse(baseUrl, meetingName, meetingDate, meetingStartTime){
 
 // video urls start
 function encode(data){
-  return window.btoa(data);
+  return window.btoa(unescape(encodeURIComponent(data)));
 }
 
 function startLensUrl(entityId, meetingName, meetingDate, meetingStartTime) {
@@ -1307,6 +1307,43 @@ function joinLensUrl(entityId) {
   return baseUrl;
 }
 
+function copyTextToClipboard(text) {
+  if (!text) {
+    return Promise.reject(new Error("Text Invalid"));
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+
+  return new Promise(function(resolve, reject) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.top = "-9999px";
+    textArea.style.left = "-9999px";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length);
+
+    try {
+      var copied = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (copied) {
+        resolve();
+        return;
+      }
+      reject(new Error("Copy command failed"));
+    } catch (error) {
+      document.body.removeChild(textArea);
+      reject(error);
+    }
+  });
+}
+
 function copyJoinUrl(entityId) {
   let url = joinLensUrl(entityId);
   if (!url) {
@@ -1314,9 +1351,11 @@ function copyJoinUrl(entityId) {
     return;
   }
   getShortTinyUrlForJoinUrl(url).then(function(shortUrl){
-    navigator.clipboard.writeText(shortUrl).then(function(){
+    return copyTextToClipboard(shortUrl);
+  }).then(function(){
       showMessageTheme2(1, "URL copied successfully!");
-    });
+  }).catch(function(){
+    showMessageTheme2(0, "Unable to copy URL");
   });
 }
 

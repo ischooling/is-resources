@@ -2205,6 +2205,10 @@ function getRequestForUpdateProfile(eleID,keyId,userId,studentStandardId,moduleI
     else if(keyId == "weddingAnniversaryDate"){
         requestProfileData['fieldValue']=$('#'+eleID).val();
     }
+    else if(keyId == "progressReportType"){
+        requestProfileData['fieldValue']=$('#progressReportAnchorDate').val();
+        requestProfileData['reportType']=parseInt($('#progressReportDaysType').val() || "14", 10);
+    }
     else if(keyId == 'communicationPreferredSlots'){
         requestProfileData["callingPreferences"] = getCallingPreference();
     }else if(keyId=='extracurricular'){

@@ -231,7 +231,7 @@ function saveInvoice() {
                         onlyHtml: "",
                         payId: res.payId
                     };
-                    var payload = btoa(JSON.stringify(payloadObj));
+                    var payload = btoa(unescape(encodeURIComponent(JSON.stringify(payloadObj))));
                     var newUrl = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/invoice/" + UNIQUEUUID + "?payload=" + payload;
                     $("#invoicePaymentLink").val(newUrl);
                     $("#invoiceLinkPara").text(newUrl);

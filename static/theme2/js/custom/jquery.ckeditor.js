@@ -4,6 +4,12 @@ $(document).ready(function() {
 function initEditor(index, elementId, placeholder, needToFlush, onChangeCallback){
 	console.log(elementId + ' = ' + placeholder);
 
+	const targetEl = document.querySelector('#' + elementId);
+	if (!targetEl || typeof ClassicEditor === "undefined") {
+		console.warn("initEditor skipped: element or ClassicEditor missing", elementId);
+		return Promise.resolve(null);
+	}
+
 	if (index == 1 && editor1) {
 		editor1.destroy();
 	}
@@ -22,7 +28,7 @@ function initEditor(index, elementId, placeholder, needToFlush, onChangeCallback
 	}
 
 	return ClassicEditor
-		.create(document.querySelector('#' + elementId), {
+		.create(targetEl, {
 			placeholder: placeholder,
 			
 		})

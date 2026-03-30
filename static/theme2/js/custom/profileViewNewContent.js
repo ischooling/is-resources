@@ -1,5 +1,7 @@
 var PORFILE_RESPONSE_DATA;
 var PORFILE_RESPONSE_UPDATED_DATA;
+var PROFILE_PROGRESS_REPORT_CURRENT_DAYS = null;
+var PROFILE_PROGRESS_REPORT_PENDING_DAYS = null;
 async function renderStudentProfilePage(extraParam){
 	COMMUNICATION_APPEND_ROW="";
     if($("#profileFielddModal").length>0){
@@ -22,7 +24,10 @@ async function renderStudentProfilePage(extraParam){
         if($("#uploadFile").length>0){
             $("#uploadFile").remove();
         }
-        $("body").append(viewUploadFileModal()+changeLearingProgramGradeModalContent(data[2])+confirmSaveModalContent(PORFILE_RESPONSE_DATA)+getCommunicationAttchFileModal());
+        if($("#progressReportConfirmModal").length>0){
+            $("#progressReportConfirmModal").remove();
+        }
+        $("body").append(viewUploadFileModal()+changeLearingProgramGradeModalContent(data[2])+confirmSaveModalContent(PORFILE_RESPONSE_DATA)+getCommunicationAttchFileModal()+profileProgressReportConfirmModal());
         // if(USER_ROLE == "STUDENT"){
 
         // }else{
@@ -1616,14 +1621,240 @@ function academicInformation(data){
                     html+=`</div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
                         html+=lastAcademicProofElement(data)
-                    html+=`</div>
-                    <div class="col-12 text-right">
+                    html+=`</div>`;
+                    html+=`<div class="col-12 text-right">
                         <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
                     </div>
+                    `;
+                        html+=profileProgressReportSectionElement(data)
+                    html+=`
                 </div>    
             </div>    
         </div>`;
     return html;
+}
+
+function profileProgressReportSectionElement(data){
+    var selectedDays = profileProgressReportResolveDaysType(data);
+    var dateRangeLabel = profileProgressReportGetDateRangeLabel(selectedDays);
+    var anchorDate = profileProgressReportGetAnchorDateString();
+    PROFILE_PROGRESS_REPORT_CURRENT_DAYS = selectedDays;
+    PROFILE_PROGRESS_REPORT_PENDING_DAYS = null;
+    var html=
+        `<div class="col-12">
+            <hr class="mt-2 mb-3"/>
+        </div>
+        <div class="col-12 mb-2">
+            <div class="d-flex align-items-center flex-wrap">
+                <span class="font-weight-semi-bold text-dark">Set Progress Report</span>
+                <span class="badge badge-light bg-light border text-dark ml-2 mb-2 mb-md-0 px-3 py-2" id="progressReportDateRangeLabel">${dateRangeLabel}</span>
+                <input type="hidden" name="progressReportDaysType" id="progressReportDaysType" value="${selectedDays}"/>
+                <input type="hidden" name="progressReportAnchorDate" id="progressReportAnchorDate" value="${anchorDate}"/>
+            </div>
+        </div>`;
+    html+=`<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">`;
+        html+=profileProgressReportOptionCardElement(7, "Weekly", "Every 7 days", selectedDays)
+    html+=`</div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">`;
+        html+=profileProgressReportOptionCardElement(14, "Biweekly", "Every 14 days", selectedDays)
+    html+=`</div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">`;
+        html+=profileProgressReportOptionCardElement(28, "Monthly", "Every 28 days", selectedDays)
+    html+=`</div>`;
+    return html;
+}
+
+function profileProgressReportOptionCardElement(days, title, subtitle, selectedDays){
+    var cardBorderClass = "border-light";
+    var radioChecked = "";
+    var radioAccent = "text-muted";
+    if(parseInt(days, 10) === parseInt(selectedDays, 10)){
+        cardBorderClass = "border-primary shadow-sm";
+        radioChecked = "checked";
+        radioAccent = "text-primary";
+    }
+    var html=
+        `<div class="border rounded-10 p-1 d-flex align-items-center justify-content-between progress-report-option-card ${cardBorderClass} bg-white cursor w-100"
+            id="progressReportOptionCard_${days}"
+            onclick="profileProgressReportSelect(event, ${days})">
+            <div class="d-flex align-items-center">
+                <div class="avatar-icon-wrapper mr-3">
+                    <div class="avatar-icon bg-light-primary border-0 rm-border d-flex align-items-center justify-content-center">
+                        <i class="fa fa-calendar text-primary"></i>
+                    </div>
+                </div>    
+                <div>
+                    <div class="font-weight-bold text-dark">${title}</div>
+                    <div class="text-muted">${subtitle}</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center ${radioAccent}">
+                <input type="radio"
+                    name="progressReportOption"
+                    id="progressReportOption_${days}"
+                    value="${days}"
+                    ${radioChecked}
+                    class="checkbox-lg"
+                    onclick="profileProgressReportSelect(event, ${days})"
+                    />
+            </div>
+        </div>`;
+    return html;
+}
+
+function profileProgressReportSelect(e, days){
+    if(e && typeof e.preventDefault === "function"){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    var safeDays = profileProgressReportSanitizeDaysType(days);
+    if(PROFILE_PROGRESS_REPORT_CURRENT_DAYS === null || PROFILE_PROGRESS_REPORT_CURRENT_DAYS === undefined){
+        PROFILE_PROGRESS_REPORT_CURRENT_DAYS = parseInt($("#progressReportDaysType").val() || "14", 10);
+    }
+    PROFILE_PROGRESS_REPORT_CURRENT_DAYS = profileProgressReportSanitizeDaysType(PROFILE_PROGRESS_REPORT_CURRENT_DAYS);
+
+    profileProgressReportApplySelection(PROFILE_PROGRESS_REPORT_CURRENT_DAYS);
+
+    PROFILE_PROGRESS_REPORT_PENDING_DAYS = safeDays;
+    $("#progressReportConfirmModal").modal("show");
+}
+
+function profileProgressReportApplySelection(days){
+    var safeDays = profileProgressReportSanitizeDaysType(days);
+    $("#progressReportDaysType").val(safeDays);
+    $("#progressReportDateRangeLabel").text(profileProgressReportGetDateRangeLabel(safeDays));
+    $("#progressReportAnchorDate").val(profileProgressReportGetAnchorDateString());
+
+    $("input[name='progressReportOption']").prop("checked", false);
+    $("#progressReportOption_"+safeDays).prop("checked", true);
+
+    $(".progress-report-option-card").removeClass("border-primary shadow-sm").addClass("border-light");
+    $("#progressReportOptionCard_"+safeDays).removeClass("border-light").addClass("border-primary shadow-sm");
+}
+
+function profileProgressReportResolveDaysType(data){
+    var candidate =
+        (data && (data.reportType)) ||
+        (data && data.studentStandardDTO && data.studentStandardDTO[0] && data.studentStandardDTO[0].reportType) ||
+        (data && data.studentStandardDTO && data.studentStandardDTO.reportType) ||
+        (data && (data.progressReportDaysType || data.daysType || data.progressReportFrequencyDays || data.progressReportTypeDays)) ||
+        (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.profileData && (PORFILE_RESPONSE_DATA.profileData.progressReportDaysType || PORFILE_RESPONSE_DATA.profileData.daysType)) ||
+        14;
+    return profileProgressReportSanitizeDaysType(candidate);
+}
+
+function profileProgressReportSanitizeDaysType(days){
+    var val = parseInt(days, 10);
+    if(val === 30){
+        return 28;
+    }
+    if(val === 15){
+        return 14;
+    }
+    if(val !== 7 && val !== 14 && val !== 28){
+        return 14;
+    }
+    return val;
+}
+
+function profileProgressReportGetDateRangeLabel(days){
+    var safeDays = profileProgressReportSanitizeDaysType(days);
+    var startDate = profileProgressReportGetBaseDateAsDateOnly();
+    var endDate = new Date(startDate.getTime());
+    if(safeDays === 7){
+        endDate.setDate(endDate.getDate() + (safeDays - 1));
+    }else{
+        endDate.setDate(endDate.getDate() + safeDays);
+    }
+    return profileProgressReportFormatLongDate(startDate)+" - "+profileProgressReportFormatLongDate(endDate);
+}
+
+function profileProgressReportGetAnchorDateString(){
+    return profileProgressReportFormatShortDate(profileProgressReportGetBaseDateAsDateOnly());
+}
+
+function profileProgressReportFormatShortDate(dateObj){
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var m = months[dateObj.getMonth()];
+    var d = dateObj.getDate();
+    var dd = d < 10 ? ("0"+d) : d;
+    var y = dateObj.getFullYear();
+    return m+" "+dd+", "+y;
+}
+
+function profileProgressReportFormatLongDate(dateObj){
+    var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    var m = months[dateObj.getMonth()];
+    var d = dateObj.getDate();
+    var y = dateObj.getFullYear();
+    return m+" "+d+", "+y;
+}
+
+function profileProgressReportGetBaseDateAsDateOnly(){
+    var baseDate = new Date();
+    if(window.today != "" && window.today != undefined){
+        baseDate = window.today;
+    }
+    baseDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+    var day = baseDate.getDay();
+    var saturday = new Date(baseDate.getTime());
+    saturday.setDate(saturday.getDate() + (6 - day));
+    return saturday;
+}
+
+function profileProgressReportConfirmModal(){
+    var html=
+        `<div class="modal fade fade-scale theme-modal" id="progressReportConfirmModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered box-shadow-none" role="document" style="max-width:460px">
+                <div class="modal-content border-0 rm-border no-shadow rounded-20 overflow-hidden bg-white">
+                    <div class="modal-header bg-primary text-white py-2">
+                        <h5 class="modal-title font-weight-semi-bold m-0">Set Progress Report</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="profileProgressReportConfirmNo()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="rounded-10 border border-warning bg-light-warning text-center p-3">
+                            <div class="avatar-icon-wrapper avatar-icon-xs mx-auto mb-2">
+                                <div class="avatar-icon bg-orange text-white d-flex align-items-center justify-content-center">
+                                    <i class="fa fa-info font-12"></i>
+                                </div>
+                            </div>
+                            <div id="progressReportConfirmMessage" class="font-size-md text-orange">
+                                Your current report frequency (e.g.,Weekly,Biweekly,Monthly) will remain active until its configured end date. Any changes you make will take effect only after the current configuration period ends.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-light px-4" data-dismiss="modal" onclick="profileProgressReportConfirmNo()">No</button>
+                        <button type="button" class="btn btn-primary px-4" onclick="profileProgressReportConfirmYes()">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
+}
+
+function profileProgressReportConfirmYes(){
+    if(PROFILE_PROGRESS_REPORT_PENDING_DAYS === null || PROFILE_PROGRESS_REPORT_PENDING_DAYS === undefined){
+        $("#progressReportConfirmModal").modal("hide");
+        return;
+    }
+    PROFILE_PROGRESS_REPORT_CURRENT_DAYS = profileProgressReportSanitizeDaysType(PROFILE_PROGRESS_REPORT_PENDING_DAYS);
+    PROFILE_PROGRESS_REPORT_PENDING_DAYS = null;
+    profileProgressReportApplySelection(PROFILE_PROGRESS_REPORT_CURRENT_DAYS);
+    applyChanges('progressReportDaysType','progressReportType', PORFILE_RESPONSE_DATA.userId, PORFILE_RESPONSE_DATA.studentStandardId, PORFILE_RESPONSE_DATA.moduleId, 'student', false, 0);
+    $("#progressReportConfirmModal").modal("hide");
+}
+
+function profileProgressReportConfirmNo(){
+    PROFILE_PROGRESS_REPORT_PENDING_DAYS = null;
+    if(PROFILE_PROGRESS_REPORT_CURRENT_DAYS !== null && PROFILE_PROGRESS_REPORT_CURRENT_DAYS !== undefined){
+        profileProgressReportApplySelection(PROFILE_PROGRESS_REPORT_CURRENT_DAYS);
+    }
+    if($("#progressReportConfirmModal").hasClass("show")){
+        $("#progressReportConfirmModal").modal("hide");
+    }
 }
 
 function studentIDElement(data){

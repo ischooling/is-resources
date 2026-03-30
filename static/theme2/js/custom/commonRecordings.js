@@ -142,13 +142,13 @@ function playRecording(videoUrl, title) {
 
 function getURLForSignVideo(videoUrl) {
     const payload = JSON.stringify({ url: videoUrl });
-    const encodePayload = window.btoa(payload);
+    const encodePayload = window.btoa(unescape(encodeURIComponent(payload)));
     return BASE_URL + CONTEXT_PATH + "videos/signed-url?payload=" + encodePayload;
 }
 
 function getURLForTranscriptContent(transcriptUrl) {
     var payload = JSON.stringify({ url: transcriptUrl });
-    var encodePayload = window.btoa(payload);
+    var encodePayload = window.btoa(unescape(encodeURIComponent(payload)));
     return BASE_URL + CONTEXT_PATH + "transcript/show-content?payload=" + encodePayload;
 }
 

@@ -1827,7 +1827,7 @@ function copyEnrollmentLink(eleID, msgEle){
 			payload['discountType']=$('#discountMsgTag').attr('data-discount-type');
 			payload['discountValue']=$('#discountMsgTag').attr('data-discount-value');
 			payload['discountCode']=$('#discountMsgTag').attr('data-discount-code');
-			var finalUrl=prefixUrl+splitText+window.btoa(JSON.stringify(payload));
+			var finalUrl=prefixUrl+splitText+window.btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 			$('#'+eleID).attr('value',finalUrl);
 		}
 		//message='Student will get '+discount+'% disount on enrollment';

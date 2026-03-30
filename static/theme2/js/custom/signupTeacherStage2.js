@@ -795,7 +795,7 @@ async function startDemoRecordingFun(attempt, isReattempting){
 			entityId: responseDataDemoRecording.data.meetingId,
 			entityType: "GENERAL_MEETINGS"
 		};
-		const encodedPayload = btoa(JSON.stringify(payloadToStartMeeting));
+		const encodedPayload = btoa(unescape(encodeURIComponent(JSON.stringify(payloadToStartMeeting))));
 		const queryParams = `?payload=${encodeURIComponent(encodedPayload)}`;
 		$.ajax({
 			type: "GET",

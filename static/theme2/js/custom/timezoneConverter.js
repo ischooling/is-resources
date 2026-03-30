@@ -85,7 +85,7 @@ function renderSingleTimezone(results){
 function countryStateCitySuggestionList(results){
 	html=
 	'<li class="border-bottom bg-light-gray px-2 bg-light-primary" id="'+results.iso2+'-TIMEZONE">'
-		+'<a href="javascript:void(0)" class="d-flex flex-wrap" onclick="selectTimeZone(event,\''+results.location.lng+'\',\''+results.location.lat+'\',\''+btoa(results.formatted_address)+'\',\''+results.iso2+'\')">'
+		+'<a href="javascript:void(0)" class="d-flex flex-wrap" onclick="selectTimeZone(event,\''+results.location.lng+'\',\''+results.location.lat+'\',\''+btoa(unescape(encodeURIComponent(results.formatted_address)))+'\',\''+results.iso2+'\')">'
 			+'<div class="satate-and-city">'
 				// +'<span class="city full text-primary text-left">'+results.city+'</span>'
 				+'<span class="state-and-country full text-dark text-left ml-2">'
@@ -383,7 +383,7 @@ function getDefaultLocation(){
 function getCurrentTimezoneContent(){
 	var res=getDefaultLocation();
 	baseTimezone=res.timezone;
-	var formatted_address=btoa(res.city+', '+res.country);
+	var formatted_address=btoa(unescape(encodeURIComponent(res.city+', '+res.country)));
 	$('.current-timezone-list-ul').append(singleTimezone(res.lon, res.lat, formatted_address, res.countryCode, false));
 	$(".date-picker").datepicker({
 		format:"D, d M, yyyy"
