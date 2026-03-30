@@ -2876,38 +2876,49 @@ function getLeadEnrollmentHoldPopup() {
 
   var html =
     `<style id="leadEnrollmentHoldPopupStyles">
-      #leadEnrollmentHoldPopupForm .hold-enrollment-dialog{max-width:980px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-modal{border-radius:28px;overflow:hidden;box-shadow:0 28px 70px rgba(11,57,105,.24);background:#fff;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-header{border-bottom:0;padding:18px 28px;background:linear-gradient(135deg,#0b78f2 0%,#1fa2ff 100%);}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:2.15rem;font-weight:600;line-height:1.1;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-close{padding:0;background:transparent;border:0;color:#fff;opacity:1;text-shadow:none;font-size:44px;line-height:1;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-body{padding:28px 34px 22px;background:linear-gradient(180deg,#f6fbff 0%,#ffffff 58%);}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-footer{border-top:1px solid #e3edf8;padding:18px 34px 24px;background:#fff;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-form{background:#fff;border:1px solid #dfebf8;border-radius:24px;padding:24px 22px 12px;box-shadow:0 18px 42px rgba(15,72,126,.09);}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-form-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-section-title{font-size:28px;font-weight:700;color:#16324f;line-height:1.15;margin-bottom:6px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-subtitle{font-size:14px;color:#667b93;max-width:560px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-chip{display:inline-flex;align-items:center;padding:10px 16px;border-radius:999px;background:#edf6ff;color:#1463c2;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-form label{margin-bottom:6px !important;color:#213349;font-weight:600;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-form .form-control{height:56px;border-radius:16px;border:1px solid #cfdced;box-shadow:none;font-size:15px;color:#22384d;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-dialog{max-width:640px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-modal{border-radius:18px;overflow:hidden;box-shadow:0 18px 42px rgba(11,57,105,.18);background:#fff;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-header{border-bottom:0;padding:10px 14px;background:linear-gradient(135deg,#0b78f2 0%,#1fa2ff 100%);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:1rem;font-weight:600;line-height:1.2;margin-right:10px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-close{display:flex;align-items:center;justify-content:center;align-self:center;width:24px;height:24px;margin:0 8px 0 auto;padding:0;background:transparent;border:0;color:#fff;opacity:1;text-shadow:none;font-size:24px;line-height:1;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-close span{display:block;line-height:1;transform:translateY(-1px);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-body{padding:12px 14px 10px;background:linear-gradient(180deg,#f6fbff 0%,#ffffff 58%);max-height:calc(100vh - 130px);overflow-y:auto;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-footer{border-top:1px solid #e3edf8;padding:10px 14px 14px;background:#fff;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form{background:#fff;border:1px solid #dfebf8;border-radius:12px;padding:12px 12px 4px;box-shadow:0 8px 18px rgba(15,72,126,.06);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-section-title{font-size:16px;font-weight:700;color:#16324f;line-height:1.15;margin-bottom:3px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-subtitle{font-size:11px;color:#667b93;max-width:360px;line-height:1.35;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-chip{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:#edf6ff;color:#1463c2;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form label{margin-bottom:4px !important;color:#213349;font-weight:600;font-size:12px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .form-control{height:auto;min-height:31px;border-radius:8px;border:1px solid #cfdced;box-shadow:none;font-size:12px;color:#22384d;padding:4px 8px;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-form .form-control:focus{border-color:#69a8ff;box-shadow:0 0 0 4px rgba(10,120,242,.12);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti{width:100%;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti input{width:100%;height:56px;border-radius:16px;border:1px solid #cfdced;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-form-divider{border-top:1px solid #e5eef8;margin:18px 0 22px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel{background:linear-gradient(135deg,#f8fbff 0%,#eef5ff 100%);border:1px solid #dbe8f9;border-radius:20px;padding:14px 18px;margin-bottom:18px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti input{width:100%;height:auto;min-height:31px;border-radius:8px;border:1px solid #cfdced;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti--separate-dial-code .iti__selected-flag{background:#f8fafc;border-right:1px solid #cfdced;border-radius:8px 0 0 8px;padding:0 8px 0 10px;min-width:74px;justify-content:center;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti--separate-dial-code .iti__selected-dial-code{font-size:11px;color:#4b5d73;margin-left:4px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti--separate-dial-code .iti__flag-container{padding:1px 0 1px 1px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form .iti__country-list{z-index:2055;max-width:260px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-form-divider{border-top:1px solid #e5eef8;margin:10px 0 12px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel{background:linear-gradient(135deg,#f8fbff 0%,#eef5ff 100%);border:1px solid #dbe8f9;border-radius:10px;padding:8px 10px;margin-bottom:10px;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel table{margin-bottom:0;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel th,
-      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel td{border:0;padding:6px 4px;font-size:13px;vertical-align:middle;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-best-time-title{font-size:17px;font-weight:700;color:#16324f;margin-bottom:12px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-active-banner{display:block;border:1px solid #d8e7fb;border-radius:24px;padding:18px 20px;background:linear-gradient(135deg,#fffaf1 0%,#ffffff 100%);box-shadow:0 18px 44px rgba(15,72,126,.08);}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-lock-panel td{border:0;padding:4px 3px;font-size:12px;vertical-align:middle;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-best-time-title{font-size:13px;font-weight:700;color:#16324f;margin-bottom:8px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-active-banner{display:block;border:1px solid #d8e7fb;border-radius:10px;padding:10px 12px;background:linear-gradient(135deg,#fffaf1 0%,#ffffff 100%);box-shadow:0 8px 18px rgba(15,72,126,.05);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-active-banner.timer-only{padding:0;border:0;background:transparent;box-shadow:none;margin-bottom:0;}
-      #leadEnrollmentHoldPopupForm.hold-timer-only-mode .hold-enrollment-body{padding:30px 34px 18px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-secondary{min-width:164px;height:52px;border-radius:16px;background:linear-gradient(135deg,#33a7f6 0%,#1e94e4 100%);border:0;color:#fff;font-size:18px;font-weight:600;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary{min-width:188px;height:52px;border-radius:16px;background:linear-gradient(135deg,#27cf47 0%,#1fbf45 100%);border:0;color:#fff;font-size:18px;font-weight:700;box-shadow:0 14px 30px rgba(31,191,69,.26);}
+      #leadEnrollmentHoldPopupForm.hold-timer-only-mode .hold-enrollment-body{padding:14px;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-secondary{min-width:96px;border-radius:.2rem;font-size:12px;font-weight:600;padding:.25rem .55rem;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary{min-width:112px;border-radius:.2rem;font-size:12px;font-weight:600;padding:.25rem .55rem;box-shadow:none;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary:hover,
       #leadEnrollmentHoldPopupForm .hold-enrollment-btn-secondary:hover{color:#fff;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-release{border-radius:12px;font-weight:600;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-btn-release{border-radius:.2rem;font-weight:600;font-size:12px;padding:.25rem .5rem;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-btn-primary:disabled{background:#94c6a1;box-shadow:none;}
+      #leadEnrollmentHoldPopupForm .bootstrap-select{width:100% !important;}
+      #leadEnrollmentHoldPopupForm .bootstrap-select > .dropdown-toggle{height:31px;padding:4px 28px 4px 8px;border:1px solid #cfdced;border-radius:8px;background:#fff;font-size:12px;line-height:1.4;}
+      #leadEnrollmentHoldPopupForm .bootstrap-select > .dropdown-toggle:focus{outline:0 !important;box-shadow:0 0 0 4px rgba(10,120,242,.12) !important;border-color:#69a8ff;}
+      #leadEnrollmentHoldPopupForm .bootstrap-select .dropdown-menu{z-index:2055;max-height:220px !important;overflow:auto;}
+      #leadEnrollmentHoldPopupForm .bootstrap-select .dropdown-menu.inner{max-height:220px !important;}
+      #leadEnrollmentHoldPopupForm .bootstrap-select .dropdown-item{font-size:12px;padding:.35rem .75rem;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card{background:#fff;border:1px solid #dbe8f8;border-radius:18px;padding:16px 18px;text-align:left;box-shadow:0 12px 26px rgba(15,72,126,.06);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card span{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;color:#6d8197;text-transform:uppercase;margin-bottom:8px;}
@@ -2921,9 +2932,10 @@ function getLeadEnrollmentHoldPopup() {
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value{font-size:48px;font-weight:800;line-height:1.14;color:#23c245;word-break:break-word;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value.is-expired{color:#d7263d;}
       @media (max-width:991px){
-        #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:1.7rem;}
-        #leadEnrollmentHoldPopupForm .hold-enrollment-body{padding:22px 18px 18px;}
-        #leadEnrollmentHoldPopupForm .hold-enrollment-footer{padding:16px 18px 20px;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-dialog{max-width:92vw;margin:.75rem auto;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:.95rem;}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-body{padding:10px 10px 8px;max-height:calc(100vh - 100px);}
+        #leadEnrollmentHoldPopupForm .hold-enrollment-footer{padding:8px 10px 10px;}
         #leadEnrollmentHoldPopupForm .hold-enrollment-form-head{display:block;}
         #leadEnrollmentHoldPopupForm .hold-enrollment-chip{margin-top:10px;}
         #leadEnrollmentHoldPopupForm .hold-enrollment-meta-grid{grid-template-columns:1fr;}
@@ -2932,12 +2944,12 @@ function getLeadEnrollmentHoldPopup() {
       }
     </style>
     <div id="leadEnrollmentHoldPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadEnrollmentHoldTitle" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered hold-enrollment-dialog">
+      <div class="modal-dialog modal-md modal-dialog-centered hold-enrollment-dialog">
         <div class="modal-content border-0 hold-enrollment-modal">
           <div class="modal-header text-white hold-enrollment-header">
             <h5 class="modal-title" id="leadEnrollmentHoldTitle">Holding Enrollment (<span id="holdEnrollLeadNo">N/A</span>)</h5>
             <button type="button" class="close hold-enrollment-close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true" style="display:block;line-height:1;margin-top:-1px;">&times;</span>
             </button>
           </div>
           <div class="modal-body hold-enrollment-body">
@@ -2955,7 +2967,7 @@ function getLeadEnrollmentHoldPopup() {
                 </div>
                 <div class="hold-enrollment-chip">Sales Hold Workflow</div>
               </div>
-              <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-2 pb-2 px-0" method="post" id="leadEnrollmentHoldForm" action="javascript:void(0);">
+              <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-1 pb-1 px-0" method="post" id="leadEnrollmentHoldForm" action="javascript:void(0);">
                 <input type="hidden" name="leadId" id="holdEnrollLeadId" value="" />
                 <input type="hidden" name="holdIsdCode" id="holdEnrollIsdCode" value="" />
                 <input type="hidden" name="holdIsdCodeIso" id="holdEnrollIsdCodeIso" value="" />
@@ -2964,37 +2976,37 @@ function getLeadEnrollmentHoldPopup() {
                 <div class="row">
                   <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
                     <label class="m-0">Child First Name</label>
-                    <input type="text" class="form-control" name="holdFname" id="holdEnrollFname" maxlength="100" autocomplete="off" />
+                    <input type="text" class="form-control form-control-sm" name="holdFname" id="holdEnrollFname" maxlength="100" autocomplete="off" />
                   </div>
                   <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
                     <label class="m-0">Child Middle Name</label>
-                    <input type="text" class="form-control" name="holdMname" id="holdEnrollMname" maxlength="100" autocomplete="off" />
+                    <input type="text" class="form-control form-control-sm" name="holdMname" id="holdEnrollMname" maxlength="100" autocomplete="off" />
                   </div>
                   <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
                     <label class="m-0">Child Last Name</label>
-                    <input type="text" class="form-control" name="holdLname" id="holdEnrollLname" maxlength="100" autocomplete="off" />
+                    <input type="text" class="form-control form-control-sm" name="holdLname" id="holdEnrollLname" maxlength="100" autocomplete="off" />
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Grade</label>
-                    <select class="form-control" name="holdGrade" id="holdEnrollGrade">
+                    <select class="form-control form-control-sm selectpicker" name="holdGrade" id="holdEnrollGrade" data-container="#leadEnrollmentHoldPopupForm" data-size="6" data-dropup-auto="false" data-width="100%">
                       ${gradeOptions}
                     </select>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Email</label>
-                    <input type="email" class="form-control" name="holdEmail" id="holdEnrollEmail" maxlength="200" autocomplete="off" />
+                    <input type="email" class="form-control form-control-sm" name="holdEmail" id="holdEnrollEmail" maxlength="200" autocomplete="off" />
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Phone No</label>
-                    <input type="text" class="form-control" name="holdPhone" id="holdEnrollPhone" maxlength="15" autocomplete="off" />
+                    <input type="text" class="form-control form-control-sm" name="holdPhone" id="holdEnrollPhone" maxlength="15" autocomplete="off" />
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Alternate Email</label>
-                    <input type="email" class="form-control" name="holdAltEmail" id="holdEnrollAltEmail" maxlength="200" autocomplete="off" />
+                    <input type="email" class="form-control form-control-sm" name="holdAltEmail" id="holdEnrollAltEmail" maxlength="200" autocomplete="off" />
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Alt Phone No</label>
-                    <input type="text" class="form-control" name="holdAltPhone" id="holdEnrollAltPhone" maxlength="15" autocomplete="off" />
+                    <input type="text" class="form-control form-control-sm" name="holdAltPhone" id="holdEnrollAltPhone" maxlength="15" autocomplete="off" />
                   </div>
                 </div>
                 <div id="holdLockInfoSection" class="d-none hold-enrollment-lock-panel">
@@ -3010,7 +3022,7 @@ function getLeadEnrollmentHoldPopup() {
                 <div class="row">
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Holding For</label>
-                    <select class="form-control" name="lockHours" id="holdEnrollLockHours">
+                    <select class="form-control form-control-sm selectpicker" name="lockHours" id="holdEnrollLockHours" data-container="#leadEnrollmentHoldPopupForm" data-size="4" data-dropup-auto="false" data-width="100%">
                       <option value="24">24 hrs</option>
                       <option value="48">48 hrs</option>
                       <option value="72" selected>72 hrs</option>
@@ -3022,23 +3034,23 @@ function getLeadEnrollmentHoldPopup() {
                 <div class="row mt-1">
                   <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
                     <label class="m-0">Date</label>
-                    <input type="text" class="form-control datepicker" name="holdBestTimeDate" id="holdEnrollBestTimeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" placeholder="MM-DD-YYYY" />
+                    <input type="text" class="form-control form-control-sm datepicker" name="holdBestTimeDate" id="holdEnrollBestTimeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" placeholder="MM-DD-YYYY" />
                   </div>
                   <div class="col-lg-2 col-md-2 col-sm-3 col-3 mb-2">
                     <label class="m-0">HH</label>
-                    <select class="form-control" id="holdEnrollBestTimeHH" name="holdBestTimeHH">
+                    <select class="form-control form-control-sm selectpicker" id="holdEnrollBestTimeHH" name="holdBestTimeHH" data-container="#leadEnrollmentHoldPopupForm" data-size="6" data-dropup-auto="false" data-width="100%">
                       ${hhOptions}
                     </select>
                   </div>
                   <div class="col-lg-2 col-md-2 col-sm-3 col-3 mb-2">
                     <label class="m-0">MM</label>
-                    <select class="form-control" id="holdEnrollBestTimeMM" name="holdBestTimeMM">
+                    <select class="form-control form-control-sm selectpicker" id="holdEnrollBestTimeMM" name="holdBestTimeMM" data-container="#leadEnrollmentHoldPopupForm" data-size="6" data-dropup-auto="false" data-width="100%">
                       ${mmOptions}
                     </select>
                   </div>
                   <div class="col-lg-2 col-md-2 col-sm-3 col-3 mb-2">
                     <label class="m-0">AM/PM</label>
-                    <select class="form-control" id="holdEnrollBestTimeAMPM" name="holdBestTimeAMPM">
+                    <select class="form-control form-control-sm selectpicker" id="holdEnrollBestTimeAMPM" name="holdBestTimeAMPM" data-container="#leadEnrollmentHoldPopupForm" data-size="2" data-dropup-auto="false" data-width="100%">
                       <option value="AM">AM</option>
                       <option value="PM">PM</option>
                     </select>
@@ -3049,8 +3061,8 @@ function getLeadEnrollmentHoldPopup() {
             </div>
           </div>
           <div class="modal-footer hold-enrollment-footer">
-            <button type="button" class="btn float-right pr-4 pl-4 ml-2 hold-enrollment-btn-secondary" id="holdEnrollmentCloseBtn" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn float-right pr-4 pl-4 hold-enrollment-btn-primary" id="saveEnrollmentHoldBtn" onclick="saveLeadEnrollmentHold()">Hold Enrollment</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm float-right px-3 ml-2 hold-enrollment-btn-secondary" id="holdEnrollmentCloseBtn" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success btn-sm float-right px-3 hold-enrollment-btn-primary" id="saveEnrollmentHoldBtn" onclick="saveLeadEnrollmentHold()">Hold Enrollment</button>
           </div>
         </div>
       </div>
@@ -3061,12 +3073,17 @@ function getLeadEnrollmentHoldPopup() {
 var itiHoldPhone;
 var itiHoldAltPhone;
 
-function getHoldEnrollmentMinDateMoment(lockHours) {
+function getHoldEnrollmentDateRange(lockHours) {
   var hours = parseInt(lockHours, 10);
   if (isNaN(hours) || hours <= 0) {
     hours = 72;
   }
-  return moment().startOf("day").add(Math.max(1, Math.ceil(hours / 24)), "days");
+  var startMoment = moment().startOf("day");
+  var endMoment = moment().startOf("day").add(Math.max(1, Math.ceil(hours / 24)), "days");
+  return {
+    startMoment: startMoment,
+    endMoment: endMoment
+  };
 }
 
 function refreshHoldEnrollmentBestTimePicker(lockHours, preserveCurrentValue) {
@@ -3075,20 +3092,39 @@ function refreshHoldEnrollmentBestTimePicker(lockHours, preserveCurrentValue) {
     return;
   }
 
-  var minMoment = getHoldEnrollmentMinDateMoment(lockHours);
+  var dateRange = getHoldEnrollmentDateRange(lockHours);
   try {
-    $bestTimeDate.datepicker("setStartDate", minMoment.toDate());
+    $bestTimeDate.datepicker("setStartDate", dateRange.startMoment.toDate());
+    $bestTimeDate.datepicker("setEndDate", dateRange.endMoment.toDate());
   } catch (e) {}
 
   var currentMoment = moment($bestTimeDate.val() || "", "MM-DD-YYYY", true);
-  var shouldReplaceValue = !preserveCurrentValue || !currentMoment.isValid() || currentMoment.isBefore(minMoment, "day");
+  var shouldReplaceValue = !preserveCurrentValue
+    || !currentMoment.isValid()
+    || currentMoment.isBefore(dateRange.startMoment, "day")
+    || currentMoment.isAfter(dateRange.endMoment, "day");
   if (shouldReplaceValue) {
-    var defaultDate = minMoment.format("MM-DD-YYYY");
+    var defaultDate = dateRange.startMoment.format("MM-DD-YYYY");
     $bestTimeDate.val(defaultDate);
     try {
       $bestTimeDate.datepicker("update", defaultDate);
     } catch (e) {}
   }
+}
+
+function initHoldEnrollmentSelectPickers() {
+  if (!$.fn.selectpicker) {
+    return;
+  }
+
+  var $selects = $("#leadEnrollmentHoldPopupForm").find(".selectpicker");
+  $selects.each(function () {
+    try {
+      $(this).selectpicker("destroy");
+    } catch (e) {}
+  });
+
+  $selects.selectpicker();
 }
 
 /**
@@ -3131,7 +3167,7 @@ function openLeadEnrollmentHoldPopup(lead) {
   }
   var phoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollPhone");
   itiHoldPhone = window.intlTelInput(phoneEl, {
-    //separateDialCode: true,
+    separateDialCode: true,
   });
   itiHoldPhone.setCountry(lead.isdCodeIso || 'us');
   phoneEl.addEventListener('countrychange', function() {
@@ -3147,7 +3183,7 @@ function openLeadEnrollmentHoldPopup(lead) {
   }
   var altPhoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollAltPhone");
   itiHoldAltPhone = window.intlTelInput(altPhoneEl, {
-    //separateDialCode: true,
+    separateDialCode: true,
   });
   itiHoldAltPhone.setCountry(lead.isdCodeAlterIso || 'us');
   altPhoneEl.addEventListener('countrychange', function() {
@@ -3165,10 +3201,20 @@ function openLeadEnrollmentHoldPopup(lead) {
     format: 'mm-dd-yyyy',
     autoclose: true,
     todayHighlight: true,
-    startDate: getHoldEnrollmentMinDateMoment($("#holdEnrollLockHours").val()).toDate(),
+    startDate: getHoldEnrollmentDateRange($("#holdEnrollLockHours").val()).startMoment.toDate(),
+    endDate: getHoldEnrollmentDateRange($("#holdEnrollLockHours").val()).endMoment.toDate(),
     orientation: 'top'
   });
   refreshHoldEnrollmentBestTimePicker($("#holdEnrollLockHours").val(), false);
+
+  initHoldEnrollmentSelectPickers();
+  if ($.fn.selectpicker) {
+    $("#holdEnrollGrade").selectpicker("val", lead.standard || "");
+    $("#holdEnrollLockHours").selectpicker("val", "72");
+    $("#holdEnrollBestTimeHH").selectpicker("val", $("#holdEnrollBestTimeHH").val() || "00");
+    $("#holdEnrollBestTimeMM").selectpicker("val", $("#holdEnrollBestTimeMM").val() || "00");
+    $("#holdEnrollBestTimeAMPM").selectpicker("val", $("#holdEnrollBestTimeAMPM").val() || "AM");
+  }
 
   // Show modal
   $("#leadEnrollmentHoldPopupForm").modal({ backdrop: 'static', keyboard: false });

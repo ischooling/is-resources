@@ -926,7 +926,7 @@ function enrAvailOpenViewInNewTab() {
 		(select2Href ? '<script src="' + select2Href + '"></script>' : "") +
 		"<script>(function(){function qa(s){try{return Array.prototype.slice.call(document.querySelectorAll(s));}catch(e){return[];}}function q(s){try{return document.querySelector(s);}catch(e){return null;}}function norm(s){return String(s||'').toLowerCase().replace(/\\s+/g,' ').trim();}function val(el){try{return norm((el&&el.value)||'');}catch(e){return'';}}function toInt(x){var n=parseInt(String(x||''),10);return isNaN(n)?0:n;}function hasSelect2(el){try{return !!(window.jQuery&&jQuery.fn&&jQuery.fn.select2&&el&&jQuery(el).hasClass('select2-hidden-accessible'));}catch(e){return false;}}function clearEl(el){if(!el)return;try{if(hasSelect2(el)){jQuery(el).val('').trigger('change');return;}}catch(e){}try{el.value='';}catch(e2){}}function init(){var root=q('#enrAvailPreviewRoot');if(!root)return;var raw=null;try{raw=localStorage.getItem('" +
 			ENR_AVAIL_PREVIEW_KEY +
-			"');}catch(e){}if(!raw){root.innerHTML='<div class=\"text-muted text-center py-5\">No preview data</div>';return;}var d={};try{d=JSON.parse(raw)||{};}catch(e2){d={};}document.title=d.title||document.title;root.innerHTML=d.html||'';var strip=q('#enrAvailFilterStrip');if(!strip)return;var selCountry=q('#enrAvailF_Country');var selProgram=q('#enrAvailF_Program');var selGrade=q('#enrAvailF_Grade');var btnClear=q('#enrAvailF_Clear');var countEl=q('#enrAvailF_Count');var titleEl=q('#enrAvailCH_Title');var subEl=q('#enrAvailCH_Subtitle');var statTotal=q('#enrAvailS_Total');var statAvail=q('#enrAvailS_Available');var statRes=q('#enrAvailS_Reserved');var statCon=q('#enrAvailS_Confirmed');var statWait=q('#enrAvailS_Wait');var barTotal=q('#enrAvailBar_Total');var barAvail=q('#enrAvailBar_Available');var barRes=q('#enrAvailBar_Reserved');var barCon=q('#enrAvailBar_Confirmed');var barWait=q('#enrAvailBar_Wait');var rows=qa('.enrAvailRecRow');var emptyRow=q('#enrAvailCounselorEmpty');function pct(x,total){return total?Math.max(0,Math.min(100,Math.round((x/total)*100))):0;}function apply(){var fc=val(selCountry),fp=val(selProgram),fg=val(selGrade);var visible=0,sumTotal=0,sumBooked=0,sumAbout=0,sumRemaining=0,sumWait=0,sumOverbooked=0;rows.forEach(function(row){var ok=true;var rc=norm(row.getAttribute('data-enr-country'));var rp=norm(row.getAttribute('data-enr-program'));var rg=norm(row.getAttribute('data-enr-grade'));if(fc&&rc!==fc)ok=false;if(ok&&fp&&rp!==fp)ok=false;if(ok&&fg&&rg!==fg)ok=false;row.style.display=ok?'':'none';if(ok){visible++;sumTotal+=toInt(row.getAttribute('data-enr-total'));sumBooked+=toInt(row.getAttribute('data-enr-booked'));sumAbout+=toInt(row.getAttribute('data-enr-about'));sumRemaining+=toInt(row.getAttribute('data-enr-free')||row.getAttribute('data-enr-remaining'));sumWait+=toInt(row.getAttribute('data-enr-wait'));sumOverbooked+=toInt(row.getAttribute('data-enr-overbooked'));}});if(countEl)countEl.textContent=visible.toLocaleString()+' record'+(visible===1?'':'s');if(emptyRow)emptyRow.style.display=visible?'none':'';var ctx=[];if(fg)ctx.push((selGrade&&selGrade.value)||'');if(fp)ctx.push((selProgram&&selProgram.value)||'');if(fc)ctx.push((selCountry&&selCountry.value)||'');var ctxTxt=ctx.length?(' — '+ctx.join(' · ')):'';if(titleEl)titleEl.textContent=sumRemaining.toLocaleString()+' seats available'+ctxTxt;if(subEl)subEl.textContent=sumBooked.toLocaleString()+' confirmed enrollments · '+sumAbout.toLocaleString()+' reserved (pending) · '+sumWait.toLocaleString()+' waitlist · '+sumOverbooked.toLocaleString()+' overbooked · '+sumTotal.toLocaleString()+' total seats';if(statTotal)statTotal.textContent=sumTotal.toLocaleString();if(statAvail)statAvail.textContent=sumRemaining.toLocaleString();if(statRes)statRes.textContent=sumAbout.toLocaleString();if(statCon)statCon.textContent=sumBooked.toLocaleString();if(statWait)statWait.textContent=sumWait.toLocaleString();if(barTotal)barTotal.style.width='100%';if(barAvail)barAvail.style.width=pct(sumRemaining,sumTotal)+'%';if(barRes)barRes.style.width=pct(sumAbout,sumTotal)+'%';if(barCon)barCon.style.width=pct(sumBooked,sumTotal)+'%';if(barWait)barWait.style.width=pct(sumWait,sumTotal)+'%';}function bind(el){if(!el||!el.addEventListener)return;['change','input'].forEach(function(evt){try{el.addEventListener(evt,apply);}catch(e){}});}bind(selCountry);bind(selProgram);bind(selGrade);try{if(window.jQuery&&jQuery.fn&&jQuery.fn.select2){[selCountry,selProgram,selGrade].forEach(function(el){if(!el)return;try{var $el=jQuery(el);if($el.hasClass('select2-hidden-accessible'))$el.select2('destroy');}catch(e){}try{jQuery(el).select2({width:'100%',minimumResultsForSearch:0,dropdownParent:jQuery(strip)}).on('change',apply);}catch(e2){}});}}catch(e3){}if(btnClear&&btnClear.addEventListener){btnClear.addEventListener('click',function(){clearEl(selCountry);clearEl(selProgram);clearEl(selGrade);apply();});}try{if(!root.__enrAvailClickBound){root.__enrAvailClickBound=true;root.addEventListener('click',function(e){var t=e&&e.target;while(t&&t!==root&&!(t.classList&&t.classList.contains('enrAvailEditBtn'))){t=t.parentNode;}if(!t||t===root)return;try{e.preventDefault&&e.preventDefault();}catch(ex){}var id=t.getAttribute('data-id')||'';if(!id)return;try{if(window.opener&&typeof window.opener.enrAvailJumpToEdit==='function'){window.opener.enrAvailJumpToEdit(id);try{window.opener.focus&&window.opener.focus();}catch(ex2){}try{window.close();}catch(ex3){}return;}}catch(ex4){}try{localStorage.setItem('" +
+			"');}catch(e){}if(!raw){root.innerHTML='<div class=\"text-muted text-center py-5\">No preview data</div>';return;}var d={};try{d=JSON.parse(raw)||{};}catch(e2){d={};}document.title=d.title||document.title;root.innerHTML=d.html||'';var strip=q('#enrAvailFilterStrip');if(!strip)return;var selCountry=q('#enrAvailF_Country');var selProgram=q('#enrAvailF_Program');var selGrade=q('#enrAvailF_Grade');var btnClear=q('#enrAvailF_Clear');var countEl=q('#enrAvailF_Count');var titleEl=q('#enrAvailCH_Title');var subEl=q('#enrAvailCH_Subtitle');var statTotal=q('#enrAvailS_Total');var statAvail=q('#enrAvailS_Available');var statRes=q('#enrAvailS_Reserved');var statCon=q('#enrAvailS_Confirmed');var statWait=q('#enrAvailS_Wait');var barTotal=q('#enrAvailBar_Total');var barAvail=q('#enrAvailBar_Available');var barRes=q('#enrAvailBar_Reserved');var barCon=q('#enrAvailBar_Confirmed');var barWait=q('#enrAvailBar_Wait');var rows=qa('.enrAvailRecRow');var emptyRow=q('#enrAvailCounselorEmpty');function pct(x,total){return total?Math.max(0,Math.min(100,Math.round((x/total)*100))):0;}function apply(){var fc=val(selCountry),fp=val(selProgram),fg=val(selGrade);var visible=0,sumTotal=0,sumBooked=0,sumAbout=0,sumRemaining=0,sumWait=0,sumOverbooked=0;rows.forEach(function(row){var ok=true;var rc=norm(row.getAttribute('data-enr-country'));var rp=norm(row.getAttribute('data-enr-program'));var rg=norm(row.getAttribute('data-enr-grade'));if(fc&&rc!==fc)ok=false;if(ok&&fp&&rp!==fp)ok=false;if(ok&&fg&&rg!==fg)ok=false;row.style.display=ok?'':'none';if(ok){visible++;sumTotal+=toInt(row.getAttribute('data-enr-total'));sumBooked+=toInt(row.getAttribute('data-enr-booked'));sumAbout+=toInt(row.getAttribute('data-enr-about'));sumRemaining+=toInt(row.getAttribute('data-enr-free')||row.getAttribute('data-enr-remaining'));sumWait+=toInt(row.getAttribute('data-enr-wait'));sumOverbooked+=toInt(row.getAttribute('data-enr-overbooked'));}});if(countEl)countEl.textContent=visible.toLocaleString()+' record'+(visible===1?'':'s');if(emptyRow)emptyRow.style.display=visible?'none':'';var ctx=[];if(fg)ctx.push((selGrade&&selGrade.value)||'');if(fp)ctx.push((selProgram&&selProgram.value)||'');if(fc)ctx.push((selCountry&&selCountry.value)||'');var ctxTxt=ctx.length?(' — '+ctx.join(' · ')):'';if(titleEl)titleEl.textContent=sumRemaining.toLocaleString()+' seats available'+ctxTxt;if(subEl)subEl.textContent=sumBooked.toLocaleString()+' confirmed enrollments · '+sumAbout.toLocaleString()+' reserved (pending) · '+sumWait.toLocaleString()+' waitlist · '+sumOverbooked.toLocaleString()+' overbooked · '+sumTotal.toLocaleString()+' Capacity';if(statTotal)statTotal.textContent=sumTotal.toLocaleString();if(statAvail)statAvail.textContent=sumRemaining.toLocaleString();if(statRes)statRes.textContent=sumAbout.toLocaleString();if(statCon)statCon.textContent=sumBooked.toLocaleString();if(statWait)statWait.textContent=sumWait.toLocaleString();if(barTotal)barTotal.style.width='100%';if(barAvail)barAvail.style.width=pct(sumRemaining,sumTotal)+'%';if(barRes)barRes.style.width=pct(sumAbout,sumTotal)+'%';if(barCon)barCon.style.width=pct(sumBooked,sumTotal)+'%';if(barWait)barWait.style.width=pct(sumWait,sumTotal)+'%';}function bind(el){if(!el||!el.addEventListener)return;['change','input'].forEach(function(evt){try{el.addEventListener(evt,apply);}catch(e){}});}bind(selCountry);bind(selProgram);bind(selGrade);try{if(window.jQuery&&jQuery.fn&&jQuery.fn.select2){[selCountry,selProgram,selGrade].forEach(function(el){if(!el)return;try{var $el=jQuery(el);if($el.hasClass('select2-hidden-accessible'))$el.select2('destroy');}catch(e){}try{jQuery(el).select2({width:'100%',minimumResultsForSearch:0,dropdownParent:jQuery(strip)}).on('change',apply);}catch(e2){}});}}catch(e3){}if(btnClear&&btnClear.addEventListener){btnClear.addEventListener('click',function(){clearEl(selCountry);clearEl(selProgram);clearEl(selGrade);apply();});}try{if(!root.__enrAvailClickBound){root.__enrAvailClickBound=true;root.addEventListener('click',function(e){var t=e&&e.target;while(t&&t!==root&&!(t.classList&&t.classList.contains('enrAvailEditBtn'))){t=t.parentNode;}if(!t||t===root)return;try{e.preventDefault&&e.preventDefault();}catch(ex){}var id=t.getAttribute('data-id')||'';if(!id)return;try{if(window.opener&&typeof window.opener.enrAvailJumpToEdit==='function'){window.opener.enrAvailJumpToEdit(id);try{window.opener.focus&&window.opener.focus();}catch(ex2){}try{window.close();}catch(ex3){}return;}}catch(ex4){}try{localStorage.setItem('" +
 			ENR_AVAIL_EDIT_FROM_PREVIEW_KEY +
 				"',String(id));}catch(ex5){}alert('Edit is available in the dashboard window.');});}}catch(e4){}apply();}try{init();}catch(e){try{var r=q('#enrAvailPreviewRoot');if(r)r.innerHTML='<div class=\"text-muted text-center py-5\">Unable to render preview</div>';}catch(ex){}}try{if(!window.__enrAvailStorageBound){window.__enrAvailStorageBound=true;window.addEventListener('storage',function(){try{init();}catch(e){}});}}catch(e5){}})();</script>" +
 		"</body></html>";
@@ -1046,7 +1046,7 @@ function enrAvailAddRow(base) {
 		"</select>" +
 		"</div>" +
 		'<div class="col-xl-1 col-lg-2 col-md-6 col-sm-12 mb-2">' +
-		'<label class="font-12 text-muted mb-1">Total seats</label>' +
+		'<label class="font-12 text-muted mb-1">Capacity</label>' +
 		'<input class="form-control form-control-sm" type="number" min="0" name="total" value="' +
 		(enrAvailEsc(b.total) || "") +
 		'" placeholder="0"/>' +
@@ -1240,7 +1240,7 @@ async function enrAvailSaveAll() {
 	});
 
 	if (!toSave.length) {
-		enrAvailToast(0, "Fill in total seats for at least one row");
+		enrAvailToast(0, "Fill in capacity for at least one row");
 		return;
 	}
 
@@ -1763,6 +1763,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'">Cancel</button>';
 					}
 
+					var totalValueStyle = 'font-size:20px;line-height:1;';
+					var metricBoxStyle = 'width:90px;min-width:90px;';
+					var lysBoxStyle = 'width:110px;min-width:110px;';
 					var totalEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
 							'<div class="text-muted font-10 mb-1">Total</div>' +
@@ -1777,9 +1780,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.t) +
 							'"/></div>'
-						: '<div class="text-center"><div class="text-dark font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Total</div><div class="text-dark font-weight-bold" style="' + totalValueStyle + '">' +
 							meta.t.toLocaleString() +
-							'</div><div class="text-muted font-10">Total</div></div>';
+							"</div></div>";
 
 					var confirmEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
@@ -1793,9 +1796,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.b) +
 							'"/></div>'
-						: '<div class="text-center"><div class="text-info font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Confirm</div><div class="text-info font-weight-bold" style="' + totalValueStyle + '">' +
 							meta.b.toLocaleString() +
-							'</div><div class="text-muted font-10">Confirm</div></div>';
+							"</div></div>";
 
 					var rsvEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
@@ -1809,9 +1812,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.rv) +
 							'"/></div>'
-						: '<div class="text-center"><div class="text-warning font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Reserve</div><div class="text-warning font-weight-bold" style="' + totalValueStyle + '">' +
 							meta.rv.toLocaleString() +
-							'</div><div class="text-muted font-10">Reserve</div></div>';
+							"</div></div>";
 
 					var waitEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
@@ -1825,9 +1828,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(meta.wait) +
 							'"/></div>'
-						: '<div class="text-center"><div class="text-primary font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Waiting</div><div class="text-primary font-weight-bold" style="' + totalValueStyle + '">' +
 							meta.wait.toLocaleString() +
-							'</div><div class="text-muted font-10">Waiting</div></div>';
+							"</div></div>";
 					
 						var freeEl = isEditing
 							? '<div class="text-right" style="width:90px;">' +
@@ -1841,15 +1844,15 @@ function enrAvailRenderSummaryDrill(kind) {
 								'" value="' +
 								enrAvailEsc(meta.free) +
 								'" readonly/></div>'
-							: '<div class="text-center"><div class="text-success font-weight-bold" style="font-size:18px;line-height:1;">' +
+							: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Free</div><div class="text-success font-weight-bold" style="' + totalValueStyle + '">' +
 								meta.free.toLocaleString() +
-								'</div><div class="text-muted font-10">Free</div></div>';
+								"</div></div>";
 
 					var lysVal = it.lastYearStrength || 0;
 					var lysEl = isEditing
-						? '<div class="text-right" style="width:90px;">' +
-							'<div class="text-muted font-10 mb-1">Last Year Strength(%)</div>' +
-							'<input type="number" min="0" max="100" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:90px;" id="' +
+						? '<div class="text-right" style="width:110px;">' +
+							'<div class="text-muted font-10 mb-1" style="white-space:nowrap;">Last Year Strength(%)</div>' +
+							'<input type="number" min="0" max="100" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:110px;" id="' +
 							enrAvailEsc(px + "_lys") +
 							'" data-key="' +
 							enrAvailEsc(key) +
@@ -1858,23 +1861,25 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(lysVal) +
 							'"/></div>'
-						: '<div class="text-center"><div class="text-secondary font-weight-bold" style="font-size:18px;line-height:1;">' +
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + lysBoxStyle + '"><div class="text-muted font-10 mb-1" style="white-space:nowrap;">Last Year Strength(%)</div><div class="text-secondary font-weight-bold" style="' + totalValueStyle + '">' +
 							lysVal + '%' +
-							'</div><div class="text-muted font-10">Last Year Strength(%)</div></div>';
+							"</div></div>";
+
+					var leftBlockStyle = "min-width:220px;flex:0 1 560px;max-width:560px;width:100%;";
 
 				return (
 					'<div class="py-2' +
 					(idx ? " border-top" : "") +
 					'">' +
-				'<div class="d-flex align-items-start justify-content-between flex-wrap">' +
-				'<div class="pr-2" style="min-width:220px;flex:1 1 auto;">' +
+				'<div class="d-flex align-items-start justify-content-between flex-nowrap">' +
+				'<div class="pr-2" style="' + leftBlockStyle + '">' +
 					'<div class="font-weight-bold text-dark mb-1">' +
 					enrAvailEsc(it.label) +
 					"</div>" +
 					(it.subLabel
 						? '<div class="text-muted font-12 mb-1">' + enrAvailEsc(it.subLabel) + "</div>"
 						: "") +
-					'<div class="progress progress-bar-xs progress-bar-rounded w-100 mb-1">' +
+					'<div class="progress progress-bar-xs progress-bar-rounded w-100 mb-1" style="height:4px;">' +
 					'<div class="progress-bar ' +
 					barClass +
 					'" role="progressbar" style="width:' +
@@ -1882,18 +1887,18 @@ function enrAvailRenderSummaryDrill(kind) {
 					'%"></div></div>' +
 						'<div class="text-muted font-12">' +
 						meta.b.toLocaleString() +
-						" confirmed · " +
+						" Confirmed · " +
 						meta.rv.toLocaleString() +
-						" reserved · " +
+						" Reserved · " +
 						meta.wait.toLocaleString() +
-						" wait · " +
+						" Wait · " +
 						meta.t.toLocaleString() +
-						" total · " +
+						" Total · " +
 						meta.filled +
-						"% filled</div>" +
+						"% Filled</div>" +
 						"</div>" +
-						'<div class="d-flex align-items-center" style="gap:12px;flex:0 0 auto;">' +
-						'<div class="d-flex align-items-center" style="gap:16px;">' +
+						'<div class="d-flex align-items-center" style="gap:10px;flex:0 0 auto;white-space:nowrap;margin-left:12px;">' +
+						'<div class="d-flex align-items-center" style="gap:18px;">' +
 						totalEl +
 						confirmEl +
 						rsvEl +
@@ -2589,18 +2594,18 @@ function enrAvailRenderCounselorPreview(opts) {
 		'<div class="card-body py-3">' +
 		'<div class="font-24 font-weight-bold text-dark" id="enrAvailCH_Title">' +
 		sumRemaining.toLocaleString() +
-		" seats available</div>" +
+		" Seats Available</div>" +
 		'<div class="text-muted font-12 mt-1" id="enrAvailCH_Subtitle">' +
 		sumBooked.toLocaleString() +
-		" confirmed enrollments · " +
+		" Confirmed Enrollments · " +
 		sumAbout.toLocaleString() +
-		" reserved (pending) · " +
+		" Reserved (pending) · " +
 		sumWait.toLocaleString() +
-		" waitlist · " +
+		" Waitlist · " +
 		sumOverbooked.toLocaleString() +
-		" overbooked · " +
+		" Overbooked · " +
 		sumTotal.toLocaleString() +
-		" total seats</div>" +
+		" Capacity</div>" +
 		"</div>" +
 		"</div>";
 	if (opts.hideHeader) header = "";
@@ -2693,26 +2698,26 @@ function enrAvailRenderCounselorPreview(opts) {
 					'<td class="font-weight-semi-bold text-center">' +
 					enrAvailEsc(enrAvailToInt(r.lastYearStrength)) +
 					'%</td>' +
-							'<td class="text-left" style="min-width:200px;">' +
-							'<div class="d-inline-flex flex-column align-items-start justify-content-start">' +
-							'<div class="d-inline-flex align-items-center justify-content-start" style="gap:12px;">' +
-							'<span class="text-muted font-12 font-weight-semi-bold" style="width:46px;text-align:center;line-height:1;">' +
-							enrAvailEsc(pct) +
-							'%</span>' +
-							'<div class="progress progress-bar-xs progress-bar-rounded" style="width:160px;height:6px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;">' +
-							'<div class="progress-bar ' +
-							enrAvailProgressClass(pct) +
-							'" role="progressbar" style="height:100%;border-radius:999px;width:' +
-							pctBar +
-							'%"></div></div>' +
-							"</div>" +
-							"</div>" +
-							"</td>" +
-						'<td class="text-center"><span class="badge badge-pill ' +
-						badgeClass +
-						' px-3 py-1" style="text-transform:none;">' +
-						enrAvailEsc(sm.status) +
-						"</span></td>" +
+					'<td class="text-center" style="width:70px;">' +
+					'<span class="text-muted font-12 font-weight-semi-bold" style="width:38px;text-align:center;line-height:1;display:inline-block;">' +
+					enrAvailEsc(pct) +
+					"%</span>" +
+					"</td>" +
+				'<td class="text-center" style="width:160px;">' +
+				'<div class="d-inline-flex flex-column align-items-center justify-content-center" style="gap:6px;">' +
+				'<span class="badge badge-pill ' +
+				badgeClass +
+				' px-2 py-1" style="text-transform:none;font-size:10px;line-height:1;">' +
+				enrAvailEsc(sm.status) +
+				"</span>" +
+				'<div class="progress progress-bar-xs progress-bar-rounded mb-0" style="width:90px;height:6px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;">' +
+				'<div class="progress-bar ' +
+				enrAvailProgressClass(pct) +
+				'" role="progressbar" style="height:100%;border-radius:999px;width:' +
+				pctBar +
+				'%"></div></div>' +
+				"</div>" +
+				"</td>" +
 						"</tr>"
 				);
 			})
@@ -2740,7 +2745,7 @@ function enrAvailRenderCounselorPreview(opts) {
 					'<th class="text-muted font-12 text-center">Available</th>' +
 					'<th class="text-muted font-12 text-center">Overbooked</th>' +
 					'<th class="text-muted font-12 text-center">Last Year Strength(%)</th>' +
-						'<th class="text-muted font-12 text-left" style="padding-left:20px;">Current Year Strength(%)</th>' +
+					'<th class="text-muted font-12 text-center">Current Year Strength(%)</th>' +
 					'<th class="text-muted font-12 text-center">Status</th>' +
 					"</tr>" +
 					"</thead>" +
@@ -2840,7 +2845,7 @@ function enrAvailRenderCountryPreview() {
 		"</select>" +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:120px;">' +
-		'<div class="text-muted font-12 mb-1">Total seats</div>' +
+		'<div class="text-muted font-12 mb-1">Capacity</div>' +
 		'<input id="enrAvailF_TotalMin" type="number" min="0" step="1" class="form-control form-control-sm rounded-10" placeholder="Min" />' +
 		"</div>" +
 		'<div class="mr-2 mb-2" style="min-width:120px;">' +
