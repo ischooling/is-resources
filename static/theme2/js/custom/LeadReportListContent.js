@@ -1,12 +1,54 @@
 
 var LEAD_CATEGORY="B2C";
-async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE, LEAD_CATEGORY){
+
+function initializeLeadReportDatepickers() {
+	var dateFieldSelectors = [
+		"#counselorStartDate",
+		"#counselorEndDate",
+		"#dataChartStartDate",
+		"#dataChartEndDate",
+		"#dataStartDate",
+		"#dataEndDate",
+		"#dataStudentStartDate",
+		"#dataStudentEndDate",
+		"#dataSchoolDemoStartDate",
+		"#dataSchoolDemoEndDate",
+		"#daywiseStartDate",
+		"#daywiseEndDate",
+		"#dataLeadCampaignStartDate",
+		"#dataLeadCampaignEndDate",
+		"#dataReviewStartDate",
+		"#dataReviewEndDate"
+	];
+
+	dateFieldSelectors.forEach(function(selector) {
+		var $field = $(selector);
+		if (!$field.length) {
+			return;
+		}
+
+		if ($field.data("datepicker")) {
+			$field.datepicker("destroy");
+		}
+
+		$field.datepicker({
+			format : 'dd-mm-yyyy',
+			autoclose: true
+		});
+	});
+}
+
+async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE, LEAD_CATEGORY, viewMode){
 	//var urlLead = "lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
   	var objRight= await getLeadReportData(roleAndModule.moduleId, USER_ID, 'report');
 	var objectRights=objRight.objectRights;
 	OBJECT_RIGHTS=objectRights;
-	var html=getLeadReportMasterContent(title, objectRights);
+	viewMode = viewMode || 'full';
+	var html=viewMode === 'campaign'
+		? getLeadCampaignDetailMasterContent(title, objectRights)
+		: getLeadReportMasterContent(title, objectRights);
     $('#dashboardContentInHTML').html(html);
+	initializeLeadReportDatepickers();
 
 	// var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
 	// 	html += await dashboardHeaderContent();
@@ -20,180 +62,140 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	// 	+'</div>';
 	// 	html +=await dashboardFooterContent();
 	// 	$('body').html(html);
+	if($("#counselorStartDate").length){
+		$("#syncZadarmaDate").datepicker({
+				format : 'yyyy-mm-dd',
+				autoclose: true,
 
-	$("#counselorStartDate").datepicker({
-			format : 'dd-mm-yyyy',
-			autoclose: true,
-	});
-	$("#counselorEndDate").datepicker({
-		format : 'dd-mm-yyyy',
-		autoclose: true,
-	});
+		}).datepicker('setDate', new Date());
 
-	$("#syncZadarmaDate").datepicker({
-			format : 'yyyy-mm-dd',
-			autoclose: true,
+		callLeadCounselorsList('leadReportSearch',"DAY",'','','listCounselorTbody', false, 0, 0);
+		$("#searchLeadCounselorType").on("change", function(){
+			if($("#searchLeadCounselorType").val()=='CUSTOM'){
+				$(".hidecounselorLead").css({"display":"block"});
+				$("#zadarmaCallSync").addClass('hidden');
+			}else{
+				$(".hidecounselorLead").css({"display":"none"})
+				callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(),'','','listCounselorTbody', false, 0, 0);
+			}
+		});
 
-	}).datepicker('setDate', new Date());
-
-    callLeadCounselorsList('leadReportSearch',"DAY",'','','listCounselorTbody', false, 0, 0);
-    $("#searchLeadCounselorType").on("change", function(){
-        if($("#searchLeadCounselorType").val()=='CUSTOM'){
-            $(".hidecounselorLead").css({"display":"block"});
-            $("#zadarmaCallSync").addClass('hidden');
-        }else{
-            $(".hidecounselorLead").css({"display":"none"})
-            callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(),'','','listCounselorTbody', false, 0, 0);
-        }
-    });
-
-    $("#searchLeadCounselorReportType").on("change", function(){
-        if($("#searchLeadCounselorReportType").val()=='Counselor'){
-            $(".changeHeadText").text('Academic Expert');
-        }else if($("#searchLeadCounselorReportType").val()=='LOGS'){
-            $(".changeHeadText").text('User');
-        } else{
-            $(".changeHeadText").text($("#searchLeadCounselorReportType").val());
-        }
-        
-        var startDate=$("#counselorStartDate").val();
-        var endDate=$("#counselorEndDate").val();
-         if($("#counselorStartDate").val()=='' && $("#counselorStartDate").val()==undefined){
-           startDate='';
-        }
-        if($("#counselorEndDate").val()=='' && $("#counselorEndDate").val()==undefined){
-            endDate='';
-        }
-       callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody',false, 0, 0);
-    });
-    
-
-    $("#btnLeadCounselorWiseSubmit").on("click",function(){
-        var startDate = $("#counselorStartDate").val();
-        var endDate = $("#counselorEndDate").val();
-        var searchCountrytype = $("#searchLeadCounselorType").val();
-       
-        if($("#counselorStartDate").val()=='' && $("#counselorStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-		    return false;
-        }
-        if($("#counselorEndDate").val()=='' && $("#counselorEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-		    return false;
-        }
-        callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody', false, 0, 0);
-    });
-    
-	$("#exportCounselorLead").unbind().bind('click',function(){
+		$("#searchLeadCounselorReportType").on("change", function(){
+			if($("#searchLeadCounselorReportType").val()=='Counselor'){
+				$(".changeHeadText").text('Academic Expert');
+			}else if($("#searchLeadCounselorReportType").val()=='LOGS'){
+				$(".changeHeadText").text('User');
+			} else{
+				$(".changeHeadText").text($("#searchLeadCounselorReportType").val());
+			}
 			
-		var leadStartDate = $("#counselorStartDate").val();
-		var leadEndDate = $("#counselorEndDate").val();
-		var searchCountrytype = $("#searchLeadCounselorType").val();
-		var assignTo=""; 
-		var assignTos= $("#leadReportSearch #assignToSearch").val();
-		if(assignTos.length>0){
-			assignTo=assignTos.join('@');
-		}
-		var leadSorc="";
-		var lSource = $("#leadReportSearch #sourceSearch").val();
-		if(lSource.length>0){
-			leadSorc=lSource.join('@');
-		}
-		var leadStatuses = $("#leadReportSearch #statusSearch").val();
-		var standard = $("#leadReportSearch #gradeSearch").val();
-		var demoAssignTo = $("#leadReportSearch #leadDemoAssign").val();
-		var acadmicYear = $("#leadReportSearch #acadmicYear").val();
-		var country = $("#leadReportSearch #countryId").val();
-		var utmCampaign="";
-		var utmCam = $("#leadReportSearch #searchCampaign").val();
-		if(utmCam!=undefined && utmCam.length>0){
-			utmCampaign=utmCam.join('@');
-		}
-		var reportType = $("#searchLeadCounselorReportType").val();
+			var startDate=$("#counselorStartDate").val();
+			var endDate=$("#counselorEndDate").val();
+			if($("#counselorStartDate").val()=='' && $("#counselorStartDate").val()==undefined){
+				startDate='';
+			}
+			if($("#counselorEndDate").val()=='' && $("#counselorEndDate").val()==undefined){
+				endDate='';
+			}
+			callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody',false, 0, 0);
+		});
+		
 
-		var sendQuery='userId='+USER_ID+'&schoolId='+SCHOOL_ID+'&assignTo='+assignTo+'&leadStartDate='+leadStartDate+'&leadEndDate='+leadEndDate+'&leadSources='+leadSorc+'&leadStatuses='+leadStatuses;
-		sendQuery = sendQuery +'&standard='+standard+'&demoAssignTo='+demoAssignTo+'&acadmicYear='+acadmicYear+'&country='+country+'&utmCampaigns='+utmCampaign+'&searchCountrytype='+searchCountrytype+'&reportType='+reportType;
-		console.log(sendQuery);
-			var urlSend = '/dashboard/report/counselor-lead-export?'+sendQuery;
-			getAsPost(urlSend);
-	});
+		$("#btnLeadCounselorWiseSubmit").on("click",function(){
+			var startDate = $("#counselorStartDate").val();
+			var endDate = $("#counselorEndDate").val();
+			var searchCountrytype = $("#searchLeadCounselorType").val();
+		
+			if($("#counselorStartDate").val()=='' && $("#counselorStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#counselorEndDate").val()=='' && $("#counselorEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody', false, 0, 0);
+		});
+		
+		$("#exportCounselorLead").unbind().bind('click',function(){
+			
+			var leadStartDate = $("#counselorStartDate").val();
+			var leadEndDate = $("#counselorEndDate").val();
+			var searchCountrytype = $("#searchLeadCounselorType").val();
+			var assignTo=""; 
+			var assignTos= $("#leadReportSearch #assignToSearch").val();
+			if(assignTos.length>0){
+				assignTo=assignTos.join('@');
+			}
+			var leadSorc="";
+			var lSource = $("#leadReportSearch #sourceSearch").val();
+			if(lSource.length>0){
+				leadSorc=lSource.join('@');
+			}
+			var leadStatuses = $("#leadReportSearch #statusSearch").val();
+			var standard = $("#leadReportSearch #gradeSearch").val();
+			var demoAssignTo = $("#leadReportSearch #leadDemoAssign").val();
+			var acadmicYear = $("#leadReportSearch #acadmicYear").val();
+			var country = $("#leadReportSearch #countryId").val();
+			var utmCampaign="";
+			var utmCam = $("#leadReportSearch #searchCampaign").val();
+			if(utmCam!=undefined && utmCam.length>0){
+				utmCampaign=utmCam.join('@');
+			}
+			var reportType = $("#searchLeadCounselorReportType").val();
 
-	$("#acadmicYear").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#leadReportSearch"
-	});
+			var sendQuery='userId='+USER_ID+'&schoolId='+SCHOOL_ID+'&assignTo='+assignTo+'&leadStartDate='+leadStartDate+'&leadEndDate='+leadEndDate+'&leadSources='+leadSorc+'&leadStatuses='+leadStatuses;
+			sendQuery = sendQuery +'&standard='+standard+'&demoAssignTo='+demoAssignTo+'&acadmicYear='+acadmicYear+'&country='+country+'&utmCampaigns='+utmCampaign+'&searchCountrytype='+searchCountrytype+'&reportType='+reportType;
+			console.log(sendQuery);
+				var urlSend = '/dashboard/report/counselor-lead-export?'+sendQuery;
+				getAsPost(urlSend);
+		});
+	}
 
-	$("#sourceSearch").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#leadReportSearch"
-	});
-	
-	$("#statusSearch").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#leadReportSearch"
-	});
-	
-	$("#assignToSearch").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#leadReportSearch"
-	});	
-	
-	$("#countryId").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#leadReportSearch"
-	});
-	$("#leadDemoAssign").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#leadReportSearch"
-	});
+	if($("#acadmicYear").length){
+		$("#acadmicYear").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});
 
-    $("#searchReportCampaign").select2({
-        theme:"bootstrap4",
-        dropdownParent:"#leadReportSearch"
-    });
+		$("#sourceSearch").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});
+		
+		$("#statusSearch").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});
+		
+		$("#assignToSearch").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});	
+		
+		$("#countryId").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});
+		$("#leadDemoAssign").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});
 
-	$("#dataChartStartDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-	});
-	$("#dataChartEndDate").datepicker({
-		format : 'dd-mm-yyyy',
-		autoclose: true,
-	});
-	$("#dataStartDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
-    $("#dataEndDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
+		$("#searchReportCampaign").select2({
+			theme:"bootstrap4",
+			dropdownParent:"#leadReportSearch"
+		});
 
-	$("#dataStudentStartDate").datepicker({
-            format : 'dd-mm-yyyy',
-            autoclose: true,
-    });
-    $("#dataStudentEndDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
+		getSessionMasterList('reportLeadSearchForm', 'acadmicYear', true);
+		callLeadSourceList('reportLeadSearchForm','B2C','sourceSearch', true);
+		callLeadStatusList('reportLeadSearchForm','B2C','statusSearch', false);
+		callPCountries('reportLeadSearchForm', 0, 'countryId');
+		callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','assignToSearch', true, OBJECT_RIGHTS.discardPermission, USER_ID);
+		callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','leadDemoAssign', true, OBJECT_RIGHTS.discardPermission, USER_ID);
+		callMasterCampainList('reportLeadSearchForm','','searchReportCampaign');
+	}
 
-	$("#dataSchoolDemoStartDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-	});
-	$("#dataSchoolDemoEndDate").datepicker({
-		format : 'dd-mm-yyyy',
-		autoclose: true,
-	});
-	$("#daywiseStartDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-	});
-	$("#daywiseEndDate").datepicker({
-		format : 'dd-mm-yyyy',
-		autoclose: true,
-	});
 	$("#searchCampaignType").select2({
         theme:"bootstrap4",
 		placeholder:"Select Campaign"
@@ -204,151 +206,129 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		placeholder:"Select Country"
         //dropdownParent:"#leadCounselorDataForm"
     });
-    $("#dataLeadCampaignStartDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
-    $("#dataLeadCampaignEndDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
+	if($("#searchCountryType").length){
+		callPCountries('campaignForm', 0, 'searchCountryType');
+	}
 
-	$("#dataReviewStartDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
-    $("#dataReviewEndDate").datepicker({
-        format : 'dd-mm-yyyy',
-        autoclose: true,
-    });
+	if($("#dataChartStartDate").length){
+		callDaywiseLead("DAY","chart-pie-days",'','');
+		callCampainWise("DAY", "lead-source","chart-lead-source",'','');
+		callDeviceCount("DAY","chart-pie-device",'','','Y');
+		callDeviceCount("DAY","chart-pie-device-demo",'','','N');
 
+		$("#searchtypeTotalLead").on("change", function(){
+			if($("#searchtypeTotalLead").val()=='CUSTOM'){
+				$(".hideChartdate").css({"display":"block"});
+			}else{
+				$(".hideChartdate").css({"display":"none"})
+				callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",'','');
+				callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",'','');
+				callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",'','','Y');
+				callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device-demo",'','','N');
+			}
+		});
 
-	getSessionMasterList('reportLeadSearchForm', 'acadmicYear', true);
-	callLeadSourceList('reportLeadSearchForm','B2C','sourceSearch', true);
-	callLeadStatusList('reportLeadSearchForm','B2C','statusSearch', false);
-	callPCountries('reportLeadSearchForm', 0, 'countryId');
-	callPCountries('campaignForm', 0, 'searchCountryType');
-	callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','assignToSearch', true, OBJECT_RIGHTS.discardPermission, USER_ID);
-	callLeadAssignUserList('reportLeadSearchForm',''+OBJECT_RIGHTS.leadType+'','leadDemoAssign', true, OBJECT_RIGHTS.discardPermission, USER_ID);
-	callMasterCampainList('reportLeadSearchForm','','searchReportCampaign');
-	
-	
-	callDaywiseLead("DAY","chart-pie-days",'','');
-	callCampainWise("DAY", "lead-source","chart-lead-source",'','');
+		$("#btnChartWiseSubmit").on("click",function(){
+			var startDate = $("#dataChartStartDate").val();
+			var endDate = $("#dataChartEndDate").val();
+			var searchCountrytype = $("#searchtypeTotalLead").val();
+			if($("#dataChartStartDate").val()=='' && $("#dataChartStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#dataChartEndDate").val()=='' && $("#dataChartEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",startDate,endDate);
+			callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",startDate,endDate);
+			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",startDate,endDate,'Y');
+			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device-demo",startDate,endDate, 'N');
+		});
+	}
 
-	callDeviceCount("DAY","chart-pie-device",'','','Y');
-	callDeviceCount("DAY","chart-pie-device-demo",'','','N');
+	if($("#dataStartDate").length){
+		callLeadtimecountry("DAY",'','');
+		$("#searchtype").on("change", function(){
+			if($("#searchtype").val()=='CUSTOM'){
+				$(".hidetimeCountrydate").css({"display":"block"});
+			}else{
+				$(".hidetimeCountrydate").css({"display":"none"})
+				callLeadtimecountry($("#searchtype").val(),'','');
+			}
+		});
 
+		$("#btnTimeCountrySubmit").on("click",function(){
+			var startDate = $("#dataStartDate").val();
+			var endDate = $("#dataEndDate").val();
 
-	$("#searchtypeTotalLead").on("change", function(){
-		if($("#searchtypeTotalLead").val()=='CUSTOM'){
-			$(".hideChartdate").css({"display":"block"});
-		}else{
-			$(".hideChartdate").css({"display":"none"})
-			callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",'','');
-			callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",'','');
-			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",'','','Y');
-			callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device-demo",'','','N');
-			
-		}
-	});
+			if($("#dataStartDate").val()=='' && $("#dataStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#dataEndDate").val()=='' && $("#dataEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callLeadtimecountry($("#searchtype").val(), startDate, endDate);
+		});
+	}
 
-	$("#btnChartWiseSubmit").on("click",function(){
-        var startDate = $("#dataChartStartDate").val();
-        var endDate = $("#dataChartEndDate").val();
-        var searchCountrytype = $("#searchtypeTotalLead").val();
-        if($("#dataChartStartDate").val()=='' && $("#dataChartStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-		        return false;
-        }
-        if($("#dataChartEndDate").val()=='' && $("#dataChartEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-		        return false;
-        }
-        callDaywiseLead($("#searchtypeTotalLead").val(),"chart-pie-days",startDate,endDate);
-        callCampainWise($("#searchtypeTotalLead").val(), "lead-source","chart-lead-source",startDate,endDate);
-		callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device",startDate,endDate,'Y');
-		callDeviceCount($("#searchtypeTotalLead").val(),"chart-pie-device-demo",startDate,endDate, 'N');
-    });
+	if($("#dataStudentStartDate").length){
+		callLeadEnrolled('',"DAY",'','');
+		$("#searchStudenttype").on("change", function(){
+			if($("#searchStudenttype").val()=='CUSTOM'){
+				$(".hidestudentdate").css({"display":"block"});
+			}else{
+				$(".hidestudentdate").css({"display":"none"})
+				callLeadEnrolled('',$("#searchStudenttype").val(),'','');
+			}
+		});
 
-	
-    callLeadtimecountry("DAY",'','');
-    $("#searchtype").on("change", function(){
-        if($("#searchtype").val()=='CUSTOM'){
-            $(".hidetimeCountrydate").css({"display":"block"});
-        }else{
-             $(".hidetimeCountrydate").css({"display":"none"})
-            callLeadtimecountry($("#searchtype").val(),'','');
-        }
-    });
+		$("#btnStudentWiseSubmit").on("click",function(){
+			var startDate = $("#dataStudentStartDate").val();
+			var endDate = $("#dataStudentEndDate").val();
+			var searchCountrytype = $("#searchStudenttype").val();
+			if($("#dataStudentStartDate").val()=='' && $("#dataStudentStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#dataStudentEndDate").val()=='' && $("#dataStudentEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callLeadEnrolled('', $("#searchStudenttype").val(), startDate, endDate);
+		});
+	}
 
-    $("#btnTimeCountrySubmit").on("click",function(){
-        var startDate = $("#dataStartDate").val();
-        var endDate = $("#dataEndDate").val();
+	if($("#dataSchoolDemoStartDate").length){
+		callLeadDemoList("DAY",'','');
+		$("#searchSchoolDemoType").on("change", function(){
+			if($("#searchSchoolDemoType").val()=='CUSTOM'){
+				$(".hideschooldemo").css({"display":"block"});
+			}else{
+				$(".hideschooldemo").css({"display":"none"})
+				callLeadDemoList($("#searchSchoolDemoType").val(),'','');
+			}
+		});
 
-        if($("#dataStartDate").val()=='' && $("#dataStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-		        return false;
-        }
-        if($("#dataEndDate").val()=='' && $("#dataEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-		        return false;
-        }
-        callLeadtimecountry($("#searchtype").val(), startDate, endDate);
-    });
+		$("#btnSchoolDemoWiseSubmit").on("click",function(){
+			var startDate = $("#dataSchoolDemoStartDate").val();
+			var endDate = $("#dataSchoolDemoEndDate").val();
+			var searchCountrytype = $("#searchSchoolDemoType").val();
+			if($("#dataSchoolDemoStartDate").val()=='' && $("#dataSchoolDemoStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#dataSchoolDemoEndDate").val()=='' && $("#dataSchoolDemoEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callLeadDemoList($("#searchSchoolDemoType").val(), startDate, endDate);
+		});
+	}
 
-	
-    callLeadEnrolled('',"DAY",'','');
-    $("#searchStudenttype").on("change", function(){
-        if($("#searchStudenttype").val()=='CUSTOM'){
-            $(".hidestudentdate").css({"display":"block"});
-        }else{
-            $(".hidestudentdate").css({"display":"none"})
-            callLeadEnrolled('',$("#searchStudenttype").val(),'','');
-        }
-    });
-
-    $("#btnStudentWiseSubmit").on("click",function(){
-        var startDate = $("#dataStudentStartDate").val();
-        var endDate = $("#dataStudentEndDate").val();
-        var searchCountrytype = $("#searchStudenttype").val();
-        if($("#dataStudentStartDate").val()=='' && $("#dataStudentStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-                return false;
-        }
-        if($("#dataStudentEndDate").val()=='' && $("#dataStudentEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-                return false;
-        }
-        callLeadEnrolled('', $("#searchStudenttype").val(), startDate, endDate);
-    });
-
-	
-    callLeadDemoList("DAY",'','');
-    $("#searchSchoolDemoType").on("change", function(){
-        if($("#searchSchoolDemoType").val()=='CUSTOM'){
-            $(".hideschooldemo").css({"display":"block"});
-        }else{
-            $(".hideschooldemo").css({"display":"none"})
-            callLeadDemoList($("#searchSchoolDemoType").val(),'','');
-        }
-    });
-
-    $("#btnSchoolDemoWiseSubmit").on("click",function(){
-        var startDate = $("#dataSchoolDemoStartDate").val();
-        var endDate = $("#dataSchoolDemoEndDate").val();
-        var searchCountrytype = $("#searchSchoolDemoType").val();
-        if($("#dataSchoolDemoStartDate").val()=='' && $("#dataSchoolDemoStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-		        return false;
-        }
-        if($("#dataSchoolDemoEndDate").val()=='' && $("#dataSchoolDemoEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-		        return false;
-        }
-        callLeadDemoList($("#searchSchoolDemoType").val(), startDate, endDate);
-    });
-	if(objectRights.permissioncolumn=='Y'){
+	if(objectRights.permissioncolumn=='Y' && $("#daywiseStartDate").length){
 		callEnrollmentListDaywise('Enrollment', 'DAY','','');
 		$("#searchDaywise").on("change", function(){
 			if($("#searchDaywise").val()=='CUSTOM'){
@@ -385,83 +365,87 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 			}
 			callEnrollmentListDaywise($("#searchDaywiseReportType").val(), $("#searchDaywise").val(), startDate, endDate);
 		});
-
 	}
-    callLeadCampaignList("DAY",'','','','');
-    $("#searchLeadCampaignType").on("change", function(){
-        if($("#searchLeadCampaignType").val()=='CUSTOM'){
-            $(".hidecampaignLead").css({"display":"block"});
-        }else{
-            $(".hidecampaignLead").css({"display":"none"})
-            callLeadCampaignList($("#searchLeadCampaignType").val(),'','','','');
-        }
-    });
-    // $("#searchCampaignType").on("change", function(){
-    //     var startDate = $("#dataLeadCampaignStartDate").val();
-    //     var endDate = $("#dataLeadCampaignEndDate").val();
-        
-    //     if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
-    //         startDate = $("#dataLeadCampaignStartDate").val();
-    //     }
-    //     if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
-    //         endDate = $("#dataLeadCampaignEndDate").val();
-    //     }
-    //     callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
-    // });
 
-	$("#searchCountryType").on("change", function(){
-        var startDate = $("#dataLeadCampaignStartDate").val();
-        var endDate = $("#dataLeadCampaignEndDate").val();
-        
-        if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
-            startDate = $("#dataLeadCampaignStartDate").val();
-        }
-        if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
-            endDate = $("#dataLeadCampaignEndDate").val();
-        }
-        callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
-    });
+	if($("#searchLeadCampaignType").length){
+		callLeadCampaignList("DAY",'','','','');
+		$("#searchLeadCampaignEmail").on("keydown", function(e){
+			if(e.key === "Enter"){
+				e.preventDefault();
+				var startDate = $("#dataLeadCampaignStartDate").val();
+				var endDate = $("#dataLeadCampaignEndDate").val();
+				if($("#searchLeadCampaignType").val() !== 'CUSTOM'){
+					startDate = '';
+					endDate = '';
+				}
+				callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
+			}
+		});
+		$("#searchLeadCampaignType").on("change", function(){
+			if($("#searchLeadCampaignType").val()=='CUSTOM'){
+				$(".hidecampaignLead").css({"display":"block"});
+			}else{
+				$(".hidecampaignLead").css({"display":"none"})
+				callLeadCampaignList($("#searchLeadCampaignType").val(),'','','','');
+			}
+		});
 
-    $("#btnLeadCampaignWiseSubmit").on("click",function(){
-        var startDate = $("#dataLeadCampaignStartDate").val();
-        var endDate = $("#dataLeadCampaignEndDate").val();
-        var searchCountrytype = $("#searchLeadCampaignType").val();
-       
-        if($("#dataLeadCampaignStartDate").val()=='' && $("#dataLeadCampaignStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-		    return false;
-        }
-        if($("#dataLeadCampaignEndDate").val()=='' && $("#dataLeadCampaignEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-		    return false;
-        }
-        callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
-    });
+		$("#searchCountryType").on("change", function(){
+			var startDate = $("#dataLeadCampaignStartDate").val();
+			var endDate = $("#dataLeadCampaignEndDate").val();
+			
+			if($("#dataLeadCampaignStartDate").val()!='' && $("#dataLeadCampaignStartDate").val()!=undefined){
+				startDate = $("#dataLeadCampaignStartDate").val();
+			}
+			if($("#dataLeadCampaignEndDate").val()!='' && $("#dataLeadCampaignEndDate").val()!=undefined){
+				endDate = $("#dataLeadCampaignEndDate").val();
+			}
+			callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
+		});
 
-	callCounselorReview("CUSTOM","reviewCounselor",'','');
-    $("#searchReviewtype").on("change", function(){
-        if($("#searchReviewtype").val()=='CUSTOM'){
-            $(".hideReviewdate").css({"display":"block"});
-        }else{
-            $(".hideReviewdate").css({"display":"none"})
-            callCounselorReview($("#searchReviewtype").val(),'reviewCounselor','','');
-        }
-    });
+		$("#btnLeadCampaignWiseSubmit").on("click",function(){
+			var startDate = $("#dataLeadCampaignStartDate").val();
+			var endDate = $("#dataLeadCampaignEndDate").val();
+			var searchCountrytype = $("#searchLeadCampaignType").val();
+		
+			if($("#dataLeadCampaignStartDate").val()=='' && $("#dataLeadCampaignStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#dataLeadCampaignEndDate").val()=='' && $("#dataLeadCampaignEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callLeadCampaignList($("#searchLeadCampaignType").val(), startDate, endDate,'','');
+		});
+	}
 
-    $("#btnReviewWiseSubmit").on("click",function(){
-        var startDate = $("#dataReviewStartDate").val();
-        var endDate = $("#dataReviewEndDate").val();
-        var searchReviewtype = $("#searchReviewtype").val();
-        if($("#dataReviewStartDate").val()=='' && $("#dataReviewStartDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose start date','',true);
-                return false;
-        }
-        if($("#dataReviewEndDate").val()=='' && $("#dataReviewEndDate").val()==undefined){
-            showMessageTheme2(1, 'Please choose end date','',true);
-                return false;
-        }
-        callCounselorReview(searchReviewtype, 'reviewCounselor', startDate, endDate);
-    });
+	if($("#searchReviewtype").length){
+		callCounselorReview("CUSTOM","reviewCounselor",'','');
+		$("#searchReviewtype").on("change", function(){
+			if($("#searchReviewtype").val()=='CUSTOM'){
+				$(".hideReviewdate").css({"display":"block"});
+			}else{
+				$(".hideReviewdate").css({"display":"none"})
+				callCounselorReview($("#searchReviewtype").val(),'reviewCounselor','','');
+			}
+		});
+
+		$("#btnReviewWiseSubmit").on("click",function(){
+			var startDate = $("#dataReviewStartDate").val();
+			var endDate = $("#dataReviewEndDate").val();
+			var searchReviewtype = $("#searchReviewtype").val();
+			if($("#dataReviewStartDate").val()=='' && $("#dataReviewStartDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose start date','',true);
+				return false;
+			}
+			if($("#dataReviewEndDate").val()=='' && $("#dataReviewEndDate").val()==undefined){
+				showMessageTheme2(1, 'Please choose end date','',true);
+				return false;
+			}
+			callCounselorReview(searchReviewtype, 'reviewCounselor', startDate, endDate);
+		});
+	}
 }
 
 async function dashboardHeaderContent(){
@@ -499,7 +483,26 @@ async function dashboardFooterContent(){
 
 function getLeadReportMasterContent(title, objectRights){
 	
-	var html='<div class="app-page-title mb-3 py-2">'
+	var html=getLeadReportPageTitle(title);
+		html+=getMainReportCard(objectRights);
+		html+=counselorReportPopup();
+		html+=getLeadReportSearchPopup(objectRights);
+		return html;
+}
+
+function getLeadCampaignDetailMasterContent(title, objectRights){
+	var html=getLeadReportPageTitle(title);
+	html+='<div class="main-card mb-3 card">';
+	html+='	<div class="card-body">';
+	html+=getLeadCampaignPriceList(objectRights, { hideCounselorSection: true });
+	html+='	</div>';
+	html+='</div>';
+	html+=getRatingPopup();
+	return html;
+}
+
+function getLeadReportPageTitle(title){
+	return '<div class="app-page-title mb-3 py-2">'
 		+'<div class="page-title-wrapper">'
 		+'		<div class="page-title-heading">'
 		+'			<div class="page-title-icon">'
@@ -509,10 +512,6 @@ function getLeadReportMasterContent(title, objectRights){
 		+'		</div>'
 		+'	</div>'
 		+'</div>';
-		html+=getMainReportCard(objectRights);
-		html+=counselorReportPopup();
-		html+=getLeadReportSearchPopup(objectRights);
-		return html;
 }
 
 function getMainReportCard(objRight){
@@ -1114,8 +1113,10 @@ function getLeadEnrollmentYearWise(objRights){
 return html;
 }
 
-function getLeadCampaignPriceList(objRights){
+function getLeadCampaignPriceList(objRights, options){
 	var utmCampaignList = JSON.parse(objRights.utmCampaignList);	
+	options = options || {};
+	var hideCounselorSection = options.hideCounselorSection === true;
 	// <th class="text-center bg-primary text-white">ACTIVE + IN-ACTIVE = Total Lead | FB API</th>
     // <th class="text-center bg-primary text-white">Amount Spent<br/>Cost per Lead SMS | Cost per Lead FB</th>
 	var html='';
@@ -1137,6 +1138,7 @@ function getLeadCampaignPriceList(objRights){
                    html+=` </select>
                 </div>
                 <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+                    <input type="text" class="form-control mr-1" id="searchLeadCampaignEmail" name="searchLeadCampaignEmail" placeholder="Search Email" style="width:220px">
                     <select class="form-control  mr-1" id="searchLeadCampaignType" name="searchLeadCampaignType" style="width:fit-content">
                         <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
                         <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
@@ -1164,7 +1166,7 @@ function getLeadCampaignPriceList(objRights){
 <div class="row">
     <div class="col-lg-12 col-md-12 ">
     <div id="accordion" class="accordion-wrapper">
-        <table class="table table-bordered table-striped" id="lead-campaign-list" style="font-size:11px !important;" >
+        <table class="table table-bordered table-striped" id="lead-campaign-list" data-hide-counselor-section="${hideCounselorSection ? 'Y' : 'N'}" style="font-size:11px !important;" >
          <thead id="listCampaignTfoot"></thead>
            <thead>
                 <tr>
@@ -1174,12 +1176,12 @@ function getLeadCampaignPriceList(objRights){
 					<span class="float-left">Amount Spent</span>
 					<span class="float-right">ACTIVE + IN-ACTIVE = Total Lead | FB API</span>
 					</th>
-                    <th class="text-center bg-primary text-white" style="max-width:590px !important;width:590px">Counselor Name<br/>Lead | Active | In-active</th>
+                    ${hideCounselorSection ? '' : '<th class="text-center bg-primary text-white" style="max-width:590px !important;width:590px">Counselor Name<br/>Lead | Active | In-active</th>'}
                 </tr>
             </thead>
             <tbody id="leadCampaignListTbody">
                 <tr>
-                    <td colspan="9" class="text-center">
+                    <td colspan="${hideCounselorSection ? '4' : '9'}" class="text-center">
                         <div class="loader-wrapper d-flex justify-content-center align-items-center w-100"><div class="loader">Loading...'
                         <div class="line-scale"><div></div><div></div><div></div><div></div><div></div></div></div> </div>
                     </td>
@@ -1284,7 +1286,3 @@ function getCounselorReviewList(objRights){
 	</div>`;
 	return html;
 }	
-
-
-
-

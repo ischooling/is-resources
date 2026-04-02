@@ -32,6 +32,29 @@ function paymentFeeText(overDue){
 	return (od > 0 ? ('Scheduled in ' + Math.abs(od)) : ('Overdue by ' + od));
 }
 
+function getPaymentReportWhatsAppContact(item){
+	var dto = item.updateProfileStudentDTO || {};
+	var phone = '';
+	if(dto.guardianContactCodeNo && dto.guardianContactNo){
+		phone = dto.guardianContactCodeNo + ' ' + dto.guardianContactNo;
+	}else if(dto.guardianWorkCodeNo && dto.guardianWorkContactNo){
+		phone = dto.guardianWorkCodeNo + ' ' + dto.guardianWorkContactNo;
+	}else if(dto.phoneCode && dto.phoneNo){
+		phone = dto.phoneCode + ' ' + dto.phoneNo;
+	}
+	return {
+		name: dto.guardianName || item.studentName || '',
+		phone: phone
+	};
+}
+
+function getPaymentReportWhatsAppButton(name, phone, className){
+	if(!phone){
+		return '';
+	}
+	return `&nbsp;<a href='javascript:void(0)' class='${className || 'ml-1 text-success'}' onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote(name || '')}','${paymentReportEscapeSingleQuote(phone)}')" data-toggle="tooltip" data-placement="top" data-original-title="Open WhatsApp chat"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" alt="WhatsApp"/>&nbsp;</a>`;
+}
+
 function paymentReport(){
 	var html =
 	'<div class="w-100">'
@@ -91,6 +114,10 @@ function cardDetails(data){
 	$.each(data.reports, function(key, item) {
 		
 		var param = btoa(unescape(encodeURIComponent(`{"actionType":"1a","studentStandardId":'${item.studentStandardId}',"moduleId":8,"userId":'${item.userId}'}`)));
+		var whatsappContact = getPaymentReportWhatsAppContact(item);
+		var whatsappButton = getPaymentReportWhatsAppButton(whatsappContact.name, whatsappContact.phone);
+		var parentWhatsAppButton = getPaymentReportWhatsAppButton(item.updateProfileStudentDTO.guardianName || item.studentName || '', `${item.updateProfileStudentDTO.guardianContactCodeNo || ''} ${item.updateProfileStudentDTO.guardianContactNo || ''}`.trim(), 'ml-1 text-success align-middle');
+		var studentWhatsAppButton = getPaymentReportWhatsAppButton(item.studentName || '', `${item.updateProfileStudentDTO.phoneCode || ''} ${item.updateProfileStudentDTO.phoneNo || ''}`.trim(), 'ml-1 text-success align-middle');
 		var sprogress =0;
 		sprogress=item.progressReport=='N/A'?0.0:item.progressReport.replace("%","");
 		html+=`<tr>
@@ -111,13 +138,13 @@ function cardDetails(data){
 											${item.rollNumber} | ${item.enrolledStatus} | ${item.gradeName} | ${item.learningPlan} | ${item.lmsPlatform}
 										</span>
 									</h6>
-									<h5 class="mb-1 font-16">
-										<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;
-											${/*<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>*/''}
-											<a href='javascript:void(0)' onclick="callSchoolInneraction('profile-view', '${param}', '', '8')" data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>
-										</span>
-									</h5>
-								</div>
+										<h5 class="mb-1 font-16">
+											<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;
+												${/*<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>*/''}
+												<a href='javascript:void(0)' onclick="callSchoolInneraction('profile-view', '${param}', '', '8')" data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>${whatsappButton}
+											</span>
+										</h5>
+									</div>
 							</div>
 							<ul class="nav">
 								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-0${item.studentStandardId}" class="nav-link show active">Summary</a></li>
@@ -389,7 +416,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Parent Contact No:</label>
-											<span class="field-value trans5s parent-phone-${item.userId}" number="${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo}">${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo} </span>
+											<span class="field-value trans5s parent-phone-${item.userId}" number="${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo}">${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo} ${parentWhatsAppButton}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Alternate Phone:</label>
@@ -421,7 +448,7 @@ function cardDetails(data){
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Student Phone No:</label>
-											<span class="field-value trans5s student-phone-${item.userId}" number="${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo}" isdnumber="${item.updateProfileStudentDTO.phoneCode}" >${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo} </span>
+											<span class="field-value trans5s student-phone-${item.userId}" number="${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo}" isdnumber="${item.updateProfileStudentDTO.phoneCode}" >${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo} ${studentWhatsAppButton}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Student Alternate Phone:</label>

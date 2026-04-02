@@ -1931,6 +1931,14 @@ function getRequestForLeadAssignToCounselor(userId, tblId, callFrom, forUse){
 			if(campain!=undefined){
 				leadLastCall['leadCampain'] = campain.toString();
 			}
+			var countryPriorityRules = $(this).find("td .leadCountryPriorityRules").val();
+			if(countryPriorityRules!=undefined && countryPriorityRules!=''){
+				leadLastCall['leadCountryPriorityRules'] = countryPriorityRules;
+			}
+			var campaignPriorityRules = $(this).find("td .leadCampaignPriorityRules").val();
+			if(campaignPriorityRules!=undefined && campaignPriorityRules!=''){
+				leadLastCall['leadCampaignPriorityRules'] = campaignPriorityRules;
+			}
    
 			// var grades = $(this).find("td .leadGrade").select2('val');
 			// if(grades!=undefined){
@@ -6379,7 +6387,7 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 	return reponse;
 }
 
-function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid, assignTo) {
+function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, eventid, assignTo, callFrom) {
 
 	$.ajax({
 		type : "POST",
@@ -6579,6 +6587,7 @@ function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, 
 	leadReportRequest['startDate'] = startDate;
 	leadReportRequest['endDate'] = endDate;
 	leadReportRequest['assignTo'] = assignTo;
+	leadReportRequest['email'] = $("#searchLeadCampaignEmail").val()!=undefined ? $("#searchLeadCampaignEmail").val().trim() : '';
 	
 	if(campaignName!=undefined && campaignName!=""){
 		leadReportRequest['reportType']="LEAD-LIST";
@@ -6616,6 +6625,7 @@ function getLeadCampaignWiseHtml(data){
 	var leadListCampaign=data.leadListCampaign;
 	var htmlRet ="";
 	var sr=1;
+	var hideCounselorSection = $("#lead-campaign-list").data("hideCounselorSection") === "Y";
 	var activeLead=0;
 	var inActiveLead=0;
 	var facebooklead=0;
@@ -6702,32 +6712,32 @@ function getLeadCampaignWiseHtml(data){
 			htmlRet +="<td colspan=\"3\"  style=\"vertical-align: top !important\">";
 				htmlRet +="<span class=\"font-14\"><a href=\"javascript:void(0)\" data-target=\"#collapseOne"+sr+"\" data-toggle=\"collapse\" aria-expanded=\"false\" aria-controls=\"collapse"+sr+"\" class=\"collapsed\"  onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','');\">"+leadCampaign.campaignName+"</a></span>";
 				htmlRet +="<span class=\"float-right\"><span class=\"bg-success text-white text-center  badge font-10\">"+leadCampaign.totalActiveLead+"</span> + <span class=\"bg-warning text-white text-center badge font-10\">"+leadCampaign.totalInactiveLead+"</span> = <span class=\"badge badge-primary font-10\">"+leadCampaign.totalLead+"</span> | <span class=\"badge badge-info  text-center font-10\">"+leadCampaign.totalFbLead+"</span></span>";
-				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
+				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\" style=\"table-layout:fixed;border-collapse:separate;border-spacing:0;\">";
 				htmlRet +="<tbody>";
 				htmlRet += "<tr style=\"background-color:#d3d1d1 !important\">";
 				
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Reach</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Impressions</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Frequency</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPR</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Spent</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">Results</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CPC</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">CTR</td>";
-				htmlRet += "<td style=\"width:11%;border:0;\" class=\"badge font-10 my-0\"></td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">Reach</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">Impressions</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">Frequency</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">CPR</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">Spent</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">Results</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">CPC</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">CTR</td>";
+				htmlRet += "<td style=\"width:11%;border:0;padding:6px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\"></td>";
 
 				htmlRet +="</tr>";
 				htmlRet += "<tr>";
 				
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+reach+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+freqbgColor+"\">"+frequency.toFixed(2)+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+cpcbgcolor+"\">$"+cpc.toFixed(2)+"</td>";
-				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid;border-radius:0;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%</td>";
-				htmlRet += "<td style=\"width:11%;border:0;\" class=\"badge font-10 my-0\">";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">"+reach+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">"+leadCampaign.impressions+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0 "+freqbgColor+"\">"+frequency.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0 "+cprbgcolor+"\">$"+perLeadFbSpent.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">$"+leadCampaign.totalSpend+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">"+leadCampaign.totalFbLead+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0 "+cpcbgcolor+"\">$"+cpc.toFixed(2)+"</td>";
+				htmlRet += "<td style=\"width:11%;border:0;border-right:1px solid #7f7f7f;border-radius:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0 "+ctrbgColor+"\">"+ctr.toFixed(2)+"%</td>";
+				htmlRet += "<td style=\"width:11%;border:0;padding:7px 4px;white-space:nowrap;\" class=\"badge font-10 my-0\">";
 				htmlRet += "<a href=\"javascript:void(0)\" onClick=\"openCampaignModal('"+leadCampaign.campaignName+"')\" <i class=\"fa fa-eye fa-2x\"></a><br/>";
 				htmlRet += "<span class=\"font-10 bold\">"+leadCampaign.campaignStatus+"</span>";
 				htmlRet += "</td>";
@@ -6738,40 +6748,42 @@ function getLeadCampaignWiseHtml(data){
 			
 			htmlRet +="</td>";
 			
-			htmlRet +="<td class=\"rounded-bottom-right-10\">";
-			var sizeCounselor=(leadCampaign.assignNames.length);
-			sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
-			htmlRet +="<span>"+sizeCounselor+" </span>";
-			htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Enrolled: <b>"+leadCampaign.totalConverted+"</b></span>";
-			htmlRet +="<div class=\"d-flex overflow-x-auto\" style=\"max-width:550px;\">";
-			if(leadCampaign.assignNames.length>0){
-				for (let s = 0; s < leadCampaign.assignNames.length; s++) {
-					const assignNameobj = leadCampaign.assignNames[s];
-					htmlRet +="<div class=\"border bg-white rounded-5 w-100 mr-2 recommended-teacher-thumb\" style=\"max-width:230px;min-width:230px;\" id=\"clone\" data-order=\"3\">";
-					
-					htmlRet +="<div class=\"card-body d-flex px-2 pt-2 align-items-center pb-0\">";
-					htmlRet +="<span><img width=\"42\" class=\"avatar-icon\" src=\""+assignNameobj.profilePic+"\" alt=\"\" /></span>";
-					htmlRet +="<div class=\"pl-1\"><div class=\"teacher-name font-weight-semi-bold font-size-md\"><a href=\"javascript:void(0)\" onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','"+assignNameobj.assignTo+"');\">"+assignNameobj.assignName+"</a></div>";
-					htmlRet +="<div class=\"teacher-availability\">";
-					htmlRet +="<span class=\"total-hour text-primary\">"+assignNameobj.assignLead+" | </span><span class=\"total-hour text-success\">"+assignNameobj.assignActiveLead+" | </span><span class=\"total-hour text-danger\">"+assignNameobj.assignInactiveLead+"</span>";
-					htmlRet +="</div>";
-					htmlRet +="</div>";
+			if(!hideCounselorSection){
+				htmlRet +="<td class=\"rounded-bottom-right-10\">";
+				var sizeCounselor=(leadCampaign.assignNames.length);
+				sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
+				htmlRet +="<span>"+sizeCounselor+" </span>";
+				htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Enrolled: <b>"+leadCampaign.totalConverted+"</b></span>";
+				htmlRet +="<div class=\"d-flex overflow-x-auto\" style=\"max-width:550px;\">";
+				if(leadCampaign.assignNames.length>0){
+					for (let s = 0; s < leadCampaign.assignNames.length; s++) {
+						const assignNameobj = leadCampaign.assignNames[s];
+						htmlRet +="<div class=\"border bg-white rounded-5 w-100 mr-2 recommended-teacher-thumb\" style=\"max-width:230px;min-width:230px;\" id=\"clone\" data-order=\"3\">";
+						
+						htmlRet +="<div class=\"card-body d-flex px-2 pt-2 align-items-center pb-0\">";
+						htmlRet +="<span><img width=\"42\" class=\"avatar-icon\" src=\""+assignNameobj.profilePic+"\" alt=\"\" /></span>";
+						htmlRet +="<div class=\"pl-1\"><div class=\"teacher-name font-weight-semi-bold font-size-md\"><a href=\"javascript:void(0)\" onclick=\"getListLeadCampaign('"+leadCampaign.campaignName+"','"+sr+"','"+assignNameobj.assignTo+"');\">"+assignNameobj.assignName+"</a></div>";
+						htmlRet +="<div class=\"teacher-availability\">";
+						htmlRet +="<span class=\"total-hour text-primary\">"+assignNameobj.assignLead+" | </span><span class=\"total-hour text-success\">"+assignNameobj.assignActiveLead+" | </span><span class=\"total-hour text-danger\">"+assignNameobj.assignInactiveLead+"</span>";
+						htmlRet +="</div>";
+						htmlRet +="</div>";
 
-					htmlRet +="<div class=\"pl-1 ml-auto bold\"><div class=\"teacher-name font-weight-semi-bold font-size-md\">$"+(perLeadSmsSpent*parseInt(assignNameobj.assignLead)).toFixed(2)+"</div>";
-					// htmlRet +="<span class=\"total-hour text-primary\">"+assignNameobj.hotLead+" | </span><span class=\"total-hour text-success\">"+assignNameobj.coldLead+" | </span><span class=\"total-hour text-danger\">"+assignNameobj.warmLead+"</span>";
-					htmlRet +="</div>";
-					htmlRet +="</div>";
-					
-					htmlRet +="</div>";
+						htmlRet +="<div class=\"pl-1 ml-auto bold\"><div class=\"teacher-name font-weight-semi-bold font-size-md\">$"+(perLeadSmsSpent*parseInt(assignNameobj.assignLead)).toFixed(2)+"</div>";
+						// htmlRet +="<span class=\"total-hour text-primary\">"+assignNameobj.hotLead+" | </span><span class=\"total-hour text-success\">"+assignNameobj.coldLead+" | </span><span class=\"total-hour text-danger\">"+assignNameobj.warmLead+"</span>";
+						htmlRet +="</div>";
+						htmlRet +="</div>";
+						
+						htmlRet +="</div>";
+					}
 				}
-			}
 
-			htmlRet +="</div>";
-			
-			htmlRet +="</td>";
+				htmlRet +="</div>";
+				
+				htmlRet +="</td>";
+			}
 			htmlRet +="</tr>";
 			
-			htmlRet +="<tr data-parent=\"#accordion\" id=\"collapseOne"+sr+"\" class=\"collapse campaign-tr-"+sr+"\"><td colspan=\"9\" >";
+			htmlRet +="<tr data-parent=\"#accordion\" id=\"collapseOne"+sr+"\" class=\"collapse campaign-tr-"+sr+"\"><td colspan=\""+(hideCounselorSection ? "4" : "9")+"\" >";
 			htmlRet +="<table class=\"table\" id=\"leadListByCamp"+sr+"\" style=\"font-size:11px;min-width:450px\">";
 			htmlRet +="<thead>";
 			htmlRet +="<tr>";
@@ -6796,7 +6808,7 @@ function getLeadCampaignWiseHtml(data){
 
 	}else{
 			htmlRet +="<tr>";
-			htmlRet +="<td colspan=\"9\" class=\"text-center\">No Record</td>";
+			htmlRet +="<td colspan=\""+(hideCounselorSection ? "4" : "9")+"\" class=\"text-center\">No Record</td>";
 			htmlRet +="</tr>";	
 
 	}
@@ -6809,6 +6821,7 @@ function getCampaignFooterTotal(data){
 	var leadListCampaign=data.leadListCampaign;
 	var htmlRet ="";
 	var sr=1;
+	var hideCounselorSection = $("#lead-campaign-list").data("hideCounselorSection") === "Y";
 	var totalLeads=0;
 	var totalActiveLeads=0;
 	var totalInactiveLeads=0;
@@ -6855,7 +6868,9 @@ function getCampaignFooterTotal(data){
 		// htmlRet +="<span>$"+cpc+"</span> | <span>"+ctr+"%</span>"
 		htmlRet+="<span class=\"float-right\">"+totalActiveLeads+" + "+totalInactiveLeads+" = "+totalLeads+" | "+totalFBLeads+"</span>"
 		htmlRet +="</th>";
-		htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Demo Booked: <b>"+totalDemo+"</b> | By Website: <b>"+totalWebDemo+"</b> | By Link: <b>"+totalCopyDemo+"</b> | Demo Completed: <b>"+totalDemoDone+"</b> | Enrolled: <b>"+totalConvert+"</b></td>";
+		if(!hideCounselorSection){
+			htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Demo Booked: <b>"+totalDemo+"</b> | By Website: <b>"+totalWebDemo+"</b> | By Link: <b>"+totalCopyDemo+"</b> | Demo Completed: <b>"+totalDemoDone+"</b> | Enrolled: <b>"+totalConvert+"</b></td>";
+		}
 		htmlRet +="</tr>";
 	}
 	return htmlRet;

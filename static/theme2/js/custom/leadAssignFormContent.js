@@ -22,6 +22,9 @@ async function renderLeadAssignDashboard(title, roleAndModule, SCHOOL_ID, USER_I
 	});
 
 	$("#saveLeadAssignUser").on('click', function(){
+		if(!validateLeadRuleConfig('leadAssignCounselor')){
+			return false;
+		}
 		saveLeadAssignToCounselor(USER_ID,'leadAssignCounselor','', 'LEAD');
 	});
 
@@ -496,4 +499,3 @@ function activeCounselor(chckValue, userId, orderBy) {
 		}
 		saveInactiveAssignCounselor(userId, chckValue, orderBy, 'LEAD', true);
 	}
-

@@ -59,14 +59,16 @@ function getLeadAssignUser(objectRights) {
                 } else {
                     var html =getLeadAssignUserTableHtml(assignUserList, objectRights);
                     $("#leadAssignUserList").html(html); 
-					setTimeout(function() {
+				setTimeout(function() {
 						$(".leadCountry").select2({
 							theme:"bootstrap4",
 							dropdownParent:"#leadCounselorDataForm"
 						});
-						$(".leadCampain").select2({
-							theme:"bootstrap4",
-							dropdownParent:"#leadCounselorDataForm"
+						$(".leadCampain").each(function(){
+							initializeCampaignSelect2($(this));
+						});
+						$(".leadCountry").each(function(){
+							initializeCountrySelect2($(this));
 						});
 							if(assignUserList!=""){
 								for (let m = 0; m < assignUserList.length; m++) {
@@ -74,6 +76,7 @@ function getLeadAssignUser(objectRights) {
 									getSelectCountries('leadCountry'+assignUser.assignTo,''+assignUser.countries+'');
 									getSelectCampain('leadCampain'+assignUser.assignTo,''+assignUser.campainIds+'');
 								}
+								initializeLeadRuleEditors(assignUserList);
 							}
 					}, 600);	
                     
@@ -94,6 +97,26 @@ function getLeadAssignUser(objectRights) {
 		var inc=1;
 		for (let m = 0; m < assignUserList.length; m++) {
 			const assignUser = assignUserList[m];
+			var countryPriorityCounts = {};
+			if(assignUser.countryPriorityCountMap){
+				try{
+					countryPriorityCounts = typeof assignUser.countryPriorityCountMap === 'string'
+						? JSON.parse(assignUser.countryPriorityCountMap)
+						: assignUser.countryPriorityCountMap;
+				}catch(e){
+					countryPriorityCounts = {};
+				}
+			}
+			var campaignPriorityCounts = {};
+			if(assignUser.campaignPriorityCountMap){
+				try{
+					campaignPriorityCounts = typeof assignUser.campaignPriorityCountMap === 'string'
+						? JSON.parse(assignUser.campaignPriorityCountMap)
+						: assignUser.campaignPriorityCountMap;
+				}catch(e){
+					campaignPriorityCounts = {};
+				}
+			}
 			var autoInc=assignUser.orderBy!=''?assignUser.orderBy:inc;
 
 			var bgColorStype='bg-secondary text-white';
@@ -146,9 +169,12 @@ function getLeadAssignUser(objectRights) {
 					<select class="form-control form-control-sm leadCountry" id="leadCountry${assignUser.assignTo}" name="leadCountry" multiple="multiple" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}> `;
 					for (let c = 0; c < countryList.length; c++) {
 						const country = countryList[c];
-						html+=`<option value="${country.key}">${country.value} (${country.extra})</option>`;
+						var countryCountConfig = getCountryCountConfig(countryPriorityCounts, country);
+						html+=`<option value="${country.key}" data-country-name="${country.value}" data-urgent-count="${countryCountConfig.urgent || 0}" data-important-count="${countryCountConfig.important || 0}" data-normal-count="${countryCountConfig.normal || 0}">${country.value} (${country.extra})</option>`;
 					}
 					html+=`</select>
+					<input type="hidden" class="leadCountryPriorityRules" value='${escapeRuleAttribute(assignUser.countryPriorityRules)}'>
+					<div class="lead-rule-box mt-2" data-type="country" data-assign-to="${assignUser.assignTo}"></div>
 				</td>
 				<td class="onlyCampainChkTD" councId="${assignUser.assignTo}">
 					<input type="checkbox" name="onlyCampainChk" data-councId="${assignUser.assignTo}" id="onlyCampainChk${assignUser.assignTo}" class="onlyCampainChk" ${assignUser.campaignOnlyCheck == '1' ? 'checked':''} value="${assignUser.campaignOnlyCheck}" ${assignUser.counselorActivate == 'Y' ? '':'disabled'} />
@@ -156,9 +182,12 @@ function getLeadAssignUser(objectRights) {
 					<select class="form-control form-control-sm  leadCampain" id="leadCampain${assignUser.assignTo}" name="leadCampain" multiple="multiple" ${assignUser.counselorActivate == 'Y' ? '':'disabled'}> `;
 						for (let c = 0; c < campaignList.length; c++) {
 							const camp = campaignList[c];
-							html+=`<option value="${camp.key}">${camp.value} (${camp.extra})</option>`;
+							var campaignCountConfig = getCampaignCountConfig(campaignPriorityCounts, camp);
+							html+=`<option value="${camp.key}" data-campaign-name="${camp.value}" data-urgent-count="${campaignCountConfig.urgent || 0}" data-important-count="${campaignCountConfig.important || 0}" data-normal-count="${campaignCountConfig.normal || 0}">${camp.value} (${camp.extra})</option>`;
 						}
 					html+=`</select>
+					<input type="hidden" class="leadCampaignPriorityRules" value='${escapeRuleAttribute(assignUser.campaignPriorityRules)}'>
+					<div class="lead-rule-box mt-2" data-type="campaign" data-assign-to="${assignUser.assignTo}"></div>
 				</td>
 
 				<td style="max-width:100px;">
@@ -200,6 +229,362 @@ function getLeadAssignUser(objectRights) {
 	}
         return html;
   }
+
+function escapeRuleAttribute(value){
+	if(value == null || value == undefined){
+		return "";
+	}
+	return String(value)
+		.replace(/&/g, "&amp;")
+		.replace(/'/g, "&#39;")
+		.replace(/"/g, "&quot;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;");
+}
+
+function normalizeCampaignKey(value){
+	return String(value == null ? '' : value).trim();
+}
+
+function getCountryCountConfig(countryPriorityCounts, country){
+	if(!countryPriorityCounts){
+		return {};
+	}
+	var candidates = [
+		normalizeCampaignKey(country.key),
+		normalizeCampaignKey(country.value)
+	];
+	for (let i = 0; i < candidates.length; i++) {
+		var candidate = candidates[i];
+		if(candidate !== '' && countryPriorityCounts[candidate]){
+			return countryPriorityCounts[candidate];
+		}
+	}
+	return {};
+}
+
+function getCampaignCountConfig(campaignPriorityCounts, camp){
+	if(!campaignPriorityCounts){
+		return {};
+	}
+	var candidates = [
+		normalizeCampaignKey(camp.key),
+		normalizeCampaignKey(camp.value),
+		normalizeCampaignKey(camp.value + ' (' + camp.extra + ')')
+	];
+	for (let i = 0; i < candidates.length; i++) {
+		var candidate = candidates[i];
+		if(candidate !== '' && campaignPriorityCounts[candidate]){
+			return campaignPriorityCounts[candidate];
+		}
+	}
+	return {};
+}
+
+function getLeadPriorityOptions(selectedValue){
+	var priorityOptions = [
+		{ value: '1', label: 'Urgent' },
+		{ value: '2', label: 'Important' },
+		{ value: '3', label: 'Normal' }
+	];
+	var selected = selectedValue != null && selectedValue != undefined ? String(selectedValue) : '';
+	var html = '<option value="">Priority</option>';
+	for (let i = 0; i < priorityOptions.length; i++) {
+		const option = priorityOptions[i];
+		html += `<option value="${option.value}" ${selected === option.value ? 'selected' : ''}>${option.label}</option>`;
+	}
+	return html;
+}
+
+function initializeLeadRuleEditors(assignUserList){
+	for (let m = 0; m < assignUserList.length; m++) {
+		const assignUser = assignUserList[m];
+		bindLeadRuleEditor(assignUser.assignTo, 'country');
+		bindLeadRuleEditor(assignUser.assignTo, 'campaign');
+	}
+}
+
+function bindLeadRuleEditor(assignTo, type){
+	var selectSelector = type === 'country' ? '#leadCountry' + assignTo : '#leadCampain' + assignTo;
+	var selectElement = $(selectSelector);
+	if(!selectElement.length){
+		return;
+	}
+	selectElement.off('change.leadRules').on('change.leadRules', function(){
+		renderLeadRuleEditor(assignTo, type);
+	});
+	renderLeadRuleEditor(assignTo, type);
+}
+
+function initializeCampaignSelect2(selectElement){
+	if(!selectElement || !selectElement.length){
+		return;
+	}
+	if(selectElement.hasClass('select2-hidden-accessible')){
+		selectElement.select2('destroy');
+	}
+	selectElement.select2({
+		theme:"bootstrap4",
+		dropdownParent:"#leadCounselorDataForm",
+		templateSelection: function(data){
+			return getCampaignSelectionLabel(selectElement, data);
+		},
+		templateResult: function(data){
+			return data.text;
+		}
+	});
+}
+
+function initializeCountrySelect2(selectElement){
+	if(!selectElement || !selectElement.length){
+		return;
+	}
+	if(selectElement.hasClass('select2-hidden-accessible')){
+		selectElement.select2('destroy');
+	}
+	selectElement.select2({
+		theme:"bootstrap4",
+		dropdownParent:"#leadCounselorDataForm",
+		templateSelection: function(data){
+			return getCountrySelectionLabel(selectElement, data);
+		},
+		templateResult: function(data){
+			return data.text;
+		}
+	});
+}
+
+function getCountrySelectionLabel(selectElement, data){
+	if(!data){
+		return '';
+	}
+	if(!data.id){
+		return data.text || '';
+	}
+	return getLeadRuleItemLabel($(data.element), 'country', '');
+}
+
+function getCampaignSelectionLabel(selectElement, data){
+	if(!data){
+		return '';
+	}
+	if(!data.id){
+		return data.text || '';
+	}
+	var row = selectElement.closest('tr.assignItem');
+	if(!row.length){
+		return data.text || '';
+	}
+	var rules = getLeadRuleMap(row.find('.leadCampaignPriorityRules').val(), true);
+	var rule = rules[String(data.id).trim()] || {};
+	return getLeadRuleItemLabel($(data.element), 'campaign', rule.priority || '');
+}
+
+function refreshCampaignSelectionLabels(row){
+	if(!row || !row.length){
+		return;
+	}
+	var selectElement = row.find('.leadCampain');
+	if(selectElement.length && selectElement.hasClass('select2-hidden-accessible')){
+		selectElement.trigger('change.select2');
+	}
+}
+
+function refreshCountrySelectionLabels(row){
+	if(!row || !row.length){
+		return;
+	}
+	var selectElement = row.find('.leadCountry');
+	if(selectElement.length && selectElement.hasClass('select2-hidden-accessible')){
+		selectElement.trigger('change.select2');
+	}
+}
+
+function getCampaignPriorityLeadCount(option, priorityValue){
+	if(!option || !option.length){
+		return '0';
+	}
+	var urgentCount = parseInt(option.attr('data-urgent-count'), 10) || 0;
+	var importantCount = parseInt(option.attr('data-important-count'), 10) || 0;
+	var normalCount = parseInt(option.attr('data-normal-count'), 10) || 0;
+	return String(urgentCount + importantCount + normalCount);
+}
+
+function getCountryPriorityLeadCount(option, priorityValue){
+	if(!option || !option.length){
+		return '0';
+	}
+	var urgentCount = parseInt(option.attr('data-urgent-count'), 10) || 0;
+	var importantCount = parseInt(option.attr('data-important-count'), 10) || 0;
+	var normalCount = parseInt(option.attr('data-normal-count'), 10) || 0;
+	return String(urgentCount + importantCount + normalCount);
+}
+
+function getLeadRuleItemLabel(option, type, priorityValue){
+	var label = option.text();
+	if(type === 'country'){
+		return label + '[' + getCountryPriorityLeadCount(option, priorityValue) + ']';
+	}
+	if(type !== 'campaign'){
+		return label;
+	}
+	var priorityLeadCount = getCampaignPriorityLeadCount(option, priorityValue);
+	return label + '[' + priorityLeadCount + ']';
+}
+
+function updateLeadRuleItemLabel(item, row, type){
+	var key = item.attr('data-key');
+	var priorityValue = item.find('.lead-rule-priority').val();
+	var option = row.find((type === 'country' ? '.leadCountry' : '.leadCampain') + ' option[value="' + key + '"]');
+	item.find('.lead-rule-item-label').text(getLeadRuleItemLabel(option, type, priorityValue));
+}
+
+function renderLeadRuleEditor(assignTo, type){
+	var row = $('#leadAssignUserList').find('tr.assignItem').has('.assignto[value="'+assignTo+'"]');
+	if(!row.length){
+		return;
+	}
+	var hiddenField = row.find(type === 'country' ? '.leadCountryPriorityRules' : '.leadCampaignPriorityRules');
+	var existingRules = getLeadRuleMap(hiddenField.val(), type === 'campaign');
+	var selectElement = row.find(type === 'country' ? '.leadCountry' : '.leadCampain');
+	var selectedOptions = selectElement.find('option:selected');
+	var disabledAttr = selectElement.is(':disabled') ? 'disabled' : '';
+	var html = '';
+	if(selectedOptions.length){
+		html += `<div class="text-left p-2 rounded" style="background:#f7f9ff;border:1px solid #d7e1ff;">`;
+		html += type === 'country'
+			? `<div class="font-weight-bold mb-1" style="font-size:10px;">Limit | Country Priority</div>`
+			: `<div class="d-flex align-items-center font-weight-bold mb-1" style="gap:6px;font-size:10px;">
+					<div class="flex-fill">Order</div>
+					<div class="flex-fill">Limit</div>
+					<div class="flex-fill">Campaign Priority</div>
+				</div>`;
+		html += `<div class="lead-rule-items" style="max-height:150px;overflow-y:auto;"></div>`;
+		html += `</div>`;
+	}
+	row.find('.lead-rule-box[data-type="'+type+'"]').html(html);
+	var itemsContainer = row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-items');
+	selectedOptions.each(function(){
+		var option = $(this);
+		var key = option.val();
+		var mapKey = String(key).trim();
+		var rule = existingRules[mapKey] || {};
+		var label = getLeadRuleItemLabel(option, type, rule.priority || '');
+		itemsContainer.append(`
+			<div class="border rounded p-1 mb-1 lead-rule-item" data-key="${escapeRuleAttribute(mapKey)}" style="background:#fff;">
+				<div class="font-weight-bold mb-1 lead-rule-item-label" style="font-size:10px;line-height:1.2;">${label}</div>
+				<div class="d-flex align-items-center" style="gap:6px;">
+					${type === 'campaign' ? `<input type="number" min="1" class="form-control form-control-sm lead-rule-order" placeholder="Order" data-type="${type}" data-key="${escapeRuleAttribute(mapKey)}" value="${rule.order || ''}" ${disabledAttr}>` : ``}
+					<input type="number" min="1" class="form-control form-control-sm lead-rule-limit" placeholder="Limit" data-type="${type}" data-key="${escapeRuleAttribute(mapKey)}" value="${rule.limit || ''}" ${disabledAttr}>
+					<select class="form-control form-control-sm lead-rule-priority" data-type="${type}" data-key="${escapeRuleAttribute(mapKey)}" ${disabledAttr}>
+						${getLeadPriorityOptions(rule.priority || '')}
+					</select>
+				</div>
+			</div>
+		`);
+	});
+	row.find('.lead-rule-box[data-type="'+type+'"] input').off('input.leadRules').on('input.leadRules', function(){
+		syncLeadRuleHiddenField(row, type);
+	});
+	row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-priority').off('change.leadRules').on('change.leadRules', function(){
+		updateLeadRuleItemLabel($(this).closest('.lead-rule-item'), row, type);
+		syncLeadRuleHiddenField(row, type);
+	});
+	syncLeadRuleHiddenField(row, type);
+}
+
+function getLeadRuleMap(hiddenValue, campaignRouting){
+	var rules = {};
+	if(!hiddenValue){
+		return rules;
+	}
+	try{
+		var parsed = JSON.parse(hiddenValue);
+		Object.keys(parsed).forEach(function(key){
+			var finalKey = String(key).trim();
+			rules[finalKey] = parsed[key] || {};
+		});
+	}catch(e){
+		console.error('Invalid lead rule json', e);
+	}
+	return rules;
+}
+
+function syncLeadRuleHiddenField(row, type){
+	var rules = {};
+	row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-priority').each(function(){
+		var key = $(this).attr('data-key');
+		var priority = parseInt($(this).val(), 10) || 0;
+		var limit = parseInt(row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-limit[data-key="'+key+'"]').val(), 10) || 0;
+		var order = type === 'campaign' ? (parseInt(row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-order[data-key="'+key+'"]').val(), 10) || 0) : 0;
+		if(priority > 0 && limit > 0){
+			rules[key] = { priority: priority, limit: limit };
+			if(type === 'campaign' && order > 0){
+				rules[key].order = order;
+			}
+		}
+	});
+	row.find(type === 'country' ? '.leadCountryPriorityRules' : '.leadCampaignPriorityRules').val(Object.keys(rules).length ? JSON.stringify(rules) : '');
+	if(type === 'campaign'){
+		refreshCampaignSelectionLabels(row);
+	}else if(type === 'country'){
+		refreshCountrySelectionLabels(row);
+	}
+}
+
+function validateLeadRuleConfig(tblId){
+	var isValid = true;
+	var errorMessage = '';
+	$('#'+tblId+' tr.assignItem').each(function() {
+		var row = $(this);
+		var counselorName = $.trim(row.find('td:first b').text());
+		var totalLeadLimit = parseInt(row.find('.totalAssignLead').val(), 10) || 0;
+		var configuredLimitTotals = {
+			country: 0,
+			campaign: 0
+		};
+		['country', 'campaign'].forEach(function(type){
+			var totalConfiguredLimit = 0;
+			row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-priority').each(function(){
+				var key = $(this).attr('data-key');
+				var priority = $(this).val();
+				var limit = row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-limit[data-key="'+key+'"]').val();
+				var order = type === 'campaign' ? row.find('.lead-rule-box[data-type="'+type+'"] .lead-rule-order[data-key="'+key+'"]').val() : '1';
+				var shouldValidate = priority !== '';
+				if(shouldValidate){
+					if(limit === '' || (type === 'campaign' && order === '')){
+						isValid = false;
+						if(errorMessage === ''){
+							errorMessage = 'Please complete priority, limit, and campaign order before saving.';
+						}
+					} else {
+						totalConfiguredLimit += parseInt(limit, 10) || 0;
+					}
+				}
+			});
+			configuredLimitTotals[type] = totalConfiguredLimit;
+			if(isValid && totalConfiguredLimit > totalLeadLimit){
+				isValid = false;
+				var typeLabel = type === 'campaign' ? 'Campaign' : 'Country';
+				errorMessage = 'The total ' + typeLabel.toLowerCase() + ' limit is ' + totalConfiguredLimit + ', which cannot be greater than the lead limit ' + totalLeadLimit + ' for ' + counselorName + '.';
+			}
+		});
+		if(isValid){
+			var combinedConfiguredLimit = configuredLimitTotals.country + configuredLimitTotals.campaign;
+			if(combinedConfiguredLimit > totalLeadLimit){
+				isValid = false;
+				errorMessage = 'The combined country and campaign priority limit is ' + combinedConfiguredLimit + ', which cannot be greater than the lead limit ' + totalLeadLimit + ' for ' + counselorName + '.';
+			}
+		}
+		if(!isValid){
+			return false;
+		}
+	});
+	if(!isValid){
+		showMessageTheme2(0, errorMessage, '', true);
+	}
+	return isValid;
+}
 
   function getCommitionRatePopup(assignTo){
 	$("#counselorSetCommitionPopup").modal('show');

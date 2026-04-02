@@ -1281,6 +1281,101 @@ function enrAvailGetPct(r) {
 		: 0;
 }
 
+function enrAvailStrengthTrendMeta(lastPct, currentPct) {
+	var last = Math.max(0, Math.min(100, enrAvailToInt(lastPct)));
+	var current = Math.max(0, Math.min(100, enrAvailToInt(currentPct)));
+	var delta = current - last;
+	var absDelta = Math.abs(delta);
+	var isUp = delta > 0;
+	var isDown = delta < 0;
+
+	return {
+		last: last,
+		current: current,
+		delta: delta,
+		absDelta: absDelta,
+		trendClass: isUp ? "is-up" : isDown ? "is-down" : "is-flat",
+		trendLabel: isUp ? "Growth" : isDown ? "Downfall" : "Stable",
+		deltaLabel: absDelta + "%",
+		arrow: isUp ? "up" : isDown ? "down" : "flat",
+		linePath: isUp
+			? "M8 44 L24 33 L40 39 L56 20 L74 10"
+			: isDown
+				? "M8 12 L24 20 L40 16 L56 33 L74 42"
+				: "M8 28 L24 28 L40 27 L56 28 L74 27",
+		arrowHead: isUp
+			? "74,10 66,12 70,4"
+			: isDown
+				? "74,42 66,38 70,46"
+				: "74,27 67,23 67,31",
+		sparkBars: isUp
+			? [40, 30, 35, 20, 10]
+			: isDown
+				? [12, 20, 17, 32, 40]
+				: [26, 25, 26, 25, 26]
+	};
+}
+
+function enrAvailTrendAssetPath(arrow) {
+	var base = typeof CONTEXT_PATH === "string" ? CONTEXT_PATH : "";
+	if (base && /\/$/.test(base)) base = base.slice(0, -1);
+	if (arrow === "down") return base + "/static/img/enr-trend-down.png";
+	return base + "/static/img/enr-trend-up.png";
+}
+
+function enrAvailRenderStrengthTrend(lastPct, currentPct) {
+	var meta = enrAvailStrengthTrendMeta(lastPct, currentPct);
+	return (
+		'<div class="enrAvailTrendWidget ' +
+		meta.trendClass +
+		'">' +
+		'<div class="enrAvailTrendWidget__value">' +
+		enrAvailEsc(meta.current) +
+		'%</div>' +
+		'<div class="enrAvailTrendWidget__chart">' +
+		'<img class="enrAvailTrendWidget__img" src="' +
+		enrAvailEsc(enrAvailTrendAssetPath(meta.arrow)) +
+		'" alt="' +
+		enrAvailEsc(meta.trendLabel) +
+		' trend"/>' +
+		'<div class="enrAvailTrendWidget__delta ' +
+		(meta.arrow === "down" ? "is-tip-down" : meta.arrow === "flat" ? "is-tip-flat" : "is-tip-up") +
+		'">' +
+		'<span class="enrAvailTrendWidget__deltaArrow">' +
+		(meta.arrow === "up" ? "↗" : meta.arrow === "down" ? "↘" : "→") +
+		'</span>' +
+		enrAvailEsc(meta.deltaLabel) +
+		"</div>" +
+		"</div>" +
+		"</div>"
+	);
+}
+
+function enrAvailTrendWidgetStyleTag() {
+	return (
+		"<style>" +
+		".enrAvailTrendWidget{display:flex;align-items:center;justify-content:center;gap:0;min-width:132px;margin:0 auto;}" +
+		".enrAvailTrendWidget__value{font-size:11px;line-height:1.1;font-weight:700;color:#1f2a37;min-width:22px;text-align:right;margin-right:-10px;}" +
+		".enrAvailTrendWidget__chart{position:relative;left:-10px;width:118px;height:46px;overflow:visible;}" +
+		".enrAvailTrendWidget__img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;filter:drop-shadow(0 4px 10px rgba(22,33,54,.12));transform-origin:center;}" +
+		".enrAvailTrendWidget__delta{position:absolute;display:inline-flex;align-items:center;gap:2px;padding:3px 6px;border-radius:999px;font-size:10px;line-height:1;font-weight:800;white-space:nowrap;box-shadow:0 6px 16px rgba(36,63,106,.14),inset 0 1px 0 rgba(255,255,255,.45);z-index:3;}" +
+		".enrAvailTrendWidget__delta.is-tip-up{top:50%;right:-12px;transform:translateY(-50%);}" +
+		".enrAvailTrendWidget__delta.is-tip-down{top:50%;right:-12px;bottom:auto;transform:translateY(-50%);}" +
+		".enrAvailTrendWidget__delta.is-tip-flat{top:50%;right:-12px;transform:translateY(-50%);}" +
+		".enrAvailTrendWidget__deltaArrow{font-size:10px;line-height:1;display:inline-block;}" +
+		".enrAvailTrendWidget.is-up .enrAvailTrendWidget__delta{background:rgba(6,118,71,.12);color:#067647;}" +
+		".enrAvailTrendWidget.is-up .enrAvailTrendWidget__img{animation:enrAvailTrendMoveUp 1s cubic-bezier(.2,.72,.22,1) both;}" +
+		".enrAvailTrendWidget.is-down .enrAvailTrendWidget__delta{background:rgba(217,45,32,.12);color:#d92d20;}" +
+		".enrAvailTrendWidget.is-down .enrAvailTrendWidget__img{animation:enrAvailTrendMoveDown 1s cubic-bezier(.2,.72,.22,1) both;}" +
+		".enrAvailTrendWidget.is-flat .enrAvailTrendWidget__delta{background:rgba(21,112,239,.10);color:#155eef;}" +
+		".enrAvailTrendWidget.is-flat .enrAvailTrendWidget__img{opacity:.55;filter:grayscale(.15) saturate(.7) drop-shadow(0 4px 10px rgba(22,33,54,.08));animation:enrAvailTrendMoveFlat .85s ease both;}" +
+		"@keyframes enrAvailTrendMoveUp{0%{opacity:0;transform:translateY(12px) scale(.82);}65%{opacity:1;transform:translateY(-2px) scale(1.02);}100%{opacity:1;transform:translateY(0) scale(1);}}" +
+		"@keyframes enrAvailTrendMoveDown{0%{opacity:0;transform:translateY(-12px) scale(.82);}65%{opacity:1;transform:translateY(2px) scale(1.02);}100%{opacity:1;transform:translateY(0) scale(1);}}" +
+		"@keyframes enrAvailTrendMoveFlat{0%{opacity:0;transform:translate(-10px,0) scale(.9);}100%{opacity:1;transform:translate(0,0) scale(1);}}" +
+		"</style>"
+	);
+}
+
 function enrAvailBarColor(p) {
 	return p > 80 ? "var(--red)" : p > 50 ? "var(--amber)" : "var(--green)";
 }
@@ -1735,7 +1830,9 @@ function enrAvailRenderSummaryDrill(kind) {
 				return '<div class="text-center text-muted py-4">No records found</div>';
 			}
 
-		return items
+		return (
+			enrAvailTrendWidgetStyleTag() +
+			items
 			.map(function (it, idx) {
 				var meta = enrAvailSummaryMeta(it.total, it.booked, it.reserved, it.wait);
 				var p = meta.filled;
@@ -1764,8 +1861,10 @@ function enrAvailRenderSummaryDrill(kind) {
 					}
 
 					var totalValueStyle = 'font-size:20px;line-height:1;';
-					var metricBoxStyle = 'width:90px;min-width:90px;';
-					var lysBoxStyle = 'width:110px;min-width:110px;';
+					var compactValueStyle = 'font-size:16px;line-height:1;';
+					var metricBoxStyle = 'width:82px;min-width:82px;';
+					var currentStrengthBoxStyle = 'width:138px;min-width:138px;';
+					var lastYearBoxStyle = 'width:96px;min-width:96px;';
 					var totalEl = isEditing
 						? '<div class="text-right" style="width:90px;">' +
 							'<div class="text-muted font-10 mb-1">Total</div>' +
@@ -1844,12 +1943,17 @@ function enrAvailRenderSummaryDrill(kind) {
 								'" value="' +
 								enrAvailEsc(meta.free) +
 								'" readonly/></div>'
-							: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Free</div><div class="text-success font-weight-bold" style="' + totalValueStyle + '">' +
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + metricBoxStyle + '"><div class="text-muted font-10 mb-1">Free</div><div class="text-success font-weight-bold" style="' + totalValueStyle + '">' +
 								meta.free.toLocaleString() +
 								"</div></div>";
 
 					var lysVal = it.lastYearStrength || 0;
-					var lysEl = isEditing
+					var currentStrengthEl =
+						'<div class="text-center d-flex flex-column align-items-center" style="' + currentStrengthBoxStyle + '"><div class="text-muted font-10 mb-1" style="white-space:nowrap;">Current Year Strength(%)</div>' +
+						enrAvailRenderStrengthTrend(lysVal, p) +
+						"</div>";
+
+					var lastYearEl = isEditing
 						? '<div class="text-right" style="width:110px;">' +
 							'<div class="text-muted font-10 mb-1" style="white-space:nowrap;">Last Year Strength(%)</div>' +
 							'<input type="number" min="0" max="100" class="form-control form-control-sm text-right enrAvailInlineInput" style="width:110px;" id="' +
@@ -1861,9 +1965,9 @@ function enrAvailRenderSummaryDrill(kind) {
 							'" value="' +
 							enrAvailEsc(lysVal) +
 							'"/></div>'
-						: '<div class="text-center d-flex flex-column align-items-center" style="' + lysBoxStyle + '"><div class="text-muted font-10 mb-1" style="white-space:nowrap;">Last Year Strength(%)</div><div class="text-secondary font-weight-bold" style="' + totalValueStyle + '">' +
-							lysVal + '%' +
-							"</div></div>";
+						: '<div class="text-center d-flex flex-column align-items-center" style="' + lastYearBoxStyle + '"><div class="text-muted font-10 mb-1" style="white-space:nowrap;">Last Year Strength(%)</div><div class="text-dark font-weight-bold" style="' + compactValueStyle + '">' +
+							enrAvailEsc(lysVal) +
+							'%</div></div>';
 
 					var leftBlockStyle = "min-width:220px;flex:0 1 560px;max-width:560px;width:100%;";
 
@@ -1897,14 +2001,15 @@ function enrAvailRenderSummaryDrill(kind) {
 						meta.filled +
 						"% Filled</div>" +
 						"</div>" +
-						'<div class="d-flex align-items-center" style="gap:10px;flex:0 0 auto;white-space:nowrap;margin-left:12px;">' +
-						'<div class="d-flex align-items-center" style="gap:18px;">' +
+						'<div class="d-flex align-items-center" style="gap:6px;flex:0 0 auto;white-space:nowrap;margin-left:8px;">' +
+						'<div class="d-flex align-items-start" style="gap:10px;">' +
 						totalEl +
 						confirmEl +
 						rsvEl +
 						waitEl +
 						freeEl +
-						lysEl +
+						currentStrengthEl +
+						lastYearEl +
 						"</div>" +
 						'<span class="badge badge-pill ' +
 					meta.pill.badgeClass +
@@ -1917,7 +2022,8 @@ function enrAvailRenderSummaryDrill(kind) {
 					"</div>"
 				);
 			})
-				.join("");
+				.join("")
+		);
 		}
 
 		async function enrAvailSaveInlineTotalFreeRsvWait(key) {
@@ -2532,9 +2638,7 @@ function enrAvailRenderCounselorPreview(opts) {
 	var gradeOpts = optionHtml(allGrades);
 
 	var previewTidyStyle =
-		"<style>" +
-		".enrAvailClearBtn:hover,.enrAvailClearBtn:focus,.enrAvailClearBtn:active{color:#000 !important;}" +
-		"</style>";
+		enrAvailTrendWidgetStyleTag().replace("</style>", ".enrAvailClearBtn:hover,.enrAvailClearBtn:focus,.enrAvailClearBtn:active{color:#000 !important;}</style>");
 
 	var filterStrip =
 		previewTidyStyle +
@@ -2698,10 +2802,8 @@ function enrAvailRenderCounselorPreview(opts) {
 					'<td class="font-weight-semi-bold text-center">' +
 					enrAvailEsc(enrAvailToInt(r.lastYearStrength)) +
 					'%</td>' +
-					'<td class="text-center" style="width:70px;">' +
-					'<span class="text-muted font-12 font-weight-semi-bold" style="width:38px;text-align:center;line-height:1;display:inline-block;">' +
-					enrAvailEsc(pct) +
-					"%</span>" +
+					'<td class="text-center" style="min-width:190px;">' +
+					enrAvailRenderStrengthTrend(enrAvailToInt(r.lastYearStrength), pct) +
 					"</td>" +
 				'<td class="text-center" style="width:160px;">' +
 				'<div class="d-inline-flex flex-column align-items-center justify-content-center" style="gap:6px;">' +
@@ -2951,11 +3053,13 @@ function enrAvailRenderCountryPreview() {
 
 			var rows = recs
 				.map(function (r) {
-					var p = enrAvailGetPct(r);
+					var seatMeta = enrAvailCalcSeatMeta(r.total, r.booked, r.about, r.wait);
+					var p = seatMeta.filled;
 					var pBar = Math.max(0, Math.min(100, p));
-					var remaining = r.remaining || 0;
+					var remaining = seatMeta.free;
 					var meta = enrAvailUrgencyMeta(p, remaining);
 					var bookedText = (r.booked || 0).toLocaleString() + " booked of " + (r.total || 0).toLocaleString();
+					var currentStrengthText = p + "%";
 
 					var programPill =
 						'<span class="badge badge-pill bg-light-primary text-primary px-3 py-1 d-inline-block mb-1 font-12">' +
@@ -2995,7 +3099,7 @@ function enrAvailRenderCountryPreview() {
 						gradePill +
 						"</div>" +
 						"</div>" +
-						'<div class="col-lg-6 col-md-12 mb-2 mb-lg-0">' +
+						'<div class="col-lg-5 col-md-12 mb-2 mb-lg-0">' +
 						'<div class="progress progress-bar-xs progress-bar-rounded w-100 mb-1">' +
 						'<div class="progress-bar ' +
 						meta.bar +
@@ -3013,7 +3117,13 @@ function enrAvailRenderCountryPreview() {
 						"% filled</div>" +
 						"</div>" +
 						"</div>" +
-						'<div class="col-lg-3 col-md-12 text-right">' +
+						'<div class="col-lg-2 col-md-6 mb-2 mb-lg-0 text-lg-center text-md-left text-left">' +
+						'<div class="text-dark font-weight-bold" style="font-size:30px;line-height:1;">' +
+						enrAvailEsc(currentStrengthText) +
+						"</div>" +
+						'<div class="text-muted font-12 font-weight-semi-bold">Current Year Strength(%)</div>' +
+						"</div>" +
+						'<div class="col-lg-2 col-md-6 text-right">' +
 						'<div class="' +
 						meta.text +
 						' font-weight-bold" style="font-size:36px;line-height:1;">' +

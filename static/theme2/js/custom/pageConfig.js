@@ -61,6 +61,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "holiday-list":{url:"school-holiday-list?moduleId="+moduleId,file:[{role:"",fileName:["dashboardCalendar.js","masterContent.js"]}],funName:function(){},type:"JSP",init: function(){getWaringContent1()},pageReqType:"IN"},
         "holiday-form":{url:"school-holiday-form?moduleId="+moduleId,file:[{role:"",fileName:["jquery.ckeditor.js","dashboardCalendar.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "lead-report-list":{url:"",file:[{role:"",fileName:["LeadReportListContent.js","CounselorDashboardContent.js","leads.js","LeadReportSearchPopup.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "lead-detail-by-campaign":{url:"",file:[{role:"",fileName:["LeadReportListContent.js","CounselorDashboardContent.js","leads.js","LeadReportSearchPopup.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-list":{url:"",file:[{role:"",fileName:["LeadListContent.js","B2CLeadListContent.js","B2CLead.js","B2BLeadListContent.js","leads.js","leadsContent.js","leadsPartnerContent.js","leadsPartner.js","schoolSetupContent.js","cropperImageChatSupportDocument.js","cropperImageLeadDocument.js", "schoolSetup.js", "CounselorData.js", "forceLeadsUpdate.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-assign-form":{url:"",file:[{role:"",fileName:["leadAssignFormContent.js","leadAssignForm.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-calculation-chart":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-calculation-chart?moduleId="+moduleId+"&euid="+ENCRYPTED_USER_ID},
@@ -1520,4 +1521,3 @@ function getRequestForSpecificUserScholarship(
 
   return request;
 }
-

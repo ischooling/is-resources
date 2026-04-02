@@ -207,7 +207,7 @@ function forceDemoUpdateModalContent(data){
 								</tr>
 							</thead>
 							<tbody>`
-								+demoDetailsModalBodyContent(data.details.demoDetails.demoDetails,data.details.remarkMendatory,data.details.minRemarkCount);
+								+demoDetailsModalBodyContent(data.details.allowCallhippoService,data.details.callhippoBypassNumber,data.details.demoDetails.demoDetails,data.details.remarkMendatory,data.details.minRemarkCount);
 								//console.log(data)
 							html+=
 							`</tbody>
@@ -223,7 +223,7 @@ function forceDemoUpdateModalContent(data){
 	return html;
 }
 
-function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
+function demoDetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber,data,remarkMendatory,minRemarkCount){
 	var html=``;
 	if(data.length>0){
 		$.each(data, function(i,v){
@@ -260,7 +260,7 @@ function demoDetailsModalBodyContent(data,remarkMendatory,minRemarkCount){
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
-								<td class="border-0 p-1" style="word-break:break-word">`+v.inviteePhone+`</td>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.inviteePhone+` &nbsp; <a href="javascript:void(0);" onclick="callLeadViaCallHippo('${allowCallhippoService}','${callhippoBypassNumber}','${v.inviteePhone}')" data-toggle="tooltip" data-placement="top" data-original-title="Call via CallHippo" class="btn btn-sm ml-1 d-inline-flex align-items-center rounded-pill py-1" style="font-size: 10px;background-color: #c3e4ff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"><img src="${PATH_FOLDER_IMAGE2}leadlist_icons/CallHippo.svg${SCRIPT_VERSION}" style="width:16px; margin-right:5px"> Call</a></td>
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Lead Owner Name:</th>
@@ -345,7 +345,7 @@ function forceLeadUpdateModalContent(data){
 								</tr>
 							</thead>
 							<tbody>`
-								+leadDetailsModalBodyContent(data.details.leadDetails.leadDetails,data.details.statusList,data.details.remarkMendatory,data.details.minRemarkCount);
+								+leadDetailsModalBodyContent(data.details.allowCallhippoService,data.details.callhippoBypassNumber,data.details.leadDetails.leadDetails,data.details.statusList,data.details.remarkMendatory,data.details.minRemarkCount);
 								//console.log(data)
 							html+=
 							`</tbody>
@@ -361,7 +361,7 @@ function forceLeadUpdateModalContent(data){
 	return html;
 }
 
-function leadDetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCount){
+function leadDetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber,data,statuslist,remarkMendatory,minRemarkCount){
 	var html=``;
 	if(data.length>0){
 		const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;
@@ -399,7 +399,7 @@ function leadDetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCo
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
-								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+`</td>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+` &nbsp; <a href="javascript:void(0);" onclick="callLeadViaCallHippo('${allowCallhippoService}','${callhippoBypassNumber}','${v.phone}')" data-toggle="tooltip" data-placement="top" data-original-title="Call via CallHippo" class="btn btn-sm ml-1 d-inline-flex align-items-center rounded-pill py-1" style="font-size: 10px;background-color: #c3e4ff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"><img src="${PATH_FOLDER_IMAGE2}leadlist_icons/CallHippo.svg${SCRIPT_VERSION}" style="width:16px; margin-right:5px"> Call</a></td>
 							</tr>
 							
 						</tbody>
@@ -472,8 +472,7 @@ function forceDemo2UpdateModalContent(data){
 								</tr>
 							</thead>
 							<tbody>`
-								+demo2DetailsModalBodyContent(data.details.demoDetails.demoDetails,data.details.statusList,data.details.remarkMendatory,data.details.minRemarkCount);
-								//console.log(data)
+								+demo2DetailsModalBodyContent(data.details.allowCallhippoService,data.details.callhippoBypassNumber,data.details.demoDetails.demoDetails,data.details.statusList,data.details.remarkMendatory,data.details.minRemarkCount);
 							html+=
 							`</tbody>
 						</table>
@@ -488,7 +487,7 @@ function forceDemo2UpdateModalContent(data){
 	return html;
 }
 
-function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkCount){
+function demo2DetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber,data,statuslist,remarkMendatory,minRemarkCount){
 	var html=``;
 	if(data.length>0){
 		const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;
@@ -526,7 +525,7 @@ function demo2DetailsModalBodyContent(data,statuslist,remarkMendatory,minRemarkC
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
-								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+`</td>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+` &nbsp; <a href="javascript:void(0);" onclick="callLeadViaCallHippo('${allowCallhippoService}','${callhippoBypassNumber}','${v.phone}')" data-toggle="tooltip" data-placement="top" data-original-title="Call via CallHippo" class="btn btn-sm ml-1 d-inline-flex align-items-center rounded-pill py-1" style="font-size: 10px;background-color: #c3e4ff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"><img src="${PATH_FOLDER_IMAGE2}leadlist_icons/CallHippo.svg${SCRIPT_VERSION}" style="width:16px; margin-right:5px"> Call</a></td>
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Demo Schedule At:</th>
@@ -599,7 +598,7 @@ function forceCallbackUpdateModalContent(data){
 								</tr>
 							</thead>
 							<tbody>`
-								+callbackDetailsModalBodyContent(data.details.callbackDetails.callbackDetails);
+								+callbackDetailsModalBodyContent(data.details.allowCallhippoService,data.details.callhippoBypassNumber,data.details.callbackDetails.callbackDetails);
 							html+=
 							`</tbody>
 						</table>
@@ -615,7 +614,7 @@ function forceCallbackUpdateModalContent(data){
 	return html;
 }
 
-function callbackDetailsModalBodyContent(data){
+function callbackDetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber,data){
 	var html=``;
 	if(data.length>0){
 		$.each(data, function(i,v){
@@ -651,7 +650,7 @@ function callbackDetailsModalBodyContent(data){
 							</tr>
 							<tr>
 								<th class="border-0 p-1 vertical-align-top" style="width:172px;font-weight: 600;">Phone No.:</th>
-								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+`</td>
+								<td class="border-0 p-1" style="word-break:break-word">`+v.phone+` &nbsp; <a href="javascript:void(0);" onclick="callLeadViaCallHippo('${allowCallhippoService}','${callhippoBypassNumber}','${v.phone}')" data-toggle="tooltip" data-placement="top" data-original-title="Call via CallHippo" class="btn btn-sm ml-1 d-inline-flex align-items-center rounded-pill py-1" style="font-size: 10px;background-color: #c3e4ff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"><img src="${PATH_FOLDER_IMAGE2}leadlist_icons/CallHippo.svg${SCRIPT_VERSION}" style="width:16px; margin-right:5px"> Call</a></td>
 							</tr>
 							
 						</tbody>
