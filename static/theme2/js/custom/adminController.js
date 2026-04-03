@@ -604,6 +604,8 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderEnrollmentAvalabilityContent()
      }else if(pageNo=='enrollment-reports'){
       renderEnrollmentAvalabilityReportContent()
+     }else if(pageNo=='email-template-tester'){
+      getEmailerTemplateViewerContent();
      }
      
 

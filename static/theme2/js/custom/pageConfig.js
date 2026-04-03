@@ -194,6 +194,8 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "lead-predict-list":{url:"",file:[{role:"",fileName:["leadPredictListContent.js","leadPredictList.js","B2CLead.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "enrollment-availability":{url:"",file:[{role:"",fileName:["enrollmentavailabilityContent.js","enrollmentavailability.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "enrollment-reports":{url:"",file:[],funName:function(){},type:"JS",init: function(){},pageReqType:"EX",urlSend:"/dashboard/enrollment-availability-view"},
+        "email-template-tester":{url:"",file:[{role:"",fileName:["emailTemplateTesterContent.js","emailTemplateTester.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        
     };
     
     var pageMapJSPWithFun = {
@@ -264,6 +266,24 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
     // console.timeEnd();
     
 }
+
+// async function openEmailTemplateTesterModule() {
+    
+//     try {
+//         await loadScript([{role:"",fileName:["emailTemplateTesterContent.js","emailTemplateTester.js"]}]);
+//         if (typeof renderEmailTemplateTesterContent === "function") {
+//             renderEmailTemplateTesterContent();
+//         } else {
+//             throw new Error("Email template tester renderer unavailable");
+//         }
+//     } catch (error) {
+//         console.error("openEmailTemplateTesterModule error:", error);
+//         showMessageTheme2(0, "Unable to open Email Template Tester");
+//     } finally {
+//         customLoader(false);
+//     }
+//     return false;
+// }
 
 
 

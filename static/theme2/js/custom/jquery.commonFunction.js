@@ -4101,13 +4101,13 @@ function showWarningMessage(warningMessage, functionName) {
   $("#remarksresetDelete").modal("show");
 }
 function sendAnnouncementWarning(message, functionName) {
+  $("body").append(getWaringContent1());
   $("#resetDeleteErrorWarningYes1").show();
   $("#resetDeleteErrorWarningNo1").show();
   $("#resetDeleteErrorWarningCancel1").hide();
   $("#remarksresetDelete1Icon").removeAttr("class");
   $("#remarksresetDelete1Icon").attr("class", "fa fa-envelope fa-4x");
-  functionName =
-    "$('#remarksresetDelete1').modal('hide');" + functionName + ";";
+  functionName = "$('#remarksresetDelete1').modal('hide');" + functionName + ";";
   $("#warningMessage1").html(message);
   $("#resetDeleteErrorWarningYes1").attr("onclick", functionName);
   $("#remarksresetDelete1").modal("show");
