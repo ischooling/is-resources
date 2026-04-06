@@ -1341,9 +1341,6 @@ function enrAvailRenderStrengthTrend(lastPct, currentPct) {
 		'<div class="enrAvailTrendWidget__delta ' +
 		(meta.arrow === "down" ? "is-tip-down" : meta.arrow === "flat" ? "is-tip-flat" : "is-tip-up") +
 		'">' +
-		'<span class="enrAvailTrendWidget__deltaArrow">' +
-		(meta.arrow === "up" ? "↗" : meta.arrow === "down" ? "↘" : "→") +
-		'</span>' +
 		enrAvailEsc(meta.deltaLabel) +
 		"</div>" +
 		"</div>" +
