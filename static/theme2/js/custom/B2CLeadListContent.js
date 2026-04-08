@@ -2465,7 +2465,6 @@ function getLeadEnrollmentHoldPopup() {
 
   var html =
     `<style id="leadEnrollmentHoldPopupStyles">
-      #leadEnrollmentHoldPopupForm .hold-enrollment-dialog{max-width:640px;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-modal{border-radius:18px;overflow:hidden;box-shadow:0 18px 42px rgba(11,57,105,.18);background:#fff;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-header{border-bottom:0;padding:10px 14px;background:linear-gradient(135deg,#0b78f2 0%,#1fa2ff 100%);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-header .modal-title{font-size:1rem;font-weight:600;line-height:1.2;margin-right:10px;}
@@ -2511,14 +2510,14 @@ function getLeadEnrollmentHoldPopup() {
       #leadEnrollmentHoldPopupForm .hold-enrollment-meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card{background:#fff;border:1px solid #dbe8f8;border-radius:18px;padding:16px 18px;text-align:left;box-shadow:0 12px 26px rgba(15,72,126,.06);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card span{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;color:#6d8197;text-transform:uppercase;margin-bottom:8px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card strong{display:block;font-size:18px;line-height:1.35;color:#19324d;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-meta-card strong{display:block;font-size:16px;line-height:1.35;color:#19324d;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-shell{border:1px solid #dbe8fb;border-radius:30px;padding:32px 28px;background:linear-gradient(135deg,#f7fbff 0%,#ffffff 55%,#eaf4ff 100%);box-shadow:0 26px 54px rgba(13,78,141,.16);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-badge{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border-radius:999px;background:#e8f8ec;color:#149245;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-title{margin-top:16px;font-size:34px;font-weight:700;color:#17334d;line-height:1.2;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-subtitle{margin:10px auto 0;max-width:640px;font-size:15px;color:#627892;line-height:1.6;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-card{max-width:540px;margin:24px auto 0;background:#fff;border:1px solid #dbe8fb;border-radius:24px;padding:22px 26px;box-shadow:0 18px 38px rgba(15,72,126,.12);}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-label{font-size:12px;font-weight:700;letter-spacing:.18em;color:#6b8096;text-transform:uppercase;margin-bottom:10px;}
-      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value{font-size:48px;font-weight:800;line-height:1.14;color:#23c245;word-break:break-word;}
+      #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value{font-size:32px;font-weight:800;line-height:1.14;color:#23c245;white-space:nowrap;word-break:normal;overflow:hidden;text-overflow:ellipsis;}
       #leadEnrollmentHoldPopupForm .hold-enrollment-timer-value.is-expired{color:#d7263d;}
       @media (max-width:991px){
         #leadEnrollmentHoldPopupForm .hold-enrollment-dialog{max-width:92vw;margin:.75rem auto;}
@@ -2533,7 +2532,7 @@ function getLeadEnrollmentHoldPopup() {
       }
     </style>
     <div id="leadEnrollmentHoldPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="leadEnrollmentHoldTitle" aria-hidden="true">
-      <div class="modal-dialog modal-md modal-dialog-centered hold-enrollment-dialog">
+      <div class="modal-dialog modal-lg modal-dialog-centered hold-enrollment-dialog">
         <div class="modal-content border-0 hold-enrollment-modal">
           <div class="modal-header text-white hold-enrollment-header">
             <h5 class="modal-title" id="leadEnrollmentHoldTitle">Holding Enrollment (<span id="holdEnrollLeadNo">N/A</span>)</h5>
@@ -2549,12 +2548,7 @@ function getLeadEnrollmentHoldPopup() {
             </div>
             <div id="holdEnrollmentFormSection">
               <div class="hold-enrollment-form">
-              <div class="hold-enrollment-form-head">
-                <div>
-                  <div class="hold-enrollment-section-title">Reserve This Lead Smartly</div>
-                  <div class="hold-enrollment-subtitle">Capture the child details, pick the holding duration, and lock the best connection time before the seat is offered elsewhere.</div>
-                </div>
-              </div>
+
               <form class="col-lg-12 col-md-12 col-sm-12 col-12 pt-1 pb-1 px-0" method="post" id="leadEnrollmentHoldForm" action="javascript:void(0);">
                 <input type="hidden" name="leadId" id="holdEnrollLeadId" value="" />
                 <input type="hidden" name="holdIsdCode" id="holdEnrollIsdCode" value="" />
@@ -2594,19 +2588,21 @@ function getLeadEnrollmentHoldPopup() {
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Alt Phone No</label>
-                    <input type="text" class="form-control form-control-sm" name="holdAltPhone" id="holdEnrollAltPhone" maxlength="15" autocomplete="off" />
+                    <input type="text" class="form-control form-control-sm" name="holdAltPhone" id="holdEnrollAltPhone" maxlength="200" autocomplete="off" />
                   </div>
                 </div>
+                <!--
                 <div id="holdLockInfoSection" class="d-none hold-enrollment-lock-panel">
                   <table class="table table-sm table-bordered font-12 mb-0">
                     <tbody>
                       <tr><th class="border-0 p-1" style="width:130px;">Lock Status</th><td class="border-0 p-1" id="holdLockStatusDisplay">-</td></tr>
                       <tr><th class="border-0 p-1">Lock Duration</th><td class="border-0 p-1" id="holdLockHoursDisplay">-</td></tr>
-                      <tr><th class="border-0 p-1">Hold Date</th><td class="border-0 p-1" id="holdLockDateDisplay">-</td></tr>
+                      <tr><th class="border-0 p-1">Holding Date</th><td class="border-0 p-1" id="holdLockDateDisplay">-</td></tr>
                       <tr><th class="border-0 p-1">Expiry Date</th><td class="border-0 p-1" id="holdLockExpiryDisplay">-</td></tr>
                     </tbody>
                   </table>
                 </div>
+                -->
                 <div class="row">
                   <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <label class="m-0">Holding For</label>
@@ -2749,37 +2745,73 @@ function openLeadEnrollmentHoldPopup(lead) {
   $("#holdEnrollPhone").val(lead.phone || '');
   $("#holdEnrollAltPhone").val(lead.phoneNoAlter || '');
 
-  // Init intlTelInput for phone
-  if (itiHoldPhone && typeof itiHoldPhone.destroy === 'function') {
-    itiHoldPhone.destroy();
+  function destroyIntlInstance(inputEl, instanceRef) {
+    if (instanceRef && typeof instanceRef.destroy === "function") {
+      try {
+        instanceRef.destroy();
+      } catch (e) {}
+    }
+    if (
+      inputEl &&
+      window.intlTelInputGlobals &&
+      typeof window.intlTelInputGlobals.getInstance === "function"
+    ) {
+      try {
+        var liveInstance = window.intlTelInputGlobals.getInstance(inputEl);
+        if (liveInstance && typeof liveInstance.destroy === "function") {
+          liveInstance.destroy();
+        }
+      } catch (e) {}
+    }
   }
+
+  function clearIntlInputInlinePadding(inputEl) {
+    if (!inputEl) {
+      return;
+    }
+    inputEl.style.paddingLeft = "";
+    if (!$.trim(inputEl.getAttribute("style") || "")) {
+      inputEl.removeAttribute("style");
+    }
+  }
+
+  // Init intlTelInput for phone
   var phoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollPhone");
+  destroyIntlInstance(phoneEl, itiHoldPhone);
   itiHoldPhone = window.intlTelInput(phoneEl, {
     separateDialCode: true,
   });
   itiHoldPhone.setCountry(lead.isdCodeIso || 'us');
-  phoneEl.addEventListener('countrychange', function() {
+  clearIntlInputInlinePadding(phoneEl);
+  $(phoneEl).off('countrychange.holdEnroll').on('countrychange.holdEnroll', function() {
     $('#holdEnrollIsdCodeIso').val(itiHoldPhone.getSelectedCountryData().iso2);
     $('#holdEnrollIsdCode').val(itiHoldPhone.getSelectedCountryData().dialCode);
+    clearIntlInputInlinePadding(phoneEl);
   });
   $('#holdEnrollIsdCodeIso').val(itiHoldPhone.getSelectedCountryData().iso2);
   $('#holdEnrollIsdCode').val(itiHoldPhone.getSelectedCountryData().dialCode);
+  setTimeout(function() {
+    clearIntlInputInlinePadding(phoneEl);
+  }, 0);
 
   // Init intlTelInput for alt phone
-  if (itiHoldAltPhone && typeof itiHoldAltPhone.destroy === 'function') {
-    itiHoldAltPhone.destroy();
-  }
   var altPhoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollAltPhone");
+  destroyIntlInstance(altPhoneEl, itiHoldAltPhone);
   itiHoldAltPhone = window.intlTelInput(altPhoneEl, {
     separateDialCode: true,
   });
   itiHoldAltPhone.setCountry(lead.isdCodeAlterIso || 'us');
-  altPhoneEl.addEventListener('countrychange', function() {
+  clearIntlInputInlinePadding(altPhoneEl);
+  $(altPhoneEl).off('countrychange.holdEnroll').on('countrychange.holdEnroll', function() {
     $('#holdEnrollAltIsdCodeIso').val(itiHoldAltPhone.getSelectedCountryData().iso2);
     $('#holdEnrollAltIsdCode').val(itiHoldAltPhone.getSelectedCountryData().dialCode);
+    clearIntlInputInlinePadding(altPhoneEl);
   });
   $('#holdEnrollAltIsdCodeIso').val(itiHoldAltPhone.getSelectedCountryData().iso2);
   $('#holdEnrollAltIsdCode').val(itiHoldAltPhone.getSelectedCountryData().dialCode);
+  setTimeout(function() {
+    clearIntlInputInlinePadding(altPhoneEl);
+  }, 0);
 
   var $bestTimeDate = $("#holdEnrollBestTimeDate");
   try {
@@ -2806,6 +2838,12 @@ function openLeadEnrollmentHoldPopup(lead) {
 
   // Show modal
   $("#leadEnrollmentHoldPopupForm").modal({ backdrop: 'static', keyboard: false });
+  $("#leadEnrollmentHoldPopupForm")
+    .off("shown.bs.modal.holdEnrollPaddingFix")
+    .on("shown.bs.modal.holdEnrollPaddingFix", function () {
+      clearIntlInputInlinePadding(phoneEl);
+      clearIntlInputInlinePadding(altPhoneEl);
+    });
 
   // Fetch existing hold data for this lead
   fetchLeadEnrollmentHold(lead.leadId);

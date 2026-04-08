@@ -1252,7 +1252,7 @@ function renderOldFeeCard(responseData){
 								</div>
 								<div>
 									<p class="mb-0 text-muted" style="font-size:13px;">Phone Support</p>
-									<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">+1(585) 499-0662</p>
+									<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">+1(727) 390-2419</p>
 								</div>
 							</div>
 						</div>
@@ -1444,7 +1444,7 @@ function renderFeeCard(responseData){
 							</div>
 							<div>
 								<p class="mb-0 text-muted" style="font-size:13px;">Phone Support</p>
-								<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">+1(585) 499-0662</p>
+								<p class="mb-0 text-dark font-weight-semi-bold" style="font-size:15px;">+1(727) 390-2419</p>
 							</div>
 						</div>
 					</div>
