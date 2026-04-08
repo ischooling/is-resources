@@ -2,6 +2,7 @@ var PORFILE_RESPONSE_DATA;
 var PORFILE_RESPONSE_UPDATED_DATA;
 var PROFILE_PROGRESS_REPORT_CURRENT_DAYS = null;
 var PROFILE_PROGRESS_REPORT_PENDING_DAYS = null;
+var SHOW_RESERVE_SEAT_SECTION = true;
 async function renderStudentProfilePage(extraParam){
 	COMMUNICATION_APPEND_ROW="";
     if($("#profileFielddModal").length>0){
@@ -14,6 +15,13 @@ async function renderStudentProfilePage(extraParam){
     }else{
         var data = PORFILE_RESPONSE_DATA.profileData.studentProfile;
         PORFILE_RESPONSE_UPDATED_DATA = data;
+        try{
+            var gradeId = data && data[2] ? parseInt(data[2].gradeId) : 0;
+            var lp = data && data[2] && data[2].learningProgramValue ? (data[2].learningProgramValue+"").toUpperCase() : "";
+            SHOW_RESERVE_SEAT_SECTION = !(gradeId === 7 && lp !== "ONE_TO_ONE_FLEX");
+        }catch(e){
+            SHOW_RESERVE_SEAT_SECTION = true;
+        }
         console.log(data);
         if($("#cropModal").length<1){
             $("body").append(cropperImageModalContent());
@@ -110,7 +118,7 @@ function getStudentProfilePageContent(data){
                             html+=academicInformation(data[2]);
                             html+=classesPreferredTimingInformation(data[3].prefTimeList)
                             html+=sportAndExtraCurricularInformation(data[4]);
-                            if(USER_ROLE != "PARENT" && USER_ROLE != "STUDENT"){
+                            if(USER_ROLE != "PARENT" && USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION){
                                 html+=reserveAnEnrollmentSeatAdvCourseInformation(data[5], PORFILE_RESPONSE_DATA.standardStatus, PORFILE_RESPONSE_DATA.enrollmentDetails)
                             }
                             if(USER_ROLE != "STUDENT"){
@@ -127,6 +135,8 @@ function getStudentProfilePageContent(data){
 }
 
 function profileSectionTabs(){
+    var commIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "7" : "6";
+    var emailIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "8" : "7";
     var html=
     `<div class="full mt-3">
         <ul class="m-0 p-0">
@@ -201,7 +211,7 @@ function profileSectionTabs(){
                 </a>
             </li>
             ${
-                USER_ROLE != "STUDENT" ? 
+                (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? 
                 `<li class="bg-white border border-top-left-rounded">
                     <a href="#reserve_An_Enrollment_Seat_Adv_Course_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                         <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE != "STUDENT" ? '6':''}. Reserve an Enrollment Seat & Advance Course Fee</div>
@@ -221,7 +231,7 @@ function profileSectionTabs(){
                 USER_ROLE != "STUDENT" ? 
                 `<li class="bg-white border border-top-left-rounded overflow-hidden">
                     <a href="#communicationLogDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
-                        <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6':'7'}. Communication Log</div>
+                        <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6':commIndex}. Communication Log</div>
                         <div class="widget-content-wrapper flex-fill circle-percentage text-right">
                             <div class="widget-content-left">
                                 <div class="progress-circle-wrapper">
@@ -236,7 +246,7 @@ function profileSectionTabs(){
             }
             <li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
                 <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
-                    <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" || USER_ROLE == "STUDENT" ? '6':'8'}. Student School Email Account</div>
+                    <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6':emailIndex}. Student School Email Account</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
                         <div class="widget-content-left">
                             <div class="progress-circle-wrapper">
@@ -2560,7 +2570,7 @@ function communicationLogInformation(data){
                             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
                                 <i class="fa fa-comments font-12"></i>    
                             </span>
-                            <span>${USER_ROLE == "STUDENT" ? '6':'7'}. Communication Log</span>
+                            <span>${USER_ROLE == "STUDENT" ? '6':(SHOW_RESERVE_SEAT_SECTION ? '7':'6')}. Communication Log</span>
                         </h5>
                     </div>`
                     +getAddCommunicationLogForm()
@@ -2706,7 +2716,7 @@ function studentEmailInformation(data){
                             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
                                 <i class="fa fa-envelope font-12"></i>
                             </span>
-                            <span>${USER_ROLE == "STUDENT" ? '6':'8'}. Student School Email Account</span>
+                            <span>${USER_ROLE == "STUDENT" ? '6':(SHOW_RESERVE_SEAT_SECTION ? '8':'7')}. Student School Email Account</span>
                         </h5>
                         <div class="d-flex align-items-center ml-auto">
                             ${actionButtonHtml}
