@@ -2657,6 +2657,127 @@ function getLeadEnrollmentHoldPopup() {
 var itiHoldPhone;
 var itiHoldAltPhone;
 
+function destroyHoldIntlInstance(inputEl, instanceRef) {
+  if (instanceRef && typeof instanceRef.destroy === "function") {
+    try {
+      instanceRef.destroy();
+    } catch (e) {}
+  }
+
+  if (
+    inputEl &&
+    window.intlTelInputGlobals &&
+    typeof window.intlTelInputGlobals.getInstance === "function"
+  ) {
+    try {
+      var liveInstance = window.intlTelInputGlobals.getInstance(inputEl);
+      if (liveInstance && typeof liveInstance.destroy === "function") {
+        liveInstance.destroy();
+      }
+    } catch (e) {}
+  }
+}
+
+function rebuildHoldPhoneInput(selector) {
+  var $oldInput = $(selector);
+  if (!$oldInput.length) {
+    return null;
+  }
+
+  destroyHoldIntlInstance($oldInput[0], null);
+  var $freshInput = $oldInput.clone(false);
+  $oldInput.replaceWith($freshInput);
+  return $freshInput[0];
+}
+
+function getHoldPhoneLocalValue(phoneValue, dialCode) {
+  var rawValue = $.trim(phoneValue || "");
+  if (!rawValue) {
+    return "";
+  }
+
+  var digitsOnly = rawValue.replace(/\D/g, "");
+  var cleanDialCode = (dialCode || "").replace(/\D/g, "");
+  if (
+    cleanDialCode &&
+    digitsOnly.indexOf(cleanDialCode) === 0 &&
+    digitsOnly.length > cleanDialCode.length + 4
+  ) {
+    digitsOnly = digitsOnly.substring(cleanDialCode.length);
+  }
+
+  return digitsOnly || rawValue;
+}
+
+function syncHoldPhoneInputPadding(inputEl) {
+  if (!inputEl) {
+    return;
+  }
+
+  var $input = $(inputEl);
+  var $iti = $input.closest(".iti");
+  var $selectedFlag = $iti.find(".iti__selected-flag");
+  if (!$iti.length || !$selectedFlag.length) {
+    return;
+  }
+
+  var selectedFlagWidth = $selectedFlag.outerWidth();
+  if (!selectedFlagWidth || selectedFlagWidth < 40) {
+    selectedFlagWidth = 74;
+  }
+
+  $input.css({
+    paddingLeft: (Math.ceil(selectedFlagWidth) + 6) + "px",
+    width: "100%",
+    maxWidth: "100%",
+    boxSizing: "border-box"
+  });
+}
+
+function initHoldPhoneField(selector, hiddenIsoSelector, hiddenDialSelector, countryIso, phoneValue) {
+  var inputEl = rebuildHoldPhoneInput(selector);
+  if (!inputEl) {
+    return null;
+  }
+
+  var safeCountryIso = (countryIso || "us").toLowerCase();
+  var itiInstance = window.intlTelInput(inputEl, {
+    separateDialCode: true
+  });
+  itiInstance.setCountry(safeCountryIso);
+
+  var selectedCountryData = itiInstance.getSelectedCountryData() || {};
+  var localPhoneValue = getHoldPhoneLocalValue(phoneValue, selectedCountryData.dialCode || "");
+  $(inputEl).val(localPhoneValue);
+
+  $(hiddenIsoSelector).val(selectedCountryData.iso2 || safeCountryIso);
+  $(hiddenDialSelector).val(selectedCountryData.dialCode || "");
+  syncHoldPhoneInputPadding(inputEl);
+
+  $(inputEl)
+    .off("countrychange.holdEnroll")
+    .on("countrychange.holdEnroll", function () {
+      var latestCountryData = itiInstance.getSelectedCountryData() || {};
+      $(hiddenIsoSelector).val(latestCountryData.iso2 || "");
+      $(hiddenDialSelector).val(latestCountryData.dialCode || "");
+      $(inputEl).val("");
+      syncHoldPhoneInputPadding(inputEl);
+    });
+
+  return itiInstance;
+}
+
+function resetHoldPhoneFields() {
+  var phoneEl = document.querySelector("#holdEnrollPhone");
+  var altPhoneEl = document.querySelector("#holdEnrollAltPhone");
+
+  destroyHoldIntlInstance(phoneEl, itiHoldPhone);
+  destroyHoldIntlInstance(altPhoneEl, itiHoldAltPhone);
+
+  itiHoldPhone = null;
+  itiHoldAltPhone = null;
+}
+
 function getHoldEnrollmentDateRange(lockHours) {
   var hours = parseInt(lockHours, 10);
   if (isNaN(hours) || hours <= 0) {
@@ -2740,78 +2861,20 @@ function openLeadEnrollmentHoldPopup(lead) {
   // Pre-fill email
   $("#holdEnrollEmail").val(lead.email || '');
   $("#holdEnrollAltEmail").val(lead.emailAlt || '');
-
-  // Pre-fill phone number
-  $("#holdEnrollPhone").val(lead.phone || '');
-  $("#holdEnrollAltPhone").val(lead.phoneNoAlter || '');
-
-  function destroyIntlInstance(inputEl, instanceRef) {
-    if (instanceRef && typeof instanceRef.destroy === "function") {
-      try {
-        instanceRef.destroy();
-      } catch (e) {}
-    }
-    if (
-      inputEl &&
-      window.intlTelInputGlobals &&
-      typeof window.intlTelInputGlobals.getInstance === "function"
-    ) {
-      try {
-        var liveInstance = window.intlTelInputGlobals.getInstance(inputEl);
-        if (liveInstance && typeof liveInstance.destroy === "function") {
-          liveInstance.destroy();
-        }
-      } catch (e) {}
-    }
-  }
-
-  function clearIntlInputInlinePadding(inputEl) {
-    if (!inputEl) {
-      return;
-    }
-    inputEl.style.paddingLeft = "";
-    if (!$.trim(inputEl.getAttribute("style") || "")) {
-      inputEl.removeAttribute("style");
-    }
-  }
-
-  // Init intlTelInput for phone
-  var phoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollPhone");
-  destroyIntlInstance(phoneEl, itiHoldPhone);
-  itiHoldPhone = window.intlTelInput(phoneEl, {
-    separateDialCode: true,
-  });
-  itiHoldPhone.setCountry(lead.isdCodeIso || 'us');
-  clearIntlInputInlinePadding(phoneEl);
-  $(phoneEl).off('countrychange.holdEnroll').on('countrychange.holdEnroll', function() {
-    $('#holdEnrollIsdCodeIso').val(itiHoldPhone.getSelectedCountryData().iso2);
-    $('#holdEnrollIsdCode').val(itiHoldPhone.getSelectedCountryData().dialCode);
-    clearIntlInputInlinePadding(phoneEl);
-  });
-  $('#holdEnrollIsdCodeIso').val(itiHoldPhone.getSelectedCountryData().iso2);
-  $('#holdEnrollIsdCode').val(itiHoldPhone.getSelectedCountryData().dialCode);
-  setTimeout(function() {
-    clearIntlInputInlinePadding(phoneEl);
-  }, 0);
-
-  // Init intlTelInput for alt phone
-  var altPhoneEl = document.querySelector("#leadEnrollmentHoldPopupForm #holdEnrollAltPhone");
-  destroyIntlInstance(altPhoneEl, itiHoldAltPhone);
-  itiHoldAltPhone = window.intlTelInput(altPhoneEl, {
-    separateDialCode: true,
-  });
-  itiHoldAltPhone.setCountry(lead.isdCodeAlterIso || 'us');
-  clearIntlInputInlinePadding(altPhoneEl);
-  $(altPhoneEl).off('countrychange.holdEnroll').on('countrychange.holdEnroll', function() {
-    $('#holdEnrollAltIsdCodeIso').val(itiHoldAltPhone.getSelectedCountryData().iso2);
-    $('#holdEnrollAltIsdCode').val(itiHoldAltPhone.getSelectedCountryData().dialCode);
-    clearIntlInputInlinePadding(altPhoneEl);
-  });
-  $('#holdEnrollAltIsdCodeIso').val(itiHoldAltPhone.getSelectedCountryData().iso2);
-  $('#holdEnrollAltIsdCode').val(itiHoldAltPhone.getSelectedCountryData().dialCode);
-  setTimeout(function() {
-    clearIntlInputInlinePadding(altPhoneEl);
-  }, 0);
+  itiHoldPhone = initHoldPhoneField(
+    "#holdEnrollPhone",
+    "#holdEnrollIsdCodeIso",
+    "#holdEnrollIsdCode",
+    lead.isdCodeIso,
+    lead.phone
+  );
+  itiHoldAltPhone = initHoldPhoneField(
+    "#holdEnrollAltPhone",
+    "#holdEnrollAltIsdCodeIso",
+    "#holdEnrollAltIsdCode",
+    lead.isdCodeAlterIso,
+    lead.phoneNoAlter
+  );
 
   var $bestTimeDate = $("#holdEnrollBestTimeDate");
   try {
@@ -2839,10 +2902,16 @@ function openLeadEnrollmentHoldPopup(lead) {
   // Show modal
   $("#leadEnrollmentHoldPopupForm").modal({ backdrop: 'static', keyboard: false });
   $("#leadEnrollmentHoldPopupForm")
-    .off("shown.bs.modal.holdEnrollPaddingFix")
-    .on("shown.bs.modal.holdEnrollPaddingFix", function () {
-      clearIntlInputInlinePadding(phoneEl);
-      clearIntlInputInlinePadding(altPhoneEl);
+    .off("shown.bs.modal.holdEnrollPhoneLayout")
+    .on("shown.bs.modal.holdEnrollPhoneLayout", function () {
+      window.requestAnimationFrame(function () {
+        syncHoldPhoneInputPadding(document.querySelector("#holdEnrollPhone"));
+        syncHoldPhoneInputPadding(document.querySelector("#holdEnrollAltPhone"));
+      });
+    })
+    .off("hidden.bs.modal.holdEnrollPhoneReset")
+    .on("hidden.bs.modal.holdEnrollPhoneReset", function () {
+      resetHoldPhoneFields();
     });
 
   // Fetch existing hold data for this lead

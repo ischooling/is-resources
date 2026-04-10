@@ -776,11 +776,11 @@ function formatLeadHoldCountdown(totalSeconds) {
   var seconds = totalSeconds % 60;
   var parts = [];
   if (days > 0) {
-    parts.push(days + (days === 1 ? " day" : " days"));
+    parts.push(days + (days === 1 ? " Day" : " Days"));
   }
-  parts.push(hours + " hrs");
-  parts.push(minutes + " mins");
-  parts.push(seconds + " secs");
+  parts.push(hours + " Hrs");
+  parts.push(minutes + " Mins");
+  parts.push(seconds + " Secs");
   return parts.join(" ");
 }
 
@@ -894,13 +894,13 @@ function renderActiveHoldBanner(holdData, activeHold, timerOnly) {
     details = ''
       + '<div class="hold-enrollment-timer-shell text-center">'
       +   '<div class="hold-enrollment-timer-badge">Enrollment Locked</div>'
-      +   '<div class="hold-enrollment-timer-title">Seat Reserved Successfully</div>'
+      +   '<div class="hold-enrollment-timer-title">Enrollment Reserved Successfully</div>'
       +   '<div class="hold-enrollment-timer-card">'
       +     '<div class="hold-enrollment-timer-label">Auto Expired in</div>'
       +     '<div id="' + timerId + '" class="hold-enrollment-timer-value text-success"></div>'
       +   '</div>'
       +   '<div class="hold-enrollment-meta-grid">'
-      +     '<div class="hold-enrollment-meta-card"><span>Holding For</span><strong>' + lockHours + ' hrs</strong></div>'
+      +     '<div class="hold-enrollment-meta-card"><span>Holding For</span><strong>' + lockHours + ' Hrs</strong></div>'
       +     '<div class="hold-enrollment-meta-card"><span>Best time to connect</span><strong>' + (bestTimeDisplay || 'Not set') + '</strong></div>'
       +     '<div class="hold-enrollment-meta-card"><span>Expiry Date</span><strong>' + expiryDisplay + '</strong></div>'
       +   '</div>'
@@ -908,7 +908,7 @@ function renderActiveHoldBanner(holdData, activeHold, timerOnly) {
   } else {
     details = ''
       + '<div class="hold-enrollment-meta-grid" style="margin-top:0;">'
-      +   '<div class="hold-enrollment-meta-card"><span>Holding For</span><strong>' + lockHours + ' hrs</strong></div>'
+      +   '<div class="hold-enrollment-meta-card"><span>Holding For</span><strong>' + lockHours + ' Hrs</strong></div>'
       +   '<div class="hold-enrollment-meta-card"><span>Holding Date</span><strong>' + holdDateDisplay + '</strong></div>'
       +   '<div class="hold-enrollment-meta-card"><span>Expiry Date</span><strong>' + expiryDisplay + '</strong></div>'
       + '</div>'
@@ -936,7 +936,7 @@ function renderLeadHoldIndicator(leadId, holdData) {
     + '<div class="mt-2 font-12 hold-enrollment-panel hold-enrollment-panel-' + leadId + '" style="background:#f7fbff;border:1px solid #d7e8fb;border-radius:12px;padding:10px 12px;">'
     +   '<div class="d-flex mb-2" style="gap:10px;">'
     +     '<div style="width:190px;min-width:190px;">Hold enrollment:</div>'
-    +     '<div class="font-weight-bold">' + lockHours + ' hrs</div>'
+    +     '<div class="font-weight-bold">' + lockHours + ' Hrs</div>'
     +   '</div>'
     +   '<div class="d-flex align-items-center mb-2" style="gap:10px;">'
     +     '<div style="width:190px;min-width:190px;">Auto Expired in:</div>'
