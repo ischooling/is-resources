@@ -316,7 +316,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 								+'</tr>'
 							+'</thead>'
 							+'<tbody class="lead-table-css">'
-								+'<tr class="">'
+								+(item.leadStatus === 'Red Flag' ? '<tr class=" red-flag-lead" style="pointer-events:none;">' : '<tr class="">')
 									+'<td style="border-top-width:5px;border-top-style:solid;border-top-color:'+item.bgColor+'" class="rounded-bottom-left-10"></td>'
 									+'<td style="border-top-width:5px;border-top-style:solid;border-top-color:'+item.bgColor+'" class="vertical-align-top">'
 										+''+item.name+''
@@ -523,7 +523,8 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 													+'<option value="Demo Confirmed">Demo Confirmed</option>'
 													+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
 													+'<option value="Not Interested">Not Interested</option>'
-													+'<option value="Positive to enrollment">Positive to enrollment</option>';
+													+'<option value="Positive to enrollment">Positive to enrollment</option>'
+													+'<option value="Red Flag">Red Flag</option>';
 										}
 										html +='</select>'
 									+'</div>'

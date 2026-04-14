@@ -5437,6 +5437,12 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				discardPermission = $("#discardPermission").val();
 				//advanceLeadSearchStudent('advanceLeadNewSearchForm',roleModuleId, 'advance-search','list' ,data['extra'],'new', true,'', leadType);
 				getLeadStatusLog(data['leadno'], callFrom, discardPermission);
+				var $leadRow = $('.lead-row-'+leadId).closest('tr');
+				if (leadStatus === 'Red Flag') {
+					$leadRow.addClass('red-flag-lead').css('pointer-events', 'none');
+				} else {
+					$leadRow.removeClass('red-flag-lead').css('pointer-events', '');
+				}
 			}
 			return false;
 		}

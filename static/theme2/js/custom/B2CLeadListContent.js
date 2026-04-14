@@ -1438,7 +1438,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 			+'<tbody class="lead-table-css" style="font-size:11px">'
 			+'<input type="hidden" id="demoMovedTrue" />'
 			+'<input type="hidden" id="blankDemo" />'
-				+'<tr class="td-border-design ">'
+				+(leads.leadStatus === 'Red Flag' ? '<tr class="td-border-design red-flag-lead" style="pointer-events:none;">' : '<tr class="td-border-design">')
 					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'">'
 						+'<table class="w-100">'
 							+'<tbody>'
@@ -2131,7 +2131,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							}	
 						html+='</ul>'
 					+'</td>'
-						+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;color:#027FFF;">';
+						+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;color:#027FFF;'+(leads.leadStatus === 'Red Flag' ? 'pointer-events:auto;opacity:1;' : '')+'">';
 					if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
 						if(leads.leadStatus=='Unassigned'){
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" ><i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';

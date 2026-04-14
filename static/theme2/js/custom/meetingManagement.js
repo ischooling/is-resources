@@ -13,14 +13,27 @@ var hostsData = getHostsOnly();
 const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_SEEING_ALL_MEETINGS');
 var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
 const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
+const specialMeetingAccessUser = getSpecialMeetingAccessUser();
+const permittedMeetingTypeIds = Array.isArray(specialMeetingAccessUser?.permittedMeetingTypeIds)
+  ? specialMeetingAccessUser.permittedMeetingTypeIds.map(id => id.toString())
+  : [];
+const isSpecialMeetingAccessUser = permittedMeetingTypeIds.length > 0;
+const settingResponse = getSettingsByTypeAndKey('CONFIGURATION', 'SHOW_MEETING_ACCESS_BUTTON');
+let SHOW_MEETING_ACCESS_BUTTON = false;
+if (settingResponse) {
+  const parsed = JSON.parse(settingResponse);
+  SHOW_MEETING_ACCESS_BUTTON = parsed?.data?.metaValue === 'true';
+}
+const canShowManageAccessBtn = USER_ROLE === 'DIRECTOR' && SHOW_MEETING_ACCESS_BUTTON;
 var selectedAttendees = [];
 var cachedUserList = [];
 var recordingTitle = null;
+var specialMeetingAccessModalData = null;
+var specialMeetingTypeCatalog = [];
 var timeOptions = [];
 var getRecordingLimit = getSettingsByTypeAndKey("CONFIGURATION", "SHOW_RECORDINGS_LIMIT");
 getRecordingLimit = JSON.parse(getRecordingLimit);
 var recordingLimit = getRecordingLimit.data.metaValue;
-const isUserAllowedRecordings = fetchUserIdToShowRecordings();
 for (let hour = 0; hour < 24; hour++) {
   for (let minute = 0; minute < 60; minute += 5) {
     let timeString = hour.toString().padStart(2, "0") + minute.toString().padStart(2, "0");
@@ -161,9 +174,30 @@ function fetchUserIdToShowRecordings() {
   try {
     const val = getSettingsByTypeAndKey('CONFIGURATION','ALL_RECORDINGS_ACCESS_USERS');
     const allowedUserIdRecordings = JSON.parse(val).data.metaValue.split(",").map(id => id.trim());
-    return allowedUserIdRecordings.includes(USER_ID.toString());
+    return allowedUserIdRecordings.includes(USER_ID.toString()) || isSpecialMeetingAccessUser;
   } catch (error) {
     console.error("Error retrieving settings:", error);
+  }
+}
+
+function getSpecialMeetingAccessUser() {
+  try {
+    const val = getSettingsByTypeAndKey('CONFIGURATION', 'SPECIAL_MEETING_ACCESS_USERS');
+    const parsedValue = JSON.parse(val);
+    const metaValue = parsedValue?.data?.metaValue;
+    if (!metaValue) {
+      return null;
+    }
+
+    const specialUsers = typeof metaValue === 'string' ? JSON.parse(metaValue) : metaValue;
+    if (!Array.isArray(specialUsers)) {
+      return null;
+    }
+
+    return specialUsers.find(user => user?.userId?.toString() === USER_ID.toString()) || null;
+  } catch (error) {
+    console.error("Error retrieving special meeting access users:", error);
+    return null;
   }
 }
 
@@ -171,6 +205,11 @@ async function fetchUserIdToShowAllMeeting() {
   customLoader(true);
   try {
     if (!isUserAllowed) {
+      $(".manageMeetingAccessBtn").hide();
+    } else {
+      $(".manageMeetingAccessBtn").show();
+    }
+    if (!isUserAllowed && !isSpecialMeetingAccessUser) {
       $("<style>")
         .prop("type", "text/css")
         .html(`
@@ -214,6 +253,14 @@ async function fetchUserIdToShowAllMeeting() {
         allowClear: true,
         multiple: true
       });
+
+      if (isSpecialMeetingAccessUser && !isUserAllowed) {
+        var hostDetails = getHostDetails(USER_ID);
+        getHostList(hostDetails);
+        getAllTimeZone(USER_TIMEZONE);
+        $("#host").attr("disabled", true);
+        $("#timezone").attr("disabled", true);
+      }
     }
   } catch (error) {
     console.error("Error retrieving settings:", error);
@@ -502,13 +549,29 @@ async function fetchMeetings(filterHostUserId) {
             <button class="tab-button p-2" id="recurringTab" onclick="showTab('recurringMeetings')">Recurring Meetings</button>
             <div class="active-line"></div>
           </div>
-          <button onclick="showMeetingForm()" class="btn btn-primary btn-lg  scheduleAButtonRight ml-auto mb-2 order-sm-1 order-0" id="scheduleMeetingBtn">Schedule a New Meeting</button>
+          <div class="ml-auto mb-2 order-sm-1 order-0 d-flex flex-wrap" style="gap: 8px;">
+            ${canShowManageAccessBtn ? `
+              <button onclick="openSpecialMeetingAccessModal()" class="btn btn-outline-primary btn-lg manageMeetingAccessBtn">
+                Manage Meeting Access
+              </button>
+            ` : ``}
+            <button onclick="showMeetingForm()" class="btn btn-primary btn-lg scheduleAButtonRight" id="scheduleMeetingBtn">
+              Schedule a New Meeting
+            </button>
+          </div>
         </div>
         ${res.data.meetingsTotalPages == 0 && res.data.recurringMeetingsTotalPages == 0 ?
           `
             <div class="d-flex flex-column justify-content-center align-items-center" style="height: 250px;">
               <h1 style="font-weight: bold;">Welcome To IS Meetings!</h1>
-              <button onclick="showMeetingForm()" class="btn btn-primary btn-lg " id="scheduleMeetingBtn">Schedule a New Meeting</button>
+              ${canShowManageAccessBtn ? `
+                <button onclick="openSpecialMeetingAccessModal()" class="btn btn-outline-primary btn-lg mb-2 manageMeetingAccessBtn">
+                  Manage Meeting Access
+                </button>
+              ` : ``}
+              <button onclick="showMeetingForm()" class="btn btn-primary btn-lg" id="scheduleMeetingBtn">
+                Schedule a New Meeting
+              </button>
             </div>
           `
           :
@@ -719,7 +782,7 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
             <button onclick="startLensUrl('${meeting.meetingId}', '${meetingTitle}', '${meetingStartDate}', '${meetingStartTime}')" class="btn btn-primary  btnRecur tdBtns">Start</button>
             <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')" class="btn btn-sm btnRecur tdBtns text-danger"><i class="fa fa-trash fa-2x"></i></button>
             <button onclick="copyJoinUrl('${meeting.meetingId}')" class="btn btn-sm btnRecur tdBtns text-dark" title="Copy invite"><i class="fa fa-clone fa-2x"></i></button>
-            ${meeting.recordingsCount > 0 ?
+            ${meeting.canAccessRecording && meeting.recordingsCount > 0 ?
             `<button onclick="showRecurringMeetingRecordings('${meeting.meetingId}','${meetingTitle}','${meeting.hostName}')" class="btn btn-sm btn-outline-primary " title="Play Recording"><i class="fa fa-video"></i></button>`
             :
             ``
@@ -760,8 +823,8 @@ function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPag
             <button onclick="showWarningMessage('Are you sure you want to delete this meeting?', 'deleteMeeting(${meeting.meetingId})')"  class="btn btn-sm text-danger" ${disableButtonsOnEndTime ? "disabled" : ""}><i class="fa fa-trash fa-2x"></i></button>
             <button onclick="copyJoinUrl('${meeting.meetingId}')" class="btn btn-sm text-dark" title="Copy invite" ${disableButtonsOnEndTime ? "disabled" : ""}><i class="fa fa-clone fa-2x"></i></button>
             ${
-              (isUserAllowedRecordings && meeting.recordingsCount > 0) || 
-              (!isUserAllowedRecordings && meeting.recordingsCount > 0 && new Date(meetingStartDate).setHours(0,0,0,0) >= new Date(pastDateLimit).setHours(0,0,0,0)) 
+              (meeting.canAccessRecording && meeting.recordingsCount > 0) || 
+              (!meeting.canAccessRecording && meeting.recordingsCount > 0 && new Date(meetingStartDate).setHours(0,0,0,0) >= new Date(pastDateLimit).setHours(0,0,0,0)) 
               ?
               `<button onclick="openRecordingModal('${meeting.meetingId}', 'GENERAL_MEETINGS', '', '${meetingTitle}', '${meeting.startDateTime?.split(" ")[0]}', '${meeting.timeRange.split('-')[0]}', '${meeting.hostName}', '', '', 'MEETING_MANAGEMENT')" 
                     style="border: 0; background: transparent; color: #027FFF !important; padding: 5px; box-shadow: 0px 0px transparent;" 
@@ -1723,6 +1786,9 @@ function getGeneralMeetingTypeList(id){
     url: BASE_URL + CONTEXT_PATH + "api/v1/get-meeting-types",
     success: function (response) {
       var list = response.data.meetingTypes;
+      if (id === '#filterGeneralMeetingType' && isSpecialMeetingAccessUser) {
+        list = list.filter(type => permittedMeetingTypeIds.includes(type.id.toString()));
+      }
       var dropdown = $(id);
       dropdown.empty();
       dropdown.append('<option value="">Select General Meeting Type</option>');
@@ -1735,6 +1801,252 @@ function getGeneralMeetingTypeList(id){
         placeholder: "Select General Meeting Type",
         theme:"bootstrap4"
       });
+    }
+  });
+}
+
+function openSpecialMeetingAccessModal() {
+  customLoader(true);
+  $.ajax({
+    type: "GET",
+    contentType: APPLICATION_JSON_VALUE,
+    url: BASE_URL + CONTEXT_PATH + `api/v1/get-special-meeting-access-settings?userId=${USER_ID}`,
+    success: function (response) {
+      customLoader(false);
+      let res = response;
+      if (typeof response === "string") {
+        const trimmed = response.trim();
+        if (trimmed.startsWith("<")) {
+          showMessageTheme2(0, "Failed to fetch special meeting access settings.");
+          return;
+        }
+        try {
+          res = JSON.parse(response);
+        } catch (e) {
+          showMessageTheme2(0, "Failed to parse special meeting access settings.");
+          return;
+        }
+      }
+      if (res.status !== "success") {
+        showMessageTheme2(0, res.message || "Failed to fetch special meeting access settings.");
+        return;
+      }
+      specialMeetingAccessModalData = res.data?.accessUsers || [];
+      specialMeetingTypeCatalog = res.data?.meetingTypes || [];
+      renderSpecialMeetingAccessModal();
+    },
+    error: function (xhr) {
+      customLoader(false);
+      console.error("get-special-meeting-access-settings failed:", xhr?.status, xhr?.responseText);
+      showMessageTheme2(0, "Failed to fetch special meeting access settings.");
+    }
+  });
+}
+
+function renderSpecialMeetingAccessModal() {
+  $("#specialMeetingAccessOverlay").remove();
+
+  const modalHtml = `
+    <div id="specialMeetingAccessOverlay" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 12px;">
+      <div id="specialMeetingAccessModal" style="width: min(1000px, 98vw); max-height: 95vh; overflow: hidden; background: #fff; border-radius: 10px; display: flex; flex-direction: column;">
+        <div style="padding: 12px 16px; background: #027FFF; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="margin: 0; font-size: 18px; font-weight: 700;">Manage Meeting Access</h4>
+          <button type="button" onclick="closeSpecialMeetingAccessModal()" style="border: 0; background: transparent; color: #fff; font-size: 22px; line-height: 1; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 16px; overflow: auto;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <p class="m-0" style="font-size: 14px; color: #4b5563;">Manage user wise allowed meeting types from UI.</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSpecialMeetingAccessRow()">+ Add User</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" style="min-width: 760px;">
+              <thead style="background-color: #f3f4f6;">
+                <tr>
+                  <th style="width: 30%;">User (Email)</th>
+                  <th style="width: 50%;">Meeting Types</th>
+                  <th style="width: 20%;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="specialMeetingAccessRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="padding: 12px 16px; border-top: 1px solid #e5e7eb; display: flex; justify-content: end; gap: 8px;">
+          <button type="button" class="btn btn-danger" onclick="closeSpecialMeetingAccessModal()">Cancel</button>
+          <button type="button" class="btn btn-success" onclick="saveSpecialMeetingAccessSettings()">Save</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  $("body").append(modalHtml);
+
+  if (Array.isArray(specialMeetingAccessModalData) && specialMeetingAccessModalData.length > 0) {
+    specialMeetingAccessModalData.forEach((row) => {
+      appendSpecialMeetingAccessRow({
+        userId: row.userId,
+        userName: row.userName || "",
+        email: row.email || "",
+        permittedMeetingTypeIds: row.permittedMeetingTypeIds || [],
+        isNew: false
+      });
+    });
+  } else {
+    addSpecialMeetingAccessRow();
+  }
+}
+
+function closeSpecialMeetingAccessModal() {
+  $("#specialMeetingAccessOverlay").remove();
+}
+
+function getSpecialMeetingTypeOptions(selectedIds) {
+  const selectedSet = new Set((selectedIds || []).map((id) => id.toString()));
+  return (specialMeetingTypeCatalog || [])
+    .map((type) => {
+      const selected = selectedSet.has(type.id.toString()) ? "selected" : "";
+      return `<option value="${type.id}" ${selected}>${type.type}</option>`;
+    })
+    .join("");
+}
+
+function appendSpecialMeetingAccessRow(rowData) {
+  const uniqueRowId = `special-row-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const isNew = rowData.isNew === true;
+  const userNameText = rowData.userName && rowData.userName.trim() !== "" ? rowData.userName : (isNew ? "Name will resolve on save" : "N/A");
+  const userIdValue = rowData.userId ? rowData.userId : "";
+  const emailValue = rowData.email ? rowData.email : "";
+  const options = getSpecialMeetingTypeOptions(rowData.permittedMeetingTypeIds || []);
+
+  const rowHtml = `
+    <tr class="specialAccessRow" data-is-new="${isNew}" id="${uniqueRowId}">
+      <td>
+        <div class="d-flex flex-column">
+          <input type="hidden" class="specialAccessUserId" value="${userIdValue}" />
+          <input type="text" class="form-control specialAccessEmail mb-1" placeholder="Enter user email" value="${emailValue}" ${isNew ? "" : "readonly"} />
+          <span class="specialAccessUserName" style="font-size: 12px; color: #6b7280;">${userNameText}</span>
+        </div>
+      </td>
+      <td>
+        <select class="form-control specialMeetingTypeSelect" multiple ${isNew ? "" : "disabled"}>
+          ${options}
+        </select>
+      </td>
+      <td>
+        <div class="d-flex" style="gap: 6px;">
+          ${isNew ? "" : `<button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleSpecialMeetingAccessEdit('${uniqueRowId}', this)">Edit</button>`}
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSpecialMeetingAccessRow('${uniqueRowId}')">Remove</button>
+        </div>
+      </td>
+    </tr>
+  `;
+
+  $("#specialMeetingAccessRows").append(rowHtml);
+  $(`#${uniqueRowId} .specialMeetingTypeSelect`).select2({
+    placeholder: "Select meeting type(s)",
+    theme: "bootstrap4",
+    width: "100%",
+    dropdownParent: $("#specialMeetingAccessModal")
+  });
+}
+
+function addSpecialMeetingAccessRow() {
+  appendSpecialMeetingAccessRow({
+    userId: "",
+    email: "",
+    userName: "",
+    permittedMeetingTypeIds: [],
+    isNew: true
+  });
+}
+
+function removeSpecialMeetingAccessRow(rowId) {
+  const $row = $(`#${rowId}`);
+  if ($row.length) {
+    $row.find(".specialMeetingTypeSelect").select2("destroy");
+    $row.remove();
+  }
+}
+
+function toggleSpecialMeetingAccessEdit(rowId, buttonRef) {
+  const $row = $(`#${rowId}`);
+  const $select = $row.find(".specialMeetingTypeSelect");
+  const isDisabled = $select.prop("disabled");
+  $select.prop("disabled", !isDisabled);
+  if (buttonRef) {
+    $(buttonRef).text(isDisabled ? "Done" : "Edit");
+  }
+}
+
+function saveSpecialMeetingAccessSettings() {
+  const accessUsers = [];
+  let invalidUserRow = false;
+
+  $("#specialMeetingAccessRows .specialAccessRow").each(function () {
+    const $row = $(this);
+    const userIdRaw = ($row.find(".specialAccessUserId").val() || "").toString().trim();
+    const emailRaw = ($row.find(".specialAccessEmail").val() || "").toString().trim();
+    const selectedMeetingTypeIds = ($row.find(".specialMeetingTypeSelect").val() || []).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id));
+    const isNew = $row.attr("data-is-new") === "true";
+
+    if (emailRaw === "") {
+      if (selectedMeetingTypeIds.length > 0) {
+        invalidUserRow = true;
+      }
+      return;
+    }
+
+    let userId = 0;
+    if (userIdRaw !== "") {
+      userId = parseInt(userIdRaw, 10) || 0;
+    }
+    const isValidEmail = emailRaw !== "" ? validateEmail(emailRaw) : false;
+    if (!isValidEmail) {
+      invalidUserRow = true;
+      return;
+    }
+
+    accessUsers.push({
+      userId: userId,
+      email: emailRaw,
+      permittedMeetingTypeIds: selectedMeetingTypeIds,
+      isNew: isNew
+    });
+  });
+
+  if (invalidUserRow) {
+    showMessageTheme2(0, "Please enter valid user email for all configured rows.");
+    return;
+  }
+
+  if (accessUsers.length === 0) {
+    showMessageTheme2(0, "Please add at least one user access row.");
+    return;
+  }
+
+  customLoader(true);
+  const requestBody = {
+    userId: USER_ID,
+    accessUsers: accessUsers
+  };
+  $.ajax({
+    url: BASE_URL + CONTEXT_PATH + "api/v1/save-special-meeting-access-settings",
+    method: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    data: JSON.stringify(requestBody),
+    success: function (response) {
+      customLoader(false);
+      const res = typeof response === "string" ? JSON.parse(response) : response;
+      if (res.status === "success") {
+        showMessageTheme2(1, "Special meeting access updated successfully.");
+        closeSpecialMeetingAccessModal();
+      } else {
+        showMessageTheme2(0, res.message || "Failed to update special meeting access.");
+      }
+    },
+    error: function () {
+      customLoader(false);
+      showMessageTheme2(0, "Failed to update special meeting access.");
     }
   });
 }

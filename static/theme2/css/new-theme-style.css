@@ -33017,6 +33017,9 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 	.td-border-design > td:first-child{/*border-left:2px solid !important*/}
 	.td-border-design > td:last-child{/*border-right:2px solid !important*/}
 	.lead-table-css tr:last-child > td:first-child{border-bottom-left-radius:10px}
+	.red-flag-lead > td{border-top:3px solid #cc0000 !important;border-bottom:3px solid #cc0000 !important;background-color:#f5f5f5 !important;color:rgba(0,0,0,0.35) !important;}
+	.red-flag-lead > td:first-child{border-left:3px solid #cc0000 !important;}
+	.red-flag-lead > td:last-child{border-right:3px solid #cc0000 !important;}
 
 	
 

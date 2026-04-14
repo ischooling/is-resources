@@ -328,9 +328,15 @@ async function proceedUpdateMeetingStatus(meetingId, leadId) {
                     $('#meetingStatus_'+meetingId).html($('#scheduleEventMeetingStatus #status option:selected').text());
                     $('#meetingComments_'+meetingId).html($('#scheduleEventMeetingStatus #remarks').val());
                     $('#confirmeUpdateSystemTraningModal').modal('hide');
-                    $('#updateSystemTraningModal').modal('hide');					
+                    $('#updateSystemTraningModal').modal('hide');
                     showMessageTheme2(1, data['message'],'',true);
                     customLoader(false);
+                    var $meetingRow = $('#meetingStatus_'+meetingId).closest('tr');
+                    if (status === 'Red Flag') {
+                        $meetingRow.addClass('red-flag-lead').css('pointer-events', 'none');
+                    } else {
+                        $meetingRow.removeClass('red-flag-lead').css('pointer-events', '');
+                    }
                 }
 			}
 		}
