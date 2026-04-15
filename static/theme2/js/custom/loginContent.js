@@ -214,7 +214,7 @@ function loginFormContent(userName, fromSpoof){
             <div class="input-group valid-field">
                 <span class="input-group-addon primary-bg primary-border-color" id="password-addon"> <i class="fa fa fa-lock  text-white"></i></span>
                 <input name="password" id="password" class="form-control" autocomplete="off"
-                    type="password" pattern="^[_A-z0-9@#]{1,}$" maxlength="20"  value="" describedby="describedby">
+                    type="password" maxlength="20"  value="" describedby="describedby">
                 <span class="input-group-addon" id="password-addon" style="cursor:pointer;background-color:#fff !important;border-color:#ccc !important;border-left:0px !important">
                     <i class="fa fa-eye-slash" id="icon-change" onclick="showPassWord('password', 'icon-change')"></i>
                     <!-- <span style="position: absolute;right: 15px;cursor:pointer;"><i class="fa fa-eye-slash"></i> -->
