@@ -3661,3 +3661,26 @@ function documentPreviewModal(){
 		</div>`
 	return html
 }
+
+function flaggedModalContent(data){
+	var academicYear = (data && data.message) ? data.message : '';
+	var html=
+		`<div class="modal fade" id="flaggedModal" tabindex="-1" role="dialog" aria-labelledby="flaggedModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header py-2 primary-bg text-white d-flex">
+						<h5 class="modal-title text-white" id="flaggedModalLabel">Enrollment Update</h5>
+					</div>
+					<div class="modal-body">
+						<p>Thank you for your interest in ${SCHOOL_NAME}.</p>
+						<p>Seats for the Academic Year ${academicYear} are currently full. We have saved your details, and if any seat becomes available due to a cancellation or withdrawal, we will reach out to you right away.</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary mx-auto" data-dismiss="modal" onclick="logoutConfimation(true, BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID);">Logout</button>
+					</div>
+				</div>
+			</div>
+		</div>`
+	return html;
+}
+

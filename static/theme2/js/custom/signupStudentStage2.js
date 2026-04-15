@@ -40,6 +40,15 @@ function callForSignUpParents() {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
+				} else if(data['statusCode'] == "FLAGGED"){
+					$("#flaggedModal").remove();
+					$("body").append(flaggedModalContent(data));
+					$("#flaggedModal").modal("show");
+					$(".step-3-skeleton").hide();
+					$("#signupStage3").hide();
+					$("#signupStage2").show();
+					setActiveStep(2);
+					$(".prev-btn, .next-btn").removeClass("disabled");
 				} else {
 					if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
 						window.location.reload();

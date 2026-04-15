@@ -177,6 +177,15 @@ function callForSignupStudentDetails() {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage();
+				} else if(data['statusCode'] == "FLAGGED"){
+					$("#flaggedModal").remove();
+					$("body").append(flaggedModalContent(data));
+					$("#flaggedModal").modal("show");
+					$(".step-2-skeleton").hide();
+					$("#signupStage2").hide();
+					$("#signupStage1").show();
+					setActiveStep(1);
+					$(".prev-btn, .next-btn").removeClass("disabled");
 				} else {
 					if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
 						window.location.reload();
@@ -718,3 +727,4 @@ async function getGradeByCriteria() {
 	var standardId=$('#applyStandardId').val();
 	$('#signupStage1 #applyStandardId').html(getOptions(JSON.parse(responseData.grades), standardId ));
 }
+

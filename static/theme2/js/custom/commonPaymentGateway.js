@@ -290,10 +290,20 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 		'schoolIdOfPaymentGateway' : schoolIdOfPaymentGateway,
 		'schoolId' : schoolId
 	}
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'payment-gateway/options',payload,'common');
+	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'payment-gateway/options',payload,'common');
 	if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
 		if (responseData['status'] == '3') {
 			redirectLoginPage();
+		}else if(responseData['statusCode'] == "FLAGGED"){
+			$("#flaggedModal").remove();
+			$("body").append(flaggedModalContent(responseData));
+			$("#flaggedModal").modal("show");
+			return false;
+			// $(".step-3-skeleton").hide();
+			// $("#signupStage3").hide();
+			// $("#signupStage2").show();
+			// setActiveStep(2);
+			// $(".prev-btn, .next-btn").removeClass("disabled");
 		} else {
 			showMessageTheme2(false, responseData['message']);
 		}

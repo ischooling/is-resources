@@ -285,7 +285,13 @@ async function callForUserSignUp(formId, moduleId) {
 	if (responseData['status'] == '0' || responseData['status'] == '2') {
 		if (moduleId == 'STUDENT') {
 			var learningProgram = $("#" + formId + " #learningProgram").val().trim();
-			if (learningProgram != 'SCHOLARSHIP') {
+			if(responseData['statusCode'] == 'FLAGGED'){
+				$("#flaggedModal").remove();
+				$("body").append(flaggedModalContent(responseData));
+				$("#flaggedModal").removeClass("animate__fadeOutUpBig");
+				$("#flaggedModal").addClass("animate__fadeInUpBig");
+				$(".blur-overlary").show();
+			}else if (learningProgram != 'SCHOLARSHIP') {
 				showServerMessage(false, responseData['message']);
 			}
 		}
@@ -601,4 +607,29 @@ function callSingupCommon(globalflag, showMessage, url, payload, parentUrl){
           }
       });
   });
+}
+
+function flaggedModalContent(data){
+	var academicYear = (data && data.extra) ? data.extra : '';
+	var html=
+		`<div class="emailValidatorModal animate__animated animate__fadeOutUpBig" id="flaggedModal">
+			<div class="emailValidatorModalBody info theme-border font-size-18">
+				<div class="full text-center">
+					<h1 class="bold-font font-size-22 rounded-modal-msg">Information</h1>
+				</div>
+				<div style="padding: 20px 10px; display: inline-block;">
+					<p style="font-size: 15px;">Thank you for your interest in ${SCHOOL_NAME}.<br/>Seats for the Academic Year ${academicYear} are currently full. We have saved your details, and if any seat becomes available due to a cancellation or withdrawal, we will reach out to you right away.</p>
+					<div class="confirmation-email-btn">
+						<input type="button" class="theme-bg text-white valid_yes button" style="margin: auto;" value="OK" onclick="closeFlaggedModal()">
+					</div>
+				</div>
+			</div>
+		</div>`
+	return html;
+}
+
+function closeFlaggedModal(){
+	$("#flaggedModal").removeClass("animate__fadeInUpBig");
+	$("#flaggedModal").addClass("animate__fadeOutUpBig");
+	$(".blur-overlary").hide();
 }
