@@ -3,6 +3,7 @@ var PORFILE_RESPONSE_UPDATED_DATA;
 var PROFILE_PROGRESS_REPORT_CURRENT_DAYS = null;
 var PROFILE_PROGRESS_REPORT_PENDING_DAYS = null;
 var SHOW_RESERVE_SEAT_SECTION = true;
+var SHOW_STUDENT_REGISTRATION_SECTION = false;
 async function renderStudentProfilePage(extraParam) {
     COMMUNICATION_APPEND_ROW = "";
     if ($("#profileFielddModal").length > 0) {
@@ -19,8 +20,14 @@ async function renderStudentProfilePage(extraParam) {
             var gradeId = data && data[2] ? parseInt(data[2].gradeId) : 0;
             var lp = data && data[2] && data[2].learningProgramValue ? (data[2].learningProgramValue + "").toUpperCase() : "";
             SHOW_RESERVE_SEAT_SECTION = !(gradeId === 7 && lp !== "ONE_TO_ONE_FLEX");
+            var isAdminSideUser = (USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE != "TEACHER");
+            if (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.rightToEdit === false) {
+                isAdminSideUser = false;
+            }
+            SHOW_STUDENT_REGISTRATION_SECTION = isAdminSideUser && !(lp.includes("BATCH") || lp.includes("GROUP"));
         } catch (e) {
             SHOW_RESERVE_SEAT_SECTION = true;
+            SHOW_STUDENT_REGISTRATION_SECTION = false;
         }
         console.log(data);
         if ($("#cropModal").length < 1) {
@@ -125,6 +132,7 @@ function getStudentProfilePageContent(data) {
         html += `<div class="full profile-section" id="communicationLogDIV"></div>`
     }
     html += `<div class="full profile-section" id="studentEmailDIV"></div>`
+    html += `<div class="full profile-section" id="zoomRegistrationDIV"></div>`
     // html+=communicationLogInformation(data)
     html += `
                     </div>
@@ -137,6 +145,7 @@ function getStudentProfilePageContent(data) {
 function profileSectionTabs() {
     var commIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "7" : "6";
     var emailIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "8" : "7";
+    var registrationIndex = (parseInt(emailIndex, 10) + 1).toString();
     var html =
         `<div class="full mt-3">
         <ul class="m-0 p-0">
@@ -242,7 +251,7 @@ function profileSectionTabs() {
                     </a>
                 </li>`: ``
         }
-            <li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
+            <li class="bg-white border border-top-left-rounded ${SHOW_STUDENT_REGISTRATION_SECTION ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
                 <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                     <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : emailIndex}. Student School Email Account</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -256,6 +265,22 @@ function profileSectionTabs() {
                     </div>
                 </a>
             </li>
+            ${SHOW_STUDENT_REGISTRATION_SECTION ?
+                `<li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
+                    <a href="#zoomRegistrationDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                        <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : registrationIndex}. Enable Registration</div>
+                        <div class="widget-content-wrapper flex-fill circle-percentage text-right">
+                            <div class="widget-content-left">
+                                <div class="progress-circle-wrapper">
+                                    <div class="circle-progress circle-progress-primary d-inline-block">
+                                        <small class="font-size-md text-dark"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>`
+                : ``}
             
         </ul>   
     </div>`;
@@ -2831,6 +2856,64 @@ function studentEmailInformation(data) {
 
 
 // Student School Email Information Ends Here
+
+// Student Zoom Registration Control (Admin-side only)
+function studentZoomRegistrationControl(data) {
+    if (!SHOW_STUDENT_REGISTRATION_SECTION) {
+        return "";
+    }
+
+    var commIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "7" : "6";
+    var emailIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "8" : "7";
+    var registrationIndex = (parseInt(emailIndex, 10) + 1).toString();
+
+    var enableRegistration = data && data.enableRegistration ? data.enableRegistration : "N";
+    var schoolEnableRegistration = data && data.schoolEnableRegistration ? data.schoolEnableRegistration : "N";
+
+    var isOverriddenBySchool = (schoolEnableRegistration === "Y");
+    var disableField = !(PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.rightToEdit) || isOverriddenBySchool;
+
+    var html = `
+        <div class="card mt-3 mb-4" id="zoomRegistrationCard">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-12 mb-2 d-flex align-items-center justify-content-between">
+                        <h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
+                            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                                <i class="fa fa-video-camera font-12"></i>
+                            </span>
+                            <span>${USER_ROLE == "STUDENT" ? '6' : registrationIndex}. Enable Registration</span>
+                        </h5>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                        <label for="enableRegistration" class="font-weight-semi-bold text-dark">Enable Registration (Y/N)</label>
+                        <div class="input-group mb-2 p-0">
+                            <select name="enableRegistration" id="enableRegistration" class="form-control form-control-sm group-append-hide-input"
+                                data-value="${enableRegistration}"
+                                onchange="controlEditField(this,'enableRegistration','${enableRegistration}','select','','', 7,'enableRegistration')"
+                                ${disableField ? "disabled" : ""}>
+                                <option value="N" ${enableRegistration === "N" ? "selected" : ""}>N</option>
+                                <option value="Y" ${enableRegistration === "Y" ? "selected" : ""}>Y</option>
+                            </select>
+                            <div class="input-group-append input-group-append-hide" style="display:none">
+                                <a href="javascript:void(0)" class="btn btn-sm btn-success" onClick="applyChanges('enableRegistration','enableRegistration','${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}','${PORFILE_RESPONSE_DATA.moduleId}','student','false',7);">
+                                    <i class="fa fa-check"></i>
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('enableRegistration','${enableRegistration}','select','enableRegistration')">
+                                    <i class="fa fa-times"></i>
+                                </a>
+                            </div>
+                        </div>
+                        ${isOverriddenBySchool ? `<small class="text-muted">School setting is enabled, so student-level setting is overridden.</small>` : ``}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return html;
+}
 function confirmActivateSchoolUserId() {
     activateYourSchoolEmail();
     window.open('http://outlook.office.com', '_blank');

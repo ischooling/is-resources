@@ -1050,6 +1050,7 @@ async function profileViewPageLoadEvent(data) {
     // Communication Log Start Here //
     $("#communicationLogDIV").append(communicationLogInformation());
     $("#studentEmailDIV").append(studentEmailInformation(data[6] || {}));
+    $("#zoomRegistrationDIV").append(studentZoomRegistrationControl(data[7] || {}));
     initEditor(1, 'commentEditor', 'Enter comments', false);
     // bindFileUploadNew1('1', '33',USER_ID,6);
     $("#fileuploadLog6").on("change", function () {

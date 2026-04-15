@@ -5669,10 +5669,76 @@ function callWithSession(url, isSelf) {
         goAheadGet(url,"");
       }
     } else {
-      window.open(url);
+      // For Zoom join links, prefer opening in the Zoom desktop app to avoid
+      // the web-client "Enter Meeting Info" (name change) screen.
+      openZoomJoinInAppOrFallback(url);
     }
   } else {
     redirectLoginPage();
+  }
+}
+
+function openZoomJoinInAppOrFallback(url) {
+  try {
+    if (!url || typeof url !== "string") {
+      window.open(url);
+      return;
+    }
+    var urlStr = url.trim();
+    if (urlStr.length < 1) {
+      window.open(url);
+      return;
+    }
+
+    var lower = urlStr.toLowerCase();
+    if (lower.indexOf("zoom.us") < 0) {
+      window.open(urlStr);
+      return;
+    }
+
+    var meetingId = null;
+    var m = urlStr.match(/\/wc\/(\d+)\/join/i);
+    if (m && m[1]) meetingId = m[1];
+    if (!meetingId) {
+      m = urlStr.match(/\/j\/(\d+)/i);
+      if (m && m[1]) meetingId = m[1];
+    }
+    if (!meetingId) {
+      m = urlStr.match(/\/w\/(\d+)/i);
+      if (m && m[1]) meetingId = m[1];
+    }
+
+    if (!meetingId) {
+      window.open(urlStr);
+      return;
+    }
+
+    var pwd = null;
+    var uname = null;
+    try {
+      var u = new URL(urlStr);
+      pwd = u.searchParams.get("pwd");
+      uname = u.searchParams.get("uname");
+    } catch (e) {
+      // ignore
+    }
+
+    var zoomMtg = "zoommtg://zoom.us/join?action=join&confno=" + encodeURIComponent(meetingId);
+    if (pwd) zoomMtg += "&pwd=" + encodeURIComponent(pwd);
+    if (uname) zoomMtg += "&uname=" + encodeURIComponent(uname.replace(/\+/g, " "));
+
+    // If popup is blocked, fallback to web.
+    var win = null;
+    try {
+      win = window.open(zoomMtg);
+    } catch (e) {
+      win = null;
+    }
+    if (!win) {
+      window.open(urlStr);
+    }
+  } catch (e) {
+    window.open(url);
   }
 }
 function callWithSessionWithGetAsPost(url, isSelf) {
@@ -6722,7 +6788,11 @@ function goToPageCommon(page, context) {
 			} else if (currentTabId === "recurringMeetings") {
 				currentPageRecurring = page;
 			}
-			fetchMeetings($('#filterHostUserId').val());
+			if (typeof meetingManagementMode !== 'undefined' && meetingManagementMode === "LOGS" && typeof fetchMeetingsJoinLogs === 'function') {
+				fetchMeetingsJoinLogs($('#filterHostUserId').val());
+			} else {
+				fetchMeetings($('#filterHostUserId').val());
+			}
 			break;
     case 'userApplication':
       CURRENT_PAGE_USER_APPLICATION = page;

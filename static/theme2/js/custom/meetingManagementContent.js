@@ -58,6 +58,10 @@ function filterFormAndList(){
   var html=
   `<div id="filterFormAndList" class="full">
     <h2 class="mb-2 font-weight-bold font-24">Meetings</h2>
+    <div class="d-flex align-items-center mb-3 flex-wrap" style="gap:10px;">
+      <button type="button" id="meetingManagementModeMeetings" class="btn btn-primary btn-sm" onclick="showMeetingManagementMode('MEETINGS')">Meeting Management</button>
+      <button type="button" id="meetingManagementModeLogs" class="btn btn-outline-primary btn-sm" onclick="showMeetingManagementMode('LOGS')">Log</button>
+    </div>
     <form id="filterMeeting" class="mb-3" autocomplete="off">
       <div class="form-row w-100">
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 mb-xl-0 mb-2">

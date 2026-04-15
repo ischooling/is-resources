@@ -2,6 +2,7 @@ var currentPageOneDay = 1;
 var currentPageRecurring = 1;
 var currentPageRecurringRecording = 1;
 var currentTabId = "oneDayMeetings";
+var meetingManagementMode = "MEETINGS"; // MEETINGS | LOGS
 var selectedHostKey = null;
 var selectedRole = null;
 var selectedHostName = null;
@@ -13,6 +14,15 @@ var hostsData = getHostsOnly();
 const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_SEEING_ALL_MEETINGS');
 var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
 const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
+// Meeting Management Log access control
+var isUserAllowedMeetingLogs = false;
+try {
+  const logsSetting = getSettingsByTypeAndKey('CONFIGURATION','MEETING_MANAGMENT_LOG');
+  const allowedLogsIds = JSON.parse(logsSetting).data.metaValue.split(",").map(id => id.trim());
+  isUserAllowedMeetingLogs = allowedLogsIds.includes(USER_ID.toString());
+} catch (e) {
+  isUserAllowedMeetingLogs = false;
+}
 const specialMeetingAccessUser = getSpecialMeetingAccessUser();
 const permittedMeetingTypeIds = Array.isArray(specialMeetingAccessUser?.permittedMeetingTypeIds)
   ? specialMeetingAccessUser.permittedMeetingTypeIds.map(id => id.toString())
@@ -34,6 +44,7 @@ var timeOptions = [];
 var getRecordingLimit = getSettingsByTypeAndKey("CONFIGURATION", "SHOW_RECORDINGS_LIMIT");
 getRecordingLimit = JSON.parse(getRecordingLimit);
 var recordingLimit = getRecordingLimit.data.metaValue;
+const isUserAllowedRecordings = fetchUserIdToShowRecordings();
 for (let hour = 0; hour < 24; hour++) {
   for (let minute = 0; minute < 60; minute += 5) {
     let timeString = hour.toString().padStart(2, "0") + minute.toString().padStart(2, "0");
@@ -305,6 +316,10 @@ function getMeetingType() {
 
 function renderMeetingManagementContent() {
   $("#meetingManagementMainDiv").append(getMeetingManagementContent());
+  // Hide logs button if user is not allowed
+  if(!isUserAllowedMeetingLogs){
+    $("#meetingManagementModeLogs").hide();
+  }
   fetchUserIdToShowAllMeeting();
   fetchUserIdToShowRecurringMeeting();
   if (currentTabId === "recurringMeetings") {
@@ -369,19 +384,24 @@ function renderMeetingManagementContent() {
       display: flex;
       margin-bottom: 10px;
       position: relative;
-      border-bottom: 2px solid #e3e3e3;
+      border-bottom: 0;
+      background: #EEF2F6;
+      border-radius: 12px;
+      padding: 4px;
+      gap: 6px;
     }
 
     .tab-button {
-      padding: 0px;
+      padding: 6px 18px;
       cursor: pointer;
       border: none;
       background-color: transparent;
       position: relative;
       transition: color 0.3s ease;
-      font-size: 16px;
+      font-size: 14px;
       color: #888888;
       font-weight: bold;
+      border-radius: 10px;
     }
 
     .tab-button:focus {
@@ -390,15 +410,11 @@ function renderMeetingManagementContent() {
 
     .tab-button.active {
       color: #027FFF;
+      background: #E4F2FF;
     }
 
     .active-line {
-      position: absolute;
-      bottom: -2px;
-      height: 2px;
-      background-color: #027FFF;
-      transition: all 0.3s ease;
-      border-radius: 50px;
+      display: none;
     }
    
     .disabled {
@@ -418,7 +434,7 @@ function renderMeetingManagementContent() {
   var hostDetails=getHostDetails(USER_ID);
   getHostListForFilter(hostDetails, isUserAllowed);
   getGeneralMeetingTypeList('#filterGeneralMeetingType');
-  fetchMeetings($('#filterHostUserId').val());
+  showMeetingManagementMode("MEETINGS");
   $("#filterMeetingStartDate, #filterMeetingEndDate").on("change", function () {
     const formattedDate = changeDateFormat(new Date(this.value), "MMM-dd-yyyy");
     if(formattedDate == "undefined 0NaN, NaN"){
@@ -442,6 +458,36 @@ function renderMeetingManagementContent() {
   });
 }
 
+function showMeetingManagementMode(mode){
+  if(mode === "LOGS" && !isUserAllowedMeetingLogs){
+    showMessageTheme2(0, "You are not authorized to view meeting logs.");
+    return;
+  }
+  meetingManagementMode = mode;
+  if(mode === "LOGS"){
+    currentPageOneDay = 1;
+    currentPageRecurring = 1;
+    currentTabId = "oneDayMeetings";
+    $("#filterDateDuration").val("Today");
+    setDateToToday('#filterMeetingStartDate, #filterMeetingEndDate');
+
+    $("#meetingManagementModeMeetings").removeClass("btn-primary").addClass("btn-outline-primary");
+    $("#meetingManagementModeLogs").removeClass("btn-outline-primary").addClass("btn-primary");
+    // In log mode, we only need listing; hide forms if open
+    $("#meetingFormDiv, #savedMeetingLinkHtml").hide();
+    $("#filterFormAndList").show();
+    fetchMeetingsJoinLogs($('#filterHostUserId').val(), true);
+  }else{
+    currentPageOneDay = 1;
+    currentPageRecurring = 1;
+    currentTabId = "oneDayMeetings";
+    $("#meetingManagementModeLogs").removeClass("btn-primary").addClass("btn-outline-primary");
+    $("#meetingManagementModeMeetings").removeClass("btn-outline-primary").addClass("btn-primary");
+    fetchMeetings($('#filterHostUserId').val(), true);
+  }
+  showTab('oneDayMeetings');
+}
+
 function backToList(buttonId) {
   if(buttonId != undefined){
     $(buttonId).off('click').on('click', function() {
@@ -449,14 +495,22 @@ function backToList(buttonId) {
       $("#filterFormAndList").show();
       fetchUserIdToShowAllMeeting();
       resetRequiredFormData('#host');
-      fetchMeetings($('#filterHostUserId').val());
+      if(meetingManagementMode === "LOGS"){
+        fetchMeetingsJoinLogs($('#filterHostUserId').val());
+      }else{
+        fetchMeetings($('#filterHostUserId').val());
+      }
     });
   }else{
     $("#meetingFormDiv, #savedMeetingLinkHtml").hide();
     $("#filterFormAndList").show();
     fetchUserIdToShowAllMeeting();
     resetRequiredFormData('#host');
-    fetchMeetings($('#filterHostUserId').val());
+    if(meetingManagementMode === "LOGS"){
+      fetchMeetingsJoinLogs($('#filterHostUserId').val());
+    }else{
+      fetchMeetings($('#filterHostUserId').val());
+    }
   }
 }
 
@@ -507,10 +561,15 @@ function setDateToToday(startAndEndDateIds) {
 }
 
 
-async function fetchMeetings(filterHostUserId) {
+async function fetchMeetings(filterHostUserId, forceFirstPage = false) {
   customLoader(true);
   filterHostUserId = [filterHostUserId];
   filterHostUserId = filterHostUserId.join(',');
+  if (forceFirstPage) {
+    currentPageOneDay = 1;
+    currentPageRecurring = 1;
+    currentTabId = "oneDayMeetings";
+  }
   const body = {
     title: $("#filterTitle").val(),
     hostUserId: filterHostUserId,
@@ -518,7 +577,7 @@ async function fetchMeetings(filterHostUserId) {
     meetingStartDate: $("#filterMeetingStartDate").val() == '' ? '' : changeDateFormat(new Date($("#filterMeetingStartDate").val()), "yyyy-mm-dd"),
     meetingEndDate: $("#filterMeetingEndDate").val() == '' ? '' : changeDateFormat(new Date($("#filterMeetingEndDate").val()), "yyyy-mm-dd"),
     limit: $("#limit").val() ? $("#limit").val() : 10,
-    pageNo: currentTabId === "oneDayMeetings" ? currentPageOneDay : currentPageRecurring,
+    pageNo: forceFirstPage ? 1 : (currentTabId === "oneDayMeetings" ? currentPageOneDay : currentPageRecurring),
     userId: USER_ID
   };
 
@@ -624,6 +683,149 @@ async function fetchMeetings(filterHostUserId) {
   customLoader(false);
 }
 
+async function fetchMeetingsJoinLogs(filterHostUserId, forceFirstPage = false) {
+  customLoader(true);
+  filterHostUserId = [filterHostUserId];
+  filterHostUserId = filterHostUserId.join(',');
+  if (forceFirstPage) {
+    currentPageOneDay = 1;
+    currentPageRecurring = 1;
+    currentTabId = "oneDayMeetings";
+  }
+  const parseFilterDate = (val) => {
+    if (!val) return null;
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return null;
+    const yyyyMMdd = changeDateFormat(d, "yyyy-mm-dd");
+    if (!yyyyMMdd || yyyyMMdd.indexOf("-") < 0) return null;
+    const parts = yyyyMMdd.split("-");
+    if (parts.length !== 3) return null;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    if (!y || !m || !day) return null;
+    return { y, m, day };
+  };
+  const startParts = parseFilterDate(($("#filterMeetingStartDate").val() || "").trim());
+  const endParts = parseFilterDate(($("#filterMeetingEndDate").val() || "").trim());
+  const startMs = startParts ? new Date(startParts.y, startParts.m - 1, startParts.day, 0, 0, 0, 0).getTime() : null;
+  const endMs = endParts ? new Date(endParts.y, endParts.m - 1, endParts.day, 23, 59, 59, 999).getTime() : null;
+
+  const body = {
+    title: $("#filterTitle").val(),
+    hostUserId: filterHostUserId,
+    meetingType: $("#filterGeneralMeetingType").val(),
+    meetingStartDate: $("#filterMeetingStartDate").val() == '' ? '' : changeDateFormat(new Date($("#filterMeetingStartDate").val()), "yyyy-mm-dd"),
+    meetingEndDate: $("#filterMeetingEndDate").val() == '' ? '' : changeDateFormat(new Date($("#filterMeetingEndDate").val()), "yyyy-mm-dd"),
+    limit: $("#limit").val() ? $("#limit").val() : 10,
+    pageNo: forceFirstPage ? 1 : (currentTabId === "oneDayMeetings" ? currentPageOneDay : currentPageRecurring),
+    userId: USER_ID
+  };
+
+  $.ajax({
+    url: BASE_URL + CONTEXT_PATH + "api/v1/get-all-meetings-join-logs",
+    method: "POST",
+    data: JSON.stringify(body),
+    contentType: APPLICATION_JSON_VALUE,
+    success: function (response) {
+      const res = JSON.parse(response);
+
+      var totalPageOneDay = res.data.meetingsTotalPages;
+      var totalPageRecurring = res.data.recurringMeetingsTotalPages;
+
+      isHaveRecurringMeetings = res.data.recurringMeetingsTotalPages;
+
+      const oneDayMeetingsHtml = renderMeetingsJoinLogs(res.data.meetings, false, totalPageOneDay, totalPageRecurring);
+
+      let recurringMeetingsToRender = res.data.recurringMeetings || [];
+      const shouldFilterJoinColumns = (meetingManagementMode === "LOGS" && currentTabId === "recurringMeetings")
+        && ((startMs && !isNaN(startMs)) || (endMs && !isNaN(endMs)));
+      if (shouldFilterJoinColumns) {
+        const filterClicksByDate = (clicks) => {
+          if (!clicks || clicks.length < 1) return [];
+          return clicks.filter(c => {
+            const ms = c && c.clickTimeMs ? parseInt(c.clickTimeMs, 10) : 0;
+            if (!ms || isNaN(ms)) return false;
+            if (startMs && ms < startMs) return false;
+            if (endMs && ms > endMs) return false;
+            return true;
+          });
+        };
+        recurringMeetingsToRender = recurringMeetingsToRender.map(m => {
+          const mm = Object.assign({}, m);
+          mm.hostClicks = filterClicksByDate(mm.hostClicks);
+          mm.externalAttendeeClicks = filterClicksByDate(mm.externalAttendeeClicks);
+          return mm;
+        });
+      }
+      const recurringMeetingsHtml = renderMeetingsJoinLogs(recurringMeetingsToRender, true, totalPageOneDay, totalPageRecurring);
+
+      const shouldShowPagination = true;
+      const paginationHtml = shouldShowPagination
+        ? (currentTabId === "oneDayMeetings"
+            ? renderPaginationCommon(currentPageOneDay, totalPageOneDay, "meetings")
+            : renderPaginationCommon(currentPageRecurring, totalPageRecurring, "meetings"))
+        : '';
+
+      const responseHtml = `
+        <div class="tabs position-relative flex-wrap">
+          <div class="order-sm-0 order-1 col-sm-auto col-12 p-0">
+            <button class="tab-button p-2" id="oneDayTab" onclick="showTab('oneDayMeetings')">One Day Meetings</button>
+            <button class="tab-button p-2" id="recurringTab" onclick="showTab('recurringMeetings')">Recurring Meetings</button>
+            <div class="active-line"></div>
+          </div>
+        </div>
+        ${res.data.meetingsTotalPages == 0 && res.data.recurringMeetingsTotalPages == 0 ?
+          `
+            <div class="d-flex flex-column justify-content-center align-items-center" style="height: 250px;">
+              <h1 style="font-weight: bold;">No Meeting Logs Found</h1>
+            </div>
+          `
+          :
+          `
+            <div class="tab-content">
+              <div id="oneDayMeetings" class="tab-pane">${oneDayMeetingsHtml}</div>
+              <div id="recurringMeetings" class="tab-pane">${recurringMeetingsHtml}</div>
+            </div>
+            ${paginationHtml}
+          `
+        }
+      `;
+
+      $("#meetingTableContainer").html(responseHtml);
+
+      if (totalPageOneDay == 0 && currentTabId == "oneDayMeetings") {
+        $(".pagination").hide();
+      } else if(totalPageRecurring == 0 && currentTabId == "recurringMeetings") {
+        $(".pagination").hide();
+      } else {
+        $(".pagination").show();
+      }
+
+      setTimeout(() => {
+        $(".tab-button").removeClass('hover-blue');("active");
+        $(`#${currentTabId === 'oneDayMeetings' ? 'oneDayTab' : 'recurringTab'}`).addClass("active");
+        $(".tab-pane").hide();
+        $(`#${currentTabId}`).show();
+        const activeButton = $(".tab-button.active");
+        const line = $(".active-line");
+        line.css({
+          width: activeButton.outerWidth(),
+          left: activeButton.position()?.left,
+        });
+      }, 100);
+
+      fetchMetaValue();
+      fetchUserIdToShowAllMeeting();
+      fetchUserIdToShowRecurringMeeting();
+    },
+    error: function () {
+      showMessageTheme2(0, "Failed to fetch meeting logs.");
+    }
+  });
+  customLoader(false);
+}
+
 function showTab(tabId) {
   currentTabId = tabId;
   $(".tab-button").removeClass('hover-blue');("active");
@@ -637,18 +839,34 @@ function showTab(tabId) {
     width: activeButton.outerWidth(),
     left: activeButton.position()?.left,
   });
+  if (meetingManagementMode === "LOGS") {
+    $("#filterDateDuration").val("Today");
+    setDateToToday('#filterMeetingStartDate, #filterMeetingEndDate');
+  }else{
+    $("#filterDateDuration").val("Today");
+    setDateToToday('#filterMeetingStartDate, #filterMeetingEndDate');
+  }
 
-  if (tabId === "recurringMeetings") {
+  $("#filterGeneralMeetingTypeDiv").show();
+  if (meetingManagementMode === "LOGS") {
+    $("#filterDateDuration").show();
+    $("#filterMeetingStartDate").show();
+    $("#filterMeetingEndDate").show();
+  } else if (tabId === "recurringMeetings") {
     $("#filterDateDuration").hide();
     $("#filterMeetingStartDate").hide();
     $("#filterMeetingEndDate").hide();
   } else {
-    $("#filterMeeting").css("display", "flex");
+    // Keep original filter layout; only toggle the date controls visibility.
     $("#filterDateDuration").show();
     $("#filterMeetingStartDate").show();
     $("#filterMeetingEndDate").show();
   }
-  fetchMeetings($('#filterHostUserId').val());
+  if(meetingManagementMode === "LOGS"){
+    fetchMeetingsJoinLogs($('#filterHostUserId').val());
+  }else{
+    fetchMeetings($('#filterHostUserId').val());
+  }
   fetchUserIdToShowAllMeeting();
   fetchUserIdToShowRecurringMeeting();
 }
@@ -656,7 +874,11 @@ function showTab(tabId) {
 function applyFilters() {
   $('#filterMeeting').off('submit').on('submit', function(event) {
     event.preventDefault();
-    fetchMeetings($('#filterHostUserId').val());
+    if(meetingManagementMode === "LOGS"){
+      fetchMeetingsJoinLogs($('#filterHostUserId').val());
+    }else{
+      fetchMeetings($('#filterHostUserId').val());
+    }
   });
 }
 
@@ -670,6 +892,227 @@ function resetFilter() {
   setDateToToday('#filterMeetingStartDate, #filterMeetingEndDate');
   currentPageOneDay = 1;
   currentPageRecurring = 1;
+}
+
+function formatJoinClicks(clicks){
+  // Backward-compatible simple formatter (used only in log UI).
+  return formatJoinTimeCards(clicks, USER_TIMEZONE, false);
+}
+
+function formatJoinTimeCards(clicks, displayTimezone, showMeta) {
+  if (!clicks || clicks.length < 1) {
+    return `<div class="mm-log-empty">-</div>`;
+  }
+
+  var html = `<div class="mm-join-scroll">`;
+  $.each(clicks, function (i, v) {
+    var clickMs = v.clickTimeMs && parseInt(v.clickTimeMs) > 0 ? parseInt(v.clickTimeMs) : null;
+    var m = null;
+    try {
+      if (clickMs && typeof moment !== 'undefined') {
+        m = (displayTimezone ? moment(clickMs).tz(displayTimezone) : moment(clickMs));
+      }
+    } catch (e) {
+      m = null;
+    }
+
+    var line1 = (m ? m.format('ddd DD MMM, YYYY | hh:mm A') : (v.clickTimeFormatted || v.clickTime || ''));
+    var line2Parts = [];
+    if (showMeta && v.metaData) {
+      line2Parts.push(v.metaData);
+    }
+    if (v.location) {
+      line2Parts.push(v.location);
+    }
+    if (v.timeZone) {
+      line2Parts.push(v.timeZone);
+    }
+    var line2 = line2Parts.length > 0 ? line2Parts.join(' | ') : '';
+
+    html += `
+      <div class="mm-join-card">
+        <div class="mm-join-line1">${line1}</div>
+        ${line2 ? `<div class="mm-join-line2">${line2}</div>` : ``}
+      </div>
+    `;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function groupClicksByMeta(clicks) {
+  var groups = {};
+  $.each(clicks || [], function (i, v) {
+    var key = (v && v.metaData) ? v.metaData : 'Unknown';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(v);
+  });
+  // Keep stable order by first appearance
+  var result = [];
+  $.each(clicks || [], function (i, v) {
+    var key = (v && v.metaData) ? v.metaData : 'Unknown';
+    if (groups[key] && groups[key]._pushed !== true) {
+      result.push({ meta: key, clicks: groups[key] });
+      groups[key]._pushed = true;
+    }
+  });
+  return result;
+}
+
+function renderMeetingsJoinLogs(meetings, isRecurring = false, totalPageOneDay, totalPageRecurring) {
+  $("<style>")
+    .prop("type", "text/css")
+    .html(`
+      .hover-blue:hover {
+        color: #027FFF;
+      }
+      table th:first-child{
+        border-radius:10px 0 0 10px;
+      }
+      table th:last-child{
+        border-radius:0 10px 10px 0;
+      }
+      .mm-log-empty{ color:#6e6e6e; }
+      /* Scroll wrapper for Host/Attendee/External cells */
+      .mm-cell-scroll{
+        max-height: 180px;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+      /* Inner list container (no scroll; scroll is handled by .mm-cell-scroll) */
+      .mm-join-scroll{
+        max-height: unset;
+        overflow: visible;
+        padding-right: 0;
+      }
+      .mm-join-card{
+        background: #F3F6FA;
+        border: 1px solid #E6EEF7;
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        line-height: 1.2;
+      }
+      .mm-join-line1{
+        font-weight: 600;
+        color: #2b2b2b;
+        font-size: 12px;
+      }
+      .mm-join-line2{
+        margin-top: 4px;
+        color: #6e6e6e;
+        font-size: 11px;
+        word-break: break-word;
+      }
+      .mm-chip{
+        display: inline-block;
+        background: #2E7DFF;
+        color: #fff;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .mm-ext-block{ margin-bottom: 10px; }
+      td{ vertical-align: top; }
+      td:nth-child(2){
+        word-break: break-word;
+      }
+    `)
+    .appendTo("head");
+
+  if ((!isRecurring && totalPageOneDay == 0) || (!isRecurring && meetings.length == 0)) {
+    return `
+      <div style="text-align: center; font-size: 18px; color: #6e6e6e; margin: 20px 0;">
+        No Meeting Logs Found
+      </div>`;
+  }
+
+  var showAttendeeColumn = !isRecurring;
+  var columnCount = showAttendeeColumn ? 7 : 6;
+
+  var meetingsHtml = `
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered text-center border-radius-table font-12 responsive nowrap" style="width:100%; table-layout: fixed;">
+	        <thead class="theme-bg primary-bg white-txt-color">
+	          <tr style="font-size: 14px;">
+	            <th style="width: 4%;">Sr. No.</th>
+	            <th style="width: 10%;">${isRecurring ? 'Meeting Title' : 'Meeting Title/Time'}</th>
+	            <th style="width: 7%;">Meeting Type</th>
+	            <th style="width: 7%;">Host</th>
+	            <th style="width: 17%;">Join Time (Host)</th>
+	            ${showAttendeeColumn ? `<th style="width: 17%;">Join Time (Attendee)</th>` : ``}
+	            <th style="width: 17%;">Join Time (External Attendee)</th>
+	          </tr>
+	        </thead>
+        <tbody>`;
+
+  if (!meetings || meetings.length == 0) {
+    meetingsHtml += `<tr><td colspan="${columnCount}" class="py-4">No data</td></tr>`;
+  } else {
+    $.each(meetings, function(index, meeting){
+      var internalAttendeeClicks = meeting.attendeeClicks || [];
+      var externalAttendeeClicks = meeting.externalAttendeeClicks || [];
+
+      // Join Time (Attendee) shows internal users (students/teachers)
+      var attendeeHtml = '';
+      var attendeeGroups = groupClicksByMeta(internalAttendeeClicks);
+      if(!attendeeGroups || attendeeGroups.length < 1){
+        attendeeHtml = `<div class="mm-log-empty">-</div>`;
+      }else{
+        $.each(attendeeGroups, function(i,g){
+          attendeeHtml += `
+            <div class="mm-ext-block">
+              <div class="mm-chip">${(g.meta || 'Unknown')}</div>
+              ${formatJoinTimeCards(g.clicks, USER_TIMEZONE, false)}
+            </div>
+          `;
+        });
+      }
+
+      // External Attendees shows only truly external users
+      var externalHtml = '';
+      var externalGroups = groupClicksByMeta(externalAttendeeClicks);
+      if(!externalGroups || externalGroups.length < 1){
+        externalHtml = `<div class="mm-log-empty">-</div>`;
+      }else{
+        $.each(externalGroups, function(i,g){
+          externalHtml += `
+            <div class="mm-ext-block">
+              <div class="mm-chip">${(g.meta || 'Unknown')}</div>
+              ${formatJoinTimeCards(g.clicks, USER_TIMEZONE, false)}
+            </div>
+          `;
+        });
+      }
+      meetingsHtml += `
+        <tr>
+          <td>${index + 1}</td>
+          <td class="text-left">
+            <div>${meeting.title || ''}</div>
+            ${!isRecurring ? `
+              <div style="font-weight: normal; color: #6e6e6e; font-size: 11px; margin-top: 4px;">
+                ${(meeting.timeRange || '')}<br/>
+                ${(meeting.timezoneName || '')}
+              </div>
+            ` : ``}
+          </td>
+          <td>${meeting.gmType || (meeting.meetingType || '')}</td>
+          <td>${meeting.hostName || ''}</td>
+          <td class="text-left"><div class="mm-cell-scroll">${formatJoinTimeCards(meeting.hostClicks, USER_TIMEZONE, false)}</div></td>
+          ${showAttendeeColumn ? `<td class="text-left"><div class="mm-cell-scroll">${attendeeHtml}</div></td>` : ``}
+          <td class="text-left"><div class="mm-cell-scroll">${externalHtml}</div></td>
+        </tr>`;
+    });
+  }
+
+  meetingsHtml += `
+        </tbody>
+      </table>
+    </div>`;
+
+  return meetingsHtml;
 }
 
 function renderMeetings(meetings, isRecurring = false, totalPageOneDay, totalPageRecurring) {

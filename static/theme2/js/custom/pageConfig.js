@@ -15,7 +15,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "online-user":{url:"",file:[{role:"",fileName:["onlineUserLiveListContent.js","onlineUserLiveList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "delete-user":{url:"",file:[{role:"",fileName:["deletedUserListContent.js","deletedUserList.js","roleList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "maintenance-down-message":{url:"maintenance-down-message?moduleId="+moduleId+"&username=&themeType=theme2",file:[{role:"",fileName:["dashboardCommonComment.js","dashboardUserActivity.js"]}],type:"JSP",pageReqType:"IN"},
-        "manage-batch-student":{url:"manage-batch-student?moduleId="+moduleId+"&themeType=theme2",file:[{role:"",fileName:["dashboardSchoolBatches.js"]}],type:"JSP",pageReqType:"IN"},
+        "manage-batch-student":{url:"manage-batch-student?moduleId="+moduleId+"&themeType=theme2",file:[{role:"",fileName:["dashboardSchoolBatches.js","zoomRegistration.js"]}],type:"JSP",pageReqType:"IN"},
         "payment-reports":{url:"",file:[{role:"",fileName:["paymentReportContent.js","paymentReport.js","dashboardManageUser.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // "payment-reports":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/payment-reports?moduleId="+moduleId},
         "assign-orientation":{url:"",file:[{role:"",fileName:["studentOrientationAssignContent.js","studentOrientation.js", "leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
