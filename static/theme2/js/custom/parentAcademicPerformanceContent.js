@@ -2,6 +2,8 @@ function getParentAcademicPerformanceContent(pageData){
     var backupStudentList = STUDENT_LIST;
     var sliderHtml = getStudentTabSliderContent(pageData.tabData, 'parentAcademicPerformanceOnStudentTabClick');
     STUDENT_LIST = backupStudentList;
+    var lmsProviderId = pageData.courseProviderId;
+    var supportsDetailedView = getParentAcademicPerformanceSupportsDetailedView(lmsProviderId);
     var html = `
         <div class="full">
             ${sliderHtml}
@@ -17,17 +19,17 @@ function getParentAcademicPerformanceContent(pageData){
                                 <tr>
                                     <th class="pl-3">Course Name</th>
                                     <th>Score</th>
-                                    <!--<th>Pace</th>-->
+                                    ${supportsDetailedView ? "<th>Pace</th>" : ""}
                                     <th>Teacher Name</th>
                                     <th>End Date</th>
                                     <th>Remaining Days</th>
-                                    <th>Pending Assignment</th>
-                                    <th>Progress (gradable)</th>
-                                    <th>Progress (all activities)</th>
+                                    ${supportsDetailedView ? "<th>Pending Assignment</th>" : ""}
+                                    ${supportsDetailedView ? "<th>Progress (gradable)</th>" : ""}
+                                    ${supportsDetailedView ? "<th>Progress (all activities)</th>" : ""}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${getParentAcademicPerformanceRowsHtml(pageData.rows)}
+                                ${getParentAcademicPerformanceRowsHtml(pageData.rows, pageData.courseProviderId)}
                             </tbody>
                         </table>
                     </div>
@@ -37,55 +39,76 @@ function getParentAcademicPerformanceContent(pageData){
     return html;
 }
 
-function getParentAcademicPerformanceRowsHtml(rows){
+function getParentAcademicPerformanceSupportsDetailedView(lmsProviderId){
+    var providerId = parseInt(lmsProviderId, 10);
+    return providerId === 37 || providerId === 38 || providerId === 36;
+}
+
+function getParentAcademicPerformanceLmsProviderId(rows){
+    var lmsProviderId = "";
+    $.each(rows || [], function(index, row){
+        if(!lmsProviderId && row && (row.lmsProviderId || row.courseProviderId)){
+            lmsProviderId = row.lmsProviderId || row.courseProviderId;
+            return false;
+        }
+    });
+    return lmsProviderId;
+}
+
+function getParentAcademicPerformanceRowsHtml(rows, lmsProviderId){
     var rowsHtml = "";
+    var supportsDetailedView = getParentAcademicPerformanceSupportsDetailedView(lmsProviderId);
     $.each(rows || [], function(index, row){
         var courseHtml = row.courseName;
-        if(row.lmsEnrollmentId && row.lmsCourseId){
+        if(supportsDetailedView && row.lmsEnrollmentId && row.lmsCourseId){
             courseHtml = `<a href="javascript:void(0)" class="text-primary" onclick="parentAcademicPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseHtml}</a>`;
         }
         rowsHtml += `
             <tr>
                 <td class="pl-3">${courseHtml}</td>
                 <td>${row.scoreText}</td>
-                <!--<td>${getParentAcademicPerformancePaceHtml(row.pace)}</td>-->
+                ${supportsDetailedView ? `<td>${getParentAcademicPerformancePaceHtml(row.pace)}</td>` : ""}
                 <td>${getSalutationByGender(row.teacherGender)} ${row.teacherName}</td>
                 <td>${row.endDate}</td>
                 <td>${row.remainingDays}</td>
-                <td>${row.pendingAssignment}</td>
-                <td>${getParentAcademicPerformanceProgressHtml(row.progressGradable)}</td>
-                <td>${getParentAcademicPerformanceProgressHtml(row.progressAllActivity)}</td>
+                ${supportsDetailedView ? `<td>${row.pendingAssignment}</td>` : ""}
+                ${supportsDetailedView ? `<td>${getParentAcademicPerformanceProgressHtml(row.progressGradable)}</td>` : ""}
+                ${supportsDetailedView ? `<td>${getParentAcademicPerformanceProgressHtml(row.progressAllActivity)}</td>` : ""}
             </tr>`;
     });
     if(!rowsHtml){
-        rowsHtml = `<tr><td colspan="9" class="text-center">No academic performance found</td></tr>`;
+        rowsHtml = `<tr><td colspan="${supportsDetailedView ? 9 : 5}" class="text-center">No academic performance found</td></tr>`;
     }
     return rowsHtml;
 }
 
-function getParentAcademicPerformancePaceHtml(pace){
-    var value = (pace || "N/A").toUpperCase();
+function getParentAcademicPerformancePaceHtml(value){
+    // var value = (pace || "N/A").toUpperCase();
     var textClass = "text-dark";
-    var label = pace || "N/A";
+    var label = value || "N/A";
     var imageName = "still.png";
     var imageStyle = "width:24px;height:24px;object-fit:contain;";
 
-    if(value === "GREEN"){
+    if(value === "Ahead"){
         textClass = "text-success";
         label = "Ahead";
         imageName = "forward.gif";
         imageStyle="width:27px;height:27px;object-fit:contain;";
-    }else if(value === "YELLOW"){
+    }else if(value === "OnTrack"){
         textClass = "text-primary";
         label = "On Track";
         imageName = "still.png";
         imageStyle="width:24px;height:24px;object-fit:contain;";
-    }else if(value === "RED"){
+    }else if(value === "Behind"){
         textClass = "text-danger";
         label = "Behind";
         imageName = "behind.gif";
         imageStyle="width:24px;height:24px;object-fit:contain;";
-    }
+	}else if(value === "GettingStarted"){
+		textClass = "text-primary";
+        label = "Get Started";
+        imageName = "still.png";
+	}
 
     var imageUrl = PATH_FOLDER_IMAGE2 + imageName;
     return `<div class="d-flex align-items-center ${textClass}">
@@ -133,6 +156,7 @@ function getParentAcademicPerformanceDetailContent(){
                         <thead>
                             <tr>
                                 <th>Total Assignments</th>
+                                <th>Excused</th>
                                 <th>Submitted</th>
                                 <th>Upcoming</th>
                                 <th>Pending</th>
@@ -147,6 +171,7 @@ function getParentAcademicPerformanceDetailContent(){
                         <tbody>
                             <tr>
                                 <td><span id="totalAssign">0</span></td>
+                                <td><span id="excusedAssign">0</span></td>
                                 <td><span id="submiteAssign">0</span></td>
                                 <td><span id="upcomingAssign">0</span></td>
                                 <td><span id="pendingAssign">0</span></td>
@@ -173,6 +198,7 @@ function getParentAcademicPerformanceDetailContent(){
                                 <th>Grade</th>
                                 ${gradeByTeacherHeaderHtml}
                                 <th>Detailed Assignment Status</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="studentLmsProgress"></tbody>

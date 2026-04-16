@@ -1,4 +1,6 @@
-function getStudentAcademicPerformanceContent(pageData){
+function getStudentAcademicPerformanceContent(pageData, lmsProviderId){
+    // var lmsProviderId = getStudentAcademicPerformanceLmsProviderId(pageData.rows);
+    var supportsDetailedView = getStudentAcademicPerformanceSupportsDetailedView(lmsProviderId);
     return `
         <div class="full mt-3">
             <div class="main-card mb-3 card rounded-10 border py-3">
@@ -12,17 +14,17 @@ function getStudentAcademicPerformanceContent(pageData){
                                 <tr>
                                     <th class="pl-3">Course Name</th>
                                     <th>Score</th>
-                                    <!--<th>Pace</th>-->
+                                    ${supportsDetailedView ? "<th>Pace</th>" : ""}
                                     <th>Teacher Name</th>
                                     <th>End Date</th>
                                     <th>Remaining Days</th>
-                                    <th>Pending Assignment</th>
-                                    <th>Progress (gradable)</th>
-                                    <th>Progress (all activities)</th>
+                                    ${supportsDetailedView ? "<th>Pending Assignment</th>" : ""}
+                                    ${supportsDetailedView ? "<th>Progress (gradable)</th>" : ""}
+                                    ${supportsDetailedView ? "<th>Progress (all activities)</th>" : ""}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${getStudentAcademicPerformanceRowsHtml(pageData.rows)}
+                                ${getStudentAcademicPerformanceRowsHtml(pageData.rows, lmsProviderId)}
                             </tbody>
                         </table>
                     </div>
@@ -31,53 +33,74 @@ function getStudentAcademicPerformanceContent(pageData){
         </div>`;
 }
 
-function getStudentAcademicPerformanceRowsHtml(rows){
+function getStudentAcademicPerformanceSupportsDetailedView(lmsProviderId){
+    var providerId = parseInt(lmsProviderId, 10);
+    return providerId === 37 || providerId === 38 || providerId === 36;
+}
+
+function getStudentAcademicPerformanceLmsProviderId(rows){
+    var lmsProviderId = "";
+    $.each(rows || [], function(index, row){
+        if(!lmsProviderId && row && (row.lmsProviderId || row.courseProviderId)){
+            lmsProviderId = row.lmsProviderId || row.courseProviderId;
+            return false;
+        }
+    });
+    return lmsProviderId;
+}
+
+function getStudentAcademicPerformanceRowsHtml(rows, lmsProviderId){
     var rowsHtml = "";
+    var supportsDetailedView = getStudentAcademicPerformanceSupportsDetailedView(lmsProviderId);
     $.each(rows || [], function(index, row){
         var courseHtml = row.courseName;
-        if(row.lmsEnrollmentId && row.lmsCourseId){
+        if(supportsDetailedView && row.lmsEnrollmentId && row.lmsCourseId){
             courseHtml = `<a href="javascript:void(0)" class="text-primary" onclick="studentAcademicPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseHtml}</a>`;
         }
         rowsHtml += `
             <tr>
                 <td class="pl-3">${courseHtml}</td>
                 <td>${row.scoreText}</td>
-                <!--<td>${getStudentAcademicPerformancePaceHtml(row.pace)}</td>-->
+                ${supportsDetailedView ? `<td>${getStudentAcademicPerformancePaceHtml(row.pace)}</td>` : ""}
                 <td>${getSalutationByGender(row.teacherGender)} ${row.teacherName}</td>
                 <td>${row.endDate}</td>
                 <td>${row.remainingDays}</td>
-                <td>${row.pendingAssignment}</td>
-                <td>${getStudentAcademicPerformanceProgressHtml(row.progressGradable)}</td>
-                <td>${getStudentAcademicPerformanceProgressHtml(row.progressAllActivity)}</td>
+                ${supportsDetailedView ? `<td>${row.pendingAssignment}</td>` : ""}
+                ${supportsDetailedView ? `<td>${getStudentAcademicPerformanceProgressHtml(row.progressGradable)}</td>` : ""}
+                ${supportsDetailedView ? `<td>${getStudentAcademicPerformanceProgressHtml(row.progressAllActivity)}</td>` : ""}
             </tr>`;
     });
     if(!rowsHtml){
-        rowsHtml = `<tr><td colspan="9" class="text-center">No academic performance found</td></tr>`;
+        rowsHtml = `<tr><td colspan="${supportsDetailedView ? 9 : 5}" class="text-center">No academic performance found</td></tr>`;
     }
     return rowsHtml;
 }
 
-function getStudentAcademicPerformancePaceHtml(pace){
-    var value = (pace || "N/A").toUpperCase();
+function getStudentAcademicPerformancePaceHtml(value){
+    // var value = (pace || "N/A").toUpperCase();
     var textClass = "text-dark";
-    var label = pace || "N/A";
+    var label = value || "N/A";
     var imageName = "still.png";
     var imageStyle = "width:24px;height:24px;object-fit:contain;";
 
-    if(value === "GREEN"){
+    if(value === "Ahead"){
         textClass = "text-success";
         label = "Ahead";
         imageName = "forward.gif";
         imageStyle = "width:27px;height:27px;object-fit:contain;";
-    }else if(value === "YELLOW"){
+    }else if(value === "OnTrack"){
         textClass = "text-primary";
         label = "On Track";
         imageName = "still.png";
-    }else if(value === "RED"){
+    }else if(value === "Behind"){
         textClass = "text-danger";
         label = "Behind";
         imageName = "behind.gif";
-    }
+	}else if(value === "GettingStarted"){
+		textClass = "text-primary";
+        label = "Get Started";
+        imageName = "still.png";
+	}
     var imageUrl = PATH_FOLDER_IMAGE2 + imageName;
     return `<div class="d-flex align-items-center ${textClass}">
         <img src="${imageUrl}" alt="${label}" style="${imageStyle}">
@@ -116,6 +139,7 @@ function getStudentAcademicPerformanceDetailContent(){
                         <thead>
                             <tr>
                                 <th>Total Assignments</th>
+                                <th>Excused</th>
                                 <th>Submitted</th>
                                 <th>Upcoming</th>
                                 <th>Pending</th>
@@ -129,6 +153,7 @@ function getStudentAcademicPerformanceDetailContent(){
                         <tbody>
                             <tr>
                                 <td><span id="totalAssign">0</span></td>
+                                <td><span id="excusedAssign">0</span></td>
                                 <td><span id="submiteAssign">0</span></td>
                                 <td><span id="upcomingAssign">0</span></td>
                                 <td><span id="pendingAssign">0</span></td>
@@ -153,6 +178,7 @@ function getStudentAcademicPerformanceDetailContent(){
                                 <th>Score</th>
                                 <th>Grade</th>
                                 <th>Detailed Assignment Status</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="studentLmsProgress"></tbody>

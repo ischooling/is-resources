@@ -1,7 +1,7 @@
 async function renderStudentAcademicPerformancePage(){
     var apiResponse = await studentAcademicPerformanceFetch();
     var rows = studentAcademicPerformanceMapRows(apiResponse, USER_ID + "");
-    $("#dashboardContentInHTML").html(getStudentAcademicPerformanceContent({ rows: rows }));
+    $("#dashboardContentInHTML").html(getStudentAcademicPerformanceContent({ rows: rows }, apiResponse.details.courseProviderId));
     studentAcademicPerformanceInitDataTable();
 }
 
@@ -127,6 +127,7 @@ function studentAcademicPerformanceLoadProgressDetail(studentUserId, lmsEnrollme
 
 function studentAcademicPerformanceBindProgressDetailData(data){
     $("#totalAssign").html(data.totalAssignment != null ? data.totalAssignment : 0);
+    $("#excusedAssign").html(data.excusedAssign != null ? data.excusedAssign : 0);
     $("#submiteAssign").html(data.submiteAssign != null ? data.submiteAssign : 0);
     $("#upcomingAssign").html(data.upcomingAssign != null ? data.upcomingAssign : 0);
     $("#pendingAssign").html(data.pendingAssign != null ? data.pendingAssign : 0);
@@ -135,11 +136,12 @@ function studentAcademicPerformanceBindProgressDetailData(data){
     $("#submitBeforeTimeAssign").html(data.submitBeforeTimeAssign != null ? data.submitBeforeTimeAssign : 0);
     $("#submitOntimeAssign").html(data.submitOntimeAssign != null ? data.submitOntimeAssign : 0);
     $("#submitLateAssign").html(data.submitLateAssign != null ? data.submitLateAssign : 0);
+    
 
     var enrollments = data.response && data.response.enrollments ? data.response.enrollments : null;
     var enrollmentList = enrollments && enrollments.enrollment ? enrollments.enrollment : [];
     if(!$.isArray(enrollmentList) || enrollmentList.length === 0){
-        $("#studentLmsProgress").html(`<tr><td colspan="8" class="text-center">No record found</td></tr>`);
+        $("#studentLmsProgress").html(`<tr><td colspan="9" class="text-center">No record found</td></tr>`);
         return;
     }
 
@@ -168,13 +170,20 @@ function studentAcademicPerformanceBindItemsRows(enrollId, itemsData){
     var html = "";
     var items = itemsData && itemsData.item ? itemsData.item : [];
     if(!$.isArray(items) || items.length === 0){
-        $("#studentLmsProgress").html(`<tr><td colspan="8" class="text-center">No record found</td></tr>`);
+        $("#studentLmsProgress").html(`<tr><td colspan="9" class="text-center">No record found</td></tr>`);
         return;
     }
     $.each(items, function(_, item){
         var submitStatus = "";
         if(item.submissionStatus){
             submitStatus = item.submissionStatus + (item.lateTime ? (" (" + item.lateTime + ")") : "");
+        }
+        var status = (item.status || item.submissionStatus || "").toUpperCase();
+        var statusIcon = "";
+        if(status === "SUBMITTED"){
+            statusIcon = `<i class="fa fa-check text-success"></i>`;
+        }else if(status === "EXCUSED"){
+            statusIcon = `<i class="fa fa-times"></i>`;
         }
         var scoreText = item.unitPercent ? (item.unitPercent + "%") : "";
         html += `<tr>
@@ -190,6 +199,7 @@ function studentAcademicPerformanceBindItemsRows(enrollId, itemsData){
         }else{
             html += `<td></td>`;
         }
+        html += `<td class="text-center">${statusIcon || ""}</td>`;
         html += `</tr>`;
     });
     $("#studentLmsProgress").html(html);

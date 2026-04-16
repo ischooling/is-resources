@@ -183,7 +183,7 @@ function bindUserApplicationData(responseData) {
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a class="dropdown-item meeting-anchor" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}','${user.interviewStatus}','${user.meetingId}','${user.meetingDetails}')">
+                                        <a class="dropdown-item meeting-anchor" href="javascript:void(0);" onclick="openUpdateStatusModalUserApplication(${user.id}, '${user.status || ''}', '${user.appliedUserRole}','${user.interviewStatus}','${user.meetingId}','${user.meetingDetails}', '${user.assignToUserId || ''}')">
                                             <i class="fas fa-edit me-2"></i>&nbsp;Update Status
                                         </a>
                                     </li>`;
@@ -332,11 +332,12 @@ function updateFormState() {
     };
 }
 
-function openUpdateStatusModalUserApplication(id, status, role, interviewStatus, meetingId, meetingDetails){
+function openUpdateStatusModalUserApplication(id, status, role, interviewStatus, meetingId, meetingDetails, assignToUserId){
     if($("#userApplicationProfileStatusModal").length == 1){
         $("#userApplicationProfileStatusModal").remove();
     }
     $("body").append(userApplicationProfileStatusModal(id, status, role, interviewStatus));
+    $("#userApplicationProfileStatusForm").attr("data-current-assign-to", assignToUserId || "");
     $("#assignedToInterview").select2({
         placeholder: "Select Assign To",
         theme:"bootstrap4"
@@ -460,6 +461,25 @@ async function updateUserApplicationProfile(id, status) {
         });
         return;
     }
+    if (selectedStatus === "Approved For Interview") {
+        const assignedToElement = $("#userApplicationProfileStatusForm #assignedToInterview");
+        const assignedToValue = assignedToElement.val();
+        if (!assignedToValue) {
+            showMessageTheme2(2, "Please select assign to");
+            return;
+        }
+        const assignedToText = assignedToElement.find("option:selected").text() || "";
+        const counselorName = assignedToText.split(" - (")[0].trim() || "the selected counselor";
+        showWarningMessageShow(
+            `Are you sure you want to assign this application to ${counselorName}?`,
+            `confirmApprovedForInterviewAssignment(${id}, ${JSON.stringify(status)})`
+        );
+        return;
+    }
+    await proceedUpdateUserApplicationProfile(id, status);
+}
+
+async function confirmApprovedForInterviewAssignment(id, status) {
     await proceedUpdateUserApplicationProfile(id, status);
 }
 
@@ -496,12 +516,14 @@ async function proceedUpdateUserApplicationProfile(id, status){
         showMessageTheme2(2, "Please select status");
         return false;
     }
-    if(selectedStatus == "Approved For Interview" || selectedStatus == "Another Round of Interview" || selectedStatus == "Final Round of Interview"){
+    if(selectedStatus == "Approved For Interview" || selectedStatus == "Another Round of Interview" || selectedStatus == "Final Round of Interview" || selectedStatus == "Update Assign To"){
         if($("#userApplicationProfileStatusForm #assignedToInterview").val() == ""){
             showMessageTheme2(2, "Please select assign to");
             return false;
         }
-        duration=$('#duration').val();
+        if (selectedStatus != "Update Assign To") {
+            duration=$('#duration').val();
+        }
     }else if(selectedStatus == "Step 2 | Few Questions"){
         if ($("#userApplicationProfileStatusForm #selectedQuestions .sortable-item").length === 0) {
             showMessageTheme2(2, "Please select any question");
@@ -514,7 +536,9 @@ async function proceedUpdateUserApplicationProfile(id, status){
         if (!slotArray) return false;
     }
     var remarks = $("#userApplicationProfileRemarks").val()?.trim();
-    if (selectedStatus === "Step 2 | Few Questions") {
+    if (selectedStatus === "Update Assign To") {
+        // Remarks are optional for reassignment-only updates.
+    } else if (selectedStatus === "Step 2 | Few Questions") {
         if (remarks && remarks.length < 25) {
             showMessageTheme2(2, "Remarks can not be less than 25 characters.");
             return false;
@@ -567,26 +591,35 @@ async function proceedUpdateUserApplicationProfile(id, status){
 
 async function applicantsViewAssignToListForInterview(role){
     var selectedStatus = $("#userApplicationProfileStatus").val();
-    if(selectedStatus == "Approved For Interview" || selectedStatus == "Another Round of Interview" || selectedStatus == "Final Round of Interview"){
+    if(selectedStatus == "Approved For Interview" || selectedStatus == "Another Round of Interview" || selectedStatus == "Final Round of Interview" || selectedStatus == "Update Assign To"){
         let payload = {}
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-screening-counselor-list', payload, '/teacher/signup');
         bindAssignToJA('userApplicationProfileStatusForm', 'assignedToInterview', responseData);
-        const interviewBookLinkValidityDaysSetting = getSettingsByTypeAndKey('CONFIGURATION','INTERVIEW_BOOK_LINK_VALIDITY_DAYS');
-        const interviewBookLinkValidityDays = JSON.parse(interviewBookLinkValidityDaysSetting).data.metaValue
-        var today = new Date();
-        today.setDate(today.getDate() + parseInt(interviewBookLinkValidityDays));
-        $("#userApplicationProfileStatusForm #interviewValidDate")
-            .datepicker({
-                format: "M dd, yyyy",
-                autoclose: true
-            }).datepicker("setDate", today);
+        var currentAssignTo = $("#userApplicationProfileStatusForm").attr("data-current-assign-to") || "";
         $("#userApplicationProfileStatusForm #assignedToInterviewDiv").show();
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
         $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
         $("#updateUserApplicationProfileBtn").text("Save");
+        $("#userApplicationProfileStatusForm #assignedToInterview").val(currentAssignTo).trigger("change");
+        if(selectedStatus == "Update Assign To"){
+            $("#userApplicationProfileStatusForm #interviewValidDate").closest(".col-md-6").hide();
+            $("#userApplicationProfileStatusForm #durationDiv").hide();
+            $("#userApplicationProfileStatusForm #finalInterviewSlotsWrapper").hide();
+        }else{
+            const interviewBookLinkValidityDaysSetting = getSettingsByTypeAndKey('CONFIGURATION','INTERVIEW_BOOK_LINK_VALIDITY_DAYS');
+            const interviewBookLinkValidityDays = JSON.parse(interviewBookLinkValidityDaysSetting).data.metaValue
+            var today = new Date();
+            today.setDate(today.getDate() + parseInt(interviewBookLinkValidityDays));
+            $("#userApplicationProfileStatusForm #interviewValidDate")
+                .datepicker({
+                    format: "M dd, yyyy",
+                    autoclose: true
+                }).datepicker("setDate", today);
+            $("#userApplicationProfileStatusForm #interviewValidDate").closest(".col-md-6").show();
+        }
         if(selectedStatus == "Approved For Interview"){
             $("#userApplicationProfileStatusForm #durationDiv").hide();
-        }else{
+        }else if(selectedStatus != "Update Assign To"){
             $("#userApplicationProfileStatusForm #durationDiv").show();
         }
         if(selectedStatus == "Final Round of Interview"){
@@ -636,6 +669,7 @@ async function applicantsViewAssignToListForInterview(role){
         $("#userApplicationProfileStatusForm #questionsDiv").hide();
         $("#userApplicationProfileStatusForm #durationDiv").hide();
         $("#userApplicationProfileStatusForm #assignedToInterview").val("").trigger("change");
+        $("#userApplicationProfileStatusForm #interviewValidDate").closest(".col-md-6").show();
         $("#userApplicationProfileStatusForm #questions").val("").trigger("change");
         $("#userApplicationProfileStatusForm #remarksPara").addClass("d-none");
         $("#updateUserApplicationProfileBtn").text("Save");

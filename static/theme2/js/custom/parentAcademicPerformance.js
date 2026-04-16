@@ -35,7 +35,8 @@ async function parentAcademicPerformanceRenderByStudent(studentUserId){
         students: students,
         selectedStudentUserId: studentUserId,
         tabData: { studentBasicDetails: students },
-        rows: rows
+        rows: rows,
+        courseProviderId: apiResponse.details.courseProviderId
     }));
     parentAcademicPerformanceSetActiveStudentThumb(studentUserId);
     parentAcademicPerformanceOnLoadEvent();
@@ -234,6 +235,7 @@ function parentAcademicPerformanceLoadProgressDetail(studentUserId, lmsEnrollmen
 
 function parentAcademicPerformanceBindProgressDetailData(data){
     var totalAssignment = data.totalAssignment != null ? data.totalAssignment : 0;
+    var excusedAssign = data.excusedAssign != null ? data.excusedAssign : 0;
     var submiteAssign = data.submiteAssign != null ? data.submiteAssign : 0;
     var upcomingAssign = data.upcomingAssign != null ? data.upcomingAssign : 0;
     var pendingAssign = data.pendingAssign != null ? data.pendingAssign : 0;
@@ -245,6 +247,7 @@ function parentAcademicPerformanceBindProgressDetailData(data){
     var gradeByTeacher = data.gradeByTeacher != null ? data.gradeByTeacher : 0;
 
     $("#totalAssign").html(totalAssignment);
+    $("#excusedAssign").html(excusedAssign);
     $("#submiteAssign").html(submiteAssign);
     $("#upcomingAssign").html(upcomingAssign);
     $("#pendingAssign").html(pendingAssign);
@@ -260,7 +263,7 @@ function parentAcademicPerformanceBindProgressDetailData(data){
     var enrollments = data.response && data.response.enrollments ? data.response.enrollments : null;
     var enrollmentList = enrollments && enrollments.enrollment ? enrollments.enrollment : [];
     if(!$.isArray(enrollmentList) || enrollmentList.length === 0){
-        $("#studentLmsProgress").html(`<tr><td colspan="${USER_ROLE !== "STUDENT" ? "9" : "8"}" class="text-center">No record found</td></tr>`);
+        $("#studentLmsProgress").html(`<tr><td colspan="${USER_ROLE !== "STUDENT" ? "10" : "9"}" class="text-center">No record found</td></tr>`);
         return;
     }
 
@@ -289,13 +292,20 @@ function parentAcademicPerformanceBindItemsRows(enrollId, itemsData){
     var html = "";
     var items = itemsData && itemsData.item ? itemsData.item : [];
     if(!$.isArray(items) || items.length === 0){
-        $("#studentLmsProgress").html(`<tr><td colspan="${USER_ROLE !== "STUDENT" ? "9" : "8"}" class="text-center">No record found</td></tr>`);
+        $("#studentLmsProgress").html(`<tr><td colspan="${USER_ROLE !== "STUDENT" ? "10" : "9"}" class="text-center">No record found</td></tr>`);
         return;
     }
     $.each(items, function(index, item){
         var submitStatus = "";
         if(item.submissionStatus){
             submitStatus = item.submissionStatus + (item.lateTime ? (" (" + item.lateTime + ")") : "");
+        }
+        var status = (item.status || item.submissionStatus || "").toUpperCase();
+        var statusIcon = "";
+        if(status === "SUBMITTED"){
+            statusIcon = `<i class="fa fa-check text-success"></i>`;
+        }else if(status === "EXCUSED"){
+            statusIcon = `<i class="fa fa-times"></i>`;
         }
         var scoreText = item.unitPercent ? (item.unitPercent + "%") : "";
         html += `<tr>
@@ -314,6 +324,7 @@ function parentAcademicPerformanceBindItemsRows(enrollId, itemsData){
         }else{
             html += `<td></td>`;
         }
+        html += `<td class="text-center">${statusIcon || ""}</td>`;
         html += `</tr>`;
     });
     $("#studentLmsProgress").html(html);

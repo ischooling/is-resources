@@ -278,6 +278,9 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                             <option value="Reject">Reject</option>`;
                                         }
                                     }
+                                    if(USER_ROLE == 'DIRECTOR'){
+                                        html+=`<option value="Update Assign To">Update Assign To</option>`;
+                                    }
                                html+=`</select>
                             </div>
                             <div id="assignedToInterviewDiv" class="form-group" style="display: none;">

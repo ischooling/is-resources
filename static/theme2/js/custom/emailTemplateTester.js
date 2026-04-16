@@ -29,12 +29,12 @@ var mailTesterState = {
 		var text = message || "Loading template preview...";
 		$("#mailTesterRenderedWrap")
 			.html(
-				'<div class="mailTesterLoader"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>' +
+				'<div class="d-inline-flex align-items-center gap-10 text-muted font-weight-semi-bold"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>' +
 					text +
 					"</span></div>"
 			)
-			.show();
-		$("#mailTesterPreviewFrame").hide();
+			.removeClass("d-none");
+		$("#mailTesterPreviewFrame").addClass("d-none");
 	}
 
 	function mailTesterClearMeta() {
@@ -49,19 +49,25 @@ var mailTesterState = {
 		);
 		$("#mailTesterRenderedWrap")
 			.text("Choose a template to generate a rendered preview.")
-			.show();
-		$("#mailTesterPreviewFrame").hide();
-		$("#mailTesterUnresolvedWrap").removeClass("mailTesterNotice--warn").hide();
+			.removeClass("d-none");
+		$("#mailTesterPreviewFrame").addClass("d-none");
+		$("#mailTesterUnresolvedWrap")
+			.addClass("d-none")
+			.removeClass("alert-warning");
 		$("#mailTesterUnresolvedText").text("None");
 		mailTesterState.preview = null;
 	}
 
 	function mailTesterSetTabs(tabName) {
 		mailTesterState.activeTab = tabName || "rendered";
-		$("[data-mailtester-tab]").removeClass("active");
-		$('[data-mailtester-tab="' + mailTesterState.activeTab + '"]').addClass("active");
-		$("[data-mailtester-pane]").removeClass("active");
-		$('[data-mailtester-pane="' + mailTesterState.activeTab + '"]').addClass("active");
+		$("[data-mailtester-tab]")
+			.removeClass("btn-primary active")
+			.addClass("btn-outline-primary");
+		$('[data-mailtester-tab="' + mailTesterState.activeTab + '"]')
+			.removeClass("btn-outline-primary")
+			.addClass("btn-primary active");
+		$("[data-mailtester-pane]").addClass("d-none");
+		$('[data-mailtester-pane="' + mailTesterState.activeTab + '"]').removeClass("d-none");
 	}
 
 	function mailTesterWriteFrame(html) {
@@ -87,8 +93,8 @@ var mailTesterState = {
 				fallbackDoc.close();
 			} catch (ignore) {}
 		}
-		$("#mailTesterRenderedWrap").hide();
-		$("#mailTesterPreviewFrame").show();
+		$("#mailTesterRenderedWrap").addClass("d-none");
+		$("#mailTesterPreviewFrame").removeClass("d-none");
 	}
 
 	function mailTesterPrefillRecipient() {
@@ -108,7 +114,7 @@ var mailTesterState = {
 
 	function mailTesterGetOverrideMap() {
 		var overrides = {};
-		$(".mailTesterTokenInput").each(function () {
+		$("[data-mailtester-token-input]").each(function () {
 			var token = String($(this).attr("data-token") || "").trim();
 			if (!token) {
 				return;
@@ -161,10 +167,10 @@ var mailTesterState = {
 		(rows || []).forEach(function (row) {
 			html +=
 				"<tr>" +
-				'<td><span class="mailTesterTokenCode">#' +
+				'<td><span class="badge badge-primary">#' +
 				mailTesterEsc(row.token || "") +
 				"#</span></td>" +
-				'<td><textarea class="form-control form-control-sm mailTesterTokenInput" data-token="' +
+				'<td><textarea class="form-control form-control-sm rounded" data-mailtester-token-input="1" data-token="' +
 				mailTesterEsc(row.token || "") +
 				'" rows="2">' +
 				mailTesterEsc(row.value || "") +
@@ -193,12 +199,16 @@ var mailTesterState = {
 
 		var unresolvedTokens = response.unresolvedTokens || [];
 		if (unresolvedTokens.length) {
-			$("#mailTesterUnresolvedWrap").addClass("mailTesterNotice--warn").show();
+			$("#mailTesterUnresolvedWrap")
+				.removeClass("d-none")
+				.addClass("alert-warning");
 			$("#mailTesterUnresolvedText").text(
 				"These placeholders still remain after sample injection: " + unresolvedTokens.join(", ")
 			);
 		} else {
-			$("#mailTesterUnresolvedWrap").removeClass("mailTesterNotice--warn").hide();
+			$("#mailTesterUnresolvedWrap")
+				.addClass("d-none")
+				.removeClass("alert-warning");
 			$("#mailTesterUnresolvedText").text("None");
 		}
 	}
@@ -224,7 +234,7 @@ var mailTesterState = {
 				if (!mailTesterState.templates.length) {
 					$("#mailTesterRenderedWrap")
 						.text("No active email templates were found in TEMPLATE.")
-						.show();
+						.removeClass("d-none");
 					return;
 				}
 			},
@@ -303,8 +313,8 @@ var mailTesterState = {
 				}
 				var isSuccess = String(response.status || "") === "1";
 				$("#mailTesterSendResult")
-					.toggleClass("mailTesterNotice--warn", !isSuccess)
-					.show();
+					.removeClass("d-none alert-warning alert-success")
+					.addClass(isSuccess ? "alert-success" : "alert-warning");
 				$("#mailTesterSendResultText").html(
 					(isSuccess ? "Mail sent to <b>" : "Mail send failed for <b>") +
 						mailTesterEsc(response.recipientEmail || recipientEmail) +
@@ -316,7 +326,9 @@ var mailTesterState = {
 			},
 			error: function () {
 				$("#mailTesterSendBtn").prop("disabled", false).text("Send Test Mail");
-				$("#mailTesterSendResult").addClass("mailTesterNotice--warn").show();
+				$("#mailTesterSendResult")
+					.removeClass("d-none alert-success")
+					.addClass("alert-warning");
 				$("#mailTesterSendResultText").text("Unable to send test mail");
 				mailTesterToast(0, "Unable to send test mail");
 			},
@@ -344,7 +356,9 @@ var mailTesterState = {
 			$("#mailTesterTemplate").val("");
 		}
 		$("#mailTesterRecipient").val("");
-		$("#mailTesterSendResult").hide().removeClass("mailTesterNotice--warn");
+		$("#mailTesterSendResult")
+			.addClass("d-none")
+			.removeClass("alert-warning alert-success");
 		$("#mailTesterSendResultText").text("No mail sent yet.");
 		mailTesterClearMeta();
 		mailTesterPrefillRecipient();

@@ -639,10 +639,17 @@ function studentStatusUpdateWithdrawn(userId, status, rolemoduleId) {
 		}
 	});
 }
-function openTeacherStudentPerformanceModal(moduleId, studentUserId, studentName) {
-	return openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName);
+function openTeacherStudentPerformanceModal(moduleId, studentUserId, studentName, lmsProviderId) {
+	if (moduleId && moduleId.nodeType === 1) {
+		var $performanceLink = $(moduleId);
+		moduleId = $performanceLink.attr("data-module-id");
+		studentUserId = $performanceLink.attr("data-student-user-id");
+		studentName = $performanceLink.attr("data-student-name");
+		lmsProviderId = $performanceLink.attr("data-lms-provider-id");
+	}
+	return openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName, lmsProviderId);
 }
-function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName) {
+function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName, lmsProviderId) {
 	if (!moduleId || !studentUserId) {
 		showMessageTheme2(0, "Invalid student performance request.");
 		return false;
@@ -655,7 +662,8 @@ function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentN
 	$("#manageUserStudentPerformanceModal")
 		.attr("data-module-id", moduleId)
 		.attr("data-student-user-id", studentUserId)
-		.attr("data-student-name", studentName || "");
+		.attr("data-student-name", studentName || "")
+		.attr("data-lms-provider-id", lmsProviderId || "");
 	$("#manageUserStudentPerformanceModal")
 		.off("hidden.bs.modal.manageUserPerformance")
 		.on("hidden.bs.modal.manageUserPerformance", function () {
@@ -663,9 +671,9 @@ function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentN
 			$("#manageUserStudentGradeHistoryPopup").remove();
 			$("#manageUserStudentPerformanceBody").html("");
 		});
-	$("#manageUserStudentPerformanceModal .modal-title").text(studentName ? ("Student Performance - " + studentName) : "Student Performance");
+	$("#manageUserStudentPerformanceModal .modal-title").text(studentName ? ("Student Performance | " + studentName) : "Student Performance");
 	$("#manageUserStudentPerformanceModal").modal("show");
-	manageUserStudentPerformanceRenderMain(studentUserId);
+	manageUserStudentPerformanceRenderMain(studentUserId, lmsProviderId);
 	return false;
 }
 
@@ -686,14 +694,14 @@ function getManageUserStudentPerformanceModalHtml() {
     </div>`;
 }
 
-async function manageUserStudentPerformanceRenderMain(studentUserId) {
+async function manageUserStudentPerformanceRenderMain(studentUserId, lmsProviderId) {
 	customLoader(true);
 	hideMessage('');
 	$("#manageUserStudentPerformanceBody").html(`<div class="py-4 text-center">Loading...</div>`);
 	try {
-		var response = await manageUserStudentPerformanceFetch(studentUserId);
+		var response = await manageUserStudentPerformanceFetch(studentUserId, lmsProviderId);
 		var rows = manageUserStudentPerformanceMapRows(response, studentUserId + "");
-		$("#manageUserStudentPerformanceBody").html(getManageUserStudentPerformanceContent(rows));
+		$("#manageUserStudentPerformanceBody").html(getManageUserStudentPerformanceContent(rows, lmsProviderId));
 		manageUserStudentPerformanceInitDataTable();
 	} catch (e) {
 		$("#manageUserStudentPerformanceBody").html(`<div class="alert alert-danger mb-0">Unable to load academic performance.</div>`);
@@ -702,11 +710,15 @@ async function manageUserStudentPerformanceRenderMain(studentUserId) {
 	}
 }
 
-async function manageUserStudentPerformanceFetch(studentUserId) {
+async function manageUserStudentPerformanceFetch(studentUserId, lmsProviderId) {
 	var ajaxReqDetails = {
 		method: "POST",
 		url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/parent/student-academic-performance",
-		body: { userId: USER_ID + "", studentUserId: studentUserId + "" },
+		body: {
+			userId: USER_ID + "",
+			studentUserId: studentUserId + "",
+			lmsProviderId: lmsProviderId || ""
+		},
 		global: true,
 		showMessage: false,
 		onFaildResolved: true,
@@ -745,29 +757,33 @@ function manageUserStudentPerformanceFormatPercent(value) {
 	return percentValue.toFixed(2) + "%";
 }
 
-function manageUserStudentPerformancePaceHtml(pace) {
-	var value = (pace || "N/A").toUpperCase();
-	var textClass = "text-dark";
-	var label = pace || "N/A";
-	var imageName = "still.png";
-	var imageStyle = "width:24px;height:24px;object-fit:contain;";
+function manageUserStudentPerformancePaceHtml(value){
+    // var value = (pace || "N/A").toUpperCase();
+    var textClass = "text-dark";
+    var label = value || "N/A";
+    var imageName = "still.png";
+    var imageStyle = "width:24px;height:24px;object-fit:contain;";
 
-	if (value === "GREEN") {
-		textClass = "text-success";
-		label = "Ahead";
-		imageName = "forward.gif";
-		imageStyle = "width:27px;height:27px;object-fit:contain;";
-	} else if (value === "YELLOW") {
+    if(value === "Ahead"){
+        textClass = "text-success";
+        label = "Ahead";
+        imageName = "forward.gif";
+        imageStyle = "width:27px;height:27px;object-fit:contain;";
+    }else if(value === "OnTrack"){
+        textClass = "text-primary";
+        label = "On Track";
+        imageName = "still.png";
+    }else if(value === "Behind"){
+        textClass = "text-danger";
+        label = "Behind";
+        imageName = "behind.gif";
+	}else if(value === "GettingStarted"){
 		textClass = "text-primary";
-		label = "On Track";
-		imageName = "still.png";
-	} else if (value === "RED") {
-		textClass = "text-danger";
-		label = "Behind";
-		imageName = "behind.gif";
+        label = "Get Started";
+        imageName = "still.png";
 	}
-	var imageUrl = PATH_FOLDER_IMAGE2 + imageName;
-	return `<div class="d-flex align-items-center ${textClass}"><img src="${imageUrl}" alt="${label}" style="${imageStyle}"><span class="ml-2">${label}</span></div>`;
+    var imageUrl = PATH_FOLDER_IMAGE2 + imageName;
+    return `<div class="d-flex align-items-center ${textClass}"><img src="${imageUrl}" alt="${label}" style="${imageStyle}"><span class="ml-2">${label}</span></div>`;
 }
 
 function manageUserStudentPerformanceProgressHtml(value) {
@@ -781,55 +797,62 @@ function manageUserStudentPerformancePercentActivityHtml(gradablePercent, gradab
 	return `<div class="text-center d-flex align-items-start mb-1"><div class="mb-0 progress col-2 pl-0 mt-1"><div class="progress-bar bg-primary" role="progressbar" style="width:${gradablePercent}%;" aria-valuenow="${gradablePercent}" aria-valuemin="0" aria-valuemax="100"></div></div><div class="text-center">&nbsp;${gradablePercent}% of gradable activities completed (${gradableDone} of ${gradableTotal})</div></div><div class="text-center d-flex align-items-start"><div class="mb-0 progress col-2 pl-0 mt-1"><div class="progress-bar bg-primary" role="progressbar" style="width:${allPercent}%;" aria-valuenow="${allPercent}" aria-valuemin="0" aria-valuemax="100"></div></div><div class="text-center">&nbsp;${allPercent}% of all activities completed (${allDone} of ${allTotal})</div></div>`;
 }
 
-function getManageUserStudentPerformanceContent(rows) {
-	return `<div class="main-card card rounded-10 border py-3">
-        <div class="card-body p-0">
-            <div class="d-flex flex-wrap align-items-center justify-content-between">
-                <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Academic Performance</h4>
-            </div>
-            <div class="table-responsive">
-                <table class="table font-12 nowrap dt-responsive" id="manageUserStudentAcademicPerformanceTable" style="width:100%;">
-                    <thead class="bg-primary text-white">
-                        <tr>
-                            <th class="pl-3">Course Name</th>
-                            <th>Score</th>
-                            <!--<th>Pace</th>-->
-                            <th>Teacher Name</th>
-                            <th>End Date</th>
-                            <th>Remaining Days</th>
-                            <th>Pending Assignment</th>
-                            <th>Progress (gradable)</th>
-                            <th>Progress (all activities)</th>
-                        </tr>
-                    </thead>
-                    <tbody>${getManageUserStudentPerformanceRowsHtml(rows)}</tbody>
-                </table>
-            </div>
-        </div>
-    </div>`;
+function manageUserStudentPerformanceSupportsDetailedView(lmsProviderId) {
+	var providerId = parseInt(lmsProviderId, 10);
+	return providerId === 36 || providerId === 37 || providerId === 38;
 }
 
-function getManageUserStudentPerformanceRowsHtml(rows) {
+function getManageUserStudentPerformanceContent(rows, lmsProviderId) {
+	var supportsDetailedView = manageUserStudentPerformanceSupportsDetailedView(lmsProviderId);
+	return `<div class="main-card card rounded-10 border py-3">
+	        <div class="card-body p-0">
+	            <div class="d-flex flex-wrap align-items-center justify-content-between">
+	                <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Academic Performance</h4>
+	            </div>
+            <div class="table-responsive">
+                <table class="table font-12 nowrap dt-responsive" id="manageUserStudentAcademicPerformanceTable" style="width:100%;">
+	                    <thead class="bg-primary text-white">
+	                        <tr>
+	                            <th class="pl-3">Course Name</th>
+	                            <th>Score</th>
+	                            ${supportsDetailedView ? "<th>Pace</th>" : ""}
+	                            <th>Teacher Name</th>
+	                            <th>End Date</th>
+	                            <th>Remaining Days</th>
+	                            ${supportsDetailedView ? "<th>Pending Assignment</th>" : ""}
+	                            ${supportsDetailedView ? "<th>Progress (gradable)</th>" : ""}
+	                            ${supportsDetailedView ? "<th>Progress (all activities)</th>" : ""}
+	                        </tr>
+	                    </thead>
+	                    <tbody>${getManageUserStudentPerformanceRowsHtml(rows, lmsProviderId)}</tbody>
+	                </table>
+	            </div>
+	        </div>
+	    </div>`;
+}
+
+function getManageUserStudentPerformanceRowsHtml(rows, lmsProviderId) {
 	var html = "";
+	var supportsDetailedView = manageUserStudentPerformanceSupportsDetailedView(lmsProviderId);
 	$.each(rows || [], function (_, row) {
 		var courseText = manageUserStudentPerformanceEscapeHtml(row.courseName || "N/A");
-		if (row.lmsEnrollmentId && row.lmsCourseId) {
+		if (supportsDetailedView && row.lmsEnrollmentId && row.lmsCourseId) {
 			courseText = `<a href="javascript:void(0)" class="text-primary" onclick="manageUserStudentPerformanceOpenProgressDetail('${row.studentUserId}','${row.lmsEnrollmentId}','${row.lmsCourseId}')">${courseText}</a>`;
 		}
 		html += `<tr>
-            <td class="pl-3">${courseText}</td>
-            <td>${row.scoreText}</td>`;
-		// <td>${manageUserStudentPerformancePaceHtml(row.pace)}</td>
-		html += `<td>${getSalutationByGender(row.teacherGender)} ${manageUserStudentPerformanceEscapeHtml(row.teacherName)}</td>
-            <td>${manageUserStudentPerformanceEscapeHtml(row.endDate)}</td>
-            <td>${manageUserStudentPerformanceEscapeHtml(row.remainingDays)}</td>
-            <td>${manageUserStudentPerformanceEscapeHtml(row.pendingAssignment + "")}</td>
-            <td>${manageUserStudentPerformanceProgressHtml(row.progressGradable)}</td>
-            <td>${manageUserStudentPerformanceProgressHtml(row.progressAllActivity)}</td>
-        </tr>`;
+	            <td class="pl-3">${courseText}</td>
+	            <td>${row.scoreText}</td>
+	            ${supportsDetailedView ? `<td>${manageUserStudentPerformancePaceHtml(row.pace)}</td>` : ""}
+				<td>${getSalutationByGender(row.teacherGender)} ${manageUserStudentPerformanceEscapeHtml(row.teacherName)}</td>
+	            <td>${manageUserStudentPerformanceEscapeHtml(row.endDate)}</td>
+	            <td>${manageUserStudentPerformanceEscapeHtml(row.remainingDays)}</td>
+	            ${supportsDetailedView ? `<td>${manageUserStudentPerformanceEscapeHtml(row.pendingAssignment + "")}</td>` : ""}
+	            ${supportsDetailedView ? `<td>${manageUserStudentPerformanceProgressHtml(row.progressGradable)}</td>` : ""}
+	            ${supportsDetailedView ? `<td>${manageUserStudentPerformanceProgressHtml(row.progressAllActivity)}</td>` : ""}
+	        </tr>`;
 	});
 	if (!html) {
-		html = `<tr><td colspan="9" class="text-center">No academic performance found</td></tr>`;
+		html = `<tr><td colspan="${supportsDetailedView ? 9 : 5}" class="text-center">No academic performance found</td></tr>`;
 	}
 	return html;
 }
@@ -878,11 +901,12 @@ function manageUserStudentPerformanceAttachGradeHistoryModal() {
 }
 
 function getManageUserStudentPerformanceDetailContent(studentUserId) {
+	var lmsProviderId = $("#manageUserStudentPerformanceModal").attr("data-lms-provider-id") || "";
 	return `<div class="full my-2 d-flex justify-content-end">
-            <a href="javascript:void(0)" onclick="manageUserStudentPerformanceRenderMain('${studentUserId}')" class="btn btn-dark rounded">
-                <i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>Back
-            </a>
-        </div>
+	            <a href="javascript:void(0)" onclick="manageUserStudentPerformanceRenderMain('${studentUserId}','${lmsProviderId}')" class="btn btn-dark rounded">
+	                <i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>Back
+	            </a>
+	        </div>
         <div class="main-card mb-3 card body-tabs-shadow">
             <div class="card-body">
                 <div class="mb-2"><b>Course:</b> <span id="manageUserStudentAcademicPerformanceCourseName">N/A</span></div>
@@ -892,13 +916,13 @@ function getManageUserStudentPerformanceDetailContent(studentUserId) {
                 <div id="manageUserStudentAcademicPerformancePercentActivity" class="mb-3"></div>
                 <div class="main-card mb-3" style="overflow-x:auto;">
                     <table class="details-table table table-striped table-bordered dt-responsive" style="min-width:980px;width:100%;">
-                        <thead><tr><th>Total Assignments</th><th>Submitted</th><th>Upcoming</th><th>Pending</th><th>Passed</th><th>Failed</th><th>Submitted BEFORE TIME</th><th>Submitted ON TIME</th><th>Submitted LATE</th></tr></thead>
-                        <tbody><tr><td id="manageUserTotalAssign">0</td><td id="manageUserSubmiteAssign">0</td><td id="manageUserUpcomingAssign">0</td><td id="manageUserPendingAssign">0</td><td id="manageUserPassesAssign">0</td><td id="manageUserFailedAssign">0</td><td id="manageUserSubmitBeforeTimeAssign">0</td><td id="manageUserSubmitOntimeAssign">0</td><td id="manageUserSubmitLateAssign">0</td></tr></tbody>
+                        <thead><tr><th>Total Assignments</th><th>Excused</th><th>Submitted</th><th>Upcoming</th><th>Pending</th><th>Passed</th><th>Failed</th><th>Submitted BEFORE TIME</th><th>Submitted ON TIME</th><th>Submitted LATE</th></tr></thead>
+                        <tbody><tr><td id="manageUserTotalAssign">0</td><td id="excusedAssign">0</td><td id="manageUserSubmiteAssign">0</td><td id="manageUserUpcomingAssign">0</td><td id="manageUserPendingAssign">0</td><td id="manageUserPassesAssign">0</td><td id="manageUserFailedAssign">0</td><td id="manageUserSubmitBeforeTimeAssign">0</td><td id="manageUserSubmitOntimeAssign">0</td><td id="manageUserSubmitLateAssign">0</td></tr></tbody>
                     </table>
                 </div>
                 <div class="main-card mb-3" style="overflow-x:auto;">
                     <table class="details-table table table-striped table-bordered dt-responsive" style="min-width:980px;width:100%;">
-                        <thead><tr><th>Activity Name</th><th>Due Date</th><th>Submitted Date</th><th>Time Spent (hh:mm:ss)</th><th>Submited Status</th><th>Score</th><th>Grade</th><th>Detailed Assignment Status</th></tr></thead>
+                        <thead><tr><th>Activity Name</th><th>Due Date</th><th>Submitted Date</th><th>Time Spent (hh:mm:ss)</th><th>Submited Status</th><th>Score</th><th>Grade</th><th>Detailed Assignment Status</th><th>Status</th></tr></thead>
                         <tbody id="manageUserStudentLmsProgress"></tbody>
                     </table>
                 </div>
@@ -948,16 +972,17 @@ function manageUserStudentPerformanceLoadProgressDetail(studentUserId, lmsEnroll
 	});
 }
 
-function manageUserStudentPerformanceBindProgressDetailData(data) {
-	$("#manageUserTotalAssign").html(data.totalAssignment != null ? data.totalAssignment : 0);
-	$("#manageUserSubmiteAssign").html(data.submiteAssign != null ? data.submiteAssign : 0);
-	$("#manageUserUpcomingAssign").html(data.upcomingAssign != null ? data.upcomingAssign : 0);
-	$("#manageUserPendingAssign").html(data.pendingAssign != null ? data.pendingAssign : 0);
-	$("#manageUserPassesAssign").html(data.passesAssign != null ? data.passesAssign : 0);
-	$("#manageUserFailedAssign").html(data.failedAssign != null ? data.failedAssign : 0);
-	$("#manageUserSubmitBeforeTimeAssign").html(data.submitBeforeTimeAssign != null ? data.submitBeforeTimeAssign : 0);
-	$("#manageUserSubmitOntimeAssign").html(data.submitOntimeAssign != null ? data.submitOntimeAssign : 0);
-	$("#manageUserSubmitLateAssign").html(data.submitLateAssign != null ? data.submitLateAssign : 0);
+function manageUserStudentPerformanceBindProgressDetailData(data){
+    $("#manageUserTotalAssign").html(data.totalAssignment != null ? data.totalAssignment : 0);
+	$("#excusedAssign").html(data.excusedAssign != null ? data.excusedAssign : 0);
+    $("#manageUserSubmiteAssign").html(data.submiteAssign != null ? data.submiteAssign : 0);
+    $("#manageUserUpcomingAssign").html(data.upcomingAssign != null ? data.upcomingAssign : 0);
+    $("#manageUserPendingAssign").html(data.pendingAssign != null ? data.pendingAssign : 0);
+    $("#manageUserPassesAssign").html(data.passesAssign != null ? data.passesAssign : 0);
+    $("#manageUserFailedAssign").html(data.failedAssign != null ? data.failedAssign : 0);
+    $("#manageUserSubmitBeforeTimeAssign").html(data.submitBeforeTimeAssign != null ? data.submitBeforeTimeAssign : 0);
+    $("#manageUserSubmitLateAssign").html(data.submitLateAssign != null ? data.submitLateAssign : 0);
+    $("#manageUserSubmitOntimeAssign").html(data.submitOntimeAssign != null ? data.submitOntimeAssign : 0);
 
 	var enrollment = (((data.response || {}).enrollments || {}).enrollment || [])[0] || {};
 	var entity = enrollment.entity || {};
@@ -976,15 +1001,34 @@ function manageUserStudentPerformanceBindProgressDetailData(data) {
 		grades.completable != null ? grades.completable : 0
 	));
 
-	var items = ((grades.items || {}).item) || [];
-	if (!$.isArray(items) || items.length === 0) {
-		$("#manageUserStudentLmsProgress").html(`<tr><td colspan="8" class="text-center">No record found</td></tr>`);
-		return;
-	}
-	var html = "";
-	$.each(items, function (_, item) {
-		var submitStatus = item.submissionStatus ? (item.submissionStatus + (item.lateTime ? (" (" + item.lateTime + ")") : "")) : "";
-		html += `<tr>
+    $("#manageUserStudentAcademicPerformanceScore").html((grades.percentage != null ? grades.percentage : 0) + "%");
+    $("#manageUserStudentAcademicPerformanceGradeLetter").html(grades.letter || "N/A");
+
+    $("#manageUserStudentAcademicPerformancePercentActivity").html(manageUserStudentPerformancePercentActivityHtml(
+            grades.complete != null ? grades.complete : 0,
+            grades.completedgradable != null ? grades.completedgradable : 0,
+            grades.gradable != null ? grades.gradable : 0,
+            grades.completeall != null ? grades.completeall : 0,
+            grades.completed != null ? grades.completed : 0,
+            grades.completable != null ? grades.completable : 0
+        ));
+
+    var items = ((grades.items || {}).item) || [];
+    if(!$.isArray(items) || items.length === 0){
+        $("#manageUserStudentLmsProgress").html(`<tr><td colspan="9" class="text-center">No record found</td></tr>`);
+        return;
+    }
+    var html = "";
+    $.each(items, function(_, item){
+        var submitStatus = item.submissionStatus ? (item.submissionStatus + (item.lateTime ? (" (" + item.lateTime + ")") : "")) : "";
+        var status = (item.status || item.status || "").toUpperCase();
+        var statusIcon = "";
+        if(status === "SUBMITTED"){
+            statusIcon = `<i class="fa fa-check text-success"></i>`;
+        }else if(status === "EXCUSED"){
+            statusIcon = `<i class="fa fa-times"></i>`;
+        }
+        html += `<tr>
             <td class="text-left">${manageUserStudentPerformanceEscapeHtml(item.title || "N/A")}</td>
             <td>${item.duedate || "N/A"}</td>
             <td class="${item.colorDueText || ''}">${item.submitteddate || "N/A"}</td>
@@ -993,6 +1037,7 @@ function manageUserStudentPerformanceBindProgressDetailData(data) {
             <td class="${item.colorScoreText || ''}">${item.unitPercent ? (item.unitPercent + "%") : ""}</td>
             <td>${item.letter || ""}</td>
             <td>${submitStatus ? `<a href="javascript:void(0);" onclick="manageUserStudentPerformanceOpenGradeHistoryPopup('${enrollment.id || ""}','${item.itemid || ""}')"><i class="fa fa-eye"></i>&nbsp;View</a>` : ""}</td>
+            <td class="text-center">${statusIcon}</td>
         </tr>`;
 	});
 	$("#manageUserStudentLmsProgress").html(html);
@@ -1048,10 +1093,4 @@ function manageUserStudentPerformanceEscapeHtml(value) {
 	if (value === undefined || value === null) { return ""; }
 	return (value + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
 }
-
-
-
-
-
-
 
