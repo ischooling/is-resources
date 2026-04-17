@@ -1848,12 +1848,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					
 						+'<table class="w-100 demotable" style="border: solid #027ffe 1px;background-color: #D5E3FC;">'
 							+'<tbody>';
-               if(leads.language!=''){
-                  html+='<tr>'
-                    +'<th class="border-0 p-1" style="width:165px">Preferred Language: </th>'
-                    +'<td class="border-0 p-1">'+(leads.language!=''?leads.language:'N/A')+'</td>'
-                  +'</tr>';
-                }
+                html+='<tr>'
+                  +'<th class="border-0 p-1" style="width:165px">Preferred Language: </th>'
+                  +'<td class="border-0 p-1">'+(leads.language!=''?leads.language:'N/A')+'</td>'
+                +'</tr>';
                 if(leads.leadPreviousDate){
                    html+='<tr>'
                     +'<th class="border-0 p-1" style="width:165px">Previous Date & time : </th>'
@@ -1905,7 +1903,12 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                           //   +'</div>'
                            +'</td>'
                           +'<td class="border-0 p-1">'
-                              +'<button type="button" class="btn btn-sm btn-primary" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Demo Summary</button>'
+                              +'<div class="d-flex flex-column align-items-start" style="gap:8px;">'
+                                  +(leads.demoTranscriptUrl
+                                      ? '<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="showVTTFile(\''+leads.demoTranscriptUrl+'\', \'Transcript\',false)">Transcript</button>'
+                                      : '')
+                                  +'<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Demo Summary</button>'
+                              +'</div>'
                           +'</td>'
                         +'</tr>';
                   }

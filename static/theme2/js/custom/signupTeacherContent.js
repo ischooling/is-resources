@@ -2084,7 +2084,7 @@ function populateRecordingModalForSignup(recordings, title) {
             modalContent += `
                 <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
                     <h4>${recordings.length + 1}. Transcript</h4>
-                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="showVTTFile('${transcriptUrl}', 'Transcript')">Read</button>
+                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="showVTTFile('${transcriptUrl}', 'Transcript', true)">Read</button>
                 </div>`;
         }
     

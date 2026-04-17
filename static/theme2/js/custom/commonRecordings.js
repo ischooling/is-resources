@@ -171,14 +171,14 @@ function convertToVTT(videoUrl) {
     return transcriptUrl;
 }
 
-function displayVTT(content, modalId) {
+function displayVTT(content, modalId, showTime) {
     const output = $("#" + modalId + " #transcript-modal-body");
     output.empty();
     if (!content || content.includes("<Error><Code>")) {
         output.append(`<p style="font-size:16px;">No Transcript Available</p>`);
     } else {
         var lines = content.split("\n");
-        if(modalId == "transcriptModal"){
+        if(modalId == "transcriptModal" && showTime){
             lines.forEach(line => {
                 var p = $("<p></p>").text(line);
                 output.append(p);
@@ -204,7 +204,7 @@ function displayVTT(content, modalId) {
     }
 }
 
-function showVTTFile(url, title) {
+function showVTTFile(url, title, showTime) {
 	let transcriptModal = $("#transcriptModal");
     transcriptModal.remove();
     $("body").append(`
@@ -232,7 +232,7 @@ function showVTTFile(url, title) {
 		url: getURLForTranscriptContent(vttFile),
 		success: function(responseData) {
             customLoader(false);
-            displayVTT(responseData.content, "transcriptModal");
+            displayVTT(responseData.content, "transcriptModal", showTime);
             $("#transcriptModal").modal("show");
 		},
 		error: function() {
