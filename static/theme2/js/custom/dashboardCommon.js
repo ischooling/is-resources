@@ -265,6 +265,28 @@ function validateChangePassword(formId) {
 	return true;
 }
 
+function openLeadAutomationDashboardInNewTab() {
+	var schoolUuid = typeof SCHOOL_UUID !== "undefined" ? SCHOOL_UUID : "";
+	var uniqueUuid = typeof UNIQUEUUID !== "undefined" ? UNIQUEUUID : "";
+	var payloadObj = {
+		userId: String(typeof USER_ID !== "undefined" ? USER_ID : ""),
+	};
+	var encodedPayload = window.btoa(unescape(encodeURIComponent(JSON.stringify(payloadObj))));
+	var url = "";
+	if (schoolUuid && uniqueUuid) {
+		url = BASE_URL + CONTEXT_PATH + schoolUuid + "/dashboard/lead-automation/" + uniqueUuid + "?payload=" + encodeURIComponent(encodedPayload);
+	} else if (schoolUuid) {
+		url = BASE_URL + CONTEXT_PATH + schoolUuid + "/dashboard/lead-automation?payload=" + encodeURIComponent(encodedPayload);
+	} else {
+		url = "/dashboard/lead-automation?payload=" + encodeURIComponent(encodedPayload);
+	}
+	var popup = window.open(url, "_blank");
+	if (!popup) {
+		return false;
+	}
+	return false;
+}
+
 function changePassword(dashboardFor) {
 	$(".disabledFields").each(function () {
 		$(this).removeAttr('disabled');

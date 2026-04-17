@@ -24,6 +24,68 @@ function callMeetingRecordingSummary(leadid, leadno) {
 	});
 }
 
+function loadAutomatedFollowupPopupData(leadId, leadNo, followupAction, extraParams) {
+  if (!leadId && !leadNo) {
+    $("#automatedFollowupPopupBody").html(getAutomatedFollowupErrorHtml("Lead id or lead no is required."));
+    return;
+  }
+
+  var schoolPath = (typeof SCHOOL_UUID !== "undefined" && SCHOOL_UUID) ? SCHOOL_UUID : ((typeof SCHOOL_ID !== "undefined" && SCHOOL_ID) ? SCHOOL_ID : "");
+  var action = String(followupAction || "").toUpperCase();
+  var extra  = extraParams || {};
+  var request = {
+    schoolId:           SCHOOL_ID,
+    leadId:             leadId ? parseInt(leadId, 10) : null,
+    leadNo:             leadNo || "",
+    dryRun:             (action === "SEND_NOW") ? false : true,
+    requestSource:      "",
+    testEmail:          "",
+    followupAction:     action,
+    templateMode:       extra.templateMode   || null,
+    selectedTemplateId: extra.selectedTemplateId ? parseInt(extra.selectedTemplateId, 10) : null,
+    customBody:         extra.customBody     || null,
+    customSubject:      extra.customSubject  || null,
+    selectedMediaIds:   (Array.isArray(extra.selectedMediaIds) && extra.selectedMediaIds.length) ? extra.selectedMediaIds : null,
+    selectedFileUrls:   (Array.isArray(extra.selectedFileUrls) && extra.selectedFileUrls.length) ? extra.selectedFileUrls : null
+  };
+
+  $.ajax({
+    type: "POST",
+    url: BASE_URL + CONTEXT_PATH + schoolPath + "/dashboard/lead-automation-followup/process",
+    contentType: "application/json",
+    dataType: "json",
+    data: JSON.stringify(request),
+    success: function (response) {
+      var data = typeof response === "string" ? JSON.parse(response) : response;
+      updateAutomatedFollowupActionState(data);
+      $("#automatedFollowupPopupBody").html(renderAutomatedFollowupPopup(data));
+      setTimeout(function () {
+        if (typeof initAutomatedFollowupBodyEditor === "function") {
+          var st = window.AUTOMATED_FOLLOWUP_STATE || {};
+          initAutomatedFollowupBodyEditor(st.initialBody || "");
+        }
+      }, 0);
+      // Show centered success/error popup for action buttons
+      if (action === "SEND_NOW" || action === "RESUME" || action === "PAUSE" || action === "SKIP") {
+        var isSuccess = data && data.status === "SUCCESS";
+        var msgMap = { SEND_NOW: "Follow-up sent successfully.", RESUME: "Follow-up resumed successfully.", PAUSE: "Follow-up paused successfully.", SKIP: "Follow-up skipped successfully." };
+        var msg = isSuccess ? (msgMap[action] || "Action completed successfully.") : ((data && data.message) || "Action failed.");
+        if (typeof window.showMessageTheme2 === "function") {
+          window.showMessageTheme2(isSuccess ? 1 : 0, msg, "", true);
+        }
+      }
+    },
+    error: function () {
+      $("#automatedFollowupPopupBody").html(getAutomatedFollowupErrorHtml("Unable to load automated follow-up preview."));
+      if (action === "SEND_NOW" || action === "RESUME" || action === "PAUSE" || action === "SKIP") {
+        if (typeof window.showMessageTheme2 === "function") {
+          window.showMessageTheme2(0, "Unable to process the action. Please try again.", "", true);
+        }
+      }
+    }
+  });
+}
+
 function renderDemoDetailSummaryPopup(rawSummary, leadNo) {
   var summaryObj = parseDemoSummaryJson(rawSummary);
   if (!summaryObj) {

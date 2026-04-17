@@ -1029,6 +1029,7 @@ function getLeadListMasterContent(roleAndModule, objRights){
 		html+=getLeadCampaignListPopup();
 		html+=getLeadWatsApp();
 		html+=getLeadEnrollmentHoldPopup();
+		html+=getAutomatedFollowupPopup();
 		
 	}
 	html+=getMoveLeadsPopup(objRights);

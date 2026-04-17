@@ -150,7 +150,7 @@ function getTableData(data) {
             '<td>' + data[i].time + '</td>' +
             '<td>' + data[i].mailStatus + '</td>' + 
             '<td class="d-flex gap-5">' +
-            '<button class="btn btn-sm btn-primary" onclick="viewEmaillogsPopupConent('+data[i].id+',\''+mails+'\',\''+ccs+'\',\''+bccs+'\',\''+data[i].subject+'\',\''+data[i].time+'\',\''+data[i].urlParameters+'\')"><i class="fa fa-eye"></i></button>' +
+            '<button class="btn btn-sm btn-primary" onclick="viewEmaillogsPopupConent('+data[i].id+',\''+mails.replace(/'/g,"\\'") +'\',\''+ccs.replace(/'/g,"\\'") +'\',\''+bccs.replace(/'/g,"\\'") +'\',\''+(data[i].subject||'').replace(/'/g,"\\'") +'\',\''+(data[i].time||'').replace(/'/g,"\\'") +'\',\''+(data[i].urlParameters||'').replace(/'/g,"\\'") +'\')"><i class="fa fa-eye"></i></button>' +
             '<a href="' + BASE_URL + CONTEXT_PATH + UNIQUEUUID + '/dashboard/email-content/'+SCHOOL_ID+'?payload=' + data[i].urlParameters + '" target="_blank" class="btn btn-sm btn-primary" ><i class="fa fa-link"></i></a>' +
             '</td>' +
             '</tr>';
