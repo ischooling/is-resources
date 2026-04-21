@@ -196,6 +196,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "enrollment-availability":{url:"",file:[{role:"",fileName:["enrollmentavailabilityContent.js","enrollmentavailability.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "enrollment-reports":{url:"",file:[],funName:function(){},type:"JS",init: function(){},pageReqType:"EX",urlSend:"/dashboard/enrollment-availability-view"},
         "email-template-tester":{url:"",file:[{role:"",fileName:["emailTemplateTesterContent.js","emailTemplateTester.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "log-viewer":{url:"",file:[{role:"",fileName:["logViewerContent.js","logViewer.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         
     };
     

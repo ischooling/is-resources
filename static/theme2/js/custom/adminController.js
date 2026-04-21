@@ -606,6 +606,8 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderEnrollmentAvalabilityReportContent()
      }else if(pageNo=='email-template-tester'){
       getEmailerTemplateViewerContent();
+     }else if(pageNo=='log-viewer'){
+      renderLogViewerContent();
      }
      
 
