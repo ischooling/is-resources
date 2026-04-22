@@ -62,6 +62,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "holiday-form":{url:"school-holiday-form?moduleId="+moduleId,file:[{role:"",fileName:["jquery.ckeditor.js","dashboardCalendar.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "lead-automation":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-automation?moduleId="+moduleId+"&userId="+USER_ID},
         "lead-report-list":{url:"",file:[{role:"",fileName:["LeadReportListContent.js","CounselorDashboardContent.js","leads.js","LeadReportSearchPopup.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "lead-logs":{url:"",file:[{role:"",fileName:["LeadReportListContent.js","LeadReportLogsContent.js","CounselorDashboardContent.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-detail-by-campaign":{url:"",file:[{role:"",fileName:["LeadReportListContent.js","CounselorDashboardContent.js","leads.js","LeadReportSearchPopup.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-list":{url:"",file:[{role:"",fileName:["LeadListContent.js","B2CLeadListContent.js","B2CLead.js","B2BLeadListContent.js","leads.js","leadsContent.js","leadsPartnerContent.js","leadsPartner.js","schoolSetupContent.js","cropperImageChatSupportDocument.js","cropperImageLeadDocument.js", "schoolSetup.js", "CounselorData.js", "forceLeadsUpdate.js","commonRecordings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-assign-form":{url:"",file:[{role:"",fileName:["leadAssignFormContent.js","leadAssignForm.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -69,7 +70,6 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-list":{url:"",file:[{role:"",fileName:["leadDemoContent.js","leads.js","LeadSettingListContent.js","LeadSettings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-report":{url:"",file:[{role:"",fileName:["leadDemoReportContent.js","leadDemoReport.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        
         "lead-setting":{url:"",file:[{role:"",fileName:["LeadSettingListContent.js","LeadSettings.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-daily-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/counselor-daily-report?moduleId="+moduleId+"&userId="+USER_ID},
         "lead-sales-research":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-sales-research?moduleId="+moduleId+"&userId="+USER_ID},

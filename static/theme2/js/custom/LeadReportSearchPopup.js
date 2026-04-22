@@ -22,6 +22,10 @@ function submitFunction(){
         $("#btnClickLeadReportSearch").on("click",function(){
             var startDate = $("#counselorStartDate").val();
             var endDate = $("#counselorEndDate").val();
+            if ($("#searchLeadCounselorReportType").val() == 'LOGS') {
+                callLeadLogsCounselorsList('leadReportSearch', $("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody');
+                return;
+            }
             callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody', false, 0, 0);
         });
     }else if(submitId == 'enrollmentList'){
@@ -31,4 +35,3 @@ function submitFunction(){
 
     }
 }
-

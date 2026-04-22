@@ -7820,44 +7820,19 @@ function callLeadCounselorsList(formId, modeSearch, startDate, endDate, elementI
 					$("#"+elementId).html(httmlTop);
 					if(!sublistStatus){
 						$("#counselor-list-footer").removeClass("d-none");
-						var httmlFoot = ""
-						if(counselorReportType=="LOGS"){
-							$("#advanceSearchAndExport12").addClass('hidden');
-							$("#listCounselorTheader_log").removeClass('hidden');
-							$("#listCounselorTheader").addClass('hidden');
-							if(modeSearch=="DAY"){
-								$("#zadarmaCallSync").removeClass('hidden');
-							}else{
-								$("#zadarmaCallSync").addClass('hidden');
-							}
-							// $("#listCounselorTheader").html(getLogsHeaderHtml());
-							httmlFoot+=getLogsFootHtml(data, false);
-						}else{
-							$("#advanceSearchAndExport12").removeClass('hidden');
-							$("#listCounselorTheader_log").addClass('hidden');
-							$("#listCounselorTheader").removeClass('hidden');
-							$("#zadarmaCallSync").addClass('hidden');
-							// $("#listCounselorTheader").html(getLeadsHeaderHtml());
-							httmlFoot+=getLeadCounselorFootHtml(data, false);
-						}
+						var httmlFoot = "";
+						$("#advanceSearchAndExport12").removeClass('hidden');
+						$("#listCounselorTheader").removeClass('hidden');
+						$("#zadarmaCallSync").addClass('hidden');
+						httmlFoot += getLeadCounselorFootHtml(data, false);
 						getLeadCounselorFootHtml(data, true);
 						$("#listCounselorTfoot").html(httmlFoot);
 					}else{
 						var foots = elementId.split("-")[1];
-						var httmlFoot = ""
-						if(counselorReportType=="LOGS"){
-							$("#advanceSearchAndExport12").addClass('hidden');
-							$("#listCounselorTheader_log").removeClass('hidden');
-							$("#listCounselorTheader").addClass('hidden');
-							// $("#listCounselorTheader").html(getLogsHeaderHtml());
-							httmlFoot+=getLogsFootHtml(data, false);
-						}else{
-							$("#advanceSearchAndExport12").removeClass('hidden');
-							$("#listCounselorTheader_log").addClass('hidden');
-							$("#listCounselorTheader").removeClass('hidden');
-							// $("#listCounselorTheader").html(getLeadsHeaderHtml());
-							httmlFoot+=getLeadCounselorFootHtml(data, false);
-						}
+						var httmlFoot = "";
+						$("#advanceSearchAndExport12").removeClass('hidden');
+						$("#listCounselorTheader").removeClass('hidden');
+						httmlFoot += getLeadCounselorFootHtml(data, false);
 						if(campaignId==-1 || countryId==-1){
 							$("#sublistCounselorTfoot--1").html(httmlFoot);
 						}else{
@@ -8102,7 +8077,7 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				if(counselorReportType=='Country' || counselorReportType=='Campaign'){
 					var dropdownCounselor=getDropdownTable(leadCounselor.assignTo, leadCounselor.totalLead, leadCounselor.duplicateLeadCount, totalLeadLink, uniqueLeadLink, duplicateLeadLink);
 					htmlRet +="<td style=\"vertical-align: top !important;background-color:#3f6ad8 !important;color:#fff;\" class=\"\">"+dropdownCounselor+"</td>";
-				}else if(counselorReportType!='LOGS'){
+				}else{
 					var uniqLead=(leadCounselor.totalLead-leadCounselor.duplicateLeadCount);
 					htmlRet +="<td style=\"vertical-align: top !important;background-color:#3f6ad8 !important;color:#fff;\" class=\"\"> ";
 					htmlRet +="<div class='d-flex align-items-center'>"
@@ -8111,23 +8086,15 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 					+"</div></td>"
 				}
 			}
-			if(counselorReportType=='LOGS'){
-				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showZadarmaDetails('${leadCounselor.zadarma}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-success text-white text-center  badge font-12\">${leadCounselor.zadarmaCount}</button>&nbsp;|&nbsp;<button onClick="showCallhippoDetails('${leadCounselor.callhippo}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-info text-white text-center  badge font-12\">${leadCounselor.callhippoCount}</button></td>`;
-				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showWatiDetails('${leadCounselor.wati}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-warning text-white text-center badge font-12\">${leadCounselor.watiCount}</button></td>`;
-				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showWhatsappDetails('${leadCounselor.whatsappIds}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-primary text-white text-center badge font-12\">${leadCounselor.whatsappCount}</button></td>`;
-				htmlRet +=`<td style=\"vertical-align: top !important;\" class=\"text-center\"><button onClick="showMailBrodcastDetails('${leadCounselor.mailIds}')" style="border: none; outline: none; cursor: pointer;" class=\"bg-info text-white text-center badge font-12\">${leadCounselor.mailCount}</button></td>`;
-
-			}else{
-				
-				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\">";
-				htmlRet +="<div class='d-flex align-items-center'>"
-				htmlRet +="<span class='d-flex'><a href=\"javascript:void(0);\"  onclick=\""+facebookleadLink+"\">"+leadCounselor.totalFbLead+"</a></span>"
-				htmlRet +="<span class='d-inline-flex ml-auto'><a href=\"javascript:void(0);\"  onclick=\""+FbleadLink+"\">"+leadCounselor.fb_total +"</a> | <a href=\"javascript:void(0);\"  onclick=\""+igleadLink+"\">"+leadCounselor.ig_total+"</a></span>"
-				htmlRet +="</div></td>";
-				htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+unattendedLink+"\">"+leadCounselor.unattended+"</a></td>";
-				htmlRet +="<td style=\"vertical-align: top !important;background-color:#f3f39e !important;color:#343a40;\" class=\"text-center\">";
-				htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
-				htmlRet +="<tbody>";
+			htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\">";
+			htmlRet +="<div class='d-flex align-items-center'>"
+			htmlRet +="<span class='d-flex'><a href=\"javascript:void(0);\"  onclick=\""+facebookleadLink+"\">"+leadCounselor.totalFbLead+"</a></span>"
+			htmlRet +="<span class='d-inline-flex ml-auto'><a href=\"javascript:void(0);\"  onclick=\""+FbleadLink+"\">"+leadCounselor.fb_total +"</a> | <a href=\"javascript:void(0);\"  onclick=\""+igleadLink+"\">"+leadCounselor.ig_total+"</a></span>"
+			htmlRet +="</div></td>";
+			htmlRet +="<td style=\"vertical-align: top !important;\" class=\"text-center\"><a href=\"javascript:void(0);\" onclick=\""+unattendedLink+"\">"+leadCounselor.unattended+"</a></td>";
+			htmlRet +="<td style=\"vertical-align: top !important;background-color:#f3f39e !important;color:#343a40;\" class=\"text-center\">";
+			htmlRet +="<table class=\"w-100 table mb-0 bg-transparent\">";
+			htmlRet +="<tbody>";
 
 
 				// ---------- SH row ----------
@@ -8196,12 +8163,11 @@ function getLeadCounselorHtml(data, startDate, endDate, counselorReportType, sub
 				
 				var countryIds=0;
 			    var campignIds=0;
-				if(counselorReportType=='Country' || counselorReportType=='Campaign'){
-					countryIds=(counselorReportType=='Country'?leadCounselor.assignTo:0);
-					campignIds=(counselorReportType=='Campaign'?leadCounselor.assignTo:0);
-					if(!sublistStatus){
-						callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'sublistCounselorTbody-'+leadCounselor.assignTo, true, countryIds, campignIds);
-					}
+			if(counselorReportType=='Country' || counselorReportType=='Campaign'){
+				countryIds=(counselorReportType=='Country'?leadCounselor.assignTo:0);
+				campignIds=(counselorReportType=='Campaign'?leadCounselor.assignTo:0);
+				if(!sublistStatus){
+					callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(), startDate, endDate, 'sublistCounselorTbody-'+leadCounselor.assignTo, true, countryIds, campignIds);
 				}
 			}
 		}
@@ -8367,44 +8333,6 @@ function getLeadCounselorFootHtml(data, fontSize){
 	htmlRet +="</tr>";
 	return htmlRet;
 }
-
-function getLogsFootHtml(data, fontSize){
-	var leadListCounselor=data.leadListCounselor;
-	var htmlRet ="";
-	var sr=1;
-	var zadarmatotal=0;
-	var callhippototal=0;
-	var watitotal=0;
-	var whatsapptotal=0;
-	var mailtotal=0;
-
-	if(leadListCounselor.length>0){
-		for (let ind = 0; ind < leadListCounselor.length; ind++) {
-			const leadCounselor = leadListCounselor[ind];
-			zadarmatotal+=leadCounselor.zadarmaCount;
-			callhippototal+=leadCounselor.callhippoCount;
-			watitotal+=leadCounselor.watiCount;	
-			whatsapptotal+=leadCounselor.whatsappCount;
-			mailtotal+=leadCounselor.mailCount;
-			sr=sr+1;
-		}
-	}
-	if(fontSize){
-		htmlRet +="<tr style=\"font-size:14px;background-color: #c9def3 !important;\">";
-	}else{
-		htmlRet +="<tr style=\"font-size:11px;background-color: #c9def3 !important;\">";
-	}
-
-	htmlRet +="<th class=\"text-center\"></th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">Total</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+zadarmatotal+" / "+callhippototal+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+watitotal+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+whatsapptotal+"</th>";
-	htmlRet +="<th style=\"vertical-align: top !important;\" class=\"text-center\">"+mailtotal+"</th>";
-	htmlRet +="</tr>";
-	return htmlRet;
-}
-
 
 function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, uniqueLeadLink, duplicateLeadLink){
 	var html='';
@@ -10600,30 +10528,6 @@ function goToPage(page) {
 		showWhatsappDetails(currentWhatsappIds);
 	}
 }
-
-function syncZadarmaCall(){
-	showMessageTheme2(1,"Call synchronization process started.");
-	$("#callSyncRotate").addClass("rotate");
-	var syncDate=$("#syncZadarmaDate").val();
-	$.ajax({
-		url: BASE_URL + CONTEXT_PATH + "zadarma/v1/sync?syncDate="+syncDate,
-		type: "GET",
-		contentType: APPLICATION_JSON_VALUE,
-		dataType: "json",
-		async: true,
-		global: false,
-        success: function (response) {
-			if(response.status == 'success'){
-				$("#callSyncRotate").removeClass("rotate");
-				callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(),'','','listCounselorTbody', false, 0, 0);
-			}else{
-				$("#callSyncRotate").removeClass("rotate");
-				showMessageTheme2(0, response.message)
-			}
-        }
-	});
-}
-
 
 function curentTimeStamp(timeZoneOffset){
 	var now = new Date();

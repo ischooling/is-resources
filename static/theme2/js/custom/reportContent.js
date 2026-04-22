@@ -161,7 +161,6 @@ function getReportsTab(objRight){
 					<option value="Counselor" ${objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
 					<option value="Country" ${objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
 					<option value="Campaign" ${objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
-					<option value="LOGS" ${objRight.searchtype == 'LOGS'?'selected':''}>LOGS</option>
 				</select>
 			</div>
 			<div class="col-md-12 col-lg-2">
@@ -171,10 +170,6 @@ function getReportsTab(objRight){
 					<option value="MONTH" ${objRight.searchtype == 'MONTH'?'selected':''}>Month</option>
 					<option value="CUSTOM" ${objRight.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
 				</select>
-			</div>
-			<div class="col-md-6 col-lg-3 hidden" id="zadarmaCallSync"> 
-				<input type="text" name="syncZadarmaDate" id="syncZadarmaDate" class="hidden" style="width:90px; margin-right: 12px;" readonly onkeydown="return false" />
-				<button class=" btn btn-info " onclick="syncZadarmaCall()"><i class="fas fa-sync " id="callSyncRotate"></i></button>
 			</div>
 			<div class="col-md-6 col-lg-5"> 
 				<div class="row" style="align-items: center;">
@@ -230,16 +225,6 @@ function getReportsTab(objRight){
 						<th class="text-center bg-primary text-white">Positive Enrollment</th>
 						<th class="text-center bg-primary text-white">Reserved</th>
 						<th class="text-center bg-primary text-white">Converted</th>
-					</tr>
-				</thead>
-				<thead id="listCounselorTheader_log" class="hidden" >
-					<tr>
-						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white"><span class="changeHeadText">Academic Expert</span> Name</th>
-						<th class="text-center bg-primary text-white">Call | Call Hippo</th>
-						<th class="text-center bg-primary text-white">Wati</th>
-						<th class="text-center bg-primary text-white">Whatsapp</th>
-						<th class="text-center bg-primary text-white">Mail</th>
 					</tr>
 				</thead>
 				<tbody id="listCounselorTbody"></tbody>
@@ -628,7 +613,6 @@ function getLeadCampaignPriceList(objRights){
 </div>`;
 return html;
 }
-
 
 
 

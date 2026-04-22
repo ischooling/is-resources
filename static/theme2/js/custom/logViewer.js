@@ -5,7 +5,7 @@ var LOG_VIEWER_TAIL_MAX_CALLS = 20;
 
 function getLogViewerFilters() {
 	return {
-		logFilePath: $.trim($("#logViewerPath").val()),
+		logFilePath: logViewerContent.getSelectedPath(),
 		searchTerm: $.trim($("#logViewerSearchTerm").val()),
 		resultLines: $.trim($("#logViewerResultLines").val()),
 		startDateTime: $.trim($("#logViewerStartDateTime").val()),
@@ -41,7 +41,7 @@ function getCurrentDateTimeLocal(offsetMinutes) {
 function applyLogViewerDefaults() {
 	var defaultPath = getLogViewerDefaultPath();
 	if (defaultPath) {
-		$("#logViewerPath").val(defaultPath);
+		logViewerContent.setSelectedPath(defaultPath);
 	}
 	if (!$("#logViewerStartDateTime").val()) {
 		$("#logViewerStartDateTime").val(getCurrentDateTimeLocal(-60));
@@ -200,11 +200,12 @@ function initLogViewer() {
 		return;
 	}
 	var defaultConfiguredPath = getLogViewerDefaultPath();
+	logViewerContent.applyPathControlMode(defaultConfiguredPath);
 	if (defaultConfiguredPath) {
-		$("#logViewerPath").val(defaultConfiguredPath);
+		logViewerContent.setSelectedPath(defaultConfiguredPath);
 	}
 	applyLogViewerDefaults();
-	defaultConfiguredPath = $.trim($("#logViewerPath").val());
+	defaultConfiguredPath = logViewerContent.getSelectedPath();
 	$container
 		.off("change.logViewerMode", "#logViewerRegistryFile")
 		.on("change.logViewerMode", "#logViewerRegistryFile", function () {
@@ -244,8 +245,9 @@ function initLogViewer() {
 			}
 			window.LOG_VIEWER_DEFAULT_PATH = resolvedPath;
 			defaultConfiguredPath = resolvedPath;
-			if (!$.trim($("#logViewerPath").val()) || $.trim($("#logViewerRegistryFile").val()) === "configured") {
-				$("#logViewerPath").val(resolvedPath);
+			logViewerContent.applyPathControlMode(defaultConfiguredPath);
+			if (!logViewerContent.getSelectedPath() || $.trim($("#logViewerRegistryFile").val()) === "configured") {
+				logViewerContent.setSelectedPath(resolvedPath);
 			}
 			logViewerContent.applyRegistryMode(defaultConfiguredPath);
 		});

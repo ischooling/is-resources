@@ -73,7 +73,6 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		$("#searchLeadCounselorType").on("change", function(){
 			if($("#searchLeadCounselorType").val()=='CUSTOM'){
 				$(".hidecounselorLead").css({"display":"block"});
-				$("#zadarmaCallSync").addClass('hidden');
 			}else{
 				$(".hidecounselorLead").css({"display":"none"})
 				callLeadCounselorsList('leadReportSearch',$("#searchLeadCounselorType").val(),'','','listCounselorTbody', false, 0, 0);
@@ -83,8 +82,6 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		$("#searchLeadCounselorReportType").on("change", function(){
 			if($("#searchLeadCounselorReportType").val()=='Counselor'){
 				$(".changeHeadText").text('Academic Expert');
-			}else if($("#searchLeadCounselorReportType").val()=='LOGS'){
-				$(".changeHeadText").text('User');
 			} else{
 				$(".changeHeadText").text($("#searchLeadCounselorReportType").val());
 			}
@@ -659,7 +656,6 @@ function getReportsTab(objRight){
 					<option value="Counselor" ${objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
 					<option value="Country" ${objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
 					<option value="Campaign" ${objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
-					<option value="LOGS" ${objRight.searchtype == 'LOGS'?'selected':''}>LOGS</option>
 				</select>
 			</div>
 			<div class="col-md-12 col-lg-2">
@@ -669,10 +665,6 @@ function getReportsTab(objRight){
 					<option value="MONTH" ${objRight.searchtype == 'MONTH'?'selected':''}>Month</option>
 					<option value="CUSTOM" ${objRight.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
 				</select>
-			</div>
-			<div class="col-md-6 col-lg-3 hidden" id="zadarmaCallSync"> 
-				<input type="text" name="syncZadarmaDate" id="syncZadarmaDate" class="hidden" style="width:90px; margin-right: 12px;" readonly onkeydown="return false" />
-				<button class=" btn btn-info " onclick="syncZadarmaCall()"><i class="fas fa-sync " id="callSyncRotate"></i></button>
 			</div>
 			<div class="col-md-6 col-lg-5"> 
 				<div class="row" style="align-items: center;">
@@ -728,17 +720,6 @@ function getReportsTab(objRight){
 						<th class="text-center bg-primary text-white" style="width:60px;">Reserved</th>
 						<th class="text-center bg-primary text-white" style="width:60px;">Converted</th>
 						<th class="text-center bg-primary text-white" style="width:60px;">Conversion</th>
-					</tr>
-				</thead>
-				<thead id="listCounselorTheader_log" class="hidden" >
-					<tr>
-						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white"><span class="changeHeadText">Counselor</span> Name</th>
-						<th class="text-center bg-primary text-white">Call | Call Hippo</th>
-						<th class="text-center bg-primary text-white">Wati</th>
-						<th class="text-center bg-primary text-white">Whatsapp</th>
-						<th class="text-center bg-primary text-white">Mail</th>
-
 					</tr>
 				</thead>
 				<tbody id="listCounselorTbody"></tbody>

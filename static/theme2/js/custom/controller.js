@@ -283,6 +283,15 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 			LEAD_CATEGORY = "B2B";
 		}
 		renderCounselorLeadReportDashboard('Lead Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
+	}else if(pageNo=='lead-report-logs'){
+		LEAD_CATEGORY="B2C";
+		if (USER_ROLE == "B2B_LEAD") {
+			LEAD_CATEGORY = "B2B";
+		}
+		if(SCHOOL_TYPE=='WLP'){
+			LEAD_CATEGORY = "B2B";
+		}
+		renderCounselorLeadLogsDashboard('Lead Logs',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
 	}else if(pageNo=='lead-detail-by-campaign'){
 		LEAD_CATEGORY="B2C";
 		if (USER_ROLE == "B2B_LEAD") {
