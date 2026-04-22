@@ -49,6 +49,13 @@ function getLogViewerContent() {
 		white-space: pre-wrap;
 		word-break: break-word;
 	}
+
+	.log-highlight {
+		background: #f7d24a;
+		color: #111;
+		padding: 0 1px;
+		border-radius: 2px;
+	}
 	</style>
 
 	<div class="app-page-title mb-3 py-2">
@@ -118,25 +125,39 @@ window.logViewerContent = (function () {
 			.replace(/'/g, "&#39;");
 	}
 
+	function escapeRegex(value) {
+		return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	}
+
+	function highlightRenderedLine(line, searchTerm) {
+		var escapedLine = escapeHtml(line);
+		var safeSearch = $.trim(searchTerm || "");
+		if (!safeSearch) {
+			return escapedLine;
+		}
+		var regex = new RegExp("(" + escapeRegex(safeSearch) + ")", "gi");
+		return escapedLine.replace(regex, '<span class="log-highlight">$1</span>');
+	}
+
 	function setStatus(message, isError) {
 		var $status = $("#logViewerStatus");
 		$status.removeClass("text-danger text-muted").addClass(isError ? "text-danger" : "text-muted");
 		$status.text(message || "");
 	}
 
-	function renderLines(resolvedPath, lines) {
+	function renderLines(resolvedPath, lines, searchTerm) {
 		if (!lines || !lines.length) {
 			$("#logViewerOutput").html("");
 			return;
 		}
 		var rendered = [];
 		for (var i = 0; i < lines.length; i++) {
-			rendered.push(escapeHtml((resolvedPath || "") + ": " + lines[i]));
+			rendered.push(highlightRenderedLine((resolvedPath || "") + ": " + lines[i], searchTerm));
 		}
 		$("#logViewerOutput").html(rendered.join("\n"));
 	}
 
-	function appendLines(resolvedPath, lines, maxLines) {
+	function appendLines(resolvedPath, lines, maxLines, searchTerm) {
 		if (!lines || !lines.length) {
 			return;
 		}
@@ -154,7 +175,7 @@ window.logViewerContent = (function () {
 		}
 		var rendered = [];
 		for (var j = 0; j < allLines.length; j++) {
-			rendered.push(escapeHtml(allLines[j]));
+			rendered.push(highlightRenderedLine(allLines[j], searchTerm));
 		}
 		$("#logViewerOutput").html(rendered.join("\n"));
 		var output = document.getElementById("logViewerOutput");

@@ -1,5 +1,7 @@
 var LOG_VIEWER_TAIL_TIMER = null;
 var LOG_VIEWER_TAIL_POSITION = -1;
+var LOG_VIEWER_TAIL_CALL_COUNT = 0;
+var LOG_VIEWER_TAIL_MAX_CALLS = 20;
 
 function getLogViewerFilters() {
 	return {
@@ -75,6 +77,7 @@ function stopLogViewerTail() {
 		clearInterval(LOG_VIEWER_TAIL_TIMER);
 		LOG_VIEWER_TAIL_TIMER = null;
 	}
+	LOG_VIEWER_TAIL_CALL_COUNT = 0;
 	$("#logViewerTailToggleBtn").attr("data-live", "off").text("Start Live");
 }
 
@@ -107,7 +110,7 @@ function searchLogViewerData() {
 			}
 			var isError = status && status !== "SUCCESS";
 			logViewerContent.setStatus(response && response.message ? response.message : "", isError);
-			logViewerContent.renderLines(response ? response.resolvedPath : "", response ? response.lines : []);
+			logViewerContent.renderLines(response ? response.resolvedPath : "", response ? response.lines : [], filters.searchTerm);
 		},
 		error: function () {
 			logViewerContent.setStatus("Unable to load logs. Please try again.", true);
@@ -118,6 +121,12 @@ function searchLogViewerData() {
 
 function fetchLogViewerTail(initialLoad) {
 	var filters = getLogViewerFilters();
+	if (LOG_VIEWER_TAIL_CALL_COUNT >= LOG_VIEWER_TAIL_MAX_CALLS) {
+		stopLogViewerTail();
+		logViewerContent.setStatus("Live stream auto-stopped after 20 calls.", false);
+		return;
+	}
+	LOG_VIEWER_TAIL_CALL_COUNT++;
 	if (!filters.logFilePath) {
 		logViewerContent.setStatus("Log file path is required.", true);
 		stopLogViewerTail();
@@ -156,11 +165,11 @@ function fetchLogViewerTail(initialLoad) {
 				LOG_VIEWER_TAIL_POSITION = -1;
 			}
 			if (initialLoad) {
-				logViewerContent.renderLines(response.resolvedPath || "", response.lines || []);
+				logViewerContent.renderLines(response.resolvedPath || "", response.lines || [], filters.searchTerm);
 			} else {
-				logViewerContent.appendLines(response.resolvedPath || "", response.lines || [], parsedLines);
+				logViewerContent.appendLines(response.resolvedPath || "", response.lines || [], parsedLines, filters.searchTerm);
 			}
-			logViewerContent.setStatus("Live streaming logs...", false);
+			logViewerContent.setStatus("Live streaming logs... (" + LOG_VIEWER_TAIL_CALL_COUNT + "/20)", false);
 		},
 		error: function () {
 			logViewerContent.setStatus("Unable to stream logs. Please try again.", true);
@@ -177,6 +186,7 @@ function toggleLogViewerTail() {
 		return;
 	}
 	LOG_VIEWER_TAIL_POSITION = -1;
+	LOG_VIEWER_TAIL_CALL_COUNT = 0;
 	$("#logViewerTailToggleBtn").attr("data-live", "on").text("Stop Live");
 	fetchLogViewerTail(true);
 	LOG_VIEWER_TAIL_TIMER = setInterval(function () {
