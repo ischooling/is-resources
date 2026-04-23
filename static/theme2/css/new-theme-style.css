@@ -28332,7 +28332,7 @@ width:0
 	position:absolute;
 	top:100%;
 	left:0;
-	z-index:1000 !important;
+	z-index:1000;
 	padding:4px;
 	margin:.125rem 0 0;
 	font-size:.88rem;
