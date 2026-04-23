@@ -34,6 +34,12 @@ function initializeLeadReportDatepickers() {
 		$field.datepicker({
 			format : 'dd-mm-yyyy',
 			autoclose: true
+		}).on("show",function(){
+			if($(this).attr("id") == "counselorStartDate" || $(this).attr("id") == "counselorEndDate"){
+				if(!$(this).hasClass("custom_index")){
+					$(this).data('datepicker').picker.addClass('custom_index');;
+				}
+			}			
 		});
 	});
 }
