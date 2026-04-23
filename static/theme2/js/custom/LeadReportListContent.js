@@ -46,6 +46,8 @@ function initializeLeadReportDatepickers() {
 
 async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE, LEAD_CATEGORY, viewMode){
 	//var urlLead = "lead-list?moduleId=" +roleAndModule.moduleId + "&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=" +ENCRYPTED_USER_ID +"&leadType=" +LEAD_CATEGORY
+	window.LEAD_REPORT_HIDE_ACTIONS = false;
+	window.LEAD_REPORT_DEFAULT_REPORT_TYPE = "COUNSELOR";
   	var objRight= await getLeadReportData(roleAndModule.moduleId, USER_ID, 'report');
 	var objectRights=objRight.objectRights;
 	OBJECT_RIGHTS=objectRights;
@@ -654,14 +656,22 @@ function getReportsTab(objRight){
 		return html;
 	}
 
-	function getLeadCounselorReportData(objRight){
+function getLeadCounselorReportData(objRight){
+		var defaultReportType = (window.LEAD_REPORT_DEFAULT_REPORT_TYPE || 'COUNSELOR').toString().toUpperCase();
+		var isCampaignLayout = !!window.LEAD_REPORT_CAMPAIGN_LAYOUT;
+		var tableWrapStart = '';
+		var tableWrapInnerStart = '';
+		var tableWrapEnd = '';
+		var tableStyle = isCampaignLayout
+			? 'style="font-size:11px !important; table-layout:fixed !important; width:1430px !important;"'
+			: 'style="font-size:11px !important"';
 		var html='';
 		html+=`<div class="row" style="align-items: center;">
 			<div class="col-md-12 col-lg-2">
 				<select class="form-control mr-1" id="searchLeadCounselorReportType" name="searchLeadCounselorReportType">
-					<option value="Counselor" ${objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
-					<option value="Country" ${objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
-					<option value="Campaign" ${objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
+					<option value="Counselor" ${defaultReportType == 'COUNSELOR' || objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
+					<option value="Country" ${defaultReportType == 'COUNTRY' || objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
+					<option value="Campaign" ${defaultReportType == 'CAMPAIGN' || objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
 				</select>
 			</div>
 			<div class="col-md-12 col-lg-2">
@@ -683,17 +693,30 @@ function getReportsTab(objRight){
 					</div> 
 				</div>         
 			</div>
-			<div class="col-md-6 col-lg-3" id="advanceSearchAndExport12"> 
-				<button class=" btn btn-info mr-2" onclick="openModal('leadReport')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>`;
-				if(USER_ROLE == 'DIRECTOR'){
-					html+=`<button class=" btn btn-success text-white mt-lg-1 mb-1" id="exportCounselorLead">Excel Export</button>`;
-				}
-			html+=`</div>
+			${window.LEAD_REPORT_HIDE_ACTIONS ? '' : `<div class="col-md-6 col-lg-3" id="advanceSearchAndExport12"> 
+				<button class=" btn btn-info mr-2" onclick="openModal('leadReport')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>`}
+				${window.LEAD_REPORT_HIDE_ACTIONS ? '' : (USER_ROLE == 'DIRECTOR' ? `<button class=" btn btn-success text-white mt-lg-1 mb-1" id="exportCounselorLead">Excel Export</button>` : '')}
+			${window.LEAD_REPORT_HIDE_ACTIONS ? '' : `</div>`}
 		</div>
 	<hr/>
 	<div class="row">
-		<div class="col-lg-12 col-md-12 p-0">
-			<table class="table table-bordered table-striped" id="counselor-list" style="font-size:11px !important" >
+		<div class="col-lg-12 col-md-12 p-0 ${isCampaignLayout ? 'lead-report-campaign-table-wrap' : ''}">
+			${tableWrapStart}
+			${tableWrapInnerStart}
+			<table class="table table-bordered table-striped" id="counselor-list" ${tableStyle} >
+				${isCampaignLayout ? `<colgroup>
+					<col style="width:45px">
+					<col style="width:220px">
+					<col style="width:85px">
+					<col style="width:80px">
+					<col style="width:55px">
+					<col style="width:570px">
+					<col style="width:100px">
+					<col style="width:65px">
+					<col style="width:65px">
+					<col style="width:65px">
+					<col style="width:75px">
+				</colgroup>` : ''}
 				<thead id="listCounselorTfoot"></thead>
 				<thead id="listCounselorTheader">
 					<tr>
@@ -702,21 +725,21 @@ function getReportsTab(objRight){
 						<th class="bg-primary text-white" style="width:80px;"><span class="text-left" style="width:80px;">Total</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white" style="width:75px;"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white" style="width:50px;">Un-attended</th>
-						<th class="text-center bg-primary text-white">
-							<table class="w-100 table mb-0 bg-transparent">
+						<th class="text-center bg-primary text-white" ${isCampaignLayout ? 'style="width:570px;padding:0;"' : ''}>
+							<table ${isCampaignLayout ? 'style="width:570px;table-layout:fixed;margin:0;"' : 'class="w-100 table mb-0 bg-transparent"'}>
 								<tbody>
 									<tr>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
-										<td class="font-10 px-1" style="width:9%;border:0;border-radius:0;">No Status</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:70px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0 ">Web</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0 ">Link</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">Completed</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">No-Show</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>
+										<td class="font-10 px-1" style="${isCampaignLayout ? 'width:50px' : 'width:9%'};border:0;border-radius:0;">No Status</td>
 									</tr>
 								</tbody>
 							</table>
