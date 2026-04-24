@@ -1504,10 +1504,11 @@ leadModifyDetailDTO['acadmicYear'] = $("#"+formId+" #leadAcadmicYear").val()!=un
 leadModifyDetailDTO['priority'] = $("#"+formId+" #leadPriority").val()!=undefined?$("#"+formId+" #leadPriority").val():'';
 leadModifyDetailDTO['utmSource'] = $("#"+formId+" #utmSourceSearch").val()!=undefined?$("#"+formId+" #utmSourceSearch").val():'';
 //leadModifyDetailDTO['utmCampaign'] = $("#"+formId+" #leadSearchCampaign").val();
+debugger;
 if($("#"+formId+" #campaignName").val()!=undefined && $("#campaignName").val()!=''){
-	leadModifyDetailDTO['utmCampaigns'] = [$("#"+formId+" #campaignName").val()];
+	leadModifyDetailDTO['utmCampaigns'] = [encodeURIComponent($("#"+formId+" #campaignName").val())];
 }else{
-	leadModifyDetailDTO['utmCampaigns'] = $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val():[];
+	leadModifyDetailDTO['utmCampaigns'] = $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val().map(c => encodeURIComponent(c)):[];
 }
 leadModifyDetailDTO['utmDescriptions'] = $("#"+formId+" #leadSearchAdSet").val()!=undefined?$("#"+formId+" #leadSearchAdSet").val():[];
 leadModifyDetailDTO['leadTemplate'] = $("#"+formId+" #leadSearchTemplate").val()!=undefined?$("#"+formId+" #leadSearchTemplate").val():[];
@@ -6597,6 +6598,7 @@ function getRequestForLeadCampaign(modeSearch,startDate, endDate, campaignName, 
 	
 	if(campaignName!=undefined && campaignName!=""){
 		leadReportRequest['reportType']="LEAD-LIST";
+		campaignName=encodeURIComponent(campaignName)
 		var utmCampaign=[campaignName];
 		leadReportRequest['utmCampaign'] = utmCampaign ;
 	}else{
@@ -8335,11 +8337,33 @@ function getLeadCounselorFootHtml(data, fontSize){
 }
 
 function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, uniqueLeadLink, duplicateLeadLink){
+	var isCampaignLayout = !!window.LEAD_REPORT_CAMPAIGN_LAYOUT;
+	var innerCellW = isCampaignLayout ? '50px' : '9%';
+	var innerFirstCellW = isCampaignLayout ? '70px' : '9%';
+	var demoThStyle = isCampaignLayout ? 'style="width:570px;padding:0;"' : '';
+	var innerTableStyle = isCampaignLayout ? 'style="width:570px;table-layout:fixed;margin:0;"' : 'class="w-100 table mb-0 bg-transparent"';
+	var tableStyle = isCampaignLayout
+		? 'style="font-size:11px !important; table-layout:fixed !important; width:1300px !important;"'
+		: 'style="font-size:11px !important; width:1300px;"';
+	var colgroup = isCampaignLayout ? `<colgroup>
+		<col style="width:40px">
+		<col style="width:180px">
+		<col style="width:80px">
+		<col style="width:75px">
+		<col style="width:55px">
+		<col style="width:570px">
+		<col style="width:100px">
+		<col style="width:75px">
+		<col style="width:65px">
+		<col style="width:60px">
+	</colgroup>` : '';
+
 	var html='';
 	html+='<div class="dropdown full">';
     html+='<button type="button"  aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm full" style="width:100px;background-color:#3f6ad8 !important;color:#fff; padding:0px"><span class=\"float-left\"><a href=\"javascript:void(0)\" style=\"color:#fff !important\" class=\"not-underline\" onclick="'+totalLeadLink+'">'+totallead+'</a></span> <span class="float-right"><a href=\"javascript:void(0)\" style=\"color:#fff !important\" class=\"not-underline\" onclick="'+uniqueLeadLink+'">'+(totallead-duplicateLeadCount) +'</a>  |  <a href=\"javascript:void(0)\" style=\"color:#fff !important\" class=\"not-underline\" onclick="'+duplicateLeadLink+'">'+duplicateLeadCount+'</a><i class="fa fa-caret-down" ></i></span></button>';
-    html+='<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: -60px; transform: translate3d(0px, 33px, 0px);">';
-    html+='<table class="table table-bordered table-striped" id="sub-counselor-list-'+listId+'" style="font-size:11px !important; width:1300px;" >';
+    html+='<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: -60px; transform: translate3d(0px, 33px, 0px); overflow-x:auto; max-width:95vw;">';
+    html+='<table class="table table-bordered table-striped" id="sub-counselor-list-'+listId+'" '+tableStyle+' >';
+	html+=colgroup;
     html+='<thead>';
 	html+='<tr>';
 	html+='<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>';
@@ -8347,21 +8371,21 @@ function getDropdownTable(listId, totallead, duplicateLeadCount, totalLeadLink, 
 	html+='<th class="bg-primary text-white">Total    U | D </th>';
 	html+='<th class="bg-primary text-white">Total    FB | IG </th>';
 	html+='<th class="text-center bg-primary text-white">Unattended</th>';
-	html+='<th class="text-center bg-primary text-white">';
-	html+='<table class="w-100 table mb-0 bg-transparent">';
+	html+='<th class="text-center bg-primary text-white" '+demoThStyle+'>';
+	html+='<table '+innerTableStyle+'>';
 	html+='<tbody>';
 	html+='<tr>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Web</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0 ">Link</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">No-Show</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>';
-	html+='<td class="font-10 px-1" style="width:9%;border:0;border-radius:0;">No Status</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerFirstCellW+';border:0;border-right: 1px solid;border-radius:0 ">Demo Schedule(S)<br/>Booked(B)</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0 ">Web</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0 ">Link</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">Completed</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">Confirmed</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">Not Confirmed</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">Reschedule</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">No-Show</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">Cancelled</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-right: 1px solid;border-radius:0;">Not Interested</td>';
+	html+='<td class="font-10 px-1" style="width:'+innerCellW+';border:0;border-radius:0;">No Status</td>';
 	html+='</tr>';
 	html+='</tbody>';
 	html+='</table>';

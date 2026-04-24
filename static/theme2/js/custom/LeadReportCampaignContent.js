@@ -214,6 +214,30 @@ function applyLeadReportCampaignWidthStyle() {
 			table-layout: fixed !important;
 			margin: 0 !important;
 		}
+		[id^="sub-counselor-list-"] tbody td table {
+			width: 570px !important;
+			min-width: 570px !important;
+			max-width: 570px !important;
+			table-layout: fixed !important;
+			margin: 0 !important;
+		}
+		[id^="sub-counselor-list-"] tbody td table td {
+			white-space: normal !important;
+			overflow: hidden !important;
+			text-align: center !important;
+			vertical-align: middle !important;
+			padding: 2px 3px !important;
+			width: 50px !important;
+		}
+		[id^="sub-counselor-list-"] tbody td table td:first-child {
+			width: 70px !important;
+		}
+		[id^="sub-counselor-list-"] tfoot td table,
+		[id^="sub-counselor-list-"] thead th table {
+			width: 570px !important;
+			table-layout: fixed !important;
+			margin: 0 !important;
+		}
 	`;
 	$("head").append(`<style id="leadReportCampaignWidthStyle">${style}</style>`);
 }
