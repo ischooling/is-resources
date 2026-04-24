@@ -1,0 +1,124 @@
+.student-academic-timeline{color:#334155;}
+.student-academic-timeline .main-card{overflow:hidden;}
+.student-academic-timeline .sat-page-head{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;}
+.student-academic-timeline .sat-brand{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.student-academic-timeline .sat-brand-logo-wrap{display:flex;align-items:center;min-height:40px;}
+.student-academic-timeline .sat-brand-logo{display:block;max-width:300px;width:100%;height:auto;object-fit:contain;}
+.student-academic-timeline .sat-brand-title{font-size:24px;line-height:1.2;font-weight:700;color:#2563eb;}
+.student-academic-timeline .sat-brand-subtitle{font-size:12px;color:#f59e0b;font-weight:600;}
+.student-academic-timeline .sat-profile-card{border:1px solid #dbeafe;border-radius:16px;padding:18px 20px;background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);}
+.student-academic-timeline .sat-profile-main{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+.student-academic-timeline .sat-profile-identify{display:flex;align-items:center;gap:14px;min-width:0;}
+.student-academic-timeline .sat-avatar{width:48px;height:48px;border-radius:50%;background:#e0ecff;color:#4f46e5;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.student-academic-timeline .sat-student-name{font-size:20px;font-weight:700;color:#0f172a;}
+.student-academic-timeline .sat-student-meta{font-size:12px;color:#94a3b8;}
+.student-academic-timeline .sat-profile-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.student-academic-timeline .sat-chip{border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
+.student-academic-timeline .sat-chip-success{background:#e9f9ef;color:#16a34a;}
+.student-academic-timeline .sat-chip-primary{background:#ebf5ff;color:#2563eb;}
+.student-academic-timeline .sat-chip-warning{background:#fff4dd;color:#d97706;}
+.student-academic-timeline .sat-metrics-shell{max-width:1380px;margin:0 auto;}
+.student-academic-timeline .sat-section-title{font-size:12px;font-weight:700;color:#0f172a;}
+.student-academic-timeline .sat-section-muted{font-size:11px;color:#94a3b8;}
+.student-academic-timeline .sat-metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+.student-academic-timeline .sat-chart-card{padding:0;background:transparent;border:none;}
+.student-academic-timeline .sat-chart-header{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-bottom:8px;}
+.student-academic-timeline .sat-chart-title{font-size:12px;font-weight:700;color:#868686;line-height:1.2;}
+.student-academic-timeline .sat-bars{display:flex;align-items:flex-end;gap:6px;height:88px;}
+.student-academic-timeline .sat-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0;}
+.student-academic-timeline .sat-bar-wrap.is-active .sat-bar-shell{border-color:#2387dd;box-shadow:inset 0 0 0 2px #ffffff;}
+.student-academic-timeline .sat-bar-wrap.is-active .sat-bar-label{color:#2387dd;font-weight:700;}
+.student-academic-timeline .sat-bar-wrap.is-history-highlight .sat-bar-shell{border-color:#bfdcff;}
+.student-academic-timeline .sat-bar-wrap.is-history-highlight .sat-bar-label{color:#7aa6df;font-weight:600;}
+.student-academic-timeline .sat-bar-shell{width:100%;max-width:22px;height:72px;border:3px solid transparent;border-radius:9px;padding:2px;display:flex;align-items:flex-end;justify-content:center;transition:.2s ease;}
+.student-academic-timeline .sat-bar{width:100%;border-radius:4px 4px 0 0;background:#b7d2ee;}
+.student-academic-timeline .sat-bar-score{background:#a9d7a4;}
+.student-academic-timeline .sat-bar-attendance{background:#f6d596;}
+.student-academic-timeline .sat-bar-fill-active-primary{background:#2689d8;}
+.student-academic-timeline .sat-bar-fill-active-success{background:#47b93f;}
+.student-academic-timeline .sat-bar-fill-active-warning{background:#dd8200;}
+.student-academic-timeline .sat-bar-label{font-size:9px;color:#9a9a9a;white-space:nowrap;max-width:24px;overflow:hidden;text-overflow:ellipsis;}
+.student-academic-timeline .sat-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px;}
+.student-academic-timeline .sat-summary-card{border:none;border-radius:14px;padding:12px 14px;background:#fbfbfb;min-height:86px;}
+.student-academic-timeline .sat-summary-label{font-size:12px;color:#a3a3a3;font-weight:500;text-transform:none;letter-spacing:0;}
+.student-academic-timeline .sat-summary-value{font-size:22px;line-height:1;font-weight:500;color:#2387dd;margin-top:5px;display:inline-block;}
+.student-academic-timeline .sat-summary-value-row{display:flex;align-items:flex-end;gap:3px;flex-wrap:wrap;}
+.student-academic-timeline .sat-summary-change{font-size:10px;font-weight:700;line-height:1.2;margin-bottom:2px;}
+.student-academic-timeline .sat-summary-change.success{color:#16a34a;}
+.student-academic-timeline .sat-summary-change.primary{color:#2563eb;}
+.student-academic-timeline .sat-summary-change.warning{color:#dd8200;}
+.student-academic-timeline .sat-summary-note{font-size:9px;color:#94a3b8;margin-top:2px;}
+.student-academic-timeline .sat-highlight-grid{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-top:10px;}
+.student-academic-timeline .sat-highlight-card{border:none;border-radius:14px;padding:12px 14px;background:#fbfbfb;}
+.student-academic-timeline .sat-progress-track{height:6px;border-radius:999px;background:#dce5f0;overflow:hidden;margin-top:6px;}
+.student-academic-timeline .sat-progress-fill{height:100%;background:linear-gradient(90deg,#60a5fa 0%,#2563eb 100%);}
+.student-academic-timeline .sat-timeline{position:relative;padding-left:26px;}
+.student-academic-timeline .sat-timeline:before{content:"";position:absolute;left:17px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#60a5fa 0%,#cbd5e1 100%);}
+.student-academic-timeline .sat-item{position:relative;padding-bottom:10px;}
+.student-academic-timeline .sat-item:last-child{padding-bottom:0;}
+.student-academic-timeline .sat-dot{position:absolute;left:-26px;top:13px;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px currentColor;background:#fff;}
+.student-academic-timeline .sat-dot.success{color:#22c55e;background:#dcfce7;}
+.student-academic-timeline .sat-dot.primary{color:#3b82f6;background:#dbeafe;}
+.student-academic-timeline .sat-dot.purple{color:#8b5cf6;background:#ede9fe;}
+.student-academic-timeline .sat-dot.warning{color:#f59e0b;background:#fef3c7;}
+.student-academic-timeline .sat-item-card{border:1px solid #e5edf7;border-radius:14px;background:#fff;overflow:hidden;}
+.student-academic-timeline .sat-item-header{padding:10px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;}
+.student-academic-timeline .sat-item-title-wrap{display:flex;align-items:flex-start;gap:8px;min-width:0;}
+.student-academic-timeline .sat-item-badge{margin-top:1px;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.student-academic-timeline .sat-item-badge.primary{background:#e0efff;color:#2563eb;}
+.student-academic-timeline .sat-item-badge.success{background:#eafaf0;color:#16a34a;}
+.student-academic-timeline .sat-item-badge.purple{background:#f1eaff;color:#7c3aed;}
+.student-academic-timeline .sat-item-badge.warning{background:#fff4dd;color:#d97706;}
+.student-academic-timeline .sat-item-title{font-size:12px;font-weight:700;color:#111827;line-height:1.3;}
+.student-academic-timeline .sat-item-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:10px;color:#94a3b8;}
+.student-academic-timeline .sat-item-toggle{font-size:14px;color:#94a3b8;line-height:1;padding-top:1px;}
+.student-academic-timeline .sat-item-body{padding:0 18px 18px;border-top:1px solid #eef2f7;}
+.student-academic-timeline .sat-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding-top:16px;}
+.student-academic-timeline .sat-detail-cell{min-width:0;}
+.student-academic-timeline .sat-detail-label{font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700;letter-spacing:.06em;}
+.student-academic-timeline .sat-detail-value{font-size:13px;color:#0f172a;font-weight:700;margin-top:4px;line-height:1.35;}
+.student-academic-timeline .sat-table-wrap{margin-top:16px;border:1px solid #eef2f7;border-radius:14px;overflow:hidden;}
+.student-academic-timeline .sat-table{width:100%;margin:0;}
+.student-academic-timeline .sat-table thead{background:#f8fafc;}
+.student-academic-timeline .sat-table th,.student-academic-timeline .sat-table td{padding:10px 12px;font-size:12px;border-top:1px solid #eef2f7;vertical-align:middle;}
+.student-academic-timeline .sat-table thead th{border-top:none;color:#64748b;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.06em;}
+.student-academic-timeline .sat-grade-pill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:999px;background:#eafaf0;color:#16a34a;font-weight:700;}
+.student-academic-timeline .sat-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.student-academic-timeline .sat-subcard{border:1px solid #eef2f7;border-radius:14px;padding:14px;background:#fbfdff;}
+.student-academic-timeline .sat-subcard-title{font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.student-academic-timeline .sat-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.student-academic-timeline .sat-doc-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #eef2f7;}
+.student-academic-timeline .sat-doc-item:first-child{border-top:none;padding-top:0;}
+.student-academic-timeline .sat-doc-meta{font-size:11px;color:#94a3b8;margin-top:2px;}
+.student-academic-timeline .sat-doc-actions{display:flex;align-items:center;gap:10px;color:#16a34a;font-size:15px;}
+.student-academic-timeline .sat-doc-actions a{color:#16a34a;text-decoration:none;cursor:pointer;}
+.student-academic-timeline .sat-checklist{display:flex;flex-wrap:wrap;gap:10px;padding-top:16px;}
+.student-academic-timeline .sat-check{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:#f8fafc;font-size:12px;font-weight:600;color:#334155;}
+.student-academic-timeline .sat-check i{color:#94a3b8;}
+.student-academic-timeline .sat-people{padding-top:16px;}
+.student-academic-timeline .sat-person{border-top:1px solid #eef2f7;padding-top:14px;margin-top:14px;}
+.student-academic-timeline .sat-person:first-child{border-top:none;padding-top:16px;margin-top:0;}
+.student-academic-timeline .sat-person-role{font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.student-academic-timeline .sat-inline-link{display:inline-block;padding:5px 10px;border-radius:999px;background:#ebf5ff;color:#2563eb;font-size:11px;font-weight:700;}
+.student-academic-timeline .sat-hidden{display:none;}
+@media (max-width: 1199px){
+    .student-academic-timeline .sat-metrics-grid{grid-template-columns:1fr;}
+    .student-academic-timeline .sat-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .student-academic-timeline .sat-detail-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media (max-width: 767px){
+    .student-academic-timeline .sat-brand{flex-direction:column;align-items:flex-start;}
+    .student-academic-timeline .sat-profile-main{align-items:flex-start;}
+    .student-academic-timeline .sat-metrics-grid{grid-template-columns:1fr;}
+    .student-academic-timeline .sat-summary-grid,
+    .student-academic-timeline .sat-highlight-grid,
+    .student-academic-timeline .sat-bottom-grid,
+    .student-academic-timeline .sat-mini-grid,
+    .student-academic-timeline .sat-detail-grid{grid-template-columns:1fr;}
+    .student-academic-timeline .sat-item-header{padding:10px 12px;}
+    .student-academic-timeline .sat-item-body{padding:0 14px 14px;}
+    .student-academic-timeline .sat-timeline{padding-left:22px;}
+    .student-academic-timeline .sat-dot{left:-22px;}
+    .student-academic-timeline .sat-table-wrap{overflow:auto;}
+    .student-academic-timeline .sat-table{min-width:560px;}
+}
