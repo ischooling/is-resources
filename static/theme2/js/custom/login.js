@@ -60,6 +60,22 @@ function getPrimaryColor(){
 	return primaryColor;
 }
 
+function getCaptchaUrlCandidates(primaryColor) {
+	var v = new Date().getTime();
+	var payload = "payload=" + primaryColor + "&v=" + v;
+	var urls = [];
+	if (typeof BASE_URL !== "undefined" && typeof API_VERSION !== "undefined") {
+		urls.push(BASE_URL + API_VERSION + "common/captcha.jpg?" + payload);
+	}
+	if (typeof CONTEXT_PATH !== "undefined" && typeof SCHOOL_UUID !== "undefined") {
+		urls.push(CONTEXT_PATH + SCHOOL_UUID + "/api/v1/common/captcha.jpg?" + payload);
+	}
+	if (typeof SCHOOL_UUID !== "undefined") {
+		urls.push("/" + SCHOOL_UUID + "/api/v1/common/captcha.jpg?" + payload);
+	}
+	return urls;
+}
+
 function checkAndReturn(type, resolve) {
 	var scriptVersionType = 'SCRIPT_VERSION';
 	var svObject = JSON.parse(localStorage.getItem(scriptVersionType));
@@ -228,6 +244,7 @@ async function initiateSetting(){
 async function loginPageOnLoadEvent(){
 	callLocationAndSelectCountryNew('loginForm');		
     $("form").attr('autocomplete', 'off');
+	refreshCaptcha('captchaImage');
 	  
 	//   /* DON'T REMOVE BELOW SCRIPT THIS IS USE FOR EID MUBARAK LOGIN PAGE */
 	  
@@ -550,7 +567,28 @@ function getRequestForForgot(formId, moduleId) {
 function refreshCaptcha(id) {
 	var primaryColor=ROOTCSS.split(':#')[1].split(';')[0];
 	if (id != undefined && id != '' && $('#' + id).length > 0) {
-		document.images[id].src = BASE_URL + API_VERSION + 'common/captcha.jpg?payload='+primaryColor+'&v=' + new Date().getTime();
+		var imageEl = document.images[id];
+		var urlCandidates = getCaptchaUrlCandidates(primaryColor);
+		if (!urlCandidates.length) {
+			return;
+		}
+		imageEl.src = urlCandidates[0];
+		if (urlCandidates.length > 1) {
+			setTimeout(function () {
+				if (!imageEl || (imageEl.complete && imageEl.naturalWidth > 0)) {
+					return;
+				}
+				imageEl.src = urlCandidates[1];
+				if (urlCandidates.length > 2) {
+					setTimeout(function () {
+						if (!imageEl || (imageEl.complete && imageEl.naturalWidth > 0)) {
+							return;
+						}
+						imageEl.src = urlCandidates[2];
+					}, 300);
+				}
+			}, 300);
+		}
 	}
 }
 function getURLForCommon(suffixUrl) {
