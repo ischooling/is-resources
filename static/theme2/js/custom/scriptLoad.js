@@ -79,10 +79,10 @@ function loadScriptCall(role, src) {
         script.src = cacheBustedSrc;
         script.id = id;
         // if(!ENVIRONMENT.startsWith("prod")){
-        //     script.onload = () => {
-        //         console.log(`Script loaded: ${src}`);
-        //         resolve();
-        //     };
+            script.onload = () => {
+                console.log(`Script loaded: ${src}`);
+                resolve();
+            };
         // }
         script.onerror = () => {
             console.error(`Failed to load script: ${src}`);
