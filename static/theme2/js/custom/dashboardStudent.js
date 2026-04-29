@@ -79,6 +79,13 @@ async function getProfileFields() {
 	return await getDashboardDataBasedUrlAndPayload(true, true,'get-profile-field', payload);
 }
 
+async function getProfileCompletingProcess() {
+	var payload = {};
+	payload['schoolId'] = SCHOOL_ID;
+	payload['userId'] = USER_ID;
+	return await getDashboardDataBasedUrlAndPayload(true, true,'get-profile-completing-process', payload);
+}
+
 function saveEligibleCourse(elegibleToChoose,currentSizeLeftTable1,currentSizeLeftTable2){
 //	var totalSize=6;
 //	var currentSizeLeft = totalSize-elegibleToChoose;

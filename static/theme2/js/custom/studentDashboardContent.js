@@ -57,18 +57,22 @@ async function rendereDashboardContent(isParent){
         if (isParent!=="false") {
             dashboardData ['isParent'] = true;
         }
-        renderStudentDashboard(dashboardData);
+        await renderStudentDashboard(dashboardData);
         renderAnnouncement(dashboardData.userId);
         renderNews(dashboardData.userId);
         renderSchoolDaiaryBtnCount();
         // renderActivity(dashboardData.userId)
         getCartCount(dashboardData.userId);
-        setTimeout(function () {
-            getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
-        }, 10000);
+        getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade)
+        // setTimeout(function () {
+        //     getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
+        // }, 10000);
         $("#timeStuStandardId").val(dashboardData.studentStandardId);
         if(data.showStudentCourseSelectionModel=='Y'){
            await getStudentTimePreference(data.studentId, data.standardId, data.providerId);
+        }
+        if(ORIENTSTATUS == "PENDING" || CAN_SHOW_ENROLL_RESERVE_MODAL) {
+            renderProfileDataInModal(dashboardData);
         }
         
 	}else if(data.studentGraduate == 'Y'){
@@ -143,7 +147,7 @@ async function renderStudentDashboard(data){
     var startFormatted = moment(startDate).format('YYYY-MM-DD');
     var endDate = moment(startDate).add(1, 'days');
     var endFormatted = endDate.format('YYYY-MM-DD');
-    callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
+    await callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
     calendarTimeInterval();
     setTimeout(function(){
         $('button.fc-today-button').unbind("click").bind("click", function() {
@@ -570,12 +574,13 @@ function batchReEnrollmentModal(){
     return html;
 }
 
-function renderProfileDataInModal(dashboardData){
+async function renderProfileDataInModal(dashboardData){
     getMissingDataByUser(dashboardData.payload).then(function(){
-        $('#profileFielddModal').on('shown.bs.modal', function() {
-        getInputIntel(inputPhoneNumberArray);
-        buindProfileElementEvent(previousSchoolElementArray);
+        $(document).on('shown.bs.modal', '#profileFielddModal', function() {
+            buindProfileElementEvent(previousSchoolElementArray);
+            getInputIntel(inputPhoneNumberArray);
         });
+        PROFILE_DATA_INTERVAL = getProfileDateInterVal();
     });
 }
 function calendarActivityModal(data){

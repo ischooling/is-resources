@@ -71,7 +71,7 @@ function getProfilePageHeader() {
                 </div>
                 <div class="page-title-actions">
                     <a href="javascript:void(0);" onclick="backToMain(\'manageAdvanceStudentContent\', 'uploadFile');" class="btn btn-dark rounded"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>${USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA.rightToEdit ? 'Back Manage User List' : 'Back'}</a>
-                    ${/*<a href="javascript:void(0);" onclick="saveBulkProfileData(\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\')" class="btn btn-success rounded"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>Save</a> */''}
+                    <a href="javascript:void(0);" onclick="saveBulkProfileData(\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\',\'student\')" class="btn btn-success rounded"><i class="fa fa-save mr-1" aria-hidden="true"></i>Bulk Save</a>
                 </div>
             </div>
         </div>`;
@@ -352,7 +352,7 @@ function personalInformation(data) {
     html += addOtherHobbiesContent(data)
     html += `</div>
                     <div class="col-12 mt-2">`;
-    html += socialMedaiLinksContent(data.socialMedia)
+    html += socialMedaiLinksContent(data.socialMedia, true)
     html += `</div>
                 </div>    
             </div>    
@@ -474,7 +474,7 @@ function phoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('phoneNumber', 'phoneNumber', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('phoneNumber',\'${data.phoneNumber != "" && data.phoneNumber != undefined ? data.phoneNumber : ""}\','input','phoneNumber')">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('phoneNumber',\'${data.phoneNumber != "" && data.phoneNumber != undefined? data.phoneNumber:""}\','inputPhone','phoneNumber','phoneNumberWhatsAppStatus', 0)">
                 <i class="fa fa-times"></i>
             </a>
         </div>
@@ -502,7 +502,7 @@ function altPhoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('altPhoneNumber', 'altPhoneNumber', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('altPhoneNumber',\'${data.altPhoneNumber != "" && data.altPhoneNumber != undefined ? data.altPhoneNumber : ""}\','input','altPhoneNumber')">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('altPhoneNumber',\'${data.altPhoneNumber !="" && data.altPhoneNumber != undefined ? data.altPhoneNumber:""}\','inputPhone','altPhoneNumber', 'altPhoneNumberWhatsAppStatus',0)">
                 <i class="fa fa-times"></i>
             </a>
         </div>
@@ -693,7 +693,7 @@ function addOtherHobbiesContent(data) {
     return html;
 }
 
-function socialMedaiLinksContent(data) {
+function socialMedaiLinksContent(data, addmoreSocialLinksFlag) {
     var socialMediaOrder = {
         "Instagram": 1,
         "YouTube": 2,
@@ -712,63 +712,73 @@ function socialMedaiLinksContent(data) {
     }
     var html =
         `<div class="form-row">
-        <div class="col-12 mb-2">
-            <span class="font-weight-semi-bold text-dark">Social Media Links</span>    
+            <div class="col-12 mb-2">
+                <span class="font-weight-semi-bold text-dark">Social Media Links</span>    
+            </div> 
         </div> 
-    </div> 
-    <div class="form-row social-links-wrapper bar_count">`;
-    if (data.length > 0) {
-        $.each(data, function (i, v) {
-            if ((parseInt(v.socialMediaMasterId) > 0) || (v.status == "Y" && v.socialMediaMasterId == "0")) {
-                html +=
-                    `<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 social-links-list-wrapper" id="social-links-list-wrapper${i}" data-social-title="${v.socMedLabel}">
-                        <div class="form-group mb-2 p-0">
-                            <div class="input-group mb-2 p-0 w-100">
-                                ${getSocialIcon(v.socMedLabel) != undefined ? `<div class="input-group-prepend">
-                                    <span class="input-group-text bg-white">
-                                        ${getSocialIcon(v.socMedLabel).replace(/width=\"[^\"]*\"/i, 'width="19"').replace(/height=\"[^\"]*\"/i, 'height="19"')}
-                                    </span>
-                                </div>` : ``}
-                                <input type="text" class="form-control form-control-sm social-Links-url group-append-hide-input" data-social-media-id="${v.socialMediaMasterId}" name="${v.socMedLabel}URL" id="${v.socMedLabel}URL" value="${v[v.socMedLabel + '_URL'] != "" ? v[v.socMedLabel + '_URL'] : ""}" placeholder="${v.socMedLabel == "Twitter" ? "X(Twitter)" : v.socMedLabel} Profile URL${v.socMedLabel == "Instagram" ? " *" : ""}" autocomplete="off" onkeyup="controlEditField(this, \'${v.socMedLabel}URL\',\'${v[v.socMedLabel + '_URL'] != "" ? v[v.socMedLabel + '_URL'] : ""}\','socialMedia', '','', 0,\'socialMedia\')">
-                                <div class="input-group-append input-group-append-hide" style="display:none">
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges(\'${v.socMedLabel}URL\', \'socialMedia\',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
-                                        <i class="fa fa-check"></i>
-                                    </a>
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges(\'${v.socMedLabel}URL\',\'${v[v.socMedLabel + '_URL'] != "" ? v[v.socMedLabel + '_URL'] : ""}\','input',\'socialMedia\')">
-                                        <i class="fa fa-times"></i>
-                                    </a>`;
-                if (v.socialMediaMasterId == 0) {
-                    html +=
-                        `<button class="btn btn-primary btn-sm" onclick="inactiveSocialMedia(\'${v.userSocialMediaId}\','SM', \'social-links-list-wrapper${i}\')">
-                                            <i class="fa fa-trash"></i>
-                                        </button>`;
-                }
-                html += `</div>
-                            </div>
-                        </div>
-                    </div>`;
+        <div class="form-row social-links-wrapper bar_count">`;
+            if (data.length > 0) {
+                html+=`${getSocialMediaFields(data)}`
             }
-        });
+        html += `</div>`;
+    if(addmoreSocialLinksFlag){
+        html+=`<a href="javascript:void(0)" class="text-primary text-decoration-none addmoreSocialLinksBtn" onclick="addmoreSocialLinks(this, 'add-other-socialLinks-wrapper')">
+            <i class="fa fa-plus"></i>&nbsp;
+            Add other social media link    
+        </a>
+        <div class="form-row add-other-socialLinks-wrapper" style="display:none">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-12 mb-2">
+                <label for="addOtherSocialMediaLinksTitle" class="font-weight-semi-bold">Link Title</label>
+                <input type="text" id="addOtherSocialMediaLinksTitle" name="addOtherSocialMediaLinksTitle" class="form-control form-control-sm" value="" placeholder="Enter Link Title"/>
+            </div>
+            <div class="col-xl-7 col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                <label for="addOtherSocialMediaLinksUrl" class="font-weight-semi-bold">URL</label>
+                <input type="text" id="addOtherSocialMediaLinksUrl" name="addOtherSocialMediaLinksUrl" class="form-control form-control-sm" value="" placeholder="Enter URL"/>
+            </div>    
+            <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12 text-right text-lg-left">
+                <label  class="font-weight-semi-bold w-100 d-lg-block d-none">&nbsp;</label>
+                <button type="button" class="btn btn-sm btn-success" onclick="addOtherSocialLinks('add-other-socialLinks-wrapper', 'addmoreSocialLinksBtn')">Add</button>
+            </div>    
+        </div>`;
     }
-    html += `</div>
-    <a href="javascript:void(0)" class="text-primary text-decoration-none addmoreSocialLinksBtn" onclick="addmoreSocialLinks(this, 'add-other-socialLinks-wrapper')">
-        <i class="fa fa-plus"></i>&nbsp;
-        Add other social media link    
-    </a>
-    <div class="form-row add-other-socialLinks-wrapper" style="display:none">
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-12 mb-2">
-            <label for="addOtherSocialMediaLinksTitle" class="font-weight-semi-bold">Link Title</label>
-            <input type="text" id="addOtherSocialMediaLinksTitle" name="addOtherSocialMediaLinksTitle" class="form-control form-control-sm" value="" placeholder="Enter Link Title"/>
-        </div>
-        <div class="col-xl-7 col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
-            <label for="addOtherSocialMediaLinksUrl" class="font-weight-semi-bold">URL</label>
-            <input type="text" id="addOtherSocialMediaLinksUrl" name="addOtherSocialMediaLinksUrl" class="form-control form-control-sm" value="" placeholder="Enter URL"/>
-        </div>    
-        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12 text-right text-lg-left">
-            <label  class="font-weight-semi-bold w-100 d-lg-block d-none">&nbsp;</label>
-            <button type="button" class="btn btn-sm btn-success" onclick="addOtherSocialLinks('add-other-socialLinks-wrapper', 'addmoreSocialLinksBtn')">Add</button>
-        </div>    
-    </div>`;
+    return html;
+}
+
+
+function getSocialMediaFields(data){
+    var html=``;
+    $.each(data, function (i, v) {
+        if ((parseInt(v.socialMediaMasterId) > 0) || (v.status == "Y" && v.socialMediaMasterId == "0")) {
+            html +=
+            `<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 social-links-list-wrapper" id="social-links-list-wrapper${i}" data-social-title="${v.socMedLabel}">
+                <div class="form-group mb-2 p-0">
+                    <div class="input-group mb-2 p-0 w-100">
+                        ${getSocialIcon(v.socMedLabel) != undefined ? `<div class="input-group-prepend">
+                            <span class="input-group-text bg-white">
+                                ${getSocialIcon(v.socMedLabel).replace(/width=\"[^\"]*\"/i, 'width="16"').replace(/height=\"[^\"]*\"/i, 'height="16"')}
+                            </span>
+                        </div>` : ``}
+                        <input type="text" class="form-control form-control-sm social-Links-url group-append-hide-input" data-social-media-id="${v.socialMediaMasterId}" name="${v.socMedLabel}URL" id="${v.socMedLabel}URL" value="${v[v.socMedLabel + '_URL'] != "" ? v[v.socMedLabel + '_URL'] : ""}" placeholder="${v.socMedLabel == "Twitter" ? "X(Twitter)" : v.socMedLabel} Profile URL${v.socMedLabel == "Instagram" ? " *" : ""}" autocomplete="off" onkeyup="controlEditField(this, \'${v.socMedLabel}URL\',\'${v[v.socMedLabel + '_URL'] != "" ? v[v.socMedLabel + '_URL'] : ""}\','socialMedia', '','', 0,\'socialMedia\')">
+                        <div class="input-group-append input-group-append-hide" style="display:none">
+                            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges(\'${v.socMedLabel}URL\', \'socialMedia\',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',0)">
+                                <i class="fa fa-check"></i>
+                            </a>
+                            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges(\'${v.socMedLabel}URL\',\'${v[v.socMedLabel + '_URL'] != "" ? v[v.socMedLabel + '_URL'] : ""}\','input',\'socialMedia\')">
+                                <i class="fa fa-times"></i>
+                            </a>`;
+                            if (v.socialMediaMasterId == 0) {
+                                html +=
+                                `<button class="btn btn-primary btn-sm" onclick="inactiveSocialMedia(\'${v.userSocialMediaId}\','SM', \'social-links-list-wrapper${i}\')">
+                                    <i class="fa fa-trash"></i>
+                                </button>`;
+                            }
+                            html += 
+                        `</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+    });
     return html;
 }
 // Personal Information Form Elements End Here
@@ -791,24 +801,24 @@ function guardianInformation(data) {
                     <div class="col-12">
                         <h6 class="text-black font-weight-bold mb-2 mt-2">Mother's Detail</h6>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += motherNameElement(data.motherName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += motherMiddleNameElement(data.motherMiddleName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += motherLastNameElement(data.motherLastName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += motherPhoneNumberElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += motherEmailElement(data.motherEmail)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += motherFacebookElement(data.motherFaceBook)
-    html += `</div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherNameElement(data.motherName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherMiddleNameElement(data.motherMiddleName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherLastNameElement(data.motherLastName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherPhoneNumberElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherEmailElement(data.motherEmail)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherFacebookElement(data.motherFacebook)}
+                    </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${motherCountryElement(data.motherCountry)}
                     </div>
@@ -824,24 +834,24 @@ function guardianInformation(data) {
                     <div class="col-12">
                         <h6 class="text-black font-weight-bold mb-2">Father's Detail</h6>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += fatherFirstNameElement(data.fatherFirstName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += fatherMiddleNameElement(data.fatherMiddleName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += fatherLastNameElement(data.fatherLastName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += fatherPhoneNumberElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += fatherEmailElement(data.fatherEmail)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += fatherFacebookElement(data.fatherFaceBook)
-    html += `</div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherFirstNameElement(data.fatherFirstName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherMiddleNameElement(data.fatherMiddleName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherLastNameElement(data.fatherLastName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherPhoneNumberElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherEmailElement(data.fatherEmail)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherFacebookElement(data.fatherFacebook)}
+                    </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${fatherCountryElement(data.fatherCountry)}
                     </div>
@@ -857,24 +867,24 @@ function guardianInformation(data) {
                     <div class="col-12">
                         <h6 class="text-black font-weight-bold mb-2">Guardian's Details</h6>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += guardianFirstNameElement(data.guardianFirstName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += guardianMiddleNameElement(data.guardianMiddleName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += guardianLastNameElement(data.guardianLastName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += guardianPhoneNumberElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += guardianEmailElement(data.guardianEmail)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += guardianFacebookElement(data.gurdianFaceBook)
-    html += `</div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianFirstNameElement(data.guardianFirstName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianMiddleNameElement(data.guardianMiddleName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianLastNameElement(data.guardianLastName)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianPhoneNumberElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianEmailElement(data.guardianEmail)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianFacebookElement(data.gurdianFacebook)}
+                    </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${guardianCountryElement(data)}
                     </div>
@@ -884,25 +894,18 @@ function guardianInformation(data) {
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${guardianDobElement(data.guardianDob)}
                     </div>
-                    <div class="w-100"></div>`;
-    html += `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += relationTypeElement(data.relationType)
-    html += `</div>`;
-    html += `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += weddingAnniversaryElement(data.weddingAnniversaryDate)
-    html += `</div>`;
-    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    //     html+=pCountryIdElement(data.pCountryId)
-    // html+=`</div>
-    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    //     html+=pStateIdElement(data.pStateId)
-    // html+=`</div>
-    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    //     html+=pCityIdElement(data.pCityId)
-    // html+=`</div>
-    html += `<div class="col-12">`;
-    html += preferredCommunicationContent(data)
-    html += `</div>
+                </div>
+                <hr/>
+                <div class="form-row">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${relationTypeElement(data.relationType)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${weddingAnniversaryDateElement(data.weddingAnniversaryDate)}
+                    </div>
+                    <div class="col-12">
+                        ${preferredCommunicationContent(data)}
+                    </div>
                 </div>  
                 <hr/>
                 <div class="form-row mt-2">
@@ -987,7 +990,7 @@ function motherPhoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('motherPhoneNumber', 'motherPhoneNumber', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('motherPhoneNumber',\'${data.motherPhoneNumber != "" && data.motherPhoneNumber != undefined ? data.motherPhoneNumber : ""}\','input','motherPhoneNumber')">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('motherPhoneNumber',\'${data.motherPhoneNumber != "" && data.motherPhoneNumber != undefined ?data.motherPhoneNumber:""}\','inputPhone','motherPhoneNumber', 'motherPhoneNumberWhatsAppStatus','motherPhoneEmergencyNumberStatus',1)">
                 <i class="fa fa-times"></i>
             </a>
         </div>
@@ -1151,7 +1154,7 @@ function fatherPhoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('fatherPhoneNumber', 'fatherPhoneNumber', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('fatherPhoneNumber',\'${data.fatherPhoneNumber != "" && data.fatherPhoneNumber != undefined ? data.fatherPhoneNumber : ""}\','input','fatherPhoneNumber')">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('fatherPhoneNumber',\'${data.fatherPhoneNumber != "" && data.fatherPhoneNumber != undefined ? data.fatherPhoneNumber:""}\','inputPhone','fatherPhoneNumber','fatherPhoneNumberWhatsAppStatus','fatherPhoneEmergencyNumberStatus',1)">
                 <i class="fa fa-times"></i>
             </a>
         </div>
@@ -1245,7 +1248,7 @@ function fatherDobElement(data) {
 
 function guardianFirstNameElement(data) {
     var html =
-        `<label for="guardianFirstName" class="font-weight-semi-bold text-dark">First Name</label>
+    `<label for="guardianFirstName" class="font-weight-semi-bold text-dark">First Name</label>
     <div class="input-group mb-2 p-0">
         <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianFirstName" id="guardianFirstName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" autocomplete="off" onkeyup="controlEditField(this,'guardianFirstName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianFirstName')">
         <div class="input-group-append input-group-append-hide" style="display:none">
@@ -1318,7 +1321,7 @@ function guardianPhoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('guardianPhoneNumber', 'guardianPhoneNumber', \'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('guardianPhoneNumber',\'${data.guardianPhoneNumber != "" && data.guardianPhoneNumber != undefined ? data.guardianPhoneNumber : ""}\','input','guardianPhoneNumber')">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('guardianPhoneNumber',\'${data.guardianPhoneNumber !="" && data.guardianPhoneNumber != undefined ?data.guardianPhoneNumber:""}\','inputPhone','guardianPhoneNumber','guardianPhoneNumberWhatsAppStatus','guardianEmergencyNumberStatus',1)">
                 <i class="fa fa-times"></i>
             </a>
         </div>
@@ -1429,7 +1432,7 @@ function relationTypeElement(data) {
     return html;
 }
 
-function weddingAnniversaryElement(data) {
+function weddingAnniversaryDateElement(data) {
     var html =
         `<label for="weddingAnniversaryDate" class="font-weight-semi-bold text-dark">Wedding Anniversary Date</label>
     <div class="input-group mb-2 p-0" style="max-width: 320px;">
@@ -1495,6 +1498,7 @@ function pCityIdElement(data) {
 }
 
 function preferredCommunicationContent(data) {
+    debugger
     var html =
         `<div class="d-flex  flex-wrap">
         <span class="font-weight-semi-bold w-100">Communication:&nbsp;</span>
@@ -1526,9 +1530,9 @@ function communicationPreferredTimingInformation(data) {
             <span class="font-weight-semi-bold w-100">Communication Preferred Timing:</span>
         </div>
         <div class="col-12" id="communication-preferred-time-wrapper">
-            <ul class="p-0 communication-preferred-time-wrapper-ul bar_count">`;
-    html += getCommunicationPreferredSlotContent(data.callingTimePrefArray);
-    html += `</ul>    
+            <ul class="p-0 communication-preferred-time-wrapper-ul bar_count">
+                ${getCommunicationPreferredSlotContent(data.callingTimePrefArray)}
+            </ul>    
         </div>
         <div class="col-12" id="communication-preferred-time-dropdown-wrapper" style="display:none">
             <div class="form-row">
@@ -1617,25 +1621,25 @@ function getCommunicationPreferredSlotContent(data) {
         if (data.length > 0) {
             $.each(data, function (index, value) {
                 html +=
-                    `<li style="list-style:none">
+                `<li style="list-style:none">
                     <div class="w-100 d-flex flex-wrap communication-preferred-timing align-items-center mb-2">
                         <span class="font-weight-bold">${value.communicationRoleType}:&nbsp;</span>
                         <ul class="d-flex ul_${value.communicationRoleType} communication_slot_ul" data-communicationRoleType-ul="${value.communicationRoleType}">`;
-                $.each(value.timings, function (i, v) {
-                    html +=
-                        `<li class="mr-2" id="communication_slot_${i + 1}_${index}" data-slot-st="${convertTo12Hour(v.startTime)}" data-slot-et="${convertTo12Hour(v.endTime)}" data-communicationRoleType="${value.communicationRoleType}">
-                                    <div class="d-inline-flex">
-                                        <span class="d-inline-flex align-items-center border btn-dashed border-primary py-1 px-2 rounded flex-grow-1 mr-1 text-primary">
-                                            <i class="fa fa-clock mr-1"></i>
-                                            <span class="font-weight-semi-bold">(${convertTo12Hour(v.startTime)} - ${convertTo12Hour(v.endTime)})</span>   
-                                        </span>    
-                                        <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="removeCommunicationPreferredTime(\'ul_${value.communicationRoleType}\', 'communication_slot_${i + 1}_${index}')">
-                                            <i class="fa fa-trash"></i>    
-                                        </a>    
-                                    </div>    
-                                </li>`;
-                });
-                html += `</ul>
+                            $.each(value.timings, function (i, v) {
+                                html +=
+                                    `<li class="mr-2" id="communication_slot_${i + 1}_${index}" data-slot-st="${convertTo12Hour(v.startTime)}" data-slot-et="${convertTo12Hour(v.endTime)}" data-communicationRoleType="${value.communicationRoleType}">
+                                        <div class="d-inline-flex">
+                                            <span class="d-inline-flex align-items-center border btn-dashed border-primary py-1 px-2 rounded flex-grow-1 mr-1 text-primary">
+                                                <i class="fa fa-clock mr-1"></i>
+                                                <span class="font-weight-semi-bold">(${convertTo12Hour(v.startTime)} - ${convertTo12Hour(v.endTime)})</span>   
+                                            </span>    
+                                            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="removeCommunicationPreferredTime(\'ul_${value.communicationRoleType}\', 'communication_slot_${i + 1}_${index}')">
+                                                <i class="fa fa-trash"></i>    
+                                            </a>    
+                                        </div>    
+                                    </li>`;
+                            });
+                        html += `</ul>
                     </div>
                 </li>`;
             });
@@ -1664,83 +1668,85 @@ function academicInformation(data) {
                             <span>3. Academic Information</span>
                             <div class="ml-auto">
                                 ${data.standardStatus == 0 ?
-            `<a href="javascript:void(0)" onclick="callWithSession('${data.studentIdCardDownloadUrl}');" class="btn btn-sm btn-success mr-1">Download Student ID Card</a>` : ``
-        }
+                                    `<a href="javascript:void(0)" onclick="callWithSession('${data.studentIdCardDownloadUrl}');" class="btn btn-sm btn-success mr-1">Download Student ID Card</a>` : ``
+                                }
                                 ${USER_ROLE != "STUDENT" && data.rightToEdit ?
-            `<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="showLearningProgamGradePlatformModal()"><i class="fa fa-edit"></i>&nbsp;Edit</a>` : ``
-        }
+                                    `<a href="javascript:void(0)" class="btn btn-sm btn-primary" onclick="showLearningProgamGradePlatformModal()"><i class="fa fa-edit"></i>&nbsp;Edit</a>` : ``
+                                }
                             </div>
                         </h5>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += studentIDElement(data.studentID)
-    html += `</div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${studentIDElement(data.studentID)}
+                    </div>
                     
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += academicYearStartDateElement(data.academicYearStartDate)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += enrollmentDateElement(data.enrollmentDate)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += learningProgramElement(data.learningProgram)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += gradeElement()
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += studentCourseProviderIdElement()
-    html += `</div>
-                    <div class="col-12">`;
-    html += courseEelement(data)
-    html += `</div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${academicYearStartDateElement(data.academicYearStartDate)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${enrollmentDateElement(data.enrollmentDate)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${learningProgramElement(data.learningProgram)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${gradeElement()}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${studentCourseProviderIdElement()}
+                    </div>
+                    <div class="col-12">
+                        ${courseEelement(data)}
+                    </div>
                     <div class="col-12">
                         <hr class="mt-1" />
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += previousCurrentSchoolNameElement(data.previousCurrentSchoolName)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += previousCurrentGradeNameElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += previousCurrentSchoolGraduationYearElement(data.previousCurrentSchoolGraduationYear)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += previousCurrentSchoolCountryElement(data.previousCurrentSchoolCountry)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">`;
-    html += ctiTakenRecommendedGradeElement(data.ctiTakenRecommendedGrade)
-    html += `</div>
-                    <div class="col-12">
-                        <hr/>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${previousCurrentSchoolNameElement(data.previousCurrentSchoolName)}
                     </div>
-                    <div class="col-12">
-                        <div class="form-group mb-2 p-0">
-                            <span class="font-weight-semi-bold text-dark">Documents</span>
-                        </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${previousCurrentGradeNameElement(data)}
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-    html += ageProofElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-    html += addressProofElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-    html += parentPassportProofElement(data)
-    html += `</div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-    html += lastAcademicProofElement(data)
-    html += `</div>`;
-    html += `<div class="col-12 text-right">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${previousCurrentSchoolGraduationYearElement(data.previousCurrentSchoolGraduationYear)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${previousCurrentSchoolCountryElement(data.previousCurrentSchoolCountry)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${ctiTakenRecommendedGradeElement(data.ctiTakenRecommendedGrade)}
+                    </div>
+                    ${documentProofContent()}
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${ageProofElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${addressProofElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${parentPassportProofElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${lastAcademicProofElement(data)}
+                    </div>
+                    <div class="col-12 text-right">
                         <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
                     </div>
-                    `;
-    html += profileProgressReportSectionElement(data)
-    html += `
+                    ${profileProgressReportSectionElement(data)}            
                 </div>    
             </div>    
         </div>`;
+    return html;
+}
+
+function documentProofContent(){
+    var html=
+    `<div class="col-12" id="documentProofHeadWrapper">
+        <hr/>
+        <div class="form-group mb-2 p-0">
+            <span class="font-weight-semi-bold text-dark">Documents</span>
+        </div>
+    </div>`;
     return html;
 }
 
@@ -1761,16 +1767,16 @@ function profileProgressReportSectionElement(data) {
                 <input type="hidden" name="progressReportDaysType" id="progressReportDaysType" value="${selectedDays}"/>
                 <input type="hidden" name="progressReportAnchorDate" id="progressReportAnchorDate" value="${anchorDate}"/>
             </div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">
+            ${profileProgressReportOptionCardElement(7, "Weekly", "Every 7 days", selectedDays)}
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">
+            ${profileProgressReportOptionCardElement(14, "Biweekly", "Every 14 days", selectedDays)}
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">
+            ${profileProgressReportOptionCardElement(28, "Monthly", "Every 28 days", selectedDays)}
         </div>`;
-    html += `<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">`;
-    html += profileProgressReportOptionCardElement(7, "Weekly", "Every 7 days", selectedDays)
-    html += `</div>
-        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">`;
-    html += profileProgressReportOptionCardElement(14, "Biweekly", "Every 14 days", selectedDays)
-    html += `</div>
-        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2 d-flex justify-content-center">`;
-    html += profileProgressReportOptionCardElement(28, "Monthly", "Every 28 days", selectedDays)
-    html += `</div>`;
     return html;
 }
 
@@ -2028,16 +2034,15 @@ function studentCourseProviderIdElement(data) {
 function courseEelement(data) {
     var html =
         `<div class="form-group mb-2 p-0 compulsorySubjectsdiv">
-        <span class="font-weight-semi-bold text-dark">Course (${data.grade != "" && data.grade != undefined ? data.grade : ""})</span>
-        <ul class="p-0 mt-2">`;
-    if (data.courses.length > 0) {
-        $.each(data.courses, function (i, v) {
-            html +=
-                `<li class="d-inline-block p-1 px-2 mr-1 rounded bg-primary text-white font-11 mb-1">${v}</li>`;
-        });
-    }
-    html += `</ul>
-    </div>`;
+            <span class="font-weight-semi-bold text-dark">Course (${data.grade != "" && data.grade != undefined ? data.grade : ""})</span>
+            <ul class="p-0 mt-2">`;
+                if(data.courses.length > 0) {
+                    $.each(data.courses, function (i, v) {
+                        html +=`<li class="d-inline-block p-1 px-2 mr-1 rounded bg-primary text-white font-11 mb-1">${v}</li>`;
+                    });
+                }
+            html += `</ul>
+        </div>`;
     return html;
 }
 
@@ -2312,34 +2317,40 @@ function classesPreferredTimingInformation(data) {
                         </h5>
                     </div>
                     <div class="col-12" id="class-preferred-time-wrapper">
-                        <ul class="p-0 d-flex flex-wrap">`;
-    html += getPreferredSlotContent(data);
-    html += `</ul>    
+                        <ul class="p-0 d-flex flex-wrap">
+                            ${getPreferredSlotContent(data)}
+                        </ul>    
                     </div>
-                    <div class="col-12" id="class-preferred-time-dropdown-wrapper" style="display:none">
-                        <div class="form-row">
-                            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                <select class="form-control form-control-sm fromTime" id="preferedStartTime">
-                                    ${generateTimeDropdown("12:00 AM", "11:59 PM", 10)}
-                                </select>   
-                            </div>
-                            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                <select class="form-control form-control-sm toTime" id="preferedEndTime">
-                                    ${generateTimeDropdown("12:00 AM", "11:59 PM", 10)}
-                                </select>    
-                            </div>
-                            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                <a href="javascript:void(0)" class="btn btn-success btn-sm" onclick="saveClassPreferredTime()">Save</a>     
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <a href="javascript:void(0)" class="text-primary text-decoration-none addClassPreferredTimeBtn" onclick="addClassPreferredTime(this, 'class-preferred-time-dropdown-wrapper')">
-                            <i class="fa fa-plus"></i>&nbsp; Add Preferred Start Time - End Time    
-                        </a>    
-                    </div>
+                    ${classPreferredTimingInformationForm()}
                 </div>    
             </div>    
+        </div>`;
+    return html;
+}
+
+function classPreferredTimingInformationForm(){
+    var html=
+    `<div class="col-12" id="class-preferred-time-dropdown-wrapper" style="display:none">
+            <div class="form-row">
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                    <select class="form-control form-control-sm fromTime" id="preferedStartTime">
+                        ${generateTimeDropdown("12:00 AM", "11:59 PM", 10)}
+                    </select>   
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                    <select class="form-control form-control-sm toTime" id="preferedEndTime">
+                        ${generateTimeDropdown("12:00 AM", "11:59 PM", 10)}
+                    </select>    
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                    <a href="javascript:void(0)" class="btn btn-success btn-sm" onclick="saveClassPreferredTime(\'PROFILE\')">Save</a>     
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <a href="javascript:void(0)" class="text-primary text-decoration-none addClassPreferredTimeBtn" onclick="addClassPreferredTime(this, 'class-preferred-time-dropdown-wrapper')">
+                <i class="fa fa-plus"></i>&nbsp; Add Preferred Start Time - End Time    
+            </a>    
         </div>`;
     return html;
 }
@@ -2349,7 +2360,7 @@ function getPreferredSlotContent(data) {
     if (data.length > 0) {
         $.each(data, function (i, v) {
             html +=
-                `<li class="mr-2 mb-2 bar_count" id="slot_${i + 1}" data-slot-st="${v.displayStartTime}" data-slot-et="${v.displayEndTime}" data-slot-id="${v.timePrefId}">
+            `<li class="mr-2 mb-2 bar_count" id="slot_${i + 1}" data-slot-st="${v.displayStartTime}" data-slot-et="${v.displayEndTime}" data-slot-id="${v.timePrefId}">
                 <div class="d-inline-flex">
                     <span class="d-inline-flex align-items-center border btn-dashed border-primary py-1 px-2 rounded flex-grow-1 mr-1 text-primary">
                         <i class="fa fa-clock mr-1"></i>
@@ -2380,15 +2391,15 @@ function sportAndExtraCurricularInformation(data) {
                             <span>5. Sport & Extra Curriculars</span>
                         </h5>
                     </div>
-                    <div class="col-12">`;
-    html += participateSportActivitiesElement(data, PORFILE_RESPONSE_DATA.studentStandardId, 'profileForm')
-    html += `</div>
+                    <div class="col-12">
+                        ${participateSportActivitiesElement(data, PORFILE_RESPONSE_DATA.studentStandardId, 'profileForm')}
+                    </div>
                     <div class="col-12">
                         <hr/>    
                     </div>
-                    <div class="col-12">`;
-    html += extracurricularActivitiesThums(data.sportsAndECList)
-    html += `</div>
+                    <div class="col-12">
+                        ${extracurricularActivitiesElement(data.sportsAndECList)}
+                    </div>
                 </div>    
             </div>    
         </div>`;
@@ -2420,9 +2431,9 @@ function participateSportActivitiesElement(data, studentStandardId, formID) {
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>`
-        + getJoinedSportsAndECList(data)
-    html += `</tbody>
+                <tbody>
+                    ${getJoinedSportsAndECList(data)}
+                </tbody>
             </table>
         </div>
     </div>
@@ -2466,7 +2477,7 @@ function getJoinedSportsAndECList(data) {
     if (data.joinedSportsAndECList.length > 0) {
         $.each(data.joinedSportsAndECList, function (i, v) {
             html +=
-                `<tr id="event_tr_${i + 1}" data-row-id="${v.id}">
+            `<tr id="event_tr_${i + 1}" data-row-id="${v.id}">
                 <td>${i + 1}</td>
                 <td>${v.title}</td>
                 <td>${v.startDate}</td>
@@ -2483,26 +2494,26 @@ function getJoinedSportsAndECList(data) {
     return html;
 }
 
-function extracurricularActivitiesThums(data) {
+function extracurricularActivitiesElement(data) {
     var html =
         `<span class="font-weight-semi-bold w-100">Would you like to join any extracurricular activities:</span>
-    <div class="d-flex flex-sm-nowrap flex-wrap sports-extra-curriculars-wrapper">
-        <div class="d-inline-flex flex-wrap">`;
-    if (data.length > 0) {
-        $.each(data, function (i, v) {
-            html +=
-                `<div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align mt-2 mr-3 cursor">
-                        <input type="checkbox" id="${v.sEclabel.replace(' ', '')}" name="${v.sEclabel.replace(' ', '')}" class="custom-control-input group-append-hide-input" ${v.assignActiveStudent == "Y" ? 'checked' : ''} data-index-id=${i} data-Id="${v.sportEcId}" data-status="${v.value}" data-title="${v.sEclabel}" check-status="${v.value == "Y" ? true : false}" onchange="controlEditField(this,this,${v.status == "Y" ? true : false},'extracurricular', '','', 4,'extracurricular')">
-                        <label class="custom-control-label cursor font-weight-semi-bold" for="${v.sEclabel.replace(' ', '')}">${v.sEclabel}</label>
-                    </div>`
-        });
-    }
-    html += `</div> 
-    </div>
-    <div class="w-100 text-right" id="saveSportsAndEcClubWrapper" style="display:none">
-        <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('extracurricular', 'extracurricular',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',4)">Save</a>
-        <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="extraCurricularHobbies('extracurricular', 'extracurricular')">Cancel</a>
-    </div>`;
+        <div class="d-flex flex-sm-nowrap flex-wrap sports-extra-curriculars-wrapper">
+            <div class="d-inline-flex flex-wrap">`;
+                if (data.length > 0) {
+                    $.each(data, function (i, v) {
+                        html +=
+                        `<div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align mt-2 mr-3 cursor">
+                            <input type="checkbox" id="${v.sEclabel.replace(' ', '')}" name="${v.sEclabel.replace(' ', '')}" class="custom-control-input group-append-hide-input" ${v.assignActiveStudent == "Y" ? 'checked' : ''} data-index-id=${i} data-Id="${v.sportEcId}" data-status="${v.value}" data-title="${v.sEclabel}" check-status="${v.value == "Y" ? true : false}" onchange="controlEditField(this,this,${v.status == "Y" ? true : false},'extracurricular', '','', 4,'extracurricular')">
+                            <label class="custom-control-label cursor font-weight-semi-bold" for="${v.sEclabel.replace(' ', '')}">${v.sEclabel}</label>
+                        </div>`
+                    });
+                }
+            html += `</div> 
+        </div>
+        <div class="w-100 text-right" id="saveSportsAndEcClubWrapper" style="display:none">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('extracurricular', 'extracurricular',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',4)">Save</a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="extraCurricularHobbies('extracurricular', 'extracurricular')">Cancel</a>
+        </div>`;
     return html;
 }
 // Sport & Extra Curriculars Form Elements End Here
@@ -2523,9 +2534,9 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                             <span>${USER_ROLE != "STUDENT" ? '6' : ''}. Reserve an Enrollment Seat & Advance Course Fee</span>
                         </h5>
                     </div>`;
-    if (standardStatus == "1") {
-        html +=
-            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                    if (standardStatus == "1") {
+                        html +=
+                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                             <label for="reserveASeat" class="font-weight-semi-bold text-dark">Reserve an Seat</label>
                             <div class="input-group mb-2 p-0">
                                 <select name="reserveASeat" id="reserveASeat" class="form-control form-control-sm group-append-hide-input" data-value="${data.reserveASeat}" onchange="controlEditField(this,'reserveASeat',\'${data.reserveASeat == "N" ? "0" : "1"}\','select','','', 5,'reserveASeat')">
@@ -2543,42 +2554,41 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                             </div>
                         </div>
                         <div class="full" style="overflow-x: auto">
-                                <table id="bookEnrollment_table" class="table table-bordered border-radius-table font-12 responsive"
-                                    style="min-width: 550px;">
-                                    <thead class="theme-bg primary-bg white-txt-color">
-                                        <tr>
-                                            ${/*<th style ="width: 24%">Case</th>*/''}
-                                            <th>Reserve an Enrollment Seat</th>
-                                            <th>Enrollment Seat Validity </th>
-                                            ${/*<th>Amount</th>*/''}
-                                        </tr>
-                                    </thead>
-                                    <tbody>`;
-        if (enrollmentDetails == null || enrollmentDetails.length < 1) {
-            html +=
-                `<tr>
-                                                <td>Not Paid</td>
-                                                <td>No </td>
-                                                <td>N/A</td>
-                                                <td>N/A</td>
+                            <table id="bookEnrollment_table" class="table table-bordered border-radius-table font-12 responsive"
+                                style="min-width: 550px;">
+                                <thead class="theme-bg primary-bg white-txt-color">
+                                    <tr>
+                                        ${/*<th style ="width: 24%">Case</th>*/''}
+                                        <th>Reserve an Enrollment Seat</th>
+                                        <th>Enrollment Seat Validity </th>
+                                        ${/*<th>Amount</th>*/''}
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                                    if(enrollmentDetails == null || enrollmentDetails.length < 1) {
+                                        html +=`<tr>
+                                            <td>Not Paid</td>
+                                            <td>No </td>
+                                            <td>N/A</td>
+                                            <td>N/A</td>
+                                        </tr>`;
+                                    } else {
+                                        $.each(enrollmentDetails, function (i, v) {
+                                            html +=
+                                            `<tr>
+                                                ${/*<td>${enrollmentDaetail.paymentCase}</td>*/''}
+                                                <td>${v.paymentStatus} ${v.advancePayment} </td>
+                                                <td>${v.expiryDate}</td>
+                                                ${/*<td>${enrollmentDaetail.amount}</td>*/''}
                                             </tr>`;
-        } else {
-            $.each(enrollmentDetails, function (i, v) {
-                html +=
-                    `<tr>
-                                                    ${/*<td>${enrollmentDaetail.paymentCase}</td>*/''}
-                                                    <td>${v.paymentStatus} ${v.advancePayment} </td>
-                                                    <td>${v.expiryDate}</td>
-                                                    ${/*<td>${enrollmentDaetail.amount}</td>*/''}
-                                                </tr>`;
-            });
-        }
-        html += `</tbody>
-                                </table>
-                            </div>`;
-    } else if (standardStatus == "0") {
-        html +=
-            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        });
+                                    }
+                                html +=`</tbody>
+                            </table>
+                        </div>`;
+                    } else if (standardStatus == "0") {
+                        html +=
+                            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                             <label for="bookASeatNextGradeOpted" class="font-weight-semi-bold text-dark">Allow Reserve an Seat for Next Grade?</label>
                             <div class="input-group mb-2 p-0">
                                 <select name="bookASeatNextGradeOpted" id="bookASeatNextGradeOpted" class="form-control form-control-sm group-append-hide-input" data-value="${data.bookASeatNextGradeOpted}" onchange="controlEditField(this,'bookASeatNextGradeOpted',\'${data.bookASeatNextGradeOpted == "N" ? "0" : "1"}\','select','','', 5,'bookASeatNextGradeOpted')">
@@ -2612,8 +2622,8 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                                 </div>
                             </div>
                         </div>`;
-    }
-    html += `</div>    
+                    }
+                html += `</div>    
             </div>    
         </div>`;
     return html;
@@ -2626,25 +2636,24 @@ function permissionForAprovalModal(elementFor, keyId, userId, studentStandardId,
 			<div class="modal-content text-center">
 				<div class="modal-header py-2 bg-primary">
 					<h5 class="modal-title text-white">`;
-    if (keyId == 'bookASeatNextGradeOpted') {
-        html += 'Reserve a Seat for Next Grade';
-    } else {
-        html += 'Course Fee Payment for Next Grade';
-    }
-    html += `</h5>
+                    if (keyId == 'bookASeatNextGradeOpted') {
+                        html += 'Reserve a Seat for Next Grade';
+                    } else {
+                        html += 'Course Fee Payment for Next Grade';
+                    }
+                    html += `</h5>
 					<button type="button" class="close remove-backdrop" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true" class="text-white">&times;</span>
 					</button>
 				</div>
 				<div class="modal-body">
 					<div class="full py-3">`;
-    if (keyId == 'bookASeatNextGradeOpted') {
-        html += `<h5>Are you sure you want to enable "Reserve a Seat for Next Grade"? Please note that "Course Fee Payment for Next Grade" will be toggled to "NO".</h5>`;
-    } else if (keyId == 'advanceGradeOpted') {
-        html += `<h5>Are you sure you want to enable "Course Fee Payment for Next Grade"? Please note that "Reserve a Seat for Next Grade" will be toggled to "NO".</h5>`;
-    }
-    html +=
-        `</div>
+                        if (keyId == 'bookASeatNextGradeOpted') {
+                            html += `<h5>Are you sure you want to enable "Reserve a Seat for Next Grade"? Please note that "Course Fee Payment for Next Grade" will be toggled to "NO".</h5>`;
+                        } else if (keyId == 'advanceGradeOpted') {
+                            html += `<h5>Are you sure you want to enable "Course Fee Payment for Next Grade"? Please note that "Reserve a Seat for Next Grade" will be toggled to "NO".</h5>`;
+                        }
+                    html +=`</div>
 				</div>
 				<div class="modal-footer">
 					<div class="m-auto">
@@ -2672,12 +2681,12 @@ function communicationLogInformation(data) {
                             </span>
                             <span>${USER_ROLE == "STUDENT" ? '6' : (SHOW_RESERVE_SEAT_SECTION ? '7' : '6')}. Communication Log</span>
                         </h5>
-                    </div>`
-        + getAddCommunicationLogForm()
-    html += `<div class="col-12"><hr/></div>
-                    <div class="w-100">`
-        + getAddCommunicationLogTable()
-    html += `</div>
+                    </div>
+                    ${getAddCommunicationLogForm()}
+                    <div class="col-12"><hr/></div>
+                    <div class="w-100">
+                        ${getAddCommunicationLogTable()}
+                    </div>
                 </div>    
             </div>    
         </div>`;
@@ -2745,12 +2754,12 @@ function getAddCommunicationLogTablebody(result) {
             <td>${v.status}</td>
             <td>${v.comments}</td>
             <td class="text-center">`;
-        if (v.uploadFile != '' && v.uploadFile != 'No file chosen...') {
-            html += `<a target="_blank" href="${FILE_UPLOAD_PATH}${v.uploadFile}"><i class="fa fa-eye"></i></a>`;
-        } else {
-            html += `N/A`;
-        }
-        html += `</td>
+                if(v.uploadFile != '' && v.uploadFile != 'No file chosen...') {
+                    html += `<a target="_blank" href="${FILE_UPLOAD_PATH}${v.uploadFile}"><i class="fa fa-eye"></i></a>`;
+                } else {
+                    html += `N/A`;
+                }
+            html += `</td>
             <td>${v.addedByName + '/' + v.createdAt}</td>
         </tr>`;
     });
@@ -2758,10 +2767,10 @@ function getAddCommunicationLogTablebody(result) {
 }
 function getAddCommunicationLogTable() {
     html =
-        `<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap" id="communicationLogTable"  style="width:100%;">`;
-    html += getAddCommunicationLogTableHeader()
-    html += `<tbody></tbody>
-    </table>`
+        `<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap" id="communicationLogTable"  style="width:100%;">
+            ${getAddCommunicationLogTableHeader()}
+            <tbody></tbody>
+        </table>`
     return html;
 }
 
@@ -2790,6 +2799,7 @@ function getCommunicationAttchFileModal() {
 
 // Student School Email Information Starts Here
 function studentEmailInformation(data) {
+    debugger
     if (!PORFILE_RESPONSE_DATA || (USER_ROLE !== "STUDENT" && USER_ROLE == "ADMIN")) {
         return "";
     }
@@ -2827,7 +2837,7 @@ function studentEmailInformation(data) {
                         <div class="position-relative form-group">
                             <label>Email</label>
                             <div class="position-relative">
-                                <input type="text" id="studentSchoolEmail" class="form-control form-control-sm pr-5" value="${email}" disabled>
+                                <input type="text" id="studentSchoolEmail" class="form-control form-control-sm pr-5" value="${azureUserStatus == "Y"? email:''}" disabled>
                                 <button type="button" class="btn btn-sm p-0 bg-transparent border-0 position-absolute d-flex align-items-center" style="right:8px;top:50%;transform:translateY(-50%);" onclick="copyStudentCredentialValue('studentSchoolEmail', this)" ${email ? "" : "disabled"}>
                                     <span class="copy-status-msg d-none mr-1 text-success font-weight-bold">Copied!</span>
                                     <i class="fa fa-copy"></i>
@@ -2839,7 +2849,7 @@ function studentEmailInformation(data) {
                         <div class="position-relative form-group">
                             <label>Password:</label>
                             <div class="position-relative">
-                                <input type="text" id="studentSchoolPassword" class="form-control form-control-sm pr-5" value="${password}" disabled>
+                                <input type="text" id="studentSchoolPassword" class="form-control form-control-sm pr-5" value="${azureUserStatus == "Y"? password:''}" disabled>
                                 <button type="button" class="btn btn-sm p-0 bg-transparent border-0 position-absolute d-flex align-items-center" style="right:8px;top:50%;transform:translateY(-50%);" onclick="copyStudentCredentialValue('studentSchoolPassword', this)" ${password ? "" : "disabled"}>
                                     <span class="copy-status-msg d-none mr-1 text-success font-weight-bold">Copied!</span>
                                     <i class="fa fa-copy"></i>
@@ -3085,7 +3095,7 @@ function getChunkProfileDataByUserModalContent(data) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" onclick="stopProfileDataInterval(\'profileFielddModal\')">Cancel</button>
-                    <button type="button" class="btn btn-success" id="confirmSaveBtn" onclick="changeLearningProgamGradePlatformModal()">Yes, Save</button>
+                    <a href="javascript:void(0);" onclick="saveBulkProfileData(\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\',\'student\')" class="btn btn-success rounded"><i class="fa fa-save mr-1" aria-hidden="true"></i>Yes, Save</a>
                 </div>
             </div>
         </div>

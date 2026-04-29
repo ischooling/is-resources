@@ -1112,38 +1112,77 @@ function callCountries(formId, value, elementId, eventBinder) {
   });
   return true;
 }
+// function callCountriesOption(formId, value, elementId, preSelected, msg) {
+//   $("#" + formId + " #" + elementId).html(
+//     '<option value="">Select country*</option>'
+//   );
+//   $.ajax({
+//     type: "POST",
+//     contentType: APPLICATION_JSON_VALUE,
+//     url: getURLForCommon("masters"),
+//     data: JSON.stringify(getRequestForMaster(formId, "COUNTRIES-LIST", value)),
+//     dataType: "json",
+//     async: false,
+//     success: function (data) {
+//       if (data["status"] == "0" || data["status"] == "2") {
+//         showMessageTheme2(1, data["message"]);
+//       } else {
+//         if(msg == undefined || msg == ""){
+//           msg = "Select Country";
+//         }
+//         buildDropdownCountry(
+//           data["mastersData"]["countries"],
+//           $("#" + formId + " #" + elementId),
+//           msg
+//         );
+//         // var html='';
+//         // html += '<option value="" disabled selected>Select Country</option>';
+//         // $.each(data['mastersData']['countries'], function(k, v) {
+//         // 	html+='<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>'
+//         // 	//html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
+//         // });
+//         // $("#"+elementId).html(html);
+//       }
+//     },
+//   });
+// }
+
 function callCountriesOption(formId, value, elementId, preSelected, msg) {
-  $("#" + formId + " #" + elementId).html(
-    '<option value="">Select country*</option>'
-  );
-  $.ajax({
-    type: "POST",
-    contentType: APPLICATION_JSON_VALUE,
-    url: getURLForCommon("masters"),
-    data: JSON.stringify(getRequestForMaster(formId, "COUNTRIES-LIST", value)),
-    dataType: "json",
-    async: false,
-    success: function (data) {
-      if (data["status"] == "0" || data["status"] == "2") {
-        showMessageTheme2(1, data["message"]);
-      } else {
-        if(msg == undefined || msg == ""){
-          msg = "Select Country";
+  return new Promise((resolve, reject) => {
+    const $element = $("#" + formId + " #" + elementId);
+
+    $element.html('<option value="">Select country*</option>');
+
+    $.ajax({
+      type: "POST",
+      contentType: APPLICATION_JSON_VALUE,
+      url: getURLForCommon("masters"),
+      data: JSON.stringify(
+        getRequestForMaster(formId, "COUNTRIES-LIST", value)
+      ),
+      dataType: "json",
+      success: function (data) {
+        if (data["status"] === "0" || data["status"] === "2") {
+          showMessageTheme2(1, data["message"]);
+          reject(data["message"]);
+        } else {
+          if (!msg) {
+            msg = "Select Country";
+          }
+
+          buildDropdownCountry(
+            data["mastersData"]["countries"],
+            $element,
+            msg
+          );
+
+          resolve(data);
         }
-        buildDropdownCountry(
-          data["mastersData"]["countries"],
-          $("#" + formId + " #" + elementId),
-          msg
-        );
-        // var html='';
-        // html += '<option value="" disabled selected>Select Country</option>';
-        // $.each(data['mastersData']['countries'], function(k, v) {
-        // 	html+='<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>'
-        // 	//html+='<option value="'+v.key+'" '+(preSelected==v.key?'selected':'')+' >'+v.value+'</option>';
-        // });
-        // $("#"+elementId).html(html);
+      },
+      error: function (xhr, status, error) {
+        reject(error);
       }
-    },
+    });
   });
 }
 

@@ -488,6 +488,17 @@ function getCallRequestForadvanceStudentSearch(formId, moduleId, themetype) {
 	studentDetailDTO["applicationNo"] = $("#" + formId + " #applicationNo").val();
 	studentDetailDTO["studentIdString"] = $("#" + formId + " #studentId").val();
 	studentDetailDTO["instagram"] = $("#" + formId + " #instagramStatus").val();
+	var profileFilterFieldId = $("#" + formId + " #filterProfileFieldId").val();
+	if (profileFilterFieldId === null || profileFilterFieldId === undefined || profileFilterFieldId === "") {
+		studentDetailDTO["profileFilterFieldId"] = [];
+		studentDetailDTO["profileFilterValue"] = "";
+	} else if (Array.isArray(profileFilterFieldId)) {
+		studentDetailDTO["profileFilterFieldId"] = profileFilterFieldId;
+		studentDetailDTO["profileFilterValue"] = $("#" + formId + " #filterProfileFieldValue").val();
+	} else {
+		studentDetailDTO["profileFilterFieldId"] = [profileFilterFieldId];
+		studentDetailDTO["profileFilterValue"] = $("#" + formId + " #filterProfileFieldValue").val();
+	}
 	studentDetailDTO["themetype"] = themetype;
 	studentDetailDTO["schoolUUID"] = SCHOOL_UUID;
 	request["studentDetailDTO"] = studentDetailDTO;
@@ -569,6 +580,12 @@ function advanceStudentSearchReset(formId) {
 		.val("")
 		.trigger("change");
 	$("#" + formId + " #filterCityId")
+		.val("")
+		.trigger("change");
+	$("#" + formId + " #filterProfileFieldId")
+		.val("")
+		.trigger("change");
+	$("#" + formId + " #filterProfileFieldValue")
 		.val("")
 		.trigger("change");
 }

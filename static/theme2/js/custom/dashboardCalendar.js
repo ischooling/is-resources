@@ -194,6 +194,11 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 					$('#schoolcalendar').fullCalendar('removeEvents');
 					//$('#schoolcalendar').fullCalendar('destroy');
 					getFullCalendar(finalEvents, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, data.activityTypes);
+					if(finalEvents.length < 1){
+						CAN_SHOW_ENROLL_RESERVE_MODAL=true;
+					}else{
+						CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(finalEvents);
+					}
 					if(flag){
 						$("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
 					}
@@ -532,7 +537,7 @@ function checkIfAnyClassRunning(todayClassArray) {
 
     for (var i = 0; i < todayClassArray.length; i++) {
         var startTime = new Date(todayClassArray[i].start).getTime();
-        var endTime = new Date(todayClassArray[i].endTime).getTime();
+        var endTime = new Date(todayClassArray[i].end).getTime();
 
         if (currentMs >= startTime && currentMs <= endTime) {
             return true;
@@ -844,9 +849,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					element.addClass("future-class");
 				}
 			}
-
 			CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(todayClassArray);
-
 			if ($('#schoolcalendar').fullCalendar('getView').name === "agendaWeek") {
 				$(".upcoming-icon").addClass("upcoming-week-view-icon");
 				$(".live-class-blink .live-symbol").addClass("live-week-view-icon");

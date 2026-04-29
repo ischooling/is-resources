@@ -35,7 +35,7 @@ var cropper;
       
       
         $("#"+inputId+"div").attr('data-PDFURL',base64URL);
-        var fileObj = new Object({"filePath":base64URL,"fileName":fileName,"docType":docType,"imgID":currentThumbId});
+        var fileObj = new Object({"filePath":base64URL,"fileName":fileName,"docType":docType,"imgID":currentThumbId,"eleID":inputId});
         var found = STUDENT_UPLOAD_DOCUMENTS.some(el => el.docType === fileObj.docType);
           if(!found){ 
             STUDENT_UPLOAD_DOCUMENTS.push(fileObj);
@@ -173,7 +173,8 @@ var cropper;
             $("#"+currentInputId+"ViewBtn").show(); 
             $("#"+currentInputId+"ViewBtn").find(".view-btn").attr("onclick", "viewAttachmentProfile(this, 'uploadFile','I', '"+currentInputId+"div')");
           }
-          var fileObj = new Object({"filePath":canvas.toDataURL(),"fileName":fileName,"docType":docType,"imgID":currentThumbId});
+          var elementId = currentThumbId.split("imgIcon")[0];
+          var fileObj = new Object({"filePath":canvas.toDataURL(),"fileName":fileName,"docType":docType,"imgID":currentThumbId,"eleID":elementId});
           var found = STUDENT_UPLOAD_DOCUMENTS.some(el => el.docType === fileObj.docType);
           if(!found){ 
             STUDENT_UPLOAD_DOCUMENTS.push(fileObj);

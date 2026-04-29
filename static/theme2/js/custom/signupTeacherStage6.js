@@ -1,14 +1,14 @@
 // var bankUploadDocsObj = [];
 
-function signupTeacherStage6OnLoadEvent(){
+async function signupTeacherStage6OnLoadEvent(){
 	$('#accountCurrency').html(getCurrenciesOption());
 	$('#accountCategory').html(getAccountCategoriesOption());
-	callCountriesOption("teacherSignupStage6", '', "accountHolderCountryId", '');
+	await callCountriesOption("teacherSignupStage6", '', "accountHolderCountryId", '');
 	callStates("teacherSignupStage6", '', "accountHolderCountryId", "accountHolderStateId", "accountHolderCityId");
 	$("#teacherSignupStage6 #accountHolderStateId").val($("#accountHolderStateId").val()).trigger('change');
 	callCities("teacherSignupStage6", $("#accountHolderStateId").val(), "accountHolderStateId", "accountHolderCityId");
 
-	callCountriesOption("teacherSignupStage6", '', "bankCountryId", '');
+	await callCountriesOption("teacherSignupStage6", '', "bankCountryId", '');
 	callStates("teacherSignupStage6", '', "bankCountryId", "bankStateId", "bankCityId");
 	$("#teacherSignupStage6 #bankStateId").val($("#bankStateId").val()).trigger('change');
 	callCities("teacherSignupStage6", $("#bankStateId").val(), "bankStateId", "bankCityId");

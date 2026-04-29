@@ -2315,7 +2315,7 @@ function getUpdateLeadCurrentTime(leads, leadId){
    var timerForCurTime;
     clearInterval(timerForCurTime);
     var currentTimeStr="";
-    var timezoneG = getSystemTimezone();//Intl.DateTimeFormat().resolvedOptions().timeZone;
+    var timezoneG = getSystemTimezone();
     //var leadCurrtime=changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
     var leadCurdate1=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,"YYYY-MM-DD","HH:mm:ss");;
     var leadCurdate=leadCurdate1.date;

@@ -2702,7 +2702,7 @@ function closeMaxLimitsWariningModal(){
 }
 
 
-function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, endTimeId) {
+function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, endTimeId, saveFrom) {
 	$(".academit-step, #decideLater, #chooseAcademicDateBtnToCountinue").hide();
 	$(".school-system-training-step, #skipTraining, #moveToDashboardProcess").show();
 	$(".modal-save-btn").attr("disabled","disabled");
@@ -2711,7 +2711,13 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, end
 	} else {
 		hideMessage('');
 	}
-	var saveType = $("#saveType").val();
+	
+	if(saveFrom == "PROFILE"){
+		var saveType = "STUDENT_PROFILE"
+	}else{
+		var saveType = $("#saveType").val();
+	}
+	
 	var enrollmentType = $("#enrollmentType").val();
 	var studentRegistrationType = $("#regstrationType").val();
 	var submitFrom = $("#" + modalID + " #submitFrom").val();
@@ -2733,7 +2739,8 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, end
 				showMessageTheme2(0, "Please select your live classes end time.", '', true);
 				return false;
 			}
-		}else{
+		}
+		else{
 			if ($('#chooseDateSystemTrainingDate').val() == undefined || $('#chooseDateSystemTrainingDate').val() == '' || $('#chooseDateSystemTrainingDate').val() == null) {
 				showMessageTheme2(0, "Please select your system training date.", '', true);
 				return false;
@@ -2773,7 +2780,7 @@ function saveTeacherTimePreference(callFrom, modalID, newTheme, startTimeId, end
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
 		url: getURLForHTML('report', 'save-time-preference'),
-		data: JSON.stringify(getRequestForTeacherTimePreference(callFrom, timeTeacherUserId, modalID, startTimeId, endTimeId)),
+		data: JSON.stringify(getRequestForTeacherTimePreference(callFrom, timeTeacherUserId, modalID, startTimeId, endTimeId, saveFrom)),
 		dataType: 'json',
 		cache: false,
 		timeout: 600000,
@@ -2937,7 +2944,7 @@ $(function () {
 	}
 });
 
-   function getRequestForTeacherTimePreference(callFrom,  teacherUserId,  modalID, startTimeId, endTimeId){
+   function getRequestForTeacherTimePreference(callFrom,  teacherUserId,  modalID, startTimeId, endTimeId, saveFrom){
 		var teacherAssign = {};
 		var teacherTimeList = [];
 		var teacherLeaveDateList =[];
@@ -2948,12 +2955,24 @@ $(function () {
 		teacherAssign['slotAddUserId']=USER_ID;
 		
 		if(callFrom=='STUDENT'){
-			teacherAssign['studentStandardId']=$("#timeStuStandardId").val();
+			if(saveFrom == "PROFILE"){
+				teacherAssign['studentStandardId']=$("#requestProfileForm #timeStuStandardId").val();
+			}else{
+				teacherAssign['studentStandardId']=$("#timeStuStandardId").val();
+			}
 			teacherAssign['userRole'] = 'STUDENT';
+			if(saveFrom == "PROFILE"){
+				$("#saveType").val('STUDENT_PROFILE');
+			}
 			teacherAssign['saveType'] =$("#saveType").val();
 			var studentRegistrationType= $("#regstrationType").val();
 			if(studentRegistrationType!='BATCH'){
-				var startDate=changeDateFormat(new Date($('#chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
+				if(saveFrom == "PROFILE"){
+					var startDate=changeDateFormat(new Date($('#requestProfileForm #chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
+				}else{
+					var startDate=changeDateFormat(new Date($('#chooseDateSystemTrainingDate').val()),"mm-dd-yyyy");
+				}
+				
 				teacherAssignTime['startDate']=$('#chooseDateSystemTrainingDate').val();
 				teacherAssign['semesterStartDate']=startDate;
 			}

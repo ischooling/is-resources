@@ -417,6 +417,13 @@ function studentAcademicTimelineTableHtml(tableData){
 }
 
 function studentAcademicTimelineFeeHtml(feeDetails){
+    if(studentAcademicTimelineHasFeePaymentRows(feeDetails)){
+        return `
+            <div class="sat-subcard">
+                <div class="sat-subcard-title">Fee details</div>
+                ${studentAcademicTimelineFeeRowsTableHtml(feeDetails)}
+            </div>`;
+    }
     return `
         <div class="sat-subcard">
             <div class="sat-subcard-title">Fee details</div>
@@ -424,6 +431,60 @@ function studentAcademicTimelineFeeHtml(feeDetails){
                 ${studentAcademicTimelineDetailCellsHtml(feeDetails)}
             </div>
         </div>`;
+}
+
+function studentAcademicTimelineHasFeePaymentRows(feeDetails){
+    return $.isArray(feeDetails) && feeDetails.length > 0 && (
+        feeDetails[0].paymentDate !== undefined
+        || feeDetails[0].receiptUrl !== undefined
+        || feeDetails[0].paymentLabel !== undefined
+        || feeDetails[0].amount !== undefined
+    );
+}
+
+function studentAcademicTimelineFeeRowsTableHtml(rows){
+    var bodyHtml = "";
+    $.each(rows || [], function(index, row){
+        var paymentLabel = studentAcademicTimelineFormatFeePaymentLabel(
+            row.paymentLabel || row.paymentName || row.label || ("Payment " + (index + 1))
+        );
+        var amountValue = row.amount || row.value || "N/A";
+        var paidDateValue = row.paymentDate || row.date || "-";
+        var receiptUrl = row.receiptUrl || "";
+        var receiptLabel = row.receiptLabel || "View receipt";
+        var receiptHtml = receiptUrl
+            ? `<a href="javascript:void(0)" class="sat-inline-link" onclick="callWithSession('${studentAcademicTimelineEscapeAttr(receiptUrl)}')">${studentAcademicTimelineEscape(receiptLabel)}</a>`
+            : `<span class="sat-detail-value">-</span>`;
+        bodyHtml += `
+            <tr>
+                <td>${studentAcademicTimelineEscape(paymentLabel)}</td>
+                <td>${studentAcademicTimelineEscape(amountValue)}</td>
+                <td>${studentAcademicTimelineEscape(paidDateValue)}</td>
+                <td>${receiptHtml}</td>
+            </tr>`;
+    });
+    return `
+        <div class="sat-table-wrap sat-fee-table-wrap">
+            <table class="table sat-table">
+                <thead>
+                    <tr>
+                        <th>Payment</th>
+                        <th>Amount</th>
+                        <th>Paid date</th>
+                        <th>Receipt</th>
+                    </tr>
+                </thead>
+                <tbody>${bodyHtml}</tbody>
+            </table>
+        </div>`;
+}
+
+function studentAcademicTimelineFormatFeePaymentLabel(value){
+    var label = String(value || "");
+    label = label.replace(/<sup>\s*(st|nd|rd|th)\s*<\/sup>/gi, "$1");
+    label = label.replace(/<[^>]*>/g, "");
+    label = label.replace(/\s+/g, " ");
+    return $.trim(label);
 }
 
 function studentAcademicTimelineDocumentsHtml(documents){

@@ -326,7 +326,7 @@ async function getStage1Data(step){
 	$("#teacherSignupStage1").show();
 	signupTeacherStage1OnLoadEvent(responseData);
 	$('.select_dropdown').select2();
-	callCountriesOption("teacherSignupStage1", responseData.details.teacher.countryId, "countryId", responseData.details.teacher.countryId);
+	await callCountriesOption("teacherSignupStage1", responseData.details.teacher.countryId, "countryId", responseData.details.teacher.countryId);
 	$("#teacherSignupStage1 #stateId").val(responseData.details.teacher.stateId).trigger('change');
 	autoSelectDropDownTeacherBasicInformation('teacherSignupStage1', responseData.details.teacher); 
 }

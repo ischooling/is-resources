@@ -604,7 +604,7 @@ function parentSchoolDiaryFormatDate(dateValue, timezone) {
     if (typeof moment === "undefined") {
         return dateValue;
     }
-    return convertDatetimeWithFormat(dateValue, timezone, Intl.DateTimeFormat().resolvedOptions().timeZone, DISPLAY_DATETIME_FORMATTER);;
+    return convertDatetimeWithFormat(dateValue, timezone, getSystemTimezone(), DISPLAY_DATETIME_FORMATTER);;
 }
 
 function parentSchoolDiaryEscapeHtml(rawText) {
