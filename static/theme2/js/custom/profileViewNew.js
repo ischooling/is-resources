@@ -23,6 +23,12 @@ var CURRENT_MODAL_SCHEDULE_SOURCE = [];
 var BULK_PROFILE_SAVE_CONTEXT = null;
 var RESERVE_ENROLLMENT_SAVE_BULK=false;
 var LOCAL_PROFILE_MISSING_FIELDS=[];
+var PROFILE_STUDENT_DOCUMENTS_RESPONSE = null;
+var PROFILE_STUDENT_DOCUMENT_REUPLOADS = {};
+var PROFILE_STUDENT_DOCUMENT_UPLOADS = {};
+var PROFILE_STUDENT_DOCUMENT_BUCKETS = null;
+var PROFILE_STUDENT_DOCUMENT_UPLOAD_PANEL_HIDDEN = false;
+var PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = "";
 var SAVE_BLUK_PROFILE_DATA =
     [
         // { eleID: "firstName", keyId: "firstName" },
@@ -1229,7 +1235,9 @@ async function profileViewPageLoadEvent(data) {
         $("#guardian_information").attr("data-section-count", "11");
     }
     calculateSectionPercentage();
-
+    if ($("#studentDocumentVerificationWrapper").length > 0) {
+        loadProfileStudentDocumentVerification();
+    }
 
 }
 
@@ -1666,6 +1674,9 @@ function saveDocs(userId, studentStandardId, docType) {
                 console.log("Save Docs", STUDENT_UPLOAD_DOCUMENTS)
                 ACADEMIC_ATTACHMENT.push(data.LIST_OF_DOC);
                 calculateSectionPercentage('', '', 'save-docs', '', '');
+                if ($("#studentDocumentVerificationWrapper").length > 0) {
+                    loadProfileStudentDocumentVerification();
+                }
                 if(USER_ROLE == "STUDENT"){
                     var eleIdsToRemove = STUDENT_UPLOAD_DOCUMENTS.map(item => item.eleID);
 
@@ -1691,6 +1702,977 @@ function saveDocs(userId, studentStandardId, docType) {
             }
         }
     });
+
+}
+
+function normalizeProfileAdmissionStatus(status) {
+    var normalized = (status || "").toString().trim().toUpperCase().replace(/[\s_]+/g, " ");
+    if (normalized === "") {
+        return "Enrollment Under Review";
+    }
+    if (normalized === "ENROLLMENT ON HOLD") {
+        return "Enrollment On Hold";
+    }
+    if (normalized === "ENROLLMENT UNDER REVIEW" || normalized === "ENROLLMENT IN REVIEW") {
+        return "Enrollment Under Review";
+    }
+    if (normalized === "ENROLLMENT REJECTED") {
+        return "Enrollment Rejected";
+    }
+    if (normalized === "ENROLLMENT CONFIRM" || normalized === "ENROLLMENT CONFIRMED") {
+        return "Enrollment Confirmed";
+    }
+    return "";
+}
+
+function escapeHtml(value) {
+    return $("<div/>").text(value == null ? "" : value).html();
+}
+
+function canEditProfileStudentDocuments() {
+    return (USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.rightToEdit);
+}
+
+function getProfileStudentDocumentKey(doc) {
+    if (!doc) {
+        return "";
+    }
+    if (parseInt(doc.fileType, 10) === 78) {
+        return "passport";
+    }
+    if (parseInt(doc.fileType, 10) === 79) {
+        return "dob";
+    }
+    if (parseInt(doc.fileType, 10) === 80 && doc.standardId) {
+        return "acad_" + doc.standardId;
+    }
+    return "doc_" + (doc.id || "");
+}
+
+function isProfileStudentDocumentMarkedUnverified(doc) {
+    if (!doc) {
+        return false;
+    }
+    var isDocumentVerified = (doc.isDocumentVerified || "").toString().toUpperCase();
+    if (isDocumentVerified === "N") {
+        return true;
+    }
+    if (isDocumentVerified === "Y") {
+        return false;
+    }
+    return ((doc.isVerificationRequired || "N") + "").toString().toUpperCase() === "Y";
+}
+
+function getProfileStudentDocumentBuckets(documentsResponse) {
+    var attachments = (documentsResponse && documentsResponse.attachments) ? documentsResponse.attachments : {};
+    var rawDocs = (documentsResponse && documentsResponse.documents) ? documentsResponse.documents : [];
+    var personalDocs = [];
+    var academicDocs = [];
+    var unverifiedMap = {};
+    var existingMap = {};
+    var unnamedDocs = [];
+
+    $.each(rawDocs, function (i, doc) {
+        var key = getProfileStudentDocumentKey(doc);
+        var standardName = $.trim(doc.standardName || "");
+        var documentName = $.trim(doc.documentName || "");
+        var isUnverified = isProfileStudentDocumentMarkedUnverified(doc);
+        if (key) {
+            existingMap[key] = doc;
+        }
+        if (key === "passport" || key === "dob") {
+            if (isUnverified) {
+                unverifiedMap[key] = doc;
+            }
+            return;
+        }
+        if (key.indexOf("acad_") === 0) {
+            academicDocs.push(doc);
+            if (isUnverified) {
+                unverifiedMap[key] = doc;
+            }
+            return;
+        }
+        if (!standardName && !documentName && !doc.standardId) {
+            unnamedDocs.push(doc);
+            return;
+        }
+        academicDocs.push(doc);
+    });
+
+    if (attachments.passportSizePhotoURL || existingMap.passport) {
+        personalDocs.push({
+            key: "passport",
+            label: "Passport Size Photo",
+            url: attachments.passportSizePhotoURL || (existingMap.passport ? existingMap.passport.fileUrl : ""),
+            name: attachments.passportSizePhotoName || attachments.passportSizePhotoDocumentName || (existingMap.passport ? (existingMap.passport.fileOriginalName || existingMap.passport.uploadFileName || "") : ""),
+            rawDoc: existingMap.passport || null
+        });
+    }
+    if (attachments.dobProofURL || existingMap.dob) {
+        personalDocs.push({
+            key: "dob",
+            label: "DOB Proof",
+            url: attachments.dobProofURL || (existingMap.dob ? existingMap.dob.fileUrl : ""),
+            name: attachments.dobProofName || attachments.dobProofDocumentName || (existingMap.dob ? (existingMap.dob.fileOriginalName || existingMap.dob.uploadFileName || "") : ""),
+            rawDoc: existingMap.dob || null
+        });
+    }
+
+    var fallbackPersonalKeys = [];
+    $.each(personalDocs, function (i, item) {
+        if ((item.key === "passport" || item.key === "dob") && !unverifiedMap[item.key]) {
+            fallbackPersonalKeys.push(item.key);
+        }
+    });
+    $.each(unnamedDocs, function (i, doc) {
+        if (!isProfileStudentDocumentMarkedUnverified(doc)) {
+            return;
+        }
+        var fallbackKey = fallbackPersonalKeys.shift();
+        if (fallbackKey) {
+            unverifiedMap[fallbackKey] = doc;
+            existingMap[fallbackKey] = doc;
+            $.each(personalDocs, function (index, item) {
+                if (item.key === fallbackKey) {
+                    item.rawDoc = doc;
+                }
+            });
+        }
+    });
+
+    $.each(personalDocs, function (i, item) {
+        item.isDocumentVerified = unverifiedMap[item.key] ? "N" : "Y";
+    });
+
+    return {
+        personalDocs: personalDocs,
+        academicDocs: academicDocs,
+        unverifiedMap: unverifiedMap,
+        existingMap: existingMap
+    };
+}
+
+function getProfileCurrentGradeId() {
+    try {
+        if (PORFILE_RESPONSE_UPDATED_DATA && PORFILE_RESPONSE_UPDATED_DATA[2] && PORFILE_RESPONSE_UPDATED_DATA[2].gradeId) {
+            return (PORFILE_RESPONSE_UPDATED_DATA[2].gradeId || "").toString();
+        }
+    } catch (e) { }
+    return ($("#grade").val() || "").toString();
+}
+
+function getProfileRequiredAcademicDocumentGrades(standardId) {
+    if (typeof getRequiredAcademicDocumentGrades === "function") {
+        try {
+            return getRequiredAcademicDocumentGrades(standardId) || [];
+        } catch (e) { }
+    }
+    if (typeof SCHOOL_STANDARD_GRADE_MASTER === "undefined" || !SCHOOL_STANDARD_GRADE_MASTER || !standardId) {
+        return [];
+    }
+    var grade = SCHOOL_STANDARD_GRADE_MASTER.find(function (item) {
+        return item.key.toString() === standardId.toString();
+    });
+    if (!grade) {
+        return [];
+    }
+    var orderBy = parseInt(grade.orderBy, 10) || 0;
+    if (orderBy <= 1) {
+        return [];
+    }
+    var getProfileStudentDocGradeByOrder = function (targetOrderBy) {
+        return SCHOOL_STANDARD_GRADE_MASTER.find(function (item) {
+            return (parseInt(item.orderBy, 10) || 0) === parseInt(targetOrderBy, 10);
+        });
+    };
+    if (orderBy >= 2 && orderBy <= 11) {
+        var previousGrade = getProfileStudentDocGradeByOrder(orderBy - 1);
+        return previousGrade ? [previousGrade] : [];
+    }
+    if (orderBy === 12) {
+        return [getProfileStudentDocGradeByOrder(10), getProfileStudentDocGradeByOrder(11)].filter(Boolean);
+    }
+    if (orderBy === 13) {
+        return [getProfileStudentDocGradeByOrder(10), getProfileStudentDocGradeByOrder(11), getProfileStudentDocGradeByOrder(12)].filter(Boolean);
+    }
+    if (orderBy >= 14 && orderBy <= 18) {
+        var previousFlexyGrade = getProfileStudentDocGradeByOrder(orderBy - 1);
+        return previousFlexyGrade ? [previousFlexyGrade] : [];
+    }
+    return [];
+}
+
+function isProfileFlexyAcademicDocumentFlow(standardId) {
+    var grade = SCHOOL_STANDARD_GRADE_MASTER.find(function (item) {
+        return item.key.toString() === (standardId || "").toString();
+    });
+    if (!grade) {
+        return false;
+    }
+    var orderBy = parseInt(grade.orderBy, 10) || 0;
+    return orderBy >= 14 && orderBy <= 18;
+}
+
+function getProfileStudentUploadMeta(docKey) {
+    var existingDoc = PROFILE_STUDENT_DOCUMENT_BUCKETS && PROFILE_STUDENT_DOCUMENT_BUCKETS.existingMap ? (PROFILE_STUDENT_DOCUMENT_BUCKETS.existingMap[docKey] || {}) : {};
+    return {
+        isReupload: existingDoc.attachmentId ? "Y" : "N",
+        attachmentId: existingDoc.attachmentId || existingDoc.id || null
+    };
+}
+
+function getProfileAcademicDocInputValue(rowKey, key) {
+    return $.trim($("#" + key + "_" + rowKey).val());
+}
+
+function syncProfileStudentDobUploadState() {
+    var hasDobProofType = $.trim($("#profileStudentDocDobProofType").val()) !== "";
+    $("#profileStudentDocDobFile").prop("disabled", !hasDobProofType);
+    if (hasDobProofType) {
+        if (!PROFILE_STUDENT_DOCUMENT_UPLOADS.dob) {
+            $("#profileStudentDocDobFileName").text("Upload your file");
+        }
+    } else {
+        $("#profileStudentDocDobFile").val("");
+        delete PROFILE_STUDENT_DOCUMENT_UPLOADS.dob;
+        $("#profileStudentDocDobFileName").text("Select proof type first");
+        $("#profileStudentDocDobView, #profileStudentDocDobRemove").hide();
+    }
+}
+
+function getProfileStudentDocumentUploadPanel(documentsResponse) {
+    var currentGradeId = getProfileCurrentGradeId();
+    var requiredGrades = getProfileRequiredAcademicDocumentGrades(currentGradeId);
+    var existingMap = PROFILE_STUDENT_DOCUMENT_BUCKETS && PROFILE_STUDENT_DOCUMENT_BUCKETS.existingMap ? PROFILE_STUDENT_DOCUMENT_BUCKETS.existingMap : {};
+    var dobDoc = existingMap.dob || {};
+    var html = '';
+    var uploadControlStyle = 'display:flex;align-items:center;gap:8px;';
+    var uploadInputWrapStyle = 'flex:1 1 auto;min-width:0;';
+    var uploadActionWrapStyle = 'display:flex;align-items:center;justify-content:flex-end;gap:6px;min-height:32px;';
+
+    html += '<div class="border rounded p-3 my-3 bg-white">';
+    html += '<div class="d-flex flex-wrap justify-content-between align-items-start mb-3">';
+    html += '<div><div class="font-weight-semi-bold text-dark">Upload Student Documents</div><small class="text-muted">Admin can upload or replace student documents here. Changes will reflect in the verification table below.</small></div>';
+    html += '</div>';
+
+    html += '<div class="mb-3"><div class="font-weight-semi-bold mb-2">Personal Documents</div><div class="row">';
+    html += '<div class="col-md-6 col-sm-12 mb-3">';
+    html += '<label class="mb-1">Passport Size Photo</label>';
+    html += '<div>';
+    html += '<div style="' + uploadControlStyle + '">';
+    html += '<div class="upload-btn-wrapper" style="' + uploadInputWrapStyle + '">';
+    html += '<input class="file-input" type="file" id="profileStudentDocPassportFile" onchange="onProfileStudentDocumentUploadChange(this, \'passport\', 78)" />';
+    html += '<span class="btn btn-light border w-100 text-left mt-0 d-flex align-items-center overflow-hidden"><i class="fa fa-file-text-o mr-1 primary-txt-color"></i><span class="text-muted text-truncate d-inline-block w-100" id="profileStudentDocPassportFileName">Upload your file</span></span>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="' + uploadActionWrapStyle + 'margin-top:8px;">';
+    html += '<button type="button" class="btn btn-primary btn-sm mr-1" id="profileStudentDocPassportView" style="display:none;" onclick="previewProfileStudentDocumentUpload(\'passport\')"><i class="fa fa-eye"></i></button>';
+    html += '<button type="button" class="btn btn-danger btn-sm" id="profileStudentDocPassportRemove" style="display:none;" onclick="removeProfileStudentDocumentUpload(\'passport\')"><i class="fa fa-trash"></i></button>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+
+    html += '<div class="col-md-6 col-sm-12 mb-3">';
+    html += '<label class="mb-1">Date of Birth Proof</label>';
+    html += '<div>';
+    html += '<div style="' + uploadControlStyle + '">';
+    html += '<select class="form-control" id="profileStudentDocDobProofType" style="flex:0 0 190px;min-width:190px;" onchange="syncProfileStudentDobUploadState()">';
+    html += '<option value="">Select document type</option>';
+    html += '<option value="Birth Certificate"' + (dobDoc.documentName === "Birth Certificate" ? ' selected' : '') + '>Birth Certificate</option>';
+    html += '<option value="Passport"' + (dobDoc.documentName === "Passport" ? ' selected' : '') + '>Passport</option>';
+    html += '<option value="National ID"' + (dobDoc.documentName === "National ID" ? ' selected' : '') + '>National ID</option>';
+    html += '</select>';
+    html += '<div class="upload-btn-wrapper" style="' + uploadInputWrapStyle + '">';
+    html += '<input class="file-input" type="file" id="profileStudentDocDobFile" onchange="onProfileStudentDocumentUploadChange(this, \'dob\', 79)" disabled />';
+    html += '<span class="btn btn-light border w-100 text-left mt-0 d-flex align-items-center overflow-hidden"><i class="fa fa-file-text-o mr-1 primary-txt-color"></i><span class="text-muted text-truncate d-inline-block w-100" id="profileStudentDocDobFileName">Select proof type first</span></span>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="' + uploadActionWrapStyle + 'margin-top:8px;">';
+    html += '<button type="button" class="btn btn-primary btn-sm mr-1" id="profileStudentDocDobView" style="display:none;" onclick="previewProfileStudentDocumentUpload(\'dob\')"><i class="fa fa-eye"></i></button>';
+    html += '<button type="button" class="btn btn-danger btn-sm" id="profileStudentDocDobRemove" style="display:none;" onclick="removeProfileStudentDocumentUpload(\'dob\')"><i class="fa fa-trash"></i></button>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div></div>';
+
+    html += '<div><div class="font-weight-semi-bold mb-2">Academic Documents</div>';
+    if (requiredGrades.length < 1) {
+        html += '<div class="text-muted">No previous academic document required for this grade.</div>';
+    } else {
+        $.each(requiredGrades, function (index, gradeInfo) {
+            var rowKey = "acad_" + gradeInfo.key;
+            var existingDoc = existingMap[rowKey] || {};
+            var titleHtml = 'Academic Document ' + (index + 1);
+            if (!isProfileFlexyAcademicDocumentFlow(currentGradeId)) {
+                titleHtml += ' <small class="text-muted">(' + escapeHtml(gradeInfo.value || "") + ')</small>';
+            }
+            html += '<div class="card mb-3"><div class="card-body py-3">';
+            html += '<h6 class="font-weight-semi-bold mb-3">' + titleHtml + '</h6>';
+            html += '<div class="form-row">';
+            html += '<div class="form-group col-md-3"><label class="mb-1">Document Name</label><input type="text" class="form-control form-control-sm" id="profileStudentDocName_' + rowKey + '" value="' + escapeHtml(existingDoc.documentName || "") + '" placeholder="Document name" /></div>';
+            html += '<div class="form-group col-md-3"><label class="mb-1">School Name</label><input type="text" class="form-control form-control-sm" id="profileStudentSchoolName_' + rowKey + '" value="' + escapeHtml(existingDoc.schoolName || "") + '" placeholder="School name" /></div>';
+            html += '<div class="form-group col-md-2"><label class="mb-1">Board Name</label><input type="text" class="form-control form-control-sm" id="profileStudentBoardName_' + rowKey + '" value="' + escapeHtml(existingDoc.boardName || "") + '" placeholder="Board name" /></div>';
+            html += '<div class="form-group col-md-2"><label class="mb-1">Passing Year</label><input type="text" class="form-control form-control-sm" maxlength="4" id="profileStudentPassingYear_' + rowKey + '" value="' + escapeHtml(existingDoc.passingYear || "") + '" placeholder="YYYY" onkeydown="return M.digit(event);" /></div>';
+            html += '<div class="form-group col-md-12"><label class="mb-1">Document Upload</label><div>';
+            html += '<div class="upload-btn-wrapper" style="width:100%;">';
+            html += '<input class="file-input" type="file" id="profileStudentAcademicFile_' + rowKey + '" onchange="onProfileStudentDocumentUploadChange(this, \'' + rowKey + '\', 80)" />';
+            html += '<span class="btn btn-light border w-100 text-left mt-0 d-flex align-items-center overflow-hidden"><i class="fa fa-file-text-o mr-1 primary-txt-color"></i><span class="text-muted text-truncate d-inline-block w-100" id="profileStudentAcademicFileName_' + rowKey + '">Upload your file</span></span>';
+            html += '</div>';
+            html += '<div style="' + uploadActionWrapStyle + 'margin-top:8px;">';
+            html += '<button type="button" class="btn btn-primary btn-sm mr-1" id="profileStudentAcademicView_' + rowKey + '" style="display:none;" onclick="previewProfileStudentDocumentUpload(\'' + rowKey + '\')"><i class="fa fa-eye"></i></button>';
+            html += '<button type="button" class="btn btn-danger btn-sm" id="profileStudentAcademicRemove_' + rowKey + '" style="display:none;" onclick="removeProfileStudentDocumentUpload(\'' + rowKey + '\')"><i class="fa fa-trash"></i></button>';
+            html += '</div>';
+            html += '</div></div>';
+            html += '</div></div></div>';
+        });
+    }
+    html += '<div class="text-right mt-3"><button type="button" class="btn btn-primary btn-sm" id="profileStudentDocumentUploadSaveBtn" onclick="saveProfileStudentDocuments()">Save Uploaded Documents</button></div>';
+    html += '</div></div>';
+    return html;
+}
+
+function getProfileStudentDocumentEncodedPayload() {
+    var userId = PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.userId ? PORFILE_RESPONSE_DATA.userId : "";
+    if (!userId) {
+        return "";
+    }
+    try {
+        return btoa(userId.toString());
+    } catch (e) {
+        return "";
+    }
+}
+
+async function loadProfileStudentDocumentVerification() {
+    if ($("#studentDocumentVerificationWrapper").length < 1) {
+        return;
+    }
+
+    var encodedPayload = getProfileStudentDocumentEncodedPayload();
+    if (!encodedPayload) {
+        if ($("#studentDocumentUploadPanelWrapper").length > 0) {
+            $("#studentDocumentUploadPanelWrapper").html('<div class="border rounded p-3 text-danger bg-light">Unable to load upload panel.</div>');
+        }
+        $("#studentDocumentVerificationWrapper").html('<div class="border rounded p-3 text-danger bg-light">Unable to load student documents.</div>');
+        return;
+    }
+
+    if ($("#studentDocumentUploadPanelWrapper").length > 0) {
+        $("#studentDocumentUploadPanelWrapper").html('<div class="border rounded p-3 text-muted bg-light">Loading upload panel...</div>');
+    }
+    $("#studentDocumentVerificationWrapper").html('<div class="border rounded p-3 text-muted bg-light">Loading documents...</div>');
+    PROFILE_STUDENT_DOCUMENT_REUPLOADS = {};
+    PROFILE_STUDENT_DOCUMENT_UPLOADS = {};
+    PROFILE_STUDENT_DOCUMENT_BUCKETS = null;
+
+    try {
+        var documentsRequest = {
+            method: "GET",
+            url: BASE_URL + CONTEXT_PATH + "student/enrollment/get-documents?payload=" + encodeURIComponent(encodedPayload),
+            global: false,
+            showMessage: false,
+            onFaildResolved: true,
+            onSuccessResolved: true
+        };
+        var statusRequest = {
+            method: "GET",
+            url: BASE_URL + CONTEXT_PATH + "student/enrollment/get-documents-status?payload=" + encodeURIComponent(encodedPayload),
+            global: false,
+            showMessage: false,
+            onFaildResolved: true,
+            onSuccessResolved: true
+        };
+        var responseList = await Promise.all([
+            callCommonAjax(documentsRequest),
+            callCommonAjax(statusRequest)
+        ]);
+        PROFILE_STUDENT_DOCUMENTS_RESPONSE = responseList[0] || {};
+        renderProfileStudentDocumentVerification(responseList[0] || {}, responseList[1] || {});
+    } catch (e) {
+        $("#studentDocumentVerificationWrapper").html('<div class="border rounded p-3 text-danger bg-light">Unable to load student documents.</div>');
+    }
+}
+
+function renderProfileStudentDocumentVerification(documentsResponse, statusResponse) {
+    var documents = documentsResponse && documentsResponse.documents ? documentsResponse.documents : [];
+    var canEdit = canEditProfileStudentDocuments();
+    PROFILE_STUDENT_DOCUMENT_BUCKETS = getProfileStudentDocumentBuckets(documentsResponse || {});
+    var admissionStatus = normalizeProfileAdmissionStatus(
+        (statusResponse && statusResponse.admissionStatus) ||
+        (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.admissionStatus) ||
+        ""
+    );
+
+    var html = '';
+    if ($("#studentDocumentUploadPanelWrapper").length > 0) {
+        if (canEdit && !PROFILE_STUDENT_DOCUMENT_UPLOAD_PANEL_HIDDEN) {
+            $("#studentDocumentUploadPanelWrapper").html(getProfileStudentDocumentUploadPanel(documentsResponse || {}));
+        } else {
+            $("#studentDocumentUploadPanelWrapper").html("");
+        }
+    }
+
+    if (canEdit) {
+        html += '<div class="mb-3">';
+        html += '<div class="font-weight-semi-bold text-dark">Student document verification</div>';
+        html += '<small class="text-muted d-block">' + (canEdit ? 'Review submitted documents, verify them, or ask for re-upload.' : 'View submitted documents and their details.') + '</small>';
+        html += '</div>';
+        html += '<div class="row mb-3">';
+        html += '<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">';
+        html += '<label for="studentDocumentsStatus" class="font-weight-semi-bold text-dark">Student documents status</label>';
+        html += '<select id="studentDocumentsStatus" class="form-control form-control-sm">';
+        html += '<option value="">Select status</option>';
+        html += '<option value="Enrollment On Hold">Enrollment On Hold</option>';
+        html += '<option value="Enrollment Under Review">Enrollment Under Review</option>';
+        html += '<option value="Enrollment Rejected">Enrollment Rejected</option>';
+        html += '<option value="Enrollment Confirmed">Enrollment Confirmed</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '</div>';
+    }
+
+    if (documents.length < 1) {
+        html += '<div class="border rounded p-3 text-muted bg-light">No submitted documents found for verification.</div>';
+        $("#studentDocumentVerificationWrapper").html(html);
+        if (canEdit && $("#studentDocumentsStatus").length > 0) {
+            $("#studentDocumentsStatus").val(admissionStatus);
+        }
+        $("#studentDocumentVerificationSubmitBtn").prop("disabled", false);
+        syncProfileStudentDobUploadState();
+        return;
+    }
+
+    html += '<div class="table-responsive border rounded"><table class="table table-bordered table-sm mb-0">';
+    html += '<thead class="bg-light"><tr>';
+    html += '<th style="min-width:170px;">Document</th>';
+    html += '<th style="min-width:210px;">Details</th>';
+    if (canEdit) {
+        // html += '<th style="min-width:150px;">Verification Required</th>';
+        html += '<th style="min-width:150px;">Verified</th>';
+        html += '<th style="min-width:220px;">Remark</th>';
+        html += '<th style="min-width:250px;">Re-upload</th>';
+    } else {
+        html += '<th style="min-width:120px;">Verified</th>';
+        // html += '<th style="min-width:150px;">Verification Required</th>';
+        html += '<th style="min-width:220px;">Remark</th>';
+    }
+    html += '</tr></thead><tbody>';
+
+    $.each(documents, function (index, doc) {
+        var docTitle = getProfileStudentDocumentTitle(doc, index);
+        var verifiedValue = ((doc.isDocumentVerified || "N") + "").toUpperCase();
+        var verificationRequiredValue = ((doc.isVerificationRequired || "Y") + "").toUpperCase();
+        var fileUrl = doc.fileUrl || "";
+        var fileExt = getProfileStudentDocumentFileExtFromUrl(fileUrl);
+        html += '<tr id="profileStudentDocumentRow_' + doc.id + '">';
+        html += '<td>';
+        html += '<div class="font-weight-semi-bold text-dark">' + escapeHtml(docTitle) + '</div>';
+        // html += '<div class="text-muted font-11">Doc ID: ' + (doc.id || "") + '</div>';
+        if (fileUrl) {
+            html += '<div class="mt-2"><button type="button" class="btn btn-primary btn-sm" data-file-url="' + escapeHtml(fileUrl) + '" data-file-ext="' + escapeHtml(fileExt) + '" onclick="viewProfileStudentVerificationDocument(this.getAttribute(\'data-file-url\'), this.getAttribute(\'data-file-ext\'))"><i class="fa fa-eye mr-1"></i>View</button></div>';
+        }
+        html += '</td>';
+        html += '<td>' + getProfileStudentDocumentMetaHtml(doc) + '</td>';
+        if (canEdit) {
+            // html += '<td><select class="form-control form-control-sm" id="profileStudentDocRequired_' + doc.id + '" onchange="toggleProfileStudentDocumentReupload(' + doc.id + ')">';
+            // html += '<option value="Y"' + (verificationRequiredValue === "Y" ? ' selected' : '') + '>Yes</option>';
+            // html += '<option value="N"' + (verificationRequiredValue === "N" ? ' selected' : '') + '>No</option>';
+            // html += '</select></td>';
+            html += '<td><select class="form-control form-control-sm" id="profileStudentDocVerified_' + doc.id + '" onchange="toggleProfileStudentDocumentReupload(' + doc.id + ')">';
+            html += '<option value="Y"' + (verifiedValue === "Y" ? ' selected' : '') + '>Yes</option>';
+            html += '<option value="N"' + (verifiedValue === "N" ? ' selected' : '') + '>No</option>';
+            html += '</select></td>';
+            html += '<td><textarea class="form-control form-control-sm" rows="3" id="profileStudentDocRemark_' + doc.id + '" placeholder="Enter verification remark">' + escapeHtml(doc.verificationRemark || "") + '</textarea></td>';
+            html += '<td>';
+            html += '<div id="profileStudentDocUploadBlock_' + doc.id + '"' + (verifiedValue === "N" ? '' : ' style="display:none;"') + '>';
+            html += '<div class="upload-btn-wrapper w-100 mb-2">';
+            html += '<input class="file-input" type="file" id="profileStudentDocUpload_' + doc.id + '" onchange="onProfileStudentDocumentReuploadChange(this, ' + doc.id + ', ' + (doc.fileType || 80) + ')" />';
+            html += '<span class="btn btn-light border w-100 text-left mt-0"><i class="fa fa-file-text-o mr-1 primary-txt-color"></i><span class="text-muted" id="profileStudentDocUploadName_' + doc.id + '">Upload your file</span></span>';
+            html += '</div>';
+            html += '<div class="d-flex align-items-center">';
+            html += '<button type="button" class="btn btn-primary btn-sm mr-1" id="profileStudentDocUploadView_' + doc.id + '" style="display:none;" onclick="previewProfileStudentDocumentReupload(' + doc.id + ')"><i class="fa fa-eye"></i></button>';
+            html += '<button type="button" class="btn btn-danger btn-sm" id="profileStudentDocUploadRemove_' + doc.id + '" style="display:none;" onclick="removeProfileStudentDocumentReupload(' + doc.id + ')"><i class="fa fa-trash"></i></button>';
+            html += '</div>';
+            html += '<small class="text-muted d-block mt-2">Upload JPG, JPEG, PNG or PDF up to 5 MB.</small>';
+            html += '</div>';
+            html += '</td>';
+        } else {
+            html += '<td>' + (verifiedValue === "Y" ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-warning">No</span>') + '</td>';
+            // html += '<td>' + (verificationRequiredValue === "Y" ? '<span class="badge badge-info">Yes</span>' : '<span class="badge badge-secondary">No</span>') + '</td>';
+            html += '<td>' + (doc.verificationRemark ? escapeHtml(doc.verificationRemark) : '<span class="text-muted">N/A</span>') + '</td>';
+        }
+        html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    $("#studentDocumentVerificationWrapper").html(html);
+    if (canEdit && $("#studentDocumentsStatus").length > 0) {
+        $("#studentDocumentsStatus").val(admissionStatus);
+    }
+    $("#studentDocumentVerificationSubmitBtn").prop("disabled", false);
+    syncProfileStudentDobUploadState();
+}
+
+function getProfileStudentDocumentTitle(doc, index) {
+    if (doc.fileType == 78) {
+        return "Passport Size Photo";
+    }
+    if (doc.fileType == 79) {
+        return "Date Of Birth Proof";
+    }
+    if (doc.standardName || doc.documentName) {
+        return $.trim((doc.standardName || "") + (doc.documentName ? " - " + doc.documentName : ""));
+    }
+    return "Document " + (index + 1);
+}
+
+function getProfileStudentDocumentMetaHtml(doc) {
+    var details = [];
+    var docKey = getProfileStudentDocumentKey(doc);
+    var attachments = PROFILE_STUDENT_DOCUMENTS_RESPONSE && PROFILE_STUDENT_DOCUMENTS_RESPONSE.attachments ? PROFILE_STUDENT_DOCUMENTS_RESPONSE.attachments : {};
+    var fileName = doc.fileOriginalName || doc.uploadFileName || "";
+    if (docKey === "passport") {
+        fileName = fileName || attachments.passportSizePhotoName || attachments.passportSizePhotoDocumentName || "";
+    } else if (docKey === "dob") {
+        fileName = fileName || attachments.dobProofName || attachments.dobProofDocumentName || "";
+    }
+    if (doc.attachmentId) {
+        details.push('<div><span class="font-weight-semi-bold">Attachment ID:</span> ' + escapeHtml(doc.attachmentId) + '</div>');
+    }
+    if (fileName) {
+        details.push('<div><span class="font-weight-semi-bold">Name:</span> ' + escapeHtml(fileName) + '</div>');
+    }
+    if (doc.schoolName) {
+        details.push('<div><span class="font-weight-semi-bold">School:</span> ' + escapeHtml(doc.schoolName) + '</div>');
+    }
+    if (doc.boardName) {
+        details.push('<div><span class="font-weight-semi-bold">Board:</span> ' + escapeHtml(doc.boardName) + '</div>');
+    }
+    if (doc.passingYear) {
+        details.push('<div><span class="font-weight-semi-bold">Passing Year:</span> ' + escapeHtml(doc.passingYear) + '</div>');
+    }
+    // if (doc.submittedDate) {
+    //     details.push('<div><span class="font-weight-semi-bold">Submitted:</span> ' + escapeHtml(doc.submittedDate) + '</div>');
+    // }
+    // if (doc.fileOriginalName) {
+    //     details.push('<div class="text-muted font-11 mt-1">' + escapeHtml(doc.fileOriginalName) + '</div>');
+    // }
+    return details.join("") || '<span class="text-muted">No additional details</span>';
+}
+
+function getProfileStudentDocumentFileExtFromUrl(url) {
+    try {
+        var cleanUrl = (url || "").split("?")[0];
+        return (cleanUrl.split(".").pop() || "pdf").toLowerCase();
+    } catch (e) {
+        return "pdf";
+    }
+}
+
+function viewProfileStudentVerificationDocument(fileUrl, fileExt) {
+    $("#uploadFile .upload_pdf .pre_upload_pdf").remove();
+    if (["png", "jpg", "jpeg"].indexOf((fileExt || "").toLowerCase()) > -1) {
+        $("#uploadFile .upload_img img").attr("src", fileUrl);
+        $("#uploadFile .upload_img").removeClass("d-none");
+        $("#uploadFile .upload_pdf").addClass("d-none");
+    } else {
+        $("#uploadFile .upload_pdf#pre_upload_pdf_div").append('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;width:100%;" data="' + fileUrl + '"></object>');
+        $("#uploadFile .upload_pdf a.download-pdf-btn").attr("href", fileUrl);
+        $("#uploadFile .upload_pdf").removeClass("d-none");
+        $("#uploadFile .upload_img").addClass("d-none");
+    }
+    $("#uploadFile").modal("show");
+}
+
+function toggleProfileStudentDocumentReupload(docId) {
+    var verifiedValue = $("#profileStudentDocVerified_" + docId).val();
+    if (verifiedValue === "N") {
+        $("#profileStudentDocUploadBlock_" + docId).slideDown(150);
+    } else {
+        $("#profileStudentDocUploadBlock_" + docId).slideUp(150);
+        removeProfileStudentDocumentReupload(docId);
+    }
+}
+
+function isValidProfileStudentDocumentFile(file) {
+    var allowed = /^(image\/(png|jpe?g)|application\/pdf)$/i;
+    if (!allowed.test(file.type)) {
+        showMessageTheme2(0, "Please upload files in following formats (jpg, jpeg, pdf or png).");
+        return false;
+    }
+    if (file.size > (5 * 1024 * 1024)) {
+        showMessageTheme2(0, "Please upload maximum 5MB file in size.");
+        return false;
+    }
+    return true;
+}
+
+function readProfileStudentDocumentAsBase64(file) {
+    return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            resolve((e.target.result || "").split(",")[1] || "");
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function onProfileStudentDocumentReuploadChange(src, docId, fileType) {
+    var file = src.files && src.files[0] ? src.files[0] : null;
+    if (!file) {
+        return;
+    }
+    if (!isValidProfileStudentDocumentFile(file)) {
+        $(src).val("");
+        return;
+    }
+    var fileContent = await readProfileStudentDocumentAsBase64(file);
+    PROFILE_STUDENT_DOCUMENT_REUPLOADS[docId] = {
+        fileName: file.name,
+        fileType: fileType,
+        mimeType: file.type,
+        fileContent: fileContent
+    };
+    $("#profileStudentDocUploadName_" + docId).text(file.name);
+    $("#profileStudentDocUploadView_" + docId + ", #profileStudentDocUploadRemove_" + docId).show();
+}
+
+async function onProfileStudentDocumentUploadChange(src, docKey, fileType) {
+    var file = src.files && src.files[0] ? src.files[0] : null;
+    if (!file) {
+        return;
+    }
+    if (!isValidProfileStudentDocumentFile(file)) {
+        $(src).val("");
+        return;
+    }
+    var fileContent = await readProfileStudentDocumentAsBase64(file);
+    PROFILE_STUDENT_DOCUMENT_UPLOADS[docKey] = {
+        fileName: file.name,
+        fileType: fileType,
+        mimeType: file.type,
+        fileContent: fileContent
+    };
+    if (docKey === "passport") {
+        $("#profileStudentDocPassportFileName").text(file.name);
+        $("#profileStudentDocPassportView, #profileStudentDocPassportRemove").show();
+    } else if (docKey === "dob") {
+        $("#profileStudentDocDobFileName").text(file.name);
+        $("#profileStudentDocDobView, #profileStudentDocDobRemove").show();
+    } else {
+        $("#profileStudentAcademicFileName_" + docKey).text(file.name);
+        $("#profileStudentAcademicView_" + docKey + ", #profileStudentAcademicRemove_" + docKey).show();
+    }
+}
+
+function removeProfileStudentDocumentReupload(docId) {
+    delete PROFILE_STUDENT_DOCUMENT_REUPLOADS[docId];
+    $("#profileStudentDocUpload_" + docId).val("");
+    $("#profileStudentDocUploadName_" + docId).text("Upload your file");
+    $("#profileStudentDocUploadView_" + docId + ", #profileStudentDocUploadRemove_" + docId).hide();
+}
+
+function removeProfileStudentDocumentUpload(docKey) {
+    delete PROFILE_STUDENT_DOCUMENT_UPLOADS[docKey];
+    if (docKey === "passport") {
+        $("#profileStudentDocPassportFile").val("");
+        $("#profileStudentDocPassportFileName").text("Upload your file");
+        $("#profileStudentDocPassportView, #profileStudentDocPassportRemove").hide();
+    } else if (docKey === "dob") {
+        $("#profileStudentDocDobFile").val("");
+        $("#profileStudentDocDobFileName").text($.trim($("#profileStudentDocDobProofType").val()) !== "" ? "Upload your file" : "Select proof type first");
+        $("#profileStudentDocDobView, #profileStudentDocDobRemove").hide();
+    } else {
+        $("#profileStudentAcademicFile_" + docKey).val("");
+        $("#profileStudentAcademicFileName_" + docKey).text("Upload your file");
+        $("#profileStudentAcademicView_" + docKey + ", #profileStudentAcademicRemove_" + docKey).hide();
+    }
+}
+
+function profileStudentDocumentBase64ToBlob(base64Content, mimeType) {
+    var byteCharacters = atob(base64Content);
+    var byteArrays = [];
+    for (var offset = 0; offset < byteCharacters.length; offset += 512) {
+        var slice = byteCharacters.slice(offset, offset + 512);
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        byteArrays.push(new Uint8Array(byteNumbers));
+    }
+    return new Blob(byteArrays, { type: mimeType || "application/octet-stream" });
+}
+
+function previewProfileStudentDocumentReupload(docId) {
+    var upload = PROFILE_STUDENT_DOCUMENT_REUPLOADS[docId];
+    if (!upload || !upload.fileContent) {
+        return;
+    }
+
+    if (PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL && PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL.indexOf("blob:") === 0) {
+        try {
+            URL.revokeObjectURL(PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL);
+        } catch (e) { }
+    }
+    PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = URL.createObjectURL(profileStudentDocumentBase64ToBlob(upload.fileContent, upload.mimeType));
+    var fileExt = upload.mimeType && upload.mimeType.indexOf("image/") === 0 ? (upload.mimeType.indexOf("png") > -1 ? "png" : "jpg") : "pdf";
+    viewProfileStudentVerificationDocument(PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL, fileExt);
+    $("#uploadFile").one("hidden.bs.modal", function () {
+        if (PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL && PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL.indexOf("blob:") === 0) {
+            try {
+                URL.revokeObjectURL(PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL);
+            } catch (e) { }
+        }
+        PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = "";
+    });
+}
+
+function previewProfileStudentDocumentUpload(docKey) {
+    var upload = PROFILE_STUDENT_DOCUMENT_UPLOADS[docKey];
+    if (!upload || !upload.fileContent) {
+        return;
+    }
+
+    if (PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL && PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL.indexOf("blob:") === 0) {
+        try {
+            URL.revokeObjectURL(PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL);
+        } catch (e) { }
+    }
+    PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = URL.createObjectURL(profileStudentDocumentBase64ToBlob(upload.fileContent, upload.mimeType));
+    var fileExt = upload.mimeType && upload.mimeType.indexOf("image/") === 0 ? (upload.mimeType.indexOf("png") > -1 ? "png" : "jpg") : "pdf";
+    viewProfileStudentVerificationDocument(PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL, fileExt);
+    $("#uploadFile").one("hidden.bs.modal", function () {
+        if (PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL && PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL.indexOf("blob:") === 0) {
+            try {
+                URL.revokeObjectURL(PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL);
+            } catch (e) { }
+        }
+        PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = "";
+    });
+}
+
+function buildProfileStudentDocumentUploadPayload() {
+    var payload = {
+        userId: parseInt(PORFILE_RESPONSE_DATA.userId),
+        attachments: []
+    };
+
+    if (PROFILE_STUDENT_DOCUMENT_UPLOADS.passport) {
+        var passportMeta = getProfileStudentUploadMeta("passport");
+        payload.attachments.push({
+            isReupload: passportMeta.isReupload,
+            attachmentId: passportMeta.attachmentId,
+            fileName: PROFILE_STUDENT_DOCUMENT_UPLOADS.passport.fileName,
+            fileType: 78,
+            fileContent: PROFILE_STUDENT_DOCUMENT_UPLOADS.passport.fileContent
+        });
+    }
+    if (PROFILE_STUDENT_DOCUMENT_UPLOADS.dob) {
+        var dobMeta = getProfileStudentUploadMeta("dob");
+        payload.attachments.push({
+            isReupload: dobMeta.isReupload,
+            attachmentId: dobMeta.attachmentId,
+            dobProof: $("#profileStudentDocDobProofType").val(),
+            fileName: PROFILE_STUDENT_DOCUMENT_UPLOADS.dob.fileName,
+            fileType: 79,
+            fileContent: PROFILE_STUDENT_DOCUMENT_UPLOADS.dob.fileContent
+        });
+    }
+
+    var requiredGrades = getProfileRequiredAcademicDocumentGrades(getProfileCurrentGradeId());
+    $.each(requiredGrades, function (index, gradeInfo) {
+        var rowKey = "acad_" + gradeInfo.key;
+        var uploaded = PROFILE_STUDENT_DOCUMENT_UPLOADS[rowKey];
+        if (!uploaded) {
+            return;
+        }
+        var academicMeta = getProfileStudentUploadMeta(rowKey);
+        payload.attachments.push({
+            isReupload: academicMeta.isReupload,
+            attachmentId: academicMeta.attachmentId,
+            standardId: parseInt(gradeInfo.key, 10),
+            documentName: getProfileAcademicDocInputValue(rowKey, "profileStudentDocName"),
+            schoolName: getProfileAcademicDocInputValue(rowKey, "profileStudentSchoolName"),
+            boardName: getProfileAcademicDocInputValue(rowKey, "profileStudentBoardName"),
+            passingYear: parseInt(getProfileAcademicDocInputValue(rowKey, "profileStudentPassingYear"), 10),
+            fileName: uploaded.fileName,
+            fileType: 80,
+            fileContent: uploaded.fileContent
+        });
+    });
+
+    return payload;
+}
+
+function validateProfileStudentDocumentUploadPayload(payload) {
+    var existingMap = PROFILE_STUDENT_DOCUMENT_BUCKETS && PROFILE_STUDENT_DOCUMENT_BUCKETS.existingMap ? PROFILE_STUDENT_DOCUMENT_BUCKETS.existingMap : {};
+
+    if (!PROFILE_STUDENT_DOCUMENT_UPLOADS.passport && !existingMap.passport) {
+        showMessageTheme2(0, "Please upload Passport Size Photo.");
+        return false;
+    }
+    if (!$("#profileStudentDocDobProofType").val() && (PROFILE_STUDENT_DOCUMENT_UPLOADS.dob || existingMap.dob)) {
+        showMessageTheme2(0, "Please select Date of Birth proof type.");
+        return false;
+    }
+    if (!PROFILE_STUDENT_DOCUMENT_UPLOADS.dob && !existingMap.dob) {
+        showMessageTheme2(0, "Please upload Date of Birth proof document.");
+        return false;
+    }
+
+    var requiredGrades = getProfileRequiredAcademicDocumentGrades(getProfileCurrentGradeId());
+    for (var i = 0; i < requiredGrades.length; i++) {
+        var gradeInfo = requiredGrades[i];
+        var rowKey = "acad_" + gradeInfo.key;
+        var documentName = getProfileAcademicDocInputValue(rowKey, "profileStudentDocName");
+        var schoolName = getProfileAcademicDocInputValue(rowKey, "profileStudentSchoolName");
+        var boardName = getProfileAcademicDocInputValue(rowKey, "profileStudentBoardName");
+        var passingYear = getProfileAcademicDocInputValue(rowKey, "profileStudentPassingYear");
+        var uploadedDoc = PROFILE_STUDENT_DOCUMENT_UPLOADS[rowKey];
+        var existingDoc = existingMap[rowKey] || {};
+        documentName = documentName || $.trim(existingDoc.documentName || "");
+        schoolName = schoolName || $.trim(existingDoc.schoolName || "");
+        boardName = boardName || $.trim(existingDoc.boardName || "");
+        passingYear = passingYear || $.trim(existingDoc.passingYear || "");
+        if (documentName === "" || schoolName === "" || boardName === "" || passingYear === "") {
+            showMessageTheme2(0, isProfileFlexyAcademicDocumentFlow(getProfileCurrentGradeId()) ? "Please fill all academic documents." : "Please fill all academic document details for " + gradeInfo.value + ".");
+            return false;
+        }
+        if (!/^\d{4}$/.test(passingYear)) {
+            showMessageTheme2(0, "Passing year must be a 4 digit year for " + gradeInfo.value + ".");
+            return false;
+        }
+        if (!uploadedDoc && !existingDoc.attachmentId) {
+            showMessageTheme2(0, isProfileFlexyAcademicDocumentFlow(getProfileCurrentGradeId()) ? "Please upload academic document file." : "Please upload academic document file for " + gradeInfo.value + ".");
+            return false;
+        }
+    }
+    if (!payload || !payload.attachments || payload.attachments.length < 1) {
+        showMessageTheme2(0, "No new document selected to save.");
+        return false;
+    }
+    return true;
+}
+
+async function saveProfileStudentDocuments() {
+    var payload = buildProfileStudentDocumentUploadPayload();
+    if (!validateProfileStudentDocumentUploadPayload(payload)) {
+        return false;
+    }
+
+    $("#profileStudentDocumentUploadSaveBtn").prop("disabled", true);
+    try {
+        var ajaxReqDetails = {
+            method: "POST",
+            url: BASE_URL + CONTEXT_PATH + "student/enrollment/save-documents",
+            body: payload,
+            global: true,
+            showMessage: true
+        };
+        var responseData = await callCommonAjax(ajaxReqDetails);
+        if (responseData && !(responseData.status == '0' || responseData.status == '2' || responseData.status == '3')) {
+            PROFILE_STUDENT_DOCUMENT_UPLOADS = {};
+            PROFILE_STUDENT_DOCUMENT_UPLOAD_PANEL_HIDDEN = true;
+            await loadProfileStudentDocumentVerification();
+        } else {
+            $("#profileStudentDocumentUploadSaveBtn").prop("disabled", false);
+        }
+    } catch (e) {
+        showMessageTheme2(0, "Unable to upload student documents.");
+        $("#profileStudentDocumentUploadSaveBtn").prop("disabled", false);
+    }
+    return false;
+}
+
+function buildProfileStudentDocumentVerificationPayload() {
+    var documents = PROFILE_STUDENT_DOCUMENTS_RESPONSE && PROFILE_STUDENT_DOCUMENTS_RESPONSE.documents ? PROFILE_STUDENT_DOCUMENTS_RESPONSE.documents : [];
+    var admissionStatus = normalizeProfileAdmissionStatus($("#studentDocumentsStatus").val());
+    var allDocumentsVerified = (documents.length > 0);
+
+    var payload = {
+        userId: parseInt(PORFILE_RESPONSE_DATA.userId),
+        studentStandardId: parseInt(PORFILE_RESPONSE_DATA.studentStandardId),
+        admissionStatus: admissionStatus,
+        documents: []
+    };
+
+    for (var i = 0; i < documents.length; i++) {
+        var doc = documents[i];
+        var verifiedValue = ($("#profileStudentDocVerified_" + doc.id).val() || "N").toUpperCase();
+        var verificationRequiredValue = ((doc.isVerificationRequired || "Y") + "").toUpperCase();
+        var verificationRemark = $.trim($("#profileStudentDocRemark_" + doc.id).val());
+        if (verifiedValue === "N" && verificationRemark === "") {
+            showMessageTheme2(0, "Please enter verification remark for rejected documents.");
+            $("#profileStudentDocRemark_" + doc.id).focus();
+            return null;
+        }
+        var payloadDoc = {
+            id: doc.id,
+            attachmentId: doc.attachmentId,
+            fileName: (PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id] && PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id].fileName) || doc.fileOriginalName || "",
+            fileType: (PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id] && PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id].fileType) || doc.fileType || "",
+            isDocumentVerified: verifiedValue,
+            isVerificationRequired: verificationRequiredValue,
+            verificationRemark: verificationRemark
+        };
+        if (verifiedValue === "N") {
+            allDocumentsVerified = false;
+            payloadDoc.fileContent = (PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id] && PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id].fileContent) || "";
+            payloadDoc.fileName = (PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id] && PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id].fileName) || payloadDoc.fileName;
+            payloadDoc.fileType = (PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id] && PROFILE_STUDENT_DOCUMENT_REUPLOADS[doc.id].fileType) || payloadDoc.fileType;
+        } else {
+            payloadDoc.fileContent = "";
+        }
+        payload.documents.push(payloadDoc);
+    }
+
+    if (allDocumentsVerified) {
+        payload.admissionStatus = "Enrollment Confirmed";
+        if ($("#studentDocumentsStatus").length > 0) {
+            $("#studentDocumentsStatus").val("Enrollment Confirmed");
+        }
+    }
+
+    if (!payload.admissionStatus) {
+        showMessageTheme2(0, "Please select student documents status.");
+        return null;
+    }
+
+    return payload;
+}
+
+async function submitStudentDocumentVerification() {
+    var payload = buildProfileStudentDocumentVerificationPayload();
+    if (!payload) {
+        return false;
+    }
+
+    $("#studentDocumentVerificationSubmitBtn").prop("disabled", true);
+    try {
+        var ajaxReqDetails = {
+            method: "POST",
+            url: BASE_URL + CONTEXT_PATH + "student/enrollment/verify-documents",
+            body: payload,
+            global: true,
+            showMessage: false,
+            onFaildResolved: true,
+            onSuccessResolved: true
+        };
+        var responseData = await callCommonAjax(ajaxReqDetails);
+        if (responseData && responseData.status == 1) {
+            showMessageTheme2(1, "Document review completed");
+            await loadProfileStudentDocumentVerification();
+        } else {
+            showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to verify student documents.");
+            $("#studentDocumentVerificationSubmitBtn").prop("disabled", false);
+        }
+    } catch (e) {
+        showMessageTheme2(0, "Unable to verify student documents.");
+        $("#studentDocumentVerificationSubmitBtn").prop("disabled", false);
+    }
+    return false;
 }
 
 function removeUploadImage(src, inputId, thumbId, type, userId, studentStandardId, removeType) {

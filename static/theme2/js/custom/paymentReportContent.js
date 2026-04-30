@@ -108,6 +108,213 @@ function paymentReport(){
 		+deleteWarning();
 	return html;
 }
+function paymentReportTabNavigation(item, activeTabKey){
+	var studentStandardId = item.studentStandardId;
+	var userId = item.userId;
+	var activeKey = activeTabKey || 'summary';
+	var tabs = [
+		{ index: 0, key: 'summary', label: 'Summary' },
+		{ index: 1, key: 'basic-detail', label: 'Basic Detail' },
+		{ index: 2, key: 'parent-detail', label: 'Parent Detail' },
+		{ index: 3, key: 'contact-info', label: 'Contact Info' },
+		{ index: 4, key: 'academic-detail', label: 'Academic Detail' },
+		{ index: 5, key: 'payment', label: 'Payment' },
+		{ index: 6, key: 'communication-log', label: 'Communication Log' },
+		{ index: 7, key: 'log-reports', label: 'Log Reports' }
+	];
+	var html = '';
+	for (var t = 0; t < tabs.length; t++) {
+		var tab = tabs[t];
+		var activeClass = tab.key === activeKey ? ' active' : '';
+		html += `<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-${tab.index}${studentStandardId}" id="payment-report-tab-${tab.key}-${studentStandardId}" data-tab-key="${tab.key}" data-student-standard-id="${studentStandardId}" data-user-id="${userId}" class="nav-link show payment-report-tab-link${activeClass}">${tab.label}</a></li>`;
+	}
+	return html;
+}
+
+function paymentReportLazyTabPlaceholder(title){
+	return `<div class="text-center text-muted py-4 payment-report-tab-placeholder">Click ${title} to load data.</div>`;
+}
+
+function paymentReportDomValue(value){
+	if(value === null || value === undefined){
+		return '';
+	}
+	var text = String(value).trim();
+	if(text === '' || text.toLowerCase() === 'null' || text.toLowerCase() === 'undefined' || text === 'N/A'){
+		return '';
+	}
+	return text;
+}
+
+function paymentReportJoinContact(code, number){
+	var left = paymentReportDomValue(code);
+	var right = paymentReportDomValue(number);
+	return (left + ' ' + right).trim();
+}
+
+function paymentReportHiddenContactMeta(item){
+	var profile = item.updateProfileStudentDTO || {};
+	return `<div class="d-none payment-report-hidden-meta">
+		<span class="field-value trans5s parent-email-${item.userId}" useremail="${paymentReportDomValue(profile.guardianEmail)}">${paymentReportDomValue(profile.guardianEmail)}</span>
+		<span class="field-value trans5s parent-phone-${item.userId}" number="${paymentReportJoinContact(profile.guardianContactCodeNo, profile.guardianContactNo)}">${paymentReportJoinContact(profile.guardianContactCodeNo, profile.guardianContactNo)}</span>
+		<span class="field-value trans5s parent-phone-alt-${item.userId}" number="${paymentReportJoinContact(profile.guardianWorkCodeNo, profile.guardianWorkContactNo)}">${paymentReportJoinContact(profile.guardianWorkCodeNo, profile.guardianWorkContactNo)}</span>
+		<span class="field-value trans5s student-email-${item.userId}" useremail="${paymentReportDomValue(profile.emailId)}">${paymentReportDomValue(profile.emailId)}</span>
+		<span class="field-value trans5s student-phone-${item.userId}" number="${paymentReportJoinContact(profile.phoneCode, profile.phoneNo)}" isdnumber="${paymentReportDomValue(profile.phoneCode)}">${paymentReportJoinContact(profile.phoneCode, profile.phoneNo)}</span>
+		<span class="field-value trans5s student-phone-alt-${item.userId}" number="${paymentReportJoinContact(profile.altPhoneCode, profile.altPhoneNo)}">${paymentReportJoinContact(profile.altPhoneCode, profile.altPhoneNo)}</span>
+	</div>`;
+}
+
+function cardDetailsSummary(data){
+	var html = '';
+	$.each(data.reports, function(key, item) {
+		var profile = item.updateProfileStudentDTO || {};
+		var param = btoa(unescape(encodeURIComponent(`{"actionType":"1a","studentStandardId":'${item.studentStandardId}',"moduleId":8,"userId":'${item.userId}'}`)));
+		var whatsappContact = getPaymentReportWhatsAppContact(item);
+		var whatsappButton = getPaymentReportWhatsAppButton(whatsappContact.name, whatsappContact.phone);
+		var sprogress = 0;
+		sprogress = item.progressReport == 'N/A' ? 0.0 : item.progressReport.replace("%", "");
+		html += `<tr id="payment-report-row-${item.studentStandardId}" data-student-standard-id="${item.studentStandardId}" data-report-mode="summary">
+				<td class="p-0">
+					<div class="mb-3 card" style="min-width:1600px">
+						<div class="card-header-tab card-header">
+							<div class="card-header-title">
+								<input type="checkbox" class="checkStudent" id="student-${item.userId}" name="student-move-another" value="${item.userId}" />
+								<span class="mx-2">${item.sno}.</span>`;
+								if(profile.profileImage=='' || profile.profileImage==null){
+									html += `<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE}profile-picture.jpg${SCRIPT_VERSION}" alt="image" thumbType=""/>`;
+								}else{
+									html += `<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${profile.profileImage}" alt="image" title="Profile Image" thumbType=""/>`;
+								}
+								html += `<div class="px-2 mb-0 w-100 rounded" style="background:#f0f9ff">
+									<h6 class="full">
+										<span class="text-uppercase font-weight-semi-bold d-inline-block" style="font-size:11px">
+											${item.rollNumber} | ${item.enrolledStatus} | ${item.gradeName} | ${item.learningPlan} | ${item.lmsPlatform}
+										</span>
+									</h6>
+									<h5 class="mb-1 font-16">
+										<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${profile.faName || ''}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;
+											<a href='javascript:void(0)' onclick="callSchoolInneraction('profile-view', '${param}', '', '8')" data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>${whatsappButton}
+										</span>
+									</h5>
+								</div>
+							</div>
+							<ul class="nav">${paymentReportTabNavigation(item, 'summary')}</ul>
+						</div>
+						<div class="card-body">
+							${paymentReportHiddenContactMeta(item)}
+							<div class="tab-content">
+								<div class="tab-pane p-2 show active" id="tab-eg5-0${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Gender:</label>
+											<span class="field-value trans5s">${profile.gender || ''}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">LMS Status:</label>
+											<span class="field-value trans5s ${profile.lmsUserStatus==1?'text-success':'text-danger'}">${profile.lmsUserStatus==1?'Enabled':(profile.lmsUserId!=null && profile.lmsUserId!='')?'Disabled':'Not Created'}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Enrollment Date:</label>
+											<span class="field-value trans5s">${item.semesterStartDate}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Overall Progress Report:</label>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Enrolled Status:</label>
+											<span class="field-value trans5s ${item.enrolledStatus=='Withdrawn'?'text-danger':'text-success'}">${item.enrolledStatus}</span>`;
+											if(item.advBookSeat==1){
+												html += `<br/><span class="field-value trans5s text-success">Reserve a Seat for Next Grade</span>`;
+											}
+											if(item.advPayment==1){
+												html += `<br/><span class="field-value trans5s text-success">Advance payment for Next Grade</span>`;
+											}
+										html += `</div>
+									</div>
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Nationality:</label>
+											<span class="field-value trans5s">${profile.nationality || ''}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Lms UserId :</label>
+											<span class="field-value trans5s">${profile.lmsUserId==null || profile.lmsUserId==''?'N/A':profile.lmsUserId}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Academic Start - End Dates:</label>
+											<span class="field-value trans5s"><br/>${item.enrollmentStartDate=='N/A'?'N/A':(item.enrollmentStartDate+' - '+item.enrollmentEndDate)}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Payment Plan:</label>
+											<span class="field-value trans5s">${item.paymentPlanName}</span>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Enrollment | Recommended By:</label>`;
+											if(item.counselorName!='N/A'){
+												html += `<span class="field-value trans5s">${item.counselorName}</span>`;
+											}else{
+												html += `<a href="javascript:void(0);" class="btn btn-primary" onclick="return callUserReferralUpdatePaymentWindow('formId','${item.studentStandardId}','8');"><i class="fa fa-cogs"></i>&nbsp;Update Referral Code</a>`;
+											}
+										html += `</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Overall Progress Report:</label>
+											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}`;
+											if(profile.lmsUserStatus==1){
+												html += `&nbsp;&nbsp;<a href='javascript:void(0)' data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report" onclick="openManageUserStudentPerformanceModal('18','${item.userId}','${paymentReportEscapeSingleQuote(item.studentName || "")}','${item.lmsProviderId || ""}')" class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
+											}
+										html += `</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Remaining Days:</label>
+											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'}">${item.remainingDays}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Fee Details:</label>
+											<span class="field-value trans5s"><span class="font-weight-semi-bold d-inline-block float-right font-size-md ${paymentFeeClass(item.overDue)}">${paymentFeeText(item.overDue)} days</span></span>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">System Orientation:
+												<span class="ml-2">${item.assignUserName=='' || item.assignUserName==null ? 'N/A' : item.assignUserName}</span>
+											</label><br/>
+											<span class="field-value trans5s ${item.systemOrientStatus!='COMPLETED' ? 'text-danger' : 'text-success'}">${item.systemOrientStatus} - ${item.systemOrientDate=='' ? 'Not selected' : item.systemOrientDate}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Teacher / Batch Mapping:</label>
+											<span class="field-value trans5s">${(item.teacherMapStaus==0 && (item.learningPlan=='SelfStudy' || item.learningPlan=='Flexy' || item.learningPlan=='Dual Diploma')) ? 'N/A' : (item.teacherMapStaus==2?'Ended':(item.teacherMapStaus==1?'Completed':'Pending'))}</span>
+											<div class="mt-1">
+												<label class="label bold">Last Active Time:</label>
+												<span class="field-value trans5s">${item.lastLoginDateTime==null?'N/A': item.lastLoginDateTime}</span>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Transcript Publish:</label>
+											<span class="field-value trans5s ${item.marksheetStatus!='Y'?'text-danger':'text-success'}">${item.marksheetStatus=='Y'?'Yes':'No'}</span>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+											<label class="label bold">Last Follows:</label>
+											<span class="field-value trans5s">${item.lastFollowby==null?'No Followup': item.lastFollowby +' - '+item.lastFollowDate}</span>
+										</div>
+									</div>
+								</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-1${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Basic Detail')}</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-2${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Parent Detail')}</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-3${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Contact Info')}</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-4${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Academic Detail')}</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-5${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Payment')}</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-6${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Communication Log')}</div>
+								<div class="tab-pane p-2 show" id="tab-eg5-7${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">${paymentReportLazyTabPlaceholder('Log Reports')}</div>
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>`;
+	});
+	return html;
+}
+
 function cardDetails(data){
 	//(l==0?'fa-angle-up':'fa-angle-down')
 	var html = '';
@@ -120,7 +327,7 @@ function cardDetails(data){
 		var studentWhatsAppButton = getPaymentReportWhatsAppButton(item.studentName || '', `${item.updateProfileStudentDTO.phoneCode || ''} ${item.updateProfileStudentDTO.phoneNo || ''}`.trim(), 'ml-1 text-success align-middle');
 		var sprogress =0;
 		sprogress=item.progressReport=='N/A'?0.0:item.progressReport.replace("%","");
-		html+=`<tr>
+		html+=`<tr id="payment-report-row-${item.studentStandardId}" data-student-standard-id="${item.studentStandardId}" data-report-mode="full">
 				<td class="p-0">
 					<div class="mb-3 card" style="min-width:1600px">
 						<div class="card-header-tab card-header">
@@ -146,16 +353,7 @@ function cardDetails(data){
 										</h5>
 									</div>
 							</div>
-							<ul class="nav">
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-0${item.studentStandardId}" class="nav-link show active">Summary</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-1${item.studentStandardId}" class="nav-link show">Basic Detail</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-2${item.studentStandardId}" class="nav-link show">Parent Detail</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-3${item.studentStandardId}" class="nav-link show">Contact Info</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-4${item.studentStandardId}" class="nav-link show">Academic Detail</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-5${item.studentStandardId}" class="nav-link show">Payment</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-6${item.studentStandardId}" class="nav-link show ">Communication Log</a></li>
-								<li class="nav-item"><a data-toggle="tab" href="#tab-eg5-7${item.studentStandardId}" class="nav-link show ">Log Reports</a></li>
-							</ul>							
+							<ul class="nav">${paymentReportTabNavigation(item, 'summary')}</ul>							
 						</div>
 						<div class="card-body">
 							<div class="tab-content">
@@ -412,15 +610,15 @@ function cardDetails(data){
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Parent Email:</label>
-											<span class="field-value trans5s parent-email-${item.userId}" useremail="${item.updateProfileStudentDTO.guardianEmail}">${item.updateProfileStudentDTO.guardianEmail}</span>
+											<span class="field-value trans5s parent-email-${item.userId}" useremail="${paymentReportDomValue(item.updateProfileStudentDTO.guardianEmail)}">${item.updateProfileStudentDTO.guardianEmail}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Parent Contact No:</label>
-											<span class="field-value trans5s parent-phone-${item.userId}" number="${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo}">${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo} ${parentWhatsAppButton}</span>
+											<span class="field-value trans5s parent-phone-${item.userId}" number="${paymentReportJoinContact(item.updateProfileStudentDTO.guardianContactCodeNo, item.updateProfileStudentDTO.guardianContactNo)}">${item.updateProfileStudentDTO.guardianContactCodeNo} ${item.updateProfileStudentDTO.guardianContactNo} ${parentWhatsAppButton}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Alternate Phone:</label>
-											<span class="field-value trans5s parent-phone-alt-${item.userId}" number="${item.updateProfileStudentDTO.guardianWorkCodeNo} ${item.updateProfileStudentDTO.guardianWorkContactNo}" >${item.updateProfileStudentDTO.guardianWorkCodeNo} ${item.updateProfileStudentDTO.guardianWorkContactNo}</span>
+											<span class="field-value trans5s parent-phone-alt-${item.userId}" number="${paymentReportJoinContact(item.updateProfileStudentDTO.guardianWorkCodeNo, item.updateProfileStudentDTO.guardianWorkContactNo)}" >${item.updateProfileStudentDTO.guardianWorkCodeNo} ${item.updateProfileStudentDTO.guardianWorkContactNo}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Your Preferred Communication:</label>
@@ -444,15 +642,15 @@ function cardDetails(data){
 									<div class="row">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Student Email/ Username:</label>
-											<span class="field-value trans5s student-email-${item.userId}" useremail="${item.updateProfileStudentDTO.emailId}">${item.updateProfileStudentDTO.emailId}</span>
+											<span class="field-value trans5s student-email-${item.userId}" useremail="${paymentReportDomValue(item.updateProfileStudentDTO.emailId)}">${item.updateProfileStudentDTO.emailId}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Student Phone No:</label>
-											<span class="field-value trans5s student-phone-${item.userId}" number="${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo}" isdnumber="${item.updateProfileStudentDTO.phoneCode}" >${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo} ${studentWhatsAppButton}</span>
+											<span class="field-value trans5s student-phone-${item.userId}" number="${paymentReportJoinContact(item.updateProfileStudentDTO.phoneCode, item.updateProfileStudentDTO.phoneNo)}" isdnumber="${paymentReportDomValue(item.updateProfileStudentDTO.phoneCode)}" >${item.updateProfileStudentDTO.phoneCode} ${item.updateProfileStudentDTO.phoneNo} ${studentWhatsAppButton}</span>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Student Alternate Phone:</label>
-											<span class="field-value trans5s student-phone-alt-${item.userId}" number="${item.updateProfileStudentDTO.altPhoneCode} ${item.updateProfileStudentDTO.altPhoneNo}">${item.updateProfileStudentDTO.altPhoneCode} ${item.updateProfileStudentDTO.altPhoneNo}</span>
+											<span class="field-value trans5s student-phone-alt-${item.userId}" number="${paymentReportJoinContact(item.updateProfileStudentDTO.altPhoneCode, item.updateProfileStudentDTO.altPhoneNo)}">${item.updateProfileStudentDTO.altPhoneCode} ${item.updateProfileStudentDTO.altPhoneNo}</span>
 										</div>
 									</div>
 								</div>

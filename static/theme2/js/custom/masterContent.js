@@ -189,6 +189,26 @@ var languages = [{ code: 'aa', name: 'Afar' },
             { code: 'zh', name: 'Chinese' },
             { code: 'zu', name: 'Zulu' } ];
 
+var SCHOOL_STANDARD_GRADE_MASTER = [
+	{"key":"11","value":"Grade K","orderBy":"1"},
+	{"key":"12","value":"Grade 1","orderBy":"2"},
+	{"key":"13","value":"Grade 2","orderBy":"3"},
+	{"key":"14","value":"Grade 3","orderBy":"4"},
+	{"key":"15","value":"Grade 4","orderBy":"5"},
+	{"key":"16","value":"Grade 5","orderBy":"6"},
+	{"key":"1","value":"Grade 6","orderBy":"7"},
+	{"key":"2","value":"Grade 7","orderBy":"8"},
+	{"key":"3","value":"Grade 8","orderBy":"9"},
+	{"key":"4","value":"Grade 9","orderBy":"10"},
+	{"key":"5","value":"Grade 10","orderBy":"11"},
+	{"key":"6","value":"Grade 11","orderBy":"12"},
+	{"key":"7","value":"Grade 12","orderBy":"13"},
+	{"key":"19","value":"Flexy - Elementary School","orderBy":"14"},
+	{"key":"9","value":"Flexy - Middle School","orderBy":"15"},
+	{"key":"10","value":"Flexy - High School","orderBy":"16"},
+	{"key":"20","value":"Flexy - Credit Recovery","orderBy":"17"},
+	{"key":"21","value":"Flexy - Advanced Placement","orderBy":"18"}
+];
 function getGradesData(requiredGrades){
 	var grades=[]
 	for(var index=0;index<requiredGrades.length;index++){

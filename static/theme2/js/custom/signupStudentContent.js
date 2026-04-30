@@ -214,6 +214,82 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	$('.dt-responsive tbody tr td:first-child').addClass('dtr-control');
  }
 
+async function getStudentDocsUnderVerificationPageContent(enrollmentDocsState){
+	const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
+	const schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var normalizedEnrollmentDocsState = (enrollmentDocsState || "").toString().toUpperCase().trim();
+	var isRejectedState = normalizedEnrollmentDocsState === "REJECTED";
+	var copyrightText = schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright &copy; ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.';
+	var html =
+		`<div style="min-height:100vh;background:#f7f8fb;display:flex;flex-direction:column;">
+			<header style="background:#ffffff;border-bottom:1px solid #edf1f7;padding:14px 0;">
+				<div class="container" style="max-width:1180px;">
+					<div class="logo" style="margin:0;">
+						<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+							<img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+						</a>
+					</div>
+				</div>
+			</header>
+			<main style="flex:1;display:flex;align-items:center;justify-content:center;padding:46px 16px 28px;">
+				<div style="width:100%;max-width:396px;">
+					<div style="background:#ffffff;border:1px solid #e5ebf3;border-radius:24px;box-shadow:0 10px 28px rgba(31,42,58,.10);padding:28px 32px 24px;text-align:center;position:relative;">
+						${isRejectedState ? `
+						<div style="width:52px;height:52px;border-radius:18px;background:#e62e2e;display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:24px;margin:0 auto 18px;box-shadow:0 8px 18px rgba(230,46,46,.18);">
+							<i class="fa fa-times"></i>
+						</div>
+						<div style="display:inline-flex;align-items:center;gap:6px;background:#fff0f0;color:#ea4e4e;border-radius:7px;padding:5px 10px;font-size:12px;line-height:1;font-weight:500;">
+							<span style="width:7px;height:7px;border-radius:50%;background:#ea4e4e;display:inline-block;"></span>
+							<span>Application rejected</span>
+						</div>
+						<h2 style="margin:18px 0 0;font-size:20px;line-height:1.25;font-weight:700;color:#25324a;">We're Sorry!</h2>
+						<div style="margin-top:22px;background:#fff6f6;border:1px solid #f3c1c1;border-radius:16px;padding:18px 16px;font-size:16px;line-height:1.65;color:#46556f;">
+							Your enrollment application couldn't be approved as all seats are currently full. You may try again in the next intake.
+						</div>
+						` : `
+						<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1f86ff 0%,#2d5ff4 100%);display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:24px;margin:0 auto 18px;box-shadow:0 8px 18px rgba(34,111,255,.28);">
+							<i class="fa fa-file-text-o"></i>
+						</div>
+						<h2 style="margin:0;font-size:20px;line-height:1.25;font-weight:700;color:#25324a;">Documents Under Verification</h2>
+						<p style="margin:24px 0 0;font-size:16px;line-height:1.55;color:#46556f;">
+							Your documents have been submitted and are currently under verification.
+						</p>
+						<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#73819a;">
+							Please check back later once verification is complete.
+						</p>
+						<div style="margin-top:22px;text-align:left;background:#edf5ff;border:1px solid #82b8ff;border-radius:10px;padding:14px 14px 13px;">
+							<div style="display:flex;align-items:flex-start;gap:10px;">
+								<div style="min-width:18px;color:#1778ff;font-size:16px;line-height:1.2;margin-top:1px;">
+									<i class="fa fa-info-circle"></i>
+								</div>
+								<div>
+									<div style="font-size:14px;font-weight:600;color:#33425d;">What happens next?</div>
+									<div style="font-size:12.5px;line-height:1.55;color:#5b6b84;margin-top:4px;">
+										Our team will review your documents within 24-48 hours. You will receive an email notification once the verification is complete.
+									</div>
+								</div>
+							</div>
+						</div>
+						`}
+						<a href="javascript:void(0);" onclick="logout();" style="margin-top:22px;display:flex;align-items:center;justify-content:center;gap:10px;height:48px;border-radius:11px;background:linear-gradient(90deg,#1787ff 0%,#2d5ff4 100%);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 10px 20px rgba(36,107,255,.18);">
+							<i class="fa fa-sign-out"></i>
+							<span>Logout</span>
+						</a>
+						<div id="studentDocsVerificationData" class="d-none" style="margin-top:18px;"></div>
+						<div style="margin-top:20px;padding-top:18px;border-top:1px solid #edf1f7;display:flex;align-items:center;justify-content:center;gap:8px;color:#7e8aa3;font-size:12.5px;">
+							<i class="fa fa-shield" style="color:#1778ff;"></i>
+							<span>Your data is secure and encrypted</span>
+						</div>
+					</div>
+				</div>
+			</main>
+			<footer style="background:#ffffff;border-top:1px solid #edf1f7;padding:14px 16px;text-align:center;">
+				<div style="font-size:13px;font-weight:600;color:#4a556b;">${copyrightText}</div>
+			</footer>
+		</div>`
+	return html;
+}
+
 async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
 	const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	const schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
@@ -2110,7 +2186,226 @@ function signupModals(){
 			+'</div>'
 		+'</div>'
 	+'</div>'
+	+getStudentDocumentUploadModalContent()
+	+getStudentDocumentSkipDeclarationModalContent()
+	+getStudentDocumentSubmitConfirmationModalContent()
+	+getStudentDocumentCameraModalContent()
+	+getStudentDocumentUnderVerificationModalContent()
+	+getStudentDocumentPreviewModalContent()
 	+'<div id="payment-selection-details"></div>';
+	return html;
+}
+
+	function getStudentDocumentUploadModalContent(){
+		var html =
+		'<div class="modal fade pr-0 right-slide-modal" id="studentDocumentUploadModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
+			+'<div class="modal-dialog modal-xl p-0 float-right" style="max-width:1440px;width:100%;">'
+				+'<div class="modal-content border-0" style="border-radius:0; min-height:100vh;">'
+					+'<div class="modal-header py-3 border-0" style="background:linear-gradient(135deg,#0f67d8 0%,#2a8cff 100%);">'
+						+'<h5 class="modal-title text-white w-100 mb-0"><span style="font-size:18px; font-weight:700; line-height:1.1;">Upload Student Documents</span><br><small class="font-weight-normal" style="font-size:12px; opacity:.92;">Kindly upload your required documents.</small></h5>'
+						+'<button type="button" class="close bg-white p-2" data-dismiss="modal" aria-label="Close" style="position:absolute;left:-32px;top:62px !important;opacity:1;color:#000;font-size:28px;line-height:1;border-top-left-radius:5px;border-bottom-left-radius:5px;"><span aria-hidden="true">&times;</span></button>'
+					+'</div>'
+					+'<div class="modal-body overflow-auto px-3 px-lg-4 py-3" style="background:#f4f8fe;">'
+						+'<div class="alert mb-3 py-2 px-3" style="background:#d9ebff; color:#184a7a; border:1px solid #bddcff; border-radius:8px;"><i class="fa fa-info-circle mr-2"></i>Please upload files in the following formats: <b>JPG, JPEG, PDF, or PNG</b> with a maximum size of <b>5 MB</b></div>'
+						+'<div class="w-100 mb-3" style="flex:0 0 100%; clear:both;">'
+							+'<div id="studentUploadedDocsTableBlock" class="d-none w-100"></div>'
+						+'</div>'
+						+'<div class="row mx-0 w-100" style="flex:0 0 100%; clear:both;">'
+							+'<div class="col-lg-5 col-md-12 px-0 pr-lg-2 mb-3 mb-lg-0" id="studentPersonalDocsColumn">'
+								+'<div id="studentPersonalDocsSection" class="h-100 border" style="background:#fff; border-color:#d6e3f5 !important; border-radius:14px; box-shadow:0 10px 25px rgba(21,74,140,.08);">'
+									+'<div class="px-3 px-lg-4 py-3 border-bottom" style="border-color:#eaf1fb !important; background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%); border-top-left-radius:14px; border-top-right-radius:14px;">'
+										+'<h4 class="font-weight-bold mb-0" style="font-size:18px; color:#132238;">1. Personal Documents</h4>'
+									+'</div>'
+									+'<div class="p-3 p-lg-4">'
+										+'<div class="mb-4" id="studentDocPassportWrap">'
+											+'<label class="mb-2 font-weight-600">Passport Size Photo Upload or Click <span class="text-danger">*</span></label>'
+											+'<div class="d-flex flex-column flex-sm-row align-items-stretch">'
+												+'<input class="file-input d-none" type="file" id="studentDocPassportFile" onchange="onStudentDocUploadChange(this, \'passport\', \'studentDocPassportView\')" />'
+												+'<div class="flex-fill mr-sm-3 mb-3 mb-sm-0">'
+													+'<div role="button" tabindex="0" onclick="triggerStudentDocFileInput(\'studentDocPassportFile\')" class="w-100 d-flex align-items-center justify-content-between" style="min-height:132px; padding:18px 18px 18px 20px; border:1px dashed #b9d7fa; background:linear-gradient(180deg,#f7fbff 0%,#eef6ff 100%); border-radius:12px;">'
+														+'<span class="d-flex flex-column pr-3"><span style="font-size:18px; font-weight:700; color:#163d74; line-height:1.1;">Click Here To Upload</span><span class="text-muted mt-2" style="font-size:13px;" id="studentDocPassportFileName">Passport Size Photo</span></span>'
+														+'<button type="button" class="btn btn-primary btn-sm px-3 py-2" id="studentDocPassportCameraBtn" onclick="openStudentDocCameraFromTrigger(event)" style="border-radius:10px; box-shadow:0 10px 18px rgba(26,115,232,.24);"><i class="fa fa-camera"></i></button>'
+													+'</div>'
+												+'</div>'
+												+'<div id="studentDocPassportPreviewCard" class="border d-flex flex-column align-items-center justify-content-center p-2" style="width:170px; min-width:170px; border-radius:12px; border-color:#dbe6f5 !important; background:#f9fbff;">'
+													+'<img id="studentDocPassportPreviewImage" src="'+BASE_URL + CONTEXT_PATH+'static/img/male-profile.png" alt="Passport Preview" style="width:100%; height:160px; object-fit:cover; border-radius:10px; background:#eef3f8; cursor:pointer;" onclick="viewStudentDocFile(\'passport\', document.getElementById(\'studentDocPassportView\'))" />'
+													+'<div class="d-flex mt-2">'
+														+'<button type="button" class="btn btn-primary btn-sm mr-1" id="studentDocPassportView" style="display:none;" onclick="viewStudentDocFile(\'passport\', this)"><i class="fa fa-eye"></i></button>'
+														+'<button type="button" class="btn btn-danger btn-sm" id="studentDocPassportRemove" style="display:none;" onclick="removeStudentDocFile(\'passport\')"><i class="fa fa-trash"></i></button>'
+													+'</div>'
+												+'</div>'
+											+'</div>'
+										+'</div>'
+										+'<div class="mb-0" id="studentDocDobWrap">'
+											+'<label class="mb-2 font-weight-600">Date of Birth Proof (Select any one) <span class="text-danger">*</span></label>'
+											+'<select class="form-control mb-2" id="studentDocDobProofType" onchange="syncStudentDobUploadState()" style="border-radius:10px;">'
+												+'<option value="">Select document type</option>'
+												+'<option value="Birth Certificate">Birth Certificate</option>'
+												+'<option value="Passport">Passport</option>'
+												+'<option value="National ID">National ID</option>'
+											+'</select>'
+											+'<div class="d-flex align-items-center">'
+												+'<div class="upload-btn-wrapper flex-fill mr-1">'
+													+'<input class="file-input" type="file" id="studentDocDobFile" onchange="onStudentDocUploadChange(this, \'dob\', \'studentDocDobView\')" disabled />'
+													+'<span class="btn btn-light border w-100 text-left mt-0" style="border-radius:10px;"><i class="fa fa-file-text-o mr-1 primary-txt-color"></i><span class="text-muted" id="studentDocDobFileName">Select proof type first</span></span>'
+												+'</div>'
+												+'<button type="button" class="btn btn-primary btn-sm ml-1 mt-0" id="studentDocDobView" style="display:none;" onclick="viewStudentDocFile(\'dob\', this)"><i class="fa fa-eye"></i></button>'
+												+'<button type="button" class="btn btn-danger btn-sm ml-1 mt-0" id="studentDocDobRemove" style="display:none;" onclick="removeStudentDocFile(\'dob\')"><i class="fa fa-trash"></i></button>'
+											+'</div>'
+										+'</div>'
+									+'</div>'
+								+'</div>'
+							+'</div>'
+							+'<div class="col-lg-7 col-md-12 px-0 pl-lg-2" id="studentAcademicDocsColumn">'
+								+'<div id="studentAcademicDocsSection" class="h-100 border" style="background:#fff; border-color:#d6e3f5 !important; border-radius:14px; box-shadow:0 10px 25px rgba(21,74,140,.08);">'
+									+'<div class="px-3 px-lg-4 py-3 border-bottom" style="border-color:#eaf1fb !important; background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%); border-top-left-radius:14px; border-top-right-radius:14px;">'
+										+'<h4 class="font-weight-bold mb-0" style="font-size:18px; color:#132238;">2. Last Academic Proof</h4>'
+									+'</div>'
+									+'<div class="p-3 p-lg-4" id="studentAcademicDocsContainer"></div>'
+								+'</div>'
+							+'</div>'
+						+'</div>'
+					+'</div>'
+					+'<div class="modal-footer justify-content-between bg-white border-0 px-3 px-lg-4 py-3" style="box-shadow:0 -6px 24px rgba(15,23,42,.05);">'
+					+'<div>'
+						+'<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Back</button>'
+					+'</div>'
+					+'<div>'
+						+'<button type="button" class="btn btn-outline-primary btn-sm mr-1" id="studentDocSkipBtn" onclick="skipStudentDocumentsFlow()">Skip, Submit Later</button>'
+						+'<button type="button" class="btn btn-primary btn-sm" onclick="confirmStudentDocumentsSubmit()">Submit Documents</button>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
+function getStudentDocumentSubmitConfirmationModalContent(){
+	var html =
+	'<div class="modal fade" id="studentDocSubmitConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">'
+		+'<div class="modal-dialog modal-sm modal-dialog-centered" role="document" style="box-shadow:none; width:450px; max-width:100%;">'
+			+'<div class="modal-content text-center">'
+				+'<div class="modal-header justify-content-center" style="width:100% !important; padding:0 !important; height:45px; border:none;"></div>'
+				+'<div class="modal-body delete-modal">'
+					+'<i class="fa fa-info" style="color:#fff !important; background:#f44336; border-radius:50%; font-size:40px; position:absolute; top:-85px; right:0; left:0; margin:0 auto; width:75px; line-height:75px;"></i>'
+					+'<p class="heading" style="color:#2d313c; font-size:20px; line-height:28px; margin-bottom:8px;"><b>Are you sure?</b></p>'
+					+'<p style="font-size:15px; color:#6c7a91; margin-bottom:0;">Are you sure you want to submit documents?<br/>This action cannot be undone.</p>'
+				+'</div>'
+				+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:15px;">'
+					+'<div class="text-center" style="margin:0 auto;">'
+						+'<button type="button" class="btn btn-primary" onclick="submitStudentDocumentsToServer()">Yes</button>'
+						+'<button type="button" class="btn mr-2" style="color:#2d313c !important; border:1px solid #9ca8ba !important; background:transparent !important;" data-dismiss="modal">No</button>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
+function getStudentDocumentSkipDeclarationModalContent(){
+	var html =
+	'<div class="modal fade" id="studentDocSkipDeclarationModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
+		+'<div class="modal-dialog modal-dialog-centered" role="document" style="max-width:680px;">'
+			+'<div class="modal-content border-0 overflow-hidden" style="border-radius:16px;">'
+				+'<div class="modal-header border-0 px-4 py-3" style="background:#214983;">'
+					+'<h5 class="modal-title text-white font-weight-bold mb-0"><i class="fa fa-file-o mr-2"></i>Declaration - Skip document upload</h5>'
+				+'</div>'
+				+'<div class="modal-body px-4 py-3 bg-white">'
+					+'<div class="border rounded px-3 py-3 mb-3" style="background:#fff7eb; border-color:#f0d19a !important;">'
+						+'<div class="d-flex align-items-start">'
+							+'<div class="mr-3 mt-1" style="width:30px; height:30px; border-radius:50%; background:#9b6409; color:#fff; display:flex; align-items:center; justify-content:center; flex:0 0 30px;">'
+								+'<i class="fa fa-exclamation-circle"></i>'
+							+'</div>'
+							+'<div style="font-size:15px; color:#5e421f; line-height:1.65;">Your enrollment will remain <strong>incomplete</strong> until all required documents are submitted. You can upload them later from your student portal.</div>'
+						+'</div>'
+					+'</div>'
+					+'<div class="border rounded px-3 py-3 mb-3" style="background:#f7f4ee; border-color:#e4ddd1 !important; font-size:15px; color:#343434; line-height:1.8;">I hereby declare that I am currently unable to upload the required documents and will submit them within <strong>7 working days</strong>. I understand that my enrollment will not be confirmed until the documents are successfully verified by International Schooling.</div>'
+					+'<label class="border rounded px-3 py-3 mb-0 w-100" style="background:#f7f4ee; border-color:#e4ddd1 !important; cursor:pointer;">'
+						+'<div class="d-flex align-items-start">'
+							+'<input type="checkbox" id="studentDocSkipDeclarationCheckbox" class="mt-1 mr-3" style="width:20px; height:20px;">'
+							+'<span style="font-size:15px; color:#212121; line-height:1.7;">I have read and accept the above declaration and take full responsibility for submitting my documents within the given timeframe.</span>'
+						+'</div>'
+					+'</label>'
+				+'</div>'
+				+'<div class="modal-footer border-0 px-4 py-3 bg-white justify-content-end">'
+					+'<button type="button" class="btn btn-outline-secondary mr-2" onclick="closeStudentDocumentSkipDeclarationModal();" style="border-radius:12px; min-width:170px;">Go back & upload</button>'
+					+'<button type="button" class="btn btn-light" id="studentDocSkipAcceptBtn" onclick="confirmStudentDocumentsSkipFlow();" disabled style="border-radius:12px; min-width:170px;">Accept & skip</button>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
+function getStudentDocumentCameraModalContent(){
+	var html =
+	'<div class="modal fade" id="studentDocCameraModal" tabindex="-1" role="dialog" aria-hidden="true">'
+		+'<div class="modal-dialog modal-md modal-dialog-centered" role="document">'
+			+'<div class="modal-content">'
+				+'<div class="modal-header bg-primary py-2 text-white">'
+					+'<h5 class="modal-title text-white">Capture Passport Photo</h5>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+				+'</div>'
+				+'<div class="modal-body">'
+					+'<video id="studentDocCameraVideo" autoplay playsinline muted style="width:100%; border-radius:6px; background:#111;"></video>'
+				+'</div>'
+				+'<div class="modal-footer">'
+					+'<button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Cancel</button>'
+					+'<button type="button" class="btn btn-primary btn-sm" onclick="captureStudentDocPhoto()">Capture</button>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
+function getStudentDocumentUnderVerificationModalContent(){
+	var html =
+	'<div class="modal fade" id="studentDocsUnderVerificationModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
+		+'<div class="modal-dialog modal-sm modal-dialog-centered" role="document" style="box-shadow:none; width:460px; max-width:100%;">'
+			+'<div class="modal-content text-center">'
+				+'<div class="modal-header justify-content-center" style="width:100% !important; padding:0 !important; height:45px; border:none;"></div>'
+				+'<div class="modal-body delete-modal" style="padding:28px 20px 12px;">'
+					+'<i class="fa fa-clock-o" style="color:#fff !important; background:#277fff; border-radius:50%; font-size:38px; position:absolute; top:-78px; right:0; left:0; margin:0 auto; width:75px; line-height:75px;"></i>'
+					+'<p class="heading" style="color:#2d313c; font-size:20px; line-height:28px; margin-bottom:8px;"><b>Documents Under Verification</b></p>'
+					+'<p style="font-size:14px; color:#6c7a91; margin-bottom:0;">Your documents have been submitted and are currently under verification. Please check back later.</p>'
+				+'</div>'
+				+'<div class="modal-footer text-center" style="border:none; padding:0; margin-bottom:16px;">'
+					+'<div class="text-center" style="margin:0 auto;">'
+						+'<button type="button" class="btn btn-primary" onclick="logoutConfimation(true, BASE_URL+CONTEXT_PATH+SCHOOL_UUID+\'/common/logout/\'+UNIQUEUUID);">Log out</button>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
+	return html;
+}
+
+function getStudentDocumentPreviewModalContent(){
+	var html =
+	'<div class="modal fade fade-scale" id="studentDocPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">'
+		+'<div class="modal-dialog modal-md box-shadow-none" role="document">'
+			+'<div class="modal-content">'
+				+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-between flex-wrap">'
+					+'<h6 class="heading text-white mb-0">Preview File</h6>'
+					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:1;"><span aria-hidden="true">&times;</span></button>'
+				+'</div>'
+				+'<div class="modal-body m-0 py-2" style="margin-top:0 !important">'
+					+'<div id="pre_upload_image_div" class="full text-center upload_img d-none">'
+						+'<img id="pre_upload_image" class="w-100" src="" />'
+					+'</div>'
+					+'<div id="pre_upload_pdf_div" class="full text-center upload_pdf d-none">'
+						+'<div class="full">'
+							+'<a href="" target="_blank" class="btn btn-sm btn-primary download-pdf-btn mb-2 pull-right" download="file.pdf">Download</a>'
+						+'</div>'
+						+'<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data=""></object>'
+					+'</div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+	+'</div>';
 	return html;
 }
 

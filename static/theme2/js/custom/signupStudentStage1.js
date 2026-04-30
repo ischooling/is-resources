@@ -526,6 +526,9 @@ function setActiveStep(step){
 		$(".next-btn").show();
 		$(".finish-btn").hide(); 
 	}
+	if(typeof updateStudentDocumentStepActionButtons === "function"){
+		updateStudentDocumentStepActionButtons();
+	}
 }
 
 async function moveStep(moveType){
@@ -581,19 +584,21 @@ async function moveStep(moveType){
 				return false;
 			}
 		}else if(prevStep==3){
+			if(typeof validateRequestForPaymentModeSelection === "function"){
+				if (!validateRequestForPaymentModeSelection('signupStage3', 'signup')) {
+					return false;
+				}
+			}
+			if(typeof handleCourseSelectionStepThreeProceed === "function"){
+				return await handleCourseSelectionStepThreeProceed();
+			}
 			if(SHOW_PAYMENT_OPTION=='Y'){
 				if(!$('#studentPaymentModal').is(':visible')){
 					callForPaymentModeSelection('signupStage3','');
 					return false;
 				}
 			}else{
-				if (!validateRequestForPaymentModeSelection('signupStage3', 'signup')) {
-					return false;
-				}
 				choosePaymentOption();
-				// $("#studentPaymentModal").modal("hide");
-				// setActiveStep(4);
-				// callForReviewAndPaymentSelection('Y');
 			}
 		}
 	}
@@ -698,6 +703,9 @@ async function moveStep(moveType){
 			$(".next-btn").show();
 			$(".finish-btn").hide(); 
 		}
+	}
+	if(typeof updateStudentDocumentStepActionButtons === "function"){
+		updateStudentDocumentStepActionButtons();
 	}
 }else{
 	redirectLoginPage();

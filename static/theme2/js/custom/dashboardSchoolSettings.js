@@ -1,6 +1,8 @@
-
-
 var newId ="";
+var ENROLLMENT_COUNTRY_MASTER_LIST = [];
+var ENROLLMENT_COUNTRY_SELECTION_SNAPSHOT = [];
+var ENROLLMENT_COUNTRY_SELECTED_IDS = [];
+
 function getSchoolSettingDetails() {
 	var schoolId=$('#schoolSettigsSelection').val();
 	hideMessage('');
@@ -637,3 +639,363 @@ function setvaluesForEditAdmissionCycle(admissionCycle, formId){
 	$("#discountSem2").val(admissionCycle.discountTwo);
 	return true;
 }
+
+async function loadEnrollmentStandardDocumentSettings() {
+	$("#errMsg").text('');
+	$("#enrollmentSettingsTable tbody").html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+	try{
+		var schoolId = getEnrollmentSchoolId();
+		await loadEnrollmentCountryMasterList();
+		var responseData = await callCommonAjax({
+			method : "POST",
+			url : getURLForHTML('dashboard', 'school-setting-standard-document-setting-data'),
+			body : {
+				schoolId : schoolId
+			},
+			global : true,
+			showMessage : false
+		});
+		renderEnrollmentStandardDocumentSettings((responseData && responseData.standardDocumentSettingsJson) ? responseData.standardDocumentSettingsJson : []);
+		await loadEnrollmentCountrySelection();
+	}catch(error){
+		$("#enrollmentSettingsTable tbody").html('<tr><td colspan="4" class="text-center text-danger">Unable to load data</td></tr>');
+		$("#errMsg").text('Unable to load enrollment settings.');
+	}
+}
+
+function renderEnrollmentStandardDocumentSettings(settingsList){
+	var settingsMap = {};
+	var tableBody = $("#enrollmentSettingsTable tbody");
+	settingsList = settingsList || [];
+	$.each(settingsList, function(index, setting){
+		if(setting && setting.standardId != null){
+			settingsMap[String(setting.standardId)] = setting;
+		}
+	});
+	tableBody.html('');
+	$.each(SCHOOL_STANDARD_GRADE_MASTER, function(index, grade){
+		var setting = settingsMap[grade.key] || {};
+		var docsRequired = ((setting.docsRequired || 'N') + '').toUpperCase() === 'Y' ? 'Y' : 'N';
+		var docsMandatory = ((setting.docsMandatory || 'N') + '').toUpperCase() === 'Y' ? 'Y' : 'N';
+		if(docsRequired === 'N'){
+			docsMandatory = 'N';
+		}
+		tableBody.append(
+			'<tr data-standard-id="' + grade.key + '">' +
+				'<td class="text-center">' + (index + 1) + '</td>' +
+				'<td>' + grade.value + '</td>' +
+				'<td>' +
+					'<div class="enrollment-toggle-wrap">' +
+						'<span class="enrollment-toggle-label">' + (docsRequired === 'Y' ? 'Yes' : 'No') + '</span>' +
+						'<label class="enrollment-switch">' +
+							'<input type="checkbox" class="enrollment-docs-required"' + (docsRequired === 'Y' ? ' checked' : '') + '>' +
+							'<span class="enrollment-switch-slider"></span>' +
+						'</label>' +
+					'</div>' +
+				'</td>' +
+				'<td>' +
+					'<div class="enrollment-toggle-wrap">' +
+						'<span class="enrollment-toggle-label">' + (docsMandatory === 'Y' ? 'Yes' : 'No') + '</span>' +
+						'<label class="enrollment-switch">' +
+							'<input type="checkbox" class="enrollment-docs-mandatory"' + (docsMandatory === 'Y' ? ' checked' : '') + (docsRequired === 'Y' ? '' : ' disabled') + '>' +
+							'<span class="enrollment-switch-slider"></span>' +
+						'</label>' +
+					'</div>' +
+				'</td>' +
+			'</tr>'
+		);
+	});
+}
+
+$(document).on('change', '.enrollment-docs-required', function(){
+	var isChecked = $(this).is(':checked');
+	var currentWrap = $(this).closest('.enrollment-toggle-wrap');
+	var mandatoryDropdown = $(this).closest('tr').find('.enrollment-docs-mandatory');
+	currentWrap.find('.enrollment-toggle-label').text(isChecked ? 'Yes' : 'No');
+	if(isChecked){
+		mandatoryDropdown.prop('disabled', false);
+	}else{
+		mandatoryDropdown.prop('checked', false).prop('disabled', true);
+	}
+	mandatoryDropdown.closest('.enrollment-toggle-wrap').find('.enrollment-toggle-label').text(mandatoryDropdown.is(':checked') ? 'Yes' : 'No');
+});
+
+$(document).on('change', '.enrollment-docs-mandatory', function(){
+	$(this).closest('.enrollment-toggle-wrap').find('.enrollment-toggle-label').text($(this).is(':checked') ? 'Yes' : 'No');
+});
+
+async function saveEnrollmentStandardDocumentSettings(){
+	$("#errMsg").text('');
+	var schoolId = getEnrollmentSchoolId();
+	var standardDocumentSettingsJson = [];
+	$("#enrollmentSettingsTable tbody tr").each(function(){
+		var standardId = $(this).attr('data-standard-id');
+		if(!standardId){
+			return;
+		}
+		var docsRequired = $(this).find('.enrollment-docs-required').is(':checked') ? 'Y' : 'N';
+		var docsMandatory = $(this).find('.enrollment-docs-mandatory').is(':checked') ? 'Y' : 'N';
+		if(docsRequired !== 'Y'){
+			docsMandatory = 'N';
+		}
+		standardDocumentSettingsJson.push({
+			docsRequired : docsRequired,
+			docsMandatory : docsMandatory,
+			standardId : String(standardId)
+		});
+	});
+
+	var ajaxReqDetails = {
+		method : "POST",
+		url : getURLForHTML('dashboard', 'school-setting-standard-document-setting-addData'),
+		body : {
+			schoolId : schoolId,
+			standardDocumentSettingsJson : standardDocumentSettingsJson
+		},
+		global : true,
+		showMessage : false
+	};
+	try{
+		var responseData = await callCommonAjax(ajaxReqDetails);
+		if(responseData && responseData.status === '1'){
+			showMessageTheme2(1, responseData.message || 'Standard document settings updated');
+			await loadEnrollmentStandardDocumentSettings();
+			return responseData;
+		}else{
+			showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : 'Unable to save enrollment settings.');
+			return null;
+		}
+	}catch(error){
+		showMessageTheme2(0, 'Unable to save enrollment settings.');
+		return null;
+	}
+}
+
+function getEnrollmentSchoolId(){
+	return parseInt($('#schoolSettigsSelection').val() || SCHOOL_ID, 10);
+}
+
+async function loadEnrollmentCountryMasterList(){
+	if(ENROLLMENT_COUNTRY_MASTER_LIST.length > 0){
+		renderEnrollmentCountrySelectionUI();
+		return;
+	}
+	try{
+		var responseData = await callCommonAjax({
+			method : "POST",
+			url : getURLForCommon('masters'),
+			body : getRequestForMaster('formId', 'COUNTRIES-LIST'),
+			global : true,
+			showMessage : false
+		});
+		if(responseData && responseData.status !== '0' && responseData.status !== '2' && responseData.mastersData && $.isArray(responseData.mastersData.countries)){
+			ENROLLMENT_COUNTRY_MASTER_LIST = $.map(responseData.mastersData.countries, function(country){
+				if(!country){
+					return null;
+				}
+				return {
+					countryId : String(country.key),
+					countryName : country.value
+				};
+			});
+			renderEnrollmentCountrySelectionUI();
+		}else{
+			$("#enrollmentCountryActionList").html('<div class="text-danger text-center py-2">Unable to load countries.</div>');
+		}
+	}catch(error){
+		$("#enrollmentCountryActionList").html('<div class="text-danger text-center py-2">Unable to load countries.</div>');
+	}
+}
+
+async function loadEnrollmentCountrySelection(){
+	try{
+		var responseData = await callCommonAjax({
+			method : "POST",
+			url : getURLForHTML('dashboard', 'school-setting-enrollment-document-country-data'),
+			body : {
+				schoolId : getEnrollmentSchoolId()
+			},
+			global : true,
+			showMessage : false
+		});
+		var selectedCountryIds = [];
+		if(responseData && $.isArray(responseData.countries)){
+			$.each(responseData.countries, function(index, country){
+				if(country && country.countryId != null){
+					selectedCountryIds.push(String(country.countryId));
+				}
+			});
+		}
+		ENROLLMENT_COUNTRY_SELECTION_SNAPSHOT = selectedCountryIds.slice();
+		ENROLLMENT_COUNTRY_SELECTED_IDS = selectedCountryIds.slice();
+		renderEnrollmentCountrySelectionUI();
+	}catch(error){
+		$("#errMsg").text('Unable to load enrollment countries.');
+	}
+}
+
+function renderEnrollmentCountrySelectionUI(){
+	renderEnrollmentSelectedCountries();
+	renderEnrollmentCountryActionList();
+}
+
+function renderEnrollmentSelectedCountries(){
+	var selectedWrapper = $("#enrollmentSelectedCountries");
+	selectedWrapper.html('');
+	if(ENROLLMENT_COUNTRY_SELECTED_IDS.length < 1){
+		selectedWrapper.html('<div class="text-muted text-center py-3">No countries selected</div>');
+		return;
+	}
+	$.each(ENROLLMENT_COUNTRY_SELECTED_IDS, function(index, selectedId){
+		var country = getEnrollmentCountryById(selectedId);
+		if(!country){
+			return;
+		}
+		selectedWrapper.append(
+			'<span class="badge badge-pill badge-primary mr-2 mb-2 px-3 py-2" style="font-size:10px;">' +
+				escapeEnrollmentCountryText(country.countryName) +
+			'</span>'
+		);
+	});
+}
+
+function renderEnrollmentCountryActionList(){
+	var listWrapper = $("#enrollmentCountryActionList");
+	var searchKeyword = (($("#enrollmentCountrySearch").val() || '') + '').toLowerCase().trim();
+	listWrapper.html('');
+	if(ENROLLMENT_COUNTRY_MASTER_LIST.length < 1){
+		listWrapper.html('<div class="text-muted text-center py-3">No countries found</div>');
+		return;
+	}
+	var visibleCount = 0;
+	$.each(ENROLLMENT_COUNTRY_MASTER_LIST, function(index, country){
+		if(searchKeyword !== '' && String(country.countryName || '').toLowerCase().indexOf(searchKeyword) === -1){
+			return;
+		}
+		visibleCount += 1;
+		var isSelected = $.inArray(String(country.countryId), ENROLLMENT_COUNTRY_SELECTED_IDS) !== -1;
+		listWrapper.append(
+			'<div class="d-flex align-items-center justify-content-between border rounded px-2 py-2 mb-2">' +
+				'<div class="pr-2" style="font-size:13px; font-weight:500;">' + escapeEnrollmentCountryText(country.countryName) + '</div>' +
+				'<button type="button" class="btn btn-sm country-toggle-btn ' + (isSelected ? 'btn-outline-secondary' : 'btn-success') + '" onclick="toggleEnrollmentCountrySelection(\'' + String(country.countryId) + '\');">' +
+					(isSelected ? 'Selected' : 'Select') +
+				'</button>' +
+			'</div>'
+		);
+	});
+	if(visibleCount < 1){
+		listWrapper.html('<div class="text-muted text-center py-3">No countries match your search</div>');
+	}
+}
+
+function toggleEnrollmentCountrySelection(countryId){
+	countryId = String(countryId);
+	var selectedIndex = $.inArray(countryId, ENROLLMENT_COUNTRY_SELECTED_IDS);
+	if(selectedIndex === -1){
+		ENROLLMENT_COUNTRY_SELECTED_IDS.push(countryId);
+	}else{
+		ENROLLMENT_COUNTRY_SELECTED_IDS.splice(selectedIndex, 1);
+	}
+	renderEnrollmentCountrySelectionUI();
+}
+
+function getEnrollmentCountryById(countryId){
+	countryId = String(countryId);
+	for(var index = 0; index < ENROLLMENT_COUNTRY_MASTER_LIST.length; index++){
+		if(String(ENROLLMENT_COUNTRY_MASTER_LIST[index].countryId) === countryId){
+			return ENROLLMENT_COUNTRY_MASTER_LIST[index];
+		}
+	}
+	return null;
+}
+
+function escapeEnrollmentCountryText(value){
+	return $('<div/>').text(value || '').html();
+}
+
+async function updateEnrollmentCountries(toggle, countryIds){
+	countryIds = $.map(countryIds || [], function(countryId){
+		if(countryId == null || countryId === ''){
+			return null;
+		}
+		return parseInt(countryId, 10);
+	});
+	if(countryIds.length < 1){
+		return null;
+	}
+	try{
+		var responseData = await callCommonAjax({
+			method : "POST",
+			url : getURLForHTML('dashboard', 'school-setting-enrollment-document-country-save'),
+			body : {
+				schoolId : getEnrollmentSchoolId(),
+				toggle : toggle,
+				countryIds : countryIds
+			},
+			global : true,
+			showMessage : false
+		});
+		if(responseData && responseData.status === '1'){
+			return responseData;
+		}
+		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : 'Unable to update countries.');
+		return null;
+	}catch(error){
+		showMessageTheme2(0, 'Unable to update countries.');
+		return null;
+	}
+}
+
+async function saveEnrollmentSettings(){
+	return saveEnrollmentCountries(true);
+}
+
+async function saveEnrollmentCountries(skipReload){
+	$("#errMsg").text('');
+	var selectedCountryIds = $.map(ENROLLMENT_COUNTRY_SELECTED_IDS || [], function(countryId){
+		return parseInt(countryId, 10);
+	});
+	var snapshotCountryIds = $.map(ENROLLMENT_COUNTRY_SELECTION_SNAPSHOT || [], function(countryId){
+		return String(countryId);
+	});
+	var addedCountryIds = $.grep(selectedCountryIds, function(countryId){
+		return $.inArray(String(countryId), snapshotCountryIds) === -1;
+	});
+	var removedCountryIds = $.map(snapshotCountryIds, function(countryId){
+		if($.inArray(String(countryId), ENROLLMENT_COUNTRY_SELECTED_IDS) === -1){
+			return parseInt(countryId, 10);
+		}
+		return null;
+	});
+	if(addedCountryIds.length > 0){
+		var countrySaveResponse = await updateEnrollmentCountries('SAVE', addedCountryIds);
+		if(!countrySaveResponse){
+			if($("#errMsg").length){
+				$("body,html").animate({scrollTop: $("#errMsg").offset().top -70}, 800);
+			}
+			return false;
+		}
+	}
+	if(removedCountryIds.length > 0){
+		var countryRemoveResponse = await updateEnrollmentCountries('REMOVE', removedCountryIds);
+		if(!countryRemoveResponse){
+			if($("#errMsg").length){
+				$("body,html").animate({scrollTop: $("#errMsg").offset().top -70}, 800);
+			}
+			return false;
+		}
+	}
+	ENROLLMENT_COUNTRY_SELECTION_SNAPSHOT = ENROLLMENT_COUNTRY_SELECTED_IDS.slice();
+	showMessageTheme2(1, 'Countries Updated');
+	if(!skipReload){
+		await loadEnrollmentCountrySelection();
+	}
+	if($("#errMsg").length){
+		$("body,html").animate({scrollTop: $("#errMsg").offset().top -70}, 800);
+	}
+	return true;
+}
+
+$(document).on('input', '#enrollmentCountrySearch', function(){
+	renderEnrollmentCountryActionList();
+});

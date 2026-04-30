@@ -1,6 +1,137 @@
 var scriptRun = false;
 var successfulEmails = [];
 var failedOrOtherEmails = [];
+var PAYMENT_REPORT_TAB_ENDPOINTS = {
+	'basic-detail': '/dashboard/student-payment-report/basic-detail',
+	'parent-detail': '/dashboard/student-payment-report/basic-detail',
+	'contact-info': '/dashboard/student-payment-report/basic-detail',
+	'academic-detail': '/dashboard/student-payment-report/basic-detail',
+	'payment': '/dashboard/student-payment-report/basic-detail',
+	'communication-log': '/dashboard/student-payment-report/basic-detail',
+	'log-reports': '/dashboard/student-payment-report/basic-detail'
+};
+
+function bindPaymentReportAccordions(context){
+	$(context || document).find(".follow-up-no").off('click.paymentReport').on('click.paymentReport', function(){
+		$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
+		$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
+		$(this).parent().find(".follow-up-content").slideDown();
+		$(this).parent().siblings().find(".follow-up-content").slideUp();
+		$(this).parent().addClass("follow-up-accordian-active");
+		$(this).parent().siblings().removeClass("follow-up-accordian-active");
+	});
+}
+
+function bindPaymentReportTabEvents(){
+	$("#studentPaymentReportTable").find(".payment-report-tab-link").off('shown.bs.tab.paymentReport').on('shown.bs.tab.paymentReport', function(){
+		var $tab = $(this);
+		var tabKey = $tab.attr('data-tab-key');
+		var studentStandardId = $tab.attr('data-student-standard-id');
+		var userId = $tab.attr('data-user-id');
+		if(tabKey == 'summary'){
+			return;
+		}
+		var $row = $("#payment-report-row-" + studentStandardId);
+		if($row.attr('data-report-mode') == 'full'){
+			if(tabKey == 'communication-log'){
+				ensurePaymentReportCommunicationLogLoaded(studentStandardId, userId);
+			}
+			return;
+		}
+		if($row.attr('data-loading') == 'Y'){
+			return;
+		}
+		loadPaymentReportTab(tabKey, studentStandardId, userId);
+	});
+}
+
+function getPaymentReportDetailRequest(tabKey, studentStandardId){
+	var request = getRequestForPaymentReport('studentPaymentForm', 2, 'N');
+	if(request && request.paymentReportRequestDTO){
+		request.paymentReportRequestDTO['studentStandardId'] = parseInt(studentStandardId, 10);
+		request.paymentReportRequestDTO['pageNumber'] = 0;
+		request.paymentReportRequestDTO['pageSize'] = 1;
+		request.paymentReportRequestDTO['type'] = 2;
+	}
+	return request;
+}
+
+function ensurePaymentReportCommunicationLogLoaded(studentStandardId, userId){
+	var $list = $(".followup-remark-" + studentStandardId);
+	if($list.length > 0 && $list.attr('data-loaded') != 'Y'){
+		$list.attr('data-loaded', 'Y');
+		getCommunicationLogList(studentStandardId, userId);
+	}
+}
+
+function initializePaymentReportFullRow(studentStandardId, userId, tabKey){
+	var $row = $("#payment-report-row-" + studentStandardId);
+	$row.find(".re-leadstatus").select2({
+		theme:'bootstrap4',
+	});
+	bindPaymentReportAccordions($row);
+	bindPaymentReportTabEvents();
+	$('[data-toggle="tooltip"]').tooltip({
+		html: true
+	});
+	if(tabKey == 'communication-log'){
+		ensurePaymentReportCommunicationLogLoaded(studentStandardId, userId);
+	}
+}
+
+function loadPaymentReportTab(tabKey, studentStandardId, userId){
+	var endpoint = PAYMENT_REPORT_TAB_ENDPOINTS[tabKey];
+	var $row = $("#payment-report-row-" + studentStandardId);
+	if(!endpoint || !$row.length){
+		return;
+	}
+	var isChecked = $("#student-" + userId).is(":checked");
+	var currentSno = $.trim($row.find(".mx-2").first().text()).replace('.', '');
+	var tabSelector = "#payment-report-tab-" + tabKey + "-" + studentStandardId;
+	var paneSelector = $(tabSelector).attr('href');
+	$row.attr('data-loading', 'Y');
+	if(paneSelector){
+		$(paneSelector).html('<div class="text-center text-muted py-4">Loading data...</div>');
+	}
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : CONTEXT_PATH + UNIQUEUUID + endpoint,
+		data : JSON.stringify(getPaymentReportDetailRequest(tabKey, studentStandardId)),
+		dataType : 'json',
+		success : function(data) {
+			$row.attr('data-loading', 'N');
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3' || !data.reports || data.reports.length < 1) {
+				if(data['status'] == '3'){
+					redirectLoginPage();
+				}else{
+					showMessageTheme2(0, data['message'] || 'Unable to load data','',true);
+				}
+				if(paneSelector){
+					$(paneSelector).html('<div class="text-center text-muted py-4">Unable to load data.</div>');
+				}
+				return false;
+			}
+			var report = data.reports[0];
+			if(currentSno != ''){
+				report.sno = currentSno;
+			}
+			$row.replaceWith(cardDetails({reports:[report]}));
+			if(isChecked){
+				$("#student-" + userId).prop('checked', true);
+			}
+			initializePaymentReportFullRow(studentStandardId, userId, tabKey);
+			$("#payment-report-tab-" + tabKey + "-" + studentStandardId).tab('show');
+			return false;
+		},
+		error : function() {
+			$row.attr('data-loading', 'N');
+			if(paneSelector){
+				$(paneSelector).html('<div class="text-center text-muted py-4">Unable to load data.</div>');
+			}
+		}
+	});
+}
 
 function paymentReportEventLoad(){
 	const getUserRoleForMonitoring = getSettingsByTypeAndKey('CONFIGURATION','DONT_SHOW_ACTIVITY_TRACKER_ROLE');
@@ -172,27 +303,8 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 						pageCount(data.count)
 					}
 					$('#studentPaymentReportTable tbody').empty();
-					$("#studentPaymentReport #studentPaymentReportTable tbody").html(cardDetails(data)).promise().done(function(){
-						$.each(data.reports, function(key, item) {
-							getCommunicationLogList(item.studentStandardId, item.userId);
-							
-						});
-						$(".re-leadstatus").select2({
-							theme:'bootstrap4',
-						});
-						// if(lRStatus!=""){
-						// 	$("#studentPaymentForm #reLeadStatus").val(lRStatus).trigger("change");
-						// }
-						// new PerfectScrollbar('.perfectScroll');
-
-						$(".follow-up-no").click(function(){
-							$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
-							$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
-							$(this).parent().find(".follow-up-content").slideDown();
-							$(this).parent().siblings().find(".follow-up-content").slideUp();
-							$(this).parent().addClass("follow-up-accordian-active");
-							$(this).parent().siblings().removeClass("follow-up-accordian-active");
-						});
+					$("#studentPaymentReport #studentPaymentReportTable tbody").html(cardDetailsSummary(data)).promise().done(function(){
+						bindPaymentReportTabEvents();
 					});
 					if(USER_ROLE=='DIRECTOR'){
 						if(data.consolidate!=null){
@@ -493,6 +605,7 @@ function submitCommunicationLog(studentStandardId, userId) {
 
 function getCommunicationLogList(studentStandardId, userId){
    // customLoader(true);
+	$(".followup-remark-"+studentStandardId).attr('data-loaded', 'Y');
 	var data={};
 	data['userId']=userId;
 	data['role']='STUDENT';
