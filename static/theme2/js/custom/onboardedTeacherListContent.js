@@ -269,7 +269,7 @@ function swatiBroadcastContentModal(data){
 																</a>
 															</td>
 															<td class="text-center">`;
-																if(element.customParams.length==0){ //console.log('only those not having parameters');
+																if(element.customParams == null || element.customParams == undefined || element.customParams.length==0){ //console.log('only those not having parameters');
 																	html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
 																		Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
 																	</a>`;
@@ -564,7 +564,7 @@ function customWatiTemplatesList(tdata){
 																	</a>
 																</td>
 																<td style="vertical-align: middle !important;" class="text-center">`;
-																	if(element.customParams.length==0){ 
+																	if(element.customParams == null || element.customParams == undefined || element.customParams.length==0){ 
 																		html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
 																			Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
 																		</a>`;
