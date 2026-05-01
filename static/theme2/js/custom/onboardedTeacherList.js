@@ -1152,6 +1152,7 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 		email: user.email,
 		grade: user.grade,
 		fullName: user.name,
+		phone: user.phoneNumber,
 		firstName: user.name.split(' ')[0],
 		leadId: user.leadId,
 
