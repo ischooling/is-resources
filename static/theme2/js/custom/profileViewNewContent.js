@@ -1728,37 +1728,37 @@ function academicInformation(data) {
                         ${studentDocumentVerificationSection()}
                     </div>`;
                     //aazim
-                    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
-				    // html += ageProofElement(data)
-				    // html += `</div>
-				    //                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-				    // html += addressProofElement(data)
-				    // html += `</div>
-				    //                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-				    // html += parentPassportProofElement(data)
-				    // html += `</div>
-				    //                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
-				    // html += lastAcademicProofElement(data)
-				    // html += `</div>`;
-				    // html += `<div class="col-12 text-right">
-				    //        <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
-				    //    </div>`;
-                    // html +=`${documentProofContent()}`
-                    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
-                    //     ${ageProofElement(data)}
-                    // </div>
-                    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
-                    //     ${addressProofElement(data)}
-                    // </div>
-                    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
-                    //     ${parentPassportProofElement(data)}
-                    // </div>
-                    // <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
-                    //     ${lastAcademicProofElement(data)}
-                    // </div>
-                    // <div class="col-12 text-right">
-                    //     <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
-                    // </div>
+                    html+=`<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`
+				    html += ageProofElement(data)
+				    html += `</div>
+				                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
+				    html += addressProofElement(data)
+				    html += `</div>
+				                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
+				    html += parentPassportProofElement(data)
+				    html += `</div>
+				                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">`;
+				    html += lastAcademicProofElement(data)
+				    html += `</div>`;
+				    html += `<div class="col-12 text-right">
+				           <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
+				       </div>`;
+                    html +=`${documentProofContent()}`
+                    html+=`<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${ageProofElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${addressProofElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${parentPassportProofElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 mb-3">
+                        ${lastAcademicProofElement(data)}
+                    </div>
+                    <div class="col-12 text-right">
+                        <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
+                    </div>`
                     html +=`${profileProgressReportSectionElement(data)}            
                 </div>
             </div>    
