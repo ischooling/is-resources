@@ -4,6 +4,8 @@ var grades_all=['KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14
 var grades_KG_10 = ['KG','1','2','3','4','5','6','7','8','9','10'];
 var requiredGrades = ['N','KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'];
 var INTERNATIONAL_SCHOOLING_POPOVER_TIMER;
+var SCHOOL_DIARY_INITIATES_ROLE = false;
+var SHOW_ONLY_RELEASE_NOTE = false;
 var languages = [{ code: 'aa', name: 'Afar' },
             { code: 'ab', name: 'Abkhazian' },
             { code: 'ae', name: 'Avestan' },
@@ -2837,24 +2839,30 @@ function getLearningProgramLabel(registrationType) {
 
 
 function getAnnouncementAndNewsContent() {
+  var showOnlyReleaseNote = SHOW_ONLY_RELEASE_NOTE === true;
   var html = 
     `<div class="right_fixed_action">
       <iframe src="https://is-chat-react.vercel.app/iframe/diary-bridge?userId=${USER_ID}"  style="height:0px"/>`;
-      if(USER_ROLE != "DIRECTOR"){
+      if(!showOnlyReleaseNote && USER_ROLE != "DIRECTOR"){
         html+=
         `<button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
           <i class="fa fa-bullhorn fa-w-16"></i>
           <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
         </button>`;
       }
-      if(USER_ROLE != "PARENT" && USER_ROLE != "DIRECTOR"){
+      if(!showOnlyReleaseNote && USER_ROLE != "PARENT" && USER_ROLE != "DIRECTOR"){
           html+=
           `<button type="button" class="custom-btn-open-options btn btn-primary" id="newsBtn" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
             <i class="fa fa-newspaper-o fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
           </button>`;
       }
-      if(CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
+      html +=
+        `<button type="button" class="custom-btn-open-options btn btn-primary" id="releaseNoteBtn" onclick="openRightSideBar(\'releaseNote_side_wrapper\');loadDashboardReleaseNotePanel(true);" data-toggle="tooltip" title="Release Notes">
+          <i class="fa fa-rocket fa-w-16"></i>
+          <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="releaseNoteBadge"></span>
+        </button>`;
+      if(!showOnlyReleaseNote && CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
         var data = {u: UNIQUEUUID, e: DEPLOYMENT_MODE, d: new Date().getTime()};
         var jsonString = JSON.stringify(data);
         var chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
@@ -2866,17 +2874,22 @@ function getAnnouncementAndNewsContent() {
           </a>`;
       }
       if (
-        USER_ROLE == "PARENT" ||
-        USER_ROLE == "TEACHER" ||
-        USER_ROLE == "STUDENT" ||
-        SCHOOL_DIARY_INITIATES_ROLE
+        !showOnlyReleaseNote &&
+        (
+          USER_ROLE == "PARENT" ||
+          USER_ROLE == "TEACHER" ||
+          USER_ROLE == "STUDENT" ||
+          SCHOOL_DIARY_INITIATES_ROLE
+        )
       ) {
         html += `<button type="button" class="custom-btn-open-options btn btn-primary" id="schoolDiaryBtn" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', false)" data-toggle="tooltip" title="${USER_ROLE == "TEACHER" ? "Teacher Diary" : USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? "Student Diary" : "School Diary"}">
             <i class="fa fa-address-book fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="schoolDiaryBadge"></span>
           </button>`;
       }
-      html += `</div>
+      html += `</div>`;
+      if(!showOnlyReleaseNote){
+        html += `
         <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
             <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
                 <i class="fa fa-times"></i>
@@ -2891,11 +2904,23 @@ function getAnnouncementAndNewsContent() {
             <div class="full mt-3" id="newsyDiv"></div>
         </div>`;
         }
+      }
+      html += `<div class="ui-theme-settings custome-ui-theme-settings" id="releaseNote_side_wrapper">
+          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'releaseNote_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+              <i class="fa fa-times"></i>
+          </button>
+          <div class="full p-2 mt-3" id="releaseNoteDashboardPanel">
+              <div class="text-muted p-3">Loading release notes...</div>
+          </div>
+      </div>`;
       if (
-        USER_ROLE == "PARENT" ||
-        USER_ROLE == "TEACHER" ||
-        USER_ROLE == "STUDENT" || 
-        SCHOOL_DIARY_INITIATES_ROLE
+        !showOnlyReleaseNote &&
+        (
+          USER_ROLE == "PARENT" ||
+          USER_ROLE == "TEACHER" ||
+          USER_ROLE == "STUDENT" || 
+          SCHOOL_DIARY_INITIATES_ROLE
+        )
       ) {
         html += `<div class="ui-theme-settings custome-ui-theme-settings" id="schoolDiary_side_wrapper">
           <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', true)" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
@@ -2905,6 +2930,9 @@ function getAnnouncementAndNewsContent() {
         </div>`;
       }
   html += `<div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>`;
+  setTimeout(function () {
+      loadDashboardReleaseNotePanel(true);
+  }, 250);
   return html;
 }
 
@@ -2927,6 +2955,196 @@ function openRightSideBar(eleId, closeFlag) {
     	getChatUserList(true);
 	}
   }
+}
+
+window.RELEASE_NOTE_DASHBOARD_STATE = window.RELEASE_NOTE_DASHBOARD_STATE || {
+	loading: false,
+	loaded: false,
+	releaseNotes: [],
+	newCount: 0
+};
+
+function releaseNoteDashboardNormalizeResponse(response) {
+	if (typeof response === "string") {
+		try {
+			return JSON.parse(response);
+		} catch (e) {
+			return {};
+		}
+	}
+	return response || {};
+}
+
+function releaseNoteDashboardIsSuccess(response) {
+	var status = String((response || {}).status || "").toUpperCase();
+	var statusCode = String((response || {}).statusCode || "").toUpperCase();
+	return status === "1" || status === "SUCCESS" || statusCode === "SUCCESS";
+}
+
+function releaseNoteDashboardFormatUtcDate(dateTimeValue) {
+	var raw = String(dateTimeValue || "").trim();
+	if (!raw) {
+		return "-";
+	}
+	var timezone = String(window.USER_TIMEZONE || "").trim() || "UTC";
+	try {
+		if (typeof convertUTCToTimezoneAs === "function" && typeof DATETIME_UTC_FORMATTER !== "undefined") {
+			return convertUTCToTimezoneAs(raw, DATETIME_UTC_FORMATTER, timezone).format("MMM D, YYYY hh:mm A");
+		}
+	} catch (e) {}
+	try {
+		if (typeof moment === "function" && moment.utc) {
+			return moment.utc(raw, "YYYY-MM-DD HH:mm:ss").tz(timezone).format("MMM D, YYYY hh:mm A");
+		}
+	} catch (e) {}
+	return raw;
+}
+
+function renderDashboardReleaseNotePanel() {
+	var state = window.RELEASE_NOTE_DASHBOARD_STATE || {};
+	var notes = Array.isArray(state.releaseNotes) ? state.releaseNotes : [];
+	var newCount = parseInt(state.newCount, 10) || 0;
+	var $badge = $("#releaseNoteBadge");
+	if ($badge.length) {
+		if (newCount > 0) {
+			$badge.text(newCount).removeClass("d-none");
+		} else {
+			$badge.addClass("d-none").text("");
+		}
+	}
+
+	var $panel = $("#releaseNoteDashboardPanel");
+	if (!$panel.length) {
+		return;
+	}
+
+	if (!notes.length) {
+		$panel.html(
+			"<div class='card mb-0'>" +
+				"<div class='card-body'>" +
+					"<h6 class='mb-2'>Release Notes</h6>" +
+					"<p class='text-muted mb-0'>No release note published for your role yet.</p>" +
+				"</div>" +
+			"</div>"
+		);
+		return;
+	}
+
+	var latest = notes[0] || {};
+	var latestTitle = String(latest.title || "Untitled Release");
+	var latestVersion = String(latest.versionLabel || "N/A");
+	var latestDate = releaseNoteDashboardFormatUtcDate(latest.publishedDateUtc || latest.publishedDate);
+	var latestSummary = String(latest.contentPreview || latest.summary || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+	if (latestSummary.length > 180) {
+		latestSummary = latestSummary.substring(0, 180) + "...";
+	}
+
+	var html = [
+		"<div class='card mb-2'>",
+			"<div class='card-body p-3'>",
+				"<div class='d-flex align-items-start justify-content-between'>",
+					"<div>",
+						"<h6 class='mb-1'>Latest Release</h6>",
+						"<div class='font-weight-bold'>" + $('<div>').text(latestTitle).html() + "</div>",
+						"<div class='small text-muted'>Version: " + $('<div>').text(latestVersion).html() + "</div>",
+						"<div class='small text-muted'>Published: " + $('<div>').text(latestDate).html() + "</div>",
+					"</div>",
+					(latest.isNew ? "<span class='badge badge-danger'>NEW</span>" : ""),
+				"</div>",
+				"<div class='small mt-2'>" + $('<div>').text(latestSummary || "No summary available.").html() + "</div>",
+				"<button type='button' class='btn btn-sm btn-primary mt-3' onclick='openDashboardReleaseNoteModule()'>Open Release Notes</button>",
+			"</div>",
+		"</div>",
+		"<div class='card mb-0'>",
+			"<div class='card-body p-3'>",
+				"<div class='d-flex align-items-center justify-content-between mb-2'>",
+					"<h6 class='mb-0'>Recent Releases</h6>",
+					"<button type='button' class='btn btn-sm btn-outline-secondary' onclick='loadDashboardReleaseNotePanel(true)'><i class='fa fa-refresh'></i></button>",
+				"</div>"
+	];
+
+	html.push("<div class='list-group'>");
+	for (var i = 0; i < notes.length && i < 8; i++) {
+		var note = notes[i] || {};
+		var noteTitle = $('<div>').text(String(note.title || "Untitled Release")).html();
+		var noteDate = $('<div>').text(releaseNoteDashboardFormatUtcDate(note.publishedDateUtc || note.publishedDate)).html();
+		var noteVersion = $('<div>').text(String(note.versionLabel || "N/A")).html();
+		var newTag = note.isNew ? "<span class='badge badge-danger ml-2'>NEW</span>" : "";
+		html.push(
+			"<div class='list-group-item p-2'>" +
+				"<div class='font-weight-semi-bold text-dark'>" + noteTitle + newTag + "</div>" +
+				"<div class='small text-muted'>Version: " + noteVersion + "</div>" +
+				"<div class='small text-muted'>Published: " + noteDate + "</div>" +
+			"</div>"
+		);
+	}
+	html.push("</div>");
+	html.push(
+			"</div>",
+		"</div>"
+	);
+	$panel.html(html.join(""));
+}
+
+function loadDashboardReleaseNotePanel(forceRefresh) {
+	var state = window.RELEASE_NOTE_DASHBOARD_STATE || {};
+	if (!forceRefresh && (state.loading || state.loaded)) {
+		renderDashboardReleaseNotePanel();
+		return;
+	}
+	state.loading = true;
+	window.RELEASE_NOTE_DASHBOARD_STATE = state;
+
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML("api/v1/release-note", "user/list"),
+		data: JSON.stringify({
+			userId: parseInt(USER_ID, 10) || 0,
+			schoolId: parseInt(SCHOOL_ID, 10) || 0,
+			moduleId: 0
+		}),
+		dataType: "json",
+		global: false,
+		success: function (rawResponse) {
+			var response = releaseNoteDashboardNormalizeResponse(rawResponse);
+			if (String(response.status || "") === "3") {
+				if (typeof redirectLoginPage === "function") {
+					redirectLoginPage();
+				}
+				return;
+			}
+			if (!releaseNoteDashboardIsSuccess(response)) {
+				state.releaseNotes = [];
+				state.newCount = 0;
+				state.loaded = true;
+				return;
+			}
+			state.releaseNotes = Array.isArray(response.releaseNotes) ? response.releaseNotes.slice(0) : [];
+			state.newCount = parseInt(response.newReleaseCount, 10);
+			if (isNaN(state.newCount)) {
+				state.newCount = 0;
+			}
+			state.loaded = true;
+		},
+		error: function () {
+			state.releaseNotes = [];
+			state.newCount = 0;
+			state.loaded = true;
+		},
+		complete: function () {
+			state.loading = false;
+			window.RELEASE_NOTE_DASHBOARD_STATE = state;
+			renderDashboardReleaseNotePanel();
+		}
+	});
+}
+
+function openDashboardReleaseNoteModule() {
+	openRightSideBar("settings-overlay");
+	if (typeof callDashboardPageSchool === "function") {
+		callDashboardPageSchool(0, "release-note", "", "?renderInAdditional=Y");
+	}
 }
 
 function toggleInternationalSchoolingPopover(show){

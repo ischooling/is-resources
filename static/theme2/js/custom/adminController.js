@@ -622,6 +622,8 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
       renderEnrollmentAvalabilityContent()
      }else if(pageNo=='enrollment-reports'){
       renderEnrollmentAvalabilityReportContent()
+     }else if(pageNo=='release-note' || pageNo=='release-note-admin-list' || pageNo=='release-note-admin-editor' || pageNo=='release-note-user-list'){
+      renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam);
      }else if(pageNo=='email-template-tester'){
       getEmailerTemplateViewerContent();
      }else if(pageNo=='log-viewer'){
