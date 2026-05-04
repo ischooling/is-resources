@@ -279,7 +279,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 			+'<div class="filter-fields d-flex flex-wrap">';
 				if(role!='TEACHER'){
 					html+='<div class="col-md-3 col-sm-3 col-xs-12">'
-						+ '<label>Select Academic Year sdaf</label>'
+						+ '<label>Select Academic Year</label>'
 						+ '<select name="sessionId" id="sessionId" class="form-control" multiple></select>'
 					+ '</div>'
 					+'<div class="col-md-3 col-sm-3 col-xs-12">'
