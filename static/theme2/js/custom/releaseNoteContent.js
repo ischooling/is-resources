@@ -68,7 +68,11 @@ function getReleaseNoteAdminListContent(title) {
 						</thead>
 						<tbody id="rnAdminTableBody">
 							<tr>
-								<td colspan="7" class="text-center">Loading...</td>
+								<td></td>
+								<td></td>
+								<td class="text-center">Loading...</td>
+								<td></td>
+								<td></td>
 							</tr>
 						</tbody>
 					</table>

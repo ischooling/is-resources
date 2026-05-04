@@ -402,7 +402,7 @@ var releaseNoteState = {
 	function rnRenderAdminTable(notes) {
 		var html = [];
 		if (!notes || !notes.length) {
-			html.push('<tr><td colspan="7" class="text-center">No release notes found.</td></tr>');
+			html.push("<tr><td></td><td></td><td class='text-center'>No release notes found.</td><td></td><td></td></tr>");
 		} else {
 			for (var i = 0; i < notes.length; i++) {
 				var item = notes[i] || {};
