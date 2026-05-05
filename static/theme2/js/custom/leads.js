@@ -1504,7 +1504,6 @@ leadModifyDetailDTO['acadmicYear'] = $("#"+formId+" #leadAcadmicYear").val()!=un
 leadModifyDetailDTO['priority'] = $("#"+formId+" #leadPriority").val()!=undefined?$("#"+formId+" #leadPriority").val():'';
 leadModifyDetailDTO['utmSource'] = $("#"+formId+" #utmSourceSearch").val()!=undefined?$("#"+formId+" #utmSourceSearch").val():'';
 //leadModifyDetailDTO['utmCampaign'] = $("#"+formId+" #leadSearchCampaign").val();
-debugger;
 if($("#"+formId+" #campaignName").val()!=undefined && $("#campaignName").val()!=''){
 	leadModifyDetailDTO['utmCampaigns'] = [encodeURIComponent($("#"+formId+" #campaignName").val())];
 }else{

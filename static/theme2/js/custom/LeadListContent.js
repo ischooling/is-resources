@@ -973,7 +973,6 @@ function getLeadPingPopupContent(pingdata, objRights){
 }
 
 function getLeadListMasterContent(roleAndModule, objRights){
-
 	var b2clead=objRights.b2cStatus;
 	var b2blead=objRights.b2bStatus;
 	var b2cnone='d-none';

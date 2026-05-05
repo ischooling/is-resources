@@ -1372,16 +1372,16 @@ function getB2cLeadList(leaddata, objRights, roleModule){
         childAge=leads.age;
       }
 
-      var facebookBadge='';
-      if(leads.facebookStatus=='Enrolled'){
-        facebookBadge='green';
-      }else if(leads.facebookStatus=='Positive'){
-        facebookBadge='#aeae64';
-      }else if(leads.facebookStatus=='Demo'){
-        facebookBadge='orange';
-      }else if(leads.facebookStatus=='Lead'){
-        facebookBadge='blue';
-      }
+      var facebookBadge='blue';
+      // if(leads.facebookStatus=='Enrolled'){
+      //   facebookBadge='green';
+      // }else if(leads.facebookStatus=='Positive'){
+      //   facebookBadge='#aeae64';
+      // }else if(leads.facebookStatus=='Demo'){
+      //   facebookBadge='orange';
+      // }else if(leads.facebookStatus=='Lead'){
+      //   facebookBadge='blue';
+      // }
       
 
 		var bgColorDemo="";
@@ -1450,10 +1450,74 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 
 								+'<tr>'
 									+'<th class="border-0 p-1">Source:</th>'
-									+'<td class="border-0 p-1" >'+(leads.LeadSourceName)
+									+'<td class="border-0 p-1" >'+(leads.LeadSourceName);
+                  	//+'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View More Details</button>'
 
-                    +((leads.LeadSourceName=='Facebook' && objRights.discardPermission) ?'<span style="color: '+facebookBadge+';font-size:15px;"><i class="fa fa-check-circle"></i></span>':'')
-                    
+                    if(leads.LeadSourceName=='Facebook' && objRights.discardPermission) {
+                     console.log(leads.fbdataList);
+                     if(leads.fbdataList!=null && leads.fbdataList!=''){
+                       const fbdataList = JSON.parse(leads.fbdataList);
+                       html+='<span style="color: '+facebookBadge+';font-size:15px;" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle"><i class="fa fa-check-circle"></i></span>'
+                       +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-md dropdown-menu p-2" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-111px, -384px, 0px);">'
+                         +'<table class="w-100"><tbody>';
+                       if(fbdataList.length>0){
+                        var sr=1;
+                        html+='<tr>'
+                              +'<th class="text-center bg-primary text-white">Sr. No.</th>'
+                               +'<th class="text-center bg-primary text-white">Send Date</th>'
+                               +'<th class="text-center bg-primary text-white">Facebook Event Id</th>'
+                               +'<th class="text-center bg-primary text-white">Facebook Event Name</th>'
+                               +'<th class="text-center bg-primary text-white">Lead Score</th>'
+                               +'<th class="text-center bg-primary text-white">Facebook Reply Id</th>'
+                             +'</tr>';
+                          for(let f=0;f<fbdataList.length;f++){
+                             const fbdata = fbdataList[f];
+                             const fbrequest = JSON.parse(fbdata.request);
+                             const fbextra = JSON.parse(fbdata.extra);
+                             const timestamp = fbdata.createdDate;
+                             const date = new Date(timestamp);
+                             const options = {
+                               weekday: 'short',
+                               day: 'numeric',
+                               month: 'short',
+                               year: 'numeric',
+                               hour: '2-digit',
+                               minute: '2-digit',
+                               hour12: true
+                             };
+                             const formatted = date.toLocaleString('en-GB', options);
+                             // Fix comma position to match your format
+                             var event_name = "";
+                             var event_id="";
+                             var lead_score = "";
+                             const finalFormat = formatted.replace(',', '');
+                             var fbrdata=fbrequest.data;
+                             if(fbrdata!=null && fbrdata.length>0){
+                                for(let r=0;r<fbrdata.length;r++){
+                                  const requestData = fbrdata[r];
+                                  event_name=requestData.event_name;
+                                  event_id=requestData.event_id;
+                                  lead_score = requestData.custom_data !=null? requestData.custom_data.lead_score : "";
+                                }
+                             }
+                             
+                            html+='<tr style="font-size:11px;">'
+                                +'<td class="text-center">'+(sr)+'</td>'
+                                +'<td>'+finalFormat+'</td>'
+                                +'<td>'+event_id+'</td>'
+                                +'<td>'+event_name+'</td>'
+                                +'<td>'+lead_score+'</td>'
+                                +'<td>'+fbextra.fbtrace_id+'</td>'
+                             +'</tr>';
+                             sr=sr+1;
+                          }
+                          html+='</tbody></table>' ;
+                        }
+                      }
+                    }else{
+                      html+='';
+                    }
+                    html+='</div>';
                     if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
                       html+='<span class="float-right">'
                         +'<a href="javascript:void(0);" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
@@ -1643,8 +1707,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 															+'<td class="border-0 p-0 font-12">'+(leads.leadLandingUrl)+'</td>'
 														+'</tr>'
 														+'<tr>'
-															+'<th class="border-0 p-0 font-12">IP:</th>'
-															+'<td class="border-0 p-0 font-12">'+(leads.ip)+'</td>'
+															
 														+'</tr>'
 														+'<tr>'
 															+'<th class="border-0 p-0 font-12">Payment IP:</th>'
