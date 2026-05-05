@@ -1472,8 +1472,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                              +'</tr>';
                           for(let f=0;f<fbdataList.length;f++){
                              const fbdata = fbdataList[f];
-                             const fbrequest = JSON.parse(fbdata.request);
-                             const fbextra = JSON.parse(fbdata.extra);
+                            if(fbdata.request!=null && fbdata.request!=''){
+                            
+                              const fbrequest = JSON.parse(fbdata.request);
+                             const fbextra = fbdata.extra=='No FB Event'?'': JSON.parse(fbdata.extra);
                              const timestamp = fbdata.createdDate;
                              const date = new Date(timestamp);
                              const options = {
@@ -1510,6 +1512,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                                 +'<td>'+fbextra.fbtrace_id+'</td>'
                              +'</tr>';
                              sr=sr+1;
+                            }
                           }
                           html+='</tbody></table>' ;
                         }
