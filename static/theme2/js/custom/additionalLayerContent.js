@@ -73,7 +73,7 @@ function addtionalLayerContentFooter() {
         ? `Copyright © ${copyrightYear} - ${copyrightName} - All Rights Reserved.`
         : "Copyright All Rights Reserved.";
 
-    var html= `<div class="app-wrapper-footer position-fixed w-100" id="additionalLayerFooter" style="left: 0;bottom: 0;z-index:9;">
+    var html= `<div class="app-wrapper-footer position-fixed w-100 bg-white" id="additionalLayerFooter" style="left: 0;bottom: 0;z-index:9;">
         <div class="app-footer">
             <div class="app-footer__inner">
                 <p style="margin: 0">${copyrightText}</p>
@@ -312,67 +312,152 @@ function paymentOverDueCard(details){
     var currencySymbol = schoolSettingsTechnical && schoolSettingsTechnical.currencySymbol
         ? schoolSettingsTechnical.currencySymbol
         : "";
-    var rowsHtml = "";
-    var srNo = 1;
+    var cardsHtml = "";
+    var firstDueDate = "";
+    var pendingCardIndex = 0;
+    var chatBaseUrl = (typeof CHAT_URL !== "undefined" && CHAT_URL) ? CHAT_URL : "https://is-chat-react.vercel.app";
+    var chatSupportUrl = chatBaseUrl + "/onboarding-support?uuid=" + UNIQUEUUID;
 
     for (var i = 0; i < dueFees.length; i++) {
         var item = dueFees[i] || {};
         if (item.status === "SUCCESS" || !item.isOverDue) {
             continue;
         }
+        if (!firstDueDate) {
+            firstDueDate = item.scheduledPayDate || "-";
+        }
+        var isFirstPendingCard = pendingCardIndex === 0;
         var amount = item.totalFeeWithMaterialFee || 0;
-        rowsHtml += `
-            <tr>
-                <td class="text-center">${srNo++}</td>
-                <td>${item.scheduledPayDate || "-"}</td>
-                <td>${item.standardName || "-"}</td>
-                <td>${item.paymentName || "-"}</td>
-                <td>${currencySymbol} ${parseFloat(amount).toFixed(2)}</td>
-                <td>${item.status || "-"}</td>
-                <td>
-                    <button type="button" class="btn btn-primary" onclick="payNow('${item.id}', '${SCHOOL_ID}')">
-                        Pay Now
-                    </button>
-                </td>
-            </tr>`;
+        cardsHtml += `
+            <div class="card mb-3 rounded mx-auto" style="max-width:420px; width:100%; border:1px solid #dfe3e8; box-shadow: 0 1px 2px rgba(16,24,40,.06);">
+                <div class="card-header bg-white d-flex align-items-center font-weight-semi-bold py-2" style="border-bottom:1px solid #e9ecef;">
+                    <i class="fa fa-file-text mr-2 text-dark"></i>Pending Fee
+                </div>
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted font-weight-semi-bold">Grade</span>
+                        <span class="font-weight-semi-bold">${item.standardName || "-"}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted font-weight-semi-bold">Fee Description</span>
+                        <span class="font-weight-semi-bold text-right ml-3">${item.paymentName || "-"}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted font-weight-semi-bold">Due Fee</span>
+                        <span class="font-weight-semi-bold">${currencySymbol} ${parseFloat(amount).toFixed(2)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-danger font-weight-semi-bold">Due Date</span>
+                        <span class="text-danger font-weight-semi-bold">${item.scheduledPayDate || "-"}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted font-weight-semi-bold">Status</span>
+                        <span class="badge" style="background:#fde68a; color:#946200; font-weight:600;">${item.status || "-"}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2" style="border-top:1px solid #e9ecef;">
+                        <span class="text-muted font-weight-semi-bold">Total Fee Due</span>
+                        <span class="font-weight-bold font-24">${currencySymbol} ${parseFloat(amount).toFixed(2)}</span>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-primary" onclick="payNow('${item.id}', '${SCHOOL_ID}')" ${isFirstPendingCard ? "" : "disabled"}>
+                            <i class="fa fa-credit-card mr-1"></i> Pay Now to Continue Classes
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        pendingCardIndex++;
     }
 
-    if (!rowsHtml) {
-        rowsHtml = `<tr><td colspan="7" class="text-center">No overdue payments found.</td></tr>`;
+    if (!cardsHtml) {
+        cardsHtml = `<div class="card rounded-10" style="border:1px solid #dfe3e8;"><div class="card-body text-center">No overdue payments found.</div></div>`;
+    }
+
+    var supportCardStyles = "";
+    if (!$("#additionalLayerSupportSideStyles").length) {
+        supportCardStyles = `<style id="additionalLayerSupportSideStyles">
+            .support-side-card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:18px;box-shadow:0 .125rem .25rem rgba(0,0,0,.075);}
+            .support-side-item{display:flex;align-items:center;gap:14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:16px;margin-top:14px;background:#fff;}
+            .support-side-chat-primary{justify-content:center;width:100%;color:#fff !important;background:#28a745 !important;border-color:#28a745 !important;text-align:center;padding-top:12px;padding-bottom:12px;}
+            .support-side-chat-primary:hover,.support-side-chat-primary:focus{color:#fff !important;text-decoration:none;}
+            .support-side-icon{font-size:26px;color:var(--pc);width:26px;text-align:center;}
+            .support-side-chat-primary .support-side-icon,.support-side-chat-primary .support-side-label{color:#fff !important;}
+            .support-side-icon.fa-phone{transform:scaleX(-1);}
+            .support-side-heading{line-height:1.2;color:#121826;font-size:18px;}
+            .support-side-label{color:#121826;line-height:1.2;}
+            .support-side-value{color:#4b5563;line-height:1.2;word-break:normal;overflow-wrap:normal;}
+            .support-side-value.email-support-value{font-size:13px !important;white-space:nowrap;}
+        </style>`;
     }
 
     var html= `
-    <div id="schedule-payment-popup" class="d-flex justify-content-center flex-column align-items-center">
+    ${supportCardStyles}
+    <div id="schedule-payment-popup" class="d-flex justify-content-center flex-column align-items-center" style="padding-bottom:90px;">
         <div class="w-100" style="max-width: 900px;">
             <div class="text-center mb-4">
-                <div class="font-24 bg-primary text-white d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-                    style="width:55px; height:55px;">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <h4 class="font-weight-bold mb-2">Hi ${USER_FULL_NAME}!</h4>
+                
+                <h4 class="font-weight-bold mb-2"><span class="mr-2">👋</span>Hi ${USER_FULL_NAME}!</h4>
             </div>
-            <p class="font-16 text-center text-gray">
-                Due to pending fee payment, the student's LMS access has been disabled.<br/>
-                Kindly complete the payment to avoid deactivation of the School Management System.
-            </p>
+            <div class="mx-auto mb-3 d-flex align-items-center rounded-10 px-3 py-2" style="max-width:550px; border:1px solid #ff5a5f; background:#fff0f1;">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle mr-2 text-white" style="width:28px; height:28px; background:#ef4444;">
+                    <i class="fa fa-exclamation-triangle"></i>
+                </span>
+                <p class="font-16 mb-0" style="color:#e53935;">
+                    Your LMS is deactivated due to pending fee since ${firstDueDate || "-"}.
+                </p>
+            </div>
+           
         </div>
-        <div class="table-responsive mt-3 p-10">
-            <table id="dueFees" class="table table-hover table-striped table-bordered font-12" style="width: 80%;margin:auto;">
-                <thead class="bg-primary text-white">
-                    <tr>
-                        <th>S.No</th>
-                        <th>Scheduled Date</th>
-                        <th>Grade</th>
-                        <th>Payment Name</th>
-                        <th>Paid Fee</th>
-                        <th>Status</th>
-                        <th width="100">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rowsHtml}
-                </tbody>
-            </table>
+        <div class="w-100 mt-3 p-10" style="max-width: 1100px;">
+            <div class="row">
+                <div class="col-xl-7 col-lg-7 col-md-12 col-12 mb-3 mb-xl-0">
+                    ${cardsHtml}
+                </div>
+                <div class="col-xl-5 col-lg-5 col-md-12 col-12 d-flex flex-column">
+                    <div class="card rounded-10" style="border:1px solid #dfe3e8; box-shadow: 0 1px 2px rgba(16,24,40,.06);">
+                        <div class="card-body py-3">
+                            <div class="support-side-card">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fa fa-headphones support-side-icon mr-3"></i>
+                                    <h4 class="support-side-heading m-0 font-weight-semi-bold">Need Any Support ?</h4>
+                                </div>
+                                <a target="_blank" href="${chatSupportUrl}" class="support-side-item support-side-chat-primary scale-animate">
+                                    <i class="fa fa-comments support-side-icon"></i>
+                                    <div class="support-side-label m-0 font-weight-semi-bold">Live Chat with School Administration</div>
+                                </a>
+                                <div class="support-side-item">
+                                    <i class="fa fa-phone support-side-icon"></i>
+                                    <div>
+                                        <div class="support-side-label font-weight-semi-bold">Phone Support</div>
+                                        <div class="support-side-value font-size-md ">+15854990662</div>
+                                    </div>
+                                </div>
+                                <div class="support-side-item">
+                                    <i class="fa fa-envelope support-side-icon"></i>
+                                    <div>
+                                        <div class="support-side-label font-weight-semi-bold">Email Support</div>
+                                        <div class="support-side-value font-size-md email-support-value"><a href="mailto:admin.support@internationalschooling.org" style="color:inherit;text-decoration:none;">admin.support@internationalschooling.org</a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-3 rounded-10" style="border:1px solid #f1d27a; background:#fff9eb;">
+                        <div class="card-body">
+                            <p class="font-weight-bold mb-2" style="color:#a86600;">
+                                <i class="fa fa-exclamation-triangle mr-2"></i>Why is timely payment important?
+                            </p>
+                            <p class="mb-0" style="color:#a86600;">
+                                 Please pay in advance to continue with your classes                            
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center pt-2 pb-4">
+                <span class="d-inline-flex align-items-center rounded-10 px-3 py-1" style="background:#e8f2ff; color:#1a73e8;">
+                    <i class="fa fa-info-circle mr-2"></i>Kindly complete the payment to avoid deactivation of the School Management System.
+                </span>
+            </div>
         </div>
     </div>`;
     return html;
