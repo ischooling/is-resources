@@ -1574,7 +1574,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   +'<td class="border-0 p-1">'+(leads.isdCode!=''?leads.isdCode:'')+' '+(leads.phone!=''?leads.phone:'N/A');
                     if(leads.isdCode!=''){
                       html+='<span>'
-                        html+='<a href="https://api.whatsapp.com/send?phone='+(leads.phoneIsd!=''?leads.phoneIsd:'')+'" target="_target" class="position-relative">' 
+                        html+=`<a href="javascript:void(0)" target="_target" class="position-relative" onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.phoneIsd!=''?leads.phoneIsd:'')}')">`
                           html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
                           
                             if(leads.whatsAppVerifiedStatus=='N'){}
@@ -1603,7 +1603,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                     html+='<br/>';
                     if(leads.phoneNoAlter!=''){
                       html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
-                      html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>';
+                      html+=`<a href="javascript:void(0)" onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" /></a>`;
                       html += `
                           <a href="javascript:void(0);" 
                             onclick="callLeadViaCallHippo('${leaddata.allowCallhippoService}','${leaddata.callhippoBypassNumber}','${leads.phoneIsd || ''}','${leads.isdCode || ''}','${leads.phone || ''}')"
@@ -3939,3 +3939,7 @@ function openLeadEnrollmentHoldPopup(lead) {
 $(document).off("change.holdEnrollmentDuration", "#holdEnrollLockHours").on("change.holdEnrollmentDuration", "#holdEnrollLockHours", function () {
   refreshHoldEnrollmentBestTimePicker($(this).val(), true);
 });
+
+function paymentReportEscapeSingleQuote(value){
+    return (value || "").toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
