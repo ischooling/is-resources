@@ -341,7 +341,7 @@ function inReviewForTeacherVerificationModal(){
                         </div>
                     </div>
                     <div class="modal-footer" style="padding:0 15px">
-                        <button type="button" class="btn k8-theme-btn primary-bg white-txt-color" onclick="logout();">Logout</button>
+                        <button type="button" class="btn k8-theme-btn primary-bg white-txt-color" onclick="logout();">Log out</button>
                     </div>
                 </div>
             </div>

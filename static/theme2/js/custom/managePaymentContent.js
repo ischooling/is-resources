@@ -33,6 +33,105 @@ function getAddPaymentSearchResult(data) {
     return html;
 }
 
+function verifyStripePayment(userPaymentDetailsId, serialNum) {
+	const btnId = `#stripe-verify-btn-${serialNum}`;
+	const msgId = `#stripe-verify-msg-${serialNum}`;
+	$(msgId).css('color', '#555').text('Verifying...');
+	$(btnId).addClass('disabled').prop('disabled', true);
+
+	$.ajax({
+		type: "GET",
+		url: `/crons/stripe-verify-payment?userPaymentDetailsId=${userPaymentDetailsId}&dryRun=false`,
+		dataType: "json",
+		success: function (resp) {
+			try {
+				const details = resp && resp.details ? resp.details : null;
+				const status = details && details.status ? details.status : (resp && resp.statusCode ? resp.statusCode : 'UNKNOWN');
+				if (status === 'PROCESSED') {
+					$(msgId).css('color', 'green').text('Paid ✓ (processed)');
+					$(`#payment-status-${serialNum}`).removeClass().addClass('fa fa-check text-success');
+					$(`#payment-status-message-${serialNum}`).text(' SUCCESS');
+					$(btnId).hide();
+					if (details && details.paymentIntentId) {
+						$(`#trans-ref-${serialNum}`).text(details.paymentIntentId);
+					}
+				} else if (status === 'UNPAID') {
+					const paymentStatus = details && details.paymentStatus ? details.paymentStatus : 'unpaid';
+					const sessionStatus = details && details.sessionStatus ? details.sessionStatus : '';
+					$(msgId).css('color', '#d39e00')
+						.text(`${paymentStatus}`);
+				} else if (status === 'SKIP') {
+					$(msgId).css('color', '#d39e00').text((details && details.reason) ? details.reason : (resp && resp.message ? resp.message : 'Skipped'));
+				} else {
+					const fullReason = (details && details.reason) ? details.reason : (resp && resp.message ? resp.message : status);
+					let shortReason = fullReason;
+					if (details && details.stripeErrorType === 'AuthenticationException') {
+						shortReason = 'Stripe auth failed (check key)';
+					} else if (details && details.stripeErrorType === 'MissingApiKey') {
+						shortReason = 'Stripe key missing';
+					} else if (fullReason && fullReason.length > 80) {
+						shortReason = fullReason.substring(0, 80) + '…';
+					}
+					$(msgId).css('color', 'red').text(shortReason).attr('title', fullReason);
+				}
+			} catch (e) {
+				$(msgId).css('color', 'red').text('Verify failed');
+			}
+		},
+		error: function () {
+			$(msgId).css('color', 'red').text('Verify failed');
+		},
+		complete: function () {
+			$(btnId).removeClass('disabled').prop('disabled', false);
+		}
+	});
+}
+
+function verifyAirwallexPayment(userPaymentDetailsId, serialNum) {
+	const btnId = `#airwallex-verify-btn-${serialNum}`;
+	const msgId = `#airwallex-verify-msg-${serialNum}`;
+	$(msgId).css('color', '#555').text('Verifying...');
+	$(btnId).addClass('disabled').prop('disabled', true);
+
+	$.ajax({
+		type: "GET",
+		url: `/crons/airwallex-verify-payment?userPaymentDetailsId=${userPaymentDetailsId}&dryRun=false`,
+		dataType: "json",
+		success: function (resp) {
+			try {
+				const details = resp && resp.details ? resp.details : null;
+				const status = details && details.status ? details.status : (resp && resp.statusCode ? resp.statusCode : 'UNKNOWN');
+				if (status === 'PROCESSED') {
+					$(msgId).css('color', 'green').text('Paid ✓ (processed)');
+					$(`#payment-status-${serialNum}`).removeClass().addClass('fa fa-check text-success');
+					$(`#payment-status-message-${serialNum}`).text(' SUCCESS');
+					$(btnId).hide();
+				} else if (status === 'UNPAID') {
+					const intentStatus = details && details.paymentIntentStatus ? details.paymentIntentStatus : 'UNPAID';
+					$(msgId).css('color', '#d39e00').text(`Unpaid (${intentStatus})`);
+				} else if (status === 'SKIP') {
+					$(msgId).css('color', '#d39e00').text((details && details.reason) ? details.reason : (resp && resp.message ? resp.message : 'Skipped'));
+				} else {
+					const fullReason = (details && details.reason) ? details.reason : (resp && resp.message ? resp.message : status);
+					let shortReason = fullReason;
+					if (fullReason && fullReason.length > 80) {
+						shortReason = fullReason.substring(0, 80) + '…';
+					}
+					$(msgId).css('color', 'red').text(shortReason).attr('title', fullReason);
+				}
+			} catch (e) {
+				$(msgId).css('color', 'red').text('Verify failed');
+			}
+		},
+		error: function () {
+			$(msgId).css('color', 'red').text('Verify failed');
+		},
+		complete: function () {
+			$(btnId).removeClass('disabled').prop('disabled', false);
+		}
+	});
+}
+
 async function getAdvancePaymentSearchResult(formId, data, moduleId) {
     const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_EDIT_CUSTOM_PAYMENTS');
     var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
@@ -71,7 +170,23 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 								<span id="copy-message${serialNum}" style="display:block; color: green; margin-left: 6px; font-weight:600;"></span>
 							</div>` : ''
 						}
-						<strong>Trans. Ref. No.:</strong> ${apsrSingle.transactionRefNumber}<br>
+						<strong>Trans. Ref. No.:</strong> <span id="trans-ref-${serialNum}">${apsrSingle.transactionRefNumber}</span>
+						${
+							apsrSingle.transactionRefNumber && apsrSingle.transactionRefNumber.toLowerCase().includes('cs_')
+							&& apsrSingle.paymentStatus !== 'SUCCESS' && apsrSingle.paymentStatus !== 'SCHEDULED' && USER_ROLE === 'DIRECTOR'
+							? `<a href=\"javascript:void(0)\" id=\"stripe-verify-btn-${serialNum}\" class=\"btn btn-sm btn-warning ml-2\" onclick=\"verifyStripePayment(${apsrSingle.userPaymentDetailsId}, ${serialNum});\">Verify</a>
+							   <span id=\"stripe-verify-msg-${serialNum}\" style=\"margin-left:6px;font-weight:600;\"></span>`
+							: ''
+						}
+						${
+							apsrSingle.pgName && apsrSingle.pgName.toUpperCase() === 'AIRWALLEX'
+							&& apsrSingle.transactionRefNumber && apsrSingle.transactionRefNumber.toLowerCase().startsWith('int_')
+							&& apsrSingle.paymentStatus !== 'SUCCESS' && apsrSingle.paymentStatus !== 'SCHEDULED' && USER_ROLE === 'DIRECTOR'
+							? `<a href=\"javascript:void(0)\" id=\"airwallex-verify-btn-${serialNum}\" class=\"btn btn-sm btn-warning ml-2\" onclick=\"verifyAirwallexPayment(${apsrSingle.userPaymentDetailsId}, ${serialNum});\">Verify</a>
+							   <span id=\"airwallex-verify-msg-${serialNum}\" style=\"margin-left:6px;font-weight:600;\"></span>`
+							: ''
+						}
+						<br>
 						<strong>User Ref. No.:</strong> ${apsrSingle.userRefNumber}<br>
 						${apsrSingle.signupUrl ? `
 							<input type="text" id="signupCopyId${serialNum}" style="float:right; opacity:0; height:0;padding:0;" value="${apsrSingle.signupUrl}">

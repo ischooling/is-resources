@@ -35,8 +35,8 @@ function getTeacherLoginHistoryContent(pageData){
                         <thead class="bg-primary text-white">
                             <tr>
                                 <th class="pl-3">S.No</th>
-                                <th>Login Date | Time</th>
-                                <th>Logout Date | Time</th>
+                                <th>Log in Date | Time</th>
+                                <th>Log out Date | Time</th>
                                 <th>Location</th>
                                 <th>Duration</th>
                             </tr>

@@ -3869,7 +3869,7 @@ function logOutModalContent(){
 				+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
 					+'<div class="modal-body delete-modal">'
 						+'<i class="zmdi zmdi-power primary-bg" style="color: #fff !important; border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
-						+'<p class="heading primary-txt-color" style=" font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to logout?</p>'
+						+'<p class="heading primary-txt-color" style=" font-family: arial; font-size: 18px; line-height: 28px; letter-spacing: 0.3px;">Are you sure you want to log out?</p>'
 					+'</div>'
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'

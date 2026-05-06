@@ -5,7 +5,69 @@ var mailTesterState = {
 	selfEmail: "",
 };
 
-(function () {
+function emailTemplateTesterPageLoadEvent(){
+	mailTesterSetTabs("rendered");
+	mailTesterState.selfEmail = String($("#mailTesterSelfEmail").val() || "").trim();
+	mailTesterPrefillRecipient();
+	mailTesterFetchTemplates();
+
+	$("#mailTesterPreviewBtn")
+		.off("click")
+		.on("click", function () {
+			mailTesterFetchPreview();
+		});
+
+	$("#mailTesterApplyOverridesBtn")
+		.off("click")
+		.on("click", function () {
+			mailTesterFetchPreview({
+				includeOverrides: true,
+				subject: $("#mailTesterSubject").val() || "",
+			});
+		});
+
+	$("#mailTesterTemplate")
+		.off("change")
+		.on("change", function () {
+			if ($(this).val()) {
+				mailTesterFetchPreview();
+			} else {
+				mailTesterClearMeta();
+			}
+		});
+
+	$("#mailTesterSendBtn")
+		.off("click")
+		.on("click", function () {
+			mailTesterSend();
+		});
+
+	$("#mailTesterSendSelfBtn")
+		.off("click")
+		.on("click", function () {
+			mailTesterSendToMyself();
+		});
+
+	$("#mailTesterResetBtn")
+		.off("click")
+		.on("click", function () {
+			mailTesterReset();
+		});
+
+	$("#mailTesterLoadRangeBtn")
+		.off("click")
+		.on("click", function () {
+			mailTesterLoadRange();
+		});
+
+	$("[data-mailtester-tab]")
+		.off("click")
+		.on("click", function () {
+			mailTesterSetTabs($(this).attr("data-mailtester-tab"));
+	});
+}
+
+// (function () {
 	function mailTesterEsc(value) {
 		return String(value === undefined || value === null ? "" : value)
 			.replace(/&/g, "&amp;")
@@ -70,12 +132,22 @@ var mailTesterState = {
 		$('[data-mailtester-pane="' + mailTesterState.activeTab + '"]').removeClass("d-none");
 	}
 
+	function mailTesterPreparePreviewHtml(html) {
+		var previewHtml = String(html || "");
+		var safeHeadStyle =
+			'<style id="mailTesterPreviewFrameStyle">html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;scroll-behavior:smooth;word-break:break-word;overflow-wrap:anywhere;}img,table,pre,code{max-width:100% !important;}img{height:auto !important;}*{box-sizing:border-box;}</style>';
+		if (/<head[^>]*>/i.test(previewHtml)) {
+			return previewHtml.replace(/<head([^>]*)>/i, "<head$1>" + safeHeadStyle);
+		}
+		return safeHeadStyle + previewHtml;
+	}
+
 	function mailTesterWriteFrame(html) {
 		var iframe = document.getElementById("mailTesterPreviewFrame");
 		if (!iframe) {
 			return;
 		}
-		var previewHtml = String(html || "");
+		var previewHtml = mailTesterPreparePreviewHtml(html);
 		try {
 			if ("srcdoc" in iframe) {
 				iframe.srcdoc = previewHtml;
@@ -284,6 +356,116 @@ var mailTesterState = {
 		});
 	}
 
+	function mailTesterPreviewRequest(payload) {
+		return new Promise(function (resolve, reject) {
+			$.ajax({
+				type: "POST",
+				contentType: "application/json",
+				url: mailTesterUrl("email-template-tester/preview"),
+				data: JSON.stringify(payload || {}),
+				dataType: "json",
+				success: function (response) {
+					resolve(response);
+				},
+				error: function (xhr) {
+					reject(xhr);
+				},
+			});
+		});
+	}
+
+	function mailTesterRangeItemHtml(response) {
+		var previewHtml = mailTesterPreparePreviewHtml(response.renderedHtml || "");
+		var escapedPreview = mailTesterEsc(previewHtml);
+		return (
+			'<div class="border rounded mb-3 bg-white">' +
+				'<div class="bg-light p-2 d-flex flex-wrap justify-content-between align-items-center">' +
+					'<div class="font-weight-semi-bold">#' + mailTesterEsc(response.templateId) + " - " + mailTesterEsc(response.displayName || response.templateFor || "") + "</div>" +
+					'<div class="text-muted font-12 mt-1 mt-sm-0">' + mailTesterEsc(response.subject || "") + "</div>" +
+				"</div>" +
+				'<div class="p-2">' +
+					'<iframe class="w-100 border rounded bg-white" style="height: 320px; overflow-x: hidden;" loading="lazy" srcdoc="' + escapedPreview + '"></iframe>' +
+				"</div>" +
+			"</div>"
+		);
+	}
+
+	async function mailTesterLoadRange() {
+		var fromId = parseInt($("#mailTesterFromId").val(), 10);
+		var toId = parseInt($("#mailTesterToId").val(), 10);
+		var limit = parseInt($("#mailTesterRangeLimit").val(), 10);
+		if (isNaN(fromId) || fromId <= 0 || isNaN(toId) || toId <= 0) {
+			mailTesterToast(0, "Valid From ID and To ID are required");
+			return;
+		}
+		if (toId < fromId) {
+			mailTesterToast(0, "To ID must be greater than or equal to From ID");
+			return;
+		}
+		if (isNaN(limit) || limit <= 0) {
+			limit = 25;
+		}
+		if (limit > 100) {
+			limit = 100;
+			$("#mailTesterRangeLimit").val("100");
+		}
+
+		var templatesInRange = (mailTesterState.templates || [])
+			.filter(function (template) {
+				var id = parseInt(template.id, 10);
+				return !isNaN(id) && id >= fromId && id <= toId;
+			})
+			.sort(function (a, b) {
+				return parseInt(a.id, 10) - parseInt(b.id, 10);
+			})
+			.slice(0, limit);
+
+		if (!templatesInRange.length) {
+			$("#mailTesterRangeInfo").text("No templates found for selected range.");
+			$("#mailTesterRangeList").html('<div class="text-muted text-center py-4">No templates found.</div>');
+			mailTesterSetTabs("range");
+			return;
+		}
+
+		$("#mailTesterLoadRangeBtn").prop("disabled", true).text("Loading...");
+		$("#mailTesterRangeInfo").text("Loading " + templatesInRange.length + " templates...");
+		$("#mailTesterRangeList").html('<div class="text-muted text-center py-4">Loading range preview...</div>');
+		mailTesterSetTabs("range");
+
+		var renderedItems = [];
+		var successCount = 0;
+		for (var i = 0; i < templatesInRange.length; i++) {
+			try {
+				var response = await mailTesterPreviewRequest({
+					templateId: String(templatesInRange[i].id || ""),
+					subject: "",
+					sampleValues: {}
+				});
+				if (mailTesterHandleSession(response)) {
+					break;
+				}
+				if (String(response.status || "") === "1") {
+					successCount++;
+					renderedItems.push(mailTesterRangeItemHtml(response));
+				}
+			} catch (e) {}
+		}
+
+		$("#mailTesterLoadRangeBtn").prop("disabled", false).text("Load Range");
+		if (!renderedItems.length) {
+			$("#mailTesterRangeInfo").text("No preview could be rendered.");
+			$("#mailTesterRangeList").html('<div class="text-muted text-center py-4">No preview could be rendered.</div>');
+			mailTesterToast(0, "Unable to render range preview");
+			return;
+		}
+
+		$("#mailTesterRangeInfo").text(
+			"Showing " + successCount + " template(s) for ID range " + fromId + " to " + toId + " (limit " + limit + ")."
+		);
+		$("#mailTesterRangeList").html(renderedItems.join(""));
+		mailTesterToast(1, "Range preview loaded");
+	}
+
 	function mailTesterSend() {
 		var recipientEmail = String($("#mailTesterRecipient").val() || "").trim();
 		if (!recipientEmail) {
@@ -360,66 +542,14 @@ var mailTesterState = {
 			.addClass("d-none")
 			.removeClass("alert-warning alert-success");
 		$("#mailTesterSendResultText").text("No mail sent yet.");
+		$("#mailTesterRangeInfo").text("No range loaded yet.");
+		$("#mailTesterRangeList").html('<div class="text-muted text-center py-4">Use Range Preview controls to load templates.</div>');
 		mailTesterClearMeta();
 		mailTesterPrefillRecipient();
 	}
 
-	window.initEmailTemplateTester = function () {
-		mailTesterSetTabs("rendered");
-		mailTesterState.selfEmail = String($("#mailTesterSelfEmail").val() || "").trim();
-		mailTesterPrefillRecipient();
-		mailTesterFetchTemplates();
-
-		$("#mailTesterPreviewBtn")
-			.off("click")
-			.on("click", function () {
-				mailTesterFetchPreview();
-			});
-
-		$("#mailTesterApplyOverridesBtn")
-			.off("click")
-			.on("click", function () {
-				mailTesterFetchPreview({
-					includeOverrides: true,
-					subject: $("#mailTesterSubject").val() || "",
-				});
-			});
-
-		$("#mailTesterTemplate")
-			.off("change")
-			.on("change", function () {
-				if ($(this).val()) {
-					mailTesterFetchPreview();
-				} else {
-					mailTesterClearMeta();
-				}
-			});
-
-		$("#mailTesterSendBtn")
-			.off("click")
-			.on("click", function () {
-				mailTesterSend();
-			});
-
-		$("#mailTesterSendSelfBtn")
-			.off("click")
-			.on("click", function () {
-				mailTesterSendToMyself();
-			});
-
-		$("#mailTesterResetBtn")
-			.off("click")
-			.on("click", function () {
-				mailTesterReset();
-			});
-
-		$("[data-mailtester-tab]")
-			.off("click")
-			.on("click", function () {
-				mailTesterSetTabs($(this).attr("data-mailtester-tab"));
-			});
-	};
-})();
+	
+// })();
 
 
 function mailTesterContentEsc(value) {

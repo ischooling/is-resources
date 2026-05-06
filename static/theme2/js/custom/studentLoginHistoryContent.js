@@ -30,7 +30,7 @@ function getStudentLoginHistoryContent(pageData){
         <div class="main-card mb-3 card rounded-10 border py-3">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between">
-                    <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Login Sessions</h4>
+                    <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Log in Sessions</h4>
                     <div class="mr-3" style="width:260px;max-width:100%;">
                         <input type="text" id="studentLoginHistorySearch" class="form-control" placeholder="Search sessions...">
                     </div>
@@ -40,8 +40,8 @@ function getStudentLoginHistoryContent(pageData){
                         <thead class="bg-primary text-white">
                             <tr>
                                 <th class="pl-3">S.No</th>
-                                <th>Login Date | Time</th>
-                                <th>Logout Date | Time</th>
+                                <th>Log in Date | Time</th>
+                                <th>Log out Date | Time</th>
                                 <th>Location</th>
                                 <th>Duration</th>
                             </tr>
