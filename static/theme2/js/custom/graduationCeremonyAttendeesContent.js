@@ -38,6 +38,41 @@ function getGraduationCeremonyAttendeesContent(title, roleAndModule, schoolId, u
                 </table>
             </div>
         </div>
+    </div>
+    <div class="modal fade" id="graduationCallbackStatusModal" tabindex="-1" role="dialog" aria-labelledby="graduationCallbackStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="graduationCallbackStatusModalLabel">Update Callback Status</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="graduationCallbackStudentEmail">
+                    <input type="hidden" id="graduationCallbackPreferredDateTime">
+                    <input type="hidden" id="graduationCallbackPreferredTimezone">
+                    <input type="hidden" id="graduationCallbackSchoolId">
+                    <input type="hidden" id="graduationCallbackUserId">
+                    <div class="mb-3">
+                        <label for="graduationCallbackStatusSelect" class="font-weight-bold">Select Status</label>
+                        <select id="graduationCallbackStatusSelect" class="form-control">
+                            <option value="">Select Status</option>
+                            <option value="COMPLETED">Completed</option>
+                        </select>
+                    </div>
+                    <div class="small text-muted line-height-18">
+                        <div><strong>Email:</strong> <span id="graduationCallbackStudentEmailText">N/A</span></div>
+                        <div><strong>Preferred Date & Time:</strong> <span id="graduationCallbackPreferredDateTimeText">N/A</span></div>
+                        <div><strong>Preferred Timezone:</strong> <span id="graduationCallbackPreferredTimezoneText">N/A</span></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="updateGraduationCeremonyCallbackStatus();">Update Status</button>
+                </div>
+            </div>
+        </div>
     </div>`
     return html;
 }
