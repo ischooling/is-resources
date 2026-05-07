@@ -18,8 +18,9 @@ async function renderStudentProfilePage(extraParam) {
         PORFILE_RESPONSE_UPDATED_DATA = data;
         try {
             var gradeId = data && data[2] ? parseInt(data[2].gradeId) : 0;
+            var marksPublishedStatus = data && data[2] ? data[2].marksPublishedStatus : "N";
             var lp = data && data[2] && data[2].learningProgramValue ? (data[2].learningProgramValue + "").toUpperCase() : "";
-            SHOW_RESERVE_SEAT_SECTION = !(gradeId === 7 && lp !== "ONE_TO_ONE_FLEX");
+            SHOW_RESERVE_SEAT_SECTION = !(gradeId === 7 && lp !== "ONE_TO_ONE_FLEX" && PORFILE_RESPONSE_DATA.standardStatus == 0);
             var isAdminSideUser = (USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE != "TEACHER");
             if (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.rightToEdit === false) {
                 isAdminSideUser = false;
@@ -2588,7 +2589,7 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                     if (standardStatus == "1") {
                         html +=
                         `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                            <label for="reserveASeat" class="font-weight-semi-bold text-dark">Reserve an Seat</label>
+                            <label for="reserveASeat" class="font-weight-semi-bold text-dark">Reserve a Seat</label>
                             <div class="input-group mb-2 p-0">
                                 <select name="reserveASeat" id="reserveASeat" class="form-control form-control-sm group-append-hide-input" data-value="${data.reserveASeat}" onchange="controlEditField(this,'reserveASeat',\'${data.reserveASeat == "N" ? "0" : "1"}\','select','','', 5,'reserveASeat')">
                                     <option value="0" ${data.reserveASeat == "N" ? 'selected' : ''}>No</option>
