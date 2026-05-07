@@ -84,13 +84,13 @@ function bindTeacherScreeningData(responseData) {
                     <td>${teacher.lastOrgName || ''}</td>
                     <td>
                         ${teacher?.attachments?.uploadDocumentTeacherResumeURL ? 
-                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewTeacherScreenAttachementResumeAndPhoto(\'${teacher?.attachments?.uploadDocumentTeacherResumeURL}\','viewTeacherScreenAttachementModal')">View Resume</a>` : 
+                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewTeacherScreenAttachementResumeAndPhoto(\'${teacher?.attachments?.uploadDocumentTeacherResumeURL}\','viewTeacherScreenAttachementModal','${(teacher?.attachments?.uploadDocumentTeacherResumeName || '').replace(/'/g, "\\'")}')">View Resume</a>` :
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
                     <td>
                         ${teacher?.attachments?.uploadDocumentTeacherPassportURL ? 
-                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewTeacherScreenAttachementResumeAndPhoto(\'${teacher?.attachments?.uploadDocumentTeacherPassportURL}\','viewTeacherScreenAttachementModal')">View Photo</a>` : 
+                            `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewTeacherScreenAttachementResumeAndPhoto(\'${teacher?.attachments?.uploadDocumentTeacherPassportURL}\','viewTeacherScreenAttachementModal','${(teacher?.attachments?.uploadDocumentTeacherPassportName || '').replace(/'/g, "\\'")}')">View Photo</a>` :
                             '<span class="text-muted">N/A</span>'
                         }
                     </td>
@@ -373,32 +373,64 @@ function updateTableRowDirectlyTA(teacherId, newStatus, assignedTo) {
     }
 }
 
-async function viewTeacherScreenAttachementResumeAndPhoto(url, modalId) {
+async function viewTeacherScreenAttachementResumeAndPhoto(url, modalId, fileName) {
+    var normalizedUrl = normalizeTeacherScreenAttachmentUrl(url);
+    var sourceUrl = getTeacherScreenAttachmentViewUrl(normalizedUrl);
+    var attachmentType = teacherScreenGetExtension(fileName || normalizedUrl).toLowerCase();
 
-    var attachmentType = teacherScreenGetExtension(url);
-    var blobUrl = await teacherScreenUrlToBlobUrl(url, attachmentType); 
-
-    if (attachmentType != 'pdf') {
-
-        $("#" + modalId + " .upload_img img").attr('src', blobUrl);
-        $("#" + modalId + ' .upload_img').removeClass("d-none");
-        $("#" + modalId + " .upload_pdf").addClass("d-none");
-        customLoader(false);
-    } else {
-
-        $("#" + modalId + " .upload_pdf .pre_upload_pdf").remove();
-        var objectTag = $('<object type="application/pdf" class="pre_upload_pdf full" style="height: 400px;" data="' + blobUrl + '"></object>');
-        objectTag.on("load", function () {
-            customLoader(false);
-           
-        });
-        $("#"+modalId+" #pre_upload_pdf_div").append(objectTag);
-        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", blobUrl);
-        $("#" + modalId + " .upload_pdf").removeClass("d-none");
-        $("#" + modalId + ' .upload_img').addClass("d-none");
+    var attachmentData = await teacherScreenUrlToBlobUrl(sourceUrl, attachmentType);
+    if (!attachmentData) {
+        return;
     }
+
+    releaseTeacherScreenAttachmentBlobUrl();
+    activeTeacherScreenAttachmentBlobUrl = attachmentData.blobUrl;
+
+    if (attachmentData.attachmentType !== 'pdf') {
+        $("#" + modalId + " .upload_img img").attr("src", attachmentData.blobUrl);
+        $("#" + modalId + " .upload_img").removeClass("d-none");
+        $("#" + modalId + " .upload_pdf").addClass("d-none");
+    } else {
+        $("#" + modalId + " .upload_pdf .pre_upload_pdf").remove();
+
+        var iframeTag = $("<iframe class=\"pre_upload_pdf full border-0\" style=\"height: 400px; width: 100%;\" referrerpolicy=\"no-referrer\" allowfullscreen></iframe>");
+        iframeTag.attr("src", attachmentData.blobUrl + "#toolbar=0&navpanes=0&scrollbar=1");
+        $("#" + modalId + " #pre_upload_pdf_div").append(iframeTag);
+
+        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", attachmentData.sourceUrl);
+        $("#" + modalId + " .upload_pdf a.open-pdf-btn").attr("href", attachmentData.sourceUrl);
+        $("#" + modalId + " .upload_pdf").removeClass("d-none");
+        $("#" + modalId + " .upload_img").addClass("d-none");
+    }
+
     customLoader(false);
     $("#" + modalId).modal("show");
+}
+
+function normalizeTeacherScreenAttachmentUrl(url) {
+    if (!url) {
+        return "";
+    }
+    var normalizedUrl = String(url).trim();
+    var duplicateUrlIndex = normalizedUrl.indexOf("https://", 8);
+    if (duplicateUrlIndex === -1) {
+        duplicateUrlIndex = normalizedUrl.indexOf("http://", 7);
+    }
+    if (duplicateUrlIndex > -1) {
+        normalizedUrl = normalizedUrl.substring(duplicateUrlIndex);
+    }
+    return normalizedUrl;
+}
+
+function getTeacherScreenAttachmentViewUrl(url) {
+    var normalizedUrl = normalizeTeacherScreenAttachmentUrl(url);
+    if (!normalizedUrl) {
+        return "";
+    }
+    var fileKey = normalizedUrl.indexOf("http://") === 0 || normalizedUrl.indexOf("https://") === 0
+        ? normalizedUrl.substring(normalizedUrl.lastIndexOf("/") + 1)
+        : normalizedUrl;
+    return BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/common/downloads?fileName=" + encodeURIComponent(fileKey);
 }
 
 function teacherScreenGetExtension(url) {
@@ -406,17 +438,56 @@ function teacherScreenGetExtension(url) {
     return url.split('.').pop().split('?')[0];
 }
 
+let activeTeacherScreenAttachmentBlobUrl = null;
+
+function releaseTeacherScreenAttachmentBlobUrl() {
+    if (activeTeacherScreenAttachmentBlobUrl) {
+        URL.revokeObjectURL(activeTeacherScreenAttachmentBlobUrl);
+        activeTeacherScreenAttachmentBlobUrl = null;
+    }
+}
+
 async function teacherScreenUrlToBlobUrl(url, attachmentType) {
     customLoader(true);
-    var response = await fetch(url);
-    if (!response.ok) {
+
+    try {
+        var response = await fetch(url, { method: "GET" });
+        if (!response.ok) {
+            throw new Error("Failed to fetch attachment");
+        }
+
+        var contentType = (response.headers.get("content-type") || "").toLowerCase();
+        var resolvedAttachmentType = contentType.indexOf("pdf") !== -1
+            ? "pdf"
+            : (contentType.indexOf("image/") !== -1 ? "image" : attachmentType);
+        var blob = await response.blob();
+
+        if (resolvedAttachmentType === "pdf" && blob.type !== "application/pdf") {
+            blob = new Blob([blob], { type: "application/pdf" });
+        }
+
+        return {
+            attachmentType: resolvedAttachmentType,
+            blobUrl: URL.createObjectURL(blob),
+            sourceUrl: url
+        };
+    } catch (error) {
+        showMessageTheme2(0, "Unable to preview this file. Please use download/open instead.");
+        return null;
+    } finally {
         customLoader(false);
-        showMessageTheme2(0, "Failed to fetch "+(attachmentType!="PDF"?"Image":attachmentType));
     }
-    var blob = await response.blob();
-    customLoader(false);
-    return URL.createObjectURL(blob);
 }
+
+$(document)
+    .off("hidden.bs.modal.teacherScreeningAttachment", "#viewTeacherScreenAttachementModal")
+    .on("hidden.bs.modal.teacherScreeningAttachment", "#viewTeacherScreenAttachementModal", function () {
+        releaseTeacherScreenAttachmentBlobUrl();
+        $(this).find(".upload_img img").attr("src", "");
+        $(this).find(".upload_pdf .pre_upload_pdf").remove();
+        $(this).find(".upload_pdf").addClass("d-none");
+        $(this).find(".upload_img").addClass("d-none");
+    });
 
 function openCommunicationLogsModalForTeacherApplication(teacherId, userRole){
     if($("#teacherApplicationCommunicationLogsModal").length == 1){

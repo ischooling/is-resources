@@ -3999,8 +3999,21 @@ function customLoaderPreview(needToShow) {
 }
 function showDocument(imagePath) {
   customLoader(true);
+  if (!imagePath) {
+    customLoader(false);
+    return;
+  }
+  var resolvedPath = String(imagePath).trim();
+  // Ensure URLs with spaces/special chars load correctly.
+  if (resolvedPath.indexOf("http://") === 0 || resolvedPath.indexOf("https://") === 0) {
+    try {
+      resolvedPath = encodeURI(resolvedPath);
+    } catch (e) {
+      resolvedPath = resolvedPath.replace(/ /g, "%20");
+    }
+  }
   $("#documentPreview").attr("src", "");
-  $("#documentPreview").attr("src", imagePath);
+  $("#documentPreview").attr("src", resolvedPath);
   $("#documentPreviewModal").modal("show");
   window.setTimeout(function () {
     customLoader(false);

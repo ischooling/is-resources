@@ -565,26 +565,58 @@ function studentAcademicTimelineOpenPreview(actionUrl){
         return;
     }
     studentAcademicTimelineEnsurePreviewModal();
-    var extension = (actionUrl.split("?")[0].split(".").pop() || "").toLowerCase();
+    var normalizedUrl = studentAcademicTimelineNormalizeUrl(actionUrl);
+    var extension = (normalizedUrl.split("?")[0].split(".").pop() || "").toLowerCase();
     var isPdf = extension === "pdf";
     var imgWrap = $("#studentAcademicTimelinePreviewImgWrap");
     var pdfWrap = $("#studentAcademicTimelinePreviewPdfWrap");
     var img = $("#studentAcademicTimelinePreviewImg");
-    var pdf = $("#studentAcademicTimelinePreviewPdf");
     var download = $("#studentAcademicTimelinePreviewDownload");
     if(isPdf){
         imgWrap.addClass("d-none");
         img.attr("src", "");
-        pdf.attr("data", actionUrl);
-        download.attr("href", actionUrl);
+        download.attr("href", normalizedUrl);
         pdfWrap.removeClass("d-none");
+        studentAcademicTimelineSetPdfPreviewUrl(normalizedUrl);
     }else{
         pdfWrap.addClass("d-none");
-        pdf.attr("data", "");
-        img.attr("src", actionUrl);
+        $("#studentAcademicTimelinePreviewPdf").attr("data", "");
+        img.attr("src", normalizedUrl);
         imgWrap.removeClass("d-none");
     }
     $("#studentAcademicTimelinePreviewModal").modal("show");
+}
+
+function studentAcademicTimelineSetPdfPreviewUrl(url){
+    // Recreate the <object> tag to force Chrome to reload the PDF reliably.
+    var current = $("#studentAcademicTimelinePreviewPdf");
+    if(current.length < 1){
+        return;
+    }
+    var replacement = $('<object id="studentAcademicTimelinePreviewPdf" type="application/pdf" class="full" style="height:400px;width:100%;" data=""></object>');
+    replacement.attr("data", url);
+    current.replaceWith(replacement);
+}
+
+function studentAcademicTimelineNormalizeUrl(actionUrl){
+    var rawUrl = String(actionUrl || "").trim();
+    if(!rawUrl){
+        return "";
+    }
+    // Encode spaces and other unsafe characters for direct S3/public URLs.
+    // encodeURI preserves existing %xx sequences so it won't double-encode already encoded URLs.
+    if(rawUrl.indexOf("http://") === 0 || rawUrl.indexOf("https://") === 0){
+        return encodeURI(rawUrl);
+    }
+    // If relative, resolve similarly to studentAcademicTimelineOpenDocument().
+    if(rawUrl.charAt(0) === "/"){
+        var base = (typeof BASE_URL !== "undefined" ? BASE_URL : window.location.origin + "/");
+        var ctx = (typeof CONTEXT_PATH !== "undefined" ? CONTEXT_PATH : "");
+        var school = (typeof SCHOOL_UUID !== "undefined" ? SCHOOL_UUID : "");
+        var resolved = base + ctx + school + rawUrl;
+        return encodeURI(resolved);
+    }
+    return encodeURI(rawUrl);
 }
 
 function studentAcademicTimelineEscapeAttr(value){

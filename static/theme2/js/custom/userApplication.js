@@ -774,6 +774,22 @@ function bindQuestionsToJA(formId, responseData) {
 
 let activeApplicantAttachmentBlobUrl = null;
 
+function resolveApplicantAttachmentUrl(url) {
+    if (!url) return "";
+
+    // If it's already a full URL (S3/public) or an app endpoint, use it as-is.
+    var trimmedUrl = (url || "").trim();
+    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
+        return trimmedUrl;
+    }
+    if (trimmedUrl.indexOf("/common/download") !== -1) {
+        return trimmedUrl;
+    }
+
+    // Otherwise treat it as an attachment name and download via the app.
+    return APP_BASE_URL + SCHOOL_UUID + "/common/downloads?fileName=" + encodeURIComponent(trimmedUrl);
+}
+
 async function viewResumeAndPhoto(url, modalId){
 
     var attachmentType = getExtension(url);
@@ -799,8 +815,8 @@ async function viewResumeAndPhoto(url, modalId){
         iframeTag.attr("src", attachmentData.blobUrl + "#toolbar=0&navpanes=0&scrollbar=1");
 
         $("#"+modalId+" #pre_upload_pdf_div").append(iframeTag);
-        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", url);
-        $("#" + modalId + " .upload_pdf a.open-pdf-btn").attr("href", url);
+        $("#" + modalId + " .upload_pdf a.download-pdf-btn").attr("href", attachmentData.sourceUrl);
+        $("#" + modalId + " .upload_pdf a.open-pdf-btn").attr("href", attachmentData.sourceUrl);
         $("#" + modalId + " .upload_pdf").removeClass("d-none");
         $("#" + modalId + ' .upload_img').addClass("d-none");
     }
@@ -833,13 +849,16 @@ async function urlToBlobUrl(url, attachmentType) {
     customLoader(true);
 
     try {
-        var response = await fetch(url, { method: "GET" });
+        var resolvedUrl = resolveApplicantAttachmentUrl(url);
+        var response = await fetch(resolvedUrl, { method: "GET" });
         if (!response.ok) {
             throw new Error("Failed to fetch attachment");
         }
 
         var contentType = (response.headers.get("content-type") || "").toLowerCase();
-        var resolvedAttachmentType = contentType.indexOf("pdf") !== -1 ? "pdf" : attachmentType;
+        var resolvedAttachmentType = contentType.indexOf("pdf") !== -1
+            ? "pdf"
+            : (contentType.indexOf("image/") !== -1 ? "image" : attachmentType);
         var blob = await response.blob();
 
         if (resolvedAttachmentType === "pdf" && blob.type !== "application/pdf") {
@@ -848,7 +867,8 @@ async function urlToBlobUrl(url, attachmentType) {
 
         return {
             attachmentType: resolvedAttachmentType,
-            blobUrl: URL.createObjectURL(blob)
+            blobUrl: URL.createObjectURL(blob),
+            sourceUrl: resolvedUrl
         };
     } catch (error) {
         showMessageTheme2(0, "Unable to preview this file. Please use download/open instead.");
