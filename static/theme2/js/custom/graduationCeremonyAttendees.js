@@ -12,13 +12,23 @@ function loadGraduationCeremonyAttendees(){
                     <small>${attendee.email}</small><br>
                     <small>Age: ${!attendee.age ? "N/A" : attendee.age}</small><br>
                     <small>Phone No.: ${attendee.phoneNo}</small><br>
+                    <small>Alt Phone No.: ${attendee.alternatePhoneNo ? attendee.alternatePhoneNo : "N/A"}</small><br>
                     <small>Country: ${attendee.country}</small>
+                    <br><small>Timezone: ${attendee.userTimezone ? attendee.userTimezone : "N/A"}</small>
+                `;
+
+                const callbackInfo = `
+                    <small>Preferred Country: ${attendee.preferredCountry ? attendee.preferredCountry : "N/A"}</small><br>
+                    <small>Status: ${attendee.callbackStatus ? attendee.callbackStatus : "N/A"}</small><br>
+                    <small>DateTime: ${attendee.callbackPreferredDateTime ? attendee.callbackPreferredDateTime : "N/A"}</small><br>
+                    <small>Timezone: ${attendee.callbackPreferredTimezone ? attendee.callbackPreferredTimezone : "N/A"}</small>
                 `;
                 const paymentLink = attendee.paymentLink
 
                 tbodyHtml += `<tr>
                     <td>${sno}</td>
                     <td>${studentInfo}</td>
+                    <td>${callbackInfo}</td>
                     <td>${attendee.graduatingYear}</td>
                     <td>${attendee.noOfAttendees}</td>
                     <td>$${attendee.amountScheduled}</td>
