@@ -1,3 +1,95 @@
+function confirmAndOpenWhatsAppChat(name, phone, leadId, rightTime) {
+  var $curSpan = $("#leadCurTimeText_" + leadId + " span").first();
+  var currentTime = ($curSpan.text() || "").trim() || "—";
+  var isPerfect = $curSpan.hasClass("text-success");
+  showBestTimeConnectModal({
+    currentTime: currentTime,
+    rightTime: rightTime && rightTime !== "" ? rightTime : "—",
+    isPerfect: isPerfect,
+    onProceed: function () {
+      openWhatsAppChatInFrame(name, phone);
+      
+    },
+  });
+  return false;
+}
+
+function showBestTimeConnectModal(opts) {
+  $("#bestTimeConnectModal").remove();
+  if(opts.isPerfect){
+    if(typeof opts.onProceed === "function") opts.onProceed();
+    return;
+  }
+
+  var statusBadge = opts.isPerfect
+    ? '<span style="display:inline-block;padding:6px 12px;border-radius:20px;background:#d4edda;color:#155724;font-size:12px;font-weight:600;border:1px solid #c3e6cb;">'
+        + '<i class="fa fa-check-circle" style="margin-right:5px;"></i>Perfect time to connect'
+        + "</span>"
+    : '<span style="display:inline-block;padding:6px 12px;border-radius:20px;background:#fff3cd;color:#856404;font-size:12px;font-weight:600;border:1px solid #ffe7a0;">'
+        + '<i class="fa fa-exclamation-triangle" style="margin-right:5px;"></i>This may not be the best time'
+        + "</span>";
+
+  var html =
+    '<div id="bestTimeConnectModal" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;">'
+    +   '<div style="background:#fff;border-radius:14px;width:440px;max-width:92%;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;">'
+    +     '<div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;">'
+    +       '<h5 style="margin:0;font-weight:700;color:#222;font-size:15px;">'
+    +         '<i class="fa fa-whatsapp" style="color:#25D366;margin-right:8px;"></i>Confirm Best Time to Connect'
+    +       '</h5>'
+    +       '<span class="bestTimeConnectClose" style="cursor:pointer;font-size:22px;line-height:1;color:#888;padding:0 4px;">&times;</span>'
+    +     '</div>'
+    +     '<div style="padding:20px;">'
+    +       '<p style="margin:0 0 14px;font-size:14px;color:#333;font-weight:600;">Are you sure this is the best time to connect?</p>'
+    +       '<div style="background:#f6f8fa;border-radius:10px;padding:14px;font-size:13px;border:1px solid #eef0f3;">'
+    +         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+    +           '<span style="color:#666;font-weight:500;">Lead\'s Current Time:</span>'
+    +           '<span style="font-weight:700;color:' + (opts.isPerfect ? '#28a745' : '#dc3545') + ';">' + opts.currentTime + '</span>'
+    +         '</div>'
+    +         '<div style="display:flex;justify-content:space-between;align-items:center;">'
+    +           '<span style="color:#666;font-weight:500;">Right Time to Call:</span>'
+    +           '<span style="font-weight:700;color:#222;">' + opts.rightTime + '</span>'
+    +         '</div>'
+    +       '</div>'
+    +       '<div style="margin-top:14px;text-align:center;">' + statusBadge + '</div>'
+    +     '</div>'
+    +     '<div style="padding:14px 20px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;background:#f8f9fa;">'
+    +       '<button type="button" class="btn btn-light btn-sm bestTimeConnectClose" style="font-weight:600;padding:6px 16px;">Cancel</button>'
+    +       '<button type="button" class="btn btn-sm bestTimeConnectProceed" style="background:#25D366;color:#fff;font-weight:600;padding:6px 18px;border:0;">'
+    +         '<i class="fa fa-paper-plane" style="margin-right:6px;"></i>Proceed'
+    +       '</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+
+  var $modal = $(html).appendTo("body");
+
+  $modal.find(".bestTimeConnectClose").on("click", function () {
+    $modal.remove();
+  });
+  $modal.find(".bestTimeConnectProceed").on("click", function () {
+    $modal.remove();
+    if (typeof opts.onProceed === "function") opts.onProceed();
+  });
+  // Click on backdrop (outside the dialog) to close.
+  $modal.on("click", function (e) {
+    if (e.target === $modal[0]) $modal.remove();
+  });
+}
+
+function getInlineCopyHtml(value, uniqueId, fnName) {
+  if (!value || value === "N/A") return "";
+  var safe = String(value).replace(/"/g, "&quot;");
+  return (
+    '<input type="text" id="copyVal_' + uniqueId + '" value="' + safe + '" ' +
+    'style="position:absolute;left:-9999px;opacity:0;height:0;width:0;padding:0;border:0;" />' +
+    '<a href="javascript:void(0)" class="ml-1 text-primary" data-toggle="tooltip" data-placement="top" ' +
+    'data-original-title="Copy" onclick="copyURL(\'copyVal_' + uniqueId + '\',\'copyMsg_' + uniqueId + '\')">' +
+    '<i class="pe-7s-copy-file" aria-hidden="true" style="font-size:14px;vertical-align:middle;"></i>' +
+    '</a>' +
+    '<span id="copyMsg_' + uniqueId + '" class="copyMsg_' + uniqueId + '" style="margin-left:4px;font-size:11px;font-weight:600;"></span>'
+  );
+}
+
 function getDuplicateLeadRemarkHtml(remark, moduleId) {
   if (!remark) {
     return "N/A";
@@ -1543,7 +1635,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tr>'
                 +'<tr>'
 									+'<th class="border-0 p-1">Parent Name:</th>'
-									+'<td class="border-0 p-1">'+(leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname +'</td>'
+									+'<td class="border-0 p-1">'+(leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname
+										+ getInlineCopyHtml(((leads.gfname!=''?leads.gfname:'') +' '+ (leads.gmname||'') +' '+ (leads.glname||'')).replace(/\s+/g,' ').trim(), 'parent_'+leads.leadId)
+									+'</td>'
 								+'</tr>'
                 +'<tr>'
                   +'<th class="border-0 p-1">Grade: </th>'
@@ -1574,7 +1668,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   +'<td class="border-0 p-1">'+(leads.isdCode!=''?leads.isdCode:'')+' '+(leads.phone!=''?leads.phone:'N/A');
                     if(leads.isdCode!=''){
                       html+='<span>'
-                        html+=`<a href="javascript:void(0)" target="_target" class="position-relative" onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.phoneIsd!=''?leads.phoneIsd:'')}')">`
+                        html+=`<a href="javascript:void(0)" target="_target" class="position-relative" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.phoneIsd!=''?leads.phoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}')">`
                           html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
                           
                             if(leads.whatsAppVerifiedStatus=='N'){}
@@ -1590,6 +1684,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                               }
                             }
                         html+='</a>'
+                        if (leads.communicationTime && leads.communicationTime !== '') {
+                          html += '<span class="badge ml-1" data-toggle="tooltip" data-placement="top" '
+                                + 'data-original-title="Best time to connect" '
+                                + 'style="background:#fff3cd;color:#856404;border:1px solid #ffe7a0;font-size:10px;font-weight:600;vertical-align:middle;padding:2px 6px;border-radius:10px;">'
+                                + '<i class="fa fa-clock-o" aria-hidden="true" style="margin-right:3px;"></i>'
+                                + 'Best: ' + leads.communicationTime
+                                + (leads.pref && leads.pref !== '' ? ' (' + leads.pref + ')' : '')
+                                + '</span>';
+                        }
                         html += '<a href="javascript:void(0);" ' +
                                   'onclick="callLeadViaCallHippo(\'' + leaddata.allowCallhippoService + '\',\'' + leaddata.callhippoBypassNumber + '\',\'' + (leads.phoneIsd || '') + '\',\'' + (leads.isdCode || '') + '\',\'' + (leads.phone || '') + '\')" ' +
                                   'data-toggle="tooltip" ' +
@@ -1603,7 +1706,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                     html+='<br/>';
                     if(leads.phoneNoAlter!=''){
                       html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
-                      html+=`<a href="javascript:void(0)" onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" /></a>`;
+                      html+=`<a href="javascript:void(0)" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" /></a>`;
                       html += `
                           <a href="javascript:void(0);" 
                             onclick="callLeadViaCallHippo('${leaddata.allowCallhippoService}','${leaddata.callhippoBypassNumber}','${leads.phoneIsd || ''}','${leads.isdCode || ''}','${leads.phone || ''}')"
@@ -1624,16 +1727,21 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 								+'</tr>'
 								+'<tr>'
 									+'<th class="border-0 p-1">Assigned To:</th>'
-									+'<td class="border-0 p-1">'+(leads.assignName!=''?leads.assignName:'N/A')+'</td>'
+									+'<td class="border-0 p-1">'+(leads.assignName!=''?leads.assignName:'N/A')
+										+ getInlineCopyHtml(leads.assignName, 'assign_'+leads.leadId)
+									+'</td>'
 								+'</tr>'
                 +'<tr>'
 									+'<th class="border-0 p-1">Added By:</th>'
-									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')+'</td>'
+									+'<td class="border-0 p-1">'+(leads.userName!=''?leads.userName:'N/A')
+									+'</td>'
 								+'</tr>';
 								if(leads.leadSupportToName!=''){
 									html+='<tr>'
 										+'<th class="border-0 p-1">Supported By:</th>'
-										+'<td class="border-0 p-1">'+(leads.leadSupportToName!=''?leads.leadSupportToName:'N/A')+'</td>'
+										+'<td class="border-0 p-1">'+(leads.leadSupportToName!=''?leads.leadSupportToName:'N/A')
+											+ getInlineCopyHtml(leads.leadSupportToName, 'support_'+leads.leadId)
+										+'</td>'
 									+'</tr>';
 								}
 
