@@ -28,7 +28,7 @@ function showReserveSeatModal(){
 	$("#reserveSeatModal").modal("show");
 }
 
-function getReserveASeatForNextGrade(userId, nextGrade){
+async function getReserveASeatForNextGrade(userId, nextGrade){
 	var postData = {};
 	postData['userId'] = userId;
 	$.ajax({
@@ -55,12 +55,15 @@ function getReserveASeatForNextGrade(userId, nextGrade){
 					if($("body .reserve-seat-wrapper").length == 0){
 						$("body").append(getReserveSeatContent(data, nextGrade));
 					}
-					setTimeout(() => {
-					// showReserveSeatContent();
-						if(CAN_SHOW_ENROLL_RESERVE_MODAL){
-							showEnrollReserveModal();
-						}
-					}, 1500);
+					// setTimeout(() => {
+					// // showReserveSeatContent();
+					// 	if(CAN_SHOW_ENROLL_RESERVE_MODAL){
+					// 		showEnrollReserveModal();
+					// 	}
+					// }, 1500);
+					if(CAN_SHOW_ENROLL_RESERVE_MODAL){
+						showEnrollReserveModal();
+					}
 				}else{
 					// $(".need-help-slide-wrapper").removeClass("slide-in");
 					$('.reserve-seat-wrapper').hide();

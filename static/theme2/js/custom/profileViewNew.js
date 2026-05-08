@@ -204,13 +204,13 @@ function addOtherHobbiesfun(hideElement, showElement) {
     `);
 
     /* -------- DATA ADD (IMPORTANT) -------- */
-    if (!PORFILE_RESPONSE_UPDATED_DATA[0].hobbies) {
-        PORFILE_RESPONSE_UPDATED_DATA[0].hobbies = [];
+    if (!PROFILE_RESPONSE_UPDATED_DATA[0].hobbies) {
+        PROFILE_RESPONSE_UPDATED_DATA[0].hobbies = [];
     }
 
     
 
-    PORFILE_RESPONSE_UPDATED_DATA[0].hobbies.push({
+    PROFILE_RESPONSE_UPDATED_DATA[0].hobbies.push({
         id: 'H_' + safeId,
         hobbiesLabel: hobbies,
         hobbiesId: '0',     // new hobby
@@ -218,7 +218,7 @@ function addOtherHobbiesfun(hideElement, showElement) {
     });
 
 
-    // console.log("Updated hobbies data:", PORFILE_RESPONSE_UPDATED_DATA[0].hobbies);
+    // console.log("Updated hobbies data:", PROFILE_RESPONSE_UPDATED_DATA[0].hobbies);
 
     $("#addOtherHobbies").val("");
     $("#saveHobbiesWrapper").show();
@@ -281,7 +281,7 @@ function removeSocialLinks(socialLinksTitle) {
 //                                 <div class="input-group">
 //                                     <input type="text" class="form-control form-control-sm social-Links-url group-append-hide-input" data-social-media-id="0" name="`+ socialLinksTitle + `URL" id="` + socialLinksTitle + `URL" value="` + socialLinks + `" placeholder="` + socialLinksTitle + ` URL" autocomplete="off" onkeyup="controlEditField(this, \'${socialLinksTitle}URL\',\'${socialLinks}\','socialMedia', '', '', 0, \'socialMedia\')">
 //                                     <div class="input-group-append input-group-append-hide">
-//                                         <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges(\'${socialLinksTitle}URL\', \'socialMedia\',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false')">
+//                                         <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges(\'${socialLinksTitle}URL\', \'socialMedia\',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false')">
 //                                             <i class="fa fa-check"></i>
 //                                         </a>
 //                                         <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges(\'${socialLinksTitle}URL\',\'${socialLinks}\','input', \'socialMedia\')">
@@ -392,7 +392,7 @@ function addOtherSocialLinks(hideElement, showElement) {
 async function removeCommunicationPreferredTime(slotWrapperClass, slotEleId) {
     $("#" + slotEleId).remove();
     $("#communicationPreferredSlotSave, #communication-preferred-time-dropdown-wrapper").show();
-    if ($("." + slotWrapperClass + " li").length < 1 && (PORFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length > 0 || PORFILE_RESPONSE_UPDATED_DATA[1].callingTimePrefArray.length > 0)) {
+    if ($("." + slotWrapperClass + " li").length < 1 && (PROFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length > 0 || PROFILE_RESPONSE_UPDATED_DATA[1].callingTimePrefArray.length > 0)) {
         if ($(".communication-preferred-time-wrapper-ul li").length == 0) {
             $("#communicationRoleType").prop("disabled", false);
         }
@@ -405,7 +405,7 @@ async function removeCommunicationPreferredTime(slotWrapperClass, slotEleId) {
         // $("#communicationPreferredSlotSave").hide();
         $("#communicationPreferredSlotSave").show();
     } else {
-        if ($("." + slotWrapperClass + " li").length < 1 && PORFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length < 1) {
+        if ($("." + slotWrapperClass + " li").length < 1 && PROFILE_RESPONSE_DATA.profileData.studentProfile[1].callingTimePrefArray.length < 1) {
             $("." + slotWrapperClass).parent().closest("li").remove();
             $("#communicationPreferredSlotSave").hide();
             COMMUNICATION_APPEND_ROW = '';
@@ -987,7 +987,7 @@ async function profileViewPageLoadEvent(data) {
     });
 
     $("#gender").val(data[0].gender).trigger("change");
-    $("#dob").datepicker({
+    $("#dob, .custom-date-fields").datepicker({
         format: 'M dd, yyyy',
         autoclose: true,
     });
@@ -1224,7 +1224,7 @@ async function profileViewPageLoadEvent(data) {
     // $('#communicationLogForm #reLeadStatus').select2({
     // 	theme:'bootstrap4',
     // })
-    getCommunicationLogData('communicationLogTable', PORFILE_RESPONSE_DATA.userId, PORFILE_RESPONSE_DATA.userRole);
+    getCommunicationLogData('communicationLogTable', PROFILE_RESPONSE_DATA.userId, PROFILE_RESPONSE_DATA.userRole);
     $("#reLeadStatus").select2({
         theme: "bootstrap4"
     });
@@ -1330,7 +1330,7 @@ function personalInformationFieldFilledCount() {
         }
     });
 
-    $.each(PORFILE_RESPONSE_UPDATED_DATA[0].hobbies, function (i, v) {
+    $.each(PROFILE_RESPONSE_UPDATED_DATA[0].hobbies, function (i, v) {
         if (v.status == "Y") {
             COUNT++;
             otherhobbies_add = false;
@@ -1436,7 +1436,7 @@ function guardianInformationFieldFilledCount() {
     //     } 
     // });
     var slotCounted = false;
-    $.each(PORFILE_RESPONSE_UPDATED_DATA[1].callingTimePrefArray, function (i, v) {
+    $.each(PROFILE_RESPONSE_UPDATED_DATA[1].callingTimePrefArray, function (i, v) {
         if (v.timings && v.timings.length > 0) {
             COUNT++;
             slotCounted = true;
@@ -1599,18 +1599,20 @@ function getSocialIcon(iconRequest) {
     return icon[iconRequest];
 }
 
-function getAllDataAndRecords(userId, studentStandardId) {
+function getAllDataAndRecords(userId, studentStandardId, docType, element_Id) {
     var uploadRequestDTO = {};
     var documentUploads = STUDENT_UPLOAD_DOCUMENTS;
-
+    if(docType == "CUSTOM_FILE"){
+        uploadRequestDTO['customProfileFieldId'] = $("#"+element_Id).attr("data-element-id");
+    }
     uploadRequestDTO['userId'] = userId;
     uploadRequestDTO['studentStandardId'] = studentStandardId;
     uploadRequestDTO['documentUploads'] = documentUploads;
     return uploadRequestDTO;
 }
 
-function saveDocs(userId, studentStandardId, docType) {
-    if (docType != "Profile Image") {
+function saveDocs(userId, studentStandardId, docType, element_Id) {
+    if (docType != "Profile Image" && docType != "CUSTOM_FILE") {
         if ($("#ageProofFileName").text() == "" && $("#addressProofFileName").text() == "" && $("#parentPassportProofFileName").text() == "" && $("#lastAcademicProofFileName").text() == "") {
             showMessageTheme2(0, 'No attachment file is selected', '', true);
             return false;
@@ -1620,7 +1622,7 @@ function saveDocs(userId, studentStandardId, docType) {
         type: "POST",
         contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('dashboard', 'save-docs'),
-        data: JSON.stringify(getAllDataAndRecords(userId, studentStandardId)),
+        data: JSON.stringify(getAllDataAndRecords(userId, studentStandardId, docType, element_Id)),
         dataType: 'json',
         async: true,
         success: function (data) {
@@ -1671,7 +1673,8 @@ function saveDocs(userId, studentStandardId, docType) {
                     showMessageTheme2(1, 'Document(s) uploaded', '', true);
                     // setTimeout(function(){customLoader(true); window.location.reload();},2000);
                 }
-                console.log("Save Docs", STUDENT_UPLOAD_DOCUMENTS)
+                console.log("Save Docs", STUDENT_UPLOAD_DOCUMENTS);
+                
                 ACADEMIC_ATTACHMENT.push(data.LIST_OF_DOC);
                 calculateSectionPercentage('', '', 'save-docs', '', '');
                 if ($("#studentDocumentVerificationWrapper").length > 0) {
@@ -1698,6 +1701,8 @@ function saveDocs(userId, studentStandardId, docType) {
                     }
                     setScheduleProfileData(PROFILE_SCHEDULE_DATA);
                     refreshProfileMissingModalStateAfterBulkSave(missingFields);
+                    STUDENT_UPLOAD_DOCUMENTS=[];
+                    CUSTOM_DATEPICKER_FIELD_FLAG=false;
                 }
             }
         }
@@ -1730,7 +1735,7 @@ function escapeHtml(value) {
 }
 
 function canEditProfileStudentDocuments() {
-    return (USER_ROLE != "STUDENT" && PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.rightToEdit);
+    return (USER_ROLE != "STUDENT" && PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA .rightToEdit);
 }
 
 function getProfileStudentDocumentKey(doc) {
@@ -2033,7 +2038,7 @@ function getProfileStudentDocumentUploadPanel(documentsResponse) {
 }
 
 function getProfileStudentDocumentEncodedPayload() {
-    var userId = PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.userId ? PORFILE_RESPONSE_DATA.userId : "";
+    var userId = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA .userId ? PROFILE_RESPONSE_DATA .userId : "";
     if (!userId) {
         return "";
     }
@@ -2100,7 +2105,7 @@ function renderProfileStudentDocumentVerification(documentsResponse, statusRespo
     PROFILE_STUDENT_DOCUMENT_BUCKETS = getProfileStudentDocumentBuckets(documentsResponse || {});
     var admissionStatus = normalizeProfileAdmissionStatus(
         (statusResponse && statusResponse.admissionStatus) ||
-        (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.admissionStatus) ||
+        (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.admissionStatus) ||
         ""
     );
 
@@ -2455,7 +2460,7 @@ function previewProfileStudentDocumentUpload(docKey) {
 
 function buildProfileStudentDocumentUploadPayload() {
     var payload = {
-        userId: parseInt(PORFILE_RESPONSE_DATA.userId),
+        userId: parseInt(PROFILE_RESPONSE_DATA .userId),
         attachments: []
     };
 
@@ -2592,8 +2597,8 @@ function buildProfileStudentDocumentVerificationPayload() {
     var allDocumentsVerified = (documents.length > 0);
 
     var payload = {
-        userId: parseInt(PORFILE_RESPONSE_DATA.userId),
-        studentStandardId: parseInt(PORFILE_RESPONSE_DATA.studentStandardId),
+        userId: parseInt(PROFILE_RESPONSE_DATA .userId),
+        studentStandardId: parseInt(PROFILE_RESPONSE_DATA .studentStandardId),
         admissionStatus: admissionStatus,
         documents: []
     };
@@ -2678,9 +2683,15 @@ async function submitStudentDocumentVerification() {
 function removeUploadImage(src, inputId, thumbId, type, userId, studentStandardId, removeType) {
     if ($("#" + thumbId).attr("src").split(":")[0] == "https" || $("#" + thumbId).attr("src").split(":")[0] == "http" || $("#" + thumbId).attr("src").split(":")[0] == "data") {
         var data = {};
+        if($("#"+inputId).attr("data-element-id") != null && $("#"+inputId).attr("data-element-id") != undefined && $("#"+inputId).attr("data-element-id") != ""){
+            data['customProfileFieldId']=$("#"+inputId).attr("data-element-id");
+            data['type'] = "CUSTOM_FILE";
+        }else{
+            data['type'] = type;
+        }
         data['userId'] = userId;
         data['studentStandardId'] = studentStandardId;
-        data['type'] = type;
+       
         $.ajax({
             type: "POST",
             contentType: APPLICATION_JSON_VALUE,
@@ -3272,6 +3283,7 @@ function submitApplyChnagesBulk() {
                 return false;
             }
             if(USER_ROLE == "STUDENT"){
+                CUSTOM_DATEPICKER_FIELD_FLAG=false;
                 const eleIdsToRemove = [...approvedList.map(item => item.eleID), ...(approvedList.some(item => item.eleID === "extracurricular") ? ["extracurricularActivities"] : [])];
                 // if(eleIdsToRemove == "extracurricular"){ 
                 //     eleIdsToRemove 
@@ -3400,6 +3412,32 @@ function cleanProfileStructure(data, eleIdsToRemove) {
 function cleanMissingFields(missingFields, eleIdsToRemove) {
 
     var fieldsToRemove = new Set();
+    if (Array.isArray(eleIdsToRemove)) {
+        eleIdsToRemove.forEach(function (id) {
+            if (id === undefined || id === null) return;
+            fieldsToRemove.add(id);
+            fieldsToRemove.add(String(id));
+        });
+    }
+    var shouldRemoveField = function (field) {
+        if (!field) {
+            return false;
+        }
+        if (fieldsToRemove.has(field.fieldId) || fieldsToRemove.has(String(field.fieldId))) {
+            return true;
+        }
+        if (field.fieldSource === "customField") {
+            var customId = field.customProfileFieldId !== undefined && field.customProfileFieldId !== null
+                ? field.customProfileFieldId
+                : field.id;
+            if (customId !== undefined && customId !== null) {
+                if (fieldsToRemove.has(customId) || fieldsToRemove.has(String(customId))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
     var parentSection = false;
     if (Array.isArray(eleIdsToRemove) && eleIdsToRemove.some(id => id.startsWith("mother") || id.startsWith("father") || id.startsWith("guardian") )) {
         parentSection = true;
@@ -3463,7 +3501,7 @@ function cleanMissingFields(missingFields, eleIdsToRemove) {
 
             Object.keys(sectionGroups).forEach(groupId => {
                 sectionGroups[groupId] = sectionGroups[groupId].filter(
-                    field => !fieldsToRemove.has(field.fieldId)
+                    field => !shouldRemoveField(field)
                 );
 
                 if (sectionGroups[groupId].length === 0) {
@@ -3483,9 +3521,9 @@ function cleanMissingFields(missingFields, eleIdsToRemove) {
             eleIdsToRemove.forEach(id => {
                 if(id == "extracurricular"){
                     id = "extracurricularActivities";
-                }else{
-                    fieldsToRemove.add(id);
                 }
+                fieldsToRemove.add(id);
+                fieldsToRemove.add(String(id));
             });
         }
 
@@ -3497,7 +3535,7 @@ function cleanMissingFields(missingFields, eleIdsToRemove) {
             Object.keys(sectionGroups).forEach(groupId => {
 
                 sectionGroups[groupId] = sectionGroups[groupId].filter(field =>
-                    !fieldsToRemove.has(field.fieldId)
+                    !shouldRemoveField(field)
                 );
 
                 // remove empty group
@@ -3606,246 +3644,255 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
     var requestProfileData = {};
     requestProfileData['studentStandardId'] = studentStandardId;
     requestProfileData['keyId'] = keyId;
-    if (keyId == 'employeeType') {
-        if ($('#employeeTypeStartDate').val() == '') {
-            showMessageTheme2(0, "Please enter employee Type Start Date.", '', false);
-            return false;
-        }
-        requestProfileData['employeeStartDate'] = $('#employeeTypeStartDate').val();
 
+    if(keyId == "customProfileFieldId"){
+        requestProfileData['fieldValue1'] =  $('#' + eleID).attr("data-element-id");
+        requestProfileData['fieldValue'] = escapeCharacters($('#' + eleID).val());
     }
-    // else if(keyId=='phoneNumber' || keyId=='altPhoneNumber' || keyId=='motherPhoneNumber' || keyId=='fatherPhoneNumber' || keyId=='guardianPhoneNumber' || keyId=='payPalPhoneNumber' ){
-    // 	var valId ="";
-    // 	var lent=$('#'+keyId).val().indexOf("-")
-    // 	if(lent>0){
-    // 		var valPhoneId = $('#'+keyId).val().split("-")[1];
-    // 	}else{
-    // 		var valPhoneId = $('#'+keyId).val();
-    // 		if(valPhoneId==""){
-    // 			showMessageTheme2(2,' Either field value is invalid or empty.','',false);
-    // 			return false;
-    // 		}
-    // 	}
-    //     valPhoneId = valPhoneId.replace(/\s+/g, '')
-    //     requestProfileData['fieldValue']=escapeCharacters(valPhoneId);
-    // }
-    else if (keyId == 'alternateEmail') {
-        var valEmailId = $('#' + keyId).val();
-        if (valEmailId == "" || !validateEmail(valEmailId)) {
-            showMessageTheme2(2, ' Either field value is invalid or empty.', '', false);
-            return false;
-        }
-        requestProfileData['fieldValue'] = valEmailId;
-    }
-    else if (keyId == 'hobbies') {
-        var hobbiesArr = [];
-        $(".hobbie-wrapper input[type='checkbox']:checked").each(function () {
-            hobbiesArr.push($(this).attr("data-hobbie-keyId") + "~" + $(this).attr("data-hobbie-label"))
-        });
-        requestProfileData['hobbiesList'] = hobbiesArr;
-        $("#saveHobbiesWrapper").hide();
-        HOBBIES_CHANGES_COUNT = [];
-    }
-    else if (keyId == 'socialMedia') {
-        
-        requestProfileData['fieldValue'] = $("[id='" + eleID + "']").attr("data-social-media-id") + "~" + $("[id='" + eleID + "']").val() + "~" + $(`[for='${eleID}']`).attr("data-title");
-        //requestProfileData['fieldValue']=
-    }
-    else if (keyId == 'specialization' || keyId == 'preferredSubjectName' || keyId == 'lastsubTaught') {
-        requestProfileData['fieldValue'] = $('#' + keyId).val().toString();
-    } else if (keyId == 'educationSpecialization') {
-        requestProfileData['fieldValue'] = $('#educationSpecialization').val();//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
-    }
-    else if (keyId == 'countrySection') {
-        requestProfileData['countryId'] = $('#country').val();
-        requestProfileData['stateId'] = $('#state').val();
-        requestProfileData['cityId'] = $('#city').val();
-    } else if (keyId == 'nationality') {
-        requestProfileData['fieldValue'] = $("#" + eleID + " option:selected").text().trim();;
-    } else if (keyId == 'motherName' || keyId == "motherMiddleName" || keyId == "motherLastName") {
-        requestProfileData['firstName'] = $('#motherName').val();
-        requestProfileData['middleName'] = $('#motherMiddleName').val();
-        requestProfileData['lastName'] = $('#motherLastName').val();
-        requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
-        requestProfileData['parentType'] = "Mother";
-    } else if (keyId == 'fatherFacebook') {
-        requestProfileData['faceBook'] = $('#fatherFacebook').val();
-        requestProfileData['parentType'] = "Father";
-    } else if (keyId == 'motherFacebook') {
-        requestProfileData['faceBook'] = $('#motherFacebook').val();
-        requestProfileData['parentType'] = "Mother";
-    } else if (keyId == 'guardianFacebook') {
-        requestProfileData['faceBook'] = $('#guardianFacebook').val();
-        requestProfileData['parentType'] = "Guardian";
-    } else if (keyId == 'motherCountry') {
-        requestProfileData['parentType'] = "Mother";
-        requestProfileData['fieldValue'] = $("#motherCountry").val();
-    }
-    else if (keyId == 'fatherCountry') {
-        requestProfileData['parentType'] = "Father";
-        requestProfileData['fieldValue'] = $("#fatherCountry").val();
-    }
-    else if (keyId == 'guardianCountry') {
-        requestProfileData['parentType'] = "Guardian";
-        requestProfileData['fieldValue'] = $("#guardianCountry").val();
-    }
-    else if (keyId == 'fatherFirstName' || keyId == "fatherMiddleName" || keyId == "fatherLastName") {
-        requestProfileData['firstName'] = $('#fatherFirstName').val();
-        requestProfileData['middleName'] = $('#fatherMiddleName').val();
-        requestProfileData['lastName'] = $('#fatherLastName').val();
-        requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
-        requestProfileData['parentType'] = "Father";
-    } else if (keyId == 'guardianFirstName' || keyId == "guardianMiddleName" || keyId == "guardianLastName") {
-        requestProfileData['firstName'] = $('#guardianFirstName').val();
-        requestProfileData['middleName'] = $('#guardianMiddleName').val();
-        requestProfileData['lastName'] = $('#guardianLastName').val();
-        requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
-        requestProfileData['parentType'] = "Guardian";
-    } else if (keyId == 'countrySectionParent') {
-        requestProfileData['countryId'] = $('#pCountryId').val();
-        requestProfileData['stateId'] = $('#pStateId').val();
-        requestProfileData['cityId'] = $('#pCityId').val();
-    } else if (keyId == 'totalTeacheingExperience') {
-        requestProfileData['yearValue'] = $("#yearExp").val();
-        requestProfileData['monthValue'] = $("#monthExp").val();
-    } else if (keyId == 'lastOrgGradeName') {
-        if ($('#lastGradeK').val().length > 0) {
-            requestProfileData['fieldValue'] = $('#lastGradeK').val().toString();
-        } else if ($('#lastGradeM').val().length > 0) {
-            requestProfileData['fieldValue'] = $('#lastGradeM').val().toString();
-        } else if ($('#lastGradeH').val().length > 0) {
-            requestProfileData['fieldValue'] = $('#lastGradeH').val().toString();
-        }
-    } else if (keyId == 'preferredGradeName') {
-        if ($('#prefGradeK').val().length > 0) {
-            requestProfileData['fieldValue'] = $('#prefGradeK').val().toString();
-        } else if ($('#prefGradeM').val().length > 0) {
-            requestProfileData['fieldValue'] = $('#prefGradeM').val().toString();
-        } else if ($('#prefGradeH').val().length > 0) {
-            requestProfileData['fieldValue'] = $('#prefGradeH').val().toString();
-        }
-    } else if (keyId == 'otherRelation' || keyId == 'relationType') {
-        requestProfileData['fieldValue'] = $("#relationType").val();
-        if ($("#otherRelation").length > 0) {
-            requestProfileData['fieldValue1'] = toTitleCase($("#otherRelation").val());
-        }
-    } else if (keyId == 'parentEmailSmsLmsCreation') {
-        requestProfileData['fieldValue'] = encode($("#parentPassword").val());
-    } else if (keyId == 'pEmailOtp') {
-        requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
-    } else if (keyId == 'pEmailOtpVerify') {
-        requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
-        requestProfileData['fieldValue1'] = $("#otp").val();
-    } else if (keyId == 'pStudEmailMappedVerify') {
-        requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
-        requestProfileData['fieldValue1'] = $("#verifyMailId").val().trim();
-    } else if (keyId == "parentEmailLmsCreation") {
-        requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
-    } else if (keyId == 'switchParentStudEmailId') {
-        requestProfileData['fieldValue'] = $('#swipeParentId').val().trim();
-        requestProfileData['fieldValue1'] = $('#studID option:selected ').attr('attrStudentEmail').trim();
-        requestProfileData['studUserId'] = $('#studID').val();
-        requestProfileData['parentId'] = $('#swipeParentId').attr("attrparentid");
-    } else if (keyId == "forcefulRepeatOrImprove") {
-        requestProfileData['forcefulRepeatOrImprove'] = $("#forcefulRepeatOrImprove").val().trim();
-    } else if (keyId == "occupation") {
-        requestProfileData['fieldValue'] = $('#' + eleID).val()
-        requestProfileData['parentType'] = $('#' + eleID).attr("data-Occupationparent");
-    }
-    else if (keyId == "parentDob") {
-        requestProfileData['fieldValue'] = $('#' + eleID).val();
-        requestProfileData['parentType'] = $('#' + eleID).attr("data-dobparent");
-    }
-    else if (keyId == "weddingAnniversaryDate") {
-        requestProfileData['fieldValue'] = $('#' + eleID).val();
-    }
-    else if (keyId == "progressReportType") {
-        requestProfileData['fieldValue'] = $('#progressReportAnchorDate').val();
-        requestProfileData['reportType'] = parseInt($('#progressReportDaysType').val() || "14", 10);
-    }
-    else if (keyId == 'communicationPreferredSlots') {
-        requestProfileData["callingPreferences"] = getCallingPreference();
-    } else if (keyId == 'extracurricular') {
-        var sportsAndEcList = [];
-        $(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function () {
-            sportsAndEcList.push($(this).attr("data-Id"));
-        });
-        requestProfileData['sportsAndEcList'] = sportsAndEcList;
-        $("#saveSportsAndEcClubWrapper").hide();
-        SPORTS_AND_CLUB_COUNT = [];
-    } else if (keyId == 'preferredcommunication') {
-        var pcWhatsapp = $('#pcWhatsappView').is(':checked') ? 'Y' : 'N';
-        var pcCall = $('#pcCallView').is(':checked') ? 'Y' : 'N';
-        var pcEmail = $('#pcEmailView').is(':checked') ? 'Y' : 'N';
-        requestProfileData['fieldValue'] = 'W=' + pcWhatsapp + '|' + 'C=' + pcCall + '|' + 'E=' + pcEmail;
-    }
-    else {
-        if (keyId == 'firstName' || keyId == 'middleName' || keyId == 'lastName' || keyId == 'lastOrgName' || keyId == 'lastJobTitle' || keyId == 'address' || keyId == 'otherSkills'
-            || keyId == 'designation' || keyId == 'departmentId' || keyId == 'acPersonName' || keyId == 'bankName'
-            || keyId == 'bankBranchName' || keyId == 'bankBranchAddress' || keyId == 'otherBankDetails' || keyId == 'otherProfessionalCourse'
-            || keyId == 'otherSpecialization' || keyId == 'anyOtherLanguages' || keyId == 'references1' || keyId == 'references2'
-            || keyId == 'specialization' || keyId == 'postGraduationSubjects' || keyId == 'graduationSubjects') {
-            requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
-        }else if(keyId == 'motherEmail' || keyId == 'fatherEmail' || keyId == 'guardianEmail'){
-            requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
-            var relationType = PORFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType; 
-            requestProfileData['primaryParent'] = escapeCharacters(relationType);
-            if (keyId == 'motherEmail') {
-                requestProfileData['parentType'] = "Mother";
-            } else if (keyId == 'fatherEmail') {
-                requestProfileData['parentType'] = "Father";
-            } else {
-                requestProfileData['parentType'] = "Guardian";
+    else{
+        if (keyId == 'employeeType') {
+            if ($('#employeeTypeStartDate').val() == '') {
+                showMessageTheme2(0, "Please enter employee Type Start Date.", '', false);
+                return false;
             }
-        } else if (keyId == 'describeYourself' || keyId == 'lastOrgJobDiscription') {
-            requestProfileData['fieldValue'] = escapeCharacters(toSentenceCase($('#' + keyId).val()));
-        } else {
-            requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
-        }
-    }
-    if (keyId == 'phoneNumber') {
-        requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuPhoneNumber .iti__active").last().attr("data-country-code");
-        requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
-        requestProfileData['contactWhatsAppStatus'] = $('#phoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-    } if (keyId == 'altPhoneNumber') {
-        requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-country-code");
-        requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code");
-        requestProfileData['contactWhatsAppStatus'] = $('#altPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-    } if (keyId == 'motherPhoneNumber') {
-        requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuParentPhoneNumber .iti__active").last().attr("data-country-code");
-        requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code");
-        requestProfileData['contactWhatsAppStatus'] = $('#motherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-        requestProfileData['emergencyContactStatus'] = $('#motherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['employeeStartDate'] = $('#employeeTypeStartDate').val();
 
-        requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
-        requestProfileData['parentType'] = "Mother";
-    } if (keyId == 'fatherPhoneNumber') {
-        requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
-        requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
-        requestProfileData['contactWhatsAppStatus'] = $('#fatherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-        requestProfileData['emergencyContactStatus'] = $('#fatherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
-        requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
-        requestProfileData['parentType'] = "Father";
-    } if (keyId == 'guardianPhoneNumber') {
-        requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
-        requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
-        requestProfileData['contactWhatsAppStatus'] = $('#guardianPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-        requestProfileData['emergencyContactStatus'] = $('#guardianEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
-        requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
-        requestProfileData['parentType'] = "Guardian";
+        }
+        // else if(keyId=='phoneNumber' || keyId=='altPhoneNumber' || keyId=='motherPhoneNumber' || keyId=='fatherPhoneNumber' || keyId=='guardianPhoneNumber' || keyId=='payPalPhoneNumber' ){
+        // 	var valId ="";
+        // 	var lent=$('#'+keyId).val().indexOf("-")
+        // 	if(lent>0){
+        // 		var valPhoneId = $('#'+keyId).val().split("-")[1];
+        // 	}else{
+        // 		var valPhoneId = $('#'+keyId).val();
+        // 		if(valPhoneId==""){
+        // 			showMessageTheme2(2,' Either field value is invalid or empty.','',false);
+        // 			return false;
+        // 		}
+        // 	}
+        //     valPhoneId = valPhoneId.replace(/\s+/g, '')
+        //     requestProfileData['fieldValue']=escapeCharacters(valPhoneId);
+        // }
+        else if (keyId == 'alternateEmail') {
+            var valEmailId = $('#' + keyId).val();
+            if (valEmailId == "" || !validateEmail(valEmailId)) {
+                showMessageTheme2(2, ' Either field value is invalid or empty.', '', false);
+                return false;
+            }
+            requestProfileData['fieldValue'] = valEmailId;
+        }
+        else if (keyId == 'hobbies') {
+            var hobbiesArr = [];
+            $(".hobbie-wrapper input[type='checkbox']:checked").each(function () {
+                hobbiesArr.push($(this).attr("data-hobbie-keyId") + "~" + $(this).attr("data-hobbie-label"))
+            });
+            requestProfileData['hobbiesList'] = hobbiesArr;
+            $("#saveHobbiesWrapper").hide();
+            HOBBIES_CHANGES_COUNT = [];
+        }
+        else if (keyId == 'socialMedia') {
+            
+            requestProfileData['fieldValue'] = $("[id='" + eleID + "']").attr("data-social-media-id") + "~" + $("[id='" + eleID + "']").val() + "~" + $(`[for='${eleID}']`).attr("data-title");
+            //requestProfileData['fieldValue']=
+        }
+        else if (keyId == 'specialization' || keyId == 'preferredSubjectName' || keyId == 'lastsubTaught') {
+            requestProfileData['fieldValue'] = $('#' + keyId).val().toString();
+        } else if (keyId == 'educationSpecialization') {
+            requestProfileData['fieldValue'] = $('#educationSpecialization').val();//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
+        }
+        else if (keyId == 'countrySection') {
+            requestProfileData['countryId'] = $('#country').val();
+            requestProfileData['stateId'] = $('#state').val();
+            requestProfileData['cityId'] = $('#city').val();
+        } else if (keyId == 'nationality') {
+            requestProfileData['fieldValue'] = $("#" + eleID + " option:selected").text().trim();;
+        } else if (keyId == 'motherName' || keyId == "motherMiddleName" || keyId == "motherLastName") {
+            requestProfileData['firstName'] = $('#motherName').val();
+            requestProfileData['middleName'] = $('#motherMiddleName').val();
+            requestProfileData['lastName'] = $('#motherLastName').val();
+            requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
+            requestProfileData['parentType'] = "Mother";
+        } else if (keyId == 'fatherFacebook') {
+            requestProfileData['faceBook'] = $('#fatherFacebook').val();
+            requestProfileData['parentType'] = "Father";
+        } else if (keyId == 'motherFacebook') {
+            requestProfileData['faceBook'] = $('#motherFacebook').val();
+            requestProfileData['parentType'] = "Mother";
+        } else if (keyId == 'guardianFacebook') {
+            requestProfileData['faceBook'] = $('#guardianFacebook').val();
+            requestProfileData['parentType'] = "Guardian";
+        } else if (keyId == 'motherCountry') {
+            requestProfileData['parentType'] = "Mother";
+            requestProfileData['fieldValue'] = $("#motherCountry").val();
+        }
+        else if (keyId == 'fatherCountry') {
+            requestProfileData['parentType'] = "Father";
+            requestProfileData['fieldValue'] = $("#fatherCountry").val();
+        }
+        else if (keyId == 'guardianCountry') {
+            requestProfileData['parentType'] = "Guardian";
+            requestProfileData['fieldValue'] = $("#guardianCountry").val();
+        }
+        else if (keyId == 'fatherFirstName' || keyId == "fatherMiddleName" || keyId == "fatherLastName") {
+            requestProfileData['firstName'] = $('#fatherFirstName').val();
+            requestProfileData['middleName'] = $('#fatherMiddleName').val();
+            requestProfileData['lastName'] = $('#fatherLastName').val();
+            requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
+            requestProfileData['parentType'] = "Father";
+        } else if (keyId == 'guardianFirstName' || keyId == "guardianMiddleName" || keyId == "guardianLastName") {
+            requestProfileData['firstName'] = $('#guardianFirstName').val();
+            requestProfileData['middleName'] = $('#guardianMiddleName').val();
+            requestProfileData['lastName'] = $('#guardianLastName').val();
+            requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
+            requestProfileData['parentType'] = "Guardian";
+        } else if (keyId == 'countrySectionParent') {
+            requestProfileData['countryId'] = $('#pCountryId').val();
+            requestProfileData['stateId'] = $('#pStateId').val();
+            requestProfileData['cityId'] = $('#pCityId').val();
+        } else if (keyId == 'totalTeacheingExperience') {
+            requestProfileData['yearValue'] = $("#yearExp").val();
+            requestProfileData['monthValue'] = $("#monthExp").val();
+        } else if (keyId == 'lastOrgGradeName') {
+            if ($('#lastGradeK').val().length > 0) {
+                requestProfileData['fieldValue'] = $('#lastGradeK').val().toString();
+            } else if ($('#lastGradeM').val().length > 0) {
+                requestProfileData['fieldValue'] = $('#lastGradeM').val().toString();
+            } else if ($('#lastGradeH').val().length > 0) {
+                requestProfileData['fieldValue'] = $('#lastGradeH').val().toString();
+            }
+        } else if (keyId == 'preferredGradeName') {
+            if ($('#prefGradeK').val().length > 0) {
+                requestProfileData['fieldValue'] = $('#prefGradeK').val().toString();
+            } else if ($('#prefGradeM').val().length > 0) {
+                requestProfileData['fieldValue'] = $('#prefGradeM').val().toString();
+            } else if ($('#prefGradeH').val().length > 0) {
+                requestProfileData['fieldValue'] = $('#prefGradeH').val().toString();
+            }
+        } else if (keyId == 'otherRelation' || keyId == 'relationType') {
+            requestProfileData['fieldValue'] = $("#relationType").val();
+            if ($("#otherRelation").length > 0) {
+                requestProfileData['fieldValue1'] = toTitleCase($("#otherRelation").val());
+            }
+        } else if (keyId == 'parentEmailSmsLmsCreation') {
+            requestProfileData['fieldValue'] = encode($("#parentPassword").val());
+        } else if (keyId == 'pEmailOtp') {
+            requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
+        } else if (keyId == 'pEmailOtpVerify') {
+            requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
+            requestProfileData['fieldValue1'] = $("#otp").val();
+        } else if (keyId == 'pStudEmailMappedVerify') {
+            requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
+            requestProfileData['fieldValue1'] = $("#verifyMailId").val().trim();
+        } else if (keyId == "parentEmailLmsCreation") {
+            requestProfileData['fieldValue'] = $("#parentEmailId").val().trim();
+        } else if (keyId == 'switchParentStudEmailId') {
+            requestProfileData['fieldValue'] = $('#swipeParentId').val().trim();
+            requestProfileData['fieldValue1'] = $('#studID option:selected ').attr('attrStudentEmail').trim();
+            requestProfileData['studUserId'] = $('#studID').val();
+            requestProfileData['parentId'] = $('#swipeParentId').attr("attrparentid");
+        } else if (keyId == "forcefulRepeatOrImprove") {
+            requestProfileData['forcefulRepeatOrImprove'] = $("#forcefulRepeatOrImprove").val().trim();
+        } else if (keyId == "occupation") {
+            requestProfileData['fieldValue'] = $('#' + eleID).val()
+            requestProfileData['parentType'] = $('#' + eleID).attr("data-Occupationparent");
+        }
+        else if (keyId == "parentDob") {
+            requestProfileData['fieldValue'] = $('#' + eleID).val();
+            requestProfileData['parentType'] = $('#' + eleID).attr("data-dobparent");
+        }
+        else if (keyId == "weddingAnniversaryDate") {
+            requestProfileData['fieldValue'] = $('#' + eleID).val();
+        }
+        else if (keyId == "progressReportType") {
+            requestProfileData['fieldValue'] = $('#progressReportAnchorDate').val();
+            requestProfileData['reportType'] = parseInt($('#progressReportDaysType').val() || "14", 10);
+        }
+        else if (keyId == 'communicationPreferredSlots') {
+            requestProfileData["callingPreferences"] = getCallingPreference();
+        } else if (keyId == 'extracurricular') {
+            var sportsAndEcList = [];
+            $(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function () {
+                sportsAndEcList.push($(this).attr("data-Id"));
+            });
+            requestProfileData['sportsAndEcList'] = sportsAndEcList;
+            $("#saveSportsAndEcClubWrapper").hide();
+            SPORTS_AND_CLUB_COUNT = [];
+        } else if (keyId == 'preferredcommunication') {
+            var pcWhatsapp = $('#pcWhatsappView').is(':checked') ? 'Y' : 'N';
+            var pcCall = $('#pcCallView').is(':checked') ? 'Y' : 'N';
+            var pcEmail = $('#pcEmailView').is(':checked') ? 'Y' : 'N';
+            requestProfileData['fieldValue'] = 'W=' + pcWhatsapp + '|' + 'C=' + pcCall + '|' + 'E=' + pcEmail;
+        }
+        else {
+            if (keyId == 'firstName' || keyId == 'middleName' || keyId == 'lastName' || keyId == 'lastOrgName' || keyId == 'lastJobTitle' || keyId == 'address' || keyId == 'otherSkills'
+                || keyId == 'designation' || keyId == 'departmentId' || keyId == 'acPersonName' || keyId == 'bankName'
+                || keyId == 'bankBranchName' || keyId == 'bankBranchAddress' || keyId == 'otherBankDetails' || keyId == 'otherProfessionalCourse'
+                || keyId == 'otherSpecialization' || keyId == 'anyOtherLanguages' || keyId == 'references1' || keyId == 'references2'
+                || keyId == 'specialization' || keyId == 'postGraduationSubjects' || keyId == 'graduationSubjects') {
+                requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
+            }else if(keyId == 'motherEmail' || keyId == 'fatherEmail' || keyId == 'guardianEmail'){
+                requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
+                if(USER_ROLE == "STUDENT"){
+                    var relationType = PROFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType;                
+                }
+                requestProfileData['primaryParent'] = escapeCharacters(relationType);
+                if (keyId == 'motherEmail') {
+                    requestProfileData['parentType'] = "Mother";
+                } else if (keyId == 'fatherEmail') {
+                    requestProfileData['parentType'] = "Father";
+                } else {
+                    requestProfileData['parentType'] = "Guardian";
+                }
+            } else if (keyId == 'describeYourself' || keyId == 'lastOrgJobDiscription') {
+                requestProfileData['fieldValue'] = escapeCharacters(toSentenceCase($('#' + keyId).val()));
+            } else {
+                    requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
+            }
+        }
+        if (keyId == 'phoneNumber') {
+            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = $('#phoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+        } if (keyId == 'altPhoneNumber') {
+            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = $('#altPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+        } if (keyId == 'motherPhoneNumber') {
+            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuParentPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = $('#motherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['emergencyContactStatus'] = $('#motherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+
+            requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
+            requestProfileData['parentType'] = "Mother";
+        } if (keyId == 'fatherPhoneNumber') {
+            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = $('#fatherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['emergencyContactStatus'] = $('#fatherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
+            requestProfileData['parentType'] = "Father";
+        } if (keyId == 'guardianPhoneNumber') {
+            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = $('#guardianPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['emergencyContactStatus'] = $('#guardianEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
+            requestProfileData['parentType'] = "Guardian";
+        }
+        if (keyId == 'payPalPhoneNumber') {
+            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');
+            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');
+        }
+        // if(keyId=='timeToCall'){
+        //     var timeList =[];
+        //     var startTime = convertTo24Hour('09:00 AM');
+        //     var endTime = convertTo24Hour('05:00 PM');
+        // 	timeList.push(startTime + "-" + endTime);
+        // 	requestProfileData['timeToCallList']=timeList;
+        //     requestProfileData['parentType']="Student";
+        // }
     }
-    if (keyId == 'payPalPhoneNumber') {
-        requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');
-        requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');
-    }
-    // if(keyId=='timeToCall'){
-    //     var timeList =[];
-    //     var startTime = convertTo24Hour('09:00 AM');
-    //     var endTime = convertTo24Hour('05:00 PM');
-    // 	timeList.push(startTime + "-" + endTime);
-    // 	requestProfileData['timeToCallList']=timeList;
-    //     requestProfileData['parentType']="Student";
-    // }
     authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
     authentication['userType'] = moduleId;
     authentication['userId'] = userId;
@@ -4110,24 +4157,24 @@ function validateFields(eleID, keyId, fieldValue) {
 }
 
 function checkParentType(eleID, keyId){
-    var relationType = PORFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType;
-    var parentUserId = PORFILE_RESPONSE_DATA.profileData.studentProfile[1].parentUserId;
+    var relationType = PROFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType;
+    var parentUserId = PROFILE_RESPONSE_DATA.profileData.studentProfile[1].parentUserId;
     if(parentUserId != null && parentUserId != undefined && parentUserId != 0){
         if(relationType  == "Mother" && $("#"+eleID).val() == "" && keyId == "motherEmail"){
             showMessageTheme2(0, "Primary parent email is mandatory");
-            var email = PORFILE_RESPONSE_DATA.profileData.studentProfile[1][eleID];
+            var email = PROFILE_RESPONSE_DATA.profileData.studentProfile[1][eleID];
             $("#"+eleID).val(email);
             $("#"+eleID).closest(".input-group").find(".input-group-append-hide").find(".btn-danger").trigger("click");
             return false;
         } else if(relationType  == "Father" && $("#"+eleID).val() == "" && keyId == "fatherEmail"){
             showMessageTheme2(0, "Primary parent email is mandatory");
-            var email = PORFILE_RESPONSE_DATA.profileData.studentProfile[1][eleID];
+            var email = PROFILE_RESPONSE_DATA.profileData.studentProfile[1][eleID];
             $("#"+eleID).val(email);
             $("#"+eleID).closest(".input-group").find(".input-group-append-hide").find(".btn-danger").trigger("click");
             return false;
         } else if(relationType  == "Guardian" && $("#"+eleID).val() == "" && keyId == "guardianEmail"){
             showMessageTheme2(0, "Primary parent email is mandatory");
-            var email = PORFILE_RESPONSE_DATA.profileData.studentProfile[1][eleID];
+            var email = PROFILE_RESPONSE_DATA.profileData.studentProfile[1][eleID];
             $("#"+eleID).val(email);
             $("#"+eleID).closest(".input-group").find(".input-group-append-hide").find(".btn-danger").trigger("click");
             return false;
@@ -4157,7 +4204,13 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
         || keyId == 'specialization' || keyId == 'postGraduationSubjects' || keyId == 'graduationSubjects' || keyId == 'educationSpecialization' || keyId == 'forcefulRepeatOrImprove') {
         /*fieldValue = toTitleCase(fieldValue);*/
     }else if(keyId == 'motherEmail' || keyId == 'fatherEmail' || keyId == 'guardianEmail'){
-        return checkParentType(eleID, keyId);
+        if (!checkParentType(eleID, keyId)) {
+            return false; // yahin se poora function ruk jayega
+        }
+        // var parentEmailVerify = checkParentType(eleID, keyId);
+        // if(!parentEmailVerify){
+        //     return false;
+        // }
     } else if (keyId == 'describeYourself' || keyId == 'lastOrgJobDiscription') {
         fieldValue = fieldValue;
     } else if (keyId == 'timezone' && !showWarning) {
@@ -4205,6 +4258,7 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                 showMessageTheme2(0, data['message'], '', false);
             }
             else {
+                CUSTOM_DATEPICKER_FIELD_FLAG=false;
                 if (keyId == "firstName" || keyId == "lastName") {
                     $(".userNameLabel").text($("#firstName").val() + " " + $("#lastName").val());
                     $("#" + eleID).closest(".input-group").find(".input-group-append-hide").hide();
@@ -4534,7 +4588,7 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                         BULK_PROFILE_SAVE_CONTEXT.currentWarningItem = null;
                         BULK_PROFILE_SAVE_CONTEXT.currentIndex++;
                         RESERVE_ENROLLMENT_SAVE_BULK=false;
-                        // console.log("not updated",PORFILE_RESPONSE_UPDATED_DATA);
+                        // console.log("not updated",PROFILE_RESPONSE_UPDATED_DATA);
                         
                         overWriteProfileData(eleID, keyId);
                         var index = SAVE_BLUK_PROFILE_DATA.findIndex(item => item.eleID === "bookASeatNextGradeOpted");
@@ -4542,8 +4596,6 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                             SAVE_BLUK_PROFILE_DATA.splice(index, 1);
                         }
                         SAVE_BLUK_PROFILE_DATA=[];
-                        
-
                         // console.log("updated",PORFILE_RESPONSE_UPDATED_DATA);
                         return processApplyChnagesBulkWarnings();
                     }
@@ -4569,7 +4621,13 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
 
 function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, countryCode, index, keyId, avalemergencyStatusID) {
     if (saveType == 'input') {
-        if ($("#" + eleID).val() != PORFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
+        var fieldValue = getValue(eleID, index); 
+        // if(keyId == "customProfileFieldId"){
+                // fieldValue = getValue(eleID);
+        // }else{
+        //     fieldValue = PROFILE_RESPONSE_UPDATED_DATA[index][eleID]
+        // }
+        if ($("#" + eleID).val() != fieldValue) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
 
             // if(eleID == "motherName" || eleID == "motherLastName"){
@@ -4601,36 +4659,36 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "none" });
             addAndRemoveRequestToSaveBulkData(false, eleID, keyId);
             // if(eleID == "motherName" || eleID == "motherLastName"){
-            //     if(eleID == "motherName" && $("#motherLastName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['motherLastName']){
+            //     if(eleID == "motherName" && $("#motherLastName").val()!=PROFILE_RESPONSE_DATA.profileData.studentProfile[1]['motherLastName']){
             //         $("#motherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
             //     }else{
             //         $("#motherLastName").closest(".input-group").find(".input-group-append-hide").hide();
             //     }
-            //     if(eleID == "motherLastName" && $("#motherName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['motherName']){
+            //     if(eleID == "motherLastName" && $("#motherName").val()!=PROFILE_RESPONSE_DATA.profileData.studentProfile[1]['motherName']){
             //         $("#motherName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
             //     }else{
             //         $("#motherName").closest(".input-group").find(".input-group-append-hide").hide();
             //     }
             // }
             // if(eleID == "fatherFirstName" || eleID == "fatherLastName"){
-            //     if(eleID == "fatherFirstName" && $("#fatherLastName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['fatherLastName']){
+            //     if(eleID == "fatherFirstName" && $("#fatherLastName").val()!=PROFILE_RESPONSE_DATA.profileData.studentProfile[1]['fatherLastName']){
             //         $("#fatherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
             //     }else{
             //         $("#fatherLastName").closest(".input-group").find(".input-group-append-hide").hide();
             //     }
-            //     if(eleID == "fatherLastName" && $("#fatherFirstName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['fatherFirstName']){
+            //     if(eleID == "fatherLastName" && $("#fatherFirstName").val()!=PROFILE_RESPONSE_DATA.profileData.studentProfile[1]['fatherFirstName']){
             //         $("#fatherFirstName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
             //     }else{
             //         $("#fatherFirstName").closest(".input-group").find(".input-group-append-hide").hide();
             //     }
             // }
             // if(eleID == "guardianFirstName" || eleID == "guardianLastName"){
-            //     if(eleID == "guardianFirstName" && $("#guardianLastName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['guardianLastName']){
+            //     if(eleID == "guardianFirstName" && $("#guardianLastName").val()!=PROFILE_RESPONSE_DATA.profileData.studentProfile[1]['guardianLastName']){
             //         $("#guardianLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
             //     }else{
             //         $("#guardianLastName").closest(".input-group").find(".input-group-append-hide").hide();
             //     }
-            //     if(eleID == "guardianLastName" && $("#guardianFirstName").val()!=PORFILE_RESPONSE_DATA.profileData.studentProfile[1]['guardianFirstName']){
+            //     if(eleID == "guardianLastName" && $("#guardianFirstName").val()!=PROFILE_RESPONSE_DATA.profileData.studentProfile[1]['guardianFirstName']){
             //         $("#guardianFirstName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
             //     }else{
             //         $("#guardianFirstName").closest(".input-group").find(".input-group-append-hide").hide();
@@ -4638,12 +4696,12 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
             // }
         }
     } else if (saveType == "select") {
-        if ($("#" + eleID).val() != PORFILE_RESPONSE_UPDATED_DATA[index][eleID == "nationality" ? "nationalityId" : eleID == "previousCurrentGradeName" ? "previousCurrentGradeId" : eleID]) {
+        if ($("#" + eleID).val() != PROFILE_RESPONSE_UPDATED_DATA[index][eleID == "nationality" ? "nationalityId" : eleID == "previousCurrentGradeName" ? "previousCurrentGradeId" : eleID]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
-            if (eleID == "reserveASeat" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
+            if (eleID == "reserveASeat" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
                 $("#reserveASeat").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
-            } else if (eleID == "reserveASeat" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#" + eleID).val() == "0")) {
+            } else if (eleID == "reserveASeat" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#" + eleID).val() == "0")) {
                 $("#reserveASeat").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
             }
@@ -4654,10 +4712,10 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
                 }
                 
             }
-            if (eleID == "bookASeatNextGradeOpted" && eleID != "advanceGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
+            if (eleID == "bookASeatNextGradeOpted" && eleID != "advanceGradeOpted" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
                 $("#bookASeatNextGradeOpted").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
-            } else if (eleID == "bookASeatNextGradeOpted" && eleID != "advanceGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#" + eleID).val() == "0")) {
+            } else if (eleID == "bookASeatNextGradeOpted" && eleID != "advanceGradeOpted" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#" + eleID).val() == "0")) {
                 $("#bookASeatNextGradeOpted").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
             }
@@ -4667,10 +4725,10 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
                     addAndRemoveRequestToSaveBulkData(false, eleID, keyId);
                 }
             }
-            if (eleID == "advanceGradeOpted" && eleID != "bookASeatNextGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
+            if (eleID == "advanceGradeOpted" && eleID != "bookASeatNextGradeOpted" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
                 $("#advanceGradeOpted").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
-            } else if (eleID == "advanceGradeOpted" && eleID != "bookASeatNextGradeOpted" && (PORFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#" + eleID).val() == "0")) {
+            } else if (eleID == "advanceGradeOpted" && eleID != "bookASeatNextGradeOpted" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "Y" && $("#" + eleID).val() == "0")) {
                 $("#advanceGradeOpted").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
             }
@@ -4687,7 +4745,7 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
             }else{
                 if(eleID == "relationType"){
-                    PORFILE_RESPONSE_UPDATED_DATA[index][eleID]=$("#"+eleID).val();
+                    PROFILE_RESPONSE_UPDATED_DATA[index][eleID]=$("#"+eleID).val();
                 }
                 $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
@@ -4704,8 +4762,8 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
         }
 
     } else if (saveType == "hobbies") {
-        var indexNum = PORFILE_RESPONSE_UPDATED_DATA[index][saveType].findIndex(item => item.id === $(eleID).attr("id"));
-        if (($(eleID).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index][saveType][parseInt(indexNum)]["status"]) {
+        var indexNum = PROFILE_RESPONSE_UPDATED_DATA[index][saveType].findIndex(item => item.id === $(eleID).attr("id"));
+        if (($(eleID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][saveType][parseInt(indexNum)]["status"]) {
             HOBBIES_CHANGES_COUNT.push($(eleID).attr("data-hobbie-label"))
             $("#saveHobbiesWrapper").show();
             addAndRemoveRequestToSaveBulkData(true, keyId, keyId);
@@ -4731,7 +4789,7 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
             }
         }
     } else if (saveType == "communication") {
-        if (($(eleID).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index][$(eleID).attr("id")]) {
+        if (($(eleID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][$(eleID).attr("id")]) {
             COMMUNICATION_CHANGES_COUNT.push($(eleID).attr("data-communication-label"));
             $("#saveCommunicationWrapper").show();
             addAndRemoveRequestToSaveBulkData(true, keyId, keyId);
@@ -4745,8 +4803,7 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
             }
         }
     } else if (saveType == "extracurricular") {
-
-        if (($(eleID).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index]["sportsAndECList"][parseInt($(eleID).attr("data-index-id"))]["value"]) {
+        if (($(eleID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index]["sportsAndECList"][parseInt($(eleID).attr("data-index-id"))]["value"]) {
             SPORTS_AND_CLUB_COUNT.push($(eleID).attr("data-Id"));
             $("#saveSportsAndEcClubWrapper").show();
             addAndRemoveRequestToSaveBulkData(true, keyId, keyId);
@@ -4759,18 +4816,17 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
                 addAndRemoveRequestToSaveBulkData(false, keyId, keyId);
             }
         }
-    }
-    else if (saveType == "inputPhone") {
-        if ($("#" + eleID).val().replace(/\s+/g, '') != PORFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
+    } else if (saveType == "inputPhone") {
+        if ($("#" + eleID).val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
-        } else if (($("#" + avalWhtsAppStatusID).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]) {
+        } else if (($("#" + avalWhtsAppStatusID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
-        } else if ($("#" + eleID).attr("data-countrycode") != PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] && PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] != "") {
+        } else if ($("#" + eleID).attr("data-countrycode") != PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] && PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] != "") {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
-        } else if (($("#" + avalemergencyStatusID).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index][avalemergencyStatusID]) {
+        } else if (($("#" + avalemergencyStatusID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][avalemergencyStatusID]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
         } else {
@@ -4781,14 +4837,21 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
     } else if (saveType == "socialMedia") {
         var elementLabel = eleID.split("URL");
         elementLabel = elementLabel[0];
-        var indexNum = PORFILE_RESPONSE_UPDATED_DATA[index][saveType].findIndex(item => item.socMedLabel === elementLabel);
-        if ($("[id='" + eleID + "']").val() != PORFILE_RESPONSE_UPDATED_DATA[index][saveType][(parseInt(indexNum))][$("[for='" + eleID + "']").attr("data-title") + "_URL"]) {
-            // if($("#"+eleID).val()!=PORFILE_RESPONSE_UPDATED_DATA[index][saveType][(parseInt($("#"+eleID).attr("data-social-media-id"))-1)][$("[for='"+eleID+"']").attr("data-title")+"_URL"]){
+        var indexNum = PROFILE_RESPONSE_UPDATED_DATA[index][saveType].findIndex(item => item.socMedLabel === elementLabel);
+        if ($("[id='" + eleID + "']").val() != PROFILE_RESPONSE_UPDATED_DATA[index][saveType][(parseInt(indexNum))][$("[for='" + eleID + "']").attr("data-title") + "_URL"]) {
+            // if($("#"+eleID).val()!=PROFILE_RESPONSE_UPDATED_DATA[index][saveType][(parseInt($("#"+eleID).attr("data-social-media-id"))-1)][$("[for='"+eleID+"']").attr("data-title")+"_URL"]){
             $("[id='" + eleID + "']").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
         } else {
             $("[id='" + eleID + "']").closest(".input-group").find(".input-group-append-hide").hide();
             addAndRemoveRequestToSaveBulkData(false, eleID, keyId);
+        }
+    } else if (saveType == "custom"){
+        var ele_type = $(src).attr("data-element-type");
+        var save_control_id = $(src).attr("data-save-wrapper");
+        if(ele_type == "radio" || ele_type == "checkbox"){
+            $("#"+save_control_id).show();
+            addAndRemoveRequestToSaveBulkData(true, keyId, keyId);
         }
     }
     // if (!RENDER_FLAG) {
@@ -4809,9 +4872,9 @@ function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, em
     }else if(saveType == 'inputPhone'){
         $("#"+eleID).val(eleValue);
         if(eleID == "motherPhoneNumber" || eleID == "fatherPhoneNumber"){
-            $("#"+emergencyNumberStatusEleId).prop("checked", (PORFILE_RESPONSE_UPDATED_DATA[index][emergencyNumberStatusEleId] == "Y"? true:false));
+            $("#"+emergencyNumberStatusEleId).prop("checked", (PROFILE_RESPONSE_UPDATED_DATA[index][emergencyNumberStatusEleId] == "Y"? true:false));
         }
-        $("#"+whatsAppStatusEleId).prop("checked", (PORFILE_RESPONSE_UPDATED_DATA[index][whatsAppStatusEleId] == "Y"? true:false));
+        $("#"+whatsAppStatusEleId).prop("checked", (PROFILE_RESPONSE_UPDATED_DATA[index][whatsAppStatusEleId] == "Y"? true:false));
         $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"none"});
     }else if(saveType == "select"){
         $("#"+eleID).val(eleValue).trigger("change");
@@ -4819,7 +4882,7 @@ function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, em
     }else if(saveType == "countrySection"){
         var elementIDs = $("#"+eleID).attr("data-country").split("_");
         $.each(elementIDs, function(i, v) {
-            var targetValue = PORFILE_RESPONSE_DATA.profileData.studentProfile[0][v];
+            var targetValue = PROFILE_RESPONSE_DATA.profileData.studentProfile[0][v];
             var found = false;
             $("#" + v + " option").each(function (key, value) {
                 if ($(this).val() == targetValue) {
@@ -4836,7 +4899,7 @@ function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, em
     } else if (saveType == "countrySectionParent") {
         var elementIDs = $("#" + eleID).attr("data-country").split("_");
         $.each(elementIDs, function (i, v) {
-            var targetValue = PORFILE_RESPONSE_DATA.profileData.studentProfile[1][v];
+            var targetValue = PROFILE_RESPONSE_DATA.profileData.studentProfile[1][v];
             targetValue = targetValue == "0" ? '' : targetValue;
             var found = false;
             $("#" + v + " option").each(function (key, value) {
@@ -4912,13 +4975,13 @@ function cancelCommunication() {
 
 function availableOnWhatsApp(src, eleID, eleValue, saveType, countryCode, index) {
     if (saveType == 'input') {
-        if ($("#" + eleID).val().replace(/\s+/g, '') != PORFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
+        if ($("#" + eleID).val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-        } else if (($(src).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index][$(src).attr("id")]) {
+        } else if (($(src).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][$(src).attr("id")]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-        } else if (countryCode.toLowerCase() != PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]].toLowerCase() && PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] != "") {
+        } else if (countryCode.toLowerCase() != PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]].toLowerCase() && PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] != "") {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
         } else {
@@ -4929,14 +4992,14 @@ function availableOnWhatsApp(src, eleID, eleValue, saveType, countryCode, index)
 }
 
 function phoneNumberDailCodeChange(eleID, eleValue, eleCurrentValue, avalWhtsAppStatusID, index) {
-    PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] == "" ? PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] = "us" : PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]];
-    if ($("#" + eleID).val().replace(/\s+/g, '') != PORFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
+    PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] == "" ? PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] = "us" : PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]];
+    if ($("#" + eleID).val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
         $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
         addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-    } else if (($("#" + avalWhtsAppStatusID).prop("checked") ? "Y" : "N") != PORFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]) {
+    } else if (($("#" + avalWhtsAppStatusID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]) {
         $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
         addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-    } else if (eleCurrentValue.toLowerCase() != PORFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]].toLowerCase()) {
+    } else if (eleCurrentValue.toLowerCase() != PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]].toLowerCase()) {
         $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
         addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
     } else {
@@ -4958,7 +5021,7 @@ function hidePermissionAndApprovalModal(eleID, callFrom) {
     $('#permissionModal').modal('hide');
     window.setTimeout(function () { $('#permissionModal').remove(); }, 1000);
     if (callFrom == "cancel") {
-        var value = PORFILE_RESPONSE_DATA.profileData.studentProfile[5][eleID] == "N" ? "0" : "1"
+        var value = PROFILE_RESPONSE_DATA.profileData.studentProfile[5][eleID] == "N" ? "0" : "1"
         $("#" + eleID).val(value).trigger("change");
         $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "none" });
     } else {
@@ -5044,7 +5107,7 @@ function getRequestForCommunicationLog(formId) {
     var authentication = {};
     var commonCommentsDTO = {};
     var documentUploads = STUDENT_UPLOAD_DOCUMENTS;
-    commonCommentsDTO['entityId'] = PORFILE_RESPONSE_DATA.userId;
+    commonCommentsDTO['entityId'] = PROFILE_RESPONSE_DATA.userId;
     if (USER_ROLE == 'TEACHER') {
         commonCommentsDTO['entityName'] = 'TEACHER';
     } else {
@@ -5108,7 +5171,7 @@ function saveCommunicationLog(formId) {
                 $('#' + formId + ' #fileuploadLog6').val('');
                 $('#' + formId + " #fileuploadLog6Span").text("No file chosen...");
                 initEditor(1, 'commentEditor', 'Enter comments', true);
-                getCommunicationLogData('communicationLogTable', PORFILE_RESPONSE_DATA.userId, PORFILE_RESPONSE_DATA.userRole);
+                getCommunicationLogData('communicationLogTable', PROFILE_RESPONSE_DATA.userId, PROFILE_RESPONSE_DATA.userRole);
             }
 
             return false;
@@ -5162,26 +5225,26 @@ function overWriteProfileData(eleID, keyId) {
             });
             $.each(communicationArry, function (i, v) {
                 var key = Object.keys(v);
-                PORFILE_RESPONSE_UPDATED_DATA[1][key] = v[key]
+                PROFILE_RESPONSE_UPDATED_DATA[1][key] = v[key]
             });
             $("#saveCommunicationWrapper").hide();
         } else if (keyId == "communicationPreferredSlots") {
-            PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, { callingPreferenceToKeep: getCallingPreference(), }, "communicationPreferredSlots");
+            PROFILE_RESPONSE_UPDATED_DATA = updateStudentData(PROFILE_RESPONSE_UPDATED_DATA, { callingPreferenceToKeep: getCallingPreference(), }, "communicationPreferredSlots");
         }
         else {
             if (keyId == "countrySectionParent" || keyId == "countrySection") {
                 var elements_ID = [];
                 elements_ID = $("#" + eleID).attr("data-country").split("_");
                 $.each(elements_ID, function (i, v) {
-                    PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, v, parseInt($("#" + v).val()));
+                    PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, v, parseInt($("#" + v).val()));
                 })
             } else if (keyId == "bookASeatNextGradeOpted" || keyId == "advanceGradeOpted" || keyId == "reserveASeat") {
                 var value = $("#" + keyId).val() == '0' ? 'N' : 'Y';
-                PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyId, value);
+                PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyId, value);
             }
             else {
                 if (keyId == "timezone" || keyId == "nationality") {
-                    PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyId, parseInt($("#" + keyId).val()));
+                    PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyId, parseInt($("#" + keyId).val()));
                 }
                 else if (keyId == 'phoneNumber' || keyId == 'altPhoneNumber' || keyId == 'motherPhoneNumber' || keyId == 'fatherPhoneNumber' || keyId == 'guardianPhoneNumber' || keyId == 'payPalPhoneNumber') {
                     var keyList = $("#" + keyId).attr("data-idList").split("_");
@@ -5194,8 +5257,8 @@ function overWriteProfileData(eleID, keyId) {
                     };
                     // console.log(phoneUpdateObj);
                     Object.keys(phoneUpdateObj).forEach(function (key) {
-                        PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(
-                            PORFILE_RESPONSE_UPDATED_DATA,
+                        PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(
+                            PROFILE_RESPONSE_UPDATED_DATA,
                             key,
                             phoneUpdateObj[key]
                         );
@@ -5205,12 +5268,12 @@ function overWriteProfileData(eleID, keyId) {
 
                     // $.each(phoneUpdateObj,function(i,v){
                     //     var key = Object.keys(v);
-                    //     PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyList[i],v[key]);
+                    //     PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyList[i],v[key]);
                     // });
                 } else {
-                    PORFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PORFILE_RESPONSE_UPDATED_DATA, keyId, $("#" + keyId).val());
+                    PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyId, $("#" + keyId).val());
                 }
-                // console.log("updated",PORFILE_RESPONSE_UPDATED_DATA);
+                // console.log("updated",PROFILE_RESPONSE_UPDATED_DATA);
             }
         }
     } else if (keyId == "hobbies") {
@@ -5218,19 +5281,19 @@ function overWriteProfileData(eleID, keyId) {
         $(".hobbie-wrapper input[type='checkbox']:checked").each(function () {
             hobbieLable.push($(this).attr("data-hobbie-label"))
         });
-        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, {
+        PROFILE_RESPONSE_UPDATED_DATA = updateStudentData(PROFILE_RESPONSE_UPDATED_DATA, {
             hobbiesToKeep: hobbieLable,
         }, 'hobbies');
     } else if (keyId == "socialMedia") {
         var label = $("[for='" + eleID + "']").attr("data-title");
         var socialMediaUpdatesObj = { [label]: $("[id='" + eleID + "']").val() }
-        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, { socialMediaUpdates: socialMediaUpdatesObj, });
+        PROFILE_RESPONSE_UPDATED_DATA = updateStudentData(PROFILE_RESPONSE_UPDATED_DATA, { socialMediaUpdates: socialMediaUpdatesObj, });
     } else if (keyId == "extracurricular") {
         var sportsToKeepLable = [];
         $(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function () {
             sportsToKeepLable.push($(this).attr("data-title"))
         });
-        PORFILE_RESPONSE_UPDATED_DATA = updateStudentData(PORFILE_RESPONSE_UPDATED_DATA, { sportsToKeep: sportsToKeepLable, }, "extracurricular");
+        PROFILE_RESPONSE_UPDATED_DATA = updateStudentData(PROFILE_RESPONSE_UPDATED_DATA, { sportsToKeep: sportsToKeepLable, }, "extracurricular");
     }
 
 }
@@ -5501,6 +5564,17 @@ function checkAndOrganizeFields(objectA, objectB) {
                         if(nowTime>=getMilliseconds(field.scheduleDateTime)){
                             if (groupsWithMissingFields.has(groupId)) {
                                 var fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                                var isFieldEmpty = fieldValue === '' || fieldValue === null || fieldValue === undefined;
+                                if (countryFields.includes(field.fieldId)) {
+                                    isFieldEmpty = fieldValue == "0" || fieldValue === null || fieldValue === undefined;
+                                }
+                                if (field.fieldSource == "customField" && field.inputType == "file") {
+                                    isFieldEmpty = (fieldValue === '' || fieldValue === null || fieldValue === undefined) &&
+                                        (field.fieldValue === '' || field.fieldValue === null || field.fieldValue === undefined) &&
+                                        (field.customFieldURL === '' || field.customFieldURL === null || field.customFieldURL === undefined) &&
+                                        (field.fileName === '' || field.fileName === null || field.fileName === undefined);
+                                }
+                                if (!isFieldEmpty) return;
                                 // ✅ ADD THIS CONDITION
                                 if (skipAllNameFields) {
                                     var isNameField =
@@ -5534,9 +5608,6 @@ function checkAndOrganizeFields(objectA, objectB) {
                                 if (!groupedFields[groupId]) {
                                     groupedFields[groupId] = [];
                                 }
-
-                                
-
                                 if (
                                     field.fieldId === 'motherPhoneNumber' ||
                                     field.fieldId === 'fatherPhoneNumber' ||
@@ -5551,13 +5622,22 @@ function checkAndOrganizeFields(objectA, objectB) {
                                         value: fieldValue
                                     });
                                 } else {
-                                    groupedFields[groupId].push({
-                                        fieldId: field.fieldId,
-                                        orderId: field.orderId,
-                                        groupId: groupId,
-                                        labelName: field.labelName,
-                                        value: fieldValue
-                                    });
+                                    if (field.fieldSource == "customField") {
+                                        groupedFields[groupId].push({
+                                            ...field,
+                                            groupId: groupId,
+                                            value: fieldValue,
+                                            fieldValue: fieldValue
+                                        });
+                                    } else {
+                                        groupedFields[groupId].push({
+                                            fieldId: field.fieldId,
+                                            orderId: field.orderId,
+                                            groupId: groupId,
+                                            labelName: field.labelName,
+                                            value: fieldValue
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -5685,13 +5765,26 @@ function checkAndOrganizeFields(objectA, objectB) {
 
                         } else {
                             if(field.fieldId != "socialMedia"){
-                                groupedFields[groupId].push({
-                                    fieldId: field.fieldId,
-                                    orderId: field.orderId,
-                                    groupId: groupId,
-                                    labelName: field.labelName,
-                                    value: getFieldValue(objectA, field.fieldId, parseInt(section.index))
-                                });
+                                if(field.fieldSource == "customField"){
+                                    var customFieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                                    var customFieldEmpty = customFieldValue === '' || customFieldValue === null || customFieldValue === undefined;
+                                    if (customFieldEmpty) {
+                                        groupedFields[groupId].push({
+                                            ...field,
+                                            value: customFieldValue,
+                                            fieldValue: customFieldValue
+                                        });
+                                    }
+                                }
+                                else{
+                                    groupedFields[groupId].push({
+                                        fieldId: field.fieldId,
+                                        orderId: field.orderId,
+                                        groupId: groupId,
+                                        labelName: field.labelName,
+                                        value: getFieldValue(objectA, field.fieldId, parseInt(section.index))
+                                    });
+                                }
                             }
                         }
                     }
@@ -5753,9 +5846,22 @@ function getSocialMediaValue(objectA, fieldId) {
 // Helper function to get field value from nested objectA
 function getFieldValue(objectA, fieldId, index) {
     var studentProfile = objectA.studentProfile[index];
+    if (!studentProfile) {
+        return "";
+    }
     // Check personal information fields
     if (studentProfile.hasOwnProperty(fieldId)) {
         return studentProfile[fieldId];
+    }
+
+    // Check custom fields inside section object
+    if (studentProfile.customFields && studentProfile.customFields.length > 0) {
+        var customField = studentProfile.customFields.find(function (f) {
+            return f && f.fieldId === fieldId;
+        });
+        if (customField) {
+            return customField.fieldValue;
+        }
     }
 
     // Check parent information fields (second object in studentProfile array)
@@ -5764,6 +5870,26 @@ function getFieldValue(objectA, fieldId, index) {
     }
 
     return "";
+}
+
+function getValue(id, index) {
+    var obj = PROFILE_RESPONSE_UPDATED_DATA[index];
+
+    if (!obj) return null;
+
+    // 1. Direct property
+    if (obj.hasOwnProperty(id)) {
+        return obj[id];
+    }
+
+    // 2. customFields
+    if (obj.customFields && obj.customFields.length > 0) {
+        let field = obj.customFields.find(f => f.fieldId === id);
+        return field ? field.fieldValue : "";
+    }
+
+    return "";
+
 }
 
 // Check if ALL hobbies have status "N" (all inactive)
@@ -5934,8 +6060,8 @@ async function renderMissingFieldsModal(missingFieldsData, scheduleSourceData) {
     if (!missingFieldsData || Object.keys(missingFieldsData).length < 1) {
         return false;
     }
-    var data = PORFILE_RESPONSE_DATA.profileData.studentProfile;
-    var html = getProfileModalHiddenFieldsHtml(data) + await getMissingProfileFields(missingFieldsData, PORFILE_RESPONSE_DATA);
+    var data = PROFILE_RESPONSE_DATA.profileData.studentProfile;
+    var html = getProfileModalHiddenFieldsHtml(data) + await getMissingProfileFields(missingFieldsData, PROFILE_RESPONSE_DATA);
     var allowClose = canCloseProfileModal(scheduleSourceData, missingFieldsData);
 
     if ($("#profileFielddModal").length < 1) {
@@ -6133,7 +6259,7 @@ function isScheduledProfileDataDue() {
 }
 
 function showScheduledMissingProfileFields() {
-    if (!PORFILE_RESPONSE_UPDATED_DATA || !PROFILE_SCHEDULE_DATA || Object.keys(PROFILE_SCHEDULE_DATA).length < 1) {
+    if (!PROFILE_RESPONSE_UPDATED_DATA || !PROFILE_SCHEDULE_DATA || Object.keys(PROFILE_SCHEDULE_DATA).length < 1) {
         return false;
     }
     var dueScheduleData = getDueProfileScheduleData();
@@ -6142,7 +6268,7 @@ function showScheduledMissingProfileFields() {
     }
     markScheduleItemsProcessed(dueScheduleData);
     var profileData = {
-        studentProfile: PORFILE_RESPONSE_UPDATED_DATA
+        studentProfile: PROFILE_RESPONSE_UPDATED_DATA
     };
     var missingScheduleFields = checkAndOrganizeFields(
         profileData,
@@ -6237,9 +6363,9 @@ async function getMissingDataByUser(payload) {
 
             if (!storedData || !storedMissing || Object.keys(storedMissing).length < 1 && !isApiCalled) {
                 // alert("Fresh Call")
-                PORFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, `profile-view-content-new?payload=${payload}`, '');
-                var data = PORFILE_RESPONSE_DATA.profileData.studentProfile;
-                PORFILE_RESPONSE_UPDATED_DATA = data;
+                PROFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, `profile-view-content-new?payload=${payload}`, '');
+                var data = PROFILE_RESPONSE_DATA.profileData.studentProfile;
+                PROFILE_RESPONSE_UPDATED_DATA = data;
                 
                 GET_FILED_DATA = await getProfileCompletingProcess();
                 GET_FILED_DATA = transformScheduleDates(GET_FILED_DATA.profileData);
@@ -6252,11 +6378,11 @@ async function getMissingDataByUser(payload) {
                 console.log("SCHEDULEL NOW STRUCTURE:", PROFILE_NOW_DATA);
                 console.log("SCHEDULEL LATER STRUCTURE:", PROFILE_SCHEDULE_DATA);
                 missingFields = {};
-                missingFields = checkAndOrganizeFields(PORFILE_RESPONSE_DATA.profileData, GET_FILED_DATA);
+                missingFields = checkAndOrganizeFields(PROFILE_RESPONSE_DATA.profileData, GET_FILED_DATA);
                 LOCAL_PROFILE_MISSING_FIELDS = missingFields;
                 console.log("missingFields", missingFields);
                 extractFields(missingFields)
-                setAllProfileFieldsData(PORFILE_RESPONSE_DATA);
+                setAllProfileFieldsData(PROFILE_RESPONSE_DATA);
                 setProfileMissingFields(missingFields);
                 setNowProfileFieldsData(PROFILE_NOW_DATA);
                 setScheduleProfileData(PROFILE_SCHEDULE_DATA);
@@ -6266,8 +6392,8 @@ async function getMissingDataByUser(payload) {
                 // alert("Local Data Called")
                 LOCAL_PROFILE_MISSING_FIELDS = storedMissing;
                 missingFields=LOCAL_PROFILE_MISSING_FIELDS
-                PORFILE_RESPONSE_DATA = storedData;
-                PORFILE_RESPONSE_UPDATED_DATA=storedData.profileData.studentProfile;
+                PROFILE_RESPONSE_DATA = storedData;
+                PROFILE_RESPONSE_UPDATED_DATA=storedData.profileData.studentProfile;
             }
             
             // if (PROFILE_NOW_DATA && PROFILE_NOW_DATA.length > 0) {
@@ -6442,7 +6568,7 @@ function transformScheduleDates(data) {
     });
 };
 
-async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
+async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
     var fieldId;
     var fieldValue;
     previousSchoolElementArray = [];
@@ -6470,6 +6596,17 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                 if (sectionTitle)
                 fieldId = v['fieldId'];
                 fieldValue = v['value'];
+                if (v && v.fieldSource === "customField" && typeof renderDynamicFieldByUserID === 'function') {
+                    if(v.inputType == "date"){
+                        previousSchoolElementArray.push(v.inputType);
+                    }
+                    var customFieldRenderIndex = typeof getProfileSectionRenderIndex === "function" ? getProfileSectionRenderIndex(sectionTitle) : 0;
+                    html +=
+                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                            ${renderDynamicFieldByUserID(v, v.fieldValue || "", customFieldRenderIndex, "PROFILE_MODAL")}
+                        </div>`;
+                    return;
+                }
                 var motherSectionFlag = v.fieldId.startsWith("mother");
                 var fatherSectionFlag = v.fieldId.startsWith("father");
                 var guardianSectionFlag = v.fieldId.startsWith("guardian");
@@ -6487,6 +6624,9 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                         `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 ${documentProofElements.includes(fieldId) ? 'mb-3':''}">
                             ${window[fieldId + 'Element'](fieldValue)}
                         </div>`;
+                        if(fieldId == "weddingAnniversaryDate"){
+                            previousSchoolElementArray.push(fieldId)
+                        }
                         
                     } else {
                         // console.warn([fieldId + 'Element'] + " not a function")
@@ -6502,11 +6642,10 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                     html += `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                             ${window[fieldId + 'Element'](fieldValue)}
                         </div>`;
-                    var fatherPhoneIndex = PORFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
+                    var fatherPhoneIndex = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
                     inputPhoneNumberArray.push({ "fieldId": fieldId, "index": fatherPhoneIndex });
 
-                } 
-                else if ((motherSectionFlag || fatherSectionFlag || guardianSectionFlag)) {
+                } else if ((motherSectionFlag || fatherSectionFlag || guardianSectionFlag)) {
                     if(fieldId == "motherDob" || fieldId == "fatherDob" || fieldId == "guardianDob"){
                         previousSchoolElementArray.push(fieldId)
                     }
@@ -6522,7 +6661,7 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                         if(typeof window[fieldId + 'Element'] === 'function') {
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PORFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
                             </div>`;
                         }
                         
@@ -6537,7 +6676,7 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                         if(typeof window[fieldId + 'Element'] === 'function') {
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PORFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
                             </div>`;
                         }
                     }else if(guardianSectionFlag){
@@ -6551,12 +6690,12 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                         if(typeof window[fieldId + 'Element'] === 'function') {
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PORFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
                             </div>`;
                         }
                     }
                     if(fieldId === 'motherPhoneNumber' || fieldId === 'fatherPhoneNumber' || fieldId === 'guardianPhoneNumber'){
-                        var fatherPhoneIndex = PORFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
+                        var fatherPhoneIndex = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
                         inputPhoneNumberArray.push({ "fieldId": fieldId, "index": fatherPhoneIndex });
                     }
                     if(fieldId == "motherCountry" || fieldId == "fatherCountry" || fieldId == "guardianCountry"){
@@ -6568,12 +6707,12 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
                         ${window['hobbiesContent'](fieldValue)}
                     </div>`;
                 }else if(fieldValue == "" && socialMedia.includes(fieldId)){
-                    // var socialMediaData = PORFILE_RESPONSE_DATA.profileData.studentProfile[0].socialMedia.filter(function(item){
+                    // var socialMediaData = PROFILE_RESPONSE_DATA.profileData.studentProfile[0].socialMedia.filter(function(item){
                     //     return item.socMedLabel == v.labelName;
                     // })
                     if(!socialMediaLinkAdd){
                         var socialMediaData = val.map(field => {
-                            return PORFILE_RESPONSE_DATA.profileData.studentProfile[0].socialMedia.find(
+                            return PROFILE_RESPONSE_DATA.profileData.studentProfile[0].socialMedia.find(
                                 item => item.socMedLabel === field.labelName
                             );
                         }).filter(Boolean);
@@ -6586,7 +6725,7 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
         if (fieldId === 'ageProof' || fieldId === 'addressProof' || fieldId === 'parentPassportProof' || fieldId === 'lastAcademicProof') {
             html +=
                 `<div class="col-12 text-right mt-3">
-                <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PORFILE_RESPONSE_DATA.userId}','${PORFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
+                <a href="javascript:void(0)" class="btn btn-success btn-sm" id="saveAcademicInformationDocsBtn" onclick="saveDocs('${PROFILE_RESPONSE_DATA.userId}','${PROFILE_RESPONSE_DATA.studentStandardId}')">Save Documents</a>
             </div>`
         }
         if(fieldId == "prefTimeList"){
@@ -6594,11 +6733,11 @@ async function getMissingProfileFields(missingFields, PORFILE_RESPONSE_DATA){
             html +=`${classPreferredTimingInformationForm()}`
         }
         if (index == "Sport & Extra Curriculars") {
-            var indexNum = PORFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty('joinedSportsAndECList'));
-            // if (PORFILE_RESPONSE_UPDATED_DATA[indexNum].joinedSportsAndECList.length < 3) {
+            var indexNum = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty('joinedSportsAndECList'));
+            // if (PROFILE_RESPONSE_UPDATED_DATA[indexNum].joinedSportsAndECList.length < 3) {
             //     html +=
             //         `<div class="col-12">
-            //         ${participateSportActivitiesElement(PORFILE_RESPONSE_UPDATED_DATA[indexNum], PORFILE_RESPONSE_DATA.studentStandardId, "requestProfileForm")}
+            //         ${participateSportActivitiesElement(PROFILE_RESPONSE_UPDATED_DATA[indexNum], PROFILE_RESPONSE_DATA.studentStandardId, "requestProfileForm")}
             //     </div>`;
             //     sportEventDatepickerFlag = true;
             // }
@@ -6672,7 +6811,7 @@ function getInputIntel(InputIntelList) {
     }
 }
 async function activateYourSchoolEmail() {
-    var userId = (PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.userId) || USER_ID;
+    var userId = (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.userId) || USER_ID;
 
     var payload = {
         userId: userId
@@ -6701,7 +6840,7 @@ async function activateYourSchoolEmail() {
     return false;
 }
 
-
+var CUSTOM_DATEPICKER_FIELD_FLAG=false;
 function buindProfileElementEvent(buindProfileElementEvent) {
     if(buindProfileElementEvent.length > 0) {
         $.each(buindProfileElementEvent, async function (i, v) {
@@ -6721,7 +6860,7 @@ function buindProfileElementEvent(buindProfileElementEvent) {
                     endDate: new Date(currentYear, 11, 31)
                 });
             }else if(v == "motherDob" || v == "fatherDob" || v == "guardianDob" || v == "weddingAnniversaryDate"){
-                $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate").datepicker({
+                $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate, .custom-date-fields").datepicker({
                     format: 'M dd, yyyy',
                     autoclose: true,
                 }).on('changeDate', function (e) {
@@ -6731,6 +6870,18 @@ function buindProfileElementEvent(buindProfileElementEvent) {
                         $(this).trigger('change');
                     }
                 });
+            }else if(v == "date" && !CUSTOM_DATEPICKER_FIELD_FLAG){
+                $(".custom-date-fields").datepicker({
+                    format: 'M dd, yyyy',
+                    autoclose: true,
+                }).on('changeDate', function (e) {
+                    // Fire `onchange="controlEditField(...)"` only for user selection
+                    // (avoid triggering during initial `datepicker('update', ...)` on page load)
+                    if (e && e.originalEvent) {
+                        $(this).trigger('change');
+                    }
+                });
+                CUSTOM_DATEPICKER_FIELD_FLAG=true;
             }
             else if (v == "previousCurrentSchoolCountry" || v == "motherCountry" || v == "fatherCountry" || v == "guardianCountry") {
                 await callCountriesOption("requestProfileForm", '', `${v}`, '', "Select Country*").then;
@@ -6771,7 +6922,7 @@ function buindProfileElementEvent(buindProfileElementEvent) {
             startDate: new Date()
         });
     }
-    checkJoinedSports(PORFILE_RESPONSE_UPDATED_DATA[4])
+    checkJoinedSports(PROFILE_RESPONSE_UPDATED_DATA[4])
 }
 
 var getProfileDateInterVal = function () {
@@ -6889,7 +7040,6 @@ function getScheduleProfileData() {
     var data = localStorage.getItem("PROFILE_SCHEDULE_DATA");
     return data ? JSON.parse(data) : {};
 }
-
 function setProfileParentNameSaveFlag(flag) {
     localStorage.setItem("MISSING_PARENT_NAME_SECTION_FLAG", flag);
 }

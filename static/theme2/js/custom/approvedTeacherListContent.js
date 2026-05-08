@@ -731,8 +731,8 @@ function resetTeacherOfficialModalForm(){
 }
 async function resetTeacherSchoolEmailPassword(buttonElement){
 	var userId = ($('#teacherOfficialMailForm input[name="userId"]').first().val() || '').trim();
-	if(!userId && typeof PORFILE_RESPONSE_DATA !== "undefined" && PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.userId){
-		userId = PORFILE_RESPONSE_DATA.userId;
+	if(!userId && typeof PROFILE_RESPONSE_DATA !== "undefined" && PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.userId){
+		userId = PROFILE_RESPONSE_DATA.userId;
 	}
 	if(!userId){
 		showMessageTheme2(0, "Invalid user id");

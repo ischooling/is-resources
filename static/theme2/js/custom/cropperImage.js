@@ -42,6 +42,9 @@ var cropper;
           }
         addDocs(STUDENT_UPLOAD_DOCUMENTS,fileObj)
         console.log(STUDENT_UPLOAD_DOCUMENTS);
+        if(docType == "CUSTOM_FILE"){
+            saveDocs(USERID,standardID, docType, currentInputId) 
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -189,8 +192,8 @@ var cropper;
             var formData = new FormData();
             formData.append('avatar', blob, 'avatar.jpg');
           });
-          if(docType == "Profile Image"){
-            saveDocs(USERID,standardID, docType) 
+          if(docType == "Profile Image" || docType == "CUSTOM_FILE"){
+            saveDocs(USERID,standardID, docType, currentInputId) 
           }
           customLoader(false);
         }

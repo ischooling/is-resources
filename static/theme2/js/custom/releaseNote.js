@@ -435,8 +435,8 @@ var releaseNoteState = {
 						// "<td>" + statusBadge + "</td>" +
 						"<td>" + datesCellHtml + "</td>" +
 						"<td>" +
-							'<button class="btn btn-sm btn-primary mr-1" type="button" onclick="releaseNoteAdminOpenEditor(' + releaseNoteId + ')"><i class="fa fa-pencil"></i>&nbsp;Edit</button>' +
-							'<button class="btn btn-sm btn-outline-secondary mr-1" type="button" onclick="releaseNoteAdminOpenDetail(' + releaseNoteId + ')"><i class="fa fa-eye"></i>&nbsp;View</button>' +
+							'<button class="btn btn-sm btn-primary mr-1 mb-1" type="button" onclick="releaseNoteAdminOpenEditor(' + releaseNoteId + ')"><i class="fa fa-pencil"></i>&nbsp;Edit</button>' +
+							'<button class="btn btn-sm btn-outline-secondary mr-1 mb-1" type="button" onclick="releaseNoteAdminOpenDetail(' + releaseNoteId + ')"><i class="fa fa-eye"></i>&nbsp;View</button>' +
 							'<button class="btn btn-sm btn-outline-info" type="button" onclick="releaseNoteAdminOpenSendMailModal(' + releaseNoteId + ')"><i class="fa fa-envelope"></i>&nbsp;' + rnEsc(mailLabel) + "</button>" +
 						"</td>" +
 					"</tr>"
@@ -694,6 +694,23 @@ var releaseNoteState = {
 			$("#releaseNoteAdminDetailModal").modal("show");
 			if (releaseNoteState.adminDetailAttachments.length) {
 				releaseNoteAdminPreviewAttachment(0);
+			}
+			if($("#rnAdminDetailBody table").length >0){
+
+				$(".table table").addClass("table table-bordered font-12");
+				if($("#rnAdminDetailBody table thead").length <1){
+					if($(".table table tbody tr:first-child > td").length >= 5){
+						$("#releaseNoteAdminDetailModal .modal-dialog").removeClass("modal-lg").addClass("modal-xl");
+					}else{
+						if(!$("#releaseNoteAdminDetailModal .modal-dialog").hasClass("modal-lg")){
+							$("#releaseNoteAdminDetailModal .modal-dialog").removeClass("modal-xl").addClass("modal-lg");	
+						}
+					}
+					$(".table table tbody tr:first-child").addClass("bg-primary text-white");
+				}else{
+					$(".table table thead").addClass("bg-primary text-white");
+				}
+
 			}
 		});
 	}
@@ -1535,6 +1552,14 @@ var releaseNoteState = {
 		if (mode === "admin-list") {
 			$(containerSelector).html(getReleaseNoteAdminListContent("Release Notes (Admin)"));
 			rnLoadAdminReleaseNotes();
+			if($("#releaseNoteStyle").length<1){
+				$("head").append(
+					`<style id="releaseNoteStyle">
+						#rnAdminDetailBody ul{padding-left:16px !important;}
+						#rnAdminDetailBody ul li{list-style-type:disc !important;line-height:24px}
+						.table table{border-collapse:collapse;}
+					</style>`)
+			}
 			return;
 		}
 		if (mode === "admin-editor") {

@@ -1,6 +1,11 @@
 var STUDENT_PROFILE_SETTING_MAP = {};
 var STUDENT_PROFILE_SETTING_PENDING_ACTION = null;
-
+var fieldOptions = [];
+var DYNAMIC_FIELDS_LIST = {};
+var EDIT_INDEX = { section: null, index: null};
+var CALL_CUSTOM_PROFILE_FIELD_FLAG = true;
+var CUSTOM_FIELD_MAP = {};
+var LAST_HIGHLIGHTED_ROW_INDEX = null;
 $(document).ready(function () {
 	$("#studentProfileSettingConfirmationModal").on("hidden.bs.modal", function () {
 		clearStudentProfileSettingConfirmationModal();
@@ -10,7 +15,7 @@ $(document).ready(function () {
 });
 
 function initStudentProfileSettingSelects() {
-
+	$("body").append(dynamicProfileFieldBuilder());
 	var learningProgram = `<option value="ALL" selected>All Program</option>`;
 	learningProgram+=getLearningProgramContent(SCHOOL_ID, "N");
 	$("#learningProgramIds").html(learningProgram);
@@ -721,3 +726,933 @@ function profileSetting() {
     });
 
 }
+
+// Dynamic Add Profile Fields code start here//
+
+
+// DYNAMIC REUSEABLE FIELDS START HERE //
+function renderDynamicField(fieldConfig, value = "") {
+
+    const {
+        fieldId,
+        label,
+        fieldType,
+        inputType,
+        options
+    } = fieldConfig;
+
+    const oldValue = value || '';
+
+    let html = '';
+
+    // ================= INPUT TEXT =================
+    if (fieldType === 'input' && inputType === 'text') {
+        html = `
+        <label class="font-weight-semi-bold text-dark">${label}</label>
+        <div class="input-group mb-2 p-0">
+            <input type="text" id="${fieldId}" class="form-control form-control-sm group-append-hide-input">
+		</div>`;
+    }
+
+    // ================= DATEPICKER =================
+    else if (fieldType === 'input' && inputType === 'date') {
+        html = `
+        <label class="font-weight-semi-bold text-dark">${label}</label>
+        <div class="input-group mb-2 p-0">
+            <input type="text" id="${fieldId}" class="form-control form-control-sm group-append-hide-input" readonly />
+		</div>`;
+    }
+
+    // ================= FILE =================
+    else if (fieldType === 'input' && inputType === 'file') {
+
+		const hasFile = value && value !== "";
+		const fileName = fieldConfig.fileName || '';
+		const attachmentType = fieldConfig.attachmentType || 'I';
+
+		html = `
+		<div class="full mb-2">
+			<span class="font-weight-semi-bold text-primary">${label}:</span>
+			<div class="d-flex">
+				<!-- VIEW MODE -->
+				<div class="w-100" id="${fieldId}ViewBtn" style="${hasFile ? '' : 'display:none'}">
+					<div class="d-flex w-100 align-items-center">
+						<div class="d-inline-flex align-items-center border btn-dashed border-primary px-2 py-1 rounded flex-grow-1 mr-1 overflow-hidden">
+							<span class="bg-light-primary rounded-circle mr-2 d-inline-flex align-items-center justify-content-center" style="width:20px;height:20px;">
+								<i class="fa fa-file text-primary"></i>    
+							</span>
+							<span class="bar_count" id="${fieldId}FileName">
+								${fileName}
+							</span>    
+						</div>
+						<div class="d-inline-flex">
+							<!-- VIEW -->
+							<a href="javascript:void(0)" class="btn btn-success btn-sm mr-1 view-btn" onclick="viewAttachmentProfile(this, 'uploadFile','${attachmentType}','${fieldId}div')">
+								<img id="${fieldId}imgIcon"
+									class="full crop-uplod-img d-none"
+									src="${hasFile ? value : PATH_FOLDER_IMAGE2 + 'no-image.jpg' + SCRIPT_VERSION}"
+									thumbtype="${attachmentType === 'I' ? 'img' : 'pdf'}">
+								<i class="fa fa-eye"></i>    
+							</a>  
+						</div>   
+					</div>
+				</div>
+				<!-- UPLOAD -->
+				<div class="upload-btn-wrapper"
+					id="${fieldId}div"
+					data-pdfurl="${hasFile ? value : PATH_FOLDER_IMAGE2 + 'no-image.jpg' + SCRIPT_VERSION}"
+					style="${hasFile ? 'display:none' : ''}">
+					<input type="file"
+						class="file-input group-append-hide-input"
+						id="${fieldId}"
+						onchange="cropImage(event,'${fieldId}','${fieldId}imgIcon','${label}','','',true)">
+					<span class="upload-btn d-inline-flex align-items-center border btn-dashed border-primary py-1 px-2 rounded justify-content-center">
+						<i class="fa fa-upload"></i>&nbsp;Upload
+					</span>
+				</div>
+
+			</div>
+		</div>`;
+	}
+
+    // ================= DROPDOWN =================
+    else if (fieldType === 'dropdown') {
+        let optionsHtml = `<option value="">Select</option>`;
+        $.each(options, function(i, opt) {
+            const selected = opt == oldValue ? 'selected' : '';
+            optionsHtml += `<option value="${opt}" ${selected}>${opt}</option>`;
+        });
+        html = `
+        <label class="font-weight-semi-bold text-dark">${label}</label>
+        <div class="input-group mb-2 p-0">
+            <select id="${fieldId}"
+                class="form-control form-control-sm group-append-hide-input"
+                onchange="controlEditField(this,'${fieldId}','${oldValue}','select')">
+                ${optionsHtml}
+            </select>
+        </div>`;
+    }
+
+    // ================= CHECKBOX =================
+    else if (fieldType === 'checkbox') {
+        let optionsHtml = '';
+        $.each(options, function(i, opt) {
+            const id = `${fieldId}_${i}`;
+            const checked = Array.isArray(oldValue) && oldValue.includes(opt) ? 'checked' : '';
+            optionsHtml += `
+            <div class="custom-control custom-checkbox mr-3 mb-2">
+                <input type="checkbox"
+                    id="${id}"
+                    class="custom-control-input group-append-hide-input"
+                    ${checked}/>
+
+                <label class="custom-control-label" for="${id}">${opt}</label>
+            </div>`;
+        });
+        html = `
+        <div>
+            <span class="font-weight-semi-bold">${label}:</span>
+            <div class="d-flex flex-wrap">${optionsHtml}</div>
+        </div>`;
+    }
+
+    // ================= RADIO =================
+    else if (fieldType === 'radio') {
+		var optionsHtml = '';
+        $.each(options, function(i, opt) {
+            const id = `${fieldId}_${i}`;
+            const checked = opt == oldValue ? 'checked' : '';
+            optionsHtml += `
+            <div class="custom-control custom-radio mr-3 mb-2">
+                <input type="radio"
+                    name="${fieldId}"
+                    id="${id}"
+                    class="custom-control-input group-append-hide-input"
+                    ${checked} >
+                <label class="custom-control-label" for="${id}">${opt}</label>
+            </div>`;
+        });
+        html = `
+        <div>
+            <span class="font-weight-semi-bold">${label}:</span>
+            <div class="d-flex flex-wrap">${optionsHtml}</div>
+		</div>`;
+    }
+
+    return html;
+} 
+// DYNAMIC REUSEABLE FIELDS END HERE // 
+
+// ===============================
+// OPEN MODAL
+// ===============================
+async function openDynamicBuilder() {
+    if (!$('#dynamicFieldModal').length) {
+        $('body').append(dynamicProfileFieldBuilder());
+    }
+    
+	$('#dynamicFieldModal').modal('show');
+	if ($("#cropModal").length < 1) {
+		$("body").append(cropperImageModalContent()+viewUploadFileModal());
+		setTimeout(function () {
+			$("head").append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/cropperImage.js?v=1.1.26">`)
+		}, 1000);
+	}
+	$(document).off('shown.bs.tab', 'a[data-toggle="tab"]').on('shown.bs.tab', 'a[data-toggle="tab"]', async function (e) {
+		var target = $(e.target).attr("href"); // active tab ka id
+		if (target === "#viewAddProfileFields" && CALL_CUSTOM_PROFILE_FIELD_FLAG) {
+			await getCustomProfileFieldsRecords();
+			CALL_CUSTOM_PROFILE_FIELD_FLAG=false;
+		}
+		// ✅ IMPORTANT: tab visible hone ke baad adjust
+        var table = $('#customProfileFieldsTable').DataTable();
+        table.columns.adjust();
+
+	});
+}
+
+async function getCustomProfileFieldsRecords() {
+
+    var payload = {
+        userId: USER_ID
+    };
+
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + `/dashboard/custom-profile-fields/list/${UNIQUEUUID}`,
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+
+    var responseData = await callCommonAjax(ajaxReqDetails);
+
+    // ✅ destroy first
+    if ($.fn.DataTable.isDataTable('#customProfileFieldsTable')) {
+        $('#customProfileFieldsTable').DataTable().clear().destroy();
+    }
+
+    var rows = ``;
+
+    $.each(responseData.data, function (index, item) {
+		CUSTOM_FIELD_MAP[item.id] = item;
+        rows += `
+        <tr id="row_${item.id}">
+            <td>${item.parentFieldName}</td>
+            <td class="text-capitalize">${item.inputType == ""? item.fieldType:item.inputType}</td>
+            <td>${item.labelName}</td>
+            <td>${item.createdBy}</td>
+            <td>${item.createdAt}</td>
+            <td>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary dropdown-toggle btn-sm"
+                        data-toggle="dropdown">
+                        <i class="fa fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="javaScript:void(0);" class="dropdown-item" onclick="showWarningMessageShow(
+                            \'Are you sure you want to remove this field?\',
+                            \'reoveCustomProfileFields(\\\'row_${item.id}\\\', \\\'${item.id}\\\')\'
+                        )">
+                            <i class="fa fa-trash"></i>&nbsp;Remove
+                        </a>
+						${/*<a href="javaScript:void(0);"
+                           onclick="editFieldFromTable('${item.id}')"
+                           class="dropdown-item">
+                            <i class="fa fa-pencil"></i> Edit
+                        </a>*/''}
+                    </div>
+                </div>
+            </td>
+        </tr>`;
+
+    });
+
+    $("#customProfileFieldsTable tbody").html(rows);
+
+    // ✅ reinitialize immediately (no timeout needed)
+    $('#customProfileFieldsTable').DataTable({
+        scrollX: true,
+		autoWidth: false,
+		destroy: true,   // safety
+		order: [],
+		columnDefs: [
+			{ orderable: false, targets: -1 } // action column disable sorting
+		]
+    });
+
+    console.log("custom fields records", responseData);
+}
+
+async function reoveCustomProfileFields(rowID, customFieldID) {
+
+    var payload = {
+        userId: USER_ID,
+		customProfileFieldId:customFieldID
+    };
+
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + `/dashboard/custom-profile-fields/inactivate/${UNIQUEUUID}`,
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+
+    var responseData = await callCommonAjax(ajaxReqDetails);
+	showMessageTheme2(1, responseData.message);
+	$("#"+rowID).remove();
+	if($('#customProfileFieldsTable tbody tr').length<1){
+		$('#customProfileFieldsTable tbody').html(`<tr><td colspan="4" class="text-center">No data available in table</td></tr>`);
+	}
+	var table = $('#customProfileFieldsTable').DataTable();
+	table.columns.adjust();
+    
+}
+
+// ===============================
+// MODAL HTML
+// ===============================
+function dynamicProfileFieldBuilder() {
+    return `
+    <div class="modal fade" id="dynamicFieldModal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+				<div class="modal-header bg-primary text-white py-2">
+                    <h5>Dynamic Profile Builder</h5>
+                    <button class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body px-0 pt-0">
+                    <div class="full">
+						<div class="card-header card-header-tab-animation mb-3" id="multiple-tab-table tab-multiple-table">
+							<ul class="nav">
+								<li class="nav-item"><a role="tab" data-toggle="tab" href="#addProfileFields" class="active nav-link">Add Field</a></li>
+								<li class="nav-item"><a role="tab" data-toggle="tab" href="#viewAddProfileFields" class="nav-link">Added Field</a></li>
+							</ul>
+						</div>
+						<div class="tab-content">
+							<div class="tab-pane active" id="addProfileFields" role="tabpanel">
+								<div class="col-12">
+									<div class="row">
+										<!-- LEFT -->
+										<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 border-right">
+											<div class="row">
+												<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+													<label for="profileSection">Select Profile Section</label>
+													<select id="profileSection" class="form-control">
+														<option value="">Select Profile Section</option>
+														<option value="1">Personal Information</option>
+														<option value="21">Parent/Guardian Information</option>
+														<option value="44">Academic Information</option>
+														<option value="60">Sport & Extra Curriculars</option>
+													</select>
+												</div>
+												<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+													<label for="fieldType">Select Field Type</label>
+													<select id="fieldType" class="form-control mb-2" onchange="handleFieldTypeChange()">
+														<option value="">Select Field Type</option>
+														<option value="input_text">Text</option>
+														<option value="input_date">Date</option>
+														<option value="input_file">File</option>
+														<option value="dropdown">Dropdown</option>
+														${/*
+															<option value="checkbox">Checkbox</option>
+															<option value="radio">Radio</option>	
+														*/''}
+													</select>
+												</div>
+												<div class="col-12">
+													<label for="fieldLabel">Enter Label Name</label>
+													<input id="fieldLabel" class="form-control mb-2 d-none" placeholder="Enter Label Name">
+												</div>
+												
+											</div>
+											<div id="optionsWrapper" class="d-none">
+												<input id="optionInput" class="form-control mb-2" placeholder="Option">
+												<button class="btn btn-sm btn-primary mb-2" onclick="addFieldOption()">Add</button>
+												<ul id="optionsList"></ul>
+											</div>
+											<div class="row">
+												<div class="col-12">
+													<div class="alert alert-warning fade show" role="alert">Before adding any new field to the student profile, please ensure that a similar field does not already exist. Creating duplicate fields may lead to data inconsistency and system inefficiencies. It is recommended to review existing fields carefully prior to adding new ones.</div>
+												</div>
+											</div>
+											<button class="btn btn-primary mt-2" onclick="fieldPreview()">Add & Preview</button>
+										</div>
+										<!-- RIGHT -->
+										<div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12">
+											<div id="previewContainer"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="viewAddProfileFields" role="tabpanel">
+								<div class="col-12">
+									<div class="table-responsive">
+										<table id="customProfileFieldsTable" class="table table-bordered border-radius-table font-12 nowrap" style="min-width:750px;width:100% !important;">
+											<thead class="bg-primary text-white">
+												<tr>
+													<th>Profile Section</th>
+													<th>Field Type</th>
+													<th>Field Label</th>
+													<th>Created by</th>
+													<th>Created at</th>
+													<th>Action</th>
+												</tr>
+											</thead>
+											<tbody></tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+// ===============================
+// HANDLE TYPE
+// ===============================
+function handleFieldTypeChange() {
+    let type = $('#fieldType').val();
+
+    $('#fieldLabel').removeClass('d-none');
+
+    if (['dropdown','checkbox','radio'].includes(type)) {
+        $('#optionsWrapper').removeClass('d-none');
+    } else {
+        $('#optionsWrapper').addClass('d-none');
+        fieldOptions = [];
+        $('#optionsList').empty();
+    }
+}
+
+// ===============================
+// OPTIONS
+// ===============================
+
+
+function addMoreProfileFields() {
+    if (!$('#dynamicFieldModal').length) {
+        $('body').append(dynamicProfileFieldBuilder());
+    }
+    $('#dynamicFieldModal').modal("show");
+}
+
+
+// ===============================
+// OPTIONS
+// ===============================
+// function addFieldOption() {
+
+//     var option = $('#optionInput').val().trim();
+//     if (!option) return;
+
+//     var hasSpecialCharacter = /[^a-zA-Z0-9 ]/.test(option);
+//     if (hasSpecialCharacter) {
+//         showMessageTheme2(0, "Special characters are not allowed in option.");
+//         return;
+//     }
+
+//     var normalizedOption = option.toLowerCase();
+//     var isDuplicateOption = fieldOptions.some(function(existingOption) {
+//         return (existingOption || '').trim().toLowerCase() === normalizedOption;
+//     });
+
+//     if (isDuplicateOption) {
+//         showMessageTheme2(0, "Duplicate option is not allowed.");
+//         return;
+//     }
+
+//     fieldOptions.push(option);
+//     $('#optionInput').val('');
+//     renderOptions();
+// }
+function addFieldOption() {
+
+    var option = $('#optionInput').val().trim();
+    if (!option) return;
+
+    var hasSpecialCharacter = /[^a-zA-Z0-9 +\-]/.test(option);
+    if (hasSpecialCharacter) {
+        showMessageTheme2(0, "Special characters are not allowed in option.");
+        return;
+    }
+
+    var normalizedOption = option.toLowerCase();
+    var isDuplicateOption = fieldOptions.some(function(existingOption) {
+        return (existingOption || '').trim().toLowerCase() === normalizedOption;
+    });
+
+    if (isDuplicateOption) {
+        showMessageTheme2(0, "Duplicate option is not allowed.");
+        return;
+    }
+
+    fieldOptions.push(option);
+    $('#optionInput').val('');
+    renderOptions();
+}
+
+function renderOptions() {
+
+    var html = '';
+
+    $.each(fieldOptions, function(index, value) {
+        html += `
+        <li class="list-group-item d-flex justify-content-between">
+            ${value}
+            <button class="btn btn-sm btn-danger" onclick="removeFieldOption(${index})">X</button>
+        </li>`;
+    });
+
+    $('#optionsList').html(html);
+}
+
+function removeFieldOption(index) {
+    fieldOptions.splice(index, 1);
+    renderOptions();
+}
+
+
+// ===============================
+// SAVE / UPDATE FIELD
+// ===============================
+
+
+function fieldPreview() {
+
+    var section = $('#profileSection option:selected').text();
+    var sectionID = $('#profileSection').val();
+    var type = $('#fieldType').val();
+    var label = $('#fieldLabel').val().trim();
+
+    // ✅ VALIDATION
+    if (sectionID == "") {
+        showMessageTheme2(0, "Section is required.");
+        return;
+    } else if (!type) {
+        showMessageTheme2(0, "Field type is required.");
+        return;
+    } else if (!label) {
+        showMessageTheme2(0, "Label is required.");
+        return;
+    }
+    if (["dropdown", "checkbox", "radio"].includes(type) && fieldOptions.length < 2) {
+        showMessageTheme2(0, "Please add at least 2 options.");
+        return;
+    }
+
+    // ✅ INIT SECTION ARRAY
+    if (!DYNAMIC_FIELDS_LIST[section]) {
+        DYNAMIC_FIELDS_LIST[section] = [];
+    }
+
+    // ✅ DUPLICATE LABEL CHECK (case-insensitive)
+    // let isDuplicate = DYNAMIC_FIELDS_LIST[section].some((f, i) =>
+    //     f.label.toLowerCase() === label.toLowerCase() &&
+    //     !(EDIT_INDEX.section === section && EDIT_INDEX.index === i)
+    // );
+
+	// var isDuplicate = Object.keys(DYNAMIC_FIELDS_LIST).some(sec =>
+    // 	DYNAMIC_FIELDS_LIST[sec].some((f, i) =>
+	// 			f.label.toLowerCase() === label.toLowerCase() 
+	// 			&&
+	// 			!(EDIT_INDEX.section === sec && EDIT_INDEX.index === i)
+	// 		)
+	// 	);
+	var isDuplicate = checkDuplicate(label, section, EDIT_INDEX);
+
+    if (isDuplicate) {
+        showMessageTheme2(0, "Field label already exists in this section!");
+        return;
+    }
+
+	var isDuplicateInTable = false;
+
+	isDuplicateInTable = checkDuplicateInTable(label, EDIT_INDEX.id);
+
+	if (isDuplicateInTable) {
+		showMessageTheme2(0, "Field label already exists in Added Fields!");
+		return;
+	}
+
+    // ✅ GENERATE FIELD TYPE
+    let fieldType = '';
+    let inputType = null;
+
+    if (type === 'input_text') {
+        fieldType = 'input';
+        inputType = 'text';
+    }
+    else if (type === 'input_date') {
+        fieldType = 'input';
+        inputType = 'date';
+    }
+    else if (type === 'input_file') {
+        fieldType = 'input';
+        inputType = 'file';
+	}
+    else {
+        fieldType = type;
+    }
+
+    // ✅ FIELD ID GENERATION (ONLY WHEN ADD)
+    let fieldId;
+	var existingEditField = null;
+
+    if (EDIT_INDEX.section !== null && !EDIT_INDEX.isFromTable){
+		if (
+			DYNAMIC_FIELDS_LIST[EDIT_INDEX.section]
+			&& DYNAMIC_FIELDS_LIST[EDIT_INDEX.section][EDIT_INDEX.index]
+		) {
+			existingEditField = DYNAMIC_FIELDS_LIST[EDIT_INDEX.section][EDIT_INDEX.index];
+		}
+
+        // EDIT → same ID rakho (if record still exists)
+		if (existingEditField) {
+        	fieldId = existingEditField.fieldId;
+		}
+    } else {
+        // ADD → unique ID banao
+    }
+	
+	// ADD mode ya stale edit reference dono case me safe unique ID generate karo
+	if (!fieldId) {
+		let baseId = label.toLowerCase()
+			.replace(/\s+/g, '_')
+			.replace(/[^a-z0-9_]/g, '');
+
+		fieldId = baseId;
+		let counter = 1;
+
+		while (
+			Object.values(DYNAMIC_FIELDS_LIST)
+				.flat()
+				.some(f => f.fieldId === fieldId)
+		) {
+			fieldId = baseId + "_" + counter++;
+		}
+	}
+
+    // ✅ FINAL OBJECT
+    let data = {
+		// section,
+		sectionID,
+		fieldId,
+		fieldType,
+		inputType,
+		label,
+		
+	};
+
+	// ✅ ONLY FOR FILE TYPE
+	if (inputType === 'file') {
+		data.fileName = "";
+		data.attachmentType = 'I';
+	}
+
+	// ✅ ONLY FOR DROPDOWN TYPE
+	if (fieldType === 'dropdown' || fieldType === 'radio' || fieldType === 'checkbox') {
+		data.options = [...fieldOptions];
+	}
+
+	// ✅ SAVE / UPDATE
+    if (EDIT_INDEX.section !== null && !EDIT_INDEX.isFromTable) {
+
+		var oldSection = EDIT_INDEX.section;
+		var oldIndex = EDIT_INDEX.index;
+		var targetIndex = null;
+
+		// section same hai to normal replace, warna old section se remove karke new section me add
+		if (oldSection === section) {
+        	DYNAMIC_FIELDS_LIST[oldSection][oldIndex] = data;
+			targetIndex = oldIndex;
+		} else {
+			DYNAMIC_FIELDS_LIST[oldSection].splice(oldIndex, 1);
+			if (DYNAMIC_FIELDS_LIST[oldSection].length === 0) {
+				delete DYNAMIC_FIELDS_LIST[oldSection];
+			}
+			if (!DYNAMIC_FIELDS_LIST[section]) {
+				DYNAMIC_FIELDS_LIST[section] = [];
+			}
+			DYNAMIC_FIELDS_LIST[section].push(data);
+			targetIndex = DYNAMIC_FIELDS_LIST[section].length - 1;
+		}
+		EDIT_INDEX = { section: section, index: targetIndex };
+    } else {
+        DYNAMIC_FIELDS_LIST[section].push(data);
+    }
+	renderAllFields();	
+	resetBuilder();
+}
+
+function checkDuplicate(label, targetSection, editIndex) {
+    var isDuplicate = false;
+	var fields = DYNAMIC_FIELDS_LIST[targetSection] || [];
+
+    for (var i = 0; i < fields.length; i++) {
+        var f = fields[i];
+
+		var isSameEditingRow = editIndex
+			&& editIndex.section === targetSection
+			&& editIndex.index === i;
+		if (isSameEditingRow) {
+			continue;
+		}
+
+        if (f.label.toLowerCase() === label.toLowerCase()) {
+            isDuplicate = true;
+            break;
+        }
+	}
+
+    return isDuplicate;
+}
+function checkDuplicateInTable(label, currentId){
+
+    var table = $('#customProfileFieldsTable').DataTable();
+    var foundIndex = -1;
+
+    // remove old highlight
+    
+
+    // ✅ loop through ALL rows (internal)
+    table.rows().every(function(rowIdx){
+        var data = this.data();
+
+        var existingLabel = $('<div>').html(data[2]).text().trim();
+
+        // ✅ ignore current editing row
+        var rowItem = Object.values(CUSTOM_FIELD_MAP)[rowIdx];
+        if(rowItem && rowItem.id === currentId){
+            return true; // continue
+        }
+
+        if(existingLabel.toLowerCase() === label.toLowerCase()){
+            foundIndex = rowIdx;
+            return false; // break
+        }
+    });
+
+    if(foundIndex !== -1){
+
+        // ✅ get display order indexes (IMPORTANT FIX)
+        var displayIndexes = table
+            .rows({ order: 'applied', search: 'applied' })
+            .indexes()
+            .toArray();
+
+        var displayPosition = displayIndexes.indexOf(foundIndex);
+
+        if(displayPosition === -1){
+            return false; // safety
+        }
+
+        // ✅ correct page calculation
+        var pageLength = table.page.len();
+        var pageIndex = Math.floor(displayPosition / pageLength);
+
+        // 👉 go to correct page
+        table.page(pageIndex).draw(false);
+
+        setTimeout(function(){
+
+            // ✅ get correct row node AFTER pagination
+            var rowNode = table.row(foundIndex).node();
+
+            if(rowNode){
+                $(rowNode).addClass("bg-warning");
+
+                // 👉 switch tab
+                $('a[href="#viewAddProfileFields"]').tab('show');
+				
+				setTimeout(function () {
+					var table = $('#customProfileFieldsTable').DataTable();
+					table.columns.adjust().draw(false);
+				}, 300);
+                // 👉 scroll to row
+                $('html, body').animate({
+                    scrollTop: $(rowNode).offset().top - 200
+                }, 500);
+            }
+
+        }, 300);
+
+        return true;
+    }
+
+    return false;
+}
+
+function saveField() {
+	$.ajax({
+        type: "POST",
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLForHTML("dashboard", "custom-profile-fields/save/" + UNIQUEUUID),
+        data: JSON.stringify(DYNAMIC_FIELDS_LIST),
+        dataType: 'json',
+        success: function (data) {
+            if (data['status'] == '0' || data['status'] == '2') {
+                showMessageTheme2(0, data['message'], '', false);
+				// DYNAMIC_FIELDS_LIST={};
+                EDIT_INDEX = { section: null, index: null };
+                return false;
+            }else{
+				// ✅ RESET EDIT MODE
+    			EDIT_INDEX = { section: null, index: null };
+				DYNAMIC_FIELDS_LIST={};
+				// ✅ UI UPDATE
+				// renderAllFields();
+				resetBuilder();
+				$("#previewContainer").html('');
+				CALL_CUSTOM_PROFILE_FIELD_FLAG=true;
+				showMessageTheme2(1, "Field Saved Successfully");
+			}
+        }
+    });
+}
+
+
+
+
+
+// ===============================
+// RENDER ALL
+// ===============================
+
+function renderAllFields() {
+	var html =
+		`<div class="d-flex align-items-center justify-content-between">
+			<h6>Preview</h6>`;
+			// if(!SAVE_FIELDS_BTN_FLAG){
+				html+=`<button class="btn btn-success mt-2 ml-auto" onclick="saveField()">Save</button>`;
+				// SAVE_FIELDS_BTN_FLAG=true;
+			// }
+		html+=`</div>`;
+	if(Object.keys(DYNAMIC_FIELDS_LIST).length>0){
+		Object.keys(DYNAMIC_FIELDS_LIST).forEach(section => {
+			html += `<h5 class="mt-3">${section}</h5>`;
+			DYNAMIC_FIELDS_LIST[section].forEach((f, i) => {
+				html += `
+				<div class="border p-2 mb-2">
+					${renderDynamicField(f)}
+					<div class="d-flex justify-content-between">
+						<div>
+							<button class="btn btn-sm btn-outline-primary" onclick="editField('${section}','${f.sectionID}', ${i})">Edit</button>
+							<button class="btn btn-sm btn-danger" onclick="deleteField('${section}', ${i})">Delete</button>
+						</div>
+					</div>
+				</div>`;
+
+				onclick=""
+			});
+		});
+	}
+	$('#previewContainer').html(html);
+	// datepicker init
+    Object.values(DYNAMIC_FIELDS_LIST).forEach(sectionArr => {
+        sectionArr.forEach(f => {
+			if (f.inputType === 'date') {
+                if (!$('#' + f.fieldId).hasClass('hasDatepicker')) {
+                    $('#' + f.fieldId).datepicker({
+						autoclose: true,
+	   					format : 'M dd, yyyy',
+                    });
+                }
+            }
+        });
+    });
+
+}
+
+// ===============================
+// DELETE
+// ===============================
+function deleteField(section, index){
+    DYNAMIC_FIELDS_LIST[section].splice(index,1);
+
+    // agar section empty ho gaya to remove kar do
+    if (DYNAMIC_FIELDS_LIST[section].length === 0) {
+        delete DYNAMIC_FIELDS_LIST[section];
+    }
+	
+	if(Object.keys(DYNAMIC_FIELDS_LIST).length<1){
+		SAVE_FIELDS_BTN_FLAG=false;		
+	}
+    renderAllFields();
+	resetBuilder();
+}
+
+// ===============================
+// EDIT
+// ===============================
+function editField(section, sectionID, index){
+
+    let f = DYNAMIC_FIELDS_LIST[section][index];
+
+    $('#profileSection').val(sectionID);
+    $('#fieldLabel').val(f.label);
+    $('#fieldType').val(
+        f.inputType ? 'input_'+f.inputType : f.fieldType
+    );
+
+    handleFieldTypeChange();
+
+    fieldOptions = [...(f.options || [])];
+    renderOptions();
+
+    EDIT_INDEX = { section, index };
+}
+
+function editFieldFromTable(id){
+
+    var item = CUSTOM_FIELD_MAP[id];
+    if (!item) return;
+
+    // ✅ 1. Switch to Add Field tab
+    $('a[href="#addProfileFields"]').tab('show');
+
+    // ✅ 2. Fill form
+    $('#profileSection').val(item.fieldParent);
+    $('#fieldType').val(item.fieldType);
+    $('#fieldLabel').val(item.labelName);
+
+    handleFieldTypeChange();
+
+    // ✅ 3. Options (if exist)
+    fieldOptions = item.options ? [...item.options] : [];
+    renderOptions();
+
+    // ✅ 4. Set EDIT MODE (separate from old function)
+    EDIT_INDEX = {
+        id: id,
+        isFromTable: true
+    };
+}
+
+
+function resetBuilder() {
+    fieldOptions = [];
+    EDIT_INDEX = { section: null, index: null };;
+	$('#fieldLabel').removeClass('d-none');
+    $('#fieldLabel').val('');
+    $('#fieldType').val('');
+    $('#profileSection').val('');
+    $('#optionsWrapper').addClass('d-none');
+    $('#optionsList').empty();
+}
+
+
+
+
+// Dynamic Add Profile Fields code end here//
+
+

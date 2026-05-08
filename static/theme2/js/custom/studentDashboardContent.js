@@ -63,7 +63,7 @@ async function rendereDashboardContent(isParent){
         renderSchoolDaiaryBtnCount();
         // renderActivity(dashboardData.userId)
         getCartCount(dashboardData.userId);
-        getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade)
+        await getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade)
         // setTimeout(function () {
         //     getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
         // }, 10000);
