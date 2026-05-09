@@ -351,7 +351,7 @@ function parentStudentCalendarRequestByFilter(src){
     }
 }
 
-async function showClassMeetingSummary(meetingId, eventId){
+async function showClassMeetingSummary(meetingId, eventId, eventInstanceKey){
     parentStudentClassScheduleEnsureSummaryModal();
     $("#parentStudentClassSummaryModalBody").html(getParentStudentClassSummaryLoadingHtml());
     $("#parentStudentClassSummaryModal").modal("show");
@@ -371,7 +371,7 @@ async function showClassMeetingSummary(meetingId, eventId){
         var response = await callCommonAjax(ajaxReqDetails);
         var details = response && response.details ? response.details : {};
         details = parentStudentClassScheduleNormalizeSummaryResponse(details);
-        var eventMeta = parentStudentClassScheduleGetEventMeta(meetingId, eventId);
+        var eventMeta = parentStudentClassScheduleGetEventMeta(meetingId, eventId, eventInstanceKey);
         if(!details || $.isEmptyObject(details)){
             $("#parentStudentClassSummaryModalBody").html(getParentStudentClassSummaryNoDataHtml("No class summary found."));
             return;
@@ -603,14 +603,31 @@ function parentStudentClassScheduleNormalizeSummaryResponse(details){
     return normalized;
 }
 
-function parentStudentClassScheduleGetEventMeta(meetingId, eventId){
+function parentStudentClassScheduleBuildEventInstanceKey(eventObj){
+    if(!eventObj){
+        return "";
+    }
+    return [
+        eventObj.id || "",
+        eventObj.meetingId || "",
+        eventObj.start || "",
+        eventObj.end || ""
+    ].join("|");
+}
+
+function parentStudentClassScheduleGetEventMeta(meetingId, eventId, eventInstanceKey){
     var meta = {};
     if(!$.isArray(GLOBAL_EVENTS)){
         return meta;
     }
     var eventObj = null;
-    if(eventId){
+    if(eventInstanceKey){
         eventObj = GLOBAL_EVENTS.find(function(e){
+            return parentStudentClassScheduleBuildEventInstanceKey(e) === eventInstanceKey;
+        });
+    }
+    if(eventId){
+        eventObj = eventObj || GLOBAL_EVENTS.find(function(e){
             return (e.id + "") === (eventId + "");
         });
     }

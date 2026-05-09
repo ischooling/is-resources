@@ -63,12 +63,86 @@
 			var name = escapeChatHtml(a.name || 'Admin');
 			var n = parseInt(a.count, 10) || 0;
 			var roleSuffix = a.role === 'superadmin' ? ' ★' : '';
-			html += '<div class="chat-chip">'
+			var adminId = escapeChatHtml(a.userId || '');
+			// Chips are click-targets: superadmins jump straight into that admin's filtered list.
+			html += '<div class="chat-chip chat-chip-admin"'
+				+ ' data-admin-id="' + adminId + '"'
+				+ ' data-admin-name="' + name + '"'
+				+ ' role="button" tabindex="0"'
+				+ ' style="cursor:pointer;">'
 				+ '<span class="chip-name">' + name + roleSuffix + '</span>'
 				+ '<span class="chip-count">' + n + '</span>'
 				+ '</div>';
 		});
 		$stack.html(html);
+	}
+
+	// Post `setFilterMode` to the chat iframe — wait for widgetReady if the iframe hasn't
+	// finished loading yet. Returns nothing; fire-and-forget.
+	function postFilterModeWhenReady($chatFrame, mode) {
+		if (!$chatFrame || !$chatFrame.length || !mode) return;
+		function send() {
+			var iframeEl = document.getElementById('chat-frame');
+			if (!iframeEl || !iframeEl.contentWindow) return;
+			try {
+				iframeEl.contentWindow.postMessage(
+					{ type: 'setFilterMode', mode: mode },
+					IS_CHAT_URL
+				);
+			} catch (e) { /* ignore cross-origin errors */ }
+		}
+		if ($chatFrame.data('widget-ready')) {
+			send();
+			return;
+		}
+		if (!$chatFrame.attr('src')) {
+			$chatFrame.attr('src', getISChatWidgetUrl());
+		}
+		var fired = false;
+		var onReady = function (event) {
+			if (fired) return;
+			if (IS_CHAT_ORIGIN && event.origin !== IS_CHAT_ORIGIN) return;
+			if (!event.data || event.data.type !== 'widgetReady') return;
+			fired = true;
+			window.removeEventListener('message', onReady);
+			send();
+		};
+		window.addEventListener('message', onReady);
+	}
+
+	function openAdminConversations(adminId, adminName) {
+		if (!adminId) return;
+		var $chatFrame = $('#chat-frame');
+		if (!$chatFrame.length) return;
+		showChatFrame($chatFrame);
+		function postFilter() {
+			var iframeEl = document.getElementById('chat-frame');
+			if (!iframeEl || !iframeEl.contentWindow) return;
+			try {
+				iframeEl.contentWindow.postMessage(
+					{ type: 'filterByAdmin', adminId: adminId, adminName: adminName || '' },
+					IS_CHAT_URL
+				);
+			} catch (e) { /* ignore cross-origin errors */ }
+		}
+		if ($chatFrame.data('widget-ready')) {
+			postFilter();
+		} else {
+			// Widget hasn't loaded yet — wait for widgetReady, then post.
+			$chatFrame.attr('src', $chatFrame.attr('src') || getISChatWidgetUrl());
+			var fired = false;
+			var onReady = function (event) {
+				if (fired) return;
+				if (IS_CHAT_ORIGIN && event.origin !== IS_CHAT_ORIGIN) return;
+				if (!event.data || event.data.type !== 'widgetReady') return;
+				fired = true;
+				window.removeEventListener('message', onReady);
+				postFilter();
+			};
+			window.addEventListener('message', onReady);
+		}
+		// Collapse the hover stack so it doesn't sit on top of the iframe.
+		$('#chat-btn-stack').removeClass('is-open');
 	}
 
 	function handleUnreadMessage(data) {
@@ -119,7 +193,7 @@
 		var pending = $chatFrame.data('pending-chat');
 		if (pending) {
 			$chatFrame.removeData('pending-chat');
-			openWhatsAppChatInFrame(pending.name, pending.phone);
+			openWhatsAppChatInFrame(pending.name, pending.phone, pending.leadNo);
 		}
 	}
 
@@ -129,22 +203,23 @@
 		$('#close-icon').show();
 	}
 
-	function openWhatsAppChatInFrame(name, phone) {
+	function openWhatsAppChatInFrame(name, phone, leadNo) {
 		var chatBaseUrl = getISChatBaseUrl();
 		var normalizedPhone = (phone || '').toString().replace(/\D/g, '');
 		if (!chatBaseUrl || !normalizedPhone) return false;
+		var leadNoStr = leadNo == null ? '' : String(leadNo);
 		var $chatFrame = $('#chat-frame');
 		if ($chatFrame.length) {
 			showChatFrame($chatFrame);
 			if ($chatFrame.data('widget-ready')) {
-				$chatFrame.data('active-chat', { name: name, phone: normalizedPhone });
+				$chatFrame.data('active-chat', { name: name, phone: normalizedPhone, leadNo: leadNoStr });
 				$chatFrame[0].contentWindow.postMessage(
-					{ type: 'openChat', name: name || '', phone: normalizedPhone },
+					{ type: 'openChat', name: name || '', phone: normalizedPhone, leadNo: leadNoStr },
 					getISChatBaseUrl()
 				);
 				return false;
 			}
-			$chatFrame.data('pending-chat', { name: name, phone: normalizedPhone });
+			$chatFrame.data('pending-chat', { name: name, phone: normalizedPhone, leadNo: leadNoStr });
 			if (!$chatFrame.attr('src')) {
 				var widgetUrl = $chatFrame.data('default-src') || getISChatWidgetUrl();
 				$chatFrame.data('default-src', widgetUrl);
@@ -153,6 +228,7 @@
 			return false;
 		}
 		var chatUrl = chatBaseUrl + '/?name=' + encodeURIComponent(name || '') + '&phone=' + encodeURIComponent(normalizedPhone);
+		if (leadNoStr) chatUrl += '&leadNo=' + encodeURIComponent(leadNoStr);
 		window.open(chatUrl, '_blank');
 		return false;
 	}
@@ -200,6 +276,10 @@
 				$frame.show();
 				$('#chat-icon').hide();
 				$('#close-icon').show();
+				// Superadmins always land on the org-wide "All Chats" view when opening.
+				if (USER_ROLE === 'SUPER_ADMIN') {
+					postFilterModeWhenReady($frame, 'ALL');
+				}
 			}
 		});
 		$('#close-icon').on('click', function (e) {
@@ -256,7 +336,8 @@
 	window.ISChatBadge = {
 		renderChatStack: renderChatStack,
 		renderAdminStack: renderAdminStack,
-		handleUnreadMessage: handleUnreadMessage
+		handleUnreadMessage: handleUnreadMessage,
+		openAdminConversations: openAdminConversations
 	};
 
 	$(document).mouseup(function (e) {
@@ -331,5 +412,22 @@
 		$(document).on('mouseleave', '#chat-btn, #chat-btn-stack', closeStackSoon);
 		$(document).on('focus', '#chat-btn', openStack);
 		$(document).on('blur', '#chat-btn', closeStackSoon);
+
+		// Click an admin chip → open chat frame filtered to that admin's conversations.
+		$(document).on('click', '.chat-chip-admin', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var adminId = $(this).attr('data-admin-id');
+			var adminName = $(this).attr('data-admin-name');
+			openAdminConversations(adminId, adminName);
+		});
+		$(document).on('keydown', '.chat-chip-admin', function (e) {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				var adminId = $(this).attr('data-admin-id');
+				var adminName = $(this).attr('data-admin-name');
+				openAdminConversations(adminId, adminName);
+			}
+		});
 	});
 })(jQuery);

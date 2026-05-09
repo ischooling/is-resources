@@ -166,7 +166,8 @@ function renderClassScheduleTable(events, startDate, endDate) {
                     CLASS_COUNT++;
                 }else if(event.category === "ACTIVITY"){
                     ACTIVITY_COUNT++;
-                } 
+                }
+                var eventInstanceKey = parentStudentClassScheduleBuildEventInstanceKey(event);
                 html += `
                 <tr class="${event.category}-row even-row" data-event-id="${event.id}">
                     <td class="py-2">${serial++}</td>
@@ -176,7 +177,7 @@ function renderClassScheduleTable(events, startDate, endDate) {
                     <td class="py-2">${typeBadge}</td>
                     <td class="py-2 status-cell">${getStatusBadge(getEventStatus(event))}</td>
                     <td class="py-2 text-primary">${event.classesAttendance == "Attended" ? event.classesAttendance + " | " + event.classesAttendanceDuration : (event.classesAttendance == "Attending" ? event.classesAttendance : "<span class='text-dark'>N/A<span>")}</td>
-                    <td class="py-2">${event.classesAttendance == "Attended" ? `<a href='javascript:void(0);' onclick='showClassMeetingSummary("${event.meetingId}","${event.id}")' class='border border-primary text-primary bg-light-primary rounded-10 btn btn-sm font-11'> <i class="fa fa-eye" aria-hidden="true"></i> View</a>` : "N/A"}</td>
+                    <td class="py-2">${event.classesAttendance == "Attended" ? `<a href='javascript:void(0);' onclick='showClassMeetingSummary("${event.meetingId}","${event.id}","${eventInstanceKey}")' class='border border-primary text-primary bg-light-primary rounded-10 btn btn-sm font-11'> <i class="fa fa-eye" aria-hidden="true"></i> View</a>` : "N/A"}</td>
                 </tr>`;
             });
 

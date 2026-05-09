@@ -1,4 +1,4 @@
-function confirmAndOpenWhatsAppChat(name, phone, leadId, rightTime) {
+function confirmAndOpenWhatsAppChat(name, phone, leadId, rightTime, leadNo) {
   var $curSpan = $("#leadCurTimeText_" + leadId + " span").first();
   var currentTime = ($curSpan.text() || "").trim() || "—";
   var isPerfect = $curSpan.hasClass("text-success");
@@ -7,8 +7,7 @@ function confirmAndOpenWhatsAppChat(name, phone, leadId, rightTime) {
     rightTime: rightTime && rightTime !== "" ? rightTime : "—",
     isPerfect: isPerfect,
     onProceed: function () {
-      openWhatsAppChatInFrame(name, phone);
-      
+      openWhatsAppChatInFrame(name, phone, leadNo);
     },
   });
   return false;
@@ -76,13 +75,14 @@ function showBestTimeConnectModal(opts) {
   });
 }
 
-function getInlineCopyHtml(value, uniqueId, fnName) {
+function getInlineCopyHtml(value, uniqueId,color) {
   if (!value || value === "N/A") return "";
   var safe = String(value).replace(/"/g, "&quot;");
+  let text_color = color ?color : "text-primary"
   return (
     '<input type="text" id="copyVal_' + uniqueId + '" value="' + safe + '" ' +
     'style="position:absolute;left:-9999px;opacity:0;height:0;width:0;padding:0;border:0;" />' +
-    '<a href="javascript:void(0)" class="ml-1 text-primary" data-toggle="tooltip" data-placement="top" ' +
+    `<a href="javascript:void(0)" class="ml-1 ${text_color}" data-toggle="tooltip" data-placement="top" ` +
     'data-original-title="Copy" onclick="copyURL(\'copyVal_' + uniqueId + '\',\'copyMsg_' + uniqueId + '\')">' +
     '<i class="pe-7s-copy-file" aria-hidden="true" style="font-size:14px;vertical-align:middle;"></i>' +
     '</a>' +
@@ -1491,7 +1491,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
         // +objRights.countryOffsetTimezone
         // <span class="leadInfoTime"></span>
         // '+objRights.countryOffsetTimezone+'
-				html+='<span class="lead-no-cell lead-no-cell-'+leads.leadId+'">'+leads.srNo+'.&nbsp;Filled details &nbsp;<span class="font-weight-bold">'+leads.leadNo+'</span></span> | Lead Score: <span class="'+lScoreColor+' text-white bold p-1 rounded">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span>'
+				html+='<span class="lead-no-cell lead-no-cell-'+leads.leadId+'">'+leads.srNo+'.&nbsp;Filled details &nbsp;<span class="font-weight-bold">'+leads.leadNo + getInlineCopyHtml(leads.leadNo, 'Leadno_'+leads.leadId,"text-white")+'</span></span> | Lead Score: <span class="'+lScoreColor+' text-white bold p-1 rounded">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span>'
 				html+='<br><div class="d-flex justify-content-center"><p class="bold font-12 p-1 bg-white text-dark w-fit-content mt-1 mb-0 rounded" id="timerLeadDisplay_'+leads.leadId+'"></p></div>'
             var priorityColor='bg-warning text-dark';
             if(leads.priority=='Urgent'){
@@ -1668,7 +1668,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   +'<td class="border-0 p-1">'+(leads.isdCode!=''?leads.isdCode:'')+' '+(leads.phone!=''?leads.phone:'N/A');
                     if(leads.isdCode!=''){
                       html+='<span>'
-                        html+=`<a href="javascript:void(0)" target="_target" class="position-relative" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.phoneIsd!=''?leads.phoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}')">`
+                        html+=`<a href="javascript:void(0)" target="_target" class="position-relative" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.phoneIsd!=''?leads.phoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}','${paymentReportEscapeSingleQuote(leads.leadNo||'')}')">`
                           html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
                           
                             if(leads.whatsAppVerifiedStatus=='N'){}
@@ -1706,7 +1706,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                     html+='<br/>';
                     if(leads.phoneNoAlter!=''){
                       html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
-                      html+=`<a href="javascript:void(0)" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" /></a>`;
+                      html+=`<a href="javascript:void(0)" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}','${paymentReportEscapeSingleQuote(leads.leadNo||'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" /></a>`;
                       html += `
                           <a href="javascript:void(0);" 
                             onclick="callLeadViaCallHippo('${leaddata.allowCallhippoService}','${leaddata.callhippoBypassNumber}','${leads.phoneIsd || ''}','${leads.isdCode || ''}','${leads.phone || ''}')"

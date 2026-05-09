@@ -3004,7 +3004,16 @@ function renderDashboardReleaseNotePanel() {
 	var state = window.RELEASE_NOTE_DASHBOARD_STATE || {};
 	var notes = Array.isArray(state.releaseNotes) ? state.releaseNotes : [];
 	var newCount = parseInt(state.newCount, 10) || 0;
+	var totalCount = notes.length;
+	var $releaseNoteBtn = $("#releaseNoteBtn");
 	var $badge = $("#releaseNoteBadge");
+	if ($releaseNoteBtn.length) {
+		if (totalCount >= 1) {
+			$releaseNoteBtn.removeClass("d-none");
+		} else {
+			$releaseNoteBtn.addClass("d-none");
+		}
+	}
 	if ($badge.length) {
 		if (newCount > 0) {
 			$badge.text(newCount).removeClass("d-none");
@@ -3023,7 +3032,7 @@ function renderDashboardReleaseNotePanel() {
 			"<div class='card mb-0'>" +
 				"<div class='card-body'>" +
 					"<h6 class='mb-2'>Release Notes</h6>" +
-					"<p class='text-muted mb-0'>No release note published for your role yet.</p>" +
+					"<p class='text-muted mb-0'>Coming soon.</p>" +
 				"</div>" +
 			"</div>"
 		);
