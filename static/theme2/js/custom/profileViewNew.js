@@ -3832,8 +3832,9 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
                 requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
             }else if(keyId == 'motherEmail' || keyId == 'fatherEmail' || keyId == 'guardianEmail'){
                 requestProfileData['fieldValue'] = escapeCharacters($('#' + keyId).val());
+                 var relationType = escapeCharacters($('#relationType').val());
                 if(USER_ROLE == "STUDENT"){
-                    var relationType = PROFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType;                
+                    relationType = PROFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType;                
                 }
                 requestProfileData['primaryParent'] = escapeCharacters(relationType);
                 if (keyId == 'motherEmail') {
