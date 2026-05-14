@@ -21,6 +21,7 @@ function loadGraduationCeremonyAttendees(){
                 const studentInfo = `
                     <strong>${attendee.fullName}</strong><br>
                     <small>${attendee.email}</small><br>
+                    <small>Attend As: ${attendee.attendAs ? attendee.attendAs : "N/A"}</small><br>
                     <small>Age: ${!attendee.age ? "N/A" : attendee.age}</small><br>
                     <small>Phone No.: ${attendee.phoneNo}</small><br>
                     <small>Alt Phone No.: ${attendee.alternatePhoneNo ? attendee.alternatePhoneNo : "N/A"}</small><br>
