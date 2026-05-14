@@ -791,7 +791,21 @@ function saveReferralCodeFromPaymentWindow() {
     }
   });
 }
+var STUDENT_BROADCAST_PROVIDER = 'WATI';
+function getStudentBroadcastProviderMeta(provider) {
+	if ((provider || '').toUpperCase() === 'GUPSHUP') {
+		return { key: 'GUPSHUP', label: 'Gupshup', getTemplatesRoute: 'get-gupshup-templates-for-student-list', sendMessageRoute: 'send-gupshup-message-for-student' };
+	}
+	return { key: 'WATI', label: 'Wati', getTemplatesRoute: 'get-wati-templates-for-student-list', sendMessageRoute: 'send-wati-message-for-student' };
+}
 function getWatiBroadcastTemplates(){
+	var providerArg = arguments.length > 0 ? arguments[0] : null;
+	var providerMeta = getStudentBroadcastProviderMeta(providerArg);
+	STUDENT_BROADCAST_PROVIDER = providerMeta.key;
+	if (typeof setWhatsappBroadcastProvider === 'function') {
+		setWhatsappBroadcastProvider(providerMeta.key);
+	}
+	$('.whatsapp-provider-label').text(providerMeta.label);
 	$("#allWatiBroadcastTemplatesList").html('');
 	$("#allWatiBroadcastTemplatesList").html('');
 	$('#mcustomWatiBroadcastTemplatesListClose').click(function(e) { 
@@ -822,7 +836,7 @@ function getWatiBroadcastTemplates(){
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('leads','get-wati-templates-for-student-list'),
+		url : getURLFor('leads', providerMeta.getTemplatesRoute),
 		data : JSON.stringify(request),
 		dataType : 'json',
 		cache : false,
@@ -833,19 +847,25 @@ function getWatiBroadcastTemplates(){
 				showMessageTheme2(0, data['message'],'',false);
 			} else {
 				watiTemplateContent=data;
-				//console.log('watiTemplateContent DATA : ' + JSON.stringify(watiTemplateContent));
+				var isGupshupPreview = (data.provider || providerMeta.key) === 'GUPSHUP';
 				$.each(watiTemplateContent.messageTemplates, function(index, obj) {
 					if(obj.customParams != null && obj.customParams != ''){
 						$.each(obj.customParams, function(i, param) {
 							var placeholder = "{{" + param.paramName + "}}";
-							var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
-							if (obj.bodyOriginal.includes("*{{"+param.paramName+"}}*")) {
-								var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							var boldedRegex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							if (isGupshupPreview) {
+								obj.body = obj.body.replace(boldedRegex, placeholder);
+								obj.bodyOriginal = obj.bodyOriginal.replace(boldedRegex, "<b>" + placeholder + "</b>");
 							} else {
-								var regex = placeholder;
+								var regex;
+								if (obj.bodyOriginal.includes("*{{"+param.paramName+"}}*")) {
+									regex = boldedRegex;
+								} else {
+									regex = placeholder;
+								}
+								obj.body = obj.body.replace(regex, param.paramValue);
+								obj.bodyOriginal = obj.bodyOriginal.replace(regex, "<b>"+param.paramValue+"</b>");
 							}
-							obj.body = obj.body.replace(regex, param.paramValue);
-							obj.bodyOriginal = obj.bodyOriginal.replace(regex, "<b>"+param.paramValue+"</b>");
 						});
 					}
 				});
@@ -867,6 +887,8 @@ function getWatiBroadcastTemplates(){
 				var userListPopup = $("#usrPopData");
 				// userListPopup.html('');
 				userListPopup.html(swatiBroadcastSendMobileModal(data));
+
+				$('.whatsapp-provider-label').text(providerMeta.label);
 
 				$("#mswatiBroadcastSendThroughMobile").modal("hide");
 				//return false;
@@ -1288,19 +1310,33 @@ function sendWatiNotificationToUserForStudent(indexNo,templateName,selectedUsers
 	$('#resendWatiMessagesData').html('<a id="resend_btn" class="btn btn-primary px-3 py-2 mr-2 mt-3 float-right" href="javascript:void(0);">Resend</a>');
 	
 
+	var providerMeta = getStudentBroadcastProviderMeta(STUDENT_BROADCAST_PROVIDER);
+	var selectedTemplate = (typeof getSelectedWhatsappBroadcastTemplate === 'function') ? getSelectedWhatsappBroadcastTemplate(indexNo) : null;
+
 	var request={}
 	request['userId']=USER_ID;
 	request['templateName']=templateName;
-	//request['broadcastName']="broadcastName";
-	//request['userData']="userData";
-	//request['leadID']=leadID; 
-	request['selectedUsers']=selectedUsers; 
-	//console.log(request);
+	request['templateId']=selectedTemplate && selectedTemplate.templateId ? selectedTemplate.templateId : '';
+	request['provider']=providerMeta.key;
+	request['selectedUsers']=selectedUsers;
+
+	if (providerMeta.key === 'GUPSHUP') {
+		var paramCount = (typeof getSelectedWhatsappBroadcastTemplateParamCount === 'function') ? getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate) : 0;
+		request['templateParamCount'] = paramCount;
+		if (typeof collectGupshupParamMapping === 'function') {
+			var mapping = collectGupshupParamMapping(paramCount);
+			if (mapping === null) {
+				showMessageTheme2(0, 'Please map all template placeholders before sending','',false);
+				return false;
+			}
+			request['paramMapping'] = mapping;
+		}
+	}
 
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('leads','send-wati-message-for-student'),
+		url : getURLFor('leads', providerMeta.sendMessageRoute),
 		data : JSON.stringify(request),
 		dataType : 'json',
 		cache : false,

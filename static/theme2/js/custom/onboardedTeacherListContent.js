@@ -383,6 +383,10 @@ function swatiBroadcastSendMobileModal(data){
 									</div>
 							</div>
 							<div class="modal-body pt-1">
+								<div id="gupshupParamMappingWrap" class="full mb-2" style="display:none;">
+									<div class="font-weight-bold mb-1" style="font-size:13px;">Map template placeholders:</div>
+									<div id="gupshupParamMapping" class="d-flex flex-wrap" style="gap:8px;"></div>
+								</div>
 								<form id="sendWatiBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
 									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
 										<table id="mbroadcastWatiSendTable" class="table" style="font-size:14px;min-width:450px;">

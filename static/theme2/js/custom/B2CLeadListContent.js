@@ -126,6 +126,8 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
     html +=
       '<button class=" btn btn-primary  text-white  btn-full-mobile mb-2 mr-2" onclick="getWatiTemplates()" >Wati Broadcast</button>';
     html +=
+      '<button class="btn text-white  btn-full-mobile mb-2 mr-2" style="background-color:#7000FF;" onclick="getWatiTemplates(\'GUPSHUP\')" >Gupshup Broadcast</button>';
+    html +=
         '<button class=" btn btn-focus text-white btn-full-mobile mb-2" onclick="getEmailTemplates(\'B2C\')" >Email Broadcast</button>';
     html += "</div>";
   }

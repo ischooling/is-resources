@@ -169,6 +169,7 @@ function getLeadLogsFiltersAndTable() {
 						<th class="text-center bg-primary text-white"><span class="changeHeadText">User</span> Name</th>
 						<th class="text-center bg-primary text-white">Call | Call Hippo</th>
 						<th class="text-center bg-primary text-white">Wati</th>
+						<th class="text-center bg-primary text-white">Gupshup</th>
 						<th class="text-center bg-primary text-white">Whatsapp</th>
 						<th class="text-center bg-primary text-white">Mail</th>
 						<th class="text-center bg-primary text-white">Action</th>
@@ -280,7 +281,7 @@ function getLeadLogsCounselorHtml(data) {
 	var htmlRet = "";
 
 	if (!leadListCounselor.length) {
-		return '<tr><td colspan="7" class="text-center">No Record</td></tr>';
+		return '<tr><td colspan="8" class="text-center">No Record</td></tr>';
 	}
 
 	for (var ind = 0; ind < leadListCounselor.length; ind++) {
@@ -292,6 +293,7 @@ function getLeadLogsCounselorHtml(data) {
 		htmlRet += '<td style="vertical-align: top !important;" class="text-left">' + sanitizeLeadLogsText(leadCounselor.assignName) + '</td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showZadarmaDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.zadarma) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-success text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.zadarmaCount) + '</button>&nbsp;|&nbsp;<button onClick="showCallhippoDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.callhippo) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-info text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.callhippoCount) + '</button></td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showWatiDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.wati) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-warning text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.watiCount) + '</button></td>';
+		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showGupshupBroadcastDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.gupshupIds) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-success text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.gupshupCount) + '</button></td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showWhatsappDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.whatsappIds) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-primary text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.whatsappCount) + '</button></td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showMailBrodcastDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.mailIds) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-info text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.mailCount) + '</button></td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center">' + actionHtml + '</td>';
@@ -306,6 +308,7 @@ function getLeadLogsFootHtml(data) {
 	var zadarmatotal = 0;
 	var callhippototal = 0;
 	var watitotal = 0;
+	var gupshuptotal = 0;
 	var whatsapptotal = 0;
 	var mailtotal = 0;
 
@@ -314,6 +317,7 @@ function getLeadLogsFootHtml(data) {
 		zadarmatotal += leadCounselor.zadarmaCount || 0;
 		callhippototal += leadCounselor.callhippoCount || 0;
 		watitotal += leadCounselor.watiCount || 0;
+		gupshuptotal += leadCounselor.gupshupCount || 0;
 		whatsapptotal += leadCounselor.whatsappCount || 0;
 		mailtotal += leadCounselor.mailCount || 0;
 	}
@@ -324,11 +328,81 @@ function getLeadLogsFootHtml(data) {
 	htmlRet += '<th style="vertical-align: top !important;" class="text-center">Total</th>';
 	htmlRet += '<th style="vertical-align: top !important;" class="text-center">' + zadarmatotal + ' / ' + callhippototal + '</th>';
 	htmlRet += '<th style="vertical-align: top !important;" class="text-center">' + watitotal + '</th>';
+	htmlRet += '<th style="vertical-align: top !important;" class="text-center">' + gupshuptotal + '</th>';
 	htmlRet += '<th style="vertical-align: top !important;" class="text-center">' + whatsapptotal + '</th>';
 	htmlRet += '<th style="vertical-align: top !important;" class="text-center">' + mailtotal + '</th>';
 	htmlRet += '<th></th>';
 	htmlRet += '</tr>';
 	return htmlRet;
+}
+
+function showGupshupBroadcastDetails(ids){
+	if(!ids){
+		showMessageTheme2(0, 'No Gupshup broadcast logs');
+		return;
+	}
+	var request = { ids: ids };
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('leads', 'get-broadcast-log-by-ids'),
+		data: JSON.stringify(request),
+		dataType: 'json',
+		success: function(response){
+			if(response.statusCode !== 'S001'){
+				showMessageTheme2(0, response.message || 'No broadcast logs');
+				return;
+			}
+			renderGupshupBroadcastDetailsModal(response.data || []);
+		}
+	});
+}
+
+function renderGupshupBroadcastDetailsModal(rows){
+	$('#gupshupBroadcastDetailsModal').remove();
+	var body = '';
+	if(!rows || !rows.length){
+		body = '<tr><td colspan="8" class="text-center">No records</td></tr>';
+	}else{
+		for(var i = 0; i < rows.length; i++){
+			var r = rows[i];
+			var statusBadge = (r.deliveredStatus === 'SUCCESS')
+				? '<span class="badge badge-success text-white">SUCCESS</span>'
+				: '<span class="badge badge-danger text-white">' + (r.deliveredStatus || 'FAILED') + '</span>';
+			var sentFromVal = r.sentFrom || '';
+			var sentFromBadgeClass = (r.entityType === 'STUDENT_LIST') ? 'badge-info' : (r.entityType === 'TEACHER_LIST' ? 'badge-warning' : 'badge-primary');
+			var leadNoCell = (r.entityType === 'LEAD_LIST') ? (r.leadNo || '-') : '-';
+			body += '<tr>'
+				+ '<td>' + (i+1) + '</td>'
+				+ '<td>' + leadNoCell + '</td>'
+				+ '<td>' + (r.templateName || '') + '</td>'
+				+ '<td>' + (r.leadName || '') + ' | ' + (r.entityId || '') + '</td>'
+				+ '<td>' + (r.contactNo || '') + '</td>'
+				+ '<td><span class="badge ' + sentFromBadgeClass + ' text-white">' + sentFromVal + '</span></td>'
+				+ '<td>' + statusBadge + (r.reason ? '<div class="small text-danger">' + r.reason + '</div>' : '') + '</td>'
+				+ '<td>' + (r.deliveredDatetime || '') + '</td>'
+				+ '</tr>';
+		}
+	}
+	var html = '<div class="modal fade" id="gupshupBroadcastDetailsModal" role="dialog">'
+		+ '<div class="modal-dialog modal-xl">'
+		+ '<div class="modal-content">'
+		+ '<div class="modal-header py-2 bg-primary text-white">'
+		+ '<h5 class="modal-title">Gupshup Broadcast Logs</h5>'
+		+ '<button type="button" class="close text-white" data-dismiss="modal">&times;</button>'
+		+ '</div>'
+		+ '<div class="modal-body">'
+		+ '<table class="table table-bordered font-12">'
+		+ '<thead><tr class="bg-primary text-white">'
+		+ '<th>Sr no.</th><th>Lead No</th><th>Template</th><th>Recipient</th><th>Contact</th><th>Sent From</th><th>Status</th><th>Delivered At</th>'
+		+ '</tr></thead>'
+		+ '<tbody>' + body + '</tbody>'
+		+ '</table>'
+		+ '</div>'
+		+ '<div class="modal-footer"><button type="button" class="btn btn-danger" data-dismiss="modal">Close</button></div>'
+		+ '</div></div></div>';
+	$('body').append(html);
+	$('#gupshupBroadcastDetailsModal').modal('show');
 }
 
 function syncLeadLogsZadarmaCall() {

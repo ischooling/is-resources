@@ -5741,6 +5741,7 @@ function getWatiLogs(lid){
 }
 
 function getWatiTemplates() {
+	var providerMeta = setWhatsappBroadcastProvider(arguments.length > 0 ? arguments[0] : null);
 	$("#allWatiTemplatesList").html('');
 	$("#allWatiTemplatesList").html('');
 	$('#mcustomWatiTemplatesListClose').click(function(e) { 
@@ -5771,30 +5772,38 @@ function getWatiTemplates() {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('leads','get-wati-templates'),
+		url : getURLFor('leads', providerMeta.getTemplatesRoute),
 		data : JSON.stringify(request),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
-			if (data['statusCode'] == '0' || data['statusCode'] == '2'  || data['status'] == '0' || data['status'] == '2'  || data['statusCode'] == 'E001' || data['statusCode'] == 'E002') {
+			if (data['statusCode'] !== 'S001') {
 				//showMessageTheme2(0, data['message'],'',true);
 				showMessageTheme2(0, data['message'],'',false);
 			} else {
 				watiTemplateContent=data;
+				setWhatsappBroadcastProvider(data.provider || providerMeta.key);
 				//console.log('watiTemplateContent DATA : ' + JSON.stringify(watiTemplateContent));
+				var isGupshupPreview = (data.provider || providerMeta.key) === 'GUPSHUP';
 				$.each(watiTemplateContent.messageTemplates, function(index, obj) {
 					if(obj.customParams != null && obj.customParams != ''){
 						$.each(obj.customParams, function(i, param) {
 							var placeholder = "{{" + param.paramName + "}}";
-							var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
-							if (obj.bodyOriginal.includes("*{{"+param.paramName+"}}*")) {
-								var regex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							var boldedRegex = new RegExp("\\*{{" + param.paramName + "}}\\*", "g");
+							if (isGupshupPreview) {
+								obj.body = obj.body.replace(boldedRegex, placeholder);
+								obj.bodyOriginal = obj.bodyOriginal.replace(boldedRegex, "<b>" + placeholder + "</b>");
 							} else {
-								var regex = placeholder;
+								var regex;
+								if (obj.bodyOriginal.includes("*{{"+param.paramName+"}}*")) {
+									regex = boldedRegex;
+								} else {
+									regex = placeholder;
+								}
+								obj.body = obj.body.replace(regex, param.paramValue);
+								obj.bodyOriginal = obj.bodyOriginal.replace(regex, "<b>"+param.paramValue+"</b>");
 							}
-							obj.body = obj.body.replace(regex, param.paramValue);
-							obj.bodyOriginal = obj.bodyOriginal.replace(regex, "<b>"+param.paramValue+"</b>");
 						});
 					}
 				});
@@ -5827,6 +5836,8 @@ function getWatiTemplates() {
 }
 
 function sendWatiNotification(templateName, index){
+	var providerMeta = getCurrentWhatsappBroadcastProviderMeta();
+	var selectedTemplate = getSelectedWhatsappBroadcastTemplate(index);
 	var request={};
 	$("#table_row_"+ templateName).addClass('selected_row').siblings().removeClass('selected_row');
 	$('#templateName').html('<b>' + templateName + '</b> '); //$('#confirm_btn_data').html('<a id="confirm_btn" class="btn btn-primary mr-2" href="javascript:void(0);"  onclick="return showWarningMessageShow(\'Are you sure you want to send this data?\',\'sendWatiNotification( \\\''+templateName+'\\\','+index+') \');">SEND MSG</a>');
@@ -5835,6 +5846,7 @@ function sendWatiNotification(templateName, index){
 	
 	$('#confirm_btn_data').html('<a id="confirm_btn" class="btn btn-primary mr-2" href="javascript:void(0);" >SEND</a>');
 	$('#selectionCount').html('<span>Selected- </span><span id="selectedCount">0</span> / <span id="totalCount">0</span>');
+	renderGupshupParamMapping(selectedTemplate);
 	$("#mswatiBroadcastSendThroughMobile").modal("show");
 
 	// var table = $('#mbroadcastWatiSendTable').DataTable(); 
@@ -5905,6 +5917,8 @@ function sendWatiNotification(templateName, index){
 
 //send msg to user
 function sendWatiNotificationToUser(indexNo,templateName,leadID, d_status) {
+	var providerMeta = getCurrentWhatsappBroadcastProviderMeta();
+	var selectedTemplate = getSelectedWhatsappBroadcastTemplate(indexNo);
 	$("#successFailedWatiMessagesModal").modal("hide");
 	//console.log("status of buton==" + JSON.stringify(d_status));
 	
@@ -5938,6 +5952,17 @@ function sendWatiNotificationToUser(indexNo,templateName,leadID, d_status) {
 	var request={}
 	request['userId']=USER_ID;
 	request['templateName']=templateName;
+	request['templateId']=selectedTemplate && selectedTemplate.templateId ? selectedTemplate.templateId : "";
+	request['templateParamCount']=getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate);
+	request['provider']=providerMeta.key;
+	if (providerMeta.key === 'GUPSHUP') {
+		var mapping = collectGupshupParamMapping(getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate));
+		if (mapping === null) {
+			showMessageTheme2(0, 'Please map all template placeholders before sending','',false);
+			return false;
+		}
+		request['paramMapping'] = mapping;
+	}
 	//request['broadcastName']="broadcastName";
 	//request['userData']="userData";
 	//request['leadID']=leadID; 
@@ -5947,14 +5972,14 @@ function sendWatiNotificationToUser(indexNo,templateName,leadID, d_status) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('leads','set-wati-message'),
+		url : getURLFor('leads', providerMeta.sendMessageRoute),
 		data : JSON.stringify(request),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
 			//if (data['statusCode'] == '0' || data['statusCode'] == '2' || data['statusCode'] == 'E001'|| data['statusCode'] == 'E002') {
-			if (data['statusCode'] == 'EX01' || data['statusCode'] == 'E004' ) {
+			if (data['statusCode'] == 'EX01' || data['statusCode'] == 'E003' || data['statusCode'] == 'E004' || data['statusCode'] == 'E005' || data['statusCode'] == 'E006') {
 				showMessageTheme2(0, data['message'],'',false);
 				$("input#allchecked").prop('checked', false);
 				$('input[name="chk-users-lead"]').prop('checked', false);
@@ -6010,14 +6035,27 @@ function getViewTemplate(data){ //console.log("inside getViewTemplate data :: " 
     var jsonData= [data] //console.log("inside getViewTemplate jsonData :: " + JSON.stringify(jsonData));
 	var html =  '';
 	var imgURL = '';
+	var providerMeta = (typeof getCurrentWhatsappBroadcastProviderMeta === 'function') ? getCurrentWhatsappBroadcastProviderMeta() : null;
+	var isGupshupPreview = providerMeta && providerMeta.key === 'GUPSHUP';
         $.each(jsonData, function(index, value){ //console.log('value : '+ JSON.stringify(value.header));
             html+='<div class="main-card card mx-auto mb-3" style="max-width:300px;">'
             +'<div class="card-body p-2">'
 				if(value.header != null && value.header.mediaFromPC!=null && value.header.mediaFromPC!=''){
-					html+='<img src="/'+ imgURL+value.header.mediaFromPC+'" class="w-100 mb-3" style="max-width:250px">'	
+					html+='<img src="/'+ imgURL+value.header.mediaFromPC+'" class="w-100 mb-3" style="max-width:250px">'
 				}
                 html+='<ul class="p-0">';
-					var list = value.bodyOriginal.split("\n");
+					var previewBody = value.bodyOriginal;
+					if (isGupshupPreview && Array.isArray(value.customParams)) {
+						$.each(value.customParams, function(_, param) {
+							var placeholder = "{{" + param.paramName + "}}";
+							if (param.paramValue) {
+								var boldVal = "<b>" + param.paramValue + "</b>";
+								previewBody = previewBody.split(boldVal).join("<b>" + placeholder + "</b>");
+								previewBody = previewBody.split(param.paramValue).join(placeholder);
+							}
+						});
+					}
+					var list = previewBody.split("\n");
                     $.each(list, function(i, item){
                         html+='<li class="'+(i<5? "mb-3":(i==15? "mb-3":""))+'">'+item+'</li>';
                     });
@@ -7371,9 +7409,29 @@ function openSuccessFailedWatiMessages(resp_data,indexSF,templateName) {
 	//usrPopDataOnResend.html('');
 	usrPopDataOnResend.html(successFailedWatiMessagesModal(resp_data));
 
-	//console.log( JSON.stringify(usrPopDataOnResend.html()));
-	$("#failedWatiTableDiv").slideDown();
-	$("#successWatiTableDiv").slideUp();
+	var successCount = (typeof sData !== 'undefined' && sData) ? sData.length : 0;
+	var failedCount  = (typeof fData !== 'undefined' && fData) ? fData.length : 0;
+
+	if (successCount > 0 && failedCount === 0) {
+		$("#successWatiDiv").show();
+		$("#failedWatiDiv").hide();
+		$("#successWatiTableDiv").slideDown();
+		$("#failedWatiTableDiv").slideUp();
+		$("#chevron_success").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	} else if (failedCount > 0 && successCount === 0) {
+		$("#successWatiDiv").hide();
+		$("#failedWatiDiv").show();
+		$("#failedWatiTableDiv").slideDown();
+		$("#successWatiTableDiv").slideUp();
+		$("#chevron_failed").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_success").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	} else {
+		$("#successWatiDiv").show();
+		$("#failedWatiDiv").show();
+		$("#failedWatiTableDiv").slideDown();
+		$("#successWatiTableDiv").slideUp();
+	}
 	$("#successWatiTable").dataTable();
 
 	//if($("#successFailedWatiMessagesModal").length < 1) {
@@ -7393,12 +7451,6 @@ function openSuccessFailedWatiMessages(resp_data,indexSF,templateName) {
         //     { orderable: false, targets: 0 }
         // ]
     });
-
-	$("#successWatiDiv").css("cursor", "pointer");
-	$("#failedWatiDiv").css("cursor", "default");
-
-	$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
-	$("#chevron_success").removeClass("fa-chevron-down").addClass("fa-chevron-up");
 
 	$("#successWatiDiv").click(function() {
 		$("#successWatiTableDiv").slideDown(500);
@@ -7506,6 +7558,107 @@ function closeModalAndFlushData(){
 	$("#leadNoMove").val("");
 	$("#remarksresetDelete1").remove();
 	$(".modal-backdrop").remove();
+	window.currentWhatsappBroadcastProvider = "WATI";
+}
+
+function getWhatsappBroadcastProviderMeta(provider) {
+	var providerKey = String(provider || window.currentWhatsappBroadcastProvider || "WATI").toUpperCase();
+	if (providerKey === "GUPSHUP") {
+		return {
+			key: "GUPSHUP",
+			label: "Gupshup",
+			getTemplatesRoute: "get-gupshup-templates",
+			sendMessageRoute: "set-gupshup-message"
+		};
+	}
+	return {
+		key: "WATI",
+		label: "Wati",
+		getTemplatesRoute: "get-wati-templates",
+		sendMessageRoute: "set-wati-message"
+	};
+}
+
+function setWhatsappBroadcastProvider(provider) {
+	var providerMeta = getWhatsappBroadcastProviderMeta(provider);
+	window.currentWhatsappBroadcastProvider = providerMeta.key;
+	return providerMeta;
+}
+
+function getCurrentWhatsappBroadcastProviderMeta() {
+	return getWhatsappBroadcastProviderMeta(window.currentWhatsappBroadcastProvider || "WATI");
+}
+
+function getCurrentBroadcastProviderLabel() {
+	return getCurrentWhatsappBroadcastProviderMeta().label;
+}
+
+function getSelectedWhatsappBroadcastTemplate(indexNo) {
+	if(!watiTemplateContent || !Array.isArray(watiTemplateContent.messageTemplates)) {
+		return null;
+	}
+	if(indexNo == null || indexNo === "" || isNaN(Number(indexNo))) {
+		return null;
+	}
+	return watiTemplateContent.messageTemplates[Number(indexNo)] || null;
+}
+
+var GUPSHUP_PARAM_FIELD_OPTIONS = [
+	{ value: 'name', label: 'Name' },
+	{ value: 'grade', label: 'Grade' },
+	{ value: 'phone', label: 'Phone' },
+	{ value: 'counsellorName', label: 'Counsellor Name' }
+];
+
+function renderGupshupParamMapping(selectedTemplate) {
+	var $wrap = $('#gupshupParamMappingWrap');
+	var $container = $('#gupshupParamMapping');
+	if (!$wrap.length || !$container.length) { return; }
+	var providerMeta = getCurrentWhatsappBroadcastProviderMeta();
+	var paramCount = getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate);
+	if (!providerMeta || providerMeta.key !== 'GUPSHUP' || paramCount <= 0) {
+		$wrap.hide();
+		$container.empty();
+		return;
+	}
+	var defaults = ['name', 'grade', 'counsellorName', 'phone'];
+	var html = '';
+	for (var i = 0; i < paramCount; i++) {
+		var def = defaults[i] || 'name';
+		html += '<div class="d-flex align-items-center" style="gap:4px;">';
+		html += '<span style="font-size:13px;">{{' + (i + 1) + '}} &rarr;</span>';
+		html += '<select class="form-control form-control-sm gupshup-param-map" data-index="' + i + '" style="width:auto;font-size:13px;">';
+		$.each(GUPSHUP_PARAM_FIELD_OPTIONS, function(_, opt) {
+			html += '<option value="' + opt.value + '"' + (opt.value === def ? ' selected' : '') + '>' + opt.label + '</option>';
+		});
+		html += '</select></div>';
+	}
+	$container.html(html);
+	$wrap.show();
+}
+
+function collectGupshupParamMapping(paramCount) {
+	var mapping = [];
+	var allowed = $.map(GUPSHUP_PARAM_FIELD_OPTIONS, function(o) { return o.value; });
+	for (var i = 0; i < paramCount; i++) {
+		var val = $('.gupshup-param-map[data-index="' + i + '"]').val();
+		if (!val || $.inArray(val, allowed) === -1) { return null; }
+		mapping.push(val);
+	}
+	return mapping;
+}
+
+function getSelectedWhatsappBroadcastTemplateParamCount(templateData) {
+	if(!templateData) {
+		return 0;
+	}
+	if(templateData.parameterCount != null && templateData.parameterCount !== "") {
+		return Number(templateData.parameterCount) || 0;
+	}
+	if(Array.isArray(templateData.customParams)) {
+		return templateData.customParams.length;
+	}
+	return 0;
 }
 
 async function getLeadStatusLog(leadno, callFrom, adminStatus) {

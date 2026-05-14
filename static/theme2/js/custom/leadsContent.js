@@ -741,7 +741,7 @@ function swatiBroadcastContentModal(data){
 }
 
 function swatiBroadcastSendMobileModal(data){
-	
+	var providerLabel = typeof getCurrentBroadcastProviderLabel === "function" ? getCurrentBroadcastProviderLabel() : "Wati";
 	var html =
 			`<style>
 				#mbroadcastWatiSendTable {
@@ -772,6 +772,10 @@ function swatiBroadcastSendMobileModal(data){
 									</div>
 							</div>
 							<div class="modal-body pt-1">
+								<div id="gupshupParamMappingWrap" class="full mb-2" style="display:none;">
+									<div class="font-weight-bold mb-1" style="font-size:13px;">Map template placeholders:</div>
+									<div id="gupshupParamMapping" class="d-flex flex-wrap" style="gap:8px;"></div>
+								</div>
 								<form id="sendWatiBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
 									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
 										<table id="mbroadcastWatiSendTable" class="table" style="font-size:14px;min-width:450px;">
@@ -865,7 +869,7 @@ function swatiBroadcastSendMobileModal(data){
 												<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 											</svg>
 										</span>
-										<span class="circle">Wati</span>
+										<span class="circle">`+providerLabel+`</span>
 										<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 											<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 												<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
@@ -913,7 +917,7 @@ function watiContent(data){
 //Custom Wati Templates List function
 
 function customWatiTemplatesList(tdata){
-
+	var providerLabel = typeof getCurrentBroadcastProviderLabel === "function" ? getCurrentBroadcastProviderLabel() : "Wati";
 	var html=
 		`<style>
 			#watiBroadcastTable {
@@ -930,7 +934,7 @@ function customWatiTemplatesList(tdata){
 					<div class="modal-content border-0 watiBroadcastTableDiv">
 						<div class="modal-header py-1 bg-primary text-white">
 							<div class="">
-								<p class="fsize-1 mb-0 font-weight-bold">Wati Broadcast</p>
+								<p class="fsize-1 mb-0 font-weight-bold">`+providerLabel+` Broadcast</p>
 							</div>
 							<button type="button" class="close text-white" onclick="selfModalHide('mcustomWatiTemplatesList'); closeModalAndFlushData();">
 								<span aria-hidden="true">&times;</span>
@@ -1034,7 +1038,7 @@ function customWatiTemplatesList(tdata){
 												<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 											</svg>
 										</span>
-										<span class="circle">Wati</span>
+										<span class="circle">`+providerLabel+`</span>
 										<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 											<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 												<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
@@ -1058,6 +1062,7 @@ function customWatiTemplatesList(tdata){
 
 function successFailedWatiMessagesModal(allData) {
 	// console.log(" successFailedWatiMessagesModal data :: " + JSON.stringify(allData));
+	var providerLabel = typeof getCurrentBroadcastProviderLabel === "function" ? getCurrentBroadcastProviderLabel() : "Wati";
 	
 	sData = [];
 	fData = [];
@@ -1268,7 +1273,7 @@ function successFailedWatiMessagesModal(allData) {
 													<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 												</svg>
 											</span>
-											<span class="circle">Wati</span>
+											<span class="circle">`+providerLabel+`</span>
 											<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 												<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 													<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>

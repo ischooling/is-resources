@@ -69,7 +69,8 @@ function paymentReport(){
 						+'<input type="text" id="studentName"  placeholder="Search by Student Name, Email, Country/ City or Student-Id" class="form-control border-0 text-primary" style="background: #f0f9ff;"/>'
 					+'</div>'
 					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates()">Wati Broadcast</button>'
-					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiLogsFilterRecords()">Wati Logs</button>'
+					+'<button class=" btn btn-success text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates(\'GUPSHUP\')">Gupshup Broadcast</button>'
+					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiLogsFilterRecords()">Broadcast Logs</button>'
 					+'<button class=" btn btn-focus text-white btn-full-mobile mr-2" onclick="getEmailBroadcastTemplates()">Email Broadcast</button>'
 					+'<button class=" btn btn-focus text-white btn-full-mobile mr-2" onclick="getMailLogsFilterRecords()">Email Logs</button>'
 					+'<div class="filter-btn ml-2 d-inline-flex align-items-center">'
@@ -1334,7 +1335,7 @@ function swatiBroadcastContentModal(data){
 													<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 												</svg>
 											</span>
-											<span class="circle">Wati</span>
+											<span class="circle whatsapp-provider-label">Wati</span>
 											<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 												<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 													<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
@@ -1388,6 +1389,10 @@ function swatiBroadcastSendMobileModal(data){
 									</div>
 							</div>
 							<div class="modal-body pt-1">
+								<div id="gupshupParamMappingWrap" class="full mb-2" style="display:none;">
+									<div class="font-weight-bold mb-1" style="font-size:13px;">Map template placeholders:</div>
+									<div id="gupshupParamMapping" class="d-flex flex-wrap" style="gap:8px;"></div>
+								</div>
 								<form id="sendWatiBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
 									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
 										<table id="mbroadcastWatiSendTable" class="table" style="font-size:14px;min-width:450px;">
@@ -1506,7 +1511,7 @@ function swatiBroadcastSendMobileModal(data){
 												<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 											</svg>
 										</span>
-										<span class="circle">Wati</span>
+										<span class="circle whatsapp-provider-label">Wati</span>
 										<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 											<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 												<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
@@ -1661,7 +1666,7 @@ function customWatiTemplatesList(tdata){
 												<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 											</svg>
 										</span>
-										<span class="circle">Wati</span>
+										<span class="circle whatsapp-provider-label">Wati</span>
 										<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 											<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 												<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
@@ -1895,7 +1900,7 @@ function successFailedWatiMessagesModal(allData) {
 													<path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
 												</svg>
 											</span>
-											<span class="circle">Wati</span>
+											<span class="circle whatsapp-provider-label">Wati</span>
 											<span class="d-inline-block ml-auto" style="margin-left: auto;line-height: 0px;">
 												<svg xmlns="http://www.w3.org/2000/svg" width="4px" fill="#fff" viewBox="0 0 128 512">
 													<path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/>
@@ -1930,6 +1935,13 @@ function viewWatiTemplate(flag, indexNumber, templateName){ //console.log("flag 
 			$("#priviewTemplate").html(getViewTemplate(watiTemplateContent.messageTemplates[indexNumber]));
 			$("#priviewTemplateSecond").html(getViewTemplate(watiTemplateContent.messageTemplates[indexNumber]));
 			$("#priviewTemplateThird").html(getViewTemplate(watiTemplateContent.messageTemplates[indexNumber]));
+			var previewProviderLabel = 'Wati';
+			if (typeof getCurrentWhatsappBroadcastProviderMeta === 'function') {
+				previewProviderLabel = getCurrentWhatsappBroadcastProviderMeta().label || previewProviderLabel;
+			} else if (typeof STUDENT_BROADCAST_PROVIDER !== 'undefined' && STUDENT_BROADCAST_PROVIDER === 'GUPSHUP') {
+				previewProviderLabel = 'Gupshup';
+			}
+			$('.whatsapp-provider-label').text(previewProviderLabel);
 		},200)
 	}else{
 		$(".wati-wrapper").removeClass("active-wati-template");
@@ -1942,14 +1954,28 @@ function getViewTemplate(data){ //console.log("inside getViewTemplate data :: " 
     var jsonData= [data] //console.log("inside getViewTemplate jsonData :: " + JSON.stringify(jsonData));
 	var html =  '';
 	var imgURL = '';
+	var providerMeta = (typeof getCurrentWhatsappBroadcastProviderMeta === 'function') ? getCurrentWhatsappBroadcastProviderMeta() : null;
+	var isGupshupPreview = (providerMeta && providerMeta.key === 'GUPSHUP')
+		|| (typeof STUDENT_BROADCAST_PROVIDER !== 'undefined' && STUDENT_BROADCAST_PROVIDER === 'GUPSHUP');
         $.each(jsonData, function(index, value){ //console.log('value : '+ JSON.stringify(value.header));
             html+='<div class="main-card card mx-auto mb-3" style="max-width:300px;">'
             +'<div class="card-body p-2">'
 				if(value.header != null && value.header.mediaFromPC!=null && value.header.mediaFromPC!=''){
-					html+='<img src="/'+ imgURL+value.header.mediaFromPC+'" class="w-100 mb-3" style="max-width:250px">'	
+					html+='<img src="/'+ imgURL+value.header.mediaFromPC+'" class="w-100 mb-3" style="max-width:250px">'
 				}
                 html+='<ul class="p-0">';
-					var list = value.bodyOriginal.split("\n");
+					var previewBody = value.bodyOriginal;
+					if (isGupshupPreview && Array.isArray(value.customParams)) {
+						$.each(value.customParams, function(_, param) {
+							var placeholder = "{{" + param.paramName + "}}";
+							if (param.paramValue) {
+								var boldVal = "<b>" + param.paramValue + "</b>";
+								previewBody = previewBody.split(boldVal).join("<b>" + placeholder + "</b>");
+								previewBody = previewBody.split(param.paramValue).join(placeholder);
+							}
+						});
+					}
+					var list = previewBody.split("\n");
                     $.each(list, function(i, item){
                         html+='<li class="'+(i<5? "mb-3":(i==15? "mb-3":""))+'">'+item+'</li>';
                     });
@@ -2016,9 +2042,12 @@ function sendWatiNotification(templateName, index){
 	$('#templateName').html('<b>' + templateName + '</b> '); //$('#confirm_btn_data').html('<a id="confirm_btn" class="btn btn-primary mr-2" href="javascript:void(0);"  onclick="return showWarningMessageShow(\'Are you sure you want to send this data?\',\'sendWatiNotification( \\\''+templateName+'\\\','+index+') \');">SEND MSG</a>');
 	boolval =true;
 	$('#viewMethodCalling').html('<a href="javascript:void(0)" class="btn btn-primary btn-sm rounded-circle" onclick="viewWatiTemplate('+boolval+','+index+', `'+templateName+'`);" > <i class="fa fa-eye text-white"></i> </a>');
-	
+
 	$('#confirm_btn_data').html('<a id="confirm_btn" class="btn btn-primary mr-2" href="javascript:void(0);" >SEND</a>');
 	$('#selectionCount').html('<span>Selected- </span><span id="selectedCount">0</span> / <span id="totalCount">0</span>');
+	if (typeof renderGupshupParamMapping === 'function' && typeof getSelectedWhatsappBroadcastTemplate === 'function') {
+		renderGupshupParamMapping(getSelectedWhatsappBroadcastTemplate(index));
+	}
 	$("#mswatiBroadcastSendThroughMobile").modal("show");
 
 	// var table = $('#mbroadcastWatiSendTable').DataTable(); 
@@ -2135,7 +2164,7 @@ function getWatiLogsRecordsFilterModal(){
 			<div class="modal-dialog modal-xl">
 				<div class="modal-content">
 					<div class="modal-header py-2 bg-primary text-white">
-						<h5 class="modal-title ">Wati Logs</h5>
+						<h5 class="modal-title ">Broadcast Logs</h5>
 						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 					</div>
 					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
@@ -2176,6 +2205,7 @@ function getWatiLogsRecordsFilterModal(){
 										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10" style="5% !important">Sr no.</th>
 										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Counselor Name</th>
 										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Student Name | Student ID</th>
+										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Provider</th>
 										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Template Name</th>
 										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Status</th>
 										<th class="bg-primary text-white font-weight-normal border-bottom-0 vertical-align-middle">Delivered Date Time</th>
@@ -2201,11 +2231,14 @@ function getWatiRecordsList(data){
 	var html=``;
 	if(data.details.length>0){
 		$.each(data.details, function(i, v){
+			var providerVal = v.provider || 'WATI';
+			var providerBadgeClass = providerVal === 'GUPSHUP' ? 'badge-success' : 'badge-info';
 			html+=
 			`<tr>
 				<td>${((data.pageNo-1)*10)+(i+1)}</td>
 				<td>${v.counselorName}</td>
 				<td>${v.studentName} | <b>${v.rollNo}</b></td>
+				<td><span class="badge ${providerBadgeClass} text-white">${providerVal}</span></td>
 				<td>${v.templateName}</td>
 				<td>${v.status}</td>
 				<td>${convertDatetimeWithFormat(v.deliveredDateTime, 'Asia/Kolkata', USER_TIMEZONE, 'MMM DD, YYYY hh:mm a')}</td>
@@ -2217,7 +2250,7 @@ function getWatiRecordsList(data){
 	}else{
 		html+=
 			`<tr>
-				<td colspan="7" class="font-weight-bold text-center">No record found</td>
+				<td colspan="8" class="font-weight-bold text-center">No record found</td>
 			</tr>`;
 	}
 	return html;
