@@ -291,6 +291,7 @@ function submitLeads(formId, roleModuleId, leadsFrom, newTheme, leadFrom, modalI
  });
 }
 function getRequestForLeadSave(formId, leadFrom, leadType){
+	debugger
  var leadAddFormRequestDTO = {};
  var authentication = {};
 var leadCommonDTO = {};
@@ -359,7 +360,6 @@ leadModifyDTO['leadType']=leadType;
 	leadModifyDetailDTO['controlType'] = 'add';
 }else{
 	
-	//leadCommonDTO['leadMailerLiteGroupName'] = $("#leadSourceGroup").val();
 	if($("#"+formId+" #leadSource").val()!=undefined){
 		leadModifyDTO['leadSource'] =$("#"+formId+" #leadSource").val();
 	}
@@ -426,6 +426,7 @@ leadModifyDTO['leadType']=leadType;
 	leadModifyDTO['controlType'] = $("#"+formId+" #countrolType").val();
 	leadModifyDetailDTO['mergeLeadsId'] = $("#"+formId+" #mergeLeads").val();
 }
+leadModifyDetailDTO['notes'] = escapeCharacters($("#"+formId+" #leadnotes").val());
 if($("#"+formId+" #leadSupportTo").val()=='' &&  $("#"+formId+" #leadSupportTo").val()==undefined){
 	leadModifyDTO['leadSupportTo'] = 0;
 }else{
@@ -2402,9 +2403,9 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						$("#"+formId+" #leadGuardlname").val(leadDemo.leadStudentDetailDTO.gurdianLname);
 						//$("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country);
 						 
-						
 						$("#"+formId+" #leadPin").val(leadDemo.leadStudentDetailDTO.pincode);
 						$("#"+formId+" #leadAdd").val(leadDemo.leadStudentDetailDTO.address);
+						$("#"+formId+" #leadnotes").val(leadDemo.leadModifyDetailDTO.notes);
 						
 						//if(leadType=='B2B'){
 							//$("#"+formId+" #leadAssignTo").val(leadDemo.leadModifyDTO.assignTo).trigger('change');

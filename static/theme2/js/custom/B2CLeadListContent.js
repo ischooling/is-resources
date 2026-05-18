@@ -507,7 +507,11 @@ function getLeadFormPopup(objRights) {
     '							<label class="m-0">Priority</label>' +
     '							<select name="leadPriority" id="leadPriority" class="form-control" >' +
     '								<option value="">Select Priority</option> ' +
-    "						</select>" +
+    "						  </select>" +
+     "						</div>" +
+    '						<div class="col-xl-4 col-lg-4 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
+     "							<label>Notes</label>" +
+    '							<textarea name="leadnotes" id="leadnotes" rows="3" class="form-control" style="height:50px"></textarea>' +
     "						</div>" +
     '						<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 b2cLeadstatus">' +
     "							<label>Remarks</label>" +
@@ -1951,6 +1955,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 												+'</tr>'
 												+'<tr>'
 													+'<td colspan="2"  class="border-0 p-1 leadtagstatus_'+leads.leadNo+'"></td>'
+												+'</tr>'
+                        +'<tr>'
+													+'<th class="border-0 p-1">Notes:</th>'
+													+'<td class="border-0 p-1">'+leads.notes+'</td>'
 												+'</tr>'
 												+'<tr>'
 													+'<th class="border-0 p-1">Any remarks for the academic expert:</th>'

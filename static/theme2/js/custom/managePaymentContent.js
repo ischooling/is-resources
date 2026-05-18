@@ -140,6 +140,16 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
     const paymentShowingUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_SHOWING_PAYMENTS_AMOUNT');
     var paymentShowingUsersIds = JSON.parse(paymentShowingUsers).data.metaValue.split(",").map(id => id.trim());
     const isUserAllowedToSeePayments = paymentShowingUsersIds.includes(USER_ID.toString());
+	let isPaymentVerifyAllowedUser = false;
+	try {
+		const paymentVerifySetting = getSettingsByTypeAndKey('CONFIGURATION', 'PAYMENY_VERIFY');
+		const paymentVerifyValue = paymentVerifySetting ? JSON.parse(paymentVerifySetting).data.metaValue : '';
+		isPaymentVerifyAllowedUser = paymentVerifyValue
+			? paymentVerifyValue.split(',').map(id => id.trim()).includes(USER_ID.toString())
+			: false;
+	} catch (e) {
+		isPaymentVerifyAllowedUser = false;
+	}
 	const roleAndModule = await getUserRights(SCHOOL_ID, USER_ROLE_ID, USER_ID, moduleId);
 	let html = '';
 	$.each(data.advancePaymentSearchResponseDTO, function (k, apsrSingle) {
@@ -173,7 +183,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 						<strong>Trans. Ref. No.:</strong> <span id="trans-ref-${serialNum}">${apsrSingle.transactionRefNumber}</span>
 						${
 							apsrSingle.transactionRefNumber && apsrSingle.transactionRefNumber.toLowerCase().includes('cs_')
-							&& apsrSingle.paymentStatus !== 'SUCCESS' && apsrSingle.paymentStatus !== 'SCHEDULED' && USER_ROLE === 'DIRECTOR'
+							&& apsrSingle.paymentStatus !== 'SUCCESS' && apsrSingle.paymentStatus !== 'SCHEDULED' && isPaymentVerifyAllowedUser
 							? `<a href=\"javascript:void(0)\" id=\"stripe-verify-btn-${serialNum}\" class=\"btn btn-sm btn-warning ml-2\" onclick=\"verifyStripePayment(${apsrSingle.userPaymentDetailsId}, ${serialNum});\">Verify</a>
 							   <span id=\"stripe-verify-msg-${serialNum}\" style=\"margin-left:6px;font-weight:600;\"></span>`
 							: ''
@@ -181,7 +191,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 						${
 							apsrSingle.pgName && apsrSingle.pgName.toUpperCase() === 'AIRWALLEX'
 							&& apsrSingle.transactionRefNumber && apsrSingle.transactionRefNumber.toLowerCase().startsWith('int_')
-							&& apsrSingle.paymentStatus !== 'SUCCESS' && apsrSingle.paymentStatus !== 'SCHEDULED' && USER_ROLE === 'DIRECTOR'
+							&& apsrSingle.paymentStatus !== 'SUCCESS' && apsrSingle.paymentStatus !== 'SCHEDULED' && isPaymentVerifyAllowedUser
 							? `<a href=\"javascript:void(0)\" id=\"airwallex-verify-btn-${serialNum}\" class=\"btn btn-sm btn-warning ml-2\" onclick=\"verifyAirwallexPayment(${apsrSingle.userPaymentDetailsId}, ${serialNum});\">Verify</a>
 							   <span id=\"airwallex-verify-msg-${serialNum}\" style=\"margin-left:6px;font-weight:600;\"></span>`
 							: ''
