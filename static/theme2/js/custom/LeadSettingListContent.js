@@ -66,6 +66,10 @@ function getSettingTab(objRight){
 				<a role="tab" class="nav-link" id="tab-3" data-toggle="tab" href="#tab-content-3">
 					<span>Notification Control</span>
 				</a>
+			</li><li class="nav-item">
+				<a role="tab" class="nav-link" id="tab-4" data-toggle="tab" href="#tab-content-4" onclick="getAICallScheduleList()">
+					<span>AI Call Settings</span>
+				</a>
 			</li>
 		</ul>
 		<div class="tab-content p-3 border">`;
@@ -80,8 +84,22 @@ function getSettingTab(objRight){
 				<div class="tab-pane tabs-animation fade" id="tab-content-3" role="tabpanel">
 					<div class="tabs-animation">`;
 						html+=getNotificationControlContent()
-					html+=`</div></div>		
-			</div>
+					html+=`</div></div>
+				<div class="tab-pane tabs-animation fade" id="tab-content-4" role="tabpanel">
+					<div class="tabs-animation">
+						<div class="row mb-2">
+							<div class="col-12 text-right">
+								<button type="button" class="btn btn-primary btn-sm" onclick="addAICallTimezoneRow()">
+									<i class="fa fa-plus"></i> Add Timezone Window
+								</button>
+							</div>
+						</div>
+						<div id="ai-call-schedule-list">
+							<div class="text-center text-muted py-3">Loading...</div>
+						</div>
+					</div>
+				</div>
+		</div>
 		</form>	`;
 		return html;
 	}
