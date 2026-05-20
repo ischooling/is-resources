@@ -70,6 +70,7 @@ function callForDashboardDataForPasswordChange(formId, actionUrl, replaceDiv, sh
 	if (replaceDiv == 'section-linebox') {
 		flag = false;
 	}
+	// customLoader(true);
 	$.ajax({
 		global: flag,
 		type: "POST",
@@ -118,7 +119,10 @@ function callForDashboardDataForPasswordChange(formId, actionUrl, replaceDiv, sh
 				}
 				return false;
 			}
-		}
+		},
+		// complete: function () {
+		// 	customLoader(false);
+		// }
 	});
 }
 
@@ -179,11 +183,11 @@ function callCommonDashboardPage(pageNo) {
 }
 
 function callCommonDashboardPageForPasswordChange(pageNo, show) {
-	// if (show == 'No') {
-	// 	callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'No');
-	// } else {
-	// 	callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'Yes');
-	// }
+	if (show == 'No') {
+		callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'No');
+	} else {
+		callForDashboardDataForPasswordChange('formIdIfAny', 'changed-password-request', 'changePasswordContent', 'Yes');
+	}
 }
 
 function callInneraction(actionType, arg0) {

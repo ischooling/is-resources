@@ -439,8 +439,12 @@ function getSettingDataList(tableID) {
                                 + '<td style="max-width:300px;width300px">'+ value.metaType + '</td>'
                                 + '<td style="max-width:300px;width300px">'+ value.metaKey + '</td>'
                                 + '<td style="max-width:300px;width300px">'
-                                + '<span class="textValue" >' + value.metaValue + '</span>'
-                                + '<textarea type="text" class="d-none inputValue metaValue" style="width:280px" maxlength="2000" id="metaValue' + value.id + '" value="'+ value.metaValue+'"/>'
+                                + '<span class="textValue textField" data-field="metaValue" >' + value.metaValue + '</span>'
+                                + '<textarea type="text" class="d-none inputValue inputField metaValue" data-field="metaValue" style="width:280px" maxlength="2000" id="metaValue' + value.id + '" value="'+ value.metaValue+'"/>'
+                                + '</td>'
+                                + '<td style="max-width:300px;width300px">'
+                                + '<span class="textField" data-field="comments" >' + (value.comments == null ? "" : value.comments) + '</span>'
+                                + '<textarea type="text" class="d-none inputField" data-field="comments" style="width:280px" maxlength="2000" id="comments' + value.id + '" value="'+ (value.comments == null ? "" : value.comments) +'"/>'
                                 + '</td>'
                                 + '<td>'+ value.parentId + '</td>'
                                 // + '<td>' + value.activated+ '</td>'
@@ -495,6 +499,7 @@ function savaSettingData(formId) {
     setting['metaType'] =$("#" + formId + " #metaType").val();
     setting['metaKey'] =$("#" + formId + " #metaKey").val();
     setting['metaValue'] =$("#" + formId + " #metaValue").val();
+    setting['comments'] =$("#" + formId + " #comments").val();
     setting['parentId'] =$("#" + formId + " #parentId").val();
     setting['activated'] =$("#" + formId + " #activated").val();
     setting['deleted'] =$("#" + formId + " #deleted").val();
@@ -527,6 +532,7 @@ function saveEditData(formId, rowUniqueID) {
     setting['metaType'] = $("#" + formId + " #metaType" + rowUniqueID).val();
     setting['metaKey'] = $("#" + formId + " #metaKey" + rowUniqueID).val();
     setting['metaValue'] =$("#" + formId + " #metaValue" + rowUniqueID).val();
+    setting['comments'] =$("#" + formId + " #comments" + rowUniqueID).val();
     setting['parentId'] = $("#" + formId + " #parentId" + rowUniqueID).val();
     return setting;
 }
@@ -535,10 +541,21 @@ function saveEditData(formId, rowUniqueID) {
 
 $(document).on("click", ".edit-button", function () {    
     var row = $(this).closest("tr");
-    var currentValue = row.find(".textValue").text();
-    row.find(".edit-button, .textValue").addClass("d-none");
-    row.find(".save-button, .cancel-button, .inputValue").removeClass("d-none");
-    row.find(".metaValue").val(currentValue);
+    row.find(".edit-button, .textValue, .textField").addClass("d-none");
+    row.find(".save-button, .cancel-button, .inputValue, .inputField").removeClass("d-none");
+    if(row.find(".inputField").length > 0){
+        row.find(".inputField").each(function(){
+            var field = $(this).data("field");
+            if(!field){
+                return;
+            }
+            var current = row.find('.textField[data-field="'+field+'"]').text();
+            $(this).val(current);
+        });
+    }else{
+        var currentValue = row.find(".textValue").text();
+        row.find(".inputValue").val(currentValue);
+    }
     if($(this).parent().closest("tr").find(".session-td").length > 0){
         var currentSession =$(this).parent().closest("tr").find(".session-td").text()
         var sY =  $(this).parent().closest("tr").find(".session-td").attr("data-startyear").split("-");
@@ -576,18 +593,28 @@ $(document).on("click", ".edit-button", function () {
 $(document).on("click", ".save-button", function () {
     var row = $(this).closest("tr");
     var primaryId = $(this).data("primaryId");
-    var newValue = row.find(".inputValue").val(); 
-    row.find(".textValue").text(newValue);
-    row.find(".save-button, .cancel-button, .inputValue").addClass("d-none");
-    row.find(".edit-button, .textValue").removeClass("d-none");
+    if(row.find(".inputField").length > 0){
+        row.find(".inputField").each(function(){
+            var field = $(this).data("field");
+            if(!field){
+                return;
+            }
+            row.find('.textField[data-field="'+field+'"]').text($(this).val());
+        });
+    }else{
+        var newValue = row.find(".inputValue").val();
+        row.find(".textValue").text(newValue);
+    }
+    row.find(".save-button, .cancel-button, .inputValue, .inputField").addClass("d-none");
+    row.find(".edit-button, .textValue, .textField").removeClass("d-none");
     //window.location.reload();
 });
 
 $(document).on("click", ".cancel-button", function () {
     var row = $(this).closest("tr");
     var primaryId = $(this).data("primaryId");
-    row.find(".save-button, .cancel-button, .inputValue").addClass("d-none");
-    row.find(".edit-button, .textValue").removeClass("d-none");
+    row.find(".save-button, .cancel-button, .inputValue, .inputField").addClass("d-none");
+    row.find(".edit-button, .textValue, .textField").removeClass("d-none");
 });
 
 //Template Section 

@@ -818,6 +818,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     '								<option value="AB">Demo By Website</option>' +
     '								<option value="A">Demo By Link</option>' +
     '								<option value="AG">Demo By Agent</option>' +
+    '								<option value="AC">Demo By Chat</option>' +
     "							</select>" +
     "						</div>" +
     '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
@@ -1517,6 +1518,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							bgColorDemo="background-color:#7000FF !important;color:#fff";
 							html+='<span class="float-right bold p-1 rounded" style="background-color:#7000FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}else if(leads.demoFrom=='Demo by Link'){
+							bgColorDemo="background-color:#2200FF !important;color:#fff";
+							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
+						}else if(leads.demoFrom=='Demo by Chat'){
 							bgColorDemo="background-color:#2200FF !important;color:#fff";
 							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}else if(leads.demoFrom=='Demo by Agent'){

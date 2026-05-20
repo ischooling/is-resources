@@ -777,17 +777,22 @@ let activeApplicantAttachmentBlobUrl = null;
 function resolveApplicantAttachmentUrl(url) {
     if (!url) return "";
 
-    // If it's already a full URL (S3/public) or an app endpoint, use it as-is.
-    var trimmedUrl = (url || "").trim();
-    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
-        return trimmedUrl;
-    }
-    if (trimmedUrl.indexOf("/common/download") !== -1) {
+    // Always preview/download via same-origin endpoints to avoid browser CSP
+    // connect-src restrictions against third-party domains (e.g. S3) when using fetch().
+    var trimmedUrl = String(url || "").trim();
+    if (trimmedUrl.indexOf("/common/download/") !== -1 || trimmedUrl.indexOf("/common/downloads") !== -1) {
         return trimmedUrl;
     }
 
-    // Otherwise treat it as an attachment name and download via the app.
-    return APP_BASE_URL + SCHOOL_UUID + "/common/downloads?fileName=" + encodeURIComponent(trimmedUrl);
+    // If it's a full URL, extract the file key (last path segment).
+    var fileKey = trimmedUrl;
+    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
+        var cleanUrl = trimmedUrl.split("?")[0].split("#")[0];
+        fileKey = cleanUrl.substring(cleanUrl.lastIndexOf("/") + 1);
+    }
+
+    // Stream via AWS/public lookup endpoint (works even if file isn't on local disk).
+    return APP_BASE_URL + SCHOOL_UUID + "/common/download/" + encodeURIComponent(fileKey);
 }
 
 async function viewResumeAndPhoto(url, modalId){

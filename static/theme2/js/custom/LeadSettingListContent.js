@@ -90,7 +90,7 @@ function getSettingTab(objRight){
 						<div class="row mb-2">
 							<div class="col-12 text-right">
 								<button type="button" class="btn btn-primary btn-sm" onclick="addAICallTimezoneRow()">
-									<i class="fa fa-plus"></i> Add Timezone Window
+									<i class="fa fa-plus"></i> Add Country
 								</button>
 							</div>
 						</div>

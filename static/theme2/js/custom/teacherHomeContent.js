@@ -4,7 +4,7 @@ async function rendereTeacherHomeContent(){
     commonProfileDTO = await getUserShortProfile(USER_ID);
     chatEligibility = await getChatEligibility(USER_ID,SCHOOL_ID);
     customLoader(true);
-    if(!commonProfileDTO.lastPassUpdatedDate){
+    if(commonProfileDTO.lastPassUpdatedDate){
         window.setTimeout(function(){callCommonDashboardPageForPasswordChange('14', 'No')},1000)
     }
     var payload = {};

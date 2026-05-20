@@ -106,9 +106,9 @@ async function rendereDashboardContent(isParent){
 		renderMigrationDetailsOptionContent(data);
         
         $("head").append(`<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js">`);
-	}    
+	}  
     if (isParent!=="true") {
-        if(!data.lastPassUpdatedDate){
+        if(data.lastPassUpdatedDate){
             window.setTimeout(function(){callCommonDashboardPageForPasswordChange('14','No')},1000)
         }
     }
