@@ -1,29 +1,26 @@
 function getFeedbackContent(title) {
     var html = `
-    <div class="card mx-auto mt-2 rounded-10 perfect-scrollbar-on" style="max-width: 550px;>
-        <div class="card-body">
-            <div class="card-content theme-card">
-                <div class="card-header pgc text-white">
-                    <h5 class="card-title font-20 text-white mt-2">Feedback</h5>
+    <div class="card mx-auto mt-2 rounded-10 perfect-scrollbar-on" style="max-width: 550px;">
+        <div class="card-content theme-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title font-20 text-white mt-2">Feedback</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/FeedbackHeaderIcon.png" style="width:60px;">
                 </div>
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/FeedbackHeaderIcon.png" style="width:60px;">
-                    </div>
-                    <h4 class="font-weight-bold mb-4">
-                        We Would like to know your Feedback
-                    </h4>
-                    <div id="questionContainer" class="overflow-y-auto" style="max-height:500px;"></div>
-                    <div class="d-flex justify-content-between mt-4">
-                <button type="submit" class="btn btn-primary mx-auto" name="submit" id="questionSubmit" value="Submit" onclick="saveStudentFeedback()">
-                    Submit Feedback
-                </button>
-          </div>
+                <h4 class="font-weight-bold mb-4">
+                    We Would like to know your Feedback
+                </h4>
+                <div id="questionContainer" class="overflow-y-auto" style="max-height:500px;"></div>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary mx-auto" name="submit" id="questionSubmit" value="Submit" onclick="saveStudentFeedback()">
+                        Submit Feedback
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
-    `;
+    </div>`;
     return html;
 }
 function bindFeedbackQuestions(questions) {

@@ -67,7 +67,7 @@ function cardDetails(data){
 							<div class="card-header-title mr-auto">
 								<input type="checkbox" class="checkTeacher" id="teacher-${item.userId}" name="teacher-move-another" value="${item.userId}" /> 
 								<span class="mx-2">${item.sno}.</span>`;
-								html+=`<img  id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE}${item.gender === "FEMALE"? 'female-profile':'male-profile' }.png${SCRIPT_VERSION}" alt="image"  thumbType=""/>`;
+								html+=`<img  id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE2}${item.gender === "FEMALE"? 'female-profile':'male-profile' }.png${SCRIPT_VERSION}" alt="image"  thumbType=""/>`;
 								html+=`<div class="px-2 mb-0 w-100 rounded" style="background:#f0f9ff">
 									<h6 class="full">
 										<span class="text-uppercase font-weight-semi-bold d-inline-block" style="font-size:11px">

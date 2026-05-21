@@ -25,615 +25,370 @@ async function initiateSetting(){
 }
 
 initiateSetting();
+
+const contentHandlers = {
+    'student-home': () => { CALENDAR_EVENT = false; rendereDashboardContent(isParent); },
+    'student-addon': () => renderBuyExtraClasses(USER_ID),
+    'book-a-session': () => renderBookClassContent('', '', '', true, moduleId),
+    'home': () => renderSchoolDashboard('School Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'module': () => renderModuleListDashboard('Module List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'modulerole': () => renderRoleListDashboard('Roles List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'user-list': () => renderAdminManageUserListDashboard('Admin Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'online-user': () => renderOnlineUserListDashboard('Live Online Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'delete-user': () => renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'assign-orientation': () => renderStudentOrientationAssignDashboard('Assign Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-orientation-list': () => renderStudentOrientationListDashboard('System training Students List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'manage-lms-user': () => initManageLmsUser(),
+    'manage-session': () => initManageSession(),
+    'extra-session-details': () => initExtraSessionDetails(),
+    'student-teacher-sessions': () => initStudentTeacherSessions(),
+    'auto-progress-report': () => renderAutoProgressReportDashboard("Bulk Student Progress Report", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'teacher-screening-profiles': () => initTeacherScreeningProfiles(),
+    'teacher-profile': () => renderReceivedTeachedProfileListDashboard('Received Teacher Profile', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'pending-interview-remarks': () => renderPendingContractListDashboard('Pending Contract', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'teacher-profile-pending-verification': () => renderPendingVerificationTeachedProfileListDashboard('Pending Verification', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'teacher-profile-pending-bank-details': () => renderBankDetailsTeacherProfleListDashboard('Pending Bank Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'approved-teachers': () => renderApprovedTeacherDashboard("Approved Teachers", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, "0", "0,1", "approved"),
+    'rejected-teachers': () => renderRejectedTeacherListDashboard('Rejected Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'withdraw-teachers': () => renderApprovedTeacherDashboard("Withdrawn Teachers", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, "1", "0,1", "withdraw"),
+    'teacher-assign-interview': () => renderTeacherInterviewAssignDashboard('Assign Teacher Interview', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'payment': () => initPayment(),
+    'invoice': () => initInvoice(),
+    'lead-report-list': () => initLeadReportList(),
+    'lead-detail-by-campaign': () => initLeadDetailByCampaign(),
+    'lead-list': () => initLeadList(),
+    'lead-assign-form': () => renderLeadAssignDashboard('Lead Assign Form', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'admin-partner-enrollment-list': () => renderPartnerList('Student Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'lead-demo-list': () => renderMeetingTimeDashboard('Lead Demo Calendar', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'lead-demo-report': () => renderLeadDemoReportDashboard('Lead Demo Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'lead-predict-list': () => renderLeadPredictListDashboard('Lead Predict List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'lead-setting': () => initLeadSetting(),
+    'email-status': () => $("#dashboardContentInHTML").html(getEmailVerifyContent("Email Verification", false)),
+    'email-logs': () => initEmailLogs(),
+    'wati-numbers': () => renderWatiNumbersContent(),
+    'partner-school-payment': () => initPartnerSchoolPayment(),
+    'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
+    'user-screening-profiles': () => initUserScreeningProfiles(),
+    'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent(); },
+    'create-manage-sessions': () => initCreateManageSessions(),
+    'schedule-a-session': () => initScheduleASession(),
+    'admin-task': () => initAdminTask(),
+    'partner-dashboard': () => renderPartnerDashboard('Partner Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'partner-enrollment-list': () => renderPartnerList('Student Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'add-student-enrollment': () => enrollmentPartnerStudent(0),
+    'dashboard': () => initDashboard(),
+    'partner-enrollment-students-wlp': () => initPartnerEnrollmentStudentsWlp(),
+    'dashboard-monitoring': () => getDashboardMonitoringContent(),
+    'counselor-dashboard': () => renderCounselorDashboard('Counselor Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'counselor-enrollment-list': () => renderCounselorEnrollList('Student Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'task': () => renderTaskListDashboard("Task", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'add-sub-partner': () => renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'partner-fee-structure': () => renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'profile-view': () => renderStudentProfilePage(extraParam),
+    'payment-reports': () => getPaymentReportContent(),
+    'onboarded-teacher-list': () => getOnboardedTeacherContent(),
+    'user-feedback': () => getReviewDashboardContent('User Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'question-list': () => getQuestionDashboardContent('Question List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'clubs': () => renderClubsPage("Clubs"),
+    'manage-club': () => renderManageClubsPage("Manage Clubs"),
+    'spanish-club': () => renderClubsCommonPage("Spanish Club"),
+    'french-club': () => renderClubsCommonPage("French Club"),
+    'german-club': () => renderClubsCommonPage("German Club"),
+    'english-club': () => renderClubsCommonPage("English Club"),
+    'chinese-club': () => renderClubsCommonPage("Chinese Club"),
+    'team-building-club': () => renderClubsCommonPage("Team Building Club"),
+    'cultural-exchange-club': () => renderClubsCommonPage("Cultural Exchange Club"),
+    'leadership-skills-club': () => renderClubsCommonPage("Leadership Skills Club"),
+    'debate-club': () => renderClubsCommonPage("Debate Club"),
+    'drama-expression-club': () => renderClubsCommonPage("Drama & Expression Club"),
+    'public-speaking-club': () => renderClubsCommonPage("Public Speaking Club"),
+    'focus-reaction-training-club': () => renderClubsCommonPage("Focus & Reaction Training Club"),
+    'skill-development-club': () => renderClubsCommonPage("Skill Development Club"),
+    'team-communication-club': () => renderClubsCommonPage("Team Communication Club"),
+    'online-tournaments-club': () => renderClubsCommonPage("Online Tournaments Club"),
+    'strategy-games-club': () => renderClubsCommonPage("Strategy Games Club"),
+    'competitive-gaming': () => renderClubsCommonPage("Competitive Gaming Club"),
+    'global-competitions-club': () => renderClubsCommonPage("Global Competitions Club"),
+    'game-strategy-analysis-club': () => renderClubsCommonPage("Game Strategy & Analysis Club"),
+    'parent-student-login-details': () => renderStudentParentLoginHistoryPage('Login History', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'parent-syllabus-assigned-teacher': () => renderParentSyllabusAssignedTeacherPage('Assigned Course Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'parent-fee-details': () => renderParentFeeDetailsPage('Fee Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'parent-download-academic-docs': () => renderParentAcademicDocsPage('Academic Documents', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'parent-academic-performance': () => renderParentAcademicPerformancePage('Academic Performance', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'parent-progress': () => renderParentProgressPage('Progress Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-login-details': () => renderStudentLoginHistoryPage(extraParam),
+    'teacher-login-details': () => renderTeacherLoginHistoryPage('Login History', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'syllabus-assigned-teacher': () => renderStudentSyllabusAssignedTeacherPage('Assigned Course Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'academic-year-extention': () => renderStudentAcademicYearExtentionPage('Academic Year Extension', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'fee-details': () => renderStudentFeeDetailsPage('Fee Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-progress-report': () => renderStudentAcademicPerformancePage('Academic Performance', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'progress-detail': () => renderStudentProgressDetailPage('Progress Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-feedback': () => renderStudentFeedbackPage('Student Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-handbook': () => renderStudentHandbookPage('Student Handbook', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'batch-student-examination-sheet': () => renderStudentExaminationSheetPage("Student's Examination Schedule", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'Parent-dashboard': () => renderParentDashboardContent(),
+    'parent-class-schedule': () => renderParentStudentClassScheduleContent(),
+    'parent-attendance': () => renderAtendaceByStudentIdContent(),
+    'enrollment-availability': () => renderEnrollmentAvalabilityContent(),
+    'enrollment-reports': () => renderEnrollmentAvalabilityReportContent(),
+    'email-template-tester': () => getEmailerTemplateViewerContent(),
+};
+
+const getLeadCategory = () => {
+    let category = "B2C";
+    if (USER_ROLE == "B2B_LEAD") category = "B2B";
+    if (SCHOOL_TYPE == 'WLP') category = "B2B";
+    return category;
+};
+
+function initManageLmsUser() {
+    $('#dashboardContentInHTML').html(getManageLmsUserContent('Manage LMS User', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    getSessionMasterList('lmsStudentFilter', 'activeSession', false);
+    $("#standardId").select2({ theme: "bootstrap4" });
+    $("#standardId option[value='17']").remove();
+    $(".filterDates").datepicker({ todayBtn: 1, autoclose: true, format: 'M dd, yyyy', todayHighlight: true });
+}
+
+function initManageSession() {
+    $('#dashboardContentInHTML').html(getManageSessionUserContent('Manage Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    $("#standardId").select2({ theme: "bootstrap4", dropdownParent: "#lmsStudentFilter" });
+    $("#standardId option[value='17']").remove();
+    $(".filterDates").datepicker({ todayBtn: 1, autoclose: true, format: 'M dd, yyyy', todayHighlight: true });
+    getSessionMasterList('lmsStudentFilter', 'sessionId', false);
+}
+
+function initExtraSessionDetails() {
+    $("#dashboardContentInHTML").html(renderManageClassContent('Manage Extra Classes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    getExtraSessionDetails('extraSessionDetails', 0, '' + roleAndModule.moduleId + '');
+    $("#extraDetailSearch").on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            getExtraSessionDetails('extraSessionDetails', 0, '' + roleAndModule.moduleId + '');
+        }
+    });
+}
+
+function initStudentTeacherSessions() {
+    console.log("hello");
+    $('#dashboardContentInHTML').html(getManageSessionContent('Classes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    $('#classJoinInSameWindowModal').remove();
+    $("body").append(calendarMeetingLinkValidate());
+    $(".filterDates").datepicker("destroy");
+    $('.filterDates').datepicker({ autoclose: true, format: 'M dd, yyyy' });
+    $('#dashboardContentInHTML').append(getUpdateManageMeetingResultModal(roleAndModule, USER_ROLE));
+    $('#dashboardContentInHTML').append(getMeetingUrlModal(roleAndModule, USER_ROLE));
+    $('#dashboardContentInHTML').append(getSendMailModal(roleAndModule, USER_ROLE));
+    $('#dashboardContentInHTML').append(getPublicRecordModal(roleAndModule, USER_ROLE));
+    $('#dashboardContentInHTML').append(getRevokeModal(roleAndModule, USER_ROLE));
+    getSessionMasterList('classroomSessionFilter', 'sessionId', false);
+    $('#classroomSessionFilter #sessionId').select2({ theme: "bootstrap4", dropdownParent: "#classroomSessionFilter" });
+}
+
+async function initTeacherScreeningProfiles() {
+    await getRenderTeacherPreScreeningProfileContent("Teacher Applications", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE);
+    $("#filterGrades").select2({ theme: "bootstrap4" });
+    $("#filterCourses").select2({ theme: "bootstrap4" });
+    teacherScreeningProfileOnloadFunction();
+}
+
+function initPayment() {
+    isDiscountApplied = false;
+    $("#dashboardContentInHTML").html(getManagePaymentContent("Payment Details", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    getSessionMasterList("advancePaymentSearchForm", "academicSession", false);
+    callCountries("advancePaymentSearchForm", "", "countryId");
+    if (SCHOOL_ID == 4 || SCHOOL_ID == 5) {
+        $("#gradeId option[value=9]").remove();
+        $("#gradeId option[value=10]").remove();
+    }
+    $("#advSerch .modal-body .multiselect-dropdown").select2({ placeholder: "Select an option", theme: "bootstrap4", dropdownParent: "#advSerch .modal-body", minimumResultsForSearch: Infinity });
+    $("#paymentType1").on("change", function () {
+        if ($(this).val() == "REGISTRATION_FEE_ADV") {
+            $("#addStudentPaymentForm #paymentName1").val("Reserve a Seat for " + getNextGrade('addStudentPaymentForm', 'standardId1'));
+            $("#addStudentPaymentForm #paymentName1").prop("disabled", true);
+        } else {
+            $("#addStudentPaymentForm #paymentName1").val("");
+            $("#addStudentPaymentForm #paymentName1").prop("disabled", false);
+        }
+    });
+    $("#addPaymentModal .modal-body .multiselect-dropdown").select2({ placeholder: "Select an option", theme: "bootstrap4", dropdownParent: "#addPaymentModal .modal-body", minimumResultsForSearch: Infinity }).on("change", function () {
+        if ($(this).attr("id") == "status1" && $(this).val() == "SCHEDULED") {
+            $("#paymentDate1").val("").datepicker("update");
+            $("#paymentDate1").prop("disabled", true);
+            $(".hideWhenStatusScheduled").hide();
+        } else {
+            $("#paymentDate1").prop("disabled", false);
+            $(".hideWhenStatusScheduled").show();
+        }
+    });
+    setpaymentDateFrom();
+    setpaymentDateTo();
+    initEditor(1, "descriptionDiv", "Put description if any", false);
+    $("#paymentDate1").datepicker({ autoclose: true, endDate: new Date(), format: "mm-dd-yyyy", disableTouch: false });
+    $("#scheduleDate1").datepicker({ startDate: new Date(), autoclose: true, format: "mm-dd-yyyy", disableTouch: false });
+    $("#addCountryId").select2({ theme: "bootstrap4", dropdownParent: "#addPaymentModal" });
+    $("#addStateId").select2({ theme: "bootstrap4", dropdownParent: "#addPaymentModal" });
+    $("#addCityId").select2({ theme: "bootstrap4", dropdownParent: "#addPaymentModal" });
+    getAllCountryList('addPaymentModal', 'addCountryId');
+    $("select#addCountryId").on("change", function () { callStates('addPaymentModal', this.value, 'addCountryId', 'addStateId'); });
+    $("select#addStateId").on("change", function () { callCities('addPaymentModal', this.value, 'addStateId', 'addCityId'); });
+}
+
+function initInvoice() {
+    $("#dashboardContentInHTML").hide();
+    $("#dashboardContentInHTMLAdditional").show();
+    renderInvoiceContent("Y", "Y", "", true);
+}
+
+function initLeadReportList() {
+    LEAD_CATEGORY = getLeadCategory();
+    renderCounselorLeadReportDashboard('Lead Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, LEAD_CATEGORY);
+}
+
+function initLeadDetailByCampaign() {
+    LEAD_CATEGORY = getLeadCategory();
+    renderCounselorLeadReportDashboard('Lead Detail By Campaign', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, LEAD_CATEGORY, 'campaign');
+}
+
+function initLeadList() {
+    LEAD_CATEGORY = getLeadCategory();
+    $('#dashboardContentInHTML').html(renderCounselorLeadListDashboard('Lead List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, LEAD_CATEGORY));
+}
+
+function initLeadSetting() {
+    LEAD_CATEGORY = getLeadCategory();
+    renderLeadSettingDashboard('Lead Settings', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, LEAD_CATEGORY);
+}
+
+function initEmailLogs() {
+    $("#dashboardContentInHTML").html(getEmailLogsContent("Email Logs"));
+    $("#startDate").datepicker({ autoclose: true, format: 'yyyy-mm-dd' });
+    $("#endDate").datepicker({ autoclose: true, format: 'yyyy-mm-dd' });
+    $("#classStatus").select2({ theme: "bootstrap4", minimumResultsForSearch: Infinity });
+    $("#markStatus").select2({ theme: "bootstrap4" });
+    $("#sortBy").select2({ theme: "bootstrap4", minimumResultsForSearch: Infinity });
+    getEmailLogsByEmail();
+}
+
+function initPartnerSchoolPayment() {
+    $('#dashboardContentInHTML').html(renderSchoolPayment());
+    initializeSchoolPaymentPage();
+    getPartnerSchoolList();
+}
+
+function initGraduationCeremonyAttendees() {
+    $("#dashboardContentInHTML").html(getGraduationCeremonyAttendeesContent("Graduation Ceremony Attendees", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    loadGraduationCeremonyAttendees();
+}
+
+function initUserScreeningProfiles() {
+    $('#dashboardContentInHTML').html(renderUserApplicationContent("Job Applicants", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    userApplicationProfileOnloadFunction();
+}
+
+function initCreateManageSessions() {
+    $('#dashboardContentInHTMLAdditional').html(getManageSessionContentTeacher('All Classes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    $(".filterDates").datepicker("destroy");
+    $('.filterDates').datepicker({ autoclose: true, format: 'dd-mm-yyyy' });
+    $('#dashboardContentInHTMLAdditional').append(getUpdateMeetingResultModal(roleAndModule, USER_ROLE));
+    $('#dashboardContentInHTMLAdditional').append(getMeetingUrlModal(roleAndModule, USER_ROLE));
+    $('#dashboardContentInHTMLAdditional').append(getSendMailModal(roleAndModule, USER_ROLE));
+    $("#standardId").select2({ theme: "bootstrap4" });
+    $("#classStatus").select2({ theme: "bootstrap4", minimumResultsForSearch: Infinity });
+    $("#markStatus").select2({ theme: "bootstrap4" });
+    $("#sortBy").select2({ theme: "bootstrap4", minimumResultsForSearch: Infinity });
+}
+
+async function initScheduleASession() {
+    $('#dashboardContentInHTML').html(await getScheduleSessionContentTeacher('Book a Class', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    generateTinyUrls();
+    $("#meetingDate").datepicker("destroy");
+    $("#meetingDate").datepicker({ autoclose: true, startDate: new Date(), format: 'M dd, yyyy', container: '.meetingDateWrapper' });
+    $(".filterDates").datepicker("destroy");
+    $('.filterDates').datepicker({ autoclose: true, format: 'M dd, yyyy' });
+    $('#showMeetingModalDiv').show();
+    await getTimeZones('classroomSessionFilter', 'countryTimezone', 'countryTimezoneId');
+    await getTeacherAssignedGrade('classroomSessionFilter', USER_ID);
+    $("#countryTimezone").select2({ theme: "bootstrap4" });
+    $("#studentName").select2({ theme: "bootstrap4" });
+    $("#startFromTime").select2({ theme: "bootstrap4" });
+}
+
+function initAdminTask() {
+    $('#dashboardContentInHTML').html(getAdminTaskContent('Admin Tasks', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    getTeacherDetails('adminTaskFilter', 'userId', 'userIdOfflineClass', SCHOOL_ID);
+    $('#adminTaskFilter #userId').select2({ theme: "bootstrap4" });
+    $(".filterDates").datepicker({ todayBtn: 1, autoclose: true, format: 'M dd, yyyy', todayHighlight: true });
+    getMeetingVendorUserStatus(SCHOOL_ID, USER_ID, 'LENS');
+}
+
+function initDashboard() {
+    if (SCHOOL_TYPE == "WLP") {
+        if (SCHOOL_ID != 2) {
+            $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+        } else {
+            $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+        }
+    } else {
+        callForDashboardData("formIdIfAny", "dashboard-content?moduleId=" + moduleId, replaceDiv);
+    }
+}
+
+function initPartnerEnrollmentStudentsWlp() {
+    $('#dashboardContentInHTML').html(renderSchoolEnrollmentStudents(`${schoolSettingsOffice.schoolType == "WLP" ? "Student Enrollment List" : "Enrollment Partner Student List"}`));
+    getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", SCHOOL_ID);
+    callPartnerCountries('partnerEnrollFilterForm', 0, 'countryId');
+    getPartnerSchools(SCHOOL_ID);
+    callAllStandardList('partnerEnrollFilterForm', 'gradeId');
+
+    $("select#schoolName").on("change", function () { getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", this.value); });
+    $("select#countryId").on("change", function () { callStates('partnerEnrollFilterForm', this.value, 'countryId'); });
+    $("select#stateId").on("change", function () { callCities('partnerEnrollFilterForm', this.value, 'stateId'); });
+    $("select#partnerName").on("change", function () { $("#referralCode").val($('option:selected', this).attr('dail-referral-code')); });
+
+    $("#partnerName, #academicYear, #enrollmentStatus, #learningProgram, #gradeId, #commissionStatus, #countryId, #stateId, #cityId").select2({ theme: "bootstrap4" });
+    $("#paymentDateFrom, #paymentDateTo").datepicker({ autoclose: true, format: 'M dd, yyyy' });
+
+    $(".follow-up-no").click(function () {
+        $(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
+        $(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
+        $(this).parent().find(".follow-up-content").slideDown();
+        $(this).parent().siblings().find(".follow-up-content").slideUp();
+        $(this).parent().addClass("follow-up-accordian-active");
+        $(this).parent().siblings().removeClass("follow-up-accordian-active");
+    });
+
+    callStudentListByPartnerWLP('partnerEnrollFilterForm');
+    $("#searchEnrolled").on('click', function () {
+        currentPagePartnerEnrollmentList = 1;
+        callStudentListByPartnerWLP('partnerEnrollFilterForm');
+    });
+
+    $("#startDate").datepicker({ autoclose: true, format: 'M dd, yyyy' }).on('changeDate', function (e) {
+        $('#endDate').val('');
+        $('#endDate').prop('disabled', false);
+        $('#endDate').datepicker('setStartDate', e.date);
+    });
+    $("#endDate").datepicker({ autoclose: true, format: 'M dd, yyyy' }).on('changeDate', function () {
+        if ($("#startDate").val() && $("#endDate").val()) { getMonthlyRevenue(); }
+    });
+
+    getLearningProgramContentFromServer(SCHOOL_ID, 'partnerEnrollFilterForm', 'learningProgram');
+    populateMonths();
+}
+
 async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
-	customLoader(true);
-	try{
-		roleAndModule = await getUserRights(SCHOOL_ID_OF_USER, USER_ROLE_ID, USER_ID, moduleId);
-		ROLE_MODULE=roleAndModule;
-		if(pageNo == "student-home"){
-			CALENDAR_EVENT=false;
-			rendereDashboardContent(isParent);
-		}else if (pageNo == "student-addon") {
-			renderBuyExtraClasses(USER_ID);
-		}else if (pageNo == "book-a-session") {
-			renderBookClassContent('','','', true, moduleId);
-		}else if(pageNo == "home"){
-			renderSchoolDashboard('School Dashboard', roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE);
-		}else if(pageNo=="module"){
-			renderModuleListDashboard('Module List', roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
-		}else if(pageNo=="modulerole"){
-			renderRoleListDashboard('Roles List', roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
-		}else if (pageNo === "user-list") {
-			renderAdminManageUserListDashboard('Admin Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if(pageNo == "online-user"){
-			renderOnlineUserListDashboard('Live Online Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if(pageNo == "delete-user"){
-			renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if (pageNo === "assign-orientation") {
-			renderStudentOrientationAssignDashboard('Assign Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if (pageNo === "student-orientation-list") {
-			renderStudentOrientationListDashboard('System training Students List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-		}else if(pageNo=='manage-lms-user'){
-			$('#dashboardContentInHTML').html(getManageLmsUserContent('Manage LMS User',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-			getSessionMasterList('lmsStudentFilter', 'activeSession',false);
-			$("#standardId").select2({
-				theme:"bootstrap4",
-			});
-			$("#standardId option[value='17']").remove();
-			$(".filterDates").datepicker({
-				todayBtn:  1,
-				autoclose: true,
-				format: 'M dd, yyyy',
-				todayHighlight : true,
+    customLoader(true);
+    try {
+        roleAndModule = await getUserRights(SCHOOL_ID_OF_USER, USER_ROLE_ID, USER_ID, moduleId);
+        ROLE_MODULE = roleAndModule;
 
-			});
-		}else if(pageNo=='manage-session'){
-			$('#dashboardContentInHTML').html(getManageSessionUserContent('Manage Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-			$("#standardId").select2({
-				theme:"bootstrap4",
-				dropdownParent:"#lmsStudentFilter"
-			});
-			$("#standardId option[value='17']").remove();
-			$(".filterDates").datepicker({
-				todayBtn:  1,
-				autoclose: true,
-				format: 'M dd, yyyy',
-				todayHighlight : true,
-			});
-			getSessionMasterList('lmsStudentFilter', 'sessionId',false);
-		}else if (pageNo == "extra-session-details") {
-			$("#dashboardContentInHTML").html(renderManageClassContent('Manage Extra Classes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
-			getExtraSessionDetails('extraSessionDetails',0, ''+roleAndModule.moduleId+'');
-			$("#extraDetailSearch").on('keyup', function (e) {
-				if (e.key === 'Enter' || e.keyCode === 13) {
-					getExtraSessionDetails('extraSessionDetails',0, ''+roleAndModule.moduleId+'');
-				}
-			});
-		}else if(pageNo=='student-teacher-sessions'){
-			console.log("hello");
-			$('#dashboardContentInHTML').html(getManageSessionContent('Classes',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-			$('#classJoinInSameWindowModal').remove();
-			$("body").append(calendarMeetingLinkValidate());
-			$(".filterDates").datepicker("destroy");
-			$('.filterDates').datepicker({
-				autoclose: true,
-				format: 'M dd, yyyy',
-
-			});
-			$('#dashboardContentInHTML').append(getUpdateManageMeetingResultModal(roleAndModule, USER_ROLE));
-			$('#dashboardContentInHTML').append(getMeetingUrlModal(roleAndModule, USER_ROLE));
-			$('#dashboardContentInHTML').append(getSendMailModal(roleAndModule, USER_ROLE));
-			$('#dashboardContentInHTML').append(getPublicRecordModal(roleAndModule, USER_ROLE));
-			$('#dashboardContentInHTML').append(getRevokeModal(roleAndModule, USER_ROLE));
-			getSessionMasterList('classroomSessionFilter', 'sessionId', false);
-			$('#classroomSessionFilter #sessionId').select2({
-				theme:"bootstrap4",
-				dropdownParent:"#classroomSessionFilter"
-			});
-		}else if (pageNo == "auto-progress-report") {
-			renderAutoProgressReportDashboard("Bulk Student Progress Report", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if(pageNo == "teacher-screening-profiles"){
-			await getRenderTeacherPreScreeningProfileContent("Teacher Applications", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE);
-			$("#filterGrades").select2({
-				theme:"bootstrap4",
-			});
-			$("#filterCourses").select2({
-				theme:"bootstrap4",
-			});
-			teacherScreeningProfileOnloadFunction();
-		}else if(pageNo == "teacher-profile"){
-			renderReceivedTeachedProfileListDashboard('Received Teacher Profile', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE);
-		}else if(pageNo == "pending-interview-remarks"){
-			renderPendingContractListDashboard('Pending Contract', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE);
-		}else if(pageNo == "teacher-profile-pending-verification"){
-			renderPendingVerificationTeachedProfileListDashboard('Pending Verification', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if(pageNo == "teacher-profile-pending-bank-details"){
-			renderBankDetailsTeacherProfleListDashboard('Pending Bank Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if (pageNo == "approved-teachers") {
-			renderApprovedTeacherDashboard( "Approved Teachers", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, "0","0,1", "approved" )
-		}else if(pageNo == "rejected-teachers"){
-			renderRejectedTeacherListDashboard('Rejected Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if (pageNo == "withdraw-teachers") {
-			renderApprovedTeacherDashboard( "Withdrawn Teachers", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, "1","0,1","withdraw" )
-		}else if (pageNo === "teacher-assign-interview") {
-			renderTeacherInterviewAssignDashboard('Assign Teacher Interview', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
-		}else if (pageNo == "payment") {
-			isDiscountApplied=false;
-			$("#dashboardContentInHTML").html(getManagePaymentContent( "Payment Details", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE ) );
-			getSessionMasterList("advancePaymentSearchForm", "academicSession", false);
-			callCountries("advancePaymentSearchForm", "", "countryId");
-			if (SCHOOL_ID == 4 || SCHOOL_ID == 5) {
-			$("#gradeId option[value=9]").remove();
-			$("#gradeId option[value=10]").remove();
-			}
-			$("#advSerch .modal-body .multiselect-dropdown").select2({
-			placeholder: "Select an option",
-			theme:"bootstrap4",
-			dropdownParent: "#advSerch .modal-body",
-			minimumResultsForSearch: Infinity,
-			});
-			$("#paymentType1").on("change", function () {
-			if ($(this).val() == "REGISTRATION_FEE_ADV") {
-				$("#addStudentPaymentForm #paymentName1").val("Reserve a Seat for "+getNextGrade('addStudentPaymentForm', 'standardId1'));
-				$("#addStudentPaymentForm #paymentName1").prop("disabled", true);
-			} else {
-				$("#addStudentPaymentForm #paymentName1").val("");
-				$("#addStudentPaymentForm #paymentName1").prop("disabled", false);
-			}
-			});
-			$("#addPaymentModal .modal-body .multiselect-dropdown").select2({
-				placeholder: "Select an option",
-				theme:"bootstrap4",
-				dropdownParent: "#addPaymentModal .modal-body",
-				minimumResultsForSearch: Infinity,
-			}).on("change", function () {
-			if ($(this).attr("id") == "status1" && $(this).val() == "SCHEDULED") {
-				$("#paymentDate1").val("").datepicker("update");
-				$("#paymentDate1").prop("disabled", true);
-				$(".hideWhenStatusScheduled").hide();
-			} else {
-				$("#paymentDate1").prop("disabled", false);
-				$(".hideWhenStatusScheduled").show();
-			}
-			});
-			setpaymentDateFrom();
-			setpaymentDateTo();
-			initEditor(1, "descriptionDiv", "Put description if any", false);
-			$("#paymentDate1").datepicker({
-			autoclose: true,
-			endDate: new Date(),
-			format: "mm-dd-yyyy",
-			disableTouch: false,
-			});
-			$("#scheduleDate1").datepicker({
-			startDate: new Date(),
-			autoclose: true,
-			format: "mm-dd-yyyy",
-			disableTouch: false,
-			});
-			$("#addCountryId").select2({
-				theme:"bootstrap4",
-				dropdownParent:"#addPaymentModal"
-			});	
-			$("#addStateId").select2({
-				theme:"bootstrap4",
-				dropdownParent:"#addPaymentModal"
-			});
-			$("#addCityId").select2({
-				theme:"bootstrap4",
-				dropdownParent:"#addPaymentModal"
-			});
-			getAllCountryList('addPaymentModal','addCountryId');
-			$("select#addCountryId").on("change",function(){
-				callStates('addPaymentModal', this.value, 'addCountryId', 'addStateId');
-			});
-				
-			$("select#addStateId").on("change",function(){
-				callCities('addPaymentModal', this.value, 'addStateId', 'addCityId');
-			});
-		}else if(pageNo == "invoice"){
-			$("#dashboardContentInHTML").hide();
-			$("#dashboardContentInHTMLAdditional").show();
-			renderInvoiceContent("Y", "Y", "", true);
-		}else if(pageNo=='lead-report-list'){
-			LEAD_CATEGORY="B2C";
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			renderCounselorLeadReportDashboard('Lead Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
-		}else if(pageNo=='lead-report-campaign'){
-			LEAD_CATEGORY="B2C";
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			renderLeadReportCampaignDashboard('Lead Campaign',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
-		}else if(pageNo=='lead-logs'){
-			LEAD_CATEGORY="B2C";
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			renderCounselorLeadLogsDashboard('Lead Logs',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
-		}else if(pageNo=='lead-detail-by-campaign'){
-			LEAD_CATEGORY="B2C";
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			renderCounselorLeadReportDashboard('Lead Detail By Campaign',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY, 'campaign')
-		}else if(pageNo=='lead-list'){
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			renderCounselorLeadListDashboard('Lead List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY);
-		}else if(pageNo=='lead-assign-form'){
-			renderLeadAssignDashboard('Lead Assign Form',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-		}else if(pageNo=='admin-partner-enrollment-list'){
-			renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-		}else if(pageNo=='lead-demo-list'){
-			renderMeetingTimeDashboard('Lead Demo Calendar',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-		}else if(pageNo=='lead-demo-report'){
-			renderLeadDemoReportDashboard('Lead Demo Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-		}else if(pageNo=='lead-predict-list'){
-			renderLeadPredictListDashboard('Lead Predict List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-		}else if(pageNo=='lead-setting'){
-			LEAD_CATEGORY="B2C";
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			renderLeadSettingDashboard('Lead Settings',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
-		}else if (pageNo == "email-status") {
-			$("#dashboardContentInHTML").html(getEmailVerifyContent("Email Verification", false));
-		}else if (pageNo == "email-logs") {
-			$("#dashboardContentInHTML").html(getEmailLogsContent("Email Logs"));
-			$("#startDate").datepicker({
-				autoclose: true,
-				format: 'yyyy-mm-dd',
-
-			});
-			$("#endDate").datepicker({
-				autoclose: true,
-				format: 'yyyy-mm-dd',
-
-			});
-			$("#classStatus").select2({
-				theme:"bootstrap4",
-				minimumResultsForSearch:Infinity
-
-			});
-			$("#markStatus").select2({
-				theme:"bootstrap4",
-			});
-			$("#sortBy").select2({
-				theme:"bootstrap4",
-				minimumResultsForSearch:Infinity
-
-			});
-			getEmailLogsByEmail()
-		}else if (pageNo == "wati-numbers") {
-			renderWatiNumbersContent();
-		}else if(pageNo == "partner-school-payment"){
-			$('#dashboardContentInHTML').html(renderSchoolPayment());
-			initializeSchoolPaymentPage();
-			getPartnerSchoolList();
-		}else if(pageNo == "graduation-ceremony-attendees") {
-			$("#dashboardContentInHTML").html(getGraduationCeremonyAttendeesContent( "Graduation Ceremony Attendees", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
-			loadGraduationCeremonyAttendees();
-		}else if(pageNo=='user-screening-profiles'){
-			$('#dashboardContentInHTML').html(renderUserApplicationContent("Job Applicants", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
-			userApplicationProfileOnloadFunction();
-		}else if(pageNo=='teacher-home'){
-			CALENDAR_EVENT=false;
-			rendereTeacherHomeContent();
-		}else if(pageNo=='create-manage-sessions'){
-			$('#dashboardContentInHTMLAdditional').html(getManageSessionContentTeacher('All Classes',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-			$(".filterDates").datepicker("destroy");
-			$('.filterDates').datepicker({
-				autoclose: true,
-				format: 'dd-mm-yyyy',
-
-			});
-			$('#dashboardContentInHTMLAdditional').append(getUpdateMeetingResultModal(roleAndModule, USER_ROLE));
-			$('#dashboardContentInHTMLAdditional').append(getMeetingUrlModal(roleAndModule, USER_ROLE));
-			$('#dashboardContentInHTMLAdditional').append(getSendMailModal(roleAndModule, USER_ROLE));
-			$("#standardId").select2({
-				theme:"bootstrap4"
-			});
-			$("#classStatus").select2({
-				theme:"bootstrap4",
-				minimumResultsForSearch:Infinity
-
-			});
-			$("#markStatus").select2({
-				theme:"bootstrap4",
-			});
-			$("#sortBy").select2({
-				theme:"bootstrap4",
-				minimumResultsForSearch:Infinity
-
-			});
-		}else if(pageNo=='schedule-a-session'){
-			$('#dashboardContentInHTML').html(await getScheduleSessionContentTeacher('Book a Class',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-			generateTinyUrls();
-			$("#meetingDate").datepicker("destroy");
-			$("#meetingDate").datepicker({
-				autoclose: true,
-				startDate: new Date(),
-				format: 'M dd, yyyy',
-				container: '.meetingDateWrapper',
-			});
-			$(".filterDates").datepicker("destroy");
-			$('.filterDates').datepicker({
-				autoclose: true,
-				format: 'M dd, yyyy',
-			});
-			$('#showMeetingModalDiv').show();
-			await getTimeZones('classroomSessionFilter','countryTimezone','countryTimezoneId');
-			await getTeacherAssignedGrade('classroomSessionFilter',USER_ID);
-			$("#countryTimezone").select2({
-				theme:"bootstrap4"
-			});
-			$("#studentName").select2({
-				theme:"bootstrap4"
-			});
-			$("#startFromTime").select2({
-				theme:"bootstrap4"
-			});
-			// $('#dashboardContentInHTML').append(getUpdateMeetingResultModal(roleAndModule, USER_ROLE));
-			// $('#dashboardContentInHTML').append(getMeetingUrlModal(roleAndModule, USER_ROLE));
-			// $('#dashboardContentInHTML').append(getSendMailModal(roleAndModule, USER_ROLE));
-		}else if(pageNo=='admin-task'){
-			$('#dashboardContentInHTML').html(getAdminTaskContent('Admin Tasks',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-			getTeacherDetails('adminTaskFilter','userId','userIdOfflineClass',SCHOOL_ID);
-			$('#adminTaskFilter #userId').select2({
-				theme:"bootstrap4",
-			});
-			$(".filterDates").datepicker({
-				todayBtn:  1,
-				autoclose: true,
-				format: 'M dd, yyyy',
-				todayHighlight : true,
-				
-			});
-			getMeetingVendorUserStatus(SCHOOL_ID,USER_ID,'LENS');
-		}else if(pageNo=='partner-dashboard'){
-			renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-		}else if(pageNo=='lead-list'){
-			if (USER_ROLE == "B2B_LEAD") {
-				LEAD_CATEGORY = "B2B";
-			}
-			if(SCHOOL_TYPE=='WLP'){
-				LEAD_CATEGORY = "B2B";
-			}
-			$('#dashboardContentInHTML').html(renderCounselorLeadListDashboard('Lead List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY));
-		}else if(pageNo=='partner-enrollment-list'){
-			renderPartnerList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-		}else if(pageNo=='add-student-enrollment'){
-			enrollmentPartnerStudent(0);
-		}else if (pageNo == "dashboard") {
-			if (SCHOOL_TYPE == "WLP") {
-				// var urlSend = "/dashboard/admin-partner-dashboard?moduleId=" + moduleId;
-				// getAsPost(urlSend);
-				// customLoader(false);
-				//partner-dashboard
-				if(SCHOOL_ID != 2){
-					$('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE));
-				}else{
-					$('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)); 
-				}
-			}else {
-				callForDashboardData("formIdIfAny","dashboard-content?moduleId=" + moduleId,replaceDiv);
-			}
-		}else if (pageNo == "partner-enrollment-students-wlp") {
-			$('#dashboardContentInHTML').html(renderSchoolEnrollmentStudents(`${schoolSettingsOffice.schoolType == "WLP" ? "Student Enrollment List" :"Enrollment Partner Student List"}`));
-			getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", SCHOOL_ID);
-			callPartnerCountries('partnerEnrollFilterForm', 0, 'countryId');
-			// callPartnerListBy('partnerEnrollFilterForm','partnerName');
-			getPartnerSchools(SCHOOL_ID);
-			callAllStandardList('partnerEnrollFilterForm', 'gradeId');
-
-			$("select#schoolName").on("change",function(){
-				getSchoolSessionMasterList('partnerEnrollFilterForm', "academicYear", this.value);
-			});
-
-			$("select#countryId").on("change",function(){
-				callStates('partnerEnrollFilterForm', this.value, 'countryId');
-			});
-				
-			$("select#stateId").on("change",function(){
-				callCities('partnerEnrollFilterForm', this.value, 'stateId');
-			});
-
-			$("select#partnerName").on("change",function(){
-				$("#referralCode").val($('option:selected', this).attr('dail-referral-code'));
-			});
-
-			$("#partnerName").select2({
-				theme:"bootstrap4"
-			});
-			$("#academicYear").select2({
-				theme:"bootstrap4"
-			});
-			$("#enrollmentStatus").select2({
-				theme:"bootstrap4"
-			});
-			$("#learningProgram").select2({
-				theme:"bootstrap4"
-			});
-			$("#gradeId").select2({
-				theme:"bootstrap4"
-			});
-			$("#commissionStatus").select2({
-				theme:"bootstrap4"
-			});
-			$("#countryId").select2({
-				theme:"bootstrap4"
-			});
-			$("#stateId").select2({
-				theme:"bootstrap4"
-			});
-			$("#cityId").select2({
-				theme:"bootstrap4"
-			});
-			$("#paymentDateFrom").datepicker({
-				autoclose: true,
-				format: 'M dd, yyyy',
-			});
-			$("#paymentDateTo").datepicker({
-				autoclose: true,
-				format: 'M dd, yyyy',
-			});
-
-			$(".follow-up-no").click(function(){
-				$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
-				$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
-				$(this).parent().find(".follow-up-content").slideDown();
-				$(this).parent().siblings().find(".follow-up-content").slideUp();
-				$(this).parent().addClass("follow-up-accordian-active");
-				$(this).parent().siblings().removeClass("follow-up-accordian-active");
-			});
-
-			callStudentListByPartnerWLP('partnerEnrollFilterForm');
-			$("#searchEnrolled").on('click',function(){
-				currentPagePartnerEnrollmentList = 1;
-				callStudentListByPartnerWLP('partnerEnrollFilterForm');
-			});
-
-			$("#startDate").datepicker({
-				autoclose: true,
-				format: 'M dd, yyyy',
-			}).on('changeDate', function (e) {
-				$('#endDate').val('');
-				$('#endDate').prop('disabled', false);
-				$('#endDate').datepicker('setStartDate', e.date);
-			});
-
-			$("#endDate").datepicker({
-				autoclose: true,
-				format: 'M dd, yyyy',
-			}).on('changeDate', function () {
-				if ($("#startDate").val() && $("#endDate").val()) {
-					getMonthlyRevenue();
-				}
-			});
-
-			getLearningProgramContentFromServer(SCHOOL_ID,'partnerEnrollFilterForm','learningProgram');
-			populateMonths();
-		}else if(pageNo == "dashboard-monitoring"){
-			getDashboardMonitoringContent();
-		}else if(pageNo=='counselor-dashboard'){
-			renderCounselorDashboard('Counselor Dashboard',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-		}
-		else if(pageNo=='counselor-enrollment-list'){
-			renderCounselorEnrollList('Student Enrollments',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-		}else if(pageNo=='task'){
-			renderTaskListDashboard("Task", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
-		}else if(pageNo=='add-sub-partner'){
-			renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
-		}else if(pageNo=='partner-fee-structure'){
-			renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE)
-		}else if(pageNo=='profile-view'){
-			renderStudentProfilePage(extraParam);
-		}else if(pageNo=='payment-reports'){
-      getPaymentReportContent()
-		}else if(pageNo=='onboarded-teacher-list'){
-      getOnboardedTeacherContent()
-		}else if(pageNo=='user-feedback'){
-      	getReviewDashboardContent('User Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-    }else if(pageNo=='question-list'){
-      getQuestionDashboardContent('Question List',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-    }else if(pageNo=='clubs'){
-      renderClubsPage("Clubs");
-		}else if(pageNo=='manage-club'){
-      renderManageClubsPage("Manage Clubs");
-    }else if(pageNo=='spanish-club'){
-      renderClubsCommonPage("Spanish Club");
-    }else if(pageNo=='french-club'){
-      renderClubsCommonPage("French Club");
-    }else if(pageNo=='german-club'){
-      renderClubsCommonPage("German Club");
-    }else if(pageNo=='english-club'){
-      renderClubsCommonPage("English Club");
-    }else if(pageNo=='chinese-club'){
-      renderClubsCommonPage("Chinese Club");
-    }else if(pageNo=='team-building-club'){
-      renderClubsCommonPage("Team Building Club");
-    }else if(pageNo=='cultural-exchange-club'){
-      renderClubsCommonPage("Cultural Exchange Club");
-    }else if(pageNo=='leadership-skills-club'){
-      renderClubsCommonPage("Leadership Skills Club");
-    }else if(pageNo=='debate-club'){
-      renderClubsCommonPage("Debate Club");
-    }else if(pageNo=='drama-expression-club'){
-      renderClubsCommonPage("Drama & Expression Club");
-    }else if(pageNo=='public-speaking-club'){
-      renderClubsCommonPage("Public Speaking Club");
-    }else if(pageNo=='focus-reaction-training-club'){
-      renderClubsCommonPage("Focus & Reaction Training Club");
-    }else if(pageNo=='skill-development-club'){
-      renderClubsCommonPage("Skill Development Club");
-    }else if(pageNo=='team-communication-club'){
-      renderClubsCommonPage("Team Communication Club");
-    }else if(pageNo=='online-tournaments-club'){
-      renderClubsCommonPage("Online Tournaments Club");
-    }else if(pageNo=='strategy-games-club'){
-      renderClubsCommonPage("Strategy Games Club");
-    }else if(pageNo=='competitive-gaming'){
-      renderClubsCommonPage("Competitive Gaming Club");
-    }else if(pageNo=='global-competitions-club'){
-      renderClubsCommonPage("Global Competitions Club");
-    }else if(pageNo=='game-strategy-analysis-club'){
-      renderClubsCommonPage("Game Strategy & Analysis Club");
-     }else if(pageNo=='parent-student-login-details'){
-      await renderStudentParentLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='parent-syllabus-assigned-teacher'){
-      await renderParentSyllabusAssignedTeacherPage('Assigned Course Teachers',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='parent-fee-details'){
-      await renderParentFeeDetailsPage('Fee Details',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='parent-download-academic-docs'){
-      await renderParentAcademicDocsPage('Academic Documents',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='parent-academic-performance'){
-      await renderParentAcademicPerformancePage('Academic Performance',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='parent-progress'){
-      await renderParentProgressPage('Progress Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='student-login-details'){
-      await renderStudentLoginHistoryPage(extraParam);
-     }else if(pageNo=='teacher-login-details'){
-      await renderTeacherLoginHistoryPage('Login History',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='syllabus-assigned-teacher'){
-      await renderStudentSyllabusAssignedTeacherPage('Assigned Course Teachers',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='academic-year-extention'){
-      await renderStudentAcademicYearExtentionPage('Academic Year Extension',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='fee-details'){
-      await renderStudentFeeDetailsPage('Fee Details',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='student-progress-report'){
-      await renderStudentAcademicPerformancePage('Academic Performance',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='progress-detail'){
-      await renderStudentProgressDetailPage('Progress Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='student-feedback'){
-      renderStudentFeedbackPage('Student Feedback',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE)
-     }else if(pageNo=='student-handbook'){
-      await renderStudentHandbookPage('Student Handbook',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='batch-student-examination-sheet'){
-      await renderStudentExaminationSheetPage("Student's Examination Schedule",roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
-     }else if(pageNo=='Parent-dashboard'){
-      renderParentDashboardContent()
-     }else if(pageNo=='parent-class-schedule'){
-      renderParentStudentClassScheduleContent()
-     }else if(pageNo=='parent-attendance'){
-      renderAtendaceByStudentIdContent()
-     }else if(pageNo=='enrollment-availability'){
-      renderEnrollmentAvalabilityContent()
-     }else if(pageNo=='enrollment-reports'){
-      renderEnrollmentAvalabilityReportContent()
-     }else if(pageNo=='release-note' || pageNo=='release-note-admin-list' || pageNo=='release-note-admin-editor' || pageNo=='release-note-user-list'){
-      renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam);
-     }else if(pageNo=='email-template-tester'){
-      getEmailerTemplateViewerContent();
-     }else if(pageNo=='log-viewer'){
-      renderLogViewerContent();
-     }
-
-     
-	}catch(err){
-		console.error("getContent error:", err);
-
+        const handler = contentHandlers[pageNo];
+        if (handler) {
+            await handler();
+        } else {
+            console.warn(`No handler found for pageNo: ${pageNo}`);
+        }
+    } catch (err) {
+        console.error("getContent error:", err);
         if (err === "offline") {
             showMessageTheme2(0, "You are offline. Please check internet.");
         } else if (err === "Empty response") {
@@ -641,7 +396,7 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
         } else {
             showMessageTheme2(0, "Something went wrong. Please reload.");
         }
-	}finally {
+    } finally {
         customLoader(false);
     }
 }
@@ -657,7 +412,7 @@ function backToMain(tableId, modalID){
 	$("#dashboardContentInHTMLAdditional").hide();
 	$('html, body').animate({ scrollTop: 0 }, 500);
 	if(tableId != "" && tableId != undefined){
-		if($.fn.DataTable.isDataTable('#'+tableId)) {
+		if($.fn.DataTable.isDataTable('#'+tableId)){
 			$('#'+tableId).DataTable().destroy();
 		}
 		$('#'+tableId).DataTable();

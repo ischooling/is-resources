@@ -1244,7 +1244,7 @@ function saveDocs(userId, studentStandardId, docType){
 	});
 }
 
-function removeUploadImage(src, inputId, thumbId, type, studentStandardId){
+function removeUploadImage(src, inputId, thumbId, type, studentStandardId, removeType){
 	if($("#"+thumbId).attr("src").split(":")[0]=="https" || $("#"+thumbId).attr("src").split(":")[0]=="http"){
 		var data={};
     	data['userId']=USER_ID;
@@ -1287,6 +1287,9 @@ function removeUploadImage(src, inputId, thumbId, type, studentStandardId){
 	$("#"+inputId+"div").attr("data-base64url",PATH_FOLDER_IMAGE2+'no-image.jpg'+SCRIPT_VERSION);
 	$("#"+inputId+"div").show();
 	$('#' + inputId+'Remove').hide();
+	if(removeType == "new"){
+		$('#' + inputId+'ViewBtn').hide();
+	}
 	$('.removeDocBtn').each(function(index){
 		if($(this).attr('style') == 'display: none'){
 			$("#allDocsNotUploaded").show();

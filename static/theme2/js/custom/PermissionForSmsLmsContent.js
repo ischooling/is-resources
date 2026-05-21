@@ -80,9 +80,9 @@ async function cardContent(data){
                                 <div class="card-body">
                                     <div class="col-md-12 text-center">
                                         <div class="full">
-                                            <h2 class="full text-center text-primary-gradient font-weight-bold">SMS</h2>
+                                            <h2 class="full text-center text-primary font-weight-bold">SMS</h2>
                                         </div>
-                                        <a href="javascript:void(0)" onclick="windowRedirectToDashboard('${data.dashboardUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-primary -gradient text-white p-4 br-3">
+                                        <a href="javascript:void(0)" onclick="windowRedirectToDashboard('${data.dashboardUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-primary text-white p-4 br-3">
                                             <div class="d-flex flex-wrap justify-content-center">
                                                 <h6 class="mt-2 mb-0"><i class="fa fa-user" style="font-size:22px"> </i> <b>School Management System (SMS)</b></h6>
                                             </div>
@@ -106,7 +106,7 @@ async function cardContent(data){
                                                             <h6 class="mb-0"><i class="fa fa-book" style="font-size:18px"> </i> <b> ${sso.lmsProviderName}</b></h6>
                                                         </a>`
                                                     }else{
-                                                        html+=`<a href="javascript:void(0)" onclick="callWithSession('${sso.lmsProviderSSOUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-success -gradient text-white br-3 p-2">
+                                                        html+=`<a href="javascript:void(0)" onclick="callWithSession('${sso.lmsProviderSSOUrl}')" class="mb-2 mr-2 btn-icon-vertical btn bg-success-gradient text-white br-3 p-2">
                                                             <h6 class="mb-0"><i class="fa fa-book" style="font-size:18px"> </i> <b>${sso.lmsProviderName}</b></h6>
                                                         </a>`
                                                     }

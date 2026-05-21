@@ -18,7 +18,7 @@ async function loginContent(userName, fromSpoof){
                             </a>
                         </div>*/''}
                         ${/*<div class="new-year-img">
-                            <img src="${PATH_FOLDER_IMAGE}2022.png" loding="lazy"/>
+                            <img src="${PATH_FOLDER_IMAGE2}2022.png" loding="lazy"/>
                         </div>*/''} 
                     </div>`;
 
@@ -164,7 +164,7 @@ function CommonLandingImageContent(data){
     html=`
     <div class="col-lg-8 col-md-8 col-sm-6 col-xs-12 text-center">
         <p>&nbsp;</p>
-        <img src="${PATH_FOLDER_IMAGE}student.png${SCRIPT_VERSION}" style="background: #fff; height: 220px" loding="lazy">`;
+        <img src="${PATH_FOLDER_IMAGE2}student.png${SCRIPT_VERSION}" style="background: #fff; height: 220px" loding="lazy">`;
         if (schoolSettings.schoolId === 1) {
             html+=`<h1 style="font-size: 23px;">Learn at your own comfort with </h1>`;
         }
@@ -172,19 +172,19 @@ function CommonLandingImageContent(data){
         `<div class="full-social-links mobile-view">
             <p class="social-icon-img-format">`;
                 if (schoolSettingsLinks.fbUrl) {
-                html+=`<a href="${schoolSettingsLinks.fbUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE}facebook.png${SCRIPT_VERSION}" loding="lazy"></a>`;
+                html+=`<a href="${schoolSettingsLinks.fbUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE2}facebook.png${SCRIPT_VERSION}" loding="lazy"></a>`;
                 }
                 if (schoolSettingsLinks.twitterUrl) {
-                html+=`<a href="${schoolSettingsLinks.twitterUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE}twitter.png${SCRIPT_VERSION}" loding="lazy"></a>`;
+                html+=`<a href="${schoolSettingsLinks.twitterUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE2}twitter.png${SCRIPT_VERSION}" loding="lazy"></a>`;
                 }
                 if (schoolSettingsLinks.instagramUrl) {
-                html+=`<a href="${schoolSettingsLinks.instagramUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE}instagram.png${SCRIPT_VERSION}" loding="lazy"></a>`;
+                html+=`<a href="${schoolSettingsLinks.instagramUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE2}instagram.png${SCRIPT_VERSION}" loding="lazy"></a>`;
                 }
                 if (schoolSettingsLinks.linkdinUrl) {
-                html+=`<a href="${schoolSettingsLinks.linkdinUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE}linkedin.png${SCRIPT_VERSION}" loding="lazy"></a>`;
+                html+=`<a href="${schoolSettingsLinks.linkdinUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE2}linkedin.png${SCRIPT_VERSION}" loding="lazy"></a>`;
                 }
                 if (schoolSettingsLinks.pintrestUrl) {
-                html+=`<a href="${schoolSettingsLinks.pintrestUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE}pin.png${SCRIPT_VERSION}" loding="lazy"></a>`;
+                html+=`<a href="${schoolSettingsLinks.pintrestUrl}" target="_blank"><img src="${PATH_FOLDER_IMAGE2}pin.png${SCRIPT_VERSION}" loding="lazy"></a>`;
                 }
             html+=`</p>
         </div>

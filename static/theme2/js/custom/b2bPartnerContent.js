@@ -453,7 +453,7 @@ function getAccountManagerDetailsContent(data){
 						<div class="d-inline-flex w-100">
 							<div class="icon-wrapper rounded-circle m-0" style="width:25px;height:25px">
 								<div class="icon-wrapper-bg opacity-9 bg-primary"></div>
-								<img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" class="position-relative mx-auto" style="z-index:5;width:15px;">
+								<img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" class="position-relative mx-auto" style="z-index:5;width:15px;">
 							</div> 
 							<div>
 								<h6 class="ml-1 font-size-lg font-weight-semi-bold">WhatsApp</h6>    

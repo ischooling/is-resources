@@ -1294,7 +1294,7 @@ async function publishTeacherContract(formId, userId){
 
 function insertTeacherSignature(formId) {
     signatureTableTeacher(formId);
-    const signatureUrl = PATH_FOLDER_IMAGE + schoolSettingsTechnical.teachAgreementSign;
+    const signatureUrl = PATH_FOLDER_IMAGE2 +"letter/"+ schoolSettingsTechnical.teachAgreementSign;
     if (!signatureUrl) return;
 
     convertImageToBase64(signatureUrl, function (base64) {

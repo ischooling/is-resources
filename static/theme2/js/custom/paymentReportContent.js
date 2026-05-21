@@ -52,7 +52,7 @@ function getPaymentReportWhatsAppButton(name, phone, className){
 	if(!phone){
 		return '';
 	}
-	return `&nbsp;<a href='javascript:void(0)' class='${className || 'ml-1 text-success'}' onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote(name || '')}','${paymentReportEscapeSingleQuote(phone)}')" data-toggle="tooltip" data-placement="top" data-original-title="Open WhatsApp chat"><img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" alt="WhatsApp"/>&nbsp;</a>`;
+	return `&nbsp;<a href='javascript:void(0)' class='${className || 'ml-1 text-success'}' onclick="return openWhatsAppChatInFrame('${paymentReportEscapeSingleQuote(name || '')}','${paymentReportEscapeSingleQuote(phone)}')" data-toggle="tooltip" data-placement="top" data-original-title="Open WhatsApp chat"><img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" alt="WhatsApp"/>&nbsp;</a>`;
 }
 
 function paymentReport(){
@@ -182,7 +182,7 @@ function cardDetailsSummary(data){
 								<input type="checkbox" class="checkStudent" id="student-${item.userId}" name="student-move-another" value="${item.userId}" />
 								<span class="mx-2">${item.sno}.</span>`;
 								if(profile.profileImage=='' || profile.profileImage==null){
-									html += `<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE}profile-picture.jpg${SCRIPT_VERSION}" alt="image" thumbType=""/>`;
+									html += `<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE2}profile-picture.jpg${SCRIPT_VERSION}" alt="image" thumbType=""/>`;
 								}else{
 									html += `<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${profile.profileImage}" alt="image" title="Profile Image" thumbType=""/>`;
 								}
@@ -336,7 +336,7 @@ function cardDetails(data){
 								<input type="checkbox" class="checkStudent" id="student-${item.userId}" name="student-move-another" value="${item.userId}" /> 
 								<span class="mx-2">${item.sno}.</span>`;
 								if(item.updateProfileStudentDTO.profileImage=='' || item.updateProfileStudentDTO.profileImage==null){
-									html+=`<img  id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE}profile-picture.jpg${SCRIPT_VERSION}" alt="image"  thumbType=""/>`;
+									html+=`<img  id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${PATH_FOLDER_IMAGE2}profile-picture.jpg${SCRIPT_VERSION}" alt="image"  thumbType=""/>`;
 								}else{
 									html+=`<img id="profileImageStudent" name="profileImageStudent" width="42" class="rounded-circle user-header-img" src="${item.updateProfileStudentDTO.profileImage}" alt="image" title="Profile Image" thumbType=""/>`;
 								}
@@ -627,7 +627,7 @@ function cardDetails(data){
 												<label for="pcWhatsappView" class="radio d-inline-flex align-items-center px-2 cursor">
 													<input class="mr-1" type="checkbox" id="pcWhatsappView" name="pcWhatsappView" value="WhatsApp" ${item.updateProfileStudentDTO.communicationWhatsApp == "Y" ?"checked":""} disabled=""> 
 													<span>WhatsApp&nbsp;</span>
-													<img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px"> 
+													<img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px"> 
 												</label>
 												<label for="pcCallView" class="radio d-inline-flex align-items-center px-2 cursor">
 													<input class="mr-1" type="checkbox" id="pcCallView" name="pcCallView" value="Call" ${item.updateProfileStudentDTO.communicationCall == "Y" ?"checked":""} disabled="">

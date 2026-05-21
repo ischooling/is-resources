@@ -283,7 +283,7 @@ function getViewAdminUserLmsCredaintial(data){
 												<div class="btn-group">
 													<button type="button" class="btn btn-danger  dropdown-toggle  btn-sm"
 														data-toggle="dropdown" aria-haspopup="true"
-														aria-expanded="false" data-toggle="tooltip" title="Action" style="background-color:#007fff !important;border-color:var(--pc);box-shadow:none;">
+														aria-expanded="false" data-toggle="tooltip" title="Action" style="background-color:var(--pc) !important;border-color:var(--pc);box-shadow:none;">
 														<i class="fa fa-ellipsis-v"></i>
 													</button>
 													<div class="dropdown-menu">`;

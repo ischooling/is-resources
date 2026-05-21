@@ -190,7 +190,7 @@ function enrollmentPartnerBasicDetails(data){
 									+'<p class="m-0" id="whatsappNumberError"></p>';
 									if(data.details.otpVerifiedByWhatsapp=='W' || data.details.otpVerifiedByWhatsapp=='N'){
 										if(data.details.otpVerifiedByWhatsapp=='W'){
-											html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" style="position:absolute;right:40px;top:33px" />';
+											html+='<img src="'+PATH_FOLDER_IMAGE2+'watsapp-icon.png" width="16px" style="position:absolute;right:40px;top:33px" />';
 										}
 										html+='<img src="'+PATH_FOLDER_IMAGE2+'payment-sucess.png" width="16px" style="position:absolute;right:20px;top:33px"/>'
 									}

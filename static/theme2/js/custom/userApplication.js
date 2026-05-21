@@ -104,7 +104,7 @@ function bindUserApplicationData(responseData) {
                             ? `<a href="https://wa.me/${user.phoneNo}" target="_blank" style="text-decoration:none; color:inherit;">
                                     +${user.phoneNo}
                                     <span style="margin-left: 5px;">
-                                        <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" />
+                                        <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" height="16px" alt="WhatsApp" />
                                     </span>
                             </a>`
                             : `+${user.phoneNo || ''}`

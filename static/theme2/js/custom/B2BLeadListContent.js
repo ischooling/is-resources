@@ -917,7 +917,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 														if(leads.isdCode!=''){
 															html+='<span>'
 																html+='<a href="https://api.whatsapp.com/send?phone='+(leads.phoneIsd!=''?leads.phoneIsd:'')+'" target="_target" class="position-relative">' 
-																html+='<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" />';
+																html+='<img src="'+PATH_FOLDER_IMAGE2+'watsapp-icon.png" width="16px" />';
 																
 																if(leads.whatsAppVerifiedStatus=='N'){}
 																else{
@@ -937,7 +937,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 														html+='<br/>';
 														if(leads.phoneNoAlter!=''){
 															html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
-															html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></a>';
+															html+='<a href="https://api.whatsapp.com/send?phone='+(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')+'" target="_target"> <img src="'+PATH_FOLDER_IMAGE2+'watsapp-icon.png" width="16px" /></a>';
 														}
 													html+='</td>'
 												+'</tr>'
@@ -1009,7 +1009,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 							+'</tbody>'
 						+'</table>'
 					+'</td>'
-					+'<td class="p-0 '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;width: 230px; '+((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)?'border-top:5px solid #007fff !important':'border-top:5px solid #007fff !important')+'">'
+					+'<td class="p-0 '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;width: 230px; '+((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)?'border-top:5px solid var(--pc) !important':'border-top:5px solid var(--pc) !important')+'">'
 						if((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)){
 							html+='<ul class="follow-up-accordian m-0 p-0 overflow-auto" style="max-height: 228px;margin-top:-40px !important">';
 						}else{

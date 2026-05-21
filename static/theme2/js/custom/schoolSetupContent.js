@@ -88,7 +88,8 @@ function getSchoolSetupContent(schoolLetterSetup, schoolLogoSetup, colorThemeSet
             if(colorThemeSetup){
                 html+=getColorThemeContent();
             }
-            html+=`<button type="button" class="btn btn-primary btn-shadow w-max ml-auto pr-4 pl-4 my-3 d-flex" id="savePartnerSchoolImages" onclick="savePartnerSchoolImages(${schoolLetterSetup}, ${schoolLogoSetup}, ${colorThemeSetup}, \'leadPartnerUserB2B\')">Save</button>`
+            // html+=`<button type="button" class="btn btn-primary btn-shadow w-max ml-auto pr-4 pl-4 my-3 d-flex" id="savePartnerSchoolImages" onclick="savePartnerSchoolImages(${schoolLetterSetup}, ${schoolLogoSetup}, ${colorThemeSetup}, \'leadPartnerUserB2B\')">Save</button>`
+            html+=`<button type="button" class="btn btn-primary btn-shadow w-max ml-auto pr-4 pl-4 my-3 d-flex" id="savePartnerSchoolImages">Save</button>`
         html+=`</div>`;
 	return html;
 }
@@ -316,24 +317,24 @@ function getColorThemeContent(){
 				<div class="d-flex align-items-start flex-wrap mb-4">
 					<div class="mr-5 mb-4">
 						<label class="d-block font-weight-bold mb-2">Primary Color</label>
-						<input type="color" id="primaryColor" value="#007fff" class="color-preview" onchange="updateColorPreview()">
+						<input type="color" id="primaryColor" value="${getCssVariableValue(ROOTCSS, 'pc')}" class="color-preview" onchange="updateColorPreview()">
 						<div class="gradient-preview" id="primaryGradientPreview"></div>
 						<small class="text-muted d-block mt-1">Primary Gradient</small>
 					</div>
 					
 					<div class="mr-5 mb-4">
 						<label class="d-block font-weight-bold mb-2">Secondary Color</label>
-						<input type="color" id="secondaryColor" value="#001b47" class="color-preview" onchange="updateColorPreview()">
+						<input type="color" id="secondaryColor" value="${getCssVariableValue(ROOTCSS, 'sc')}" class="color-preview" onchange="updateColorPreview()">
 					</div>
 
 					<div class="mr-5 mb-4">
 						<label class="d-block font-weight-bold mb-2">Third Color</label>
-						<input type="color" id="thirdColor" value="#000000" class="color-preview" onchange="updateColorPreview()">
+						<input type="color" id="thirdColor" value="${getCssVariableValue(ROOTCSS, 'tc')}" class="color-preview" onchange="updateColorPreview()">
 					</div>
 
 					<div class="mr-5 mb-4">
 						<label class="d-block font-weight-bold mb-2">Fourth Color</label>
-						<input type="color" id="fourthColor" value="#2862C5" class="color-preview" onchange="updateColorPreview()">
+						<input type="color" id="fourthColor" value="${getCssVariableValue(ROOTCSS, 'fc')}" class="color-preview" onchange="updateColorPreview()">
 					</div>
 					
 					<div class="mb-4">

@@ -4,7 +4,7 @@ var schoolSettingsTechnical;
 var schoolSettings;
 $(document).ready(function () {
 	if($("#themeColor").length<1){
-	  	$("head").append(`<style id="themeColor">${ROOTCSS}</style>`);
+	  	$("head").append(`<style id="themeColor">${USER_COLOR_THEME}</style>`);
 	}
 });
 function goAhead(url, hash) {
@@ -56,7 +56,7 @@ function chooseCountryElement(elementId, value) {
   }
 }
 function getPrimaryColor(){
-	var primaryColor=ROOTCSS.split(':#')[1].split(';')[0];
+	var primaryColor=USER_COLOR_THEME.split(':#')[1].split(';')[0];
 	return primaryColor;
 }
 
@@ -565,7 +565,7 @@ function getRequestForForgot(formId, moduleId) {
   return request;
 }
 function refreshCaptcha(id) {
-	var primaryColor=ROOTCSS.split(':#')[1].split(';')[0];
+	var primaryColor=USER_COLOR_THEME.split(':#')[1].split(';')[0];
 	if (id != undefined && id != '' && $('#' + id).length > 0) {
 		var imageEl = document.images[id];
 		var urlCandidates = getCaptchaUrlCandidates(primaryColor);

@@ -5,6 +5,10 @@ var itiSchoolSupportNumber;
 
 function renderPartnerCotent(partnerTypeId, partnerDefaultSettings, partnerType){
 	$("#LeadPartnerUserFormB2BPopup").html(createPartnerAndSetCommissionModal(partnerTypeId, partnerType));
+	$(document).off("click", "#savePartnerSchoolImages").on("click", "#savePartnerSchoolImages", function (e) {
+		e.preventDefault();
+		savePartnerSchoolImages(true, true, true, 'leadPartnerUserB2B', 'LEAD_B2B_PARTNER');
+	});
 	$('#saveCommissionRateForm #learningProgram').val('ONE_TO_ONE');
 	$('#filterCommissionRate #learningProgramFilter').val('ONE_TO_ONE');
 	getAllCountryList('officeContactDetailsForm','officeCountryId');
@@ -1204,7 +1208,7 @@ function getOfficeContactDetailsContent(){
 										<input class="file-input" type="file" name="logoUpload" id="logoUpload" fileType="51" elem-id="1" onchange="uploadDocsFun(this, 'schoolLogo');">
 										
 										<input class="file-input" type="file" name="logoUpload" id="logoUpload" onchange="cropImage(event, 'logoUpload', 'logoImagePartner', 'Logo Image', '')">
-										<img id="logoImagePartner" name="logoImagePartner" class="user " src="${PATH_FOLDER_IMAGE}profile-picture.jpg${SCRIPT_VERSION}" alt="image" title="Logo Image" thumbType=""/>
+										<img id="logoImagePartner" name="logoImagePartner" class="user " src="${PATH_FOLDER_IMAGE2}profile-picture.jpg${SCRIPT_VERSION}" alt="image" title="Logo Image" thumbType=""/>
 										
 										<span class="upload-btn primary-txt-color w-25 ml-2 border-left rounded">
 											<i class="fa fa-upload"></i>

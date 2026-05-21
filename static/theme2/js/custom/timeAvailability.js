@@ -3775,7 +3775,7 @@ function inactiveMeetingSlotType(userId,slotTypeId,activeSlot,overlayEleWrapper,
 		contentType: APPLICATION_JSON_VALUE,
 		data: JSON.stringify(request),
 		dataType: 'json',
-		async: false,
+		// async: false,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0, data['message'], '', true);

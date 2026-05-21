@@ -1,7 +1,6 @@
 var STUDENT_ACADEMIC_TIMELINE_MOCK_DATA = {};
 
 async function renderStudentAcademicTimelinePage(pageData){
-    debugger
     var resolvedData = await studentAcademicTimelineResolvePageData(pageData);
     ensureStudentAcademicTimelineStyles();
     if($("#dashboardContentInHTMLAdditional").length > 0){

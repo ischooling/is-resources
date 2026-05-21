@@ -75,35 +75,7 @@ function generateGradient(primaryColor) {
     `radial-gradient(140.04% 140.04% at 101% 97%, rgba(11, 101, 255, 0.80) 32.81%, rgba(102, 178, 255, 0.80) 100%)`
 }
 
-function lightenColor(color, percent) {
-    const num = parseInt(color.replace("#", ""), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.min(255, (num >> 16) + amt);
-    const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
-    const B = Math.min(255, (num & 0x0000FF) + amt);
-    
-    return "#" + (
-        0x1000000 +
-        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-        (B < 255 ? (B < 1 ? 0 : B) : 255)
-    ).toString(16).slice(1);
-}
 
-function darkenColor(color, percent) {
-    const num = parseInt(color.replace("#", ""), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.max(0, (num >> 16) - amt);
-    const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
-    const B = Math.max(0, (num & 0x0000FF) - amt);
-    
-    return "#" + (
-        0x1000000 +
-        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-        (B < 255 ? (B < 1 ? 0 : B) : 255)
-    ).toString(16).slice(1);
-}
 
 function resetToDefaultColors() {
     $('#primaryColor').val('#007fff');
@@ -130,7 +102,7 @@ function prefillColorData(parentColor) {
 	updateColorPreview();
 }
 
-async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeSetup, modalId){
+async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, colorThemeSetup, modalId, saveFrom){
     var requiredFileTypes=[];
     var schoolLetterSetupTypes=[
         53, // TEACHER_CONTRACT_LETTER_HEAD
@@ -155,7 +127,7 @@ async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, color
     if(schoolLogoSetup){
        requiredFileTypes.push(...schoolLogoSetupTypes)
     }
-	if(schoolLetterSetup || schoolLogoSetup){
+    if(schoolLetterSetup || schoolLogoSetup){
         var missingFields = [];
         requiredFileTypes.forEach((type) => {
             const exists = PARTNER_SCHOOL_IMAGES.some((file) => file.fileType == type);
@@ -174,12 +146,16 @@ async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, color
         var thirdColor = $('#thirdColor').val();
         var fourthColor = $('#fourthColor').val();
         
-        var primaryLight = lightenColor(primaryColor, 85);
+        var primaryLight = lightenColor(primaryColor, 80);
         var secondaryLight = lightenColor(secondaryColor, 85);
         var thirdLight = lightenColor(thirdColor, 85);
         var fourthLight = lightenColor(fourthColor, 85);
         var primaryGradient = generateGradient(primaryColor);
-        var parentColor = `:root{--pc:${primaryColor};--plc:${primaryLight};--sc:${secondaryColor};--slc:${secondaryLight};--pgc:${primaryGradient};--tc:${thirdColor};--tlc:${thirdLight};--fc:${fourthColor};--flc:${fourthLight};--login-bg-color:${primaryColor};}`;
+        var parentColor = {
+            "rootcss": `:root{--pc:${primaryColor};--plc:${primaryLight};--sc:${secondaryColor};--slc:${secondaryLight};--pgc:${primaryGradient};--tc:${thirdColor};--tlc:${thirdLight};--fc:${fourthColor};--flc:${fourthLight};--login-bg-color:${primaryColor};}`,
+            "HEADER_BG": "default-header-bg",
+            "SIDEBAR_NEVIGATION_BG": "default-sidebar-bg"
+        };
     }
 	
 	var body = {
@@ -220,16 +196,25 @@ async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, color
                 }else{
                     showMessageTheme2(1, data['message'], '', false);
                 }
-                updatePartnerProgressBar();
+                if(saveFrom == "LEAD_B2B_PARTNER"){
+                    updatePartnerProgressBar();
+                }
 			}
 		}
 	});
 }
 
 function getPartnerSchoolImages(formId, rawLeadId){
-	var body = {
-		rawLeadId: $("#"+formId+" #"+rawLeadId).val()
-	}
+    if(formId == "partnerUserB2BSaveForm"){
+        var body = {
+            rawLeadId: $("#"+formId+" #"+rawLeadId).val()
+        }
+    }else{
+       var body = {
+            rawLeadId: '0',
+        }
+    }
+	
 	$.ajax({
 		type : "POST",
 		contentType : "application/json",
@@ -360,4 +345,19 @@ function executeConfetti(elementId) {
         count++;
         if (count > 5) clearInterval(interval); // stop after a few bursts
     }, 1200);
+}
+
+
+function getCssVariableValue(cssString, variableName) {
+    var regex = new RegExp(`--${variableName}:\\s*([^;]+)`);
+    var match = cssString.match(regex);
+    return match ? match[1].trim() : null;
+}
+
+
+function closeImageModal(){
+	$("#imageModal").modal("hide");
+	setTimeout(() => {
+		$("#imageModal").remove();
+	}, 500);
 }

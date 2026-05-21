@@ -1983,7 +1983,7 @@ function bindFileUploadNew(uploadIndex, uploadCategoryId, uploadUserId) {
                 $("#" + uploadIndex)
                   .parents(".file-tab")
                   .find("img")
-                  .attr("src", PATH_FOLDER_IMAGE + "pdf.jpg");
+                  .attr("src", PATH_FOLDER_IMAGE2 + "pdf.jpg");
               }
             }
           });
@@ -2874,7 +2874,7 @@ function bindFileUploadNew1(
 //                   $("#fileupload" + uploadIndex)
 //                     .parents(".file-tab")
 //                     .find("img")
-//                     .attr("src", PATH_FOLDER_IMAGE + "pdf.jpg");
+//                     .attr("src", PATH_FOLDER_IMAGE2 + "pdf.jpg");
 //                 }
 //                 if (uploadCategoryId == 34) {
 //                   hideMessageErrorNew("fileupload1Error", "fileupload1");
@@ -3010,11 +3010,11 @@ function bindFileUploadNew1(
 //                     "href",
 //                     FILE_UPLOAD_PATH + file.fileName
 //                   );
-//                   //								$('#fileupload'+uploadIndex+'imgIcon').attr('src',PATH_FOLDER_IMAGE+'pdf.jpg');
+//                   //								$('#fileupload'+uploadIndex+'imgIcon').attr('src',PATH_FOLDER_IMAGE2+'pdf.jpg');
 //                   setTimeout(function () {
 //                     $("#fileupload" + uploadIndex + "imgIcon").attr(
 //                       "src",
-//                       PATH_FOLDER_IMAGE + "pdf.jpg"
+//                       PATH_FOLDER_IMAGE2 + "pdf.jpg"
 //                     );
 //                   }, 3000);
 //                 } else {
@@ -7128,4 +7128,100 @@ function getSalutationByGender(gender) {
     return "";
   }
   return "";
+}
+
+function updateThemeColorVariable(varName, newValue) {
+    const $styleTag = $("#themeColor");  // simpler selector
+    if($styleTag.length === 0) {
+        console.warn("Style tag with id 'themeColor' not found.");
+        return;
+    }
+
+    const cssText = $styleTag.html();
+    // Make regex case-insensitive and allow optional spaces
+    const regex = new RegExp(`(--${varName}\\s*:\\s*)([^;]+)`, "i");
+    console.log(regex)
+    if (regex.test(cssText)) {
+        // Replace existing variable value but keep the --varName: part intact
+        $styleTag.html(cssText.replace(regex, `$1${newValue}`));
+    } else {
+        // If variable doesn't exist, add it inside :root
+        $styleTag.html(cssText.replace(regex, `$1${newValue}`));
+    }
+}
+
+
+function requestToChangeDashboardColorTheme(headerbg, sliderbarBg, rootcss) {
+  var requestData = {
+    userId: USER_ID,
+    colorObj: {
+      rootcss: rootcss,
+      HEADER_BG: headerbg,
+      SIDEBAR_NEVIGATION_BG: sliderbarBg
+    }
+  };
+
+  
+
+  $.ajax({
+    type: "POST",
+    contentType: "application/json",
+    url : API_VERSION + "update-theme",
+    data: JSON.stringify(requestData),
+    dataType: "json",
+    success: function (data) {
+      if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+        if (data['status'] == '3') {
+          redirectLoginPage();
+        } else {         
+          showMessageTheme2(0, data['message'], '', true);
+        }
+      } else {
+        showMessageTheme2(1, data['message'], '', true);
+      }
+    }
+  });
+}
+
+function lightenColor(color, percent) {
+    // const num = parseInt(color.replace("#", ""), 16);
+    // const amt = Math.round(2.55 * percent);
+    // const R = Math.min(255, (num >> 16) + amt);
+    // const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
+    // const B = Math.min(255, (num & 0x0000FF) + amt);
+    
+    // return "#" + (
+    //     0x1000000 +
+    //     (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+    //     (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+    //     (B < 255 ? (B < 1 ? 0 : B) : 255)
+    // ).toString(16).slice(1);
+    let r = parseInt(color.substring(1,3), 16);
+    let g = parseInt(color.substring(3,5), 16);
+    let b = parseInt(color.substring(5,7), 16);
+
+    r = Math.round(r + (255 - r) * percent / 100);
+    g = Math.round(g + (255 - g) * percent / 100);
+    b = Math.round(b + (255 - b) * percent / 100);
+
+    return "#" + 
+        r.toString(16).padStart(2, '0') +
+        g.toString(16).padStart(2, '0') +
+        b.toString(16).padStart(2, '0');
+
+}
+
+function darkenColor(color, percent) {
+    const num = parseInt(color.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.max(0, (num >> 16) - amt);
+    const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
+    const B = Math.max(0, (num & 0x0000FF) - amt);
+    
+    return "#" + (
+        0x1000000 +
+        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+        (B < 255 ? (B < 1 ? 0 : B) : 255)
+    ).toString(16).slice(1);
 }

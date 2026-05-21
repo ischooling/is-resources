@@ -1,0 +1,97 @@
+
+/*-----------------------------------------------------  STUDENT PROGRESSION CSS START HERE----------------------------------------------------------------*/
+
+/* STUDENT PROGRESS REPORT CSS START HERE */
+.full{width: 100%;float: left;position: relative;overflow-x: auto;}
+.bold{font-weight: 600}
+.student-report .row .row-in-br:nth-child(4){border-right:0;}
+.student-report .report-head{margin: 30px 0;}
+.student-name{font-size: 34px;color:#9931b1;font-weight: 600;text-align: center;margin-bottom: 10px;}
+.student-report .report-message{font-size: 20px;font-style: italic;text-align: center;width: 100%;display: inline-block;}
+.student-report .report-message b{color:#9931b1;}
+.student-report .circle-border{width: 125px;height: 125px;border:6px solid #982fb0;border-radius: 50%;display: flex;align-items: center;justify-content: center;margin: 0 auto;}
+.student-report .report-icon{max-width: 100px;width: 100%;}
+.student-report .number{font-size: 62px !important;font-weight: 600}
+.student-report .report-title{font-size:18px;font-weight: 600;margin: 0; padding: 10px 0;}
+.student-report  .required-credits{margin: 30px 0;}
+.student-report  .required-credits-message{font-size: 20px;text-align: center;width: 100%;display: inline-block;font-weight: 600}
+.student-report  .required-credits-message b{color:#9931b1;}
+.progression-button-wrapper{display: flex;width:100%;margin-bottom: 30px;}
+.progression-button-wrapper .design-btn{display: inline-block;padding: 10px 30px; border-radius: 5px;color:#fff;background:#9931b1;font-size: 14px; }
+@media(max-width: 480px){
+  .progression-button-wrapper{display: block;}
+}
+/* STUDENT PROGRESS REPORT CSS END HERE */
+
+
+
+/*STUDENT COURSE SELECTION  CSS START HERE*/
+.student-courses-section .section-title{margin:20px 0 0 0;text-align: center;font-weight: 600;color:#009fff;}
+.student-courses-section .nav-tabs{width: 100%;}
+.student-courses-section .nav-tabs li{display: flex;flex-grow: 1;}
+.student-courses-section .nav-tabs li a{width: 100%;font-size: 14px;font-weight: 600;}
+.student-courses-section .tab-content{width: 100%;float: left;}
+.student-courses-section .wrapper{width: 100%;float: left;border:1px solid #e4e7ea;border-top:0;padding: 15px;}
+.student-courses-section .selecte_value{width: 100%;float: left;position: relative;margin-bottom: 15px;}
+.student-courses-section .selecte_value .selected_value_field{width: 100%;float: left;border:1px solid #e4e7ea;padding: 5px;min-height: 40px;position: relative;padding-right: 30px;display: flex;flex-wrap: wrap; align-items: center;font-size: 14px;color: #888;}
+.student-courses-section .selecte_value .selected_value_field label{margin: 0;}
+.student-courses-section .selecte_value .selected_value_field:after{content: "\f0d7";position: absolute;right: 15px;top:50%;transform: translateY(-50%);font-size: 16px;font-family: fontawesome;}
+.student-courses-section .selecte_value .selected_value_field .selected-label{display: inline-block;margin-right: 4px;margin-bottom: 4px; padding: 4px;border-radius: 4px;background: #e4e7ea}
+.student-courses-section .selecte_value .selected_value_field .selected-label i{padding-left: 5px;}
+.student-courses-section .selection-list{ width:100%;float: left;}
+.student-courses-section .selecte_value .courses-list{display: none;width: 100%;float: left; list-style: none;padding: 0;border:1px solid #e4e7ea;border-top:0;background: #fff;z-index: 1;}
+.student-courses-section .selecte_value .courses-list .course{width: 100%;float: left;padding:0 20px;border-bottom: 1px solid #e4e7ea}
+.student-courses-section .selecte_value .courses-list .course label{display: inline-block;padding: 10px 0;margin: 0;}
+/*STUDENT COURSE SELECTION  CSS END HERE*/
+
+/*STUDENT SELECTED COURSES TABLE DESIGN CSS START HERE */
+/*.table-style{margin-bottom: 15px;}*/
+.table-style .table{text-align: center;margin: 0; margin-bottom: 15px; border-bottom: 0;}
+.table-style .table tr{background: #f4fcff}
+.table-style .table tr:nth-child(even){background: #fbfeff;}
+.table-style .table tr th{font-weight: 600}
+.table-style .table .table-heading{font-size: 14px;background: #009fff;color:#fff;}
+.table-style .table .remove-course, .table-style .table .view, .table-style .table .edit, .table-style .table .round-eye{display: inline-block;cursor: pointer;width: 20px;height: 20px;border: 1px solid #962eb0;border-radius: 50%;color: #962eb0;margin-left: 10px;}
+.table-style .table .remove-course i, .table-style .table .view, .table-style .table .edit i, .table-style .table .round-eye i{line-height: 18px;}
+.table-style .table .remove-course:hover{border-color:red;color:red;}
+.payment-btn{margin-top: 15px;}
+.payment-btn input[type='submit']{width: 100%;display: inline-block;background:#009fff;color:#fff;text-align: center; border:0;padding:13px 10px;font-size: 14px;font-weight: 600;text-transform: uppercase;}
+
+.modal-style .table{min-width: 750px;}
+.modal-style .modal-header{display: flex;align-items: center;padding-right: 15px;}
+.modal-style .modal-body .student-semester-details .list{margin-bottom: 20px;}
+.modal-style .modal-body label{font-weight: 600;color:#444;}
+.modal-style .modal-body .detail-input{width: 100%;float: left;border:0;border-bottom:2px solid #e4e7ea;padding:0px 10px 10px 0px;background: #fff;font-size: 14px;}
+.modal-style .modal-body .detail-input[disabled]{cursor: not-allowed;}
+.modal-courses-list{padding:45px 0 20px 0;}
+.modal-courses-list .modal-header{width: 98% !important;}
+.modal-save-btn input{padding: 8px 35px;background:#337ab7;color:#fff;font-size: 14px;float: right;border:0;margin-top: 15px;}
+.blue-bg{background:#337ab7 !important;box-shadow:none !important;border-color:#337ab7 !important}
+.modal-style .modal-body .table-style .table .table-heading{background: #337ab7}
+.modal-style .close{font-size: 25px;color: #fff;outline: 0}
+/* Checkbox customize css */
+.modal-courses-name {display: block;position: relative;padding: 10px 15px;background: #fbfeff; margin-bottom: 12px;cursor: pointer;font-size:14px;font-weight: 400 !important;line-height: 20px;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}
+.modal-courses-name input {position: absolute;opacity: 0;cursor: pointer;height: 20px;width: 20px;top:50%;right: 15px;transform: translateY(-50%);-webkit-transform: translateY(-50%)}
+.checkmark {position: absolute;top: 50%;right: 15px;height: 20px;width: 20px;border:2px solid #eee;background: #fff;transform: translateY(-50%);-webkit-transform: translateY(-50%)}
+.checkmark.disabled{pointer-events: none;}
+.modal-courses-name:hover input ~ .checkmark {background-color: #ccc;}
+.modal-courses-name input:checked ~ .checkmark {background-color: #2196F3;}
+.checkmark:after {content: "";position: absolute;display: none;}
+.modal-courses-name input:checked ~ .checkmark:after {display: block;}
+.modal-courses-name .checkmark:after {left: 5px;top: 0px;width:7px;height:13px;border: solid white;border-width: 0 3px 3px 0;-webkit-transform: rotate(45deg);-ms-transform: rotate(45deg);transform: rotate(45deg);}
+/*STUDENT SELECTED COURSES TABLE DESIGN CSS END HERE */
+
+@media(max-width: 786px){
+  .progression-button-wrapper .design-btn{padding: 10px}
+}
+
+@media(max-width: 480px){
+  .student-name{font-size: 22px;line-height: 24px;}
+  .student-report .report-message{font-size: 16px;font-weight: 600}
+  .student-report .required-credits-message{font-size: 18px;line-height: 24px}
+
+}
+
+/*-----------------------------------------------------  STUDENT PROGRESSION CSS END HERE----------------------------------------------------------------*/
+
+

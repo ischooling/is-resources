@@ -268,3 +268,6 @@ function viewAttachment(src, modalId, attachmentType) {
   // Show modal
   $("#" + modalId).modal("show");
 }
+
+
+

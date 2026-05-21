@@ -1300,12 +1300,6 @@ function openFeeStructureLogsModal(){
 
 
 
-function closeImageModal(){
-	$("#imageModal").modal("hide");
-	setTimeout(() => {
-		$("#imageModal").remove();
-	}, 500);
-}
 
 
 

@@ -73,7 +73,7 @@ function studentAcademicYearExtentionBuildProceedData(apiResponse, subjectId){
     var data = {
         subjectId: subject.subjectId || subjectId || "",
         subjectName: subject.subjectName || "N/A",
-        imgURl: subject.imgURl || (subject.subjectIcon ? (PATH_FOLDER_IMAGE + "subjects/" + subject.subjectIcon) : (schoolSettingsLinks.logoUrl || "")),
+        imgURl: subject.imgURl || (subject.subjectIcon ? (PATH_FOLDER_IMAGE2 + "subjects/" + subject.subjectIcon) : (schoolSettingsLinks.logoUrl || "")),
         bgColor: subject.bgColor || "bg-primary",
         extentionAvailStatus: subject.extentionAvailStatus || "N",
         currentExtentionType: subject.currentExtentionType || "",

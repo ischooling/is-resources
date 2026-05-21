@@ -686,7 +686,7 @@ function getCounselorScheduleEventCotent(data){
 						+'<div class="d-flex flex-wrap align-items-center">'
 							+'<label for="communicationWhatsApp" class="d-inline-flex align-items-center mr-4 mb-2 cursor-pointer">'
 								+'<input type="checkbox" id="communicationWhatsApp" name="communicationWhatsApp" class="mr-2" value="Y">'
-								+'<span class="text-primary font-weight-bold"><img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /> Whatsapp</span>'
+								+'<span class="text-primary font-weight-bold"><img src="'+PATH_FOLDER_IMAGE2+'watsapp-icon.png" width="16px" /> Whatsapp</span>'
 							+'</label>'
 							+'<label for="communicationCall" class="d-inline-flex align-items-center mb-2 cursor-pointer">'
 								+'<input type="checkbox" id="communicationCall" name="communicationCall" class="mr-2" value="Y">'

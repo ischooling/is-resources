@@ -12,7 +12,7 @@ function getStudentAcademicYearExtentionContent(pageData){
             if(subject.imgURl){
                 imgHtml = `<img src="${subject.imgURl}" alt="" class="w-100 bg-white p-2">`;
             }else if(subject.subjectIcon){
-                imgHtml = `<img src="${PATH_FOLDER_IMAGE}subjects/${subject.subjectIcon}" alt="" class="w-100 bg-white p-2">`;
+                imgHtml = `<img src="${PATH_FOLDER_IMAGE2}subjects/${subject.subjectIcon}" alt="" class="w-100 bg-white p-2">`;
             }else{
                 imgHtml = `<img src="${schoolSettingsLinks.logoUrl}" alt="" class="w-100 bg-white p-2">`;
             }

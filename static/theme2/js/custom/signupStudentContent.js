@@ -1384,7 +1384,7 @@ function getParentDetailsContent(data) {
                     <input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp" 
                         ${signupParent.communicationWhatsApp == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                     <span>WhatsApp</span>
-                    <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png" width="16px" />
+                    <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" />
                 </label>
                 <label class="cursor communication-mode text-dark" for="pcModeCall">
                     <input id="pcModeCall" name="pcModeCall" type="checkbox" value="call" 
@@ -2930,7 +2930,7 @@ function parentDetailsPreview(data){
 											html+='<input type="checkbox" value="whatsapp" disabled>';
 										}
 										html+='<span>WhatsApp</span>'
-										+'<img src="'+PATH_FOLDER_IMAGE+'watsapp-icon.png" width="16px" /></i>'
+										+'<img src="'+PATH_FOLDER_IMAGE2+'watsapp-icon.png" width="16px" /></i>'
 									+'</label>'
 									+'<label class="communication-mode text-dark" for="pcModeCall">';
 										if(signupParent.communicationCall == "Y"){

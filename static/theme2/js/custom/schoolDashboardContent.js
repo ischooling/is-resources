@@ -24,7 +24,9 @@ async function renderSchoolDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,US
 			)
 		});
 	}
-	renderSchoolDaiaryBtnCount();
+	if(SCHOOL_DIARY_INITIATES_ROLE){
+		renderSchoolDaiaryBtnCount();
+	}
 	
 }
 

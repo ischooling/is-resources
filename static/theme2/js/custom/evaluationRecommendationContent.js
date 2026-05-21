@@ -171,7 +171,7 @@ function finalRemarks(recommendation){
 				+'<h5 class="font-size-lg font-weight-bold">Final Remarks</h5>'
 			+'</div>'
 			+'<div class="col-lg-8 col-md-12 col-sm-12 col-12">'
-				+'<span class="d-inline-block full text-white" style="background-color:#0044cd"> &nbsp;We thank '+ recommendation.studentName+' for participating in our <img src="'+PATH_FOLDER_IMAGE+'connectToImpact/connect_to_impact.png" width="195"/> program.'
+				+'<span class="d-inline-block full text-white" style="background-color:#0044cd"> &nbsp;We thank '+ recommendation.studentName+' for participating in our <img src="'+PATH_FOLDER_IMAGE2+'connectToImpact/connect_to_impact.png" width="195"/> program.'
 				+'<textarea class="form-control" name="finalRemarks" id="finalRemarks" rows="5" maxlength="1000">'+recommendation.finalRemarks+'</textarea>'
 			+'</div>'
 			+'<div class="col-lg-4 col-md-12 col-sm-12 col-12">'

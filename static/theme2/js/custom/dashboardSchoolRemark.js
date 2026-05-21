@@ -303,7 +303,7 @@ function teacherAgreementOfferTemplate(){
 			<br><br>
 
 			<!-- Signature -->
-			<img src="${PATH_FOLDER_IMAGE}${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" style="height: 80px;"><br>
+			<img src="${PATH_FOLDER_IMAGE2}${schoolSettingsTechnical.teachAgreementSign}${SCRIPT_VERSION}" style="height: 80px;"><br>
 
 			<b>Alwin Sabu</b><br>
 			International Schooling<br>

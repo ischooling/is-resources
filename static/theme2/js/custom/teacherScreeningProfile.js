@@ -63,7 +63,7 @@ function bindTeacherScreeningData(responseData) {
                                 target="_blank"
                                 style="cursor:pointer; color:inherit; text-decoration:none; display:inline-flex; align-items:center;">
                                     +${teacher.phoneNo || ''}
-                                    <img src="${PATH_FOLDER_IMAGE}watsapp-icon.png"
+                                    <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png"
                                         width="16"
                                         height="16"
                                         alt="WhatsApp"
