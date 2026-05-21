@@ -29,7 +29,7 @@ initiateSetting();
 const contentHandlers = {
     'student-home': () => { CALENDAR_EVENT = false; rendereDashboardContent(isParent); },
     'student-addon': () => renderBuyExtraClasses(USER_ID),
-    'book-a-session': () => renderBookClassContent('', '', '', true, moduleId),
+    'book-a-session': ({ moduleId }) => renderBookClassContent('', '', '', true, moduleId),
     'home': () => renderSchoolDashboard('School Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'module': () => renderModuleListDashboard('Module List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'modulerole': () => renderRoleListDashboard('Roles List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -84,7 +84,7 @@ const contentHandlers = {
     'task': () => renderTaskListDashboard("Task", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'add-sub-partner': () => renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'partner-fee-structure': () => renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'profile-view': () => renderStudentProfilePage(extraParam),
+    'profile-view': ({ extraParam }) => renderStudentProfilePage(extraParam),
     'payment-reports': () => getPaymentReportContent(),
     'onboarded-teacher-list': () => getOnboardedTeacherContent(),
     'user-feedback': () => getReviewDashboardContent('User Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -116,7 +116,7 @@ const contentHandlers = {
     'parent-download-academic-docs': () => renderParentAcademicDocsPage('Academic Documents', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'parent-academic-performance': () => renderParentAcademicPerformancePage('Academic Performance', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'parent-progress': () => renderParentProgressPage('Progress Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'student-login-details': () => renderStudentLoginHistoryPage(extraParam),
+    'student-login-details': ({ extraParam }) => renderStudentLoginHistoryPage(extraParam),
     'teacher-login-details': () => renderTeacherLoginHistoryPage('Login History', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'syllabus-assigned-teacher': () => renderStudentSyllabusAssignedTeacherPage('Assigned Course Teachers', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'academic-year-extention': () => renderStudentAcademicYearExtentionPage('Academic Year Extension', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -383,7 +383,7 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 
         const handler = contentHandlers[pageNo];
         if (handler) {
-            await handler();
+            await handler({ moduleId, replaceDiv, extraParam });
         } else {
             console.warn(`No handler found for pageNo: ${pageNo}`);
         }
