@@ -1333,7 +1333,14 @@ function callForResetPassword(formId, moduleId) {
     showMessageTheme2(false, "Password does not match.", "", false);
     return false;
   }
-  if (!pattern.test($("#" + formId + " #password").val())) {
+  if (
+    !checkPasswordStrength(
+      $("#" + formId + " #password").get(0),
+      formId,
+      "password",
+      "P"
+    )
+  ) {
     showMessageTheme2(
       false,
       " New password must match all requirements",
@@ -1343,10 +1350,12 @@ function callForResetPassword(formId, moduleId) {
     return false;
   }
   if (
-    !pattern.test(
-      $("#" + formId + " #confirmPassword")
-        .val()
-        .trim()
+    !checkPasswordStrength(
+      $("#" + formId + " #confirmPassword").get(0),
+      formId,
+      "confirmPassword",
+      "CP",
+      "password"
     )
   ) {
     showMessageTheme2(
@@ -5236,138 +5245,475 @@ function hidePassWordSuggession(src) {
   $(src).parent().find(".password-sugession").hide();
 }
 
-function checkPasswordStrength(
-  src,
-  formID,
-  elementId,
-  passwordType,
-  matchElementId
-) {
-  var passwodSuggessionHTML =
-    '<div class="password-sugession">' +
-    '<h6 class="password-sugession-title"><b>Password must include at least:</b></h6>	' +
-    '<p class="password-sugession-type password-uppercase-letter"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 uppercase letter</p>' +
-    '<p class="password-sugession-type password-lowercase-letter"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 lowercase letter</p>' +
-    '<p class="password-sugession-type password-special-letter"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 special character</p>' +
-    '<p class="password-sugession-type password-number"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 number</p>' +
-    '<p class="password-sugession-type password-length"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> min 8 characters & max 20 characters</p>';
-  if (passwordType == "CP") {
-    passwodSuggessionHTML +=
-      '<p class="password-sugession-type comfirm-password"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> password and confirm password should be same</p>';
-  }
-  +"</div>";
-  $("#" + formID + " #" + elementId)
-    .parent()
-    .css({ position: "relative" });
-  if (
-    $("#" + formID + " #" + elementId)
-      .parent()
-      .find(".password-sugession").length < 1
-  ) {
-    $("#" + formID + " #" + elementId)
-      .parent()
-      .append(passwodSuggessionHTML);
-  }
-  $(src).parent().find(".password-sugession").show();
-  if (passwordType == "P") {
-    var password = $("#" + elementId).val();
+function updateValidationUI(container, selector, isValid) {
+  var element = container.find(selector);
+  element.find(".ps-dot").hide();
+  if (isValid) {
+    element.find(".ps-valid").show();
+    element.find(".ps-invalid").hide();
+    element.css({ color: "green" });
   } else {
-    var password = $("#" + elementId).val();
-    var comfirmPassword = $("#" + matchElementId).val();
-  }
-
-  // Regular expressions for password validation
-  var lowercaseRegex = /^(?=.*[a-z])/;
-  var uppercaseRegex = /^(?=.*[A-Z])/;
-  var digitRegex = /^(?=.*\d)/;
-  var specialCharRegex = /^(?=.*[@$!%*?&#])/;
-
-  var isLowercaseValid = lowercaseRegex.test(password);
-  var isUppercaseValid = uppercaseRegex.test(password);
-  var isDigitValid = digitRegex.test(password);
-  var isSpecialCharValid = specialCharRegex.test(password);
-
-  var isValid =
-    isLowercaseValid && isUppercaseValid && isDigitValid && isSpecialCharValid;
-  if (password.length == 0) {
-    $(".ps-dot").show();
-    $(".ps-valid").hide();
-    $(".ps-invalid").hide();
-    $(".password-length").css({ color: "inherit" });
-    $(".password-lowercase-letter").css({ color: "inherit" });
-    $(".password-uppercase-letter").css({ color: "inherit" });
-    $(".password-number").css({ color: "inherit" });
-    $(".password-special-letter").css({ color: "inherit" });
-  } else {
-    if (password.length < 8 && password.length <= 20) {
-      $(".password-length .ps-valid").hide();
-      $(".password-length .ps-invalid").show();
-      $(".password-length .ps-dot").hide();
-      $(".password-length").css({ color: "red" });
-    } else {
-      $(".password-length .ps-valid").show();
-      $(".password-length .ps-invalid").hide();
-      $(".password-length .ps-dot").hide();
-      $(".password-length").css({ color: "green" });
-    }
-    if (!isLowercaseValid) {
-      $(".password-lowercase-letter .ps-valid").hide();
-      $(".password-lowercase-letter .ps-invalid").show();
-      $(".password-lowercase-letter .ps-dot").hide();
-      $(".password-lowercase-letter").css({ color: "red" });
-    } else {
-      $(".password-lowercase-letter .ps-valid").show();
-      $(".password-lowercase-letter .ps-invalid").hide();
-      $(".password-lowercase-letter .ps-dot").hide();
-      $(".password-lowercase-letter").css({ color: "green" });
-    }
-    if (!isUppercaseValid) {
-      $(".password-uppercase-letter .ps-valid").hide();
-      $(".password-uppercase-letter .ps-invalid").show();
-      $(".password-uppercase-letter .ps-dot").hide();
-      $(".password-uppercase-letter").css({ color: "red" });
-    } else {
-      $(".password-uppercase-letter .ps-valid").show();
-      $(".password-uppercase-letter .ps-invalid").hide();
-      $(".password-uppercase-letter .ps-dot").hide();
-      $(".password-uppercase-letter").css({ color: "green" });
-    }
-
-    if (!isDigitValid) {
-      $(".password-number .ps-valid").hide();
-      $(".password-number .ps-invalid").show();
-      $(".password-number .ps-dot").hide();
-      $(".password-number").css({ color: "red" });
-    } else {
-      $(".password-number .ps-valid").show();
-      $(".password-number .ps-invalid").hide();
-      $(".password-number .ps-dot").hide();
-      $(".password-number").css({ color: "green" });
-    }
-    if (!isSpecialCharValid) {
-      $(".password-special-letter .ps-valid").hide();
-      $(".password-special-letter .ps-invalid").show();
-      $(".password-special-letter .ps-dot").hide();
-      $(".password-special-letter").css({ color: "red" });
-    } else {
-      $(".password-special-letter .ps-valid").show();
-      $(".password-special-letter .ps-invalid").hide();
-      $(".password-special-letter .ps-dot").hide();
-      $(".password-special-letter").css({ color: "green" });
-    }
-    if (password != comfirmPassword) {
-      $(".comfirm-password .ps-valid").hide();
-      $(".comfirm-password .ps-invalid").show();
-      $(".comfirm-password .ps-dot").hide();
-      $(".comfirm-password").css({ color: "red" });
-    } else {
-      $(".comfirm-password .ps-valid").show();
-      $(".comfirm-password .ps-invalid").hide();
-      $(".comfirm-password .ps-dot").hide();
-      $(".comfirm-password").css({ color: "green" });
-    }
+    element.find(".ps-valid").hide();
+    element.find(".ps-invalid").show();
+    element.css({ color: "red" });
   }
 }
+
+function resetValidationUI(container) {
+  container.find(".ps-dot").show();
+  container.find(".ps-valid").hide();
+  container.find(".ps-invalid").hide();
+  container.find(".password-sugession-type").css({ color: "inherit" });
+}
+
+function hasSequentialChars(password) {
+  var value = (password || "").toLowerCase();
+  var alphabets = "abcdefghijklmnopqrstuvwxyz";
+  var reverseAlphabets = alphabets.split("").reverse().join("");
+  var numbers = "0123456789";
+  var reverseNumbers = numbers.split("").reverse().join("");
+  for (var i = 0; i < value.length - 2; i++) {
+    for (var size = 3; size <= 5; size++) {
+      if (i + size > value.length) {
+        continue;
+      }
+      var part = value.substring(i, i + size);
+      if (
+        alphabets.includes(part) ||
+        reverseAlphabets.includes(part) ||
+        numbers.includes(part) ||
+        reverseNumbers.includes(part)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function hasKeyboardPattern(password) {
+  var value = (password || "").toLowerCase();
+  var keyboardPatterns = [
+    "qwertyuiop",
+    "poiuytrewq",
+    "asdfghjkl",
+    "lkjhgfdsa",
+    "zxcvbnm",
+    "mnbvcxz",
+    "1234567890",
+    "0987654321",
+  ];
+  for (var i = 0; i < keyboardPatterns.length; i++) {
+    var sequence = keyboardPatterns[i];
+    for (var j = 0; j <= sequence.length - 4; j++) {
+      if (value.includes(sequence.substring(j, j + 4))) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function hasRepeatedChars(password) {
+  return /(.)\1\1/.test(password || "");
+}
+
+// function checkPasswordStrength(
+//   src,
+//   formID,
+//   elementId,
+//   passwordType,
+//   matchElementId
+// ) {
+//   var passwodSuggessionHTML =
+//     '<div class="password-sugession">' +
+//     '<h6 class="password-sugession-title"><b>Password must include at least:</b></h6>	' +
+//     '<p class="password-sugession-type password-uppercase-letter"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 uppercase letter</p>' +
+//     '<p class="password-sugession-type password-lowercase-letter"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 lowercase letter</p>' +
+//     '<p class="password-sugession-type password-special-letter"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 special character</p>' +
+//     '<p class="password-sugession-type password-number"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> 1 number</p>' +
+//     '<p class="password-sugession-type password-length"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> min 8 characters & max 20 characters</p>';
+//   if (passwordType == "CP") {
+//     passwodSuggessionHTML +=
+//       '<p class="password-sugession-type comfirm-password"><span class="ps-valid"><i class="fa fa-check"></i></span><span class="ps-invalid"><i class="fa fa-times"></i></span> <span class="ps-dot">.</span> password and confirm password should be same</p>';
+//   }
+//   +"</div>";
+//   $("#" + formID + " #" + elementId)
+//     .parent()
+//     .css({ position: "relative" });
+//   if (
+//     $("#" + formID + " #" + elementId)
+//       .parent()
+//       .find(".password-sugession").length < 1
+//   ) {
+//     $("#" + formID + " #" + elementId)
+//       .parent()
+//       .append(passwodSuggessionHTML);
+//   }
+//   $(src).parent().find(".password-sugession").show();
+//   if (passwordType == "P") {
+//     var password = $("#" + elementId).val();
+//   } else {
+//     var password = $("#" + elementId).val();
+//     var comfirmPassword = $("#" + matchElementId).val();
+//   }
+
+//   // Regular expressions for password validation
+//   var lowercaseRegex = /^(?=.*[a-z])/;
+//   var uppercaseRegex = /^(?=.*[A-Z])/;
+//   var digitRegex = /^(?=.*\d)/;
+//   var specialCharRegex = /^(?=.*[@$!%*?&#])/;
+
+//   var isLowercaseValid = lowercaseRegex.test(password);
+//   var isUppercaseValid = uppercaseRegex.test(password);
+//   var isDigitValid = digitRegex.test(password);
+//   var isSpecialCharValid = specialCharRegex.test(password);
+//   var isValid =
+//     isLowercaseValid && isUppercaseValid && isDigitValid && isSpecialCharValid;
+//   if (password.length == 0) {
+//     $(".ps-dot").show();
+//     $(".ps-valid").hide();
+//     $(".ps-invalid").hide();
+//     $(".password-length").css({ color: "inherit" });
+//     $(".password-lowercase-letter").css({ color: "inherit" });
+//     $(".password-uppercase-letter").css({ color: "inherit" });
+//     $(".password-number").css({ color: "inherit" });
+//     $(".password-special-letter").css({ color: "inherit" });
+//   } else {
+//     if (password.length < 8 && password.length <= 20) {
+//       $(".password-length .ps-valid").hide();
+//       $(".password-length .ps-invalid").show();
+//       $(".password-length .ps-dot").hide();
+//       $(".password-length").css({ color: "red" });
+//     } else {
+//       $(".password-length .ps-valid").show();
+//       $(".password-length .ps-invalid").hide();
+//       $(".password-length .ps-dot").hide();
+//       $(".password-length").css({ color: "green" });
+//     }
+//     if (!isLowercaseValid) {
+//       $(".password-lowercase-letter .ps-valid").hide();
+//       $(".password-lowercase-letter .ps-invalid").show();
+//       $(".password-lowercase-letter .ps-dot").hide();
+//       $(".password-lowercase-letter").css({ color: "red" });
+//     } else {
+//       $(".password-lowercase-letter .ps-valid").show();
+//       $(".password-lowercase-letter .ps-invalid").hide();
+//       $(".password-lowercase-letter .ps-dot").hide();
+//       $(".password-lowercase-letter").css({ color: "green" });
+//     }
+//     if (!isUppercaseValid) {
+//       $(".password-uppercase-letter .ps-valid").hide();
+//       $(".password-uppercase-letter .ps-invalid").show();
+//       $(".password-uppercase-letter .ps-dot").hide();
+//       $(".password-uppercase-letter").css({ color: "red" });
+//     } else {
+//       $(".password-uppercase-letter .ps-valid").show();
+//       $(".password-uppercase-letter .ps-invalid").hide();
+//       $(".password-uppercase-letter .ps-dot").hide();
+//       $(".password-uppercase-letter").css({ color: "green" });
+//     }
+
+//     if (!isDigitValid) {
+//       $(".password-number .ps-valid").hide();
+//       $(".password-number .ps-invalid").show();
+//       $(".password-number .ps-dot").hide();
+//       $(".password-number").css({ color: "red" });
+//     } else {
+//       $(".password-number .ps-valid").show();
+//       $(".password-number .ps-invalid").hide();
+//       $(".password-number .ps-dot").hide();
+//       $(".password-number").css({ color: "green" });
+//     }
+//     if (!isSpecialCharValid) {
+//       $(".password-special-letter .ps-valid").hide();
+//       $(".password-special-letter .ps-invalid").show();
+//       $(".password-special-letter .ps-dot").hide();
+//       $(".password-special-letter").css({ color: "red" });
+//     } else {
+//       $(".password-special-letter .ps-valid").show();
+//       $(".password-special-letter .ps-invalid").hide();
+//       $(".password-special-letter .ps-dot").hide();
+//       $(".password-special-letter").css({ color: "green" });
+//     }
+//     if (password != comfirmPassword) {
+//       $(".comfirm-password .ps-valid").hide();
+//       $(".comfirm-password .ps-invalid").show();
+//       $(".comfirm-password .ps-dot").hide();
+//       $(".comfirm-password").css({ color: "red" });
+//     } else {
+//       $(".comfirm-password .ps-valid").show();
+//       $(".comfirm-password .ps-invalid").hide();
+//       $(".comfirm-password .ps-dot").hide();
+//       $(".comfirm-password").css({ color: "green" });
+//     }
+//   }
+// }
+function checkPasswordStrength(
+src,
+formID,
+elementId,
+passwordType,
+matchElementId
+) {
+var passwodSuggessionHTML =
+'<div class="password-sugession">' +
+'<h6 class="password-sugession-title"><b>Password must include at least:</b></h6>' +
+
+
+'<p class="password-sugession-type password-uppercase-letter">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> 1 uppercase letter</p>' +
+
+'<p class="password-sugession-type password-lowercase-letter">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> 1 lowercase letter</p>' +
+
+'<p class="password-sugession-type password-special-letter">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> 1 special character (! @ # $ % & *)</p>' +
+
+'<p class="password-sugession-type password-number">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> 1 number</p>' +
+
+'<p class="password-sugession-type password-length">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> min 8 characters & max 20 characters</p>' +
+
+'<p class="password-sugession-type password-sequence">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> no consecutive sequences (e.g. 123, abc, zyx)</p>' +
+
+'<p class="password-sugession-type password-keyboard-pattern">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> no keyboard patterns (e.g. qwerty, asdf)</p>' +
+
+'<p class="password-sugession-type password-repeat">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> no repeated characters (e.g. aaa, 111)</p>';
+
+
+if (passwordType == "CP") {
+passwodSuggessionHTML +=
+'<p class="password-sugession-type comfirm-password">' +
+'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+'<span class="ps-dot">.</span> password and confirm password should be same</p>';
+}
+
+passwodSuggessionHTML += "</div>";
+
+var inputElement = $("#" + formID + " #" + elementId);
+var parentElement = inputElement.parent();
+
+parentElement.css({
+position: "relative",
+});
+
+if (parentElement.find(".password-sugession").length < 1) {
+parentElement.append(passwodSuggessionHTML);
+}
+
+var suggestionBox = parentElement.find(".password-sugession");
+$(".password-sugession").not(suggestionBox).hide();
+
+var password = inputElement.val();
+var confirmPassword = matchElementId
+? $("#" + formID + " #" + matchElementId).val()
+: "";
+
+// regex validations
+var lowercaseRegex = /[a-z]/;
+var uppercaseRegex = /[A-Z]/;
+var digitRegex = /\d/;
+var specialCharRegex = /[!@#$%&*]/;
+
+var isLowercaseValid = lowercaseRegex.test(password);
+var isUppercaseValid = uppercaseRegex.test(password);
+var isDigitValid = digitRegex.test(password);
+var isSpecialCharValid = specialCharRegex.test(password);
+var isLengthValid = password.length >= 8 && password.length <= 20;
+
+var hasSequence = hasSequentialChars(password);
+var hasKeyboard = hasKeyboardPattern(password);
+var hasRepeat = hasRepeatedChars(password);
+
+if (password.length === 0) {
+suggestionBox.show();
+resetValidationUI(suggestionBox);
+if (typeof validEndInvalidField === "function") {
+validEndInvalidField(null, elementId);
+}
+return false;
+}
+
+updateValidationUI(
+suggestionBox,
+".password-lowercase-letter",
+isLowercaseValid
+);
+
+updateValidationUI(
+suggestionBox,
+".password-uppercase-letter",
+isUppercaseValid
+);
+
+updateValidationUI(
+suggestionBox,
+".password-number",
+isDigitValid
+);
+
+updateValidationUI(
+suggestionBox,
+".password-special-letter",
+isSpecialCharValid
+);
+
+updateValidationUI(
+suggestionBox,
+".password-length",
+isLengthValid
+);
+
+updateValidationUI(
+suggestionBox,
+".password-sequence",
+!hasSequence
+);
+
+updateValidationUI(
+suggestionBox,
+".password-keyboard-pattern",
+!hasKeyboard
+);
+
+updateValidationUI(
+suggestionBox,
+".password-repeat",
+!hasRepeat
+);
+
+if (passwordType == "CP") {
+updateValidationUI(
+suggestionBox,
+".comfirm-password",
+password === confirmPassword
+);
+}
+
+var isPasswordValid =
+isLowercaseValid &&
+isUppercaseValid &&
+isDigitValid &&
+isSpecialCharValid &&
+isLengthValid &&
+!hasSequence &&
+!hasKeyboard &&
+!hasRepeat;
+
+if (passwordType == "CP") {
+isPasswordValid =
+isPasswordValid &&
+password === confirmPassword;
+}
+
+if (isPasswordValid) {
+suggestionBox.hide();
+} else {
+suggestionBox.show();
+}
+if (typeof validEndInvalidField === "function") {
+validEndInvalidField(isPasswordValid, elementId);
+}
+
+return isPasswordValid;}
+
+function validatePasswordByField(element) {
+  var input = $(element);
+  var form = input.closest("form");
+  if (form.length < 1 || !input.attr("id")) {
+    return true;
+  }
+  var formId = form.attr("id");
+  var fieldId = input.attr("id");
+  var type = "P";
+  var matchId = "";
+  if (input.attr("data-match")) {
+    type = "CP";
+    matchId = input.attr("data-match").replace("#", "");
+  } else if (
+    fieldId === "confirmPassword" ||
+    fieldId === "confirmpassword"
+  ) {
+    type = "CP";
+    matchId = fieldId === "confirmpassword" ? "newpassword" : "password";
+  }
+  return checkPasswordStrength(
+    input.get(0),
+    formId,
+    fieldId,
+    type,
+    matchId
+  );
+}
+
+function validatePasswordForm(formElement) {
+  var form = $(formElement);
+  if (form.length < 1) {
+    return true;
+  }
+  var isValid = true;
+  var passwordFields = form.find(".password-suggession-popup");
+  passwordFields.each(function () {
+    if ($(this).is(":visible") && !validatePasswordByField(this)) {
+      isValid = false;
+    }
+  });
+  return isValid;
+}
+
+$(document).on(
+  "input keyup change paste",
+  ".password-suggession-popup",
+  function () {
+    var currentField = this;
+    setTimeout(function () {
+      validatePasswordByField(currentField);
+      var form = $(currentField).closest("form");
+      var confirmField = form.find("#confirmPassword, #confirmpassword");
+      if (confirmField.length > 0 && confirmField.val() !== "") {
+        validatePasswordByField(confirmField.get(0));
+      }
+    }, 0);
+  }
+);
+
+$(document).on("submit", "form", function (event) {
+  if (!validatePasswordForm(this)) {
+    event.preventDefault();
+    return false;
+  }
+});
+
+$(document).on("click", "#changepassword", function (event) {
+  var form = $("#passwordForm");
+  if (form.length > 0 && !validatePasswordForm(form.get(0))) {
+    event.preventDefault();
+    return false;
+  }
+});
+
 
 function parseUrlToJson(params) {
   var data = {};
@@ -7224,4 +7570,4 @@ function darkenColor(color, percent) {
         (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
         (B < 255 ? (B < 1 ? 0 : B) : 255)
     ).toString(16).slice(1);
-}
+  }

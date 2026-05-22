@@ -258,11 +258,22 @@ function validateChangePassword(formId) {
 		showMessageTheme2(0, " New password and confirm password mismatch.", '', false);
 		return false;
 	}
-	if (!pattern.test($('#' + formId + ' #newpassword').val())) {
+	if (!checkPasswordStrength(
+		$('#' + formId + ' #newpassword').get(0),
+		formId,
+		'newpassword',
+		'P'
+	)) {
 		showMessageTheme2(0, " New password must match all requirements", '', false);
 		return false;
 	}
-	if (!pattern.test($('#' + formId + ' #confirmpassword').val().trim())) {
+	if (!checkPasswordStrength(
+		$('#' + formId + ' #confirmpassword').get(0),
+		formId,
+		'confirmpassword',
+		'CP',
+		'newpassword'
+	)) {
 		showMessageTheme2(0, " Confirm password must match all requirements", '', false);
 		return false;
 	}

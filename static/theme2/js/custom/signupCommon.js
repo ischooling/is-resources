@@ -164,8 +164,13 @@ function signupStudentOnLoad() {
 	// });
 	$("#password").blur(function () {
 		if ($(this).val().trim().length > 0) {
-			var pass = $("#userSignupForm #password").val().trim();
-			if (!(pattern.test(pass))) {
+			var isPasswordStrong = checkPasswordStrength(
+				$("#userSignupForm #password").get(0),
+				"userSignupForm",
+				"password",
+				"P"
+			);
+			if (!isPasswordStrong) {
 				showElementErrorMessage(false, 'password', 'Create your own password must match all requirements.');
 				if ($(this).val().trim() != $("#userSignupForm #confirmPassword").val().trim() && $("#userSignupForm #confirmPassword").val().trim().length > 0) {
 					showElementErrorMessage(false, 'confirmPassword', 'Create your own password and Confirm y our own Password do not match');
@@ -202,13 +207,18 @@ function signupStudentOnLoad() {
 	$("#confirmPassword").blur(function () {
 		if ($(this).val().length > 0) {
 
-			var confpass = $("#userSignupForm #confirmPassword").val().trim();
 			if (!validPassword($("#userSignupForm #confirmPassword").val().trim())) {
 				$("#userSignupForm #confirmPassword").css('color', '#a9a9a9');
 				showElementErrorMessage(false, 'confirmPassword', 'Confirm password is either empty or invalid');
 				validEndInvalidField(false, "confirmPassword");
 				flag = false;
-			} else if (!(pattern.test(confpass))) {
+			} else if (!checkPasswordStrength(
+				$("#userSignupForm #confirmPassword").get(0),
+				"userSignupForm",
+				"confirmPassword",
+				"CP",
+				"password"
+			)) {
 				showElementErrorMessage(false, 'confirmPassword', 'Confirm your own Passwords must match all requirements.');
 				validEndInvalidField(false, "confirmPassword");
 				flag = false
@@ -366,8 +376,13 @@ function validateRequestForSignup(formId, moduleId) {
 		}
 		flag = false
 	}
-	var pass = $("#" + formId + " #password").val().trim();
-	if (!(pattern.test(pass))) {
+	var isPasswordStrong = checkPasswordStrength(
+		$("#" + formId + " #password").get(0),
+		formId,
+		"password",
+		"P"
+	);
+	if (!isPasswordStrong) {
 		showElementErrorMessage(false, 'password', 'Create your own password must match all requirements.');
 		flag = false
 	} else if (!validPassword($("#" + formId + " #password").val().trim())) {
@@ -375,13 +390,18 @@ function validateRequestForSignup(formId, moduleId) {
 		showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
 		flag = false
 	}
-	var confpass = $("#" + formId + " #confirmPassword").val().trim();
 
 	if (!validPassword($("#" + formId + " #confirmPassword").val().trim())) {
 		$("#" + formId + " #confirmPassword").css('color', '#a9a9a9');
 		showElementErrorMessage(false, 'confirmPassword', 'Confirm password is either empty or invalid');
 		flag = false;
-	} else if (!(pattern.test(confpass))) {
+	} else if (!checkPasswordStrength(
+		$("#" + formId + " #confirmPassword").get(0),
+		formId,
+		"confirmPassword",
+		"CP",
+		"password"
+	)) {
 		showElementErrorMessage(false, 'confirmPassword', 'Confirm your own Passwords must match all requirements.');
 		flag = false
 	} else if ($("#" + formId + " #password").val().trim() != $("#" + formId + " #confirmPassword").val().trim()) {
