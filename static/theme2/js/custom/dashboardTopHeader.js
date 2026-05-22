@@ -62,7 +62,7 @@
 		visible.slice().reverse().forEach(function (a) {
 			var name = escapeChatHtml(a.name || 'Admin');
 			var n = parseInt(a.count, 10) || 0;
-			var roleSuffix = a.role === 'superadmin' ? ' ★' : '';
+			var roleSuffix = a.role === 'superadmin' || a.role === 'director' ? ' ★' : '';
 			var adminId = escapeChatHtml(a.userId || '');
 			// Chips are click-targets: superadmins jump straight into that admin's filtered list.
 			html += '<div class="chat-chip chat-chip-admin"'
@@ -147,7 +147,7 @@
 
 	function handleUnreadMessage(data) {
 		var $badge = $('#chat-badge');
-		var isSuperAdmin = (data.viewerRole === 'superadmin') || (USER_ROLE === 'SUPER_ADMIN');
+		var isSuperAdmin = (data.viewerRole === 'superadmin') || (USER_ROLE === 'SUPER_ADMIN') ||  (data.viewerRole === 'director') || (USER_ROLE === 'director');
 		var personalCount = parseInt(data.count, 10) || 0;
 		var adminCount = (typeof data.adminBreakdownCount === 'number')
 			? data.adminBreakdownCount
