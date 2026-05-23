@@ -562,7 +562,7 @@ function studentGraduationCeremontPopup(registrationDeadline, standardId){
     if(registrationDeadline){
         formattedDeadline = changeDateFormat(new Date(registrationDeadline + "T00:00:00"), "MMM-dd-yyyy");
     }
-    var gradeName = SCHOOL_STANDARD_GRADE_MASTER.find(grade => grade.key == standardId)?.value;
+    var gradeName = SCHOOL_STANDARD_GRADE_MASTER.find(grade => grade.key == standardId)?.value || standardId || "12";
     var html =
         `<div class="modal fade" id="graduationCeremonyModal" tabindex="-1" role="dialog" aria-labelledby="graduationCeremonyLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none graduation-ceremony-dialog" role="document">
@@ -604,23 +604,11 @@ function studentGraduationCeremontPopup(registrationDeadline, standardId){
                             </div>
                             <div class="graduation-ceremony-divider"></div>
                             <div class="graduation-ceremony-section">
-                                <h4 class="graduation-ceremony-section-title">Where would you like to attend the ceremony?</h4>
-                                <div class="row justify-content-center graduation-option-row">
-                                    <div class="col-md-4 col-sm-6 mb-3">
-                                        <button type="button" class="graduation-option-card" data-group="location" data-value="dubai">
-                                            <span class="graduation-option-icon graduation-location-icon"><img src="${PATH_FOLDER_IMAGE2}graduation-ceremony/dubai-infra.png${SCRIPT_VERSION}" alt="Dubai"></span>
-                                            <span class="graduation-option-text">Dubai</span>
-                                            <span class="graduation-option-check"><i class="fa fa-circle-o" aria-hidden="true"></i><i class="fa fa-check-circle" aria-hidden="true"></i></span>
-                                        </button>
-                                    </div>
-                                    <div class="col-md-4 col-sm-6 mb-3">
-                                        <button type="button" class="graduation-option-card" data-group="location" data-value="singapore">
-                                            <span class="graduation-option-icon graduation-location-icon"><img src="${PATH_FOLDER_IMAGE2}graduation-ceremony/signapore-infra.png${SCRIPT_VERSION}" alt="Singapore"></span>
-                                            <span class="graduation-option-text">Singapore</span>
-                                            <span class="graduation-option-check"><i class="fa fa-circle-o" aria-hidden="true"></i><i class="fa fa-check-circle" aria-hidden="true"></i></span>
-                                        </button>
-                                    </div>
-                                </div>
+                                <h4 class="graduation-ceremony-section-title">The Graduation Ceremony will be held in Dubai <span class="graduation-option-icon graduation-location-icon"><img src="${PATH_FOLDER_IMAGE2}graduation-ceremony/dubai-infra.png${SCRIPT_VERSION}" alt="Dubai"></span></h4>
+                                ${/*<div class="graduation-fixed-location">
+                                    
+                                    <span class="graduation-fixed-location-text">Dubai</span>
+                                </div>*/''}
                             </div>
                             <div class="graduation-link-panel disabled" id="graduationLinkPanel">
                                 <div class="graduation-link-label">
@@ -628,7 +616,7 @@ function studentGraduationCeremontPopup(registrationDeadline, standardId){
                                     <span>Registration Form Link:</span>
                                 </div>
                                 <div class="graduation-link-input-wrap">
-                                    <input type="text" id="graduationCeremonyRegistrationLink" class="graduation-link-input" value="" readonly placeholder="Select attendance type and location to generate your registration link">
+                                    <input type="text" id="graduationCeremonyRegistrationLink" class="graduation-link-input" value="" readonly placeholder="Select attendance type to generate your registration link">
                                 </div>
                                 <div class="graduation-link-actions">
                                     <button type="button" class="graduation-copy-btn" id="graduationCeremonyRedirectLinkBtn" disabled>
@@ -637,10 +625,10 @@ function studentGraduationCeremontPopup(registrationDeadline, standardId){
                                     </button>
                                 </div>
                             </div>
-                            <div class="graduation-link-hint">
-                                <a href="javascript:void(0)" id="graduationCeremonyOpenLink" class="graduation-open-link disabled-link">Select attendance type and location to generate your registration link</a>
+                            ${/*<div class="graduation-link-hint">
+                                <a href="javascript:void(0)" id="graduationCeremonyOpenLink" class="graduation-open-link disabled-link">Select attendance type to generate your registration link</a>
                                 <span class="graduation-copy-message" id="graduationCeremonyCopyMessage"></span>
-                            </div>
+                            </div>*/''}
                         </div>
                         <div class="graduation-deadline-strip">
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
@@ -676,9 +664,11 @@ function studentGraduationCeremontPopup(registrationDeadline, standardId){
             .graduation-option-card.active .graduation-option-check .fa-circle-o { display: none; }
             .graduation-option-card.active .graduation-option-check .fa-check-circle { display: inline-block; }
             .graduation-ceremony-divider { height: 1px; background: #dce6f8; margin: 14px auto 20px; max-width: 760px; }
+            .graduation-fixed-location { max-width: 260px; margin: 0 auto; min-height: 68px; border: 2px solid #cfdcf8; background: rgba(255, 255, 255, 0.96); color: #143d93; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(24, 72, 170, 0.08); }
+            .graduation-fixed-location-text { font-size: 16px; line-height: 1.15; font-weight: 700; padding-left: 10px; }
             .graduation-link-panel { margin: 20px auto 8px; max-width: 760px; background: #143d93; border-radius: 16px; padding: 10px; display: flex; align-items: center; box-shadow: 0 14px 32px rgba(20, 61, 147, 0.22); }
             .graduation-link-panel.disabled { opacity: 0.8; }
-            .graduation-link-label { width: 185px; color: #ffffff; display: flex; align-items: center; font-size: 14px; font-weight: 700; padding: 0 6px 0 4px; }
+            .graduation-link-label { width: 190px; color: #ffffff; display: flex; align-items: center; font-size: 14px; font-weight: 700; padding: 0 6px 0 4px; }
             .graduation-link-label i { font-size: 18px; margin-right: 8px; }
             .graduation-link-input-wrap { flex: 1; padding: 0 8px; }
             .graduation-link-input { width: 100%; min-height: 44px; border: 0; border-radius: 12px; padding: 10px 12px; color: #143d93; font-size: 13px; font-weight: 600; background: #ffffff; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18); }
@@ -696,8 +686,8 @@ function studentGraduationCeremontPopup(registrationDeadline, standardId){
             .graduation-deadline-strip i { font-size: 16px; margin-right: 8px; }
             .graduation-deadline-strong { font-weight: 800; letter-spacing: 0.4px; }
             .graduation-deadline-divider { margin: 0 8px; opacity: 0.9; }
-            @media (max-width: 1199.98px) { .graduation-ceremony-dialog { max-width: 82vw; } .graduation-ceremony-content { padding: 34px 24px 36px; } .graduation-ceremony-title { font-size: 28px; } .graduation-ceremony-subtitle { font-size: 14px; } .graduation-option-text { font-size: 14px; } .graduation-link-panel { flex-wrap: wrap; } .graduation-link-label, .graduation-link-actions, .graduation-link-input-wrap { width: 100%; } .graduation-link-label { justify-content: center; margin-bottom: 10px; } .graduation-link-input-wrap { padding: 0; } .graduation-link-actions { margin-top: 10px; } }
-            @media (max-width: 991.98px) { #graduationCeremonyModal .modal-dialog { max-width: calc(100vw - 20px) !important; padding: 6px; margin: 0.5rem auto; } .graduation-ceremony-modal-content { display: flex; justify-content: center; } .graduation-ceremony-shell { background: #ffffff; } .graduation-ceremony-content { padding: 56px 14px 26px; } .graduation-ceremony-title { font-size: 24px; } .graduation-ceremony-subtitle { font-size: 13px; margin-bottom: 18px; } .graduation-ceremony-section-title { font-size: 18px; } .graduation-option-card { min-height: 60px; padding: 10px; } .graduation-option-icon { width: 30px; font-size: 20px; } .graduation-location-icon img { max-width: 28px; max-height: 28px; } .graduation-option-text { font-size: 14px; padding: 0 8px; } .graduation-option-check { width: 20px; font-size: 20px; } .graduation-ceremony-divider { margin: 12px auto 16px; } .graduation-link-input { min-height: 40px; font-size: 12px; padding: 10px; } .graduation-copy-btn { min-height: 40px; } .graduation-deadline-strip { font-size: 12px; padding: 10px; } .graduation-deadline-strip i { font-size: 14px; } }
+            @media (max-width: 1199.98px) { .graduation-ceremony-dialog { max-width: 82vw; } .graduation-ceremony-content { padding: 34px 24px 36px; } .graduation-ceremony-title { font-size: 28px; } .graduation-ceremony-subtitle { font-size: 14px; } .graduation-option-text, .graduation-fixed-location-text { font-size: 14px; } .graduation-link-panel { flex-wrap: wrap; } .graduation-link-label, .graduation-link-actions, .graduation-link-input-wrap { width: 100%; } .graduation-link-label { justify-content: center; margin-bottom: 10px; } .graduation-link-input-wrap { padding: 0; } .graduation-link-actions { margin-top: 10px; } }
+            @media (max-width: 991.98px) { #graduationCeremonyModal .modal-dialog { max-width: calc(100vw - 20px) !important; padding: 6px; margin: 0.5rem auto; } .graduation-ceremony-modal-content { display: flex; justify-content: center; } .graduation-ceremony-shell { background: #ffffff; } .graduation-ceremony-content { padding: 56px 14px 26px; } .graduation-ceremony-title { font-size: 24px; } .graduation-ceremony-subtitle { font-size: 13px; margin-bottom: 18px; } .graduation-ceremony-section-title { font-size: 18px; } .graduation-option-card, .graduation-fixed-location { min-height: 60px; padding: 10px; } .graduation-option-icon { width: 30px; font-size: 20px; } .graduation-location-icon img { max-width: 28px; max-height: 28px; } .graduation-option-text, .graduation-fixed-location-text { font-size: 14px; padding: 0 8px; } .graduation-option-check { width: 20px; font-size: 20px; } .graduation-ceremony-divider { margin: 12px auto 16px; } .graduation-link-input { min-height: 40px; font-size: 12px; padding: 10px; } .graduation-copy-btn { min-height: 40px; } .graduation-deadline-strip { font-size: 12px; padding: 10px; } .graduation-deadline-strip i { font-size: 14px; } }
         </style>`;
     return html;
 }
@@ -722,39 +712,39 @@ function initializeStudentGraduationCeremonyPopup(studentEmail){
         window.open(registrationLink, "_blank");
         return false;
     });
-    $(document).off("click", "#graduationCeremonyOpenLink");
-    $(document).on("click", "#graduationCeremonyOpenLink", function(){
-        var registrationLink = $("#graduationCeremonyRegistrationLink").val();
-        if(!registrationLink){
-            return false;
-        }
-        window.open(registrationLink, "_blank");
-        return false;
-    });
+    // $(document).off("click", "#graduationCeremonyOpenLink");
+    // $(document).on("click", "#graduationCeremonyOpenLink", function(){
+    //     var registrationLink = $("#graduationCeremonyRegistrationLink").val();
+    //     if(!registrationLink){
+    //         return false;
+    //     }
+    //     window.open(registrationLink, "_blank");
+    //     return false;
+    // });
     updateStudentGraduationCeremonyRegistrationLink(studentEmail);
 }
 
 function updateStudentGraduationCeremonyRegistrationLink(studentEmail){
     var attendAs = $('.graduation-option-card[data-group="attendAs"].active').attr("data-value") || "";
-    var location = $('.graduation-option-card[data-group="location"].active').attr("data-value") || "";
+    var location = "dubai";
     var registrationLink = "";
-    var linkHint = "Select attendance type and location to generate your registration link";
-    if (attendAs !== "" && location !== "") {
+    // var linkHint = "Select attendance type to generate your registration link";
+    if (attendAs !== "") {
         var deploymentMode = (DEPLOYMENT_MODE || "").toLowerCase();
         var isTestEnv = deploymentMode === "dev" || deploymentMode === "uat";
         registrationLink = "https://event.internationalschooling.org" + "?attendAs=" + encodeURIComponent(attendAs) + "&location=" + encodeURIComponent(location) +  "&email=" + encodeURIComponent(studentEmail);
         if (isTestEnv) {
             registrationLink += "&type=T" + "&baseUrl=" + APP_BASE_URL;
         }
-        linkHint = "Click the link to open the registration form";
+        // linkHint = "Click the link to open the registration form";
     }
     $("#graduationCeremonyRegistrationLink").val(registrationLink);
     $("#graduationCeremonyCopyMessage").text("");
     $("#graduationCeremonyRedirectLinkBtn").prop("disabled", registrationLink === "");
     $("#graduationLinkPanel").toggleClass("disabled", registrationLink === "");
-    $("#graduationCeremonyOpenLink").text(linkHint);
-    $("#graduationCeremonyOpenLink").attr("href", registrationLink !== "" ? registrationLink : "javascript:void(0)");
-    $("#graduationCeremonyOpenLink").toggleClass("disabled-link", registrationLink === "");
+    // $("#graduationCeremonyOpenLink").text(linkHint);
+    // $("#graduationCeremonyOpenLink").attr("href", registrationLink !== "" ? registrationLink : "javascript:void(0)");
+    // $("#graduationCeremonyOpenLink").toggleClass("disabled-link", registrationLink === "");
 }
 
 function batchReEnrollmentModal(){

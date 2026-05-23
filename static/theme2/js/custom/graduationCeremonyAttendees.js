@@ -18,29 +18,39 @@ function loadGraduationCeremonyAttendees(){
                 const rawPreferredDateTime = attendee.callbackPreferredDateTime && attendee.callbackPreferredDateTime != "N/A" ? attendee.callbackPreferredDateTime : "";
                 const callbackPreferredTimezone = attendee.callbackPreferredTimezone || attendee.userTimezone || "";
                 const formattedDateAccToTZ = rawPreferredDateTime ? changeDateFormat(convertTZ(rawPreferredDateTime, USER_TIMEZONE), "MMM dd, yyyy hh:mm A") : "N/A";
+                const callbackTimeSlot = getGraduationCeremonyTimeSlot(rawPreferredDateTime);
+                const phoneNo = formatGraduationCeremonyPhone(attendee.phoneNo);
+                const alternatePhoneNo = formatGraduationCeremonyPhone(attendee.alternatePhoneNo);
+                const phoneWhatsAppIcon = getGraduationCeremonyWhatsAppIcon(attendee.phoneOnWhatsApp);
+                const alternatePhoneWhatsAppIcon = getGraduationCeremonyWhatsAppIcon(attendee.alternatePhoneOnWhatsApp);
                 const studentInfo = `
                     <strong>${attendee.fullName}</strong><br>
                     <small>${attendee.email}</small><br>
                     <small>Attend As: ${attendee.attendAs ? attendee.attendAs : "N/A"}</small><br>
                     <small>Age: ${!attendee.age ? "N/A" : attendee.age}</small><br>
-                    <small>Phone No.: ${attendee.phoneNo}</small><br>
-                    <small>Alt Phone No.: ${attendee.alternatePhoneNo ? attendee.alternatePhoneNo : "N/A"}</small><br>
+                    <small>Phone No.: ${phoneNo}${phoneWhatsAppIcon}</small><br>
+                    <small>Alt Phone No.: ${alternatePhoneNo}${alternatePhoneWhatsAppIcon}</small><br>
                     <small>Country: ${attendee.country}</small>
                     <br><small>Timezone: ${attendee.userTimezone ? attendee.userTimezone : "N/A"}</small>
                 `;
                 const callbackInfo = `
-                    <small>Preferred Country: ${attendee.preferredCountry ? attendee.preferredCountry : "N/A"}</small><br>
                     <small>Status: ${callbackStatus}</small><br>
-                    <small>Date & Time: ${formattedDateAccToTZ}</small><br>
-                    <small>Timezone: ${callbackPreferredTimezone ? callbackPreferredTimezone : "N/A"}</small>
+                    <small>Time Slot: ${callbackTimeSlot}</small>
                 `;
+                const attendeesInfo = attendee.attendees && attendee.attendees.length > 0
+                    ? attendee.attendees.map(function(person, personIndex){
+                        return `<div class="mb-1">
+                            <small><strong>${personIndex + 1}.</strong> ${person.name ? person.name : "N/A"}${person.relation ? ` (${person.relation})` : ""}${person.gender ? ` - ${person.gender}` : ""}</small>
+                        </div>`;
+                    }).join("")
+                    : `<small>N/A</small>`;
 
                 tbodyHtml += `<tr>
                     <td>${sno}</td>
                     <td>${studentInfo}</td>
                     <td>${callbackInfo}</td>
-                    <td>${attendee.graduatingYear}</td>
-                    <td>${attendee.noOfAttendees}</td>
+                    <td>${attendeesInfo}</td>
+                    <td>${attendee.noOfAttendees?attendee.noOfAttendees : "N/A"}</td>
                     <td>$${attendee.amountScheduled}</td>
                     <td>${attendee.amountStatus}</td>
                     <td>${attendee.foodAllergy}</td>
@@ -70,6 +80,48 @@ function loadGraduationCeremonyAttendees(){
             });
         }
     });
+}
+
+function getGraduationCeremonyTimeSlot(preferredDateTime){
+    if(!preferredDateTime || preferredDateTime == "N/A"){
+        return "N/A";
+    }
+
+    var formattedDateTime = changeDateFormat(convertTZ(preferredDateTime, USER_TIMEZONE), "MMM dd, yyyy hh:mm A");
+    var timePart = formattedDateTime.split(" ").slice(-2).join(" ");
+    var slotMap = {
+        "10:00 AM": "10:00 AM - 1:00 PM",
+        "01:00 PM": "1:00 PM - 4:00 PM",
+        "04:00 PM": "4:00 PM - 8:00 PM",
+        "08:00 PM": "8:00 PM - 12:00 AM"
+    };
+
+    return slotMap[timePart] || timePart || "N/A";
+}
+
+function formatGraduationCeremonyPhone(phoneNo){
+    if(!phoneNo){
+        return "N/A";
+    }
+
+    var trimmedPhoneNo = (phoneNo + "").trim();
+    if(trimmedPhoneNo === "" || trimmedPhoneNo.toUpperCase() === "N/A"){
+        return "N/A";
+    }
+
+    trimmedPhoneNo = trimmedPhoneNo.replace(/-/g, " ").replace(/\s+/g, " ").trim();
+    trimmedPhoneNo = trimmedPhoneNo.replace(/^\+*/, "");
+    trimmedPhoneNo = "+" + trimmedPhoneNo;
+
+    return trimmedPhoneNo;
+}
+
+function getGraduationCeremonyWhatsAppIcon(isOnWhatsApp){
+    if(isOnWhatsApp !== "Y"){
+        return "";
+    }
+
+    return ` <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="14px" alt="WhatsApp"/>`;
 }
 
 $(document).off("click", ".open-graduation-status-modal").on("click", ".open-graduation-status-modal", function () {

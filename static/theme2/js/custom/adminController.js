@@ -68,6 +68,7 @@ const contentHandlers = {
     'wati-numbers': () => renderWatiNumbersContent(),
     'partner-school-payment': () => initPartnerSchoolPayment(),
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
+    'event-discount': () => initEventDiscount(),
     'user-screening-profiles': () => initUserScreeningProfiles(),
     'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent(); },
     'create-manage-sessions': () => initCreateManageSessions(),
