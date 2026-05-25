@@ -352,8 +352,11 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 				<p class="mb-0" style="color:#0051FF">Demo By Agent</p>
 				<p id="demoByAgentCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
 			</div>`;
-      
-		
+      html+=`<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #00897B;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#00897B">Demo By Chat</p>
+				<p id="demoByChatCount" class="mb-0 text-white px-2 rounded" style="background-color:#00897B;">-</p>
+			</div>`;
+
   html += "</div>";
   html += "</div>";
 
@@ -900,37 +903,6 @@ function getLeadAdvanceSearchPopup(objRights) {
     '	<label class="m-0">Last Followup Days</label>' +
     '	<input type="text" name="leadFollwoupDays" id="leadFollwoupDays"  class="form-control"/> ' +
     "</div>" +
-    '<div class="col-xl-2 col-lg-2 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">' +
-    '<label class="m-0">Sort by</label>' +
-    '<select name="leadsShortBy" id="leadsShortBy" class="form-control">' +
-    '<option value="modifydate" ' +
-    (objRights.shortBy == "modifydate" ? "selected" : "") +
-    ">Modified Date</option>" +
-    '<option value="createdate" ' +
-    (objRights.shortBy == "createdate" ? "selected" : "") +
-    ">Created Date</option>" +
-    '<option value="childname" ' +
-    (objRights.shortBy == "childname" ? "selected" : "") +
-    ">Child Name</option>" +
-    '<option value="grade" ' +
-    (objRights.shortBy == "grade" ? "selected" : "") +
-    ">Grade</option>" +
-    '<option value="country" ' +
-    (objRights.shortBy == "country" ? "selected" : "") +
-    ">Country</option>" +
-    "</select>" +
-    "</div>" +
-    '<div class="col-xl-2 col-lg-2 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">' +
-    '<label class="m-0">Ascending/ Descending</label>' +
-    '<select name="leadsShortType" id="leadsShortType" class="form-control">' +
-    '<option value="DESC" ' +
-    (objRights.shortType == "DESC" ? "selected" : "") +
-    ">Descending</option>" +
-    '<option value="ASC" ' +
-    (objRights.shortType == "ASC" ? "selected" : "") +
-    ">Ascending</option>" +
-    "</select>" +
-    "</div>" +
     "</div>" +
     
     "			</form>" +
@@ -1330,6 +1302,12 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       : "-";
   $("#demoByAgentCount").html(`${demoByAgentCountHTML}`);
 
+  var demoByChatCountHTML =
+    leadTotalData.totalChatDemo > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalChatDemo','${leadTotalData.leadFrom}')">${leadTotalData.totalChatDemo}</a>`
+      : "-";
+  $("#demoByChatCount").html(`${demoByChatCountHTML}`);
+
   var assignedToLeadManagerCountHTML =
     leadTotalData.totalDemoSupport > 0
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalDemoSupport','${leadTotalData.leadFrom}')">${leadTotalData.totalDemoSupport}</a>`
@@ -1420,9 +1398,20 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 		+'<option value="50" '+(leaddata.recordsPerPage=='50'?'selected':'')+'>50</option>'
 		+'<option value="100" '+(leaddata.recordsPerPage=='100'?'selected':'')+'>100</option>'
 	+'</select>'
-  +'<span class="leadInfoTime ml-3 bg-dark text-white p-1"></span>'
+	+'<span class="leadInfoTime ml-3 bg-dark text-white p-1"></span>'
+	+'<select name="leadsShortBy" id="leadsShortBy" class="ml-2" style="height:28px;font-size:13px;border:1px solid #ccc;border-radius:4px;padding:0 4px;">'
+		+'<option value="modifydate" '+(objRights.shortBy=='modifydate'?'selected':'')+'>Modified Date</option>'
+		+'<option value="createdate" '+(objRights.shortBy=='createdate'?'selected':'')+'>Created Date</option>'
+		// +'<option value="childname" '+(objRights.shortBy=='childname'?'selected':'')+'>Child Name</option>'
+		// +'<option value="grade" '+(objRights.shortBy=='grade'?'selected':'')+'>Grade</option>'
+		// +'<option value="country" '+(objRights.shortBy=='country'?'selected':'')+'>Country</option>'
+	+'</select>'
+	+'<select name="leadsShortType" id="leadsShortType" class="ml-1" style="height:28px;font-size:13px;border:1px solid #ccc;border-radius:4px;padding:0 4px;">'
+		+'<option value="DESC" '+(objRights.shortType=='DESC'?'selected':'')+'>Descending</option>'
+		+'<option value="ASC" '+(objRights.shortType=='ASC'?'selected':'')+'>Ascending</option>'
+	+'</select>'
 	+'<div>'
-		
+
 	+'</div>';
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];

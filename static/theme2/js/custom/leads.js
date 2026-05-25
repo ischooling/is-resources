@@ -10989,6 +10989,11 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		$("#leadsPagging").off('change').on('change', function () {
 		  getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true, '', objRights, roleModule);
 		});
+		$("#leadsShortBy, #leadsShortType").off('change').on('change', function () {
+		  objRights.shortBy = $("#leadsShortBy").val();
+		  objRights.shortType = $("#leadsShortType").val();
+		  getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true, '', objRights, roleModule);
+		});
 	  }
   
 	//   console.log("data success bind time :" + new Date());

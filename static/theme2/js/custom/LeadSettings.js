@@ -194,6 +194,8 @@ var AI_CALL_COUNTRIES_DATA = []; // {key: id, value: name} — loaded from maste
 
 function getAICallScheduleList() {
 	$('#ai-call-schedule-list').html('<div class="text-center text-muted py-3">Loading...</div>');
+	AI_DEMO_REMINDERS = [];
+	loadAIDemoReminders();
 	var d = {}; d['schoolId']=SCHOOL_ID; d['userId']=USER_ID;
 	// Step 1: load countries master
 	$.ajax({
@@ -297,6 +299,8 @@ function renderAICallScheduleRows(list) {
 	var allStartTimes = allRow ? parseTimeArray(allRow.startTime, '09:00') : ['09:00'];
 	var allEndTimes   = allRow ? parseTimeArray(allRow.endTime,   '17:00') : ['17:00'];
 	var allExclude    = allRow ? parseJsonArr(allRow.excludeCountries) : [];
+	// Demo Confirmation Reminders card
+	html += buildAIDemoReminderSection();
 	// Exclude Countries - top section only, linked to ALL row
 	html += buildAIExcludeSection(allExclude);
 	html += buildAICallRow(allRow ? allRow.id : null, 0, allStartTimes, allEndTimes, allActiveDays, true);
@@ -433,6 +437,142 @@ function saveAIExcludeCountries(btn) {
 		error: function() {
 			$(btn).prop('disabled', false).html('<i class="fa fa-save mr-1"></i>Save');
 			showMessageTheme2(0, 'Error saving exclude countries');
+		}
+	});
+}
+
+/* =========================================================
+   Demo Confirmation Reminders
+   ========================================================= */
+var AI_DEMO_REMINDERS = []; // loaded from backend
+
+function buildAIDemoReminderSection() {
+	var tagsHtml = AI_DEMO_REMINDERS.length
+		? AI_DEMO_REMINDERS.map(function(r, i) {
+			var label = r.minutes + ' min ' + (r.type === 'before' ? 'before demo' : 'after demo');
+			var color  = r.type === 'before' ? 'badge-primary' : 'badge-success';
+			return '<span class="badge '+color+' mr-1 mb-1 ai-demo-reminder-tag" data-index="'+i+'" '
+				+ 'data-minutes="'+r.minutes+'" data-type="'+r.type+'" '
+				+ 'style="font-size:12px;padding:5px 10px;">'
+				+ label
+				+ ' <a href="javascript:void(0);" class="text-white ml-1" onclick="removeAIDemoReminder(this)">&#x2715;</a>'
+				+ '</span>';
+		}).join('')
+		: '<span class="text-muted small" id="ai-reminder-empty">No reminders set</span>';
+
+	return '<div class="card mb-3 border-info" id="ai-demo-reminder-section">'
+		+ '<div class="card-body py-2">'
+		+ '<div class="d-flex align-items-start">'
+		+ '<div class="mr-3" style="min-width:160px;">'
+		+ '<h6 class="mb-0 text-info"><i class="fa fa-bell mr-1"></i>Demo Reminders</h6>'
+		+ '<small class="text-muted">Send reminders before / after demo</small>'
+		+ '</div>'
+		+ '<div class="flex-grow-1">'
+		+ '<div class="ai-demo-reminder-tags d-flex flex-wrap mb-2">' + tagsHtml + '</div>'
+		+ '<div class="d-flex align-items-center">'
+		+ '<input type="number" id="ai-reminder-minutes" class="form-control form-control-sm mr-1" placeholder="Minutes" min="1" max="1440" style="max-width:100px;">'
+		+ '<select id="ai-reminder-type" class="form-control form-control-sm mr-2" style="max-width:130px;">'
+		+   '<option value="before">Before Demo</option>'
+		+   '<option value="after">After Demo</option>'
+		+ '</select>'
+		+ '<button type="button" class="btn btn-info btn-sm mr-2" onclick="addAIDemoReminder()">'
+		+   '<i class="fa fa-plus mr-1"></i>Add'
+		+ '</button>'
+		+ '<button type="button" class="btn btn-primary btn-sm" id="ai-reminder-save-btn" onclick="saveAIDemoReminders(this)">'
+		+   '<i class="fa fa-save mr-1"></i>Save'
+		+ '</button>'
+		+ '</div>'
+		+ '</div>'
+		+ '</div>'
+		+ '</div>'
+		+ '</div>';
+}
+
+function addAIDemoReminder() {
+	var mins = parseInt($('#ai-reminder-minutes').val());
+	var type = $('#ai-reminder-type').val();
+	if (!mins || mins < 1) {
+		showMessageTheme2(0, 'Please enter valid minutes');
+		return;
+	}
+	// Check duplicate
+	var exists = AI_DEMO_REMINDERS.some(function(r) { return r.minutes === mins && r.type === type; });
+	if (exists) {
+		showMessageTheme2(0, 'This reminder already exists');
+		return;
+	}
+	AI_DEMO_REMINDERS.push({ minutes: mins, type: type });
+	$('#ai-reminder-minutes').val('');
+	// Re-render tags only
+	var tagsWrap = $('#ai-demo-reminder-section .ai-demo-reminder-tags');
+	tagsWrap.html(AI_DEMO_REMINDERS.map(function(r, i) {
+		var label = r.minutes + ' min ' + (r.type === 'before' ? 'before demo' : 'after demo');
+		var color  = r.type === 'before' ? 'badge-primary' : 'badge-success';
+		return '<span class="badge '+color+' mr-1 mb-1 ai-demo-reminder-tag" data-index="'+i+'" '
+			+ 'data-minutes="'+r.minutes+'" data-type="'+r.type+'" '
+			+ 'style="font-size:12px;padding:5px 10px;">'
+			+ label
+			+ ' <a href="javascript:void(0);" class="text-white ml-1" onclick="removeAIDemoReminder(this)">&#x2715;</a>'
+			+ '</span>';
+	}).join(''));
+}
+
+function removeAIDemoReminder(a) {
+	var idx = parseInt($(a).closest('.ai-demo-reminder-tag').attr('data-index'));
+	AI_DEMO_REMINDERS.splice(idx, 1);
+	// Re-render tags
+	var tagsWrap = $('#ai-demo-reminder-section .ai-demo-reminder-tags');
+	if (!AI_DEMO_REMINDERS.length) {
+		tagsWrap.html('<span class="text-muted small" id="ai-reminder-empty">No reminders set</span>');
+	} else {
+		tagsWrap.html(AI_DEMO_REMINDERS.map(function(r, i) {
+			var label = r.minutes + ' min ' + (r.type === 'before' ? 'before demo' : 'after demo');
+			var color  = r.type === 'before' ? 'badge-primary' : 'badge-success';
+			return '<span class="badge '+color+' mr-1 mb-1 ai-demo-reminder-tag" data-index="'+i+'" '
+				+ 'data-minutes="'+r.minutes+'" data-type="'+r.type+'" '
+				+ 'style="font-size:12px;padding:5px 10px;">'
+				+ label
+				+ ' <a href="javascript:void(0);" class="text-white ml-1" onclick="removeAIDemoReminder(this)">&#x2715;</a>'
+				+ '</span>';
+		}).join(''));
+	}
+}
+
+function saveAIDemoReminders(btn) {
+	$(btn).prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Saving...');
+	var d = {};
+	d['schoolId'] = SCHOOL_ID;
+	d['userId']   = USER_ID;
+	d['reminders'] = JSON.stringify(AI_DEMO_REMINDERS);
+	$.ajax({
+		type: 'POST', contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', 'save-ai-demo-reminders'),
+		data: JSON.stringify(d), dataType: 'json', cache: false, timeout: 600000,
+		success: function(resp) {
+			$(btn).prop('disabled', false).html('<i class="fa fa-save mr-1"></i>Save');
+			if (resp['status'] == '0' || resp['status'] == '2') {
+				showMessageTheme2(0, resp['message'] || 'Failed to save');
+			} else {
+				showMessageTheme2(1, 'Demo reminders saved successfully');
+			}
+		},
+		error: function() {
+			$(btn).prop('disabled', false).html('<i class="fa fa-save mr-1"></i>Save');
+			showMessageTheme2(0, 'Error saving reminders');
+		}
+	});
+}
+
+function loadAIDemoReminders() {
+	var d = {}; d['schoolId'] = SCHOOL_ID; d['userId'] = USER_ID;
+	$.ajax({
+		type: 'POST', contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', 'get-ai-demo-reminders'),
+		data: JSON.stringify(d), dataType: 'json', cache: false, timeout: 600000,
+		success: function(resp) {
+			if (resp['status'] == '1' && resp['reminders']) {
+				try { AI_DEMO_REMINDERS = JSON.parse(resp['reminders']); } catch(e) { AI_DEMO_REMINDERS = []; }
+			}
 		}
 	});
 }

@@ -56,6 +56,7 @@ const contentHandlers = {
     'invoice': () => initInvoice(),
     'lead-report-list': () => initLeadReportList(),
     'lead-detail-by-campaign': () => initLeadDetailByCampaign(),
+    'lead-report-campaign': () => initLeadReportCampaign(),
     'lead-list': () => initLeadList(),
     'lead-assign-form': () => renderLeadAssignDashboard('Lead Assign Form', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'admin-partner-enrollment-list': () => renderPartnerList('Student Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -247,6 +248,11 @@ function initLeadReportList() {
 function initLeadDetailByCampaign() {
     LEAD_CATEGORY = getLeadCategory();
     renderCounselorLeadReportDashboard('Lead Detail By Campaign', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE, LEAD_CATEGORY, 'campaign');
+}
+
+function initLeadReportCampaign() {
+    LEAD_CATEGORY = getLeadCategory();
+    renderLeadReportCampaignDashboard('Lead Campaign',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
 }
 
 function initLeadList() {
