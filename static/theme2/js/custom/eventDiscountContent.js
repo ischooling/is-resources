@@ -108,7 +108,7 @@ function getEventDiscountPageContent(title) {
 
     <!-- Create Discount Modal -->
     <div class="modal fade" id="createDiscountModal" tabindex="-1" role="dialog" aria-labelledby="createDiscountModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered shadow-none" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="createDiscountModalLabel">Create Discount</h5>
@@ -170,7 +170,7 @@ function getEventDiscountPageContent(title) {
 
     <!-- Assign Discount Modal -->
     <div class="modal fade" id="assignDiscountModal" tabindex="-1" role="dialog" aria-labelledby="assignDiscountModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered shadow-none" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="assignDiscountModalLabel">Assign Discount</h5>
@@ -200,7 +200,7 @@ function getEventDiscountPageContent(title) {
 
     <!-- Create & Assign Modal -->
     <div class="modal fade" id="createAndAssignModal" tabindex="-1" role="dialog" aria-labelledby="createAndAssignModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-lg shadow-none" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title" id="createAndAssignModalLabel">Create &amp; Assign Discount</h5>

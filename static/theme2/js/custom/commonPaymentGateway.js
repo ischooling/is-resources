@@ -880,6 +880,7 @@ async function courseFeeModalTNC(responseData) {
 			userId
 		}
     } = responseData;
+	const isGraduationCeremonyPayment = paymentName && paymentName.includes('Graduation Ceremony');
 
     // Helper function to determine which content to show
     const getModalContent = () => {
@@ -1012,6 +1013,20 @@ async function courseFeeModalTNC(responseData) {
                     </ol>
                 </div>
             `;
+        } else if (isGraduationCeremonyPayment) {
+            return `
+                <div class="px-4 py-2">
+                    <p class="m-0 mt-3 font-weight-bold">By registering for the Graduation Ceremony 2026 organized by ${SCHOOL_NAME}, I acknowledge, understand, and agree to the following terms and conditions:</p>
+                    <ol class="font-12 mt-2 pl-4 ol-style">
+                        <li class="mb-1"><strong>Non-Refundable Policy:</strong> All fees paid toward the Graduation Ceremony 2026 are strictly non-refundable, non-transferable, and non-adjustable under any circumstances, including but not limited to cancellation, absence, travel issues, visa delays/rejections, personal reasons, medical reasons, scheduling conflicts, or any other unforeseen situations.</li>
+                        <li class="mb-1"><strong>Accuracy of Information:</strong> Participants must provide complete, accurate, and truthful information during registration and communication with ${SCHOOL_NAME}. Any misrepresentation, false declaration, forged documentation, or misleading information may result in immediate cancellation of participation without any refund.</li>
+                        <li class="mb-1"><strong>Event Updates &amp; Communication:</strong> It is the responsibility of the participant (or parent/guardian) to regularly check the official website, email communications, or official announcements for updates related to the Graduation Ceremony 2026. ${SCHOOL_NAME} shall not be held responsible for missed updates, notifications, schedule changes, or communication failures.</li>
+                        <li class="mb-1"><strong>Event Modifications:</strong> ${SCHOOL_NAME} reserves the right to amend event schedules, modify event arrangements, change venue details, update participation policies, and limit or revoke offers or benefits at any time without prior notice if required due to operational, legal, safety, or unforeseen circumstances.</li>
+						<li class="mb-1">${SCHOOL_NAME} reserves the right to withhold entry to and participation in the graduation ceremony without prior notice, at the school's sole discretion.</li>
+                        <li class="mb-1"><strong>Acceptance of Terms:</strong> By completing the registration and payment process, I confirm that I have read and understood the Graduation Ceremony 2026 Fee Refund Policy &amp; Terms and Conditions, I voluntarily agree to all the above-mentioned terms, and I understand that all decisions made by ${SCHOOL_NAME} regarding the event shall be final.</li>
+                    </ol>
+                </div>
+            `;
         } else {
             return `
                 <div class="px-4 py-2">
@@ -1054,6 +1069,8 @@ async function courseFeeModalTNC(responseData) {
             return 'Fee Refund Policy And Terms & Conditions For Extra Class Fee';
         } else if (type === 'EXTENSION_FEE') {
             return 'Fee Refund Policy And Terms & Conditions For Academic Year Extension';
+        } else if (isGraduationCeremonyPayment) {
+            return `Fee Refund Policy And Terms & Conditions For ${paymentName}`;
         } else {
             return `Fee Refund Policy And Terms & Conditions For ${paymentName}`;
         }

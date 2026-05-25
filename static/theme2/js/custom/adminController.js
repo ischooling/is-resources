@@ -286,6 +286,12 @@ function initGraduationCeremonyAttendees() {
     loadGraduationCeremonyAttendees();
 }
 
+
+function initEventDiscount() {
+    $('#dashboardContentInHTML').html(getEventDiscountPageContent('Event Discount'));
+    eventDiscountOnLoad();
+}
+
 function initUserScreeningProfiles() {
     $('#dashboardContentInHTML').html(renderUserApplicationContent("Job Applicants", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
     userApplicationProfileOnloadFunction();
