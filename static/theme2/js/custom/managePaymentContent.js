@@ -896,6 +896,14 @@ function getAdvancePaymentSearch(schoolId, moduleId) {
                     <input type="text" id="paymentDateTo" name="paymentDateTo" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly>
                   </div>
                 </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-12" id="counselorUserIdWrapper" style="display:none">
+                  <div class="form-group mb-2 p-0">
+                    <label class="mb-0">Payment Added By</label>
+                    <select name="counselorUserId" id="counselorUserId" class="multiselect-dropdown form-control">
+                      <option value="">Select User</option>
+                    </select>
+                  </div>
+                </div>
                 <div class="col-lg-2 col-md-2 col-sm-12 col-12">
                   <div class="form-group mb-2 p-0 sortBy">
                     <label class="mb-0">Sort in</label>

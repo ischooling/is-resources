@@ -19,9 +19,61 @@ function setpaymentDateTo() {
 function addCustomPayment() {
     $('.addPayment-wrapper').stop().slideToggle();
 }
+
+function isPaymentCounselorScopedUser() {
+    var scoped = false;
+    $.ajax({
+        url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + `/api/v1/payment-counselor-scope-enabled`,
+        method: "GET",
+        contentType: APPLICATION_JSON_VALUE,
+        async: false,
+        success: function (resp) {
+            scoped = resp === true || resp === 'true';
+        },
+        error: function () {
+            scoped = false;
+        }
+    });
+    return scoped;
+}
+
+function populateAdvancePaymentCounselorList(formId, elementId) {
+    $.ajax({
+        type: "POST",
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLForCommon('masters'),
+        data: JSON.stringify(getRequestForMaster(formId, 'PAYMENT_ADDED_BY_LIST')),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        async: false,
+        success: function (data) {
+            if (data['status'] == '0' || data['status'] == '2') {
+                return;
+            }
+            var result = data['mastersData'] && data['mastersData']['counselorList'] ? data['mastersData']['counselorList'] : [];
+            var dropdown = $("#" + formId + " #" + elementId);
+            dropdown.html('');
+            dropdown.append('<option value=\"\">Select User</option>');
+            $.each(result, function (k, v) {
+                dropdown.append('<option value=\"' + v.key + '\">' + v.value + '</option>');
+            });
+        }
+    });
+}
+
 function advancePaymentSerch() {
     $('#advSerch').modal('show');
     $('#advancePaymentSearchForm #paymentType').html(getPaymentTitle('S',$('#allSchoolId').val()), '');
+
+    if (isPaymentCounselorScopedUser()) {
+        $('#advancePaymentSearchForm #counselorUserIdWrapper').hide();
+        $('#advancePaymentSearchForm #counselorUserId').val('').trigger('change');
+    } else {
+        $('#advancePaymentSearchForm #counselorUserIdWrapper').show();
+        populateAdvancePaymentCounselorList('advancePaymentSearchForm', 'counselorUserId');
+        $('#advancePaymentSearchForm #counselorUserId').select2({ theme: "bootstrap4", dropdownParent: "#advSerch .modal-body" });
+    }
 
 }
 function sendmail(id) {
@@ -148,6 +200,10 @@ function getCallRequestForAdvancePaymentSearchStudent(formId, moduleId) {
     advancePaymentSearchDTO['schoolId'] = $("#" + formId + " #schoolId").select2('val');
     advancePaymentSearchDTO['studentEmail'] = $("#" + formId + " #studentEmail").val().trim();
     advancePaymentSearchDTO['studentStringId'] = $("#" + formId + " #studentId").val().trim();
+    var counselorUserId = $("#" + formId + " #counselorUserId").val();
+    if (counselorUserId != null && counselorUserId != undefined && counselorUserId !== '') {
+        advancePaymentSearchDTO['paymentCreatedByUserId'] = parseInt(counselorUserId);
+    }
     advancePaymentSearchDTO['schoolUUID'] = SCHOOL_UUID;
 
     requestPaymentSearch['advancePaymentSearchDTO'] = advancePaymentSearchDTO;
@@ -172,6 +228,7 @@ function advancePaymentSearchStudentReset(formId) {
     $("#" + formId + " #studentName").val('');
     $("#" + formId + " #studentEmail").val('');
     $("#" + formId + " #studentId").val('');
+    $("#" + formId + " #counselorUserId").val('').trigger('change');
     $("#" + formId + " #countryId").val('-1').trigger('change');
     $("#" + formId + " #paymentMode").val('').trigger('change');
     //	$("#"+formId+" #paymentTitle").val('');
@@ -794,6 +851,13 @@ function showPaymentPopup(id,controlType) {
                     var dob2 = new Date(parseInt(dob1[0]), parseInt(dob1[1]) - 1, parseInt(dob1[2]));
                     $("#scheduleDate2").datepicker().datepicker("setDate", dob2);
                 }
+
+                if (isPaymentCounselorScopedUser() && data.userPaymentDetails.status === 'SUCCESS') {
+                    $("#payableAmount2").val("Paid").prop("disabled", true);
+                    // $("#additionalAmount2").val("Paid").prop("disabled", true);
+                    // $("#editPaymentModal .modal-footer .btn-success").hide();
+                }
+
                 var paymentName2 = $('#paymentName2').val();
                 if (null != paymentName2 && paymentName2.startsWith('Course Fee - ')) {
                     paymentName2 = paymentName2.split('Course Fee - ');
