@@ -134,6 +134,12 @@ const contentHandlers = {
     'enrollment-availability': () => renderEnrollmentAvalabilityContent(),
     'enrollment-reports': () => renderEnrollmentAvalabilityReportContent(),
     'email-template-tester': () => getEmailerTemplateViewerContent(),
+    'release-note': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
+    'release-note-admin-list': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
+    'release-note-admin-editor': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
+    'release-note-user-list': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
+    'log-viewer': () => renderLogViewerContent(),
+    'lead-logs': () => renderCounselorLeadLogsDashboard('Lead Logs',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
 };
 
 const getLeadCategory = () => {
@@ -396,7 +402,7 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 
         const handler = contentHandlers[pageNo];
         if (handler) {
-            await handler({ moduleId, replaceDiv, extraParam });
+            await handler({ pageNo, moduleId, replaceDiv, extraParam });
         } else {
             console.warn(`No handler found for pageNo: ${pageNo}`);
         }
