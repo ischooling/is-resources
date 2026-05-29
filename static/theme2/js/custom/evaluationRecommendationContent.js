@@ -61,15 +61,26 @@ function connectToImpactDetails(recommendation){
 				+'<div class="col-md-4">'
 					+'<div class="widget MB-40">'
 						+'<p>'
-							+'<strong>Previous/Current Grade</strong> : '+recommendation.currentGrade
-						+'</p>'
+							+'<strong>Previous/Current Grade</strong> : ';
+							if(recommendation.currentGrade!=''){
+								html+=recommendation.currentGrade;
+							}else{
+								html+='NA';
+							}
+							
+						html+='</p>'
 					+'</div>'
 				+'</div>'
 				+'<div class="col-md-4">'
 					+'<div class="widget MB-40">'
 						+'<p>'
-							+'<strong>Seeking Enrollment in Grade</strong> : '+recommendation.seekingGrade
-						+'</p>'
+							+'<strong>Seeking Enrollment in Grade</strong> : ';
+							if(recommendation.seekingGrade!=''){
+								html+=recommendation.seekingGrade;
+							}else{
+								html+='NA';
+							}
+						html+='</p>'
 					+'</div>'
 				+'</div>'
 			+'</div>'

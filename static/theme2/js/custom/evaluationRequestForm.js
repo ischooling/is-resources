@@ -27,24 +27,6 @@ function validateRequestForEvaluationFormDetails(formId, otpType) {
 
   var flag = true;
   if (
-    $("#" + formId + " #currentGradeId").val() == 0 ||
-    $("#" + formId + " #currentGradeId").val() == null
-  ) {
-    showMessageErrorNew(
-      true,
-      "Previous/Current Grade is required",
-      "currentGradeIdError"
-    );
-    flag = false;
-  }
-  if (
-    $("#" + formId + " #gradeId").val() == 0 ||
-    $("#" + formId + " #gradeId").val() == null
-  ) {
-    showMessageErrorNew(true, "Enrolling in Grade is required", "gradeIdError");
-    flag = false;
-  }
-  if (
     $("#" + formId + " #studFirstName").val() == "" ||
     $("#" + formId + " #studFirstName").val() == null
   ) {
@@ -88,13 +70,6 @@ function validateRequestForEvaluationFormDetails(formId, otpType) {
       showMessageErrorNew(true, "Date of Birth is not valid", "dobError");
       flag = false;
     }
-  }
-  if (
-    $("#" + formId + " #counselorId").val() == "" ||
-    $("#" + formId + " #counselorId").val() == null
-  ) {
-    showMessageErrorNew(true, "Referral Code is required", "counselorIdError");
-    flag = false;
   }
   if (
     $("#" + formId + " #ptFirstName").val() == "" ||

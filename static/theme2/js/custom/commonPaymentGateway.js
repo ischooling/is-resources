@@ -316,7 +316,9 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 		if($("#bookAnEnrollmentModel").hasClass("show")){
 			$("#bookAnEnrollmentModel").modal("hide");
 		}
-		$('#paymentOptionsModal').modal({ backdrop: 'static', keyboard: false });
+		setTimeout(function(){
+			$('#paymentOptionsModal').modal({ backdrop: 'static', keyboard: false });
+		}, 700);
 		$.each(responseData.details.paymentOptions, function(k,v){
 			if(v.name=='Airwallex'){
 				getAirwallexMethods('payButton'+(k+1), schoolIdOfPaymentGateway);
