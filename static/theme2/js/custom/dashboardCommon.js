@@ -1181,8 +1181,11 @@ function callStudentRedirectToDashboard(userId, userPaymentDetailsId, sendMailSt
 					}
 				}
 				showMessageTheme2(1, stringMessage[1]);
-				DEFAULT_SEARCH_STATE = true; callDashboardPageSchool('2b', 'studentTab', '', '&schoolId=' + SCHOOL_ID);
-				if(callback){callback()};  
+				if (callback) {
+					callback();
+				} else {
+					DEFAULT_SEARCH_STATE = true; callDashboardPageSchool('2b', 'studentTab', '', '&schoolId=' + SCHOOL_ID);
+				}
 				return false;
 			}
 		}

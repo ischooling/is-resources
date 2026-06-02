@@ -6,6 +6,7 @@ var releaseNoteState = {
 	currentReleaseNoteId: 0,
 	editorAttachments: [],
 	editorPreviewIndex: -1,
+	joditEditor: null,
 	availableRoleOptions: [],
 	editorSelectedRoles: [],
 	editorRoleSearchTerm: "",
@@ -17,6 +18,9 @@ var releaseNoteState = {
 };
 
 (function () {
+	var RN_JODIT_CSS_URL = "https://cdn.jsdelivr.net/npm/jodit@3.24.9/build/jodit.min.css";
+	var RN_JODIT_JS_URL = "https://cdn.jsdelivr.net/npm/jodit@3.24.9/build/jodit.min.js";
+	var rnJoditLoadPromise = null;
 	var RELEASE_NOTE_ADMIN_ROLES = [
 		"ADMIN",
 		"ADMIN1",
@@ -1042,6 +1046,9 @@ var releaseNoteState = {
 
 	function rnEditorGetContent() {
 		try {
+			if (releaseNoteState.joditEditor && releaseNoteState.joditEditor.value !== undefined) {
+				return String(releaseNoteState.joditEditor.value || "").trim();
+			}
 			if (window.editor1 && typeof window.editor1.getData === "function") {
 				return String(window.editor1.getData() || "").trim();
 			}
@@ -1049,8 +1056,411 @@ var releaseNoteState = {
 		return String($("#releaseNoteContentEditor").val() || "").trim();
 	}
 
+	function rnLoadExternalCss(id, href) {
+		if (document.getElementById(id)) {
+			return;
+		}
+		var link = document.createElement("link");
+		link.id = id;
+		link.rel = "stylesheet";
+		link.href = href;
+		document.head.appendChild(link);
+	}
+
+	function rnEnsureJoditListStyles() {
+		if (document.getElementById("releaseNoteJoditListStyle")) {
+			return;
+		}
+		$("head").append(
+			"<style id='releaseNoteJoditListStyle'>" +
+				"#releaseNoteAdminForm .jodit-wysiwyg ul,.jodit-container .jodit-wysiwyg ul{list-style:disc outside!important;list-style-type:disc!important;margin:0 0 12px 24px!important;padding-left:22px!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg ol,.jodit-container .jodit-wysiwyg ol{list-style:decimal outside!important;list-style-type:decimal!important;margin:0 0 12px 24px!important;padding-left:22px!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg ul>li,.jodit-container .jodit-wysiwyg ul>li{display:list-item!important;list-style:disc outside!important;list-style-type:disc!important;margin:0 0 6px!important;padding-left:2px!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg ol>li,.jodit-container .jodit-wysiwyg ol>li{display:list-item!important;list-style:decimal outside!important;list-style-type:decimal!important;margin:0 0 6px!important;padding-left:2px!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg li ul,.jodit-container .jodit-wysiwyg li ul{list-style:circle outside!important;list-style-type:circle!important;margin-top:6px!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg li ul>li,.jodit-container .jodit-wysiwyg li ul>li{list-style:circle outside!important;list-style-type:circle!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg li ol,.jodit-container .jodit-wysiwyg li ol{list-style:lower-alpha outside!important;list-style-type:lower-alpha!important;margin-top:6px!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg li::marker,.jodit-container .jodit-wysiwyg li::marker{display:inline!important;color:inherit!important;}" +
+				"#releaseNoteAdminForm .jodit-wysiwyg i,#releaseNoteAdminForm .jodit-wysiwyg em,.jodit-container .jodit-wysiwyg i,.jodit-container .jodit-wysiwyg em{font-style:italic!important;}" +
+			"</style>"
+		);
+	}
+
+	function rnLoadExternalScript(id, src) {
+		return new Promise(function (resolve, reject) {
+			var existingScript = document.getElementById(id);
+			if (existingScript && existingScript.getAttribute("data-loaded") === "Y") {
+				resolve();
+				return;
+			}
+			if (existingScript) {
+				existingScript.addEventListener("load", resolve);
+				existingScript.addEventListener("error", reject);
+				return;
+			}
+			var script = document.createElement("script");
+			script.id = id;
+			script.src = src;
+			script.onload = function () {
+				script.setAttribute("data-loaded", "Y");
+				resolve();
+			};
+			script.onerror = reject;
+			document.head.appendChild(script);
+		});
+	}
+
+	function rnLoadJoditAssets() {
+		rnEnsureJoditListStyles();
+		if (window.Jodit) {
+			return Promise.resolve();
+		}
+		if (!rnJoditLoadPromise) {
+			rnLoadExternalCss("releaseNoteJoditCss", RN_JODIT_CSS_URL);
+			rnJoditLoadPromise = rnLoadExternalScript("releaseNoteJoditJs", RN_JODIT_JS_URL);
+		}
+		return rnJoditLoadPromise;
+	}
+
+	function rnDestroyJoditEditor() {
+		if (!releaseNoteState.joditEditor) {
+			return;
+		}
+		try {
+			releaseNoteState.joditEditor.destruct();
+		} catch (e) {}
+		releaseNoteState.joditEditor = null;
+	}
+
+	function rnExecJoditCommand(editor, command) {
+		try {
+			if (editor && typeof editor.execCommand === "function") {
+				editor.execCommand(command);
+			}
+			if (editor && typeof editor.synchronizeValues === "function") {
+				editor.synchronizeValues();
+			}
+		} catch (e) {}
+	}
+
+	function rnGetJoditSelectionNode(editor) {
+		try {
+			if (editor && editor.s && typeof editor.s.current === "function") {
+				var currentNode = editor.s.current();
+				if (currentNode) {
+					return currentNode;
+				}
+			}
+			var editorRoot = editor && editor.editor ? editor.editor : null;
+			var selection = window.getSelection ? window.getSelection() : null;
+			if (selection && selection.anchorNode && editorRoot && editorRoot.contains(selection.anchorNode)) {
+				return selection.anchorNode;
+			}
+		} catch (e) {}
+		return null;
+	}
+
+	function rnIsJoditCommandActive(editor, command) {
+		var node = rnGetJoditSelectionNode(editor);
+		var editorRoot = editor && editor.editor ? editor.editor : null;
+		if (node && node.nodeType === 3) {
+			node = node.parentNode;
+		}
+		while (node && node !== editorRoot) {
+			var tagName = String(node.tagName || "").toLowerCase();
+			var styleValue = String(node.getAttribute && node.getAttribute("style") || "").toLowerCase();
+			if (command === "bold" && (tagName === "b" || tagName === "strong" || /font-weight\s*:\s*(bold|[6-9]00)/i.test(styleValue))) {
+				return true;
+			}
+			if (command === "italic" && (tagName === "i" || tagName === "em" || /font-style\s*:\s*italic/i.test(styleValue))) {
+				return true;
+			}
+			node = node.parentNode;
+		}
+		return false;
+	}
+
+	function rnInitJoditEditor() {
+		var editorElement = document.getElementById("releaseNoteContentEditor");
+		if (!editorElement) {
+			return;
+		}
+		rnLoadJoditAssets().then(function () {
+			var currentElement = document.getElementById("releaseNoteContentEditor");
+			if (!currentElement || !window.Jodit) {
+				return;
+			}
+			rnDestroyJoditEditor();
+			releaseNoteState.joditEditor = window.Jodit.make(currentElement, {
+				height: 380,
+				minHeight: 280,
+				toolbarAdaptive: false,
+				toolbarSticky: false,
+				defaultMode: 1,
+				askBeforePasteHTML: false,
+				askBeforePasteFromWord: false,
+				defaultActionOnPaste: "insert_as_html",
+				beautifyHTML: false,
+				showCharsCounter: false,
+				showWordsCounter: false,
+				showXPathInStatusbar: false,
+				buttons: [
+					"paragraph", "|",
+					"rnBold", "rnItalic", "link", "|",
+					"fontsize", "brush", "|",
+					"ul", "ol", "outdent", "indent", "|",
+					"image", "table", "|",
+					"undo", "redo"
+				],
+				controls: {
+					rnBold: {
+						icon: "bold",
+						tooltip: "Bold",
+						exec: function (editor) {
+							rnExecJoditCommand(editor, "bold");
+						},
+						isActive: function (editor) {
+							return rnIsJoditCommandActive(editor, "bold");
+						}
+					},
+					rnItalic: {
+						icon: "italic",
+						tooltip: "Italic",
+						exec: function (editor) {
+							rnExecJoditCommand(editor, "italic");
+						},
+						isActive: function (editor) {
+							return rnIsJoditCommandActive(editor, "italic");
+						}
+					},
+					fontsize: {
+						list: {
+							"10px": "Tiny",
+							"12px": "Small",
+							"14px": "Default",
+							"22px": "Big",
+							"32px": "Huge"
+						}
+					}
+				},
+				cleanHTML: {
+					removeEmptyElements: false,
+					fillEmptyParagraph: false
+				},
+				uploader: {
+					insertImageAsBase64URI: true
+				}
+			});
+			releaseNoteState.joditEditor.value = String($(currentElement).val() || "");
+		}).catch(function () {
+			rnShowToast(0, "Unable to load release note editor. Textarea fallback is available.");
+		});
+	}
+
+	function rnMergeInlineStyle(element, styleText) {
+		if (!element || !styleText) {
+			return;
+		}
+		var existingStyle = String(element.getAttribute("style") || "").trim();
+		if (existingStyle && existingStyle.charAt(existingStyle.length - 1) !== ";") {
+			existingStyle += ";";
+		}
+		element.setAttribute("style", styleText + existingStyle);
+	}
+
+	function rnAppendInlineStyle(element, styleText) {
+		if (!element || !styleText) {
+			return;
+		}
+		var existingStyle = String(element.getAttribute("style") || "").trim();
+		if (existingStyle && existingStyle.charAt(existingStyle.length - 1) !== ";") {
+			existingStyle += ";";
+		}
+		element.setAttribute("style", existingStyle + styleText);
+	}
+
+	function rnApplyStyleToTags(root, selector, styleText) {
+		var nodes = root.querySelectorAll(selector);
+		for (var i = 0; i < nodes.length; i++) {
+			rnMergeInlineStyle(nodes[i], styleText);
+		}
+	}
+
+	function rnApplyStyleToClass(root, className, styleText) {
+		var nodes = root.querySelectorAll("." + className);
+		for (var i = 0; i < nodes.length; i++) {
+			rnMergeInlineStyle(nodes[i], styleText);
+		}
+	}
+
+	function rnRemoveUnsafeMailHtml(root) {
+		var unsafeNodes = root.querySelectorAll("script, style");
+		for (var i = unsafeNodes.length - 1; i >= 0; i--) {
+			unsafeNodes[i].parentNode.removeChild(unsafeNodes[i]);
+		}
+
+		var allNodes = root.querySelectorAll("*");
+		for (var j = 0; j < allNodes.length; j++) {
+			var attrs = allNodes[j].attributes;
+			for (var k = attrs.length - 1; k >= 0; k--) {
+				if (/^on/i.test(attrs[k].name)) {
+					allNodes[j].removeAttribute(attrs[k].name);
+				}
+			}
+		}
+	}
+
+	function rnHslToHex(h, s, l) {
+		var hue = (((parseFloat(h) % 360) + 360) % 360) / 360;
+		var saturation = Math.max(0, Math.min(100, parseFloat(s))) / 100;
+		var lightness = Math.max(0, Math.min(100, parseFloat(l))) / 100;
+		var r;
+		var g;
+		var b;
+		if (saturation === 0) {
+			r = g = b = lightness;
+		} else {
+			var q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
+			var p = 2 * lightness - q;
+			var hueToRgb = function (t) {
+				if (t < 0) {
+					t += 1;
+				}
+				if (t > 1) {
+					t -= 1;
+				}
+				if (t < 1 / 6) {
+					return p + (q - p) * 6 * t;
+				}
+				if (t < 1 / 2) {
+					return q;
+				}
+				if (t < 2 / 3) {
+					return p + (q - p) * (2 / 3 - t) * 6;
+				}
+				return p;
+			};
+			r = hueToRgb(hue + 1 / 3);
+			g = hueToRgb(hue);
+			b = hueToRgb(hue - 1 / 3);
+		}
+		var toHex = function (value) {
+			var hex = Math.round(value * 255).toString(16);
+			return hex.length === 1 ? "0" + hex : hex;
+		};
+		return "#" + toHex(r) + toHex(g) + toHex(b);
+	}
+
+	function rnNormalizeMailCssColors(root) {
+		var nodes = root.querySelectorAll("[style]");
+		var hslPattern = /hsl\(\s*([0-9.]+)(?:deg)?\s*,\s*([0-9.]+)%\s*,\s*([0-9.]+)%\s*\)/gi;
+		for (var i = 0; i < nodes.length; i++) {
+			var styleText = String(nodes[i].getAttribute("style") || "");
+			styleText = styleText.replace(hslPattern, function (match, h, s, l) {
+				return rnHslToHex(h, s, l);
+			});
+			nodes[i].setAttribute("style", styleText);
+		}
+	}
+
+	function rnGetListDepth(listElement) {
+		var depth = 0;
+		var parent = listElement.parentElement;
+		while (parent) {
+			if (parent.tagName && /^(UL|OL)$/i.test(parent.tagName)) {
+				depth++;
+			}
+			parent = parent.parentElement;
+		}
+		return depth;
+	}
+
+	function rnApplyNestedListMailStyles(root) {
+		var lists = root.querySelectorAll("ul, ol");
+		for (var i = 0; i < lists.length; i++) {
+			var list = lists[i];
+			var depth = rnGetListDepth(list);
+			var marginLeft = 22 + (depth * 18);
+			var isOrdered = list.tagName.toLowerCase() === "ol";
+			var listType = isOrdered ? (depth > 0 ? "lower-alpha" : "decimal") : (depth % 3 === 0 ? "disc" : (depth % 3 === 1 ? "circle" : "square"));
+			list.setAttribute("type", isOrdered ? (depth > 0 ? "a" : "1") : listType);
+			rnAppendInlineStyle(list, "margin:0 0 12px " + marginLeft + "px!important;padding-left:22px!important;list-style:" + listType + " outside!important;list-style-type:" + listType + "!important;list-style-position:outside!important;");
+
+			var childItems = list.children || [];
+			for (var j = 0; j < childItems.length; j++) {
+				if (childItems[j].tagName && childItems[j].tagName.toLowerCase() === "li") {
+					rnAppendInlineStyle(childItems[j], "display:list-item!important;list-style:" + listType + " outside!important;list-style-type:" + listType + "!important;margin:0 0 6px!important;padding-left:2px!important;");
+				}
+			}
+		}
+
+		var items = root.querySelectorAll("li");
+		for (var k = 0; k < items.length; k++) {
+			rnAppendInlineStyle(items[k], "display:list-item!important;margin:0 0 6px!important;padding-left:2px!important;");
+		}
+	}
+
+	function rnStripEditorOnlyAttributes(root) {
+		var nodes = root.querySelectorAll("*");
+		for (var i = 0; i < nodes.length; i++) {
+			nodes[i].removeAttribute("class");
+			nodes[i].removeAttribute("contenteditable");
+			nodes[i].removeAttribute("data-cke-filler");
+		}
+	}
+
+	function rnBuildEmailSafeContent(rawContent) {
+		var content = String(rawContent || "").trim();
+		if (!content) {
+			return "";
+		}
+
+		var wrapper = document.createElement("div");
+		wrapper.innerHTML = content;
+		rnRemoveUnsafeMailHtml(wrapper);
+
+		rnApplyStyleToClass(wrapper, "text-tiny", "font-size:10px;line-height:1.45;");
+		rnApplyStyleToClass(wrapper, "text-small", "font-size:12px;line-height:1.5;");
+		rnApplyStyleToClass(wrapper, "text-big", "font-size:22px;line-height:1.35;");
+		rnApplyStyleToClass(wrapper, "text-huge", "font-size:32px;line-height:1.2;");
+		rnApplyStyleToClass(wrapper, "marker-yellow", "background-color:#fef08a;");
+		rnApplyStyleToClass(wrapper, "marker-green", "background-color:#bbf7d0;");
+		rnApplyStyleToClass(wrapper, "pen-red", "color:#dc2626;");
+		rnApplyStyleToClass(wrapper, "pen-green", "color:#16a34a;");
+
+		rnApplyStyleToTags(wrapper, "h1", "font-family:Arial,Helvetica,sans-serif;font-size:26px;line-height:1.25;color:#111827;margin:0 0 14px;font-weight:700;");
+		rnApplyStyleToTags(wrapper, "h2", "font-family:Arial,Helvetica,sans-serif;font-size:22px;line-height:1.3;color:#111827;margin:0 0 12px;font-weight:700;");
+		rnApplyStyleToTags(wrapper, "h3", "font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.35;color:#111827;margin:0 0 10px;font-weight:700;");
+		rnApplyStyleToTags(wrapper, "h4", "font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.4;color:#111827;margin:0 0 10px;font-weight:700;");
+		rnApplyStyleToTags(wrapper, "p", "font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#1f2937;margin:0 0 12px;");
+		rnApplyStyleToTags(wrapper, "div", "font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#1f2937;");
+		rnApplyStyleToTags(wrapper, "span", "font-family:Arial,Helvetica,sans-serif;");
+		rnApplyStyleToTags(wrapper, "i", "font-style:italic!important;");
+		rnApplyStyleToTags(wrapper, "em", "font-style:italic!important;");
+		rnApplyStyleToTags(wrapper, "ul", "font-family:Arial,Helvetica,sans-serif!important;font-size:14px!important;line-height:1.65!important;color:#1f2937!important;margin:0 0 12px 22px!important;padding-left:18px!important;list-style-type:disc!important;list-style-position:outside!important;");
+		rnApplyStyleToTags(wrapper, "ol", "font-family:Arial,Helvetica,sans-serif!important;font-size:14px!important;line-height:1.65!important;color:#1f2937!important;margin:0 0 12px 22px!important;padding-left:18px!important;list-style-type:decimal!important;list-style-position:outside!important;");
+		rnApplyStyleToTags(wrapper, "li", "font-family:Arial,Helvetica,sans-serif!important;font-size:14px!important;line-height:1.65!important;color:#1f2937!important;display:list-item!important;margin:0 0 6px!important;padding-left:2px!important;");
+		rnApplyStyleToTags(wrapper, "blockquote", "font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#374151;margin:0 0 12px;padding:10px 14px;border-left:4px solid #d1d5db;background:#f9fafb;");
+		rnApplyStyleToTags(wrapper, "a", "color:#2563eb;text-decoration:underline;");
+		rnApplyStyleToTags(wrapper, "table", "border-collapse:collapse;width:100%;margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1f2937;");
+		rnApplyStyleToTags(wrapper, "th", "border:1px solid #d1d5db;padding:8px 10px;background:#f3f4f6;color:#111827;font-weight:700;text-align:left;");
+		rnApplyStyleToTags(wrapper, "td", "border:1px solid #d1d5db;padding:8px 10px;color:#1f2937;");
+		rnApplyStyleToTags(wrapper, "img", "max-width:100%;height:auto;border:0;display:block;");
+		rnApplyStyleToTags(wrapper, "figure", "margin:0 0 14px;padding:0;");
+		rnApplyStyleToTags(wrapper, "figcaption", "font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.45;color:#6b7280;margin-top:6px;text-align:center;");
+		rnApplyNestedListMailStyles(wrapper);
+		rnNormalizeMailCssColors(wrapper);
+		rnStripEditorOnlyAttributes(wrapper);
+
+		return "<div style='font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#1f2937;'>" + wrapper.innerHTML + "</div>";
+	}
+
 	function rnEditorSetContent(content) {
 		try {
+			if (releaseNoteState.joditEditor && releaseNoteState.joditEditor.value !== undefined) {
+				releaseNoteState.joditEditor.value = content || "";
+				return;
+			}
 			if (window.editor1 && typeof window.editor1.setData === "function") {
 				window.editor1.setData(content || "");
 				return;
@@ -1206,6 +1616,7 @@ var releaseNoteState = {
 			return false;
 		}
 
+		var content = rnEditorGetContent();
 		var payload = rnGetRequestBasePayload();
 		payload.releaseNoteId = rnToInt(releaseNoteState.currentReleaseNoteId, 0);
 		payload.versionLabel = String($("#rnVersionLabel").val() || "").trim();
@@ -1213,7 +1624,7 @@ var releaseNoteState = {
 		payload.impactModules = rnEditorGetImpactModules();
 		payload.targetRoles = rnEditorGetSelectedRoles();
 		payload.summary = String($("#rnSummary").val() || "").trim();
-		payload.content = rnEditorGetContent();
+		payload.content = rnBuildEmailSafeContent(content);
 		payload.attachments = releaseNoteState.editorAttachments || [];
 		payload.isDraft = isDraft === true;
 		payload.publish = isDraft !== true;
@@ -1319,6 +1730,7 @@ var releaseNoteState = {
 	}
 
 	function rnInitEditorScreen() {
+		rnDestroyJoditEditor();
 		releaseNoteState.editorAttachments = [];
 		releaseNoteState.editorPreviewIndex = -1;
 		releaseNoteState.editorSelectedRoles = [];
@@ -1326,11 +1738,7 @@ var releaseNoteState = {
 		rnEditorRenderAttachments();
 		rnEditorRenderRoleOptions();
 		rnEditorSetContent("");
-		if (typeof initEditor === "function") {
-			try {
-				initEditor(1, "releaseNoteContentEditor", "Please add release details", false);
-			} catch (e) {}
-		}
+		rnInitJoditEditor();
 		rnLoadRoleOptions();
 		if (rnToInt(releaseNoteState.currentReleaseNoteId, 0) > 0) {
 			rnEditorLoadDetailForEdit(releaseNoteState.currentReleaseNoteId);

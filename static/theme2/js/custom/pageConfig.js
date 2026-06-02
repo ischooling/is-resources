@@ -60,7 +60,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "school-announce":{url:"teacher-school-announce?moduleId="+moduleId,file:[{role:"",fileName:["jquery.ckeditor.js","dashboardAnnouncement.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "release-note":{url:"",file:[{role:"",fileName:["releaseNoteContent.js","releaseNote.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "release-note-admin-list":{url:"",file:[{role:"",fileName:["releaseNoteContent.js","releaseNote.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "release-note-admin-editor":{url:"",file:[{role:"",fileName:["releaseNoteContent.js","releaseNote.js","jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "release-note-admin-editor":{url:"",file:[{role:"",fileName:["releaseNoteContent.js","releaseNote.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "release-note-user-list":{url:"",file:[{role:"",fileName:["releaseNoteContent.js","releaseNote.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "holiday-list":{url:"school-holiday-list?moduleId="+moduleId,file:[{role:"",fileName:["dashboardCalendar.js","masterContent.js"]}],funName:function(){},type:"JSP",init: function(){getWaringContent1()},pageReqType:"IN"},
         "holiday-form":{url:"school-holiday-form?moduleId="+moduleId,file:[{role:"",fileName:["jquery.ckeditor.js","dashboardCalendar.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
