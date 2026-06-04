@@ -502,4 +502,7 @@ async function getStage6Data(){
 	signupTeacherStage6OnLoadEvent();
 	$(".step-6-skeleton").hide();
 	$("#teacherSignupStage6").show();
+	if (typeof refreshCustomFieldState === "function") {
+		refreshCustomFieldState("#teacherSignupStage6");
+	}
 }

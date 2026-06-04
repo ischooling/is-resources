@@ -57,7 +57,7 @@ function signupStudentOnLoad() {
 			} else {
 				validEndInvalidField(false, "email");
 				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'email', role + ' email is either empty or invalid.');
+					showElementErrorMessage(false, 'email', 'Student email is either empty or invalid.');
 				} else {
 					showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
 				}
@@ -87,7 +87,7 @@ function signupStudentOnLoad() {
 			if ($("#confirmEmail").val().trim().length > 0) {
 				validEndInvalidField(false, "confirmEmail");
 				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'confirmEmail', 'Confirm ' + role + ' email empty or invalid.');
+					showElementErrorMessage(false, 'confirmEmail', 'Confirm Student email empty or invalid.');
 				} else {
 					showElementErrorMessage(false, 'confirmEmail', 'Confirm email is either empty or invalid');
 				}
@@ -352,7 +352,7 @@ function validateRequestForSignup(formId, moduleId) {
 	if (!validateEmail($("#" + formId + " #email").val().trim())) {
 		$("#" + formId + " #email").css('color', '#a9a9a9');
 		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
+			showElementErrorMessage(false, 'email', 'Student email is either empty or invalid.');
 		} else {
 			showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
 		}
@@ -361,7 +361,7 @@ function validateRequestForSignup(formId, moduleId) {
 	if (!validateEmail($("#" + formId + " #confirmEmail").val().trim())) {
 		$("#" + formId + " #confirmEmail").css('color', '#a9a9a9');
 		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'confirmEmail', 'Confirm email is either empty or invalid');
+			showElementErrorMessage(false, 'confirmEmail', 'Confirm Student email empty or invalid.');
 		} else {
 			showElementErrorMessage(false, 'confirmEmail', 'Confirm email is either empty or invalid');
 		}

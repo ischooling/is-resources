@@ -145,7 +145,7 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li .field-title{font-size: 14px;display: inline-block;width: 100%;margin-bottom: 4px;color:#000;font-family:opensans-regular;margin-left: 45px;}
 .right-section .form ul li label.error{position: absolute;left: 0;top:100%;color:red;}
 .right-section .form ul li .field-icon{content: '';position: absolute;left: 0;top:0;width: 45px;height: 100%;border-top-left-radius: 50px;border-bottom-left-radius: 50px;font-size: 18px;display: flex;align-items: center;justify-content: center;}
-.right-section .form ul li input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), .right-section .form ul li textarea, .right-section .form ul li select{width: 100%;float: left;font-size: 14px;padding: 10px 12px 10px 50px;background:#f7f7f7;border:1px solid #eee2ff;border-radius: 50px;color:#737373;}
+.right-section .form ul li input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), .right-section .form ul li textarea, .right-section .form ul li select{width: 100%;float: left;font-size: 14px;padding: 10px 12px 10px 50px;border-radius: 50px;color:#737373;}
 .right-section .form ul li input[type="submit"], input[type="submit"]{display: inline-block;padding: 10px 25px;border:0;border-radius: 50px;font-size: 14px;}
 .right-section .form ul li .captcha-img{content: '';position: absolute;right: 0;top:0;display: flex;align-items: center;height: 100%;overflow: hidden; background: var(--pc);border-top-right-radius: 50px;border-bottom-right-radius: 50px;}
 .right-section .form ul li .captcha-img .refresh-link{display: inline-block;line-height: 14px;padding-right: 15px;color:#fff;}

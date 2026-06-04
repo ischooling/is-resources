@@ -357,16 +357,22 @@ function addOtherSocialLinks(hideElement, showElement) {
             }
 
             // ✅ UI ADD (IMPORTANT: safeTitle for ID, rawTitle for display)
+            var socialLinksLabel = escapeHtml(rawTitle);
+            var socialLinksValue = escapeHtml(socialLinks);
+            var socialLinksValueJs = socialLinks.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
             $('.social-links-wrapper').append(`
-                <div class="social-links-list-wrapper" id="${safeTitle}_wrapper">
-                    <input type="text"
-                        class="social-Links-url"
-                        id="${safeTitle}URL"
-                        name="${safeTitle}URL"
-                        value="${socialLinks}"   <!-- ✅ REAL URL -->
-                        placeholder="${rawTitle} URL">  <!-- ✅ USER FRIENDLY -->
-
-                    <button onclick="removeSocialLinks('${safeTitle}')">X</button>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 social-links-list-wrapper" id="${safeTitle}_wrapper" data-social-title="${safeTitle}">
+                    <div class="custom-field-scope">
+                        <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+                            <input type="text" class="form-control form-control-sm social-Links-url group-append-hide-input" style="flex:1 1 0;min-width:0;padding-right:72px;" data-social-media-id="0" name="${safeTitle}URL" id="${safeTitle}URL" value="${socialLinksValue}" placeholder=" " autocomplete="off" onkeyup="controlEditField(this, '${safeTitle}URL','${socialLinksValueJs}','socialMedia', '', '', 0, 'socialMedia')">
+                            <label for="${safeTitle}URL">${socialLinksLabel} URL</label>
+                            <div class="input-group-append position-absolute" style="right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+                                <button type="button" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center" onclick="removeSocialLinks('${safeTitle}')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `);
 

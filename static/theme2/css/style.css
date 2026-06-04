@@ -302,7 +302,7 @@ h3 {
 
 .form-row {
 	display: flex;
-	margin-bottom: 20px;
+	margin-bottom: 1px;
 	flex-wrap: inherit !important;
 }
 
@@ -393,7 +393,7 @@ h3 {
   .fa-globe
 ) {
   position: absolute;
-  top: 50%;
+  top: 31%;
   transform: translateY(-50%);
   font-size: 16px;
   z-index: 999;

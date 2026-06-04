@@ -688,6 +688,9 @@ async function getStage2Data(){
 	$(".high-school-0").val(highSchool_subjects).trigger("change");
 	$(".step-2-skeleton").hide();
 	$("#teacherSignupStage2").show();
+	if (typeof refreshCustomFieldState === "function") {
+		refreshCustomFieldState("#teacherSignupStage2");
+	}
 }
 
 async function openModalForDemoVideo(formId) {

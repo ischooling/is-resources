@@ -57,6 +57,9 @@ async function getStage5Data(){
 	$(".step-5-skeleton").hide();
 	$("#teacherSignupStage5").show();
 	$(".next-btn a").text("Next");
+	if (typeof refreshCustomFieldState === "function") {
+		refreshCustomFieldState("#teacherSignupStage5");
+	}
 }
 
 function verificationValidationOnSave(formId){

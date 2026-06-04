@@ -24,6 +24,73 @@ function showSkeleton (isShow, skeletonType){
 signupStageStatusInitiated=false;
 var signupStage1Form = '';
 var signupStage2Form = '';
+function addSignupFieldBackgroundOverride() {
+	if ($("#signupFieldBackgroundOverride").length > 0) {
+		return;
+	}
+	$("head").append(`
+		<style id="signupFieldBackgroundOverride">
+			#signupStage1 .valid-field.true .custom-field input,
+			#signupStage1 .valid-field.true .custom-field select,
+			#signupStage1 .valid-field.true .custom-field .select2-selection--single,
+			#signupStage2 .valid-field.true .custom-field input,
+				#signupStage2 .valid-field.true .custom-field select,
+				#signupStage2 .valid-field.true .custom-field .select2-selection--single {
+					background-color: #fff !important;
+					box-shadow: inset 0 0 0 1000px #fff !important;
+				}
+				#signupStage1 .custom-field .iti {
+					display: block;
+					width: 100%;
+				}
+				#signupStage1 .custom-field .iti input.form-control-field {
+					padding-left: 68px !important;
+				}
+				#signupStage1 .custom-field .iti .iti__selected-flag {
+					padding-left: 12px;
+					padding-right: 10px;
+				}
+				@media (max-width: 767px) {
+					#signupStage1 .nationality-id-hint {
+						top: 95% !important;
+					}
+				}
+			#signupStage2 .custom-field .iti {
+                    display: block;
+                    width: 100%;
+                }
+                #signupStage2 .custom-field .iti input#parentPhoneNumber {
+                    padding-left: 68px !important;
+                }
+                #signupStage1 .custom-field .iti .iti__selected-flag {
+                    padding-left: 12px;
+                    padding-right: 10px;
+                }
+                #signupStage2 .custom-field .iti .iti__selected-flag {
+                    padding-left: 12px;
+                    padding-right: 10px;
+                }
+            </style>`);
+}
+function placeSignupValidationError(error, element) {
+	var customField = element.closest(".custom-field");
+	if (customField.length > 0) {
+		error.css({
+			// top: "calc(100% + 16px)",
+			// right: "0",
+			// color: "red"
+			position:"absolute",
+			top:"100%",
+			color:"red",
+			font:"12px",
+			text:"right",
+			left:"0",
+		});
+		error.appendTo(customField);
+	} else {
+		error.insertAfter(element);
+	}
+}
 async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
 	if(signupType == "Offline" && studentUserId != USER_ID){
 		signupStageStatusInitiated=false;
@@ -45,10 +112,14 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	if(USER_ROLE == "B2B_PARTNER"){
 		$("#learningProgramPartnerStudent").select2({theme:"bootstrap4"});
 	}
+	addSignupFieldBackgroundOverride();
 	$("#formSteps").append(signupModals());
 	signupStage1Form = $('#signupStage1');
 	signupStage2Form = $('#signupStage2');
 	signupStage1Form.validate({
+		errorElement: "span",
+		errorClass: "error-msg",
+		errorPlacement: placeSignupValidationError,
 	    rules: {
 		   firstName: {
 			  required: true,
@@ -62,7 +133,7 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 			  required: true
 			  //dateFormat:true
 		   },
-		   gender: {
+			   studentGender: {
 			  required: true,
 		   },
 		   countryId: {
@@ -90,7 +161,7 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 			  minlength: 5,
 			  maxlength: 15
 		   }
- 
+
 	    },
 	    messages: {
 		   firstName: {
@@ -102,7 +173,7 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 		   dob: {
 			  required: "Please enter date of birth"
 		   },
-		   gender: {
+			   studentGender: {
 			  required: "Please select gender"
 		   },
 		   countryId: {
@@ -126,14 +197,17 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 		   contactNumber: {
 			  required: "Please enter phone number"
 		   }
- 
+
 	    }
 	});
 	signupStage2Form.validate({
+		errorElement: "span",
+		errorClass: "error-msg",
+		errorPlacement: placeSignupValidationError,
 	    rules: {
 		   parentFirstName: {
 			  required: true,
- 
+
 		   },
 		   parentMiddletName: {
 		   },
@@ -206,8 +280,8 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	}
 	setActiveStep(signupPage);
 	getSignupStatus();
- 
- 
+
+
 	if (signupPage > 0) {
 	    setActiveTab(signupPage);
 	}
@@ -295,14 +369,14 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 	const schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 	var payload = {
 				'userId' : USER_ID
-			};	
+			};
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
 	// if(responseData.commissionPayBy == "PWP" || responseData.commissionPayBy == ""){
 	// 	SHOW_PAYMENT_OPTION = "N";
-	// } 
+	// }
 	SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 	var html = `
-        <div class="wrapper-style">`
+        <div class="wrapper-style custom-field-scope">`
 			if(signupType == "Online" || studentUserId == USER_ID){
 				html+=
 				`<a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()">
@@ -322,7 +396,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 							</a>
 						</div>
 					</div>`;
-	
+
 					if(SCHOOL_ID == 1){
 						html+=
 						`<div class="mobile-view">
@@ -428,21 +502,21 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                             <div id="signupStage1Content" style="display:inline-block;width: 100%;"></div>
                         </form>
                     </section>
-                    
+
                     <section id="step-2" class="step">
                         <div class="full step-2-skeleton skeleton-wrapper"></div>
                         <form id="signupStage2" name="signupStage2" method="post" autocomplete="off" action="javascript:void(0);">
                             <div id="signupStage2Content" style="display: inline-block;width: 100%;"></div>
                         </form>
                     </section>
-                    
+
                     <section id="step-3" class="step">
                         <div class="full step-3-skeleton skeleton-wrapper"></div>
                         <form id="signupStage3" name="signupStage3" method="post" autocomplete="off" action="javascript:void(0);">
                             <div id="signupStage3Content" style="display: inline-block;width: 100%;"></div>
                         </form>
                     </section>
-                    
+
                     <section id="step-4" class="step">
                         <div class="full step-4-skeleton skeleton-wrapper"></div>
                         <div id="signupStage4Content" style="display: inline-block;width: 100%;"></div>
@@ -483,7 +557,7 @@ function renderStudentDetails(data, signupType){
 	var scriptExecuted = false;
 	$('#signupStage1Content').html(getStudentDetailsContent(data, signupType));
 	$('#referralCode').val(localStorage.getItem('referralCode'+USER_ID));
-	
+
 	if(signupStudent.gender != null && signupStudent.gender!=''){
 		$('#signupStage1 #gender').val(signupStudent.gender);
 	}
@@ -509,7 +583,7 @@ function renderStudentDetails(data, signupType){
 	}
 	$("#applyStandardId").unbind('change').bind('change',function(){
 		$('#applyStandardId').valid();
-		dobInitalize(SCHOOL_ID,true, signupStudent.courseProviderId)	
+		dobInitalize(SCHOOL_ID,true, signupStudent.courseProviderId)
 	});
 	dobInitalize(SCHOOL_ID,false,signupStudent.courseProviderId)
 	$("#signupStage1 #gender option[value='TRANSGENDER']").remove();
@@ -532,6 +606,9 @@ function renderStudentDetails(data, signupType){
 		inputContact = document.querySelector("#contactNumber");
 		if(inputContact != null){
 			itiContcat = window.intlTelInput(inputContact);
+			if(typeof refreshCustomFieldState === "function"){
+				refreshCustomFieldState($(inputContact).closest(".custom-field"));
+			}
 			if(IGNORECOUNTRYARRAY.includes(signupStudent.countryCode) || signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null) {
 			  itiContcat.setCountry('us');
 			   }else{
@@ -540,6 +617,9 @@ function renderStudentDetails(data, signupType){
 			inputContact.addEventListener('countrychange', function(e) {
 				$('#countryIsd').val(itiContcat.getSelectedCountryData().iso2);
 				$('#countryDailCode').val(itiContcat.getSelectedCountryData().dialCode);
+				if(typeof refreshCustomFieldState === "function"){
+					refreshCustomFieldState($(inputContact).closest(".custom-field"));
+				}
 			});
 			scriptExecuted = true;
 		}
@@ -605,7 +685,7 @@ function renderStudentDetails(data, signupType){
 			validEndInvalidField(true, "countryIdOfSchool");
 		}
 	});
-	
+
 	$("#dob").on("change", function() {
 		if($('#signupStage1 #dob').val()!=""){
 			var dobd =getDateInDateFormat($("#signupStage1 #dob").val());
@@ -717,7 +797,7 @@ function renderStudentDetails(data, signupType){
 	}
 	if(signupStudent.stateId!=null && signupStudent.stateId>0){
 		mandatoryFields.push('stateId');
-	}	
+	}
 	if(signupStudent.cityId !=null && signupStudent.cityId>0){
 		mandatoryFields.push('cityId');
 	}
@@ -738,6 +818,12 @@ function renderStudentDetails(data, signupType){
 	}
 	if(signupStudent.countryNameOfSchool!='' && signupStudent.countryNameOfSchool != undefined && signupStudent.countryNameOfSchool != null){
 		mandatoryFields.push('countryIdOfSchool');
+	}
+	if(typeof refreshCustomFieldState === "function"){
+		refreshCustomFieldState("#signupStage1");
+		setTimeout(function(){
+			refreshCustomFieldState("#signupStage1");
+		}, 300);
 	}
 	if(mandatoryFields.length>0){
 		formValdate('signupStage1', mandatoryFields, []);
@@ -765,7 +851,7 @@ function renderStudentDetails(data, signupType){
 		$('#stateId').valid();
 		$('#cityId').valid();
 	});
-	
+
 	$("#signupStage1 #stateId").on("change",function(){
 		var selectedState =  $('option:selected', this).attr("value");
 		$('#stateId').valid();
@@ -776,7 +862,7 @@ function renderStudentDetails(data, signupType){
 			$("#cityId").html("<option value=''>Select City*</option>");
 		}
 		$('#cityId').valid();
-	
+
 	});
 	$("#signupStage1 #cityId").on("change",function(){
 		checkCSCValidation($("#signupStage1 #cityId").val(), "cityId", "City");
@@ -858,71 +944,101 @@ function getStudentDetailsContent(data, signupType) {
         <div class="form-row">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" name="firstName" style="text-transform:capitalize" id="firstName" class="form-control-field" 
-                    value="${signupStudent.firstName}" maxlength="40" 
-                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''} 
-                    onkeydown="return M.isChars(event);" placeholder="First Name*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" name="firstName" style="text-transform:capitalize" id="firstName" class="form-control-field"
+                        value="${signupStudent.firstName}" maxlength="40"
+                        ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
+                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="firstName">First Name*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" name="middleName" style="text-transform:capitalize" id="middleName" class="form-control-field" 
-                    value="${signupStudent.middleName}" maxlength="40" 
-                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''} 
-                    onkeydown="return M.isChars(event);" placeholder="Middle Name" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" name="middleName" style="text-transform:capitalize" id="middleName" class="form-control-field"
+                        value="${signupStudent.middleName}" maxlength="40"
+                        ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
+                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="middleName">Middle Name</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" name="lastName" style="text-transform:capitalize" id="lastName" class="form-control-field" 
-                    value="${signupStudent.lastName}" maxlength="40" 
-                    ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''} 
-                    onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" name="lastName" style="text-transform:capitalize" id="lastName" class="form-control-field"
+                        value="${signupStudent.lastName}" maxlength="40"
+                        ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
+                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="lastName">Last Name*</label>
+                </div>
             </div>
         </div>
 		<div class="form-row">
 			<div class="form-holder valid-field">
 				<i class="zmdi zmdi-book"></i>
-					<select name="learningLabel" id="learningLabel" tabindex="${++tabindex}" onchange="calculateGradeLabel()" style="display:${data.signupStudent.courseProviderId === 39 ? 'block' : 'none'};">
+				<div class="custom-field" style="display:${data.signupStudent.courseProviderId === 39 ? 'block' : 'none'};">
+					<select name="learningLabel" id="learningLabel" class="form-control-field" tabindex="${++tabindex}" onchange="calculateGradeLabel()" style="display:${data.signupStudent.courseProviderId === 39 ? 'block' : 'none'};">
 						${getLearningLabel()}
 					</select>
-					<select name="applyStandardId" id="applyStandardId" tabindex="${++tabindex}" style="display:${data.signupStudent.courseProviderId != 39 ? 'block' : 'none'};">
+					<label for="learningLabel">Learning Label*</label>
+				</div>
+				<div class="custom-field" style="display:${data.signupStudent.courseProviderId != 39 ? 'block' : 'none'};">
+					<select name="applyStandardId" id="applyStandardId" class="form-control-field" tabindex="${++tabindex}" style="display:${data.signupStudent.courseProviderId != 39 ? 'block' : 'none'};">
 						${getOptions(data.signupStudent.grades, data.signupStudent.standardId)}
 					</select>
+					<label for="applyStandardId">Grade*</label>
+				</div>
 			</div>
 			<div class="form-holder valid-field">
 				<i class="zmdi zmdi-account-calendar"></i>
-				<input type="text" name="dob" id="dob" class="form-control-field" 
-				value="${signupStudent.dob}" 
-				placeholder="Date of Birth* (MMM dd, yyyy)" 
-				onkeydown="return false" tabindex="${++tabindex}" readonly>
+				<div class="custom-field">
+					<input type="text" name="dob" id="dob" class="form-control-field"
+					value="${signupStudent.dob}"
+					placeholder=" "
+					onkeydown="return false" tabindex="${++tabindex}" readonly>
+					<label for="dob">Date of Birth* (MMM dd, yyyy)</label>
+				</div>
 			</div>
 			<div class="form-holder valid-field">
 				<i class="zmdi zmdi-male-female"></i>
-				<select name="gender" id="gender" required tabindex="${++tabindex}" 
-				${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}>
-				${getGenderContent()}
-				</select>
+				<div class="custom-field">
+						<select name="studentGender" id="gender" class="form-control-field" required tabindex="${++tabindex}"
+					${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}>
+					${getGenderContent()}
+					</select>
+					<label for="gender">Gender*</label>
+				</div>
 			</div>
 		</div>
         <div class="form-row">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-email"></i>
-                <input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field" 
-                    value="${signupStudent.communicationEmail}" ${signupStudent.communicationEmail == "" ? "" : "disabled"} 
-                    placeholder="Email*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field"
+                        value="${signupStudent.communicationEmail}" ${signupStudent.communicationEmail == "" ? "" : "disabled"}
+                        placeholder=" " tabindex="${++tabindex}">
+                    <label for="communicationEmail">Email*</label>
+                </div>
             </div>
             <div class="form-holder password valid-field">
                 <i class="zmdi zmdi-smartphone-android"></i>
-                <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field" 
-                    maxlength="15" value="${signupStudent.contactNumber}" 
-                    onkeydown="return M.digit(event);" placeholder="Phone Number*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field"
+                        maxlength="15" value="${signupStudent.contactNumber}"
+                        onkeydown="return M.digit(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="contactNumber">Phone Number*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="nationality" id="nationality" required tabindex="${++tabindex}">
-                    <option value="">Select Nationality*</option>
-                    ${getNationalityOption(signupStudent.countries, signupStudent.nationality)}
-                </select>
-                <span style="color:#444;position:absolute;top:100%;left:0">You must have a valid ID of your nationality<span>
+                <div class="custom-field">
+                    <select name="nationality" id="nationality" class="form-control-field" required tabindex="${++tabindex}">
+                        <option value="">Select Nationality*</option>
+                        ${getNationalityOption(signupStudent.countries, signupStudent.nationality)}
+                    </select>
+                    <label for="nationality">Nationality*</label>
+                </div>
+                <span class="nationality-id-hint" style="color:#444;position:absolute;top:60%;left:0">You must have a valid ID of your nationality</span>
             </div>
         </div>
         <div class="form-row mb-2">
@@ -931,25 +1047,34 @@ function getStudentDetailsContent(data, signupType) {
         <div class="form-row">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="countryId" id="countryId" required tabindex="${++tabindex}" 
-                    ${data.schoolId === 5 ? 'disabled' : ''}>
-                    <option value="">Select Country*</option>
-                    ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
-                </select>
+                <div class="custom-field">
+                    <select name="countryId" id="countryId" class="form-control-field" required tabindex="${++tabindex}"
+                        ${data.schoolId === 5 ? 'disabled' : ''}>
+                        <option value="">Select Country*</option>
+                        ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
+                    </select>
+                    <label for="countryId">Country*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="stateId" id="stateId" required tabindex="${++tabindex}">
-                    <option value="">Select State/Province*</option>
-                    ${getStatesOption(signupStudent.states, signupStudent.stateId)}
-                </select>
+                <div class="custom-field">
+                    <select name="stateId" id="stateId" class="form-control-field" required tabindex="${++tabindex}">
+                        <option value="">Select State/Province*</option>
+                        ${getStatesOption(signupStudent.states, signupStudent.stateId)}
+                    </select>
+                    <label for="stateId">State/Province*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="cityId" id="cityId" required tabindex="${++tabindex}">
-                    <option value="">Select City*</option>
-                    ${getCitiesOption(signupStudent.cities, signupStudent.cityId)}
-                </select>
+                <div class="custom-field">
+                    <select name="cityId" id="cityId" class="form-control-field" required tabindex="${++tabindex}">
+                        <option value="">Select City*</option>
+                        ${getCitiesOption(signupStudent.cities, signupStudent.cityId)}
+                    </select>
+                    <label for="cityId">City*</label>
+                </div>
             </div>
         </div>
 		<div class="dual-diploma form-row mb-2" style="display:none;">
@@ -958,23 +1083,32 @@ function getStudentDetailsContent(data, signupType) {
 		<div class="dual-diploma form-row" style="display:none;">
 			<div class="form-holder valid-field">
 				<i class="zmdi zmdi-graduation-cap"></i>
-				<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field" 
-					value="${signupStudent.studyingSchoolName}" 
-					placeholder="Student's School Name*" tabindex="${++tabindex}">
+				<div class="custom-field">
+					<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field"
+						value="${signupStudent.studyingSchoolName}"
+						placeholder=" " tabindex="${++tabindex}">
+					<label for="studyingSchoolName">Student's School Name*</label>
+				</div>
 			</div>
 			<div class="form-holder valid-field">
 				<i class="zmdi zmdi zmdi-book"></i>
-				<select name="studyingGradeId" id="studyingGradeId" tabindex="${++tabindex}">
-					<option value="0">Student Current Grade*</option>
-					${getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)}
-				</select>
+				<div class="custom-field">
+					<select name="studyingGradeId" id="studyingGradeId" class="form-control-field" tabindex="${++tabindex}">
+						<option value="0">Student Current Grade*</option>
+						${getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)}
+					</select>
+					<label for="studyingGradeId">Student Current Grade*</label>
+				</div>
 			</div>
 			<div class="form-holder valid-field">
 				<i class="zmdi zmdi-pin"></i>
-				<select name="countryIdOfSchool" id="countryIdOfSchool" required tabindex="${++tabindex}">
-					<option value="">Select Country of School*</option>
-					${getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)}
-				</select>
+				<div class="custom-field">
+					<select name="countryIdOfSchool" id="countryIdOfSchool" class="form-control-field" required tabindex="${++tabindex}">
+						<option value="">Select Country of School*</option>
+						${getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)}
+					</select>
+					<label for="countryIdOfSchool">Country of School*</label>
+				</div>
 			</div>
 		</div>`;
     return html;
@@ -1001,23 +1135,30 @@ function renderParentDetails(data){
 		createSelect2Element('signupStage2', 'relation')
 		createSelect2Element('signupStage2', 'parentGender');
 		if(!scriptExecuted1){
-			inputParentPhone = document.querySelector("#parentPhoneNumber");
-			if(inputParentPhone!=null && inputParentPhone!=''){
-				itiParent = window.intlTelInput(inputParentPhone);
-				if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
-					if(IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2)) {
-						selectedCountry	= "US";
-					}else{
-						itiParent.setCountry(signupParent.countryIsdCode2);
-					}
-					
-				}else{
-					//itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
-				}
-				inputParentPhone.addEventListener('countrychange', function(e) {
-					$('#parentCountryIsd').val(itiParent.getSelectedCountryData().iso2);
-					$('#parentCountryDailCode').val(itiParent.getSelectedCountryData().dialCode);
-				});
+            inputParentPhone = document.querySelector("#parentPhoneNumber");
+            if(inputParentPhone!=null && inputParentPhone!=''){
+                itiParent = window.intlTelInput(inputParentPhone);
+                if(typeof refreshCustomFieldState === "function"){
+                    refreshCustomFieldState($(inputParentPhone).closest(".custom-field"));
+                }
+                if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
+                    if(IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2)) {
+                        itiParent.setCountry('us');
+                    }else{
+                        itiParent.setCountry(signupParent.countryIsdCode2);
+                    }
+
+                }else{
+                    //itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
+                }
+                inputParentPhone.addEventListener('countrychange', function(e) {
+                    $('#parentCountryIsd').val(itiParent.getSelectedCountryData().iso2);
+                    $('#parentCountryDailCode').val(itiParent.getSelectedCountryData().dialCode);
+                    if(typeof refreshCustomFieldState === "function"){
+                        refreshCustomFieldState($(inputParentPhone).closest(".custom-field"));
+                    }
+                });
+
 				scriptExecuted1 = true
 			}
 		}
@@ -1118,7 +1259,7 @@ function renderParentDetails(data){
 			return false
 		}
 	});
-	
+
 	var pMandatoryFields=[];
 	var pNonMandatoryFields=[];
 	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
@@ -1173,6 +1314,12 @@ function renderParentDetails(data){
 		}
 	}
 
+	if(typeof refreshCustomFieldState === "function"){
+		refreshCustomFieldState("#signupStage2");
+		setTimeout(function(){
+			refreshCustomFieldState("#signupStage2");
+		}, 300);
+	}
 	if(pMandatoryFields.length>0){
 		formValdate('signupStage2', pMandatoryFields, []);
 	}
@@ -1201,7 +1348,7 @@ function renderParentDetails(data){
 			pCheckCSCValidation("", "pCityId", "City");
 			$("#signupStage2").valid()
 		});
-	
+
 		$("#pStateId").on("change",function(){
 			var selectedState =  $('option:selected', this).attr("value");
 			$('#pStateId').valid();
@@ -1273,25 +1420,34 @@ function getParentDetailsContent(data) {
         <div class="form-row">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <select name="workingProfession" id="workingProfession" class="form-control-field" required tabindex="${++tabindex}">
-                    <option value="" disabled selected>Are you a student or a working professional?*</option>
-                    <option value="SS">School Student</option>
-                    <option value="CS">College Student</option>
-                    <option value="WP">Working Professional</option>
-                </select>
+                <div class="custom-field">
+                    <select name="workingProfession" id="workingProfession" class="form-control-field" required tabindex="${++tabindex}">
+                        <option value="" disabled selected>Are you a student or a working professional?*</option>
+                        <option value="SS">School Student</option>
+                        <option value="CS">College Student</option>
+                        <option value="WP">Working Professional</option>
+                    </select>
+                    <label for="workingProfession">Student or working professional?*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" name="institutionName" id="institutionName" class="form-control-field" 
-                    value="${signupParent.institutionName}" 
-                    placeholder="Name of the School/College/Organization*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" name="institutionName" id="institutionName" class="form-control-field"
+                        value="${signupParent.institutionName}"
+                        placeholder=" " tabindex="${++tabindex}">
+                    <label for="institutionName">Name of School/College/Organization*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="institutionCountryId" id="institutionCountryId" class="form-control-field" required tabindex="${++tabindex}">
-                    <option value="0" disabled selected>Country of the School/College/Organization*</option>
-                    ${getCountriesOption(signupParent.countries, signupParent.countryId)}
-                </select>
+                <div class="custom-field">
+                    <select name="institutionCountryId" id="institutionCountryId" class="form-control-field" required tabindex="${++tabindex}">
+                        <option value="0" disabled selected>Country of the School/College/Organization*</option>
+                        ${getCountriesOption(signupParent.countries, signupParent.countryId)}
+                    </select>
+                    <label for="institutionCountryId">Country of School/College/Organization*</label>
+                </div>
             </div>
         </div>`;
     } else {
@@ -1301,43 +1457,61 @@ function getParentDetailsContent(data) {
         <div class="form-row " style="${hideClass}">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName" 
-                    value="${signupParent.firstName}" maxlength="40" onkeydown="return M.isChars(event);" 
-                    placeholder="First Name*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName"
+                        value="${signupParent.firstName}" maxlength="40" onkeydown="return M.isChars(event);"
+                        placeholder=" " tabindex="${++tabindex}">
+                    <label for="parentFirstName">First Name*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentMiddletName" id="parentMiddletName" 
-                    name="parentMiddletName" value="${signupParent.middleName}" maxlength="40" 
-                    onkeydown="return M.isChars(event);" placeholder="Middle Name" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentMiddletName" id="parentMiddletName"
+                        name="parentMiddletName" value="${signupParent.middleName}" maxlength="40"
+                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="parentMiddletName">Middle Name</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
-                <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName" 
-                    name="parentlastName" value="${signupParent.lastName}" maxlength="40" 
-                    onkeydown="return M.isChars(event);" placeholder="Last Name*" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName"
+                        name="parentlastName" value="${signupParent.lastName}" maxlength="40"
+                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="parentlastName">Last Name*</label>
+                </div>
             </div>
         </div>
         <div class="form-row " style="${hideClass}">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-map"></i>
-                <select name="relation" id="relation" required tabindex="15">
-                    ${getRelationshipContent()}
-                </select>
+                <div class="custom-field">
+                    <select name="relation" id="relation" class="form-control-field" required tabindex="15">
+                        ${getRelationshipContent()}
+                    </select>
+                    <label for="relation">Relation with student*</label>
+                </div>
             </div>
             <div class="form-holder valid-field bottom-error-message">
                 <i class="zmdi zmdi-email"></i>
                 <i class="zmdi zmdi-check-circle verified-mail-id"></i>
-                <input type="email" class="form-control-field parent-email" id="parentEmailId" name="parentEmailId" 
-                    placeholder="Parent Email (Optional)" value="${signupParent.email}" 
-                    autocomplete="off" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="email" class="form-control-field parent-email" id="parentEmailId" name="parentEmailId"
+                        placeholder=" " value="${signupParent.email}"
+                        autocomplete="off" tabindex="${++tabindex}">
+                    <label for="parentEmailId">Parent Email (Optional)</label>
+                </div>
                 <a href="javascript:void(0)" class="input-over-btn send-mail-btn primary-bg white-txt-color" onclick="resendOtp();">Verify Mail</a>
             </div>
             <div class="form-holder valid-field bottom-error-message">
                 <i class="zmdi zmdi-smartphone-android"></i>
-                <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber" 
-                    maxlength="15" placeholder="Parent Phone Number (Optional)" value="${signupParent.contactNumber}" 
-                    autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
+                <div class="custom-field">
+                    <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber"
+                        maxlength="15" placeholder=" " value="${signupParent.contactNumber}"
+                        autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
+                    <label for="parentPhoneNumber">Parent Phone Number (Optional)</label>
+                </div>
             </div>
         </div>
         <div class="form-row m-0 " style="${hideClass}">
@@ -1352,24 +1526,33 @@ function getParentDetailsContent(data) {
         <div class="form-row " style="${hideClass}">
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="pCountryId" id="pCountryId" tabindex="${++tabindex}">
-                    <option value="">Select Country*</option>
-                    ${getCountriesOption(signupParent.countries, signupParent.countryId)}
-                </select>
+                <div class="custom-field">
+                    <select name="pCountryId" id="pCountryId" class="form-control-field" tabindex="${++tabindex}">
+                        <option value="">Select Country*</option>
+                        ${getCountriesOption(signupParent.countries, signupParent.countryId)}
+                    </select>
+                    <label for="pCountryId">Country*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="pStateId" id="pStateId" tabindex="${++tabindex}">
-                    <option value="">Select State/Province*</option>
-                    ${getStatesOption(signupParent.states, signupParent.stateId)}
-                </select>
+                <div class="custom-field">
+                    <select name="pStateId" id="pStateId" class="form-control-field" tabindex="${++tabindex}">
+                        <option value="">Select State/Province*</option>
+                        ${getStatesOption(signupParent.states, signupParent.stateId)}
+                    </select>
+                    <label for="pStateId">State/Province*</label>
+                </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
-                <select name="pCityId" id="pCityId" tabindex="${++tabindex}">
-                    <option value="">Select City*</option>
-                    ${getCitiesOption(signupParent.cities, signupParent.cityId)}
-                </select>
+                <div class="custom-field">
+                    <select name="pCityId" id="pCityId" class="form-control-field" tabindex="${++tabindex}">
+                        <option value="">Select City*</option>
+                        ${getCitiesOption(signupParent.cities, signupParent.cityId)}
+                    </select>
+                    <label for="pCityId">City*</label>
+                </div>
             </div>
         </div>`;
     }
@@ -1381,18 +1564,18 @@ function getParentDetailsContent(data) {
             <b>(You may choose more than one)</b>
             <div>
                 <label class="cursor communication-mode text-dark valid-field" for="pcModeWhatsapp">
-                    <input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp" 
+                    <input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp"
                         ${signupParent.communicationWhatsApp == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                     <span>WhatsApp</span>
                     <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" />
                 </label>
                 <label class="cursor communication-mode text-dark" for="pcModeCall">
-                    <input id="pcModeCall" name="pcModeCall" type="checkbox" value="call" 
+                    <input id="pcModeCall" name="pcModeCall" type="checkbox" value="call"
                         ${signupParent.communicationCall == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                     <span>Call</span><i class="fa fa-phone"></i>
                 </label>
                 <label class="cursor communication-mode text-dark" for="pcModeEmail">
-                    <input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email" 
+                    <input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email"
                         ${signupParent.communicationEmail == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                     <span>Email</span><i class="fa fa-envelope"></i>
                 </label>
@@ -1437,7 +1620,7 @@ function renderCourseSelectionContent(csr){
 		removeSlideAnimationClass();
 	},1500);
 
-	
+
 	$('.accordion .a-title').unbind().bind('click', function () {
 		const $li = $(this).closest('li');
 		const $icon = $(this).find('.plus-icon');
@@ -1492,7 +1675,7 @@ function renderCourseSelectionContent(csr){
 		// 	$('.course-radio-btn-wrapper.open').parent().find('.bg-border').css({"background":"#dcdcdc"});
 		// 	$('.course-radio-btn-wrapper.open').parent().siblings().find('.course-check-box input').prop("checked", false);
 		// }else{
-		// 	$('.course-radio-btn-wrapper').parent().find(".course-name a").css({"color":"#333"});	
+		// 	$('.course-radio-btn-wrapper').parent().find(".course-name a").css({"color":"#333"});
 		// }
 	});
 	// $('.course-radio-btn-wrapper.open').parent().find(".course-name a").css({"color":"#333"});
@@ -1506,14 +1689,14 @@ function getCourseSelectionContent(csr){
 	if(csr.standardId!=8){
 	}
 	html+=
-	'<h3 class="mb-1 select-grade-title">';
+	'<h3 class="mb-1 select-grade-title course-selection-grade-title" style="display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:12px;">';
 		if(csr.courseProviderId == 39){
-			html+='<span class="alternate-txt-color">Your Courses For</span>';
+			html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 		}else{
 			if(csr.registrationType == 'BATCH'){
-				html+='<span class="alternate-txt-color">Your Courses For</span>';
+				html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 			}else{
-				html+='<span class="alternate-txt-color">Course Selection For</span>';
+				html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Course Selection For</span>';
 			}
 		}
 		if(csr.courseProviderId == 39){
@@ -1532,12 +1715,15 @@ function getCourseSelectionContent(csr){
 		}else{
 			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 				html+=
-					'<div class="form-holder valid-field" style="margin-left:5px">'
+					'<div class="form-holder valid-field grade-selection-holder" style="width:auto;margin:0;min-width:250px;flex:0 1 340px;">'
 					+'<i class="zmdi zmdi-book"></i>'
-					+'<select name="gradeId" id="gradeId" class="form-control-field" onchange="switchGrade()" style="width:250px;height:28px;line-height:20px">'
-						+'<option value="">Select Grade</option>'
-						+getStandardContentForFlexy()
-					+'</select>'
+					+'<div class="custom-field" style="width:100%;">'
+						+'<select name="gradeId" id="gradeId" class="form-control-field" onchange="switchGrade()" style="width:100%;height:38px;line-height:20px;">'
+							+'<option value="">Select Grade</option>'
+							+getStandardContentForFlexy()
+						+'</select>'
+						+'<label for="gradeId">Grade</label>'
+					+'</div>'
 				+'</div>';
 			}else{
 				var grade = csr.standardName.split(" ");
@@ -1551,7 +1737,7 @@ function getCourseSelectionContent(csr){
 					+'</span>';
 				}
 			}
-		}	
+		}
 		html+=
 	'</h3>';
 	if(csr.standardId!=null && csr.standardId>0){
@@ -1591,7 +1777,7 @@ function getCourseSelectionContent(csr){
 					}
 				}
 			// }
-			
+
 			if(csr.requiredFixedCourses){
 				html+=
 				'<div class="course-img-wrapper" style="min-height:275px;">'
@@ -1609,7 +1795,7 @@ function getCourseSelectionContent(csr){
 												}else{
 													html+=' Course worth '+csr.totalCredit+' credit';
 												}
-												
+
 											}else{
 												html+='You have '+csr.selectedSubjects.length;
 												if(csr.selectedSubjects.length>1){
@@ -1623,7 +1809,7 @@ function getCourseSelectionContent(csr){
 										}
 									html+=
 									'</h4>';
-									// 
+									//
 									// if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 									// 	html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">Remove ALL&nbsp;<i class="fa fa-trash"></i></span>';
 									// }
@@ -1679,7 +1865,7 @@ function getCourseSelectionContent(csr){
 																			};
 																		});
 																	}
-																	
+
 																	if(courseDetails.courseDescriptionUrl != null && courseDetails.courseDescriptionUrl!=''){
 																		//html+='<a href="'+courseDetails.courseDescriptionUrl+'" target="_blank" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">View Course Details</a>';
 																		html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+courseDetails.courseDescriptionUrl+`', '`+courseDetails.courseName+`')" class="white-txt-color" style="font-weight:400;text-decoration:underline;display:inline-block;padding:0px 5px;font-size:13px">Course Summary</a>`;
@@ -1722,7 +1908,7 @@ function getCourseSelectionContent(csr){
 									+'</div>'
 								+'</div>'
 							+'</div>'
-						+'</div>'		
+						+'</div>'
 					+'</div>'
 				+'</div>';
 			}else {
@@ -1910,7 +2096,7 @@ function getCourseSelectionContent(csr){
 														html+=
 														'(PLEASE NOTE - LIVE CLASSES ARE NOT OFFERED IN THIS PROGRAM)';
 													}
-													
+
 												html+='</span>'
 											+'</label>';
 											if(csr.eligibleForRecommendedCourse){
@@ -2612,7 +2798,7 @@ function paymentModalContentWithData(cdrDTO){
 		+'</div>'
 	+'</div>';
 	$("#studentPaymentModal .modal-body").append(html);
-	
+
 }
 
 function getReviewAndPayRendered(data){
@@ -2867,7 +3053,7 @@ function parentDetailsPreview(data){
 							+'</tr>';
 						}else{
 							if(data.signupStudent.courseProviderId==39){
-	
+
 							}else{
 								html+=
 								'<tr>'
@@ -3034,7 +3220,7 @@ function courseDetailsPreview(data){
 	+'</div>';
 	return html;
 }
-		
+
 function feePaymentReview(data){
 	var signupCourse=data.signupCourse;
 	var cdrDTO=data.feePaymentDetailsResponse;
@@ -3047,7 +3233,7 @@ function feePaymentReview(data){
 				// 	html+='<span class="primary-bg change-grade" onclick="moveStep(\'prev\')">Change Plan <i class="fa fa-exchange"></i></span>';
 				// }
 			}
-			
+
 		html+='</h3>'
 		+'<div class="table-responsive">'
 			+'<table class="table-style">'
@@ -3089,7 +3275,7 @@ function feePaymentReview(data){
 						+monthlyFeeShchedule(cdrDTO)
 					'</tbody>'
 				+'</table>';
-			}	
+			}
 		html+='</div>'
 	+'</div>';
 	return html;
@@ -3107,7 +3293,7 @@ function getBookAnEnrollmentTable(cdrDTO){
 			+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
 			+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
 		+'</tr>';
-		
+
 	return html;
 }
 
@@ -3385,7 +3571,7 @@ function monthlyFeeShchedule(cdrDTO){
 				'</b></td>'
 			+'</tr>';
 		});
-		
+
 	return html;
 }
 
@@ -3440,7 +3626,7 @@ function getCustomizedPaymentTable(data){
 	return html;
 }
 // function bookAnEnrollmentTNCModal(data){
-	
+
 // 	var html ='';
 // 	html+='<div class="modal fade theme-modal fade-scale" id="bookAnEnrollmentTNC" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">'
 // 		+'<div class="modal-dialog modal-lg" role="document" style="top:50%;transform: translateY(-50%);">'
@@ -3508,7 +3694,7 @@ function referenceNumberModal(data){
 			+'</div>'
 		+'</div>'
 	+'</div>';
-	return html;	
+	return html;
 }
 
 function logoutModalLogout(data){
@@ -3528,7 +3714,7 @@ function logoutModalLogout(data){
 								html+='You will be able to access the dashboard once the payment is received.';
 							}
 							html+=
-							'You can contact us at ' 
+							'You can contact us at '
 							+'<b>'
 								+' <a href="mailto:'+data.contactEmail+'" target="_blank">'+data.contactEmail+'</a>'
 							+'</b> for more information'
@@ -3542,7 +3728,7 @@ function logoutModalLogout(data){
 			+'</div>'
 		+'</div>'
 	+'</div>';
-	return html;	
+	return html;
 }
 
 function goToDashboardWarningMessageModal(data){
@@ -3628,7 +3814,7 @@ function skeletonCourseSelection(){
 	var html=
 	'<h3 class="mb-1 select-grade-title">'
 		+'<span>YOUR COURSES IN</span>'
-		
+
 	+'</h3>'
 	+'<div class="step3-skeleton">'
 		+'<div class="skeleton" style="height:39px;margin-bottom:25px"></div>'
@@ -3693,7 +3879,7 @@ function skeletonFeeDetails(){
 							+'<td class="skeleton" height="85px"></td>'
 							+'<td class="skeleton" height="85px"></td>'
 							+'<td class="skeleton" height="85px"></td>'
-							
+
 						+'</tr>'
 						+'<tr>'
 							+'<td class="skeleton" height="85px"></td>'
@@ -3853,8 +4039,8 @@ function recommendedCourseModalContent(data){
 						+'<a href="javascript:void(0)" class="btn btn-light text-white;" id="confirmAndAddRecommendedCourse" onclick="chooseRecomendedCourse()" disabled><b>Confirm</b></a>'
 					+'</div>';
 				}
-				
-				
+
+
 			html+='</div>'
 		+'</div>'
 	+'</div>';
@@ -3945,7 +4131,7 @@ function documentPreviewModal(){
 						</button>
 					</div>
 					<div class="modal-body" style="min-height:300px; max-height: 550px; overflow: auto; text-align: center;">
-						
+
 						<img id="documentPreview" src="" alt="" title="" style="width: auto; height: auto; max-width: 100%;" />
 					</div>
 					<div class="modal-footer">
@@ -3978,4 +4164,3 @@ function flaggedModalContent(data){
 		</div>`
 	return html;
 }
-

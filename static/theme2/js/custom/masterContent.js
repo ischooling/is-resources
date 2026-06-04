@@ -429,10 +429,10 @@ function getAllGradeOnSelectId(elementId, selectOption){
 
 function getGenderContent(){
 	var html='<option value="">Select gender*</option>';
-	html+='<option value="MALE">MALE</option>';
-	html+='<option value="FEMALE">FEMALE</option>';
+	html+='<option value="MALE">Male</option>';
+	html+='<option value="FEMALE">Female</option>';
 	// html+='<option value="TRANSGENDER">TRANSGENDER</option>';
-	html+='<option value="DONOTWANTTOSPECIFY">DO NOT WANT TO SPECIFY</option>';
+	html+='<option value="DONOTWANTTOSPECIFY">Do Not Want to Specify</option>';
 	return html;
 }
 
@@ -2630,15 +2630,24 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 	$("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
 	$("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
     phoneNumber.addEventListener('countrychange', function(e) {
+		
 		if(saveType == "selfSave"){
 			phoneNumberDailCodeChange(phoneNumber.intlTelInputInstance.a.id,flagCode,phoneNumber.intlTelInputInstance.j, avalWhtsAppStatusID, index)
 		}
         $("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
         $("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
         $(phoneNumber).attr("placeholder", placeholderValue);
+		if(formId == "profileForm"){
+			$("label[for='"+eleId+"']").css({"left":$("#"+eleId).css("padding-left")})
+		}
     });
     phoneNumber.intlTelInputInstance = itiInstances;
     //phoneNumber.setAttribute('data-intlTelInput-initialized', 'true');
+	setTimeout(function () {
+		if(formId == "profileForm"){
+			$("label[for='"+eleId+"']").css({"left":$("#"+eleId).css("padding-left")})
+		}
+	},500);
 }
 
 function validatePhoneNumber(eleId) {

@@ -63,7 +63,7 @@ button:focus {border: 0 !important;outline: none !important}
 .steps ul li a .icon{display: flex;align-items: center;justify-content: center; background: #fff;border-radius: 50%;width: 40px;height: 40px;text-align: center;position: relative;z-index: 2;border:1px solid #fff}
 .steps ul li.current a .icon{border-color:var(--pc)}
 h3 {font-size: 20px;color: #333;text-align: center;font-weight: 600;letter-spacing: 2px;margin-bottom: 29px;font-weight: 600;}
-.form-row {display: flex;margin-bottom: 20px;flex-wrap: inherit !important;}
+.form-row {display: flex;margin-bottom: 1px;flex-wrap: inherit !important;}
 .form-row .form-holder {width: 50%;margin-right: 20px;}
 .form-row .form-holder.m-0{margin-right:0!important}
 .form-row .form-holder  label{font-size: 13px;margin-bottom: 0}
@@ -77,7 +77,7 @@ h3 {font-size: 20px;color: #333;text-align: center;font-weight: 600;letter-spaci
 .form-holder .textarea-icon.icon-field i{top:10px;transform: translateY(0%);}
 .sup{color:red;font-size: 15px;position: relative;top:-3px;} 
 .form-holder i.zmdi-eye {cursor: pointer;}
-.form-control-field,.select-option-field{height: 32px  !important;border: 1px solid #e6e6e6  !important;width: 100% !important;background: none;padding: 0 35px 0 8px;color: #999;background-image: none !important;line-height: 32px;}
+.form-control-field,.select-option-field{height: 44px  !important;border: 1px solid #e6e6e6  !important;width: 100% !important;background: none;padding: 0 35px 0 8px;color: #999;background-image: none !important;line-height: 32px;}
 textarea.form-control-field{height: inherit !important;}
 .select-option-field {padding: 0 !important;border: 0;}
 .form-control-field:focus, .select2-container--default .select2-selection--single[aria-expanded="true"] {/*border-color: var(--pc) !important;*/border-color: var(--pc);}

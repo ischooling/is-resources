@@ -124,7 +124,7 @@ function getURLForHTML(apiType, suffixUrl) {
       BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl
     );
   }
-  
+
 }
 function getURLForHTMLWithPayload(apiType, suffixUrl) {
   let url = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/" + apiType + "/" + suffixUrl;
@@ -203,7 +203,245 @@ function getURLForSignup(suffixUrl, module) {
   }
   return API_VERSION + apiType + "/" + suffixUrl;
 }
+function getCustomFieldCss() {
+  return `
+.custom-field-scope .custom-field{
+    position:relative;
+    margin-bottom:30px;
+    width:100%;
+    --custom-field-default:#cfd4dc;
+    --custom-field-default-text:#9ca3af;
+    --custom-field-active:#007bff;
+    --custom-field-value:#4b5563;
+    --custom-field-bg:#fff;
+}
 
+.custom-field-scope .custom-field input,
+.custom-field-scope .custom-field select,
+.custom-field-scope .custom-field textarea{
+    width:100%;
+    height:44px;
+    padding:5px 16px 0;
+    border:2px solid var(--custom-field-default);
+    border-radius:6px !important;
+    background-color:var(--custom-field-bg);
+    color:var(--custom-field-value);
+    font-size:16px;
+    outline:none;
+    transition:all .3s ease;
+    appearance:none;
+}
+
+.custom-field-scope .custom-field input::placeholder,
+.custom-field-scope .custom-field textarea::placeholder{
+    color:transparent !important;
+}
+
+.custom-field-scope .custom-field .iti{
+    width:100%;
+    height:44px;
+}
+
+.custom-field-scope .custom-field .iti input{
+    height:44px;
+    /*padding-left:120px !important;*/
+    padding-top:6px;
+    padding-bottom:0;
+    border-radius:6px !important;
+}
+
+.custom-field-scope .custom-field .iti .iti__flag-container{
+    height:44px;
+    top:0;
+    bottom:0;
+}
+
+.custom-field-scope .custom-field .iti .iti__selected-flag{
+    height:44px;
+    align-items:center;
+   /*min-width:104px;*/
+    padding:0 8px 0 14px;
+}
+
+.custom-field-scope .custom-field:has(.iti) label:not(.error-msg){
+    left:46px;
+}
+
+.custom-field-scope .custom-field.has-value:has(.iti) label:not(.error-msg),
+.custom-field-scope .custom-field.is-filled:has(.iti) label:not(.error-msg),
+.custom-field-scope .custom-field.active:has(.iti) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.iti input:focus) label:not(.error-msg){
+    left:12px;
+}
+
+.custom-field-scope .custom-field .select2-container{
+    width:100% !important;
+    height:44px !important;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--single{
+    height:44px !important;
+    min-height:44px !important;
+    border:2px solid var(--custom-field-default);
+    border-radius:6px !important;
+    background-color:var(--custom-field-bg);
+    outline:none;
+    transition:all .3s ease;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__placeholder{
+    color:transparent !important;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__rendered{
+    color:var(--custom-field-value);
+    font-size:16px;
+    line-height:40px !important;
+    padding:0 40px 0 16px !important;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__arrow{
+    height:42px !important;
+    right:10px;
+}
+
+.custom-field-scope .custom-field:has(select option:checked[value=""]) select,
+.custom-field-scope .custom-field:has(select option:checked[value="0"]) select,
+.custom-field-scope .custom-field:has(select option:checked[value=""]) .select2-selection__rendered,
+.custom-field-scope .custom-field:has(select option:checked[value="0"]) .select2-selection__rendered{
+    color:transparent !important;
+}
+
+.custom-field-scope .custom-field textarea{
+    min-height:88px;
+    resize:vertical;
+}
+
+.custom-field-scope .custom-field label:not(.error-msg){
+    position:absolute;
+    left:12px;
+    top:48%;
+    transform:translateY(-50%);
+    color:var(--custom-field-default-text);
+    background:var(--custom-field-bg);
+    padding:0 8px;
+    font-size:16px;
+    pointer-events:none;
+    transition:all .25s ease;
+}
+
+/* FLOAT EFFECT */
+.custom-field-scope .custom-field input:focus + label:not(.error-msg),
+.custom-field-scope .custom-field input:not(:placeholder-shown) + label:not(.error-msg),
+.custom-field-scope .custom-field select:focus + label:not(.error-msg),
+.custom-field-scope .custom-field textarea:focus + label:not(.error-msg),
+.custom-field-scope .custom-field textarea:not(:placeholder-shown) + label:not(.error-msg),
+.custom-field-scope .custom-field:has(.iti input:focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.iti input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+.custom-field-scope .custom-field.has-value label:not(.error-msg),
+.custom-field-scope .custom-field.is-filled label:not(.error-msg),
+.custom-field-scope .custom-field.active label:not(.error-msg),
+.custom-field-scope .custom-field:has(input[value]:not([value=""])) label:not(.error-msg),
+.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) label:not(.error-msg),
+.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg){
+    top:0;
+    transform:translateY(-46%);
+    font-size:12px;
+    font-weight:500;
+    z-index:5;
+}
+
+/* ACTIVE / FILLED EFFECT */
+.custom-field-scope .custom-field input:focus,
+.custom-field-scope .custom-field input:not(:placeholder-shown),
+.custom-field-scope .custom-field select:focus,
+.custom-field-scope .custom-field textarea:focus,
+.custom-field-scope .custom-field textarea:not(:placeholder-shown),
+.custom-field-scope .custom-field:has(.iti input:focus) input,
+.custom-field-scope .custom-field:has(.iti input:not(:placeholder-shown)) input,
+.custom-field-scope .custom-field:has(.select2-container--focus) .select2-selection--single,
+.custom-field-scope .custom-field.has-value input,
+.custom-field-scope .custom-field.has-value select,
+.custom-field-scope .custom-field.has-value textarea,
+.custom-field-scope .custom-field.has-value .select2-selection--single,
+.custom-field-scope .custom-field.is-filled input,
+.custom-field-scope .custom-field.is-filled select,
+.custom-field-scope .custom-field.is-filled textarea,
+.custom-field-scope .custom-field.is-filled .select2-selection--single,
+.custom-field-scope .custom-field.active input,
+.custom-field-scope .custom-field.active select,
+.custom-field-scope .custom-field.active textarea,
+.custom-field-scope .custom-field.active .select2-selection--single,
+.custom-field-scope .custom-field:has(input[value]:not([value=""])) input,
+.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) .select2-selection--single,
+.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) select,
+.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) textarea{
+    border-color:var(--custom-field-active);
+}
+
+.custom-field-scope .custom-field input:focus + label:not(.error-msg),
+.custom-field-scope .custom-field input:not(:placeholder-shown) + label:not(.error-msg),
+.custom-field-scope .custom-field select:focus + label:not(.error-msg),
+.custom-field-scope .custom-field textarea:focus + label:not(.error-msg),
+.custom-field-scope .custom-field textarea:not(:placeholder-shown) + label:not(.error-msg),
+.custom-field-scope .custom-field:has(.iti input:focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.iti input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+.custom-field-scope .custom-field.has-value label:not(.error-msg),
+.custom-field-scope .custom-field.is-filled label:not(.error-msg),
+.custom-field-scope .custom-field.active label:not(.error-msg),
+.custom-field-scope .custom-field:has(input[value]:not([value=""])) label:not(.error-msg),
+.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) label:not(.error-msg),
+.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg){
+    color:var(--custom-field-active);
+}
+
+/* FOCUS EFFECT */
+.custom-field-scope .custom-field input:focus,
+.custom-field-scope .custom-field select:focus,
+.custom-field-scope .custom-field textarea:focus{
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+/* CUSTOM SELECT ARROW */
+.custom-field-scope .custom-field select{
+    padding-right:40px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' stroke='%239ca3af' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+}
+
+.custom-field-scope .custom-field select:focus,
+.custom-field-scope .custom-field.has-value select,
+.custom-field-scope .custom-field.is-filled select,
+.custom-field-scope .custom-field.active select,
+.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' stroke='%23007bff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* REMOVE DEFAULT ARROW */
+.custom-field-scope .custom-field select::-ms-expand{
+    display:none;
+}
+`;
+}
+function refreshCustomFieldState(context) {
+  var parent = context == undefined || context == null ? $(document) : $(context);
+  var fields = parent.filter(".custom-field").add(parent.find(".custom-field"));
+  fields.filter(function () {
+    return $(this).closest(".custom-field-scope").length > 0;
+  }).each(function () {
+    var customField = $(this);
+    var field = customField.find("input, select, textarea").first();
+    var value = field.length > 0 ? field.val() : "";
+    if ($.isArray(value)) {
+      value = value.join("");
+    }
+    value = value == undefined || value == null ? "" : value.toString().trim();
+    customField.toggleClass("has-value", value !== "" && value !== "0");
+  });
+}
 $(document).ready(function () {
   var stickyHeaderHeight = $('.sticky-header').height();
   $('.app-container').css({ "margin-top": stickyHeaderHeight - 59 });
@@ -212,6 +450,17 @@ $(document).ready(function () {
       var stickyHeaderHeight = $('.sticky-header').height();
       $('.app-container').css({ "margin-top": stickyHeaderHeight - 59 });
     });
+  });
+  $("head").append(`<style id="customFieldCss">${getCustomFieldCss()}</style>`);
+  refreshCustomFieldState();
+  setTimeout(function () {
+    refreshCustomFieldState();
+  }, 300);
+  $(document).on("input change blur", ".custom-field-scope .custom-field input, .custom-field-scope .custom-field select, .custom-field-scope .custom-field textarea", function () {
+    refreshCustomFieldState($(this).closest(".custom-field"));
+  });
+  $(document).on("select2:select select2:clear change", ".custom-field-scope .custom-field select", function () {
+    refreshCustomFieldState($(this).closest(".custom-field"));
   });
   if($("#themeColor").length<1){
     $("head").append(`<style id="themeColor">${ROOTCSS}</style>`);
@@ -360,7 +609,7 @@ function showMessageTheme2BankDetails(isWarnig, message, id) {
 //     } else if (messageType == 1 || messageType == true) {
 //       $("#messageDiv1").addClass("success");
 //       $("#messageDiv1").html(
-//         // '<i class="fa fa-check-circle"></i>&nbsp;' + 
+//         // '<i class="fa fa-check-circle"></i>&nbsp;' +
 //         message
 //       );
 //     } else if (messageType == 2) {
@@ -400,7 +649,7 @@ function showMessage(messageType, message, id, msgHide) {
     } else if (messageType == 1 || messageType == true) {
       $("#messageDiv1").addClass("success");
       $("#messageDiv1").html(
-        // '<i class="fa fa-check-circle"></i> ' + 
+        // '<i class="fa fa-check-circle"></i> ' +
         message
       );
     } else if (messageType == 2) {
@@ -626,7 +875,7 @@ function customLoader(needToShow) {
         }
       }, 200);
       $(".dt-responsive tbody tr td:first-child").addClass("dtr-control");
-  } 
+  }
 }
 function customLoaderExternalPage(needToShow) {
   if (needToShow) {
@@ -825,7 +1074,7 @@ function validateRequestForEmailCheck(formId) {
   ) {
     $("#" + formId + " #email").css("color", "#a9a9a9");
     validEndInvalidField(false, "email");
-    showMessageTheme2(false, "email", "Student email is either empty or invalid");
+    showMessageTheme2(false, "email", "Student email is either empty or invalid.");
     return false;
   }
   validEndInvalidField(true, "email");
@@ -1022,7 +1271,7 @@ function getAllCountryTimezone(formId, value, elementId) {
           reject(new Error(data["message"]));
         } else {
           const optionsHtml = data["mastersData"]["countryTimeZones"]
-            .map((v) => 
+            .map((v) =>
               `<option custom_timezone_id="${v.key}" value="${v.value}">(${v.extra}) - ${v.extra1}/${v.extra3}</option>`
             )
             .join("");
@@ -1516,7 +1765,7 @@ function callForEmailResend(emailId, moduleId, sendStatus) {
       if (data["status"] == "0" || data["status"] == "2") {
         if (data["statusCode"] == "0022") {
           showMessageTheme2(0, data["message"],'',true);
-          
+
         } else {
           showMessageTheme2(0, data["message"],'',true);
         }
@@ -2067,7 +2316,7 @@ function bindFileUploadNew1(
               isError = true;
             }
           }
-        } 
+        }
         else {
           if((USER_ROLE != "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 5767168) || (USER_ROLE == "TEACHER" && data.originalFiles.length && data.originalFiles[0]["size"] > 5767168)) {
             if (USER_ROLE == "TEACHER") {
@@ -2085,7 +2334,7 @@ function bindFileUploadNew1(
             "36" == uploadCategoryId ||
             "37" == uploadCategoryId ||
             "38" == uploadCategoryId
-            
+
           ) {
             showMessageTheme2ErrorNew(
               true,
@@ -2269,7 +2518,7 @@ function bindFileUploadNew1(
           ) {
             redirectLoginPage();
           }
-        } 
+        }
         else {
           $.each(data.result.uploadFiles, function (index, file) {
             if (file.status == 1) {
@@ -2316,7 +2565,7 @@ function bindFileUploadNew1(
                     FILE_UPLOAD_PATH + file.fileName
                   );
                 }
-              } 
+              }
               else if (uploadMethodType == 2) {
                 hideMessageErrorNew("evaluationDocsError");
                 // console.log(
@@ -2373,7 +2622,7 @@ function bindFileUploadNew1(
                     "fileupload" + uploadIndex + "Error"
                   );
                 }
-              } 
+              }
               else if (uploadMethodType == 3) {
                 $("#fileupload" + uploadIndex + "img").attr(
                   "fileName",
@@ -2454,7 +2703,7 @@ function bindFileUploadNew1(
                 } else {
                   $("#fileupload" + uploadIndex + "div").hide();
                 }
-              } 
+              }
               else if (uploadMethodType == 4) {
                 $("#fileName" + uploadIndex).html(file.fileName);
                 $("#fileupload" + uploadIndex + "Span").html(file.fileName);
@@ -2499,8 +2748,8 @@ function bindFileUploadNew1(
                 "36" == uploadCategoryId ||
                 "37" == uploadCategoryId ||
                 "33" == uploadCategoryId ||
-                "38" == uploadCategoryId || 
-                "51" == uploadCategoryId 
+                "38" == uploadCategoryId ||
+                "51" == uploadCategoryId
               ) {
                 setTimeout(function () {
                   if ("34" == uploadCategoryId) {
@@ -2759,13 +3008,13 @@ function bindFileUploadNew1(
 //             $("#fileupload" + uploadIndex + "ProgressStatus")
 //               .removeClass("progress-bar-success")
 //               .addClass("progress-bar-danger");
-//           } 
+//           }
 //           else if (uploadMethodType == 2) {
 //             $("#fileupload" + uploadIndex)
 //               .parents(".file-tab")
 //               .find("span.fileName")
 //               .text();
-//           } 
+//           }
 //           else if (uploadMethodType == 3) {
 //             $("#fileupload" + uploadIndex)
 //               .parent("span")
@@ -2808,7 +3057,7 @@ function bindFileUploadNew1(
 //               .parent("p")
 //               .find("a.view")
 //               .attr("style", "display:none;");
-//           } 
+//           }
 //           else if (uploadMethodType == 4) {
 //             $("#fileName" + uploadIndex).html("");
 //             $("#divdeleteDocument" + uploadIndex).attr(
@@ -4424,7 +4673,7 @@ function createSelect2Element(formId, elementId, placeholder) {
   }else{
     $("#" + formId + " #" + elementId).select2();
   }
-  
+
 }
 
 function destroySelect2Element(formId, elementId) {
@@ -4870,7 +5119,7 @@ function callStudentBatchesByGradeId(
             }else{
                 showMessageTheme2(1, "User list fetched successfully");
             }
-            
+
           }
           buildDropdown(
             data["mastersData"]["studentList"],
@@ -4882,7 +5131,7 @@ function callStudentBatchesByGradeId(
             showMessageTheme2(2, "User not found");
           }
         }
-        
+
       }
     }
   });
@@ -5061,7 +5310,7 @@ $(document).on("hidden.bs.modal", ".modal", function () {
 
 
 // $(document).on("hidden.bs.modal", ".modal", function () {
-//   var modalShow; 
+//   var modalShow;
 //   if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
 //   // Check if there are still open modals
 //   if ($(modalShow).length === 0 && $(".modal.in").length === 0) {
@@ -6276,7 +6525,7 @@ function getDashboardDataBasedUrlAndPayload(globalflag,showMessage,url,payload) 
             }
           }
         } else {
-          
+
           resolve(data);
         }
       },
@@ -6628,7 +6877,7 @@ function showDropdownCustomView(tableID){
           const $menu = $btn.next('.dropdown-menu');
           // Clone the dropdown menu
           const $clonedMenu = $menu.clone().addClass('show external-dropdown-menu');
-          
+
           // Position it relative to the button
           const offset = $btn.offset();
           const height = $btn.outerHeight();
@@ -6886,8 +7135,8 @@ function getUploadInputBtn(inputId, uploadViewElementId, fileType, elem_id, btn_
       if(file_input_show_hide_flag){
         html+=
         `<div id="policeVeriProfile" class="file-btn  text-left w-fit-content float-left position-relative">
-          <span id="fileName8" class="fileName" style="display: none;"></span> 
-          <input onchange="uploadDocsFun(this, 'verify', \'${uploadViewElementId}\', true);previewPoliceVerification(event);" class="file-input" type="file" name="${inputId}" id="${inputId}" fileType="${fileType}" elem-id="${elem_id}" value="Upload ${btn_label_name}"/> 
+          <span id="fileName8" class="fileName" style="display: none;"></span>
+          <input onchange="uploadDocsFun(this, 'verify', \'${uploadViewElementId}\', true);previewPoliceVerification(event);" class="file-input" type="file" name="${inputId}" id="${inputId}" fileType="${fileType}" elem-id="${elem_id}" value="Upload ${btn_label_name}"/>
           <span class="btn primary-bg white-txt-color mt-1">Upload Police Verification</span>
         </div>`;
       }
@@ -6939,7 +7188,7 @@ function handleRecipientSignatureUpload(input, targetId){
     input.value = "";
     return;
   }
-  
+
   if (file.size > 300 * 1024) {
     showMessageTheme2(2, "File size must be less than 300 KB.");
     input.value = "";
@@ -7002,7 +7251,7 @@ async function getSignedUrlForCopyClipboard(videoUrl) {
         contentType: "application/json",
         global: false,
         success: function(response) {
-          resolve(response); 
+          resolve(response);
         },
         error: function(err) {
           reject(err);
@@ -7053,7 +7302,7 @@ function getPaymentBySchoolId(schoolId){
               console.log(data.pgList)
               data.pgList.forEach(function (pg) {
                 if(pg.active === 'Y') {
-                  options += 
+                  options +=
                   `<option value="${pg.getwayName}">
                       ${pg.getwayLabel}
                   </option>`;
@@ -7061,7 +7310,7 @@ function getPaymentBySchoolId(schoolId){
                 if(pg.paymentGatway && pg.paymentGatway.length > 0) {
                   pg.paymentGatway.forEach(function (subPg) {
                     if(subPg.active === 'Y') {
-                      options+= 
+                      options+=
                       `<option value="${subPg.getwayName}">
                           ${subPg.getwayLabel}
                       </option>`;
@@ -7111,10 +7360,10 @@ function renderPaginationCommon(currentPage, totalPages, context = '') {
 		  <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
 			<button class="page-link" onclick="goToPageCommon(${currentPage - 1}, '${context}')"><i class="fa fa-chevron-left mr-2" style="font-size: 10px;"></i>Previous</button>
 		  </li>`;
-  
+
 	let startPage = Math.max(1, currentPage - 1);
 	let endPage = Math.min(totalPages, currentPage + 1);
-  
+
 	if (startPage > 1) {
 	  paginationHtml += `
 		<li class="page-item">
@@ -7127,14 +7376,14 @@ function renderPaginationCommon(currentPage, totalPages, context = '') {
 		  </li>`;
 	  }
 	}
-  
+
 	for (let i = startPage; i <= endPage; i++) {
 	  paginationHtml += `
 		<li class="page-item ${i === currentPage ? 'active' : ''}">
 		  <button class="page-link" onclick="goToPageCommon(${i}, '${context}')">${i}</button>
 		</li>`;
 	}
-  
+
 	if (endPage < totalPages) {
 	  if (endPage < totalPages - 1) {
 		paginationHtml += `
@@ -7147,14 +7396,14 @@ function renderPaginationCommon(currentPage, totalPages, context = '') {
 		  <button class="page-link" onclick="goToPageCommon(${totalPages}, '${context}')">${totalPages}</button>
 		</li>`;
 	}
-  
+
 	paginationHtml += `
 		  <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
 			<button class="page-link" onclick="goToPageCommon(${currentPage + 1}, '${context}')">Next<i class="fa fa-chevron-right ml-2" style="font-size: 10px;"></i></button>
 		  </li>
 		</ul>
 	  </nav>`;
-  
+
 	return paginationHtml;
 }
 
@@ -7217,7 +7466,7 @@ function formatTimeDisplay(timeInSeconds) {
   const minutes = Math.floor(timeInSeconds / 60);
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  
+
   if (hours > 0) {
     return `${hours}h ${remainingMinutes}m`;
   } else {
@@ -7309,9 +7558,9 @@ function openAiSummaryModal(summary) {
     //   var modalHtml = `
     //       <div class="modal fade show" id="aiSummaryModalCustom" tabindex="-1" role="dialog" style="display:block; z-index: 99999;">
     //         <div class="modal-dialog modal-lg" role="document" style="z-index:100000;">
-              
+
     //           <div class="modal-content" style="border-radius:12px; overflow:hidden;">
-                
+
     //             <div class="modal-header py-2 bg-primary text-white">
     //               <h5 class="modal-title">AI Summary</h5>
     //               <button type="button" class="close text-white" onclick="closeAiSummaryModal();" aria-label="Close">
@@ -7384,7 +7633,7 @@ async function previewContractPdf(callFrom){
     payload["entityId"] = parseInt($("#contractId").val());
     payload["entityType"] = "TEACHER_AGREEMENT_LOG";
   }
-  
+
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
 	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
 		showMessageTheme2(0, responseData.message);
@@ -7507,7 +7756,7 @@ function requestToChangeDashboardColorTheme(headerbg, sliderbarBg, rootcss) {
     }
   };
 
-  
+
 
   $.ajax({
     type: "POST",
@@ -7519,7 +7768,7 @@ function requestToChangeDashboardColorTheme(headerbg, sliderbarBg, rootcss) {
       if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
         if (data['status'] == '3') {
           redirectLoginPage();
-        } else {         
+        } else {
           showMessageTheme2(0, data['message'], '', true);
         }
       } else {
@@ -7535,7 +7784,7 @@ function lightenColor(color, percent) {
     // const R = Math.min(255, (num >> 16) + amt);
     // const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
     // const B = Math.min(255, (num & 0x0000FF) + amt);
-    
+
     // return "#" + (
     //     0x1000000 +
     //     (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
@@ -7550,7 +7799,7 @@ function lightenColor(color, percent) {
     g = Math.round(g + (255 - g) * percent / 100);
     b = Math.round(b + (255 - b) * percent / 100);
 
-    return "#" + 
+    return "#" +
         r.toString(16).padStart(2, '0') +
         g.toString(16).padStart(2, '0') +
         b.toString(16).padStart(2, '0');
@@ -7563,7 +7812,7 @@ function darkenColor(color, percent) {
     const R = Math.max(0, (num >> 16) - amt);
     const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
     const B = Math.max(0, (num & 0x0000FF) - amt);
-    
+
     return "#" + (
         0x1000000 +
         (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +

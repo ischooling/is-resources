@@ -79,7 +79,7 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
 
 function generateTeacherEnrollmentContent(moduleName){
     var html=
-        `<div class="wrapper-style">
+        `<div class="wrapper-style custom-field-scope">
             <a class="tab-and-mobile-logout-btn primary-bg white-txt-color" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
                 <i class="zmdi zmdi-power"></i>
                 Log out
@@ -469,118 +469,99 @@ function getTeacherBasicInfoContent(signupTeacher){
         <input type="hidden" id="countryIsd" value="91" />
         <h3 id="first_step" >Personal Details</h3>
             <div class="form-row">
-                <div class="form-holder">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-account"></i> <input id="teacherFirstName"
-                                type="text" class="form-control-field" name="teacherFirstName"
-                                placeholder="First Name*" value=""
-                                onkeydown="return M.isChars(event);"
-                                maxlength="40" style="text-transform:capitalize" >
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-account"></i>
+                    <div class="custom-field">
+                        <input id="teacherFirstName" type="text" class="form-control-field" name="teacherFirstName"
+                            placeholder=" " value="" onkeydown="return M.isChars(event);"
+                            maxlength="40" style="text-transform:capitalize" >
+                        <label for="teacherFirstName">First Name*</label>
                     </div>
                 </div>
-                <div class="form-holder">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-account"></i> <input type="text"
-                                id="teacherMiddleName" class="form-control-field"
-                                name="teacherMiddleName" placeholder="Middle Name"
-                                value=""
-                                onkeydown="return M.isChars(event);"
-                                maxlength="40" style="text-transform:capitalize" >
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-account"></i>
+                    <div class="custom-field">
+                        <input type="text" id="teacherMiddleName" class="form-control-field"
+                            name="teacherMiddleName" placeholder=" " value=""
+                            onkeydown="return M.isChars(event);"
+                            maxlength="40" style="text-transform:capitalize" >
+                        <label for="teacherMiddleName">Middle Name</label>
                     </div>
                 </div>
-                <div class="form-holder">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-account"></i> <input type="text"
-                                id="teacherLastName" class="form-control-field"
-                                name="teacherLastName" placeholder="Last Name*"
-                                value=""
-                                onkeydown="return M.isChars(event);"
-                                maxlength="40" style="text-transform:capitalize" >
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-account"></i>
+                    <div class="custom-field">
+                        <input type="text" id="teacherLastName" class="form-control-field"
+                            name="teacherLastName" placeholder=" " value=""
+                            onkeydown="return M.isChars(event);"
+                            maxlength="40" style="text-transform:capitalize" >
+                        <label for="teacherLastName">Last Name*</label>
                     </div>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-holder">
-                    <div class="form-group ">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-pin"></i>
-                            <select class="select_dropdown" name="countryId" id="countryId" ${SCHOOL_ID==5?'disabled':''}>
-                                <option value="">Select Country*</option>
-                            </select>
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-pin"></i>
+                    <div class="custom-field">
+                        <select class="select_dropdown form-control-field" name="countryId" id="countryId" ${SCHOOL_ID==5?'disabled':''}>
+                            <option value="">Select Country*</option>
+                        </select>
+                        <label for="countryId">Country*</label>
                     </div>
                 </div>
-                <div class="form-holder">
-                    <div class="form-group divState">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-pin"></i>
-                            <select class="select_dropdown" name="stateId" id="stateId">
-                                <option value="">Select State/Province*</option>
-                            </select>
-                        </div>
+                <div class="form-holder valid-field divState">
+                    <i class="zmdi zmdi-pin"></i>
+                    <div class="custom-field">
+                        <select class="select_dropdown form-control-field" name="stateId" id="stateId">
+                            <option value="">Select State/Province*</option>
+                        </select>
+                        <label for="stateId">State/Province*</label>
                     </div>
                 </div>
-                <div class="form-holder">
-                    <div class="form-group divCity">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-pin"></i>
-                            <select class="select_dropdown" name="cityId" id="cityId">
-                                <option value="">Select City*</option>
-                            </select>
-                        </div>
+                <div class="form-holder valid-field divCity">
+                    <i class="zmdi zmdi-pin"></i>
+                    <div class="custom-field">
+                        <select class="select_dropdown form-control-field" name="cityId" id="cityId">
+                            <option value="">Select City*</option>
+                        </select>
+                        <label for="cityId">City*</label>
                     </div>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-holder">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-account-calendar"></i> <input type="text"
-                                class="form-control-field" name="teacherDob" id="teacherDob" readonly onkeydown="return false"
-                                placeholder="Date of Birth*"
-                                value="">
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-account-calendar"></i>
+                    <div class="custom-field">
+                        <input type="text" class="form-control-field" name="teacherDob" id="teacherDob"
+                            readonly onkeydown="return false" placeholder=" " value="">
+                        <label for="teacherDob">Date of Birth*</label>
                     </div>
                 </div>
-                <div class="form-holder">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-male-female"></i>
-                            <select class="select_dropdown" name="teacherGender" id="teacherGender">`;
-                                html+=getGenderContent()
-                            html+=`</select>
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-male-female"></i>
+                    <div class="custom-field">
+                        <select class="select_dropdown form-control-field" name="teacherGender" id="teacherGender">`;
+                            html+=getGenderContent()
+                        html+=`</select>
+                        <label for="teacherGender">Gender*</label>
                     </div>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-holder">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-email"></i> <input type="email"
-                                id="teacherEmailId" class="form-control-field"
-                                name="teacherEmailId" placeholder="Email*"
-                                value="" disabled>
-                        </div>
+                <div class="form-holder valid-field">
+                    <i class="zmdi zmdi-email"></i>
+                    <div class="custom-field">
+                        <input type="email" id="teacherEmailId" class="form-control-field"
+                            name="teacherEmailId" placeholder=" " value="" disabled>
+                        <label for="teacherEmailId">Email*</label>
                     </div>
                 </div>
-                <div class="form-holder password">
-                    <div class="form-group">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-smartphone-android"></i> 
-                            <input type="tel" class="form-control-field" id="phone_no" name="phone_no"
-                                placeholder="Phone Number*"
-                                value=""  
-                                onkeydown="return M.digit(event);"
-                                maxlength="20"    
-                            >
-                        </div>
+                <div class="form-holder password valid-field">
+                    <i class="zmdi zmdi-smartphone-android"></i>
+                    <div class="custom-field">
+                        <input type="tel" class="form-control-field" id="phone_no" name="phone_no"
+                            placeholder=" " value="" onkeydown="return M.digit(event);" maxlength="20">
+                        <label for="phone_no">Phone Number*</label>
                     </div>
                 </div>
             </div>`;
@@ -601,60 +582,57 @@ function getTeacherProfessionalDetailsContent(stup){
         <input type="hidden" id="lastSalarySlip" value="${stup.uploadDocumentLastSalarySlip}" />
         <h3 id="second_step">Professional Details</h3>
         <div class="form-row">
-            <div class="form-holder">
-                <div class="icon-field valid-field">
-                    <i class="zmdi zmdi-book"></i>
-                    <select class="select_dropdown" id="highestQualificationId" name="highestQualificationId">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-book"></i>
+                <div class="custom-field">
+                    <select class="select_dropdown form-control-field" id="highestQualificationId" name="highestQualificationId">
                         <option value="">Highest Education Degree *</option>`
                         $.each(getHeighestEducation(), function(index, qualification){
                             html+= `<option value="${index}">${qualification}</option>`;
                         });
                     html+=`</select>
+                    <label for="highestQualificationId">Highest Education Degree*</label>
                 </div>
             </div>
-            <div class="form-holder">
-                <div class="icon-field valid-field">
-                    <i class="zmdi zmdi-book"></i>
-                    <input type="text" class="form-control-field valid" id="teacherSubjectSpecialization" name="teacherSubjectSpecialization" placeholder="Enter Degree Specialization*" onkeydown="return M.isAddressLine(event);" value="${escapeCharacters(stup.teacherSubjectSpecialization)}" maxlength="100" style="text-transform:capitalize" aria-required="true" aria-invalid="false">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-holder">
-                <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="icon-field valid-field">
-                            <i class="zmdi zmdi-calendar"></i>
-                            <select id="totalExperianceFromYYYY" name="totalExperianceFromYYYY" class="select_dropdown" name="gender">
-                                <option selected value="">Experience In Years*</option>`
-                                $.each(getTotalExpYears(), function(index, years){
-                                    html+=`<option value="${index}">${years}</option>`
-                                })
-                            html+=`</select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-holder">
-                <div class="icon-field valid-field">
-                    <i class="zmdi zmdi-case"></i> <input type="text"
-                        class="form-control-field"
-                        id="lastOrganizationName"
-                        name="lastOrganizationName"
-                        placeholder="Last Organization Name*"
-                        onkeydown="return M.isAddressLine(event);"
-                        value="${escapeCharacters(stup.lastOrganizationName)}"
-                        maxlength="100" style="text-transform:capitalize" >
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-book"></i>
+                <div class="custom-field">
+                    <input type="text" class="form-control-field valid" id="teacherSubjectSpecialization" name="teacherSubjectSpecialization" placeholder=" " onkeydown="return M.isAddressLine(event);" value="${escapeCharacters(stup.teacherSubjectSpecialization)}" maxlength="100" style="text-transform:capitalize" aria-required="true" aria-invalid="false">
+                    <label for="teacherSubjectSpecialization">Enter Degree Specialization*</label>
                 </div>
             </div>
         </div>
 
         <div class="form-row">
-            <div class="form-holder">
-                <div class="icon-field textarea-icon  valid-field">
-                    <i class="zmdi zmdi-case"></i>
-                    <textarea class="form-control-field" id="lastJobDesc" name="lastJobDesc" placeholder="Why Should We Hire You? (Describe how you stand out from other online teachers highlighting your expertise) *" onkeydown="return M.isAddressLine(event);" rows="2" style="text-transform:initial" maxlength="200">${escapeCharacters(stup.lastJobDesc)}</textarea>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-calendar"></i>
+                <div class="custom-field">
+                    <select id="totalExperianceFromYYYY" name="totalExperianceFromYYYY" class="select_dropdown form-control-field">
+                        <option selected value="">Experience In Years*</option>`
+                        $.each(getTotalExpYears(), function(index, years){
+                            html+=`<option value="${index}">${years}</option>`
+                        })
+                    html+=`</select>
+                    <label for="totalExperianceFromYYYY">Experience In Years*</label>
+                </div>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-case"></i>
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" id="lastOrganizationName" name="lastOrganizationName"
+                        placeholder=" " onkeydown="return M.isAddressLine(event);"
+                        value="${escapeCharacters(stup.lastOrganizationName)}" maxlength="100" style="text-transform:capitalize" >
+                    <label for="lastOrganizationName">Last Organization Name*</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-case"></i>
+                <div class="custom-field">
+                    <textarea class="form-control-field" id="lastJobDesc" name="lastJobDesc" placeholder=" " onkeydown="return M.isAddressLine(event);" rows="2" style="text-transform:initial" maxlength="200">${escapeCharacters(stup.lastJobDesc)}</textarea>
+                    <label for="lastJobDesc">Why Should We Hire You?*</label>
                 </div>
             </div>
         </div>
@@ -744,22 +722,23 @@ function getTeacherProfessionalDetailsContent(stup){
         
         if(stup.demoVedioLink != null && stup.demoVedioLink != undefined && stup.demoVedioLink != ""){
             html+=`<div class="form-row">
-                <div class="form-holder des-holder">
+                <div class="form-holder des-holder valid-field">
                     <div class="form-group">
-                        <div class="icon-field error-top-0  valid-field">
-                            <a class="primary-txt-color" data-toggle="modal" data-target="#vedioInstruction"> <i
+                        <a class="primary-txt-color" data-toggle="modal" data-target="#vedioInstruction"> <i
                                 class="zmdi zmdi-info" data-toggle="tooltip" title=""
                                 data-original-title="Demo Video Instructions"></i>
-                            </a>
+                        </a>
+                        <div class="custom-field">
                             <input
                                 type="text"
                                 onkeydown="return M.isAddressLine(event);"
                                 class="form-control-field"
                                 id="demoVedioLink"
                                 name="demoVedioLink"
-                                placeholder="Please provide a link of your demo*"
+                                placeholder=" "
                                 value="${escapeCharacters(stup.demoVedioLink)}"
                             />
+                            <label for="demoVedioLink">Please provide a link of your demo*</label>
                         </div>
                         <span>The link should be publicly accessible e.g. public
                             YouTube, or Google Drive links (Click on the info icon for the
@@ -973,37 +952,29 @@ function getTeacherVerificationDetailsContent(data){
                 <p style="color: red; margin-bottom: 15px">You can add links to all your social media profiles. However, adding at least one profile link in mandatory(*).</p>
                 <div class="form-row mb-2">
                     <div class="form-holder" style="flex: 1; min-width: 250px;">
-                        <div class="form-group">
-                            <label for="linkedinProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
-                                LinkedIn Profile URL
-                            </label>
-                            <input id="linkedinProfileUrl" name="linkedinProfileUrl" type="text" class="form-control-field" placeholder="LinkedIn Profile URL" value="${checkValueValidation(data.teacherVerification.linkedIn, "")}">
+                        <div class="custom-field">
+                            <input id="linkedinProfileUrl" name="linkedinProfileUrl" type="text" class="form-control-field" placeholder=" " value="${checkValueValidation(data.teacherVerification.linkedIn, "")}">
+                            <label for="linkedinProfileUrl">LinkedIn Profile URL</label>
                         </div>
                     </div>
                     <div class="form-holder" style="flex: 1; min-width: 250px;">
-                        <div class="form-group">
-                            <label for="facebookProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
-                                Facebook Profile URL
-                            </label>
-                            <input id="facebookProfileUrl" name="facebookProfileUrl" type="text" class="form-control-field" placeholder="Facebook Profile URL" value="${checkValueValidation(data.teacherVerification.facebook, "")}">
+                        <div class="custom-field">
+                            <input id="facebookProfileUrl" name="facebookProfileUrl" type="text" class="form-control-field" placeholder=" " value="${checkValueValidation(data.teacherVerification.facebook, "")}">
+                            <label for="facebookProfileUrl">Facebook Profile URL</label>
                         </div>
                     </div>
                     <div class="form-holder" style="flex: 1; min-width: 250px;">
-                        <div class="form-group">
-                            <label for="instagramProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
-                                Instagram Profile URL
-                            </label>
-                            <input id="instagramProfileUrl" name="instagramProfileUrl" type="text" class="form-control-field" placeholder="Instagram Profile URL" value="${checkValueValidation(data.teacherVerification.instagram, "")}">
+                        <div class="custom-field">
+                            <input id="instagramProfileUrl" name="instagramProfileUrl" type="text" class="form-control-field" placeholder=" " value="${checkValueValidation(data.teacherVerification.instagram, "")}">
+                            <label for="instagramProfileUrl">Instagram Profile URL</label>
                         </div>
                     </div>
                 </div>
                 <div class="form-row mt-2">
                     <div class="form-holder" style="width: 500px !important;">
-                        <div class="form-group">
-                            <label for="twitterProfileUrl" class="mb-2" style="font-size: 16px; font-weight: 600;">
-                                X (Twitter) Profile URL
-                            </label>
-                            <input id="twitterProfileUrl" name="twitterProfileUrl" type="text" class="form-control-field" placeholder="Twitter/X Profile URL" value="${checkValueValidation(data.teacherVerification.twitter, "")}">
+                        <div class="custom-field">
+                            <input id="twitterProfileUrl" name="twitterProfileUrl" type="text" class="form-control-field" placeholder=" " value="${checkValueValidation(data.teacherVerification.twitter, "")}">
+                            <label for="twitterProfileUrl">X (Twitter) Profile URL</label>
                         </div>
                     </div>
                 </div>
@@ -1055,31 +1026,55 @@ function getTeacherVerificationDetailsContent(data){
                     <h6 class="mb-1" style="font-weight: bold;color: gray;">Reference 1<sup class="text-danger">*</sup></h6>
                     <div class="form-row d-flex flex-wrap gap-3">
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference1Name" type="text" class="form-control-field" placeholder="Name" value="${data.employeeReference?.[0]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
+                            <div class="custom-field">
+                                <input id="reference1Name" type="text" class="form-control-field" placeholder=" " value="${data.employeeReference?.[0]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
+                                <label for="reference1Name">Name</label>
+                            </div>
                         </div>
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference1Email" type="email" class="form-control-field" placeholder="Email" value="${data.employeeReference?.[0]?.email || ''}" maxlength="50">
+                            <div class="custom-field">
+                                <input id="reference1Email" type="email" class="form-control-field" placeholder=" " value="${data.employeeReference?.[0]?.email || ''}" maxlength="50">
+                                <label for="reference1Email">Email</label>
+                            </div>
                         </div>
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference1Phone" type="tel" class="form-control-field" placeholder="Phone Number" value="${data.employeeReference?.[0]?.number || ''}" maxlength="20">
+                            <div class="custom-field">
+                                <input id="reference1Phone" type="tel" class="form-control-field" placeholder=" " value="${data.employeeReference?.[0]?.number || ''}" maxlength="20">
+                                <label for="reference1Phone">Phone Number</label>
+                            </div>
                         </div>
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference1Designation" type="text" class="form-control-field" placeholder="Designation" value="${data.employeeReference?.[0]?.designation || ''}" maxlength="50">
+                            <div class="custom-field">
+                                <input id="reference1Designation" type="text" class="form-control-field" placeholder=" " value="${data.employeeReference?.[0]?.designation || ''}" maxlength="50">
+                                <label for="reference1Designation">Designation</label>
+                            </div>
                         </div>
                     </div>
                     <h6 class="mt-2 mb-1" style="font-weight: bold;color: gray;">Reference 2<sup class="text-danger">*</sup></h6>
                     <div class="form-row d-flex flex-wrap gap-3">
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference2Name" type="text" class="form-control-field" placeholder="Name" value="${data.employeeReference?.[1]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
+                            <div class="custom-field">
+                                <input id="reference2Name" type="text" class="form-control-field" placeholder=" " value="${data.employeeReference?.[1]?.name || ''}" onkeydown="return M.isChars(event);" maxlength="50">
+                                <label for="reference2Name">Name</label>
+                            </div>
                         </div>
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference2Email" type="email" class="form-control-field" placeholder="Email" value="${data.employeeReference?.[1]?.email || ''}" maxlength="50">
+                            <div class="custom-field">
+                                <input id="reference2Email" type="email" class="form-control-field" placeholder=" " value="${data.employeeReference?.[1]?.email || ''}" maxlength="50">
+                                <label for="reference2Email">Email</label>
+                            </div>
                         </div>
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference2Phone" type="tel" class="form-control-field" placeholder="Phone Number" value="${data.employeeReference?.[1]?.number || ''}" maxlength="20">
+                            <div class="custom-field">
+                                <input id="reference2Phone" type="tel" class="form-control-field" placeholder=" " value="${data.employeeReference?.[1]?.number || ''}" maxlength="20">
+                                <label for="reference2Phone">Phone Number</label>
+                            </div>
                         </div>
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
-                            <input id="reference2Designation" type="text" class="form-control-field" placeholder="Designation" value="${data.employeeReference?.[1]?.designation || ''}" maxlength="50">
+                            <div class="custom-field">
+                                <input id="reference2Designation" type="text" class="form-control-field" placeholder=" " value="${data.employeeReference?.[1]?.designation || ''}" maxlength="50">
+                                <label for="reference2Designation">Designation</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1259,7 +1254,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Account Currency <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-money"></i>
                                 <select name="accountCurrency" id="accountCurrency" class="form-control-field form-control secondary-focus-border-color">
                                 </select>
@@ -1269,7 +1264,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Account Number <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-account"></i>
                                 <input id="accountNumber" name="accountNumber" type="text"
                                     value="" autocomplete="off"
@@ -1282,7 +1277,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">IBAN (If Available)</label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-account-calendar"></i>
                                 <input id="iban" name="iban" type="text" autocomplete="off"
                                     value=""
@@ -1293,7 +1288,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Account Type <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-balance"></i>
                                 <select name="accountCategory" id="accountCategory" class="form-control-field form-control secondary-focus-border-color">
                                 </select>
@@ -1309,7 +1304,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">First <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-account"></i>
                                 <input id="accountHolderFirstName" name="accountHolderFirstName" type="text"
                                     value="" autocomplete="off"
@@ -1322,7 +1317,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Middle</label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-account"></i>
                                 <input id="accountHolderMiddleName" name="accountHolderMiddleName" type="text"
                                     value="" autocomplete="off"
@@ -1335,7 +1330,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Last <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-account"></i>
                                 <input id="accountHolderLastName" name="accountHolderLastName" type="text"
                                     value="" autocomplete="off"
@@ -1350,7 +1345,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Account Holder Address<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i> <input 
                                 type="text" maxlength="100" 
                                 id="accountHolderAddress"  
@@ -1368,7 +1363,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label>Country <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <select class="select_dropdown form-control-field " name="accountHolderCountryId" id="accountHolderCountryId"></select>
                             </div>
@@ -1377,7 +1372,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label>State <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <select class="select_dropdown form-control-field " name="accountHolderStateId" id="accountHolderStateId"></select>
                             </div>
@@ -1386,7 +1381,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label>City <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <select class="select_dropdown form-control-field " name="accountHolderCityId" id="accountHolderCityId"></select>
                             </div>
@@ -1398,7 +1393,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Postal Code<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <input id="accountHolderPostal" name="accountHolderPostal" type="text"
                                     autocomplete="off" value=""
@@ -1409,7 +1404,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Phone No.<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-phone"></i>
                                 <input id="accountHolderPhone"  name="accountHolderPhone" value="" 
                                     type="text" autocomplete="off"
@@ -1422,7 +1417,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Email-ID<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-email"></i>
                                 <input id="accountHolderEmail" value="" 
                                     name="accountHolderEmail" type="text" autocomplete="off"
@@ -1437,7 +1432,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Bank Name <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-city-alt"></i> 
                                 <input type="text" id="bankName" name="bankName"
                                     value=""
@@ -1450,7 +1445,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Bank Branch Name<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-city-alt"></i> <input
                                     class="form-control-field form-control secondary-focus-border-color"
                                     onkeydown="return M.isChars(event);" id="bankBranchName" type="text"
@@ -1464,7 +1459,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Bank Branch Address<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i> <input 
                                 type="text" maxlength="100" 
                                 id="bankBranchAddress"  
@@ -1482,7 +1477,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label>Country <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <select class="select_dropdown form-control-field " name="bankCountryId" id="bankCountryId"></select>
                             </div>
@@ -1491,7 +1486,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label>State <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <select class="select_dropdown form-control-field " name="bankStateId" id="bankStateId"></select>
                             </div>
@@ -1500,7 +1495,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label>City <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <select class="select_dropdown form-control-field " name="bankCityId" id="bankCityId"></select>
                             </div>
@@ -1511,7 +1506,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Postal Code <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <input id="bankPostal" name="bankPostal" type="text"
                                     autocomplete="off" value=""
@@ -1522,7 +1517,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Other Details</label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-pin"></i>
                                 <input id="otherDetails" name="otherDetails" type="text"
                                     autocomplete="off" value=""
@@ -1536,7 +1531,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Bank Swift Code (If Applicable)</label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-code"></i>
                                 <input type="text" id="swiftCode" name="swiftCode"
                                     value=""
@@ -1549,7 +1544,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">Bank IFSC Code (If Applicable)</label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-code"></i> 
                                 <input type="text" id="bankIfsc" name="bankIfsc"
                                     value=""
@@ -1562,7 +1557,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder">
                         <div class="form-group">
                             <label class="secondary-txt-color">IBAN/Routing Number (If Applicable)</label>
-                            <div class="icon-field  valid-field">
+                            <div class="icon-field valid-field custom-field">
                                 <i class="zmdi zmdi-account"></i> <input
                                     class="form-control-field form-control secondary-focus-border-color"
                                     id="routeNumber" type="text" name="routeNumber"
