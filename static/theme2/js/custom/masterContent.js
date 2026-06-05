@@ -1087,7 +1087,7 @@ function getAccountCategory(){
 	return {"Savings":"Savings","Checking":"Checking","Current":"Current"};
 }
 function getAccountCategoriesOption(preSelected){
-	var html='<option value="">Select Account Type</option>'
+	var html='<option value=" ">Select Account Type</option>'
 	$.each(getAccountCategory(), function(k, v) {
 		html+='<option value="'+k+'" '+(preSelected==k?'selected':'')+' >'+k+'</option>';
 	});

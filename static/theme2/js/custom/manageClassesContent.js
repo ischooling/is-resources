@@ -269,89 +269,113 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 	});
 	return html;
 }
+function addManageClassesFilterCss(){
+	if($('#manageClassesFilterCss').length > 0){
+		return;
+	}
+	$('head').append('<style id="manageClassesFilterCss">'
+		+'#classroomSessionFilter #standardIdDiv .custom-field:has(#standardId option:checked[value=""]) label:not(.error-msg){top:48% !important;transform:translateY(-50%) !important;font-size:16px !important;font-weight:400 !important;color:var(--custom-field-default-text) !important;background:var(--custom-field-bg) !important;z-index:5;}'
+		+'#classroomSessionFilter #standardIdDiv .custom-field:has(#standardId option:checked[value=""]) .select2-selection--single{border-color:var(--custom-field-default) !important;}'
+		+'#classroomSessionFilter #standardIdDiv .custom-field:has(#standardId option:checked[value=""]) .select2-selection__rendered{color:transparent !important;}'
+		+'#classroomSessionFilter #standardIdDiv .custom-field:has(#standardId option:checked[value=""]) select{border-color:var(--custom-field-default) !important;}'
+	+'</style>');
+}
+function initManageClassesFilterSelect2(){
+	setTimeout(function(){
+		$('#classroomSessionFilter #enrollmentType').select2();
+		$('#classroomSessionFilter #classCreateFor').select2();
+		$('#classroomSessionFilter #standardId').select2();
+		$('#classroomSessionFilter #courseProviderId').select2();
+		$('#classroomSessionFilter #markStatus').select2();
+		$('#classroomSessionFilter #classStatus').select2();
+		$('#classroomSessionFilter #searchBy').select2();
+		$('#classroomSessionFilter #sortBy').select2();
+		if(typeof refreshCustomFieldState == 'function'){
+			refreshCustomFieldState($('#classroomSessionFilter'));
+		}
+	}, 0);
+}
 function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
+	addManageClassesFilterCss();
+	function classroomFilterField(colClass, fieldHtml, styleAttr, fieldClass){
+		return '<div class="'+colClass+'" '+(styleAttr || '')+'>'
+			+'<div class="input-group position-relative custom-field '+(fieldClass || '')+' mb-2 mt-3 p-0">'
+				+fieldHtml
+			+'</div>'
+		+'</div>';
+	}
+	var searchByOptions = role!='TEACHER'
+		? '<option value="A">Admin</option><option value="S">Student</option><option value="T">Teacher</option>'
+		: '<option value="S">Student</option>';
 	var html=
 	'<div class="filter-wrapper">'
 		+'<div class="full">'
 		+'<button class="btn btn-sm btn-primary float-right show-filter" onClick="toggleFilter(\'classroomSessionFilter\')"><i class="fa fa-filter"></i>&nbsp;Advance Search</button>'
 		+'</div>'
 		+'<form name="classroomSessionFilter" id="classroomSessionFilter" action="javascript:void(0)">'
-			+'<div class="filter-fields d-flex flex-wrap">';
+			+'<div class="filter-fields d-flex flex-wrap custom-field-scope">';
 				if(role!='TEACHER'){
-					html+='<div class="col-md-3 col-sm-3 col-xs-12">'
-						+ '<label>Select Academic Year</label>'
-						+ '<select name="sessionId" id="sessionId" class="form-control" multiple></select>'
-					+ '</div>'
-					+'<div class="col-md-3 col-sm-3 col-xs-12">'
-						+'<label>Select Learning Program</label>'
-						+'<select name="enrollmentType" id="enrollmentType" class="form-control">'
+					html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+						'<select name="sessionId" id="sessionId" class="form-control-field" multiple></select>'
+						+'<label for="sessionId">Select Academic Year</label>', '', 'active')
+					+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+						'<select name="enrollmentType" id="enrollmentType" class="form-control-field">'
 							+'<option value="">Select Learning Program</option>'
 							+getLearningProgramContent(schoolId)
 						+'</select>'
-					+'</div>';
+						+'<label for="enrollmentType">Select Learning Program</label>', '', 'active');
 				}
-				html+='<div class="col-md-3 col-sm-3 col-xs-12">'
-						+'<label>Select Class For</label>'
-						+'<select name="classCreateFor" id="classCreateFor" class="form-control">'
+				html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+					'<select name="classCreateFor" id="classCreateFor" class="form-control-field">'
 							+'<option value="ALL" selected>ALL</option>'
 							+'<option value="STUDENT_DOUBT_SESSION">One Day Class</option>'
 							+'<option value="PTM">PTM</option>'
 							+'<option value="CUSTOM">CUSTOM</option>'
 						+'</select>'
-					+'</div>';
-				html+='<div class="col-md-3 col-sm-3 col-xs-12">'
-						+'<label>Grade</label>'
-						+'<select name="standardId" id="standardId" class="form-control">'
-							+'<option value="">Select Grade</option>'
+						+'<label for="classCreateFor">Select Class For</label>', '', 'active');
+				html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+					'<select name="standardId" id="standardId" class="form-control-field">'
+							+'<option value="" disabled selected>Grade</option>'
 							+getStandardContent(schoolId,false, false)
 						+'</select>'
-				+'</div>';
+						+'<label for="standardId">Grade</label>', 'id="standardIdDiv"');
 				if(role!='TEACHER'){
-					html+='<div class="col-md-3 col-sm-3 col-xs-12">'
-								+'<label>Select LMS Platform</label>'
-								+'<select name="courseProviderId" id="courseProviderId" class="form-control">'
+					html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+						'<select name="courseProviderId" id="courseProviderId" class="form-control-field">'
 									+getLmsPlatformContent(schoolId)
 								+'</select>'
-						+'</div>';
+								+'<label for="courseProviderId">Select LMS Platform</label>', '', 'active');
 				}
 				if(role!='TEACHER'){
-					html+='<div class="col-md-3 col-sm-6 col-xs-12">'
-						+'<label>Student ID</label>'
-						+'<input type="text" name="studentId" id="studentId" class="form-control" value="" maxlength="100">'
-					+'</div>';
+					html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+						'<input type="text" name="studentId" id="studentId" class="form-control-field" value="" maxlength="100" placeholder=" ">'
+						+'<label for="studentId">Student ID</label>');
 				}
-				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
-						+'<label>Student Name</label>'
-						+'<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);">'
-					+'</div>';
-				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
-					+'<label>Course Name</label>'
-					+'<input type="text" name="subjectIds" id="subjectIds" class="form-control" value="" maxlength="40" onkeydown="return M.isChars(event);">'
-				+'</div>';
+				html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+					'<input type="text" name="studentName" id="studentName" class="form-control-field" value="" maxlength="100" placeholder=" " onkeydown="return M.isChars(event);">'
+					+'<label for="studentName">Student Name</label>');
+				html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+					'<input type="text" name="subjectIds" id="subjectIds" class="form-control-field" value="" maxlength="40" placeholder=" " onkeydown="return M.isChars(event);">'
+					+'<label for="subjectIds">Course Name</label>');
 				if(role!='TEACHER'){
-					html+='<div class="col-md-3 col-sm-6 col-xs-12">'
-						+'<label>Teacher Name</label>'
-						+'<input type="text" name="teacherName" id="teacherName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);">'
-					+'</div>'
-					+'<div class="col-md-3 col-sm-6 col-xs-12">'
-						+'<label>Employee ID</label>'
-						+'<input type="text" name="employeeId" id="employeeId" class="form-control" value="" maxlength="100"/>'
-					+'</div>'
-					+'<div class="col-md-3 col-sm-6 col-xs-12">'
-						+'<label>Teacher Email</label>'
-						+'<input type="text" name="teacherEmail" id="teacherEmail" class="form-control" value="" maxlength="100" onkeydown="return M.isEmail(event);"/>'
-					+'</div>'
-					+'<div class="col-md-3 col-sm-3 col-xs-12">'
-						+'<label>Booking Status</label>'
-						+'<select name="classStatus" id="classStatus" class="form-control">'
+					html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+						'<input type="text" name="teacherName" id="teacherName" class="form-control-field" value="" maxlength="100" placeholder=" " onkeydown="return M.isChars(event);">'
+						+'<label for="teacherName">Teacher Name</label>')
+					+classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+						'<input type="text" name="employeeId" id="employeeId" class="form-control-field" value="" maxlength="100" placeholder=" "/>'
+						+'<label for="employeeId">Employee ID</label>')
+					+classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+						'<input type="text" name="teacherEmail" id="teacherEmail" class="form-control-field" value="" maxlength="100" placeholder=" " onkeydown="return M.isEmail(event);"/>'
+						+'<label for="teacherEmail">Teacher Email</label>')
+					+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+						'<select name="classStatus" id="classStatus" class="form-control-field">'
 							+'<option value="">Select Booking Status</option>'
 							+'<option value="B">Booked</option>'
 							// +'<option value="A">Available</option>'
 						+'</select>'
-					+'</div>'
-					+'<div class="col-md-3 col-sm-3 col-xs-12">'
-						+'<label>Class Status</label>'
-						+'<select name="markStatus" id="markStatus" class="form-control">'
+						+'<label for="classStatus">Booking Status</label>', '', 'active')
+					+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+						'<select name="markStatus" id="markStatus" class="form-control-field">'
 							+'<option value="">Select Class Status</option>'
 							+'<option value="NU">Not Updated</option>'
 							+'<option value="Completed">Completed</option>'
@@ -359,12 +383,11 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="Missed by Student">Missed by Student</option>'
 							+'<option value="Missed by Teacher">Missed by Teacher</option>'
 						+'</select>'
-					+'</div>';
+						+'<label for="markStatus">Class Status</label>', '', 'active');
 				}
-				html+='<div class="col-md-3 col-sm-6 col-xs-12">'
-					+'<label>Class Start Date</label>'
-					+'<input type="text" name="classStartDate" id="classStartDate" class="form-control filterDates" value="" maxlength="10" readonly onkeydown="return false"/>'
-				+'</div>'
+				html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+					'<input type="text" name="classStartDate" id="classStartDate" class="form-control-field filterDates" value="" maxlength="10" placeholder=" " readonly onkeydown="return false"/>'
+					+'<label for="classStartDate">Class Start Date</label>')
 				// +'<div class="col-md-3 col-sm-6 col-12 mb-2">'
 				// 	+'<label>Class Start Time</label>'
 				// 	+'<select name="classStartTime" id="classStartTime" class="form-control">'
@@ -372,10 +395,9 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 				// 		+getHoursAndMins(23,1)
 				// 	+'</select>'
 				// +'</div>'
-				+'<div class="col-md-3 col-sm-6 col-12 mb-2">'
-					+'<label>Class End Date</label>'
-					+'<input type="text" name="classEndDate" id="classEndDate" class="form-control filterDates" value="" maxlength="10" readonly onkeydown="return false"/>'
-				+'</div>'
+				+classroomFilterField('col-md-3 col-sm-6 col-12 mb-2',
+					'<input type="text" name="classEndDate" id="classEndDate" class="form-control-field filterDates" value="" maxlength="10" placeholder=" " readonly onkeydown="return false"/>'
+					+'<label for="classEndDate">Class End Date</label>')
 				// +'<div class="col-md-3 col-sm-6 col-12 mb-2">'
 				// 	+'<label>Class End Time</label>'
 				// 	+'<select name="classEndTime" id="classEndTime" class="form-control">'
@@ -383,29 +405,20 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 				// 		+getHoursAndMins(23,1)
 				// 	+'</select>'
 				// +'</div>'
-				+'<div class="col-md-3 col-sm-3 col-xs-12" style="display:'+(role=='TEACHER'?'none':'block')+';">'
-					+'<label>Search By</label>'
-					+'<select name="searchBy" id="searchBy" class="form-control">';
-						if(role!='TEACHER'){
-							html+='<option value="A">Admin</option>'
-							+'<option value="S">Student</option>'
-							+'<option value="T">Teacher</option>';
-						}else{
-							html+='<option value="S">Student</option>';
-						}
-			html+='</select>'
-				+'</div>'
-				+'<div class="col-md-3 col-sm-3 col-xs-12">'
-					+'<label>Sort By</label>'
-					+'<select name="sortBy" id="sortBy" class="form-control">'
+				+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+					'<select name="searchBy" id="searchBy" class="form-control-field">'
+						+searchByOptions
+					+'</select>'
+					+'<label for="searchBy">Search By</label>', 'style="display:'+(role=='TEACHER'?'none':'block')+';"', 'active')
+				+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+					'<select name="sortBy" id="sortBy" class="form-control-field">'
 						+'<option value="DESC">Descending</option>'
 						+'<option value="ASC">Ascending</option>'
 					+'</select>'
-				+'</div>'
-				+'<div class="col-md-3 col-sm-6 col-xs-12">'
-					+'<label>Page Size</label>'
-							+'<input type="text" name="pageSize" id="pageSize" class="form-control" value="25"/>'
-						+'</div>'
+					+'<label for="sortBy">Sort By</label>', '', 'active')
+				+classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+					'<input type="text" name="pageSize" id="pageSize" class="form-control-field" value="25" placeholder=" "/>'
+					+'<label for="pageSize">Page Size</label>')
 						+'<div class="col-md-12 col-sm-12 col-xs-12 mt-2 text-right">'
 							+'<button class="btn btn-sm btn-danger mr-2" onclick="advanceManageClassroomSearchReset(\'classroomSessionFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
 							+'<button class="btn btn-sm btn-success" onclick="advanceClassroomSearch(\'classroomSessionFilter\',\''+roleAndModule.moduleId+'\','+userId+',\''+role+'\');"><i class="fa fa-search"></i>&nbsp;Search</button>'
@@ -413,6 +426,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 					+'</div>'
 				+'</form>'
 			+'</div>';
+	initManageClassesFilterSelect2();
 	return html;
 }
 

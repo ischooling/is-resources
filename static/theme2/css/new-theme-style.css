@@ -31851,7 +31851,7 @@ table td.child ul li{white-space: normal;}
 .filter-wrapper{width:100%;display:inline-block;}
 .filter-wrapper button{margin-bottom:10px;}
 .filter-wrapper button:focus{outline:none}
-.filter-fields{width:100%;float:left; border:1px solid var(--pc);background:var(--plc);padding:15px 0;}
+.filter-fields{width:100%;float:left; border:1px solid var(--pc);padding:15px 0;}
 .filter-fields label{color:var(--pc) !important}
 
 @media(max-width: 990px){

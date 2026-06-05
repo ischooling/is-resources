@@ -1694,9 +1694,9 @@ function getCourseSelectionContent(csr){
 			html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 		}else{
 			if(csr.registrationType == 'BATCH'){
-				html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
+				html+='<span class="alternate-txt-color course-selection-title-text" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 			}else{
-				html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Course Selection For</span>';
+				html+='<span class="alternate-txt-color course-selection-title-text" style="margin-bottom:0;white-space:nowrap;">Course Selection For</span>';
 			}
 		}
 		if(csr.courseProviderId == 39){

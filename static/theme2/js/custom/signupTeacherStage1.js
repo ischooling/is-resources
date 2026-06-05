@@ -10,6 +10,9 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 			
 		}else{
 			itiContcat = window.intlTelInput(inputContact);
+			if(typeof refreshCustomFieldState === "function"){
+				refreshCustomFieldState($(inputContact).closest(".custom-field"));
+			}
 			if(IGNORECOUNTRYARRAY.includes(signupTeacher.countryData) || signupTeacher.countryData == '' || signupTeacher.countryData == undefined || signupTeacher.countryData == null) {
 			  itiContcat.setCountry('us');
 			   }else{
@@ -18,6 +21,9 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 			inputContact.addEventListener('countrychange', function(e) {
 				$('#countryData').val(itiContcat.getSelectedCountryData().iso2);
 				$('#countryIsd').val(itiContcat.getSelectedCountryData().dialCode);
+				if(typeof refreshCustomFieldState === "function"){
+					refreshCustomFieldState($(inputContact).closest(".custom-field"));
+				}
 			});
 			scriptExecuted = true;
 		}

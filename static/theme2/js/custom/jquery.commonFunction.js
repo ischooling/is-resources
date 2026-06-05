@@ -6321,7 +6321,7 @@ function callWithSession(url, isSelf) {
       openZoomJoinInAppOrFallback(url);
     }
   } else {
-    redirectLoginPage();
+    logout("?from=session-out");
   }
 }
 
@@ -6392,7 +6392,7 @@ function callWithSessionWithGetAsPost(url, isSelf) {
   if (getSession()) {
     getAsPost(url, isSelf);
   } else {
-    redirectLoginPage();
+    logout("?from=session-out");
   }
 }
 var debouncing = function (mainFun, delay) {

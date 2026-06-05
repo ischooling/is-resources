@@ -37,11 +37,42 @@ function getManageAdminTasksTableBody(result, userId, role){
 	return html;
 }
 
+function getAdminTaskCustomField(columnClass, label, fieldHtml){
+	return '<div class="'+columnClass+'">'
+		+'<div class="custom-field">'
+			+fieldHtml
+			+'<label>'+label+'</label>'
+		+'</div>'
+	+'</div>';
+}
+
+function getAdminTaskTextInput(name, id, value, extraClass, extraAttr){
+	value = value == undefined ? '' : value;
+	extraClass = extraClass == undefined ? '' : extraClass;
+	extraAttr = extraAttr == undefined ? '' : extraAttr;
+	return '<input type="text" name="'+name+'" id="'+id+'" class="form-control '+extraClass+'" value="'+value+'" placeholder=" " '+extraAttr+'/>';
+}
+
+function getAdminTaskSelect(name, id, options, extraAttr){
+	extraAttr = extraAttr == undefined ? '' : extraAttr;
+	return '<select name="'+name+'" id="'+id+'" class="form-control" '+extraAttr+'>'
+		+options
+	+'</select>';
+}
+
+function refreshAdminTaskCustomFields(formId){
+	if(typeof refreshCustomFieldState == 'function'){
+		setTimeout(function(){
+			refreshCustomFieldState($('#'+formId));
+		}, 0);
+	}
+}
+
 function getAdminTasksFilter(roleAndModule, schoolId, userId, role){
 	var html=
 	'<div class="row">'
 		+'<div class="col-md-12">'
-			+'<div class="filter-wrapper">'
+			+'<div class="filter-wrapper custom-field-scope">'
 			    if(role=='TEACHER'){
 					html+='<div id="showMessage" class="font-weight-bold full text-center text-primary"></div>';
 				}
@@ -71,31 +102,32 @@ function getAdminTasksFilter(roleAndModule, schoolId, userId, role){
 				+'<form name="adminTaskFilter" id="adminTaskFilter" action="javascript:void(0)">';
 					{tt == "theme1"? html+='<div class="filter-fields row">':html+='<div class="filter-fields d-flex flex-wrap">'}
 						if(role!='TEACHER'){
-							html+='<div class="col-md-3 col-sm-6 col-12">'
-									+'<label>Select Teacher</label>'
-									+'<select name="userId" id="userId" class="form-control">'
-									+'</select>'
-								+'</div>';
+							html+=getAdminTaskCustomField(
+								'col-md-3 col-sm-6 col-12',
+								'Select Teacher',
+								getAdminTaskSelect('userId', 'userId', '')
+							);
 						}
-						html+='<div class="col-md-3 col-sm-6 col-12">'
-							+'<label> Start Date</label>'
-							+'<input type="text" name="taskStartDate" id="taskStartDate" class="form-control filterDates" value="" maxlength="10"/>'
-						+'</div>'
-						+'<div class="col-md-3 col-sm-6 col-12">'
-							+'<label>End Date</label>'
-							+'<input type="text" name="taskEndDate" id="taskEndDate" class="form-control filterDates" value="" maxlength="10"/>'
-						+'</div>'
-						+'<div class="col-md-3 col-sm-3 col-12">'
-							+'<label>Sort By</label>'
-							+'<select name="sortBy" id="sortBy" class="form-control">'
-								+'<option value="DESC">Descending</option>'
-								+'<option value="ASC">Ascending</option>'
-							+'</select>'
-						+'</div>'
-						+'<div class="col-md-3 col-sm-6 col-12">'
-							+'<label>Page Size</label>'
-							+'<input type="text" name="pageSize" id="pageSize" class="form-control" value="25"/>'
-						+'</div>'
+						html+=getAdminTaskCustomField(
+							'col-md-3 col-sm-6 col-12',
+							'Start Date',
+							getAdminTaskTextInput('taskStartDate', 'taskStartDate', '', 'filterDates', 'maxlength="10"')
+						)
+						+getAdminTaskCustomField(
+							'col-md-3 col-sm-6 col-12',
+							'End Date',
+							getAdminTaskTextInput('taskEndDate', 'taskEndDate', '', 'filterDates', 'maxlength="10"')
+						)
+						+getAdminTaskCustomField(
+							'col-md-3 col-sm-3 col-12',
+							'Sort By',
+							getAdminTaskSelect('sortBy', 'sortBy', '<option value="DESC">Descending</option><option value="ASC">Ascending</option>')
+						)
+						+getAdminTaskCustomField(
+							'col-md-3 col-sm-6 col-12',
+							'Page Size',
+							getAdminTaskTextInput('pageSize', 'pageSize', '25')
+						)
 						+'<div class="col-md-12 col-sm-12 col-12 mt-2">'
 							+'<button class="btn btn-sm btn-success float-right" onclick="advanceTeacherAdminTasksSearch(\'adminTaskFilter\',\''+roleAndModule.moduleId+'\','+userId+',\''+role+'\');"><i class="fa fa-check"></i>&nbsp;Apply</button>'
 						+'</div>'
@@ -104,6 +136,7 @@ function getAdminTasksFilter(roleAndModule, schoolId, userId, role){
 			+'</div>'
 		+'</div>'
 	+'</div>';
+	refreshAdminTaskCustomFields('adminTaskFilter');
 	return html;
 }
 

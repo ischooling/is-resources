@@ -24,6 +24,7 @@ function meetingDataByType(data, userId){
 		}
 		
 	}
+	refreshScheduleCustomFields('classroomSessionFilter');
 }
 
 function getMeetingTitle(){
@@ -33,6 +34,7 @@ function getMeetingTitle(){
 	var meetingSubject =  stname + " | " + subjectName;
 	
 	$('#classroomSessionFilter #meetingSubject').val(meetingSubject);
+	refreshScheduleCustomFields('classroomSessionFilter');
 	// getTeacherList('classroomSessionFilter');
 }
 
@@ -523,6 +525,9 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 		return false;
 	}
 	$(".meetingSlotAdd").prop("disabled", true);
+	$('#standardId').select2();
+	$('#startTimeHours').select2();
+	$('#startTimeMins').select2();
 	hideMessage('');
 	customLoader(true);
 	$.ajax({
@@ -619,10 +624,72 @@ function showHideMeetingCreationForm(data, moduleId){
 		customLoader(false);
 	}
 
+	refreshScheduleCustomFields('classroomSessionFilter');
 }
+function getScheduleCustomField(columnClass, label, fieldHtml, wrapperAttr){
+	wrapperAttr = wrapperAttr == undefined ? '' : wrapperAttr;
+	return '<div class="'+columnClass+'" '+wrapperAttr+'>'
+		+'<div class="custom-field">'
+			+fieldHtml
+			+'<label>'+label+'</label>'
+		+'</div>'
+	+'</div>';
+}
+
+function getScheduleTextInput(name, id, value, extraAttr){
+	value = value == undefined ? '' : value;
+	extraAttr = extraAttr == undefined ? '' : extraAttr;
+	return '<input type="text" name="'+name+'" id="'+id+'" class="form-control" value="'+value+'" placeholder=" " '+extraAttr+'>';
+}
+
+function getScheduleSelect(name, id, options, extraAttr){
+	extraAttr = extraAttr == undefined ? '' : extraAttr;
+	return '<select name="'+name+'" id="'+id+'" class="form-control" '+extraAttr+'>'
+		+options
+	+'</select>';
+}
+
+function refreshScheduleCustomFields(formId){
+	if(typeof refreshCustomFieldState == 'function'){
+		setTimeout(function(){
+			refreshCustomFieldState($('#'+formId));
+		}, 0);
+	}
+}
+
+function initScheduleClassSelect2(){
+	setTimeout(function(){
+		$('#standardId').select2();
+		$('#startTimeHours').select2();
+		$('#startTimeMins').select2();
+	}, 0);
+}
+
+function addScheduleStudentNameCss(){
+	if($('#scheduleStudentNameCss').length > 0){
+		return;
+	}
+	$('head').append('<style id="scheduleStudentNameCss">'
+		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field input,'
+		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field select{height:44px !important;line-height:44px !important;padding-top:0 !important;padding-bottom:0 !important;}'
+		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-container,'
+		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection--single{height:44px !important;min-height:44px !important;}'
+		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection__rendered{line-height:44px !important;padding-top:0 !important;padding-bottom:0 !important;}'
+		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection__arrow{height:44px !important;}'
+		+'.schedule-class-line-height-scope #classroomSessionFilter #studentNameDiv .select2-selection--single{display:flex !important;align-items:center !important;}'
+		+'.schedule-class-line-height-scope #classroomSessionFilter #studentNameDiv .select2-selection__rendered{line-height:normal !important;width:100%;}'
+		+'#classroomSessionFilter #studentNameDiv .custom-field label:not(.error-msg){z-index:20;background:#fff;}'
+		+'#classroomSessionFilter #studentNameDiv .custom-field.has-value label:not(.error-msg),'
+		+'#classroomSessionFilter #studentNameDiv .custom-field.active label:not(.error-msg),'
+		+'#classroomSessionFilter #studentNameDiv .custom-field:has(.select2-container--focus) label:not(.error-msg){top:0;transform:translateY(-46%);font-size:12px;font-weight:500;color:var(--custom-field-active);}'
+		+'#classroomSessionFilter #studentNameDiv .custom-field .select2-container{position:relative;z-index:1;}'
+	+'</style>');
+}
+
 function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
+	addScheduleStudentNameCss();
 	var html=
-	'<div class="filter-wrapper">'
+	'<div class="filter-wrapper custom-field-scope schedule-class-line-height-scope">'
 		// +'<div class="full">'
 		// +'<button class="btn btn-sm btn-primary float-right show-filter" onClick="toggleFilter(\'classroomSessionFilter\')"><i class="fa fa-filter"></i>&nbsp;Filter</button>'
 		// +'</div>'
@@ -638,112 +705,101 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 				html+='<input type="hidden" id="gradeName" name="gradeName" value="" />';
 				html+='<input type="hidden" id="controlType" name="controlType" value="${controlType}" />';
 				if(role!='TEACHER'){
-						html+='<div class="col-lg-3 col-md-4 col-sm-3 col-12 mb-3">'
-									+'<label>Select Learning Program</label>'
-									+'<select name="enrollmentType" id="enrollmentType" class="form-control">'
-										+getLearningProgramContent(schoolId)
-									+'</select>'
-								+'</div>';
-							}
-							if(role=='TEACHER'){
-								html+='<div class="col-lg-3 col-md-4 col-sm-3 col-12 mb-3 d-none" >'
-											+'<label>Create Class For</label>'
-											+'<select name="meetingType" id="meetingType" class="form-control" onchange=" meetingDataByType(this.value)" disabled>'
-												+'<option value="STUDENT_DOUBT_SESSION" selected disabled>Student</option>'
-												// +'<option value="SELF">Self</option>'
-											+'</select>'
-										+'</div>';
-							}
+					html+=getScheduleCustomField(
+						'col-lg-3 col-md-4 col-sm-3 col-12',
+						'Select Learning Program',
+						getScheduleSelect('enrollmentType', 'enrollmentType', getLearningProgramContent(schoolId))
+					);
+				}
+				if(role=='TEACHER'){
+					html+=getScheduleCustomField(
+						'col-lg-3 col-md-4 col-sm-3 col-12 d-none',
+						'Create Class For',
+						getScheduleSelect('meetingType', 'meetingType', '<option value="STUDENT_DOUBT_SESSION" selected disabled>Student</option>', 'onchange=" meetingDataByType(this.value)" disabled')
+					);
+				}
 						
-						html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3"  id="meetingTypeDiv">'
-							+'<label>Type of Class</label>'
-							+'<select name="meetingFor" id="meetingFor" class="form-control" onchange="showHideMeetingCreationForm(this.value, '+roleAndModule.moduleId+')">'
-								+'<option value="ODM" selected>One Day Class</option>'
-								// +'<option value="RM">Recurring Class</option>'
-								+'<option value="PTM">Book a PTM</option>'
-								+'<option value="CUSTOM">Create Custom Class</option>'
-							+'</select>'
-						+'</div>';
-						html+='<div class="col-lg-3 col-md-4 col-sm-3 col-12 mb-3 " id="customTitleDiv" style="display:none;">'
-									+'<label>Class Title</label>'
-									+'<input type="text" name="customTitle" id="customTitle" class="form-control" value="" maxlength="100" onkeydown="return M.isEmail(event);">'
-								+'</div>';	
-						html+='<div class="col-lg-3 col-md-4 col-sm-3 col-12 mb-3" id="standardIdDiv">'
-								+'<label>Grade</label>'
-									+'<select name="standardId" id="standardId" class="form-control" onchange="return getTeacherAssignedStudent(this.value,'+userId+');">'
-									+'</select>'
-							+'</div>';
+				html+=getScheduleCustomField(
+					'col-lg-3 col-md-4 col-sm-6 col-12',
+					'Type of Class',
+					getScheduleSelect('meetingFor', 'meetingFor', '<option value="ODM" selected>One Day Class</option><option value="PTM">Book a PTM</option><option value="CUSTOM">Create Custom Class</option>', 'onchange="showHideMeetingCreationForm(this.value, '+roleAndModule.moduleId+')"'),
+					'id="meetingTypeDiv"'
+				);
+				html+=getScheduleCustomField(
+					'col-lg-3 col-md-4 col-sm-3 col-12',
+					'Class Title',
+					getScheduleTextInput('customTitle', 'customTitle', '', 'maxlength="100" onkeydown="return M.isEmail(event);"'),
+					'id="customTitleDiv" style="display:none;"'
+				);
+				html+=getScheduleCustomField(
+					'col-lg-3 col-md-4 col-sm-3 col-12',
+					'Grade',
+					getScheduleSelect('standardId', 'standardId', '', 'onchange="return getTeacherAssignedStudent(this.value,'+userId+');"'),
+					'id="standardIdDiv"'
+				);
 					
 					if(role!='TEACHER'){
-						html+='<div class="col-lg-3 col-md-4 col-sm-3 col-12">'
-									+'<label>Select LMS Platform</label>'
-									+'<select name="courseProviderId" id="courseProviderId" class="form-control">'
-										+getLmsPlatformContent(schoolId)
-									+'</select>'
-								+'</div>';
+						html+=getScheduleCustomField(
+							'col-lg-3 col-md-4 col-sm-3 col-12',
+							'Select LMS Platform',
+							getScheduleSelect('courseProviderId', 'courseProviderId', getLmsPlatformContent(schoolId))
+						);
 					}
 						if(role!='TEACHER'){
-							html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3">'
-										+'<label>Student ID</label>'
-										+'<input type="text" name="studentIdSearch" id="studentIdSearch" class="form-control" value="" maxlength="100"/>'
-									+'</div>';
+							html+=getScheduleCustomField(
+								'col-lg-3 col-md-4 col-sm-6 col-12',
+								'Student ID',
+								getScheduleTextInput('studentIdSearch', 'studentIdSearch', '', 'maxlength="100"')
+							);
 						}
-					html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3" id="studentNameDiv">'
-								+'<label>Student Name</label>';
-								if(role=='TEACHER'){
-									html+='<select name="studentName" id="studentName" class="form-control" onchange="return callCoursesAssignedToteacher(this.value,'+userId+')">'
-										+'</select>';
-								}else{
-									html+='<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);">';
-								}
-					html+='</div>';
-					html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3"  id="courseNameDiv">'
-						+'<label>Course Name</label>';
-						if(role=='TEACHER'){
-							html+='<select name="subjectIds" id="subjectIds" class="form-control" onchange="getMeetingTitle()">'
-								+'</select>';
-						}else{
-							html+='<input type="text" name="subjectIds" id="subjectIds" class="form-control" value="" maxlength="40" onkeydown="return M.isChars(event);">';
-						}
-					html+='</div>';
+					html+=getScheduleCustomField(
+						'col-lg-3 col-md-4 col-sm-6 col-12',
+						'Student Name',
+						role=='TEACHER'
+							? getScheduleSelect('studentName', 'studentName', '', 'onchange="return callCoursesAssignedToteacher(this.value,'+userId+')"')
+							: getScheduleTextInput('studentName', 'studentName', '', 'maxlength="100" onkeydown="return M.isChars(event);"'),
+						'id="studentNameDiv"'
+					);
+					html+=getScheduleCustomField(
+						'col-lg-3 col-md-4 col-sm-6 col-12',
+						'Course Name',
+						role=='TEACHER'
+							? getScheduleSelect('subjectIds', 'subjectIds', '', 'onchange="getMeetingTitle()"')
+							: getScheduleTextInput('subjectIds', 'subjectIds', '', 'maxlength="40" onkeydown="return M.isChars(event);"'),
+						'id="courseNameDiv"'
+					);
 					if(role!='TEACHER'){
-						html+='<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-3"  id="meetingSubjectDiv">'
-									+'<label>Meeting Title</label>'
-									+'<input type="text" name="meetingSubject" id="meetingSubject" class="form-control" value="" maxlength="200" disabled>'
-								+'</div>';
+						html+=getScheduleCustomField(
+							'col-lg-3 col-md-4 col-sm-6 col-12',
+							'Meeting Title',
+							getScheduleTextInput('meetingSubject', 'meetingSubject', '', 'maxlength="200" disabled'),
+							'id="meetingSubjectDiv"'
+						);
 					}
-					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 mb-3 meetingDateWrapper"  id="">'
-								+'<label>Meeting Date</label>'
-								+'<input type="text" name="meetingDate" id="meetingDate" class="form-control" value="" onchange="createClassButtonHide()" readonly onkeydown="return false">'
-							+'</div>';
-					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 mb-3 startTimeHoursWrapper"  id="">'
-								+'<label>Start Time</label>'
-
+					html+=getScheduleCustomField(
+						'col-lg-2 col-md-4 col-sm-6 col-12 meetingDateWrapper',
+						'Meeting Date',
+						getScheduleTextInput('meetingDate', 'meetingDate', '', 'onchange="createClassButtonHide()" readonly onkeydown="return false"')
+					);
+					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 startTimeHoursWrapper">'
 								+'<div class="d-flex align-items-center w-100">'
-									+'<div class="flex-grow-1">'
-										+'<select name="" id="startTimeHours" class="form-control" onchange="createClassButtonHide()">'
-										+'<option value="" disabled selected>HH</option>'
-										+getHoursAndMins(23,1)
-										+'</select>'		
+									+'<div class="custom-field flex-grow-1 mb-0">'
+										+getScheduleSelect('', 'startTimeHours', '<option value="" disabled selected>HH</option>'+getHoursAndMins(23,1), 'onchange="createClassButtonHide()"')
+										+'<label>HH</label>'
 									+'</div>'
 									+'<span class="d-inline-block mx-1">:</span>'
-									+'<div class="flex-grow-1">'
-										+'<select name="" id="startTimeMins" class="form-control" onchange="createClassButtonHide()">'
-											+'<option value="" disabled selected>MM</option>'
-											+getHoursAndMins(59,5)
-										+'</select>'	
+									+'<div class="custom-field flex-grow-1 mb-0">'
+										+getScheduleSelect('', 'startTimeMins', '<option value="" disabled selected>MM</option>'+getHoursAndMins(59,5), 'onchange="createClassButtonHide()"')
+										+'<label>MM</label>'
 									+'</div>'
 								+'</div>'
 							+'</div>';
 							html+=getRecurringClassContent(roleAndModule.moduleId);
-					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 mb-3 durationWrapper">'
-							+'<label>Duration <i>(mins)</i></label>'
-							+'<div class="row">'
-								+'<div class="col-lg-5 col-md-6 col-sm-6 col-12 mb-3 durationWrapper">'
-									+'<input type="text" name="duration" id="duration" class="form-control" value="50" disabled>'
-								+'</div>'
-							+'</div>'
-						+'</div>';	
+					html+=getScheduleCustomField(
+						'col-lg-2 col-md-4 col-sm-6 col-12 durationWrapper',
+						'Duration (mins)',
+						getScheduleTextInput('duration', 'duration', '50', 'disabled')
+					);
 					html+='<div class="col-md-12 col-sm-12 col-12 mt-2 text-right" id="showMeetingModalDiv">'
 							+'<button class="btn btn-primary mr-1 validationBtn" onclick="return meetingSlotModalForValidateScheduleClass(\'classroomSessionFilter\','+roleAndModule.moduleId+');">Validate Class</button>'
 							+'<button class="btn btn-danger" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+roleAndModule.moduleId+')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
@@ -751,6 +807,8 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 			+'</div>'
 		+'</form>'
 	+'</div>'
+	initScheduleClassSelect2();
+	refreshScheduleCustomFields('classroomSessionFilter');
 	return html;
 }
 
@@ -758,55 +816,41 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 
 function getRecurringClassContent(moduleId){
 			var html = 	
-				'<div class="col-md-3 col-sm-6 col-12" style="display: none;">'
-					+'<div class="form-group">'
-						+'<label>TimeZone (Teacher)<sup class="text-danger sup">*</sup></label>'
-						+'<select name="countryTimezoneFromId" id="countryTimezoneFromId" class="form-control">'
-						+'</select>'
-					+'</div>'
-				+'</div>'
-				+'<div class="col-md-2 col-sm-6 col-12 hide-on-odm" style="display: none;">'
-					+'<div class="form-group">'
-						+'<label>Classroom Duration<sup class="text-danger sup">*</sup></label>'
-						+'<select name="classDuration" id="classDuration" class="form-control" onchange="createClassButtonHide()">'
-							+'<option value="50"  selected>50</option>'
-							// <c:forEach var="hrsTime" begin="0" end="90" step="5">
-							// 	<option value="${hrsTime>9? hrsTime : '0'.concat(hrsTime)}">${hrsTime>9? hrsTime : '0'.concat(hrsTime)}</option>
-							// </c:forEach>
-						+'</select>'
-					+'</div>'
-				+'</div>'
-				+'<div class="col-md-2 col-sm-6 col-12 hide-on-odm" style="display: none;">'
-					+'<div class="form-group">'
-						+'<label>Buffer Time<sup class="text-danger sup">*</sup></label>'
-						+'<select name="bufferTime" id="bufferTime" class="form-control">'
-							+'<option value="10"  selected>10</option>'
-						+'</select>'
-					+'</div>'
-				+'</div>'
-				+'<div class="col-md-2 col-sm-6 col-12 hide-on-odm" style="display: none;">'
-					+'<div class="form-group">'
-						+'<label>Start From Time<sup class="text-danger sup">*</sup></label>'
-						+'<select name="startFromTime" id="startFromTime" class="form-control" multiple="multiple">'
-							+'<option value="00">00</option>'
-							+'<option value="15">15</option>'
-							+'<option value="30">30</option>'
-							+'<option value="45">45</option>'
-						+'</select>'
-					+'</div>'
-				+'</div>'
+				getScheduleCustomField(
+					'col-md-3 col-sm-6 col-12',
+					'TimeZone (Teacher)',
+					getScheduleSelect('countryTimezoneFromId', 'countryTimezoneFromId', ''),
+					'style="display: none;"'
+				)
+				+getScheduleCustomField(
+					'col-md-2 col-sm-6 col-12 hide-on-odm',
+					'Classroom Duration',
+					getScheduleSelect('classDuration', 'classDuration', '<option value="50" selected>50</option>', 'onchange="createClassButtonHide()"'),
+					'style="display: none;"'
+				)
+				+getScheduleCustomField(
+					'col-md-2 col-sm-6 col-12 hide-on-odm',
+					'Buffer Time',
+					getScheduleSelect('bufferTime', 'bufferTime', '<option value="10" selected>10</option>'),
+					'style="display: none;"'
+				)
+				+getScheduleCustomField(
+					'col-md-2 col-sm-6 col-12 hide-on-odm',
+					'Start From Time',
+					getScheduleSelect('startFromTime', 'startFromTime', '<option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option>', 'multiple="multiple"'),
+					'style="display: none;"'
+				)
 				+'<div class="col-md-4 col-sm-6 col-12 hide-on-odm" style="display: none;">'
-					+'<div class="form-group">'
-						+'<label>Set Time<sup class="text-danger sup">*</sup></label>'
-						+'<div style="display:flex;align-items:center">'
-							+'<span style="padding:0 5px">'
-								+'<input type="text" class="teachStartDate form-control" name="classStartDate" placeholder="Select Start Date" id="classStartDate" value="" autocomplete="off" readonly onkeydown="return false" />'
+					+'<div class="d-flex align-items-center">'
+							+'<span class="custom-field mb-0" style="padding:0 5px">'
+								+'<input type="text" class="teachStartDate form-control" name="classStartDate" placeholder=" " id="classStartDate" value="" autocomplete="off" readonly onkeydown="return false" />'
+								+'<label>Start Date</label>'
 							+'</span>'
-							+'<span style="padding:0 5px">'
-								+'<input type="text" class="teachEndDate form-control " name="classEndDate" placeholder="Select End Date" id="classEndDate" value="" autocomplete="off" readonly onkeydown="return false" />'
+							+'<span class="custom-field mb-0" style="padding:0 5px">'
+								+'<input type="text" class="teachEndDate form-control " name="classEndDate" placeholder=" " id="classEndDate" value="" autocomplete="off" readonly onkeydown="return false" />'
+								+'<label>End Date</label>'
 							+'</span>'
 							+'<a href="javascript:void(0);" class="btn btn-sm bg-primary text-white" onclick="getSplitTime(\'classroomSessionFilter\');"> <i class="pe-7s-refresh-2"></i></a>  '
-						+'</div>'
 					+'</div>'
 				+'</div>'
 				+'<div class="row hide-on-odm col-12 row" id="timeSlotSession" style="display:none"></div>'

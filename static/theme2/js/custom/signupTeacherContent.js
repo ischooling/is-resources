@@ -1,6 +1,111 @@
 var schoolSettingsTechnical;              
 var schoolSettingsLinks;
 var schoolSettingsOffice;
+function addTeacherSignupFieldBackgroundOverride() {
+    if ($("#teacherSignupFieldBackgroundOverride").length > 0) {
+        return;
+    }
+    $("head").append(`
+        <style id="teacherSignupFieldBackgroundOverride">
+            #teacherSignupStage1 .valid-field.true .custom-field input,
+            #teacherSignupStage1 .valid-field.true .custom-field select,
+            #teacherSignupStage1 .valid-field.true .custom-field .select2-selection--single,
+            #teacherSignupStage2 .valid-field.true .custom-field input,
+            #teacherSignupStage2 .valid-field.true .custom-field select,
+            #teacherSignupStage2 .valid-field.true .custom-field .select2-selection--single,
+            #teacherSignupStage6 .valid-field.true .custom-field input,
+            #teacherSignupStage6 .valid-field.true .custom-field select,
+            #teacherSignupStage6 .valid-field.true .custom-field .select2-selection--single {
+                background-color: #fff !important;
+                box-shadow: inset 0 0 0 1000px #fff !important;
+            }
+            #teacherSignupStage1 .custom-field .iti {
+                display: block;
+                width: 100%;
+            }
+            #teacherSignupStage1 .custom-field .iti input.form-control-field {
+                padding-left: 68px !important;
+            }
+            #teacherSignupStage1 .custom-field .iti .iti__selected-flag {
+                padding-left: 12px;
+                padding-right: 10px;
+            }
+            #teacherSignupStage5 .custom-field .iti {
+                display: block;
+                width: 100%;
+            }
+            #teacherSignupStage5 .custom-field .iti input.form-control-field {
+                padding-left: 88px !important;
+            }
+            #teacherSignupStage5 .custom-field .iti .iti__selected-flag {
+                padding-left: 12px;
+                padding-right: 10px;
+            }
+            #teacherSignupStage1 .teacher-select2-aligned-row .select2-container--default .select2-selection--single {
+                height: 42px !important;
+            }
+            #teacherSignupStage1 .teacher-select2-aligned-row .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 42px !important;
+            }
+            #teacherSignupStage1 .teacher-select2-aligned-row .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 42px !important;
+            }
+            #teacherSignupStage2 .custom-field input.form-control-field {
+                height: 42px !important;
+                line-height: 42px !important;
+            }
+            #teacherSignupStage2 .custom-field .select2-container--default .select2-selection--single {
+                height: 42px !important;
+            }
+            #teacherSignupStage2 .custom-field .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 42px !important;
+            }
+            #teacherSignupStage2 .custom-field .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 42px !important;
+            }
+            #teacherSignupStage6 .custom-field input.form-control-field,
+            #teacherSignupStage6 .custom-field select.form-control-field {
+                height: 42px !important;
+                line-height: 42px !important;
+            }
+            #teacherSignupStage6 .custom-field .select2-container--default .select2-selection--single {
+                height: 42px !important;
+            }
+            #teacherSignupStage6 .custom-field .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 42px !important;
+            }
+            #teacherSignupStage6 .custom-field .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 42px !important;
+            }
+        </style>`);
+}
+function placeTeacherSignupValidationError(error, element) {
+    var customField = element.closest(".custom-field");
+    if (customField.length > 0) {
+        error.addClass("error-msg");
+        error.css({
+            position: "absolute",
+            top: "100%",
+            color: "red",
+            fontSize: "12px",
+            textAlign: "right",
+            left: "0"
+        });
+        error.appendTo(customField);
+    } else {
+        error.insertAfter(element);
+    }
+}
+function applyTeacherSignupValidationPlacement() {
+    $("#teacherSignupStage1, #teacherSignupStage2, #teacherSignupStage6").each(function() {
+        var validator = $(this).data("validator");
+        if (validator) {
+            validator.settings.errorElement = "label";
+            validator.settings.errorClass = "error";
+            validator.settings.errorPlacement = placeTeacherSignupValidationError;
+        }
+    });
+}
 async function renderTeacherEnrollmentPage(signupPage, moduleName){
     schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
     schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
@@ -8,6 +113,8 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     $("body").append(generateTeacherEnrollmentContent(moduleName));
     createStepsImage();
     getFormsValidation();
+    addTeacherSignupFieldBackgroundOverride();
+    applyTeacherSignupValidationPlacement();
     if(signupPage >= 6 && signupPage <=7){
         await getStage5Data();
         if(signupPage == 7){
@@ -499,7 +606,7 @@ function getTeacherBasicInfoContent(signupTeacher){
                     </div>
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row teacher-location-row teacher-select2-aligned-row">
                 <div class="form-holder valid-field">
                     <i class="zmdi zmdi-pin"></i>
                     <div class="custom-field">
@@ -528,7 +635,7 @@ function getTeacherBasicInfoContent(signupTeacher){
                     </div>
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row teacher-select2-aligned-row">
                 <div class="form-holder valid-field">
                     <i class="zmdi zmdi-account-calendar"></i>
                     <div class="custom-field">
@@ -1246,325 +1353,275 @@ function getTeacherBankAccountDetails(){
         <div class="form-row">
             <div class="form-holder bank-details secondary-border-color">
                 <div class="full">
-                    <h5 class="text-center k8-theme-text text-capitalize secondary-txt-color">
+                    <h5 class="text-center k8-theme-text text-capitalize secondary-txt-color mb-2">
                         <b>BANK DETAILS</b>
                     </h5>
                 </div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Account Currency <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-money"></i>
-                                <select name="accountCurrency" id="accountCurrency" class="form-control-field form-control secondary-focus-border-color">
-                                </select>
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-money"></i>
+                        <div class="custom-field">
+                            <select name="accountCurrency" id="accountCurrency" class="form-control-field">
+                            </select>
+                            <label for="accountCurrency">Account Currency*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Account Number <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-account"></i>
-                                <input id="accountNumber" name="accountNumber" type="text"
-                                    value="" autocomplete="off"
-                                    class="form-control-field form-control secondary-focus-border-color">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-account"></i>
+                        <div class="custom-field">
+                            <input id="accountNumber" name="accountNumber" type="text"
+                                value="" autocomplete="off" placeholder=" "
+                                class="form-control-field">
+                            <label for="accountNumber">Account Number*</label>
                         </div>
                     </div>
                 </div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">IBAN (If Available)</label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-account-calendar"></i>
-                                <input id="iban" name="iban" type="text" autocomplete="off"
-                                    value=""
-                                    class="form-control-field form-control secondary-focus-border-color">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-account-calendar"></i>
+                        <div class="custom-field">
+                            <input id="iban" name="iban" type="text" autocomplete="off"
+                                value="" placeholder=" "
+                                class="form-control-field">
+                            <label for="iban">IBAN (If Available)</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Account Type <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-balance"></i>
-                                <select name="accountCategory" id="accountCategory" class="form-control-field form-control secondary-focus-border-color">
-                                </select>
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-balance"></i>
+                        <div class="custom-field">
+                            <select name="accountCategory" id="accountCategory" class="form-control-field">
+                            </select>
+                            <label for="accountCategory">Account Type*</label>
                         </div>
                     </div>
                 </div>
                 <div class="divider"></div>
-                <div class="form-row m-0">
+                <div class="form-row mb-4">
                     <h6 class="m-0"><b>Account Holder Name</b><span class="fontf-italic">&nbsp;(as per bank record)</span></h6>
                 </div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">First <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-account"></i>
-                                <input id="accountHolderFirstName" name="accountHolderFirstName" type="text"
-                                    value="" autocomplete="off"
-                                    style="text-transform:capitalize"
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="return M.isChars(event);" maxlength="50">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-account"></i>
+                        <div class="custom-field">
+                            <input id="accountHolderFirstName" name="accountHolderFirstName" type="text"
+                                value="" autocomplete="off" placeholder=" "
+                                style="text-transform:capitalize"
+                                class="form-control-field"
+                                onkeydown="return M.isChars(event);" maxlength="50">
+                            <label for="accountHolderFirstName">First*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Middle</label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-account"></i>
-                                <input id="accountHolderMiddleName" name="accountHolderMiddleName" type="text"
-                                    value="" autocomplete="off"
-                                    style="text-transform:capitalize"
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="return M.isChars(event);" maxlength="50">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-account"></i>
+                        <div class="custom-field">
+                            <input id="accountHolderMiddleName" name="accountHolderMiddleName" type="text"
+                                value="" autocomplete="off" placeholder=" "
+                                style="text-transform:capitalize"
+                                class="form-control-field"
+                                onkeydown="return M.isChars(event);" maxlength="50">
+                            <label for="accountHolderMiddleName">Middle</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Last <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-account"></i>
-                                <input id="accountHolderLastName" name="accountHolderLastName" type="text"
-                                    value="" autocomplete="off"
-                                    style="text-transform:capitalize"
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="return M.isChars(event);" maxlength="50">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-account"></i>
+                        <div class="custom-field">
+                            <input id="accountHolderLastName" name="accountHolderLastName" type="text"
+                                value="" autocomplete="off" placeholder=" "
+                                style="text-transform:capitalize"
+                                class="form-control-field"
+                                onkeydown="return M.isChars(event);" maxlength="50">
+                            <label for="accountHolderLastName">Last*</label>
                         </div>
                     </div>
                 </div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Account Holder Address<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i> <input 
-                                type="text" maxlength="100" 
-                                id="accountHolderAddress"  
-                                name="accountHolderAddress"
-                                style="text-transform:capitalize" 
-                                value=""
-                                class="form-control-field form-control secondary-focus-border-color"
-                                onkeydown="return M.isAddressLine(event);"
-                                autocomplete="off">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <input type="text" maxlength="100" 
+                            id="accountHolderAddress"  
+                            name="accountHolderAddress"
+                            style="text-transform:capitalize" 
+                            value="" placeholder=" "
+                            class="form-control-field"
+                            onkeydown="return M.isAddressLine(event);"
+                            autocomplete="off">
+                            <label for="accountHolderAddress">Account Holder Address*</label>
                         </div>
                     </div>
                 </div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label>Country <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <select class="select_dropdown form-control-field " name="accountHolderCountryId" id="accountHolderCountryId"></select>
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <select class="select_dropdown form-control-field" name="accountHolderCountryId" id="accountHolderCountryId"></select>
+                            <label for="accountHolderCountryId">Country*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label>State <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <select class="select_dropdown form-control-field " name="accountHolderStateId" id="accountHolderStateId"></select>
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <select class="select_dropdown form-control-field" name="accountHolderStateId" id="accountHolderStateId"></select>
+                            <label for="accountHolderStateId">State*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label>City <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <select class="select_dropdown form-control-field " name="accountHolderCityId" id="accountHolderCityId"></select>
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <select class="select_dropdown form-control-field" name="accountHolderCityId" id="accountHolderCityId"></select>
+                            <label for="accountHolderCityId">City*</label>
                         </div>
                     </div>
 
                 </div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Postal Code<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <input id="accountHolderPostal" name="accountHolderPostal" type="text"
-                                    autocomplete="off" value=""
-                                    class="form-control-field form-control secondary-focus-border-color">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <input id="accountHolderPostal" name="accountHolderPostal" type="text"
+                                autocomplete="off" value="" placeholder=" "
+                                class="form-control-field">
+                            <label for="accountHolderPostal">Postal Code*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Phone No.<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-phone"></i>
-                                <input id="accountHolderPhone"  name="accountHolderPhone" value="" 
-                                    type="text" autocomplete="off"
-                                    style="text-transform:capitalize"
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="return M.digit(event);" maxlength="50">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Email-ID<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-email"></i>
-                                <input id="accountHolderEmail" value="" 
-                                    name="accountHolderEmail" type="text" autocomplete="off"
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="divider"></div>
-                <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Bank Name <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-city-alt"></i> 
-                                <input type="text" id="bankName" name="bankName"
-                                    value=""
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="return M.isChars(event);" style="text-transform:capitalize"
-                                    autocomplete="off" maxlength="50">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Bank Branch Name<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-city-alt"></i> <input
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    onkeydown="return M.isChars(event);" id="bankBranchName" type="text"
-                                    style="text-transform:capitalize" value=""
-                                    name="bankBranchName" autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Bank Branch Address<sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i> <input 
-                                type="text" maxlength="100" 
-                                id="bankBranchAddress"  
-                                name="bankBranchAddress"
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-phone"></i>
+                        <div class="custom-field">
+                            <input id="accountHolderPhone" name="accountHolderPhone" value="" 
+                                type="text" autocomplete="off" placeholder=" "
                                 style="text-transform:capitalize"
-                                value=""
-                                class="form-control-field form-control secondary-focus-border-color"
-                                onkeydown="return M.isAddressLine(event);"
-                                autocomplete="off">
-                            </div>
+                                class="form-control-field"
+                                onkeydown="return M.digit(event);" maxlength="50">
+                            <label for="accountHolderPhone">Phone No.*</label>
                         </div>
                     </div>
-                </div>
-                <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label>Country <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <select class="select_dropdown form-control-field " name="bankCountryId" id="bankCountryId"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label>State <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <select class="select_dropdown form-control-field " name="bankStateId" id="bankStateId"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label>City <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <select class="select_dropdown form-control-field " name="bankCityId" id="bankCityId"></select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Postal Code <sup class="sup" title="required">*</sup></label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <input id="bankPostal" name="bankPostal" type="text"
-                                    autocomplete="off" value=""
-                                    class="form-control-field form-control secondary-focus-border-color">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Other Details</label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-pin"></i>
-                                <input id="otherDetails" name="otherDetails" type="text"
-                                    autocomplete="off" value=""
-                                    class="form-control-field form-control secondary-focus-border-color">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-email"></i>
+                        <div class="custom-field">
+                            <input id="accountHolderEmail" value="" 
+                                name="accountHolderEmail" type="text" autocomplete="off" placeholder=" "
+                                class="form-control-field"
+                                onkeydown="">
+                            <label for="accountHolderEmail">Email-ID*</label>
                         </div>
                     </div>
                 </div>
                 <div class="divider"></div>
                 <div class="form-row m-0">
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Bank Swift Code (If Applicable)</label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-code"></i>
-                                <input type="text" id="swiftCode" name="swiftCode"
-                                    value=""
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    maxlength="50" autocomplete="off"
-                                    onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-city-alt"></i>
+                        <div class="custom-field">
+                            <input type="text" id="bankName" name="bankName"
+                                value="" placeholder=" "
+                                class="form-control-field"
+                                onkeydown="return M.isChars(event);" style="text-transform:capitalize"
+                                autocomplete="off" maxlength="50">
+                            <label for="bankName">Bank Name*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">Bank IFSC Code (If Applicable)</label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-code"></i> 
-                                <input type="text" id="bankIfsc" name="bankIfsc"
-                                    value=""
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    maxlength="50" autocomplete="off"
-                                    onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);">
-                            </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-city-alt"></i>
+                        <div class="custom-field">
+                            <input class="form-control-field"
+                                onkeydown="return M.isChars(event);" id="bankBranchName" type="text"
+                                style="text-transform:capitalize" value="" placeholder=" "
+                                name="bankBranchName" autocomplete="off">
+                            <label for="bankBranchName">Bank Branch Name*</label>
                         </div>
                     </div>
-                    <div class="form-holder">
-                        <div class="form-group">
-                            <label class="secondary-txt-color">IBAN/Routing Number (If Applicable)</label>
-                            <div class="icon-field valid-field custom-field">
-                                <i class="zmdi zmdi-account"></i> <input
-                                    class="form-control-field form-control secondary-focus-border-color"
-                                    id="routeNumber" type="text" name="routeNumber"
-                                    value="" maxlength="50" tabindex="8"
-                                    onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);"
-                                    autocomplete="off">
-                            </div>
+                </div>
+                <div class="form-row m-0">
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <input type="text" maxlength="100" 
+                            id="bankBranchAddress"  
+                            name="bankBranchAddress"
+                            style="text-transform:capitalize"
+                            value="" placeholder=" "
+                            class="form-control-field"
+                            onkeydown="return M.isAddressLine(event);"
+                            autocomplete="off">
+                            <label for="bankBranchAddress">Bank Branch Address*</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row m-0">
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <select class="select_dropdown form-control-field" name="bankCountryId" id="bankCountryId"></select>
+                            <label for="bankCountryId">Country*</label>
+                        </div>
+                    </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <select class="select_dropdown form-control-field" name="bankStateId" id="bankStateId"></select>
+                            <label for="bankStateId">State*</label>
+                        </div>
+                    </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <select class="select_dropdown form-control-field" name="bankCityId" id="bankCityId"></select>
+                            <label for="bankCityId">City*</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row m-0">
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <input id="bankPostal" name="bankPostal" type="text"
+                                autocomplete="off" value="" placeholder=" "
+                                class="form-control-field">
+                            <label for="bankPostal">Postal Code*</label>
+                        </div>
+                    </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-pin"></i>
+                        <div class="custom-field">
+                            <input id="otherDetails" name="otherDetails" type="text"
+                                autocomplete="off" value="" placeholder=" "
+                                class="form-control-field">
+                            <label for="otherDetails">Other Details</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="form-row m-0">
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-code"></i>
+                        <div class="custom-field">
+                            <input type="text" id="swiftCode" name="swiftCode"
+                                value="" placeholder=" "
+                                class="form-control-field"
+                                maxlength="50" autocomplete="off"
+                                onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);">
+                            <label for="swiftCode">Bank Swift Code (If Applicable)</label>
+                        </div>
+                    </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-code"></i>
+                        <div class="custom-field">
+                            <input type="text" id="bankIfsc" name="bankIfsc"
+                                value="" placeholder=" "
+                                class="form-control-field"
+                                maxlength="50" autocomplete="off"
+                                onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);">
+                            <label for="bankIfsc">Bank IFSC Code (If Applicable)</label>
+                        </div>
+                    </div>
+                    <div class="form-holder valid-field">
+                        <i class="zmdi zmdi-account"></i>
+                        <div class="custom-field">
+                            <input class="form-control-field"
+                                id="routeNumber" type="text" name="routeNumber"
+                                value="" maxlength="50" tabindex="8" placeholder=" "
+                                onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);"
+                                autocomplete="off">
+                            <label for="routeNumber">IBAN/Routing Number (If Applicable)</label>
                         </div>
                     </div>
                 </div>
@@ -1945,7 +2002,7 @@ function step6Skeleton(){
 	`<h3 class="alternate-txt-color">Account Details</h3>
 	<div class="step1-skeleton">
 		<div style="border: rgb(232, 237, 239) 2px solid; border-radius: 5px; padding-inline: 10px; padding-top: 10px; margin-bottom: 15px;">
-            <h5 class="text-center k8-theme-text text-capitalize secondary-txt-color">
+            <h5 class="text-center k8-theme-text text-capitalize secondary-txt-color mb-4">
                 <b>BANK DETAILS</b>
             </h5>
             <div class="form-row" style="margin-top:10px;">

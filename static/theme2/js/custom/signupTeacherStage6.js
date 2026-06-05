@@ -245,6 +245,12 @@ async function signupTeacherStage6OnLoadEvent(){
 			validEndInvalidField(true, "routeNumber");
 		}
 	});
+	$('#accountHolderCountryId').select2();
+	$('#accountHolderStateId').select2();
+	$('#accountHolderCityId').select2();
+	$('#bankCountryId').select2();
+	$('#bankStateId').select2();
+	$('#bankCityId').select2();
 }
 
 function validateTeacherAgreement(formId) {
@@ -499,7 +505,7 @@ async function getStage6Data(){
 	showSkeleton(true, "step6");
 	reviewDone = true;
 	$("#teacherSignupContentStage6").html(getTeacherBankAccountDetails());
-	signupTeacherStage6OnLoadEvent();
+	await signupTeacherStage6OnLoadEvent();
 	$(".step-6-skeleton").hide();
 	$("#teacherSignupStage6").show();
 	if (typeof refreshCustomFieldState === "function") {
