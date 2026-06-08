@@ -525,9 +525,6 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 		return false;
 	}
 	$(".meetingSlotAdd").prop("disabled", true);
-	$('#standardId').select2();
-	$('#startTimeHours').select2();
-	$('#startTimeMins').select2();
 	hideMessage('');
 	customLoader(true);
 	$.ajax({
@@ -552,9 +549,9 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 				}
 				if(controllType=='ADD'){
 					$('#'+formId)[0].reset();
-					$("#standardId").prop('selectedIndex',0);
-					$("#startTimeHours").prop('selectedIndex',0);
-					$("#startTimeMins").prop('selectedIndex',0);
+					$("#standardId").val('');
+					$("#startTimeHours").val('');
+					$("#startTimeMins").val('');
 					$('#studentName').empty().trigger("change");
 					$('#subjectIds').find('option').remove();
 					$('#studentId').val('');
@@ -642,6 +639,13 @@ function getScheduleTextInput(name, id, value, extraAttr){
 	return '<input type="text" name="'+name+'" id="'+id+'" class="form-control" value="'+value+'" placeholder=" " '+extraAttr+'>';
 }
 
+function getScheduleInput(type, name, id, value, extraAttr){
+	type = type == undefined ? 'text' : type;
+	value = value == undefined ? '' : value;
+	extraAttr = extraAttr == undefined ? '' : extraAttr;
+	return '<input type="'+type+'" name="'+name+'" id="'+id+'" class="form-control" value="'+value+'" placeholder=" " '+extraAttr+'>';
+}
+
 function getScheduleSelect(name, id, options, extraAttr){
 	extraAttr = extraAttr == undefined ? '' : extraAttr;
 	return '<select name="'+name+'" id="'+id+'" class="form-control" '+extraAttr+'>'
@@ -658,11 +662,7 @@ function refreshScheduleCustomFields(formId){
 }
 
 function initScheduleClassSelect2(){
-	setTimeout(function(){
-		$('#standardId').select2();
-		$('#startTimeHours').select2();
-		$('#startTimeMins').select2();
-	}, 0);
+	// These fields are plain inputs now, so no Select2 setup is needed here.
 }
 
 function addScheduleStudentNameCss(){
@@ -734,7 +734,7 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 				html+=getScheduleCustomField(
 					'col-lg-3 col-md-4 col-sm-3 col-12',
 					'Grade',
-					getScheduleSelect('standardId', 'standardId', '', 'onchange="return getTeacherAssignedStudent(this.value,'+userId+');"'),
+					getScheduleInput('number', 'standardId', 'standardId', '', 'onchange="return getTeacherAssignedStudent(this.value,'+userId+');" min="1" step="1"'),
 					'id="standardIdDiv"'
 				);
 					
@@ -784,12 +784,12 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 startTimeHoursWrapper">'
 								+'<div class="d-flex align-items-center w-100">'
 									+'<div class="custom-field flex-grow-1 mb-0">'
-										+getScheduleSelect('', 'startTimeHours', '<option value="" disabled selected>HH</option>'+getHoursAndMins(23,1), 'onchange="createClassButtonHide()"')
+										+getScheduleInput('number', '', 'startTimeHours', '', 'onchange="createClassButtonHide()" min="0" max="23" step="1" placeholder="HH"')
 										+'<label>HH</label>'
 									+'</div>'
 									+'<span class="d-inline-block mx-1">:</span>'
 									+'<div class="custom-field flex-grow-1 mb-0">'
-										+getScheduleSelect('', 'startTimeMins', '<option value="" disabled selected>MM</option>'+getHoursAndMins(59,5), 'onchange="createClassButtonHide()"')
+										+getScheduleInput('number', '', 'startTimeMins', '', 'onchange="createClassButtonHide()" min="0" max="59" step="5" placeholder="MM"')
 										+'<label>MM</label>'
 									+'</div>'
 								+'</div>'
