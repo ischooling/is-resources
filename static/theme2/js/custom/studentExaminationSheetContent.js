@@ -13,7 +13,7 @@ function getStudentExaminationSheetContent(title, filePath){
     <div class="main-card mb-3 card">
         <div class="card-body">
             <div class="full hide-tab">
-                ${hasFile ? `<iframe src="${filePath}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>` : `<h4 class="text-center">Your Examination Schedule is going to upload soon.</h4>`}
+                ${hasFile ? `<iframe src="https://mozilla.github.io/pdf.js/web/viewer.html?file=${filePath}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>` : `<h4 class="text-center">Your Examination Schedule is going to upload soon.</h4>`}
             </div>
         </div>
     </div>`;
