@@ -186,7 +186,7 @@ var releaseNoteState = {
 			html = "<object data='" + safeUrl + "' type='application/pdf' class='w-100 rounded border' style='height:500px;background:#fff;'></object>";
 		} else {
 			html = "" +
-				"<iframe src='" + safeUrl + "' class='w-100 rounded border' style='height:420px;background:#fff;'></iframe>" +
+				"<iframe src='" + getPdfViewerUrl(safeUrl) + "' class='w-100 rounded border' style='height:420px;background:#fff;'></iframe>" +
 				"<div class='small text-muted mt-2'>If preview is not supported by browser for this file type, use download.</div>" +
 				"<a class='btn btn-sm btn-outline-primary mt-2' href='" + safeUrl + "' download>Download File</a>";
 		}

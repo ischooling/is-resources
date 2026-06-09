@@ -7819,4 +7819,11 @@ function darkenColor(color, percent) {
         (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
         (B < 255 ? (B < 1 ? 0 : B) : 255)
     ).toString(16).slice(1);
-  }
+}
+function getPdfViewerUrl(pdfUrl) {
+    return APP_BASE_URL +
+        "static/pdfjs/web/viewer.html?file=" +
+        encodeURIComponent(APP_BASE_URL + "pdf-proxy?url=" + encodeURIComponent(pdfUrl));
+}
+
+

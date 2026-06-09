@@ -209,7 +209,7 @@ function viewActivityAttachmentSource(uploadFile, filePath){
 	if(uploadFile!='' && uploadFile !='No file chosen...'){
 		if(uploadFile.endsWith('.pdf')?'pdf-view':''){
 			$("#viewActivityAttachmentModal .modal-dialog").addClass("modal-xl").removeClass("modal-lg");
-			html+=`<iframe src="${filePath}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>`;
+			html+=`<iframe src="${getPdfViewerUrl(filePath)}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>`;
 		}else{
 			$("#viewActivityAttachmentModal .modal-dialog").addClass("modal-lg").removeClass("modal-xl");
 			html+=`<img src="${filePath}" style="width:100%;" class="activity-upload-img"/>`;
