@@ -672,6 +672,8 @@ function addScheduleStudentNameCss(){
 	$('head').append('<style id="scheduleStudentNameCss">'
 		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field input,'
 		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field select{height:44px !important;line-height:44px !important;padding-top:0 !important;padding-bottom:0 !important;}'
+		+'#classroomSessionFilter #standardIdDiv select,'
+		+'#classroomSessionFilter #standardIdDiv select option{color:#000 !important;}'
 		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-container,'
 		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection--single{height:44px !important;min-height:44px !important;}'
 		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection__rendered{line-height:44px !important;padding-top:0 !important;padding-bottom:0 !important;}'
@@ -731,12 +733,11 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 					getScheduleTextInput('customTitle', 'customTitle', '', 'maxlength="100" onkeydown="return M.isEmail(event);"'),
 					'id="customTitleDiv" style="display:none;"'
 				);
-				html+=getScheduleCustomField(
-					'col-lg-3 col-md-4 col-sm-3 col-12',
-					'Grade',
-					getScheduleInput('number', 'standardId', 'standardId', '', 'onchange="return getTeacherAssignedStudent(this.value,'+userId+');" min="1" step="1"'),
-					'id="standardIdDiv"'
-				);
+				html+='<div class="col-lg-3 col-md-4 col-sm-3 col-12" id="standardIdDiv">'
+					+'<div class="custom-field">'
+						+getScheduleSelect('standardId', 'standardId', '<option value="" selected disabled hidden></option>'+getStandardContent(schoolId,false,false), 'onchange="return getTeacherAssignedStudent(this.value,'+userId+');" style="color:#000 !important;padding-left:16px !important;line-height:18px !important;"')
+					+'</div>'
+				+'</div>';
 					
 					if(role!='TEACHER'){
 						html+=getScheduleCustomField(
@@ -782,18 +783,18 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 						getScheduleTextInput('meetingDate', 'meetingDate', '', 'onchange="createClassButtonHide()" readonly onkeydown="return false"')
 					);
 					html+='<div class="col-lg-2 col-md-4 col-sm-6 col-12 startTimeHoursWrapper">'
-								+'<div class="d-flex align-items-center w-100">'
-									+'<div class="custom-field flex-grow-1 mb-0">'
-										+getScheduleInput('number', '', 'startTimeHours', '', 'onchange="createClassButtonHide()" min="0" max="23" step="1" placeholder="HH"')
-										+'<label>HH</label>'
-									+'</div>'
-									+'<span class="d-inline-block mx-1">:</span>'
-									+'<div class="custom-field flex-grow-1 mb-0">'
-										+getScheduleInput('number', '', 'startTimeMins', '', 'onchange="createClassButtonHide()" min="0" max="59" step="5" placeholder="MM"')
-										+'<label>MM</label>'
-									+'</div>'
-								+'</div>'
-							+'</div>';
+							+'<div class="d-flex align-items-center w-100">'
+								+'<div class="custom-field flex-grow-1 mb-0">'
+								+getScheduleSelect('startTimeHours', 'startTimeHours', '<option value="" disabled selected style="color:#000 !important;">HH</option>'+getHoursAndMins(23,1), 'onchange="createClassButtonHide()" style="color:#000 !important;-webkit-text-fill-color:#000 !important;opacity:1;"')
+								+'<label>HH</label>'
+							+'</div>'
+							+'<span class="d-inline-block mx-1">:</span>'
+							+'<div class="custom-field flex-grow-1 mb-0">'
+								+getScheduleSelect('startTimeMins', 'startTimeMins', '<option value="" disabled selected style="color:#000 !important;">MM</option>'+getHoursAndMins(55,5), 'onchange="createClassButtonHide()" style="color:#000 !important;-webkit-text-fill-color:#000 !important;opacity:1;"')
+								+'<label>MM</label>'
+							+'</div>'
+						+'</div>'
+					+'</div>';
 							html+=getRecurringClassContent(roleAndModule.moduleId);
 					html+=getScheduleCustomField(
 						'col-lg-2 col-md-4 col-sm-6 col-12 durationWrapper',

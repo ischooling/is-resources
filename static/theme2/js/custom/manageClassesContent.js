@@ -334,7 +334,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 						+'</select>'
 						+'<label for="classCreateFor">Select Class For</label>', '', 'active');
 				html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
-					'<select name="standardId" id="standardId" class="form-control-field">'
+					'<select name="standardId" style="text:black;" id="standardId" class="form-control-field">'
 							+'<option value="" disabled selected>Grade</option>'
 							+getStandardContent(schoolId,false, false)
 						+'</select>'
