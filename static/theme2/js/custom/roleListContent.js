@@ -28,6 +28,9 @@ async function renderRoleListDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,
 		theme:"bootstrap4",
 		dropdownParent:"#roleFormModal"
 	});
+	if(typeof refreshCustomFieldState == 'function'){
+		refreshCustomFieldState($('#roleFormModal'));
+	}
 	
 }
 
@@ -137,39 +140,39 @@ function getRoleAddEditPopup(){
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<form autocomplete="off" id="roleFormId">
+			<form autocomplete="off" id="roleFormId" class="custom-field-scope">
 				<div class="modal-body">
 					<input type="hidden" name="roleId" id="roleId" value="" />
 					<div class="row">
 						<div class="col-md-6 col-sm-6 col-12">
-							<div class="form-group mb-2">
-								<label class="control-label mb-0">Select School</label> 
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 								<select class="form-control" name="schoolId" id="schoolId" ${SCHOOL_ID !=''?'enable':''} >
 									<option value="0">Select School</option>
 								</select> 
+								<label for="schoolId">Select School</label>
 							</div>
 						</div>
 						<div class="col-md-6 col-sm-6 col-12">
-							<div class="form-group mb-2">
-								<label for="roleName" class="control-label mb-0">Role Type Name<span class="text-danger">*</span></label> 
-								<input type="text" name="roleName" id="roleName" class="form-control"  required="required">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="roleName" id="roleName" class="form-control" placeholder=" " required="required">
+								<label for="roleName">Role Type Name<span class="text-danger">*</span></label> 
 							</div>
 						</div>
 						<div class="col-md-6 col-sm-6 col-12">
-							<div class="form-group mb-2">
-								<label class="control-label mb-0">Parent Role</label> 
+							<div class="input-group position-relative custom-field role-parent-field mb-2 mt-3 p-0">
 								<select class="form-control" name="parentRole" id="parentRole">
 	                                <option value="0">Select Parent role</option>
 	                            </select> 
+								<label for="parentRole">Parent Role</label>
 							</div>
 						</div>
 						<div class="col-md-6 col-sm-6 col-12">
-							<div class="form-group mb-2">
-								<label for="roleActive" class="control-label mb-0">Active/ In-Active<span class="text-danger">*</span></label> 
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 								<select class="form-control"  name="roleActive" id="roleActive" >
 		                            <option value="Y">Active</option>
 		                            <option value="N">Inactive</option>
 		                        </select>
+								<label for="roleActive">Active/ In-Active<span class="text-danger">*</span></label> 
 							</div>
 						</div>
 					</div>
@@ -183,7 +186,3 @@ function getRoleAddEditPopup(){
 </div>`;
 		return html;
 }
-
-
-
-

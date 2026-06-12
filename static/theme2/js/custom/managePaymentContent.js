@@ -402,14 +402,17 @@ function mapStudentModal() {
                         </button>
                     </div>
                     <form action="javascript:void(0);" id="mapStudentForm" name="mapStudentForm" autocomplete="off">
-                        <div class="modal-body">
+                        <div class="modal-body custom-field-scope">
                             <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                                 <div class="form-row">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-12 mb-3">
                                         <p><i></i></p>
                                         <h3 class="text-center" id="mapToStudentId"></h3>
                                         <input type="hidden" id="unregistredPaymentId" name="unregistredPaymentId" value="" class="form-control">
-                                        <input id="mapToUsers" name="mapToUsers" class="form-control" value="">
+                                        <div class="custom-field">
+                                            <input id="mapToUsers" name="mapToUsers" class="form-control" value="" placeholder=" ">
+                                            <label>Map To User</label>
+                                        </div>
                                     </div>
                                     <div class="col-md-12">
                                         <button type="button" class="btn btn-sm btn-primary  float-right pr-4 pl-4 ml-2" onclick="mapUnregisteredUserPaymentProcess('mapStudentForm')">Map</button>
@@ -471,24 +474,32 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 			<div class="full" style="overflow-x:inherit">`;
 				if(roleAndModule.added == 'Y') {
 					html += `
-					<div class="addPayment-wrapper row">
+					<div class="addPayment-wrapper row custom-field-scope">
 						<div class="col-md-3 col-sm-6 col-12">
-						<label>School Name</label>
+						<div class="custom-field">
 						<select name="schoolId" id="schoolId" class="multiselect-dropdown form-control">
 							${getSchoolContent(SCHOOL_ID)}
 						</select>
+						<label>School Name</label>
+						</div>
 						</div>
 						<div class="col-md-3 col-sm-6 col-12">
+						<div class="custom-field">
+						<input type="text" name="studentId" id="studentId" style="text-transform:capitalize" class="form-control" placeholder=" ">
 						<label>Student ID</label>
-						<input type="text" name="studentId" id="studentId" style="text-transform:capitalize" class="form-control">
+						</div>
 						</div>
 						<div class="col-md-3 col-sm-6 col-12">
+						<div class="custom-field">
+						<input type="text" name="firstName" id="searchName" style="text-transform:capitalize" class="form-control" placeholder=" ">
 						<label>Name</label>
-						<input type="text" name="firstName" id="searchName" style="text-transform:capitalize" class="form-control">
+						</div>
 						</div>
                         <div class="col-md-3 col-sm-6 col-12">
-                        <label>Student Email</label>
-						<input type="text" name="searchEmail" id="searchEmail" style="text-transform:capitalize" class="form-control">
+                        <div class="custom-field">
+						<input type="text" name="searchEmail" id="searchEmail" style="text-transform:capitalize" class="form-control" placeholder=" ">
+						<label>Student Email</label>
+						</div>
 						</div>
 						<div class="col-md-12 col-sm-12 col-12 mt-2">
 						<a href="javascript:void(0)" class="btn btn-success pull-right mt-2" onclick="searchStudentByNameAndEmail();">
@@ -564,157 +575,160 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 function getAddPaymentModal(schoolId, moduleId) {
     var html = `
         <div id="addPaymentModal" class="modal fade bd-example-modal-lg fade-scale square-field" tabindex="" data-backdrop="static" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
+            <div class="modal-dialog modal-xl" style="max-width:calc(100vw - 12px);width:calc(100vw - 12px);margin:0.5rem auto;">
                 <div class="modal-content border-0">
                     <div class="modal-header py-2 bg-primary">
                         <h5 class="modal-title text-white">Payment Details</h5>
                     </div>
                     <form action="javascript:void(0);" id="addStudentPaymentForm" name="addStudentPaymentForm" autocomplete="off">
-                        <div class="modal-body">
+                        <div class="modal-body custom-field-scope" style="padding:1.5rem 2rem;">
                             <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                                 <div class="form-row">
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12" style="display:none">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="studentStandardId" name="studentStandardId" type="text" class="form-control" placeholder=" ">
                                             <label class="mb-0">Student Standard Id</label>
-                                            <input id="studentStandardId" name="studentStandardId" type="text" class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12" id="studentIdDiv">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="studentId1" name="studentId1" type="text" class="form-control" style="padding-right:22px" placeholder=" ">
                                             <label class="mb-0">Student ID<sup class="text-danger">*</sup></label>
-                                            <input id="studentId1" name="studentId1" type="text" class="form-control" style="padding-right:22px">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12" id="studentEmailDiv">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="studentEmail" name="studentEmail" type="text" class="form-control" style="padding-right:22px" placeholder=" ">
                                             <label class="mb-0">Student Email<sup class="text-danger">*</sup></label>
-                                            <input id="studentEmail" name="studentEmail" type="text" class="form-control" style="padding-right:22px">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="studentName1" name="studentName1" type="text" class="form-control" placeholder=" ">
                                             <label class="mb-0">Student Name<sup class="text-danger">*</sup></label>
-                                            <input id="studentName1" name="studentName1" type="text" class="form-control">
                                         </div>
                                     </div>
                                     <div id="learningProgramWrapper" class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Learning Program<sup class="text-danger">*</sup></label>
+                                        <div class="form-group mb-3 custom-field">
                                             <select id="learningProgram1" name="learningProgram1" class="multiselect-dropdown form-control">
                                                 <option value="">Select Learning Program</option>
                                                 ${getLearningProgramContent(schoolId)}
                                             </select>
+                                            <label class="mb-0">Learning Program<sup class="text-danger">*</sup></label>
                                         </div>
                                     </div>
                                     <div id="gradeWrapper" class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Grade<sup class="text-danger hideWhenlearningProgramFlexy">*</sup></label>
+                                        <div class="form-group mb-3 custom-field">
                                             <select id="standardId1" name="standardId1" class="multiselect-dropdown form-control">
                                                 <option value="" disabled>Select Grade*</option>
                                                 ${getStandardContent(schoolId, false, false)}
                                             </select>
+                                            <label class="mb-0">Grade<sup class="text-danger hideWhenlearningProgramFlexy">*</sup></label>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Fee Title<sup class="text-danger">*</sup></label>
+                                        <div class="form-group mb-3 custom-field">
                                             <select id="paymentType1" name="paymentType" class="multiselect-dropdown form-control">
                                                 <!-- Payment Titles go here -->
                                             </select>
+                                            <label class="mb-0">Fee Title<sup class="text-danger">*</sup></label>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="paymentName1" name="paymentName1" type="text" class="form-control" placeholder=" ">
                                             <label class="mb-0">Payment Name<sup class="text-danger">*</sup></label>
-                                            <input id="paymentName1" name="paymentName1" type="text" class="form-control">
                                         </div>
                                     </div>
                                     <div id="alternatePaymentWrapper" class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Alternate Payment Name</label>
+                                        <div class="form-group mb-3">
+                                            <label class="mb-0 d-block ml-3">Alternate Payment Name</label>
                                             <div class="d-flex align-items-center gap-10">
-                                                <div class="flex-grow-1"><span id="paymentAlternateName"></span> - </div>
+                                                <div class="flex-grow-1 mb-4"><span id="paymentAlternateName"></span> - </div>
                                                 <div class="flex-grow-1">
+                                                    <div class="custom-field">
                                                     <select id="installmentNumber1" name="installmentNumber1" class="form-control">
                                                         ${getIntallmentNumbre()}
                                                     </select>
+                                                    <label>Installment</label>
+                                                    </div>
                                                 </div>
-                                                <div>of</div>
+                                                <div class="mb-4">of</div>
                                                 <div class="flex-grow-1">
+                                                    <div class="custom-field">
                                                     <select id="numberOfMonth1" name="numberOfMonth1" class="form-control">
                                                         ${getNumberOfMonths()}
                                                     </select>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <label>Installment</label>
+                                                    <label>Months</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div id="userReferenceNoWrapper" class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field mt-2">
+                                            <input id="userRefNumber1" name="userRefNumber" type="text" class="form-control" placeholder=" ">
                                             <label class="mb-0">User Reference No.</label>
-                                            <input id="userRefNumber1" name="userRefNumber" type="text" class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="payableAmount" name="payableAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" placeholder=" ">
                                             <label class="mb-0">Fee Amount<sup class="text-danger">*</sup></label>
-                                            <input id="payableAmount" name="payableAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);">
                                         </div>
                                     </div>
                                     <div id="additionalFeeWrapper" class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="additionalAmount" name="additionalAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" disabled placeholder=" ">
                                             <label class="mb-0">Additional Fee</label>
-                                            <input id="additionalAmount" name="additionalAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" disabled>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Currency<sup class="text-danger">*</sup></label>
+                                        <div class="form-group mb-3 custom-field">
                                             <select id="currency1" name="currency" class="multiselect-dropdown form-control">
                                                 ${getCurrenciesBySchoolId(schoolId)}
                                             </select>
+                                            <label class="mb-0">Currency<sup class="text-danger">*</sup></label>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Payment Gateway Used</label>
+                                        <div class="form-group mb-3 custom-field">
                                             <select id="paymentGateway1" name="paymentGateway" class="multiselect-dropdown form-control">
                                                 ${getPaymentGateway(schoolId)}
                                             </select>
+                                            <label class="mb-0">Payment Gateway Used</label>
                                         </div>
                                     </div>
 
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
-                                            <label class="mb-0">Status<sup class="text-danger">*</sup></label>
+                                        <div class="form-group mb-3 custom-field">
                                             <select id="status1" name="status" class="multiselect-dropdown form-control">
                                                 <option value="0" selected>Select Status</option>
                                                 <option value="SCHEDULED">SCHEDULED</option>
                                                 <option value="SUCCESS">SUCCESS</option>
                                             </select>
+                                            <label class="mb-0">Status<sup class="text-danger">*</sup></label>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input type="text" id="paymentDate1" name="paymentDate1" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly disabled placeholder=" ">
                                             <label class="mb-0">Payment Date<sup class="text-danger hideWhenStatusScheduled">*</sup></label>
-                                            <input type="text" id="paymentDate1" name="paymentDate1" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly disabled>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input type="text" id="scheduleDate1" name="scheduleDate1" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly placeholder=" ">
                                             <label class="mb-0">Schedule Date<sup class="text-danger">*</sup></label>
-                                            <input type="text" id="scheduleDate1" name="scheduleDate1" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly>
                                         </div>
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-2 p-0">
+                                        <div class="form-group mb-3 custom-field">
+                                            <input id="transactionNumber" name="transactionNumber" type="text" class="form-control" placeholder=" ">
                                             <label class="mb-0">Transaction No.</label>
-                                            <input id="transactionNumber" name="transactionNumber" type="text" class="form-control">
                                         </div>
                                     </div>
-                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-2">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-3">
                                         <label class="mb-0">Add Description(If any):</label>
                                         <div name="descriptionDiv" id="descriptionDiv" style="max-height:100px"></div>
                                     </div>
@@ -745,193 +759,195 @@ function getAddPaymentModal(schoolId, moduleId) {
 function getAdvancePaymentSearch(schoolId, moduleId) {
   var html = `
     <div id="advSerch" class="modal fade bd-example-modal-lg fade-scale square-field" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-xl">
+      <div class="modal-dialog modal-xl" style="max-width:calc(100vw - 12px);width:calc(100vw - 12px);margin:0.5rem auto;">
         <div class="modal-content border-0">
           <div class="modal-header py-2 bg-primary">
             <h5 class="modal-title text-white">Advance Search</h5>
             <button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
           </div>
           <form action="javascript:void(0);" id="advancePaymentSearchForm" name="advancePaymentSearchForm" autocomplete="off">
-            <div class="modal-body">
+            <div class="modal-body custom-field-scope" style="padding:2rem 2.25rem;">
               <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 schoolName">
-                    <label class="mb-0">School Name</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 schoolName custom-field">
                     <select name="schoolId" id="schoolId" class="multiselect-dropdown form-control">
                       ${getSchoolContent(schoolId)}
                     </select>
+                    <label>School Name</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Academic Session</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
                     <select id="academicSession" name="academicSession" class="multiselect-dropdown form-control"></select>
+                    <label>Academic Session</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 registeredStudent">
-                    <label class="mb-0">Unregistered/Registered Student</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 registeredStudent custom-field">
                     <select id="userRegistrationType" name="userRegistrationType" class="multiselect-dropdown form-control">
                       <option value="Registered">Registered</option>
                       <option value="Unregistered">Unregistered</option>
                       <option value="INVOICE">Invoice</option>
                     </select>
+                    <label>Unregistered/Registered Student</label>
                   </div>
                 </div>
-                <div class="col-lg-4 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 paymentType">
-                    <label class="mb-0">Payment Title</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 paymentType custom-field">
                     <select id="paymentType" name="paymentType" multiple="multiple" class="multiselect-dropdown form-control">
                     </select>
+                    <label>Payment Title</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 paymentVia">
-                    <label class="mb-0">Payment Via</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 paymentVia custom-field">
                     <select id="paymentVia" name="paymentVia" multiple="multiple" class="multiselect-dropdown form-control">
                       ${paymentVia(schoolId)}
                     </select>
+                    <label>Payment Via</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 paymentGateway">
-                    <label class="mb-0">Payment Gateway Used</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 paymentGateway custom-field">
                     <select id="paymentGateway" name="paymentGateway" class="multiselect-dropdown form-control">
                       ${getPaymentGateway(schoolId)}
                     </select>
+                    <label>Payment Gateway Used</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 enrollmentType">
-                    <label class="mb-0">Select Enrollment Type</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 enrollmentType custom-field">
                     <select name="registrationType" id="registrationType" class="multiselect-dropdown form-control">
                       <option value="">Select Learning Program</option>
                       ${getLearningProgramContent(schoolId)}
                     </select>
+                    <label>Select Enrollment Type</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 gradeID">
-                    <label class="mb-0">Grade</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 gradeID custom-field">
                     <select id="gradeId" name="gradeId" multiple="multiple" class="multiselect-dropdown form-control">
                       <option value="" disabled>Select Grade*</option>
                       ${getStandardContent(schoolId, true, false)}
                     </select>
+                    <label>Grade</label>
                   </div>
                 </div>
-                <div class="col-md-3 col-sm-12 col-12 enrollStatus">
-                  <label class="mb-0">Enroll Status</label>
-                  <select name="enrollStatus" id="enrollStatus" class="multiselect-dropdown form-control">
-                    <option value="">Enroll Status</option>
-                    <option value="0">Completed</option>
-                    <option value="1">Withdrawn</option>
-                    <option value="2">Partial entry - New enrollment</option>
-                    <option value="3">Partial entry - Re-enrollment</option>
-                  </select>
-                </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Student Id</label>
-                    <input id="studentId" name="studentId" type="text" class="form-control" autocomplete="off">
+                <div class="col-md-4 col-sm-6 col-12 enrollStatus">
+                  <div class="form-group mb-4 custom-field">
+                    <select name="enrollStatus" id="enrollStatus" class="multiselect-dropdown form-control">
+                      <option value="">Enroll Status</option>
+                      <option value="0">Completed</option>
+                      <option value="1">Withdrawn</option>
+                      <option value="2">Partial entry - New enrollment</option>
+                      <option value="3">Partial entry - Re-enrollment</option>
+                    </select>
+                    <label>Enroll Status</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Name</label>
-                    <input id="studentName" name="studentName" type="text" class="form-control" autocomplete="off">
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input id="studentId" name="studentId" type="text" class="form-control" autocomplete="off" placeholder=" ">
+                    <label>Student Id</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Email</label>
-                    <input id="studentEmail" name="studentEmail" type="text" class="form-control" autocomplete="off">
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input id="studentName" name="studentName" type="text" class="form-control" autocomplete="off" placeholder=" ">
+                    <label>Name</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 countryId">
-                    <label class="mb-0">Country</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input id="studentEmail" name="studentEmail" type="text" class="form-control" autocomplete="off" placeholder=" ">
+                    <label>Email</label>
+                  </div>
+                </div>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 countryId custom-field">
                     <select id="countryId" name="countryId" multiple="multiple" class="multiselect-dropdown form-control"></select>
+                    <label>Country</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 paymentMode">
-                    <label class="mb-0">Student's Selected Payment Mode</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 paymentMode custom-field">
                     <select id="paymentMode" name="paymentMode" multiple="multiple" class="multiselect-dropdown form-control">
                       ${getPaymentMode(schoolId)}
                     </select>
+                    <label>Student's Selected Payment Mode</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Transaction Reference No.</label>
-                    <input id="transactionRefNumber" name="transactionRefNumber" type="text" class="form-control">
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input id="transactionRefNumber" name="transactionRefNumber" type="text" class="form-control" placeholder=" ">
+                    <label>Transaction Reference No.</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">User Reference No.</label>
-                    <input id="userRefNumber" name="userRefNumber" type="text" class="form-control">
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input id="userRefNumber" name="userRefNumber" type="text" class="form-control" placeholder=" ">
+                    <label>User Reference No.</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-3 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 paymentStatus">
-                    <label class="mb-0">Payment Status</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 paymentStatus custom-field">
                     <select id="paymentStatus" name="paymentStatus" multiple="multiple" class="multiselect-dropdown form-control">
                       <option value="SUCCESS">SUCCESS</option>
                       <option value="INITIATED">INITIATED</option>
                       <option value="SCHEDULED">SCHEDULED</option>
                       <option value="REJECTED">REJECTED</option>
                     </select>
+                    <label>Payment Status</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Payment Date From</label>
-                    <input type="text" id="paymentDateFrom" name="paymentDateFrom" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input type="text" id="paymentDateFrom" name="paymentDateFrom" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly placeholder=" ">
+                    <label>Payment Date From</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Payment Date To</label>
-                    <input type="text" id="paymentDateTo" name="paymentDateTo" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input type="text" id="paymentDateTo" name="paymentDateTo" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly placeholder=" ">
+                    <label>Payment Date To</label>
                   </div>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-12" id="counselorUserIdWrapper" style="display:none">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Payment Added By</label>
+                <div class="col-md-4 col-sm-6 col-12" id="counselorUserIdWrapper" style="display:none">
+                  <div class="form-group mb-4 custom-field">
                     <select name="counselorUserId" id="counselorUserId" class="multiselect-dropdown form-control">
                       <option value="">Select User</option>
                     </select>
+                    <label>Payment Added By</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 sortBy">
-                    <label class="mb-0">Sort in</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 sortBy custom-field">
                     <select id="sortBy" name="sortBy" class="multiselect-dropdown form-control">
                       <option value="DESC">Descending</option>
                       <option value="ASC">Ascending</option>
                     </select>
+                    <label>Sort in</label>
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0 orderBy">
-                    <label class="mb-0">Order by</label>
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 orderBy custom-field">
                     <select id="orderBy" name="orderBy" class="multiselect-dropdown form-control">
                       <option value="PAY_DATE">Payment Date</option>
                       <option value="SCHEDULED_PAY_DATE">Scheduled Payment Date</option>
                     </select>
+                    <label>Order by</label>
                   </div>
                 </div>
-                <div class="col-lg-1 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">Start Position</label>
-                    <input type="text" id="startPosition" name="startPosition" class="form-control" value="0" onkeydown="return M.digit(event);">
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input type="text" id="startPosition" name="startPosition" class="form-control" value="0" onkeydown="return M.digit(event);" placeholder=" ">
+                    <label>Start Position</label>
                   </div>
                 </div>
-                <div class="col-lg-1 col-md-2 col-sm-12 col-12">
-                  <div class="form-group mb-2 p-0">
-                    <label class="mb-0">No of Records</label>
-                    <input type="text" id="numberOfRecords" name="numberOfRecords" class="form-control" value="25" onkeydown="return M.digit(event);">
+                <div class="col-md-4 col-sm-6 col-12">
+                  <div class="form-group mb-4 custom-field">
+                    <input type="text" id="numberOfRecords" name="numberOfRecords" class="form-control" value="25" onkeydown="return M.digit(event);" placeholder=" ">
+                    <label>No of Records</label>
                   </div>
                 </div>
               </div>
@@ -962,25 +978,25 @@ function getPaymentRemark(schoolId, moduleId) {
                     </button>
                 </div>
                 
-                <div class="modal-body">
+                <div class="modal-body custom-field-scope">
                     <form autocomplete="off" id="paymentRemarksForm">
                         <input type="hidden" id="userPaymentDetailsId" value="">
                         <input type="hidden" id="userId" value="">
                         <input type="hidden" id="moduleId" value="">
                         <input type="hidden" id="serialNumber" value="">
 						
-						<div class="form-group">
-                            <label for="remarksStatus" class="control-label">Status:</label>
+						<div class="form-group custom-field">
                             <select class="form-control" name="remarksStatus" id="remarksStatus" onchange="changeRemark();">
                                 <option value="">Select status</option>
                                 <option value="Approve">Approve</option>
                                 <option value="Decline">Reject</option>
                             </select>
+                            <label for="remarksStatus" class="control-label">Status:</label>
                         </div>
 
-                        <div id="pendingRemark" class="form-group">
+                        <div id="pendingRemark" class="form-group custom-field">
+                            <textarea class="form-control" id="remarks" maxlength="200" placeholder=" "></textarea>
                             <label for="message-text" class="control-label">Remarks:</label>
-                            <textarea class="form-control" id="remarks" maxlength="200"></textarea>
                         </div>
 
                         <div>
@@ -1007,7 +1023,7 @@ function getPaymentRemark(schoolId, moduleId) {
 function editPaymentContent(moduleId, userPayment, controlType, standardName) {
     var html = `
     <div id="editPaymentModal" class="modal fade bd-example-modal-lg fade-scale square-field" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl" style="max-width:calc(100vw - 12px);width:calc(100vw - 12px);margin:0.5rem auto;">
             <div class="modal-content border-0">
                 <div class="modal-header py-2 theme-bg text-white">
                     <h5 class="modal-title">Payment Details</h5>
@@ -1017,44 +1033,50 @@ function editPaymentContent(moduleId, userPayment, controlType, standardName) {
                 </div>
 
                 <form action="javascript:void(0);" id="addStudentPaymentForm" name="addStudentPaymentForm" autocomplete="off">
-                    <div class="modal-body">
+                    <div class="modal-body custom-field-scope" style="padding:1.5rem 2rem;">
                         <div class="col-12">
                             <div class="form-row">
                                 
                                 <!-- Fee Title -->
                                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
-                                        <label class="mb-0">Fee Title</label>
+                                    <div class="form-group mb-3 custom-field">
                                         <select id="paymentType2" name="paymentType" class="multiselect-dropdown form-control" disabled>
                                             ${getPaymentTitle('addStudentPaymentForm',userPayment.schoolId)}
                                         </select>
+                                        <label class="mb-0">Fee Title</label>
                                     </div>
                                 </div>
 
                                 <!-- Payment Name -->
                                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field">
+                                        <input id="paymentName2" name="paymentName2" type="text" value="${userPayment.paymentName}" class="form-control" ${userPayment.paymentName.includes('Reserve an Enrollment Seat') ? 'disabled' : ''} placeholder=" ">
                                         <label class="mb-0">Payment Name</label>
-                                        <input id="paymentName2" name="paymentName2" type="text" value="${userPayment.paymentName}" class="form-control" ${userPayment.paymentName.includes('Reserve an Enrollment Seat') ? 'disabled' : ''}>
                                     </div>
                                 </div>
 
                                 <!-- Alternate Payment Name -->
                                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
-                                        <label class="mb-0">Alternate Payment Name</label>
+                                    <div class="form-group mb-3">
+                                        <label class="mb-0 d-block ml-3">Alternate Payment Name</label>
                                         <div class="d-flex align-items-center gap-10">
-                                            <div class="flex-grow-1"><span>${standardName}</span> - </div>
+                                            <div class="flex-grow-1 mb-4"><span>${standardName}</span> - </div>
                                             <div class="flex-grow-1">
-                                                <select id="installmentNumber2" name="installmentNumber2" class="form-control">
-                                                    ${getIntallmentNumbre()}
-                                                </select>
+                                                <div class="custom-field">
+                                                    <select id="installmentNumber2" name="installmentNumber2" class="form-control">
+                                                        ${getIntallmentNumbre()}
+                                                    </select>
+                                                    <label>Installment</label>
+                                                </div>
                                             </div>
-                                            <div>of</div>
+                                            <div class="mb-4">of</div>
                                             <div class="flex-grow-1">
-                                                <select id="numberOfMonth2" name="numberOfMonth2" class="form-control">
-                                                    ${getNumberOfMonths()}
-                                                </select>
+                                                <div class="custom-field">
+                                                    <select id="numberOfMonth2" name="numberOfMonth2" class="form-control">
+                                                        ${getNumberOfMonths()}
+                                                    </select>
+                                                    <label>Months</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1062,79 +1084,79 @@ function editPaymentContent(moduleId, userPayment, controlType, standardName) {
 
                                 <!-- User Reference No. -->
                                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field mt-2">
+                                        <input id="userRefNumber2" name="userRefNumber" type="text" class="form-control" value="${userPayment.referenceNumber}" placeholder=" ">
                                         <label class="mb-0">User Reference No.</label>
-                                        <input id="userRefNumber2" name="userRefNumber" type="text" class="form-control" value="${userPayment.referenceNumber}">
                                     </div>
                                 </div>
 
                                 <!-- Fee Amount -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field">
+                                        <input id="payableAmount2" name="payableAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" value="${userPayment.payAmount}" placeholder=" ">
                                         <label class="mb-0">Fee Amount</label>
-                                        <input id="payableAmount2" name="payableAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" value="${userPayment.payAmount}">
                                     </div>
                                 </div>
 
                                 <!-- Additional Fee -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field">
+                                        <input id="additionalAmount2" name="additionalAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" value="${userPayment.additionalPayment}" disabled placeholder=" ">
                                         <label class="mb-0">Additional Fee</label>
-                                        <input id="additionalAmount2" name="additionalAmount" type="tel" class="form-control" onkeydown="return M.floatDigit(event);" value="${userPayment.additionalPayment}" disabled>
                                     </div>
                                 </div>
 
                                 <!-- Currency -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
-                                        <label class="mb-0">Currency</label>
+                                    <div class="form-group mb-3 custom-field">
                                         <select id="currency2" name="currency2" class="multiselect-dropdown form-control">
                                             ${getCurrenciesBySchoolId(userPayment.schoolId)}
                                         </select>
+                                        <label class="mb-0">Currency</label>
                                     </div>
                                 </div>
 
                                 <!-- Payment Gateway -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
-                                        <label class="mb-0">Payment Gateway Used</label>
+                                    <div class="form-group mb-3 custom-field">
                                         <select id="paymentGateway2" name="paymentGateway2" class="multiselect-dropdown form-control">
                                             ${getPaymentGateway(userPayment.schoolId)}
                                         </select>
+                                        <label class="mb-0">Payment Gateway Used</label>
                                     </div>
                                 </div>
 
                                 <!-- Status -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
-                                        <label class="mb-0">Status</label>
+                                    <div class="form-group mb-3 custom-field">
                                         <select id="status2" name="status2" class="multiselect-dropdown form-control">
                                             ${getPaymentStatus()}
                                         </select>
+                                        <label class="mb-0">Status</label>
                                     </div>
                                 </div>
 
                                 <!-- Payment Date -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field">
+                                        <input type="text" id="paymentDate2" name="paymentDate2" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly placeholder=" ">
                                         <label class="mb-0">Payment Date</label>
-                                        <input type="text" id="paymentDate2" name="paymentDate2" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly>
                                     </div>
                                 </div>
 										
                                 <!-- Schedule Date -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field">
+                                        <input type="text" id="scheduleDate2" name="scheduleDate2" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly placeholder=" ">
                                         <label class="mb-0">Schedule Date</label>
-                                        <input type="text" id="scheduleDate2" name="scheduleDate2" class="form-control" data-toggle="datepicker" onkeydown="return false" readonly>
                                     </div>
                                 </div>
 
                                 <!-- Transaction No. -->
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="form-group mb-2 p-0">
+                                    <div class="form-group mb-3 custom-field">
+                                        <input id="transactionNumber2" name="transactionNumber2" type="text" class="form-control" value="${userPayment.transactionId != null ? userPayment.transactionId : ''}" placeholder=" ">
                                         <label class="mb-0">Transaction No.</label>
-                                        <input id="transactionNumber2" name="transactionNumber2" type="text" class="form-control" value="${userPayment.transactionId != null ? userPayment.transactionId : ''}">
                                     </div>
                                 </div>
 
@@ -1185,3 +1207,9 @@ function editPaymentContent(moduleId, userPayment, controlType, standardName) {
 
     return html;
 }
+
+$(document).on('shown.bs.modal', '#mapStudentModal, #addPaymentModal, #advSerch, #paymentRemarks, #editPaymentModal', function () {
+    if (typeof refreshCustomFieldState === 'function') {
+        refreshCustomFieldState($(this));
+    }
+});

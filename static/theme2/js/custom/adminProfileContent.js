@@ -98,7 +98,7 @@ function getProfilePageContent(data, callFrom, arg0){
                             html+= `<a href="javascript:void(0)" onClick="backToMain(\'manageProfileParentContent\');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
                         }
                    html+= `</div>
-                    <form class="full admin-profile-wrapper px-4 position-relative" id="profilePageFromTag" style="margin-top:-95px">
+                    <form class="full admin-profile-wrapper px-4 position-relative custom-field-scope" id="profilePageFromTag" style="margin-top:-95px">
                         <div class="profile-picture-wrapper">
                             <div class="profile-picture">
                                 <div class="full">
@@ -134,106 +134,106 @@ function getProfilePageContent(data, callFrom, arg0){
                             <div class="row mt-4 ">
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">User Name</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark userNameLabel">${data.userFullName}</div> 
-                                        <div class="field-input w-100">
-                                            <input type="text" id="userName" name="userName" class="form-control field-input" value="${data.userFullName}"/>
+                                        <div class="field-input w-100 position-relative custom-field">
+                                            <input type="text" id="userName" name="userName" class="form-control field-input" value="${data.userFullName}" placeholder=" "/>
+                                            <label class="m-0">User Name</label>
                                         </div>
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">Gender</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark genderLabel">${data.gender}</div> 
-                                        <div class="field-input w-100">
+                                        <div class="field-input w-100 position-relative custom-field">
                                             <select id="gender" name="gender" class="form-control field-input">
-                                                <option value="MALE" ${data.gender == "MALE"? 'selected':''}>MALE</option>
-                                                <option value="FEMALE" ${data.gender == "FEMALE"? 'selected':''}>FEMALE</option>
-                                                <option value="TRANSGENDER" ${data.gender == "TRANSGENDER"? 'selected':''}>TRANSGENDER</option>
+                                                <option value="MALE" ${data.gender == "MALE"? 'selected':''}>Male</option>
+                                                <option value="FEMALE" ${data.gender == "FEMALE"? 'selected':''}>Female</option>
+                                                <option value="TRANSGENDER" ${data.gender == "TRANSGENDER"? 'selected':''}>Transgender</option>
                                                 <option value="DONOTWANTTOSPECIFY" ${data.gender == "DONOTWANTTOSPECIFY"? 'selected':''}>DO NOT WANT TO SPECIFY</option>   
                                             </select>
+                                            <label class="m-0">Gender</label>
                                         </div>
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3 w-100">
                                     <div class="form-group">
-                                        <label class="m-0">Phone Number</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark phoneNumberLabel">${data.contactNumber !=''? data.contactNumber:'N/A' }</div> 
-                                        <div class="w-100;">
-                                            <input type="text" id="phoneNumber" name="phoneNumber" class="form-control field-input" value="${data.contactNumber}"/>
+                                        <div class="w-100 position-relative custom-field field-input">
+                                            <input type="text" id="phoneNumber" name="phoneNumber" class="form-control field-input" value="${data.contactNumber}" placeholder=" "/>
+                                            <label style="left: 106px;">Phone Number</label>
                                         </div>  
                                     </div>  
                                 </div>
                                 
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">Email</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark emailIdLabel">${data.emailId}</div> 
-                                        <div class="field-input w-100">
-                                            <input type="text" id="emailId" name="emailId" class="form-control field-input" value="${data.emailId}" disabled/>
+                                        <div class="field-input w-100 position-relative custom-field">
+                                            <input type="text" id="emailId" name="emailId" class="form-control field-input" value="${data.emailId}" disabled placeholder=" "/>
+                                            <label class="m-0">Email</label>
                                         </div>  
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">User name</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark useremailIdLabel">${data.userName}</div> 
-                                        <div class="field-input w-100">
-                                            <input type="text" id="userEmailId" name="userEmailId" class="form-control field-input" value="${data.userName}" disabled/>
+                                        <div class="field-input w-100 position-relative custom-field">
+                                            <input type="text" id="userEmailId" name="userEmailId" class="form-control field-input" value="${data.userName}" disabled placeholder=" "/>
+                                            <label class="m-0">User name</label>
                                         </div>  
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">Added Date</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark addedDateLabel">Added Date</div> 
-                                        <div class="field-input w-100">
-                                            <input type="text" id="addedDate" name="addedDate" class="form-control field-input" value="${data.addedDate}" readonly onkeydown="return false"/>
+                                        <div class="field-input w-100 position-relative custom-field">
+                                            <input type="text" id="addedDate" name="addedDate" class="form-control field-input" value="${data.addedDate}" readonly onkeydown="return false" placeholder=" "/>
+                                            <label class="m-0">Added Date</label>
                                         </div>  
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">Country</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark countryLabel">${data.country !=""?data.country:"N/A"}</div> 
-                                        <div class="field-input w-100">
+                                        <div class="field-input w-100 position-relative custom-field">
                                             <select id="country" name="country" class="form-control field-input"></select>
+                                            <label class="m-0">Country</label>
                                         </div>  
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">State</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark stateLabel">${data.state !=""?data.state:"N/A"}</div> 
-                                        <div class="field-input w-100">
+                                        <div class="field-input w-100 position-relative custom-field">
                                             <select id="state" name="state" class="form-control field-input" disabled></select>
+                                            <label class="m-0">State</label>
                                         </div> 
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">City</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark cityLabel">${data.city !=""?data.city:"N/A"}</div> 
-                                        <div class="field-input w-100">
+                                        <div class="field-input w-100 position-relative custom-field">
                                             <select id="city" name="city" class="form-control field-input" disabled></select>
+                                            <label class="m-0">City</label>
                                         </div> 
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">Timezone</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark countryTimezoneIdLabel">${data.countryTimezone}</div>
-                                        <div class="field-input w-100">
+                                        <div class="field-input w-100 position-relative custom-field">
                                             <select id="countryTimezoneId" name="countryTimezoneId" class="form-control field-input"></select>
+                                            <label class="m-0">Timezone</label>
                                         </div> 
                                     </div>  
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <label class="m-0">Languages</label>
                                         <div class="profile-label field-value font-weight-semi-bold text-dark langKnownLabel">`+getLanguagesValueByCode(data.languagesKnown)+`</div>
-                                        <div class="field-input w-100">
+                                        <div class="field-input w-100 position-relative custom-field">
                                              <select id="languages" name="languages" class="form-control field-input" multiple>`+getLanguages(false)+`</select>
+                                             <label class="m-0">Languages</label>
                                         </div> 
                                     </div>  
                                 </div>
@@ -303,67 +303,67 @@ function getProfileBankDetailsContent(data){
                     <i class="fa fa-edit"></i>&nbsp; Edit
                 </a>
             </div>
-            <div class="row mt-4">
+                <div class="row mt-4 custom-field-scope">
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">BIC Name</label>
                         <div id="bicNameLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.iban}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="bicNameB2b" name="bicNameB2b" class="form-control" value="${data == "N/A" ? "" : data.iban}"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="bicNameB2b" name="bicNameB2b" class="form-control" value="${data == "N/A" ? "" : data.iban}" placeholder=" "/>
+                            <label class="m-0">BIC Name</label>
                         </div>
                     </div>  
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">Bank Address</label>
                         <div id="bankAddressLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.bankBranchAddress}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="bankAddressB2b" name="bankAddressB2b" class="form-control" value="${data == "N/A" ? "" : data.bankBranchAddress}"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="bankAddressB2b" name="bankAddressB2b" class="form-control" value="${data == "N/A" ? "" : data.bankBranchAddress}" placeholder=" "/>
+                            <label class="m-0">Bank Address</label>
                         </div>
                     </div>  
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">Swift Code</label>
                         <div id="swiftCodeLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.swiftCode}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="swiftCodeB2b" name="swiftCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.swiftCode}"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="swiftCodeB2b" name="swiftCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.swiftCode}" placeholder=" "/>
+                            <label class="m-0">Swift Code</label>
                         </div>
                     </div>  
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">Bank Code</label>
                         <div id="bankCodeLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.bankIfsc}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="bankCodeB2b" name="bankCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.bankIfsc}"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="bankCodeB2b" name="bankCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.bankIfsc}" placeholder=" "/>
+                            <label class="m-0">Bank Code</label>
                         </div>
                     </div>  
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">Branch Code</label>
                         <div id="branchCodeLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.routeNo}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="branchCodeB2b" name="branchCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.routeNo}"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="branchCodeB2b" name="branchCodeB2b" class="form-control" value="${data == "N/A" ? "" : data.routeNo}" placeholder=" "/>
+                            <label class="m-0">Branch Code</label>
                         </div>
                     </div>  
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">Account Holder Name</label>
                         <div id="accountNameLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.accountHolderFirstName}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="accountNameB2b" name="accountNameB2b" class="form-control" value="${data == "N/A" ? "" : data.accountHolderFirstName}"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="accountNameB2b" name="accountNameB2b" class="form-control" value="${data == "N/A" ? "" : data.accountHolderFirstName}" placeholder=" "/>
+                            <label class="m-0">Account Holder Name</label>
                         </div>
                     </div>  
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                     <div class="form-group">
-                        <label class="m-0">Account Number</label>
                         <div id="accountNumberLabel" class="font-weight-semi-bold text-dark bank-details-field">${data == "N/A" ? "" : data.accountNo}</div> 
-                        <div class="w-100 bank-details-input-field">
-                            <input type="text" id="accountNumberB2b" name="accountNumberB2b" class="form-control" value="${data == "N/A" ? "" : data.accountNo}" onkeydown="return M.digit(event);"/>
+                        <div class="w-100 bank-details-input-field position-relative custom-field">
+                            <input type="text" id="accountNumberB2b" name="accountNumberB2b" class="form-control" value="${data == "N/A" ? "" : data.accountNo}" onkeydown="return M.digit(event);" placeholder=" "/>
+                            <label class="m-0">Account Number</label>
                         </div>
                     </div>  
                 </div>

@@ -211,6 +211,19 @@ var SCHOOL_STANDARD_GRADE_MASTER = [
 	{"key":"20","value":"Flexy - Credit Recovery","orderBy":"17"},
 	{"key":"21","value":"Flexy - Advanced Placement","orderBy":"18"}
 ];
+function formatDropdownDisplayLabel(label){
+	if(label === undefined || label === null){
+		return '';
+	}
+	return String(label)
+		.trim()
+		.toLowerCase()
+		.replace(/[_-]+/g, ' ')
+		.replace(/\s+/g, ' ')
+		.replace(/\b\w/g, function (char) {
+			return char.toUpperCase();
+		});
+}
 function getGradesData(requiredGrades){
 	var grades=[]
 	for(var index=0;index<requiredGrades.length;index++){
@@ -432,9 +445,10 @@ function getGenderContent(){
 	html+='<option value="MALE">Male</option>';
 	html+='<option value="FEMALE">Female</option>';
 	// html+='<option value="TRANSGENDER">TRANSGENDER</option>';
-	html+='<option value="DONOTWANTTOSPECIFY">Do Not Want to Specify</option>';
+	html+='<option value="DONOTWANTTOSPECIFY">Do Not Want To Specify</option>';
 	return html;
 }
+
 
 function getRelationshipContent(){
 	var html='<option value="">Select relationship*</option>'

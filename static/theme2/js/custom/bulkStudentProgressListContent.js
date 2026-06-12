@@ -43,6 +43,16 @@ async function renderAutoProgressReportDashboard(title, roleAndModule, SCHOOL_ID
 	var intdays = parseInt($("#reporttype").val(), 10);
 	strtDate.setDate(strtDate.getDate() + (intdays-1));
 	$("#endReportDate").val(getDateStringFormat(strtDate));
+	if(typeof refreshCustomFieldState === 'function'){
+		refreshCustomFieldState($("#autoStudentSearchForm"));
+		refreshCustomFieldState($("#generateReport"));
+		refreshCustomFieldState($("#autoMailStudent"));
+		setTimeout(function(){
+			refreshCustomFieldState($("#autoStudentSearchForm"));
+			refreshCustomFieldState($("#generateReport"));
+			refreshCustomFieldState($("#autoMailStudent"));
+		}, 0);
+	}
 
 	$("#reporttype").on('change',function(){
 		var reporttype = $("#reporttype").val();
@@ -238,30 +248,40 @@ function getAutoViewModule(){
 				</button>
 			</div>
 			<div id="autoProgressContents" class="modal-body">
-				<form action="javascript:void(0);" class="m-0" id="autoStudentSearchForm" name="autoStudentSearchForm" autocomplete='off'>
-					<div class="row">
+				<form action="javascript:void(0);" class="m-0 custom-field-scope" id="autoStudentSearchForm" name="autoStudentSearchForm" autocomplete='off'>
+					<div class="row custom-field-scope">
 						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-3 col-12">
-							<label>Academic Year<sup>*</sup></label>
-							<select	name="acadmicYear" id="acadmicYear" class="form-control"></select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select	name="acadmicYear" id="acadmicYear" class="form-control"></select>
+								<label for="acadmicYear">Academic Year<sup>*</sup></label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-3 col-12">
-							<label>LMS Platform<sup>*</sup></label>
-							<select name="lmsPlatform" id="lmsPlatform" class="form-control"></select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="lmsPlatform" id="lmsPlatform" class="form-control"></select>
+								<label for="lmsPlatform">LMS Platform<sup>*</sup></label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-							<label>Select grade<sup>*</sup></label>
-							<select name="standardId" id="standardId" class="form-control">
-								<option value="">Select Grade</option>`;
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="standardId" id="standardId" class="form-control">
+									<option value="">Select Grade</option>`;
 								html+=getStandardContent(SCHOOL_ID,true, false)
 							html+=`</select>
+								<label for="standardId">Select grade<sup>*</sup></label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 field-icon-dev">
-							<label>Student Email</label>
-							<input type="text" class="form-control" name="userNameOrEmail" id="userNameOrEmail" value="" autocomplete="off" />
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" class="form-control" name="userNameOrEmail" id="userNameOrEmail" value="" autocomplete="off" placeholder=" " />
+								<label for="userNameOrEmail">Student Email</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-							<label>Student Name</label>
-							<input type="text" class="form-control" name="studentName" id="studentName" value="" autocomplete="off"  />
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" class="form-control" name="studentName" id="studentName" value="" autocomplete="off" placeholder=" " />
+								<label for="studentName">Student Name</label>
+							</div>
 						</div>
 						<div class="col-12 text-right">
 							<button class="btn btn-success  proceedRecurringClassbtn" type="submit" onclick="callAutoWeeklyStudent('autoStudentSearchForm','${USER_ID}')" ><i class="fa fa-search"></i>&nbsp;Search</button>
@@ -269,23 +289,29 @@ function getAutoViewModule(){
 					</div>
 				</form>	
 				<div class="full" id="generateReport" style="display:none">
-					<div class="row">
+					<div class="row custom-field-scope">
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
-							<label>Select Report Type<sup>*</sup></label>
-							<select name="reporttype" id="reporttype" class="form-control"  required>
-								<option value="7">Every 7 days</option>	
-								<option value="15">Every 15 days</option>	
-								<option value="30">Every 30 days</option>	
-								<option value="0">Custom</option>	
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="reporttype" id="reporttype" class="form-control"  required>
+									<option value="7">Every 7 days</option>	
+									<option value="15">Every 15 days</option>	
+									<option value="30">Every 30 days</option>	
+									<option value="0">Custom</option>	
+								</select>
+								<label for="reporttype">Select Report Type<sup>*</sup></label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
-							<label class="bmd-label-floating">Report Start Date:</label> 
-							<input type="text" class="form-control" id="startReportDate" name="startReportDate" autocomplete="off" readonly onkeydown="return false" />
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" class="form-control" id="startReportDate" name="startReportDate" autocomplete="off" readonly onkeydown="return false" placeholder=" " />
+								<label for="startReportDate" class="bmd-label-floating">Report Start Date:</label> 
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12">
-							<label class="bmd-label-floating">Report End Date:</label> 
-							<input type="text" class="form-control" id="endReportDate" name="endReportDate" autocomplete="off" readonly onkeydown="return false" />
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" class="form-control" id="endReportDate" name="endReportDate" autocomplete="off" readonly onkeydown="return false" placeholder=" " />
+								<label for="endReportDate" class="bmd-label-floating">Report End Date:</label> 
+							</div>
 						</div>
 						<div class="col-lg-3 col-md-3 col-sm-3 col-12">
 							<button class="btn btn-success sendMailbtn" type="submit"  onclick="return showWarningMessageForGenerate('Are you sure you want to generate the report?','callAutoWeeklyStudentSendMail(\\\'autoStudentSendForm\\\',\\\'${USER_ID}\\\',\\\'${UNIQUEUUID}\\\',\\\'${moduleId}\\\')')" > Generate Report</button>
@@ -328,18 +354,24 @@ function getAutoMailStudent(){
 				</button>
 			</div>
 			<div class="modal-body">
-				<div class="row">
+				<div class="row custom-field-scope">
 					<div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-2">
 						<input type="hidden" id="reportID"/>
-						<select id="reportFilter" class="form-control" onchange="callFilterdStudentWeeklyReport('','${USER_ID}','${UNIQUEUUID}','','','','view',0);">
-							<option value="all" selected >All</option>
-							<option value="success">Success</option>
-							<option value="failed">Failed</option>
-						</select>
+						<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+							<select id="reportFilter" class="form-control" onchange="callFilterdStudentWeeklyReport('','${USER_ID}','${UNIQUEUUID}','','','','view',0);">
+								<option value="all" selected >All</option>
+								<option value="success">Success</option>
+								<option value="failed">Failed</option>
+							</select>
+							<label for="reportFilter">Report Filter</label>
+						</div>
 					</div>
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12 mb-2">
 					<div class="d-flex align-items-center flex-wrap justify-content-end mb-2" style="gap:0.5rem">
-						<input type="text" name="weeklyReportSearch" id="weeklyReportSearch" class="w-fit-content form-control form-control-sm" placeholder="Search" />
+						<div class="input-group position-relative custom-field mb-0 p-0" style="width:auto;">
+							<input type="text" name="weeklyReportSearch" id="weeklyReportSearch" class="w-fit-content form-control form-control-sm" placeholder=" " />
+							<label for="weeklyReportSearch">Search</label>
+						</div>
 					</div>
 						<table class="table table-bordered responsive nowrap" id="autoWeeklyMailStudent" style="width:100%;">
 						<thead>

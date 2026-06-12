@@ -31,40 +31,50 @@ function getManageClubsFilter(countObj) {
     var html=`
         <div class="card shadow-sm mb-3" style="border-radius:12px;">
             <div class="card-body">
-                <div class="row">
+                <div class="row custom-field-scope">
 
                     <div class="col-md-3 mb-2">
-                        <label class="font-weight-bold mb-1">Student Name</label>
-                        <input type="text" class="form-control" id="filterClubStudentName">
+                        <div class="position-relative custom-field mb-2 mt-3 p-0">
+                            <input type="text" class="form-control" id="filterClubStudentName" placeholder=" ">
+                            <label class="font-weight-bold mb-1">Student Name</label>
+                        </div>
                     </div>
 
                     <div class="col-md-3 mb-2">
-                        <label class="font-weight-bold mb-1">Student Email</label>
-                        <input type="text" class="form-control" id="filterClubStudentEmail">
+                        <div class="position-relative custom-field mb-2 mt-3 p-0">
+                            <input type="text" class="form-control" id="filterClubStudentEmail" placeholder=" ">
+                            <label class="font-weight-bold mb-1">Student Email</label>
+                        </div>
                     </div>
 
                     <div class="col-md-3 mb-2">
-                        <label class="font-weight-bold mb-1">Club</label>
-                        <select class="form-control" id="filterClubName">
-                            <option value="">All Clubs</option>`;
-                            $.each(countObj, function(clubName, count){
-                            html+=`<option value="${clubName}">
-                                ${clubName}
-                            </option>`;
-                            });
-                        html+=`</select>
+                        <div class="position-relative custom-field mb-2 mt-3 p-0">
+                            <select class="form-control" id="filterClubName">
+                                <option value="">All Clubs</option>`;
+                                $.each(countObj, function(clubName, count){
+                                html+=`<option value="${clubName}">
+                                    ${clubName}
+                                </option>`;
+                                });
+                            html+=`</select>
+                            <label class="font-weight-bold mb-1">Club</label>
+                        </div>
                     </div>
 
                     <div class="col-md-3 mb-2">
-                        <label class="font-weight-bold mb-1">Country</label>
-                        <select class="form-control" id="filterClubCountryId"></select>
+                        <div class="position-relative custom-field mb-2 mt-3 p-0">
+                            <select class="form-control" id="filterClubCountryId"></select>
+                            <label class="font-weight-bold mb-1">Country</label>
+                        </div>
                     </div>
 
                     <div class="col-md-3 mb-2">
-                        <label class="font-weight-bold mb-1">Grade</label>
-                        <select class="form-control" id="filterClubStandardId">
-                            <option value="0">Select Grade</option>
-                        </select>
+                        <div class="position-relative custom-field mb-2 mt-3 p-0">
+                            <select class="form-control" id="filterClubStandardId">
+                                <option value="0">Select Grade</option>
+                            </select>
+                            <label class="font-weight-bold mb-1">Grade</label>
+                        </div>
                     </div>
 
 	                    <div class="col-12 col-md-auto mb-2 d-flex align-items-end px-1">

@@ -1674,7 +1674,7 @@ function getHostList(hostDetails) {
 function onChangeHost(src){
   selectedHostKey = $(src).val();
   if(selectedHostKey != ''){
-    const selectedHost = onChangeHostVar?.find(host => host.key === selectedHostKey);
+    const selectedHost = onChangeHostVar?.find(host => String(host.key) === String(selectedHostKey));
     selectedHostName = selectedHost ? selectedHost.extra : null;
     selectedRole = selectedHost ? selectedHost.extra4 : null;
     selectedHostTimezone = selectedHost ? selectedHost.extra3 : null;
@@ -1740,28 +1740,33 @@ function getAllTimeZone(timezoneDetails) {
       success: function(response) {
         const data = response.mastersData.countryTimeZones;
         const timezoneSelect = $("#timezone");
+        const requestedTimezoneValue = typeof timezoneDetails === "string" ? timezoneDetails : timezoneDetails?.value;
+        const requestedTimezoneKey = typeof timezoneDetails === "object" && timezoneDetails !== null ? timezoneDetails?.key : "";
+
+        if (timezoneSelect.hasClass("select2-hidden-accessible")) {
+          timezoneSelect.select2("destroy");
+        }
+
         timezoneSelect.empty();
         timezoneSelect.append('<option value="">Select Timezone</option>');
 
         data.forEach(timezone => {
-          const isSelected = timezoneDetails === timezone.value ? "selected" : "";
+          const isSelected = requestedTimezoneValue && timezone.value === requestedTimezoneValue ? "selected" : "";
           const optionHtml = `<option ${isSelected} value="${timezone.key}">(${timezone.extra}) ${timezone.value}</option>`;
           timezoneSelect.append(optionHtml);
         });
 
-        if (timezoneDetails) {
-          const selectedKey = data.find(tz => tz.value === timezoneDetails)?.key;
-          if (selectedKey) {
-            timezoneSelect.val(selectedKey);
-          } else {
-            timezoneSelect.val(timezoneDetails.key);
-          }
+        let selectedKey = "";
+        if (requestedTimezoneValue) {
+          selectedKey = data.find(tz => tz.value === requestedTimezoneValue)?.key || requestedTimezoneKey || "";
         }
 
         timezoneSelect.select2({
           placeholder: "Select Timezone",
           theme:"bootstrap4"
         });
+
+        timezoneSelect.val(selectedKey).trigger("change");
       }
     });
 }

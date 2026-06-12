@@ -238,114 +238,133 @@ function getCounselorSetCommitionPopup(){
 					<div class="tab-content p-4">
 						<div class="tab-pane active p-1 bg-light-primary border border-primary rounded-10 card" id="addForm" role="tabpanel">
 							<div class="col-12 mt-2 mb-2">
-								<form id="saveCounselorCommissionRateForm" autocomplete="off" action="javascript:void(0);">
+								<form id="saveCounselorCommissionRateForm" autocomplete="off" action="javascript:void(0);" class="custom-field-scope">
 									<input type="hidden" name="assignTo" id="assignTo" value=""  class="form-control">
-									<div class="row">
+									<div class="row align-items-end">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 pr-0">
-											<label class="m-0">Commission By School</label>
-											<div class="d-flex flex-wrap">
-												<div class="col-xl-9 col-lg-9 col-md-8 col-sm-12 col-12 mb-2 pl-0">
+											<small class="text-muted d-block mb-1">Commission By School</small>
+											<div class="d-flex flex-nowrap" style="gap:6px">
+												<div class="custom-field mb-0" style="flex:1 1 0; min-width:0;">
 													<select name="byPartnerType" id="byPartnerType" class="form-control">
 														<option value="P">Percentage</option>
 														<option value="F">Amount in USD without $ sign</option>
 													</select>
+													<label for="byPartnerType" class="m-0 d-block mb-0">Type</label>
 												</div>
-												<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-2 pl-0">
-													<input type="text" name="byPartnerValue" id="byPartnerValue" value="" onkeyup="getNum(this,'','byPartnerType')" class="form-control">
+												<div class="custom-field mb-0" style="flex:0 0 70px">
+													<input type="text" name="byPartnerValue" id="byPartnerValue" value="" onkeyup="getNum(this,'','byPartnerType')" placeholder=" " class="form-control">
+													<label for="byPartnerValue" class="m-0 d-block mb-0">Value</label>
 												</div>
 											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 pr-0">
-											<label class="m-0">Commission By Partner(Through IS)</label>
-											<div class="d-flex flex-wrap">
-												<div class="col-xl-9 col-lg-9 col-md-8 col-sm-12 col-12 mb-2 pl-0">
+											<small class="text-muted d-block mb-1">Commission By Partner (Through IS)</small>
+											<div class="d-flex flex-nowrap" style="gap:6px">
+												<div class="custom-field mb-0" style="flex:1 1 0; min-width:0;">
 													<select name="bySchoolType" id="bySchoolType" class="form-control">
 														<option value="P">Percentage</option>
 														<option value="F">Amount in USD without $ sign</option>
 													</select>
+													<label for="bySchoolType" class="m-0 d-block mb-0">Type</label>
 												</div>
-												<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-2 pl-0">
-													<input type="text" name="bySchoolValue" id="bySchoolValue" value="" onkeyup="getNum(this,'','byPartnerType')" class="form-control">
+												<div class="custom-field mb-0" style="flex:0 0 70px">
+													<input type="text" name="bySchoolValue" id="bySchoolValue" value="" onkeyup="getNum(this,'','byPartnerType')" placeholder=" " class="form-control">
+													<label for="bySchoolValue" class="m-0 d-block mb-0">Value</label>
 												</div>
 											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 pr-0">
-											<label class="m-0">Commission By Partner(Direct enrollment)</label>
-											<div class="d-flex flex-wrap">
-												<div class="col-xl-9 col-lg-9 col-md-8 col-sm-12 col-12 mb-2 pl-0">
+											<small class="text-muted d-block mb-1">Commission By Partner (Direct Enrollment)</small>
+											<div class="d-flex flex-nowrap" style="gap:6px">
+												<div class="custom-field mb-0" style="flex:1 1 0; min-width:0;">
 													<select name="bySchoolPartnerType" id="bySchoolPartnerType" class="form-control">
 														<option value="P">Percentage</option>
 														<option value="F">Amount in USD without $ sign</option>
 													</select>
+													<label for="bySchoolPartnerType" class="m-0 d-block mb-0">Type</label>
 												</div>
-												<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-2 pl-0">
-													<input type="text" name="bySchoolPartnerValue" id="bySchoolPartnerValue" value="" onkeyup="getNum(this,'','bySchoolPartnerValue')" class="form-control">
+												<div class="custom-field mb-0" style="flex:0 0 70px">
+													<input type="text" name="bySchoolPartnerValue" id="bySchoolPartnerValue" value="" onkeyup="getNum(this,'','bySchoolPartnerValue')" placeholder=" " class="form-control">
+													<label for="bySchoolPartnerValue" class="m-0 d-block mb-0">Value</label>
 												</div>
 											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Select Learning Program</label>
-											<select name="learningProgram" id="learningProgram" class="form-control" onchange="getGradesByLearningProgram('saveCounselorCommissionRateForm','learningProgram','standardId','counselorSetCommitionPopup')">
-												<option value="A" selected>All Program</option>
-												<option value="ONE_TO_ONE">One-to-One Learning</option>
-												<option value="BATCH">Group Learning</option>
-												<option value="SCHOLARSHIP">Self Study Learning</option>
-												<option value="SSP">Self Study Plus</option>
-												<option value="ONE_TO_ONE_FLEX">Flexy Learning Program</option>
-											</select>
-										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Select Grade</label>
-											<select name="standardId" id="standardId" class="form-control" multiple="multiple">
-												
-											</select>
-										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Enrollment Min/Max Range</label>
-											<div class="d-flex gap-5">
-												<input type="text" class="form-control" id="enrollRangeMin" name="enrollRangeMin" placeholder="Min" value="" onkeydown="return M.digit(event);" maxlength="5" />
-												<input type="text" class="form-control" id="enrollRangeMax" name="enrollRangeMax" placeholder="Max" value="" onkeydown="return M.digit(event);" maxlength="5" />
+											<div class="custom-field mb-0">
+												<select name="learningProgram" id="learningProgram" class="form-control" onchange="getGradesByLearningProgram('saveCounselorCommissionRateForm','learningProgram','standardId','counselorSetCommitionPopup')">
+													<option value="A" selected>All Program</option>
+													<option value="ONE_TO_ONE">One-to-One Learning</option>
+													<option value="BATCH">Group Learning</option>
+													<option value="SCHOLARSHIP">Self Study Learning</option>
+													<option value="SSP">Self Study Plus</option>
+													<option value="ONE_TO_ONE_FLEX">Flexy Learning Program</option>
+												</select>
+												<label for="learningProgram" class="m-0 d-block mb-0">Select Learning Program</label>
 											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Applicable From</label>
-											<input type="text" name="startDate" id="startDate" class="datepicker form-control" readonly>
+											<div class="custom-field mb-0">
+												<select name="standardId" id="standardId" class="form-control" multiple="multiple">
+												</select>
+												<label for="standardId" class="m-0 d-block mb-0">Select Grade</label>
+											</div>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">
-											<label class="m-0 full">&nbsp;</label>
-											<a href="javascript:void(0)" onclick="saveCounselorCommissionRate('saveCounselorCommissionRateForm')" class="btn btn-success mr-1  btn-lg">Add Commission</a>
-											<a href="javascript:void(0)" onclick="resetCounselorCommissionRate('saveCounselorCommissionRateForm')" class="btn btn-primary  btn-lg">Reset</a>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
+											<small class="text-muted d-block mb-1">Enrollment Min/Max Range</small>
+											<div class="d-flex" style="gap:6px">
+												<div class="custom-field mb-0" style="flex:1 1 0">
+													<input type="text" class="form-control" id="enrollRangeMin" name="enrollRangeMin" placeholder=" " value="" onkeydown="return M.digit(event);" maxlength="5" />
+													<label for="enrollRangeMin" class="m-0 d-block mb-0">Min</label>
+												</div>
+												<div class="custom-field mb-0" style="flex:1 1 0">
+													<input type="text" class="form-control" id="enrollRangeMax" name="enrollRangeMax" placeholder=" " value="" onkeydown="return M.digit(event);" maxlength="5" />
+													<label for="enrollRangeMax" class="m-0 d-block mb-0">Max</label>
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
+											<div class="custom-field mb-0">
+												<input type="text" name="startDate" id="startDate" class="datepicker form-control" placeholder=" " readonly>
+												<label for="startDate" class="m-0 d-block mb-0">Applicable From</label>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left d-flex align-items-center" style="gap:6px">
+											<a href="javascript:void(0)" onclick="saveCounselorCommissionRate('saveCounselorCommissionRateForm')" class="btn btn-success btn-lg">Add Commission</a>
+											<a href="javascript:void(0)" onclick="resetCounselorCommissionRate('saveCounselorCommissionRateForm')" class="btn btn-primary btn-lg">Reset</a>
 										</div>
 									</div>
 								</form>
 							</div>
 						</div>	
 						<div class="tab-pane" id="filterBy" role="tabpanel">
-						<form id="filterCounselorCommissionRate" autocomplete="off" action="javascript:void(0);">
+						<form id="filterCounselorCommissionRate" autocomplete="off" action="javascript:void(0);" class="custom-field-scope">
 						<input type="hidden" name="assignToFilter" id="assignToFilter" value=""  class="form-control">
 							<div class="full p-1 bg-light-primary border border-primary rounded-10 card">
 								<div class="col-12 mt-2 mb-2">
-									<div class="row">
+									<div class="row align-items-center">
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Select Learning Program</label>
-											<select name="learningProgramFilter" id="learningProgramFilter" class="form-control" onchange="getGradesByLearningProgram('filterCounselorCommissionRate','learningProgramFilter','standardIdFilter','counselorSetCommitionPopup')">
-												<option value="">Select Learning Program</option>
-												<option value="A">All Program</option>
-												<option value="ONE_TO_ONE">One-to-One Learning</option>
-												<option value="BATCH">Group Learning</option>
-												<option value="SCHOLARSHIP">Self Study Learning</option>
-												<option value="SSP">Self Study Plus</option>
-												<option value="ONE_TO_ONE_FLEX">Flexy Learning Program</option>
-											</select>
+											<div class="custom-field mb-0">
+												<select name="learningProgramFilter" id="learningProgramFilter" class="form-control" onchange="getGradesByLearningProgram('filterCounselorCommissionRate','learningProgramFilter','standardIdFilter','counselorSetCommitionPopup')">
+													<option value="">Select Learning Program</option>
+													<option value="A">All Program</option>
+													<option value="ONE_TO_ONE">One-to-One Learning</option>
+													<option value="BATCH">Group Learning</option>
+													<option value="SCHOLARSHIP">Self Study Learning</option>
+													<option value="SSP">Self Study Plus</option>
+													<option value="ONE_TO_ONE_FLEX">Flexy Learning Program</option>
+												</select>
+												<label for="learningProgramFilter" class="m-0 d-block mb-0">Select Learning Program</label>
+											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">
-											<label class="m-0">Select Grade</label>
-											<select name="standardIdFilter" id="standardIdFilter" class="form-control" multiple="multiple">
-											</select>
+											<div class="custom-field mb-0">
+												<select name="standardIdFilter" id="standardIdFilter" class="form-control" multiple="multiple">
+												</select>
+												<label for="standardIdFilter" class="m-0 d-block mb-0">Select Grade</label>
+											</div>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">
-											<label class="m-0 full">&nbsp;</label>
-											<a href="javascript:void(0)" onclick="resetCounselorFilterByForm('filterCounselorCommissionRate')" class="btn btn-primary mr-1">Reset</a>
+										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left d-flex align-items-center" style="gap:6px">
+											<a href="javascript:void(0)" onclick="resetCounselorFilterByForm('filterCounselorCommissionRate')" class="btn btn-primary">Reset</a>
 											<a href="javascript:void(0)" onclick="getCounselorCommissionRateFilter('filterCounselorCommissionRate', false)" class="btn btn-success">Find</a>
 										</div>
 									</div>

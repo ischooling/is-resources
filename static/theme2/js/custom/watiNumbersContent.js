@@ -24,20 +24,29 @@ function getWatiNumbersContent() {
 
     <div class="main-card mb-3 card">
       <div class="card-body">
-        <div class="filter-container mb-3">
+        <div class="filter-container mb-3 custom-field-scope">
           <div class="form-row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12 mb-2 mb-lg-0">
-              <input type="text" id="filterName" class="form-control" placeholder="Enter Name">
+              <div class="form-group custom-field mb-0">
+                <input type="text" id="filterName" class="form-control" placeholder=" " autocomplete="off">
+                <label for="filterName" class="m-0">Name</label>
+              </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12 mb-2 mb-lg-0">
-              <input type="text" id="filterNumber" class="form-control" placeholder="Enter Number">
+              <div class="form-group custom-field mb-0">
+                <input type="text" id="filterNumber" class="form-control" placeholder=" " autocomplete="off">
+                <label for="filterNumber" class="m-0">Number</label>
+              </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 col-12 mb-2 mb-lg-0">
-              <select id="filterStatus" class="form-control">
-                <option value="">Select Status</option>
-                <option value="A">Active</option>
-                <option value="I">Inactive</option>
-              </select>
+              <div class="form-group custom-field mb-0">
+                <select id="filterStatus" class="form-control">
+                  <option value="">Select Status</option>
+                  <option value="A">Active</option>
+                  <option value="I">Inactive</option>
+                </select>
+                <label for="filterStatus" class="m-0">Status</label>
+              </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-12 col-sm-6 col-12 mb-2 mb-lg-0">
               <button onclick="showFilterData();" class="btn btn-lg btn-success ">Search <i class="fa fa-search"></i></button>
@@ -274,18 +283,18 @@ function addWatiNumber() {
               </button>
           </div>
           <div class="modal-body">
-            <form action="javascript:void(0);" id="addWatiNumberForm">
-              <div class="mb-3">
-                <label for="addNumber" class="">Wati Number</label>
-                <input type="text" id="addNumber" class="form-control" placeholder="Enter Wati Number" required autocomplete="off">
+            <form action="javascript:void(0);" id="addWatiNumberForm" class="custom-field-scope">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="addNumber" class="form-control" placeholder=" " required autocomplete="off">
+                <label for="addNumber" class="m-0">Wati Number</label>
               </div>
-              <div class="mb-3">
-                <label for="addWUrl" class="">Wati URL</label>
-                <input type="text" id="addWUrl" class="form-control" placeholder="Enter Wati URL" required autocomplete="off">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="addWUrl" class="form-control" placeholder=" " required autocomplete="off">
+                <label for="addWUrl" class="m-0">Wati URL</label>
               </div>
-              <div class="mb-3">
-                <label for="addWToken" class="">Wati Token</label>
-                <input type="text" id="addWToken" class="form-control" placeholder="Enter Wati Token" required autocomplete="off">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="addWToken" class="form-control" placeholder=" " required autocomplete="off">
+                <label for="addWToken" class="m-0">Wati Token</label>
               </div>
             </form>
           </div>
@@ -336,32 +345,32 @@ function updateWati(number, watiToken, watiUrl, status,studentWati) {
               </button>
           </div>
           <div class="modal-body">
-            <form action="javascript:void(0);" id="updateWatiNumberForm">
-              <div class="mb-3">
-                <label for="updateNumber">Wati Number</label>
-                <input type="text" id="updateNumber" class="form-control" value="${number}" required autocomplete="off" readonly>
+            <form action="javascript:void(0);" id="updateWatiNumberForm" class="custom-field-scope">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="updateNumber" class="form-control" value="${number}" placeholder=" " required autocomplete="off" readonly>
+                <label for="updateNumber" class="m-0">Wati Number</label>
               </div>
-              <div class="mb-3">
-                <label for="updateWUrl">Wati URL</label>
-                <input type="text" id="updateWUrl" class="form-control" value="${watiUrl}" required autocomplete="off">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="updateWUrl" class="form-control" value="${watiUrl}" placeholder=" " required autocomplete="off">
+                <label for="updateWUrl" class="m-0">Wati URL</label>
               </div>
-              <div class="mb-3">
-                <label for="updateWToken">Wati Token</label>
-                <input type="text" id="updateWToken" class="form-control" value="${watiToken}" required autocomplete="off">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="updateWToken" class="form-control" value="${watiToken}" placeholder=" " required autocomplete="off">
+                <label for="updateWToken" class="m-0">Wati Token</label>
               </div>
-              <div class="mb-3">
-                <label for="updateStatus">Status</label>
+              <div class="mb-3 form-group custom-field">
                 <select id="updateStatus" class="form-control">
                   <option value="A" ${status == "A" ? "selected" : ""}>Active</option>
                   <option value="I" ${status == "I" ? "selected" : ""}>Inactive</option>
                 </select>
+                <label for="updateStatus" class="m-0">Status</label>
               </div>
-              <div class="mb-3">
-                <label for="studentWati">Eligible for Wati Broadcast in Student List and Teacher List</label>
+              <div class="mb-3 form-group custom-field">
                 <select id="studentWati" class="form-control">
                   <option value="Y" ${studentWati == "Y" ? "selected" : ""}>Active</option>
                   <option value="N" ${studentWati == "N" ? "selected" : ""}>Inactive</option>
                 </select>
+                <label for="studentWati" class="m-0">Eligible for Wati Broadcast in Student List and Teacher List</label>
               </div>
             </form>
           </div>
@@ -423,14 +432,14 @@ function addWatiUser(number){
               </button>
           </div>
           <div class="modal-body">
-            <form action="javascript:void(0);" id="addWatiUserForm">
-              <div class="mb-3">
-                <label for="addWatiUserNumber">Wati Number</label>
-                <input type="text" id="addWatiUserNumber" class="form-control" style="cursor:not-allowed;" value="${number}" required disabled autocomplete="off">
+    <form action="javascript:void(0);" id="addWatiUserForm" class="custom-field-scope">
+              <div class="mb-3 form-group custom-field">
+                <input type="text" id="addWatiUserNumber" class="form-control" style="cursor:not-allowed;" value="${number}" placeholder=" " required disabled autocomplete="off">
+                <label for="addWatiUserNumber" class="m-0">Wati Number</label>
               </div>
-              <div class="mb-3">
-                <label for="addUsers">Add Users</label>
+              <div class="mb-3 form-group custom-field">
                 <select id="addUsers" class="form-control" autocomplete="off"></select>
+                <label for="addUsers" class="m-0">Add Users</label>
               </div>
             </form>
           </div>

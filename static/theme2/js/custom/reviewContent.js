@@ -163,7 +163,7 @@ function getReviewSearchPopup(){
                 </button>
             </div>
             <div class="modal-body">
-                <form action="javascript:void(0);" id="reviewPopupSearchForm" name="reviewPopupSearchForm" autocomplete='off'>
+                <form action="javascript:void(0);" id="reviewPopupSearchForm" name="reviewPopupSearchForm" autocomplete='off' class="custom-field-scope">
 				<input type="hidden" name="userId" id="userId" value="${USER_ID}">
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">
@@ -172,18 +172,24 @@ function getReviewSearchPopup(){
 					</div>
 					<div class="row">
 						<div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-12 mb-1 mt-1 acadmicYearDiv">
-							<label class="m-0">Academic Year</label>
-							<select	name="acadmicYear" id="acadmicYear" class="form-control" >
-							<option value="all">All</option>
-							</select>
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<select name="acadmicYear" id="acadmicYear" class="form-control">
+									<option value="all">All</option>
+								</select>
+								<label class="m-0">Academic Year</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="startDateSearch" id="startDateSearch" class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">
+								<label class="m-0">Start Date</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="endDateSearch" id="endDateSearch" class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">
+								<label class="m-0">To Date</label>
+							</div>
 						</div>
 					</div>
 				</form>

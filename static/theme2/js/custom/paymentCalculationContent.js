@@ -70,7 +70,7 @@ function renderCustomPayment(userId, studentStandardId, schoolWebsite, logoUrl, 
 
 function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
 	var html = `
-		<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">
+		<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar" id="customPaymentContentRoot">
 			<div class="sticky-header">
 				<div class="app-header header-shadow">
 					<div class="app-header__logo" style="order:0">
@@ -94,7 +94,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 						`<div class="">
 							<div class="col-lg-12 col-md-12 col-sm-12 col-12 p-1 mt-4">
 								<div class="main-card card " style="overflow-x:hidden">
-									<div class="card-body p-1">
+									<div class="card-body p-1 custom-field-scope">
 										<div id="notEligible" class="" style="display:none;">
 											<div class="full mb-1">
 												<h4 class="font-weight-semi-bold text-primary studentDetails">N/A</h4>
@@ -186,7 +186,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																		<div class="col-lg-1 col-md-1 col-sm-2 col-2 text-center p-0">
 																			<b>&nbsp;</b>
 																		</div>
-																		<select id="customPaymentPlan" name="customPaymentPlan" class="form-control select2Dropdown" onChange="customPlanChange()"></select>
+																		<div class="custom-field flex-fill mb-0">
+																			<select id="customPaymentPlan" name="customPaymentPlan" class="form-control select2Dropdown" onChange="customPlanChange()"></select>
+																		</div>
 																	</div>
 																</td>
 															</tr>
@@ -197,7 +199,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																		<div class="col-lg-1 col-md-1 col-sm-2 col-2 text-center p-0">
 																			<b>&nbsp;</b>
 																		</div>
-																		<input type="text" id="payableFee" name="payableFee" class="form-control" value="" disabled/>
+																		<div class="custom-field flex-fill mb-0">
+																			<input type="text" id="payableFee" name="payableFee" class="form-control" value="" placeholder=" " disabled/>
+																		</div>
 																	</div>
 																</td>
 															</tr>
@@ -208,8 +212,12 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																		<div class="col-lg-2 col-md-2 col-sm-2 col-2 text-center p-0">
 																			<b>+</b>
 																		</div>
-																		<input type="text" id="premiumAmount" name="premiumAmount" class="form-control" value="" onkeyup="calculatePremiumAmount();" />
-																		<input type="text" id="premiumPercentage" name="premiumPercentage" class="form-control" value="" min="1" max="100" onkeyup="premiumPercentageChange()" disabled />
+																		<div class="custom-field flex-fill mb-0 mr-2">
+																			<input type="text" id="premiumAmount" name="premiumAmount" class="form-control" value="" placeholder=" " onkeyup="calculatePremiumAmount();" />
+																		</div>
+																		<div class="custom-field flex-fill mb-0">
+																			<input type="text" id="premiumPercentage" name="premiumPercentage" class="form-control" value="" placeholder=" " min="1" max="100" onkeyup="premiumPercentageChange()" disabled />
+																		</div>
 																	</div>
 																</td>
 															</tr>
@@ -222,7 +230,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																		<div class="col-lg-2 col-md-2 col-sm-2 col-2 text-center p-0">
 																			<b>=</b>
 																		</div>
-																		<input type="text" id="payableFeeAfterPremium" name="payableFeeAfterPremium" class="form-control" value="" disabled/>
+																		<div class="custom-field flex-fill mb-0">
+																			<input type="text" id="payableFeeAfterPremium" name="payableFeeAfterPremium" class="form-control" value="" placeholder=" " disabled/>
+																		</div>
 																	</div>
 																</td>
 															</tr>
@@ -235,8 +245,12 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																		<div class="col-lg-2 col-md-2 col-sm-2 col-2 text-center p-0">
 																			<b>-</b>
 																		</div>
-																		<input type="text" id="discountAmount" name="discountAmount" class="form-control" value="" onkeyup="calculateDiscountAmount();"/>
-																		<input type="text" id="discountPercentage" name="discountPercentage" class="form-control" value="" min="1" max="100" onkeyup="discountercentageChange()" disabled/>
+																		<div class="custom-field flex-fill mb-0 mr-2">
+																			<input type="text" id="discountAmount" name="discountAmount" class="form-control" value="" placeholder=" " onkeyup="calculateDiscountAmount();"/>
+																		</div>
+																		<div class="custom-field flex-fill mb-0">
+																			<input type="text" id="discountPercentage" name="discountPercentage" class="form-control" value="" placeholder=" " min="1" max="100" onkeyup="discountercentageChange()" disabled/>
+																		</div>
 																	</div>
 																</td>
 															</tr>
@@ -249,7 +263,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																		<div class="col-lg-2 col-md-2 col-sm-2 col-2 text-center p-0">
 																			<b>=</b>
 																		</div>
-																		<input type="text" id="payableFeeAfterDiscount" name="payableFeeAfterDiscount" class="form-control" value="" disabled/>
+																		<div class="custom-field flex-fill mb-0">
+																			<input type="text" id="payableFeeAfterDiscount" name="payableFeeAfterDiscount" class="form-control" value="" placeholder=" " disabled/>
+																		</div>
 																	</div>
 																</td>
 															</tr>
@@ -269,9 +285,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label>1<sup>st</sup> installment <b>(minimum: <span id="minimumPayment"></span>)</b></label>
 																</td>
 																<td width="200px">
-																	<div class="d-flex align-items-center">
-																		<input type="text" id="firstInstallment" name="firstInstallment" class="form-control" value="" onkeydown="return M.floatDigit(event);" onblur="firstIntallmentFlatChange()"/>
-																		<input type="text" id="firstInstallmentPercentage" name="firstInstallmentPercentage" class="form-control" value="" onkeydown="return M.floatDigit(event);" onkeyup="firstIntallmentPercentageChange()" disabled/>
+																	<div class="d-flex align-items-center custom-field mb-0">
+																		<input type="text" id="firstInstallment" name="firstInstallment" class="form-control" value="" placeholder=" " onkeydown="return M.floatDigit(event);" onblur="firstIntallmentFlatChange()"/>
+																		<input type="text" id="firstInstallmentPercentage" name="firstInstallmentPercentage" class="form-control" value="" placeholder=" " onkeydown="return M.floatDigit(event);" onkeyup="firstIntallmentPercentageChange()" disabled/>
 																	</div>
 																</td>
 															</tr>
@@ -280,8 +296,8 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label>Remaining Payable Fee</label>
 																</td>
 																<td width="200px">
-																	<div class="d-flex align-items-center">
-																		<input type="text" id="remainingPayableFee" name="remainingPayableFee" class="form-control" value="" onkeydown="return M.floatDigit(event);" disabled/>
+																	<div class="d-flex align-items-center custom-field mb-0">
+																		<input type="text" id="remainingPayableFee" name="remainingPayableFee" class="form-control" value="" placeholder=" " onkeydown="return M.floatDigit(event);" disabled/>
 																	</div>
 																</td>
 															</tr>
@@ -290,7 +306,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label>Number of Installment(Including 1<sup>st</sup> installment)</label>
 																</td>
 																<td width="200px">
-																	<div class="d-flex align-items-center">
+																	<div class="d-flex align-items-center custom-field mb-0">
 																		<select id="noOfInstallment" name="noOfInstallment" class="form-control select2Dropdown" onChange="generateInstallments()"></select>
 																	</div>
 																</td>
@@ -300,7 +316,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label class="full">Over a period of (in months)</label>
 																</td>
 																<td width="200px">
-																	<select id="durationWithin" name="durationWithin" class="form-control select2Dropdown" onChange="generateInstallments()"></select>
+																	<div class="position-relative form-group mb-0 custom-field">
+																		<select id="durationWithin" name="durationWithin" class="form-control select2Dropdown" onChange="generateInstallments()"></select>
+																	</div>
 																</td>
 															</tr>
 															<tr>
@@ -308,7 +326,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label class="full">Gap between two installments</label>
 																</td>
 																<td width="200px">
-																	<input type="text" id="gapBetweenTwoIntstallment" name="gapBetweenTwoIntstallment" class="form-control" value="" onkeydown="return M.floatDigit(event);" disabled/>
+																	<div class="position-relative form-group mb-0 custom-field">
+																		<input type="text" id="gapBetweenTwoIntstallment" name="gapBetweenTwoIntstallment" class="form-control" value="" placeholder=" " onkeydown="return M.floatDigit(event);" disabled/>
+																	</div>
 																</td>
 															</tr>
 															<tr>
@@ -316,7 +336,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label class="full">Tentative Schedule data of 1st Installment</label>
 																</td>
 																<td width="200px">
-																	<input type="text" id="tentativeFirstPayDate" name="tentativeFirstPayDate" class="form-control dataPicker" value=""/>
+																	<div class="position-relative form-group mb-0 custom-field">
+																		<input type="text" id="tentativeFirstPayDate" name="tentativeFirstPayDate" class="form-control dataPicker" value="" placeholder=" "/>
+																	</div>
 																</td>
 															</tr>
 															<tr>
@@ -324,7 +346,9 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																	<label class="full">Discount on Remaining Payable Fee after Premium</label>
 																</td>
 																<td width="200px">
-																	<select id="discountApplicableFor" name="discountApplicableFor" class="form-control select2Dropdown" onChange="generateSchedule()"></select>
+																	<div class="position-relative form-group mb-0 custom-field">
+																		<select id="discountApplicableFor" name="discountApplicableFor" class="form-control select2Dropdown" onChange="generateSchedule()"></select>
+																	</div>
 																</td>
 															</tr>
 															<tr style="display:none">
@@ -503,77 +527,77 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 							<div class="card-header bg-primary text-white">
 								<h5 class="m-0">Advance Payment | ${advanceFeeDetails.studentName}</h5>
 							</div>
-							<div class="card-body pt-0 pb-1">
+							<div class="card-body pt-0 pb-1 custom-field-scope">
 								<div class="row">
 									<div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
 										<div class="card is-water-mark full mt-2">
-											<div class="card-body col py-1">
+											<div class="card-body col py-1 custom-field-scope">
 												<div class="full">
 													<div class="row">
 														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Select Learning Program</label>
-																<input type="hidden" id="firstInstallmentHidden" name="firstInstallmentHidden" class="form-control" value="" disabled="">
-																<input type="hidden" id="forGradeIdHidden" name="forGradeIdHidden" class="form-control" value="" disabled="">
-																<input type="hidden" id="currentLearningProgramHidden" name="currentLearningProgramHidden" class="form-control" value="" disabled="">
-																<select id="learningProgram" class="form-control py-1" style="height:inherit" onChange="applyGradeFee(this,'LP')">
-																	<option value="">Select Learning Program</option>
-																	${getLearningProgramContent(SCHOOL_ID)}
-																</select>
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Select Grade</label>
-																<select id="forGradeId" class="form-control py-1" style="height:inherit" onChange="applyGradeFee(this,'G')">
-																	${getStandardContent(SCHOOL_ID, false, false)}
-																</select>
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Fee Plan</label>
-																<select id="paymentMode" class="form-control py-1" style="height:inherit" onchange="getAdvanceFeeDetailsContent()">
-																	${getPaymentOptionDetails(advanceFeeDetails.planDiscount, advanceFeeDetails.alreadyPaid)}
-																</select>
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Course Fee</label>
-																<input id="courseFee" value="" placeholder="Course Fee" type="text" class="form-control text-right py-1" style="height:inherit" onkeyup="calculatePayableAdvanceFee()" disabled>
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Transaction Charges</label>
-																<input id="transactionCharge" value="" placeholder="Transaction Charges" type="text" class="form-control text-right py-1" style="height:inherit" onkeyup="calculatePayableAdvanceFee()">
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Progression Discount</label>
-																<input id="progressionDiscount" value="" placeholder="Progression Discount" type="text" class="form-control text-right py-1" style="height:inherit" onkeyup="calculatePayableAdvanceFee()">
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Plan Discount</label>
-																<input id="planDiscount" value="" placeholder="Plan Discount" type="text" class="form-control text-right py-1" style="height:inherit" onkeyup="calculatePayableAdvanceFee()">
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Additional Discount</label>
-																<input id="additionalDiscount" value="" placeholder="Additional Discount" type="text" class="form-control text-right py-1" style="height:inherit" onkeyup="calculatePayableAdvanceFee()">
-															</div>
-														</div>
-														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-															<div class="position-relative form-group mb-0">
-																<label class="m-0">Already Paid</label>
-																<input id="alreadyPaid" value="" placeholder="Already Paid" type="text" class="form-control text-right py-1" style="height:inherit" onkeyup="calculatePayableAdvanceFee()">
-															</div>
-														</div>
+													<input type="hidden" id="firstInstallmentHidden" name="firstInstallmentHidden" class="form-control" value="" disabled="">
+													<input type="hidden" id="forGradeIdHidden" name="forGradeIdHidden" class="form-control" value="" disabled="">
+													<input type="hidden" id="currentLearningProgramHidden" name="currentLearningProgramHidden" class="form-control" value="" disabled="">
+															<div class="position-relative form-group mb-3 custom-field">
+																<select id="learningProgram" class="form-control py-1"   onChange="applyGradeFee(this,'LP')">
+															<option value="">Select Learning Program</option>
+															${getLearningProgramContent(SCHOOL_ID)}
+														</select>
+														<label class="m-0">Select Learning Program</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<select id="forGradeId" class="form-control py-1"   onChange="applyGradeFee(this,'G')">
+															${getStandardContent(SCHOOL_ID, false, false)}
+														</select>
+														<label class="m-0">Select Grade</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<select id="paymentMode" class="form-control py-1"   onchange="getAdvanceFeeDetailsContent()">
+															${getPaymentOptionDetails(advanceFeeDetails.planDiscount, advanceFeeDetails.alreadyPaid)}
+														</select>
+														<label class="m-0">Fee Plan</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<input id="courseFee" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()" disabled>
+														<label class="m-0">Course Fee</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<input id="transactionCharge" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
+														<label class="m-0">Transaction Charges</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<input id="progressionDiscount" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
+														<label class="m-0">Progression Discount</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<input id="planDiscount" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
+														<label class="m-0">Plan Discount</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-0 custom-field">
+														<input id="additionalDiscount" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
+														<label class="m-0">Additional Discount</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mt-4 custom-field">
+														<input id="alreadyPaid" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
+														<label class="m-0">Already Paid</label>
+													</div>
+												</div>
 													</div>
 													<table class="table table-bordered mb-1 mt-1" cellpadding="1">
 														<tbody>

@@ -1,5 +1,6 @@
 function getEventDiscountPageContent(title) {
     return `
+    <div class="custom-field-scope">
     <div class="app-page-title mb-3 py-2">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
@@ -31,10 +32,12 @@ function getEventDiscountPageContent(title) {
             <div class="card-body">
                 <div class="row align-items-end">
                     <div class="col-md-4 mb-2">
-                        <label class="font-weight-bold mb-1">Event Name</label>
-                        <select class="form-control" id="filterMasterEventName">
-                            <option value="">All Events</option>
-                        </select>
+                        <div class="form-group custom-field mb-0">
+                            <select class="form-control" id="filterMasterEventName">
+                                <option value="">All Events</option>
+                            </select>
+                            <label class="font-weight-bold mb-1">Event Name</label>
+                        </div>
                     </div>
                     <div class="col-12 col-md-auto mb-2">
                         <button class="btn btn-primary mr-2" onclick="applyMasterFilter()">Apply Filter</button>
@@ -70,16 +73,20 @@ function getEventDiscountPageContent(title) {
             <div class="card-body">
                 <div class="row align-items-end">
                     <div class="col-md-4 mb-2">
-                        <label class="font-weight-bold mb-1">Event Name</label>
-                        <select class="form-control" id="filterAssigneeEventName">
-                            <option value="">All Events</option>
-                        </select>
+                        <div class="form-group custom-field mb-0">
+                            <select class="form-control" id="filterAssigneeEventName">
+                                <option value="">All Events</option>
+                            </select>
+                            <label class="font-weight-bold mb-1">Event Name</label>
+                        </div>
                     </div>
                     <div class="col-md-4 mb-2">
-                        <label class="font-weight-bold mb-1">Discount <small class="text-muted">(optional)</small></label>
-                        <select class="form-control" id="filterAssigneeDiscountName">
-                            <option value="">All Discounts</option>
-                        </select>
+                        <div class="form-group custom-field mb-0">
+                            <select class="form-control" id="filterAssigneeDiscountName">
+                                <option value="">All Discounts</option>
+                            </select>
+                            <label class="font-weight-bold mb-1">Discount <small class="text-muted">(optional)</small></label>
+                        </div>
                     </div>
                     <div class="col-12 col-md-auto mb-2">
                         <button class="btn btn-primary mr-2" onclick="applyAssigneeFilter()">Apply Filter</button>
@@ -115,46 +122,46 @@ function getEventDiscountPageContent(title) {
                     <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form id="createDiscountForm">
+                    <form id="createDiscountForm" class="custom-field-scope">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Event Name <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="cdEventName" placeholder="Graduation Ceremony">
+                                    <label class="font-weight-bold">Event Name <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Discount Type <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <select class="form-control" id="cdDiscountType">
                                         <option value="">Select Type</option>
                                         <option value="AMOUNT">AMOUNT</option>
                                         <option value="PERCENT">PERCENT</option>
                                     </select>
+                                    <label class="font-weight-bold">Discount Type <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Discount Value <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="number" class="form-control" id="cdDiscountValue" placeholder="e.g. 50" min="1">
+                                    <label class="font-weight-bold">Discount Value <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Coupon Code <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="cdCouponCode" placeholder="e.g. GC50">
+                                    <label class="font-weight-bold">Coupon Code <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Valid From <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="cdValidFrom" placeholder="Select date" readonly>
+                                    <label class="font-weight-bold">Valid From <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Valid To <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="cdValidTo" placeholder="Select date" readonly>
+                                    <label class="font-weight-bold">Valid To <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -177,16 +184,16 @@ function getEventDiscountPageContent(title) {
                     <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form id="assignDiscountForm">
-                        <div class="form-group">
-                            <label class="font-weight-bold">Discount <span class="text-danger">*</span></label>
+                    <form id="assignDiscountForm" class="custom-field-scope">
+                        <div class="form-group custom-field">
                             <select class="form-control" id="adDiscountId">
                                 <option value="">Select Discount</option>
                             </select>
+                            <label class="font-weight-bold">Discount <span class="text-danger">*</span></label>
                         </div>
-                        <div class="form-group">
-                            <label class="font-weight-bold">Email <span class="text-danger">*</span></label>
+                        <div class="form-group custom-field">
                             <input type="email" class="form-control" id="adEmail" placeholder="e.g. user@example.com">
+                            <label class="font-weight-bold">Email <span class="text-danger">*</span></label>
                         </div>
                     </form>
                 </div>
@@ -207,56 +214,56 @@ function getEventDiscountPageContent(title) {
                     <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form id="createAndAssignForm">
+                    <form id="createAndAssignForm" class="custom-field-scope">
                         <h6 class="text-primary font-weight-bold border-bottom pb-2 mb-3">Discount Details</h6>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Event Name <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="caEventName" placeholder="Graduation Ceremony">
+                                    <label class="font-weight-bold">Event Name <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Discount Type <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <select class="form-control" id="caDiscountType">
                                         <option value="">Select Type</option>
                                         <option value="AMOUNT">AMOUNT</option>
                                         <option value="PERCENT">PERCENT</option>
                                     </select>
+                                    <label class="font-weight-bold">Discount Type <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Discount Value <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="number" class="form-control" id="caDiscountValue" placeholder="e.g. 10" min="1">
+                                    <label class="font-weight-bold">Discount Value <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Coupon Code <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="caCouponCode" placeholder="e.g. GC10">
+                                    <label class="font-weight-bold">Coupon Code <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Valid From <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="caValidFrom" placeholder="Select date" readonly>
+                                    <label class="font-weight-bold">Valid From <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Valid To <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="text" class="form-control" id="caValidTo" placeholder="Select date" readonly>
+                                    <label class="font-weight-bold">Valid To <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                         </div>
                         <h6 class="text-primary font-weight-bold border-bottom pb-2 mb-3 mt-2">User Details</h6>
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Email <span class="text-danger">*</span></label>
+                                <div class="form-group custom-field">
                                     <input type="email" class="form-control" id="caEmail" placeholder="e.g. user@example.com">
+                                    <label class="font-weight-bold">Email <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -268,6 +275,7 @@ function getEventDiscountPageContent(title) {
                 </div>
             </div>
         </div>
+    </div>
     </div>
     `;
 }

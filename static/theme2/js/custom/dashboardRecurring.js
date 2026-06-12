@@ -403,7 +403,6 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 				dropdown.append('<option value="">Select</option>');
 				var userTimezone='';
 				var coursesEndDate='';
-				var teacherId='';
 				var meetingVendor='';
 				daysCount = 15;
 				startDaysCount=15;
@@ -411,7 +410,6 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 					dropdown.append('<option value="' + v.key + '">'+ v.value + ' ('+ v.extra +') </option>');
 					userTimezone=v.extra2;
 					coursesEndDate=v.extra1;
-					teacherId=v.key;
 					meetingVendor=v.extra3;
 					daysCount = v.extra4
 					startDaysCount=v.extra5;
@@ -421,7 +419,7 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 						$("#"+formId+" #countryTimezoneFromId").val(userTimezone).trigger('change');
 					}
 				}
-				$("#"+formId+" #teacherId").val(teacherId);
+				dropdown.val('');
 				if(meetingVendor!=undefined && meetingVendor!=''){
 					$("#"+formId+" #meetingVendor").val(meetingVendor);
 					$("#"+formId+" #meetingVendor").prop('disabled',true);
@@ -449,6 +447,9 @@ function callTeacherBySubject(formId, value, studentId, meetingType, studentEmai
 					initiateRecurringDateStart(formId,'classStartDate','classEndDate',coursesEndDate,'');
 				}
 				initiateRecurringDateEnd(formId,'classStartDate','classEndDate',coursesEndDate);
+				if(typeof refreshCustomFieldState === 'function'){
+					refreshCustomFieldState($('#'+formId));
+				}
 			}
 		}
 	});

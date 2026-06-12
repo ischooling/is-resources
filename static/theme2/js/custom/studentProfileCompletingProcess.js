@@ -748,18 +748,18 @@ function renderDynamicField(fieldConfig, value = "") {
     // ================= INPUT TEXT =================
     if (fieldType === 'input' && inputType === 'text') {
         html = `
-        <label class="font-weight-semi-bold text-dark">${label}</label>
-        <div class="input-group mb-2 p-0">
-            <input type="text" id="${fieldId}" class="form-control form-control-sm group-append-hide-input">
+        <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+            <input type="text" id="${fieldId}" class="form-control form-control-sm group-append-hide-input" placeholder=" " value="${typeof escapeHtml === 'function' ? escapeHtml(oldValue) : oldValue}">
+            <label for="${fieldId}">${label}</label>
 		</div>`;
     }
 
     // ================= DATEPICKER =================
     else if (fieldType === 'input' && inputType === 'date') {
         html = `
-        <label class="font-weight-semi-bold text-dark">${label}</label>
-        <div class="input-group mb-2 p-0">
-            <input type="text" id="${fieldId}" class="form-control form-control-sm group-append-hide-input" readonly />
+        <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+            <input type="text" id="${fieldId}" class="form-control form-control-sm group-append-hide-input" placeholder=" " value="${typeof escapeHtml === 'function' ? escapeHtml(oldValue) : oldValue}" readonly />
+            <label for="${fieldId}">${label}</label>
 		</div>`;
     }
 
@@ -823,13 +823,13 @@ function renderDynamicField(fieldConfig, value = "") {
             optionsHtml += `<option value="${opt}" ${selected}>${opt}</option>`;
         });
         html = `
-        <label class="font-weight-semi-bold text-dark">${label}</label>
-        <div class="input-group mb-2 p-0">
+        <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
             <select id="${fieldId}"
                 class="form-control form-control-sm group-append-hide-input"
                 onchange="controlEditField(this,'${fieldId}','${oldValue}','select')">
                 ${optionsHtml}
             </select>
+            <label for="${fieldId}">${label}</label>
         </div>`;
     }
 
@@ -892,6 +892,9 @@ async function openDynamicBuilder() {
     }
     
 	$('#dynamicFieldModal').modal('show');
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState($('#dynamicFieldModal'));
+	}
 	if ($("#cropModal").length < 1) {
 		$("body").append(cropperImageModalContent()+viewUploadFileModal());
 		setTimeout(function () {
@@ -1027,7 +1030,7 @@ function dynamicProfileFieldBuilder() {
                     <button class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body px-0 pt-0">
-                    <div class="full">
+                    <div class="full custom-field-scope">
 						<div class="card-header card-header-tab-animation mb-3" id="multiple-tab-table tab-multiple-table">
 							<ul class="nav">
 								<li class="nav-item"><a role="tab" data-toggle="tab" href="#addProfileFields" class="active nav-link">Add Field</a></li>
@@ -1042,32 +1045,38 @@ function dynamicProfileFieldBuilder() {
 										<div class="col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12 border-right">
 											<div class="row">
 												<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-													<label for="profileSection">Select Profile Section</label>
-													<select id="profileSection" class="form-control">
-														<option value="">Select Profile Section</option>
-														<option value="1">Personal Information</option>
-														<option value="21">Parent/Guardian Information</option>
-														<option value="44">Academic Information</option>
-														<option value="60">Sport & Extra Curriculars</option>
-													</select>
+													<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+														<select id="profileSection" class="form-control">
+															<option value="">Select Profile Section</option>
+															<option value="1">Personal Information</option>
+															<option value="21">Parent/Guardian Information</option>
+															<option value="44">Academic Information</option>
+															<option value="60">Sport & Extra Curriculars</option>
+														</select>
+														<label for="profileSection">Select Profile Section</label>
+													</div>
 												</div>
 												<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-													<label for="fieldType">Select Field Type</label>
-													<select id="fieldType" class="form-control mb-2" onchange="handleFieldTypeChange()">
-														<option value="">Select Field Type</option>
-														<option value="input_text">Text</option>
-														<option value="input_date">Date</option>
-														<option value="input_file">File</option>
-														<option value="dropdown">Dropdown</option>
-														${/*
-															<option value="checkbox">Checkbox</option>
-															<option value="radio">Radio</option>	
-														*/''}
-													</select>
+													<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+														<select id="fieldType" class="form-control mb-2" onchange="handleFieldTypeChange()">
+															<option value="">Select Field Type</option>
+															<option value="input_text">Text</option>
+															<option value="input_date">Date</option>
+															<option value="input_file">File</option>
+															<option value="dropdown">Dropdown</option>
+															${/*
+																<option value="checkbox">Checkbox</option>
+																<option value="radio">Radio</option>	
+															*/''}
+														</select>
+														<label for="fieldType">Select Field Type</label>
+													</div>
 												</div>
 												<div class="col-12">
-													<label for="fieldLabel">Enter Label Name</label>
-													<input id="fieldLabel" class="form-control mb-2 d-none" placeholder="Enter Label Name">
+													<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+														<input id="fieldLabel" class="form-control mb-2 d-none" placeholder=" ">
+														<label for="fieldLabel">Enter Label Name</label>
+													</div>
 												</div>
 												
 											</div>
@@ -1085,7 +1094,7 @@ function dynamicProfileFieldBuilder() {
 										</div>
 										<!-- RIGHT -->
 										<div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12">
-											<div id="previewContainer"></div>
+											<div id="previewContainer" class="custom-field-scope"></div>
 										</div>
 									</div>
 								</div>
@@ -1144,6 +1153,9 @@ function addMoreProfileFields() {
         $('body').append(dynamicProfileFieldBuilder());
     }
     $('#dynamicFieldModal').modal("show");
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState($('#dynamicFieldModal'));
+	}
 }
 
 
@@ -1570,6 +1582,9 @@ function renderAllFields() {
             }
         });
     });
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState($('#previewContainer'));
+	}
 
 }
 
@@ -1610,6 +1625,9 @@ function editField(section, sectionID, index){
     renderOptions();
 
     EDIT_INDEX = { section, index };
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState($('#dynamicFieldModal'));
+	}
 }
 
 function editFieldFromTable(id){
@@ -1636,6 +1654,9 @@ function editFieldFromTable(id){
         id: id,
         isFromTable: true
     };
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState($('#dynamicFieldModal'));
+	}
 }
 
 
@@ -1648,11 +1669,12 @@ function resetBuilder() {
     $('#profileSection').val('');
     $('#optionsWrapper').addClass('d-none');
     $('#optionsList').empty();
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState($('#dynamicFieldModal'));
+	}
 }
 
 
 
 
 // Dynamic Add Profile Fields code end here//
-
-

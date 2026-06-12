@@ -77,110 +77,140 @@ function schoolPaymentFilterAndTable(){
 function schoolPaymentFilter(){
     var html=
         `<h5 class="font-weight-semi-bold text-dark">Payment Search</h5>
-            <div class="col-12 mb-2 border rounded-10 pb-3 pt-4 px-4 mb-4 bg-light-primary">
+            <div class="col-12 mb-2 border rounded-10 pb-3 pt-4 px-4 mb-4">
                 <div class="">
-                    <form id="paymentSeachForm">
+                    <form id="paymentSeachForm" class="custom-field-scope">
                         <div class="row">
 							<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="schoolName" class="full text-primary">School Name</label>`;
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">`;
                                 if(USER_ROLE == "DIRECTOR"){
                                     html+=`<select id="schoolName" class="form-control" onchange="getPartnerSchoolsBase(\'schoolName\');"></select>`;
                                 }else if(USER_ROLE == "SCHOOL_ADMIN"){
-                                    html+=`<input type="text" id="schoolName" class="form-control" disabled readyonly data-schoolId=''/>`;
+                                    html+=`<input type="text" id="schoolName" class="form-control" disabled readyonly data-schoolId='' placeholder=" "/>`;
                                 }else if(USER_ROLE == "B2B_PARTNER"){
-                                    html+=`<input type="text" id="schoolName" class="form-control" disabled readyonly data-schoolId=''/>`;
+                                    html+=`<input type="text" id="schoolName" class="form-control" disabled readyonly data-schoolId='' placeholder=" "/>`;
                                 }
-                            html+=`</div> 
+                            html+=`<label for="schoolName">School Name</label>
+                                </div>
+                            </div> 
 							<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="partnerName" class="full text-primary">Partner Name</label>`;
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">`;
                                 if(USER_ROLE == "DIRECTOR"){
                                     html+=`<select id="partnerName" class="form-control"></select>`;
                                 }else if(USER_ROLE == "SCHOOL_ADMIN"){
-                                    html+=`<input type="text" id="partnerName" class="form-control" disabled readyonly/>`;
+                                    html+=`<input type="text" id="partnerName" class="form-control" disabled readyonly placeholder=" "/>`;
                                 }else if(USER_ROLE == "B2B_PARTNER"){
-                                    html+=`<input type="text" id="partnerName" class="form-control" disabled readyonly/>`;
+                                    html+=`<input type="text" id="partnerName" class="form-control" disabled readyonly placeholder=" "/>`;
                                 }
-                            html+`</div>
-                            <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="academicSession" class="full text-primary">Academic Session</label>
-                                <select id="academicSession" class="form-control"></select>
+                            html+=`<label for="partnerName">Partner Name</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="transactionNo" class="full text-primary">Transaction No.</label>
-                                <input type="text" id="transactionNo" class="form-control" />
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="academicSession" class="form-control"></select>
+                                    <label for="academicSession">Academic Session</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="userRefNo" class="full text-primary">User Reference No.</label>
-                                <input type="text" id="userRefNo" class="form-control" />
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <input type="text" id="transactionNo" class="form-control" placeholder=" " />
+                                    <label for="transactionNo">Transaction No.</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="paymentVia" class="full text-primary">Payment Via</label>
-                                <select id="paymentVia" class="form-control">
-                                    <option value="">Select Payment Via</option>
-                                    <option value="card">Credit Card/Debit Card</option>
-                                    <option value="bankTransfer">Bank Transfer</option>
-                                    <option value="cash">Cash</option>
-                                </select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <input type="text" id="userRefNo" class="form-control" placeholder=" " />
+                                    <label for="userRefNo">User Reference No.</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="paymentGatewayUsed" class="full text-primary">Payment Gateway Used</label>
-                                <select id="paymentGatewayUsed" class="form-control">`
-                                    +getPaymentBySchoolId(SCHOOL_ID)
-                                html+=`</select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="paymentVia" class="form-control">
+                                        <option value="">Select Payment Via</option>
+                                        <option value="card">Credit Card/Debit Card</option>
+                                        <option value="bankTransfer">Bank Transfer</option>
+                                        <option value="cash">Cash</option>
+                                    </select>
+                                    <label for="paymentVia">Payment Via</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="proofOfPayment" class="full text-primary">Proof of Payment</label>
-                                <select id="proofOfPayment" class="form-control">
-                                    <option value="">Select Proof of Payment</option>
-                                    <option value="Y">Yes</option>
-                                    <option value="N">No</option>
-                                </select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="paymentGatewayUsed" class="form-control">`
+                                        +getPaymentBySchoolId(SCHOOL_ID)
+                                    html+=`</select>
+                                    <label for="paymentGatewayUsed">Payment Gateway Used</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="paymentReviewed" class="full text-primary">Payment Reviewed</label>
-                                <select id="paymentReviewed" class="form-control">
-                                    <option value="">Select Payment Reviewed</option>
-                                    <option value="Y">Yes</option>
-                                    <option value="N">No</option>
-                                </select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="proofOfPayment" class="form-control">
+                                        <option value="">Select Proof of Payment</option>
+                                        <option value="Y">Yes</option>
+                                        <option value="N">No</option>
+                                    </select>
+                                    <label for="proofOfPayment">Proof of Payment</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="paymentStatus" class="full text-primary">Payment Status</label>
-                                <select id="paymentStatus" class="form-control">
-                                    <option value="">Select Payment Status</option>
-                                    <option value="SUCCESS">Success</option>
-                                    <option value="SCHEDULED">Scheduled</option>
-                                    <option value="INITIATED">Initiated</option>
-                                    <option value="REJECTED">Rejected</option>
-                                    <option value="FAILURE">Failure</option>
-                                    <option value="PENDING">Pending</option>
-                                </select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="paymentReviewed" class="form-control">
+                                        <option value="">Select Payment Reviewed</option>
+                                        <option value="Y">Yes</option>
+                                        <option value="N">No</option>
+                                    </select>
+                                    <label for="paymentReviewed">Payment Reviewed</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="paymentDateFrom" class="full text-primary">Payment Date From</label>
-                                <input type="text" style="background-color:white;" id="paymentDateFrom" placeholder="Select Payment Date From" readonly class="form-control" />
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="paymentStatus" class="form-control">
+                                        <option value="">Select Payment Status</option>
+                                        <option value="SUCCESS">Success</option>
+                                        <option value="SCHEDULED">Scheduled</option>
+                                        <option value="INITIATED">Initiated</option>
+                                        <option value="REJECTED">Rejected</option>
+                                        <option value="FAILURE">Failure</option>
+                                        <option value="PENDING">Pending</option>
+                                    </select>
+                                    <label for="paymentStatus">Payment Status</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="paymentDateTo" class="full text-primary">Payment Date To</label>
-                                <input type="text" style="background-color:white;" id="paymentDateTo" placeholder="Select Payment Date To" readonly class="form-control" />
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <input type="text" style="background-color:white;" id="paymentDateFrom" placeholder="Select Payment Date From" readonly class="form-control" />
+                                    <label for="paymentDateFrom">Payment Date From</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="orderBy" class="full text-primary">Order By</label>
-                                <select id="orderBy" class="form-control">
-									<option value="scheduledPaymentDate">Initiated Payment Date</option>
-                                    <option value="paymentDate">Payment Date</option>
-                                </select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <input type="text" style="background-color:white;" id="paymentDateTo" placeholder="Select Payment Date To" readonly class="form-control" />
+                                    <label for="paymentDateTo">Payment Date To</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="sortIn" class="full text-primary">Sort in</label>
-                                <select id="sortIn" class="form-control">
-                                    <option value="D">Descending</option>
-                                    <option value="A">Ascending</option>
-                                </select>
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="orderBy" class="form-control">
+										<option value="scheduledPaymentDate">Initiated Payment Date</option>
+                                        <option value="paymentDate">Payment Date</option>
+                                    </select>
+                                    <label for="orderBy">Order By</label>
+                                </div>
                             </div>
                             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                                <label for="noOfRecords" class="full text-primary">No. of Records</label>
-                                <input type="text" value="25" id="noOfRecords" class="form-control" />
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <select id="sortIn" class="form-control">
+                                        <option value="D">Descending</option>
+                                        <option value="A">Ascending</option>
+                                    </select>
+                                    <label for="sortIn">Sort in</label>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
+                                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                                    <input type="text" value="25" id="noOfRecords" class="form-control" placeholder=" " />
+                                    <label for="noOfRecords">No. of Records</label>
+                                </div>
                             </div>
                             <div class="col-12 mt-2 text-right mb-2">`
 								if(USER_ROLE != "DIRECTOR"){
@@ -345,7 +375,7 @@ function studentFeesModalContent(){
                         </button>
                     </div>
                     <div class="modal-body overflow-y-auto">
-                        <form id="searchStudentFees" class="full">`
+                        <form id="searchStudentFees" class="full custom-field-scope">`
                             +searchStudentFeesContent()
                         html+=`</form>`
                         +studentFeesTable()
@@ -360,29 +390,39 @@ function searchStudentFeesContent(){
     var html=
         `<div class="row mb-3">
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="partnerNameSearch" class="full text-primary">Partner Name</label>
-                <select id="partnerNameSearch" class="form-control" disabled='true'>
-                </select>
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <select id="partnerNameSearch" class="form-control" disabled='true'>
+                    </select>
+                    <label for="partnerNameSearch" class="full text-primary">Partner Name</label>
+                </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="studentIdSearch" class="full text-primary">Student ID</label>
-                <input type="text" id="studentIdSearch" class="form-control" />
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <input type="text" id="studentIdSearch" class="form-control" placeholder=" " />
+                    <label for="studentIdSearch" class="full text-primary">Student ID</label>
+                </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="studentNameSearch" class="full text-primary">Student Name</label>
-                <input type="text" id="studentNameSearch" class="form-control" />
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <input type="text" id="studentNameSearch" class="form-control" placeholder=" " />
+                    <label for="studentNameSearch" class="full text-primary">Student Name</label>
+                </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="gradeSearch" class="full text-primary">Grade</label>
-                <select id="gradeSearch" class="form-control"></select>
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <select id="gradeSearch" class="form-control"></select>
+                    <label for="gradeSearch" class="full text-primary">Grade</label>
+                </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="learningProgramSeach" class="full text-primary">Learning Program</label>
-                <select id="learningProgramSeach" class="form-control">
-                    <option value="One to One Learning">One to One Learning</option>
-                    <option value="Group Learning">Group Learning</option>
-                    <option value="Self Study Learning">Self Study Learning</option>
-                </select>
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <select id="learningProgramSeach" class="form-control">
+                        <option value="One to One Learning">One to One Learning</option>
+                        <option value="Group Learning">Group Learning</option>
+                        <option value="Self Study Learning">Self Study Learning</option>
+                    </select>
+                    <label for="learningProgramSeach" class="full text-primary">Learning Program</label>
+                </div>
             </div>
             ${/*<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
                 <label for="paymentTypeSearch" class="full text-primary">Payment Type</label>
@@ -394,12 +434,16 @@ function searchStudentFeesContent(){
                 </select>
             </div>*/''}
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="paymentDateFromSearch" class="full text-primary">Payment Date From</label>
-                <input type="text" id="paymentDateFromSearch" class="form-control" />
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <input type="text" id="paymentDateFromSearch" class="form-control" placeholder=" " />
+                    <label for="paymentDateFromSearch" class="full text-primary">Payment Date From</label>
+                </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
-                <label for="paymentDateToSearch" class="full text-primary">Payment Date To</label>
-                <input type="text" id="paymentDateToSearch" class="form-control" />
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <input type="text" id="paymentDateToSearch" class="form-control" placeholder=" " />
+                    <label for="paymentDateToSearch" class="full text-primary">Payment Date To</label>
+                </div>
             </div>
             <div class="col-12 mt-2 text-right mb-2">
 				<button type="reset" class="btn btn-danger btn-shadow float-right pr-4 pl-4 mr-2" id="resetStudentFeesBtn">Reset</button>
@@ -467,18 +511,18 @@ function paymentRemarksModal(sprId){
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form autocomplete="off" id="paymentRemarksForm">
-                            <div class="form-group">
-                                <label for="interviewStatus" class="control-label">Status:</label>
+                        <form autocomplete="off" id="paymentRemarksForm" class="custom-field-scope">
+                            <div class="form-group custom-field">
                                 <select class="form-control" name="remarksStatus" id="remarksStatus">
                                     <option value="">Select Status</option>
                                     <option value="SUCCESS">Approve Payment</option>
                                     <option value="REJECTED">Reject Payment</option>
                                 </select>
+                                <label for="interviewStatus" class="control-label">Status:</label>
                             </div>
-                            <div id="pendingPartnerRemark" class="form-group">
-                                <label for="message-text" class="control-label">Remarks:</label>
+                            <div id="pendingPartnerRemark" class="form-group custom-field">
                                 <textarea class="form-control px-2" id="remarks" id="message-text" maxlength="200" placeholder="Enter Remarks" style="padding:6px 0"></textarea>
+                                <label for="message-text" class="control-label">Remarks:</label>
                             </div>
                         </form>
                     </div>

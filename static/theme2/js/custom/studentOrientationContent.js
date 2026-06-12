@@ -71,6 +71,14 @@ async function renderStudentOrientationListDashboard(title, roleAndModule, SCHOO
 		format: 'mm-dd-yyyy',
 		container: '#orientationSearchForm',
 	});
+	if(typeof refreshCustomFieldState === 'function'){
+		refreshCustomFieldState($("#orientationSearchForm"));
+		setTimeout(function(){
+			refreshCustomFieldState($("#orientationSearchForm"));
+			refreshCustomFieldState($("#orientStatusUpdateForm"));
+			refreshCustomFieldState($("#moveOrientationNewForm"));
+		}, 0);
+	}
 
 	var result = JSON.parse( OBJECT_RIGHTS.assignList);
 	if(result.length>0){
@@ -138,9 +146,9 @@ $("#selectAllOrientation").click(function () {
      $("#orientationNoMove").val(newOrientation);
  });
  
- $(".checkLead").click(function () {
- 	  var leadnew = $("#leadNoMove").val();
-       var chkAll = $("#selectLeadAll");
+	$(".checkLead").click(function () {
+	 	  var leadnew = $("#leadNoMove").val();
+	       var chkAll = $("#selectLeadAll");
        chkAll.attr("checked", "checked");
        var chkRows = $("#leadDataList").find(".checkLead");
        chkRows.each(function () {
@@ -161,9 +169,16 @@ $("#selectAllOrientation").click(function () {
      		}
             
      });
-     leadnew = leadnew + leadNo;
-     $("#leadNoMove").val(leadnew);
-   });
+	     leadnew = leadnew + leadNo;
+	     $("#leadNoMove").val(leadnew);
+	   });
+	if(typeof refreshCustomFieldState === 'function'){
+		setTimeout(function(){
+			refreshCustomFieldState($("#orientationSearchForm"));
+			refreshCustomFieldState($("#orientStatusUpdateForm"));
+			refreshCustomFieldState($("#moveOrientationNewForm"));
+		}, 0);
+	}
 
 }
 function toggleOption(checkbox) {
@@ -276,79 +291,103 @@ function getStudentOrientAdvanceSearchPopup(){
                 </button>
             </div>
             <div class="modal-body">
-                <form action="javascript:void(0);" id="orientationSearchForm" name="orientationSearchForm" autocomplete='off'>
+                <form action="javascript:void(0);" id="orientationSearchForm" name="orientationSearchForm" autocomplete='off' class="custom-field-scope">
 				<input type="hidden" name="userId" id="userId" value="${USER_ID }">
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">
 							<div class="orientationErrorText"></div>
 						</div>
 					</div>
-					<div class="row">
+					<div class="row custom-field-scope">
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">
-							<label class="m-0">Status</label>
-							<select name="statusSearch" id="statusSearch" class="form-control">
-									<option value="">Select Status</option>
-									<option value="PENDING">Pending</option>
-									<option value="COMPLETED">Completed</option>
-									<option value="RESCHEDULE">Reschedule</option>
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="statusSearch" id="statusSearch" class="form-control">
+										<option value="">Select Status</option>
+										<option value="PENDING">Pending</option>
+										<option value="COMPLETED">Completed</option>
+										<option value="RESCHEDULE">Reschedule</option>
+								</select>
+								<label class="m-0">Status</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Student ID</label>
-							<input type="text" name="studentIdSearch" id="studentIdSearch" class="form-control" maxlength="100">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="studentIdSearch" id="studentIdSearch" class="form-control" maxlength="100" placeholder=" ">
+								<label class="m-0">Student ID</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Phone No.</label>
-							<input type="text" name="phoneNoSearch" id="phoneNoSearch" class="form-control" onkeydown="return M.digit(event);" maxlength="15"/>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="phoneNoSearch" id="phoneNoSearch" class="form-control" onkeydown="return M.digit(event);" maxlength="15" placeholder=""/>
+								<label class="m-0">Phone No.</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Student Name</label>
-							<input type="text" name="stdfnameSearch" id="stdfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="stdfnameSearch" id="stdfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">
+								<label class="m-0">Student Name</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Parent Name</label>
-							<input type="text" name="parentfnameSearch" id="parentfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="parentfnameSearch" id="parentfnameSearch" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">
+								<label class="m-0">Parent Name</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">
-							<label class="m-0">Grade</label>
-							<select name="gradeSearch" id="gradeSearch" class="form-control" >
-								<option value="0">Select Grade</option>
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="gradeSearch" id="gradeSearch" class="form-control" >
+									<option value="0">Select Grade</option>
+								</select>
+								<label class="m-0">Grade</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">
-							<label class="m-0">Country</label>
-							<select name="countryId" id="countryId" class="form-control" >
-								<option value="0">Select country</option>
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="countryId" id="countryId" class="form-control" >
+									<option value="0">Select country</option>
+								</select>
+								<label class="m-0">Country</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 state">
-							<label class="m-0">State</label>
-							<select name="stateId" id="stateId" class="form-control" >
-								<option value="0">Select state</option>
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="stateId" id="stateId" class="form-control" >
+									<option value="0">Select state</option>
+								</select>
+								<label class="m-0">State</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">
-							<label class="m-0">City</label>
-							<select name="cityId" id="cityId" class="form-control" >
-								<option value="0">Select city</option>
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="cityId" id="cityId" class="form-control" >
+									<option value="0">Select city</option>
+								</select>
+								<label class="m-0">City</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1 city">
-							<label class="m-0">Select Date Type</label>
-							<select class="form-control" name="selectedType" id="selectedType" onchange="selectDateOnTypeChange(this)">
-								<option value="today">Today</option>    
-								<option value="week">Week</option>    
-								<option value="month">Month</option>    
-								<option value="custom" selected>Custom</option>    
-						 	</select>   
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select class="form-control" name="selectedType" id="selectedType" onchange="selectDateOnTypeChange(this)">
+									<option value="today">Today</option>    
+									<option value="week">Week</option>    
+									<option value="month">Month</option>    
+									<option value="custom" selected>Custom</option>    
+								</select>
+								<label class="m-0">Select Date Type</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 datepickerStartWrapper">
-							<label class="m-0">Start Date</label>
-							<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="startDateSearch" id="startDateSearch"  class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">
+								<label class="m-0">Start Date</label>
+							</div>
 						</div>
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 datepickerEndWrapper">
-							<label class="m-0">To Date</label>
-							<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="endDateSearch" id="endDateSearch"  class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">
+								<label class="m-0">To Date</label>
+							</div>
 						</div>	
 					</div>
 				</form>
@@ -465,24 +504,28 @@ function getOrientationUpdatePopup(){
                 </button>
             </div>
             <div class="modal-body">
-                <form class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2" method="post" action="javascript:void(0);" id="orientStatusUpdateForm">
+                <form class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2 custom-field-scope" method="post" action="javascript:void(0);" id="orientStatusUpdateForm">
 					<input type="hidden" name="orientId" id="orientId" value="" />
 					<input type="hidden" name="totalRescheduleNumber" id="totalRescheduleNumber" value="" />
 					<input type="hidden" name="rescheduleNumber" id="rescheduleNumber" value="" />
 					
-					<div class="row">
+					<div class="row custom-field-scope">
 						<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Status</label>
-							<select name="orientStatus" id="orientStatus" class="form-control" onchange="updateOrientStatus(this)">
-								<option value="">Select Status</option>
-								<!-- <option value="PENDING">Pending</option> -->
-								<option value="COMPLETED">Completed</option>
-								<option value="RESCHEDULE">Reschedule</option>
-							</select>
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<select name="orientStatus" id="orientStatus" class="form-control" onchange="updateOrientStatus(this)">
+									<option value="">Select Status</option>
+									<!-- <option value="PENDING">Pending</option> -->
+									<option value="COMPLETED">Completed</option>
+									<option value="RESCHEDULE">Reschedule</option>
+								</select>
+								<label class="m-0">Status</label>
+							</div>
 						</div>
 						<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12 mb-1 mt-1">
-							<label class="m-0">Remark</label>
-							<input type="text" name="orientRemark" id="orientRemark"  class="form-control" />
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="orientRemark" id="orientRemark"  class="form-control" placeholder=" " />
+								<label class="m-0">Remark</label>
+							</div>
 						</div>
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1 checkboxStatus" style="display:none;">
 							<div class="checkbox-type">
@@ -517,15 +560,15 @@ function getOrientationMovePopup(){
 			<div class="modal-header p-2 bg-primary text-white">
 				<h5 class="m-0">Move Orientation</h5>
 			</div>
-			<form action="javascript:void(0);" id="moveOrientationNewForm" name="moveLeadNewForm" autocomplete='off'>
+			<form action="javascript:void(0);" id="moveOrientationNewForm" name="moveLeadNewForm" autocomplete='off' class="custom-field-scope">
 				<input type="hidden" name="orientationNoMove" id="orientationNoMove"/>
-				<div class="modal-body delete-modal">
+				<div class="modal-body delete-modal custom-field-scope">
 					<div class="full">
-						<div class="form-group mb-2 p-0">
-							<label class="mb-0">Move Assigned Orientation to</label> 
+						<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 							<select	name="orientationAssignMove" id="orientationAssignMove" class="form-control" >
 									<option value="0">Select Assignee</option>
 								</select>
+							<label class="mb-0">Move Assigned Orientation to</label> 
 						</div>
 					</div>
 					<div class="full mt-1">
@@ -539,6 +582,3 @@ function getOrientationMovePopup(){
 </div>`;
 return html;
 }
-
-
-

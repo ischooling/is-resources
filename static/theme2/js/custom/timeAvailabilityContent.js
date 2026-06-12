@@ -319,7 +319,7 @@ function skeletonleftSide(){
 function skeletonleftright(){
 	var html = 
 		'<div class="counselor-slot-ui-column pb-4 date-picker-wrapper">'
-			+'<form id="bookSlotForEventForm">'
+			+'<form id="bookSlotForEventForm" class="custom-field-scope">'
 				+'<div class="date-calendar">'
 					+'<div class="full py-sm-4 px-4 pt-3">'
 						+'<div class="form-holder skeleton" style="width:100%;max-width:200px;height:30px;"></div>'
@@ -546,7 +546,7 @@ function getCounselorMeetingDetailsCotent(data){
 function getCounselorDatePickerCotent(data){
 	var html = 
 		'<div class="counselor-slot-ui-column pb-4 date-picker-wrapper">'
-			+'<form id="bookSlotForEventForm">'
+			+'<form id="bookSlotForEventForm" class="custom-field-scope">'
 				+'<div class="w-100 text-center p-4 border-bottom mt-4 d-lg-none d-block">'
 					+'<a href="'+schoolSettingsLinks.schoolWebsite+'" target="blank" class="d-inline-block mb-4">'
 						+'<img src="'+schoolSettingsLinks.logoUrl+''+SCRIPT_VERSION+'" style="max-width: 300px;width: 100%;" />'
@@ -581,10 +581,13 @@ function getCounselorDatePickerCotent(data){
 					html += '</div>'
 					+'<div class="full px-4 pt-2 mt-2 mb-5">';
 					if(data.forAllCounselor != 'true' || data.counselorAutoSelect == 'true'){
-						html += '<h6 class="font-weight-bold text-black">Your current time zone is </h6>'
+						html += '<h6 class="font-weight-bold text-black mb-4"> </h6>'
 					}
-				html += '<select name="countryTimezoneId" id="countryTimezoneId" class="form-control">'
+				html += '<div class="form-group position-relative custom-field mb-0">'
+						+'<select name="countryTimezoneId" id="countryTimezoneId" class="form-control">'
 						+'</select>'
+						+'<label for="countryTimezoneId" class="font-weight-bold text-black">Your current time zone is</label>'
+					+'</div>'
 					+'</div>'
 					+'<div class="full px-4">'
 						+'<div class="calender-nav d-none">'
@@ -617,30 +620,34 @@ function getCounselorDatePickerCotent(data){
 }
 function getCounselorScheduleEventCotent(data){
 	var html = 
-		'<div class="counselor-slot-ui-column pb-4 schedule-event-wrapper" id="meetingBookSlotForm" style="display: none;">';
+		'<div class="counselor-slot-ui-column pb-4 schedule-event-wrapper custom-field-scope" id="meetingBookSlotForm" style="display: none;">';
 			// +'<div class="back-btn-to-change-date on-mobile-view position-relative" onclick="backToReschedule()">'
 			// 	+'<i class="fa fa-arrow-left"></i>'
 			// +'</div>'
 			if(data.forAllCounselor == 'true' && data.counselorAutoSelect != 'true'){
-				html +='<div class="row">';
-				if(data.userFindStatus=='N'){
-					html +='<div class="col-lg-6">';
-				}else{
-					html +='<div class="col-lg-12">';
-				}
-					html +='<div class="full px-4 mt-3">'
-							+'<div class="full mb-3">'
-								+'<h5 class="text-black font-weight-bold">Counselor*</h5>'
-								+'<select class="form-control" name="counselorName" id="counselorName"></select>'
+					html +='<div class="row">';
+					if(data.userFindStatus=='N'){
+						html +='<div class="col-lg-6">';
+					}else{
+						html +='<div class="col-lg-12">';
+					}
+						html +='<div class="full px-4 mt-3">'
+								+'<div class="full mb-3">'
+									+'<div class="form-group position-relative custom-field mb-0">'
+										+'<select class="form-control" name="counselorName" id="counselorName"></select>'
+										+'<label for="counselorName" class="font-weight-bold text-black">Counselor*</label>'
+									+'</div>'
+								+'</div>'
 							+'</div>'
-						+'</div>'
-					+'</div>';
+						+'</div>';
 					if(data.userFindStatus=='N'){
 						html +='<div class="col-lg-6">' 
 							+'<div class="full px-4 mt-3">'
 								+'<div class="full mb-3">'
-									+'<h5 class="text-black font-weight-bold">Lead Source*</h5>'
-									+'<select class="form-control" name="counselorLeadSource" id="counselorLeadSource"></select>'
+									+'<div class="form-group position-relative custom-field mb-0">'
+										+'<select class="form-control" name="counselorLeadSource" id="counselorLeadSource"></select>'
+										+'<label for="counselorLeadSource" class="font-weight-bold text-black">Lead Source*</label>'
+									+'</div>'
 								+'</div>'
 							+'</div>'
 						+'</div>';
@@ -669,17 +676,23 @@ function getCounselorScheduleEventCotent(data){
 			+'<input type="hidden" name="isdCode" id="isdCode" value="" />'
 			+'<div class="full px-4 mt-3">'
 				+'<div class="full mb-3">'
-					+'<label class="font-weight-bold text-black">Name*</label>'
-					+'<input type="text" name="name" id="name"  value="'+data.sendUserName+'" class="form-control" '+(data.sendUserName != ""?"disabled":"")+' onkeydown="return M.isChars(event);">'
+					+'<div class="form-group position-relative custom-field mb-0">'
+						+'<input type="text" name="name" id="name"  value="'+data.sendUserName+'" class="form-control" '+(data.sendUserName != ""?"disabled":"")+' onkeydown="return M.isChars(event);" placeholder=" ">'
+						+'<label for="name" class="font-weight-bold text-black">Name*</label>'
+					+'</div>'
 				+'</div>'
 				+'<div class="full mb-3">'
-					+'<label class="font-weight-bold text-black">Email*</label>'
-					+'<input type="text" name="email" id="email" value="'+data.sendUserEmail+'" class="form-control" '+(data.sendUserEmail != ""?"disabled":"")+' pattern="^([A-Za-z0-9_\-\.])+@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$">'
+					+'<div class="form-group position-relative custom-field mb-0">'
+						+'<input type="text" name="email" id="email" value="'+data.sendUserEmail+'" class="form-control" '+(data.sendUserEmail != ""?"disabled":"")+' pattern="^([A-Za-z0-9_\\-\\.])+@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,4})$" placeholder=" ">'
+						+'<label for="email" class="font-weight-bold text-black">Email*</label>'
+					+'</div>'
 				+'</div>';
 				if(data.timePreferenceSlotName == 'Follow-up Meeting' && data.userFindStatus!='N'){
 					html+='<div class="full mb-3">'
-						+'<label class="font-weight-bold text-black">Phone No.*</label>'
-						+'<input type="text" name="phoneNo" id="phoneNo"  value="'+sanitizeMeetingPhoneValue(data.sendUserPhone)+'" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+						+'<div class="form-group position-relative custom-field mb-0">'
+							+'<input type="text" name="phoneNo" id="phoneNo"  value="'+sanitizeMeetingPhoneValue(data.sendUserPhone)+'" class="form-control" maxlength="12" onkeydown="return M.digit(event);" placeholder=" ">'
+							+'<label for="phoneNo" class="font-weight-bold text-black">Phone No.*</label>'
+						+'</div>'
 					+'</div>';
 					html+='<div class="full mb-4">'
 						+'<label class="font-weight-bold text-black d-block mb-2">Connect with </label>'
@@ -698,15 +711,21 @@ function getCounselorScheduleEventCotent(data){
 						+'<label class="font-weight-bold text-black d-block mb-2">Preferred Time</label>'
 						+'<div class="row mx-n2 align-items-center">'
 							+'<div class="col-12 col-md-4 px-2 mb-2">'
-								+'<select class="form-control" name="preferredStartTime" id="preferredStartTime">'
-									+getPreferredTimeOptions()
-								+'</select>'
+								+'<div class="form-group position-relative custom-field mb-0">'
+									+'<select class="form-control" name="preferredStartTime" id="preferredStartTime">'
+										+getPreferredTimeOptions()
+									+'</select>'
+									+'<label for="preferredStartTime" class="font-weight-bold text-black">Start Time</label>'
+								+'</div>'
 							+'</div>'
 							+'<div class="col-12 col-md-1 px-2 mb-2 text-center font-weight-bold text-black">-</div>'
 							+'<div class="col-12 col-md-4 px-2 mb-2">'
-								+'<select class="form-control" name="preferredEndTime" id="preferredEndTime">'
-									+getPreferredTimeEndOptions()
-								+'</select>'
+								+'<div class="form-group position-relative custom-field mb-0">'
+									+'<select class="form-control" name="preferredEndTime" id="preferredEndTime">'
+										+getPreferredTimeEndOptions()
+									+'</select>'
+									+'<label for="preferredEndTime" class="font-weight-bold text-black">End Time</label>'
+								+'</div>'
 							+'</div>'
 						+'</div>'
 					+'</div>';
@@ -715,37 +734,51 @@ function getCounselorScheduleEventCotent(data){
 				if(data.userFindStatus=='N'){
 					if(data.leadType!=undefined && data.leadType=='B2B'){
 						html+='<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black" for="">Country*</label>'
-							+'<select class="form-control" name="countryId" id="countryId">'
-							+'</select>'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<select class="form-control" name="countryId" id="countryId">'
+								+'</select>'
+								+'<label for="countryId" class="font-weight-bold text-black">Country*</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black">Phone No.*</label>'
-							+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);" placeholder=" ">'
+								+'<label for="phoneNo" class="font-weight-bold text-black">Phone No.*</label>'
+							+'</div>'
 						+'</div>';
 					}else if(data.timePreferenceSlotName == 'Interview'){
 						html+='<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black" for="">Country*</label>'
-							+'<select class="form-control" name="countryId" id="countryId">'
-							+'</select>'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<select class="form-control" name="countryId" id="countryId">'
+								+'</select>'
+								+'<label for="countryId" class="font-weight-bold text-black">Country*</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black">Phone No.*</label>'
-							+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);" placeholder=" ">'
+								+'<label for="phoneNo" class="font-weight-bold text-black">Phone No.*</label>'
+							+'</div>'
 						+'</div>';
 					}else{
 						html+='<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black">Grade*</label>'
-							+'<select class="form-control" name="gradeId" id="gradeId">'+getStandardContent(SCHOOL_ID, false, true)+'</select>'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<select class="form-control" name="gradeId" id="gradeId">'+getStandardContent(SCHOOL_ID, false, true)+'</select>'
+								+'<label for="gradeId" class="font-weight-bold text-black">Grade*</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black" for="">Country*</label>'
-							+'<select class="form-control" name="countryId" id="countryId">'
-							+'</select>'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<select class="form-control" name="countryId" id="countryId">'
+								+'</select>'
+								+'<label for="countryId" class="font-weight-bold text-black">Country*</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="full mb-3">'
-							+'<label class="font-weight-bold text-black">Phone No.*</label>'
-							+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);">'
+							+'<div class="form-group position-relative custom-field mb-0">'
+								+'<input type="text" name="phoneNo" id="phoneNo"  value="" class="form-control" maxlength="12" onkeydown="return M.digit(event);" placeholder=" ">'
+								+'<label for="phoneNo" class="font-weight-bold text-black" >Phone No.*</label>'
+							+'</div>'
 						+'</div>';
 					}
 				}

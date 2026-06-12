@@ -576,24 +576,24 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                         </button>
                     </div>
                     <div class="modal-body overflow-auto">
-                        <form autocomplete="off" id="teacherContractForm">
+                        <form autocomplete="off" id="teacherContractForm" class="custom-field-scope">
                             <input type="hidden" id="contractId" value="${contractId}">
                             <h6 class="font-weight-bold mb-2">Contract Details</h6>
                             <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="referenceNumber" value="${data.agreementRefNumber || ''}" placeholder=" ">
                                         <label>Reference Number</label>
-                                        <input type="text" class="form-control" id="referenceNumber" value="${data.agreementRefNumber || ''}">
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="contractDate" value="${contractDate}" readonly onkeydown="return false" disabled placeholder=" ">
                                         <label>Contract Creation Date</label>
-                                        <input type="text" class="form-control" id="contractDate" value="${contractDate}" readonly onkeydown="return false" disabled>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>Role Type</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select class="form-control" id="roleType" disabled>
                                             <option value="Teacher">Teacher</option>
                                         </select>
+                                        <label>Role Type</label>
                                     </div>
                                 </div>
                             </div>
@@ -601,13 +601,13 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                             <h6 class="font-weight-bold mb-2">First Party Representative Details</h6>
                             <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="firstPartyName" value="Alwin Sabu" placeholder=" ">
                                         <label>Name</label>
-                                        <input type="text" class="form-control" id="firstPartyName" value="Alwin Sabu">
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="firstPartyDesignation" value="Associate Director" placeholder=" ">
                                         <label>Designation</label>
-                                        <input type="text" class="form-control" id="firstPartyDesignation" value="Associate Director">
                                     </div>
                                 </div>
                             </div>
@@ -615,60 +615,60 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                             <h6 class="font-weight-bold mb-2">Second Party Representative Details</h6>
                             <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" value="${data.name || name || ''}" id="teacherName" ${name || data.name ? "disabled" : ""} placeholder=" ">
                                         <label>Name</label>
-                                        <input type="text" class="form-control" value="${data.name || name || ''}" id="teacherName" ${name || data.name ? "disabled" : ""}>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="email" class="form-control" value="${email || ''}" id="teacherEmail" ${email ? "disabled" : ""} placeholder=" ">
                                         <label>Email</label>
-                                        <input type="email" class="form-control" value="${email || ''}" id="teacherEmail" ${email ? "disabled" : ""}>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="teacherDesignation" value="${data?.designation || ''}" placeholder=" ">
                                         <label>Teacher's Designation</label>
-                                        <input type="text" class="form-control" id="teacherDesignation" value="${data?.designation || ''}">
                                     </div>
-									<div class="form-group col-md-3 col-12">
-                                        <label>Employment Type</label>
+									<div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select class="form-control" id="employmentType">
                                             <option value="">Select Employment Type</option>
                                             <option value="Part-Time" ${data.employeeType === 'Part-Time' ? 'selected' : ''}>Part-Time</option>
                                             <option value="Full-Time" ${data.employeeType === 'Full-Time' ? 'selected' : ''}>Full-Time</option>
                                         </select>
+                                        <label>Employment Type</label>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="workingHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.workingHours || ''}" placeholder=" ">
                                         <label>Agreed Working Hours per Month</label>
-                                        <input type="text" class="form-control" id="workingHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.workingHours || ''}">
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="adminHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.admintTaskHours || ''}" placeholder=" ">
                                         <label>Admin Task Hours per Month</label>
-                                        <input type="text" class="form-control" id="adminHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.admintTaskHours || ''}">
                                     </div>
-									<div class="form-group col-md-4 col-12" id="specializationWrapper">
-                                        <label>Course Specialization</label>
+									<div class="form-group col-md-4 col-12 position-relative custom-field" id="specializationWrapper">
                                         <select class="form-control" id="specialization" multiple>
                                             <option value="">Select</option>
                                         </select>
+                                        <label>Course Specialization</label>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
-									<div class="form-group col-md-3 col-12">
-                                        <label>Nationality</label>
+									<div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select class="form-control" id="teacherNationality" onchange="preSelectCurrency(this);"></select>
+                                        <label>Nationality</label>
                                     </div>
-									<div class="form-group col-md-1 col-12">
-                                        <label>Currency</label>
+									<div class="form-group col-md-1 col-12 position-relative custom-field">
                                         <select class="form-control" id="teacherCurrency" disabled>
 											<option value="USD" selected>USD</option>
 											<option value="INR">INR</option>
 										</select>
+                                        <label>Currency</label>
                                     </div>
-                                    <div class="form-group col-md-2 col-12">
+                                    <div class="form-group col-md-2 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="monthlySalary" onkeydown="return M.digit(event);" value="${data?.payOut || ''}" placeholder=" ">
                                         <label>Monthly Salary</label>
-                                        <input type="text" class="form-control" id="monthlySalary" onkeydown="return M.digit(event);" value="${data?.payOut || ''}">
                                     </div>
                                     <div class="form-group col-md-4 col-12">
                                         <label>Working Days</label>
@@ -677,17 +677,17 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                 </div>
 								
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>Country</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select class="form-control" id="teacherContractCountry"></select>
+                                        <label>Country</label>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>State / Province</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select class="form-control" id="teacherContractState"></select>
+                                        <label>State / Province</label>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>City</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select class="form-control" id="teacherContractCity"></select>
+                                        <label>City</label>
                                     </div>
                                 </div>
                             </div>
@@ -695,8 +695,7 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                             <h6 class="font-weight-bold mb-2">Contract Duration</h6>
                             <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>Starting Date of Contract</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <input
                                             onchange="calculateEndDate(
                                                 'teacherContractForm',
@@ -705,11 +704,11 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                                 'contractEndDate',
                                                 'YEAR'
                                             )"
-                                            type="text" class="form-control" id="contractStartDate" readonly onkeydown="return false" value="${contractDate}"
+                                            type="text" class="form-control" id="contractStartDate" readonly onkeydown="return false" value="${contractDate}" placeholder=" "
                                         >
+                                        <label>Starting Date of Contract</label>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>Contract Duration</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select 
                                             onchange="calculateEndDate(
                                                 'teacherContractForm',
@@ -732,10 +731,11 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                             <option value="9" ${data.contractDurationYears == 9 ? 'selected' : ''}>9 Years</option>
                                             <option value="10" ${data.contractDurationYears == 10 ? 'selected' : ''}>10 Years</option>
                                         </select>
+                                        <label>Contract Duration</label>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="contractEndDate" readonly onkeydown="return false" disabled placeholder=" ">
                                         <label>Effective End Date</label>
-                                        <input type="text" class="form-control" id="contractEndDate" readonly onkeydown="return false" disabled>
                                     </div>
                                 </div>
                                 <div class="form-row">
@@ -761,8 +761,7 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                             <h6 class="font-weight-bold mb-2">Set the Validity for Offer of Acceptance</h6>
                             <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
                                 <div class="form-row">
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>Starting Date of Validity</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <input
                                             onchange="calculateEndDate(
                                                 'teacherContractForm',
@@ -771,11 +770,11 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                                 'contractValidityEndDate',
                                                 'DAY'
                                             )"
-                                            type="text" class="form-control" id="contractValidityStartDate" readonly onkeydown="return false" value="${validityStartDate}"
+                                            type="text" class="form-control" id="contractValidityStartDate" readonly onkeydown="return false" value="${validityStartDate}" placeholder=" "
                                         >
+                                        <label>Starting Date of Validity</label>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
-                                        <label>Valid Till (Days)</label>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <select
                                             onchange="calculateEndDate(
                                                 'teacherContractForm',
@@ -788,10 +787,11 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                             <option value="0">Select Days</option>
                                             ${dayOptions}
                                         </select>
+                                        <label>Valid Till (Days)</label>
                                     </div>
-                                    <div class="form-group col-md-3 col-12">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="contractValidityEndDate" readonly onkeydown="return false" disabled value="${validityEndDate}" placeholder=" ">
                                         <label>Effective Validity End Date</label>
-                                        <input type="text" class="form-control" id="contractValidityEndDate" readonly onkeydown="return false" disabled value="${validityEndDate}">
                                     </div>
                                 </div>
                             </div>

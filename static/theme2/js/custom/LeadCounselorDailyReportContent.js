@@ -185,22 +185,34 @@ function getMainReportCard(objRight){
 			<div class="tab-content p-3 border">
 			<div class="tab-pane tabs-animation fade show active" id="tab-content-1" role="tabpanel">
 				<div class="tabs-animation">
-					<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
-						<div class="d-flex w-25 ml-auto mb-2" id="selectCounselorList"></div>
-						<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
-							<option value="DAY" >Today</option>
-							<option value="WEEK" >Week</option>
-							<option value="MONTH" >Month</option>
-							<option value="CUSTOM">Custom</option>
-						</select>
+					<div class="d-flex align-items-center flex-wrap justify-content-end custom-field-scope" style="gap:0.5rem" >
+						<div class="custom-field mb-2 ml-auto" style="flex:0 0 220px">
+							<div id="selectCounselorList"></div>
+							<label for="counselorid">Select Counselors</label>
+						</div>
+						<div class="custom-field mb-2 mr-1" style="flex:0 0 160px">
+							<select class="form-control" id="searchtypeTotalLead" name="searchtypeTotalLead">
+								<option value="DAY" >Today</option>
+								<option value="WEEK" >Week</option>
+								<option value="MONTH" >Month</option>
+								<option value="CUSTOM">Custom</option>
+							</select>
+							<label for="searchtypeTotalLead">Period</label>
+						</div>
 						<div class="hidedate">
 							<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
 								<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-									<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
-									<div class="mx-1">To</div>
-									<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+									<div class="custom-field mb-2" style="flex:0 0 150px">
+										<input type="text" name="dataStartDate" class="form-control" id="dataStartDate" placeholder=" " readonly onkeydown="return false" />
+										<label for="dataStartDate">Start Date</label>
+									</div>
+									<div class="mx-1 mb-2" style="line-height:44px">To</div>
+									<div class="custom-field mb-2" style="flex:0 0 150px">
+										<input type="text" name="dataEndDate" class="form-control" id="dataEndDate" placeholder=" " readonly onkeydown="return false" />
+										<label for="dataEndDate">End Date</label>
+									</div>
 								</div>
-								<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
+								<button class="btn btn-primary mb-2" id="btnWiseSubmit" style="height:44px">Submit</button>
 							</div>
 						</div>
 					</div>
@@ -211,22 +223,34 @@ function getMainReportCard(objRight){
 			<div class="tab-pane tabs-animation fade show " id="tab-content-2" role="tabpanel">
 				<div class="tabs-animation">
 				
-				<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem" >
-					<div class="d-flex w-25 ml-auto mb-2" id="selectAdminList"></div>
-					<select class="form-control form-control-sm mr-1 mb-2" id="searchtypeAdminTotalLead" name="searchtypeAdminTotalLead" style="width:fit-content">
-						<option value="DAY" >Today</option>
-						<option value="WEEK" >Week</option>
-						<option value="MONTH" >Month</option>
-						<option value="CUSTOM">Custom</option>
-					</select>
+				<div class="d-flex align-items-center flex-wrap justify-content-end custom-field-scope" style="gap:0.5rem" >
+					<div class="custom-field mb-2 ml-auto" style="flex:0 0 220px">
+						<div id="selectAdminList"></div>
+						<label for="adminid">Select Admin</label>
+					</div>
+					<div class="custom-field mb-2 mr-1" style="flex:0 0 160px">
+						<select class="form-control" id="searchtypeAdminTotalLead" name="searchtypeAdminTotalLead">
+							<option value="DAY" >Today</option>
+							<option value="WEEK" >Week</option>
+							<option value="MONTH" >Month</option>
+							<option value="CUSTOM">Custom</option>
+						</select>
+						<label for="searchtypeAdminTotalLead">Period</label>
+					</div>
 					<div class="hideAdmindate">
 						<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
 							<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-								<input type="text" name="dataAdminStartDate" class="form-control form-control-sm" id="dataAdminStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
-								<div class="mx-1">To</div>
-								<input type="text" name="dataAdminEndDate" class="form-control form-control-sm" id="dataAdminEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+								<div class="custom-field mb-2" style="flex:0 0 150px">
+									<input type="text" name="dataAdminStartDate" class="form-control" id="dataAdminStartDate" placeholder=" " readonly onkeydown="return false" />
+									<label for="dataAdminStartDate">Start Date</label>
+								</div>
+								<div class="mx-1 mb-2" style="line-height:44px">To</div>
+								<div class="custom-field mb-2" style="flex:0 0 150px">
+									<input type="text" name="dataAdminEndDate" class="form-control" id="dataAdminEndDate" placeholder=" " readonly onkeydown="return false" />
+									<label for="dataAdminEndDate">End Date</label>
+								</div>
 							</div>
-							<button class="btn btn-primary" id="btnAdminWiseSubmit">Submit</button>
+							<button class="btn btn-primary mb-2" id="btnAdminWiseSubmit" style="height:44px">Submit</button>
 						</div>
 					</div>
 				</div>

@@ -593,7 +593,11 @@ function validateLeadRuleConfig(tblId){
 	$('#addFormPopup').trigger('click') ;
 	$(".td-border-design").html('');
 	resetCounselorFilterByForm('filterCounselorCommissionRate');
-
+	if(typeof refreshCustomFieldState === 'function'){
+		setTimeout(function(){
+			refreshCustomFieldState($("#counselorSetCommitionPopup"));
+		}, 0);
+	}
 }
 
 

@@ -177,10 +177,13 @@ function getCallRequestForRoleEdit(formId, roleId) {
 
 function getFormFillRole(formId, roleDTO) {
   $("#" + formId + " #roleId").val(roleDTO.roleId);
-  $("#" + formId + " #schoolId").val(roleDTO.schoolId);
+  $("#" + formId + " #schoolId").val(roleDTO.schoolId).trigger('change');
   $("#" + formId + " #roleName").val(roleDTO.roleName);
-  $("#" + formId + " #parentRole").val(roleDTO.parentId);
-  $("#" + formId + " #roleActive").val(roleDTO.activated);
+  $("#" + formId + " #parentRole").val(roleDTO.parentId).trigger('change');
+  $("#" + formId + " #roleActive").val(roleDTO.activated).trigger('change');
+  if(typeof refreshCustomFieldState == 'function'){
+    refreshCustomFieldState($("#" + formId));
+  }
 }
 
 function getRequestForRole(formId, key, value) {
@@ -222,6 +225,10 @@ function callRoleDropdown(formId, value, elementId) {
 				$.each(result, function (k, v) {
 					dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
 				});
+				dropdown.trigger('change');
+				if(typeof refreshCustomFieldState == 'function'){
+					refreshCustomFieldState($("#" + formId));
+				}
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
 		}
@@ -239,13 +246,12 @@ function callSchoolDropdown(formId, elementId) {
 }
 
 function roleFormContentModal(){
-		$('#roleFormModal #moduleName').val('');
-		$('#roleFormModal #pageLink').val('');
-		$('#roleFormModal #moduleIcon').val('');
-		$('#roleFormModal #moduleType').val('');
-		$('#roleFormModal #parentModule').val('');
-		$('#roleFormModal #orderSet').val('');
-		$('#roleFormModal #moduleActive').val('');
-		$("#roleFormModal #roleActive").val('Y')
+		$('#roleFormModal #roleId').val('');
+		$('#roleFormModal #roleName').val('');
+		$('#roleFormModal #parentRole').val('0').trigger('change');
+		$("#roleFormModal #roleActive").val('Y').trigger('change');
+		if(typeof refreshCustomFieldState == 'function'){
+			refreshCustomFieldState($('#roleFormModal'));
+		}
 		$('#roleFormModal').modal('show');
 	}

@@ -923,191 +923,237 @@ function filterStudentPaymentReportForm(){
 	'<div class="filterStudentPaymentReportForm" style="display:block">'
 		+'<div class="card">'
 			+'<div class="card-body">'
-				+'<form id="studentPaymentForm">'
+				+'<form id="studentPaymentForm" class="custom-field-scope">'
 					+'<div class="row">'
 							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-								+'<label>Academic Session</label>'
-								+'<select id="sessionId" class="form-control selectReset">'
+								+'<div class="form-group custom-field">'
+									+'<select id="sessionId" class="form-control selectReset">'
+									+'</select>'
+									+'<label>Academic Session</label>'
+								+'</div>'
+							+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<div class="form-group custom-field">'
+									+'<select id="dateType" class="form-control">'
+										+'<option value="PAYMENT_DATE" selected>Payment Date</option>'
+										+'<option value="ACADEMIC_YEAR">Academic Year</option>'
+									+'</select>'
+									+'<label>Date Type</label>'
+								+'</div>'
+							+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<div class="form-group custom-field">'
+									+'<input type="text" id="startDate" class="form-control" placeholder=" " readonly onkeydown="return false" >'
+									+'<label id="startDateLabel">Payment Start Date</label>'
+								+'</div>'
+							+'</div>'
+							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+								+'<div class="form-group custom-field">'
+									+'<input type="text" id="endDate" class="form-control" placeholder=" " readonly onkeydown="return false" >'
+									+'<label id="endDateLabel">Payment End Date</label>'
+								+'</div>'
+							+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<select id="paymentStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
+									+'<option value="SUCCESS">Success</option>'
+									+'<option value="ODUE">Overdue</option>'
+									+'<option value="DUE">Upcoming</option>'
+									+'<option value="AP">Advance Payment</option>'
+									+'<option value="ABS">Advance Book Seat </option>'
 								+'</select>'
+								+'<label>Payment Status</label>'
 							+'</div>'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-								+'<label>Date Type</label>'
-								+'<select id="dateType" class="form-control">'
-									+'<option value="PAYMENT_DATE" selected>Payment Date</option>'
-									+'<option value="ACADEMIC_YEAR">Academic Year</option>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<input type="text" id="overDueBy" class="form-control" placeholder=" " value="">'
+								+'<label>Over Due By (Days in Numbers)</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<select id="learningPlatform" class="form-control selectReset multiple-select-option" multiple="multiple">'
+									+getLmsPlatformContent(SCHOOL_ID)
 								+'</select>'
+								+'<label>Select LMS Platform</label>'
 							+'</div>'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-								+'<label id="startDateLabel">Payment Start Date</label>'
-								+'<input type="text" id="startDate" class="form-control" placeholder="Select Start Date" readonly onkeydown="return false" >'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<select name="systemTrainStatus" id="systemTrainStatus" class="form-control">'
+									+'<option value="">Select System Training</option>'
+									+'<option value="COMPLETED">Completed</option>'
+									+'<option value="PENDING">Pending</option>'
+								+'</select>'
+								+'<label>System Training</label>'
 							+'</div>'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-								+'<label id="endDateLabel">Payment End Date</label>'
-								+'<input type="text" id="endDate" class="form-control" placeholder="Select End Date" readonly onkeydown="return false" >'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<select name="teacherMapStaus" id="teacherMapStaus" class="form-control">'
+									+'<option value="">Select Teacher Mapping</option>'
+									+'<option value="2">Mapping End</option>'
+									+'<option value="1">Completed</option>'
+									+'<option value="0">Pending</option>'
+								+'</select>'
+								+'<label>Teacher / Batch Mapping</label>'
 							+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Payment Status</label>'
-							+'<select id="paymentStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								+'<option value="SUCCESS">Success</option>'
-								+'<option value="ODUE">Overdue</option>'
-								+'<option value="DUE">Upcoming</option>'
-								+'<option value="AP">Advance Payment</option>'
-								+'<option value="ABS">Advance Book Seat </option>'
-							+'</select>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Over Due By (Days in Numbers)</label>'
-							+'<input type="text" id="overDueBy" class="form-control" placeholder="Enter days count" value="">'
+							+'<div class="form-group custom-field">'
+								+'<select id="learningProgram" class="form-control selectReset multiple-select-option" multiple="multiple">'
+									+getLearningProgramContent(SCHOOL_ID)
+								+'</select>'
+								+'<label>Select Enroll Type</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Select LMS Platform</label>'
-							+'<select id="learningPlatform" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								+getLmsPlatformContent(SCHOOL_ID)
-							+'</select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>System Training</label>'
-							+'<select name="systemTrainStatus" id="systemTrainStatus" class="form-control">'
-								+'<option value="">Select System Training</option>'
-								+'<option value="COMPLETED">Completed</option>'
-								+'<option value="PENDING">Pending</option>'
-							+'</select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Teacher / Batch Mapping</label>'
-							+'<select name="teacherMapStaus" id="teacherMapStaus" class="form-control">'
-								+'<option value="">Select Teacher Mapping</option>'
-								+'<option value="2">Mapping End</option>'
-								+'<option value="1">Completed</option>'
-								+'<option value="0">Pending</option>'
-							+'</select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Select Enroll Type</label>'
-							+'<select id="learningProgram" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								+getLearningProgramContent(SCHOOL_ID)
-							+'</select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Grade</label>'
-							+'<select id="gradeId" class="form-control selectReset multiple-select-option" multiple="multiple">'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select id="gradeId" class="form-control selectReset multiple-select-option" multiple="multiple">'
+								+'</select>'
+								+'<label>Grade</label>'
+							+'</div>'
 						+'</div>'
 			
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Enroll Status</label>'
-							+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
-								+'<option value="0">Completed- New enrollment</option>'
-								+'<option value="4">Completed- Re enrollment</option>'
-								+'<option value="1">Withdrawn</option>'
-								+'<option value="2">Partial entry - New enrollment</option>'
-								+'<option value="3">Partial entry - Re-enrollment</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
+									+'<option value="0">Completed- New enrollment</option>'
+									+'<option value="4">Completed- Re enrollment</option>'
+									+'<option value="1">Withdrawn</option>'
+									+'<option value="2">Partial entry - New enrollment</option>'
+									+'<option value="3">Partial entry - Re-enrollment</option>'
+								+'</select>'
+								+'<label>Enroll Status</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Academic Year Selected</label>'
-							+'<select name="academicYearStatus" id="academicYearStatus" class="form-control">'
-								+'<option value="">Select Academic Year Selected Status</option>'
-								+'<option value="Y">Yes</option>'
-								+'<option value="N">No</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select name="academicYearStatus" id="academicYearStatus" class="form-control">'
+									+'<option value="">Select Academic Year Selected Status</option>'
+									+'<option value="Y">Yes</option>'
+									+'<option value="N">No</option>'
+								+'</select>'
+								+'<label>Academic Year Selected</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Re-Enroll</label>'
-							+'<select id="reEnrollStatus" class="form-control selectReset multiple-select-option">'
-								+'<option value="">Select Re-Enroll Status</option>'
-								+'<option value="YEAREND">Academic Year End</option>'
-								+'<option value="ONGOING">Ongoing</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select id="reEnrollStatus" class="form-control selectReset multiple-select-option">'
+									+'<option value="">Select Re-Enroll Status</option>'
+									+'<option value="YEAREND">Academic Year End</option>'
+									+'<option value="ONGOING">Ongoing</option>'
+								+'</select>'
+								+'<label>Re-Enroll</label>'
+							+'</div>'
 						+'</div>'
 
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Re-Enroll Remaining (Days in Numbers)</label>'
-							+'<input type="text" id="remainingDueBy" class="form-control" placeholder="Enter days count" value="">'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-						+'<label>Overall Progress Report</label>'
-						+'<div class="row">'
-							+'<div class="col-6">'
-							+'<select id="progressMin" class="form-control">'
-								+'<option value="200">Min</option>'
-								+'<option value="">N/A</option>'
-								+'<option value="0.00">0</option>'
-								+'<option value="10.00">10</option>'
-								+'<option value="20.00">20</option>'
-								+'<option value="30.00">30</option>'
-								+'<option value="40.00">40</option>'
-								+'<option value="50.00">50</option>'
-								+'<option value="60.00">60</option>'
-								+'<option value="70.00">70</option>'
-								+'<option value="80.00">80</option>'
-								+'<option value="90.00">90</option>'
-								+'<option value="100.00">100</option>'
-							+'</select>'
-							+'</div>'
-							+'<div class="col-6">'
-							+'<select id="progressMax" class="form-control">'
-								+'<option value="200">Max</option>'
-								+'<option value="">N/A</option>'
-								+'<option value="0.00">0</option>'
-								+'<option value="10.00">10</option>'
-								+'<option value="20.00">20</option>'
-								+'<option value="30.00">30</option>'
-								+'<option value="40.00">40</option>'
-								+'<option value="50.00">50</option>'
-								+'<option value="60.00">60</option>'
-								+'<option value="70.00">70</option>'
-								+'<option value="80.00">80</option>'
-								+'<option value="90.00">90</option>'
-								+'<option value="100.00">100</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<input type="text" id="remainingDueBy" class="form-control" placeholder=" " value="">'
+								+'<label>Re-Enroll Remaining (Days in Numbers)</label>'
 							+'</div>'
 						+'</div>'
+						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="form-group custom-field-scope">'
+							+'<label>Overall Progress Report</label>'
+							+'<div class="row">'
+								+'<div class="col-6 custom-field">'
+									+'<select id="progressMin" class="form-control">'
+										+'<option value="200">Min</option>'
+										+'<option value="">N/A</option>'
+										+'<option value="0.00">0</option>'
+										+'<option value="10.00">10</option>'
+										+'<option value="20.00">20</option>'
+										+'<option value="30.00">30</option>'
+										+'<option value="40.00">40</option>'
+										+'<option value="50.00">50</option>'
+										+'<option value="60.00">60</option>'
+										+'<option value="70.00">70</option>'
+										+'<option value="80.00">80</option>'
+										+'<option value="90.00">90</option>'
+										+'<option value="100.00">100</option>'
+									+'</select>'
+									+'<label for="progressMin" style="left:20px;">MIN</label>'
+								+'</div>'
+								+'<div class="col-6 custom-field">'
+									+'<select id="progressMax" class="form-control">'
+										+'<option value="200">Max</option>'
+										+'<option value="">N/A</option>'
+										+'<option value="0.00">0</option>'
+										+'<option value="10.00">10</option>'
+										+'<option value="20.00">20</option>'
+										+'<option value="30.00">30</option>'
+										+'<option value="40.00">40</option>'
+										+'<option value="50.00">50</option>'
+										+'<option value="60.00">60</option>'
+										+'<option value="70.00">70</option>'
+										+'<option value="80.00">80</option>'
+										+'<option value="90.00">90</option>'
+										+'<option value="100.00">100</option>'
+									+'</select>'
+									+'<label for="progressMax" style="left:20px;">MAX</label>'
+								+'</div>'
+							+'</div>'
+						+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Student Status</label>'
-							+'<select name="studentStatus" id="studentStatus" class="form-control">'
-								+'<option value="">Select Student Status</option>'
-								+'<option value="1">Active</option>'
-								+'<option value="0">Inactive</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select name="studentStatus" id="studentStatus" class="form-control">'
+									+'<option value="">Select Student Status</option>'
+									+'<option value="1">Active</option>'
+									+'<option value="0">Inactive</option>'
+								+'</select>'
+								+'<label>Student Status</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>LMS Status</label>'
-							+'<select name="lmsStatus" id="lmsStatus" class="form-control">'
-								+'<option value="">Select LMS Status</option>'
-								+'<option value="1">Active</option>'
-								+'<option value="0">Inactive</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select name="lmsStatus" id="lmsStatus" class="form-control">'
+									+'<option value="">Select LMS Status</option>'
+									+'<option value="1">Active</option>'
+									+'<option value="0">Inactive</option>'
+								+'</select>'
+								+'<label>LMS Status</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Transcript Status</label>'
-							+'<select name="transcriptStatus" id="transcriptStatus" class="form-control">'
-								+'<option value="">Select Status</option>'
-								+'<option value="Y">Published</option>'
-								+'<option value="N">Not Published</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select name="transcriptStatus" id="transcriptStatus" class="form-control">'
+									+'<option value="">Select Status</option>'
+									+'<option value="Y">Published</option>'
+									+'<option value="N">Not Published</option>'
+								+'</select>'
+								+'<label>Transcript Status</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Call Recording Status</label>'
-							+'<select name="recordingStatus" id="recordingStatus" class="form-control">'
-								+'<option value="">Select Status</option>'
-								+'<option value="Y">Yes</option>'
-								+'<option value="N">No</option>'
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select name="recordingStatus" id="recordingStatus" class="form-control">'
+									+'<option value="">Select Status</option>'
+									+'<option value="Y">Yes</option>'
+									+'<option value="N">No</option>'
+								+'</select>'
+								+'<label>Call Recording Status</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Enrolled By</label>'
-							+'<select id="userId" class="form-control selectReset multiple-select-option">'
-								+'<option value="">ALL</option>'
-								+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '')
-							+'</select>'
+							+'<div class="form-group custom-field">'
+								+'<select id="userId" class="form-control selectReset multiple-select-option">'
+									+'<option value="">ALL</option>'
+									+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '')
+								+'</select>'
+								+'<label>Enrolled By</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<label>Communication Log Status</label>'
-							+'<select id="reLeadStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
+							+'<div class="form-group custom-field">'
+								+'<select id="reLeadStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
 								
-							+'</select>'
+								+'</select>'
+								+'<label>Communication Log Status</label>'
+							+'</div>'
 						+'</div>'
 						
 						
@@ -1119,15 +1165,17 @@ function filterStudentPaymentReportForm(){
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
 							+'<div class="row">'
 								+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">'
-									+'<label>Page Size</label>'
-									+'<select id="pageSize" class="form-control">'
-										+'<option value="10">10</option>'
-										+'<option value="25">25</option>'
-										+'<option value="50">50</option>'
-										+'<option value="100">100</option>'
-										+'<option value="150">150</option>'
-										+'<option value="200">200</option>'
-									+'</select>'
+									+'<div class="form-group custom-field">'
+										+'<select id="pageSize" class="form-control">'
+											+'<option value="10">10</option>'
+											+'<option value="25">25</option>'
+											+'<option value="50">50</option>'
+											+'<option value="100">100</option>'
+											+'<option value="150">150</option>'
+											+'<option value="200">200</option>'
+										+'</select>'
+										+'<label>Page Size</label>'
+									+'</div>'
 								+'</div>'
 							+'</div>'
 						+'</div>'
@@ -2170,33 +2218,43 @@ function getWatiLogsRecordsFilterModal(){
 						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 					</div>
 					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
-						<form class="form-row" id="watiLogsRecords" autocomplete="off">
+						<form class="form-row custom-field-scope" id="watiLogsRecords" autocomplete="off">
 						<div class="col-md-12 col-lg-2">
-							<label>Counsoler Name</label>
-							<select name="counsolerToSearch" id="counsolerToSearch" class="form-control" multiple>'
-								<option value="">Select Counsoler</option>'
-							</select>
+							<div class="form-group custom-field">
+								<select name="counsolerToSearch" id="counsolerToSearch" class="form-control" multiple>'
+									<option value="">Select Counsoler</option>'
+								</select>
+								<label>Counsoler Name</label>
+							</div>
 						</div>
 							<div class="col-md-12 col-lg-2">
-								<label>Fillter</label>
-								<select class="form-control mr-1" id="searchDateType" name="searchDateType">
-									<option value="DAY">Today</option>
-									<option value="WEEK">Week</option>
-									<option value="MONTH">Month</option>
-									<option value="CUSTOM">Custom</option>
-								</select>
+								<div class="form-group custom-field">
+									<select class="form-control mr-1" id="searchDateType" name="searchDateType">
+										<option value="DAY">Today</option>
+										<option value="WEEK">Week</option>
+										<option value="MONTH">Month</option>
+										<option value="CUSTOM">Custom</option>
+									</select>
+									<label>Fillter</label>
+								</div>
 							</div>
 							<div class="col-md-12 col-lg-2" id="endDateDiv">
-								<label>Start Date<sup class="text-danger">*</sup></label>
-								<input class="form-control" name="startDate" id="startDate" placeholder="Start Date"/>    
+								<div class="form-group custom-field">
+									<input class="form-control" name="startDate" id="startDate" placeholder=" "/>    
+									<label>Start Date<sup class="text-danger">*</sup></label>
+								</div>
 							</div> 
 							<div class="col-md-12 col-lg-2" id="endDateDiv">
-								<label>End Date<sup class="text-danger">*</sup></label>
-								<input class="form-control" name="endDate" id="endDate" placeholder="End Date"/>    
+								<div class="form-group custom-field">
+									<input class="form-control" name="endDate" id="endDate" placeholder=" "/>    
+									<label>End Date<sup class="text-danger">*</sup></label>
+								</div>
 							</div>
 							<div class="col-md-12 col-lg-1">
-								<label>Page Size<sup class="text-danger">*</sup></label>
-								<input class="form-control" name="pageSize" id="pageSize" value="10" placeholder="Page Size" onkeydown="return M.digit(event);"/>    
+								<div class="form-group custom-field">
+									<input class="form-control" name="pageSize" id="pageSize" value="10" placeholder=" " onkeydown="return M.digit(event);"/>    
+									<label>Page Size<sup class="text-danger">*</sup></label>
+								</div>
 							</div>
 						</form>
 						<hr/>
@@ -2302,33 +2360,43 @@ function getMailLogsRecordsFilterModal(){
 						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 					</div>
 					<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
-						<form class="form-row" id="mailLogsRecords" autocomplete="off">
+						<form class="form-row custom-field-scope" id="mailLogsRecords" autocomplete="off">
 						<div class="col-md-12 col-lg-2">
-							<label>Counsoler Name</label>
-							<select name="counsolerToSearch" id="counsolerToSearch" class="form-control" multiple>'
-								<option value="">Select Counsoler</option>'
-							</select>
+							<div class="form-group custom-field">
+								<select name="counsolerToSearch" id="counsolerToSearch" class="form-control" multiple>'
+									<option value="">Select Counsoler</option>'
+								</select>
+								<label>Counsoler Name</label>
+							</div>
 						</div>
 							<div class="col-md-12 col-lg-2">
-								<label>Fillter</label>
-								<select class="form-control mr-1" id="searchDateType" name="searchDateType">
-									<option value="DAY">Today</option>
-									<option value="WEEK">Week</option>
-									<option value="MONTH">Month</option>
-									<option value="CUSTOM">Custom</option>
-								</select>
+								<div class="form-group custom-field">
+									<select class="form-control mr-1" id="searchDateType" name="searchDateType">
+										<option value="DAY">Today</option>
+										<option value="WEEK">Week</option>
+										<option value="MONTH">Month</option>
+										<option value="CUSTOM">Custom</option>
+									</select>
+									<label>Fillter</label>
+								</div>
 							</div>
 							<div class="col-md-12 col-lg-2" id="endDateDiv">
-								<label>Start Date<sup class="text-danger">*</sup></label>
-								<input class="form-control" name="startDate" id="startDate" placeholder="Start Date"/>    
+								<div class="form-group custom-field">
+									<input class="form-control" name="startDate" id="startDate" placeholder=" "/>    
+									<label>Start Date<sup class="text-danger">*</sup></label>
+								</div>
 							</div> 
 							<div class="col-md-12 col-lg-2" id="endDateDiv">
-								<label>End Date<sup class="text-danger">*</sup></label>
-								<input class="form-control" name="endDate" id="endDate" placeholder="End Date"/>    
+								<div class="form-group custom-field">
+									<input class="form-control" name="endDate" id="endDate" placeholder=" "/>    
+									<label>End Date<sup class="text-danger">*</sup></label>
+								</div>
 							</div>
 							<div class="col-md-12 col-lg-1">
-								<label>Page Size<sup class="text-danger">*</sup></label>
-								<input class="form-control" name="pageSize" id="pageSize" value="10" placeholder="Page Size" onkeydown="return M.digit(event);"/>    
+								<div class="form-group custom-field">
+									<input class="form-control" name="pageSize" id="pageSize" value="10" placeholder=" " onkeydown="return M.digit(event);"/>    
+									<label>Page Size<sup class="text-danger">*</sup></label>
+								</div>
 							</div>
 						</form>
 						<hr/>

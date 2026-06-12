@@ -103,15 +103,15 @@ function getReleaseNoteAdminListContent(title) {
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>
-					<div class="modal-body">
+					<div class="modal-body custom-field-scope">
 						<input type="hidden" id="rnSendMailReleaseNoteId" value="0" />
-						<div class="form-group">
-							<label>To Emails (comma separated)<sup class="text-danger">*</sup></label>
-							<input type="text" class="form-control" id="rnSendMailToEmails" placeholder="user1@example.com, user2@example.com" />
+						<div class="form-group custom-field">
+							<input type="text" class="form-control" id="rnSendMailToEmails" placeholder=" ">
+							<label for="rnSendMailToEmails">To Emails (comma separated)<sup class="text-danger">*</sup></label>
 						</div>
-						<div class="form-group mb-0">
-							<label>CC Emails (comma separated)</label>
-							<input type="text" class="form-control" id="rnSendMailCcEmails" placeholder="cc1@example.com, cc2@example.com" />
+						<div class="form-group mb-0 custom-field">
+							<input type="text" class="form-control" id="rnSendMailCcEmails" placeholder=" ">
+							<label for="rnSendMailCcEmails">CC Emails (comma separated)</label>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -143,27 +143,27 @@ function getReleaseNoteAdminEditorContent(title) {
 
 		<div class="main-card mt-3 mb-3 card">
 			<div class="card-body">
-				<form id="releaseNoteAdminForm" action="javascript:void(0);">
+				<form id="releaseNoteAdminForm" action="javascript:void(0);" class="custom-field-scope">
 					<div class="row">
 						<div class="col-md-4 col-sm-6 col-12">
-							<div class="form-group">
-								<label>Version Label</label>
-								<input type="text" class="form-control" id="rnVersionLabel" maxlength="100" autocomplete="off" placeholder="e.g. v60.1.0" />
+							<div class="form-group custom-field">
+								<input type="text" class="form-control" id="rnVersionLabel" maxlength="100" autocomplete="off" placeholder=" ">
+								<label for="rnVersionLabel">Version Label</label>
 							</div>
 						</div>
 						<div class="col-md-8 col-sm-6 col-12">
-							<div class="form-group">
-								<label>Release Title<sup class="text-danger">*</sup></label>
-								<input type="text" class="form-control" id="rnTitle" maxlength="250" autocomplete="off" placeholder="Enter release note title" />
+							<div class="form-group custom-field">
+								<input type="text" class="form-control" id="rnTitle" maxlength="250" autocomplete="off" placeholder=" ">
+								<label for="rnTitle">Release Title<sup class="text-danger">*</sup></label>
 							</div>
 						</div>
 					</div>
 
 					<div class="row">
 						<div class="col-md-12 col-12">
-							<div class="form-group">
-								<label>Impact Module (comma separated)<sup class="text-danger">*</sup></label>
-								<input type="text" class="form-control" id="rnImpactModules" maxlength="500" autocomplete="off" placeholder="Example: Admissions, Attendance, Report Card" />
+							<div class="form-group custom-field">
+								<input type="text" class="form-control" id="rnImpactModules" maxlength="500" autocomplete="off" placeholder=" ">
+								<label for="rnImpactModules">Impact Module (comma separated)<sup class="text-danger">*</sup></label>
 							</div>
 						</div>
 					</div>
@@ -180,18 +180,18 @@ function getReleaseNoteAdminEditorContent(title) {
 
 					<div class="row">
 						<div class="col-md-12 col-12">
-							<div class="form-group">
-								<label>Short Summary</label>
+							<div class="form-group custom-field">
 								<textarea class="form-control" rows="2" id="rnSummary" maxlength="1000" placeholder="Brief summary for listing preview"></textarea>
+								<label for="rnSummary">Short Summary</label>
 							</div>
 						</div>
 					</div>
 
 					<div class="row">
 						<div class="col-md-12 col-12">
-							<div class="form-group">
-								<label>Release Content<sup class="text-danger">*</sup></label>
+							<div class="form-group custom-field">
 								<textarea class="form-control" rows="8" id="releaseNoteContentEditor" placeholder="Describe updates, fixes and notes"></textarea>
+								<label for="releaseNoteContentEditor">Release Content<sup class="text-danger">*</sup></label>
 							</div>
 						</div>
 					</div>

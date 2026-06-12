@@ -1474,7 +1474,7 @@ function addTimePreference(startTimeId, endTimeId){
 			});
 			var flag = checkOverlap(timeSlots);
 			if(!flag){
-				var html ='<span class="d-inline-block ml-2 selectedPreferenceSlot" id="selectedPreferenceSlot'+(selectSlotLength+1)+'" startTime="'+st+'" endTime="'+et+'">'
+			var html ='<span class="d-inline-block ml-2 selectedPreferenceSlot" id="selectedPreferenceSlot'+(selectSlotLength+1)+'" startTime="'+st+'" endTime="'+et+'" style="margin-top:-8px;vertical-align:top;">'
 					+'<div class="m-0 font-weight-bold">Preference '+(selectSlotLength+1)+'</div>'
 					+'<label class="bg-light-primary text-primary rounded-5 d-inline-block p-1 border border-primary px-2">'
 						+'<span class="d-inline-block startTimeText">'+st+'</span> - <span class="d-inline-block endTimeText">'+et+'</span>'
@@ -1712,7 +1712,5 @@ function checkdateIsPastOrNot(dateString) {
 	currentDate.setHours(0, 0, 0, 0);
 	return providedDate < currentDate;
   }
-
-
 
 

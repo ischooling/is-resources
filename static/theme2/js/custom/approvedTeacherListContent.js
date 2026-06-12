@@ -15,6 +15,15 @@ async function renderApprovedTeacherDashboard(title, roleAndModule, SCHOOL_ID, U
 	
 	var html= await getApprovedTeacherListContent(title, roleAndModule.moduleId);
     $('#dashboardContentInHTML').html(html);
+	if(typeof refreshCustomFieldState === 'function'){
+		setTimeout(function(){
+			refreshCustomFieldState($('#assignSubjectsTeacher'));
+			refreshCustomFieldState($('#searchpaymentHistory'));
+			refreshCustomFieldState($('#addPaymentHistory'));
+			refreshCustomFieldState($('#teacherAddBufferAvailabilityForm'));
+			refreshCustomFieldState($('#teacherOfficialMailForm'));
+		}, 0);
+	}
 	// callRoleDropdown("adminFilter",'','roleUser');
 	if(callFrom=='withdraw'){
 		getWithdrawTeacherList(roleAndModule.moduleId, USER_ID, SCHOOL_ID, ids, types, 0) ;
@@ -214,47 +223,57 @@ function getUserActivity(){
 function getAssignSubjectsTeacher(){
 	var html=`<div class="modal fade" id="assignSubjectsTeacher"  role="dialog" aria-labelledby="currentSubjectModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xl" role="document">
-		<div class="modal-content" style="margin:60px auto;">
+		<div class="modal-content custom-field-scope" style="margin:60px auto;">
 			<div class="modal-header py-2 bg-primary text-white" >
 				<h5 class="modal-title" id="currentSubjectModalLabel">Assign Courses</h5>
 			</div>
-			<div class="modal-body overflow-y-auto" style="max-height:400px;">
+			<div class="modal-body overflow-y-auto custom-field-scope" style="max-height:400px;">
 				<input type="hidden" name="userId" id="userId"/>
 				<div class="row mb-2">
 					<div class="col-lg-2 col-md-4 col-sm-6 col-12">
-						<label>LMS Platform:  </label>
-						<select id="courseProvider"  name="courseProvider" class="form-control">
-						</select>
+						<div class="custom-field">
+							<select id="courseProvider"  name="courseProvider" class="form-control">
+							</select>
+							<label>LMS Platform:  </label>
+						</div>
 					</div>
 					<div class="col-lg-2 col-md-4 col-sm-6 col-12">
-						<label for="inputState">Course Type</label> 
-						<select id="courseType" class="form-control">`;
+						<div class="custom-field">
+							<select id="courseType" class="form-control">`;
 						for (let c = 0; c < courseTypeList.length; c++) {
 							const courseType = courseTypeList[c];
 							html+=`<option value="${courseType.metaKey}" >${courseType.metaValue}</option>`;
 						}
 						html+=`</select>
+							<label for="inputState">Course Type</label> 
+						</div>
 					</div>
 					<div class="col-lg-2 col-md-4 col-sm-6 col-12">
-						<label for="inputState">Grade</label> 
-						<select id="standardId" class="form-control">
-							<option value="0">Choose Grade</option>`
+						<div class="custom-field">
+							<select id="standardId" class="form-control">
+								<option value="0">Choose Grade</option>`
 							for (let g = 0; g < gradeList.length; g++) {
 							const grade = gradeList[g];
 							html+=`<option value="${grade.key}" >${grade.value}</option>`;
 						}
 						html+=`</select>
+							<label for="inputState">Grade</label> 
+						</div>
 					</div>
 					<div class="col-lg-2 col-md-4 col-sm-6 col-12">
-						<label>Course Name:</label>
-						<input type="text" name="courseName" id="courseName" class="form-control" autocomplete="off"/>
+						<div class="custom-field">
+							<input type="text" name="courseName" id="courseName" class="form-control" autocomplete="off" placeholder=" "/>
+							<label>Course Name:</label>
+						</div>
 					</div>
 					<div class="col-lg-2 col-md-4 col-sm-6 col-12">					
-						<label>Flex:</label>
-						<select id="flaxStatus" class="form-control">
-							<option value="No">No</option>
-							<option value="Yes">Yes</option>
-						</select>
+						<div class="custom-field">
+							<select id="flaxStatus" class="form-control">
+								<option value="No">No</option>
+								<option value="Yes">Yes</option>
+							</select>
+							<label>Flex:</label>
+						</div>
 					</div>	
 					<div class="col-lg-2 col-md-4 col-sm-6 col-12">
 						<label class="full">&nbsp;</label>
@@ -286,25 +305,25 @@ function getCommonPaymentModel(){
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div class="modal-body" style="max-height: 500px; overflow: auto;">
-					<form id="searchpaymentHistory" name="searchpaymentHistory" action="javascript:void(0);" method="post">
+			<div class="modal-body custom-field-scope" style="max-height: 500px; overflow: auto;">
+					<form id="searchpaymentHistory" name="searchpaymentHistory" action="javascript:void(0);" method="post" class="custom-field-scope">
 						<div class="row">
 						<div class="col-lg-5 col-md-5 col-sm-4 col-12">
-							<div class="form-group">
-								<label>Date</label>
+							<div class="form-group custom-field">
 								<input type="hidden" class="form-control" id="entityIdSearch" value="">
 								<input type="hidden" class="form-control" id="entityNameSearch" value="">
-								<input type="text" class="form-control" id="paymentDateSearch" placeholder="Payment Date" readonly onkeydown="return false">
+								<input type="text" class="form-control" id="paymentDateSearch" placeholder=" " readonly onkeydown="return false">
+								<label>Date</label>
 							</div>
 						</div>
 						<div class="col-lg-5 col-md-5 col-sm-4 col-12">
-							<div class="form-group">
-								<label>Payment Method</label>
+							<div class="form-group custom-field">
 								<select id="paymentModeSearch" name="paymentModeSearch" class="form-control" style="width: 100%;">
 									<option value=""></option>
 									<option value="PayPal">PayPal</option>
 									<option value="Bank Transfer">Bank Transfer</option>
 								</select>
+								<label>Payment Method</label>
 							</div>
 						</div>
 						<div class="col-lg-2 col-md-2 col-sm-4 col-12 text-center">
@@ -335,41 +354,40 @@ function getCommonAddPaymentModel(){
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div id="commonAddPaymentModelContents" class="modal-body">
-				<form class="pay-his" id="addPaymentHistory" name="addPaymentHistory" action="javascript:void(0);" method="post">
+			<div id="commonAddPaymentModelContents" class="modal-body custom-field-scope">
+				<form class="pay-his custom-field-scope" id="addPaymentHistory" name="addPaymentHistory" action="javascript:void(0);" method="post">
 					<div class="row">
 						<div class="col-md-12 text-center">
 							<p class="" style="font-size: 12px; text-align: center; margin: 0; height: 25px;" id="modalMessageNew"></p>
 						</div>
 						<div class="col-md-6">
-							<div class="form-group">
-								<label>Teacher Name</label>
+							<div class="form-group custom-field">
 								<input type="text" id="userName" class="form-control" name="userName" value="" disabled>
 								<input type="hidden" id="paymentId" class="form-control" name="paymentId" value="">
 								<input type="hidden" id="userId" class="form-control" name="userId" value="${USER_ID}" >
 								<input type="hidden" id="entityId" class="form-control" name="entityId" value="" >
 								<input type="hidden" id="entityName" class="form-control" name="entityName" value="">
+								<label>Teacher Name</label>
 							</div>
 						</div>
 						<div class="col-md-6">
-							<div class="form-group">
+							<div class="form-group custom-field">
+								<input type="text" id="paymentDate" class="form-control" name="paymentDate" value="" readonly onkeydown="return false" placeholder=" ">
 								<label>Payment Date</label>
-								<input type="text" id="paymentDate" class="form-control" name="paymentDate" value="" readonly onkeydown="return false">
 							</div>
 						</div>
 						<div class="col-md-6">
-							<div class="form-group">
-								<label>Payment Mode</label>
+							<div class="form-group custom-field">
 								<select id="paymentMode" name="paymentMode" class="form-control">
 									<option value="">Select Payment Mode</option>
 									<option value="PayPal">PayPal</option>
 									<option value="Bank Transfer">Bank Transfer</option>
 								</select>
+								<label>Payment Mode</label>
 							</div>
 						</div>
 						<div class="col-md-6">
-							<div class="form-group">
-								<label>Payment Amount</label>
+							<div class="form-group custom-field">
 								<div class="row">
 									<div class="col-md-4">
 										<select id="paymentCurrency" name="paymentCurrency" class="form-control">
@@ -379,15 +397,16 @@ function getCommonAddPaymentModel(){
 										</select>
 									</div>
 									<div class="col-md-8">
-										<input type="text" class="form-control" id="paymentAmount" name="paymentAmount" value="" placeholder="Amount" maxlength="7" onkeydown="return M.floatDigit(event);">
+										<input type="text" class="form-control" id="paymentAmount" name="paymentAmount" value="" placeholder=" " maxlength="7" onkeydown="return M.floatDigit(event);">
 									</div>
 								</div>
+								<label>Payment Amount</label>
 							</div>
 						</div>
 						<div class="col-md-6">
-							<div class="form-group">
+							<div class="form-group custom-field">
+								<textarea id="remarks" name="remarks" class="form-control" rows="2" cols="" placeholder=" " maxlength="250"></textarea>
 								<label>Remark</label>
-								<textarea id="remarks" name="remarks" class="form-control" rows="2" cols="" placeholder="Add remarks, if any" maxlength="250"></textarea>
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -432,18 +451,18 @@ return html;
 function getTeacherAddBufferAvailaibilityModel(){
 	var html=`<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" id="teacherAddBufferAvailaibilityModel">
 		<div class="modal-dialog modal-md">
-			<div class="modal-content" style="border: none; border-radius: 1px;">
-				<form name="teacherAddBufferAvailabilityForm" id="teacherAddBufferAvailabilityForm">
+		<div class="modal-content" style="border: none; border-radius: 1px;">
+				<form name="teacherAddBufferAvailabilityForm" id="teacherAddBufferAvailabilityForm" class="custom-field-scope">
 					<input type="hidden" class="form-control" id="userId" name="userId" value="">
 					<input type="hidden" class="form-control" id="teacherId" name="teacherId" value="">
 					<div class="modal-header py-2 bg-primary text-center text-white">
 						<h5 class="modal-title" id="myLargeModalLabel">Add/Edit Buffer Hours to Add Availaibility.</h5>
 						<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
 					</div>
-					<div class="modal-body">
-						<div class="form-group col-md-12">
+					<div class="modal-body custom-field-scope">
+						<div class="form-group col-md-12 custom-field">
+							<input type="text" class="form-control" id="bufferHours" name="bufferHours" maxlength="3" onkeydown="return M.digit(event);" placeholder=" " >
 							<label>Buffer Hours</label>
-							<input type="text" class="form-control" id="bufferHours" name="bufferHours" maxlength="3" onkeydown="return M.digit(event);" >
 						</div>
 						<div class="col-md-12">`;
 							if(roleAndModule.added=='Y'){
@@ -462,7 +481,7 @@ function getTeacherOfficialModel(officialEmail){
 	var html=`<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" id="teacherOfficialModel">
 	<div class="modal-dialog modal-md">
 		<div class="modal-content" style="border: none; border-radius: 1px;">
-			<form name="teacherOfficialMailForm" id="teacherOfficialMailForm">
+			<form name="teacherOfficialMailForm" id="teacherOfficialMailForm" class="custom-field-scope">
 				<input type="hidden" class="form-control" id="userId" name="userId" value="">
 				<input type="hidden" class="form-control" id="azureCreateStatus" name="azureCreateStatus" value="N">
 				<input type="hidden" class="form-control" id="teacherId" name="teacherId" value="">
@@ -471,23 +490,23 @@ function getTeacherOfficialModel(officialEmail){
 					<h5 class="modal-title" id="myLargeModalLabel">Generate School Email Id</h5>
 					<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
 				</div>
-				<div class="modal-body">
-					<div class="form-group col-md-12">
-						<label>Official Email</label>
+				<div class="modal-body custom-field-scope">
+					<div class="form-group col-md-12 custom-field">
 						<input type="hidden" class="form-control" id="userId" name="userId" maxlength="100">
-						<input type="text" class="form-control" id="officialEmailId" name="officialEmailId" maxlength="100">
+						<input type="text" class="form-control" id="officialEmailId" name="officialEmailId" maxlength="100" placeholder=" ">
+						<label>Official Email</label>
 					</div>
-					<div class="form-group col-md-12">
+					<div class="form-group col-md-12 custom-field">
+						<input type="text" class="form-control" id="zoomPassword" name="zoomPassword" maxlength="100" readonly placeholder=" ">
 						<label>Current Password</label>
-						<input type="text" class="form-control" id="zoomPassword" name="zoomPassword" maxlength="100"readonly>
 					</div>
 					<div class="form-group col-md-12 paswrd" style="display:none">
+						<input type="text" class="form-control" id="teamPassword" name="teamPassword" maxlength="100" value="" placeholder=" ">
 						<label>Team Password</label>
-						<input type="text" class="form-control" id="teamPassword" name="teamPassword" maxlength="100" value="">
 					</div>
 					<div class="form-group col-md-12 paswrd" style="display:none">
+						<input type="text" class="form-control" id="confirmTeamPassword" name="confirmTeamPassword" maxlength="100" value="" placeholder=" ">
 						<label>Team Confirm Password</label>
-						<input type="text" class="form-control" id="confirmTeamPassword" name="confirmTeamPassword" maxlength="100" value="">
 					</div>
 					<div class="col-md-12">
 						<button type="button" id="createOfficialEmailBtn" class="send btn btn-success" onclick="return createTeacherOfficialEmail()">

@@ -3,6 +3,11 @@ function renderInvoiceContent(withStamp, onlyHtml, payId, isAddEdit) {
     if (isAddEdit) {
       content += invoiceHeader() + invoiceEditorContent();
       $("#dashboardContentInHTMLAdditional").html(content);
+      if (typeof refreshCustomFieldState === 'function') {
+        setTimeout(function () {
+          refreshCustomFieldState($('#invoiceFormContainer'));
+        }, 0);
+      }
     }else{
         content+=`<div id="invoicePreviewContainer"></div>`;
         content += showMessageTheme2Content() + getLoaderContent();
@@ -31,7 +36,7 @@ function invoiceHeader(){
 
 function invoiceEditorContent(){
     var html=
-        `<div id="invoiceFormContainer" class="main-card my-3 card">
+        `<div id="invoiceFormContainer" class="main-card my-3 card custom-field-scope">
             <div class="card-body">`;
                 html+=invoiceFormContent()
                 +invoiceItemsTableAndDescription()
@@ -46,17 +51,17 @@ function invoiceFormContent(){
         <div class="d-flex justify-content-center flex-md-row flex-column" style="gap:8px;">
             <div class="col-md-4 rounded-10 border p-3">
                 <h5 class="mb-3 font-weight-semi-bold">Invoice Meta</h5>
-                <div class="form-group">
+                <div class="form-group custom-field">
+                    <input type="text" id="invoiceId" class="form-control" readonly value="" autocomplete="off" placeholder=" ">
                     <label>Invoice # (auto)<sup class="text-danger">*</sup></label>
-                    <input type="text" id="invoiceId" class="form-control" readonly value="" autocomplete="off">
                 </div>
-                <div class="form-group">
+                <div class="form-group custom-field">
+                    <input type="text" id="invoicePaymentTitle" class="form-control" value="" autocomplete="off" placeholder=" ">
                     <label>Payment Title<sup class="text-danger">*</sup></label>
-                    <input type="text" id="invoicePaymentTitle" class="form-control" value="" autocomplete="off">
                 </div>
-                <div class="form-group">
+                <div class="form-group custom-field">
+                    <input type="text" id="invoiceDate" class="form-control" readonly onkeydown="return false" autocomplete="off" placeholder=" ">
                     <label>Date<sup class="text-danger">*</sup></label>
-                    <input type="text" id="invoiceDate" class="form-control" readonly onkeydown="return false" autocomplete="off">
                 </div>
                 ${/*<div class="form-group">
                     <label>Discount Code</label>
@@ -72,35 +77,51 @@ function invoiceFormContent(){
                 <input type="hidden" id="payerCountryData" value="" />
                 <input type="hidden" id="payerCountryIsd" value="" />
 
-                <label for="payerName" class="form-label">Name<sup class="text-danger">*</sup></label>
-                <input type="text" id="payerName" class="form-control mb-2" placeholder="Name" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="text" id="payerName" class="form-control mb-2" placeholder=" " autocomplete="off">
+                    <label for="payerName" class="form-label">Name<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="payerEmail" class="form-label">Email<sup class="text-danger">*</sup></label>
-                <input type="email" id="payerEmail" class="form-control mb-2" placeholder="Email" maxlength="100" onkeydown="return M.isEmail(event);" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="email" id="payerEmail" class="form-control mb-2" placeholder=" " maxlength="100" onkeydown="return M.isEmail(event);" autocomplete="off">
+                    <label for="payerEmail" class="form-label">Email<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="payerPhone" class="form-label">Phone</label>
-                <input type="text" id="payerPhone" class="form-control mb-2" placeholder="Phone" onkeydown="return M.digit(event);" maxlength="20" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="text" id="payerPhone" class="form-control mb-2" style="padding-left: 64px !important;" placeholder=" " onkeydown="return M.digit(event);" maxlength="20" autocomplete="off">
+                    <label for="payerPhone" class="form-label">Phone</label>
+                </div>
 
-                <label for="payerAddress" class="form-label">Address<sup class="text-danger">*</sup></label>
-                <textarea id="payerAddress" class="form-control mb-2" placeholder="Address"></textarea>
+                <div class="form-group custom-field">
+                    <textarea id="payerAddress" class="form-control mb-2" placeholder=" "></textarea>
+                    <label for="payerAddress" class="form-label">Address<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="payerCountry" class="form-label">Country<sup class="text-danger">*</sup></label>
-                <select id="payerCountry" class="form-control mb-2">
-                    <option value="0">Select Country</option>
-                </select>
+                <div class="form-group custom-field">
+                    <select id="payerCountry" class="form-control mb-2">
+                        <option value="0">Select Country</option>
+                    </select>
+                    <label for="payerCountry" class="form-label">Country<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="payerState" class="form-label">State<sup class="text-danger">*</sup></label>
-                <select id="payerState" class="form-control mb-2">
-                    <option value="0">Select State</option>
-                </select>
+                <div class="form-group custom-field">
+                    <select id="payerState" class="form-control mb-2">
+                        <option value="0">Select State</option>
+                    </select>
+                    <label for="payerState" class="form-label">State<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="payerCity" class="form-label">City<sup class="text-danger">*</sup></label>
-                <select id="payerCity" class="form-control mb-2">
-                    <option value="0">Select City</option>
-                </select>
+                <div class="form-group custom-field">
+                    <select id="payerCity" class="form-control mb-2">
+                        <option value="0">Select City</option>
+                    </select>
+                    <label for="payerCity" class="form-label">City<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="payerPIN" class="form-label">PIN<sup class="text-danger">*</sup></label>
-                <input type="text" id="payerPIN" class="form-control mb-2" placeholder="PIN" onkeydown="return M.digit(event);" maxlength="6" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="text" id="payerPIN" class="form-control mb-2" placeholder=" " onkeydown="return M.digit(event);" maxlength="6" autocomplete="off">
+                    <label for="payerPIN" class="form-label">PIN<sup class="text-danger">*</sup></label>
+                </div>
             </div>
 
             <div id="recipientDetails" class="col-md-4 rounded-10 border p-3">
@@ -109,35 +130,51 @@ function invoiceFormContent(){
                 <input type="hidden" id="recipientCountryData" value="" />
                 <input type="hidden" id="recipientCountryIsd" value="" />
 
-                <label for="recipientName" class="form-label">Name<sup class="text-danger">*</sup></label>
-                <input type="text" id="recipientName" class="form-control mb-2" placeholder="Name" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="text" id="recipientName" class="form-control mb-2" placeholder=" " autocomplete="off">
+                    <label for="recipientName" class="form-label">Name<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="recipientEmail" class="form-label">Email</label>
-                <input type="email" id="recipientEmail" class="form-control mb-2" placeholder="Email" maxlength="100" onkeydown="return M.isEmail(event);" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="email" id="recipientEmail" class="form-control mb-2" placeholder=" " maxlength="100" onkeydown="return M.isEmail(event);" autocomplete="off">
+                    <label for="recipientEmail" class="form-label">Email</label>
+                </div>
 
-                <label for="recipientPhone" class="form-label">Phone</label>
-                <input type="text" id="recipientPhone" class="form-control mb-2" placeholder="Phone" onkeydown="return M.digit(event);" maxlength="20" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="text" id="recipientPhone" class="form-control mb-2" style="padding-left: 64px !important;" placeholder=" " onkeydown="return M.digit(event);" maxlength="20" autocomplete="off">
+                    <label for="recipientPhone" class="form-label">Phone</label>
+                </div>
 
-                <label for="recipientAddress" class="form-label">Address<sup class="text-danger">*</sup></label>
-                <textarea id="recipientAddress" class="form-control mb-2" placeholder="Address"></textarea>
+                <div class="form-group custom-field">
+                    <textarea id="recipientAddress" class="form-control mb-2" placeholder=" "></textarea>
+                    <label for="recipientAddress" class="form-label">Address<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="recipientCountry" class="form-label">Country<sup class="text-danger">*</sup></label>
-                <select id="recipientCountry" class="form-control mb-2">
-                    <option value="0">Select Country</option>
-                </select>
+                <div class="form-group custom-field">
+                    <select id="recipientCountry" class="form-control mb-2">
+                        <option value="0">Select Country</option>
+                    </select>
+                    <label for="recipientCountry" class="form-label">Country<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="recipientState" class="form-label">State<sup class="text-danger">*</sup></label>
-                <select id="recipientState" class="form-control mb-2">
-                    <option value="0">Select State</option>
-                </select>
+                <div class="form-group custom-field">
+                    <select id="recipientState" class="form-control mb-2">
+                        <option value="0">Select State</option>
+                    </select>
+                    <label for="recipientState" class="form-label">State<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="recipientCity" class="form-label">City<sup class="text-danger">*</sup></label>
-                <select id="recipientCity" class="form-control mb-2">
-                    <option value="0">Select City</option>
-                </select>
+                <div class="form-group custom-field">
+                    <select id="recipientCity" class="form-control mb-2">
+                        <option value="0">Select City</option>
+                    </select>
+                    <label for="recipientCity" class="form-label">City<sup class="text-danger">*</sup></label>
+                </div>
 
-                <label for="recipientPIN" class="form-label">PIN<sup class="text-danger">*</sup></label>
-                <input type="text" id="recipientPIN" class="form-control mb-2" placeholder="PIN" onkeydown="return M.digit(event);" maxlength="6" autocomplete="off">
+                <div class="form-group custom-field">
+                    <input type="text" id="recipientPIN" class="form-control mb-2" placeholder=" " onkeydown="return M.digit(event);" maxlength="6" autocomplete="off">
+                    <label for="recipientPIN" class="form-label">PIN<sup class="text-danger">*</sup></label>
+                </div>
             </div>
         </div>`
     return html;
@@ -167,9 +204,9 @@ function invoiceItemsTableAndDescription(){
         </div>
         
         <div class="rounded-10 p-3 border mt-4">
-            <div class="form-group mt-3">
+            <div class="form-group mt-3 custom-field">
+                <textarea id="invoiceDescription" class="form-control" placeholder=" ">All fees are in US Dollars</textarea>
                 <label>Description / Notes</label>
-                <textarea id="invoiceDescription" class="form-control">All fees are in US Dollars</textarea>
             </div>
         </div>
         

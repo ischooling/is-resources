@@ -7,6 +7,7 @@ async function renderSchoolReportDashboard(title, roleAndModule, SCHOOL_ID, USER
 	OBJECT_RIGHTS=objectRights;
 	var html=getLeadReportMasterContent(title, objectRights);
     $('#dashboardContentInHTML').html(html);
+	refreshCustomFieldState('#dashboardContentInHTML');
 
 
 
@@ -153,36 +154,45 @@ function getReportsTab(objRight){
 		return html;
 	}
 
-	function getLeadCounselorReportData(objRight){
-		var html='';
-		html+=`<div class="row" style="align-items: center;">
-			<div class="col-md-12 col-lg-2">
+function getLeadCounselorReportData(objRight){
+	var html='';
+	html+=`<div class="row custom-field-scope" style="align-items: center;">
+			<div class="col-md-12 col-lg-2 custom-field">
 				<select class="form-control mr-1" id="searchLeadCounselorReportType" name="searchLeadCounselorReportType">
 					<option value="Counselor" ${objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
 					<option value="Country" ${objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
 					<option value="Campaign" ${objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
 				</select>
+				<label class="m-0 d-block mb-0">Report Type</label>
 			</div>
-			<div class="col-md-12 col-lg-2">
+			<div class="col-md-12 col-lg-2 custom-field">
 				<select class="form-control mr-1" id="searchLeadCounselorType" name="searchLeadCounselorType">
 					<option value="DAY" ${objRight.searchtype == 'DAY'?'selected':''}>Today</option>
 					<option value="WEEK" ${objRight.searchtype == 'WEEK'?'selected':''}>Week</option>
 					<option value="MONTH" ${objRight.searchtype == 'MONTH'?'selected':''}>Month</option>
 					<option value="CUSTOM" ${objRight.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
 				</select>
+				<label class="m-0 d-block mb-0">View Type</label>
 			</div>
 			<div class="col-md-6 col-lg-5"> 
 				<div class="row" style="align-items: center;">
-					<div class="col-md-12 col-lg-6 hidecounselorLead text-center">
-						<input type="text" name="counselorStartDate" id="counselorStartDate" style="width:90px; margin-right: 6px;" readonly onkeydown="return false" /> To 
-						<input type="text" name="counselorEndDate" id="counselorEndDate" style="width:90px; margin-left: 6px;" readonly onkeydown="return false"  />
+					<div class="col-md-12 col-lg-6 hidecounselorLead text-center d-flex align-items-center justify-content-center flex-wrap" style="gap:0.5rem;">
+						<div class="custom-field" style="width:90px;">
+							<input type="text" name="counselorStartDate" id="counselorStartDate" style="width:90px; margin-right: 6px;" readonly onkeydown="return false" />
+							<label class="m-0 d-block mb-0">Start Date</label>
+						</div>
+						<span class="mx-1">To</span>
+						<div class="custom-field" style="width:90px;">
+							<input type="text" name="counselorEndDate" id="counselorEndDate" style="width:90px; margin-left: 6px;" readonly onkeydown="return false"  />
+							<label class="m-0 d-block mb-0">End Date</label>
+						</div>
 					</div>
 					<div class="col-md-12 col-lg-6 hidecounselorLead">
 						<button class="btn btn-primary" id="btnLeadCounselorWiseSubmit">Submit</button>
 					</div> 
 				</div>         
 			</div>
-			<div class="col-md-6 col-lg-3" id="advanceSearchAndExport12"> 
+			<div class="col-md-6 col-lg-3 mb-4" id="advanceSearchAndExport12"> 
 				<button class=" btn btn-info" onclick="openModal('leadReport')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>`;
 				if(USER_ROLE == "DIRECTOR"){
 					html+=`<button class=" btn btn-success text-white mt-lg-1 btn-full-mobile mb-1" id="exportCounselorLead">Excel Export</button> `
@@ -247,7 +257,7 @@ function getLeadReportSearchPopup(objRights){
                 </button>
             </div>
             <div class="modal-body">
-                <form action="javascript:void(0);" id="reportLeadSearchForm" name="reportLeadSearchForm" autocomplete='off'>
+                <form action="javascript:void(0);" id="reportLeadSearchForm" name="reportLeadSearchForm" autocomplete='off' class="custom-field-scope">
 				<input type="hidden" name="userId" id="userId" value="${USER_ID}">
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">
@@ -256,56 +266,56 @@ function getLeadReportSearchPopup(objRights){
 					</div>
 					
 					<div class="row">
-						<div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-12 mb-1 mt-1 acadmicYearDiv">
-							<label class="m-0">Academic Year</label>
+						<div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-12 mb-1 mt-1 acadmicYearDiv custom-field">
 							<select	name="acadmicYear" id="acadmicYear" class="form-control" >
 							<option value="all">All</option>
 							</select>
+							<label class="m-0 d-block mb-0">Academic Year</label>
 						</div>
-						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 enrollType">
-							<label class="m-0">Enrollment Type</label>
+						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 enrollType custom-field">
 							<select	name="enrollmentSearch" id="enrollmentSearch" class="form-control">
 								<option value="" >Select</option>
 								<option value="fresh" >Fresh</option>
 								<option value="reEnroll" >Re-Enroll</option>
 							</select>
+							<label class="m-0 d-block mb-0">Enrollment Type</label>
 						</div>
-						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadSource">
-							<label class="m-0">Lead Source</label>
+						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadSource custom-field">
 							<select	name="sourceSearch" id="sourceSearch" class="form-control" multiple ></select>
+							<label class="m-0 d-block mb-0">Lead Source</label>
 						</div>
-						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">
-							<label class="m-0">Lead Status</label>
+						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus custom-field">
 							<select name="statusSearch" id="statusSearch" class="form-control" multiple ></select>
+							<label class="m-0 d-block mb-0">Lead Status</label>
 						</div>
 						
-						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign">
-							<label class="m-0">Lead Assign To</label>
+						<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign custom-field">
 							 <select name="assignToSearch" id="assignToSearch" class="form-control" multiple></select>
+							 <label class="m-0 d-block mb-0">Lead Assign To</label>
 						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">
-							<label class="m-0">Grade</label>
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade custom-field">
 							<select name="gradeSearch" id="gradeSearch" class="form-control" >
 							<option value="0">Select Grade</option>`;
 							html+=getStandardContent(objRights.schoolId,true, false)
 							html+=`</select>
+							<label class="m-0 d-block mb-0">Grade</label>
 						</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">
-							<label class="m-0">Country</label>
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country custom-field">
 							<select name="countryId" id="countryId" class="form-control" >
 								<option value="0">Select country</option>
 								<option value="-1">N/A</option>
 							</select>
+							<label class="m-0 d-block mb-0">Country</label>
 						</div>
-                		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">
-							<label class="m-0">Demo Assign</label>
+                		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign custom-field">
 							<select	name="leadDemoAssign" id="leadDemoAssign" class="form-control" >
 								<option value="0">Select Assign</option>
 							</select>
+							<label class="m-0 d-block mb-0">Demo Assign</label>
                 		</div>
-						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
-							<label class="m-0">Select Campaign</label>
+						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 custom-field">
 							<select  name="searchReportCampaign" id="searchReportCampaign" class="form-control searchReportCampaign" multiple ></select>
+							<label class="m-0 d-block mb-0">Select Campaign</label>
 						</div>
 					</div>
 				</form>
@@ -323,21 +333,30 @@ return html;
 
 function getLeadReportChart(objRights){
 	var html='';
-	html+=`<div class="row">
+	html+=`<div class="row custom-field-scope">
 		<div class="col-md-12 col-lg-12">
 			<div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-				<select class="form-control form-control-sm mr-1" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
+				<div class="custom-field mr-1" style="width:fit-content">
+					<select class="form-control form-control-sm" id="searchtypeTotalLead" name="searchtypeTotalLead" style="width:fit-content">
 					<option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
 					<option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
 					<option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
 					<option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
-				</select>
+					</select>
+					<label class="m-0 d-block mb-0">View Type</label>
+				</div>
 				<div class="hideChartdate">
 					<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
 						<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-							<input type="text" name="dataChartStartDate" class="form-control form-control-sm" id="dataChartStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+							<div class="custom-field">
+								<input type="text" name="dataChartStartDate" class="form-control form-control-sm" id="dataChartStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+								<label class="m-0 d-block mb-0">Start Date</label>
+							</div>
 							<div class="mx-1">To</div>
-							<input type="text" name="dataChartEndDate" class="form-control form-control-sm" id="dataChartEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+							<div class="custom-field">
+								<input type="text" name="dataChartEndDate" class="form-control form-control-sm" id="dataChartEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+								<label class="m-0 d-block mb-0">End Date</label>
+							</div>
 						</div>
 						<button class="btn btn-primary" id="btnChartWiseSubmit">Submit</button>
 					</div>
@@ -369,21 +388,30 @@ function getLeadReportChart(objRights){
 
 function getLeadCountryTime(objRights){
 	var html='';
-	html+=`<div class="row">
+	html+=`<div class="row custom-field-scope">
     <div class="col-md-12 col-lg-12">
         <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-            <select class="form-control form-control-sm mr-1" id="searchtype" name="searchtype" style="width:fit-content">
-                <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
-                <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
-                <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
-                <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
-            </select>
+            <div class="custom-field mr-1" style="width:fit-content">
+                <select class="form-control form-control-sm" id="searchtype" name="searchtype" style="width:fit-content">
+                    <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
+                    <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
+                    <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
+                    <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
+                </select>
+                <label class="m-0 d-block mb-0">View Type</label>
+            </div>
             <div class="hidetimeCountrydate">
                 <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                     <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataStartDate" id="dataStartDate" class="form-control form-control-sm" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+                        <div class="custom-field">
+                            <input type="text" name="dataStartDate" id="dataStartDate" class="form-control form-control-sm" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+                            <label class="m-0 d-block mb-0">Start Date</label>
+                        </div>
                         <div class="mx-1">To</div> 
-                        <input type="text" name="dataEndDate" id="dataEndDate" class="form-control form-control-sm" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+                        <div class="custom-field">
+                            <input type="text" name="dataEndDate" id="dataEndDate" class="form-control form-control-sm" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+                            <label class="m-0 d-block mb-0">End Date</label>
+                        </div>
                     </div>
                     <button class="btn btn-primary" id="btnTimeCountrySubmit">Submit</button>
                 </div>
@@ -409,26 +437,35 @@ return html;
 }
 function getLeadEnrollmentList(objRights){
 	var html='';
-	html+=`<div class="row">
+	html+=`<div class="row custom-field-scope">
     <div class="col-md-12 col-lg-12">
         <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-            <select class="form-control form-control-sm mr-1" id="searchStudenttype" name="searchStudenttype" style="width:fit-content">
-                <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
-                <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
-                <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
-                <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
-            </select>
+            <div class="custom-field mr-1" style="width:fit-content">
+                <select class="form-control form-control-sm" id="searchStudenttype" name="searchStudenttype" style="width:fit-content">
+                    <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
+                    <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
+                    <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
+                    <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
+                </select>
+                <label class="m-0 d-block mb-0">View Type</label>
+            </div>
             <div class="hidestudentdate">
                 <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                     <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataStudentStartDate" class="form-control form-control-sm" id="dataStudentStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" /> 
+                        <div class="custom-field">
+                            <input type="text" name="dataStudentStartDate" class="form-control form-control-sm" id="dataStudentStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" /> 
+                            <label class="m-0 d-block mb-0">Start Date</label>
+                        </div>
                         <div class="mx-1">To</div> 
-                        <input type="text" name="dataStudentEndDate" class="form-control form-control-sm mr-1" id="dataStudentEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+                        <div class="custom-field">
+                            <input type="text" name="dataStudentEndDate" class="form-control form-control-sm mr-1" id="dataStudentEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+                            <label class="m-0 d-block mb-0">End Date</label>
+                        </div>
                     </div>
                     <button class="btn btn-primary" id="btnStudentWiseSubmit">Submit</button>
                 </div>
             </div>
-            <button class=" btn btn-info" onclick="openModal('enrollmentList')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>
+            <button class=" btn btn-info mb-4" onclick="openModal('enrollmentList')"><i class="fa fa-search"></i>&nbsp;Advance Search</button>
         </div>
     </div>
 </div>
@@ -458,21 +495,30 @@ return html;
 
 function getLeadSchoolDemoList(objRights){
 	var html='';
-	html+=`<div class="row">
+	html+=`<div class="row custom-field-scope">
     <div class="col-md-12 col-lg-12">
         <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-            <select class="form-control form-control-sm mr-1" id="searchSchoolDemoType" name="searchSchoolDemoType" style="width:fit-content">
-                <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
-                <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
-                <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
-                <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
-            </select>
+            <div class="custom-field mr-1" style="width:fit-content">
+                <select class="form-control form-control-sm" id="searchSchoolDemoType" name="searchSchoolDemoType" style="width:fit-content">
+                    <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
+                    <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
+                    <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
+                    <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
+                </select>
+                <label class="m-0 d-block mb-0">View Type</label>
+            </div>
             <div class="hideschooldemo">
                 <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                     <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-                        <input type="text" name="dataSchoolDemoStartDate" class="form-control form-control-sm" id="dataSchoolDemoStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+                        <div class="custom-field">
+                            <input type="text" name="dataSchoolDemoStartDate" class="form-control form-control-sm" id="dataSchoolDemoStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+                            <label class="m-0 d-block mb-0">Start Date</label>
+                        </div>
                         <div class="mx-1">To</div>
-                        <input type="text" name="dataSchoolDemoEndDate" class="form-control form-control-sm" id="dataSchoolDemoEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+                        <div class="custom-field">
+                            <input type="text" name="dataSchoolDemoEndDate" class="form-control form-control-sm" id="dataSchoolDemoEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+                            <label class="m-0 d-block mb-0">End Date</label>
+                        </div>
                     </div>
                     <button class="btn btn-primary" id="btnSchoolDemoWiseSubmit">Submit</button>
                 </div>
@@ -508,26 +554,35 @@ function getLeadEnrollmentYearWise(objRights){
 	// <option value="ReEnrollment" ${searchtype eq 'ReEnrollment'?'selected':''}>Re-Enrollment</option>
     // <option value="Campaign" ${searchtype eq 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
 	var html='';
-	html+=`<div class="row">
-        <div class="col-md-12 col-lg-2">
+	html+=`<div class="row custom-field-scope">
+        <div class="col-md-12 col-lg-2 custom-field">
             <select class="form-control mr-1" id="searchDaywiseReportType" name="searchDaywiseReportType">
                 <option value="Enrollment" ${objRights.searchtype == 'Enrollment'?'selected':''}>Fresh Enrollment</option>
                 <option value="Leads" ${objRights.searchtype == 'Leads'?'selected':''}>Leads</option>
             </select>
+            <label class="m-0 d-block mb-0">Report Type</label>
         </div>
-        <div class="col-md-12 col-lg-2">
+        <div class="col-md-12 col-lg-2 custom-field">
             <select class="form-control mr-1" id="searchDaywise" name="searchDaywise">
                 <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
                 <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
                 <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month Wise</option>
                 <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
             </select>
+            <label class="m-0 d-block mb-0">View Type</label>
         </div>
         <div class="col-md-6 col-lg-5"> 
             <div class="row">
-                <div class="col-md-12 col-lg-6 hidedaywise text-center">
-                    <input type="text" name="daywiseStartDate" id="daywiseStartDate" style="width:90px" readonly /> To 
-                    <input type="text" name="daywiseEndDate" id="daywiseEndDate" style="width:90px" readonly />
+                <div class="col-md-12 col-lg-6 hidedaywise text-center d-flex align-items-center justify-content-center flex-wrap" style="gap:0.5rem;">
+                    <div class="custom-field" style="width:90px;">
+                        <input type="text" name="daywiseStartDate" id="daywiseStartDate" style="width:90px" readonly />
+                        <label class="m-0 d-block mb-0">Start Date</label>
+                    </div>
+                    <span class="mx-1">To</span>
+                    <div class="custom-field" style="width:90px;">
+                        <input type="text" name="daywiseEndDate" id="daywiseEndDate" style="width:90px" readonly />
+                        <label class="m-0 d-block mb-0">End Date</label>
+                    </div>
                 </div>
                 <div class="col-md-12 col-lg-6 hidedaywise">
                     <button class="btn btn-primary" id="btnDayWiseSubmit">Submit</button>
@@ -549,30 +604,40 @@ return html;
 function getLeadCampaignPriceList(objRights){
 	var utmCampaignList = JSON.parse(objRights.utmCampaignList);	
 	var html='';
-	html+=`<div class="row">
+	html+=`<div class="row custom-field-scope">
         <div class="col-md-12 col-lg-12">
             <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap:0.5rem">
-                <div class="col-xl-4 col-lg-6 col-md-12 p-0">
+                <div class="col-xl-4 col-lg-6 col-md-12 p-0 custom-field">
                     <select class="form-control  mr-1 searchCampaignType" id="searchCampaignType" name="searchCampaignType" multiple="multiple">`
 					for (let u = 0; u < utmCampaignList.length; u++) {
 						const elementCamp = utmCampaignList[u];
 						html+=` <option value="${elementCamp.key}" data-campaign-name="${elementCamp.value}">${elementCamp.value} (${elementCamp.extra})</option>`;
 					}
                    html+=` </select>
+                    <label class="m-0 d-block mb-0">Campaign</label>
                 </div>
                 <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+                    <div class="custom-field mr-1" style="width:fit-content">
                     <select class="form-control  mr-1" id="searchLeadCampaignType" name="searchLeadCampaignType" style="width:fit-content">
                         <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
                         <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
                         <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month</option>
                         <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
                     </select>
+                    <label class="m-0 d-block mb-0">View Type</label>
+                    </div>
                     <div class="hidecampaignLead">
                         <div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
                             <div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
+                                <div class="custom-field">
                                 <input type="text" name="dataLeadCampaignStartDate" class="form-control" placeholder="Start Date" id="dataLeadCampaignStartDate" style="width:100px" readonly onkeydown="return false" />
+                                <label class="m-0 d-block mb-0">Start Date</label>
+                                </div>
                                 <div class="mx-1">To</div>
+                                <div class="custom-field">
                                 <input type="text" name="dataLeadCampaignEndDate" class="form-control" placeholder="End Date" id="dataLeadCampaignEndDate" style="width:100px" readonly onkeydown="return false" />
+                                <label class="m-0 d-block mb-0">End Date</label>
+                                </div>
                             </div>
                             <button class="btn btn-primary" id="btnLeadCampaignWiseSubmit">Submit</button>
                         </div>

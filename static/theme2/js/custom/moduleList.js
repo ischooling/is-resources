@@ -232,6 +232,9 @@ var modules = JSON.parse(modulesDTO);
   $("#" + formId + " #parentModule").val(modules.parentId).trigger('change');
   $("#" + formId + " #orderSet").val(modules.orderSet);
   $("#" + formId + " #moduleActive").val(modules.activated);
+  if(typeof refreshCustomFieldState === 'function'){
+    refreshCustomFieldState($("#" + formId));
+  }
 }
 
 function getRequestForModule(formId, key, value) {
@@ -273,6 +276,9 @@ function callModuleDropdown(formId, value, elementId) {
 				$.each(result, function (k, v) {
 					dropdown.append('<option value="' + v.key + '">' + v.value + '</option>');
 				});
+				if(typeof refreshCustomFieldState === 'function'){
+					refreshCustomFieldState($("#" + formId));
+				}
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
 		}

@@ -1102,31 +1102,37 @@ function getMoveLeadsPopup(objRights){
 		+'		<div class="modal-header p-2 bg-primary text-white">'
 		+'			<h5 class="m-0">Move Lead</h5>'
 		+'		</div>'
-		+'		<form action="javascript:void(0);" id="moveLeadNewForm" name="moveLeadNewForm" autocomplete=\'off\'>'
+		+'		<form class="custom-field-scope" action="javascript:void(0);" id="moveLeadNewForm" name="moveLeadNewForm" autocomplete=\'off\'>'
 		+'			<input type="hidden" name="leadNoMove" id="leadNoMove"/>'
 		+'			<input type="hidden" name="discardPermission" id="discardPermission" value="'+objRights.discardPermission+'"/>'
 		+'			<div class="modal-body delete-modal">'
 		+'				<div class="row">'
 		+'					<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
-		+'						<label class="mb-0">Move Lead Assign to</label> '
+		+'<div class="form-group custom-field mb-2">'
 		+'						<select	name="leadDemoAssignMove" id="leadDemoAssignMove" class="form-control" >'
 		+'							<option value="0">Select Assign</option>'
 		+'						</select>'
+		+'<label for="leadDemoAssignMove">Move Lead Assign to</label>'
+		+'</div>'
 		+'					</div>';
 						// if(objRights.leadType=='B2B'){
 					html+= '<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
-		+'						<label class="mb-0">Select School</label> '
+					+'<div class="form-group custom-field mb-2">'
 		+'						<select	name="leadDemoSchoolMove" id="leadDemoSchoolMove" class="form-control" onchange="callLeadAssignUserListBySchoolId(\'moveLeadNewForm\', \''+objRights.leadType+'\', \'leadDemoAssignMove\', \''+true+'\', \''+objRights.discardPermission+'\', \''+USER_ID+'\', \''+false+'\')">'
 		+'							<option value="0">Select School</option>'
 		+'						</select>'
+					+'<label for="leadDemoSchoolMove">Select School</label>'
+					+'</div>'
 		+'					</div>';
 						// }
 					html += '<div class="col-lg-6 col-md-12 col-sm-12 col-12">'
-		+'						<label class="mb-0">Interested To</label>'
+					+'<div class="form-group custom-field mb-2">'
 		+'						<select	name="leadIntrestedTo" id="leadIntrestedTo" class="form-control" >'
 		+'							<option value="B2C" '+(objRights.leadType=='B2C'?'selected':'')+'>B2C</option>'
 		+'							<option value="B2B" '+(objRights.leadType=='B2B'?'selected':'')+'>B2B</option>'
 		+'						</select>'
+					+'<label for="leadIntrestedTo">Interested To</label>'
+					+'</div>'
 		+'					</div>';
 						if(objRights.leadType=='B2C'){
 							html+=' <div class="form-group my-2 pl-3">'
@@ -1139,7 +1145,10 @@ function getMoveLeadsPopup(objRights){
 							+' </div>';
 						}
 						html+=' <div class="mt-1 col-lg-12 col-md-12 col-sm-12 col-12">'
-							+'<textarea class="form-control" name="moveRemarks" id="moveRemarks" rows="2" placeholder="remarks" style="height: 50px !important;"></textarea>'
+							+'<div class="form-group custom-field mb-2">'
+								+'<textarea class="form-control" name="moveRemarks" id="moveRemarks" rows="2" placeholder=" " style="height: 50px !important;"></textarea>'
+								+'<label for="moveRemarks">Remarks</label>'
+							+'</div>'
 						+'</div>'
 		+'</div>'
 		+'				<div class="full mt-1">'

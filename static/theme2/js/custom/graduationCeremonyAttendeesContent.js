@@ -48,18 +48,20 @@ function getGraduationCeremonyAttendeesContent(title, roleAndModule, schoolId, u
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body custom-field-scope">
                     <input type="hidden" id="graduationCallbackStudentEmail">
                     <input type="hidden" id="graduationCallbackPreferredDateTime">
                     <input type="hidden" id="graduationCallbackPreferredTimezone">
                     <input type="hidden" id="graduationCallbackSchoolId">
                     <input type="hidden" id="graduationCallbackUserId">
                     <div class="mb-3">
-                        <label for="graduationCallbackStatusSelect" class="font-weight-bold">Select Status</label>
-                        <select id="graduationCallbackStatusSelect" class="form-control">
-                            <option value="">Select Status</option>
-                            <option value="COMPLETED">Completed</option>
-                        </select>
+                        <div class="position-relative custom-field mb-2 mt-3 p-0">
+                            <select id="graduationCallbackStatusSelect" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="COMPLETED">Completed</option>
+                            </select>
+                            <label for="graduationCallbackStatusSelect" class="font-weight-bold">Select Status</label>
+                        </div>
                     </div>
                     <div class="small text-muted line-height-18">
                         <div><strong>Email:</strong> <span id="graduationCallbackStudentEmailText">N/A</span></div>

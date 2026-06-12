@@ -6,6 +6,7 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 	var commissionRate = await getCounselorCommissionRate('','counselorCommitionRate',userId);
     var html=dashboardCounselorContent(title, roleAndModule, schoolId, userId, role, commissionRate);
     $('#dashboardContentInHTML').html(html);
+	refreshCustomFieldState('#dashboardContentInHTML');
 	
 	generateTinyUrls();
 	if(USER_ROLE=='B2B_LEAD'){
@@ -789,6 +790,7 @@ function renderCounselorEnrollList(title, roleAndModule, schoolId, userId, role)
 		+'</div>'
 		+dashboardCounselorFooterContent()
 		$('body').html(html);
+		refreshCustomFieldState('body');
 	}
 	
 	getSessionMasterList('counselorEnrollFilterForm', "academicYear", false);
@@ -974,25 +976,24 @@ function B2BStudentListfilterFormSkeleton(){
 
 function B2CStudentListfilterForm(referralCode){
 	var html=
-	'<form id="counselorEnrollFilterForm">'
+	'<form id="counselorEnrollFilterForm" class="custom-field-scope">'
 		+'<div class="col-12 mb-2">'
 			+'<div class="row">';
 			if(referralCode==''){
-				html+='<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Select Partner</label>'
+				html+='<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="partnerName" id="partnerName" >'
 					+'</select>'
+					+'<label class="text-primary " style="left:20px;">Select Partner</label>'
 				+'</div>';
 			}
 
 			html+='<input type="hidden" class="form-control" name="referralCode" id="referralCode" value="'+referralCode+'"/>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Academic Year</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="academicYear" id="academicYear">'
 					+'</select>'
+					+'<label class="text-primary"  style="left:20px;">Academic Year</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Enrollment Status</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="enrollmentStatus" id="enrollmentStatus">'
 					+ '<option value="">Enrollment Status</option>'
 					+ '<option value="0">Enrolled</option>'
@@ -1000,45 +1001,45 @@ function B2CStudentListfilterForm(referralCode){
 					+ '<option value="1">Withdrawn</option>'
 					+ '<option value="2">Partial Entry</option>'
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Enrollment Status</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Grade</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="gradeId" id="gradeId">'
 					+'<option value="">Select Grade</option>'
 					+ getStandardContent(SCHOOL_ID, false)
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Grade</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Student Name</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<input type="text" class="form-control" name="studentName" id="studentName"/>'
+					+'<label class="text-primary "  style="left:20px;">Student Name</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Email</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<input type="text" class="form-control" name="email" id="email"/>'
+					+'<label class="text-primary "  style="left:20px;">Email</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Country</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="countryId" id="countryId"></select>'
+					+'<label class="text-primary "  style="left:20px;">Country</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">State</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="stateId" id="stateId"></select>'
+					+'<label class="text-primary "  style="left:20px;">State</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">City</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="cityId" id="cityId"></select>'
+					+'<label class="text-primary "  style="left:20px;">City</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Commission Status</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="commissionStatus" id="commissionStatus">'
 					+'<option value="">Select Commission Status</option>'
 						+'<option value="PENDING">Pending</option>'
 						+'<option value="Amount Transferred">Amount Transferred</option>'
 						+'<option value="None">None</option>'
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Commission Status</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Learning Program</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="learningProgram" id="learningProgram">'
 						+'<option value="">Select Learning Program</option>'
 						// +'<option value="ONE_TO_ONE">One-to-One</option>'
@@ -1048,17 +1049,17 @@ function B2CStudentListfilterForm(referralCode){
 						// +'<option value="ONE_TO_ONE_FLEX">Flexy</option>'
 						+getLearningProgramContent(SCHOOL_ID)
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Learning Program</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Payment Date From</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<input type="text" class="form-control" name="paymentDateFrom" id="paymentDateFrom" readonly onkeydown="return false"/>'
+					+'<label class="text-primary "  style="left:20px;">Payment Date From</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Payment Date To</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<input type="text" class="form-control" name="paymentDateTo" id="paymentDateTo" readonly onkeydown="return false"/>'
+					+'<label class="text-primary "  style="left:20px;">Payment Date To</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Payment Status</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="paymentStatus" id="paymentStatus">'
 						+'<option value="">Select Payment Status</option>'
 						+'<option value="SUCCESS">SUCCESS</option>'
@@ -1066,9 +1067,9 @@ function B2CStudentListfilterForm(referralCode){
 						+'<option value="INITIATED">INITIATED</option>'
 						+'<option value="FAILED">FAILED</option>'
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Payment Status</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Fee Status</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="feeStatus" id="feeStatus">'
 						+'<option value="">Select Fee Status</option>'
 						+'<option value="PENDING">Pending Fees</option>'
@@ -1076,13 +1077,14 @@ function B2CStudentListfilterForm(referralCode){
 						+'<option value="FEENOTSELECT">Fee Plan not selected</option>'
 						
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Fee Status</label>'
 				+'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Sort By</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<select class="form-control" name="sortBy" id="sortBy">'
 						+'<option value="Desc">Desc</option>'
 						+'<option value="Asc">Asc</option>'
 					+'</select>'
+					+'<label class="text-primary "  style="left:20px;">Sort By</label>'
 				+'</div>'
 				// +'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
 				// 	+'<label class="full text-primary">Order By</label>'
@@ -1091,9 +1093,9 @@ function B2CStudentListfilterForm(referralCode){
 				// 		+'<option value="PAY_DATE">Fee Date</option>'
 				// 	+'</select>'
 				// +'</div>'
-				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">'
-					+'<label class="full text-primary">Page Size</label>'
+				+'<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 custom-field">'
 					+'<input type="text" class="form-control" value="25" name="pageSize" id="pageSize"/>'
+					+'<label class="text-primary "  style="left:20px;">Page Size</label>'
 				+'</div>'
 				+'<div class="col-12 mt-2 text-right">';
 				if(referralCode==''){
@@ -1768,21 +1770,28 @@ function getRatingPopup(){
 function getSelfCounselorReport(){
 	var html=`<div class="main-card mb-3 card">
                 <div class="card-body">
-					<div class="d-flex">
-						<div class="col-md-4">	
+					<div class="d-flex custom-field-scope">
+						<div class="col-md-4 custom-field">	
 							<select class="form-control form-control-sm mr-1 mb-2 col-md-4 float-right" id="searchtypeTotalLead" name="searchtypeTotalLead">
 								<option value="DAY" >Today</option>
 								<option value="WEEK" >Week</option>
 								<option value="MONTH" >Month</option>
 								<option value="CUSTOM">Custom</option>
 							</select>
+							<label class="m-0 d-block mb-1 left">View Type</label>
 						</div>
 						<div class="hidedate">
 							<div class="d-flex align-items-center flex-wrap" style="gap:0.5rem">
 								<div class="d-inline-flex align-items-center flex-wrap" style="gap:0.5rem">
-									<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+									<div class="custom-field">
+										<input type="text" name="dataStartDate" class="form-control form-control-sm" id="dataStartDate" placeholder="Start Date" style="width:100px" readonly onkeydown="return false" />
+										<label class="m-0 d-block mb-1 left">Start Date</label>
+									</div>
 									<div class="mx-1">To</div>
-									<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+									<div class="custom-field">
+										<input type="text" name="dataEndDate" class="form-control form-control-sm" id="dataEndDate" placeholder="End Date" style="width:100px" readonly onkeydown="return false" />
+										<label class="m-0 d-block mb-1 left">End Date</label>
+									</div>
 								</div>
 								<button class="btn btn-primary" id="btnWiseSubmit">Submit</button>
 							</div>
@@ -1805,25 +1814,25 @@ function getCounselorAddTask(timeslotlist){
 					</button>
 				</div>
 				<div class="modal-body">
-				<form id="counselorAddTask">
+				<form id="counselorAddTask" class="custom-field-scope">
 				<input type="hidden" name="taskid" id="taskid" value="" />
 				<input type="hidden" name="assignto" id="assignto" value="${USER_ID}" />
 						<div class="row">
-							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-								<label for="taskname">Task Name</label>
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2 custom-field">
 								<input type="text" id="taskname" class="form-control" maxlength="500"/>
+								<label for="taskname" class="left">Task Name</label>
 							</div>
-							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-								<label>Task Date (DD-MM-YYYY)</label>
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2 custom-field">
 								<div class="d-flex align-items-center">
 									<input type="text" id="taskDate" class="form-control" readonly onkeydown="return false"/>
 								</div>
+								<label class="left">Task Date (DD-MM-YYYY)</label>
 							</div>
 							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-								<label>Time</label>
 								<div class="d-flex align-items-center">
-									<select class="form-control font-12 mr-2 fromTime" id="fromTime">
-										<option value="">Start Time</option>`
+									<div class="custom-field flex-grow-1 mr-2">
+										<select class="form-control font-12 mr-2 fromTime" id="fromTime">
+											<option value="">Start Time</option>` 
 										if(timeslotlist.length>0){
 											for (let i = 0; i < timeslotlist.length; i++) {
 												const timeopt = timeslotlist[i];
@@ -1833,9 +1842,12 @@ function getCounselorAddTask(timeslotlist){
 											}
 										}
 									html+=`</select>
+										<label class="left">Start Time</label>
+									</div>
 									<span class="mx-1">-</span>
-									<select class="form-control font-12 toTime" id="toTime">
-										<option value="">End Time</option>`
+									<div class="custom-field flex-grow-1">
+										<select class="form-control font-12 toTime" id="toTime">
+											<option value="">End Time</option>`
 										if(timeslotlist.length>0){
 											for (let i = 0; i < timeslotlist.length; i++) {
 												const timeopt = timeslotlist[i];
@@ -1845,19 +1857,21 @@ function getCounselorAddTask(timeslotlist){
 											}
 										}
 									html+=`</select>
+										<label class="left">End Time</label>
+									</div>
 								</div>
 							</div>
-							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-								<label for="status">Status</label>
+							<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2 custom-field">
 								<select class="form-control font-12" id="status">
 									<option value="PENDING">Pending</option>
 									<option value="IN-PROCESS">In-Process</option>
 									<option value="COMPLETED">Completed</option>
 								</select>
+								<label for="status" class="left">Status</label>
 							</div>
-							<div class="col-12 mb-3">
-								<label for="description">Description</label>
+							<div class="col-12 mb-3 custom-field">
 								<textarea id="description" class="form-control" rows="3"></textarea>
+								<label for="description" class="left">Description</label>
 							</div>
 						</div>
 						<a href="javascript:void(0)" class="btn btn-lg btn-primary saveTask mb-3 float-right" onclick="saveTask('counselorAddTask','add','0','counselor');">Save</a>
@@ -1883,5 +1897,3 @@ function getCounselorAddTask(timeslotlist){
 	</div>`;
 	return html;
 }
-
-

@@ -24,6 +24,9 @@ function liveClassConent(){
   // setInterval(function () {
   //   getSchoolClassTime();
   // },1000);
+  if(typeof refreshCustomFieldState === 'function'){
+    refreshCustomFieldState($('#liveClassContent'));
+  }
   getSchoolClassTime();
   // initiateEvensforClass('LIVE-CLASS-STATUS',USER_ID,'0','0');
 }
@@ -339,40 +342,50 @@ async function liveClassConentPageFooter(){
 
 function liveClassConentSearchForm(){
   var html =
-    '<div class="row mb-2 bg-light pt-2" style="font-size:12px !important">'
+    '<div class="row mb-2 mt-4 pt-2 custom-field-scope" style="font-size:12px !important">'
       +'<div class="col-lg-2 col-md-3 col-sm-6 col-12 mb-2">'
-        +'<label>Start Date</label>'
-        +'<input type="text" class="form-control" id="startDate" placeholder="Select a date" style="font-size:12px !important" readonly onkeydown="return false"/>'
+        +'<div class="custom-field">'
+          +'<input type="text" class="form-control" id="startDate" placeholder=" " style="font-size:12px !important" readonly onkeydown="return false"/>'
+          +'<label>Start Date</label>'
+        +'</div>'
       +'</div>'
       +'<div class="col-lg-1 col-md-3 col-sm-6 col-12 mb-2">'
-        +'<label>Start Time</label>'
+        +'<div class="custom-field">'
           +'<select id="startHours" class="form-control" style="font-size:12px !important">'
           +'<option disabled selected>HH</option>'
             +getHoursAndMins(23,1)
           +'</select>'
+          +'<label>Start Time</label>'
+        +'</div>'
       +'</div>'
       +'<div class="col-lg-2 col-md-3 col-sm-6 col-12 mb-2">'
-        +'<label>End Date</label>'
-        +'<input type="text" class="form-control" id="endDate" placeholder="Select a date" style="font-size:12px !important" readonly onkeydown="return false"/>'
+        +'<div class="custom-field">'
+          +'<input type="text" class="form-control" id="endDate" placeholder=" " style="font-size:12px !important" readonly onkeydown="return false"/>'
+          +'<label>End Date</label>'
+        +'</div>'
       +'</div>'
       +'<div class="col-lg-1 col-md-3 col-sm-6 col-12 mb-2">'
-        +'<label>End Time</label>'
+        +'<div class="custom-field">'
           +'<select id="endHours" class="form-control" style="font-size:12px !important">'
             +'<option disabled selected>HH</option>'
             +getHoursAndMins(23,1)
           +'</select>'
+          +'<label>End Time</label>'
+        +'</div>'
       +'</div>'
       +'<div class="col-lg-2 col-md-3 col-sm-6 col-12 mb-2">'
-        +'<label>Learning Program</label>'
+        +'<div class="custom-field">'
           +'<select id="learningProgram" class="form-control" style="font-size:12px !important">'
             +'<option value="">Select Learning Program</option>'
             +'<option value="ONE_TO_ONE">One-To-One</option>'
             +'<option value="GROUP">Group</option>'
             +'<option value="EXTRA_ACTIVITY">Extra Activity</option>'
           +'</select>'
+          +'<label>Learning Program</label>'
+        +'</div>'
       +'</div>'
-      +'<div class="col-lg-1 col-md-3 col-sm-6 col-12 mb-2">'
-        +'<label>Class Status</label>'
+      +'<div class="col-lg-2 col-md-3 col-sm-6 col-12 mb-2">'
+        +'<div class="custom-field">'
           +'<select id="classStatus" class="form-control" style="font-size:12px !important">'
             +'<option value="">Select Status</option>'
             +'<option value="UPCOMING">UPCOMING</option>'
@@ -380,8 +393,10 @@ function liveClassConentSearchForm(){
             +'<option value="NOT ATTENDED">NOT ATTENDED</option>'
             +'<option value="COMPLETED">COMPLETED</option>'
           +'</select>'
+          +'<label>Class Status</label>'
+        +'</div>'
       +'</div>'
-      +'<div class="col-lg-2 col-md-3 col-sm-6 col-12 mb-2">'
+      +'<div class="col-lg-1 col-md-3 col-sm-6 col-12 mb-2 d-flex align-items-end">'
         +'<label class="full">&nbsp;</label>'
         +'<a href="javascript:void(0)" class="btn btn-success" onClick="getCurrentClassLiveNew();">Search</a>'
       +'</div>'

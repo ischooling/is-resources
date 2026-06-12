@@ -194,7 +194,7 @@ function forceDemoUpdateModalContent(data){
 					}
 				html+=`
 				</div>
-				<div class="modal-body">
+				<div class="modal-body custom-field-scope">
 					<div style="width:100%; text-align: center;font-weight: bold;display:none;color:red;margin-bottom: 10px;" id="demoErrorTxt"></div>
 					<div class="full" style="max-height: 450px;overflow-y: auto;">
 						<table class="table table-borderedtable table-bordered font-12" id="demoDetailsTable">
@@ -271,8 +271,7 @@ function demoDetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber
 					</table>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
-					<div class="form-group">
-						<label class="mb-0">Update<sup>*</sup></label>
+					<div class="form-group position-relative custom-field">
 						<select name="status_`+i+`" id="status_`+i+`" class="form-control status" onchange="getTantativDate(`+i+`);">
 							<option value="">Select Status</option>
 							<option value="COMPLETED">Completed</option>
@@ -285,16 +284,17 @@ function demoDetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber
 							<option value="Not Interested">Not Interested</option>
 							<option value="Positive to enrollment">Positive to enrollment</option>
 						</select>
+						<label class="mb-0" for="status_`+i+`">Update<sup>*</sup></label>
 					</div>
-					<div class="form-group tentative_date_`+i+`" style="display:none">
-						<label class="mb-0">Tentative Date</label>
-						<input type="text" name="rtentativeDate_`+i+`" id="rtentativeDate_`+i+`" value="" class="form-control rtentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />
+					<div class="form-group tentative_date_`+i+` position-relative custom-field" style="display:none">
+						<input type="text" name="rtentativeDate_`+i+`" id="rtentativeDate_`+i+`" value="" class="form-control rtentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" placeholder=" " />
+						<label class="mb-0" for="rtentativeDate_`+i+`">Tentative Date</label>
 					</div>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
-					<div class="form-group">
-						<label class="mb-0">Remarks</label>
-						<input type="text" name="remarks_`+i+`" id="remarks_`+i+`" class="form-control remarks">
+					<div class="form-group position-relative custom-field">
+						<input type="text" name="remarks_`+i+`" id="remarks_`+i+`" class="form-control remarks" placeholder=" ">
+						<label class="mb-0" for="remarks_`+i+`">Remarks</label>
 					</div>
 				</td>
 			</tr>`;
@@ -331,7 +331,7 @@ function forceLeadUpdateModalContent(data){
 					
 				html+=`
 				</div>
-				<div class="modal-body">
+				<div class="modal-body custom-field-scope">
 					<div style="width:100%; text-align: center;font-weight: bold;display:none;color:red;margin-bottom: 10px;" id="leadErrorTxt"></div>
 					<h2 style="color:red;font-size:16px;">NOTE: New leads will only be assigned once remarks are submitted for the previous lead.</h2>
 					<div class="full" style="max-height: 450px;overflow-y: auto;">
@@ -406,20 +406,19 @@ function leadDetailsModalBodyContent(allowCallhippoService,callhippoBypassNumber
 					</table>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
-					<div class="form-group">
-						<label class="mb-0">Update<sup>*</sup></label>
-
+					<div class="form-group position-relative custom-field">
 						<select name="lead_status_`+i+`" id="lead_status_`+i+`" class="form-control status">
 							<option value="">Select Status</option>
 							${statusListHtml}
 						</select>
+						<label class="mb-0" for="lead_status_`+i+`">Update<sup>*</sup></label>
 					</div>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
-					<div class="form-group">
-						<label class="mb-0">Remarks</label>
-						<input type="text" name="lead_remarks_${i}"   id="lead_remarks_${i}"  class="form-control ${isRemarkMandatory ? 'lead_remarks' : ''}  remarks" 
+					<div class="form-group position-relative custom-field">
+						<input type="text" name="lead_remarks_${i}"   id="lead_remarks_${i}"  class="form-control ${isRemarkMandatory ? 'lead_remarks' : ''}  remarks" placeholder=" "
                                    ${isRemarkMandatory ? `minlength="${minRemarkCount}" required` : ''} />
+						<label class="mb-0" for="lead_remarks_${i}">Remarks</label>
                             ${isRemarkMandatory ? `<small id="leadRemarksCounter_${i}" class="text-muted">0 / ${minRemarkCount}</small>` : ''}
 					</div>
 				</td>
@@ -458,7 +457,7 @@ function forceDemo2UpdateModalContent(data){
 					
 				html+=`
 				</div>
-				<div class="modal-body">
+				<div class="modal-body custom-field-scope">
 					<div style="width:100%; text-align: center;font-weight: bold;display:none;color:red;margin-bottom: 10px;" id="demo2ErrorTxt"></div>
 					<h2 style="color:red;font-size:16px;">NOTE: New demos will only be assigned once remarks are submitted for the previous demo.</h2>
 					<div class="full" style="max-height: 450px;overflow-y: auto;">
@@ -541,9 +540,7 @@ function demo2DetailsModalBodyContent(allowCallhippoService,callhippoBypassNumbe
 					</table>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
-					<div class="form-group">
-						<label class="mb-0">Update<sup>*</sup></label>
-
+					<div class="form-group position-relative custom-field">
 						<select name="demo_status_`+i+`" id="demo_status_`+i+`" class="form-control status">
 							<option value="">Select Status</option>
 							<option value="COMPLETED">Completed</option>
@@ -556,16 +553,17 @@ function demo2DetailsModalBodyContent(allowCallhippoService,callhippoBypassNumbe
 							<option value="Not Interested">Not Interested</option>
 							<option value="Positive to enrollment">Positive to enrollment</option>
 						</select>
+						<label class="mb-0" for="demo_status_`+i+`">Update<sup>*</sup></label>
 					</div>
 				</td>
 				<td class="py-1" style="vertical-align: top;">
-					<div class="form-group">
-						<label class="mb-0">Remarks</label>
+					<div class="form-group position-relative custom-field">
 						<input type="text" 
                                    name="demo_remarks_${i}" 
                                    id="demo_remarks_${i}" 
-                                   class="form-control ${isRemarkMandatory ? 'demo_remarks' : ''}  remarks" 
+                                   class="form-control ${isRemarkMandatory ? 'demo_remarks' : ''}  remarks" placeholder=" "
                                    ${isRemarkMandatory ? `minlength="${minRemarkCount}" required` : ''} />
+						<label class="mb-0" for="demo_remarks_${i}">Remarks</label>
                             ${isRemarkMandatory ? `<small id="demoRemarksCounter_${i}" class="text-muted">0 / ${minRemarkCount}</small>` : ''}
 					</div>
 				</td>

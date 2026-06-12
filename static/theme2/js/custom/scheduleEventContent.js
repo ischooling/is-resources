@@ -61,6 +61,12 @@ function getScheduleEventContent(data, clickFrom, currentPageNo, boxSearchCondit
 	$("#endDate").datepicker({
 		format:"M d, yyyy"
 	});
+	if(typeof refreshCustomFieldState === 'function'){
+		refreshCustomFieldState($("#scheduleEventsSearchForm"));
+		setTimeout(function(){
+			refreshCustomFieldState($("#scheduleEventsSearchForm"));
+		}, 0);
+	}
 
 	$("#saveFollowup").unbind().bind("click", function(){
 		console.log("saveFollowup");
@@ -109,54 +115,493 @@ function cardContent(data,clickFrom,currentPageNo,boxSearchCondition){
 }
 
 function studentEnrollmentFilterForm(data){
-	$("<style>")
-    .prop("type", "text/css")
-    .html(`
-      .select2-container--bootstrap4 .select2-selection{
-		padding: 12px 0px !important;
-	  }
-    `)
-    .appendTo("head");
-	
-	var html = 
-			'<form id="scheduleEventsSearchForm" style="display:none">'
-				+'<div class="border rounded-10 pb-1 pt-4 px-4  mb-4 bg-light-primary" style="border-color: #ABA8A8;">'
-					+'<div class="row">'
+	$("#scheduleEventPageCustomFieldCss").remove();
+	if($("#scheduleEventPageCustomFieldCss").length < 1){
+		$("<style id='scheduleEventPageCustomFieldCss'>")
+		.prop("type", "text/css")
+		.html(`
+		  /* ============================================================
+		     PAGE-SCOPED FLOATING-LABEL DESIGN for Schedule Events page.
+		     Scoped to this page's form + its modals only.
+		     Does NOT touch other pages.
+		  ============================================================ */
+		  #scheduleEventsSearchForm .custom-field,
+		  #updateSystemTraningModal .custom-field,
+		  #confirmeUpdateSystemTraningModal .custom-field,
+		  #moveEventModal .custom-field,
+		  #moveCounselorInScheduleEventModal .custom-field{
+			position:relative;
+			width:100%;
+			margin-bottom:18px;
+			padding:0 !important;
+			display:block;
+			overflow:visible;
+		  }
+
+		  /* Inputs / selects / textareas base */
+		  #scheduleEventsSearchForm .custom-field > input.form-control,
+		  #scheduleEventsSearchForm .custom-field > input.form-control-sm,
+		  #scheduleEventsSearchForm .custom-field > select.form-control,
+		  #scheduleEventsSearchForm .custom-field > select.form-control-sm,
+		  #scheduleEventsSearchForm .custom-field > textarea.form-control,
+		  #updateSystemTraningModal .custom-field > input.form-control,
+		  #updateSystemTraningModal .custom-field > select.form-control,
+		  #updateSystemTraningModal .custom-field > textarea.form-control,
+		  #moveEventModal .custom-field > select.form-control,
+		  #moveCounselorInScheduleEventModal .custom-field > select.form-control{
+			width:100% !important;
+			height:44px !important;
+			padding:5px 16px !important;
+			border:2px solid #cfd4dc !important;
+			border-radius:6px !important;
+			background-color:#fff !important;
+			color:#4b5563 !important;
+			font-size:14px !important;
+			outline:none !important;
+			transition:all .25s ease;
+			box-shadow:none !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field > input.form-control::placeholder,
+		  #scheduleEventsSearchForm .custom-field > input.form-control-sm::placeholder,
+		  #updateSystemTraningModal .custom-field > input.form-control::placeholder{
+			color:transparent !important;
+		  }
+
+		  /* Date-range pair inside one custom-field */
+		  #scheduleEventsSearchForm .custom-field > .d-flex > input.form-control,
+		  #scheduleEventsSearchForm .custom-field > .d-flex > input.form-control-sm{
+			width:100% !important;
+			height:44px !important;
+			padding:5px 12px !important;
+			border:2px solid #cfd4dc !important;
+			border-radius:6px !important;
+			background-color:#fff !important;
+			color:#4b5563 !important;
+			font-size:14px !important;
+			outline:none !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field > .d-flex > input.form-control::placeholder,
+		  #scheduleEventsSearchForm .custom-field > .d-flex > input.form-control-sm::placeholder{
+			color:transparent !important;
+		  }
+
+		  /* Hide native arrow on the underlying <select> that select2 wraps */
+		  #scheduleEventsSearchForm .custom-field > select.form-control,
+		  #scheduleEventsSearchForm .custom-field > select.form-control-sm,
+		  #updateSystemTraningModal .custom-field > select.form-control,
+		  #moveEventModal .custom-field > select.form-control,
+		  #moveCounselorInScheduleEventModal .custom-field > select.form-control{
+			-webkit-appearance:none;
+			-moz-appearance:none;
+			appearance:none;
+			background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' stroke='%239ca3af' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+			background-repeat:no-repeat;
+			background-position:right 14px center;
+			padding-right:40px !important;
+		  }
+
+		  /* Select2 container width */
+		  #scheduleEventsSearchForm .custom-field .select2-container,
+		  #updateSystemTraningModal .custom-field .select2-container,
+		  #moveEventModal .custom-field .select2-container,
+		  #moveCounselorInScheduleEventModal .custom-field .select2-container{
+			width:100% !important;
+			min-height:44px;
+			height:auto !important;
+			position:relative;
+			z-index:1;
+		  }
+
+		  /* Select2 SINGLE — bulletproof vertical centering */
+		  #scheduleEventsSearchForm .custom-field .select2-container .select2-selection--single,
+		  #updateSystemTraningModal .custom-field .select2-container .select2-selection--single,
+		  #moveEventModal .custom-field .select2-container .select2-selection--single,
+		  #moveCounselorInScheduleEventModal .custom-field .select2-container .select2-selection--single{
+			height:44px !important;
+			min-height:44px !important;
+			border:2px solid #cfd4dc !important;
+			border-radius:6px !important;
+			background-color:#fff !important;
+			padding:0 !important;
+			margin:0 !important;
+			display:flex !important;
+			align-items:center !important;
+			box-sizing:border-box !important;
+			outline:none !important;
+			transition:all .25s ease;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--single .select2-selection__rendered,
+		  #updateSystemTraningModal .custom-field .select2-selection--single .select2-selection__rendered,
+		  #moveEventModal .custom-field .select2-selection--single .select2-selection__rendered,
+		  #moveCounselorInScheduleEventModal .custom-field .select2-selection--single .select2-selection__rendered{
+			color:#4b5563 !important;
+			font-size:14px !important;
+			line-height:40px !important;
+			padding:0 40px 0 14px !important;
+			margin:0 !important;
+			display:block !important;
+			flex:1 1 auto !important;
+			height:40px !important;
+			width:100% !important;
+			white-space:nowrap !important;
+			overflow:hidden !important;
+			text-overflow:ellipsis !important;
+			box-sizing:border-box !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--single .select2-selection__placeholder,
+		  #updateSystemTraningModal .custom-field .select2-selection--single .select2-selection__placeholder,
+		  #moveEventModal .custom-field .select2-selection--single .select2-selection__placeholder,
+		  #moveCounselorInScheduleEventModal .custom-field .select2-selection--single .select2-selection__placeholder{
+			color:transparent !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--single .select2-selection__arrow,
+		  #updateSystemTraningModal .custom-field .select2-selection--single .select2-selection__arrow,
+		  #moveEventModal .custom-field .select2-selection--single .select2-selection__arrow,
+		  #moveCounselorInScheduleEventModal .custom-field .select2-selection--single .select2-selection__arrow{
+			height:42px !important;
+			width:30px !important;
+			top:0 !important;
+			right:0 !important;
+			position:absolute !important;
+			pointer-events:none;
+		  }
+
+		  /* Select2 MULTI */
+		  #scheduleEventsSearchForm .custom-field .select2-container .select2-selection--multiple{
+			min-height:44px !important;
+			border:2px solid #cfd4dc !important;
+			border-radius:6px !important;
+			background-color:#fff !important;
+			padding:3px 8px !important;
+			cursor:text;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-selection__rendered{
+			display:flex !important;
+			flex-wrap:wrap !important;
+			align-items:center !important;
+			gap:4px !important;
+			padding:0 !important;
+			margin:0 !important;
+			line-height:normal !important;
+			color:#4b5563 !important;
+			width:100% !important;
+			list-style:none !important;
+			min-height:34px !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-selection__choice{
+			border:1px solid #bfdbfe !important;
+			border-radius:999px !important;
+			background:#eff6ff !important;
+			color:#1d4ed8 !important;
+			padding:1px 10px 1px 24px !important;
+			margin:2px 0 !important;
+			font-size:12px !important;
+			line-height:20px !important;
+			position:relative !important;
+			max-width:100%;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-selection__choice__remove{
+			color:#1d4ed8 !important;
+			font-size:14px !important;
+			font-weight:bold !important;
+			position:absolute !important;
+			left:8px !important;
+			top:50% !important;
+			transform:translateY(-50%) !important;
+			border:0 !important;
+			background:transparent !important;
+			padding:0 !important;
+			margin:0 !important;
+			line-height:1 !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-search--inline,
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-search{
+			display:inline-flex !important;
+			align-items:center !important;
+			margin:0 !important;
+			padding:0 !important;
+			flex:1 1 60px !important;
+			min-width:60px !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-search__field{
+			width:100% !important;
+			min-height:28px !important;
+			height:28px !important;
+			line-height:28px !important;
+			margin:0 !important;
+			padding:0 4px !important;
+			color:#4b5563 !important;
+			font-size:14px !important;
+			box-shadow:none !important;
+			border:0 !important;
+			background:transparent !important;
+		  }
+		  #scheduleEventsSearchForm .custom-field .select2-selection--multiple .select2-search__field::placeholder{
+			color:transparent !important;
+		  }
+
+		  /* Dropdown options always visible (override transparent inheritance) */
+		  #scheduleEventsSearchForm .custom-field select option,
+		  #scheduleEventsSearchForm .custom-field select optgroup,
+		  #updateSystemTraningModal .custom-field select option,
+		  #moveEventModal .custom-field select option,
+		  #moveCounselorInScheduleEventModal .custom-field select option{
+			color:#4b5563 !important;
+			background-color:#fff !important;
+		  }
+
+		  /* ===== Label: default CENTERED (placeholder mode) ===== */
+		  #scheduleEventsSearchForm .custom-field > label,
+		  #updateSystemTraningModal .custom-field > label,
+		  #confirmeUpdateSystemTraningModal .custom-field > label,
+		  #moveEventModal .custom-field > label,
+		  #moveCounselorInScheduleEventModal .custom-field > label{
+			position:absolute !important;
+			left:10px !important;
+			top:50% !important;
+			transform:translateY(-50%) !important;
+			margin:0 !important;
+			padding:0 6px !important;
+			background:#fff !important;
+			color:#9ca3af !important;
+			font-size:14px !important;
+			font-weight:normal !important;
+			line-height:1.2 !important;
+			pointer-events:none !important;
+			transition:all .2s ease !important;
+			z-index:2 !important;
+			max-width:calc(100% - 30px);
+			white-space:nowrap;
+			overflow:hidden;
+			text-overflow:ellipsis;
+		  }
+
+		  /* ===== Label FLOATED — classic outlined Material design (label sits ON the top
+		     border, half above / half below, white background creating the notch).
+		     z-index stays LOW (3) so an open select2 dropdown panel always sits above it.
+		     The JSP at TimeAvailability.jsp sets .select2-container--open to z-index:999999,
+		     and the dropdown panel defaults to ~1051 — both are way above our label. */
+		  #scheduleEventsSearchForm .custom-field:has(> input:focus) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> input:not(:placeholder-shown)) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> input[value]:not([value=""])) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> select:focus) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> select > option:checked:not([value=""])) > label,
+		  #scheduleEventsSearchForm .custom-field:has(.select2-container--focus) > label,
+		  #scheduleEventsSearchForm .custom-field:has(.select2-container--open) > label,
+		  #scheduleEventsSearchForm .custom-field:has(.select2-selection--multiple .select2-selection__choice) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> .d-flex > input:focus) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> .d-flex > input:not(:placeholder-shown)) > label,
+		  #scheduleEventsSearchForm .custom-field:has(> .d-flex > input[value]:not([value=""])) > label,
+		  #scheduleEventsSearchForm .custom-field.has-value > label,
+		  #updateSystemTraningModal .custom-field:has(> input:focus) > label,
+		  #updateSystemTraningModal .custom-field:has(> input:not(:placeholder-shown)) > label,
+		  #updateSystemTraningModal .custom-field:has(> input[value]:not([value=""])) > label,
+		  #updateSystemTraningModal .custom-field:has(> select:focus) > label,
+		  #updateSystemTraningModal .custom-field:has(> select > option:checked:not([value=""])) > label,
+		  #updateSystemTraningModal .custom-field:has(.select2-container--focus) > label,
+		  #updateSystemTraningModal .custom-field:has(.select2-container--open) > label,
+		  #updateSystemTraningModal .custom-field.has-value > label,
+		  #moveEventModal .custom-field:has(> select:focus) > label,
+		  #moveEventModal .custom-field:has(> select > option:checked:not([value=""])) > label,
+		  #moveEventModal .custom-field:has(.select2-container--focus) > label,
+		  #moveEventModal .custom-field:has(.select2-container--open) > label,
+		  #moveEventModal .custom-field.has-value > label,
+		  #moveCounselorInScheduleEventModal .custom-field:has(> select:focus) > label,
+		  #moveCounselorInScheduleEventModal .custom-field:has(> select > option:checked:not([value=""])) > label,
+		  #moveCounselorInScheduleEventModal .custom-field:has(.select2-container--focus) > label,
+		  #moveCounselorInScheduleEventModal .custom-field:has(.select2-container--open) > label,
+		  #moveCounselorInScheduleEventModal .custom-field.has-value > label{
+			top:0 !important;
+			transform:translateY(-50%) !important;
+			font-size:11px !important;
+			font-weight:600 !important;
+			color:#007bff !important;
+			line-height:1 !important;
+			padding:0 6px !important;
+			background:#fff !important;
+			z-index:3 !important;
+		  }
+
+		  /* ============================================================
+		     Force overflow:visible on the wrapping containers so the floated
+		     label (which extends ~6px above the field's top border) is not
+		     clipped by Bootstrap's .card { overflow:hidden } or any other
+		     ancestor on this page. Scoped only to the containers that wrap
+		     our specific form (#scheduleEventsSearchForm) or its modals.
+		  ============================================================ */
+		  .card:has(#scheduleEventsSearchForm),
+		  .card:has(#scheduleEventsSearchForm) > .card-body,
+		  .card:has(#scheduleEventsSearchForm) .tab-content,
+		  .card:has(#scheduleEventsSearchForm) .tab-pane,
+		  .main-card:has(#scheduleEventContent),
+		  .main-card:has(#scheduleEventContent) > .card-body,
+		  .main-card:has(#scheduleEventContent) .tab-content,
+		  .main-card:has(#scheduleEventContent) .tab-pane,
+		  #scheduleEventContent,
+		  #scheduleEventContent > .card-body,
+		  #updateSystemTraningModal .modal-content,
+		  #updateSystemTraningModal .modal-body,
+		  #moveEventModal .modal-content,
+		  #moveEventModal .modal-body,
+		  #moveCounselorInScheduleEventModal .modal-content,
+		  #moveCounselorInScheduleEventModal .modal-body{
+			overflow:visible !important;
+		  }
+
+		  /* Same low z-index for the un-floated (centered placeholder) label too */
+		  #scheduleEventsSearchForm .custom-field > label,
+		  #updateSystemTraningModal .custom-field > label,
+		  #confirmeUpdateSystemTraningModal .custom-field > label,
+		  #moveEventModal .custom-field > label,
+		  #moveCounselorInScheduleEventModal .custom-field > label{
+			z-index:2 !important;
+		  }
+
+		  /* Z-INDEX STACKING — explained:
+		     • Default labels:                z-index 3  (low; any dropdown panel can sit above)
+		     • When this field's own select2 is OPEN, the JSP forces the container
+		       (.select2-container--open) to 999999 — that closed box would cover
+		       the BOTTOM HALF of our label (the part inside the field) and the
+		       notch effect breaks. So when THIS field is open, bump THIS label
+		       to 1000000 — JUST above the container. Other fields' labels stay
+		       at 3, untouched.
+		     • Dropdown PANEL (.select2-dropdown, appended to <body>) is forced to
+		       1000001 so it always sits above any label, including the bumped-open
+		       one. This prevents another field's open dropdown from being punched
+		       through by a neighboring field's label. */
+		  /* Open-state label bump — covers BOTH the empty-open case AND the
+		     has-value-open case (when user re-opens after selecting). The
+		     .has-value + :has(.select2-container--open) combo gets an even more
+		     specific rule (3 classes) to definitively beat the floated-state
+		     rule which has 2 classes (.custom-field.has-value). MAX z-index. */
+		  #scheduleEventsSearchForm .custom-field:has(.select2-container--open) label,
+		  #scheduleEventsSearchForm .custom-field.has-value:has(.select2-container--open) label,
+		  #scheduleEventsSearchForm .custom-field.has-value:has(.select2-container--open) > label,
+		  #scheduleEventsSearchForm .input-group.custom-field:has(.select2-container--open) label,
+		  #scheduleEventsSearchForm .input-group.custom-field.has-value:has(.select2-container--open) label,
+		  #updateSystemTraningModal .custom-field:has(.select2-container--open) label,
+		  #updateSystemTraningModal .custom-field.has-value:has(.select2-container--open) label,
+		  #updateSystemTraningModal .custom-field.has-value:has(.select2-container--open) > label,
+		  #moveEventModal .custom-field:has(.select2-container--open) label,
+		  #moveEventModal .custom-field.has-value:has(.select2-container--open) label,
+		  #moveEventModal .custom-field.has-value:has(.select2-container--open) > label,
+		  #moveCounselorInScheduleEventModal .custom-field:has(.select2-container--open) label,
+		  #moveCounselorInScheduleEventModal .custom-field.has-value:has(.select2-container--open) label,
+		  #moveCounselorInScheduleEventModal .custom-field.has-value:has(.select2-container--open) > label{
+			z-index:2147483646 !important;
+			position:absolute !important;
+		  }
+		  /* ONLY the dropdown PANEL gets the super-high z-index, just above the label.
+		     DO NOT bump .select2-container--open itself — its closed field box
+		     would cover the label's bottom half and break the notch effect. */
+		  .select2-dropdown,
+		  .select2-container .select2-dropdown,
+		  body > .select2-container--open .select2-dropdown,
+		  .select2-container--bootstrap4 .select2-dropdown{
+			z-index:2147483647 !important;
+		  }
+
+		  /* Active blue border when focused / has value / open */
+		  #scheduleEventsSearchForm .custom-field:has(> input:focus) > input,
+		  #scheduleEventsSearchForm .custom-field:has(> input:not(:placeholder-shown)) > input,
+		  #scheduleEventsSearchForm .custom-field:has(> input[value]:not([value=""])) > input,
+		  #scheduleEventsSearchForm .custom-field:has(> select:focus) > select,
+		  #scheduleEventsSearchForm .custom-field:has(> select > option:checked:not([value=""])) > select,
+		  #scheduleEventsSearchForm .custom-field:has(.select2-container--focus) .select2-selection,
+		  #scheduleEventsSearchForm .custom-field:has(.select2-container--open) .select2-selection,
+		  #scheduleEventsSearchForm .custom-field:has(.select2-selection--multiple .select2-selection__choice) .select2-selection,
+		  #scheduleEventsSearchForm .custom-field.has-value > input,
+		  #scheduleEventsSearchForm .custom-field.has-value > select,
+		  #scheduleEventsSearchForm .custom-field.has-value .select2-selection,
+		  #scheduleEventsSearchForm .custom-field:has(> .d-flex > input:focus) > .d-flex > input,
+		  #scheduleEventsSearchForm .custom-field:has(> .d-flex > input:not(:placeholder-shown)) > .d-flex > input,
+		  #scheduleEventsSearchForm .custom-field:has(> .d-flex > input[value]:not([value=""])) > .d-flex > input,
+		  #updateSystemTraningModal .custom-field:has(> input:focus) > input,
+		  #updateSystemTraningModal .custom-field:has(> input:not(:placeholder-shown)) > input,
+		  #updateSystemTraningModal .custom-field:has(> select:focus) > select,
+		  #updateSystemTraningModal .custom-field:has(> select > option:checked:not([value=""])) > select,
+		  #updateSystemTraningModal .custom-field:has(.select2-container--focus) .select2-selection,
+		  #updateSystemTraningModal .custom-field:has(.select2-container--open) .select2-selection,
+		  #updateSystemTraningModal .custom-field.has-value .select2-selection,
+		  #moveEventModal .custom-field:has(> select:focus) > select,
+		  #moveEventModal .custom-field:has(> select > option:checked:not([value=""])) > select,
+		  #moveEventModal .custom-field:has(.select2-container--focus) .select2-selection,
+		  #moveEventModal .custom-field:has(.select2-container--open) .select2-selection,
+		  #moveCounselorInScheduleEventModal .custom-field:has(.select2-container--focus) .select2-selection,
+		  #moveCounselorInScheduleEventModal .custom-field:has(.select2-container--open) .select2-selection{
+			border-color:#007bff !important;
+		  }
+
+		  /* Hide rendered text when placeholder option is selected (no double text) */
+		  #scheduleEventsSearchForm .custom-field:has(> select > option:checked[value=""]) .select2-selection__rendered,
+		  #updateSystemTraningModal .custom-field:has(> select > option:checked[value=""]) .select2-selection__rendered,
+		  #moveEventModal .custom-field:has(> select > option:checked[value=""]) .select2-selection__rendered,
+		  #moveCounselorInScheduleEventModal .custom-field:has(> select > option:checked[value=""]) .select2-selection__rendered{
+			color:transparent !important;
+		  }
+
+		  /* Reset Bootstrap input-group quirks inside our custom-field on this page */
+		  #scheduleEventsSearchForm .input-group.custom-field{
+			flex-wrap:nowrap;
+			display:block !important;
+		  }
+		`)
+		.appendTo("head");
+	}
+
+	var html =
+			'<form id="scheduleEventsSearchForm" class="custom-field-scope" style="display:none">'
+				+'<div class="border rounded-10 pb-1 pt-4 px-4  mb-4 custom-field-scope" style="border-color: #ABA8A8;">'
+					+'<div class="row custom-field-scope">'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Select Counselor</label>'
-							+'<select class="form-control select-first-value" name="counselorName" id="counselorName"></select>'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control select-first-value" name="counselorName" id="counselorName"></select>'
+								+'<label for="counselorName" class="font-weight-semi-bold">Select Counselor</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Select Event Type</label>'
-							+'<select class="form-control select-first-value" name="eventType" id="eventType"></select>'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control select-first-value" name="eventType" id="eventType"></select>'
+								+'<label for="eventType" class="font-weight-semi-bold">Select Event Type</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Meeting Status</label>'
-							+'<select class="form-control" name="meetingStatus" id="meetingStatus">'
-								+'<option value="">Select Status</option>'
-								+'<option value="PENDING">Pending</option>'
-								+'<option value="COMPLETED">Completed</option>'
-								+'<option value="RESCHEDULE">Reschedule</option>'
-								+'<option value="CANCELLED">Cancelled</option>'
-								+'<option value="NOTATTENDED">Did not attend Meeting</option>'
-							+'</select>'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control" name="meetingStatus" id="meetingStatus">'
+									+'<option value="">Select Status</option>'
+									+'<option value="PENDING">Pending</option>'
+									+'<option value="COMPLETED">Completed</option>'
+									+'<option value="RESCHEDULE">Reschedule</option>'
+									+'<option value="CANCELLED">Cancelled</option>'
+									+'<option value="NOTATTENDED">Did not attend Meeting</option>'
+								+'</select>'
+								+'<label for="meetingStatus" class="font-weight-semi-bold">Meeting Status</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Invitee Name</label>'
-							+'<input class="form-control-sm form-control" type="text" name="inviteeName" id="inviteeName">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<input class="form-control-sm form-control" type="text" name="inviteeName" id="inviteeName" placeholder=" ">'
+								+'<label for="inviteeName" class="font-weight-semi-bold">Invitee Name</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Invitee Phone No.</label>'
-							+'<input class="form-control-sm form-control" type="text" name="inviteePhoneNo" id="inviteePhoneNo">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<input class="form-control-sm form-control" type="text" name="inviteePhoneNo" id="inviteePhoneNo" placeholder=" ">'
+								+'<label for="inviteePhoneNo" class="font-weight-semi-bold">Invitee Phone No.</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Invitee Email</label>'
-							+'<input class="form-control-sm form-control" type="email"  name="inviteeEmail" id="inviteeEmail">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<input class="form-control-sm form-control" type="email"  name="inviteeEmail" id="inviteeEmail" placeholder=" ">'
+								+'<label for="inviteeEmail" class="font-weight-semi-bold">Invitee Email</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold" for="">Select Country</label>'
-							+'<select class="form-control-sm form-control" name="Id" id="countryId">'
-							+'</select>'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control-sm form-control" name="Id" id="countryId">'
+								+'</select>'
+								+'<label for="countryId" class="font-weight-semi-bold">Select Country</label>'
+							+'</div>'
 						+'</div>'
 						// +'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
 						// 	+'<label class="font-weight-semi-bold">Learning Program</label>'
@@ -165,41 +610,53 @@ function studentEnrollmentFilterForm(data){
 						// 	+'</select>'
 						// +'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Grade</label>'
-							+'<select class="form-control" name="gradeId" id="gradeId"></select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Search by</label>'
-							// +'<input class="form-control datepicker" type="text"  name="searchByDate" id="searchByDate">'
-							+'<select class="form-control" name="searchBy" id="searchBy">'
-							+'</select>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Date Range</label>'
-							+'<div class="d-flex" style="gap: 8px;">'
-								+'<input class="form-control-sm form-control datepicker" type="text" name="startDate" id="startDate" readonly onkeydown="return false">'
-								+'<input class="form-control-sm form-control datepicker" type="text" name="endDate" id="endDate" readonly onkeydown="return false">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control" name="gradeId" id="gradeId"></select>'
+								+'<label for="gradeId" class="font-weight-semi-bold">Grade</label>'
 							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Sort By</label>'
-							+'<select class="form-control" name="sortBy" id="sortBy">'
-								+'<option value="">Select Option</option>'
-								+'<option value="ASC">Ascending</option>'
-								+'<option value="DESC">Descending</option>'
-							+'</select>'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+							// +'<input class="form-control datepicker" type="text"  name="searchByDate" id="searchByDate">'
+								+'<select class="form-control" name="searchBy" id="searchBy">'
+								+'</select>'
+								+'<label for="searchBy" class="font-weight-semi-bold">Search by</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">With Recordings</label>'
-							+'<select class="form-control" name="withRecordings" id="withRecordings">'
-								+'<option value="">Select Option</option>'
-								+'<option value="Y">Yes</option>'
-								+'<option value="N">No</option>'
-							+'</select>'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<div class="d-flex" style="gap: 8px;">'
+									+'<input class="form-control-sm form-control datepicker" type="text" name="startDate" id="startDate" readonly onkeydown="return false" placeholder=" ">'
+									+'<input class="form-control-sm form-control datepicker" type="text" name="endDate" id="endDate" readonly onkeydown="return false" placeholder=" ">'
+								+'</div>'
+								+'<label class="font-weight-semi-bold">Date Range</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
-							+'<label class="font-weight-semi-bold">Page Size</label>'
-							+'<input class="form-control-sm form-control" type="text" name="pageSize" id="pageSize" value="10" placeholder="Enter Page Size">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control" name="sortBy" id="sortBy">'
+									+'<option value="">Select Option</option>'
+									+'<option value="ASC">Ascending</option>'
+									+'<option value="DESC">Descending</option>'
+								+'</select>'
+								+'<label for="sortBy" class="font-weight-semi-bold">Sort By</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<select class="form-control" name="withRecordings" id="withRecordings">'
+									+'<option value="">Select Option</option>'
+									+'<option value="Y">Yes</option>'
+									+'<option value="N">No</option>'
+								+'</select>'
+								+'<label for="withRecordings" class="font-weight-semi-bold">With Recordings</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2">'
+							+'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+								+'<input class="form-control-sm form-control" type="text" name="pageSize" id="pageSize" value="10" placeholder=" ">'
+								+'<label for="pageSize" class="font-weight-semi-bold">Page Size</label>'
+							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12 mb-2 ml-auto">'
 							+'<label class="full">&nbsp;</label>'
@@ -485,105 +942,119 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 
 function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount, eventName,appliedUserRole){
 	const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;	
+	const statusLabel = (eventName == 'Initial-Interview' || eventName == 'Interview') ? 'Interview Status' : 'Status';
+	const statusOptions = (eventName == 'Initial-Interview' || eventName == 'Interview')
+		? '<option value="COMPLETED">Completed</option>'
+			+'<option value="CANCELLED">Cancelled</option>'
+			+'<option value="RESCHEDULE">Reschedule</option>'
+			+'<option value="NOTATTENDED">No Show</option>'
+		: '<option value="COMPLETED">Completed</option>'
+			+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
+			+'<option value="NOTATTENDED">No Show</option>'
+			+'<option value="CANCELLED">Cancelled</option>'
+			+'<option value="RESCHEDULE">Reschedule</option>'
+			+'<option value="Demo Confirmed">Demo Confirmed</option>'
+			+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
+			+'<option value="Not Interested">Not Interested</option>'
+			+'<option value="Positive to enrollment">Positive to enrollment</option>'
+			+'<option value="Red Flag">Red Flag</option>';
+	const applicationStatusBlock = (eventName == 'Initial-Interview' || eventName == 'Interview')
+		? `<div id="applicationStatusDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">
+				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+					<select name="applicationStatus" id="applicationStatus" class="form-control" onchange="showAndHideDuration('scheduleEventMeetingStatus');">
+						<option value="">Select Application Status</option>
+						<option value="Another Round of Interview">Another Round of Interview</option>
+						${appliedUserRole == 'Teacher' ? '<option value="Approved for Selection Process">Approved for Selection Process</option>' : '<option value="Accepted for Contract">Accepted for Contract</option>'}
+						<option value="On Hold">On Hold</option>
+						<option value="Reject">Reject</option>
+					</select>
+					<label>Application Status</label>
+				</div>
+			</div>
+			<div id="assignedToInterviewDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">
+				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+					<select id="assignedToInterview" class="form-control"></select>
+					<label>Assigned To</label>
+				</div>
+			</div>
+			<div id="durationDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">
+				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+					<select name="duration" id="duration" class="form-control">
+						<option value="15">15 Min</option>
+						<option value="30">30 Min</option>
+					</select>
+					<label>Duration</label>
+				</div>
+			</div>
+			<div id="interviewValidDateDiv" style="display: none;" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+					<input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled placeholder=" " />
+					<label for="interviewValidDate" class="control-label">Interview link is valid till</label>
+				</div>
+			</div>
+			<div id="finalInterviewSlotsWrapper" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2" style="display: none;"></div>`
+		: '';
+	const tentativeDateBlock = `<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">
+				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+					<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" placeholder=" " />
+					<label class="mb-0">Tentative Date</label>
+				</div>
+			</div>`;
+	const leadSourceBlock = `<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">
+				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+					<select name="leadSource" id="leadSource" class="form-control"><option value="">Select Source</option></select>
+					<label class="mb-0">Source</label>
+				</div>
+			</div>`;
+	const remarksAttributes = isRemarkMandatory ? `class="form-control schedule_remarks remarks" isRemarkMendatory="true" minlength="${minRemarkCount}" required` : 'class="form-control"';
+	const remarksCounter = isRemarkMandatory ? `<small id="scheduleRemarksCounter" class="text-muted">0 / ${minRemarkCount}</small>` : '';
 	var html =
-			'<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
-				+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">'
-					+'<div class="modal-content border-0">'
-						+'<div class="modal-header py-2 bg-primary text-white">'
-							+'<h5 class="modal-title" >Update Status</h5>'
-							+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-								+'<span aria-hidden="true">&times;</span>'
-							+'</button>'
-						+'</div>'
-						+'<div class="modal-body">'
-							+'<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off">'
-							+'<input type="hidden" name="meetingType" id="meetingType" value=""  />'
-								+'<div class="row">'
-									+'<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">'
-										+'<label>';
-										if(eventName == 'Initial-Interview'  || eventName == 'Interview'){
-											html +='Interview Status';
-										}else{
-											html +='Status';
-										}
-										html +='</label>'
-										+'<select name="status" id="status" class="form-control" onchange="showHideApplicationStatus(this);">'
-											+'<option value="">Select Status</option>';
-										if(eventName == 'Initial-Interview' || eventName == 'Interview'){
-											html +='<option value="COMPLETED">Completed</option>'
-													+'<option value="CANCELLED">Cancelled</option>'
-													+'<option value="RESCHEDULE">Reschedule</option>'
-													+'<option value="NOTATTENDED">No Show</option>';
-										}else{
-											html +='<option value="COMPLETED">Completed</option>'
-													+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
-													+'<option value="NOTATTENDED">No Show</option>'
-													+'<option value="CANCELLED">Cancelled</option>'
-													+'<option value="RESCHEDULE">Reschedule</option>'
-													+'<option value="Demo Confirmed">Demo Confirmed</option>'
-													+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
-													+'<option value="Not Interested">Not Interested</option>'
-													+'<option value="Positive to enrollment">Positive to enrollment</option>'
-													+'<option value="Red Flag">Red Flag</option>';
-										}
-										html +='</select>'
-									+'</div>'
-									if(eventName == 'Initial-Interview' || eventName == 'Interview'){
-										html+='<div id="applicationStatusDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">'
-											+'<label>Application Status</label>'
-											+'<select name="applicationStatus" id="applicationStatus" class="form-control" onchange="showAndHideDuration(\'scheduleEventMeetingStatus\');">'
-												+'<option value="">Select Application Status</option>'
-												+'<option value="Another Round of Interview">Another Round of Interview</option>'
-												if(appliedUserRole== 'Teacher'){
-													html+='<option value="Approved for Selection Process">Approved for Selection Process</option>';
-												}else{
-													html+='<option value="Accepted for Contract">Accepted for Contract</option>';
-												}
-												html+='<option value="On Hold">On Hold</option>'
-												+'<option value="Reject">Reject</option>'
-											+'</select>'
-										+'</div>'
-										+'<div id="assignedToInterviewDiv" class="form-group" style="display: none;">'
-											+'<label>Assigned To</label>'
-											+'<select id="assignedToInterview" class="form-control"></select>'
-										+'</div>'
-										+'<div id="durationDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">'
-											+'<label>Duration</label>'
-											+'<select name="duration" id="duration" class="form-control">'
-												+'<option value="15">15 Min</option>'
-												+'<option value="30">30 Min</option>'
-											+'</select>'
-										+'</div>'
-										+'<div id="interviewValidDateDiv" style="display: none;" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">'
-											+'<label for="interviewValidDate" class="control-label">Interview link is valid till</label>'
-											+'<input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled />'
-										+'</div>'
-										+'<div id="finalInterviewSlotsWrapper" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2" style="display: none;"></div>'
-									}
-									html+='<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
-										+'<label class="mb-0">Tentative Date</label>'
-										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
-									+'	</div>'
-									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">'
-										+'<label class="mb-0">Source</label>'
-										+'<select	name="leadSource" id="leadSource" class="form-control" ><option value="">Select Source</option></select>'
-									+'	</div>'
-									+'<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">'
-										+'<label>Remarks</label>'
-										+`<input type="text" name="remarks" id="remarks"  class="form-control ${isRemarkMandatory ? 'schedule_remarks remarks' : ''}" ${isRemarkMandatory ? `isRemarkMendatory="true" minlength="${minRemarkCount}" required` : ''}>`
-										+ `${(!isRemarkMandatory)? '':'<small id="scheduleRemarksCounter" class="text-muted">0 / '+minRemarkCount+'</small>'}`
-									+'</div>'
-								+'</div>'
-							+'</form>'
-						+'</div>'
-						+'<div class="modal-footer">'
-							+'<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-							+'<button type="button" class="btn btn-success  float-right pr-4 pl-4" onclick="updateMeetingStatus(\''+meetingId+'\',\''+leadId+'\')">Save</button>'
-						+'</div>'
-					+'</div>'
-				+'</div>'
-			+'</div>';
-		return html;
+			`<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
+					<div class="modal-content border-0">
+						<div class="modal-header py-2 bg-primary text-white">
+							<h5 class="modal-title">Update Status</h5>
+							<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off" class="custom-field-scope">
+								<input type="hidden" name="meetingType" id="meetingType" value="" />
+								<div class="row custom-field-scope">
+									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+										<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+											<select name="status" id="status" class="form-control" onchange="showHideApplicationStatus(this);">
+												<option value="">Select Status</option>
+												${statusOptions}
+											</select>
+											<label>${statusLabel}</label>
+										</div>
+									</div>
+									${applicationStatusBlock}
+									${tentativeDateBlock}
+									${leadSourceBlock}
+									<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">
+										<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+											<input type="text" name="remarks" id="remarks" ${remarksAttributes} placeholder=" " />
+											<label>Remarks</label>
+										</div>
+										${remarksCounter}
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-success  float-right pr-4 pl-4" onclick="updateMeetingStatus('${meetingId}','${leadId}')">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+	setTimeout(function () {
+		refreshCustomFieldState($("#updateSystemTraningModal"));
+	}, 0);
+	return html;
 }
 
 function confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry){
@@ -705,60 +1176,65 @@ function confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, me
 
 function moveEventModal(){
 	var html =
-			'<div id="moveEventModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
-				+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">'
-					+'<div class="modal-content border-0">'
-						+'<div class="modal-header py-2 bg-primary text-white">'
-							+'<h5 class="modal-title" >Move CTI</h5>'
-							+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-								+'<span aria-hidden="true">&times;</span>'
-							+'</button>'
-						+'</div>'
-						+'<div class="modal-body">'
-							+'<div class="full">'
-								+'<table class="table border rounded-10" style="border-collapse:separate">'
-									+'<tbody>'
-										+'<tr>'
-											+'<td class="border-0" style="width:135px"><strong>Event Name:</strong></td>'
-											+'<td class="border-0">CTI</td>'
-										+'</tr>'
-										+'<tr>'
-											+'<td class="border-0" style="width:135px"><strong>Counselor Name:</strong></td>'
-											+'<td class="border-0">Alwin Sabu</td>'
-										+'</tr>'
-										+'<tr>'
-											+'<td class="border-0" style="width:135px"><strong>Invitee Name:</strong></td>'
-											+'<td class="border-0">Demo Student</td>'
-										+'</tr>'
-										+'<tr>'
-											+'<td class="border-0" style="width:135px"><strong>Date | Time:</strong></td>'
-											+'<td class="border-0">Mar 21, 2024 9:00 to 9:50 PM '+BASE_TIMEZONE+'</td>'
-										+'</tr>'
-									+'</tbody>'
-								+'</table>'
-							+'</div>'
-							+'<div class="full">'
-								+'<form action="javascript:void(0);" id="" name="" autocomplete="off">'
-									+'<div class="row">'
-										+'<div class="col-12">'
-											+'<label class="font-weight-bold">Move To:</label>'
-											+'<select name="moveTo" id="moveTo" class="form-control">'
-												+'<option value="">Pooja</option>'
-												+'<option value="">Alwin</option>'
-											+'</select>'
-										+'</div>'
-									+'</div>'
-								+'</form>'
-							+'</div>'
-						+'</div>'
-						+'<div class="modal-footer">'
-							+'<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
-							+'<button type="button" class="btn btn-success  float-right pr-4 pl-4">Save</button>'
-						+'</div>'
-					+'</div>'
-				+'</div>'
-			+'</div>';
-		return html;
+			`<div id="moveEventModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
+					<div class="modal-content border-0">
+						<div class="modal-header py-2 bg-primary text-white">
+							<h5 class="modal-title">Move CTI</h5>
+							<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body custom-field-scope">
+							<div class="full">
+								<table class="table border rounded-10" style="border-collapse:separate">
+									<tbody>
+										<tr>
+											<td class="border-0" style="width:135px"><strong>Event Name:</strong></td>
+											<td class="border-0">CTI</td>
+										</tr>
+										<tr>
+											<td class="border-0" style="width:135px"><strong>Counselor Name:</strong></td>
+											<td class="border-0">Alwin Sabu</td>
+										</tr>
+										<tr>
+											<td class="border-0" style="width:135px"><strong>Invitee Name:</strong></td>
+											<td class="border-0">Demo Student</td>
+										</tr>
+										<tr>
+											<td class="border-0" style="width:135px"><strong>Date | Time:</strong></td>
+											<td class="border-0">Mar 21, 2024 9:00 to 9:50 PM ${BASE_TIMEZONE}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="full">
+								<form action="javascript:void(0);" id="" name="" autocomplete="off" class="custom-field-scope">
+									<div class="row">
+										<div class="col-12">
+											<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+												<select name="moveTo" id="moveTo" class="form-control">
+													<option value="">Pooja</option>
+													<option value="">Alwin</option>
+												</select>
+												<label class="font-weight-bold">Move To:</label>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-success  float-right pr-4 pl-4">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+	setTimeout(function () {
+		refreshCustomFieldState($("#moveEventModal"));
+	}, 0);
+	return html;
 }
 function pagination(clickFrom, boxSearchCondition, countType){
 	var html = 
@@ -795,14 +1271,14 @@ function moveCounselorInScheduleEventModal(meetingId){
 					<div class="modal-header p-2 bg-primary text-white">
 						<h5 class="m-0">Move Event</h5>
 					</div>
-					<form action="javascript:void(0);" id="moveCounselorInScheduleEventForm" name="moveCounselorInScheduleEventForm" autocomplete='off'>
-						<div class="modal-body delete-modal">
+					<form action="javascript:void(0);" id="moveCounselorInScheduleEventForm" name="moveCounselorInScheduleEventForm" autocomplete='off' class="custom-field-scope">
+						<div class="modal-body delete-modal custom-field-scope">
 							<div class="full">
-								<div class="form-group mb-2 p-0">
-									<label class="mb-0">Move interview</label> 
+								<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 									<select	name="assigneeMove" id="assigneeMove" class="form-control" >
 										<option value="0">Select Assignee</option>
 									</select>
+									<label class="mb-0">Move interview</label> 
 								</div>
 							</div>
 							<div class="full mt-1">
@@ -812,7 +1288,10 @@ function moveCounselorInScheduleEventModal(meetingId){
 						</div>
 					</form>
 				</div>
-			</div>
-		</div>`
-	return html;
-}
+				</div>
+			</div>`
+	setTimeout(function () {
+		refreshCustomFieldState($("#moveCounselorInScheduleEventModal"));
+	}, 0);
+		return html;
+	}

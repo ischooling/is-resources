@@ -323,7 +323,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="">Select Learning Program</option>'
 							+getLearningProgramContent(schoolId)
 						+'</select>'
-						+'<label for="enrollmentType">Select Learning Program</label>', '', 'active');
+						+'<label for="enrollmentType">Select Learning Program</label>');
 				}
 				html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
 					'<select name="classCreateFor" id="classCreateFor" class="form-control-field">'
@@ -332,7 +332,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="PTM">PTM</option>'
 							+'<option value="CUSTOM">CUSTOM</option>'
 						+'</select>'
-						+'<label for="classCreateFor">Select Class For</label>', '', 'active');
+						+'<label for="classCreateFor">Select Class For</label>');
 				html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
 					'<select name="standardId" style="text:black;" id="standardId" class="form-control-field">'
 							+'<option value="" disabled selected>Grade</option>'
@@ -344,7 +344,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 						'<select name="courseProviderId" id="courseProviderId" class="form-control-field">'
 									+getLmsPlatformContent(schoolId)
 								+'</select>'
-								+'<label for="courseProviderId">Select LMS Platform</label>', '', 'active');
+								+'<label for="courseProviderId">Select LMS Platform</label>');
 				}
 				if(role!='TEACHER'){
 					html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
@@ -373,7 +373,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="B">Booked</option>'
 							// +'<option value="A">Available</option>'
 						+'</select>'
-						+'<label for="classStatus">Booking Status</label>', '', 'active')
+						+'<label for="classStatus">Booking Status</label>')
 					+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
 						'<select name="markStatus" id="markStatus" class="form-control-field">'
 							+'<option value="">Select Class Status</option>'
@@ -383,7 +383,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="Missed by Student">Missed by Student</option>'
 							+'<option value="Missed by Teacher">Missed by Teacher</option>'
 						+'</select>'
-						+'<label for="markStatus">Class Status</label>', '', 'active');
+						+'<label for="markStatus">Class Status</label>');
 				}
 				html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
 					'<input type="text" name="classStartDate" id="classStartDate" class="form-control-field filterDates" value="" maxlength="10" placeholder=" " readonly onkeydown="return false"/>'
@@ -409,13 +409,13 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 					'<select name="searchBy" id="searchBy" class="form-control-field">'
 						+searchByOptions
 					+'</select>'
-					+'<label for="searchBy">Search By</label>', 'style="display:'+(role=='TEACHER'?'none':'block')+';"', 'active')
+					+'<label for="searchBy">Search By</label>', 'style="display:'+(role=='TEACHER'?'none':'block')+';"')
 				+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
 					'<select name="sortBy" id="sortBy" class="form-control-field">'
 						+'<option value="DESC">Descending</option>'
 						+'<option value="ASC">Ascending</option>'
 					+'</select>'
-					+'<label for="sortBy">Sort By</label>', '', 'active')
+					+'<label for="sortBy">Sort By</label>')
 				+classroomFilterField('col-md-3 col-sm-6 col-xs-12',
 					'<input type="text" name="pageSize" id="pageSize" class="form-control-field" value="25" placeholder=" "/>'
 					+'<label for="pageSize">Page Size</label>')

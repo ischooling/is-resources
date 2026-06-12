@@ -1386,6 +1386,7 @@ customLoader(true);
 				 //$('#'+formId)[0].reset();
 				  $('#leadAdvanceSearch').modal('hide');
 				  $('#leadSourceList').html(htmlContent);
+				  refreshCustomFieldState('#leadSourceList');
 				
 				 $("#leadDataList .checkLead").prop('checked', false);
 				 callTotalCountLeads(formId, moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, leadType,'Y', leadsFollowCount,''); 
@@ -2475,6 +2476,7 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 					});
 					
 					renderDocumentContent(userId, leadId, 'LEAD-DOC');
+					refreshCustomFieldState("#"+formId);
 					showAddMoreBtnArray=[];
 					$.each($('.upload-docs-wrapper[style*="display: none"]'), function(){showAddMoreBtnArray.push(parseInt($(this).attr("index")))});
 				}
@@ -4402,6 +4404,7 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 								$("#mergeleadlist").html(htmld);
 								clickRedioForMergeLead(formId, modalId, leadType);
 							}
+							refreshCustomFieldState("#"+formId);
 					   }
 					}
 				}
@@ -9327,20 +9330,29 @@ function populateZadarmaRecords(data, data2,meetingTitle, totalPages,totalCount)
 			<span aria-hidden="true">&times;</span>
 		  </button>
 		</div>
-		<div class="p-3 d-flex px-5" style="margin-left:auto; justify-content: space-between;">
-			<select name="zadarmaPagging" id="zadarmaPagging" class="mr-2 w-5 px-2 rounded-lg" onchange="showZadarmaSortDetails()">
-				<option value="10" selected="">10</option>
-				<option value="25">25</option>
-				<option value="50">50</option>
-				<option value="100">100</option>
-			</select>
-			<div class="d-flex" style="width:450px;">
-				<select class="form-control mr-2 w-50" id="sortzadarmalogs" name="sortzadarmalogs" onchange="showZadarmaSortDetails()">
-					<option value="ALL" selected="">All</option>
-					<option value="ATTENDED">Attended Call</option>
-					<option value="UNATTENDED">Un Attended Call</option>
+		<div class="p-3 d-flex px-5 custom-field-scope" style="margin-left:auto; justify-content: space-between;">
+			<div class="custom-field mr-2" style="width:90px; flex:0 0 90px;">
+				<select name="zadarmaPagging" id="zadarmaPagging" class="w-100 px-2 rounded-lg" onchange="showZadarmaSortDetails()">
+					<option value="10" selected="">10</option>
+					<option value="25">25</option>
+					<option value="50">50</option>
+					<option value="100">100</option>
 				</select>
-				<input placeholder="Search" type="text" class="w-50 px-2" onkeydown="getFilterZadarmaLeadNo(this.value, ${totalPages}, ${totalCount})" class="form-control">
+				<label class="m-0 d-block mb-1">Page Size</label>
+			</div>
+			<div class="d-flex" style="width:450px;">
+				<div class="custom-field mr-2 w-50">
+					<select class="form-control w-100" id="sortzadarmalogs" name="sortzadarmalogs" onchange="showZadarmaSortDetails()">
+						<option value="ALL" selected="">All</option>
+						<option value="ATTENDED">Attended Call</option>
+						<option value="UNATTENDED">Un Attended Call</option>
+					</select>
+					<label class="m-0 d-block mb-1">Call Type</label>
+				</div>
+				<div class="custom-field w-50">
+					<input placeholder="Search" type="text" class="w-100 px-2 form-control" onkeydown="getFilterZadarmaLeadNo(this.value, ${totalPages}, ${totalCount})">
+					<label class="m-0 d-block mb-1">Search</label>
+				</div>
 			</div>
 		</div>
 		<div style="background-color: #fff; height: 100vh;">
@@ -9367,6 +9379,7 @@ function populateZadarmaRecords(data, data2,meetingTitle, totalPages,totalCount)
 	  </div>
 	`;
 	$("body").append(modalContent);
+	refreshCustomFieldState("#zadarmaLogModal");
     renderZadarmaTable(data);
 	renderUnMatchZadarmaTable(data2)
 	$("#zadarmaPagination").html(renderPagination(currentPageZadarma, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.callId)),...new Set(data2.map((elem,index) => elem.callId))].length));
@@ -9606,7 +9619,7 @@ function populateCallhippoRecords(data, data2,meetingTitle, totalPages,totalCoun
 	.appendTo("head");
 	var modalContent = `
 	  <div id="callhippoLogBackdrop" class="recurring-modal-backdrop" onclick="closeZadarmaModal();"></div>
-	  <div id="callhippoLogModal" class="recurring-modal">
+	  <div id="callhippoLogModal" class="recurring-modal custom-field-scope">
 		<div class="p-3" style="background-color:#027FFF;">
 		  <h5 class="mb-0" style="color: white;font-size:18px;font-weight: 700;">${meetingTitle}</h5>
 		   <button onclick="closeCallhippoModal();" type="button" class="p-2 cursor" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-30px;top:35px;background-color: white !important;border-radius: 5px 0px 0px 5px;font-size: 35px;border:0px;color:#000;">
@@ -9614,19 +9627,28 @@ function populateCallhippoRecords(data, data2,meetingTitle, totalPages,totalCoun
 		  </button>
 		</div>
 		<div class="p-3 d-flex px-5" style="margin-left:auto; justify-content: space-between;">
-			<select name="callhippoPagging" id="callhippoPagging" class="mr-2 w-5 px-2 rounded-lg" onchange="showCallhippoSortDetails()">
-				<option value="10" selected="">10</option>
-				<option value="25">25</option>
-				<option value="50">50</option>
-				<option value="100">100</option>
-			</select>
-			<div class="d-flex" style="width:450px;">
-				<select class="form-control mr-2 w-50" id="sortcallhippologs" name="sortcallhippologs" onchange="showCallhippoSortDetails()">
-					<option value="ALL" selected="">All</option>
-					<option value="ATTENDED">Attended Call</option>
-					<option value="UNATTENDED">Un Attended Call</option>
+			<div class="custom-field mr-2" style="min-width:88px;">
+				<select name="callhippoPagging" id="callhippoPagging" class="px-2 rounded-lg" style="width: 13%" onchange="showCallhippoSortDetails()">
+					<option value="10" selected="">10</option>
+					<option value="25">25</option>
+					<option value="50">50</option>
+					<option value="100">100</option>
 				</select>
-				<input placeholder="Search" type="text" class="w-50 px-2" onkeydown="getFilterCallhippoLeadNo(this.value, ${totalPages}, ${totalCount})" class="form-control">
+				<label class="m-0 d-block mb-1">Page Size</label>
+			</div>
+			<div class="d-flex" style="width:450px;">
+				<div class="custom-field mr-2 w-50">
+					<select class="form-control w-100" id="sortcallhippologs" name="sortcallhippologs" onchange="showCallhippoSortDetails()">
+						<option value="ALL" selected="">All</option>
+						<option value="ATTENDED">Attended Call</option>
+						<option value="UNATTENDED">Un Attended Call</option>
+					</select>
+					<label class="m-0 d-block mb-1">Call Type</label>
+				</div>
+				<div class="custom-field w-50">
+					<input placeholder="Search" type="text" class="w-100 px-2 form-control" onkeydown="getFilterCallhippoLeadNo(this.value, ${totalPages}, ${totalCount})">
+					<label class="m-0 d-block mb-1">Search</label>
+				</div>
 			</div>
 		</div>
 		<div style="background-color: #fff; height: 100vh;">
@@ -9653,6 +9675,7 @@ function populateCallhippoRecords(data, data2,meetingTitle, totalPages,totalCoun
 	  </div>
 	`;
 	$("body").append(modalContent);
+	refreshCustomFieldState("#callhippoLogModal");
     renderCallhippoTable(data);
 	renderUnMatchCallhippoTable(data2)
 	$("#callhippoPagination").html(renderPagination(currentPageCallhippo, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.id)),...new Set(data2.map((elem,index) => elem.id))].length));
@@ -9899,8 +9922,11 @@ function populateMailRecords(data, data2,meetingTitle, totalPages,totalCount){
 			<span aria-hidden="true">&times;</span>
 		  </button>
 		</div>
-		<div class="p-3" style="width:300px; margin-left:auto;">
-			<input placeholder="Search" type="text" onchange="getFilterMailLeadNo(this.value, ${totalPages})" class="form-control">
+		<div class="p-3 custom-field-scope" style="width:300px; margin-left:auto;">
+			<div class="custom-field">
+				<input placeholder="Search" type="text" onchange="getFilterMailLeadNo(this.value, ${totalPages})" class="form-control">
+				<label class="m-0 d-block mb-1">Search</label>
+			</div>
 		</div>
 		<div style="background-color: #fff; height: 100vh;">
 		  <div class="px-5" style="height: 80vh;overflow-y:auto;">
@@ -9943,6 +9969,7 @@ function populateMailRecords(data, data2,meetingTitle, totalPages,totalCount){
 			</div>
 		</div>`;
 	$("body").append(modalContent);
+	refreshCustomFieldState("#mailLogModal");
 	$("#mailPagination").html(renderPagination(currentPageMail, totalPages,totalCount,[...new Set(data.map((elem,_) => elem.id)),...new Set(data2.map((elem,_) => elem.id))].length));
     renderMailTable(data, totalPages,totalCount,[...new Set(data.map((elem,_) => elem.id)),...new Set(data2.map((elem,_) => elem.id))].length);
 	renderUnMatchMailTable(data2)
@@ -10101,8 +10128,11 @@ function populateWatiRecords(data,data2, meetingTitle, totalPages,totalCount){
 			<span aria-hidden="true">&times;</span>
 		  </button>
 		</div>
-		<div class="p-3" style="width:300px; margin-left:auto;">
-			<input placeholder="Search" type="text" onchange="getFilterWatiLeadNo(this.value, ${totalPages});" class="form-control">
+		<div class="p-3 custom-field-scope" style="width:300px; margin-left:auto;">
+			<div class="custom-field">
+				<input placeholder="Search" type="text" onchange="getFilterWatiLeadNo(this.value, ${totalPages});" class="form-control">
+				<label class="m-0 d-block mb-1">Search</label>
+			</div>
 		</div>
 		<div style="background-color: #fff; height: 100vh;">
 		  <div class="px-5" style="height: 80vh;overflow-y:auto;">
@@ -10130,6 +10160,7 @@ function populateWatiRecords(data,data2, meetingTitle, totalPages,totalCount){
 		$("#watiLogModal").remove()
 	}
 	$("body").append(modalContent);
+	refreshCustomFieldState("#watiLogModal");
 	if (!data || data.length === 0) {
 	  $("#watiLogModalTableBody").html('<tr><td colspan="3" class="text-center py-5" style="font-size: 16px;font-weight: 700;">No recordings found</td></tr>');
 	}
@@ -10523,8 +10554,11 @@ function populateWhatsappRecords(data,data2, meetingTitle, totalPages,totalCount
 		  </button>
 		</div>
 
-		<div class="p-3" style="width:300px; margin-left:auto;">
-			<input placeholder="Search" type="text" onchange="getFilterWhatsappLeadNo(this.value, ${totalPages})" class="form-control">
+		<div class="p-3 custom-field-scope" style="width:300px; margin-left:auto;">
+			<div class="custom-field">
+				<input placeholder="Search" type="text" onchange="getFilterWhatsappLeadNo(this.value, ${totalPages})" class="form-control">
+				<label class="m-0 d-block mb-1">Search</label>
+			</div>
 		</div>
   
 		<div style="background-color: #fff; height: 100vh;">
@@ -10545,6 +10579,7 @@ function populateWhatsappRecords(data,data2, meetingTitle, totalPages,totalCount
 		</div>
 	  </div>`;
 	$("body").append(modalContent);
+	refreshCustomFieldState("#whatsappLogModal");
 	$("#whatsappPagination").html(renderPagination(currentPageWhatsapp, totalPages,totalCount,[...new Set(data.map((elem,index) => elem.leadNo))].length));
     renderWhatsappTable(data, totalPages,totalCount);
 	// renderUnMatchWhatsappTable(data2)
@@ -10767,9 +10802,11 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
   
 		if (objRights.leadType == 'B2B') {
 		  $("#b2b-lead-list").html("");
+		  refreshCustomFieldState('#b2b-lead-list');
 		} else {
 		  const html = getB2cLeadHeaderList(data, objRights, roleModule);
 		  $("#b2c-lead-list").html(html);
+		  refreshCustomFieldState('#b2c-lead-list');
 		}
 	  } else {
 		if($("#advanceLeadNewSearchForm #campaignName").val()) {
@@ -10779,6 +10816,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		if (objRights.leadType == 'B2B') {
 		  const html = getB2bLeadList(data, objRights, roleModule);
 		  $("#b2b-lead-list").html(html);
+		  refreshCustomFieldState('#b2b-lead-list');
 		  $('#b2b-lead-list').off('click', '.follow-up-no').on('click', '.follow-up-no', function () {
 			$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
 			$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
@@ -10790,6 +10828,7 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		} else {
 		  const html = getB2cLeadList(data, objRights, roleModule);
 		  $("#b2c-lead-list").html(html);
+		  refreshCustomFieldState('#b2c-lead-list');
 		  $('[data-toggle="tooltip"]').tooltip();
   
 		  const leaddata = data.data || [];
@@ -10811,6 +10850,8 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 			theme:"bootstrap4",
 			dropdownParent:"#b2c-lead-list"
 		 });
+		  refreshCustomFieldState('#advanceLeadNewSearchForm');
+		  refreshCustomFieldState('#b2c-lead-list');
 
 	var leadid=0;
 	$(document).on("input", ".lead_list_remarks", function () {

@@ -841,7 +841,7 @@ async function addTeacherContract(userId, name, email, contractId) {
     
     $('#teacherContractForm #specialization').select2({
         theme: "bootstrap4",
-        dropdownParent: "#specializationWrapper"
+        dropdownParent: "#addTeacherContractModal .modal-body"
     });
     
 	getAllNationalityList("teacherContractForm", "teacherNationality");

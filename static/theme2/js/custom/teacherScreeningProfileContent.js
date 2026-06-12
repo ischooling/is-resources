@@ -1,5 +1,12 @@
 async function getRenderTeacherPreScreeningProfileContent(title, roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE){
     $('#dashboardContentInHTML').html(renderTeacherPreScreeningProfileContent(title))
+    if(typeof refreshCustomFieldState === 'function'){
+        setTimeout(function(){
+            refreshCustomFieldState($('#teacherScreeningFilterForm'));
+            refreshCustomFieldState($('#teacherScreeningProfileStatusModal'));
+            refreshCustomFieldState($('#teacherApplicationCommunicationLogsModal'));
+        }, 0);
+    }
     await loadTeacherScreeningData()
 }
 function renderTeacherPreScreeningProfileContent(title){
@@ -25,58 +32,76 @@ function renderTeacherPreScreeningProfileContent(title){
 
 function teacherScreeningFilter(){
     var html=
-        `<form id="teacherScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2" style="display:none;">
-            <div class="row">
+        `<form id="teacherScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2 custom-field-scope" style="display:none;">
+            <div class="row custom-field-scope">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Name/Source</label>
-                    <input type="text" id="filterName" class="form-control">
+                    <div class="custom-field">
+                        <input type="text" id="filterName" class="form-control" placeholder=" ">
+                        <label>Name/Source</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Phone</label>
-                    <input type="text" id="filterPhone" class="form-control" onkeydown="return M.digit(event);">
+                    <div class="custom-field">
+                        <input type="text" id="filterPhone" class="form-control" onkeydown="return M.digit(event);" placeholder=" ">
+                        <label>Phone</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Email</label>
-                    <input type="text" id="filterEmail" class="form-control">
+                    <div class="custom-field">
+                        <input type="text" id="filterEmail" class="form-control" placeholder=" ">
+                        <label>Email</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Country</label>
-                    <select name="filterCountryId" id="filterCountryId" class="form-control">
-                        <option value="0">Select country</option>
-                    </select>
+                    <div class="custom-field">
+                        <select name="filterCountryId" id="filterCountryId" class="form-control">
+                            <option value="0">Select country</option>
+                        </select>
+                        <label>Country</label>
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Assigned To</label>
-                    <select id="filterAssignedTo" class="form-control">
-                        <option value="">All</option>
-                    </select>
+                    <div class="custom-field">
+                        <select id="filterAssignedTo" class="form-control">
+                            <option value="">All</option>
+                        </select>
+                        <label>Assigned To</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Application Status</label>
-                    <select id="filterStatus" class="form-control">
-                        <option value="">Select Status</option>
-                        <option value="Approved For Interview">Approved For Interview</option>
-                        <option value="Approved for Selection Process">Approved for Selection Process</option>
-                        <option value="On Hold">On Hold</option>
-                    </select>
+                    <div class="custom-field">
+                        <select id="filterStatus" class="form-control">
+                            <option value="">Select Status</option>
+                            <option value="Approved For Interview">Approved For Interview</option>
+                            <option value="Approved for Selection Process">Approved for Selection Process</option>
+                            <option value="On Hold">On Hold</option>
+                        </select>
+                        <label>Application Status</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Grades</label>
-                    <select id="filterGrades" multiple="" class="form-control">
-                        ${getStandardContentByCourseProviderId(SCHOOL_ID)}
-                    </select>
+                    <div class="custom-field">
+                        <select id="filterGrades" multiple="" class="form-control">
+                            ${getStandardContentByCourseProviderId(SCHOOL_ID)}
+                        </select>
+                        <label>Grades</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Courses</label>
-                    <select id="filterCourses" multiple="" class="form-control">
-                        ${getAllCoursesOptions('filterCourses')}
-                    </select>
+                    <div class="custom-field">
+                        <select id="filterCourses" multiple="" class="form-control">
+                            ${getAllCoursesOptions('filterCourses')}
+                        </select>
+                        <label>Courses</label>
+                    </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>No. of records</label>
-                    <input type="text" id="pageSize" class="form-control" onkeydown="return M.digit(event);" value="10">
+                    <div class="custom-field">
+                        <input type="text" id="pageSize" class="form-control" onkeydown="return M.digit(event);" value="10" placeholder=" ">
+                        <label>No. of records</label>
+                    </div>
                 </div>
             </div>
             <div class="d-flex justify-content-end mt-3">
@@ -161,9 +186,8 @@ function teacherScreeningProfileStatusModal(id, status){
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form autocomplete="off" id="teacherScreeningProfileStatusForm">
-                            <div class="form-group">
-                                <label for="teacherScreeningProfileStatus" class="control-label">Status:</label>
+                        <form autocomplete="off" id="teacherScreeningProfileStatusForm" class="custom-field-scope">
+                            <div class="form-group custom-field">
                                 <select class="form-control" name="teacherScreeningProfileStatus" id="teacherScreeningProfileStatus" onchange="viewAssignToListForInterview();">
                                     <option value="0">Select status</option>`
                                     if(status == "Approved For Interview"){
@@ -183,15 +207,16 @@ function teacherScreeningProfileStatusModal(id, status){
                                         <option value="Reject">Reject</option>`;
                                     }
                                html+=`</select>
+                                <label for="teacherScreeningProfileStatus" class="control-label">Status:</label>
                             </div>
-                            <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
-                                <label>Assigned To</label>
+                            <div id="assignedToInterviewDiv" class="form-group custom-field" style="display: none;">
                                 <select id="assignedToInterview" class="form-control">
                                 </select>
+                                <label>Assigned To</label>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group custom-field">
+                                <textarea id="teacherScreeningProfileRemarks" class="form-control px-2" maxlength="200" placeholder=" "></textarea>
                                 <label for="message-text" class="control-label">Remarks:</label>
-                                <textarea id="teacherScreeningProfileRemarks" class="form-control px-2" maxlength="200"></textarea>
                             </div>
                         </form>
                         <div class="d-flex justify-content-end">
@@ -243,12 +268,12 @@ function communicationLogsContentForTeacherApplication(teacherId, useRole){
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form autocomplete="off" id="teacherScreeningProfileStatusForm">
+                        <form autocomplete="off" id="teacherScreeningProfileStatusForm" class="custom-field-scope">
                             <div class="row">
                                 <div class="col-lg-4 col-md-6 col-sm-12 col-12">
-                                    <div class="position-relative form-group">
+                                    <div class="position-relative form-group custom-field">
+                                        <input name="logTitle" id="logTitle" placeholder=" " type="text" value="" class="form-control">
                                         <label for="title" class="">Remark Title</label>
-                                        <input name="logTitle" id="logTitle" placeholder="Title" type="text" value="" class="form-control">
                                     </div>
                                 </div>
                                 ${/*<div class="col-lg-4 col-md-6 col-sm-12 col-12">
@@ -292,9 +317,9 @@ function communicationLogsContentForTeacherApplication(teacherId, useRole){
                                     </div>
                                 </div>
                             </div>
-                            <div class="position-relative form-group">
-                                <label for="title" title="Mandatory field">Comment<sup class="text-danger font-size-md"><b>*</b></sup></label>
+                            <div class="position-relative form-group custom-field">
                                 <div id="commentEditorTA"></div>
+                                <label for="title" title="Mandatory field">Comment<sup class="text-danger font-size-md"><b>*</b></sup></label>
                             </div>
                             <div class="position-relative form-group text-right mb-0">
                                 <a href="javascript:void(0)" class="btn btn-sm btn-primary px-4" onclick="saveCommunicationLogTA('teacherScreeningProfileStatusForm', '${teacherId}', '${useRole}')">Add</a>

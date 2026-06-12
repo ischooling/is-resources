@@ -539,6 +539,8 @@ function showElementErrorMessage(show, elementId, message) {
 function validMailPermission(flag, elementID) {
 	if (flag) {
 		validEndInvalidField(true, "email");
+		$("#confirmEmail").val($("#email").val());
+		validEndInvalidField(true, "confirmEmail");
 		if ($("#email").val().trim() == $("#confirmEmail").val().trim()) {
 			validEndInvalidField(true, "confirmEmail");
 		} else if ($("#confirmEmail").val().trim() == "") {

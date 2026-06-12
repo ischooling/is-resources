@@ -62,39 +62,50 @@ function filterFormAndList(){
       <button type="button" id="meetingManagementModeMeetings" class="btn btn-primary btn-sm" onclick="showMeetingManagementMode('MEETINGS')">Meeting Management</button>
       <button type="button" id="meetingManagementModeLogs" class="btn btn-outline-primary btn-sm" onclick="showMeetingManagementMode('LOGS')">Log</button>
     </div>
-    <form id="filterMeeting" class="mb-3" autocomplete="off">
-      <div class="form-row w-100">
+    <form id="filterMeeting" class="mb-3 custom-field-scope" autocomplete="off">
+        <div class="form-row w-100">
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 mb-xl-0 mb-2">
-          <div id="filterHostUserIdDiv">
+          <div id="filterHostUserIdDiv" class="form-group custom-field mb-0">
             <select id="filterHostUserId" name="filterHostUserId" class="form-control">
               <!-- Dynamically loaded -->
             </select>
+            <label for="filterHostUserId" class="m-0">Host</label>
           </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 mb-xl-0 mb-2">
-          <div id="filterGeneralMeetingTypeDiv">
+          <div id="filterGeneralMeetingTypeDiv" class="form-group custom-field mb-0">
             <select id="filterGeneralMeetingType" name="filterGeneralMeetingType" class="form-control">
               <!-- Dynamically loaded -->
             </select>
+            <label for="filterGeneralMeetingType" class="m-0">Meeting Type</label>
           </div>
         </div>
         <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 pr-0">
           <div class="form-row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-12 ms-0 mb-2">
-              <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14" >
-                <option value="Today" selected>Today</option>  
-                <option value="Week">Week</option>
-                <option value="Month">Month</option>
-                <option value="Custom">Custom</option>
-              </select>
+              <div class="form-group custom-field mb-0">
+                <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14" >
+                  <option value="Today" selected>Today</option>  
+                  <option value="Week">Week</option>
+                  <option value="Month">Month</option>
+                  <option value="Custom">Custom</option>
+                </select>
+                <label for="filterDateDuration" class="m-0">Date Range</label>
+              </div>
             </div>
             <div class="col-xl-5 col-lg-6 col-md-6 col-sm-8 col-12 ms-0 mb-2">
               <div class="form-row">
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 ms-0 mb-2">
-                      <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingStartDate" class="form-control" placeholder="Start Date" autocomplete="off" />
+                      <div class="form-group custom-field mb-0">
+                        <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingStartDate" class="form-control" placeholder=" " autocomplete="off" />
+                        <label for="filterMeetingStartDate" class="m-0">Start Date</label>
+                      </div>
                   </div>
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
-                      <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingEndDate" class="form-control" placeholder="End Date" autocomplete="off" />
+                      <div class="form-group custom-field mb-0">
+                        <input onchange="getDatepickerChangeVal(this)" type="text" id="filterMeetingEndDate" class="form-control" placeholder=" " autocomplete="off" />
+                        <label for="filterMeetingEndDate" class="m-0">End Date</label>
+                      </div>
                   </div>
               </div>
             </div>
@@ -181,24 +192,29 @@ function getMeetingFormHtml() {
               <button id="backFromForm" class="bg-transparent mb-4 border-0 text-primary cursor">
                 <i class="fa fa-chevron-left mr-2"></i> Back to Meeting
               </button>
-              <h2 class="mb-3 font-weight-bold">Schedule Meeting</h2>
-              <form id="meetingForm" autocomplete="off">
+              <h2 class="mb-1 font-weight-bold">Schedule Meeting</h2>
+              <div class="mb-4 text-muted" style="font-size: 14px; line-height: 1.4;">
+                Please fill in the meeting details below.
+              </div>
+              <form id="meetingForm" autocomplete="off" class="custom-field-scope">
                 <div class="form-row mb-3">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
-                    <label for="generalMeetingType" class="font-16">Meeting Type</label>
-                  </div>
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">Meeting Type</div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
-                    <select id="generalMeetingType" name="generalMeetingType" class="form-control" required autocomplete="off">
-                      <!-- Dynamically loaded -->
-                    </select>
+                    <div class="form-group custom-field mb-0">
+                      <select id="generalMeetingType" name="generalMeetingType" class="form-control" required autocomplete="off">
+                        <!-- Dynamically loaded -->
+                      </select>
+                      <label for="generalMeetingType" class="m-0">Meeting Type</label>
+                    </div>
                   </div>
                 </div>
                 <div class="form-row mb-3">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
-                    <label for="topic" class="font-16">Topic</label>
-                  </div>
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">Topic</div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
-                    <input type="text" id="topic" class="form-control" placeholder="Enter topic" autocomplete="off" required />
+                    <div class="form-group custom-field mb-0">
+                      <input type="text" id="topic" class="form-control" placeholder=" " autocomplete="off" required />
+                      <label for="topic" class="m-0">Topic</label>
+                    </div>
                   </div>
                 </div>
                 <div class="form-row mb-3" id="meetingTypeContainer">
@@ -235,23 +251,23 @@ function getMeetingFormHtml() {
                   </div>
                 </div>
                 <div class="form-row mb-3">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
-                    <label for="host" class="font-16">Host</label>
-                  </div>
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">Host</div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
-                    <select onchange="onChangeHost(this);checkAndFetchMeetings();updateNewDateInCalender();" id="host" name="host" class="form-control" required autocomplete="off">
-                      <!-- Dynamically loaded -->
-                    </select>
+                    <div class="form-group custom-field mb-0">
+                      <select onchange="onChangeHost(this);checkAndFetchMeetings();updateNewDateInCalender();" id="host" name="host" class="form-control" required autocomplete="off">
+                        <!-- Dynamically loaded -->
+                      </select>
+                      <label for="host" class="m-0">Host</label>
+                    </div>
                   </div>
                 </div>
                 <div class="form-row mb-3" id="attendeesContainer" style="display: none;">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
-                    <label for="attendees" class="font-16">Attendees</label>
-                  </div>
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">Attendees</div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
                     <div class="d-flex flex-column w-100">
-                      <div class="d-flex flex-column w-100 position-relative" style="gap:2px;">
-                        <input id="attendees" class="form-control" placeholder="Search by name & email" oninput="getAttendeesList();">
+                      <div class="form-group custom-field mb-0 position-relative">
+                        <input id="attendees" class="form-control" placeholder=" " oninput="getAttendeesList();">
+                        <label for="attendees" class="m-0">Attendees</label>
                         <ul id="dynamic-attendees-list" class="rounded m-0 px-2 position-absolute" style="background-color: #eee; list-style: none; max-height: 150px;z-index: 10;overflow-y: auto;width: 100%;top: 42px; display: none;"></ul>
                       </div>
                       <!-- List of selected attendees -->
@@ -260,43 +276,49 @@ function getMeetingFormHtml() {
                   </div>
                 </div>
                 <div class="form-row mb-3" id="whenContainer" style="display: none;">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">
                     <label for="when" class="form-label font-16">When</label>
                   </div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
                     <div class="d-flex w-100" style="gap: 16px;">
-                      <input
-                        onchange="checkAndFetchMeetings();getDatepickerChangeVal(this);"
-                        type="text"
-                        id="when"
-                        name="when"
-                        placeholder="Select Date"
-                        class="form-control datepicker"
-                        autocomplete="off"
-                        required
-                        readonly
-                        onkeydown="return false"
-                      >
-                      <select
-                        onchange="checkAndFetchMeetings();"
-                        id="hour"
-                        name="hour"
-                        class="form-control"
-                        required
-                        autocomplete="off"
-                      >
-                        <option value="" disabled selected>HH:MM</option>
-                      </select>
+                      <div class="form-group custom-field mb-0 flex-grow-1">
+                        <input
+                          onchange="checkAndFetchMeetings();getDatepickerChangeVal(this);"
+                          type="text"
+                          id="when"
+                          name="when"
+                          placeholder=" "
+                          class="form-control datepicker"
+                          autocomplete="off"
+                          required
+                          readonly
+                          onkeydown="return false"
+                        >
+                        <label for="when" class="m-0">Date</label>
+                      </div>
+                      <div class="form-group custom-field mb-0 flex-grow-1">
+                        <select
+                          onchange="checkAndFetchMeetings();"
+                          id="hour"
+                          name="hour"
+                          class="form-control"
+                          required
+                          autocomplete="off"
+                        >
+                          <option value="" disabled selected>HH:MM</option>
+                        </select>
+                        <label for="hour" class="m-0">Time</label>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="form-row mb-3" id="durationContainer" style="display: none;">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">
                     <label for="durationHour" class="form-label font-16">Duration</label>
                   </div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
                     <div class="form-row w-100">
-                      <div class="d-flex align-items-center col-xl-3 col-lg-3 col-md-5 col-sm-4 col-6">
+                      <div class="form-group custom-field mb-0 d-flex align-items-center col-xl-3 col-lg-3 col-md-5 col-sm-4 col-6">
                         <select
                           id="durationHour"
                           name="durationHour"
@@ -314,10 +336,11 @@ function getMeetingFormHtml() {
                           <option value="06">06</option>
                           <option value="07">07</option>
                         </select>
+                        <label for="durationHour" class="m-0">Hours</label>
                         <p class="m-0 ml-1">Hr</p>
                       </div>
 
-                      <div class="d-flex align-items-center col-xl-3 col-lg-3 col-md-5 col-sm-4 col-6">
+                      <div class="form-group custom-field mb-0 d-flex align-items-center col-xl-3 col-lg-3 col-md-5 col-sm-4 col-6">
                         <select
                           id="durationMinute"
                           name="durationMinute"
@@ -333,19 +356,23 @@ function getMeetingFormHtml() {
                           <option value="40">40</option>
                           <option value="50">50</option>
                         </select>
+                        <label for="durationMinute" class="m-0">Minutes</label>
                         <p class="m-0 ml-1">Min</p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="form-row mb-3">
-                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                  <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12 d-none d-xl-block">
                     <label for="timezone" class="font-16">Time Zone</label>
                   </div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
-                    <select id="timezone" name="timezone" class="form-control" disabled required autocomplete="off">
-                      <!-- Add more timezones as needed -->
-                    </select>
+                    <div class="form-group custom-field mb-0">
+                      <select id="timezone" name="timezone" class="form-control" disabled required autocomplete="off">
+                        <!-- Add more timezones as needed -->
+                      </select>
+                      <label for="timezone" class="m-0">Time Zone</label>
+                    </div>
                   </div>
                 </div>
                 <div class="full pt-2 text-right">
@@ -689,16 +716,25 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
       <div style="background-color: #F1F3F5; height: 100vh;">
 
         <!-- Date Filter Section -->
-        <form id="filterRecurringRecording" class="d-flex align-items-center mb-3 px-5" autocomplete="off" style="gap: 10px;">
-          <select onchange="setFilterDatesAccordingly(this, '#filterRecurringMeetingStartDate', '#filterRecurringMeetingEndDate');" id="filterRecurringDateDuration" class="border rounded" style="border-color: #a1a1a1 !important;width: 10%; font-size: 14px; padding: 8px; appearance: auto; -webkit-appearance: auto; -moz-appearance: auto;">
-            <option value="Week" selected>This Week</option>
-            <option value="Month">This Month</option>
-            <option value="Custom">Custom</option>
-          </select>
+        <form id="filterRecurringRecording" class="custom-field-scope d-flex align-items-center mb-3 px-5" autocomplete="off" style="gap: 10px;">
+          <div class="form-group custom-field mb-0" style="width: 10%;">
+            <select onchange="setFilterDatesAccordingly(this, '#filterRecurringMeetingStartDate', '#filterRecurringMeetingEndDate');" id="filterRecurringDateDuration" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px; appearance: auto; -webkit-appearance: auto; -moz-appearance: auto;">
+              <option value="Week" selected>This Week</option>
+              <option value="Month">This Month</option>
+              <option value="Custom">Custom</option>
+            </select>
+            <label for="filterRecurringDateDuration" class="m-0">Date Range</label>
+          </div>
 
           <div class="d-flex align-items-center my-4" style="gap:10px;">
-            <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingStartDate" value="${startOfWeek}" class="form-control"  placeholder="Select start date">
-            <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingEndDate" value="${endOfWeek}" class="form-control" placeholder="Select end date">
+            <div class="form-group custom-field mb-0">
+              <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingStartDate" value="${startOfWeek}" class="form-control" placeholder=" ">
+              <label for="filterRecurringMeetingStartDate" class="m-0">Start Date</label>
+            </div>
+            <div class="form-group custom-field mb-0">
+              <input onchange="getDatepickerChangeVal(this);" type="text" id="filterRecurringMeetingEndDate" value="${endOfWeek}" class="form-control" placeholder=" ">
+              <label for="filterRecurringMeetingEndDate" class="m-0">End Date</label>
+            </div>
           </div>
 
           <button id="filterRecurringSearchButton" type="submit" onclick="applyRecurringRecordingFilters('${entityId}');" class="btn ml-auto rounded text-white" style="width: max-content; background-color: #027FFF; padding: 10px 20px; font-weight: bold;">Search</button>

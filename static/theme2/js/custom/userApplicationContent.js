@@ -1,4 +1,5 @@
 function renderUserApplicationContent(title){
+    appendUserApplicationCustomCss();
     var html=
         `<div class="app-page-title mb-3 py-2">
             <div class="page-title-wrapper">
@@ -22,49 +23,197 @@ function renderUserApplicationContent(title){
     return html;
 }
 
+function appendUserApplicationCustomCss(){
+    if(typeof $ !== "undefined" && $("#userApplicationCustomCss").length < 1){
+        $("head").append(`<style id="userApplicationCustomCss">${getUserApplicationCustomCss()}</style>`);
+    }
+}
+
+function getUserApplicationCustomCss(){
+    return `
+#userScreeningFilterForm.custom-field-scope .custom-field label:not(.error-msg),
+#userApplicationProfileStatusForm.custom-field-scope .custom-field label:not(.error-msg),
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field label:not(.error-msg){
+    left:25px;
+    z-index:7;
+}
+
+#userScreeningFilterForm.custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+#userScreeningFilterForm.custom-field-scope .custom-field.has-value:has(.select2-container) label:not(.error-msg),
+#userScreeningFilterForm.custom-field-scope .custom-field.is-filled:has(.select2-container) label:not(.error-msg),
+#userScreeningFilterForm.custom-field-scope .custom-field.active:has(.select2-container) label:not(.error-msg),
+#userApplicationProfileStatusForm.custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+#userApplicationProfileStatusForm.custom-field-scope .custom-field.has-value:has(.select2-container) label:not(.error-msg),
+#userApplicationProfileStatusForm.custom-field-scope .custom-field.is-filled:has(.select2-container) label:not(.error-msg),
+#userApplicationProfileStatusForm.custom-field-scope .custom-field.active:has(.select2-container) label:not(.error-msg),
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field.has-value:has(.select2-container) label:not(.error-msg),
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field.is-filled:has(.select2-container) label:not(.error-msg),
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field.active:has(.select2-container) label:not(.error-msg){
+    top:0;
+    transform:translateY(-46%);
+    font-size:12px;
+    font-weight:500;
+    color:var(--custom-field-active);
+    background:var(--custom-field-bg);
+    z-index:8;
+}
+
+#userScreeningFilterForm.custom-field-scope .custom-field .select2-container,
+#userApplicationProfileStatusForm.custom-field-scope .custom-field .select2-container,
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field .select2-container{
+    position:relative;
+    z-index:1;
+    height:44px !important;
+    min-height:44px !important;
+}
+
+#userScreeningFilterForm.custom-field-scope .custom-field .select2-container .select2-selection--single,
+#userApplicationProfileStatusForm.custom-field-scope .custom-field .select2-container .select2-selection--single,
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field .select2-container .select2-selection--single{
+    height:44px !important;
+    min-height:44px !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center !important;
+}
+
+#userScreeningFilterForm.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__rendered,
+#userApplicationProfileStatusForm.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__rendered,
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__rendered{
+    line-height:40px !important;
+    height:40px !important;
+    padding-top:0 !important;
+    padding-bottom:0 !important;
+}
+
+#userScreeningFilterForm.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__arrow,
+#userApplicationProfileStatusForm.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__arrow,
+#userApplicationCommunicationLogsModal .custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__arrow{
+    height:42px !important;
+}
+
+#userScreeningFilterForm .user-application-date-fields{
+    align-items:flex-start;
+}
+
+#userScreeningFilterForm.custom-field-scope .user-application-date-field{
+    flex:1 1 0;
+    min-width:0;
+    margin-bottom:0;
+}
+
+#userApplicationProfileStatusForm.custom-field-scope .custom-field textarea#userApplicationProfileRemarks{
+    height:auto;
+    min-height:88px;
+    padding-top:16px;
+}
+
+#userApplicationCommunicationLogsModal .user-application-upload-field .upload-input{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    opacity:0;
+    cursor:pointer;
+}
+
+#userApplicationCommunicationLogsModal .user-application-upload-field .upload-label{
+    cursor:pointer;
+}
+
+@media (max-width:575.98px){
+    #userScreeningFilterForm .user-application-date-fields{
+        flex-direction:column;
+        gap:0 !important;
+    }
+
+    #userScreeningFilterForm.custom-field-scope .user-application-date-field{
+        margin-bottom:18px;
+    }
+}
+`;
+}
+
+function initUserApplicationSelect2Fields(context){
+    if(typeof $ === "undefined" || !$.fn.select2){
+        return;
+    }
+    var parent = context ? $(context) : $(document);
+    var modalParent = parent.closest(".modal");
+    var select2Configs = {
+        filterCountryId: { placeholder: "Select Country", theme: "bootstrap4" },
+        filterAssignedTo: { placeholder: "Select Assign To", theme: "bootstrap4" },
+        filterAppliedUserRole: { placeholder: "Select Applied User Role", theme: "bootstrap4" },
+        applicantsStatus: { placeholder: "Select Status", theme: "bootstrap4" },
+        filterDateDuration: { placeholder: "Select Duration", theme: "bootstrap4", minimumResultsForSearch: Infinity },
+        eventStatus: { placeholder: "Select Interview Status", theme: "bootstrap4" },
+        userApplicationProfileStatus: { placeholder: "Select Status", theme: "bootstrap4" },
+        assignedToInterview: { placeholder: "Select Assign To", theme: "bootstrap4" },
+        duration: { placeholder: "Select Duration", theme: "bootstrap4", minimumResultsForSearch: Infinity }
+    };
+
+    parent.find("select").each(function(){
+        var select = $(this);
+        var config = select2Configs[select.attr("id")];
+        if(!config){
+            return;
+        }
+        if(!select.hasClass("select2-hidden-accessible")){
+            var options = $.extend({}, config);
+            if(modalParent.length > 0){
+                options.dropdownParent = modalParent;
+            }
+            select.select2(options);
+        }
+        if(typeof refreshCustomFieldState === "function"){
+            refreshCustomFieldState(select.closest(".custom-field"));
+        }
+    });
+}
+
 function userScreeningFilter(){
+    appendUserApplicationCustomCss();
     var html=
-        `<form id="userScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2">
+        `<form id="userScreeningFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2 custom-field-scope">
             <div class="row">
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Name</label>
-                    <input type="text" id="filterName" class="form-control">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
+                    <input type="text" id="filterName" class="form-control" placeholder=" ">
+                    <label for="filterName">Name</label>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Phone</label>
-                    <input type="text" id="filterPhone" class="form-control" onkeydown="return M.digit(event);">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
+                    <input type="text" id="filterPhone" class="form-control" placeholder=" " onkeydown="return M.digit(event);">
+                    <label for="filterPhone">Phone</label>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Email</label>
-                    <input type="text" id="filterEmail" class="form-control">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
+                    <input type="text" id="filterEmail" class="form-control" placeholder=" ">
+                    <label for="filterEmail">Email</label>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Country</label>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
                     <select name="filterCountryId" id="filterCountryId" class="form-control">
                         <option value="0">Select country</option>
                     </select>
+                    <label>Country</label>
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Assigned To</label>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
                     <select id="filterAssignedTo" class="form-control">
                         <option value="">All</option>
                     </select>
+                    <label>Assigned To</label>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Applied User Role</label>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
                     <select name="filterAppliedUserRole" id="filterAppliedUserRole" class="form-control">
                         <option value=""></option>`
                         +getAllHiringRoles('GET-ALL-HIRING-ROLES')
                     html+=`</select>
+                    <label>Applied User Role</label>
                 </div>
                 ${/*<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>No. of records</label>
                     <input type="text" id="pageSize" class="form-control" onkeydown="return M.digit(event);" value="10">
                 </div>*/''}
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                    <label>Status</label>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
                         <option value="">Select Status</option>
                         <option value="Applied">Applied</option>
@@ -79,18 +228,28 @@ function userScreeningFilter(){
                         <option value="Hired">Hired</option>
                         <option value="Reject">Rejected</option>
                     </select>
+                    <label>Status</label>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
-                    <label>Date</label>
-                    <div class="d-flex gap-5">
-                        <select onchange="setFilterDatesAccordingly(this, '#filterStartDate', '#filterEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14">
-                            <option value="Today">Today</option>  
-                            <option value="Week">Week</option>
-                            <option value="Month">Month</option>
-                            <option value="Custom" selected>Custom</option>
-                        </select>
-                        <input type="text" class="form-control" id="filterStartDate" readonly onkeydown="return false" />
-                        <input type="text" class="form-control" id="filterEndDate" readonly onkeydown="return false" />
+                    <label class="mb-2">Date</label>
+                    <div class="d-flex gap-5 user-application-date-fields">
+                        <div class="custom-field user-application-date-field">
+                            <select onchange="setFilterDatesAccordingly(this, '#filterStartDate', '#filterEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14">
+                                <option value="Today">Today</option>  
+                                <option value="Week">Week</option>
+                                <option value="Month">Month</option>
+                                <option value="Custom" selected>Custom</option>
+                            </select>
+                            <label>Duration</label>
+                        </div>
+                        <div class="custom-field user-application-date-field">
+                            <input type="text" class="form-control" id="filterStartDate" placeholder=" " readonly onkeydown="return false" />
+                            <label for="filterStartDate">Start Date</label>
+                        </div>
+                        <div class="custom-field user-application-date-field">
+                            <input type="text" class="form-control" id="filterEndDate" placeholder=" " readonly onkeydown="return false" />
+                            <label for="filterEndDate">End Date</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -158,6 +317,7 @@ function userApplicationTableContent(){
 }
 
 function userApplicationProfileStatusModal(id, status, role, interviewStatus){
+    appendUserApplicationCustomCss();
     var html=
         `<div class="modal right-slide-modal fade" id="userApplicationProfileStatusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog" role="document">
@@ -181,11 +341,10 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                 <tbody></tbody>
                             </table>
                         </div>
-                        <form class="full" autocomplete="off" id="userApplicationProfileStatusForm">`;
+                        <form class="full custom-field-scope" autocomplete="off" id="userApplicationProfileStatusForm">`;
                             if(interviewStatus == "Booked"){
                                 html+=
-                                `<div class="form-group">
-                                    <label>Interview Status</label>
+                                `<div class="form-group custom-field">
                                     <select id="eventStatus" class="form-control" onchange="eventStatuschangeEvent(this, \'${status}\')">
                                         <option value="">Select Interview Status</option>
                                         <option value="COMPLETED">Completed</option>
@@ -193,10 +352,10 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                         <option value="RESCHEDULE">Reschedule</option>
                                         <option value="NOTATTENDED">No Show</option>
                                     </select>
+                                    <label>Interview Status</label>
                                 </div>`
                             }
-                            html+=`<div class="form-group">
-                                <label for="userApplicationProfileStatus" class="control-label">Application Status:</label>
+                            html+=`<div class="form-group custom-field">
                                 <select class="form-control" name="userApplicationProfileStatus" id="userApplicationProfileStatus" onchange="applicantsViewAssignToListForInterview('${role}');">
                                     <option value="0">Select Status</option>`
                                     if(TEACHER_SUB_ROLES.includes(role)){
@@ -282,26 +441,27 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                         html+=`<option value="Update Assign To">Update Assign To</option>`;
                                     }
                                html+=`</select>
+                                <label for="userApplicationProfileStatus" class="control-label">Application Status:</label>
                             </div>
                             <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
                                 <div class="row">
-                                    <div class="col-md-6 col-12">
-                                        <label>Assigned To</label>
+                                    <div class="col-md-6 col-12 custom-field">
                                         <select id="assignedToInterview" class="form-control"></select>
+                                        <label>Assigned To</label>
                                     </div>
 
-                                    <div class="col-md-6 col-12">
+                                    <div class="col-md-6 col-12 custom-field">
+                                        <input type="text" class="form-control" id="interviewValidDate" placeholder=" " readonly onkeydown="return false" disabled />
                                         <label for="interviewValidDate" class="control-label">Interview link is valid till</label>
-                                        <input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled />
                                     </div>
                                 </div>
                             </div>
-                            <div id="durationDiv" class="form-group" style="display: none;">
-                                <label>Duration</label>
+                            <div id="durationDiv" class="form-group custom-field" style="display: none;">
                                 <select id="duration" class="form-control">
                                     <option value="15">15 Min</option>
                                     <option value="30">30 Min</option>
                                 </select>
+                                <label>Duration</label>
                             </div>
 
                             <div id="finalInterviewSlotsWrapper" style="display: none;"></div>
@@ -337,9 +497,9 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="message-text" class="control-label">Remarks:</label>
-                                <textarea id="userApplicationProfileRemarks" class="form-control px-2" minlength="25" maxlength="200" oninput="wordsCountValidate(this, \'userApplicationProfileRemarksCounter\');" required></textarea>
+                            <div class="form-group custom-field">
+                                <textarea id="userApplicationProfileRemarks" class="form-control px-2" placeholder=" " minlength="25" maxlength="200" oninput="wordsCountValidate(this, \'userApplicationProfileRemarksCounter\');" required></textarea>
+                                <label for="userApplicationProfileRemarks" class="control-label">Remarks:</label>
                                 <small id="userApplicationProfileRemarksCounter" class="text-muted">0 / 25</small>
                                 <p id="remarksPara" class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold d-none">Note- Remarks will be sent to the applicant via email.</p>
                             </div>
@@ -383,6 +543,7 @@ function viewApplicantsAttachementModalContent(){
 }
 
 function communicationLogsContentForUserApplication(userId, useRole, callFrom){
+    appendUserApplicationCustomCss();
     var html=
         `<div class="modal fade show" id="userApplicationCommunicationLogsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
             <div class="modal-dialog modal-xl" role="document">
@@ -394,12 +555,12 @@ function communicationLogsContentForUserApplication(userId, useRole, callFrom){
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form autocomplete="off" id="userScreeningProfileStatusForm">
+                        <form autocomplete="off" id="userScreeningProfileStatusForm" class="custom-field-scope">
                             <div class="row">
                                 <div class="col-lg-4 col-md-6 col-sm-12 col-12">
-                                    <div class="position-relative form-group">
-                                        <label for="title" class="">Remark Title</label>
-                                        <input name="logTitle" id="logTitle" placeholder="Title" type="text" value="" class="form-control">
+                                    <div class="position-relative form-group custom-field">
+                                        <input name="logTitle" id="logTitle" placeholder=" " type="text" value="" class="form-control">
+                                        <label for="logTitle" class="">Remark Title</label>
                                     </div>
                                 </div>
                                 ${/*<div class="col-lg-4 col-md-6 col-sm-12 col-12">
@@ -410,7 +571,7 @@ function communicationLogsContentForUserApplication(userId, useRole, callFrom){
                                 </div>*/''}
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-1 mt-1">
                                     <label class="m-0 full">&nbsp;Attachment (if any)</label>
-                                    <div class="full position-relative" 
+                                    <div class="full position-relative user-application-upload-field" 
                                         id="fileuploadLog7div" 
                                         uploaded="" 
                                         fileName="" 
@@ -605,15 +766,15 @@ function addQuestionsModal(){
                                 <a class="nav-link font-weight-semi-bold" id="add-tab" data-toggle="tab" href="#addQuestionsTab" role="tab">Add Question</a>
                             </li>
                         </ul>
-                        <div class="tab-content mt-3">
+                        <div class="tab-content mt-3 custom-field-scope">
                             <div class="tab-pane fade show active" id="viewQuestionsTab" role="tabpanel">
-                                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 text-left p-0">
-                                    <label>Filter Role</label>
+                                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 text-left p-0 custom-field">
                                     <select name="filterRoleType" onchange="getAllQuestions();" id="filterRoleType" class="form-control">
                                         <option value="">All</option>
                                         <option value="Common">Common</option>`
                                             +getAllHiringRoles('GET-ALL-HIRING-ROLES')
                                     html+=`</select>
+                                    <label for="filterRoleType">Filter Role</label>
                                 </div>
                                 <p class="mt-2 mb-0 text-danger font-weight-semi-bold text-left px-2 py-1 rounded font-12">Note: <span class="font-weight-bold">*</span> are mandatory questions</p>
                                 <div id="allQuestionsWrapper" style="max-height: 60vh; overflow-y: auto;"></div>
@@ -624,13 +785,13 @@ function addQuestionsModal(){
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="addQuestionsTab" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
-                                        <label>User Role</label>
+                                <div class="row custom-field-scope">
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left custom-field">
                                         <select name="roleType" id="roleType" class="form-control">
                                             <option value="Common">Common</option>`
                                                 +getAllHiringRoles('GET-ALL-HIRING-ROLES')
                                         html+=`</select>
+                                        <label for="roleType">User Role</label>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 text-left">
                                         <label>Question Type</label><br>
@@ -641,9 +802,9 @@ function addQuestionsModal(){
                                             <input type="radio" name="questionType" value="N"> Non-Mandatory
                                         </label>
                                     </div>
-                                    <div class="col-12 mt-3 text-left">
-                                        <label>Question</label>
-                                        <textarea id="questionText" class="form-control" rows="3"></textarea>
+                                    <div class="col-12 mt-3 text-left custom-field">
+                                        <textarea id="questionText" class="form-control" rows="3" placeholder=" "></textarea>
+                                        <label for="questionText">Question</label>
                                     </div>
                                     <div class="col-12 mt-3">
                                         <button class="btn btn-primary float-right" onclick="saveQuestion('addQuestionsModal')">Save Question</button>
@@ -744,33 +905,32 @@ function resendInterviewModalContent(userId, mailName, status){
                     </div>
                     <div class="modal-body">
 
-                        <form class="row ${status == 'Final Round of Interview' ? '' : 'justify-content-center'}" id="resendInterviewForm">`
+                        <form class="row ${status == 'Final Round of Interview' ? '' : 'justify-content-center'} custom-field-scope" id="resendInterviewForm">`
                             if(status == "Final Round of Interview"){
                                 html+=
-                                `<div class="col-md-6 col-12">
-                                    <label>Assigned To</label>
+                                `<div class="col-md-6 col-12 custom-field">
                                     <select id="assignedToInterview" class="form-control"></select>
+                                    <label for="assignedToInterview">Assigned To</label>
                                 </div>
-                                <div class="col-md-6 col-12">
-                                    <label>Interview Link is valid till <i class="fa fa-exclamation-triangle text-danger ml-2 font-20 d-none" aria-hidden="true"></i></label>
-                                    <input type="text" class="form-control" id="interviewBookLinkExpireDate" readonly onkeydown="return false"/>
+                                <div class="col-md-6 col-12 custom-field">
+                                    <input type="text" class="form-control" id="interviewBookLinkExpireDate" readonly onkeydown="return false" placeholder=" "/>
+                                    <label for="interviewBookLinkExpireDate">Interview Link is valid till <i class="fa fa-exclamation-triangle text-danger ml-2 font-20 d-none" aria-hidden="true"></i></label>
                                 </div>
-                                <div class="col-md-6 col-12 mt-1">
-                                    <label>Duration</label>
+                                <div class="col-md-6 col-12 mt-1 custom-field">
                                     <select id="duration" class="form-control" disabled>
                                         <option value="30">30 Min</option>
                                     </select>
+                                    <label for="duration">Duration</label>
                                 </div>
 
                                 <div id="finalInterviewSlotsWrapper" style="display: none;" class="col-12 mt-1"></div>`
                             }else{
                                 html+=
-                                `<div class="col-12 text-center">
-                                    <label>Interview Link is valid till:</label>
-                                </div>
-                                
-                                <div class="col-12 d-flex justify-content-center align-items-center">
-                                    <input type="text" class="form-control col-4" id="interviewBookLinkExpireDate" readonly onkeydown="return false"/>
+                                `<div class="col-12 d-flex justify-content-center align-items-center">
+                                    <div class="custom-field col-4 mb-0">
+                                        <input type="text" class="form-control" id="interviewBookLinkExpireDate" readonly onkeydown="return false" placeholder=" "/>
+                                        <label for="interviewBookLinkExpireDate">Interview Link is valid till:</label>
+                                    </div>
                                     <i class="fa fa-exclamation-triangle text-danger ml-2 font-26 d-none" aria-hidden="true"></i>
                                 </div>`
                             }

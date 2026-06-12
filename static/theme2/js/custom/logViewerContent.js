@@ -70,41 +70,53 @@ function getLogViewerContent() {
 	<div class="main-card mb-3 card">
 		<div class="card-body">
 			<div class="log-console-toolbar">
-				<form id="logViewerSearchForm" class="row">
+				<form id="logViewerSearchForm" class="row custom-field-scope">
 					<div class="row col-12 log-console-filter-row m-0 p-0">
 						<div class="col-lg-2 col-md-6 col-sm-12">
-							<label for="logViewerRegistryFile">Registry File</label>
-							<select id="logViewerRegistryFile" class="form-control">
-								<option value="custom">Custom File</option>
-								<option value="configured">Configured Log File</option>
-							</select>
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<select id="logViewerRegistryFile" class="form-control">
+									<option value="custom">Custom File</option>
+									<option value="configured">Configured Log File</option>
+								</select>
+								<label for="logViewerRegistryFile">Registry File</label>
+							</div>
 						</div>
 						<div class="col-lg-3 col-md-6 col-sm-12">
-							<label for="logViewerPath">Log file path</label>
-							<input type="text" class="form-control" id="logViewerPath"
-								placeholder="/usr/local/src/logs/IS-LOGS/IS-DEBUG.log" autocomplete="off">
-							<select id="logViewerPathSelect" class="form-control d-none">
-								<option value="/usr/local/src/logs/IS-LOGS/IS-DEBUG.log">/usr/local/src/logs/IS-LOGS/IS-DEBUG.log</option>
-								<option value="/usr/local/src/logs/LEAD-LOGS/LEAD-DEBUG.log">/usr/local/src/logs/LEAD-LOGS/LEAD-DEBUG.log</option>
-								<option value="/usr/local/src/logs/middleware/9100/middleware.log">/usr/local/src/logs/middleware/9100/middleware.log</option>
-								<option value="/usr/local/src/logs/middleware/9200/middleware.log">/usr/local/src/logs/middleware/9200/middleware.log</option>
-							</select>
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<select id="logViewerPathSelect" class="form-control d-none">
+									<option value="/usr/local/src/logs/IS-LOGS/IS-DEBUG.log">/usr/local/src/logs/IS-LOGS/IS-DEBUG.log</option>
+									<option value="/usr/local/src/logs/LEAD-LOGS/LEAD-DEBUG.log">/usr/local/src/logs/LEAD-LOGS/LEAD-DEBUG.log</option>
+									<option value="/usr/local/src/logs/middleware/9100/middleware.log">/usr/local/src/logs/middleware/9100/middleware.log</option>
+									<option value="/usr/local/src/logs/middleware/9200/middleware.log">/usr/local/src/logs/middleware/9200/middleware.log</option>
+								</select>
+								<input type="text" class="form-control" id="logViewerPath"
+									placeholder=" " autocomplete="off">
+								<label for="logViewerPath">Log file path</label>
+							</div>
 						</div>
 						<div class="col-lg-2 col-md-6 col-sm-12">
-							<label for="logViewerSearchTerm">Search Term</label>
-							<input type="text" class="form-control" id="logViewerSearchTerm" placeholder="Search text">
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" class="form-control" id="logViewerSearchTerm" placeholder=" ">
+								<label for="logViewerSearchTerm">Search Term</label>
+							</div>
 						</div>
 						<div class="col-lg-1 col-md-6 col-sm-12">
-							<label for="logViewerResultLines">Results lines</label>
-							<input type="number" class="form-control" id="logViewerResultLines" min="1" max="1000" value="10">
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<input type="number" class="form-control" id="logViewerResultLines" min="1" max="1000" value="10" placeholder=" ">
+								<label for="logViewerResultLines">Results lines</label>
+							</div>
 						</div>
 						<div class="col-lg-2 col-md-6 col-sm-12">
-							<label for="logViewerStartDateTime">Start DateTime</label>
-							<input type="datetime-local" class="form-control" id="logViewerStartDateTime">
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<input type="datetime-local" class="form-control" id="logViewerStartDateTime" placeholder=" ">
+								<label for="logViewerStartDateTime">Start DateTime</label>
+							</div>
 						</div>
 						<div class="col-lg-2 col-md-6 col-sm-12">
-							<label for="logViewerEndDateTime">End DateTime</label>
-							<input type="datetime-local" class="form-control" id="logViewerEndDateTime">
+							<div class="position-relative custom-field mb-2 mt-3 p-0">
+								<input type="datetime-local" class="form-control" id="logViewerEndDateTime" placeholder=" ">
+								<label for="logViewerEndDateTime">End DateTime</label>
+							</div>
 						</div>
 					</div>
 					<div class="col-lg-12 mt-1 pl-0">

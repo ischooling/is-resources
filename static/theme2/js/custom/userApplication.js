@@ -57,6 +57,7 @@ async function userApplicationProfileOnloadFunction(){
         }
         $("#applicantsStatus").html(html).trigger("change");
     });
+    initUserApplicationSelect2Fields("#userScreeningFilterForm");
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
     loadUserApplicationData(false, "onLoad");
@@ -352,6 +353,7 @@ function openUpdateStatusModalUserApplication(id, status, role, interviewStatus,
         $(this).append($element);
         $(this).trigger("change");
     });
+    initUserApplicationSelect2Fields("#userApplicationProfileStatusModal");
     if(meetingId!=''){
         var trRow =
             `<tr>
@@ -896,6 +898,7 @@ function openCommunicationLogsModalForUserApplication(userId, userRole, callFrom
         $("#userApplicationCommunicationLogsModal").remove();
     }
     $("body").append(communicationLogsContentForUserApplication(userId, userRole, callFrom));
+    initUserApplicationSelect2Fields("#userApplicationCommunicationLogsModal");
     initEditor(1, 'commentEditorJA','Enter comments', false, ckEditorCountValidate);
     $("#fileuploadLog7").on("change",function(){
         var attachment = $("#fileuploadLog7").val().split("\\")[2]

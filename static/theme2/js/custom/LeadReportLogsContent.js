@@ -4,6 +4,7 @@ async function renderCounselorLeadLogsDashboard(title, roleAndModule, SCHOOL_ID,
 	OBJECT_RIGHTS = objectRights;
 
 	$('#dashboardContentInHTML').html(getLeadLogsMasterContent(title));
+	refreshCustomFieldState('#dashboardContentInHTML');
 	initializeLeadReportDatepickers();
 	initializeLeadLogsPage();
 }
@@ -42,15 +43,15 @@ function getLeadLogsUserMappingModal() {
 	html += '				</button>';
 	html += '			</div>';
 	html += '			<div class="modal-body">';
-	html += '				<div id="leadLogsUserMappingForm">';
+	html += '				<div id="leadLogsUserMappingForm" class="custom-field-scope">';
 	html += '					<input type="hidden" id="leadLogsUserMappingId" name="leadLogsUserMappingId" value="0" />';
-	html += '					<div class="form-group">';
-	html += '						<label class="font-weight-bold mb-1">User</label>';
+	html += '					<div class="form-group custom-field">';
 	html += '						<select class="form-control" id="leadLogsUserId" name="leadLogsUserId"></select>';
+	html += '						<label class="font-weight-bold mb-0">User</label>';
 	html += '					</div>';
-	html += '					<div class="form-group mb-0">';
-	html += '						<label class="font-weight-bold mb-1">PBX ID</label>';
+	html += '					<div class="form-group mb-0 custom-field">';
 	html += '						<input type="text" class="form-control" id="leadLogsPbxId" name="leadLogsPbxId" placeholder="Enter PBX ID e.g. Alwin (109)" />';
+	html += '						<label class="font-weight-bold mb-0">PBX ID</label>';
 	html += '					</div>';
 	html += '				</div>';
 	html += '				<div id="leadLogsUserMappingListSection" class="hidden">';
@@ -118,18 +119,19 @@ function getLeadLogsCard() {
 }
 
 function getLeadLogsFiltersAndTable() {
-	return `<div class="row align-items-end">
+	return `<div class="row align-items-end custom-field-scope">
 				<input type="hidden" id="searchLeadCounselorReportType" name="searchLeadCounselorReportType" value="LOGS" />
 				<div class="col-12 col-md-6 col-lg-2 mb-2">
 					<div class="form-control bg-light text-uppercase font-weight-bold">Lead Logs</div>
 				</div>
-				<div class="col-12 col-md-6 col-lg-2 mb-2">
+				<div class="col-12 col-md-6 col-lg-2 mb-2 custom-field">
 					<select class="form-control" id="searchLeadCounselorType" name="searchLeadCounselorType">
 						<option value="DAY">Today</option>
 						<option value="WEEK">Week</option>
 						<option value="MONTH">Month</option>
 						<option value="CUSTOM">Custom</option>
 					</select>
+					<label class="m-0 d-block mb-0">View Type</label>
 				</div>
 				<div class="col-12 col-md-6 col-lg-1 mb-2" id="zadarmaCallSync">
 					<input type="text" name="syncZadarmaDate" id="syncZadarmaDate" class="form-control hidden" readonly onkeydown="return false" />
@@ -137,15 +139,15 @@ function getLeadLogsFiltersAndTable() {
 						<i class="fas fa-sync" id="callSyncRotate"></i>
 					</button>
 				</div>
-				<div class="col-12 col-lg-5 mb-2">
+				<div class="col-12 col-lg-5 mb-2 custom-field-scope">
 					<div class="row align-items-end">
-						<div class="col-12 col-md-5 hidecounselorLead mb-2 mb-md-0">
-							<label class="m-0 d-block mb-1">Start Date</label>
+						<div class="col-12 col-md-5 hidecounselorLead mb-2 mb-md-0 custom-field">
 							<input type="text" name="counselorStartDate" id="counselorStartDate" class="form-control" readonly onkeydown="return false" />
+							<label class="m-0 d-block mb-0">Start Date</label>
 						</div>
-						<div class="col-12 col-md-5 hidecounselorLead mb-2 mb-md-0">
-							<label class="m-0 d-block mb-1">End Date</label>
+						<div class="col-12 col-md-5 hidecounselorLead mb-2 mb-md-0 custom-field">
 							<input type="text" name="counselorEndDate" id="counselorEndDate" class="form-control" readonly onkeydown="return false" />
+							<label class="m-0 d-block mb-0">End Date</label>
 						</div>
 						<div class="col-12 col-md-2 hidecounselorLead">
 							<button class="btn btn-primary btn-block" id="btnLeadCounselorWiseSubmit">Submit</button>

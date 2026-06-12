@@ -1,6 +1,7 @@
 
 async function renderDeletedUserListDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE){
 	ROLE_MODULE=roleAndModule;
+	addDeletedFilterCustomFieldCss();
 	var html=await getDeletedUserListContent(title);
     $('#dashboardContentInHTML').html(html);
 	callRoleDropdown("deletedFilter",'','roleUser');
@@ -19,11 +20,39 @@ async function renderDeletedUserListDashboard(title, roleAndModule, SCHOOL_ID, U
 
 	$("#deletedFilter #roleUser").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#deletedFilter"
+		dropdownParent:"#deletedFilter",
+		width:"100%"
 	});
+	if(typeof refreshCustomFieldState === 'function'){
+		refreshCustomFieldState($("#deletedFilter"));
+		setTimeout(function(){
+			refreshCustomFieldState($("#deletedFilter"));
+		}, 300);
+	}
 	$('.show-filter').on('click', function(){
 		$('.filter-fields').stop().slideToggle();
 	});
+}
+
+function addDeletedFilterCustomFieldCss(){
+	if($("#deletedFilterCustomFieldCss").length < 1){
+		$("head").append(`<style id="deletedFilterCustomFieldCss">
+			#deletedFilter .custom-field .select2.select2-container--bootstrap4,
+			#deletedFilter .custom-field .select2-container{
+				position:relative;
+				width:100% !important;
+				z-index:1 !important;
+			}
+			#deletedFilter .custom-field label:not(.error-msg){
+				position:absolute;
+				z-index:20 !important;
+				background:#fff;
+			}
+			#deletedFilter .custom-field .select2-selection__rendered{
+				line-height:26px !important;
+			}
+		</style>`);
+	}
 }
 
 function getDeletedUserListContent(title){
@@ -92,32 +121,40 @@ function getDeltedUserFilterForm(){
 	var html=''
 	html+=`<div class="filter-wrapper">
 		<button class="btn btn-sm btn-primary float-right show-filter"><i class="fa fa-filter"></i>&nbsp;Filter</button>
-		<form name="deletedFilter" id="deletedFilter" action="javascript:void(0)">
+		<form name="deletedFilter" id="deletedFilter" class="custom-field-scope" action="javascript:void(0)">
 			<input type="hidden" name="userClickFrom" id="userClickFrom" value="common" />
 			<div class="filter-fields rounded">
 				<div class="row px-3">
 				<div class="col-md-4 col-sm-6 col-12">
-					<label>Role Type</label>
-					<select name="roleUser" id="roleUser" class="form-control" >
-						<option value="0">Select Role</option>
-					</select>
+					<div class="custom-field">
+						<select name="roleUser" id="roleUser" class="form-control" >
+							<option value="0">Select Role</option>
+						</select>
+						<label for="roleUser">Role Type</label>
+					</div>
 				</div>
 				<div class="col-md-3 col-sm-6 col-12">
-					<label>Email ID</label>
-					<input type="text" name="emailId" id="emailId" class="form-control" value="" maxlength="40"  />
+					<div class="custom-field">
+						<input type="text" name="emailId" id="emailId" class="form-control" value="" maxlength="40" placeholder=" " />
+						<label for="emailId">Email ID</label>
+					</div>
 				</div>
 				<div class="col-md-3 col-sm-6 col-12">
-					<label>User Name</label>
-					<input type="text" name="userName" id="userName" class="form-control" value=""  />
+					<div class="custom-field">
+						<input type="text" name="userName" id="userName" class="form-control" value="" placeholder=" " />
+						<label for="userName">User Name</label>
+					</div>
 				</div>
 				
 				<div class="col-md-3 col-sm-6 col-12">
-					<label>Page Size</label>
-					<input type="text" name="pageSize"  id="pageSize" class="form-control" value="10"  />
+					<div class="custom-field">
+						<input type="text" name="pageSize"  id="pageSize" class="form-control" value="10" placeholder=" " />
+						<label for="pageSize">Page Size</label>
+					</div>
 				</div>
 				<div class="col-md-12 col-sm-12 col-12 mt-2 text-right">
-					<button class="btn btn-danger  pr-4 pl-4 mr-2" onclick="advanceSearchDeleteReset('deletedFilter');"><i class="fa fa-undo"></i>&nbsp;Reset</button>
-					<button class="btn btn-success  pr-4 pl-4" id="deletedSearchUsers"><i class="fa fa-search"></i>&nbsp;Search</button>
+					<button type="button" class="btn btn-danger  pr-4 pl-4 mr-2" onclick="advanceSearchDeleteReset('deletedFilter'); if(typeof refreshCustomFieldState === 'function'){setTimeout(function(){refreshCustomFieldState($('#deletedFilter'));}, 0);}"><i class="fa fa-undo"></i>&nbsp;Reset</button>
+					<button type="button" class="btn btn-success  pr-4 pl-4" id="deletedSearchUsers"><i class="fa fa-search"></i>&nbsp;Search</button>
 				</div>
 			</div>
 			</div>

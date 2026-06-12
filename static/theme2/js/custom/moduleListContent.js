@@ -16,10 +16,25 @@ async function renderModuleListDashboard(title, roleAndModule, SCHOOL_ID, USER_I
 			}
 //}
 	});
-	$("#moduleFormModal #parentModule").select2({
+	$("#moduleFormModal #moduleType, #moduleFormModal #parentModule").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#moduleFormModal"
+		dropdownParent:"#moduleFormModal",
+		width:"100%"
 	});
+	$("#moduleFormModal").off('shown.bs.modal.moduleFieldSync').on('shown.bs.modal.moduleFieldSync', function () {
+		if(typeof refreshCustomFieldState === 'function'){
+			refreshCustomFieldState($("#moduleFormModal"));
+		}
+	});
+	$("#moduleFormModal").off('change.moduleFieldSync select2:select.moduleFieldSync select2:clear.moduleFieldSync', '#moduleType, #parentModule, #moduleActive');
+	$("#moduleFormModal").on('change.moduleFieldSync select2:select.moduleFieldSync select2:clear.moduleFieldSync', '#moduleType, #parentModule, #moduleActive', function () {
+		if(typeof refreshCustomFieldState === 'function'){
+			refreshCustomFieldState($("#moduleFormModal"));
+		}
+	});
+	if(typeof refreshCustomFieldState === 'function'){
+		refreshCustomFieldState($("#moduleFormModal"));
+	}
 
 }
 
@@ -31,10 +46,14 @@ function moduleFormContentModal(){
 		$('#moduleFormModal #parentModule').val('');
 		/* $('#moduleFormModal #orderSet').val(''); */
 		$('#moduleFormModal #moduleActive').val('Y');
+		$('#moduleFormModal #moduleType, #moduleFormModal #parentModule, #moduleFormModal #moduleActive').trigger('change').trigger('change.select2');
 		$("#standardDiv").hide();
 		$("#course").hide();
 		$("#placementCourse").hide();
 		$("#placementGradeDiv").hide();
+		if(typeof refreshCustomFieldState === 'function'){
+			refreshCustomFieldState($("#moduleFormModal"));
+		}
 		$('#moduleFormModal').modal('show');
 	}
 function getModuleContent(title){
@@ -136,7 +155,6 @@ function dataPagging(datalimit, updated){
 	}
 	return html;
 }
-
 function getModuleAddEditPopup(){
 	var html=''
 	html+=`<div class="modal fade " id="moduleFormModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" data-backdrop="static">
@@ -149,61 +167,59 @@ function getModuleAddEditPopup(){
 						</button>
 					</div>
 					<div class="modal-body">
-						<form autocomplete="off" id="moduleFormId">
+						<form autocomplete="off" id="moduleFormId" class="custom-field-scope">
 						<input type="hidden" name="moduleId" id="moduleId" value="" />
 							<div class="row">
 								<div class="col-md-6">
-									<div class="form-group">
-										<label for="moduleName" class="control-label">Module Name<span style="color: red;">*</span></label> 
-										<input type="text" name="moduleName" id="moduleName" class="form-control"  required="required">
+									<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+										<input type="text" name="moduleName" id="moduleName" class="form-control" required="required" placeholder=" ">
+										<label for="moduleName">Module Name<span style="color: red;">*</span></label>
 									</div>
 								</div>
 								<div class="col-md-6">
-									<div class="form-group">
-										<label for="pageLink" class="control-label" >Page Link <span style="color: red;">*</span></label> 
-										<input type="text" name="pageLink" id="pageLink" class="form-control"  required="required">
+									<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+										<input type="text" name="pageLink" id="pageLink" class="form-control" required="required" placeholder=" ">
+										<label for="pageLink">Page Link <span style="color: red;">*</span></label>
 									</div>
 								</div>
 								<div class="col-md-6">
-									<div class="form-group">
-										<label for="moduleIcon" class="control-label" >Module Icon <span style="color: red;">*</span></label> 
-			                            <input type="text" name="moduleIcon" id="moduleIcon" class="form-control"  required="required">
+									<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+										<input type="text" name="moduleIcon" id="moduleIcon" class="form-control" required="required" placeholder=" ">
+			                            <label for="moduleIcon">Module Icon <span style="color: red;">*</span></label>
 									</div>
 								</div>
 								<div class="col-md-6">
-									<div class="form-group">
-										<label for="email" class="control-label" >Module Type <span style="color: red;">*</span></label> 
+									<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 											<select class="form-control" name="moduleType" id="moduleType" required="required">
 				                                <option value="">Select Module Type</option>
 				                                <option value="M">Main Module</option>
 				                                <option value="S">Sub Module</option>
 				                            </select>
+										<label for="moduleType">Module Type <span style="color: red;">*</span></label>
 									</div>
 								</div>
 								
 								 <div class="col-md-6">
-									<div class="form-group">
-										<label class="control-label">Parent Module<span style="color: red;">*</span></label> 
+									<div class="input-group position-relative custom-field module-parent-field mb-2 mt-3 p-0">
 										<select class="form-control" name="parentModule" id="parentModule">
 			                            </select> 
+										<label for="parentModule">Parent Module<span style="color: red;">*</span></label>
 									</div>
 								</div> 
 								<div class="col-md-6" >
-									<div class="form-group" >
-										<label class="control-label">Order Number<span style="color: red;">*</span></label> 
-			                             <input type="text" name="orderSet" id="orderSet" class="form-control"   disabled>  
+									<div class="input-group position-relative custom-field mb-2 mt-3 p-0" >
+			                             <input type="text" name="orderSet" id="orderSet" class="form-control" placeholder=" " disabled>  
+										<label for="orderSet">Order Number<span style="color: red;">*</span></label>
 									</div>
 								</div>
 								<div class="col-md-6">
-									<div class="form-group">
-										<label for="email" class="control-label"
-											>Status <span
-											style="color: red;">*</span></label> 
+									<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 											<select class="form-control"  name="moduleActive" id="moduleActive" disabled>
-					                        	<option selected >Select Status</option>
+					                        	<option value="" selected>Select Status</option>
 					                            <option value="Y">Active</option>
 					                            <option value="N">Inactive</option>
 					                        </select>
+										<label for="moduleActive">Status <span style="color: red;">*</span></label>
 									</div>
 								</div>
 							</div>

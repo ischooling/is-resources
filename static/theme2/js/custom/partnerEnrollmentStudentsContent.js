@@ -78,7 +78,7 @@ function partnerEnrollmentCards(){
 function partnerEnrollFilterForm(){
 	var html=
         `<form id="partnerEnrollFilterForm" style="display:none">
-            <div class="col-12 mb-2 border rounded-10 pb-1 pt-4 px-4  mb-4 bg-light-primary">
+            <div class="col-12 mb-2 border rounded-10 pb-1 pt-4 px-4  mb-4 ">
                 <div class="row">
                     <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12">
                         <label class="full text-primary">Select School Name</label>

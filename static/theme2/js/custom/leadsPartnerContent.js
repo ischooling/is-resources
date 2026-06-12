@@ -265,7 +265,7 @@ function getCreatePartnerContent(buttonTitle){
 		'<div class="tab-pane active p-4" id="createPartner" role="tabpanel">'
 			+'<div class="col-xl-5 mx-auto">'
 				+'<div class="p-1 bg-light-primary border border-primary rounded-10 card">'
-					+'<form class="col-12 mt-2 mb-2" method="post" id="partnerUserB2BSaveForm" action="javascript:void(0);">'
+					+'<form class="col-12 mt-2 mb-2 custom-field-scope" method="post" id="partnerUserB2BSaveForm" action="javascript:void(0);">'
 						+'<input type="hidden" name="leadId" id="leadId" value="0" />'
 						+'<input type="hidden" name="rawLeadId" id="rawLeadId" value="0" />'
 						+'<input type="hidden" name="leadType" id="leadType" value="B2B" />'
@@ -273,43 +273,61 @@ function getCreatePartnerContent(buttonTitle){
 						+'<input type="hidden" name="pCountryCode" id="pCountryCode" value="" />'
 						+'<div class="row">'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">First Name<sub class="text-danger">*</sub></label>'
-								+'<input type="text" name="fname" id="fname" value=""   class="form-control" maxlength="100" disabled>'
+							+'<div class="form-group custom-field mb-2">'
+								+'<input type="text" name="fname" id="fname" value=""   class="form-control" maxlength="100" disabled placeholder=" ">'
+							+'<label for="fname">First Name*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Middle Name</label>'
-								+'<input type="text" name="mname" id="mname" value=""  class="form-control" maxlength="100">'
+							+'<div class="form-group custom-field mb-2">'
+								+'<input type="text" name="mname" id="mname" value=""  class="form-control" maxlength="100" placeholder=" ">'
+							+'<label for="mname">Middle Name</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Last Name</label>'
-								+'<input type="text" name="lname" id="lname" value=""  class="form-control" maxlength="100">'
+							+'<div class="form-group custom-field mb-2">'
+								+'<input type="text" name="lname" id="lname" value=""  class="form-control" maxlength="100" placeholder=" ">'
+							+'<label for="lname">Last Name</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Email<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<input type="email" name="email" id="email" class="form-control" value="" disabled>'
+							+'<label for="email">Email*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label>Mobile No.<sub class="text-danger">*</sub></label> '
-								+'<input type="text" name="phoneNo" id="phoneNo" class="form-control" value="" maxlength="15" disabled />'
+							+'<div class="form-group custom-field mb-2">'
+								+'<input type="text" name="phoneNo" id="phoneNo" class="form-control" value="" maxlength="15" disabled placeholder=" "/>'
+							+'<label for="phoneNo">Mobile No.*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Country<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="countryId" id="countryId" class="form-control" disabled></select>'
+							+'<label for="countryId">Country*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">State<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="stateId" id="stateId" class="form-control" disabled></select>'
+							+'<label for="stateId">State*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">City<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="cityId" id="cityId" class="form-control" disabled></select>'
+							+'<label for="cityId">City*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Location Partner Type<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="partnerType" id="partnerType" class="form-control"></select>'
+							+'<label for="partnerType">Location Partner Type*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Partner Type<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="originalPartnerType" id="originalPartnerType" class="form-control">'
 									+'<option value="">Select Partner Type</option>'
 									+'<option value="GP">Enrollment Partner</option>'
@@ -317,11 +335,15 @@ function getCreatePartnerContent(buttonTitle){
 									// +'<option value="RP">Reseller Partner</option>'
 									+'<option value="EPER">Enrollment Partner with Enrollment Rights</option>'
 								+'</select>'
+							+'<label for="originalPartnerType">Partner Type*</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">TimeZone<sub class="text-danger">*</sub></label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="originalTimezone" id="originalTimezone" class="form-control">'
 								+'</select>'
+							+'<label for="originalTimezone">TimeZone*</label>'
+							+'</div>'
 							+'</div>';
 							// +'<div class="col-12 mb-2">'
 							// 	+'<label class="m-0">Commision Payout</label>'
@@ -331,25 +353,31 @@ function getCreatePartnerContent(buttonTitle){
 							// 	+'</select>'
 							// +'</div>'
 							html+='<div class="col-12 mb-2">'
-								+'<label class="m-0">White Label</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="whiteLabel" id="whiteLabel" class="form-control">'
 									+'<option value="NWL">No white - labeling '+SCHOOL_NAME+' Colors and Logo</option>'
 									+'<option value="WLWC">With White Label Custom Colors and Logo</option>'
 								+'</select>'
+							+'<label for="whiteLabel">White Label</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Enrolling Students</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="enrollingStudent" id="enrollingStudent" class="form-control">'
 									+'<option value="OWN">For their own school or academy</option>'
 									+'<option value="FIS">For '+SCHOOL_NAME+'</option>'
 								+'</select>'
+							+'<label for="enrollingStudent">Enrolling Students</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Default Fee Structure</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="defaultFeeStructure" id="defaultFeeStructure" disabled class="form-control">'
 									+'<option value="is">International Schooling</option>'
 									+'<option value="AYO">Add Your Own</option>'
 								+'</select>'
+							+'<label for="defaultFeeStructure">Default Fee Structure</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 text-right">'
 								+'<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="createUserB2B">'+buttonTitle+'</button>'
@@ -385,10 +413,10 @@ function getAddFormContent(partnerType){
 		'<div class="tab-pane active" id="addForm" role="tabpanel">'
 			+'<div class="col-xl-5 mt-2 mb-2 mx-auto">'
 				+'<div class="p-1 bg-light-primary border border-primary rounded-10 card">'	
-					+'<form class="col-12 mt-2 mb-2" id="saveCommissionRateForm" autocomplete="off" action="javascript:void(0);">'
+					+'<form class="col-12 mt-2 mb-2 custom-field-scope" id="saveCommissionRateForm" autocomplete="off" action="javascript:void(0);">'
 						+'<div class="row">'
 							+'<div class="col-12 mb-2 pr-0">'
-								+'<label class="m-0">Lead Provided By Partner</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<div class="d-flex flex-wrap">'
 									+'<div class="col-9 mb-2 pl-0">'
 										+'<select name="byPartnerType" id="byPartnerType" class="form-control">'
@@ -397,12 +425,14 @@ function getAddFormContent(partnerType){
 										+'</select>'
 									+'</div>'
 									+'<div class="col-3 mb-2 pl-0">'
-										+'<input type="text" name="byPartnerValue" id="byPartnerValue" value="" onkeyup="getNum(this,\'\',\'byPartnerType\')" class="form-control">'
+										+'<input type="text" name="byPartnerValue" id="byPartnerValue" value="" onkeyup="getNum(this,\'\',\'byPartnerType\')" class="form-control" placeholder=" ">'
 									+'</div>'
 								+'</div>'
+							+'<label for="byPartnerType">Lead Provided By Partner</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2 pr-0">'
-								+'<label class="m-0">Lead Provided By IS</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<div class="d-flex flex-wrap">'
 									+'<div class="col-9 mb-2 pl-0">'
 										+'<select name="bySchoolType" id="bySchoolType" class="form-control">'
@@ -411,12 +441,14 @@ function getAddFormContent(partnerType){
 										+'</select>'
 									+'</div>'
 									+'<div class="col-3 mb-2 pl-0">'
-										+'<input type="text" name="bySchoolValue" id="bySchoolValue" value="" onkeyup="getNum(this,\'\',\'bySchoolType\')" class="form-control">'
+										+'<input type="text" name="bySchoolValue" id="bySchoolValue" value="" onkeyup="getNum(this,\'\',\'bySchoolType\')" class="form-control" placeholder=" ">'
 									+'</div>'
 								+'</div>'
+							+'<label for="bySchoolType">Lead Provided By IS</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Select Learning Program</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="learningProgram" id="learningProgram" class="form-control"' 
 								// onchange="getGradesByLearningProgram(\'saveCommissionRateForm\',\'learningProgram\',\'standardId\',\'leadPartnerUserB2B\')"
 								+'>'
@@ -425,16 +457,20 @@ function getAddFormContent(partnerType){
 										html+=getLearningProgramContent(SCHOOL_ID)
 									}
 								html+='</select>'
+							+'<label for="learningProgram">Select Learning Program</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Select Grade</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="standardId" id="standardId" class="form-control" multiple="multiple">'
 								+'</select>'
+							+'<label for="standardId">Select Grade</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
+							+'<div class="form-group custom-field mb-2">'
 								+'<div class="row">'
 									+'<div class="col-12">'
-										+'<label class="m-0">Enrollment Min/Max Range</label>'
 									+'</div>'
 									+'<div class="col-6">'
 										+'<div class="full">'
@@ -459,6 +495,8 @@ function getAddFormContent(partnerType){
 								// 	+'<option value="50-0" >50+</option>'
 									
 								// +'</select>'
+							+'<label for="minRange">Enrollment Min/Max Range</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-12 mb-2">';
 								if(partnerType == "WLP"){
@@ -472,8 +510,10 @@ function getAddFormContent(partnerType){
 								+'</select>'
 							+'</div>'
 							+'<div class="col-12 mb-2">'
-								+'<label class="m-0">Applicable From</label>'
-								+'<input type="text" name="startDate" id="startDate" class="datepicker form-control" readonly onkeydown="return false">'
+							+'<div class="form-group custom-field mb-2">'
+								+'<input type="text" name="startDate" id="startDate" class="datepicker form-control" readonly onkeydown="return false" placeholder=" ">'
+							+'<label for="startDate">Applicable From</label>'
+							+'</div>'
 							+'</div>'
 							// +'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
 							// 	+'<label class="m-0">Applicable Till</label>'
@@ -489,25 +529,29 @@ function getAddFormContent(partnerType){
 				+'</div>'
 			+'</div>'
 			+'<div class="col-12">'
-				+'<form id="filterCommissionRate" autocomplete="off" action="javascript:void(0);">'
+				+'<form class="custom-field-scope" id="filterCommissionRate" autocomplete="off" action="javascript:void(0);">'
 					+'<div class="full p-1 bg-light-primary border border-primary rounded-10 card" style="display:none">'
 						+'<div class="col-12 mt-2 mb-2">'
 							+'<div class="row">'
 								+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
-									+'<label class="m-0">Select Learning Program</label>'
+								+'<div class="form-group custom-field mb-2">'
 									+'<select name="learningProgramFilter" id="learningProgramFilter" class="form-control" '
 									// onchange="getGradesByLearningProgram(\'filterCommissionRate\',\'learningProgramFilter\',\'standardIdFilter\',\'leadPartnerUserB2B\')"
 									+'>'
 										+'<option value="A">All Program</option>'
 										// +getLearningProgramContent(SCHOOL_ID)
 									+'</select>'
+								+'<label for="learningProgramFilter">Select Learning Program</label>'
+								+'</div>'
 								+'</div>'
 								+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
-									+'<label class="m-0">Select Grade</label>'
+								+'<div class="form-group custom-field mb-2">'
 									+'<select name="standardIdFilter" id="standardIdFilter" class="form-control" multiple="multiple">'
 										+'<option value="A">ALL Grade</option>'
 										// +getStandardContent(SCHOOL_ID,true)
 									+'</select>'
+								+'<label for="standardIdFilter">Select Grade</label>'
+								+'</div>'
 								+'</div>'
 								+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">'
 									+'<label class="m-0 full">&nbsp;</label>'
@@ -557,25 +601,29 @@ function getAddFormContent(partnerType){
 function getFilterByContent(){
 	var html = 
 		'<div class="tab-pane" id="filterBy" role="tabpanel">'
-			+'<form id="filterCommissionRate" autocomplete="off" action="javascript:void(0);">'
+			+'<form class="custom-field-scope" id="filterCommissionRate" autocomplete="off" action="javascript:void(0);">'
 				+'<div class="full p-1 bg-light-primary border border-primary rounded-10 card">'
 					+'<div class="col-12 mt-2 mb-2">'
 						+'<div class="row">'
 							+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
-								+'<label class="m-0">Select Learning Program</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="learningProgramFilter" id="learningProgramFilter" class="form-control" '
 								// onchange="getGradesByLearningProgram(\'filterCommissionRate\',\'learningProgramFilter\',\'standardIdFilter\',\'leadPartnerUserB2B\')"
 								+'>'
 									+'<option value="A">All Program</option>'
 									// +getLearningProgramContent(SCHOOL_ID)
 								+'</select>'
+							+'<label for="learningProgramFilter">Select Learning Program</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2">'
-								+'<label class="m-0">Select Grade</label>'
+							+'<div class="form-group custom-field mb-2">'
 								+'<select name="standardIdFilter" id="standardIdFilter" class="form-control" multiple="multiple">'
 									+'<option value="A">ALL Grade</option>'
 									// +getStandardContent(SCHOOL_ID,true)
 								+'</select>'
+							+'<label for="standardIdFilter">Select Grade</label>'
+							+'</div>'
 							+'</div>'
 							+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 text-left">'
 								+'<label class="m-0 full">&nbsp;</label>'
@@ -620,10 +668,10 @@ function getSetDiscountContent(){
 	var html =
 		'<div class="tab-pane p-4" id="setDiscount" role="tabpanel" style="display:none">'
 			+'<div class="p-1 bg-light-primary border border-primary rounded-10 card">'
-				+'<form id="saveDiscountRateForm" class="col-12 mt-2 mb-2" method="post" action="javascript:void(0);">'
+				+'<form id="saveDiscountRateForm" class="col-12 mt-2 mb-2 custom-field-scope" method="post" action="javascript:void(0);">'
 					+'<div class="row">'
 						+'<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12 mb-2 pr-0">'
-							+'<label class="m-0">Discount Type</label>'
+						+'<div class="form-group custom-field mb-2">'
 							+'<div class="d-flex flex-wrap">'
 								+'<div class="col-xl-9 col-lg-9 col-md-8 col-sm-12 col-12 mb-2 pl-0">'
 									+'<select name="discountType" id="discountType" class="form-control">'
@@ -632,9 +680,11 @@ function getSetDiscountContent(){
 									+'</select>'
 								+'</div>'
 								+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12 mb-2 pl-0">'
-									+'<input type="text" name="discountValue" id="discountValue" value="" onkeyup="getNum(this,\'\',\'discountType\')" class="form-control">'
+									+'<input type="text" name="discountValue" id="discountValue" value="" onkeyup="getNum(this,\'\',\'discountType\')" class="form-control" placeholder=" ">'
 								+'</div>'
 							+'</div>'
+						+'<label for="discountType">Discount Type</label>'
+						+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
 							+'<label class="m-0 full">&nbsp;</label>'
@@ -1083,7 +1133,7 @@ function getOfficeContactDetailsContent(){
 		`<div class="tab-pane p-4" id="officeContactDetails" role="tabpanel">
 			<div class="col-xl-5 mx-auto">
 				<div class="p-1 bg-light-primary border border-primary rounded-10 card">
-					<form class="col-12 mt-2 mb-2" method="post" id="officeContactDetailsForm" action="javascript:void(0);">
+					<form class="col-12 mt-2 mb-2 custom-field-scope" method="post" id="officeContactDetailsForm" action="javascript:void(0);">
 						<input type="hidden" name="officeContactNumberCountryCode" id="officeContactNumberCountryCode" value="" class="form-control" maxlength="100">
 						<input type="hidden" name="officeContactNumberDailCode" id="officeContactNumberDailCode" value="" class="form-control" maxlength="100">
 						<input type="hidden" name="supportNumberCountryCode" id="supportNumberCountryCode" value="" class="form-control" maxlength="100">
@@ -1165,24 +1215,34 @@ function getOfficeContactDetailsContent(){
 								<input type="text" name="officeContactUs" id="officeContactUs" value="" class="form-control" maxlength="100">
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">Facebook</label>
-								<input type="text" name="officeFacebook" id="officeFacebook" value="" class="form-control" maxlength="100">
+							<div class="form-group custom-field mb-2">
+								<input type="text" name="officeFacebook" id="officeFacebook" value="" class="form-control" maxlength="100" placeholder=" ">
+							<label for="officeFacebook">Facebook</label>
+							</div>
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">Instagram</label>
-								<input type="text" name="officeInsta" id="officeInsta" value="" class="form-control" maxlength="100">
+							<div class="form-group custom-field mb-2">
+								<input type="text" name="officeInsta" id="officeInsta" value="" class="form-control" maxlength="100" placeholder=" ">
+							<label for="officeInsta">Instagram</label>
+							</div>
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">LinkedIn</label>
-								<input type="text" name="officeLinkedin" id="officeLinkedin" value="" class="form-control" maxlength="100">
+							<div class="form-group custom-field mb-2">
+								<input type="text" name="officeLinkedin" id="officeLinkedin" value="" class="form-control" maxlength="100" placeholder=" ">
+							<label for="officeLinkedin">LinkedIn</label>
+							</div>
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">X (Twitter)</label>
-								<input type="text" name="officeX" id="officeX" value="" class="form-control" maxlength="100">
+							<div class="form-group custom-field mb-2">
+								<input type="text" name="officeX" id="officeX" value="" class="form-control" maxlength="100" placeholder=" ">
+							<label for="officeX">X (Twitter)</label>
+							</div>
 							</div>
 							<div class="col-12 mb-2">
-								<label class="m-0">Youtube</label>
-								<input type="text" name="officeYoutube" id="officeYoutube" value="" class="form-control" maxlength="100">
+							<div class="form-group custom-field mb-2">
+								<input type="text" name="officeYoutube" id="officeYoutube" value="" class="form-control" maxlength="100" placeholder=" ">
+							<label for="officeYoutube">Youtube</label>
+							</div>
 							</div>
 							<div class="col-12 mb-2">
 								<label class="m-0">

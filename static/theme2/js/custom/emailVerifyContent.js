@@ -18,11 +18,11 @@ function getEmailVerifyContent(title, newTheme) {
 		<div class="card-body">
 			<div class="col-md-5 col-sm-12 col-12 mx-auto">
 				<div class="form-group">
-					<form id="emailVerifyForm" action="javascript:void(0);">
+					<form id="emailVerifyForm" action="javascript:void(0);" class="custom-field-scope">
 						<div class="full">
-							<label class="text-primary font-weight-semi-bold font-size-lg justify-content-start mb-0">Enter Email</label>
-							<div class="input-group">
-								<input type="text" id="getVEmail" class="form-control" />
+							<div class="input-group position-relative custom-field email-verify-field mb-2 mt-3 p-0">
+								<input type="text" id="getVEmail" class="form-control" placeholder=" " />
+								<label for="getVEmail">Enter Email</label>
 								<div class="input-group-append">
 									<button class="input-group-text bg-success text-white" onclick="getEmailVerifyByEmail()">Search</button>
 								</div>
@@ -36,5 +36,3 @@ function getEmailVerifyContent(title, newTheme) {
 	</div>`;
 	return html;
 }
-
-

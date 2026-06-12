@@ -26,36 +26,48 @@ function dashboardMonitoringContent(){
 
 function dashboardMonitoringFilterContent(){
     var html =
-        `<form id="dashboardMonitoringFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2" style="display: none;">
+        `<form id="dashboardMonitoringFilterForm" class="border rounded-10 bg-white p-3 mb-3 mt-2 custom-field-scope" style="display: none;">
             <div class="row">
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
-                    <label>Name</label>
-                    <select id="userName" class="form-control"></select>
+                    <div class="position-relative custom-field mb-2 mt-3 p-0">
+                        <select id="userName" class="form-control"></select>
+                        <label>Name</label>
+                    </div>
                 </div>
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
-                    <label>Email</label>
-                    <input type="text" id="userEmail" class="form-control">
+                    <div class="position-relative custom-field mb-2 mt-3 p-0">
+                        <input type="text" id="userEmail" class="form-control" placeholder=" ">
+                        <label>Email</label>
+                    </div>
                 </div>
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
-                    <label>Select Date Type</label>
-                    <select class="form-control" name="selectedType" id="selectedType" onchange="selectDateOnTypeChangeForMonitoring(this);">
-                        <option value="today">Today</option>    
-                        <option value="week">Week</option>    
-                        <option value="month">Month</option>    
-                        <option value="custom" selected>Custom</option>    
-                    </select>   
+                    <div class="position-relative custom-field mb-2 mt-3 p-0">
+                        <select class="form-control" name="selectedType" id="selectedType" onchange="selectDateOnTypeChangeForMonitoring(this);">
+                            <option value="today">Today</option>    
+                            <option value="week">Week</option>    
+                            <option value="month">Month</option>    
+                            <option value="custom" selected>Custom</option>    
+                        </select>   
+                        <label>Select Date Type</label>
+                    </div>
                 </div>
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 datepickerStartWrapper">
-                    <label>Start Date</label>
-                    <input type="text" id="activeTrackerDateTo" class="form-control" readonly onkeydown="return false">
+                    <div class="position-relative custom-field mb-2 mt-3 p-0">
+                        <input type="text" id="activeTrackerDateTo" class="form-control" readonly onkeydown="return false" placeholder=" ">
+                        <label>Start Date</label>
+                    </div>
                 </div>
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 datepickerEndWrapper">
-                    <label>End Date</label>
-                    <input type="text" id="activeTrackerDateFrom" class="form-control" readonly onkeydown="return false">
+                    <div class="position-relative custom-field mb-2 mt-3 p-0">
+                        <input type="text" id="activeTrackerDateFrom" class="form-control" readonly onkeydown="return false" placeholder=" ">
+                        <label>End Date</label>
+                    </div>
                 </div>
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12">
-                    <label>No. of records</label>
-                    <input type="text" id="numberOfRecords" class="form-control" value="25" onkeydown="return M.digit(event);">
+                    <div class="position-relative custom-field mb-2 mt-3 p-0">
+                        <input type="text" id="numberOfRecords" class="form-control" value="25" onkeydown="return M.digit(event);" placeholder=" ">
+                        <label>No. of records</label>
+                    </div>
                 </div>
             </div>
             <div class="d-flex flex-wrap justify-content-end mt-2">

@@ -206,7 +206,7 @@ function getURLForSignup(suffixUrl, module) {
 function getCustomFieldCss() {
   return `
 .custom-field-scope .custom-field{
-    position:relative;
+position:relative;
     margin-bottom:30px;
     width:100%;
     --custom-field-default:#cfd4dc;
@@ -218,10 +218,7 @@ function getCustomFieldCss() {
 
 .custom-field-scope .custom-field input,
 .custom-field-scope .custom-field select,
-.custom-field-scope .custom-field textarea{
-    width:100%;
-    height:44px;
-    padding:5px 16px 0;
+.custom-field-scope .custom-field textarea{width:100%;height:44px;padding:5px 16px 5px;
     border:2px solid var(--custom-field-default);
     border-radius:6px !important;
     background-color:var(--custom-field-bg);
@@ -237,14 +234,35 @@ function getCustomFieldCss() {
     color:transparent !important;
 }
 
+.custom-field-scope .custom-field input:-webkit-autofill,
+.custom-field-scope .custom-field input:-webkit-autofill:hover,
+.custom-field-scope .custom-field input:-webkit-autofill:focus,
+.custom-field-scope .custom-field textarea:-webkit-autofill,
+.custom-field-scope .custom-field textarea:-webkit-autofill:hover,
+.custom-field-scope .custom-field textarea:-webkit-autofill:focus,
+.custom-field-scope .custom-field select:-webkit-autofill,
+.custom-field-scope .custom-field select:-webkit-autofill:hover,
+.custom-field-scope .custom-field select:-webkit-autofill:focus{
+    -webkit-box-shadow:0 0 0 1000px var(--custom-field-bg) inset !important;
+    box-shadow:0 0 0 1000px var(--custom-field-bg) inset !important;
+    -webkit-text-fill-color:var(--custom-field-value) !important;
+    caret-color:var(--custom-field-value) !important;
+    background-color:var(--custom-field-bg) !important;
+    background-clip:padding-box !important;
+}
+
 .custom-field-scope .custom-field .iti{
     width:100%;
     height:44px;
 }
 
+/* Plain iti variant (no separateDialCode): the flag dropdown is ~52px wide.
+   Match iti library's own default so the typed number starts immediately
+   after the flag, with no dead gap. The separate-dial-code override below
+   widens this for that variant. */
 .custom-field-scope .custom-field .iti input{
     height:44px;
-    /*padding-left:120px !important;*/
+    padding-left:52px !important;
     padding-top:6px;
     padding-bottom:0;
     border-radius:6px !important;
@@ -259,12 +277,11 @@ function getCustomFieldCss() {
 .custom-field-scope .custom-field .iti .iti__selected-flag{
     height:44px;
     align-items:center;
-   /*min-width:104px;*/
-    padding:0 8px 0 14px;
+    padding:0 8px 0 10px;
 }
 
 .custom-field-scope .custom-field:has(.iti) label:not(.error-msg){
-    left:46px;
+    left:55px;
 }
 
 .custom-field-scope .custom-field.has-value:has(.iti) label:not(.error-msg),
@@ -276,7 +293,10 @@ function getCustomFieldCss() {
 
 .custom-field-scope .custom-field .select2-container{
     width:100% !important;
-    height:44px !important;
+    min-height:44px;
+    height:auto !important;
+    position:relative;
+    z-index:1;
 }
 
 .custom-field-scope .custom-field .select2-container .select2-selection--single{
@@ -287,6 +307,12 @@ function getCustomFieldCss() {
     background-color:var(--custom-field-bg);
     outline:none;
     transition:all .3s ease;
+    display:flex !important;
+    align-items:center !important;
+    padding:0 !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    position:relative;
 }
 
 .custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__placeholder{
@@ -298,17 +324,154 @@ function getCustomFieldCss() {
     font-size:16px;
     line-height:40px !important;
     padding:0 40px 0 16px !important;
+    margin:0 !important;
+    display:block !important;
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    align-self:center !important;
+    height:40px !important;
+    width:100% !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    box-sizing:border-box !important;
+    position:static !important;
+    top:auto !important;
+    transform:none !important;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__rendered > *{
+    line-height:inherit !important;
+    vertical-align:middle !important;
 }
 
 .custom-field-scope .custom-field .select2-container .select2-selection--single .select2-selection__arrow{
-    height:42px !important;
-    right:10px;
+    height:44px !important;
+    width:30px !important;
+    top:0 !important;
+    right:0 !important;
+    position:absolute !important;
+    pointer-events:none;
+    z-index:1;
 }
 
-.custom-field-scope .custom-field:has(select option:checked[value=""]) select,
-.custom-field-scope .custom-field:has(select option:checked[value="0"]) select,
-.custom-field-scope .custom-field:has(select option:checked[value=""]) .select2-selection__rendered,
-.custom-field-scope .custom-field:has(select option:checked[value="0"]) .select2-selection__rendered{
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple{
+    min-height:44px !important;
+    border:2px solid var(--custom-field-default);
+    border-radius:6px !important;
+    background-color:var(--custom-field-bg);
+    padding:3px 8px;
+    outline:none;
+    transition:all .3s ease;
+    cursor:text;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-selection__rendered{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:4px;
+    padding:0 !important;
+    margin:0 !important;
+    line-height:normal;
+    color:var(--custom-field-value);
+    width:100%;
+    list-style:none;
+    min-height:34px;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-selection__choice{
+    border:1px solid #bfdbfe;
+    border-radius:999px;
+    background:#eff6ff;
+    color:#1d4ed8;
+    padding:1px 10px 1px 24px;
+    margin:2px 0 !important;
+    font-size:12px;
+    line-height:20px;
+    display:inline-flex;
+    align-items:center;
+    position:relative;
+    max-width:100%;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-selection__choice__display{
+    padding:0;
+    line-height:20px;
+}
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-selection__choice__remove{
+    color:#1d4ed8;
+    font-size:14px;
+    font-weight:bold;
+    position:absolute;
+    left:8px;
+    top:50%;
+    transform:translateY(-50%);
+    border:0;
+    background:transparent;
+    padding:0;
+    margin:0;
+    line-height:1;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-selection__choice__remove:hover,
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-selection__choice__remove:focus{
+    color:#dc2626;
+    background:transparent;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-search--inline,
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-search{
+    display:inline-flex;
+    align-items:center;
+    margin:0 !important;
+    padding:0 !important;
+    flex:1 1 60px;
+    min-width:60px;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-search__field{
+    width:100% !important;
+    min-height:28px;
+    height:28px;
+    line-height:28px;
+    margin:0 !important;
+    padding:0 4px !important;
+    color:var(--custom-field-value);
+    font-size:14px;
+    box-shadow:none !important;
+    border:0 !important;
+    background:transparent !important;
+}
+
+.custom-field-scope .custom-field .select2-container .select2-selection--multiple .select2-search__field::placeholder{
+    color:transparent !important;
+}
+
+.custom-field-scope .custom-field .select2-container--focus .select2-selection--multiple,
+.custom-field-scope .custom-field:has(.select2-container--open) .select2-selection--multiple,
+.custom-field-scope .custom-field:has(.select2-selection--multiple .select2-selection__choice) .select2-selection--multiple{
+    border-color:var(--custom-field-active);
+}
+
+.custom-field-scope .custom-field .select2-container--focus .select2-selection--multiple,
+.custom-field-scope .custom-field:has(.select2-container--open) .select2-selection--multiple{
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+.custom-field-scope .custom-field:not(:has(.select2-container)):not(.has-value):not(.is-filled):not(.active) select,
+.custom-field-scope .custom-field:not(:has(.select2-container)):has(select option:checked[value=""]) select{
+    color:transparent !important;
+}
+
+.custom-field-scope .custom-field select option,
+.custom-field-scope .custom-field select optgroup{
+    color:var(--custom-field-value) !important;
+    background-color:var(--custom-field-bg) !important;
+}
+
+.custom-field-scope .custom-field:has(.select2-container):not(.has-value):not(.is-filled):not(.active) .select2-selection__rendered,
+.custom-field-scope .custom-field:has(.select2-container):has(select option:checked[value=""]) .select2-selection__rendered{
     color:transparent !important;
 }
 
@@ -328,6 +491,7 @@ function getCustomFieldCss() {
     font-size:16px;
     pointer-events:none;
     transition:all .25s ease;
+    z-index:2;
 }
 
 /* FLOAT EFFECT */
@@ -338,12 +502,17 @@ function getCustomFieldCss() {
 .custom-field-scope .custom-field textarea:not(:placeholder-shown) + label:not(.error-msg),
 .custom-field-scope .custom-field:has(.iti input:focus) label:not(.error-msg),
 .custom-field-scope .custom-field:has(.iti input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead input:focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead .tt-input:focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead .tt-input:not(:placeholder-shown)) label:not(.error-msg),
 .custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.select2-container--open) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.select2-selection--multiple .select2-selection__choice) label:not(.error-msg),
 .custom-field-scope .custom-field.has-value label:not(.error-msg),
 .custom-field-scope .custom-field.is-filled label:not(.error-msg),
 .custom-field-scope .custom-field.active label:not(.error-msg),
 .custom-field-scope .custom-field:has(input[value]:not([value=""])) label:not(.error-msg),
-.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) label:not(.error-msg),
 .custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg){
     top:0;
     transform:translateY(-46%);
@@ -360,22 +529,28 @@ function getCustomFieldCss() {
 .custom-field-scope .custom-field textarea:not(:placeholder-shown),
 .custom-field-scope .custom-field:has(.iti input:focus) input,
 .custom-field-scope .custom-field:has(.iti input:not(:placeholder-shown)) input,
+.custom-field-scope .custom-field:has(.twitter-typeahead input:focus) input,
+.custom-field-scope .custom-field:has(.twitter-typeahead input:not(:placeholder-shown)) input,
+.custom-field-scope .custom-field:has(.twitter-typeahead .tt-input:focus) input,
+.custom-field-scope .custom-field:has(.twitter-typeahead .tt-input:not(:placeholder-shown)) input,
 .custom-field-scope .custom-field:has(.select2-container--focus) .select2-selection--single,
+.custom-field-scope .custom-field:has(.select2-container--open) .select2-selection--single,
 .custom-field-scope .custom-field.has-value input,
 .custom-field-scope .custom-field.has-value select,
 .custom-field-scope .custom-field.has-value textarea,
 .custom-field-scope .custom-field.has-value .select2-selection--single,
+.custom-field-scope .custom-field.has-value .select2-selection--multiple,
 .custom-field-scope .custom-field.is-filled input,
 .custom-field-scope .custom-field.is-filled select,
 .custom-field-scope .custom-field.is-filled textarea,
 .custom-field-scope .custom-field.is-filled .select2-selection--single,
+.custom-field-scope .custom-field.is-filled .select2-selection--multiple,
 .custom-field-scope .custom-field.active input,
 .custom-field-scope .custom-field.active select,
 .custom-field-scope .custom-field.active textarea,
 .custom-field-scope .custom-field.active .select2-selection--single,
+.custom-field-scope .custom-field.active .select2-selection--multiple,
 .custom-field-scope .custom-field:has(input[value]:not([value=""])) input,
-.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) .select2-selection--single,
-.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) select,
 .custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) textarea{
     border-color:var(--custom-field-active);
 }
@@ -387,12 +562,17 @@ function getCustomFieldCss() {
 .custom-field-scope .custom-field textarea:not(:placeholder-shown) + label:not(.error-msg),
 .custom-field-scope .custom-field:has(.iti input:focus) label:not(.error-msg),
 .custom-field-scope .custom-field:has(.iti input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead input:focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead .tt-input:focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.twitter-typeahead .tt-input:not(:placeholder-shown)) label:not(.error-msg),
 .custom-field-scope .custom-field:has(.select2-container--focus) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.select2-container--open) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.select2-selection--multiple .select2-selection__choice) label:not(.error-msg),
 .custom-field-scope .custom-field.has-value label:not(.error-msg),
 .custom-field-scope .custom-field.is-filled label:not(.error-msg),
 .custom-field-scope .custom-field.active label:not(.error-msg),
 .custom-field-scope .custom-field:has(input[value]:not([value=""])) label:not(.error-msg),
-.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) label:not(.error-msg),
 .custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg){
     color:var(--custom-field-active);
 }
@@ -416,7 +596,7 @@ function getCustomFieldCss() {
 .custom-field-scope .custom-field.has-value select,
 .custom-field-scope .custom-field.is-filled select,
 .custom-field-scope .custom-field.active select,
-.custom-field-scope .custom-field:has(select option:checked:not([value=""]):not([value="0"])) select{
+.custom-field-scope .custom-field.has-value select{
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' stroke='%23007bff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
@@ -424,7 +604,134 @@ function getCustomFieldCss() {
 .custom-field-scope .custom-field select::-ms-expand{
     display:none;
 }
+
+/* DEFENSIVE: force-center the label when field is empty AND not interactive.
+   Excludes:
+     - .has-value / .is-filled / .active (JS-driven filled states)
+     - :focus-within (any descendant focused, covers both <select>:focus and select2 search input)
+     - select2 open dropdown / multi-select chip present
+     - input with non-empty value attribute (avoids flicker before JS runs)
+     - input/textarea currently NOT showing placeholder (covers runtime values set via .val()) */
+.custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) label:not(.error-msg){
+    top:48% !important;
+    transform:translateY(-50%) !important;
+    font-size:16px !important;
+    font-weight:normal !important;
+    color:var(--custom-field-default-text) !important;
+    z-index:2 !important;
+}
+
+/* DEFENSIVE: matching un-active border for the empty inactive case */
+.custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) input,
+.custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) select,
+.custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) textarea,
+.custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) .select2-selection--single,
+.custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) .select2-selection--multiple{
+    border-color:var(--custom-field-default) !important;
+}
+
+/* ============================================================
+   Z-INDEX STACKING for OPEN select2 dropdowns. Three tiers:
+     - default floated label:                  5 (low)
+     - own field's label when its own OPEN:    1000000 (above its container)
+     - dropdown PANEL (.select2-dropdown):     1000001 (above everything)
+   DO NOT bump .select2-container--open itself — its closed field box
+   would then cover the label's bottom half and break the notch effect.
+   Keep label > container, panel > label.
+   The label rule uses 'label' (not '> label') so it works whether the
+   <label> is a direct child of .custom-field or nested one level deeper. */
+.custom-field-scope .custom-field:has(.select2-container--open) label:not(.error-msg){
+    z-index:1000000 !important;
+}
+.select2-dropdown,
+.select2-container .select2-dropdown,
+body > .select2-container--open .select2-dropdown,
+.select2-container--bootstrap4 .select2-dropdown{
+    z-index:1000001 !important;
+}
+
+/* SEPARATE DIAL CODE variant of intl-tel-input (initialized with
+   separateDialCode:true) — the flag container shows the flag + "+XX" dial
+   code, making it ~84px wide instead of the ~46px of the plain variant.
+   Two fixes needed:
+     1. Visually unify the flag/dial container with the input so they read as
+        a single field (iti's default rgba(0,0,0,.05) background creates a
+        seam). Drop the background, add a clean border-right that recolors
+        with focus.
+     2. Move the floating placeholder label past the dial-code block so it
+        doesn't overlap the "+XX" text when the field is empty. */
+.custom-field-scope .custom-field .iti--separate-dial-code .iti__selected-flag{
+    background-color:transparent !important;
+    border-right:1px solid var(--custom-field-default);
+    border-radius:6px 0 0 6px !important;
+    padding:0 8px 0 14px;
+}
+/* Reset the generic .iti input padding-left (120px, sized for the plain
+   variant). In separate-dial-code mode the flag+code block is ~84px, so
+   120px leaves a visible gap between the dial code and the typed number.
+   syncHoldPhoneInputPadding may override per-instance, but a CSS baseline
+   keeps the layout correct even before/without that JS running. */
+.custom-field-scope .custom-field .iti--separate-dial-code > input{
+    padding-left:90px !important;
+}
+.custom-field-scope .custom-field:has(.iti--separate-dial-code input:focus) .iti__selected-flag,
+.custom-field-scope .custom-field.has-value:has(.iti--separate-dial-code) .iti__selected-flag,
+.custom-field-scope .custom-field.is-filled:has(.iti--separate-dial-code) .iti__selected-flag,
+.custom-field-scope .custom-field.active:has(.iti--separate-dial-code) .iti__selected-flag{
+    border-right-color:var(--custom-field-active);
+}
+.custom-field-scope .custom-field:has(.iti--separate-dial-code) label:not(.error-msg){
+    left:90px;
+}
+.custom-field-scope .custom-field.has-value:has(.iti--separate-dial-code) label:not(.error-msg),
+.custom-field-scope .custom-field.is-filled:has(.iti--separate-dial-code) label:not(.error-msg),
+.custom-field-scope .custom-field.active:has(.iti--separate-dial-code) label:not(.error-msg),
+.custom-field-scope .custom-field:has(.iti--separate-dial-code input:focus) label:not(.error-msg){
+    left:12px;
+}
+
+/* Tight cluster of related custom-fields rendered inside flex-grow-1 wrappers
+   in a nested .row (e.g., Date+HH+MM+AM/PM in the follow-up popup). Two
+   issues to fix:
+     1. Each custom-field <select> gets padding-right:40px to clear the
+        custom dropdown arrow, so 4 small selects + a date input overflow a
+        col-lg-4 container and AM/PM wraps to a new line.
+     2. The flex children's intrinsic min-content (input size=20 default,
+        select option padding) blocks shrinking — they wrap before they
+        compress.
+   Opt-in via .cf-row-tight on the inner .row: disable wrap, let children
+   shrink past min-content, and tighten the arrow padding. */
+.custom-field-scope .row.cf-row-tight{
+    flex-wrap:nowrap;
+}
+.custom-field-scope .row.cf-row-tight > *{
+    min-width:0;
+}
+.custom-field-scope .row.cf-row-tight .custom-field select{
+    padding-right:24px;
+    background-position:right 6px center;
+}
+
+/* COUNTER (e.g., "0 / 20") rendered as a <small> inside .custom-field must not
+   contribute to the field's intrinsic height — otherwise the centered placeholder
+   label (top:48%) drifts below the input's vertical midpoint and visually
+   misaligns with sibling fields (e.g., Update vs Remarks in lead/demo modals). */
+.custom-field-scope .custom-field > small{
+    position:absolute;
+    top:calc(100% + 2px);
+    left:0;
+    font-size:11px;
+    line-height:1;
+    z-index:2;
+    pointer-events:none;
+}
 `;
+}
+function isPlaceholderOptionText(text) {
+  if (!text) return false;
+  var t = text.toString().trim();
+  if (t === "") return true;
+  return /^(?:select|choose|please|pick)\b/i.test(t) || /^(?:--|—|–)/.test(t);
 }
 function refreshCustomFieldState(context) {
   var parent = context == undefined || context == null ? $(document) : $(context);
@@ -433,13 +740,30 @@ function refreshCustomFieldState(context) {
     return $(this).closest(".custom-field-scope").length > 0;
   }).each(function () {
     var customField = $(this);
+    customField.find("input, textarea").each(function () {
+      var $el = $(this);
+      var tag = ($el.prop("tagName") || "").toLowerCase();
+      var type = ($el.attr("type") || "").toLowerCase();
+      if (tag === "textarea" || (tag === "input" && type !== "hidden" && type !== "checkbox" && type !== "radio" && type !== "submit" && type !== "button" && type !== "reset" && type !== "file" && type !== "image")) {
+        if (typeof $el.attr("placeholder") === "undefined") {
+          $el.attr("placeholder", " ");
+        }
+      }
+    });
     var field = customField.find("input, select, textarea").first();
     var value = field.length > 0 ? field.val() : "";
     if ($.isArray(value)) {
-      value = value.join("");
+      value = value.filter(function (v) { return v !== null && v !== undefined && v.toString().trim() !== ""; }).join("");
     }
     value = value == undefined || value == null ? "" : value.toString().trim();
-    customField.toggleClass("has-value", value !== "" && value !== "0");
+    var hasValue = value !== "";
+    if (hasValue && field.is("select") && !field.prop("multiple")) {
+      var $selected = field.find("option:selected").first();
+      if ($selected.length && $selected.prop("disabled")) {
+        hasValue = false;
+      }
+    }
+    customField.toggleClass("has-value", hasValue);
   });
 }
 $(document).ready(function () {
@@ -456,12 +780,39 @@ $(document).ready(function () {
   setTimeout(function () {
     refreshCustomFieldState();
   }, 300);
-  $(document).on("input change blur", ".custom-field-scope .custom-field input, .custom-field-scope .custom-field select, .custom-field-scope .custom-field textarea", function () {
+  $(document).on("input change blur changeDate countrychange", ".custom-field-scope .custom-field input, .custom-field-scope .custom-field select, .custom-field-scope .custom-field textarea", function () {
     refreshCustomFieldState($(this).closest(".custom-field"));
   });
   $(document).on("select2:select select2:clear change", ".custom-field-scope .custom-field select", function () {
     refreshCustomFieldState($(this).closest(".custom-field"));
   });
+  if (window.MutationObserver) {
+    var customFieldRefreshTimer = null;
+    var scheduleCustomFieldRefresh = function (root) {
+      if (customFieldRefreshTimer) {
+        clearTimeout(customFieldRefreshTimer);
+      }
+      customFieldRefreshTimer = setTimeout(function () {
+        refreshCustomFieldState(root || null);
+        customFieldRefreshTimer = null;
+      }, 50);
+    };
+    var customFieldObserver = new MutationObserver(function (mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        var added = mutations[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (!node || node.nodeType !== 1) continue;
+          if ((node.classList && node.classList.contains("custom-field")) ||
+              (node.querySelector && node.querySelector(".custom-field"))) {
+            scheduleCustomFieldRefresh();
+            return;
+          }
+        }
+      }
+    });
+    customFieldObserver.observe(document.body, { childList: true, subtree: true });
+  }
   if($("#themeColor").length<1){
     $("head").append(`<style id="themeColor">${ROOTCSS}</style>`);
   }
@@ -7825,5 +8176,3 @@ function getPdfViewerUrl(pdfUrl) {
         "static/pdfjs/web/viewer.html?file=" +
         encodeURIComponent(APP_BASE_URL + "pdf-proxy?url=" + encodeURIComponent(pdfUrl));
 }
-
-

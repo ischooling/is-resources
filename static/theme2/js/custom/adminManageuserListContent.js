@@ -2,6 +2,7 @@
 async function renderAdminManageUserListDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,USER_ROLE){
   	
 	ROLE_MODULE=roleAndModule;
+	addAdminFilterCustomFieldCss();
 	var html= await getAdminManageUserListContent(title);
     $('#dashboardContentInHTML').html(html);
 	callRoleDropdown("adminFilter",'','roleUser');
@@ -10,10 +11,14 @@ async function renderAdminManageUserListDashboard(title, roleAndModule, SCHOOL_I
 	$("#btmSearchUsers").on("click", function(){
 		getAdminUserList('adminFilter',ROLE_MODULE.moduleId, 0);
 	});
-	$("#adminFilter #roleUser").select2({
-		theme:"bootstrap4",
-		dropdownParent:"#adminFilter"
-	});
+	initAdminFilterSelect2("#adminFilter #roleUser");
+	initAdminFilterSelect2("#adminFilter #userActive");
+	if(typeof refreshCustomFieldState === 'function'){
+		refreshCustomFieldState($("#adminFilter"));
+		setTimeout(function(){
+			refreshCustomFieldState($("#adminFilter"));
+		}, 300);
+	}
 	$('.show-filter').on('click', function(){
 		$('.filter-fields').stop().slideToggle();
 	});	
@@ -23,6 +28,36 @@ async function renderAdminManageUserListDashboard(title, roleAndModule, SCHOOL_I
 		}else if($("#adminUserSearch").val().length==0){
 			getAdminUserList('adminFilter',ROLE_MODULE.moduleId, 0);
 		}
+	});
+}
+
+function addAdminFilterCustomFieldCss(){
+	if($("#adminFilterCustomFieldCss").length < 1){
+		$("head").append(`<style id="adminFilterCustomFieldCss">
+			#adminFilter .custom-field .select2.select2-container--bootstrap4,
+			#adminFilter .custom-field .select2-container{
+				position:relative;
+				z-index:1 !important;
+			}
+			#adminFilter .custom-field label:not(.error-msg){
+				position:absolute;
+				z-index:20 !important;
+				background:#fff;
+			}
+			#adminFilter .custom-field .select2-selection__rendered{
+				line-height:26px !important;
+			}
+		</style>`);
+	}
+}
+
+function initAdminFilterSelect2(selector){
+	if($(selector).hasClass("select2-hidden-accessible")){
+		$(selector).select2("destroy");
+	}
+	$(selector).select2({
+		theme:"bootstrap4",
+		dropdownParent:"#adminFilter"
 	});
 }
 
@@ -97,43 +132,55 @@ function getFilterForm(){
 	var html=''
 	html+=`<div class="filter-wrapper">
 		<button class="btn btn-sm btn-primary float-right show-filter"><i class="fa fa-filter"></i>&nbsp;Filter</button>
-		<form name="adminFilter" id="adminFilter" action="javascript:void(0)">
+		<form name="adminFilter" id="adminFilter" class="custom-field-scope" action="javascript:void(0)">
 			<input type="hidden" name="userClickFrom" id="userClickFrom" value="common" />
 			<div class="filter-fields rounded-10" style="display:none">
 				<div class="row px-3">
 					<div class="col-md-4 col-sm-6 col-xs-12">
-						<label>Name</label>
-						<input type="text" name="Name" style="text-transform:capitalize" id="Name" class="form-control" value=""  />
+						<div class="custom-field">
+							<input type="text" name="Name" style="text-transform:capitalize" id="Name" class="form-control" value="" placeholder=" " />
+							<label for="Name">Name</label>
+						</div>
 					</div>
 					<div class="col-md-4 col-sm-6 col-xs-12">
-						<label>User Name</label>
-						<input type="text" name="userName" style="text-transform:capitalize" id="userName" class="form-control" value=""  />
+						<div class="custom-field">
+							<input type="text" name="userName" style="text-transform:capitalize" id="userName" class="form-control" value="" placeholder=" " />
+							<label for="userName">User Name</label>
+						</div>
 					</div>
 					<div class="col-md-4 col-sm-6 col-xs-12">
-						<label>Role Type</label>
-						<select name="roleUser" id="roleUser" class="form-control" >
-							<option value="0">Select Role</option>
-						</select>
+						<div class="custom-field">
+							<select name="roleUser" id="roleUser" class="form-control" >
+								<option value="0">Select Role</option>
+							</select>
+							<label for="roleUser">Role Type</label>
+						</div>
 					</div>
 					<div class="col-md-4 col-sm-4 col-xs-12">
-						<label>Added date</label>
-						<input type="text" name="addedDate" class="form-control" id="addedDate" readonly onkeydown="return false">
+						<div class="custom-field">
+							<input type="text" name="addedDate" class="form-control" id="addedDate" placeholder=" " readonly onkeydown="return false">
+							<label for="addedDate">Added date</label>
+						</div>
 					</div>
 					<div class="col-md-4 col-sm-6 col-xs-12">
-						<label>Status</label>
-						<select class="form-control" name="userActive" id="userActive">
-							<option value="">Select Status</option>
-							<option value="Y" selected="">Active</option>
-							<option value="N">Inactive</option>
-						</select>
+						<div class="custom-field">
+							<select class="form-control" name="userActive" id="userActive">
+								<option value="">Select Status</option>
+								<option value="Y" selected="">Active</option>
+								<option value="N">Inactive</option>
+							</select>
+							<label for="userActive">Status</label>
+						</div>
 					</div>
 					<div class="col-md-4 col-sm-2 col-xs-12">
-						<label>Page Size</label>
-						<input type="text" name="pageSize" style="text-transform:capitalize" id="pageSize" class="form-control" value="25"  />
+						<div class="custom-field">
+							<input type="text" name="pageSize" style="text-transform:capitalize" id="pageSize" class="form-control" value="25" placeholder=" " />
+							<label for="pageSize">Page Size</label>
+						</div>
 					</div>
 					<div class="col-md-12 col-sm-12 col-xs-12 mt-2 text-right">
-						<button class="btn btn-sm btn-danger  mr-1" onclick="searchAdminFilterReset('adminFilter')"><i class="fa fa-undo"></i>&nbsp;Reset</button>
-						<button class="btn btn-sm btn-success " id="btmSearchUsers"><i class="fa fa-search"></i>&nbsp;Search</button>
+						<button type="button" class="btn btn-sm btn-danger  mr-1" onclick="searchAdminFilterReset('adminFilter'); if(typeof refreshCustomFieldState === 'function'){setTimeout(function(){refreshCustomFieldState($('#adminFilter'));}, 0);}"><i class="fa fa-undo"></i>&nbsp;Reset</button>
+						<button type="button" class="btn btn-sm btn-success " id="btmSearchUsers"><i class="fa fa-search"></i>&nbsp;Search</button>
 					</div>
 				</div>
 			</div>
