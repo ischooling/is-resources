@@ -761,6 +761,8 @@ function refreshCustomFieldState(context) {
       var $selected = field.find("option:selected").first();
       if ($selected.length && $selected.prop("disabled")) {
         hasValue = false;
+      } else if ($selected.length && isPlaceholderOptionText($selected.text())) {
+        hasValue = false;
       }
     }
     customField.toggleClass("has-value", hasValue);

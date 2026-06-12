@@ -1167,17 +1167,20 @@ function openPopup(formId, leadType){
 	$('#'+formId).modal('show');
 	$("#advanceLeadNewSearchForm #leadAssignToSearch").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
+		dropdownParent:"#advanceLeadNewSearchForm",
+		placeholder:"Select Assign"
 	});
 	$("#advanceLeadNewSearchForm #leadCreatedBy").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
+		dropdownParent:"#advanceLeadNewSearchForm",
+		placeholder:"Select Assign"
 	});
 
 	
 	$("#advanceLeadNewSearchForm #leadDemoAssignSearch").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
+		dropdownParent:"#advanceLeadNewSearchForm",
+		placeholder:"Select Assign"
 	});
 
 	
@@ -1188,7 +1191,8 @@ function openPopup(formId, leadType){
 	});
 	$("#advanceLeadNewSearchForm #grade").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
+		dropdownParent:"#advanceLeadNewSearchForm",
+		placeholder:"Select Grade"
 	});
 	$("#advanceLeadNewSearchForm #countryId").select2({
 		theme:"bootstrap4",
@@ -1328,7 +1332,8 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	});
 	$("#advanceLeadNewSearchForm .leadSearchDeliveredStatus").select2({
 		theme:"bootstrap4",
-		dropdownParent:"#advanceLeadNewSearchForm"
+		dropdownParent:"#advanceLeadNewSearchForm",
+		placeholder:"-- Select Delivered Status --"
 	});
 
 	$("#advanceLeadNewSearchForm #leadSupportTo").select2({

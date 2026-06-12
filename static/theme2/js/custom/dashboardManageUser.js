@@ -420,9 +420,11 @@ function advanceTeacherSearch(formId, moduleId) {
 						+ '<a href="' + value.userLogUrl + '" target="_blank" class="dropdown-item">'
 						+ '<i class="fa fa-eye"></i>&nbsp;Teacher Logs'
 						+ '</a>'
-						+ '<a href="' + value.spoofLink + '" class="dropdown-item">'
-						+ '<i class="fa fa-eye"></i>View as Teacher'
-						+ '</a>'
+						+ (value.spoofLink === "Y"
+							? '<a href="javascript:void(0);" class="dropdown-item" onclick="return openSpoofUrlModal(\'' + value.userId + '\',\'' + (value.name || '').replace(/'/g, "\\'") + '\',\'teacher\');">'
+							+ '<i class="fa fa-eye"></i>&nbsp;View as Teacher'
+							+ '</a>'
+							: '')
 						+ (value.meetingCount <= 0
 							? ""
 							: '<a href="javascript:void(0);" class="dropdown-item" onclick="showWarningMessageShow(\'Are you sure you want to re-attempt recordings?\', \'enableReattemptRecording(' + value.userId + ')\');">'

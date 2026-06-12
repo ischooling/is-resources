@@ -3197,3 +3197,142 @@ function toggleInternationalSchoolingPopover(show){
 		},150);
 	}
 }
+
+function getSpoofUrlExpiryOptions() {
+	var options = [
+		{ value: 5, label: "5 minutes" },
+		{ value: 10, label: "10 minutes" },
+		{ value: 15, label: "15 minutes" },
+		{ value: 30, label: "30 minutes" },
+		{ value: 45, label: "45 minutes" }
+	];
+	for (var h = 1; h <= 24; h++) {
+		options.push({ value: h * 60, label: h + " hour" });
+	}
+	return options;
+}
+
+function getSpoofUrlModalHtml() {
+	var optionsHtml = '<option value="">Select Validity</option>';
+	$.each(getSpoofUrlExpiryOptions(), function (_, opt) {
+		optionsHtml += '<option value="' + opt.value + '" data-label="' + opt.label + '">' + opt.label + '</option>';
+	});
+	return `<div class="modal fade" id="spoofUrlModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h5 class="modal-title">View as User</h5>
+                    <button type="button" class="close text-white opacity-100" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><b>Name:&nbsp;</b><span id="spoofUrlUserName"></span></label>
+                    </div>
+                    <div class="form-group">
+                        <label for="spoofUrlExpirySelect">Select URL Validity</label>
+                        <select id="spoofUrlExpirySelect" class="form-control" style="width:100%;" onchange="onSpoofUrlExpiryChange(this);">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <div id="spoofUrlResultBox" class="mt-3" style="display:none;">
+                        <div class="form-group">
+                            <label><b>Generated URL:</b></label>
+                            <div class="input-group">
+                                <input type="text" id="spoofUrlGeneratedUrl" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <textarea id="spoofUrlInvitationText" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;"></textarea>
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-success mr-2" onclick="copyURL('spoofUrlGeneratedUrl','spoofUrlCopyMsg')"><i class="fa fa-copy"></i>&nbsp;Copy URL</button>
+                            <button type="button" class="btn btn-primary" onclick="copyURL('spoofUrlInvitationText','spoofUrlCopyMsg')"><i class="fa fa-copy"></i>&nbsp;Copy Invitation</button>
+                        </div>
+                        <div class="text-center mt-2"><span class="spoofUrlCopyMsg"></span></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function openSpoofUrlModal(userId, userName, roleLabel) {
+	if (!userId) {
+		showMessageTheme2(0, "Invalid user.");
+		return false;
+	}
+	if ($("#spoofUrlModal").length === 0) {
+		$("body").append(getSpoofUrlModalHtml());
+	}
+	$("#spoofUrlModal").attr("data-user-id", userId);
+	$("#spoofUrlUserName").text(userName || "");
+	$("#spoofUrlResultBox").hide();
+	$("#spoofUrlGeneratedUrl").val("");
+	$("#spoofUrlInvitationText").val("");
+	var $select = $("#spoofUrlExpirySelect");
+	$select.val("");
+	if ($.fn.select2) {
+		if ($select.hasClass("select2-hidden-accessible")) {
+			$select.select2("destroy");
+		}
+		$select.select2({
+			dropdownParent: $("#spoofUrlModal"),
+			placeholder: "Select Validity",
+			width: "100%"
+		});
+	}
+	$("#spoofUrlModal").modal("show");
+	return false;
+}
+
+function onSpoofUrlExpiryChange(selectEl) {
+	var $select = $(selectEl);
+	var minutes = $select.val();
+	if (!minutes) {
+		$("#spoofUrlResultBox").hide();
+		return;
+	}
+	var userId = $("#spoofUrlModal").attr("data-user-id");
+	var label = $select.find("option:selected").attr("data-label") || (minutes + " minutes");
+	generateSpoofUrl(userId, minutes, label);
+}
+
+async function generateSpoofUrl(userId, expiryMinutes, validityLabel) {
+	try {
+		customLoader(true);
+		var ajaxReqDetails = {
+			method: "POST",
+			url: APP_BASE_URL + SCHOOL_UUID + "/create-spoof-url/" + UNIQUEUUID,
+			body: {
+				userId: userId + "",
+				expiryMinutes: expiryMinutes + ""
+			},
+			global: true,
+			showMessage: true,
+			onFaildResolved: true,
+			onSuccessResolved: true
+		};
+		var response = await callCommonAjax(ajaxReqDetails);
+		if (response && (response.status === "SUCCESS" || response.statusCode === "200") && response.details) {
+			var details = response.details;
+			$("#spoofUrlUserName").text(details.userName || $("#spoofUrlUserName").text());
+			$("#spoofUrlGeneratedUrl").val(details.spoofUrl || "");
+			var invitationText = "Name - " + (details.userName || "")
+				+ "\nValidity - " + validityLabel
+				+ "\nUrl - " + (details.spoofUrl || "");
+			$("#spoofUrlInvitationText").val(invitationText);
+			$("#spoofUrlResultBox").show();
+		} else {
+			$("#spoofUrlResultBox").hide();
+			showMessageTheme2(0, (response && response.message) || "Unable to generate URL.");
+		}
+	} catch (e) {
+		console.error("generateSpoofUrl error", e);
+		showMessageTheme2(0, "Unable to generate URL.");
+	} finally {
+		customLoader(false);
+	}
+}

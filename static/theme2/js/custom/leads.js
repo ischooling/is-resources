@@ -1601,7 +1601,7 @@ function advanceLeadSearchStudentReset(formId, leadType){
 	$("#"+formId+" #phoneNoSearch").val('');
 	$("#"+formId+" #leadstdfnameSearch").val('');
 	$("#"+formId+" #leadParentfnameSearch").val('');
-	$("#"+formId+" #leadGradeSearch").val(0).trigger('change');
+	$("#"+formId+" #leadGradeSearch").val('').trigger('change');
 	$("#"+formId+" #countryId").val(0).trigger('change');
 	//  $("#"+formId+" #stateId").val(0).trigger('change');
 	//  $("#"+formId+" #city").val(0).trigger('change');
@@ -1620,7 +1620,7 @@ function advanceLeadSearchStudentReset(formId, leadType){
 	$("#"+formId+" #clsrmBkedDateSearch").val('');
 	$("#"+formId+" #clsrmBkedLastDateSearch").val('');
 	$("#"+formId+" #leadSearchTemplate").val('').trigger('change');
-	$("#"+formId+" #leadSearchDeliveredStatus").val('ALL').trigger('change');
+	$("#"+formId+" #leadSearchDeliveredStatus").val('').trigger('change');
 	$("#"+formId+" #leadSearchCampaign").val(0).trigger('change');
 	$("#"+formId+" #leadSearchAdSet").val('').trigger('change');
 	$("#"+formId+" #leadCallback").val("").trigger('change');
@@ -5636,7 +5636,7 @@ function callTemplateList(dropdownStatus, elementIdid, selectedUserId) { //conso
 	}
 	//data['userId']=selectedUser;
 	//console.log("data val :: " + JSON.stringify(data));
-	$("#leadSearchDeliveredStatus").val('ALL').trigger('change');
+	$("#leadSearchDeliveredStatus").val('').trigger('change');
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -10844,7 +10844,11 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
 		  $(".leadSearchCampaign").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
 		  $(".leadSearchTemplate").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
-		  $(".leadSearchDeliveredStatus").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
+		  $(".leadSearchDeliveredStatus").select2({
+			theme: "bootstrap4",
+			dropdownParent: "#advanceLeadNewSearchForm",
+			placeholder: "-- Select Delivered Status --"
+		  });
 
 		  $(".leadStatus-followup").select2({
 			theme:"bootstrap4",

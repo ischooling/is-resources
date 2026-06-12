@@ -839,7 +839,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">' +
     '<div class="form-group custom-field mb-2">' +
     '	<select name="leadGradeSearch" id="leadGradeSearch" class="form-control" >' +
-    '		<option value="0">Select Grade</option>' +getStandardContent(SCHOOL_ID, true, false) +
+    '		<option value="">Select Grade</option>' +getStandardContent(SCHOOL_ID, true, false) +
     "	</select>" +
     '<label for="leadGradeSearch">Grade</label>' +
     '</div>' +
@@ -868,19 +868,19 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;' +
     '<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead&nbsp;' +
     '<input type="checkbox" id="checkByLeadDemo" name="checkByLeadDemo" /> Lead With Demo';
-  html += '<div class="form-group custom-field mb-2">';
+  html += '<div class="form-group mb-2">';
   if (objRights.leadHideRights) {
     html +='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple disabled></select>';
   } else {
     html +='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple></select>';
   }
-  html += '<label for="leadAssignToSearch">Lead Assign To Search</label>';
+  html += '<label for="leadAssignToSearch"> </label>';
   html += '</div>';
   html += '</div>';
   html +='<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
     '<div class="form-group custom-field mb-2">' +
     '<select	name="leadCreatedBy" id="leadCreatedBy" class="form-control" >' +
-    '<option value="0">Select Assign</option>' +
+    '<option value="">Select Assign</option>' +
     '</select>' +
     '<label for="leadCreatedBy">Lead Added by</label>' +
     '</div>' +
@@ -888,7 +888,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
     '<div class="form-group custom-field mb-2">' +
     '	<select	name="leadDemoAssignSearch" id="leadDemoAssignSearch" class="form-control" >' +
-    '		<option value="0">Select Assign</option>' +
+    '		<option value="">Select Assign</option>' +
     '	</select>' +
     '<label for="leadDemoAssignSearch">Demo Assign</label>' +
     '</div>' +
@@ -994,7 +994,7 @@ function getLeadAdvanceSearchPopup(objRights) {
     '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
     '<div class="form-group custom-field mb-2">' +
     '	<select  name="leadSearchDeliveredStatus" id="leadSearchDeliveredStatus" class="form-control leadSearchDeliveredStatus"  >' +
-    '		<option value="ALL"  >-- Select Delivered Status --</option>' +
+    '		<option value=""  >-- Select Delivered Status --</option>' +
     '		<option value="SUCCESS" >SUCCESS</option>' +
     '		<option value="FAIL" >FAIL</option>' +
     '		<option value="UNREACHED"  >UNREACHED</option>' +
