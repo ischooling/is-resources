@@ -20,7 +20,7 @@ function getEmailVerifyContent(title, newTheme) {
 				<div class="form-group">
 					<form id="emailVerifyForm" action="javascript:void(0);" class="custom-field-scope">
 						<div class="full">
-							<div class="input-group position-relative custom-field email-verify-field mb-2 mt-3 p-0">
+							<div class="input-group position-relative custom-field email-verify-field mb-2 mt-3 p-0 flex-nowrap">
 								<input type="text" id="getVEmail" class="form-control" placeholder=" " />
 								<label for="getVEmail">Enter Email</label>
 								<div class="input-group-append">
