@@ -1,65 +1,67 @@
+var SHOW_GRADUATION_LOGIN_DESIGN = true;
 
 async function loginContent(userName, fromSpoof){
     var html =``;
         html+=marqueeContent();
         html+=
-        `<div class="login-bg">
-            <div class="container" style="display: flex;justify-content: center;">
-                ${/*<div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
-
+        `<div class="login-bg login-redesign bg-primary${SHOW_GRADUATION_LOGIN_DESIGN ? ' login-graduation-split' : ''}">
+            <div class="login-orbs" aria-hidden="true">
+                <span class="login-orb login-orb-1"></span>
+                <span class="login-orb login-orb-2"></span>
+                <span class="login-orb login-orb-3"></span>
+                <span class="login-orb login-orb-4"></span>
+                <span class="login-orb login-orb-5"></span>
+                <span class="login-orb login-orb-6"></span>
+            </div>
+            ${SHOW_GRADUATION_LOGIN_DESIGN ? `
+                <aside class="graduation-event graduation-event-side">
+                    <div class="graduation-event-content">
+                        <div class="graduation-event-heading">
+                           <div class="graduation-cap" aria-hidden="true">🎓</div>
+                            <span class="graduation-event-badge"><span></span>GRADUATION CEREMONY 2026</span>  
+                        </div>
+                         <p class="graduation-location">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"></path>
+                            </svg>
+                            Atlantis, The Palm — Dubai, UAE
+                        </p>
+                        <h2>We're Celebrating<br>Graduation <strong>2026</strong></h2>
+                        <p class="graduation-description">Don't miss this milestone moment. <strong>Register now</strong> to be part of the celebration!</p>
+                        <a class="graduation-register-btn graduation-register-blink" href="https://www.internationalschooling.org/events" target="_blank" rel="noopener">
+                            Register Now
+                        </a>
                     </div>
-                </div>*/''}
+                </aside>
+            ` : ``}
+            <div class="container login-redesign__container" style="display: flex;justify-content: center;">
                 <div class="row">
-                    <div class="col-lg-6 col-md-12 col-sm-6 col-xs-12 text-center">
-                        ${/*<div class="login-logo eid_logo_align_2022">
-                            <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                                <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="160" loding="lazy"/>
-                            </a>
-                        </div>*/''}
-                        ${/*<div class="new-year-img">
-                            <img src="${PATH_FOLDER_IMAGE2}2022.png" loding="lazy"/>
-                        </div>*/''} 
-                    </div>`;
-
-                    +CommonLandingImageContent();
-                    html+=
-                    `<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">`;
-                        if(SCHOOL_ID === 1){
-                            html+=`<div class="login-wrapper">`;
-                        } else{
-                            html+=`<div class="login-wrapper" style="text-align: center;">`;
-                        }
-                        html+=
-                        `${/*<img src="${PATH_FOLDER_IMAGE2}happy_new_year_2025_text.jpg" class="christmas-text-img" loding="lazy"/>*/''}
-                        ${/*<img src="${PATH_FOLDER_IMAGE2}happy_new_year_2025_text.png" class="christmas-text-img" style="display: inline-block;float: none;" loding="lazy"/>*/''}
-                        <div class="login">
-                            <div class="login-logo eid_logo_align_2022" style="margin:0">
-                                <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-                                    <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="350" loding="lazy" />
-                                </a>`;
-                                // if(SCHOOL_ID == 1){
-                                //     html+=`<h5 class="text-primary" style="margin-top:5px;font-size:14px;font-weight:500">My School, My Location, My Time</h5>`;
-                                // }
-                                html+=
-                                `</div>
-                                <hr style="margin:20px 0px 0px 0px;"/>`
-                                if(SCHOOL_ID === 1){
-                                    html+=`<h4 class="sms"style="">School Management System</h4>`;
-                                }else{
-                                    html+=`<h4 class="sms primary-txt-color"style="">School Management System</h4>`;
-                                }
-                                html+=
-                                `<div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        ${SCHOOL_ID === 1 ? `<div class="login-wrapper">` : `<div class="login-wrapper" style="text-align: center;">`}
+                            <div class="login">
+                                <div class="login-logo eid_logo_align_2022" style="margin:0">
+                                    <a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+                                        <img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" width="350" loding="lazy" />
+                                    </a>
+                                </div>
+                                <hr style="margin:18px 0px 16px 0px;"/>
+                                <h4 class="sms primary-txt-color">School Management System</h4>
+                                <div>
                                     <div class="user-circle">
                                         <span class="circle-border primary-border-color">
-                                            <i class="fa fa fa-user-o user-icon primary-txt-color"></i>
+                                            <span class="profile-avatar" aria-hidden="true">
+                                                <span class="profile-avatar-head"></span>
+                                                <span class="profile-avatar-body"></span>
+                                            </span>
                                         </span>
+                                        
                                     </div>
                                 </div>
-                                <h1 class="primary-txt-color">User Log In</h1>`;
+                                <h1 class="login-welcome"><span class="primary-txt-color">Welcome</span> <span class="secondary-txt-color">back!</span></h1>
+                                `;
 
                                 html+=loginFormContent(userName, fromSpoof);
+
                                 html+=
                                 `<div class="form-group"></div>
                             </div>
@@ -194,74 +196,68 @@ function CommonLandingImageContent(data){
 function loginFormContent(userName, fromSpoof){
     var html=
     `
-        <form class="input-with-icon login-2023-theme" id="loginForm" name="loginForm" method="post" autocomplete="off">
-	        <input type="hidden" name="location" id="location" value="{}" />
+        <form class="input-with-icon login-2023-theme custom-field-scope login-form" id="loginForm" name="loginForm" method="post" autocomplete="off">
+            <input type="hidden" name="location" id="location" value="{}" />
             <input type="hidden" name="fromSpoof" id="fromSpoof" value="${fromSpoof}" />
-            <div class="text-left">
-                <label class="control-label" style="font-size: 12px !important;">Email</label>
-                <div class="input-group valid-field">
-                    <span class="input-group-addon primary-bg primary-border-color" id="email-addon"> <i class="fa fa-envelope text-white"></i></span>
-                    <input	type="email" name="email" id="email" autocomplete="off" class="form-control"
-                            value="${userName}" maxlength="50" describedby="email-addon">
-                    <span class="input-group-addon" id="email-addon" style="cursor:pointer;background-color:#fff !important;border-color:#ccc !important;border-left:0px !important">
-                        <a href="javascript:void(0)" data-toggle="tooltip" title="Please login using the email & password provided at the time of enrollment."><i class="fa fa-info-circle"></i></a>
-                    </span>
-                </div>
-            </div>
-            <div class="text-left">
-                <label class="control-label" style="font-size: 12px !important;">Password</label>
-            </div>
-            <div class="input-group valid-field">
-                <span class="input-group-addon primary-bg primary-border-color" id="password-addon"> <i class="fa fa fa-lock  text-white"></i></span>
-                <input name="password" id="password" class="form-control" autocomplete="off"
-                    type="password" maxlength="20"  value="" describedby="describedby">
-                <span class="input-group-addon" id="password-addon" style="cursor:pointer;background-color:#fff !important;border-color:#ccc !important;border-left:0px !important">
-                    <i class="fa fa-eye-slash" id="icon-change" onclick="showPassWord('password', 'icon-change')"></i>
-                    <!-- <span style="position: absolute;right: 15px;cursor:pointer;"><i class="fa fa-eye-slash"></i> -->
+            <div class="custom-field valid-field login-field login-field-email">
+                <span class="login-field-icon primary-txt-color">
+                    <i class="fa fa-envelope"></i>
                 </span>
+                <input type="email" name="email" id="email" autocomplete="off" class="form-control"
+                        value="${userName}" maxlength="50" describedby="email-addon" placeholder=" ">
+                <label class="control-label" for="email">Email</label>
+                <a href="javascript:void(0)" class="login-field-action login-field-info" data-toggle="tooltip" data-html="true" data-container=".login-wrapper"
+                        data-template="<div class='tooltip login-email-tooltip' role='tooltip'><div class='tooltip-arrow'></div><div class='tooltip-inner'></div></div>"
+                        title="Please login using the email &amp; password provided at the time of enrollment.">
+                    <i class="fa fa-info-circle"></i>
+                </a>
             </div>
-            <p class="text-right text-dark m-0">`;
-                // if(!schoolSettingsLinks.signupUrl){
-                //     html+=`<a class="primary-txt-color" href="${schoolSettingsLinks.signupUrl}">Don't have an account?</a> <br />`
-                // }
-                html+=`<a style="color:#828282;font-size: 12px;" href="javaScript:void(0)" onclick="callFocusForForgotPassword()">Forgot Password?</a><br />`;
-                // if(!schoolSettingsLinks.ticketRaisedUrl){
-                //     html+=`<a class="primary-txt-color" href="${schoolSettingsLinks.ticketRaisedUrl}" target="_blank">Submit a Ticket</a>`;
-                // }
-            html+=`</p>
-            <div class="text-left">
-                <label class="control-label" style="font-size: 12px !important;">Captcha</label>
-            </div>		
-            <div class="input-group captch-field full valid-field">
-                <div class="form-group label-floating">
-                    <input type="text" name="captcha" id="captcha" class="form-control" style="width: 58%; float:left;text-transform: uppercase;" value="" pattern="^[_A-z0-9]{1,}$" minlength="6" maxlength="6" required>
-                        ${/*onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);"*/''}
-                    <span style="background: var(--pc);padding: 1px 0px;border-radius: 4px;">
-                        <img id="captchaImage" alt="Captcha" src="" onerror="this.onerror=null;refreshCaptcha('captchaImage');" style="width:105px; height: 25px;position:relative;left:4px" loding="lazy" />
-                        <a class="refresh-link text-white" href="javascript:void(0);" title="Refresh"
-                            onClick="return refreshCaptcha('captchaImage');" style="display: inline-block;padding: 0px 8px;border-left:1px solid rgba(255, 255, 255, 0.3);color:#fff">
-                            <i class="fa fa-refresh"></i>
-                        </a>
+            <div class="custom-field valid-field login-field login-field-password">
+                <span class="login-field-icon primary-txt-color">
+                    <i class="fa fa fa-lock"></i>
+                </span>
+                <input name="password" id="password" class="form-control" autocomplete="off"
+                    type="password" maxlength="20" value="" describedby="describedby" placeholder=" ">
+                <label class="control-label" for="password">Password</label>
+                <button type="button" class="login-field-action login-field-toggle" aria-label="Show password" onclick="showPassWord('password', 'icon-change')">
+                    <i class="fa fa-eye-slash" id="icon-change"></i>
+                </button>
+            </div>
+            <p class="text-right text-dark m-0 login-forgot-row">
+                <a class="forgot-password-link" href="javaScript:void(0)" onclick="callFocusForForgotPassword()">Forgot Password?</a>
+            </p>
+            <div class="captcha-row">
+                <div class="custom-field valid-field captch-field login-field login-field-captcha">
+                    <span class="login-field-icon primary-txt-color">
+                        <i class="fa fa-lock"></i>
                     </span>
+                    <input type="text" name="captcha" id="captcha" class="form-control" placeholder=" " value=""
+                            inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                    ${/*onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);"*/''}
+                    <label class="control-label" for="captcha">Captcha</label>
+                </div>
+                <span class="captcha-row-arrow" aria-hidden="true">←</span>
+                <div class="captcha-code-box primary-bg white-txt-color">
+                    <img id="captchaImage" alt="Captcha" src="" onerror="this.onerror=null;refreshCaptcha('captchaImage');" loding="lazy" />
+                    <a class="captcha-refresh-btn" href="javascript:void(0);" title="Refresh" onClick="return refreshCaptcha('captchaImage');">
+                        <i class="fa fa-refresh"></i>
+                    </a>
                 </div>
             </div>
 
-            <div class="form-group text-center">
-                <input type="submit" class="btn primary-bg white-txt-color" id="loginButton" value="Log In">
-                <p class="m-0"> 
-                        
-                    <span class="primary-txt-color">`;
-                        if(schoolSettingsLinks.termasOfUserUrl != null && schoolSettingsLinks.termasOfUserUrl != undefined && schoolSettingsLinks.termasOfUserUrl != ''){
-                            html+=`<a class="black-txt-color" href="${schoolSettingsLinks.termasOfUserUrl}" target="blank">Terms of use </a>`;
-                        }
-                        if(schoolSettingsLinks.privacyPolicyUrl != null && schoolSettingsLinks.privacyPolicyUrl != undefined && schoolSettingsLinks.privacyPolicyUrl != ''){
-                            html+=`| <a class="black-txt-color" href="${schoolSettingsLinks.privacyPolicyUrl}" target="blank">Privacy Policy</a>`;
-                        }
-                        html+=`<br />${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}
-                    </span>
-                </p>
+            <div class="form-group text-center login-actions">
+                <button type="submit" class="btn primary-bg btn-shadow white-txt-color login-submit-btn" id="loginButton">
+                    <span>Log in</span>
+                </button>
+                <div class="login-footer-links">
+                    ${schoolSettingsLinks.termasOfUserUrl != null && schoolSettingsLinks.termasOfUserUrl != undefined && schoolSettingsLinks.termasOfUserUrl != '' ? `<a href="${schoolSettingsLinks.termasOfUserUrl}" target="blank">Terms of use</a>` : ``}
+                    ${schoolSettingsLinks.termasOfUserUrl != null && schoolSettingsLinks.termasOfUserUrl != undefined && schoolSettingsLinks.termasOfUserUrl != '' && schoolSettingsLinks.privacyPolicyUrl != null && schoolSettingsLinks.privacyPolicyUrl != undefined && schoolSettingsLinks.privacyPolicyUrl != '' ? `<span class="dot">•</span>` : ``}
+                    ${schoolSettingsLinks.privacyPolicyUrl != null && schoolSettingsLinks.privacyPolicyUrl != undefined && schoolSettingsLinks.privacyPolicyUrl != '' ? `<a href="${schoolSettingsLinks.privacyPolicyUrl}" target="blank">Privacy Policy</a>` : ``}
+                    <div class="login-footer-copy">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</div>
+                </div>
             </div>
-        </form>`
+        </form>`;
     return html;
 }
 
@@ -405,14 +401,14 @@ function footerContent(){
 }
 
 function getCookiesConsentContent(){
-	var html=
-	`<div class="cookies cookie-consent" style="display:block;">
-		<p>The website uses 'cookies' to give you the best, most relevant experience.
-		By continuing to visit this site you agree to our use of cookies. 
-		<a href="javascript:void(0);" class="cookie-consent-agree">Accept Cookies</a>
-		</p>
-	</div>`;
-	return html;
+    var html=
+    `<div class="cookies cookie-consent" style="display:block;">
+        <p>The website uses 'cookies' to give you the best, most relevant experience.
+        By continuing to visit this site you agree to our use of cookies. 
+        <a href="javascript:void(0);" class="cookie-consent-agree">Accept Cookies</a>
+        </p>
+    </div>`;
+    return html;
 }
 
 function serverErrorMessageContent(){
