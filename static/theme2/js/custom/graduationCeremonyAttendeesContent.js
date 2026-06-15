@@ -9,7 +9,6 @@ function getGraduationCeremonyAttendeesContent(title, roleAndModule, schoolId, u
                 <div>${title}</div>
             </div>
             <div class="page-title-actions">
-                <button onclick="sendGraduationCeremonyMailToEligibleStudents();" class="btn btn-primary btn-sm">Send Mail To Eligible Students</button>
             </div>
         </div>
     </div>

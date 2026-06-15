@@ -681,7 +681,9 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 
 	if (todayClassArray.length > 0) {
 		// ✅ DATE FORMAT SAFE
-		var date = new Date(info.start);
+		//var date = new Date(info.start);
+		var date = new Date(convertDatetimeWithFormat(info.start._i, info.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC));
+
 		var formattedDate = isNaN(date)
 		? ""
 		: date.toLocaleDateString("en-US", {
