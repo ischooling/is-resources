@@ -4,19 +4,60 @@
  src:url('../fonts/fontawesome-webfont.eot?v=4.7.0');
  src:url('../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'),url('../fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'),url('../fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'),url('../fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'),url('../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');font-weight:normal;font-style:normal
 } 
+font-8 {
+	font-size: 8px !important;
+}
+.font-10 {
+	font-size: 10px !important;
+}
+.font-11 {
+	font-size: 11px !important;
+}
+.font-12 {
+	font-size:12px !important
+}
+
+
+.font-14 {
+	font-size: 14px !important;
+}
+.font-16 {
+	font-size: 16px !important;
+}
+.font-18 {
+	font-size: 18px !important;
+}
+.font-20 {
+	font-size: 20px !important;
+}
+.font-22 {
+	font-size: clamp(16px, 4vw, 22px);
+}
+.font-24 {
+	font-size: clamp(18px, 4vw, 24px);
+}
+.font-26 {
+	font-size: clamp(20px, 4vw, 26px);
+}
+.font-28 {
+	font-size: clamp(22px, 4vw, 28px);
+}
+.font-30 {
+	font-size: 30px !important;
+}
 .m-0{margin-bottom: 0;}
 .fa{display:inline-block;font:normal normal normal 14px/1 FontAwesome;font-size:inherit;text-rendering:auto;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .fa-info-circle:before{content:"\f05a"}.fa-envelope-o:before{content:"\f003"}.fa-lock:before{content:"\f023"}.fa-eye:before{content:"\f06e"}.fa-eye-slash:before{content:"\f070"}.fa-refresh:before{content:"\f021"}.fa-envelope:before{content:"\f0e0"}.fa-user:before{content:"\f007"}.fa-user-o:before{content:"\f2c0"}
 .text-white {color: #fff !important;}
 .input-with-icon .form-control:invalid{background-image: inherit !important;}
 .full{width: 100%;display: inline-block;position: relative;}
-.valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;top: 8px;color: green;transform: scale(0); visibility: hidden;opacity: 1;font-size: 20px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
+.valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;top:50%; transform:translateY(-50%); color: green;transform: scale(0); visibility: hidden;opacity: 1;font-size: 20px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
 .valid-field.true:after{content:"\f00c";color: green;right: 50px !important;z-index: 9;}
-.valid-field.false:after{content:"\f00d";color: red;right: 50px !important;z-index: 9;}
+.valid-field.false:after{content:"\f00d";color: red;right: 35px !important;z-index: 9;}
 .true.valid-field:after, .false.valid-field:after{visibility: visible;opacity: 1;transform: scale(1);}
 .true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
 .false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
-.captch-field.valid-field.false:after, .captch-field.valid-field.true:after{right: 155px !important;}
+.captch-field.valid-field.false:after, .captch-field.valid-field.true:after{right: 15px !important;}
 #statusMessage.modal-body{margin: 0 auto;padding:15px 0;font-size: 18px;color: #666;font-weight: bold;margin-top:0 !important;}
 .modal-dialog { margin: 30px auto; top: 20%;}
 .modal-body p{ padding:10px 0 10px;}
@@ -279,19 +320,19 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  line-height:1.45;
  color:#8090aa;
 }
-.login-redesign .custom-field-scope{
+.custom-field-scope{
  --custom-field-bg:#f4f8ff;
  --custom-field-default:#dae5f5;
  --custom-field-active:#2b86ff;
  --custom-field-default-text:#8e98ab;
  --custom-field-value:#30415f;
 }
-.login-redesign .custom-field-scope .custom-field{
+.custom-field-scope .custom-field{
  position:relative;
  width:100%;
  margin-bottom:14px;
 }
-.login-redesign .custom-field-scope .custom-field label:not(.error-msg){
+.custom-field-scope .custom-field label:not(.error-msg){
  position:absolute;
  left:48px;
  top:50%;
@@ -307,10 +348,10 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  pointer-events:none;
  transition:all .2s ease;
 }
-.login-redesign .custom-field-scope .custom-field input,
-.login-redesign .custom-field-scope .custom-field select,
-.login-redesign .custom-field-scope .custom-field textarea,
-.login-redesign .custom-field-scope .custom-field .select2-selection--single{
+.custom-field-scope .custom-field input,
+.custom-field-scope .custom-field select,
+.custom-field-scope .custom-field textarea,
+.custom-field-scope .custom-field .select2-selection--single{
  display:block;
  box-sizing:border-box;
  width:100%;
@@ -325,27 +366,27 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  outline:none !important;
  transition:border-color .2s ease,box-shadow .2s ease;
 }
-.login-redesign .custom-field-scope .custom-field input{
+.custom-field-scope .custom-field input{
  padding:12px 45px 10px 48px !important;
  font-size:15px;
  line-height:1.2;
  color:var(--custom-field-value);
 }
-.login-redesign .custom-field-scope .custom-field input:focus{
+.custom-field-scope .custom-field input:focus{
  border-color:var(--custom-field-active) !important;
  box-shadow:0 0 0 3px rgba(43,134,255,.13) !important;
 }
-.login-redesign .custom-field-scope .custom-field:focus-within label:not(.error-msg),
-.login-redesign .custom-field-scope .custom-field input:not(:placeholder-shown) + label:not(.error-msg),
-.login-redesign .custom-field-scope .custom-field input:-webkit-autofill + label:not(.error-msg),
-.login-redesign .custom-field-scope .custom-field:has(input:not(:placeholder-shown)) label:not(.error-msg){
+.custom-field-scope .custom-field:focus-within label:not(.error-msg),
+.custom-field-scope .custom-field input:not(:placeholder-shown) + label:not(.error-msg),
+.custom-field-scope .custom-field input:-webkit-autofill + label:not(.error-msg),
+.custom-field-scope .custom-field:has(input:not(:placeholder-shown)) label:not(.error-msg){
  top:0;
  left:15px;
  transform:translateY(-50%);
  color:var(--custom-field-active);
  font-size:11px !important;
 }
-.login-redesign .custom-field-scope .custom-field .login-field-icon{
+.custom-field-scope .custom-field .login-field-icon{
  position:absolute;
  left:17px;
  top:50%;
@@ -355,7 +396,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  font-size:16px;
  pointer-events:none;
 }
-.login-redesign .custom-field-scope .custom-field .login-field-action{
+.custom-field-scope .custom-field .login-field-action{
  position:absolute;
  right:15px;
  top:50%;
@@ -372,7 +413,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  padding:0;
  text-decoration:none;
 }
-.login-redesign .custom-field-scope .custom-field .login-field-action:hover{text-decoration:none;}
+.custom-field-scope .custom-field .login-field-action:hover{text-decoration:none;}
 .login-email-tooltip .tooltip-inner{
  box-sizing:border-box;
  width:100%;
@@ -426,7 +467,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  overflow:hidden;
 }
 .login-redesign .captcha-row .captcha-code-box img{
- max-width:76px;
+ max-width:100%;
  object-fit:contain;
  display:block;
 }
@@ -449,7 +490,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  min-width:0;
  margin-bottom:0 !important;
 }
-.login-redesign .custom-field-scope .login-field-captcha input{
+.custom-field-scope .login-field-captcha input{
  width:100% !important;
  max-width:100% !important;
  font-size:22px !important;
@@ -512,7 +553,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  width:50%;
  padding:40px 8%;
  transform:translateY(-50%);
- text-align:left;
+ text-align:center;
 }
 .login-redesign .graduation-event-content{
  position:relative;
@@ -520,6 +561,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  width:100%;
  max-width:500px;
  transform:translateX(105px);
+ text-align:center;
 }
 .login-redesign .graduation-event-badge{
  display:inline-flex;
@@ -533,11 +575,11 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  font-size:15px;
  font-weight:800;
  letter-spacing:.4px;
- text-transform:uppercase;
 }
 .login-redesign .graduation-event-heading{
  display:flex;
  align-items:center;
+ justify-content:center;
  gap:12px;
 }
 .login-redesign .graduation-event-badge span{
@@ -556,16 +598,24 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  margin:0;
  color:#fff;
  font-family:'Baloo 2', cursive;
- font-size:46px;
+ font-size:36px;
  font-weight:800;
  line-height:1.12;
 }
-.login-redesign .graduation-event-side h2 strong{
+.login-redesign .graduation-event-side, .yellow-text{
  color:#ffd56a;
+}
+
+.rounded-15 {
+	border-radius:15px !important
+}
+.overflow-hidden {
+	overflow:hidden !important
 }
 .login-redesign .graduation-location{
  display:flex;
  align-items:center;
+ justify-content:center;
  gap:10px;
  margin:20px 0 18px;
  color:#fff;
@@ -574,7 +624,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
 }
 .login-redesign .graduation-description{
  max-width:480px;
- margin:0 0 24px;
+ margin:0 auto 24px;
  color:rgba(255,255,255,.94);
  font-size:16px;
  line-height:1.5;
@@ -798,7 +848,7 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  .login-redesign .user-circle{width:100px;height:100px;margin-bottom:2px;}
  .login-redesign .login-welcome{margin:4px 0 18px;font-size:26px;}
  .login-redesign .login-subtitle{font-size:14px;margin-bottom:14px;}
- .login-redesign .custom-field-scope .custom-field{margin-bottom:11px;}
+ .custom-field-scope .custom-field{margin-bottom:11px;}
  .login-redesign .login-forgot-row{margin:-10px 2px 9px !important;}
  .login-redesign .captcha-row{grid-template-columns:minmax(0,1fr) auto 140px;}
  .login-redesign .captcha-row .captcha-code-box{flex-basis:auto;width:100%;}

@@ -17,19 +17,19 @@ async function loginContent(userName, fromSpoof){
                 <aside class="graduation-event graduation-event-side">
                     <div class="graduation-event-content">
                         <div class="graduation-event-heading">
-                           <div class="graduation-cap" aria-hidden="true">🎓</div>
-                            <span class="graduation-event-badge"><span></span>GRADUATION CEREMONY 2026</span>  
+                            <span class="graduation-event-badge">Official Graduation Ceremony, 2026</span>  
                         </div>
                          <p class="graduation-location">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"></path>
                             </svg>
-                            Atlantis, The Palm — Dubai, UAE
+                            Atlantis, The Palm Dubai - UAE
                         </p>
-                        <h2>We're Celebrating<br>Graduation <strong>2026</strong></h2>
-                        <p class="graduation-description">Don't miss this milestone moment. <strong>Register now</strong> to be part of the celebration!</p>
+                        <h2>Join Us for the<br>Graduation Ceremony <strong> 2026</strong></h2>
+                        <h3 class="yellow-text" style="margin-top:10px; "><strong>Saturday, 25 July 2026</strong></h3>
+                        <p class="graduation-description">Don't Miss this Special Moment. <br/> Be Part of the Celebration! </p>
                         <a class="graduation-register-btn graduation-register-blink" href="https://www.internationalschooling.org/events" target="_blank" rel="noopener">
-                            Register Now
+                            Register Now!
                         </a>
                     </div>
                 </aside>
@@ -239,9 +239,13 @@ function loginFormContent(userName, fromSpoof){
                 </div>
                 <span class="captcha-row-arrow" aria-hidden="true">←</span>
                 <div class="captcha-code-box primary-bg white-txt-color">
-                    <img id="captchaImage" alt="Captcha" src="" onerror="this.onerror=null;refreshCaptcha('captchaImage');" loding="lazy" />
+                    <div style="display:inline-flex">
+                        <img id="captchaImage" alt="Captcha" src="" onerror="this.onerror=null;refreshCaptcha('captchaImage');" loding="lazy" />
+                    </div>
                     <a class="captcha-refresh-btn" href="javascript:void(0);" title="Refresh" onClick="return refreshCaptcha('captchaImage');">
-                        <i class="fa fa-refresh"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" fill="#fff">
+                            <path d="M129.9 292.5C143.2 199.5 223.3 128 320 128C373 128 421 149.5 455.8 184.2C456 184.4 456.2 184.6 456.4 184.8L464 192L416.1 192C398.4 192 384.1 206.3 384.1 224C384.1 241.7 398.4 256 416.1 256L544.1 256C561.8 256 576.1 241.7 576.1 224L576.1 96C576.1 78.3 561.8 64 544.1 64C526.4 64 512.1 78.3 512.1 96L512.1 149.4L500.8 138.7C454.5 92.6 390.5 64 320 64C191 64 84.3 159.4 66.6 283.5C64.1 301 76.2 317.2 93.7 319.7C111.2 322.2 127.4 310 129.9 292.6zM573.4 356.5C575.9 339 563.7 322.8 546.3 320.3C528.9 317.8 512.6 330 510.1 347.4C496.8 440.4 416.7 511.9 320 511.9C267 511.9 219 490.4 184.2 455.7C184 455.5 183.8 455.3 183.6 455.1L176 447.9L223.9 447.9C241.6 447.9 255.9 433.6 255.9 415.9C255.9 398.2 241.6 383.9 223.9 383.9L96 384C87.5 384 79.3 387.4 73.3 393.5C67.3 399.6 63.9 407.7 64 416.3L65 543.3C65.1 561 79.6 575.2 97.3 575C115 574.8 129.2 560.4 129 542.7L128.6 491.2L139.3 501.3C185.6 547.4 249.5 576 320 576C449 576 555.7 480.6 573.4 356.5z"/>
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -264,10 +268,10 @@ function loginFormContent(userName, fromSpoof){
 function forgotPasswordContent(){
     var html=
     `
-        <div id="forgotPassword" class="modal fade " role="dialog">
-            <div class="modal-dialog  modal-dialog-centered modal-md">
+        <div id="forgotPassword" class="modal fade" role="dialog">
+            <div class="modal-dialog  modal-dialog-centered modal-md ">
                 ${/*<!-- Modal content-->*/''}
-                <div class="modal-content">
+                <div class="modal-content rounded-15 overflow-hidden ">
                     <div class="modal-header primary-bg white-txt-color">
                         <button type="button" class="close" data-dismiss="modal" style="margin-top:3px;color:#fff;opacity:1">&times;</button>
                         <h5 class="modal-title" style="color: white; text-align: center;">
@@ -275,27 +279,25 @@ function forgotPasswordContent(){
                         </h5>
                     </div>
                     <form name="forgetForm" id="forgetForm"  method="post" autocomplete="off">
-                        <div class="modal-body text-center input-with-icon">
+                        <div class="modal-body text-center input-with-icon forgot-password-body custom-field-scope">
                             ${/*<!-- <label for="recipient-name" class="form-control-label"
                                 style="text-transform: capitalize">Registered Email</label> -->*/''}
                             <div class="full">
-                                <p class="text-center m-0">Please enter your <b>REGISTERED</b> Email</p>
+                                <p class="text-center m-0 font-16"><b> Please enter your Registered Email </b></p>
                             </div>
                             <div class="input-group">
                                 <h5 style="color: green;">
                                     <span id="thanks"></span>
                                 </h5>
                             </div>
-                            <div class="text-left">
-                                <label class="primary-txt-color m-0">Registered Email</label>
-                                <div class="input-group">
-                                    <span class="input-group-addon primary-bg primary-border-color" id="email-addon2">
-                                        <i class="fa fa-envelope text-white"></i>
-                                    </span>
-                                    <input type="text" name="emailid" id="emailid" class="form-control" placeholder="" describedby="email-addon2"  required>
-                                </div>
+                            <div class="custom-field valid-field login-field forgot-password-field">
+                                <span class="login-field-icon primary-txt-color" id="email-addon2">
+                                    <i class="fa fa-envelope"></i>
+                                </span>
+                                <input type="text" name="emailid" id="emailid" class="form-control" placeholder=" " describedby="email-addon2" required>
+                                <label class="control-label" for="emailid">Registered Email</label>
                             </div>
-                            <button type="button" class="btn btn-primary primary-bg white-txt-color" id="forgotSubmit">Send Password Reset Link to my Email</button>
+                            <button type="button" class="btn btn-primary btn-round btn-shadow primary-bg white-txt-color" id="forgotSubmit">Send Password Reset Link to my Email</button>
                         </div>
                         
                     </form>
