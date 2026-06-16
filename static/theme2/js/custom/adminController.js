@@ -341,13 +341,9 @@ function initAdminTask() {
 
 function initDashboard() {
     if (SCHOOL_TYPE == "WLP") {
-        if (SCHOOL_ID != 2) {
-            $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
-        } else {
-            $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
-        }
+        $('#dashboardContentInHTML').html(renderPartnerDashboard('Partner Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
     } else {
-        callForDashboardData("formIdIfAny", "dashboard-content?moduleId=" + moduleId, replaceDiv);
+        callForDashboardData("formIdIfAny", "dashboard-content?moduleId=" + moduleId);
     }
 }
 

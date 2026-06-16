@@ -1,8 +1,46 @@
+var GRADUATION_CEREMONY_FILTER_STATE = {
+    filterValues: {
+        ceremonyTitle: "GRADUATION_CEREMONY_2026"
+    }
+};
+
+function resetGraduationCeremonyFilterStateToDefault(){
+    GRADUATION_CEREMONY_FILTER_STATE = {
+        filterValues: {
+            ceremonyTitle: "GRADUATION_CEREMONY_2026"
+        }
+    };
+}
+
 function loadGraduationCeremonyAttendees(){
+    ensureDefaultGraduationCeremonyFilters();
+
+    if(typeof refreshCustomFieldState === "function"){
+        refreshCustomFieldState($("#graduationCeremonyFilterForm"));
+        setTimeout(function(){
+            refreshCustomFieldState($("#graduationCeremonyFilterForm"));
+        }, 0);
+    }
+
+    var request = {
+        userId: USER_ID,
+        ceremonyTitle: GRADUATION_CEREMONY_FILTER_STATE.filterValues.ceremonyTitle || "",
+        name: GRADUATION_CEREMONY_FILTER_STATE.filterValues.name || "",
+        email: GRADUATION_CEREMONY_FILTER_STATE.filterValues.email || "",
+        country: GRADUATION_CEREMONY_FILTER_STATE.filterValues.country || "",
+        attendAs: GRADUATION_CEREMONY_FILTER_STATE.filterValues.attendAs || "",
+        membersType: GRADUATION_CEREMONY_FILTER_STATE.filterValues.membersType || "",
+        paymentStatus: GRADUATION_CEREMONY_FILTER_STATE.filterValues.paymentStatus || "",
+        callbackStatus: GRADUATION_CEREMONY_FILTER_STATE.filterValues.callbackStatus || "",
+        phone: GRADUATION_CEREMONY_FILTER_STATE.filterValues.phone || ""
+    };
+
     return $.ajax({
-        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-all-ceremony-attendees?userId=${btoa(USER_ID)}`,
-        type: 'GET',
+        url: `${APP_BASE_URL}${SCHOOL_UUID}/get-all-ceremony-attendees`,
+        type: 'POST',
         cache: false,
+        contentType: APPLICATION_JSON_VALUE,
+        data: JSON.stringify(request),
         dataType: 'json',
         success: function(response) {
             if ($.fn.DataTable.isDataTable('#attendeesTable')) {
@@ -10,10 +48,9 @@ function loadGraduationCeremonyAttendees(){
             }
 
             let tbodyHtml = '';
-            $.each(response.details, function(index, attendee) {
+            $.each(response.details || [], function(index, attendee) {
                 const sno = index + 1;
                 const callbackStatus = attendee.callbackStatus ? attendee.callbackStatus : "N/A";
-                const isCallbackCompleted = callbackStatus.toUpperCase() === "COMPLETED";
                 const isCallbackScheduled = callbackStatus.toUpperCase() === "SCHEDULED";
                 const rawPreferredDateTime = attendee.callbackPreferredDateTime && attendee.callbackPreferredDateTime != "N/A" ? attendee.callbackPreferredDateTime : "";
                 const callbackPreferredTimezone = attendee.callbackPreferredTimezone || attendee.userTimezone || "";
@@ -35,7 +72,8 @@ function loadGraduationCeremonyAttendees(){
                 `;
                 const callbackInfo = `
                     <small>Status: ${callbackStatus}</small><br>
-                    <small>Time Slot: ${callbackTimeSlot}</small>
+                    <small>Time Slot: ${callbackTimeSlot}</small><br>
+                    <small>Date & Time: ${formattedDateAccToTZ}</small>
                 `;
                 const attendeesInfo = attendee.attendees && attendee.attendees.length > 0
                     ? attendee.attendees.map(function(person, personIndex){
@@ -48,16 +86,16 @@ function loadGraduationCeremonyAttendees(){
                 tbodyHtml += `<tr>
                     <td>${sno}</td>
                     <td>${studentInfo}</td>
-                    <td>${callbackInfo}</td>
+                    <td class="d-none">${callbackInfo}</td>
                     <td>${attendeesInfo}</td>
                     <td>${attendee.noOfAttendees?attendee.noOfAttendees : "N/A"}</td>
                     <td>$${attendee.amountScheduled}</td>
                     <td>${attendee.amountStatus}</td>
                     <td>${attendee.foodAllergy}</td>
-                    <td>`;
+                    <td><div class="graduation-ceremony-action-wrap">`;
                         if(isCallbackScheduled){
                             tbodyHtml += `<button type="button"
-                                class="btn btn-primary btn-sm open-graduation-status-modal"
+                                class="btn btn-primary btn-sm open-graduation-status-modal d-none"
                                 data-email="${attendee.email || ''}"
                                 data-callback-preferred-datetime="${rawPreferredDateTime}"
                                 data-callback-preferred-timezone="${callbackPreferredTimezone}"
@@ -65,21 +103,71 @@ function loadGraduationCeremonyAttendees(){
                                 data-user-id="${attendee.userId || USER_ID}">
                                 Update Status
                             </button>`;
-                        }else if(isCallbackCompleted){
-                            tbodyHtml += `N/A`;
-                        }else{
-                            tbodyHtml += `N/A`;
                         }
-                    tbodyHtml += `</td>
+                        if((attendee.amountStatus || "").toUpperCase() !== "SUCCESS"){
+                            tbodyHtml += `<i class="fa fa-trash text-danger graduation-ceremony-discard-icon"
+                                aria-hidden="true"
+                                title="Discard"
+                                onclick="discardGraduationCeremonyAttendee(${attendee.attendeeId})"></i>`;
+                        }else{
+                            tbodyHtml += `<span class="text-muted">N/A</span>`;
+                        }
+                    tbodyHtml += `</div></td>
                 </tr>`;
             });
 
             $('#attendeesTableBody').html(tbodyHtml);
             $('#attendeesTable').DataTable({
-                destroy: true
+                destroy: true,
+                language: {
+                    emptyTable: "No Data Available"
+                }
             });
         }
     });
+}
+
+function applyFilterGraduationCeremonyAttendees(){
+    updateGraduationCeremonyFilterState();
+    loadGraduationCeremonyAttendees();
+}
+
+function resetGraduationCeremonyAttendeesFilter(){
+    $('#graduationCeremonyFilterForm')[0].reset();
+    resetGraduationCeremonyFilterStateToDefault();
+    $("#graduationCeremonyFilterForm #filterCeremonyName").val("GRADUATION_CEREMONY_2026");
+    if(typeof refreshCustomFieldState === "function"){
+        setTimeout(function(){
+            refreshCustomFieldState($("#graduationCeremonyFilterForm"));
+        }, 0);
+    }
+    loadGraduationCeremonyAttendees();
+}
+
+function updateGraduationCeremonyFilterState(){
+    GRADUATION_CEREMONY_FILTER_STATE.filterValues = {
+        ceremonyTitle: $("#graduationCeremonyFilterForm #filterCeremonyName").val().trim(),
+        name: $("#graduationCeremonyFilterForm #filterName").val().trim(),
+        email: $("#graduationCeremonyFilterForm #filterEmail").val().trim(),
+        country: $("#graduationCeremonyFilterForm #filterCountry").val().trim(),
+        attendAs: $("#graduationCeremonyFilterForm #filterAttendAs").val().trim(),
+        membersType: $("#graduationCeremonyFilterForm #filterMembersType").val(),
+        paymentStatus: $("#graduationCeremonyFilterForm #filterPaymentStatus").val(),
+        callbackStatus: $("#graduationCeremonyFilterForm #filterCallbackStatus").val(),
+        phone: $("#graduationCeremonyFilterForm #filterPhone").val().trim()
+    };
+}
+
+function ensureDefaultGraduationCeremonyFilters(){
+    if(!GRADUATION_CEREMONY_FILTER_STATE.filterValues){
+        GRADUATION_CEREMONY_FILTER_STATE.filterValues = {};
+    }
+    if(!GRADUATION_CEREMONY_FILTER_STATE.filterValues.ceremonyTitle){
+        GRADUATION_CEREMONY_FILTER_STATE.filterValues.ceremonyTitle = "GRADUATION_CEREMONY_2026";
+    }
+    if($("#graduationCeremonyFilterForm #filterCeremonyName").length && !$("#graduationCeremonyFilterForm #filterCeremonyName").val()){
+        $("#graduationCeremonyFilterForm #filterCeremonyName").val("GRADUATION_CEREMONY_2026");
+    }
 }
 
 function getGraduationCeremonyTimeSlot(preferredDateTime){
@@ -213,6 +301,38 @@ async function updateGraduationCeremonyCallbackStatus(){
         }
     }catch(error){
         showMessageTheme2(0, "Unable to update callback status.");
+    }
+}
+
+async function discardGraduationCeremonyAttendee(attendeeId){
+    if(!attendeeId){
+        showMessageTheme2(0, "Attendee id not found.");
+        return false;
+    }
+
+    return showWarningMessage(
+        'Are you sure you want to discard this attendee?',
+        `confirmDiscardGraduationCeremonyAttendee(${attendeeId})`
+    );
+}
+
+async function confirmDiscardGraduationCeremonyAttendee(attendeeId){
+    const payload = {
+        attendeeId: attendeeId
+    };
+    const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(
+        true,
+        true,
+        'discard-graduation-ceremony-attendee',
+        payload,
+        ''
+    );
+
+    if(responseData && responseData.status == "SUCCESS"){
+        showMessageTheme2(1, responseData.message || "Record discarded successfully.");
+        loadGraduationCeremonyAttendees();
+    }else{
+        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to discard attendee.");
     }
 }
 

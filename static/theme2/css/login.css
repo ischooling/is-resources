@@ -51,10 +51,10 @@ font-8 {
 .text-white {color: #fff !important;}
 .input-with-icon .form-control:invalid{background-image: inherit !important;}
 .full{width: 100%;display: inline-block;position: relative;}
-.valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;top:50%; transform:translateY(-50%); color: green;transform: scale(0); visibility: hidden;opacity: 1;font-size: 20px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
+.valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;top:50%;color: green;transform: scale(0); visibility: hidden;opacity: 1;font-size: 20px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
 .valid-field.true:after{content:"\f00c";color: green;right: 50px !important;z-index: 9;}
 .valid-field.false:after{content:"\f00d";color: red;right: 35px !important;z-index: 9;}
-.true.valid-field:after, .false.valid-field:after{visibility: visible;opacity: 1;transform: scale(1);}
+.true.valid-field:after, .false.valid-field:after{visibility: visible;opacity: 1; transform:translateY(-50%); }
 .true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
 .false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
 .captch-field.valid-field.false:after, .captch-field.valid-field.true:after{right: 15px !important;}
@@ -572,7 +572,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  background:rgba(255,255,255,.12);
  border:1px solid rgba(255,255,255,.45);
  color:#fff;
- font-size:15px;
+ font-size:24px;
  font-weight:800;
  letter-spacing:.4px;
 }
@@ -598,7 +598,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  margin:0;
  color:#fff;
  font-family:'Baloo 2', cursive;
- font-size:36px;
+ font-size:26px;
  font-weight:800;
  line-height:1.12;
 }
@@ -733,7 +733,7 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
   justify-content:center;
  }
  .login-redesign.login-graduation-split .graduation-event-side h2{
-  font-size:34px;
+  font-size:22px;
  }
  .login-redesign.login-graduation-split .graduation-location{
  justify-content:center;
@@ -815,7 +815,7 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  }
  .login-redesign .graduation-event-badge{
  padding:4px 9px;
- font-size:10px;
+ font-size:24px;
  }
  .login-redesign .graduation-event-heading{
   justify-content:center;
@@ -870,7 +870,7 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  .login-redesign .captcha-row .captcha-code-box{width:128px;}
  .login-redesign .graduation-event-side{padding:16px 12px 14px;}
  .login-redesign .graduation-event-side h2{font-size:26px;}
- .login-redesign .graduation-event-badge{font-size:14px;}
+ .login-redesign .graduation-event-badge{font-size:26px;}
  .login-redesign .graduation-cap{font-size:24px;}
 }
 

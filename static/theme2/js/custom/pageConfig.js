@@ -170,7 +170,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         
         
         "conflicted-user-list":"conflicted-user-content?moduleId="+moduleId,
-        "withdrawn-request-list":"withdrawn-request-list?moduleId="+moduleId+"&currentPage=0",replaceDiv,
+        "withdrawn-request-list":"withdrawn-request-list?moduleId="+moduleId+"&currentPage=0",
         "lms-student-performance":"lms-student-mail?moduleId="+moduleId,
         // "student-weekly-progress":"student-weekly-progress?moduleId="+moduleId,
         "pending-training-remarks":"teacher-profile-request-content?moduleId="+moduleId+"&ids=16&types=0,1",

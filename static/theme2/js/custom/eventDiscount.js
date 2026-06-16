@@ -31,6 +31,7 @@ function switchEventDiscountTab(tab) {
         $('#eventDiscountAssigneesPanel').show();
         $('#edMastersTab').removeClass('active');
         $('#edAssigneesTab').addClass('active');
+        ensureDefaultAssigneeDataLoaded();
     }
 }
 
@@ -54,10 +55,40 @@ function applyAssigneeFilter() {
 }
 
 function resetAssigneeFilter() {
-    $('#filterAssigneeEventName').val('').trigger('change');
+    applyDefaultAssigneeFilter();
+}
+
+function getDefaultAssigneeEventName() {
+    var graduationCeremonyEvent = eventDiscountMastersList.find(function (m) {
+        return (m.eventName || '').trim().toLowerCase() === 'graduation ceremony';
+    });
+    if (graduationCeremonyEvent) {
+        return graduationCeremonyEvent.eventName;
+    }
+    return eventDiscountMastersList.length > 0 ? (eventDiscountMastersList[0].eventName || '') : '';
+}
+
+function applyDefaultAssigneeFilter() {
+    var defaultEventName = getDefaultAssigneeEventName();
+    if (!defaultEventName) {
+        $('#filterAssigneeEventName').val('').trigger('change');
+        $('#filterAssigneeDiscountName').html('<option value="">All Discounts</option>').val('').trigger('change');
+        $('#eventDiscountAssigneesTbody').html('<tr><td colspan="4" class="text-center text-muted">No records found</td></tr>');
+        $('#eventDiscountCountsWrapper').html('');
+        return;
+    }
+    $('#filterAssigneeEventName').val(defaultEventName).trigger('change');
     $('#filterAssigneeDiscountName').val('').trigger('change');
-    $('#eventDiscountAssigneesTbody').html('');
-    $('#eventDiscountCountsWrapper').html('');
+    loadEventDiscountAssignees(defaultEventName, '');
+}
+
+function ensureDefaultAssigneeDataLoaded() {
+    var selectedEventName = $('#filterAssigneeEventName').val() || '';
+    if (selectedEventName) {
+        loadEventDiscountAssignees(selectedEventName, $('#filterAssigneeDiscountName').val() || '');
+        return;
+    }
+    applyDefaultAssigneeFilter();
 }
 
 function populateAssigneeDiscountDropdown(eventName) {
@@ -82,6 +113,9 @@ function populateEventNameDropdowns(masters) {
     });
     $('#filterMasterEventName').html(opts).trigger('change');
     $('#filterAssigneeEventName').html(opts).trigger('change');
+    if (CURRENT_EVENT_DISCOUNT_TAB === 'assignees') {
+        ensureDefaultAssigneeDataLoaded();
+    }
 }
 
 // ─── API calls ────────────────────────────────────────────────────────────────
