@@ -67,7 +67,7 @@ input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 .captcha-field input{padding-right:100px;}
 .captcha-field .captcha-img-wrapper{width: 85px;display: inline-block;position: absolute;right:25px;transform: translateY(-100%);}
 .captcha-field .captcha-img-wrapper img{width:100%;}
-.captcha-field a{position: absolute !important;color: white !important;right: 0px;top: 12px;width: 24px;background: #019EFF;font-size: 15px;padding: 2px;text-align: center;}
+.captcha-field a{position: absolute !important;color: white !important;right: 0px;top: 12px;width: 24px;background: #019EFF;font-size: 19px;padding: 2px;text-align: center;}
 .fancytree-helper-hidden {
 	display: none;
 }
