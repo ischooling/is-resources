@@ -63,7 +63,9 @@ function getGraduationCeremonyAttendAsOptions(){
     return [
         "Graduate",
         "Non Graduate",
-        "Performer"
+        "Performer",
+        "Teacher",
+        "Staff"
     ];
 }
 
