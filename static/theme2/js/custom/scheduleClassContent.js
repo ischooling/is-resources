@@ -310,7 +310,7 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 				$('.meetingSlotAdd').html('<i class="fa fa-check"></i> Create Class');
 				for(var i=0;i<recurringclass.length;i++){
 					if(recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA'){
-						$("#teacherAvailabilityWarningTitle").html(``);
+						//$("#teacherAvailabilityWarningTitle").html(``);
 						htmlRecu = htmlRecu +"<tr class='text-danger'>";
 						if(recurringclass[i]['slotAvailable']!='Available'){
 							notAvailabileClassCount++;
