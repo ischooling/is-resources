@@ -1,4 +1,9 @@
-var SHOW_GRADUATION_LOGIN_DESIGN = true;
+var SHOW_GRADUATION_LOGIN_DESIGN = true && isGraduationLoginDesignVisible();
+
+function isGraduationLoginDesignVisible(){
+    var graduationHideFromDate = new Date(2026, 6, 26);
+    return new Date() < graduationHideFromDate;
+}
 
 async function loginContent(userName, fromSpoof){
     var html =``;
