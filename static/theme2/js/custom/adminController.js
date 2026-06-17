@@ -402,14 +402,55 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
         } else {
             console.warn(`No handler found for pageNo: ${pageNo}`);
         }
-    } catch (err) {
+    }  catch (err) {
         console.error("getContent error:", err);
-        if (err === "offline") {
-            showMessageTheme2(0, "You are offline. Please check internet.");
-        } else if (err === "Empty response") {
-            showMessageTheme2(0, "Permission data not available.");
-        } else {
-            showMessageTheme2(0, "Something went wrong. Please reload.");
+        const status = err?.status || err?.response?.status;
+        switch (status) {
+            case 400:
+                showMessageTheme2(0, "Invalid request. Please try again.");
+                break;
+            case 401:
+                showMessageTheme2(0, "Your session has expired. Please login again.");
+                break;
+            case 403:
+                showMessageTheme2(0, "You do not have permission to access this page.");
+                break;
+            case 404:
+                showMessageTheme2(0, "Requested resource not found.");
+                break;
+            case 408:
+                showMessageTheme2(0, "Request timeout. Please try again.");
+                break;
+            case 409:
+                showMessageTheme2(0, "A conflict occurred. Please refresh and try again.");
+                break;
+            case 429:
+                showMessageTheme2(0, "Too many requests. Please wait a moment and try again.");
+                break;
+            case 500:
+                showMessageTheme2(0, "Server error occurred. Please try again later.");
+                break;
+            case 502:
+                showMessageTheme2(0, "Bad gateway. Please try again shortly.");
+                break;
+            case 503:
+                showMessageTheme2(0, "Server is busy. Please try again in a few minutes.");
+                break;
+            case 504:
+                showMessageTheme2(0, "Server response timeout. Please try again.");
+                break;
+            default:
+                if (err === "offline") {
+                    showMessageTheme2(0, "You are offline. Please check your internet connection.");
+                } else if (err === "Empty response") {
+                    showMessageTheme2(0, "Permission data not available.");
+                } else if (err?.message?.includes("Network Error") || err?.message?.includes("Failed to fetch")) {
+                    showMessageTheme2(0, "Network error. Please check your internet connection.");
+                } else if (err?.name === "AbortError") {
+                    showMessageTheme2(0, "Request was cancelled.");
+                } else {
+                    showMessageTheme2(0, "Something went wrong. Please reload.");
+                }
         }
     } finally {
         customLoader(false);

@@ -1346,13 +1346,13 @@ function createB2BAddContractModal(data){
 function getAddContractTabContent(data){
 	var html =
 		'<div class="tab-pane active p-4" id="addContract" role="tabpanel">'
-			+'<div class="p-1 bg-light-primary border border-primary rounded-10 card">'
+			+'<div class="p-1  border border-primary rounded-10 card">'
 				+'<form class="col-12 mt-2 mb-2 custom-field-scope" method="post" id="addContractForm" action="javascript:void(0);">'
 					+'<input type="hidden" id="contractId" name="contractId" value=""/>'
 					+'<input type="hidden" id="b2bLeadId" name="b2bLeadId" value=""/>'
 					+'<div class="row">'
 						+'<div class="col-12">'
-							+'<h6 class="font-weight-bold my-1">First Party Representative Details</h6>'
+							+'<h6 class="font-weight-bold my-1 mb-2">First Party Representative Details</h6>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2">'
 						+'<div class="form-group custom-field mb-2">'
@@ -1368,7 +1368,7 @@ function getAddContractTabContent(data){
 						+'</div>'
 						+'<div class="col-12 p-0"><hr class="font-weight-bold my-2"></div>'
 						+'<div class="col-12">'
-							+'<h6 class="font-weight-bold my-1">Second Party Representative Details</h6>'
+							+'<h6 class="font-weight-bold my-1 mb-2">Second Party Representative Details</h6>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-2">'
 						+'<div class="form-group custom-field mb-2">'
@@ -1421,7 +1421,7 @@ function getAddContractTabContent(data){
 						+'</div>'
 
 						+'<div class="col-12">'
-							+'<h6 class="font-weight-bold my-1">Contract Duration</h6>'
+							+'<h6 class="font-weight-bold my-1 mb-2">Contract Duration</h6>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-2">'
 						+'<div class="form-group custom-field mb-2">'
