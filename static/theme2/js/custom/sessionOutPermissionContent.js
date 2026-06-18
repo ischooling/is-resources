@@ -34,8 +34,8 @@ function sessionOutPermissionContent(data){
                             <div class="col-md-12">
                                 <div class="position-relative form-group mb-1 captcha-stylecss custom-field">
                                     <div class="captcha-field">
-                                        <input type="text" name="captcha" id="captcha" class="form-control bg-white rounded-10" value="" placeholder="Enter captcha text" pattern="^[_A-z0-9]{1,}$" minlength="6" maxlength="6"
-                                            onkeydown="return M.isAlphaNumericWithNoSpecialCharacter(event);" required>
+                                        <input type="text" name="captcha" id="captcha" class="form-control bg-white rounded-10" value="" placeholder="Enter captcha text" pattern="[0-9]*" inputmode="numeric" minlength="6" maxlength="6"
+                                            onkeydown="return M.digit(event);" oninput="this.value=this.value.replace(/[^0-9]/g,'');" required>
                                         <label class="input-floating-label" for="captcha">Captcha <span style="color: red;">*</span></label>
                                         <span class="captcha-img-wrapper show-password"> 
                                             <img id="captchaImage" alt="Captcha" src="">

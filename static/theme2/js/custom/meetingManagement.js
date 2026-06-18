@@ -314,6 +314,10 @@ function getMeetingType() {
   return selectedType;
 }
 
+function toggleMeetingDateFilters(show) {
+  $("#filterDateDurationWrapper, #filterMeetingDateRangeWrapper").toggle(show);
+}
+
 function renderMeetingManagementContent() {
   $("#meetingManagementMainDiv").append(getMeetingManagementContent());
   // Hide logs button if user is not allowed
@@ -323,9 +327,7 @@ function renderMeetingManagementContent() {
   fetchUserIdToShowAllMeeting();
   fetchUserIdToShowRecurringMeeting();
   if (currentTabId === "recurringMeetings") {
-    $("#filterDateDuration").hide();
-    $("#filterMeetingStartDate").hide();
-    $("#filterMeetingEndDate").hide();
+    toggleMeetingDateFilters(false);
   }
 
   $(document).on('click', function (e) {
@@ -849,18 +851,11 @@ function showTab(tabId) {
 
   $("#filterGeneralMeetingTypeDiv").show();
   if (meetingManagementMode === "LOGS") {
-    $("#filterDateDuration").show();
-    $("#filterMeetingStartDate").show();
-    $("#filterMeetingEndDate").show();
+    toggleMeetingDateFilters(true);
   } else if (tabId === "recurringMeetings") {
-    $("#filterDateDuration").hide();
-    $("#filterMeetingStartDate").hide();
-    $("#filterMeetingEndDate").hide();
+    toggleMeetingDateFilters(false);
   } else {
-    // Keep original filter layout; only toggle the date controls visibility.
-    $("#filterDateDuration").show();
-    $("#filterMeetingStartDate").show();
-    $("#filterMeetingEndDate").show();
+    toggleMeetingDateFilters(true);
   }
   if(meetingManagementMode === "LOGS"){
     fetchMeetingsJoinLogs($('#filterHostUserId').val());

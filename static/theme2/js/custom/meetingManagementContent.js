@@ -82,7 +82,7 @@ function filterFormAndList(){
         </div>
         <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 pr-0">
           <div class="form-row">
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-12 ms-0 mb-2">
+            <div id="filterDateDurationWrapper" class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-12 ms-0 mb-2">
               <div class="form-group custom-field mb-0">
                 <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14" >
                   <option value="Today" selected>Today</option>  
@@ -93,7 +93,7 @@ function filterFormAndList(){
                 <label for="filterDateDuration" class="m-0">Date Range</label>
               </div>
             </div>
-            <div class="col-xl-5 col-lg-6 col-md-6 col-sm-8 col-12 ms-0 mb-2">
+            <div id="filterMeetingDateRangeWrapper" class="col-xl-5 col-lg-6 col-md-6 col-sm-8 col-12 ms-0 mb-2">
               <div class="form-row">
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12 ms-0 mb-2">
                       <div class="form-group custom-field mb-0">
@@ -718,8 +718,9 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
         <!-- Date Filter Section -->
         <form id="filterRecurringRecording" class="custom-field-scope d-flex align-items-center mb-3 px-5" autocomplete="off" style="gap: 10px;">
           <div class="form-group custom-field mb-0" style="width: 10%;">
-            <select onchange="setFilterDatesAccordingly(this, '#filterRecurringMeetingStartDate', '#filterRecurringMeetingEndDate');" id="filterRecurringDateDuration" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px; appearance: auto; -webkit-appearance: auto; -moz-appearance: auto;">
-              <option value="Week" selected>This Week</option>
+            <select onchange="setFilterDatesAccordingly(this, '#filterRecurringMeetingStartDate', '#filterRecurringMeetingEndDate');" id="filterRecurringDateDuration" class="form-control font-14">
+              <option value="Today" selected>Today</option>
+              <option value="Week">This Week</option>
               <option value="Month">This Month</option>
               <option value="Custom">Custom</option>
             </select>
