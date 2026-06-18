@@ -233,6 +233,101 @@
 		return false;
 	}
 
+	// --- Single-tab guard ------------------------------------------------------
+	// The IS_CHAT iframe is expensive: every tab that loads it adds read traffic
+	// on the chat backend. So we let only ONE tab host the live widget at a time,
+	// coordinated through localStorage. Extra tabs hide their chat button and stay
+	// dormant (no iframe loaded). When the active tab closes/navigates away it
+	// releases the lock and a waiting tab takes over.
+	var IS_CHAT_LOCK_KEY = 'isChatActiveTab';
+	var IS_CHAT_HEARTBEAT_MS = 3000;   // owner refreshes the lock this often
+	var IS_CHAT_STALE_MS = 8000;       // a lock older than this is treated as dead
+	var IS_CHAT_TAB_ID = 'tab-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+	var isChatTabOwner = false;
+	var isChatHeartbeatTimer = null;
+	var isChatWaitTimer = null;
+
+	function readChatLock() {
+		try {
+			var raw = localStorage.getItem(IS_CHAT_LOCK_KEY);
+			return raw ? JSON.parse(raw) : null;
+		} catch (e) { return null; }
+	}
+
+	function writeChatLock() {
+		try {
+			localStorage.setItem(IS_CHAT_LOCK_KEY, JSON.stringify({ id: IS_CHAT_TAB_ID, ts: Date.now() }));
+		} catch (e) { /* storage disabled/full — degrade gracefully */ }
+	}
+
+	// Free if nobody holds it, we already hold it, or the holder's heartbeat has
+	// gone stale (its tab crashed/closed without releasing).
+	function chatLockIsFree() {
+		var lock = readChatLock();
+		if (!lock || lock.id === IS_CHAT_TAB_ID) return true;
+		return typeof lock.ts !== 'number' || (Date.now() - lock.ts) > IS_CHAT_STALE_MS;
+	}
+
+	function startChatHeartbeat() {
+		writeChatLock();
+		if (isChatHeartbeatTimer) clearInterval(isChatHeartbeatTimer);
+		isChatHeartbeatTimer = setInterval(function () {
+			if (isChatTabOwner) writeChatLock();
+			else { clearInterval(isChatHeartbeatTimer); isChatHeartbeatTimer = null; }
+		}, IS_CHAT_HEARTBEAT_MS);
+	}
+
+	function releaseChatLock() {
+		if (isChatHeartbeatTimer) { clearInterval(isChatHeartbeatTimer); isChatHeartbeatTimer = null; }
+		if (!isChatTabOwner) return;
+		isChatTabOwner = false;
+		var lock = readChatLock();
+		if (lock && lock.id === IS_CHAT_TAB_ID) {
+			try { localStorage.removeItem(IS_CHAT_LOCK_KEY); } catch (e) {}
+		}
+	}
+
+	function showChatButton() { $('#chat-btn').show(); }
+	function hideChatButton() { $('#chat-btn').hide(); }
+
+	// Try to become the single active tab. Claims the lock tentatively, then
+	// verifies after a short beat: if two tabs claimed at the same instant the
+	// last writer wins, and the loser backs off WITHOUT loading the iframe — so we
+	// never end up with two live widgets. Loses → fall back to dormant/waiting.
+	function becomeChatOwner() {
+		if (isChatTabOwner || !chatLockIsFree()) return;
+		isChatTabOwner = true;       // tentative claim
+		writeChatLock();
+		setTimeout(function () {
+			var lock = readChatLock();
+			if (!lock || lock.id !== IS_CHAT_TAB_ID) {
+				isChatTabOwner = false;
+				startChatWaiting();
+				return;
+			}
+			if (isChatWaitTimer) { clearInterval(isChatWaitTimer); isChatWaitTimer = null; }
+			startChatHeartbeat();
+			showChatButton();
+			isChatLoad();
+			$(window).on('beforeunload pagehide', releaseChatLock);
+		}, 120);
+	}
+
+	// Dormant mode: hide the chat button and poll occasionally so we can recover
+	// the widget if the active tab crashed without firing an unload event.
+	function startChatWaiting() {
+		hideChatButton();
+		if (isChatWaitTimer) return;
+		isChatWaitTimer = setInterval(function () {
+			if (!isChatTabOwner && chatLockIsFree()) becomeChatOwner();
+		}, IS_CHAT_STALE_MS);
+	}
+
+	function initChatTabGuard() {
+		if (chatLockIsFree()) becomeChatOwner();
+		else startChatWaiting();
+	}
+
 	function isChatLoad() {
 		var widgetUrl = getISChatWidgetUrl();
 		$('#chat-frame').off('load.isChatWidgetReady').on('load.isChatWidgetReady', function () {
@@ -357,6 +452,17 @@
 		}
 	});
 
+	// Another tab released/changed the single-tab chat lock — if we're eligible
+	// but dormant, try to take over. A little jitter keeps several waiting tabs
+	// from pouncing at the same instant.
+	window.addEventListener('storage', function (event) {
+		if (event.key !== IS_CHAT_LOCK_KEY || !ELIGIBLE_IS_CHAT || isChatTabOwner) return;
+		if (!chatLockIsFree()) return;
+		setTimeout(function () {
+			if (!isChatTabOwner && chatLockIsFree()) becomeChatOwner();
+		}, Math.floor(Math.random() * 250));
+	});
+
 	// Listen for widgetReady from the chat iframe.
 	window.addEventListener('message', function (event) {
 		if (IS_CHAT_ORIGIN && event.origin !== IS_CHAT_ORIGIN) return;
@@ -386,7 +492,7 @@
 			singleSignOnLink();
 		}
 		if (ELIGIBLE_IS_CHAT) {
-			isChatLoad();
+			initChatTabGuard();
 		}
 		if (PARENT_STUDENT_ID) {
 			$('#parentStudentSelectedId').val(PARENT_STUDENT_ID);

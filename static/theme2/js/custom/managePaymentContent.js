@@ -666,7 +666,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                         </div>
                                     </div>
                                     <div id="userReferenceNoWrapper" class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <div class="form-group mb-3 custom-field mt-2">
+                                        <div class="form-group mb-3 custom-field mt-4">
                                             <input id="userRefNumber1" name="userRefNumber" type="text" class="form-control" placeholder=" ">
                                             <label class="mb-0">User Reference No.</label>
                                         </div>

@@ -1156,25 +1156,33 @@ function setFilterDatesAccordingly(src, startDateId, endDateId) {
 
     if (value === "Today") {
         const d = changeDateFormat(today, "MMM-dd-yyyy");
-        $(startDateId + "," + endDateId).val(d).prop("disabled", true);
+        $(startDateId + "," + endDateId).val(d).prop("disabled", true).addClass("bg-light-primary");
+        return;
+    }
+
+    if (value === "Yesterday") {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const d = changeDateFormat(yesterday, "MMM-dd-yyyy");
+        $(startDateId + "," + endDateId).val(d).prop("disabled", true).addClass("bg-light-primary");
         return;
     }
 
     if (value === "Week") {
-        $(startDateId).val(changeDateFormat(getStartOfWeek(today), "MMM-dd-yyyy")).prop("disabled", true);
-        $(endDateId).val(changeDateFormat(getEndOfWeek(today), "MMM-dd-yyyy")).prop("disabled", true);
+        $(startDateId).val(changeDateFormat(getStartOfWeek(today), "MMM-dd-yyyy")).prop("disabled", true).addClass("bg-light-primary");
+        $(endDateId).val(changeDateFormat(getEndOfWeek(today), "MMM-dd-yyyy")).prop("disabled", true).addClass("bg-light-primary");
         return;
     }
 
     if (value === "Month") {
-        $(startDateId).val(changeDateFormat(getStartOfMonth(today), "MMM-dd-yyyy")).prop("disabled", true);
-        $(endDateId).val(changeDateFormat(getEndOfMonth(today), "MMM-dd-yyyy")).prop("disabled", true);
+        $(startDateId).val(changeDateFormat(getStartOfMonth(today), "MMM-dd-yyyy")).prop("disabled", true).addClass("bg-light-primary");
+        $(endDateId).val(changeDateFormat(getEndOfMonth(today), "MMM-dd-yyyy")).prop("disabled", true).addClass("bg-light-primary");
         return;
     }
-    $(startDateId).val("").prop("disabled", false);
-    $(endDateId).val("").prop("disabled", true);
+    $(startDateId).val("").prop("disabled", false).removeClass("bg-light-primary");
+    $(endDateId).val("").prop("disabled", true).addClass("bg-light-primary");
     $(startDateId).off("change").on("change", function () {
-        $(endDateId).val("").prop("disabled", false);
+        $(endDateId).val("").prop("disabled", false).removeClass("bg-light-primary");
         $(endDateId).datepicker("setStartDate", $(startDateId).val());
     });
     $(endDateId).off("change").on("change", function () {

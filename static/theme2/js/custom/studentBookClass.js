@@ -95,11 +95,11 @@ function selectTypeChange(src) {
     });
 
     // Enable and clear the fields
-    $("#startDate, #endDate").attr("disabled", false);
+    $("#startDate, #endDate").attr("disabled", false).removeClass("bg-light-primary");
     $("#startDate, #endDate").val("");
   } else {
     // Disable fields for non-custom types
-    $("#startDate, #endDate").attr("disabled", true);
+    $("#startDate, #endDate").attr("disabled", true).addClass("bg-light-primary");
     // $("#startDate, #endDate").val("");
   }
 }

@@ -542,6 +542,13 @@ function setFilterDatesAccordingly(src, startDateId, endDateId){
     $(startDateId + "," + endDateId)
       .val(formattedToday)
       .prop('disabled', true);
+  } else if (value === 'Yesterday') {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const formattedYesterday = changeDateFormat(yesterday, "MMM-dd-yyyy");
+    $(startDateId + "," + endDateId)
+      .val(formattedYesterday)
+      .prop('disabled', true);
   } else if (value === 'Week') {
     $(startDateId).val(changeDateFormat(getStartOfWeek(today), "MMM-dd-yyyy")).prop('disabled', true);
     $(endDateId).val(changeDateFormat(getEndOfWeek(today), "MMM-dd-yyyy")).prop('disabled', true);

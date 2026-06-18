@@ -359,17 +359,18 @@ $("#subjectId").select2({
 		}
 
 		if(dateType=='TODAY'){
+			$("#timeAvailableDateFrom, #timeAvailableDateTo").attr("disabled","true").addClass("bg-light-primary");
             $(".hideTimeAvailableDate").css({"display":"none"});
-        }else if(dateType=='WEEK' || dateType=='MONTH'){
-			$("#timeAvailableDateFrom").attr("disabled","true");
+        }else if(dateType=='YESTERDAY' || dateType=='WEEK' || dateType=='MONTH'){
+			$("#timeAvailableDateFrom").attr("disabled","true").addClass("bg-light-primary");
 			$("#startTime").attr("disabled","true");
-			$("#timeAvailableDateTo").attr("disabled","true");
+			$("#timeAvailableDateTo").attr("disabled","true").addClass("bg-light-primary");
 			$("#endTime").attr("disabled","true");
 			$(".hideTimeAvailableDate").css({"display":"block"});
 		}else{
-			$("#timeAvailableDateFrom").removeAttr("disabled");
+			$("#timeAvailableDateFrom").removeAttr("disabled").removeClass("bg-light-primary");
 			$("#startTime").removeAttr("disabled");
-			$("#timeAvailableDateTo").removeAttr("disabled");
+			$("#timeAvailableDateTo").removeAttr("disabled").removeClass("bg-light-primary");
 			$("#endTime").removeAttr("disabled");
 			$(".hideTimeAvailableDate").css({"display":"block"});
 		}
@@ -417,6 +418,11 @@ $("#subjectId").select2({
 			};
 			strDate = firstDate.toDateString().split(" ");
 			endDate = lastDate.toDateString().split(" ");
+		}else if(type=='YESTERDAY'){
+			var yesterday = new Date();
+			yesterday.setDate(yesterday.getDate() - 1);
+			strDate = yesterday.toString().split(" ");
+			endDate = strDate;
 		}else{
 			var dateFrom=new Date();
 			strDate =dateFrom.toString().split(" ");
@@ -589,6 +595,7 @@ async function teacherTimeAvailabilityContent(title){
 										+'<div class="custom-field">'
 											+'<select class="form-control" id="timeAvailableSearchtype" name="timeAvailableSearchtype">'
 													+'<option value="TODAY">Today</option>'
+													+'<option value="YESTERDAY">Yesterday</option>'
 													+'<option value="WEEK">Week</option>'
 													+'<option value="MONTH">Month</option>'
 													+'<option value="CUSTOM">Custom</option>'

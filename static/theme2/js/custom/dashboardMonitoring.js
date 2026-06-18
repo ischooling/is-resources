@@ -71,7 +71,7 @@ async function applyFilterDashboardMonitoring(formId, callFrom, userId, startDat
 
 function selectDateOnTypeChangeForMonitoring(src) {
     if ($(src).val() == "custom") {
-    $("#activeTrackerDateTo, #activeTrackerDateFrom").attr("disabled", false).val("");
+    $("#activeTrackerDateTo, #activeTrackerDateFrom").attr("disabled", false).removeClass("bg-light-primary").val("");
       $("#activeTrackerDateTo, #activeTrackerDateFrom").datepicker("destroy");
       $("#activeTrackerDateTo")
         .datepicker({
@@ -84,6 +84,7 @@ function selectDateOnTypeChangeForMonitoring(src) {
           $("#activeTrackerDateFrom")
             .val("")
             .attr("disabled", false)
+            .removeClass("bg-light-primary")
             .datepicker("destroy")
             .datepicker({
               format: "M dd, yyyy",
@@ -93,9 +94,9 @@ function selectDateOnTypeChangeForMonitoring(src) {
             });
         });
   
-      $("#activeTrackerDateTo").val("").attr("disabled", false);
+      $("#activeTrackerDateTo").val("").attr("disabled", false).removeClass("bg-light-primary");
     } else {
-      $("#activeTrackerDateTo, #activeTrackerDateFrom").attr("disabled", true);
+      $("#activeTrackerDateTo, #activeTrackerDateFrom").attr("disabled", true).addClass("bg-light-primary");
     }
   
     const type = $("#dashboardMonitoringFilterForm #selectedType").val();
@@ -103,6 +104,13 @@ function selectDateOnTypeChangeForMonitoring(src) {
     if (type === "today") {
       const today = new Date();
       const formatted = changeDateFormat(today, "MMM-dd-yyyy");
+      $("#activeTrackerDateTo").val(formatted);
+      $("#activeTrackerDateFrom").val(formatted);
+  
+    } else if (type === "yesterday") {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const formatted = changeDateFormat(yesterday, "MMM-dd-yyyy");
       $("#activeTrackerDateTo").val(formatted);
       $("#activeTrackerDateFrom").val(formatted);
   

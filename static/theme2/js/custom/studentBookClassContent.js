@@ -1017,6 +1017,16 @@ function renderBookedClassContent(
       endDate = startDate;
       $("#bookClassOneToOne #startDate").val(startDate);
       $("#bookClassOneToOne #endDate").val(endDate);
+    } else if ($("#bookClassOneToOne #selectedType").val() == "yesterday") {
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      let formattedDate = `${
+        monthNames[yesterday.getMonth()]
+      } ${yesterday.getDate()}, ${yesterday.getFullYear()}`;
+      startDate = formattedDate;
+      endDate = startDate;
+      $("#bookClassOneToOne #startDate").val(startDate);
+      $("#bookClassOneToOne #endDate").val(endDate);
     } else if ($("#bookClassOneToOne #selectedType").val() == "week") {
       let today = new Date();
       let firstDay = new Date(today.setDate(today.getDate() - today.getDay())); // Start of the week (Sunday)
@@ -1085,6 +1095,7 @@ function bookClassFilterFormContent(
                         <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-12 mb-lg-0 mb-2">
                             <select class="form-control" name="selectedType" id="selectedType" onchange="selectTypeChange(this)">
                                 <option value="today">Today</option>    
+                                <option value="yesterday">Yesterday</option>    
                                 <option value="week">Week</option>    
                                 <option value="month">Month</option>    
                                 <option value="custom">Custom</option>    

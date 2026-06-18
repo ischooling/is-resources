@@ -370,6 +370,7 @@ function getStudentOrientAdvanceSearchPopup(){
 							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 								<select class="form-control" name="selectedType" id="selectedType" onchange="selectDateOnTypeChange(this)">
 									<option value="today">Today</option>    
+									<option value="yesterday">Yesterday</option>    
 									<option value="week">Week</option>    
 									<option value="month">Month</option>    
 									<option value="custom" selected>Custom</option>    

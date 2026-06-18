@@ -670,11 +670,11 @@ function selectDateOnTypeChange(src) {
     });
 
     // Enable and clear the fields
-    $("#startDateSearch, #endDateSearch").attr("disabled", false);
+    $("#startDateSearch, #endDateSearch").attr("disabled", false).removeClass("bg-light-primary");
     $("#startDateSearch, #endDateSearch").val("");
   } else {
     // Disable fields for non-custom types
-    $("#startDateSearch, #endDateSearch").attr("disabled", true);
+    $("#startDateSearch, #endDateSearch").attr("disabled", true).addClass("bg-light-primary");
     // $("#startDate, #endDate").val("");
   }
 
@@ -683,6 +683,19 @@ function selectDateOnTypeChange(src) {
 		let month = today.getMonth() + 1; // Month is 0-indexed, so add 1
 		let day = today.getDate();
 		let year = today.getFullYear();
+		month = month < 10 ? '0' + month : month;
+		day = day < 10 ? '0' + day : day;
+		let formattedDate =`${month}-${day}-${year}`;
+		startDate = formattedDate;
+		endDate = startDate;
+		$("#orientationSearchForm #startDateSearch").val(startDate);
+		$("#orientationSearchForm #endDateSearch").val(endDate);
+	} else if ($("#orientationSearchForm #selectedType").val() == "yesterday") {
+		let yesterday = new Date();
+		yesterday.setDate(yesterday.getDate() - 1);
+		let month = yesterday.getMonth() + 1; // Month is 0-indexed, so add 1
+		let day = yesterday.getDate();
+		let year = yesterday.getFullYear();
 		month = month < 10 ? '0' + month : month;
 		day = day < 10 ? '0' + day : day;
 		let formattedDate =`${month}-${day}-${year}`;

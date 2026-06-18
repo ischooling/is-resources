@@ -13,17 +13,39 @@ function renderLeadDemoReportDashboard(title, roleAndModule, schoolId, userId, u
     fetchLeadDemoReportData(0);
 }
 
+function getLeadDemoReportDateRange(rangeType) {
+    var now   = new Date();
+    var start = new Date();
+    var end   = new Date();
+    if (rangeType === 'yesterday') {
+        start.setDate(now.getDate() - 1);
+        end.setDate(now.getDate() - 1);
+    } else if (rangeType === 'week') {
+        var day = now.getDay();
+        start = new Date(now); start.setDate(now.getDate() - day);
+        end   = new Date(start); end.setDate(start.getDate() + 6);
+    } else if (rangeType === 'month') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    }
+    function fmt(d) {
+        var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+        var dd = ('0' + d.getDate()).slice(-2);
+        return d.getFullYear() + '-' + mm + '-' + dd;
+    }
+    return { startDate: fmt(start), endDate: fmt(end) };
+}
+
 function initLeadDemoReportFilters() {
     var today = new Date();
     $('#leadDemoReportCounselorId').html('<option value="">All Counselor</option>');
     callLeadAssignUserList('leadDemoReportFilterForm', 'B2C', 'leadDemoReportCounselorId', true, true, USER_ID);
 
-    $('#leadDemoReportCounselorId').select2({
-        theme: 'bootstrap4'
-    });
-    $('#leadDemoReportStatus').select2({
-        theme: 'bootstrap4',
-        minimumResultsForSearch: Infinity
+    $('#leadDemoReportCounselorId').select2({ theme: 'bootstrap4' });
+    $('#leadDemoReportDateRange').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity });
+    $('#leadDemoReportMeetingType').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity, width: '100%' });
+    $('#leadDemoReportMeetingType').off('change.ldrmt').on('change.ldrmt', function () {
+        fetchLeadDemoReportData(0);
     });
 
     $('#leadDemoReportStartDate, #leadDemoReportEndDate').datepicker({
@@ -31,11 +53,18 @@ function initLeadDemoReportFilters() {
         format: 'yyyy-mm-dd',
         todayHighlight: true
     });
-
     $('#leadDemoReportStartDate').datepicker('setDate', today);
     $('#leadDemoReportEndDate').datepicker('setDate', today);
-    $('#leadDemoReportStartTime').val('00:00');
-    $('#leadDemoReportEndTime').val('23:59');
+
+    $('#leadDemoReportDateRange').off('change.ldr').on('change.ldr', function () {
+        var val = $(this).val();
+        if (val === 'custom') {
+            $('#leadDemoReportFromDateCol, #leadDemoReportToDateCol').show();
+        } else {
+            $('#leadDemoReportFromDateCol, #leadDemoReportToDateCol').hide();
+            fetchLeadDemoReportData(0);
+        }
+    });
 }
 
 function bindLeadDemoReportEvents() {
@@ -45,14 +74,13 @@ function bindLeadDemoReportEvents() {
 
     $('#leadDemoReportResetBtn').off('click').on('click', function() {
         LEAD_DEMO_REPORT_STATE.page = 0;
-        $('#leadDemoReportStatus').val('').trigger('change');
-        $('#leadDemoReportCounselorId').val('').trigger('change');
-        $('#leadDemoReportSearchText').val('');
+        $('#leadDemoReportDateRange').val('today').trigger('change');
+        $('#leadDemoReportFromDateCol, #leadDemoReportToDateCol').hide();
         var today = new Date();
         $('#leadDemoReportStartDate').datepicker('setDate', today);
         $('#leadDemoReportEndDate').datepicker('setDate', today);
-        $('#leadDemoReportStartTime').val('00:00');
-        $('#leadDemoReportEndTime').val('23:59');
+        $('#leadDemoReportCounselorId').val('').trigger('change');
+        $('#leadDemoReportMeetingType').val('REQUESTDEMO').trigger('change');
         fetchLeadDemoReportData(0);
     });
 
@@ -72,21 +100,26 @@ function bindLeadDemoReportEvents() {
 }
 
 function getLeadDemoReportRequestParams(page) {
-    var startTime =  $('#leadDemoReportStartTime').val() ||'00:00';
-    var endTime =  $('#leadDemoReportEndTime').val() || '23:59';
-    var startDate = ($('#leadDemoReportStartDate').val() || '') + ' ' + startTime;
-    var endDate = ($('#leadDemoReportEndDate').val() || '') + ' ' + endTime;
-    var params = {
-        startDate: startDate,
-        endDate: endDate,
-        schoolId: SCHOOL_ID,
-        demoAssignUserId: $('#leadDemoReportCounselorId').val() || '',
-        status: $('#leadDemoReportStatus').val() || '',
-        page: page,
-        pageSize: LEAD_DEMO_REPORT_STATE.pageSize
+    var rangeType = $('#leadDemoReportDateRange').val() || 'today';
+    var startDate, endDate;
+    if (rangeType === 'custom') {
+        startDate = ($('#leadDemoReportStartDate').val() || '') + ' 00:00';
+        endDate   = ($('#leadDemoReportEndDate').val()   || '') + ' 23:59';
+    } else {
+        var range = getLeadDemoReportDateRange(rangeType);
+        startDate = range.startDate + ' 00:00';
+        endDate   = range.endDate   + ' 23:59';
+    }
+    return {
+        startDate:        startDate,
+        endDate:          endDate,
+        schoolId:         SCHOOL_ID,
+        demoAssignUserId: $('#leadDemoReportCounselorId').val()  || '',
+        status:           $('#leadDemoReportStatus').val()       || '',
+        meetingType:      $('#leadDemoReportMeetingType').val()  || '',
+        page:             page,
+        pageSize:         LEAD_DEMO_REPORT_STATE.pageSize
     };
-    console.log('Request Params:', params);
-    return params;
 }
 
 function fetchLeadDemoReportData(page) {
@@ -115,6 +148,7 @@ function fetchLeadDemoReportData(page) {
             var reportData = data.data || [];
             LEAD_DEMO_REPORT_STATE.totalCount = data.count || 0;
             renderLeadDemoReportTable(reportData, page);
+            renderLeadDemoSummaryCards(reportData);
             setLeadDemoReportPagination(LEAD_DEMO_REPORT_STATE.totalCount, page);
         },
         error: function() {
@@ -126,6 +160,46 @@ function fetchLeadDemoReportData(page) {
             customLoader(false);
         }
     });
+}
+
+function renderLeadDemoSummaryCards(reportData) {
+    var totals = {
+        totalDemo:      0,
+        completed:      0,
+        demoNotDone:    0,
+        notShow:        0,
+        cancelled:      0,
+        confirmed:      0,
+        notConfirmed:   0,
+        reschedule:     0,
+        notInterested:  0,
+        noStatusUpdate: 0,
+        totalMeetingDuration: 0
+    };
+    $.each(reportData || [], function(_, item) {
+        totals.totalDemo      += item.totalDemo        || 0;
+        totals.completed      += item.totalDemoDone || 0;
+        totals.demoNotDone    += (item.totalDemo - item.totalDemoDone) || 0;
+        totals.notShow        += item.notShowDemo      || 0;
+        totals.cancelled      += item.cancelledDemo    || 0;
+        totals.confirmed      += item.demoConfirm         || 0;
+        totals.notConfirmed   += item.demoNotConfirm   || 0;
+        totals.reschedule     += item.rescheduleDemo   || 0;
+        totals.notInterested  += item.notInterested    || 0;
+        totals.noStatusUpdate += item.noStatusUpdate   || 0;
+        totals.totalMeetingDuration += item.totalMeetingDuration ? parseInt(item.totalMeetingDuration) : 0;
+    });
+    $('#ldrCardTotalDemo').text(totals.totalDemo);
+    $('#ldrCardCompleted').text(totals.completed);
+    $('#ldrCardDemoNotDone').text(totals.demoNotDone);
+    $('#ldrCardNotShow').text(totals.notShow);
+    $('#ldrCardCancelled').text(totals.cancelled);
+    $('#ldrCardConfirmed').text(totals.confirmed);
+    $('#ldrCardNotConfirmed').text(totals.notConfirmed);
+    $('#ldrCardReschedule').text(totals.reschedule);
+    $('#ldrCardNotInterested').text(totals.notInterested);
+    $('#ldrCardNoStatusUpdate').text(totals.noStatusUpdate);
+    $('#ldrCardTotalMeetingDuration').text(totals.totalMeetingDuration);
 }
 
 function renderLeadDemoReportTable(reportData, page) {
@@ -215,6 +289,7 @@ function downloadLeadDemoReportCsv(rows) {
             item.userWiseDemoDone || 0,
             item.cancelledDemo || 0,
             item.notShowDemo || 0,
+            item.demoConfirm || 0,
             item.demoNotConfirm || 0,
             item.rescheduleDemo || 0
         ].join(','));
@@ -250,6 +325,7 @@ function downloadLeadDemoReportExcel(rows) {
             + '<td>' + (item.userWiseDemoDone || 0) + '</td>'
             + '<td>' + (item.cancelledDemo || 0) + '</td>'
             + '<td>' + (item.notShowDemo || 0) + '</td>'
+            + '<td>' + (item.demoConfirm || 0) + '</td>'
             + '<td>' + (item.demoNotConfirm || 0) + '</td>'
             + '<td>' + (item.rescheduleDemo || 0) + '</td>'
             + '</tr>';

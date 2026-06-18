@@ -34998,3 +34998,19 @@ to { background-color: rgb(6, 145, 6); }
 	color:#92400E !important;
 }
 .bhagat{color:red}
+.select2-container .select2-selection--multiple .select2-selection__rendered,
+.select2-container--default .select2-selection--multiple .select2-selection__rendered,
+.select2-container--bootstrap4 .select2-selection--multiple .select2-selection__rendered {
+	overflow: visible !important;
+	text-overflow: clip !important;
+	white-space: normal !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice,
+.select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+	max-width: none !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+	white-space: nowrap !important;
+	word-break: normal;
+	overflow-wrap: normal;
+}

@@ -236,6 +236,7 @@ function userScreeningFilter(){
                         <div class="custom-field user-application-date-field">
                             <select onchange="setFilterDatesAccordingly(this, '#filterStartDate', '#filterEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14">
                                 <option value="Today">Today</option>  
+                                <option value="Yesterday">Yesterday</option>
                                 <option value="Week">Week</option>
                                 <option value="Month">Month</option>
                                 <option value="Custom" selected>Custom</option>

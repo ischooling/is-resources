@@ -86,6 +86,7 @@ function filterFormAndList(){
               <div class="form-group custom-field mb-0">
                 <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="form-control font-14" >
                   <option value="Today" selected>Today</option>  
+                  <option value="Yesterday">Yesterday</option>
                   <option value="Week">Week</option>
                   <option value="Month">Month</option>
                   <option value="Custom">Custom</option>
@@ -138,6 +139,7 @@ function filterFormAndList(){
           <div class="" style="width: 10%">
             <select onchange="setFilterDatesAccordingly(this, '#filterMeetingStartDate', '#filterMeetingEndDate')" id="filterDateDuration" name="filterDateDuration" class="border rounded" style="border-color: #a1a1a1 !important;width: 100%; font-size: 14px; padding: 8px; appearance: auto; -webkit-appearance: auto; -moz-appearance: auto;">
               <option value="Today" selected>Today</option>  
+              <option value="Yesterday">Yesterday</option>
               <option value="Week">Week</option>
               <option value="Month">Month</option>
               <option value="Custom">Custom</option>
@@ -720,6 +722,7 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
           <div class="form-group custom-field mb-0" style="width: 10%;">
             <select onchange="setFilterDatesAccordingly(this, '#filterRecurringMeetingStartDate', '#filterRecurringMeetingEndDate');" id="filterRecurringDateDuration" class="form-control font-14">
               <option value="Today" selected>Today</option>
+              <option value="Yesterday">Yesterday</option>
               <option value="Week">This Week</option>
               <option value="Month">This Month</option>
               <option value="Custom">Custom</option>
