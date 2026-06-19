@@ -277,12 +277,8 @@ function markStudentDocumentForReupload(docKey, noteText){
 	}
 }
 
-function getDefaultStudentPassportPreviewImage(){
-	return BASE_URL + CONTEXT_PATH + "static/img/male-profile.png";
-}
-
 function setStudentPassportPreviewImage(imageSrc){
-	$("#studentDocPassportPreviewImage").attr("src", imageSrc || getDefaultStudentPassportPreviewImage());
+	$("#studentDocPassportPreviewImage").attr("src", imageSrc || PATH_FOLDER_IMAGE2+'male-profile.png');
 }
 
 function triggerStudentDocFileInput(inputId){

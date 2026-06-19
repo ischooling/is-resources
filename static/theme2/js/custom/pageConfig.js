@@ -1,4 +1,8 @@
+var PAGE_REQUEST;
+var MODULE_ID;
 async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
+    PAGE_REQUEST = pageNo;
+    MODULE_ID = moduleId;
     showAndHideDashboardAndAdditionalContent("main");
     console.time();
     var pageRequest = {

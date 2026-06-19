@@ -13,8 +13,12 @@ function initSmsErrorLogTable() {
     }
 
     var dataUrl = CONTEXT_PATH + SCHOOL_UUID + '/dashboard/sms-error-log-data';
-
+    debugger
     smsErrorLogTable = $('#smsErrorLogTable').DataTable({
+        fixedHeader: true,
+        scrollY: '400px',
+        scrollCollapse: true,
+        paging: true,
         processing:  true,
         serverSide:  true,
         responsive:  true,
@@ -49,6 +53,7 @@ function initSmsErrorLogTable() {
                 d.fModuleId    = $('#errModuleId').val()    || '';
                 d.fHttpStatus  = $('#errHttpStatus').val()  || '';
                 d.fAppVersion  = $('#errAppVersion').val()  || '';
+                return d;
             },
             error: function(xhr) {
                 if (typeof SMSErrorLogger !== 'undefined') {
@@ -74,7 +79,7 @@ function initSmsErrorLogTable() {
             { data: 'schoolId',    title: 'School ID',   defaultContent: '-' },
             { data: 'userId',      title: 'User ID',      defaultContent: '-' },
             { data: 'userRole',    title: 'Role',         defaultContent: '-' },
-            { data: 'moduleId',    title: 'Module ID',    defaultContent: '-' },
+            { data: 'moduleId',    title: 'Module ID',    defaultContent: '-', orderable: false },
             { data: 'pageNo',      title: 'Page No',      defaultContent: '-' },
             {
                 data:           'httpStatus',
@@ -159,6 +164,7 @@ function openSmsErrorDetail(id) {
         type:     'GET',
         dataType: 'json',
         success:  function(data) {
+            debugger
             $('#smsErrorDetailModalBody').html(getSmsErrorDetailHtml(data));
         },
         error: function(xhr) {

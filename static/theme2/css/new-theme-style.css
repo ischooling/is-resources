@@ -31973,7 +31973,7 @@ table td.child ul li{white-space: normal;}
 
 
 /* fee recipt css  */
-.is-water-mark-bg{background-image: url('https://sms.internationalschooling.org/static/img/back-logo.png');background-repeat:repeat;}
+.is-water-mark-bg{background-image: url('https://sms.internationalschooling.org/static/theme2/images/back-logo.png');background-repeat:repeat;}
 .fee-table{ margin-top:20px;}
 .fee-table table{ width:100%; font:normal 13px Arial, Helvetica, sans-serif; line-height:22px; border:none;}
 /* .fee-table table tr{ border:none;} */
@@ -31991,7 +31991,7 @@ table td.child ul li{white-space: normal;}
 	.card-title{display: none;}
 	.navbar-wrapper{display: none !important;}
 	body{-webkit-print-color-adjust: exact !important;}
-	#printableArea{background-image:url('https://sms.internationalschooling.org/static/img/back-logo.png') !important;background-repeat:repeat !important;}
+	#printableArea{background-image:url('https://sms.internationalschooling.org/static/theme2/images/back-logo.png') !important;background-repeat:repeat !important;}
 	.rec-tab tr th{padding:10px !important; color:#fff !important;}
 	.chat-button{opacity:0;}
 	.table > tbody > tr{position:static !important;}

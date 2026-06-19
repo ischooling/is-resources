@@ -2414,7 +2414,7 @@ function signupModals(){
 													+'</div>'
 												+'</div>'
 												+'<div id="studentDocPassportPreviewCard" class="border d-flex flex-column align-items-center justify-content-center p-2" style="width:170px; min-width:170px; border-radius:12px; border-color:#dbe6f5 !important; background:#f9fbff;">'
-													+'<img id="studentDocPassportPreviewImage" src="'+BASE_URL + CONTEXT_PATH+'static/img/male-profile.png" alt="Passport Preview" style="width:100%; height:160px; object-fit:cover; border-radius:10px; background:#eef3f8; cursor:pointer;" onclick="viewStudentDocFile(\'passport\', document.getElementById(\'studentDocPassportView\'))" />'
+													+'<img id="studentDocPassportPreviewImage" src="'+PATH_FOLDER_IMAGE2+'male-profile.png" alt="Passport Preview" style="width:100%; height:160px; object-fit:cover; border-radius:10px; background:#eef3f8; cursor:pointer;" onclick="viewStudentDocFile(\'passport\', document.getElementById(\'studentDocPassportView\'))" />'
 													+'<div class="d-flex mt-2">'
 														+'<button type="button" class="btn btn-primary btn-sm mr-1" id="studentDocPassportView" style="display:none;" onclick="viewStudentDocFile(\'passport\', this)"><i class="fa fa-eye"></i></button>'
 														+'<button type="button" class="btn btn-danger btn-sm" id="studentDocPassportRemove" style="display:none;" onclick="removeStudentDocFile(\'passport\')"><i class="fa fa-trash"></i></button>'

@@ -186,7 +186,7 @@ function getSmsErrorDetailHtml(d) {
                     <tr><th>Created At</th><td>${d.createdAt || '-'}</td></tr>
                     <tr><th>School ID</th><td>${d.schoolId || '-'}</td></tr>
                     <tr><th>User ID</th><td>${d.userId || '-'}</td></tr>
-                    <tr><th>Role ID</th><td>${d.userRoleId || '-'}</td></tr>
+                    <tr><th>Role</th><td>${d.userRole || '-'}</td></tr>
                     <tr><th>Module ID</th><td>${d.moduleId || '-'}</td></tr>
                     <tr><th>Page No</th><td>${d.pageNo || '-'}</td></tr>
                     <tr><th>HTTP Status</th><td>${httpBadge}</td></tr>

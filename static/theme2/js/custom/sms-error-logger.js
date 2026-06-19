@@ -57,13 +57,14 @@
     }
 
     function _buildPayload(options) {
+        var mid = options.moduleId || _config.moduleId;
         return {
             errorUuid:     _generateUUID(),
-            userId:        options.userId     || _config.userId,
-            schoolId:      options.schoolId   || _config.schoolId,
-            userRoleId:    options.userRoleId || _config.userRoleId,
-            moduleId:      options.moduleId   || _config.moduleId,
-            pageNo:        options.pageNo     || _config.pageNo,
+            userId:        options.userId   || _config.userId,
+            schoolId:      options.schoolId || _config.schoolId,
+            userRole:      USER_ROLE,
+            moduleId:      MODULE_ID,
+            pageNo:        PAGE_REQUEST,
             sessionId:     options.sessionId  || _config.sessionId,
             currentUrl:    options.currentUrl || _currentUrl(),
             httpStatus:    options.httpStatus || null,
