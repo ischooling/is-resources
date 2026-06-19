@@ -3336,3 +3336,25 @@ async function generateSpoofUrl(userId, expiryMinutes, validityLabel) {
 		customLoader(false);
 	}
 }
+
+function getNewReleaseNotificationModal(){
+	var html=
+	`<div class="modal fade" id="newReleaseNotificationModal" tabindex="-1" role="dialog" aria-labelledby="newReleaseNotificationModalLabel" aria-modal="true" data-backdrop="static">
+		<div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-width:420px">
+			<div class="modal-content rounded-15 overflow-hidden">
+				<div class="bg-primary py-1"></div>
+				<div class="modal-body pt-1 pb-4">
+					<div class="full">
+						<div class="full  my-4">
+							<h5 class="text-center"><span class="d-inline-block mb-2" style="font-size:55px">🎉</span> <br/>A new version of the system is available.<br/>Please refresh the page to load the latest updates and continue using the system.</h5>
+						</div>
+					</div>
+					<div class="full mt-2 text-center">
+						<button type="button" class="btn btn-pill btn-success px-3 mx-auto" onclick="acceptnNewReleaseRequest();">Refresh</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}

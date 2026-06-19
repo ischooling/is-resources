@@ -1,5 +1,4 @@
-PRO_IP_API_URL =
-  "https://pro.ip-api.com/json/?key=9908tZlRhI0pK5W&fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query";
+PRO_IP_API_URL = "/api/v1/ip-location";
 moduleId = "REQUESTDEMO";
 FILE_UPLOAD_PATH = "https://s3.amazonaws.com/internationalsch/";
 var APPLICATION_JSON_VALUE = "application/json";

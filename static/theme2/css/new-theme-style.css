@@ -34491,6 +34491,14 @@ to { background-color: rgb(6, 145, 6); }
 .side-bar-icon .fa-user{
 	content: none !important;
 }
+
+.side-bar-icon .pe-7s-paper-bug{
+	font-size: 0 !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;         
+	background-image: url(../images/Icon/sidebar/bug_icon.png) !important;
+}
 .side-bar-icon .fa-user{
 	content: "";
 	font-size: 0 !important;

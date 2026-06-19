@@ -56,41 +56,40 @@ async function loadScript(files) {
 }
 
 
+var _scriptPromiseCache = {};
+
 function loadScriptCall(role, src) {
-    return new Promise((resolve, reject) => {
-        if (!src) {
-            resolve();
-            return;
-        }
+    if (!src) return Promise.resolve();
 
-        var id = src.split(".")[0] + "JS";
-        var cacheBustedSrc = role === "js"
-            ? RESOURCE_PATH + src + "?t=" + Date.now()
-            : RESOURCE_PATH + "custom/" + src + "?t=" + Date.now();
+    var id = src.split(".")[0] + "JS";
 
-        // already loaded
-        if ($('#' + id).length > 0) {
-            resolve();
-            return;
-        }
+    // Return cached promise if script is already loading or loaded
+    if (_scriptPromiseCache[id]) {
+        return _scriptPromiseCache[id];
+    }
 
+    var cacheBustedSrc = role === "js"
+        ? RESOURCE_PATH + src + "?t=" + Date.now()
+        : RESOURCE_PATH + "custom/" + src + "?t=" + Date.now();
+
+    _scriptPromiseCache[id] = new Promise((resolve, reject) => {
         var script = document.createElement("script");
         script.type = "text/javascript";
         script.src = cacheBustedSrc;
         script.id = id;
-        // if(!ENVIRONMENT.startsWith("prod")){
-            script.onload = () => {
-                console.log(`Script loaded: ${src}`);
-                resolve();
-            };
-        // }
+        script.onload = () => {
+            console.log(`Script loaded: ${src}`);
+            resolve();
+        };
         script.onerror = () => {
             console.error(`Failed to load script: ${src}`);
+            delete _scriptPromiseCache[id]; // allow retry on error
             reject(`Failed to load script: ${src}`);
         };
-
         document.head.appendChild(script);
     });
+
+    return _scriptPromiseCache[id];
 }
 
 

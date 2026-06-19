@@ -4,6 +4,17 @@ var GRADUATION_CEREMONY_FILTER_STATE = {
     }
 };
 
+const ALLOW_DISCARD_GRADUATION_CEREMONY_ATTENDEE = getSettingsByTypeAndKey('CONFIGURATION', 'ALLOW_DISCARD_GRADUATION_CEREMONY_ATTENDEE');
+var isUserAllowedToDiscardGraduationCeremonyAttendee = false;
+try{
+    var discardAllowedUserIds = JSON.parse(ALLOW_DISCARD_GRADUATION_CEREMONY_ATTENDEE).data.metaValue.split(",").map(function(id){
+        return id.trim();
+    });
+    isUserAllowedToDiscardGraduationCeremonyAttendee = discardAllowedUserIds.includes(USER_ID.toString());
+}catch(e){
+    isUserAllowedToDiscardGraduationCeremonyAttendee = false;
+}
+
 function resetGraduationCeremonyFilterStateToDefault(){
     GRADUATION_CEREMONY_FILTER_STATE = {
         filterValues: {
@@ -60,6 +71,11 @@ function loadGraduationCeremonyAttendees(){
                 const alternatePhoneNo = formatGraduationCeremonyPhone(attendee.alternatePhoneNo);
                 const phoneWhatsAppIcon = getGraduationCeremonyWhatsAppIcon(attendee.phoneOnWhatsApp);
                 const alternatePhoneWhatsAppIcon = getGraduationCeremonyWhatsAppIcon(attendee.alternatePhoneOnWhatsApp);
+                const paidAmount = attendee.paidAmount || attendee.amountScheduled || 0;
+                const pendingAmount = attendee.pendingAmount || 0;
+                const totalAmount = attendee.totalAmount || 0;
+                const hasPaidGuests = (attendee.hasPaidGuests || "").toUpperCase() === "Y";
+                const pendingPaymentStatus = attendee.pendingPaymentStatus ? attendee.pendingPaymentStatus : "N/A";
                 const studentInfo = `
                     <strong>${attendee.fullName}</strong><br>
                     <small>${attendee.email}</small><br>
@@ -77,11 +93,28 @@ function loadGraduationCeremonyAttendees(){
                 `;
                 const attendeesInfo = attendee.attendees && attendee.attendees.length > 0
                     ? attendee.attendees.map(function(person, personIndex){
+                        const amountText = person.amount === null || person.amount === undefined || person.amount === "null"
+                            ? "N/A"
+                            : `$${person.amount}`;
+                        const statusText = person.amountStatus ? person.amountStatus : "SCHEDULED";
+                        const paidBadgeClass = (person.isPaid || "").toUpperCase() === "Y" ? "success" : "warning";
                         return `<div class="mb-1">
-                            <small><strong>${personIndex + 1}.</strong> ${person.name ? person.name : "N/A"}${person.relation ? ` (${person.relation})` : ""}${person.gender ? ` - ${person.gender}` : ""}</small>
+                            <small>
+                                <strong>${personIndex + 1}.</strong> ${person.name ? person.name : "N/A"}${person.relation ? ` (${person.relation})` : ""}${person.gender ? ` - ${person.gender}` : ""}
+                                <span class="ml-1">- ${amountText}</span>
+                                <span class="badge badge-${paidBadgeClass} ml-1">${statusText}</span>
+                            </small>
                         </div>`;
                     }).join("")
                     : `<small>N/A</small>`;
+                const amountInfo = hasPaidGuests && pendingAmount > 0
+                    ? `<small><strong>Pending:</strong> $${pendingAmount}</small><br>
+                       <small><strong>Paid:</strong> $${paidAmount}</small><br>
+                       <small><strong>Total:</strong> $${totalAmount}</small>`
+                    : `<small>$${(attendee.amountStatus || "").toUpperCase() === "SUCCESS" ? totalAmount : pendingAmount}</small>`;
+                const paymentStatusInfo = hasPaidGuests && pendingAmount > 0
+                    ? `<small><strong>${attendee.amountStatus}</strong></small><br><small>Pending Batch: ${pendingPaymentStatus}</small>`
+                    : `<small>${attendee.amountStatus}</small>`;
 
                 tbodyHtml += `<tr>
                     <td>${sno}</td>
@@ -89,8 +122,8 @@ function loadGraduationCeremonyAttendees(){
                     <td class="d-none">${callbackInfo}</td>
                     <td>${attendeesInfo}</td>
                     <td>${attendee.noOfAttendees?attendee.noOfAttendees : "N/A"}</td>
-                    <td>$${attendee.amountScheduled}</td>
-                    <td>${attendee.amountStatus}</td>
+                    <td>${amountInfo}</td>
+                    <td>${paymentStatusInfo}</td>
                     <td>${attendee.foodAllergy}</td>
                     <td><div class="graduation-ceremony-action-wrap">`;
                         if(isCallbackScheduled){
@@ -104,7 +137,7 @@ function loadGraduationCeremonyAttendees(){
                                 Update Status
                             </button>`;
                         }
-                        if((attendee.amountStatus || "").toUpperCase() !== "SUCCESS"){
+                        if(isUserAllowedToDiscardGraduationCeremonyAttendee && (attendee.amountStatus || "").toUpperCase() !== "SUCCESS" && !hasPaidGuests){
                             tbodyHtml += `<i class="fa fa-trash text-danger graduation-ceremony-discard-icon"
                                 aria-hidden="true"
                                 title="Discard"
@@ -200,6 +233,7 @@ function formatGraduationCeremonyPhone(phoneNo){
     trimmedPhoneNo = trimmedPhoneNo.replace(/-/g, " ").replace(/\s+/g, " ").trim();
     trimmedPhoneNo = trimmedPhoneNo.replace(/^\+*/, "");
     trimmedPhoneNo = "+" + trimmedPhoneNo;
+    trimmedPhoneNo = trimmedPhoneNo.replace(/^\+\s+/, "+");
 
     return trimmedPhoneNo;
 }

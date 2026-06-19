@@ -4,6 +4,14 @@ var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";
 var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "api/v1/";
 var GLOBAL_EMAIL = "";
 var GRADE_CAL_RULE = {};
+var CDN_VERSION;
+var SCRIPTVERSIONCHECKINTERVAL = null;
+
+// ── Version Checker localStorage keys ──────────────────────────────────────
+var VC_KEY_NEXT_AT      = 'versionCheck_nextAt';     // epoch ms of next scheduled check
+var VC_KEY_POST_RELOAD  = 'versionCheck_postReload'; // set before reload via Refresh button
+var VC_KEY_LAST_RAN     = 'versionCheck_lastRanAt';  // multi-tab guard: epoch ms of last run
+// ───────────────────────────────────────────────────────────────────────────
 var DEFAULT_SEARCH_STATE = true;
 var editor1;
 var editor2;
@@ -835,6 +843,18 @@ $(document).ready(function () {
     $('.daterange').on('keydown paste drop cut', function(e) {
       e.preventDefault();
     });
+    // debugger
+    // var getCDN_version = getSettingsByTypeAndKey("CONFIGURATION", "RESOURCES_CDN_URL");
+    // getCDN_version = JSON.parse(getCDN_version);
+    // if(getCDN_version != ""){
+    //   var CDN_V = getCDN_version.data.metaValue; 
+    //   CDN_VERSION= CDN_V.split("@")[1];
+    //   localStorage.setItem("CDN_VERSION", CDN_VERSION); 
+    // }
+    // FOR SMS ERROR LOG AJAX BELOW LINE
+    if (typeof SMSErrorLogger !== 'undefined') {
+        $.ajaxSetup({ error: SMSErrorLogger.ajaxErrorHandler });
+    }
 });
 function setPagePosition(position) {
   signupPage = position;
@@ -1190,17 +1210,20 @@ function resetDropdown(dropdown, emptyMessage) {
   //	dropdown.append('<option disabled selected> </option>');
 }
 $(document).ajaxStart(function (e) {
+  
   AJAXREQUESTCOUNT++;
   // console.log("AJAX call started:");
   customLoader(true);
 });
 $(document).ajaxStop(function () {
   AJAXREQUESTCOUNT--;
-  // if (AJAXREQUESTCOUNT <= 0) {
-  //   AJAXREQUESTCOUNT = 0; // just to be safe, avoid negative counts
-  //   // console.log("All AJAX calls completed");
+   if (AJAXREQUESTCOUNT <= 0) {
+     AJAXREQUESTCOUNT = 0; // just to be safe, avoid negative counts
+     // console.log("All AJAX calls completed");
+
     customLoader(false);
-  // }
+
+   }
 });
 
 $(document).ajaxSend(function () {
@@ -1211,7 +1234,7 @@ $(document).ajaxSend(function () {
 
 $(document).ajaxComplete(function () {
   --AJAXREQUESTCOUNT;
-  if(AJAXREQUESTCOUNT <= 0) {
+  if(AJAXREQUESTCOUNT <= 1) {
     AJAXREQUESTCOUNT = 0; // prevent negative values
     customLoader(false);
   }
@@ -8177,4 +8200,149 @@ function getPdfViewerUrl(pdfUrl) {
     return APP_BASE_URL +
         "static/pdfjs/web/viewer.html?file=" +
         encodeURIComponent(APP_BASE_URL + "pdf-proxy?url=" + encodeURIComponent(pdfUrl));
+}
+
+// ============================================================
+// Script Version Checker — Production Implementation
+// ============================================================
+// Scheduling flow:
+//
+//   Login / Dashboard load
+//        │
+//        ├─ post-reload flag set?  ──YES──► schedule check in 30 min
+//        │
+//        ├─ VC_KEY_NEXT_AT exists?
+//        │       ├─ remaining > 0  ──────► resume with remaining time
+//        │       └─ overdue        ──────► run check immediately
+//        │
+//        └─ fresh login            ──────► schedule check in 5 min
+//
+//   _runVersionCheck()
+//        │
+//        ├─ same version           ──────► schedule next check in 30 min
+//        │
+//        └─ NEW version ───────────────► clear timer → show modal
+//                                              │
+//                                     user clicks Refresh
+//                                              │
+//                                    acceptnNewReleaseRequest()
+//                                              │
+//                                    set post-reload flag → reload()
+//                                              │
+//                                    (page reloads, flow restarts above)
+// ============================================================
+
+var VC_DELAY_FIRST  = 1  * 60 * 1000; // 5 minutes — first check after login
+var VC_DELAY_REPEAT = 30 * 60 * 1000; // 30 minutes — every subsequent check
+var VC_DEBOUNCE_MS  = 60 * 1000;      // 60 seconds — multi-tab duplicate-run guard
+
+/**
+ * Entry point — call this once after login succeeds and the dashboard is ready.
+ * Handles fresh logins, mid-session page navigations, and post-reload continuation.
+ */
+function initVersionChecker() {
+  vcClearTimer();
+
+  // ── Post-reload case: user clicked Refresh on the update modal ──
+  // Schedule the next check 30 minutes from now and exit.
+  if (localStorage.getItem(VC_KEY_POST_RELOAD) === 'true') {
+    localStorage.removeItem(VC_KEY_POST_RELOAD);
+    vcSchedule(VC_DELAY_REPEAT);
+    return;
+  }
+
+  // ── Resumed session: a next-check timestamp is already stored ──
+  // This keeps the schedule alive across page navigations / manual refreshes.
+  var nextAt = localStorage.getItem(VC_KEY_NEXT_AT);
+  if (nextAt) {
+    var remaining = parseInt(nextAt, 10) - Date.now();
+    if (remaining > 0) {
+      vcSchedule(remaining); // resume with exact remaining time
+    } else {
+      vcRun();               // overdue — run the check immediately
+    }
+    return;
+  }
+
+  // ── Fresh login: no prior state ──
+  vcSchedule(VC_DELAY_FIRST);
+}
+
+/**
+ * Schedules a version check after `delayMs` milliseconds.
+ * Persists the target epoch time so the schedule survives page navigations.
+ */
+function vcSchedule(delayMs) {
+  vcClearTimer();
+  localStorage.setItem(VC_KEY_NEXT_AT, Date.now() + delayMs);
+  SCRIPTVERSIONCHECKINTERVAL = setTimeout(vcRun, delayMs);
+}
+
+/**
+ * Clears the pending timer and removes the stored next-check timestamp.
+ */
+function vcClearTimer() {
+  if (SCRIPTVERSIONCHECKINTERVAL) {
+    clearTimeout(SCRIPTVERSIONCHECKINTERVAL);
+    SCRIPTVERSIONCHECKINTERVAL = null;
+  }
+  localStorage.removeItem(VC_KEY_NEXT_AT);
+}
+
+/**
+ * Executes the version check.
+ * Multi-tab guard: if another tab ran a check within the debounce window,
+ * skip this run and align the next schedule to that tab's timing.
+ */
+function vcRun() {
+  localStorage.removeItem(VC_KEY_NEXT_AT);
+
+  var lastRan = localStorage.getItem(VC_KEY_LAST_RAN);
+  if (lastRan) {
+    var elapsed = Date.now() - parseInt(lastRan, 10);
+    if (elapsed < VC_DEBOUNCE_MS) {
+      // Another tab checked recently — align our next check to avoid overlap.
+      vcSchedule(VC_DELAY_REPEAT - elapsed);
+      return;
+    }
+  }
+
+  localStorage.setItem(VC_KEY_LAST_RAN, Date.now());
+  startScriptVersionChecker();
+}
+
+/**
+ * Fetches the latest SCRIPT_VERSION and CDN_VERSION from the server.
+ *   • Same version  → schedule next check in 30 minutes.
+ *   • New version   → stop all timers, show #newReleaseNotificationModal.
+ */
+function startScriptVersionChecker() {
+  var scriptRes = getSettingsByTypeAndKey("CONFIGURATION", "SCRIPT_VERSION");
+  if (typeof scriptRes === 'string') scriptRes = JSON.parse(scriptRes);
+  var SV = scriptRes.data.metaValue;
+
+  var cdnRes = getSettingsByTypeAndKey("CONFIGURATION", "RESOURCES_CDN_URL");
+  if (typeof cdnRes === 'string') cdnRes = JSON.parse(cdnRes);
+  var CDN_V = cdnRes.data.metaValue.split("@")[1];
+  var versionObj ={"SCRIPT VERSION":SV, "CDN":CDN_V}
+  console.log("Script Version Checker Called", versionObj)
+  if (SCRIPT_VERSION !== SV || CDN_V !== CDN_VERSION) {
+    // New version available — stop checking while modal is open.
+    vcClearTimer();
+    $("#newReleaseNotificationModal").modal("show");
+  } else {
+    // Up to date — schedule the next routine check.
+    vcSchedule(VC_DELAY_REPEAT);
+  }
+}
+
+/**
+ * Called when the user clicks the Refresh button inside #newReleaseNotificationModal.
+ * Sets a localStorage flag so initVersionChecker() (called after reload) resumes
+ * with a 30-minute schedule rather than treating this as a fresh login.
+ */
+function acceptnNewReleaseRequest() {
+  vcClearTimer();
+  localStorage.setItem(VC_KEY_POST_RELOAD, 'true');
+  location.reload();
 }

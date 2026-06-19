@@ -15,7 +15,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "online-user":{url:"",file:[{role:"",fileName:["onlineUserLiveListContent.js","onlineUserLiveList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "delete-user":{url:"",file:[{role:"",fileName:["deletedUserListContent.js","deletedUserList.js","roleList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "maintenance-down-message":{url:"maintenance-down-message?moduleId="+moduleId+"&username=&themeType=theme2",file:[{role:"",fileName:["dashboardCommonComment.js","dashboardUserActivity.js"]}],type:"JSP",pageReqType:"IN"},
-        "manage-batch-student":{url:"manage-batch-student?moduleId="+moduleId+"&themeType=theme2",file:[{role:"",fileName:["dashboardSchoolBatches.js","zoomRegistration.js"]}],type:"JSP",pageReqType:"IN"},
+        "manage-batch-student":{url:"manage-batch-student?moduleId="+moduleId+"&themeType=theme2",file:[{role:"",fileName:["dashboardSchoolBatches.js"]}],type:"JSP",pageReqType:"IN"},
         "payment-reports":{url:"",file:[{role:"",fileName:["paymentReportContent.js","paymentReport.js","dashboardManageUser.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // "payment-reports":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/payment-reports?moduleId="+moduleId},
         "assign-orientation":{url:"",file:[{role:"",fileName:["studentOrientationAssignContent.js","studentOrientation.js", "leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -85,6 +85,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "wati-numbers":{url:"",file:[{role:"",fileName:["watiNumbersContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "partner-school-payment":{url:"",file:[{role:"",fileName:["partnerSchoolPaymentContent.js","partnerSchoolPayment.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "graduation-ceremony-attendees":{url:"",file:[{role:"",fileName:["graduationCeremonyAttendeesContent.js","graduationCeremonyAttendees.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "sms-error-log":{url:"",file:[{role:"",fileName:["smsErrorLogContent.js","smsErrorLog.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "event-discount":{url:"",file:[{role:"",fileName:["eventDiscountContent.js","eventDiscount.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "user-screening-profiles":{url:"",file:[{role:"",fileName:["userApplicationContent.js","userApplication.js", "teacherScreeningProfileContent.js", "teacherScreeningProfile.js","jquery.ckeditor.js","cropperImageChatSupportDocument.js","finalRoundOfInterviewSlotsContent.js", "finalRoundOfInterviewSlots.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-weekly-progress":{url:"student-weekly-progress-report?moduleId="+moduleId,file:[{role:"",fileName:["dashboardWeeklyProgress.js"]}],type:"JSP",pageReqType:"IN"},
@@ -203,6 +204,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "enrollment-reports":{url:"",file:[],funName:function(){},type:"JS",init: function(){},pageReqType:"EX",urlSend:"/dashboard/enrollment-availability-view"},
         "email-template-tester":{url:"",file:[{role:"",fileName:["emailTemplateTesterContent.js","emailTemplateTester.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "log-viewer":{url:"",file:[{role:"",fileName:["logViewerContent.js","logViewer.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "location-checker-captures":{url:"location-checker-captures-content?moduleId="+moduleId,file:[],type:"JSP",pageReqType:"IN"},
         
     };
     

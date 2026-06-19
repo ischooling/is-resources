@@ -7,6 +7,11 @@ var schoolList;
 var CALENDAR_EVENT=false;
 var parentColor;
 
+// Wire all jQuery AJAX errors to the backend error logger (fire-and-forget)
+if (typeof $ !== 'undefined' && typeof SMSErrorLogger !== 'undefined') {
+    $.ajaxSetup({ error: SMSErrorLogger.ajaxErrorHandler });
+}
+
 async function initiateSetting(){
     try {
         schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
@@ -69,6 +74,7 @@ const contentHandlers = {
     'wati-numbers': () => renderWatiNumbersContent(),
     'partner-school-payment': () => initPartnerSchoolPayment(),
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
+    'sms-error-log': () => renderSmsErrorLog('SMS Error Log', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'event-discount': () => initEventDiscount(),
     'user-screening-profiles': () => initUserScreeningProfiles(),
     'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent(); },
@@ -405,6 +411,20 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
     }  catch (err) {
         console.error("getContent error:", err);
         const status = err?.status || err?.response?.status;
+
+        // Send to backend error logger — fire-and-forget, never blocks UI
+        if (typeof SMSErrorLogger !== 'undefined') {
+            SMSErrorLogger.log({
+                errorType:    err?.name || 'getContentError',
+                errorMessage: err?.message || String(err),
+                stackTrace:   err?.stack  || '',
+                httpStatus:   status      || null,
+                pageNo:       String(pageNo),
+                moduleId:     moduleId,
+                requestParams: JSON.stringify({ pageNo, moduleId, replaceDiv, extraParam })
+            });
+        }
+
         switch (status) {
             case 400:
                 showMessageTheme2(0, "Invalid request. Please try again.");
