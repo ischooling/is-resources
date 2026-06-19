@@ -677,6 +677,7 @@ function getRequestForCourseSelection(courseId) {
 		preferredCourseId.push($("#courseCategory").val());
 		studentCourseDetailsInfoDTO['preferredCourseId']=preferredCourseId;
 	}
+	studentCourseDetailsInfoDTO['requestFromMigration']='N';
 	return studentCourseDetailsInfoDTO;
 }
 
@@ -838,6 +839,7 @@ function getRequestForChoosePaymentOption() {
 	var feePaymentPlanDTO = {};
 	feePaymentPlanDTO['userId'] = $("#userId").val();
 	feePaymentPlanDTO['paymentMode'] = $("#payMode").val();
+	feePaymentPlanDTO['requestFromMigration']='N';
 	return feePaymentPlanDTO;
 }
 
@@ -1103,6 +1105,7 @@ function getRequestForPaymentModeSelection(formId, courseId) {
 		studentCourseDetailsInfoDTO['selectedSubjects'] = '';
 	}
 	studentCourseDetailsInfoDTO['controlType'] = $("#controlType").val();
+	studentCourseDetailsInfoDTO['requestFromMigration']='N';
 	return studentCourseDetailsInfoDTO;
 }
 
@@ -1201,6 +1204,7 @@ function getRequestForReviewAndPaymentSelection(reloadRequired) {
 	var studentRequestDTO = {};
 	studentRequestDTO['userId'] = $('#userId').val();
 	studentRequestDTO['reloadRequired'] = reloadRequired;
+	studentRequestDTO['requestFromMigration']='N';
 	return studentRequestDTO;
 }
 

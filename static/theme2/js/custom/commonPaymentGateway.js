@@ -12,7 +12,8 @@ async function checkPayment(formId, userPaymentDetailsId, schoolId){
 		'userPaymentDetailsId' : userPaymentDetailsId,
 		'schoolId' : schoolId
 	};	
-	
+	$("#enrollReserveModal").modal("hide");
+	$("#reserveSeatModal").modal("hide");
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'check-payment',payload,'common');
 	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
 		if (responseData.status == '3') {
@@ -290,6 +291,9 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 		'schoolIdOfPaymentGateway' : schoolIdOfPaymentGateway,
 		'schoolId' : schoolId
 	}
+	$("#enrollReserveModal").modal("hide");
+	$("#reserveSeatModal").modal("hide");
+	$("#bookAnEnrollmentModel").modal("hide");
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'payment-gateway/options',payload,'common');
 	if (responseData['status'] == '0' || responseData['status'] == '2' || responseData['status'] == '3') {
 		if (responseData['status'] == '3') {
@@ -547,7 +551,7 @@ async function getPaymentGatewayOptionsModal(details){
 											if(v.name=='Airwallex'){
 												html+=`
 												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
-													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
+													<div id="payButton${k+1}" class="smoov lg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
 												</div>`;
@@ -555,7 +559,7 @@ async function getPaymentGatewayOptionsModal(details){
 											else if(v.name=='YOCO'){
 												 html+= `
 												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end" style="display:none;">
-													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color">
+													<div id="payButton${k+1}" class="smoov lg white-txt-color">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
 												</div>`;
@@ -563,7 +567,7 @@ async function getPaymentGatewayOptionsModal(details){
 											else if(v.name=='STRIPE' || v.name=='CONVERA'){
 												html+=
 												`<div class="payment-icon" style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
-													<div id="payButton${k+1}" class="smoov lg primary-bg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
+													<div id="payButton${k+1}" class="smoov lg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
 												</div>`;

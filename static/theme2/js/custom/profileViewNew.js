@@ -996,6 +996,10 @@ async function profileViewPageLoadEvent(data) {
     $("#dob, .custom-date-fields").datepicker({
         format: 'M dd, yyyy',
         autoclose: true,
+    }).on('changeDate', function (e) {
+        if (e && e.originalEvent) {
+            $(this).trigger('change');
+        }
     });
     $('#dob').datepicker('update', new Date(data[0].dob));
     $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate").datepicker({
@@ -1019,6 +1023,9 @@ async function profileViewPageLoadEvent(data) {
     }
     if (data[1].weddingAnniversaryDate) {
         $('#weddingAnniversaryDate').datepicker('update', new Date(data[1].weddingAnniversaryDate));
+    }
+    if (data[5] && data[5].reenrollmentDiscount) {
+        $('#reenrollmentDiscount').datepicker('update', new Date(data[5].reenrollmentDiscount));
     }
     await callCountriesOption("profileForm", '', "country", '', "Select Country*");
     await callCountriesOption("profileForm", '', "motherCountry", '');
@@ -3807,6 +3814,9 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
             requestProfileData['parentType'] = $('#' + eleID).attr("data-dobparent");
         }
         else if (keyId == "weddingAnniversaryDate") {
+            requestProfileData['fieldValue'] = $('#' + eleID).val();
+        }
+        else if (keyId == "reenrollmentDiscount") {
             requestProfileData['fieldValue'] = $('#' + eleID).val();
         }
         else if (keyId == "progressReportType") {

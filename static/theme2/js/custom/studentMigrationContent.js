@@ -1,8 +1,12 @@
+console.log('content')
 var highSchoolGrade=[];
 highSchoolGrade.push(4);
 highSchoolGrade.push(5);
 highSchoolGrade.push(6);
 highSchoolGrade.push(7);
+var GRADE_FEE_DONE;
+var PROGRESSION_DISCOUNT=0;
+var TAKE_INDIVIDUAL_COURSE=false;
 const discountTimeLimitSettings = getSettingsByTypeAndKey('CONFIGURATION','DISCOUNT_TIME_LIMIT');
 var discountTimeLimitDays = JSON.parse(discountTimeLimitSettings).data.metaValue;
 var SIGNUPTYPE;
@@ -16,7 +20,7 @@ function showSkeleton (isShow, skeletonType){
 	}else if(isShow && skeletonType == "step3"){
 		$(".step-3-skeleton").html(skeletonCourseSelection());
 		$("#divNextSessionCourseChoose").show();
-		$("#courseSubjectDetails, #divNextSession").hide();
+		// $("#courseSubjectDetails, #divNextSession").hide();
 	}else if(isShow && skeletonType == "fee-details-modal"){
 		$(".step-feeDetails-skeleton").show();
 		$(".feeDetailsContentDiv").hide();
@@ -29,6 +33,7 @@ function showSkeleton (isShow, skeletonType){
 }
 
 async function renderMigrationDetailsOptionContent(data) {
+	GRADE_FEE_DONE = data.gradeFeeDone;
 	var payload = {
 		'userId' : USER_ID
 	};  
@@ -47,31 +52,39 @@ async function renderMigrationDetailsOptionContent(data) {
 	var html='';
 	if(data.customPaymentEnabled){
 		html+=
-		'<div id="divNextSessionCourseReview" style="display:'+(data.pageNumberToDisplay==3?'block;':'none;')+'">'
+		'<div id="divNextSessionCourseReview">'
 			+'<div class="full step-4-skeleton skeleton-wrapper"></div>'
 		+'</div>';
 		$('#dashboardContentInHTML').html(html);
 		callForReviewAndPaymentSelection('N');
-	}else{
+	}
+	else{
 		html+=
-		'<div id="divNextSession" style="display:'+(data.pageNumberToDisplay<=1?'block;':'none;')+'">'
-        	+migrationDetailsOptionContent(data)
-		+'</div>'
-		+'<div id="divNextSessionCourseWrapper" style="display:'+(data.pageNumberToDisplay==2?'block;':'none;')+'">'
-				+'<div id="pageHeading"></div>'
-				+'<div class="mb-3 card">'
-					+'<div class="card-body">'
-						+'<div id="courseFilterFormWrapper"></div>'
-						+'<div id="divNextSessionCourseChoose" style="display:'+(data.pageNumberToDisplay==2?'block;':'none;')+'"></div>'
-						+removeAllCorusesModal()
-						html+='<div id="payment-selection-details"></div>'
-					+'</div>'
+		'<input type="hidden" id="userId" name="userId" value="'+data.userId+'">'
+		+'<input type="hidden" id="standardId" name="standardId" value="'+data.standardId+'" min_limit="'+data.minCourseLimitMigration+'" max_limit="'+data.maxCourseLimitMigration+'" upper_band="'+data.upperBandLimitMigration+'">'
+		+'<input type="hidden" id="enrollmentType" name="enrollmentType" value="'+data.enrollmentType+'">'
+		+'<input type="hidden" id="registrationType" name="registrationType" value="'+data.registrationType+'">'
+		+'<input type="hidden" id="courseProviderId" name="courseProviderId" value="'+data.providerId+'">'
+		+'<input type="hidden" id="selectedSubjects" name="selectedSubjects" value="" data-entiresubject="" data-individual="">'
+		+'<input type="hidden" id="payMode" name="payMode" value="'+data.signupCourse.payMode+'" data-paymode="'+data.signupCourse.payMode+'">'
+		+'<input type="hidden" id="controlType" name="controlType" value="">'
+		+'<input type="hidden" id="totalCreditInput" name="totalCreditInput" value="">';
+		if(!GRADE_FEE_DONE || (data.migrationOptionsForImproveGrade != null && data.migrationOptionsForImproveGrade != undefined && data.migrationOptionsForImproveGrade.length>0)){
+			if(MIGRATION_DATA.migrationOptionsForNextGrade.length<1 || !GRADE_FEE_DONE){
+				html+=
+				'<div id="divNextSession" style="display:block">'
+					+migrationDetailsOptionContent(data)
 				+'</div>'
-		+'</div>'
-		+'<div id="divNextSessionCourseReview" style="display:'+(data.pageNumberToDisplay==3?'block;':'none;')+'">'
-			+'<div class="full step-4-skeleton skeleton-wrapper"></div>'
-		+'</div>'
-		+'<div id="addAndRemoveLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
+				+'<div id="payment-selection-details"></div>'
+				+'<div id="courseSelectionWrapper"></div>';
+			}else{
+				html+=getCourseSelectionAndReviewContent()
+			}
+			
+		}else{
+			html+=getCourseSelectionAndReviewContent()
+		}
+		html+='<div id="addAndRemoveLoader" class="loader-wrapper d-flex justify-content-center align-items-center loader-style hide-loader">'
 			// +'<div class="loader primary-border-top-color">';
 				if(SCHOOL_ID == 1){
 					// html+=
@@ -90,29 +103,40 @@ async function renderMigrationDetailsOptionContent(data) {
 				}
 			html+=
 			// '</div>'
-		'</div>';
+		'</div>'
+		+'</div>';
 		$('#dashboardContentInHTML').html(html);
-		if(data.pageNumberToDisplay==2){
+		// if(data.pageNumberToDisplay==2){
+		// 	$("#pageHeading").html(getStudentMigrationHeader(data));
+		// }
+		if(GRADE_FEE_DONE && (data.migrationOptionsForNextGrade != null && data.migrationOptionsForNextGrade != undefined && data.migrationOptionsForNextGrade.length>0)){
 			$("#pageHeading").html(getStudentMigrationHeader(data));
 		}
 		$("#grade").select2({
 			theme:"bootstrap4",
 		})
 		$('#gradeId').val(data.standardId)
-		if(data.pageNumberToDisplay>=2){
+		// if(data.pageNumberToDisplay>=2){
+		// 	getAllCourseDetails('N', '');
+		// }
+
+		if(GRADE_FEE_DONE && (data.migrationOptionsForNextGrade != null && data.migrationOptionsForNextGrade != undefined && data.migrationOptionsForNextGrade.length>0)){
 			getAllCourseDetails('N', '');
 		}
-		if(data.pageNumberToDisplay==3){
-			callForReviewAndPaymentSelection('N', responseData.enrollmentBy, SIGNUPTYPE);
-		}
+		// if(data.pageNumberToDisplay==3){
+		// 	callForReviewAndPaymentSelection('N', responseData.enrollmentBy, SIGNUPTYPE);
+		// }
 	}
 }
 
 function migrationDetailsOptionContent(data) {
+	console.log(data)
+	var chatBaseUrl = (typeof CHAT_URL !== "undefined" && CHAT_URL) ? CHAT_URL : "https://is-chat-react.vercel.app";
+    	var chatSupportUrl = chatBaseUrl + "/onboarding-support?uuid=" + UNIQUEUUID;
 	var studentCredit=data.studentCredit;
 	var disabledAdmission=data.disabledAdmission;
 	var html =
-	'<div class="app-page-title mb-3 py-2">'
+	'<div class="app-page-title mb-3 mt-2 py-2">'
 		+'<div class="page-title-wrapper">'
 			+'<div class="page-title-heading">'
 				+'<div class="page-title-icon">'
@@ -126,133 +150,306 @@ function migrationDetailsOptionContent(data) {
 			html+= '</div>'
 		+'</div>'
 	+'</div>'
-	+'<div class="main-card mb-3 card mx-auto" style="max-width:800px;width:100%">'
-		+'<div class="col-md-12 col-sm-12 col-xs-12">'
-			+'<div class="row">'
-				+'<div class="card-body student-report">'
+	+'<div class="main-card mb-3 mx-auto">'
+		+'<div class="row">'
+			+'<div class="col-xl-9 col-lg-9 col-md-12 col-12 mb-3 mb-xl-0">'
+				+'<div class="card rounded-15 shadow-lg" style="margin:0;">'
 					+'<div class="row">'
-						+'<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 report-head">'
-							if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0 && data.pageNumberToDisplay == 1){
-								html+='<h2 class="text-primary font-weight-bold text-center">Congratulations!</h2>'
-								setTimeout(fireConfetti, 1000);
-								setTimeout(fireConfetti, 3000);
-							}
-							html+='<h4 class="text-center font-weight-semi-bold mb-3">'+data.name+'!</h4>'
-							if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-								html+='<p class="mb-0 font-18 text-center">'
-									+'You have successfully completed <b>'+studentCredit.currentGrade+'</b> with <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b>'
-								+'</p>'
-							}else{
-								html+='<p class="mb-0 font-18 text-center">'
-									+'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b> in <b>'+studentCredit.currentGrade+'</b>'
-								+'</p>'
-							}
-						html+='</div>'
-						+'<div class="mx-auto mb-3">'
-						if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-							html+='<img class="p-3 bg-light-success border border-success" src="'+PATH_FOLDER_IMAGE2+'passed-badge.png" alt="passed_badge" style="width: 130px; height: 130px; object-fit: contain; border-radius: 100px;" />'
-						}else{
-							html+='<img class="p-3 bg-light-danger border border-danger" src="'+PATH_FOLDER_IMAGE2+'failed-badge.png" alt="failed_badge" style="width: 130px; height: 130px; object-fit: contain; border-radius: 100px;" />'
-						}
-						html+='</div>'
-						if(data.registrationType!="ONE_TO_ONE_FLEX"){
-							if(studentCredit.currentGradeId != 7){
-								html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
-									+'<h5 class="text-center">';
-										if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-											html+='You have been <b>Promoted</b> to the Next <b>'+studentCredit.nextGrade+'</b>';
-										}
-									html+=
-									'</h5>'
-								+'</div>';
-							}
-						}
-						html+='<div class="progression-button-wrapper">'
-							if(parseFloat(studentCredit.totalCredit) < studentCredit.minmumCreditLimit  && (studentCredit.withDrawSubject != 0 || studentCredit.incomplteSubject !=0)){
-								html+=
-								'<div class="col text-center">';
-									if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
-										html+='<a class="design-btn" href="javascript:void(0);" onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\''+studentCredit.currentGrade+'\',\'REGISTRATION_REPEAT_GRADE\',\'ONE_TO_ONE\');"> COMPLETE YOUR CREDITS </a>';
-									}else if(studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<=17){
-										html+='<a class="design-btn" href="javascript:void(0);" onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\''+studentCredit.currentGrade+'\',\'REGISTRATION_REPEAT_GRADE\',\'ONE_TO_ONE\');"> COMPLETE YOUR CREDITS </a>';
-									}else{
-										html+='<a class="design-btn bg-primary " href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'complete\');">COMPLETE YOUR CREDITS </a>';
+						+'<div class="card-body student-report">'
+							+'<div class="row">'
+								+'<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 report-head mb-1">'
+									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0 && data.pageNumberToDisplay == 1){
+										// html+='<h2 class="text-primary font-weight-bold text-center">Congratulations!</h2>'
+										// setTimeout(fireConfetti, 1000);
+										// setTimeout(fireConfetti, 3000);
 									}
-									html+='<h6 class="mt-1 font-weight-semi-bold">Re-take a withdrawn/incomplete course or study another course</h6>'
-								+'</div>';
-							}
-							if(data.forcefulRepeatOrImprove == "Y"){
-								html+='<div class="d-flex mx-auto flex-column flex-md-row">'
-									+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 mr-md-3 mr-0 mb-2 mb-md-0" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
-									+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
-								+'</div>'
-							}else {
-								if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
-									html+=
-										'<div class="col text-center">'
-											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
+									// html+='<h4 class="text-center font-weight-semi-bold mb-3">'+data.name+'!</h4>'
+									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+										html+='<p class="mb-0 font-18 text-center">'
+											// +'You have successfully completed <b>'+studentCredit.currentGrade+'</b> with <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b>'
+											// +'<img data-emoji="🎉" alt="🎉" aria-label="🎉" draggable="false" src="https://fonts.gstatic.com/s/e/notoemoji/17.0/1f389/72.png" style="width:25px" loading="lazy">&nbsp;<span class="font-weight-semi-bold">'+studentCredit.currentGrade+' Completed!</span>'
+											// +'<span class="font-weight-semi-bold d-inline-block p-1 px-3 rounded-20 bg-light-success border-success border text-success font-14">'+studentCredit.currentGrade+' - Promoted</span>'
+											+'<span class="font-weight-semi-bold d-inline-block mb-4 px-4 rounded-20 bg-light-success border-success border font-20 text-dark font-weight-bold">Promoted</span>'
+										+'</p>'
+									}else{
+										html+='<p class="font-18 text-center mb-2">'
+											// +'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b> in <b>'+studentCredit.currentGrade+'</b>'
+											+'<span class="font-weight-semi-bold d-inline-block p-1 px-3 rounded-20 bg-light-warning border-warning border text-gray font-14">Not Promoted</span>'
+										+'</p>'
+									}
+								html+='</div>'
+								+'<div class="mx-auto mb-2">'
+								if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+									// html+='<img class="p-3 bg-light-success border border-success" src="'+PATH_FOLDER_IMAGE2+'passed-badge.png" alt="passed_badge" style="width: 130px; height: 130px; object-fit: contain; border-radius: 100px;" />'
+									// html+='<img src="'+PATH_FOLDER_IMAGE2+'pass_icon.png" alt="passed_badge" style="width: 100px; height: 100px; object-fit: contain;" />'
+									html+='<h4 class="font-weight-bold font-26">Very well done!</h4>';
+								}
+								html+='</div>'
+								
+								if(data.registrationType!="ONE_TO_ONE_FLEX"){
+									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+										html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
+											+'<h6 class="text-center font-18 font-weight-semi-bold">';
+												html+='You are successfully promoted to <span class="font-weight-semi-bold">'+studentCredit.nextGrade+'!</span>'
+											+'</h6>'
 										+'</div>';
-								// }else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit && studentCredit.currentGradeId<=6){
-								}else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit){
-									if(studentCredit.currentGradeId<3 
-										|| (studentCredit.currentGradeId==3 && data.cgpaRule == 'Dont Apply') 
-										|| (studentCredit.currentGradeId==3 && studentCredit.avgCumulativeGpa > 2.0 && data.cgpaRule == 'Apply')
-										|| (studentCredit.currentGradeId>3) ){
+									}else{
+										html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
+											+'<h2 class="text-center font-28 font-weight-bold mb-2">'
+												+'Don\'t give up'
+											+'</h2>'
+											+'<h6 class="text-center font-18 font-weight-bold text-muted">'
+												+'Retake your courses and earn your way to the next grade'
+											+'</h6>'
+										+'</div>';
+									}
+								}
+								if(parseFloat(studentCredit.totalCredit) < studentCredit.minmumCreditLimit  && (studentCredit.withDrawSubject != 0 || studentCredit.incomplteSubject !=0)){
+									if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
+										// only for flexy grade
+									}else if(studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<=17){
+										// only for elementry grade
+									}else{
+										// only for middle & high grade 
+									}
+								}
+								if(data.forcefulRepeatOrImprove == "Y"){
+									// only for force improve grade 
+								}else{
+									if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
+										// only for flexy grade
+									}
+									else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit){
+										if(studentCredit.currentGradeId<3 
+											|| (studentCredit.currentGradeId==3 && data.cgpaRule == 'Dont Apply') 
+											|| (studentCredit.currentGradeId==3 && studentCredit.avgCumulativeGpa > 2.0 && data.cgpaRule == 'Apply')
+											|| (studentCredit.currentGradeId>3))
+										{
 											if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-												$.each(data.migrationOptionsForNextGrade, function(k, migrationOption) {
-													html+=
-													'<div class="col text-center">'
-														+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);"'
-														if($.inArray(migrationOption.nextGradeId, [7,9,10,19,20,21])>=0){
-															html+='onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'' + migrationOption.nextGradeName + '\',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+												// only for flexy grade
+												if(data.registrationType=="BATCH" || data.registrationType=="ONE_TO_ONE"){
+													html+=getMigrationCountdownWapper(data);
+												}
+											}
+										}
+									}else if(studentCredit.withDrawSubject == 0 ){
+											if(studentCredit.currentGradeId==17 
+												|| (studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<16)
+												|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Apply' && studentCredit.avgCumulativeGpa>2.0)
+												|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Dont Apply'))
+											{
+												if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+													if(data.registrationType=="BATCH" || data.registrationType=="ONE_TO_ONE"){
+														html+=getMigrationCountdownWapper(data);
+													}
+												}
+											}
+									}else{
+
+									}
+								}
+								html+='<div class="progression-button-wrapper">'
+									if(parseFloat(studentCredit.totalCredit) < studentCredit.minmumCreditLimit  && (studentCredit.withDrawSubject != 0 || studentCredit.incomplteSubject !=0)){
+										html+=
+										'<div class="col text-center">';
+											if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
+												html+='<a class="design-btn" href="javascript:void(0);" onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\'REGISTRATION_REPEAT_GRADE\',\'ONE_TO_ONE\');"> COMPLETE YOUR CREDITS </a>';
+											}else if(studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<=17){
+												html+='<a class="design-btn" href="javascript:void(0);" onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\'REGISTRATION_REPEAT_GRADE\',\'ONE_TO_ONE\');"> COMPLETE YOUR CREDITS </a>';
+											}else{
+												html+='<a class="design-btn bg-primary " href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'complete\');">COMPLETE YOUR CREDITS </a>';
+											}
+											html+='<h6 class="mt-1 font-weight-semi-bold">Re-take a withdrawn/incomplete course or study another course</h6>'
+										+'</div>';
+									}
+									if(data.forcefulRepeatOrImprove == "Y"){
+										html+='<div class="d-flex mx-auto flex-column flex-md-row">'
+											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15 mr-md-3 mr-0 mb-2 mb-md-0" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">1 Continue in '+studentCredit.currentGrade+'</a>'
+											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15 mt-2" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\');">';
+											if(data.registrationType!="ONE_TO_ONE_FLEX"){
+												if(studentCredit.currentGradeId != 7 && data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+													html+='<i class="fa fa-rocket mr-2"></i>';
+												}
+											}
+											html+='2 Continue in '+studentCredit.nextGrade+'</a>'
+										+'</div>'
+									}
+									else {
+										if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
+											html+=
+												'<div class="col text-center">'
+													if(studentCredit.currentLearningProgram == "ONE_TO_ONE_FLEX"){
+														if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+															html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callForStudentNextSession(' + studentCredit.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + studentCredit.currentLearningProgram + '\');">'
+															html+='<i class="fa fa-rocket mr-2"></i>';
 														}else{
-															html+='onclick="callChoiceForStudentModel();"';
+															html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">'
 														}
-														html+='>Enroll Now in '+studentCredit.nextGrade+'</a>'
+														// if(data.registrationType!="ONE_TO_ONE_FLEX"){
+															// if(studentCredit.currentGradeId != 7 && data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+															// 	html+='<i class="fa fa-rocket mr-2"></i>';
+															// }
+														// }
+														html+='3 Continue in '+(studentCredit.currentLearningProgram == "ONE_TO_ONE_FLEX" ? studentCredit.currentGrade:studentCredit.nextGrade)+'</a>';
+													}else{
+														html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\')">'
+														if(data.registrationType!="ONE_TO_ONE_FLEX"){
+															if(studentCredit.currentGradeId != 7 && data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+																html+='<i class="fa fa-rocket mr-2"></i>';
+															}
+														}
+														html+='4 Continue in '+studentCredit.nextGrade+'</a>';
+													}
+													// +'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\')"><i class="fa fa-rocket mr-2"></i>5 Continue in '+studentCredit.nextGrade+'</a>'
+												html+='</div>';
+										// }else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit && studentCredit.currentGradeId<=6){
+										}
+										else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit){
+											
+											if(studentCredit.currentGradeId<3 
+												|| (studentCredit.currentGradeId==3 && data.cgpaRule == 'Dont Apply') 
+												|| (studentCredit.currentGradeId==3 && studentCredit.avgCumulativeGpa > 2.0 && data.cgpaRule == 'Apply')
+												|| (studentCredit.currentGradeId>3) ){
+													if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+														$.each(data.migrationOptionsForNextGrade, function(k, migrationOption) {
+															
+															html+=
+															'<div class="col text-center mt-2">'
+																+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);"'
+																if($.inArray(migrationOption.nextGradeId, [9,10,19,20,21])>=0){
+																	html+='onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+																}else{
+																	if(migrationOption.isEligibleForMigration === 'Y') {
+																		if(migrationOption.learningProgram == "DUAL_DIPLOMA"){
+																			html+='onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+																		}else{
+																			html+='onclick="submitCourse(\'' + data.enrollmentBy + '\',\'REGISTRATION_NEXT_GRADE\');"';
+																		}
+																	}else{
+																		html+='onclick="submitCourse(\'' + data.enrollmentBy + '\',\'REGISTRATION_NEXT_GRADE\');"';
+																	}
+																}
+																html+='>'
+																
+																// html+='Continue in '+studentCredit.nextGrade+'</a>'
+																html+='Re-Enroll Today Before Too Late</a>'
+															+'</div>';
+														});
+													}
+													else if(data.migrationOptionsForImproveGrade!=undefined && data.migrationOptionsForImproveGrade.length>0){
+														html+='<div class="col text-center mt-3">';
+															$.each(data.migrationOptionsForImproveGrade, function(k, migrationOption) {
+																html+=
+																'<div class="col text-center mt-2">'
+																	+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);"'
+																		// if(migrationOption.learningProgram == "DUAL_DIPLOMA" || migrationOption.learningProgram == "ONE_TO_ONE_FLEX"){
+																		// 	html+='onclick="callForStudentNextSession(' + migrationOption.currentGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+																		// }
+																		// // if($.inArray(migrationOption.currentGradeId, [9,10,19,20,21])>=0){
+																		// // 	html+='onclick="callForStudentNextSession(' + migrationOption.currentGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+																		// // }
+																		// // html+='onclick="callForStudentNextSession(' + migrationOption.currentGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
+																		// else{
+																		// 	if($.inArray(migrationOption.currentGradeId, [1,2,3,4,5,6,7,9,10,19,20,21])>=0){
+																		// 		html+='onclick="callChoiceForStudentModelRepeaters(\'improve\');"';
+																		// 	}else{
+																		// 		html+='onclick="submitCourse(\'' + data.enrollmentBy + '\', \'REGISTRATION_REPEAT_GRADE\');"';
+																		// 	}
+																		// }
+																		if($.inArray(migrationOption.currentGradeId, [1,2,3,4,5,6,7,9,10,19,20,21])>=0){
+																			html+='onclick="callChoiceForStudentModelRepeaters(\'improve\');"';
+																		}else{
+																			html+='onclick="submitCourse(\'' + data.enrollmentBy + '\', \'REGISTRATION_REPEAT_GRADE\');"';
+																		}
+																	html+='>'
+																	if(data.registrationType!="ONE_TO_ONE_FLEX"){
+																		if(studentCredit.currentGradeId != 7 && data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+																			html+='<i class="fa fa-rocket mr-2"></i>';
+																		}
+																	}
+																	html+='Continue in '+studentCredit.nextGrade+'</a>'
+																+'</div>';
+															});
+														html+='</div>';
+													}else{
+														html+='<div class="col text-center mt-3">'
+															+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">8 Continue in '+studentCredit.currentGrade+'</a>'
+														+'</div>';
+													}
+											}
+										}
+										else if(studentCredit.withDrawSubject == 0 ){
+											if(studentCredit.currentGradeId==17 
+												|| (studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<16)
+												|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Apply' && studentCredit.avgCumulativeGpa>2.0)
+												|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Dont Apply')){
+											if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+												html+=
+													'<div class="col text-center">'
+														+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15 mt-2" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\');">'
+														if(data.registrationType!="ONE_TO_ONE_FLEX"){
+															if(studentCredit.currentGradeId != 7 && data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+																html+='<i class="fa fa-rocket mr-2"></i>';
+															}
+														}
+														html+='9 Continue in '+studentCredit.nextGrade+'</a>'
 													+'</div>';
-												});
+											}
 											}else{
 												html+='<div class="col text-center mt-3">'
-													+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
+													+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">10 Continue in '+studentCredit.currentGrade+'</a>'
 												+'</div>';
 											}
-									}
-								}else if(studentCredit.withDrawSubject == 0 ){
-									if(studentCredit.currentGradeId==17 
-										|| (studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<16)
-										|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Apply' && studentCredit.avgCumulativeGpa>2.0)
-										|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Dont Apply')){
-									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-										html+=
-											'<div class="col text-center">'
-												+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2" href="javascript:void(0);" onclick="callChoiceForStudentModel();">Enroll Now in '+studentCredit.nextGrade+'</a>'
+										}else{
+											html+=+'<div class="col text-center mt-3">'
+												+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">11 Continue in '+studentCredit.currentGrade+'</a>'
 											+'</div>';
+										}
 									}
-									}else{
-										html+='<div class="col text-center mt-3">'
-											+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
-										+'</div>';
-									}
-								}else{
-									html+=+'<div class="col text-center mt-3">'
-										+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Repeat or Improve Your Grade</a>'
-									+'</div>';
-								}
-							}
-							html+=
-						'</div>'
-					+'</div>';
-					if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-						if($.inArray(data.migrationOptionsForNextGrade[0].learningProgram, ['ONE_TO_ONE','BATCH'])>=0){
-							html+='<p class="mt-1 mb-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Progression Discount available for a limited time! Only '+ discountTimeLimitDays +' days left!</p>';
-						}
-					}
-				html+='</div>'
+									html+=
+								'</div>'
+								// +'<div class="w-100 text-center font-weight-semi-bold mb-2"><img src="'+PATH_FOLDER_IMAGE2+'shield-svg.svg" width="14" /> Trusted Online School Since 2014</div>'
+							+'</div>';
+							// if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+							// 	if($.inArray(data.migrationOptionsForNextGrade[0].learningProgram, ['ONE_TO_ONE','BATCH'])>=0){
+							// 		html+='<p class="mt-1 mb-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Re-Enrollment Discount available for a limited time! Only '+ discountTimeLimitDays +' days left!</p>';
+							// 	}
+							// }
+						html+='</div>'
+					+'</div>'
+				+'</div>'
 			+'</div>'
+			+'<div class="col-xl-3 col-lg-3 col-md-12 col-12 d-flex flex-column">';
+				html+=
+				`<div class="support-side-card shadow-lg">
+					<div class="d-flex align-items-center mb-3">
+						${/*<i class="fa fa-headphones support-side-icon mr-3 fa-1x"></i>*/''}
+						<h4 class="support-side-heading m-0 font-weight-bold font-16">Need Support?</h4>
+					</div>
+					<a target="_blank" href="${chatSupportUrl}" class="support-side-item support-side-chat-primary scale-animate">
+						<i class="fa fa-comments support-side-icon"></i>
+						<div class="support-side-label m-0 font-weight-semi-bold font-11">Live Chat with School Administration</div>
+					</a>
+					<div class="support-side-item">
+						<i class="fa fa-phone support-side-icon fa-1x" style="transform:none;"></i>
+						<div>
+							<div class="support-side-label font-weight-semi-bold">Phone Support</div>
+							<div class="support-side-value font-size-md ">+15854990662</div>
+						</div>
+					</div>
+					<div class="support-side-item">
+						<i class="fa fa-envelope support-side-icon fa-1x"></i>
+						<div>
+							<div class="support-side-label font-weight-semi-bold">Email Support</div>
+							<div class="support-side-value font-size-md email-support-value"><a href="mailto:admin.support@internationalschooling.org" style="color:inherit;text-decoration:none;white-space:normal;word-break:break-word">admin.support@internationalschooling.org</a></div>
+						</div>
+					</div>
+				</div>`;
+			html+='</div>'
 		+'</div>'
 	+'</div>';
 	html+='<div>'
-		// +'<p class="my-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Progression Discount available for a limited time!</p>'
+		// +'<p class="my-3 font-weight-semi-bold text-center font-italic font-18 blink text-success">Re-Enrollment Discount available for a limited time!</p>'
 	+'</div>'
 	html+='<div class="modal fade fade-scale" tabindex="-1" role="dialog" id="choiceForStudentModel">'
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
@@ -279,7 +476,7 @@ function migrationDetailsOptionContent(data) {
 									'<div class="mb-2 text-center">'
 										+ '<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choiceBatch" data-dismiss="modal" '
 											+ (migrationOption.learningProgram == 'BATCH' && data.matchSubjectCount > 0 ? 'disabled ' : '')
-											+ 'onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'' + migrationOption.nextGradeName + '\',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');">'
+											+ 'onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');">'
 											+ migrationOption.learningProgramLabel
 										+ '</button>';
 			
@@ -291,7 +488,7 @@ function migrationDetailsOptionContent(data) {
 						});
 						html+=
 					'</div>'
-					+'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
+					// +'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
 				+'</div>'
 				+'<div class="modal-footer"><button type="button" class="btn btn-danger  pr-4 pl-4" data-dismiss="modal">Close</button></div>'
 				+'<div style="clear: both"></div>'
@@ -325,7 +522,7 @@ function migrationDetailsOptionContent(data) {
 										html+=
 										'<div class="mb-2 text-center">'
 											+'<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choice'+migrationOption.learningProgram+'" data-dismiss="modal" '
-											+' onclick="callForStudentNextSession('+migrationOption.currentGradeId+',\''+migrationOption.currentGradeName	+'\',\'REGISTRATION_REPEAT_GRADE\',\''+migrationOption.learningProgram+'\');">'
+											+' onclick="callForStudentNextSession('+migrationOption.currentGradeId+',\'REGISTRATION_REPEAT_GRADE\',\''+migrationOption.learningProgram+'\');">'
 												+migrationOption.learningProgramLabel
 											+'</button>';
 											// if (data.matchSubjectCount > 0 && migrationOption.learningProgram == 'BATCH') {
@@ -338,7 +535,7 @@ function migrationDetailsOptionContent(data) {
 							'</div>'
 						+'</div>'
 					+'</div>'
-					+'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
+					// +'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
 				+'</div>'
 				+'<div class="modal-footer">'
 					+'<button type="button" class="btn btn-danger  pr-4 pl-4" onclick="callChoiceForStudentModelRepeatersPAndCBack(\'improve\');">Back</button>'
@@ -352,7 +549,7 @@ function migrationDetailsOptionContent(data) {
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
 			+'<div class="modal-content">'
 				+'<div class="modal-header pt-2 pb-2 bg-primary text-center text-white">'
-					+'<h5 class="modal-title" id="myLargeModalLabel">Learning Programs &nbsp;|&nbsp; Improve Past Grades</h5>'
+					+'<h5 class="modal-title" id="myLargeModalLabel">12 Continue in '+studentCredit.currentGrade+'</h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body">'
@@ -361,19 +558,58 @@ function migrationDetailsOptionContent(data) {
 							+'<div class="d-flex justify-content-center flex-wrap">';
 								if(studentCredit.takeIndividualButton == 'Y'){
 									html+=
-									'<button type="button" class="send btn btn-primary  btn-lg text-uppercase text-center mr-2" id="choiceIndividualCourseImprove" data-dismiss="modal" '
-										+'onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\''+studentCredit.currentGrade+'\',\'REGISTRATION_IMPORVE_GRADES\',\''+data.registrationType+'\');">'
-										+'Take an individual course'
-									+'</button>';
+									'<div class="mb-2 text-center">'
+										+'<button type="button" class="send btn btn-primary  btn-lg text-uppercase text-center mr-2" id="choiceIndividualCourseImprove" data-dismiss="modal" '
+											+'onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\'REGISTRATION_IMPORVE_GRADES\',\''+data.registrationType+'\');">'
+											+'Take an individual course'
+										+'</button>'
+									+'</div>';
 								}
-								html+=
-								'<button type="button" class="send btn btn-primary ml-1  btn-lg text-uppercase text-center mr-2" id="choiceRepeatEntire" data-dismiss="modal" onclick="callChoiceForStudentModelRepeatersPAndC();">'
-									+'Repeat the entire grade'
-								+'</button>'
-							+'</div>'
+								// html+=
+								// '<button type="button" class="send btn btn-primary ml-1  btn-lg text-uppercase text-center mr-2" id="choiceRepeatEntire" data-dismiss="modal" onclick="callChoiceForStudentModelRepeatersPAndC();">'
+								// 	+'Repeat the entire grade'
+								// +'</button>'
+								$.each(data.migrationOptionsForImproveGrade, function(k, migrationOption){
+									
+									var displayFlag=false;
+									if (migrationOption.isEligibleForMigration === 'Y') {
+										if(migrationOption.learningProgram=='DUAL_DIPLOMA'){
+											if(jQuery.inArray(studentCredit.currentGradeId, highSchoolGrade) !== -1) {
+												displayFlag=true;
+											}
+										}else{
+											displayFlag=true;
+										}
+									}
+									if(displayFlag){
+										html+=
+										'<div class="mb-2 text-center">';
+											if(migrationOption.learningProgram=='DUAL_DIPLOMA' || migrationOption.learningProgram == 'ONE_TO_ONE_FLEX'){
+												html+='<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choice'+migrationOption.learningProgram+'" data-dismiss="modal" '
+													+' onclick="callForStudentNextSession('+migrationOption.currentGradeId+',\'REGISTRATION_REPEAT_GRADE\',\''+migrationOption.learningProgram+'\');">'
+														+'Repeat the entire grade'
+													+'</button>';
+											}else{
+												html+='<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choice'+migrationOption.learningProgram+'"" '
+												+' onclick="callForStudentNextSession('+studentCredit.currentGradeId+',\'REGISTRATION_REPEAT_GRADE\',\''+data.registrationType+'\');">'
+													+'Repeat the entire grade'
+												+'</button>';
+											}
+											// +'<button type="button" class="send btn btn-primary mb-2 btn-lg text-uppercase text-center mr-2" id="choice'+migrationOption.learningProgram+'" data-dismiss="modal" '
+											// +' onclick="callForStudentNextSession('+migrationOption.currentGradeId+',\'REGISTRATION_REPEAT_GRADE\',\''+migrationOption.learningProgram+'\');">'
+											// 	+'Repeat the entire grade'
+											// +'</button>';
+											
+											// if (data.matchSubjectCount > 0 && migrationOption.learningProgram == 'BATCH') {
+											// 	html += '<br/>Not eligible for this program';
+											// }
+										html += '</div>';
+									}
+								});
+							html+='</div>'
 						+'</div>'
 					+'</div>'
-					+'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
+					// +'<div><span>If you wish to change your learning program, you can reach out to us at <a href="mailto:'+data.emailAccountSupport+'"> '+data.emailAccountSupport+'</a></span></div>'
 				+'</div>'
 				+'<div class="modal-footer"><button type="button" class="btn btn-danger  pr-4 pl-4" data-dismiss="modal">Close</button></div>'
 				+'<div style="clear: both"></div>'
@@ -383,39 +619,66 @@ function migrationDetailsOptionContent(data) {
 	return html;
 }
 
+function getCourseSelectionAndReviewContent(){
+	var html=
+		'<div id="divNextSessionCourseWrapper" style="display:block">'
+			+'<div id="pageHeading"></div>'
+			+'<div class="mb-3 card">'
+				+'<div class="card-body">'
+					+'<div id="courseFilterFormWrapper"></div>'
+					+'<div id="divNextSessionCourseChoose" style="display:block"></div>'
+					+removeAllCorusesModal()
+					+'<div id="payment-selection-details"></div>'
+				+'</div>'
+			+'</div>'
+		+'</div>'
+		+'<div id="divNextSessionCourseReview" style="display:none">'
+			+'<div class="full step-4-skeleton skeleton-wrapper"></div>'
+		+'</div>';
+	return html;
+}
+
 
 function getStudentMigrationHeader(csr){
 	var html=
-	'<input type="hidden" id="userId" name="userId" value="'+csr.userId+'">'
-	+'<input type="hidden" id="standardId" name="standardId" value="'+csr.standardId+'" min_limit="'+csr.minCourseLimitMigration+'" max_limit="'+csr.maxCourseLimitMigration+'" upper_band="'+csr.upperBandLimitMigration+'">'
-	+'<input type="hidden" id="enrollmentType" name="enrollmentType" value="'+csr.enrollmentType+'">'
-	+'<input type="hidden" id="registrationType" name="registrationType" value="'+csr.registrationType+'">'
-	+'<input type="hidden" id="courseProviderId" name="courseProviderId" value="'+csr.courseProviderId+'">'
-	+'<input type="hidden" id="selectedSubjects" name="selectedSubjects" value="'+csr.selectedSubjectsAsString+'">'
-	+'<input type="hidden" id="payMode" name="payMode" value="'+csr.paymentMode+'" data-paymode="'+csr.paymentMode+'">'
-	+'<input type="hidden" id="controlType" name="controlType" value="">'
-	+'<input type="hidden" id="totalCreditInput" name="totalCreditInput" value="'+csr.totalCredit+'">'
-    +'<div class="app-page-title mb-3 py-2">'
+	'<div class="app-page-title mb-3 mt-2 py-2">'
         +'<div class="page-title-wrapper">'
             +'<div class="page-title-heading w-100">'
                 +'<div class="page-title-icon">'
                     +'<i class="fa fa-book text-primary"> </i>'
                 +'</div>'
-                +'<div class="flex-grow-1">'
-                    +csr.enrollmentTypeString
-                    +'<span class="text-primary d-inline-block ml-1">';
+                +'<div class="mx-auto text-center">'
+                    // +csr.enrollmentTypeString
+                    // +'<span class="text-primary d-inline-block ml-1">';
+					// if(csr.registrationType=='ONE_TO_ONE_FLEX'){
+					// 	html+=
+					// 	`<select class="form-control" name="gradeId" id="gradeId" onchange="switchGrade()" `+(csr.enrollmentType=='REGISTRATION_IMPORVE_GRADES'?'disabled':'')+`>`
+					// 		+getStandardContentForFlexy()
+					// 	html+=`</select>`;
+					// }else{
+					// 	html+=' ( '+csr.standardName+' )';
+					// }
 					if(csr.registrationType=='ONE_TO_ONE_FLEX'){
-						html+=
-						`<select class="form-control" name="gradeId" id="gradeId" onchange="switchGrade()" `+(csr.enrollmentType=='REGISTRATION_IMPORVE_GRADES'?'disabled':'')+`>`
-							+getStandardContentForFlexy()
-						html+=`</select>`;
+						html+=`<div class="w-100"><span class="d-inline-block bg-primary px-2 font-size-lg rounded text-white">${csr.registrationTypeString}</span></div>`;
 					}else{
-						html+=' ( '+csr.standardName+' )';
+						html+=`<div class="w-100"><span class="d-inline-block bg-primary px-2 font-size-lg rounded text-white">${csr.registrationTypeString}</span></div>`;
 					}
-				html+=
-                    '</span>'
-                    +' - '
-                    +csr.registrationTypeString
+					+'<span class="text-primary d-inline-block ml-1">';
+						if(csr.registrationType=='ONE_TO_ONE_FLEX'){
+							html+=
+							`<div class="d-inline-flex align-items-center">
+							<label class="m-0 font-16 font-weight-semi-bold">Course Selection For</label>&nbsp;
+							<select class="form-control" style="width:fit-content !important" name="gradeId" id="gradeId" onchange="switchGrade()" `+(csr.enrollmentType=='REGISTRATION_IMPORVE_GRADES'?'disabled':'')+`>`
+								+getStandardContentForFlexy()
+							html+=`</select>
+							</div>`;
+						}else{
+							html+=`<label class="m-0 font-16 font-weight-semi-bold">Select Your Courses for&nbsp;</label><b>${csr.standardName}</b>`;
+						}
+					html+='</span>'
+                +'</div>'
+				+'<div class="page-title-icon opacity-0">'
+                    +'<i class="fa fa-book text-primary"> </i>'
                 +'</div>'
             +'</div>'
         +'</div>'
@@ -948,10 +1211,9 @@ function getCourseSelectionContent(csr){
 						'</div>'
 					+'</div>'
 				+'</div>'
-				
-				+'<div class="full mt-2">'
-					+'<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(1);">Back</button>'
-					+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:var(--pc) !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse(\'' + csr.enrollmentBy + '\');">'
+				+'<div class="full mt-2">';
+					html+='<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:var(--pc) !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse(\'' + csr.enrollmentBy + '\');">'
+					+'<div class="mb-2"><button type="button" class="btn theme-bg text-white pl-4 pr-4" onclick="displaySection1();">Back</button></div>'
 				+'</div>'
 				+noTeacherAssistanceAvailableModal(csr)
 				+apCourseSelectionWarningModal()
@@ -1186,8 +1448,8 @@ function migrationCourseSelection(csr){
 				+'</div>'
 			+'</div>'
 			+'<div class="full mt-2">'
-				+'<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(1);">Back</button>'
 				+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:#007fff !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse();">'
+				+'<div class="mb-2"><button type="button" class="btn theme-bg text-white pl-4 pr-4" onclick="displaySection1();">Back</button></div>'
 			+'</div>'
 		+'</div>';
 	return html;
@@ -1338,7 +1600,7 @@ function changeSelectedGradeModal(){
 	var html = 
 		'<div class="modal fade" id="changeSelectedGrade">'
 			+'<div class="modal-dialog modal-md modal-dialog-centered" role="document" >'
-				+'<div class="modal-content text-center">'
+				+'<div class="modal-content rounded-10 text-center">'
 					+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
 					+'<div class="modal-body delete-modal">'
 						+'<i aria-hidden="true" class="fa fa-exchange text-white primary-bg white-txt-color theme-bg" style="border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
@@ -1433,23 +1695,90 @@ function logoutModalLogout(data){
 	return html;	
 }
 
-function renderPaymentMode(){
-	$('#payment-selection-details').html(getPaymentModeContent());
+function openStudentPaymentModalSafely(){
+	var $paymentModal = $("#studentPaymentModal");
+	if($paymentModal.length === 0){
+		return;
+	}
+	// Clear stale modal artifacts (common after refresh/partial reloads on some UAT setups).
+	$(".modal-backdrop").remove();
+	$("body").removeClass("modal-open").css("padding-right", "");
+	$paymentModal.removeClass("show in").hide();
+	$paymentModal.removeData("bs.modal");
+
+	$paymentModal.modal({
+		backdrop: "static",
+		keyboard: false,
+		show: false
+	});
+	// Support both Bootstrap 4(.show) and Bootstrap 3(.in) modal visible classes.
+	var $otherOpenModals = $(".modal.show, .modal.in").not($paymentModal);
+	if($otherOpenModals.length > 0){
+		var remaining = $otherOpenModals.length;
+		var showPaymentModal = function(){
+			if(remaining <= 0){
+				window.setTimeout(function(){
+					$paymentModal.modal("show");
+				}, 0);
+			}
+		};
+		$otherOpenModals.one("hidden.bs.modal", function(){
+			remaining--;
+			showPaymentModal();
+		});
+		$otherOpenModals.modal("hide");
+		// Fallback for environments where hidden event may not reliably fire.
+		window.setTimeout(function(){
+			if(remaining > 0){
+				remaining = 0;
+			}
+			showPaymentModal();
+		}, 400);
+		return;
+	}
+	window.setTimeout(function(){
+		$paymentModal.modal("show");
+	}, 0);
+}
+
+async function renderPaymentMode(){
+	console.log("Modal open function called")
+	$("#studentPaymentModal").remove();
+	$("body").append(await getPaymentModeContent());
 	if(SHOW_PAYMENT_OPTION == 'Y'){
-		$("#studentPaymentModal").modal("show");
+		openStudentPaymentModalSafely();
 	}
 }
 
-function getPaymentModeContent(cdrDTO){
+function repeatGradeClick(enrollmentBy, enrollmentType, standardId, registrationType, courseProviderId) {
+    $('#choiceForStudentModelRepeaters').one('hidden.bs.modal', function () {
+		if(MIGRATION_DATA.registrationType != "DUAL_DIPLOMA"  || MIGRATION_DATA.registrationType != "ONE_TO_ONE_FLEX"){
+			if(GRADE_FEE_DONE && MIGRATION_DATA.migrationOptionsForNextGrade.length<1){
+				if($("#divNextSessionCourseChoose").length<1){
+					$("#courseSelectionWrapper").html(getCourseSelectionAndReviewContent());
+				}
+				// $('#gradeId').val(standardId);
+				// $('#registrationType').val(registrationType);
+				// $('#courseProviderId').val(courseProviderId);
+				displaySection2();
+				getAllCourseDetails('N', '');
+			}else{
+				submitCourse(enrollmentBy, enrollmentType);
+			}
+		}
+	}).modal('hide');
+}
+
+async function getPaymentModeContent(cdrDTO){
 	var html=
-	'<div class="modal fade theme-modal fade-scale max-size-modal" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-		+'<div class="modal-dialog modal-xl" role="document">'
-			+'<div class="modal-content">'
-				+'<div class="modal-header py-2 primary-bg white-txt-color">'
-					+'<h5 class="modal-title" style=" margin-left: 10px;">Fee Details</h5>'
-					+'<button type="button" class="close" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" style="color: #fff;">&times;</span></button>'
+	'<div class="modal fade max-size-modal" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
+		+'<div class="modal-dialog modal-md" role="document" style="max-width:550px">'
+			+'<div class="modal-content rounded-20">'
+				+'<div class="modal-header py-2 rounded-20 bg-white text-dark">'
+					+'<h5 class="modal-title payment-option-modal-title" style=" margin-left: 10px;">Payment Option</h5>'
+					+'<button type="button" class="close opacity-10" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-primary d-inline-block bg-light-primary rounded-circle" style="width:25px;height:25px;line-height:20px">&times;</span></button>'
 				+'</div>'
-				+'<div class="modal-body" style="display:inline-block;width:100%;">'
+				+'<div class="modal-body pt-1" style="display:inline-block;width:100%;">'
 					+skeletonFeeDetails()
 				+'</div>'
 			+'</div>'
@@ -1458,197 +1787,299 @@ function getPaymentModeContent(cdrDTO){
 	return html;
 }
 
-function paymentModalContentWithData(cdrDTO){
+async function paymentModalContentWithData(cdrDTO){
+	debugger;
 	$(".feeDetailsContentDiv").remove();
 	var html = 
-	'<div class="col-md-12 col-sm-12 col-xs-12 feeDetailsContentDiv">'
-		+'<div class="label-floating feePayMode">'
-			+'<div class="col-md-12 col-sm-12 col-xs-12 p-0">'
-				+'<div class="payment-item">';
+	`<div class="col-md-12 col-sm-12 col-xs-12 p-0 feeDetailsContentDiv">
+		<div class="label-floating feePayMode">
+			<div class="col-md-12 col-sm-12 col-xs-12 p-0">
+				<div class="text-dark mb-2 font-weight-semi-bold">You have to choose from ${getPaymentOptionCount(cdrDTO)} option</div>
+				<div class="payment-item flex-column">`;
 				if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee != null && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 					html+=
-					'<div class="radio radio-payment-option white-txt-color">'
-						+'<input id="pay-registration" value="1" type="radio" name="payModeCheckboxes">'
-						+'<label for="pay-registration" class="primary-border-color" onclick="displayScholorshipDetails(\'dtl-registration\');">'
-							+'<span class="circle primary-border-color ml-0"></span>'
-							+'<span class="check primary-bg-checked"></span>'
-							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px" id="payFive"> <b> Reserve an Enrollment Seat</b><br>'
-								+'('+cdrDTO.enrollmentFee.enrollmentFeeString+')'
-							+'</span>'
-						+'</label>'
-					+'</div>';
+					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
+						<input id="pay-registration" value="1" type="radio" name="payModeCheckboxes">
+						<label for="pay-registration" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-registration\');">
+							<div class="d-flex align-items-center">
+								<span class="circle border ml-0 checkbox-border" style="top:inherit"></span>
+								<span class="check" style="top:inherit"></span>
+								<div class="ml-3" id="payFive"> 
+									<b class="text-dark d-block ml-2 font-weight-semi-bold"> Reserve an Enrollment Seat</b>
+								</div>
+							</div>
+							<div class="text-right">
+								<div class="d-flex align-items-center justify-content-end text-dark">
+									<div class="font-weight-bold font-20 amount">${cdrDTO.enrollmentFee.enrollmentFeeString}</div>
+								</div>
+							</div>
+						</label>
+					</div>`;
 				}
 				if(cdrDTO.oneTimePayment!=''){
 					html+=
-					'<div class="radio radio-payment-option white-txt-color">'
-						+'<input id="pay-one" value="1" type="radio" name="payModeCheckboxes">'
-						+'<label for="pay-one" class="primary-border-color" onclick="displayScholorshipDetails(\'dtl-one\');">'
-							+'<span class="circle primary-border-color ml-0"></span>'
-							+'<span class="check primary-bg-checked"></span>'
-							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px" id="payOne">';
-								//+'<b>'+cdrDTO.oneTimePayment.paymentMode+'</b>';
-								if(cdrDTO.oneTimePayment.paymentOptionDiscount>0){
-									html+=
-									'<b>Pay one time & save '
-									+cdrDTO.oneTimePayment.paymentOptionDiscountString+'</b><br>';
-								}else{
-									html+='<b>Pay one time</b><br>';
-								}
-								html+= 
-								cdrDTO.oneTimePayment.payableFeeString
-							+'</span>'
-						+'</label>'
-					+'</div>';
+					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
+						<input id="pay-one" value="1" type="radio" name="payModeCheckboxes">
+						<label for="pay-one" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-one\');">
+							<div class="d-flex align-items-center">
+								<span class="circle border ml-0 checkbox-border" style="top:inherit"></span>
+								<span class="check" style="top:inherit"></span>
+								<div class="ml-3" id="payOne">`;
+									if(cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
+										html+=`<div class="text-dark d-block ml-2 font-weight-semi-bold">Pay one time & <b class="text-success font-weight-semi-bold">save ${cdrDTO.oneTimePayment.paymentOptionDiscountString}</b></div>`;
+									}else{
+										html+=`<b class="text-dark d-block ml-2">Pay one time</b>`;
+									}
+									html+=`<div class="text-muted small ml-2 font-12">Best value option</div>
+								</div>
+							</div>
+							<div class="text-right">
+								<div class="d-flex align-items-center justify-content-end text-dark">
+									<div class="font-weight-bold font-20 amount">${cdrDTO.oneTimePayment.payableFeeString}</div>`;
+									// if(cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
+									// 	html+=`<div class="badge ml-2 bg-success rounded-20 font-normal text-capitalize text-white">Save ${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}</div>`;
+									// }
+								html+=`</div>`;
+								// if(cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
+								// 	html+=`<div class="old-price font-12 text-dark">${cdrDTO.courseFeeString}</div>`;
+								// }
+							html+=`</div>
+						</label>
+					</div>`;
 				}
 				if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails!=''){
 					html+=
-					'<div class="radio radio-payment-option white-txt-color">'
-						+'<input id="pay-three" value="2" type="radio" name="payModeCheckboxes">'
-						+'<label for="pay-three" class="primary-border-color" onclick="displayScholorshipDetails(\'dtl-three\');">'
-							+'<span class="circle primary-border-color ml-0"></span>'
-							+'<span class="check primary-bg-checked"></span>'
-							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px">'
-								+'<b>'
-								// +cdrDTO.monthlyFeeDetails.paymentMode;
-								// if(cdrDTO.schoolId==5){
-								// 	html+='(4 Installments, every 3 months)';
-								// }else{
-									html+='Pay in easy installments';
-								// }
-								html+='</b><br>'+cdrDTO.monthlyFeeDetails.payableFeeString
-							+'</span>'
-						+'</label>'
-					+'</div>';
+					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
+						<input id="pay-three" value="2" type="radio" name="payModeCheckboxes">
+						<label for="pay-three" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-three\');">
+							<div class="d-flex align-items-center">
+								<span class="circle border ml-0 checkbox-border" style="top:inherit"></span>
+								<span class="check" style="top:inherit"></span>
+								<div class="ml-3">
+									<b class="text-dark d-block ml-2 font-weight-semi-bold">
+										${/*
+											${cdrDTO.monthlyFeeDetails.paymentMode}`;
+											if(cdrDTO.schoolId==5){
+												html+=`(4 Installments, every 3 months)`;
+											}else{
+												html+=`Pay in easy installments`;
+											}	
+										*/''}
+										Pay in easy installments
+									</b>
+									<div class="text-muted small ml-2 font-12">Flexible payment plan</div>
+								</div>
+							</div>
+							<div class="text-right">
+								<div class="d-flex align-items-center justify-content-end text-dark">
+									<div class="font-weight-bold font-20 amount">${cdrDTO.monthlyFeeDetails.payableFeeString}</div>
+								</div>
+								<div class="text-muted small ml-2 font-12">Monthly payments available</div>
+							</div>
+						</label>
+					</div>`;
 				}
 				if(cdrDTO.customPaymentEnabled!=null && cdrDTO.customPaymentEnabled!=''){
 					html+=
-					'<div class="radio radio-payment-option white-txt-color">'
-						+'<input id="pay-custom" value="5" type="radio" name="payModeCheckboxes">'
-						+'<label for="pay-custom" class="primary-border-color" onclick="displayScholorshipDetails(\'dtl-custom\');">'
-							+'<span class="circle primary-border-color ml-0"></span>'
-							+'<span class="check primary-bg-checked"></span>'
-							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px">'
-								+'<b>Customized plan (Pay in easy installments)</b> <br>'
-								+paymentCalculationResponse.paymentDetails.totalPayableAmountString
-							+'</span>'
-						+'</label>'
-					+'</div>';
+					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
+						<input id="pay-custom" value="5" type="radio" name="payModeCheckboxes">
+						<label for="pay-custom" class="primary-border-color border rounded-10" onclick="displayScholorshipDetails(\'dtl-custom\');">
+							<span class="circle primary-border-color ml-0"></span>
+							<span class="check"></span>
+							<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px">
+								<b>Customized plan (Pay in easy installments)</b><br>
+								${paymentCalculationResponse.paymentDetails.totalPayableAmountString}
+							</span>
+						</label>
+					</div>`;
 				}
-				html+=
-				'</div>'
-			+'</div>';
-			html+=
-			'<div class="col-md-12 col-sm-12 col-xs-12 p-0">'
-				+'<div class="row">'
-					+'<div class="col-md-12 col-sm-12 col-xs-12">'
-						+'<div class="scholarship-details">'
-							+'<div class="row">'
-								+'<div class="col-md-12">'
-									+'<div class="table-responsive">';
+				html+=`</div>
+			</div>
+			<div class="col-md-12 col-sm-12 col-xs-12 p-0">
+				<div class="row">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<div class="scholarship-details">`;
+							if(cdrDTO.oneTimePayment!=null){
+								html+=
+								`<div class="w-100 p-2 pb-3 rounded-10 border annual-course-fee-details" style="display: none;background-color:#F9FAFB;">
+									<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>
+									<div class="d-flex flex-wrap">
+										<span class="text-muted">Course Fee</span>
+										<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${cdrDTO.courseFeeString}</span>
+									</div>`;
+									if(cdrDTO.oneTimePayment!='' && (cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0)){
+										html+=`<hr class="my-1" />
+										${commonPaymentTableForPaymentModal(cdrDTO, "annually")}`
+									}
+								html+=`</div>`;
+							} 
+							if(cdrDTO.monthlyFeeDetails!=null &&  cdrDTO.monthlyFeeDetails!=''){
+								html+=
+								`<div class="w-100 bg-light p-2 pb-3 rounded-10 border installment3-course-fee-details" id="installment3-course-fee-details" style="display: none;">
+									<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>
+									<div class="d-flex flex-wrap">
+										<span class="text-muted">Course Fee</span>
+										<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${cdrDTO.courseFeeString}</span>
+									</div>`;
+									if(cdrDTO.monthlyFeeDetails!=null &&  cdrDTO.monthlyFeeDetails!=''){
+										html+=`<hr class="my-1" />
+										${commonPaymentTableForPaymentModal(cdrDTO,'monthly')}`
+									}
+								html+=`</div>`;
+							}
+							html+=`<div class="row">
+								<div class="col-md-12">
+									<div class="table-responsive">`;
 									if(cdrDTO.bookAnEnrollmentPaidStatus!=null && cdrDTO.enrollmentFee != null && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 										html+=
-										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
-											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'
-												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
-												+'</tr>'
-											+'</thead>'
-											+'<tbody>'
-												+getBookAnEnrollmentTable(cdrDTO)
-											+'</tbody>'
-										+'</table>'
-										+'<div id="BookEnrollmentSeat">‘Reserve an Enrollment Seat’ Fee of&nbsp;<b>'+cdrDTO.enrollmentFee.enrollmentFeeString+'</b>&nbsp;is non-refundable.</div>';
+										`<div  id="book-seat-fee-details" class="full" style="display: none;">
+											${getBookAnEnrollmentTable(cdrDTO)}
+										</div>
+										<div id="BookEnrollmentSeat" class="mb-1 full" style="display: none;">‘Reserve an Enrollment Seat’ Fee of&nbsp;<b>${cdrDTO.enrollmentFee.enrollmentFeeString}</b>&nbsp;is non-refundable.</div>`;
 									}
-									if(cdrDTO.oneTimePayment!=''){
+									console.log(cdrDTO);
+									if(cdrDTO.oneTimePayment!='' && cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
 										html+=
-										'<table id="annual-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
-											+'<thead class="theme-bg primary-bg white-txt-color">'
-												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
-												+'</tr>'
-											+'</thead>'
-											+'<tbody>'
-												+getAnnualPaymentTable(cdrDTO);
-											+'</tbody>'
-										+'</table>';
+										`<div class="w-100 annual-course-fee-details" id="annual-course-fee-details" style="display:none">
+											<div class="w-100 p-2 rounded-10 border border-success mt-2" style="background-color:#F0FDF4;">
+												<h5 class="text-dark font-weight-semi-bold font-16 mb-2">Fee Discount</h5>`;
+													if(cdrDTO.oneTimePayment.youSave != null){
+														if(cdrDTO.oneTimePayment.youSave.description!=null && cdrDTO.oneTimePayment.youSave.description.length>0){
+															$.each(cdrDTO.oneTimePayment.youSave.entityDescriptions, function(k, item) {
+																html+=
+																`<div class="d-flex flex-wrap my-1">
+																	<span class="text-dark">${parseInt(k)+1}. ${item.entityDescription}</span>
+																	<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">-${item.entityFee}</span>
+																</div>`;
+															});
+															// $.each(cdrDTO.oneTimePayment.youSave.entityFees, function(k, fee) {
+															// 	html+=`<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${fee}</span>`;
+															// });
+														}
+													}
+													html+=`<hr class="mb-0"/>
+														<div class="d-flex flex-wrap my-1">
+															<span class="text-dark font-16 font-weight-bold">Total Discount</span>
+															<span class="font-18 font-weight-bold text-dark ml-auto d-inline-block">-${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}</span>
+														</div>`
+													console.log(cdrDTO)
+											html+=`</div>
+											<div class="full">
+												<div class="d-flex flex-wrap my-1">
+													<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
+													<span class="font-24 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.oneTimePayment.payableFeeString}</span>
+												</div>
+											</div>
+										</div>
+										${/*
+											<table id="annual-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">
+												<thead class="theme-bg primary-bg white-txt-color">
+													<tr>
+														<th style="width: 60%;">Fee Description</th>
+														<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee (${cdrDTO.currencyIsoCode})</th>
+														<th style="width: 20%; text-align:center">Total Fee</th>
+													</tr>
+												</thead>
+												<tbody>
+													${getAnnualPaymentTable(cdrDTO)}
+												</tbody>
+											</table>
+										*/''}`;
 									}
 									if(cdrDTO.monthlyFeeDetails!=null &&  cdrDTO.monthlyFeeDetails!=''){
+										if(cdrDTO.monthlyFeeDetails.youSave.description!=null){
+											html+=
+											`<div class="w-100 installment3-course-fee-details" id="installment3-course-fee-details" style="display:none">
+												<div class="w-100 bg-light-success p-2 rounded-10 border border-success mt-2">
+													<h5 class="text-dark font-weight-semi-bold font-16 mb-2">Fee Discount</h5>`;
+													
+														if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.youSave!=null){
+															if(cdrDTO.monthlyFeeDetails.youSave.description.length>0){
+																$.each(cdrDTO.monthlyFeeDetails.youSave.entityDescriptions, function(k, item) {
+																	html+=
+																	`<div class="d-flex flex-wrap my-1">
+																		<span class="text-dark">${parseInt(k)+1}. ${item.entityDescription}</span>
+																		<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">-${item.entityFee}</span>
+																	</div>`;
+																});
+																html+=`<hr class="mb-0"/>
+																<div class="d-flex flex-wrap my-1">
+																	<span class="text-dark font-16 font-weight-bold">Total Discount</span>
+																	<span class="font-18 font-weight-bold text-dark ml-auto d-inline-block">-${cdrDTO.monthlyFeeDetails.youSave.totalEntityFeeString}</span>
+																</div>`;
+															}
+														}
+												html+=`</div>
+												<div class="full">
+													<div class="d-flex flex-wrap my-1">
+														<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
+														<span class="font-24 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.monthlyFeeDetails.payableFeeString}</span>
+													</div>
+												</div>
+											</div>`;
+										}
 										html+=
-										'<table id="installment3-course-fee-details" class="installment3-course-fee-details table table-bordered table-striped without_h_scroll" style="display: none;">'
-											+'<thead class="theme-bg primary-bg white-txt-color">'
-												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
-												+'</tr>'
-											+'</thead>'
-											+'<tbody>'
-												+getMonthlyPaymentTable(cdrDTO)
-											+'</tbody>'
-										+'</table>'
-										+'<div class="full installment3-course-fee-details" style="display: none;">'
-											+'<div>'
-												+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">Fee Schedule</h3>'
-											+'</div>'
-											+'<table class="table table-bordered table-striped without_h_scroll">'
-												+'<thead class="theme-bg primary-bg white-txt-color">'
-													+'<tr>'
-														+'<th style="width: 60%;">Fee DESCRIPTION</th>'
-														+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>'
-														+'<th style="width: 20%; text-align:center">Paying Now</th>'
-													+'</tr>'
-												+'</thead>'
-												+'<tbody>'
-													+monthlyFeeShchedule(cdrDTO)
-												+'</tbody>'
-											+'</table>'
-										+'</div>';
+										`<div class="full installment3-course-fee-details mt-2" style="display:none">
+											<table class="table table-bordered table-striped without_h_scroll border-radius-table">
+												<thead>
+													<tr>
+														<th colspan="3" class="font-18 font-weight-bold text-dark bg-light">Fee Schedule</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td class="theme-bg primary-bg white-txt-color">Fee Description</td>
+														<td class="theme-bg primary-bg white-txt-color" style="text-align:center"><span class="previewPaymentOption"></span>Total Fee</td>
+														<td class="theme-bg primary-bg white-txt-color" style="text-align:center">Paying Now</td>
+													</tr>
+													${monthlyFeeShchedule(cdrDTO)}
+												</tbody>
+											</table>
+										</div>`;
 									}
 									if(cdrDTO.paymentCalculationResponse!=''){
 										html+=
-										'<table id="custom-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
-											+'<thead class="theme-bg primary-bg white-txt-color">'
-												+'<tr>'
-													+'<th style="width: 60%;">Fee Description</th>'
-													+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="width: 20%; text-align:center">Total Fee</th>'
-												+'</tr>'
-											+'</thead>'
-											+'<tbody>'
-												+getCustomizedPaymentTable(cdrDTO)
-											+'</tbody>'
-										+'</table>';
+										`<table id="custom-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">
+											<thead class="theme-bg primary-bg white-txt-color">
+												<tr>
+													<th>Fee Description</th>
+													<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ${cdrDTO.currencyIsoCode}</th>
+													<th style="text-align:center">Total Fee</th>
+												</tr>
+											</thead>
+											<tbody>
+												${getCustomizedPaymentTable(cdrDTO)}
+											</tbody>
+										</table>`;
 									}
-									html+=
-									'</div>'
-								+'</div>'
-							+'</div>'
-						+'</div>'
-						+'<div>'
-							+'<p><b>Thank you so much for trusting and choosing  '+SCHOOL_NAME+'.</b></p>'
-						+'</div>'
-					+'</div>'
-					+'<div class="col-md-12 col-sm-12 col-xs-12">'
-						+'<div class="row">'
-							+'<div class="col-md-10"></div>'
-							+'<div class="col-md-2 text-right">'
-								+'<button type="button" class="btn theme-bg primary-bg white-txt-color" onclick="choosePaymentOption();">Next</button>'
-							+'</div>'
-						+'</div>'
-					+'</div>'
-				+'</div>'
-			+'</div>'
-		+'</div>'
-	+'</div>';
+									html+=`</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<p class="py-1 rounded bg-light text-center thank_trusting font-12 font-weight-normal ${cdrDTO.oneTimePayment.paymentOptionDiscount > 0 ? "":"mt-2"}" style="display:none"><i class="fa fa-heart text-primary"></i>&nbsp;Thank you so much for trusting and choosing <b class="text-primary">${SCHOOL_NAME}</b></p>
+						</div>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<div class="row">
+							<div class="col-12 text-center thank_trusting" style="display:none">
+								<button type="button" class="btn btn-lg theme-bg primary-bg white-txt-color font-18" onclick="choosePaymentOption();">Continue <i class="fa fa-arrow-right"></i></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`;
 	$("#studentPaymentModal .modal-body").append(html);
 }
 
 function getReviewAndPayRendered(data, partnerEnrollmentFlag, signupType){
+	if($("#divNextSessionCourseChoose").length<1){
+		$("#courseSelectionWrapper").html(getCourseSelectionAndReviewContent());
+	}
 	$('#divNextSessionCourseReview').html(getReviewAndPayContent(data, partnerEnrollmentFlag, signupType)+submitApplicationWarningModal());
+	// divNextSessionCourseReview divNextSessionCourseChoose
     displaySection3();
 	$(".step-4-skeleton").html('');
 	$(".ReviewAndPayContent").show();
@@ -1713,136 +2144,147 @@ function getReviewAndPayRendered(data, partnerEnrollmentFlag, signupType){
 }
 
 function getReviewAndPayContent(data, partnerEnrollmentFlag, signupType){
+	var signupCourse=data.signupCourse;
 	var html=
-    '<div class="mb-3 card">'
-		+'<input type="hidden" value="'+signupType+'" id="signupType"/>'
-		+'<div class="card-body">'
-			+'<div class="full step-4-skeleton skeleton-wrapper"></div>'
-			+'<section class="ReviewAndPayContent">'
-				+'<h5 class="text-center font-weight-bold">Kindly Review your details</h5>'
-				+'<div class="form-row m-0">'
-					+'<div class="form-holder w-100">'
-						+'<div class="full">'
-							+'<ul class="accordion mob-scroll">'
-								+'<li>'
-									+courseDetailsPreview(data, partnerEnrollmentFlag)
-								+'</li>'
-							+'</ul>';
-							// if(data.returnUrl !=''){
-							// 	html+=
-							// 	'<hr>'
-							// 	+'<div class="edit-btn" style="margin-bottom:20px;">'
-							// 		+'<a class="primary-bg white-txt-color" target="_blank" href="'+data.returnUrl+'">Download Reserve an Enrollment Seat Receipt <i class="fa fa-download"></i></a>';
-							// 	+'</div>';
-							// 	if(data.paymentExpire !=''){
-							// 		html+='<div><strong>Note: </strong>Please note that the enrollment seat will be valid till <strong>'+data.expiryDate+'</strong>  after which you will have to pay the course fee in full to complete the enrollment process.</div>';
-							// 	}
-							// 	html+=
-							// 	'<hr>';
-							// }
-							if(SHOW_PAYMENT_OPTION=='Y'){
-								html+=feePaymentReview(data)
-							}
-						html+=
-						'</div>'
-					+'</div>'
-				+'</div>'
-				+'</section>'
-				+' <div class="col-md-12 col-sm-12 p-0 mt-3">';
-					if(partnerEnrollmentFlag != "P" && SHOW_PAYMENT_OPTION == 'Y'){
-						if(!data.customPaymentEnabled){
-							console.log("data", data)
-							html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>';
-						}
-						var paynow=true
-						if(data.advanceFeeEnabled){
-							if(data.feePaymentDetailsResponse.advanceFeeDetails.payableFee<=0){
-								paynow=false;
-							}
-						}
-						if(data.advanceFeeEnabled){
-							html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right ml-2" onclick="callForProgressionToDashboard();">'+(paynow?'Pay Later':'Proceed to Dashboard')+'</button>';
-						}
-						if(paynow){
-							html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions('+data.schoolId+','+data.schoolId+','+data.userPaymentDetailsId+',\''+data.entityType+'\','+data.entityId+','+USER_ID+');">Pay Now</button>';
-						}
-					}else{
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>';
-						html+='<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="showPaymentModal();">Submit Application</button>';
-					}
-				html+=
-				'</div>'
-		+'</div>'
-	+'</div>'	
+    `<div class="app-page-title my-2">
+		<div class="page-title-wrapper">
+			<div class="page-title-heading">
+				<div>Kindly Review Your Details</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-row">
+		<input type="hidden" value="${signupType}" id="signupType"/>`;
+		if(data.signupCourse.courseDTO.length>0){
+			html+=
+			`<div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+				${courseDetailsPreview(data, partnerEnrollmentFlag)}
+			</div>`;
+		}
+		if(SHOW_PAYMENT_OPTION=='Y'){
+			html+=
+			`<div class="${data.signupCourse.courseDTO.length<1? 'col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12':'col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12'} ">
+				<div class="mb-3 card rounded-15">
+					<div class="card-header bg-primary text-white rounded-top-left-15 rounded-top-right-15 py-2 h-auto font-weight-semi-bold text-transform-none">${data.feeSetionTitile}</div>
+					<div class="card-body py-2 px-3 ">
+						${SHOW_PAYMENT_OPTION=='Y' ? feePaymentReview1(data):""}
+					</div>
+				</div>
+			</div>`;
+		}
+	html+=`</div>
+	<div class="col-md-12 col-sm-12 p-0 mt-3">`;
+		if(partnerEnrollmentFlag != "P" && SHOW_PAYMENT_OPTION == 'Y'){
+			if(data.advanceFeeEnabled && $("#divNextSession").length>0 && !TAKE_INDIVIDUAL_COURSE){
+				html+=`<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(1);">Back</button>`;
+			}else if(!data.customPaymentEnabled){
+				console.log("data", data)
+				html+=`<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>`;
+			}
+			var hasAdvance = data.advanceFeeEnabled || data.gradeFeeDone || data.advancePaymentApplied;
+			var paynow=true;
+			// TIC / Repeat: advance already paid → no extra payment needed, takes priority
+			if(data.advancePaymentApplied && !data.extraCoursePaymentRequired){
+				paynow=false;
+			} else if(data.advanceFeeEnabled || data.gradeFeeDone){
+				if(data.feePaymentDetailsResponse.advanceFeeDetails!=null && data.feePaymentDetailsResponse.advanceFeeDetails.payableFee<=0){
+					paynow=false;
+				}
+			}
+			if(hasAdvance){
+				html+=`<button class="btn theme-bg text-white pl-4 pr-4 pull-right ml-2" onclick="callForProgressionToDashboard();">${(paynow?'Pay Later':'Proceed to Dashboard')}</button>`;
+			}
+			if(paynow){
+				html+=`<button class="btn bg-success text-white pl-4 pr-4 pull-right" onclick="getPaymentGatewaysOptions(\'${data.schoolId}\',\'${data.schoolId}\',\'${data.userPaymentDetailsId}\',\'${data.entityType}\',\'${data.entityId}\',\'${USER_ID}\');">Pay Now</button>`;
+			}
+		}else{
+			html+=`<button class="btn theme-bg text-white pl-4 pr-4 pull-left" onclick="backCourseSelection(2);">Back</button>
+			<button class="btn theme-bg text-white pl-4 pr-4 pull-right" onclick="showPaymentModal();">Submit Application</button>`;
+		}
+	html+=
+	`</div>`;
 
-	+wuPaymentWarningModal(data)
-	+logoutModalLogout(data)
-	+goToDashboardWarningMessageModal(data)
-	// +smoovPayContent(data);
+	html += wuPaymentWarningModal(data);
+	html += logoutModalLogout(data);
+	html += goToDashboardWarningMessageModal(data);
+	// html += smoovPayContent(data);
+
 	return html;
 }
 
 function courseDetailsPreview(data, partnerEnrollmentFlag){
 	var signupCourse=data.signupCourse;
+	var cdrDTO=data.feePaymentDetailsResponse;
 	var html =
-	'<div class="student-courses-info">'
-		+'<div class="full">'
-			+'<h4 class="a-title">Selected Courses <i class="fa  plus-icon ' + (partnerEnrollmentFlag == "P" ? 'fa-minus' : 'fa-plus') + '"></i></h4>'
-			+'<div class="h_scroll primary-bg">'
-				+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
-			+'</div>'
-		+'</div>'
-		+'<div class="a-content" style="' + (partnerEnrollmentFlag == "P" ? 'display:block;' : '') + '">'
-			+'<div class="table-responsive course-selection-wrapper" style="display:block;">'
-				+'<h3 class="selected-grade font-weight-bold text-center" style="margin-bottom:15px; font-size:16px">'
-					+signupCourse.standardName
-				+'</h3>'
-				+'<table class="table-style">'
-					+'<thead>'
-						+'<tr>'
-							+'<th>Course Name</th>';
+	`<div class="mb-3 card rounded-15">
+		<div class="card-header bg-primary text-white rounded-top-left-15 rounded-top-right-15 py-2 h-auto d-flex flex-wrap"><span class="d-inline-flex font-weight-semi-bold text-transform-none">Selected Courses</span><span class="d-inline-flex py-1 px-2 rounded bg-white text-primary ml-auto font-weight-semi-bold">${signupCourse.standardName}</span></div>
+		<div class="card-body card-body py-2 px-3 ">
+			<div>
+				<table class="table border-radius-table font-12 border rounded-10 overflow-hidden">
+					<thead class="bg-light">
+						<tr>
+							<th><b>Course Name</b></th>`;
 							if($.inArray(signupCourse.standardId, [17,11,12,13,14,15,16]) == -1) {
-								html+='<th>Credit</th>';
+								html+=`<th><b>Credit</b></th>`;
 							}
 							html+=
-						'</tr>'
-					+'</thead>'
-					+'<tbody>';
+						`</tr>
+					</thead>
+					<tbody>`;
 						$.each(signupCourse.courseDTO, function(k, courseDt) {
 							if(courseDt.courseName.startsWith('Spanish') && (data.schoolId==1 || data.schoolId==3) && data.standardId>=11 && data.standardId<=17){
 
 							}else{
 								html+=
-								'<tr>'
-									+'<td>'+courseDt.courseName+'</td>';
+								`<tr>
+									<td>${courseDt.courseName}</td>`;
 									if($.inArray(signupCourse.standardId, [17,11,12,13,14,15,16]) == -1) {
-										html+='<td>'+courseDt.creditScore+'</td>'
+										html+=`<td>${courseDt.creditScore}</td>`
 									}
 								html+=
-								'</tr>';
+								`</tr>`;
 							}
 						});
-					html+='</tbody>';
+					html+=`</tbody>`;
 					if($.inArray(signupCourse.standardId, [17,11,12,13,14,15,16]) == -1) {
 						html+=
-						'<tfoot>'
-							+'<tr>'
-								+'<th>Total Credit</th>'
-								+'<th>'+signupCourse.totalCredit+'</th>'
-							+'</tr>'
-						+'</tfoot>';
+						`<tfoot class="overflow-hidden" style="border-top-left-radius:0px !important;border-top-right-radius:0px !important">
+							<tr class="bg-light" style="border-top-left-radius:0px !important;border-top-right-radius:0px !important">
+								<th style="border-top-left-radius:0px !important;border-top-right-radius:0px !important">Total Credit</th>
+								<th style="border-top-left-radius:0px !important;border-top-right-radius:0px !important">${signupCourse.totalCredit}</th>
+							</tr>
+						</tfoot>`;
 					}
-				html+='</table>'
-			+'</div>';
-			if(!data.customPaymentEnabled){
-				// html+=
-				// '<div class="edit-btn">'
-				// 	+'<button class="primary-bg white-txt-color" onclick="displaySection(2)">Edit <i class="fa fa-edit"></i></button>'
-				// +'</div>';
+				html+=`</table>
+			</div>`;
+			if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
+				html+=
+				`<div class="mt-2 border border-success rounded-10 p-2" style="background-color:#F0FDF4;">
+					<div class="d-flex w-100 flex-nowrap align-items-center gap-10">
+						<div class="d-inline-flex border border-dark-success p-1 rounded-circle flex-shrink-0" style="width:40px;height:40px">
+							<span class="d-inline-flex bg-dark-success w-100 text-white rounded-circle justify-content-center align-items-center">
+								<i class="fa fa-check font-16"></i>
+							</span>
+						</div>
+						<div class="d-inline-flex flex-nowrap align-items-center flex-grow-1 gap-10">
+							<div class="d-inline-flex flex-column px-2 flex-grow-1">
+								<h6 class="font-12 font-weight-semi-bold text-dark">Fee Already Paid (Advance Fee)</h6>
+								<p class="m-0 font-10">Your advance fee has been received successfully</p>
+								<span class="font-weight-bold font-12 text-dark">THANK YOU!</span>
+							</div>`;
+							if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
+								html+=
+								`<div class="d-inline-flex text-dark flex-grow-0 flex-shrink-0 border-left btn-dashed border-success flex-column px-2 justify-content-center" style="min-width:100px">
+									<span class="font-weight-bold font-10">PAID AMOUNT</span>
+									<h6 class="font-weight-bold font-14">${cdrDTO.feeAlreayPaid.totalEntityFeeString}</h6>
+								</div>`;
+							}
+						html+=`</div>
+					</div>
+				</div>`;
 			}
-			html+=
-		'</div>'
-	+'</div>';
+		html+=`</div>
+	</div>`;
 	return html;
 }
 		
@@ -1853,7 +2295,7 @@ function feePaymentReview(data){
 	'<div class="full amount-description">'
 		+'<h5 class="font-weight-bold text-center" style="margin-bottom:15px;">'
 			+data.feeSetionTitile;
-			if(!data.customPaymentEnabled || (cdrDTO.advanceFeeEnabled && (cdrDTO.advanceFeeDetails.monthlyFees==null || cdrDTO.advanceFeeDetails.monthlyFees.length==0) ) ){
+			if(!data.customPaymentEnabled || ((cdrDTO.advanceFeeEnabled || cdrDTO.gradeFeeDone) && (cdrDTO.advanceFeeDetails.monthlyFees==null || cdrDTO.advanceFeeDetails.monthlyFees.length==0) ) ){
 				if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.monthlyFees.length>0){
 					html+='<span class="primary-bg change-grade" onclick="backCourseSelection(\'2\', true)">Change Plan <i class="fa fa-exchange" style="font-family:FontAwesome"></i></span>';
 				}
@@ -1863,23 +2305,39 @@ function feePaymentReview(data){
 			+'<table class="table-style">'
 				+'<thead>'
 					+'<tr>'
-						+'<th class="th" style="width:60%">Fee Description</th>'
-						+'<th class="th" style="text-align:center;width:20%">Fee ('+data.currencyIsoCode+')</th>'
-						+'<th class="th" style="text-align:center;width:20%">Total Fee</th>'
+						+'<th class="th">Fee Description</th>'
+						+'<th class="th" style="text-align:center;">Fee ('+data.currencyIsoCode+')</th>'
+						+'<th class="th" style="text-align:center;">Total Fee</th>'
 					+'</tr>'
 				+'</thead>'
 				+'<tbody>';
-				if(signupCourse.payMode == 'registration'){
-					html+=getBookAnEnrollmentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'annually'){
-					html+=getAnnualPaymentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
-					html+=getMonthlyPaymentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
-					html+=getCustomizedPaymentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
-					html+=getAdvancePaymentTable(cdrDTO);
+				
+				if($("#enrollmentType").val() == "REGISTRATION_NEXT_GRADE" || $("#enrollmentType").val() == "REGISTRATION_REPEAT_GRADE"){
+					if(signupCourse.payMode == 'registration'){
+						html+=getBookAnEnrollmentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'annually'){
+						html+=getAdvancePaymentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+						html+=getAdvancePaymentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
+						html+=getAdvancePaymentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+						html+=getAdvancePaymentTable(cdrDTO);
+					}
+				}else{
+					if(signupCourse.payMode == 'registration'){
+						html+=getBookAnEnrollmentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'annually'){
+						html+=getAnnualPaymentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+						html+=getMonthlyPaymentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
+						html+=getCustomizedPaymentTable(cdrDTO);
+					}else if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+						html+=getAdvancePaymentTable(cdrDTO);
+					}
 				}
+				
 				html+=
 				'</tbody>'
 			+'</table>';
@@ -1893,241 +2351,371 @@ function feePaymentReview(data){
 			}
 			if(eligibleForInstallment){
 				html+=
-				'<div class="full">'
-					+'<div class="full">'
-						+'<br/>'
-						+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">Fee Schedule</h3>'
-					+'</div>'
-					+'<table class="table-style">'
-						+'<thead>'
-							+'<tr>'
-								+'<th style="width: 60%;">Fee Description</th>'
-								+'<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>';
-								if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
-									html+='<th style="width: 20%; text-align:center">Status</th>';
-								}else{
-									html+='<th style="width: 20%; text-align:center">Paying Now</th>';
-								}
+				`<div class="full">
+					<table class="table border-radius-table table-bordered">
+						<thead>
+							<tr>
+								<th colspan="3" class="bg-light py-1 font-16">Fee Schedule</th>
+							</tr>
+						</thead>
+						<thead>
+							
+						</thead>
+						<tbody>
+							<tr class="bg-primary text-white">
+								<th>Fee Description</th>
+								<th style="text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>`;
+								// if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+									html+=`<th style="text-align:center">Status</th>`;
+								// }else{
+									// html+='<th style="width: 20%; text-align:center">Paying Now</th>';
+								// }
 								html+=
-							'</tr>'
-						+'</thead>'
-						+'<tbody>';
-							if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+							`</tr>`;
+							// if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
 								html+=advanceFeeShchedule(cdrDTO);
-							}else{
-								html+=monthlyFeeShchedule(cdrDTO);
-							}
+							// }else{
+								// html+=monthlyFeeShchedule(cdrDTO);
+							// }
 							html+=
-						'</tbody>'
-					+'</table>'
-				+'</div>';
+						`</tbody>
+					</table>
+				</div>`;
 			}	
-		html+='</div>'
-	+'</div>';
+		html+=`</div>
+	</div>`;
+	return html;
+}
+function feePaymentReview1(data){
+	var signupCourse=data.signupCourse;
+	var cdrDTO=data.feePaymentDetailsResponse;
+	var html=
+		`<div class="full">`;
+			if(!data.customPaymentEnabled || ((cdrDTO.advanceFeeEnabled || cdrDTO.gradeFeeDone) && (cdrDTO.advanceFeeDetails.monthlyFees==null || cdrDTO.advanceFeeDetails.monthlyFees.length==0) ) ){
+				if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.monthlyFees.length>0){
+					html+=
+					`<h5 class="font-weight-bold text-center" style="margin-bottom:15px;">
+						<span class="primary-bg change-grade" onclick="backCourseSelection(\'2\', true)">Change Plan <i class="fa fa-exchange" style="font-family:FontAwesome"></i></span>
+					</h5>`;
+				}
+			}
+			html+=
+			`<div class="full">
+				<div>`;
+					// TIC / Repeat with advance already paid and no extra fee → show $0 payable
+				var zeroPayableStr = (data.advancePaymentApplied && !data.extraCoursePaymentRequired)
+					? (data.currencySymbol + '0.00') : undefined;
+				if($("#enrollmentType").val() == "REGISTRATION_IMPORVE_GRADES"){
+						html+=getAnnualPaymentTable(cdrDTO, zeroPayableStr);
+					}else if($("#enrollmentType").val() == "REGISTRATION_NEXT_GRADE" || $("#enrollmentType").val() == "REGISTRATION_REPEAT_GRADE"){
+						if(signupCourse.payMode == 'registration'){
+							html+=getBookAnEnrollmentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'annually'){
+							html+=getAdvancePaymentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+							html+=getAdvancePaymentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
+							html+=getCustomizedPaymentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+							html+=getAdvancePaymentTable(cdrDTO);
+						}
+					}else{
+						if(signupCourse.payMode == 'registration'){
+							html+=getBookAnEnrollmentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'annually'){
+							html+=getAnnualPaymentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+							html+=getMonthlyPaymentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
+							html+=getCustomizedPaymentTable(cdrDTO);
+						}else if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+							html+=getAdvancePaymentTable(cdrDTO);
+						}
+					}
+				html+=`</div>`;
+				
+				var eligibleForInstallment=false;
+				if(signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+					eligibleForInstallment=true;
+				}else if(
+					(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually')
+					&& (cdrDTO.advanceFeeDetails != null && cdrDTO.advanceFeeDetails.monthlyFees!=null && cdrDTO.advanceFeeDetails.monthlyFees.length>0) ){
+					eligibleForInstallment=true;
+				}
+				if(eligibleForInstallment){
+					html+=
+					`<div class="full">
+						<table class="table border-radius-table table-bordered">
+							<thead>
+								<tr>
+									<th colspan="3" class="bg-light py-1 font-16">Fee Schedule</th>
+								</tr>
+								
+							</thead>
+							<tbody>
+								<tr class="bg-primary text-white">
+									<td>Fee Description</td>
+									<td style="text-align:left"><span class="previewPaymentOption"></span>Total Fee</td>`;
+									// if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+										html+=`<td style="text-align:left">Status</td>`;
+									// }else{
+										// html+='<th style="width: 20%; text-align:center">Paying Now</th>';
+									// }
+									html+=
+								`</tr>`;
+								// if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
+									html+=advanceFeeShchedule(cdrDTO);
+								// }else{
+									// html+=monthlyFeeShchedule(cdrDTO);
+								// }
+								html+=
+							`</tbody>
+						</table>
+					</div>`;
+				}	
+			html+=`</div>
+		</div>`;
 	return html;
 }
 
 function getBookAnEnrollmentTable(cdrDTO){
 	var html=
-		// '<tr>'
-		// 	+'<td>Reserve an Enrollment Seat</td>'
-		// 	+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
-		// 	+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
-		// +'</tr>'
-		'<tr>'
-			+'<td><b>Payable Fee</b></td>'
-			+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
-			+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
-		+'</tr>';
-		
+		`<div class="full">
+			<div class="d-flex flex-wrap my-1">
+				<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
+				<span class="font-24 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.enrollmentFee.enrollmentFeeString}</span>
+			</div>
+		</div>`;
 	return html;
 }
+
+function commonPaymentTableForPaymentModal(cdrDTO, prefix){
+	console.log("cdrDTO",cdrDTO)
+	var html ='';
+		if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+			html+=
+			`<div id="${prefix}_extra">
+				<div class="font-14 font-weight-semi-bold text-black-80 mb-1">Extra Course Fee</div>
+				<div class="d-flex">`;
+					if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+						html+=`<div>`;
+							$.each(cdrDTO.courseExtraFeeDetails.description, function(k, desc) {
+								html+=`<span class="full my-1 text-black-70">${desc}</span>`;
+							});
+						html+=`</div>`;
+					}
+					if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+						html+=
+						`<div class="ml-auto" id="${prefix}_extra_price">`;
+							$.each(cdrDTO.courseExtraFeeDetails.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right">+${fee}</span>`;
+							});
+						html+=`</div>`
+					}
+				html+=`</div>
+				<hr class="my-2"/>
+				<div class="d-flex">
+					<span class="full my-1 font-weight-semi-bold text-black-80">Total Extra Course Fee</span>
+					<span class="full my-1 ml-auto text-right">${cdrDTO.courseExtraFeeDetails.totalEntityFeeString}</span>
+				</div>
+			</div>
+			<hr class="my-2"/>`;
+		}
+		if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
+			html+=
+			`<div id="${prefix}_external_material">
+				<div class="font-14 font-weight-bold text-black-80">External Material Fee</div>
+				<div class="d-flex">`;
+					if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+						html+=`<div>`;
+							$.each(cdrDTO.courseMaterialFeeDetails.description, function(k, desc) {
+								html+=`<span class="full my-1 text-black-70">${desc}</span>`;
+							});
+						html+=`</div>`;
+					}
+					if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
+						html+=
+						`<div class="ml-auto" id="${prefix}_extra_price">`;
+							$.each(cdrDTO.courseMaterialFeeDetails.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right"> + ${fee}</span>`;
+							});
+						html+=`</div>`
+					}
+				html+=`</div>
+				<hr class="my-2"/>
+				<div class="d-flex">
+					<span class="full my-1 font-weight-semi-bold text-black-80">Total Extra Course Fee</span>
+					<span class="full my-1 ml-auto text-right">${cdrDTO.courseMaterialFeeDetails.totalEntityFeeString}</span>
+				</div>
+			</div>
+			<hr class="my-2"/>`;
+		}
+		if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
+			html+=
+			`<div id="${prefix}_feeAlreadyPaidDesc">
+				<div class="d-flex">
+					<span class="full my-1 text-success">Fee Already Paid `;
+						$.each(cdrDTO.feeAlreayPaid.description, function(k, desc) {
+							html+=`(${desc})`;
+						});
+					html+=`</span>`;
+					if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
+						html+=
+						`<div id="${prefix}_feeAlreadyPaidDescPrice" class="w-100">`;
+							$.each(cdrDTO.feeAlreayPaid.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right font-weight-bold text-success"> - ${fee}</span>`;
+							});
+						html+=`</div>`
+					}
+				html+=`</div>
+			</div>`
+		}
+	return html;
+}
+
 
 function commonPaymentTable(cdrDTO, prefix){
+	console.log("cdrDTO",cdrDTO)
 	var html ='';
-	if(!cdrDTO.requestFromMigration){
-		html +='<tr>'
-			+'<td>'+cdrDTO.enrollmentFee.label+'</td>'
-			+'<td style="text-align:right">'
-				+cdrDTO.enrollmentFee.enrollmentFeeString
-			+'</td>'
-			+'<td style="text-align:right">'
-				+cdrDTO.enrollmentFee.enrollmentFeeString
-			+'</td>'
-		+'</tr>';
-	}
-	html +='<tr>'
-			+'<td>Course Fee</td>'
-			+'<td style="text-align:right">'+cdrDTO.courseFeeString+'</td>'
-			+'<td style="text-align:right">'+cdrDTO.courseFeeString+'</td>'
-		+'</tr>';
-	if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
-		html+=
-		'<tr>'
-			+'<td>';
-				if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
-					html+=
-					'<div id="'+prefix+'_extra">'
-						+'<span>Extra Course Fee</span>'
-						+'<ol class="extra-course-ol">';
+	// if(!cdrDTO.requestFromMigration){
+	// 	html +='<tr>'
+	// 		+'<td>'+cdrDTO.enrollmentFee.label+'</td>'
+	// 		+'<td style="text-align:right">'
+	// 			+cdrDTO.enrollmentFee.enrollmentFeeString
+	// 		+'</td>'
+	// 		+'<td style="text-align:right">'
+	// 			+cdrDTO.enrollmentFee.enrollmentFeeString
+	// 		+'</td>'
+	// 	+'</tr>';
+	// }
+	html+=
+	`<div class="border rounded-15 p-2 mb-2" style="background:#f9fafb">
+		<div>
+			<h5 class="font-weight-semi-bold font-16 mb-2">Fee Breakdown</h5>
+		</div>
+		<div class="d-flex">
+			<span>Course Fee</span>
+			<span class="d-inline-flex ml-auto">${cdrDTO.courseFeeString}</span>
+		</div>
+		<hr class="my-2"/>`
+		if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+			html+=
+			`<div id="${prefix}_extra">
+				<div class="font-14 font-weight-semi-bold text-black-80 mb-1">Extra Course Fee</div>
+				<div class="d-flex">`;
+					if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+						html+=`<div>`;
 							$.each(cdrDTO.courseExtraFeeDetails.description, function(k, desc) {
-								html+='<li class="extra-course-name">'+desc+'</li>';
+								html+=`<span class="full my-1 text-black-70">${desc}</span>`;
 							});
-							html+=
-						'</ol>'
-						+'<span>Total Extra Course Fee</span>'
-					+'</div>';
-				}
-			html+=
-			'</td>'
-			+'<td>';
-				if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
-					html+=
-					'<div id="'+prefix+'_extra_price">'
-					+'<span>&nbsp;</span>'
-					+'<ul class="extra-course-price-ul">';
-						$.each(cdrDTO.courseExtraFeeDetails.entityFees, function(k, fee) {
-							html+='<li class="extra-course-price" style="text-align:right"> + '+fee+'</li>';
-						});
+						html+=`</div>`;
+					}
+					if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
 						html+=
-					'</ul>'
-				+'</div>';
-				}
+						`<div class="ml-auto" id="${prefix}_extra_price">`;
+							$.each(cdrDTO.courseExtraFeeDetails.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right">+${fee}</span>`;
+							});
+						html+=`</div>`
+					}
+				html+=`</div>
+				<hr class="my-2"/>
+				<div class="d-flex">
+					<span class="full my-1 font-weight-semi-bold text-black-80">Total Extra Course Fee</span>
+					<span class="full my-1 ml-auto text-right">${cdrDTO.courseExtraFeeDetails.totalEntityFeeString}</span>
+				</div>
+			</div>
+			<hr class="my-2"/>`;
+		}
+		if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
 			html+=
-			'</td>'
-			+'<td style="vertical-align:bottom;text-align:right"> + '+cdrDTO.courseExtraFeeDetails.totalEntityFeeString+'</td>'
-		+'</tr>';
-	}
-	if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
-		html+=
-		'<tr>'
-			+'<td>';
-				if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
-					html+=
-					'<div id="'+prefix+'_external_material">'
-						+'<span>External Material Fee</span>'
-						+'<ol class="external-course-ol">';
+			`<div id="${prefix}_external_material">
+				<div class="font-14 font-weight-bold text-black-80">External Material Fee</div>
+				<div class="d-flex">`;
+					if(cdrDTO.courseExtraFeeDetails!=null && cdrDTO.courseExtraFeeDetails.totalEntityFee>0){
+						html+=`<div>`;
 							$.each(cdrDTO.courseMaterialFeeDetails.description, function(k, desc) {
-								html+='<li class="external-course-name">'+desc+'</li>';
+								html+=`<span class="full my-1 text-black-70">${desc}</span>`;
 							});
-							html+=
-						'</ol>'
-						+'<span>Total External Material Fee</span>'
-					+'</div>';
-				}
-			html+=
-			'</td>'
-			+'<td>';
-				if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
-					html+=
-					'<div id="'+prefix+'_external_material_price">'
-						+'<span>&nbsp;</span>'
-						+'<ul class="external-course-price-ul">';
-							$.each(cdrDTO.courseMaterialFeeDetails.entityFees, function(k, fee) {
-								html+='<li class="external-course-price" style="text-align:right"> + '+fee+'</li>';
-							});
-							html+=
-						'</ul>'
-					+'</div>';
-				}
-			html+=
-			'</td>'
-			+'<td style="vertical-align:bottom;text-align:right"> + '+cdrDTO.courseMaterialFeeDetails.totalEntityFeeString+'</td>'
-		+'</tr>';
-	}
-	if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
-		html+=
-		'<tr>'
-			+'<td>';
-				if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
-					html+=
-					'<div id="'+prefix+'_feeAlreadyPaidDesc">'
-						+'<span>Fee Already Paid</span>'
-						+'<ol class="extra-course-ol">';
-							$.each(cdrDTO.feeAlreayPaid.description, function(k, desc) {
-								html+='<li class="extra-course-name">'+desc+'</li>';
-							});
-							html+=
-						'</ol>'
-						+'<span>Total Paid</span>'
-					+'</div>';
-				}
-			html+=
-			'</td>'
-			+'<td>';
-				if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
-					html+=
-					'<div id="'+prefix+'_feeAlreadyPaidDescPrice">'
-					+'<span>&nbsp;</span>'
-					+'<ul class="extra-course-price-ul">';
-						$.each(cdrDTO.feeAlreayPaid.entityFees, function(k, fee) {
-							html+='<li class="extra-course-price" style="text-align:right"> - '+fee+'</li>';
-						});
+						html+=`</div>`;
+					}
+					if(cdrDTO.courseMaterialFeeDetails!=null && cdrDTO.courseMaterialFeeDetails.totalEntityFee>0){
 						html+=
-					'</ul>'
-				+'</div>';
-				}
+						`<div class="ml-auto" id="${prefix}_extra_price">`;
+							$.each(cdrDTO.courseMaterialFeeDetails.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right"> + ${fee}</span>`;
+							});
+						html+=`</div>`
+					}
+				html+=`</div>
+				<hr class="my-2"/>
+				<div class="d-flex">
+					<span class="full my-1 font-weight-semi-bold text-black-80">Total Extra Course Fee</span>
+					<span class="full my-1 ml-auto text-right">${cdrDTO.courseMaterialFeeDetails.totalEntityFeeString}</span>
+				</div>
+			</div>
+			<hr class="my-2"/>`;
+		}
+		if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
 			html+=
-			'</td>'
-			+'<td style="vertical-align:bottom;text-align:right"> - '+cdrDTO.feeAlreayPaid.totalEntityFeeString+'</td>'
-		+'</tr>';
-	}
+			`<div id="${prefix}_feeAlreadyPaidDesc">
+				<div class="d-flex">
+					<span class="full my-1 text-success">Fee Already Paid `;
+						$.each(cdrDTO.feeAlreayPaid.description, function(k, desc) {
+							html+=`(${desc})`;
+						});
+					html+=`</span>`;
+					if(cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0){
+						html+=
+						`<div id="${prefix}_feeAlreadyPaidDescPrice" class="w-100">`;
+							$.each(cdrDTO.feeAlreayPaid.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right font-weight-bold text-success"> - ${fee}</span>`;
+							});
+						html+=`</div>`
+					}
+				html+=`</div>
+			</div>`
+		}
+	html+=`</div>` 
 	return html;
 }
 
-function getAnnualPaymentTable(cdrDTO){
+function getAnnualPaymentTable(cdrDTO, overridePayableFeeStr){
 	var html= commonPaymentTable(cdrDTO,'annually');
 	// if(cdrDTO.schoolId==1 || cdrDTO.schoolId==3 || cdrDTO.schoolId==3){
 		if(cdrDTO.oneTimePayment!=null && cdrDTO.oneTimePayment.youSave!=null){
 			if(cdrDTO.oneTimePayment.youSave.description!=null && cdrDTO.oneTimePayment.youSave.description.length>0){
 				html+=
-				'<tr>'
-					+'<td>'
-						+'<table class="payment-table-inside-table">'
-							+'<tbody>'
-								+'<tr>'
-									+'<td>Fee Discounts</td>';
-								+'</tr>'		
-								$.each(cdrDTO.oneTimePayment.youSave.description, function(k, desc) {
-									html+='<tr><td class="pl-4">'+(parseInt(k)+1)+". "+desc+'</td></tr>';
-								});
-							html+='</tbody>'
-							+'<tfoot>'
-								+'<tr>'
-									+'<td>Total You Saved</td>'
-								+'</tr>'
-							+'</tfoot>'
-						+'</table>'
-					+'</td>'
-					+'<td>'
-						+'<table class="payment-table-inside-table">'
-							+'<tbody>'
-								+'<tr>'
-									+'<td>&nbsp;</td>';
-								+'</tr>'		
-								$.each(cdrDTO.oneTimePayment.youSave.entityFees, function(k, fee) {
-									html+='<tr><td style="text-align:right">- '+fee+'</td></tr>';
-								});
-							html+='</tbody>'
-							+'<tfoot>'
-								+'<tr>'
-									+'<td>&nbsp;</td>'
-								+'</tr>'
-							+'</tfoot>'
-						+'</table>'
-					+'</td>'
-					+'<td style="vertical-align:bottom;text-align:right"> - '+cdrDTO.oneTimePayment.youSave.totalEntityFeeString+'</td>'
-				+'</tr>';
+				`<div class="full p-2 border border-success rounded-15" style="background-color:#F0FDF4;">
+					<div>
+						<h5 class="font-weight-semi-bold font-16 mb-2 text-dark">Fee Discounts</h5>
+					</div>
+					<div class="d-flex">
+						<div>`;
+							$.each(cdrDTO.oneTimePayment.youSave.description, function(k, desc) {
+								html+=`<span class="full my-1 text-dark">${(parseInt(k)+1)}. ${desc}</span>`
+							});
+						html+=`</div>
+						<div class="ml-auto">`;
+							$.each(cdrDTO.oneTimePayment.youSave.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right text-dark">-${fee}</span>`
+							});
+						html+=`</div>
+					</div>
+					<hr class="m-0"/>
+					<div class="d-flex align-items-center mt-1">
+						<h5 class="font-weight-bold font-18 mb-0 text-dark">Total Discount</h5>
+						<span class="d-inline-flex my-1 font-weight-bold font-18 text-right text-dark ml-auto">-${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}</span>
+					</div>
+				</div>`;
 			}
 		}
+		var displayPayableFee = (overridePayableFeeStr !== undefined) ? overridePayableFeeStr : cdrDTO.oneTimePayment.payableFeeString;
 		html+=
-		'<tr>'
-			+'<td>'
-				+'<strong>Payable Fee</strong>'
-			+'</td>'
-			+'<td style="text-align:right"><b>'+cdrDTO.oneTimePayment.payableFeeString+'</b></td>'
-			+'<td style="text-align:right"><b>'+cdrDTO.oneTimePayment.payableFeeString+'</b></td>'
-		+'</tr>';
+		`<div class="d-flex align-items-center">
+			<h5 class="font-weight-bold font-16 my-2 text-dark">Payable Fee</h5>
+			<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${displayPayableFee}</span>
+		</div>`;
 	// }else if(cdrDTO.schoolId==4){
 	// }else if(cdrDTO.schoolId==5){
 	// }
@@ -2140,53 +2728,37 @@ function getMonthlyPaymentTable(cdrDTO){
 		if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.youSave!=null){
 			if(cdrDTO.monthlyFeeDetails.youSave.description!=null &&  cdrDTO.monthlyFeeDetails.youSave.description.length>0){
 				html+=
-				'<tr>'
-					+'<td>'
-						+'<table class="payment-table-inside-table">'
-							+'<tbody>'
-								+'<tr>'
-									+'<td>Fee Discounts</td>'
-								+'</tr>'
-								$.each(cdrDTO.monthlyFeeDetails.youSave.description, function(k, desc) {
-									html+='<tr><td class="pl-4">'+(parseInt(k)+1)+". "+desc+'</td></tr>';
-								});
-							html+='</tbody>'
-							+'<tfoot>'
-								+'<tr>'
-									+'<td>Total You Saved</td>'
-								+'</tr>'
-							+'</tfoot>'
-						+'</table>'
-					+'</td>'
-					+'<td>'
-						+'<table class="payment-table-inside-table">'
-							+'<tbody>'
-								+'<tr>'
-									+'<td>&nbsp;</td>';
-								+'</tr>'		
-								$.each(cdrDTO.monthlyFeeDetails.youSave.entityFees, function(k, fee) {
-									html+='<tr><td style="text-align:right">- '+fee+'</td></tr>';
-								});
-							html+='</tbody>'
-							+'<tfoot>'
-								+'<tr>'
-									+'<td>&nbsp;</td>'
-								+'</tr>'
-							+'</tfoot>'
-						+'</table>'
-					+'</td>'
-					+'<td style="vertical-align:bottom;text-align:right"> - '+cdrDTO.monthlyFeeDetails.youSave.totalEntityFeeString+'</td>'
-				+'</tr>';
+				`<div class="full p-2 border border-success rounded-15" style="background-color:#F0FDF4;">
+					<div>
+						<h5 class="font-weight-semi-bold font-16 mb-2 text-dark">Fee Discounts</h5>
+					</div>
+					<div class="d-flex">
+						<div>`;
+							$.each(cdrDTO.monthlyFeeDetails.youSave.description, function(k, desc) {
+								html+=`<span class="full my-1 text-dark">${(parseInt(k)+1)}. ${desc}</span>`
+							});
+						html+=`</div>
+						<div class="ml-auto">`;
+							$.each(cdrDTO.monthlyFeeDetails.youSave.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right text-dark">-${fee}</span>`
+							});
+						html+=`</div>
+					</div>
+					<hr class="m-0"/>
+					<div class="d-flex align-items-center mt-1">
+						<h5 class="font-weight-bold font-18 mb-0 text-dark">Total Discount</h5>
+						<span class="d-inline-flex my-1 font-weight-bold font-18 text-right text-dark ml-auto">-${cdrDTO.monthlyFeeDetails.youSave.totalEntityFeeString}</span>
+					</div>
+				</div>`;
 			}
 		}
 		html+=
-		'<tr>'
-			+'<td>'
-				+'<strong>Payable Fee</strong>'
-			+'</td>'
-			+'<td style="text-align:right"><b>'+cdrDTO.monthlyFeeDetails.payableFeeString+'</b></td>'
-			+'<td style="text-align:right"><b>'+cdrDTO.monthlyFeeDetails.payableFeeString+'</b></td>'
-		+'</tr>';
+		`
+		<div class="d-flex align-items-center">
+			<h5 class="font-weight-bold font-16 my-2 text-dark">Payable Fee</h5>
+			<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${cdrDTO.monthlyFeeDetails.payableFeeString}</span>
+		</div>`;
+		
 	// }else if(cdrDTO.schoolId==4){
 	// }else if(cdrDTO.schoolId==5){
 	// }
@@ -2215,52 +2787,89 @@ function monthlyFeeShchedule(cdrDTO){
 }
 
 function getCustomizedPaymentTable(data){
-	var html='';
+	var html=``;
 	if(data.customPaymentEnabled){
-		var paymentDetails = data.paymentCalculationResponse.paymentDetails
-		$.each(paymentDetails.schedulePayments, function(loop, schedulePayment) {
+		var paymentDetails = data.paymentCalculationResponse.paymentDetails;
+		if(paymentDetails.schedulePayments.length>0){
 			html+=
-			'<tr>'
-				+'<td>'
-					+schedulePayment.paymentTitle
-					+' '
-					+(loop==0?' (to be paid at the time of enrollment)':'')
-				+'</td>'
-				+'<td style="text-align:right">'
-					+schedulePayment.payAmountString
-				+'</td>'
-				+'<td style="text-align:right">'
-					+schedulePayment.payAmountString
-				+'</td>'
-			+'</tr>';
-		});
-		html+=
-		'<tr>'
-			+'<td><strong>Payable Fee</strong></td>'
-			+'<td style="text-align:right">'
-				+'<strong>';
-					// if(paymentDetails.schedulePayments!=null
-					// 	 && paymentDetails.schedulePayments.length>1){
-					// 	$.each(paymentDetails.schedulePayments, function(loop, schedulePayment) {
-					// 		html+=schedulePayment.payAmountString;
-					// 		var isLastElement = loop == paymentDetails.schedulePayments.length -1;
-					// 		if(!isLastElement){
-					// 			html+=' + ';
-					// 		}else{
-					// 			html+=' = ';
-					// 		}
-					// 	});
-					// }
-					html+=paymentDetails.totalPayableAmountString
-				+'</strong>'
-			+'</td>'
-			+'<td style="text-align:right">'
-				+'<strong>'
-					html+=paymentDetails.totalPayableAmountString
-				+'<strong>'
-			+'</td>'
-		+'</tr>';
+			`<div class="full">
+				<table class="table border-radius-table table-bordered m-0">
+					<thead>
+						<tr>
+							<th colspan="3" class="bg-light py-1 font-16">Fee Schedule</th>
+						</tr>
+						
+					</thead>
+					<tbody>`;
+						$.each(paymentDetails.schedulePayments, function(loop, schedulePayment) {
+							html+=
+							`<tr>
+								<td>
+									${schedulePayment.paymentTitle}
+									${loop==0?' (to be paid at the time of enrollment)':''}
+								</td>
+								<td style="text-align:right">
+									${schedulePayment.payAmountString}
+								</td>
+								<td style="text-align:right">
+									${schedulePayment.payAmountString}
+								</td>
+							</tr>`;
+						});
+					html+=`</tbody>
+				</table>
+			</div>
+			<div class="d-flex align-items-center">
+				<h5 class="font-weight-bold font-16 my-2 text-dark">Payable Fee</h5>
+				<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${paymentDetails.totalPayableAmountString}</span>
+			</div>`;
+		}
 	}
+	// if(data.customPaymentEnabled){
+	// 	var paymentDetails = data.paymentCalculationResponse.paymentDetails
+	// 	$.each(paymentDetails.schedulePayments, function(loop, schedulePayment) {
+	// 		html+=
+	// 		'<tr>'
+	// 			+'<td>'
+	// 				+schedulePayment.paymentTitle
+	// 				+' '
+	// 				+(loop==0?' (to be paid at the time of enrollment)':'')
+	// 			+'</td>'
+	// 			+'<td style="text-align:right">'
+	// 				+schedulePayment.payAmountString
+	// 			+'</td>'
+	// 			+'<td style="text-align:right">'
+	// 				+schedulePayment.payAmountString
+	// 			+'</td>'
+	// 		+'</tr>';
+	// 	});
+	// 	html+=
+	// 	'<tr>'
+	// 		+'<td><strong>Payable Fee</strong></td>'
+	// 		+'<td style="text-align:right">'
+	// 			+'<strong>';
+	// 				// if(paymentDetails.schedulePayments!=null
+	// 				// 	 && paymentDetails.schedulePayments.length>1){
+	// 				// 	$.each(paymentDetails.schedulePayments, function(loop, schedulePayment) {
+	// 				// 		html+=schedulePayment.payAmountString;
+	// 				// 		var isLastElement = loop == paymentDetails.schedulePayments.length -1;
+	// 				// 		if(!isLastElement){
+	// 				// 			html+=' + ';
+	// 				// 		}else{
+	// 				// 			html+=' = ';
+	// 				// 		}
+	// 				// 	});
+	// 				// }
+	// 				html+=
+	// 			+'</strong>'
+	// 		+'</td>'
+	// 		+'<td style="text-align:right">'
+	// 			+'<strong>'
+	// 				html+=paymentDetails.totalPayableAmountString
+	// 			+'<strong>'
+	// 		+'</td>'
+	// 	+'</tr>';
+	// }
 	$('#custom-payment-button').show();
 	return html;
 }
@@ -2271,53 +2880,36 @@ function getAdvancePaymentTable(cdrDTO){
 		if(cdrDTO.advanceFeeDetails!=null && cdrDTO.advanceFeeDetails.youSave!=null){
 			if(cdrDTO.advanceFeeDetails.youSave.description!=null &&  cdrDTO.advanceFeeDetails.youSave.description.length>0){
 				html+=
-				'<tr>'
-					+'<td>'
-						+'<table class="payment-table-inside-table">'
-							+'<tbody>'
-								+'<tr>'
-									+'<td>Fee Discounts</td>'
-								+'</tr>'
-								$.each(cdrDTO.advanceFeeDetails.youSave.description, function(k, desc) {
-									html+='<tr><td class="pl-4">'+(parseInt(k)+1)+". "+desc+'</td></tr>';
-								});
-							html+='</tbody>'
-							+'<tfoot>'
-								+'<tr>'
-									+'<td>Total You Saved</td>'
-								+'</tr>'
-							+'</tfoot>'
-						+'</table>'
-					+'</td>'
-					+'<td>'
-						+'<table class="payment-table-inside-table">'
-							+'<tbody>'
-								+'<tr>'
-									+'<td>&nbsp;</td>';
-								+'</tr>'		
-								$.each(cdrDTO.advanceFeeDetails.youSave.entityFees, function(k, fee) {
-									html+='<tr><td style="text-align:right">- '+fee+'</td></tr>';
-								});
-							html+='</tbody>'
-							+'<tfoot>'
-								+'<tr>'
-									+'<td>&nbsp;</td>'
-								+'</tr>'
-							+'</tfoot>'
-						+'</table>'
-					+'</td>'
-					+'<td style="vertical-align:bottom;text-align:right"> - '+cdrDTO.advanceFeeDetails.youSave.totalEntityFeeString+'</td>'
-				+'</tr>';
+				`<div class="full p-2 border border-success rounded-15"style="background-color:#F0FDF4;">
+					<div>
+						<h5 class="font-weight-semi-bold font-16 mb-2 text-dark">Fee Discounts</h5>
+					</div>
+					<div class="d-flex">
+						<div>`;
+							$.each(cdrDTO.advanceFeeDetails.youSave.description, function(k, desc) {
+								html+=`<span class="full my-1 text-dark">${(parseInt(k)+1)}. ${desc}</span>`
+							});
+						html+=`</div>
+						<div class="ml-auto">`;
+							$.each(cdrDTO.advanceFeeDetails.youSave.entityFees, function(k, fee) {
+								html+=`<span class="full my-1 text-right text-dark">-${fee}</span>`
+							});
+						html+=`</div>
+					</div>
+					<hr class="m-0"/>
+					<div class="d-flex align-items-center mt-1">
+						<h5 class="font-weight-bold font-18 mb-0 text-dark">Total Discount</h5>
+						<span class="d-inline-flex my-1 font-weight-bold font-18 text-right text-dark ml-auto">-${cdrDTO.advanceFeeDetails.youSave.totalEntityFeeString}</span>
+					</div>
+				</div>`;
 			}
 		}
 		html+=
-		'<tr>'
-			+'<td>'
-				+'<strong>Payable Fee</strong>'
-			+'</td>'
-			+'<td style="text-align:right"><b>'+cdrDTO.advanceFeeDetails.payableFeeString+'</b></td>'
-			+'<td style="text-align:right"><b>'+cdrDTO.advanceFeeDetails.payableFeeString+'</b></td>'
-		+'</tr>';
+		`<div class="d-flex align-items-center">
+			<h5 class="font-weight-bold font-16 my-2 text-dark">Payable Fee</h5>
+			<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${cdrDTO.advanceFeeDetails.payableFeeString}</span>
+		</div>`;
+		
 	// }else if(cdrDTO.schoolId==4){
 	// }else if(cdrDTO.schoolId==5){
 	// }
@@ -2328,20 +2920,20 @@ function advanceFeeShchedule(cdrDTO){
 	var html = '';
 		$.each(cdrDTO.advanceFeeDetails.monthlyFees, function(k, monthlyFee) {
 			html+=
-			'<tr>'
-				+'<td>'
-					+monthlyFee.paymentLabel
-				+'</td>'
-				+'<td style="text-align:right"><b>'+monthlyFee.amountString+'</b></td>'
-				+'<td style="text-align:right"><b>';
+			`<tr>
+				<td>
+					${monthlyFee.paymentLabel}
+				</td>
+				<td class="font-weight-semi-bold text-left">${monthlyFee.amountString}</td>
+				<td class="font-weight-semi-bold text-left ${monthlyFee.status == "SUCCESS" ? "text-success":"text-warning"}">`;
 				if(monthlyFee.status == 'SUCCESS'){
-					html+='Paid ('+monthlyFee.paidDate+')';
+					html+=`Paid (${monthlyFee.paidDate})`;
 				}else{
-					html+='Scheduled ('+monthlyFee.scheduledDate+')';
+					html+=`Scheduled (${monthlyFee.scheduledDate})`;
 				}
 				html+=
-				'</b></td>'
-			+'</tr>';
+				`</td>
+			</tr>`;
 		});
 		
 	return html;

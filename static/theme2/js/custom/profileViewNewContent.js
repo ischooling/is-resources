@@ -2788,9 +2788,7 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                                 <tbody>`;
                                     if(enrollmentDetails == null || enrollmentDetails.length < 1) {
                                         html +=`<tr>
-                                            <td>Not Paid</td>
                                             <td>No </td>
-                                            <td>N/A</td>
                                             <td>N/A</td>
                                         </tr>`;
                                     } else {
@@ -2806,6 +2804,9 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                                     }
                                 html +=`</tbody>
                             </table>
+                        </div>
+                        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                            ${reenrollmentDiscountElement(data.reenrollmentDiscount)}
                         </div>`;
                     } else if (standardStatus == "0") {
                         html +=
@@ -2842,11 +2843,31 @@ function reserveAnEnrollmentSeatAdvCourseInformation(data, standardStatus, enrol
                                     </a>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                            ${reenrollmentDiscountElement(data.reenrollmentDiscount)}
                         </div>`;
                     }
                 html += `</div>    
             </div>    
         </div>`;
+    return html;
+}
+
+function reenrollmentDiscountElement(data) {
+    var html =
+        `<label for="reenrollmentDiscount" class="font-weight-semi-bold text-dark">Re-enrolment Discount Validity</label>
+    <div class="input-group mb-2 p-0" style="max-width: 320px;">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count custom-date-fields" name="reenrollmentDiscount" id="reenrollmentDiscount" value="${data != "" && data != undefined ? data : ''}" autocomplete="off" readonly keydown="return false" onchange="controlEditField(this,'reenrollmentDiscount',\'${data != "" && data != undefined ? data : ''}\','input', '','', 5,'reenrollmentDiscount')">
+        <div class="input-group-append input-group-append-hide" style="display:none">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="applyChanges('reenrollmentDiscount', 'reenrollmentDiscount', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',5)">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger" onclick="cancelChanges('reenrollmentDiscount',\'${data != "" && data != undefined ? data : ''}\','input','reenrollmentDiscount')">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>`;
     return html;
 }
 

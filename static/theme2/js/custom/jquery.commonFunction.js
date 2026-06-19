@@ -5386,7 +5386,26 @@ function changeDateFormat(date, dateFormat) {
       "/" +
       date.getFullYear()
     );
-  } else {
+  } else if ("DD MMM, YYYY" == dateFormat) {
+    return (
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      " " +
+      M.months[date.getMonth()].substring(0, 3) +
+      ", " +
+      date.getFullYear()
+    );
+  } 
+  // Added DISPLAY_DATE_ONLY format
+  else if ("MMM D, YYYY" == dateFormat) {
+    return (
+      M.months[date.getMonth()].substring(0, 3) +
+      " " +
+      date.getDate() +
+      ", " +
+      date.getFullYear()
+    );
+  } 
+  else {
     return (
       date.getFullYear() +
       "-" +

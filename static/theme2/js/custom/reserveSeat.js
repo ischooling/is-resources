@@ -92,6 +92,7 @@ async function getReserveASeatForNextGrade(userId, nextGrade){
 
 function acceptReserveASeatForNextGrade(userId){
 	var postData = {};
+	$("#enrollReserveModal").modal("hide");
 	postData['userId'] = userId;
 	$.ajax({
 		type: "POST",
@@ -113,7 +114,6 @@ function acceptReserveASeatForNextGrade(userId){
 				$('.reserve-seat-wrapper').hide();
 			} else {
 				var details = data.details;
-				$("#enrollReserveModal").modal("hide");
 				$('#reserveSeatModal').remove();
 				$('.reserve-seat-wrapper').after(getReserveSeatModal(data))
 				$('#reserveSeatModal').modal({ backdrop: 'static', keyboard: false })

@@ -101,7 +101,11 @@ function getStudentMigraionOptionDetails() {
 	return returnData;
 }
 
-function callForStudentNextSession(nextGradeId, nextGradeName, enrollmentType, registrationType) {
+function callForStudentNextSession(nextGradeId, enrollmentType, registrationType) {
+	if(enrollmentType == "REGISTRATION_IMPORVE_GRADES" && $("#selectedSubjects").attr("data-individual") != $("#selectedSubjects").val()){
+		$("#selectedSubjects").val($("#selectedSubjects").attr("data-individual"));
+	}
+	$("#enrollmentType").val(enrollmentType);
 	$('#divNextSessionCourseChoose').html("");
 	hideMessage('');
 	$.ajax({
@@ -110,28 +114,62 @@ function callForStudentNextSession(nextGradeId, nextGradeName, enrollmentType, r
 		data: JSON.stringify(getRequestForStudentNextSession(nextGradeId, enrollmentType, registrationType)),
 		dataType: 'json',
 		contentType: APPLICATION_JSON_VALUE,
-		global: false,
+		// global: false,
 		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
-				if (data['status'] == '3') {
+			if(data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if(data['status'] == '3') {
 					redirectLoginPage();
-				} else {
-					if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
+				}else{
+					if(data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
 						window.location.reload();
-					} else {
+					}else{
 						showMessageTheme2(0, data['message'], '', true);
 					}
 				}
-			} else {
-				$("#choiceForStudentModelRepeaters").modal("hide");
-				showMessageTheme2(1, data['message'], '', true);
-				if(data.enrollmentType != "REGISTRATION_FRESH"){
-					$("#pageHeading").html(getStudentMigrationHeader(data));
+			}else{
+				if(enrollmentType == "REGISTRATION_IMPORVE_GRADES"){
+					$("#courseSelectionWrapper").html(getCourseSelectionAndReviewContent());
+					if(enrollmentType == "REGISTRATION_IMPORVE_GRADES"){
+						TAKE_INDIVIDUAL_COURSE=true;
+					}
+				}else{
+					TAKE_INDIVIDUAL_COURSE=false;
 				}
 				
-				$('#gradeId').val(data.standardId)
-				displaySection2();
-				getAllCourseDetails('N', '');
+				if(enrollmentType == "REGISTRATION_REPEAT_GRADE"){
+					$('#gradeId').val(data.standardId);
+					$('#registrationType').val(data.registrationType);
+					$('#courseProviderId').val(data.courseProviderId);
+					
+					if(registrationType == "DUAL_DIPLOMA" || registrationType == "ONE_TO_ONE_FLEX"){
+						$("#courseSelectionWrapper").html(getCourseSelectionAndReviewContent());
+						showMessageTheme2(1, data['message'], '', true);
+						if(data.enrollmentType != "REGISTRATION_FRESH"){
+							$("#pageHeading").html(getStudentMigrationHeader(data));
+						}
+						
+						$('#gradeId').val(data.standardId);
+						displaySection2();
+						getAllCourseDetails('N', '');
+					}else{
+						repeatGradeClick(MIGRATION_DATA.enrollmentBy, 'REGISTRATION_REPEAT_GRADE', data.standardId, data.registrationType, data.courseProviderId);
+						// else{
+						// }
+					}
+				}else{
+					if(registrationType == "DUAL_DIPLOMA" || registrationType == "ONE_TO_ONE_FLEX" || registrationType == "ONE_TO_ONE"){
+						$("#courseSelectionWrapper").html(getCourseSelectionAndReviewContent());
+					}
+					// $("#choiceForStudentModelRepeaters").modal("hide");
+					showMessageTheme2(1, data['message'], '', true);
+					if(data.enrollmentType != "REGISTRATION_FRESH"){
+						$("#pageHeading").html(getStudentMigrationHeader(data));
+					}
+					
+					$('#gradeId').val(data.standardId);
+					displaySection2();
+					getAllCourseDetails('N', '');
+				}
 			}
 		},
 		error: function(e){
@@ -149,6 +187,7 @@ function getRequestForStudentNextSession(nextGradeId, enrollmentType, registrati
 	studentCourseDetailsInfoDTO['standardId'] = nextGradeId;
 	studentCourseDetailsInfoDTO['enrollmentType'] = enrollmentType;
 	studentCourseDetailsInfoDTO['registrationType'] = registrationType;
+	studentCourseDetailsInfoDTO['requestFromMigration']='Y';
 	return studentCourseDetailsInfoDTO;
 }
 
@@ -307,17 +346,118 @@ function closeCourseDetailModal(){
 	$("#courseDetailModal").modal('hide');
 }
 
-function fireConfetti() {
-	confetti({
-		particleCount: 200,
-		angle: 120,
-		spread: 55,
-		origin: { x: 0.3, y: 0.75 }
-	});
-	confetti({
-		particleCount: 200,
-		angle: 60,
-		spread: 55,
-		origin: { x: 0.75, y: 0.75 }
-	});
+// function fireConfetti() {
+// 	confetti({
+// 		particleCount: 200,
+// 		angle: 120,
+// 		spread: 55,
+// 		origin: { x: 0.3, y: 0.75 }
+// 	});
+// 	confetti({
+// 		particleCount: 200,
+// 		angle: 60,
+// 		spread: 55,
+// 		origin: { x: 0.75, y: 0.75 }
+// 	});
+// }
+
+
+const studentsData = [
+		{
+			"para": "Wei Zhang enrolled successfully in Grade 6 under One-to-One learning program from China.",
+			"duration": "1 mins ago"
+		},
+		{
+			"para": "Sofia Laurent enrolled successfully in English Learning under Group-Learning learning program from France.",
+			"duration": "2 mins ago"
+		},
+		{
+			"para": "Faisal Al Saud enrolled successfully in Grade 10 under Dual-Diploma learning program from Saudi Arabia.",
+			"duration": "1 mins ago"
+		},
+		{
+			"para": "Aino Virtanen enrolled successfully in Flexy - High School under Self-Study plus learning program from Finland.",
+			"duration": "2 mins ago"
+		},
+		{
+			"para": "Omar Al Rashid enrolled successfully in Grade 12 under self-Study learning program from Qatar.",
+			"duration": "5 mins ago"
+		},
+		{
+			"para": "Mariam Al Nuaimi enrolled successfully in Grade 8 under Flexy learning program from UAE.",
+			"duration": "3 mins ago"
+		},
+		{
+			"para": "Chen Hao enrolled successfully in Flexy - Middle School under One-to-One learning program from China.",
+			"duration": "4 mins ago"
+		},
+		{
+			"para": "Elena Fischer enrolled successfully in Grade 5 under Group-Learning learning program from Germany.",
+			"duration": "1 mins ago"
+		},
+		{
+			"para": "Khalid Bin Ahmed enrolled successfully in Maths Learning under Dual-Diploma learning program from Kuwait.",
+			"duration": "5 mins ago"
+		},
+		{
+			"para": "Ella Korhonen enrolled successfully in Grade 3 under Flexy learning program from Finland.",
+			"duration": "2 mins ago"
+		},
+		{
+			"para": "Abdullah Al Harbi enrolled successfully in Grade 11 under One-to-One learning program from Saudi Arabia.",
+			"duration": "1 mins ago"
+		},
+		{
+			"para": "Noura Al Mazrouei enrolled successfully in Grade 7 under Group-Learning learning program from UAE.",
+			"duration": "5 mins ago"
+		},
+		{
+			"para": "Yousef Al Thani enrolled successfully in Flexy - Advanced Placement under Flexy learning program from Qatar.",
+			"duration": "3 mins ago"
+		},
+		{
+			"para": "Fatima Al Sabah enrolled successfully in Grade 9 under Self-Study plus learning program from Kuwait.",
+			"duration": "2 mins ago"
+		},
+		{
+			"para": "Hamad Al Khalifa enrolled successfully in Flexy - High School under Dual-Diploma learning program from Bahrain.",
+			"duration": "3 mins ago"
+		}
+	];
+
+toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: "toast-bottom-left",
+    timeOut: "10000",
+    extendedTimeOut: "1000"
+};
+
+function showRandomToast() {
+	var item = studentsData[Math.floor(Math.random() * studentsData.length)];
+
+    toastr.info(
+        `${item.para}<br><small>${item.duration}</small>`,
+        "Recent Enrollment",
+		{
+			toastClass: 'bg-primary'
+		}
+    );
+}
+
+function getPaymentOptionCount(cdrDTO){
+	var paymentOptionCount = 0;
+	if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee != null && cdrDTO.enrollmentFee != undefined && cdrDTO.enrollmentFee != "" && cdrDTO.enrollmentFee.enrollmentFee > 0 && !cdrDTO.bookAnEnrollmentPaidStatus){
+		paymentOptionCount++;
+	}
+	if(cdrDTO.monthlyFeeDetails != null && cdrDTO.monthlyFeeDetails != undefined && cdrDTO.monthlyFeeDetails != ""){
+		paymentOptionCount++;
+	}
+	if(cdrDTO.oneTimePayment != null && cdrDTO.oneTimePayment != undefined && cdrDTO.oneTimePayment != ""){
+		paymentOptionCount++;
+	}
+	if(cdrDTO.customPaymentEnabled != null && cdrDTO.customPaymentEnabled != undefined && cdrDTO.customPaymentEnabled != ""){
+		paymentOptionCount++;
+	}
+	return paymentOptionCount;
 }

@@ -406,25 +406,8 @@ function paymentOverDueCard(details){
         cardsHtml = `<div class="card rounded-10" style="border:1px solid #dfe3e8;"><div class="card-body text-center">No overdue payments found.</div></div>`;
     }
 
-    var supportCardStyles = "";
-    if (!$("#additionalLayerSupportSideStyles").length) {
-        supportCardStyles = `<style id="additionalLayerSupportSideStyles">
-            .support-side-card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:18px;box-shadow:0 .125rem .25rem rgba(0,0,0,.075);}
-            .support-side-item{display:flex;align-items:center;gap:14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:16px;margin-top:14px;background:#fff;}
-            .support-side-chat-primary{justify-content:center;width:100%;color:#fff !important;background:#28a745 !important;border-color:#28a745 !important;text-align:center;padding-top:12px;padding-bottom:12px;}
-            .support-side-chat-primary:hover,.support-side-chat-primary:focus{color:#fff !important;text-decoration:none;}
-            .support-side-icon{font-size:26px;color:var(--pc);width:26px;text-align:center;}
-            .support-side-chat-primary .support-side-icon,.support-side-chat-primary .support-side-label{color:#fff !important;}
-            .support-side-icon.fa-phone{transform:scaleX(-1);}
-            .support-side-heading{line-height:1.2;color:#121826;font-size:18px;}
-            .support-side-label{color:#121826;line-height:1.2;}
-            .support-side-value{color:#4b5563;line-height:1.2;word-break:normal;overflow-wrap:normal;}
-            .support-side-value.email-support-value{font-size:13px !important;white-space:nowrap;}
-        </style>`;
-    }
-
     var html= `
-    ${supportCardStyles}
+    
     <div id="schedule-payment-popup" class="d-flex justify-content-center flex-column align-items-center" style="padding-bottom:90px;">
         <div class="w-100" style="max-width: 900px;">
             <div class="text-center mb-4">

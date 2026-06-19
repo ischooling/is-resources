@@ -1,3 +1,4 @@
+console.log('nextSession')
 function callChoiceForStudentModel() {
 	$('#choiceForStudentModel').modal('show');
 }
@@ -232,6 +233,7 @@ function getAllCourseDetails(isGradeChange, courseId) {
 					$("#pageHeading").html(getStudentMigrationHeader(data));
 				}
 				$('#gradeId').val(data.standardId);
+				$('#registrationType').val(data.registrationType);
 				$('#courseProviderId').val(data.courseProviderId);
 				$('#standardId').attr('min_limit',data.minCourseLimitMigration);
 				$('#standardId').attr('max_limit',data.maxCourseLimitMigration);
@@ -294,6 +296,7 @@ function getRequestForCourseSelection(courseId) {
 		preferredCourseId.push($("#courseCategory").val());
 		studentCourseDetailsInfoDTO['preferredCourseId']=preferredCourseId;
 	}
+	studentCourseDetailsInfoDTO['requestFromMigration']='Y';
 	return studentCourseDetailsInfoDTO;
 }
 
@@ -356,10 +359,13 @@ function showSpecificContentNew(tabId, liId) {
 	//	$('#'+tabId).parent().parent().next().find('#'+tabId+'C').find('#'+liId+' .a-content').show()
 }
 function displayScholorshipDetails(radioId){
+	debugger
+	$(".payment-option-modal-title").text('Payment Details');
+	$(".thank_trusting").show();
 	var payMode='annually';
 	if(radioId=='dtl-one'){
 		payMode='annually';
-		$('#annual-course-fee-details').show()
+		$('#annual-course-fee-details, .annual-course-fee-details').show()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').hide()
@@ -372,7 +378,7 @@ function displayScholorshipDetails(radioId){
 		if(SCHOOL_ID==5){
 			payMode='sixMonthly';
 		}
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').show()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').hide()
@@ -383,7 +389,7 @@ function displayScholorshipDetails(radioId){
 		$('#custom-course-fee-details').hide()
 	}else if(radioId=='dtl-five'){
 		payMode='fiveMonthly';	
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').show()
 		$('#installment6-course-fee-details').hide()
@@ -394,7 +400,7 @@ function displayScholorshipDetails(radioId){
 		$('#custom-course-fee-details').hide()
 	}else if(radioId=='dtl-six'){
 		payMode='sixMonthly';
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').show()
@@ -405,7 +411,7 @@ function displayScholorshipDetails(radioId){
 		$('#custom-course-fee-details').hide()
 	}else if(radioId=='dtl-nine'){
 		payMode='nineMonthlly';
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').hide()
@@ -416,7 +422,7 @@ function displayScholorshipDetails(radioId){
 		$('#custom-course-fee-details').hide()
 	}else if(radioId=='dtl-ten'){
 		payMode='tenMonthly';
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').hide()
@@ -427,7 +433,7 @@ function displayScholorshipDetails(radioId){
 		$('#book-seat-fee-details, #BookEnrollmentSeat').hide()
 	}else if(radioId=='dtl-custom'){
 		payMode='c_annually';
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').hide()
@@ -437,7 +443,7 @@ function displayScholorshipDetails(radioId){
 		$('#custom-course-fee-details').show()
 	}else if(radioId=='dtl-registration'){
 		payMode='registration';
-		$('#annual-course-fee-details').hide()
+		$('#annual-course-fee-details, .annual-course-fee-details').hide()
 		$('.installment3-course-fee-details').hide()
 		$('#installment5-course-fee-details').hide()
 		$('#installment6-course-fee-details').hide()
@@ -533,25 +539,50 @@ function validateRequestForPaymentOption(formId) {
 	return true;
 }
 
-async function submitCourse(partnerEnrollmentFlag) {
+async function submitCourse(partnerEnrollmentFlag, enrollmentType) {
+	if(enrollmentType == "REGISTRATION_REPEAT_GRADE"){
+		if(MIGRATION_DATA.registrationType == "ONE_TO_ONE" || MIGRATION_DATA.registrationType == "BATCH" || MIGRATION_DATA.registrationType == "SCHOLARSHIP" || MIGRATION_DATA.registrationType == "SSP"){
+			// $("#selectedSubjects").val(MIGRATION_DATA.migrationOptionsForImproveGrade[0].selectedSubjects);
+			$("#selectedSubjects").attr("data-entiresubject",MIGRATION_DATA.migrationOptionsForImproveGrade[0].selectedSubjects);
+			$("#totalCreditInput").val($("#selectedSubjects").val().split(",").length);
+			$('#totalCredit').attr('totalCredit',$("#totalCreditInput").val());
+		}
+	}else {
+		if(TAKE_INDIVIDUAL_COURSE && $("#selectedSubjects").attr("data-individual") != $("#selectedSubjects").val()){
+			$("#selectedSubjects").attr("data-individual",$("#selectedSubjects").val());
+		}
+	}
+	
+	if(enrollmentType ==  undefined || enrollmentType == null){
+		//alert("optimize function");
+	}else{
+		$("#enrollmentType").val(enrollmentType);
+	}
 	var flag = validateRequestForPaymentModeSelection();
 	if (flag) {
-		if(ADVANCE_FEE_PAID || $('#studentPaymentModal').is(':visible')){
-			callForReviewAndPaymentSelection('Y');
-		}else if(partnerEnrollmentFlag == "P" || SHOW_PAYMENT_OPTION == 'N'){
+		if(GRADE_FEE_DONE){
+			//callForReviewAndPaymentSelection('Y');
 			choosePaymentOption(partnerEnrollmentFlag);
-			// callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
 		}else{
-			callForPaymentModeSelection('nextSessionCourseModal','');
-			return false;
+			if(ADVANCE_FEE_PAID || $('#studentPaymentModal').is(':visible') ){
+				callForReviewAndPaymentSelection('Y');
+			}else if(partnerEnrollmentFlag == "P" || SHOW_PAYMENT_OPTION == 'N'){
+				choosePaymentOption(partnerEnrollmentFlag);
+				// callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
+			}else{
+				callForPaymentModeSelection('nextSessionCourseModal','');
+				return false;
+			}
 		}
+		
 	}
 	return false;
 }
 
 function backCourseSelection(pageNumber, changePaymentPlanfalg) {
 	if (pageNumber == 1) {
-		displaySection1();
+		TAKE_INDIVIDUAL_COURSE=false;
+		displaySection2();
 	} else if (pageNumber == 2) {
 		displaySection2();
 		if(changePaymentPlanfalg){
@@ -602,6 +633,9 @@ function getRequestForPaymentModeSelection(formId,courseId){
 		studentCourseDetailsInfoDTO['selectedSubjects'] = '';
 	}
 	studentCourseDetailsInfoDTO['controlType'] = $("#controlType").val();
+	studentCourseDetailsInfoDTO['enrollmentType'] = $("#enrollmentType").val();
+	studentCourseDetailsInfoDTO['registrationType'] = $("#registrationType").val();
+	studentCourseDetailsInfoDTO['requestFromMigration']='Y';
 	return studentCourseDetailsInfoDTO;
 }
 
@@ -617,7 +651,8 @@ function callForPaymentModeSelection(formId, callFrom) {
 		url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/get-payment-details',
 		data : JSON.stringify(getRequestForPaymentModeSelection(formId,callFrom)),
 		dataType : 'json',
-		success : function(data) {
+		success : async function(data) {
+			
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
                 if (data['status'] == '3') {
                     redirectLoginPage();
@@ -634,17 +669,19 @@ function callForPaymentModeSelection(formId, callFrom) {
 				$('#studentPaymentModal').modal('hide');
 			},1000);
             } else {
-			  	showMessageTheme2(1, data['message'], '', true);
-				renderPaymentMode();
+				if(GRADE_FEE_DONE){
+					showMessageTheme2(1, data['message'], '', true);
+				}
+				await renderPaymentMode();
 				showSkeleton(true, "fee-details-modal");
-				paymentModalContentWithData(data);
+				await paymentModalContentWithData(data);
 				$(".step-feeDetails-skeleton").hide();
 				$(".feeDetailsContentDiv").show();
 				$('#payMode').val(data.paymentMode);
 				$(".radio-payment-option input:radio[name=payModeCheckboxes]").unbind().bind("change", function(){
 					radioBtnChecked();
 				});
-				selectPaymentmentMethod(true)
+				// selectPaymentmentMethod(true)
 			}
 		},
 		error: function(e){
@@ -657,8 +694,12 @@ function callForPaymentModeSelection(formId, callFrom) {
 
 function radioBtnChecked() {
 	var $radios = $('.payment-item input:radio[name=payModeCheckboxes]:checked');
-	$($radios).parent().find("label").addClass("primary-bg");
-	$($radios).parent().siblings().find("label").removeClass("primary-bg");
+	$($radios).parent().find("label").addClass("bg-light-primary primary-border-color");
+	$($radios).parent().siblings().find("label").removeClass("bg-light-primary primary-border-color");
+	$($radios).parent().find(".checkbox-border").addClass("primary-border-color");
+	$($radios).parent().find(".check").addClass("bg-primary");
+	$(".amount").removeClass("text-primary");
+	// $($radios).parent().find(".amount").addClass("text-primary");
 };
 
 $(window).on("load", function(){
@@ -667,13 +708,16 @@ $(window).on("load", function(){
 
 
 function choosePaymentOption(partnerEnrollmentFlag) {
+	console.log('choosePaymentOption');
 	var flag=true;
 	if(SHOW_PAYMENT_OPTION=='Y'){
-		if($("#pay-one").prop("checked") == true || $("#pay-three").prop("checked") == true || $("#pay-registration").prop("checked") == true || $("#pay-custom").prop("checked") == true){
-			
-		} else{
-			showMessageTheme2(0,'Please choose payment mode','',true);
-			flag=false;
+		if($("#pay-one").length>0 || $("#pay-three").length>0 || $("#pay-registration").length>0 || $("#pay-custom").length>0){
+			if($("#pay-one").prop("checked") == true || $("#pay-three").prop("checked") == true || $("#pay-registration").prop("checked") == true || $("#pay-custom").prop("checked") == true){
+				
+			} else{
+				showMessageTheme2(0,'Please choose payment mode','',true);
+				flag=false;
+			}
 		}
 	}
 	if(flag){
@@ -683,7 +727,7 @@ function choosePaymentOption(partnerEnrollmentFlag) {
 			url : BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/student/migration/choose-payment-plan',
 			data : JSON.stringify(getRequestForChoosePaymentOption()),
 			dataType : 'json',
-			global:false,
+			// global:false,
 			success : function(data) {
 				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 					if (data['status'] == '3') {
@@ -699,18 +743,28 @@ function choosePaymentOption(partnerEnrollmentFlag) {
 						}
 					}
 				} else {
-					// showMessageTheme2(1, 'Courses Updated.', '', true);
-					showSkeleton(true, "step4");
-					if(SHOW_PAYMENT_OPTION=='Y'){
-						$("#studentPaymentModal").modal("hide");
-					}
-					callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
-					if(SHOW_PAYMENT_OPTION=='Y'){
-						showMessageTheme2(1, 'Payment Mode Selected.', '', true);
-						hideModalMessage();
+					if(GRADE_FEE_DONE){
+						// showMessageTheme2(1, 'Courses Updated.', '', true);
+						showSkeleton(true, "step4");
+						if(SHOW_PAYMENT_OPTION=='Y'){
+							$("#studentPaymentModal").modal("hide");
+						}
+						callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
+						if(SHOW_PAYMENT_OPTION=='Y'){
+							showMessageTheme2(1, 'Payment Mode Selected.', '', true);
+							hideModalMessage();
+						}else{
+							showMessageTheme2(1, 'Course Selected.', '', true);
+						}
 					}else{
-						showMessageTheme2(1, 'Course Selected.', '', true);
+						if(TAKE_INDIVIDUAL_COURSE){
+							callForReviewAndPaymentSelection('Y', partnerEnrollmentFlag);
+						}else{
+							checkPayment("", data.userPaymentDetailsId, SCHOOL_ID);
+							// getPaymentGatewaysOptions(SCHOOL_ID, SCHOOL_ID, data.userPaymentDetailsId, 'USER', USER_ID, USER_ID);
+						}
 					}
+					
 				}
 			},
 			error: function(e){
@@ -726,6 +780,7 @@ function getRequestForChoosePaymentOption(){
 	var feePaymentPlanDTO={};
 	feePaymentPlanDTO['userId'] = $("#userId").val();
 	feePaymentPlanDTO['paymentMode'] = $("#payMode").val();
+	feePaymentPlanDTO['requestFromMigration']='Y';
 	return feePaymentPlanDTO;
 }
 
@@ -733,6 +788,7 @@ function getRequestForReviewAndPaymentSelection(reloadRequired){
 	var studentRequestDTO = {};
 	studentRequestDTO['userId'] = USER_ID;
 	studentRequestDTO['reloadRequired'] = reloadRequired;
+	studentRequestDTO['requestFromMigration'] = 'Y';
 	return studentRequestDTO;
 }
 
@@ -751,6 +807,7 @@ function callForReviewAndPaymentSelection(reloadRequired, partnerEnrollmentFlag,
                 if (data['status'] == '3') {
                     redirectLoginPage();
                 } else {
+					
 					if(reloadRequired){
 						if(data['statusCode']=='ELIGIBLE_ADVANCE_PLAN'){
 
@@ -1037,4 +1094,183 @@ function logoutConfimation(flag, url){
 	}else{
 		$("#logoutSignupModal").modal("hide");
 	}
+}
+
+var RE_ENROLLMENT_TIMER=false;
+// function reEnrollmentCountdown(data, onUpdate, onExpire) {
+// 	const targetTime = new Date(data.progressionDiscountDueDate + " 23:59:00").getTime();
+// 	//convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC)
+// 	var reEnrollmentCountdownInterval = setInterval(function () {
+// 		var currentTime = new Date().getTime();
+		
+// 		var distance = targetTime - currentTime;
+
+// 		if (distance <= 0) {
+// 			clearInterval(reEnrollmentCountdownInterval);
+// 			onUpdate({days: "00",hours: "00",minutes: "00",seconds: "00",});
+// 			if(onExpire) {
+// 				onExpire();
+// 			}
+// 			return;
+// 		}
+// 		else{
+// 			if($("#reEnrollmentDiscountWrapper").length>0){
+// 				if(!RE_ENROLLMENT_TIMER){
+// 					// $($("#reEnrollmentDiscountWrapper")).html(
+// 					// 	`<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-success text-center font-18"><span class="">Re-Enrollment</span> <b>Discount of ${schoolSettingsTechnical.currencySymbol}${data.progressionDiscount}</b> <span class="">Available for a Limited Time Only</span></div>
+// 					// 	<div class="w-100 text-center font-weight-semi-bold mt-2 mb-1">Valid Till Date: ${changeDateFormat(new Date(data.progressionDiscountDueDate), DISPLAY_DATE_FORMATTER)}</div>
+// 					// 	<div id="reEnrollmentCountdown" class="w-100 mb-2"></div>`
+// 					// );
+// 					$("#reEnrollmentDiscountWrapper").removeClass("opacity-0");
+// 					RE_ENROLLMENT_TIMER=true;
+// 				}else{
+// 					$("#reEnrollmentDiscountWrapper").removeClass("opacity-0");
+// 				}
+// 			}
+// 		}
+
+// 		var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+// 		var hours = Math.floor(
+// 			(distance % (1000 * 60 * 60 * 24)) /
+// 			(1000 * 60 * 60)
+// 		);
+// 		var minutes = Math.floor(
+// 			(distance % (1000 * 60 * 60)) /
+// 			(1000 * 60)
+// 		);
+// 		var seconds = Math.floor(
+// 			(distance % (1000 * 60)) / 1000
+// 		);
+// 		onUpdate(
+// 			{
+// 				days: String(days).padStart(2, "0"),
+// 				hours: String(hours).padStart(2, "0"),
+// 				minutes: String(minutes).padStart(2, "0"),
+// 				seconds: String(seconds).padStart(2, "0"),
+// 			}
+// 		);
+
+// 	}, 1000);
+// 	return function () {
+// 	clearInterval(reEnrollmentCountdownInterval);
+// 	};
+// }
+var reEnrollmentCountdownInterval;
+function reEnrollmentCountdown(data, onUpdate, onExpire) {
+
+    // Example:
+    // USER_TIMEZONE = "Asia/Amman"
+
+    const USER_TIMEZONE = window.USER_TIMEZONE || "UTC";
+
+    // Convert target date into user timezone
+    const targetDateString = `${data.progressionDiscountDueDate} 23:59:59`;
+
+    const targetTime = new Date(targetDateString).getTime();
+
+    reEnrollmentCountdownInterval = setInterval(function () {
+
+        // Current time according to user timezone
+        const currentTime = new Date(
+            new Date().toLocaleString("en-US", {
+                timeZone: USER_TIMEZONE
+            })
+        ).getTime();
+
+        var distance = targetTime - currentTime;
+
+        if (distance <= 0) {
+
+            clearInterval(reEnrollmentCountdownInterval);
+
+            onUpdate({
+                days: "00",
+                hours: "00",
+                minutes: "00",
+                seconds: "00",
+            });
+
+            if (onExpire) {
+                onExpire();
+            }
+
+            return;
+
+        } else {
+
+            if ($("#reEnrollmentDiscountWrapper").length > 0) {
+
+                if (!RE_ENROLLMENT_TIMER) {
+
+                    $("#reEnrollmentDiscountWrapper").removeClass("opacity-0");
+
+                    RE_ENROLLMENT_TIMER = true;
+
+                } else {
+
+                    $("#reEnrollmentDiscountWrapper").removeClass("opacity-0");
+
+                }
+            }
+        }
+
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+
+        var hours = Math.floor(
+            (distance % (1000 * 60 * 60 * 24)) /
+            (1000 * 60 * 60)
+        );
+
+        var minutes = Math.floor(
+            (distance % (1000 * 60 * 60)) /
+            (1000 * 60)
+        );
+
+        var seconds = Math.floor(
+            (distance % (1000 * 60)) / 1000
+        );
+
+        onUpdate({
+            days: String(days).padStart(2, "0"),
+            hours: String(hours).padStart(2, "0"),
+            minutes: String(minutes).padStart(2, "0"),
+            seconds: String(seconds).padStart(2, "0"),
+        });
+
+    }, 1000);
+
+    return function () {
+        clearInterval(reEnrollmentCountdownInterval);
+    };
+}
+
+function getMigrationCountdownWapper(data){
+	PROGRESSION_DISCOUNT =data.progressionDiscount;
+	var html=``;
+	if(data.progressionDiscount > 0){
+		html+=
+		`${/*
+			
+		*/''}
+		<div class="container text-center mt-3">
+			<div class="d-inline-block text-white rounded-10 p-2 shadow scale-animate" style="background: #33AB57;background:linear-gradient(90deg,rgba(51, 171, 87, 1) 0%, rgba(70, 182, 76, 1) 50%, rgba(89, 193, 65, 1) 100%);">
+				<div class="border btn-dashed border-light rounded py-3 px-4">
+					<h6 class="font-weight-semi-bold mb-0">
+						RE-ENROLL NOW &amp; SAVE
+					</h6>
+					<h4 class="font-weight-bold mb-0">
+						${(schoolSettingsTechnical.currencySymbol == "$" ? "USD ":"")}${data.progressionDiscount}
+					</h4>
+				</div>
+			</div>
+		</div>
+		<div class="w-100 opacity-0" id="reEnrollmentDiscountWrapper">
+			${/*<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-success text-center font-18"><b>Re-Enrollment Discount of ${schoolSettingsTechnical.currencySymbol}${data.progressionDiscount} Available for a Limited Time Only </b></div>*/''}
+			<div class="w-100 text-center font-weight-bold mt-4 mb-1 text-dark font-16">⏱️ Offer Ends on: <span class="text-danger font-weight-bold">${changeDateFormat(new Date(data.progressionDiscountDueDate), DISPLAY_DATE_ONLY)}</span></div>
+			<div id="reEnrollmentCountdown" class="w-100 mb-2"></div>
+		</div>
+		`;
+	}
+	
+	return html;
 }
