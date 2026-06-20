@@ -51,8 +51,9 @@ function initSmsErrorLogTable() {
                 d.fSchoolId    = $('#errSchoolId').val()    || '';
                 d.fUserId      = $('#errUserId').val()      || '';
                 d.fModuleId    = $('#errModuleId').val()    || '';
-                d.fHttpStatus  = $('#errHttpStatus').val()  || '';
-                d.fAppVersion  = $('#errAppVersion').val()  || '';
+                d.fHttpStatus     = $('#errHttpStatus').val()     || '';
+                d.fAppVersion     = $('#errAppVersion').val()     || '';
+                d.fErrorMessage   = $('#errErrorMessage').val()   || '';
                 return d;
             },
             error: function(xhr) {
@@ -140,6 +141,7 @@ function clearSmsErrorLogFilters() {
     $('#errModuleId').val('');
     $('#errHttpStatus').val('');
     $('#errAppVersion').val('');
+    $('#errErrorMessage').val('');
     if (smsErrorLogTable) {
         smsErrorLogTable.search('').ajax.reload(null, true);
     }

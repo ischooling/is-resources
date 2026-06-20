@@ -110,6 +110,12 @@ function getSmsErrorLogContent(title, roleAndModule) {
                                 <input type="text" id="errAppVersion" class="form-control form-control-sm" placeholder="e.g. 1.1.0">
                             </div>
                         </div>
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label>Error Message</label>
+                                <input type="text" id="errErrorMessage" class="form-control form-control-sm" placeholder="Search in error message...">
+                            </div>
+                        </div>
                         <div class="col-md-12">
                             <button type="button" class="btn btn-primary btn-sm mr-2" onclick="applySmsErrorLogFilters()">
                                 <i class="fa fa-search mr-1"></i>Search
