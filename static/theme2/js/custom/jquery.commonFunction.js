@@ -843,7 +843,6 @@ $(document).ready(function () {
     $('.daterange').on('keydown paste drop cut', function(e) {
       e.preventDefault();
     });
-    // debugger
     // var getCDN_version = getSettingsByTypeAndKey("CONFIGURATION", "RESOURCES_CDN_URL");
     // getCDN_version = JSON.parse(getCDN_version);
     // if(getCDN_version != ""){

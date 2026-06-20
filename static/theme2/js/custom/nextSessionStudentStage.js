@@ -359,7 +359,6 @@ function showSpecificContentNew(tabId, liId) {
 	//	$('#'+tabId).parent().parent().next().find('#'+tabId+'C').find('#'+liId+' .a-content').show()
 }
 function displayScholorshipDetails(radioId){
-	debugger
 	$(".payment-option-modal-title").text('Payment Details');
 	$(".thank_trusting").show();
 	var payMode='annually';

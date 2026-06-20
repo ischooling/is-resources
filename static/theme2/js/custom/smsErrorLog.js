@@ -13,7 +13,6 @@ function initSmsErrorLogTable() {
     }
 
     var dataUrl = CONTEXT_PATH + SCHOOL_UUID + '/dashboard/sms-error-log-data';
-    debugger
     smsErrorLogTable = $('#smsErrorLogTable').DataTable({
         fixedHeader: true,
         scrollY: '400px',
@@ -166,7 +165,6 @@ function openSmsErrorDetail(id) {
         type:     'GET',
         dataType: 'json',
         success:  function(data) {
-            debugger
             $('#smsErrorDetailModalBody').html(getSmsErrorDetailHtml(data));
         },
         error: function(xhr) {

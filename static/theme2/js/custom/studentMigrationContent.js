@@ -1788,7 +1788,6 @@ async function getPaymentModeContent(cdrDTO){
 }
 
 async function paymentModalContentWithData(cdrDTO){
-	debugger;
 	$(".feeDetailsContentDiv").remove();
 	var html = 
 	`<div class="col-md-12 col-sm-12 col-xs-12 p-0 feeDetailsContentDiv">
