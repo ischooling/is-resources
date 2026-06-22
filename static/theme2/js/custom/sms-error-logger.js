@@ -107,9 +107,12 @@
 
     /** Uncaught JS errors */
     window.onerror = function (message, source, lineno, colno, error) {
+        // For cross-origin scripts, browsers replace the real message with "Script error."
+        // and set error=null. Prefer error.message (same-origin) over the sanitised message param.
+        var realMessage = (error && error.message) ? error.message : message;
         SMSErrorLogger.log({
             errorType:    'UncaughtException',
-            errorMessage: message,
+            errorMessage: realMessage,
             stackTrace:   (error && error.stack) ? error.stack : (source + ':' + lineno + ':' + colno)
         });
         return false; // Don't suppress the native console error
@@ -159,6 +162,7 @@
          *   pageNo       {string}    optional  overrides init() value
          */
         log: function (options) {
+            debugger
             try {
                 _send(_buildPayload(options || {}));
             } catch (e) { /* silence */ }

@@ -11,9 +11,9 @@ function initSmsErrorLogTable() {
         $('#smsErrorLogTable').DataTable().destroy();
         smsErrorLogTable = null;
     }
-
     var dataUrl = CONTEXT_PATH + SCHOOL_UUID + '/dashboard/sms-error-log-data';
     smsErrorLogTable = $('#smsErrorLogTable').DataTable({
+        autoWidth: false,
         fixedHeader: true,
         scrollY: '400px',
         scrollCollapse: true,
@@ -117,12 +117,21 @@ function initSmsErrorLogTable() {
         },
         order: [[0, 'desc']]
     });
-
     // Re-calc responsive on page change
     $('#smsErrorLogTable').on('page.dt', function() {
         if (smsErrorLogTable && smsErrorLogTable.responsive) {
             smsErrorLogTable.responsive.recalc();
         }
+    });
+
+    smsErrorLogTable.on('length.dt', function () {
+        debugger
+        setTimeout(function () {
+            smsErrorLogTable.columns.adjust().responsive.recalc();
+        }, 500);
+    });
+    smsErrorLogTable.on('draw.dt', function () {
+        smsErrorLogTable.columns.adjust().responsive.recalc();
     });
 }
 

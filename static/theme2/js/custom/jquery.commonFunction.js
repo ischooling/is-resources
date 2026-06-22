@@ -4,7 +4,7 @@ var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";
 var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "api/v1/";
 var GLOBAL_EMAIL = "";
 var GRADE_CAL_RULE = {};
-var CDN_VERSION;
+// var CDN_VERSION;
 var SCRIPTVERSIONCHECKINTERVAL = null;
 
 // ── Version Checker localStorage keys ──────────────────────────────────────
@@ -6598,7 +6598,7 @@ async function getCommonCustomScript(userId,schoolId){
 		showMessageTheme2(true, e)
 	}
 }
-function getSettingsByTypeAndKey(type, key) {
+function getSettingsByTypeAndKey(type, key, globalFlag) {
   var responseData = {};
   $.ajax({
     url:
@@ -6609,6 +6609,7 @@ function getSettingsByTypeAndKey(type, key) {
     method: "GET",
     contentType: APPLICATION_JSON_VALUE,
     async: false,
+    global: globalFlag == false && typeof(globalFlag) == "boolean" ? globalFlag : true,
     success: function (response) {
       responseData = response;
     }
@@ -8250,7 +8251,7 @@ function getPdfViewerUrl(pdfUrl) {
 //                                    (page reloads, flow restarts above)
 // ============================================================
 
-var VC_DELAY_FIRST  = 1  * 60 * 1000; // 5 minutes — first check after login
+var VC_DELAY_FIRST  = 5 * 60 * 1000; // 5 minutes — first check after login
 var VC_DELAY_REPEAT = 30 * 60 * 1000; // 30 minutes — every subsequent check
 var VC_DEBOUNCE_MS  = 60 * 1000;      // 60 seconds — multi-tab duplicate-run guard
 
@@ -8335,11 +8336,11 @@ function vcRun() {
  *   • New version   → stop all timers, show #newReleaseNotificationModal.
  */
 function startScriptVersionChecker() {
-  var scriptRes = getSettingsByTypeAndKey("CONFIGURATION", "SCRIPT_VERSION");
+  var scriptRes = getSettingsByTypeAndKey("CONFIGURATION", "SCRIPT_VERSION", false);
   if (typeof scriptRes === 'string') scriptRes = JSON.parse(scriptRes);
   var SV = scriptRes.data.metaValue;
 
-  var cdnRes = getSettingsByTypeAndKey("CONFIGURATION", "RESOURCES_CDN_URL");
+  var cdnRes = getSettingsByTypeAndKey("CONFIGURATION", "RESOURCES_CDN_URL", false);
   if (typeof cdnRes === 'string') cdnRes = JSON.parse(cdnRes);
   var CDN_V = cdnRes.data.metaValue.split("@")[1];
   var versionObj ={"SCRIPT VERSION":SV, "CDN":CDN_V}

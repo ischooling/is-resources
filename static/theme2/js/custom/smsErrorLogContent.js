@@ -181,6 +181,7 @@ function getSmsErrorLogContent(title, roleAndModule) {
     `;
 }
 
+
 function getSmsErrorDetailHtml(d) {
     var httpBadge = getHttpStatusBadge(d.httpStatus);
     return `

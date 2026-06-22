@@ -1,4 +1,5 @@
 async function renderStudentAcademicPerformancePage(){
+    debugger
     var apiResponse = await studentAcademicPerformanceFetch();
     var rows = studentAcademicPerformanceMapRows(apiResponse, USER_ID + "");
     $("#dashboardContentInHTML").html(getStudentAcademicPerformanceContent({ rows: rows }, apiResponse.details.courseProviderId));
