@@ -78,8 +78,13 @@
         };
     }
 
+    function _isProd() {
+        try { return (window.DEPLOYMENT_MODE || '').toUpperCase() === 'PROD'; } catch (e) { return false; }
+    }
+
     /** Core fire-and-forget send — never throws. */
     function _send(payload) {
+        if (!_isProd()) return;
         try {
             /* Prefer fetch (modern); fall back to XHR (IE11 / older jQuery apps) */
             if (window.fetch) {
@@ -107,24 +112,29 @@
 
     /** Uncaught JS errors */
     window.onerror = function (message, source, lineno, colno, error) {
-        // For cross-origin scripts, browsers replace the real message with "Script error."
-        // and set error=null. Prefer error.message (same-origin) over the sanitised message param.
+        // "Script error." = cross-origin script noise — not actionable, skip
+        if (!message || message === 'Script error.') return false;
         var realMessage = (error && error.message) ? error.message : message;
+        // Only log if we have a real stack or a known source location
+        if (!error && lineno === 0 && colno === 0) return false;
         SMSErrorLogger.log({
             errorType:    'UncaughtException',
             errorMessage: realMessage,
             stackTrace:   (error && error.stack) ? error.stack : (source + ':' + lineno + ':' + colno)
         });
-        return false; // Don't suppress the native console error
+        return false;
     };
 
     /** Unhandled Promise rejections */
     window.addEventListener('unhandledrejection', function (event) {
         var reason = event.reason;
+        var msg = reason && reason.message ? reason.message : String(reason);
+        // Skip empty or trivially non-actionable rejections
+        if (!msg || msg === 'undefined' || msg === 'null' || msg === '[object Object]') return;
         SMSErrorLogger.log({
             errorType:    'UnhandledPromiseRejection',
-            errorMessage: reason && reason.message ? reason.message : String(reason),
-            stackTrace:   reason && reason.stack   ? reason.stack   : ''
+            errorMessage: msg,
+            stackTrace:   reason && reason.stack ? reason.stack : ''
         });
     });
 
@@ -162,7 +172,6 @@
          *   pageNo       {string}    optional  overrides init() value
          */
         log: function (options) {
-            debugger
             try {
                 _send(_buildPayload(options || {}));
             } catch (e) { /* silence */ }
@@ -175,12 +184,20 @@
          *   $.ajaxSetup({ error: SMSErrorLogger.ajaxErrorHandler });
          */
         ajaxErrorHandler: function (jqXHR, textStatus, errorThrown) {
+            // abort = user navigated away; status 0 = network offline — not a blocker
+            if (textStatus === 'abort' || jqXHR.status === 0) return;
+            // Only log real server errors (4xx, 5xx)
+            if (jqXHR.status < 400) return;
+            var settings = jqXHR._smsSettings || {};
+            var failedUrl = settings.url || '-';
+            var method    = settings.type || settings.method || '-';
             SMSErrorLogger.log({
-                errorType:    'AJAXError',
-                errorMessage: errorThrown || textStatus,
-                httpStatus:   jqXHR.status,
-                stackTrace:   'Response: ' + _truncate(jqXHR.responseText, 3000),
-                currentUrl:   _currentUrl()
+                errorType:     'AJAXError',
+                errorMessage:  errorThrown || textStatus || 'error',
+                httpStatus:    jqXHR.status || 0,
+                stackTrace:    '[' + method + '] ' + failedUrl + ' | Response: ' + _truncate(jqXHR.responseText, 3000),
+                requestParams: _truncate(settings.data, 2000),
+                currentUrl:    _currentUrl()
             });
         },
 

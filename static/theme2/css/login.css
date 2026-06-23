@@ -170,7 +170,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  transform:translate3d(0,0,0);
 }
 .login-redesign.login-graduation-split .login-orb-1{
- width:150px;height:150px;top:8%;left:9%;background:#7fd45a;
+ width:150px;height:150px;top:5%;left:3%;background:#7fd45a;
 }
 .login-redesign.login-graduation-split .login-orb-2{
  width:200px;height:200px;top:-60px;right:30%;border:8px solid rgba(255,255,255,.35);background:transparent;
@@ -560,7 +560,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  z-index:2;
  width:100%;
  max-width:500px;
- transform:translateX(105px);
+ transform:translateX(45px);
  text-align:center;
 }
 .login-redesign .graduation-event-badge{
@@ -655,7 +655,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  box-sizing:border-box;
  width:50%;
  margin-left:50%;
- transform:translateX(-55px);
+ transform:translateX(-20px);
 }
 .login-redesign .graduation-register-blink{
  animation:graduationRegisterBlink 1.25s ease-in-out infinite;
@@ -843,6 +843,35 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  padding:6px 20px;
  font-size:12px;
  }
+ .login-redesign.login-graduation-split .graduation-main-title{
+ font-size:19px !important;
+ line-height:1.25 !important;
+ white-space:normal !important;
+ transform:none !important;
+ }
+ .login-redesign.login-graduation-split .graduation-event-badge{
+ font-size:17px !important;
+ }
+ .login-redesign.login-graduation-split .graduation-location{
+ font-size:15px !important;
+ }
+ .login-redesign.login-graduation-split .graduation-event-date{
+ font-size:15px !important;
+ line-height:1.25 !important;
+ }
+ .login-redesign.login-graduation-split .graduation-attendee-types{
+ font-size:13px !important;
+ line-height:1.25 !important;
+ }
+ .login-redesign.login-graduation-split .graduation-registration-deadline{
+ box-sizing:border-box !important;
+ width:100% !important;
+ max-width:100% !important;
+ padding:8px 10px !important;
+ font-size:12px !important;
+ line-height:1.25 !important;
+ white-space:normal !important;
+ }
  .login-redesign .login-logo img{max-width:245px;}
  .login-redesign .sms{margin:8px 0;font-size:20px;}
  .login-redesign .user-circle{width:100px;height:100px;margin-bottom:2px;}
@@ -870,8 +899,10 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  .login-redesign .captcha-row .captcha-code-box{width:128px;}
  .login-redesign .graduation-event-side{padding:16px 12px 14px;}
  .login-redesign .graduation-event-side h2{font-size:26px;}
- .login-redesign .graduation-event-badge{font-size:26px;}
+ .login-redesign .graduation-event-badge{font-size:16px !important;}
  .login-redesign .graduation-cap{font-size:24px;}
+ .login-redesign.login-graduation-split .graduation-main-title{font-size:17px !important;}
+ .login-redesign.login-graduation-split .graduation-location{font-size:14px !important;}
 }
 
 .ball-rotate {position:relative}

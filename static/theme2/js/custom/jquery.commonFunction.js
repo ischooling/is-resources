@@ -1275,6 +1275,8 @@ $.ajaxSetup({
       }
     }
     xhr.setRequestHeader("UNIQUEUUID", UNIQUEUUID);
+    // Store settings on XHR so ajaxErrorHandler can log the failed URL and method
+    xhr._smsSettings = { url: settings.url, type: settings.type, method: settings.method, data: settings.data };
   },
 });
 

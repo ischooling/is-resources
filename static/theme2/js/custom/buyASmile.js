@@ -409,6 +409,7 @@ $.ajaxSetup({
 			}
 		}
 		xhr.setRequestHeader("UNIQUEUUID", UNIQUEUUID);
+		xhr._smsSettings = { url: settings.url, type: settings.type, method: settings.method, data: settings.data };
 	}
 });
 

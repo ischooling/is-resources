@@ -21,20 +21,22 @@ async function loginContent(userName, fromSpoof){
             ${SHOW_GRADUATION_LOGIN_DESIGN ? `
                 <aside class="graduation-event graduation-event-side">
                     <div class="graduation-event-content">
+                        <p class="graduation-description graduation-main-title" style="font-size:24px; line-height:1.25; margin-bottom:10px; font-weight:800; white-space:nowrap; transform:translateX(-54px);">Celebrating Graduation Ceremony 2026 from <strong>190+ Countries</strong></p>
                         <div class="graduation-event-heading">
-                            <span class="graduation-event-badge">Official Graduation Ceremony, 2026</span>  
+                            <span class="graduation-event-badge" style="font-size:19px;">Graduation Ceremony, 2026</span>
                         </div>
-                         <p class="graduation-location">
+                         <p class="graduation-location" style="font-size:18px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"></path>
                             </svg>
                             Atlantis, The Palm Dubai - UAE
                         </p>
-                        <h2>Join Us for the<br>Graduation Ceremony <strong> 2026</strong></h2>
-                        <h3 class="yellow-text" style="margin-top:10px; "><strong>Saturday, 25 July 2026</strong></h3>
-                        <p class="graduation-description">Don't Miss this Special Moment. <br/> Be Part of the Celebration! </p>
-                        <a class="graduation-register-btn graduation-register-blink" href="https://www.internationalschooling.org/events" target="_blank" rel="noopener">
-                            Register Now!
+                        <h3 class="yellow-text graduation-event-date" style="margin-bottom:4px; font-size:18px; font-weight:600;">July 25, 2026 &bull; 2 PM UAE Time Onwards</h3>
+                        <p class="graduation-description graduation-attendee-types" style="margin:4px 0 10px; font-size:16px; font-weight:600;">Graduate | Non-Graduate | Performer | Teacher | Staff</p>
+                        <p class="graduation-deadline graduation-registration-deadline" style="display:inline-block; width:max-content; max-width:none; margin-top:10px; padding:9px 18px; background:rgba(255,255,255,0.95); border-radius:8px; color:#ff4d4f; font-size:15px; font-weight:600; white-space:nowrap;"><strong style="color:#ff4d4f;">Last Date of Registration:</strong> July 06, 2026 | Till 10:00 PM SGT (Singapore Time)</p>
+                        <h3 class="yellow-text" style="margin:10px 0 14px; font-size:24px;"><strong>Few Seats Left</strong></h3>
+                        <a class="graduation-register-btn graduation-register-blink" style="font-size:17px;" href="https://www.internationalschooling.org/events" target="_blank" rel="noopener">
+                            Register Today!
                         </a>
                     </div>
                 </aside>
