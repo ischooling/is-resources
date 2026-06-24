@@ -233,7 +233,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
                             : `<strong>Payment Amount:</strong> ${apsrSingle.payAmount}<br>`
                         }
                         <strong>Additional Amount:</strong> ${apsrSingle.additionalPayment}<br>
-                        ${apsrSingle.selectedCurrency ? `
+                        ${apsrSingle.selectedCurrency && apsrSingle.payCurrency != null && apsrSingle.conversionRation != null ? `
                             <strong>Selected Currency:</strong> ${apsrSingle.selectedCurrency}-${apsrSingle.payCurrency} (${apsrSingle.conversionRation})<br>` : ''
                         }
                         <strong>Payment Via:</strong> ${apsrSingle.paymentTransferType}<br>

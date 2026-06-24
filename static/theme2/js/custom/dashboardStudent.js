@@ -1877,3 +1877,4 @@ function callLmsSubjectBySubject(formId, subjectId, toElementId, toElementIdAlte
 		}
 	});
 }
+

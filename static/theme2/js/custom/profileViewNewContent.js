@@ -536,7 +536,7 @@ function studentEmailIdElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="studentEmailId" id="studentEmailId" value="${data != "" && data != undefined ? data : ""}" ${USER_ROLE != "STUDENT" && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'studentEmailId',\'${data != "" && data != undefined ? data : ""}\','input', '','', 0,'studentEmailId')">
+        <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="studentEmailId" id="studentEmailId" value="${data != "" && data != undefined ? data : ""}" ${USER_ROLE != "STUDENT" && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'studentEmailId',\'${data != "" && data != undefined ? data : ""}\','input', '','', 0,'studentEmailId')">
         <label for="studentEmailId">Email <span class="text-danger">*</span></label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('studentEmailId', 'studentEmailId', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -555,7 +555,7 @@ function altEmailIdElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm group-append-hide-input" name="altEmailId" id="altEmailId" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'altEmailId',\'${data != "" && data != undefined ? data : ""}\','input', '','', 0,'altEmailId')">
+        <input type="text" class="form-control form-control-sm group-append-hide-input" name="altEmailId" id="altEmailId" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'altEmailId',\'${data != "" && data != undefined ? data : ""}\','input', '','', 0,'altEmailId')">
         <label for="altEmailId">Alternate Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('altEmailId', 'altEmailId', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1064,7 +1064,7 @@ function motherEmailElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherEmail" id="motherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'motherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherEmail')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherEmail" id="motherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'motherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherEmail')">
         <label for="motherEmail">Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('motherEmail', 'motherEmail', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1247,7 +1247,7 @@ function fatherEmailElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherEmail" id="fatherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'fatherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherEmail')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherEmail" id="fatherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'fatherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherEmail')">
         <label for="fatherEmail">Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('fatherEmail', 'fatherEmail', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1432,7 +1432,7 @@ function guardianEmailElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianEmail" id="guardianEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'guardianEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianEmail')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianEmail" id="guardianEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'guardianEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianEmail')">
         <label for="guardianEmail">Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianEmail', 'guardianEmail', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">

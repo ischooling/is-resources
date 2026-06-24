@@ -110,13 +110,38 @@
     /* Global Error Hooks                                                   */
     /* ------------------------------------------------------------------ */
 
+    var _NOISE_MESSAGES = [
+        'Script error.',
+        '$ is not defined',
+        'ResizeObserver loop limit exceeded',
+        'ResizeObserver loop completed with undelivered notifications'
+    ];
+
+    var _NOISE_SOURCES = [
+        'chrome-extension://', 'moz-extension://', 'safari-extension://',
+        'MetaMask', 'ethereum', 'web3', 'wp-admin', 'wp-content', 'wp-json'
+    ];
+
+    function _isNoise(msg, src) {
+        if (!msg) return true;
+        for (var i = 0; i < _NOISE_MESSAGES.length; i++) {
+            if (msg === _NOISE_MESSAGES[i]) return true;
+        }
+        var haystack = (msg + ' ' + (src || '')).toLowerCase();
+        var noiseKeys = ['metamask', 'ethereum', 'web3', 'chrome-extension', 'moz-extension',
+                         'safari-extension', 'wp-admin', 'wp-content', 'wp-json'];
+        for (var j = 0; j < noiseKeys.length; j++) {
+            if (haystack.indexOf(noiseKeys[j]) !== -1) return true;
+        }
+        return false;
+    }
+
     /** Uncaught JS errors */
     window.onerror = function (message, source, lineno, colno, error) {
-        // "Script error." = cross-origin script noise — not actionable, skip
         if (!message || message === 'Script error.') return false;
-        var realMessage = (error && error.message) ? error.message : message;
-        // Only log if we have a real stack or a known source location
         if (!error && lineno === 0 && colno === 0) return false;
+        var realMessage = (error && error.message) ? error.message : message;
+        if (_isNoise(realMessage, source)) return false;
         SMSErrorLogger.log({
             errorType:    'UncaughtException',
             errorMessage: realMessage,
@@ -129,8 +154,8 @@
     window.addEventListener('unhandledrejection', function (event) {
         var reason = event.reason;
         var msg = reason && reason.message ? reason.message : String(reason);
-        // Skip empty or trivially non-actionable rejections
         if (!msg || msg === 'undefined' || msg === 'null' || msg === '[object Object]') return;
+        if (_isNoise(msg, reason && reason.stack)) return;
         SMSErrorLogger.log({
             errorType:    'UnhandledPromiseRejection',
             errorMessage: msg,
@@ -188,6 +213,8 @@
             if (textStatus === 'abort' || jqXHR.status === 0) return;
             // Only log real server errors (4xx, 5xx)
             if (jqXHR.status < 400) return;
+            // 502/503/504 = infrastructure/gateway noise (Cloudflare, load balancer)
+            if (jqXHR.status === 502 || jqXHR.status === 503 || jqXHR.status === 504) return;
             var settings = jqXHR._smsSettings || {};
             var failedUrl = settings.url || '-';
             var method    = settings.type || settings.method || '-';

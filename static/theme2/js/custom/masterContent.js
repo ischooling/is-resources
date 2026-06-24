@@ -1995,7 +1995,9 @@ function callStudentSavedTimePreference(formId, toElementId,studentUserId) {
 				$("#"+formId+" #gradeName").text(data.gradeName);
 				//var learningProgram = data.enrollDetails.split("/")
 				//$("#"+formId+" #enrollDetails").text([learningProgram][0]+" | "+learningProgram[1]);
-				$("#"+formId+" #enrollDetails").text(data.learningProgram+" | "+data.lmsPlatform);	
+				if (data.learningProgram != null && data.lmsPlatform != null) {
+					$("#"+formId+" #enrollDetails").text(data.learningProgram+" | "+data.lmsPlatform);
+				}
 				$("#"+formId+" .gradeAndLearningProgram").css({"display":"inline-flex"});
 			}
 		}

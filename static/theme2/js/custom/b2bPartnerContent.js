@@ -31,7 +31,7 @@ async function renderPartnerDashboard(title, roleAndModule, schoolId, userId, ro
 	var revenue_pending_id=0.0;
 	var schoolDicountSymbol="";
 	var partnerDicountSymbol="";
-	$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
+	$.each(data && data.schoolLPDetails && data.schoolLPDetails.learningProgramDetails ? data.schoolLPDetails.learningProgramDetails : [], function(k,learningProgram){
 		//console.log(learningProgram);
 		schoolDicountSymbol=learningProgram.schoolDicountSymbol;
 		partnerDicountSymbol=learningProgram.partnerDicountSymbol;
@@ -115,7 +115,7 @@ function renderPartnerDashboardSchool(title, roleAndModule, schoolId, userId, ro
 		+dashboardFooterContent()
 		$('body').html(html);
 		$("#chartContentDiv").html(partnerDashboardLPContent(data));
-		$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
+		$.each(data && data.schoolLPDetails && data.schoolLPDetails.learningProgramDetails ? data.schoolLPDetails.learningProgramDetails : [], function(k,learningProgram){
 			getPartnerStudentGrade('',learningProgram.learningProgramCode+'_id_chart_'+k,userId,learningProgram.learningProgramCode,learningProgram.enrollmentFor);
 		});
 		// getPartnerStudentGrade('','chart-pie-enroll-one',userId);
@@ -296,7 +296,7 @@ function partnerDashboardLPContent(data, isSubPartner){
 					+'</div>';
 				});
 			}else{
-				$.each(data.schoolLPDetails.learningProgramDetails, function(k,learningProgram){
+				$.each(data && data.schoolLPDetails && data.schoolLPDetails.learningProgramDetails ? data.schoolLPDetails.learningProgramDetails : [], function(k,learningProgram){
 					var revenue= parseFloat(learningProgram.revenue_d)+parseFloat(learningProgram.revenue_id);
 					var revenue_pending=parseFloat(learningProgram.revenue_pending_d)+parseFloat(learningProgram.revenue_pending_id);
 					revenue=revenue-revenue_pending;

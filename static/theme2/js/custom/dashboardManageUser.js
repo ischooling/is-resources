@@ -1113,3 +1113,99 @@ function manageUserStudentPerformanceEscapeHtml(value) {
 	return (value + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+
+/* ---- Inactive Reason Modal for Student Block / Withdraw ---- */
+function openStudentInactiveReasonModal(userId, status, roleModuleId) {
+    if ($('#studentInactiveReasonModal').length === 0) {
+        $('body').append(buildStudentInactiveReasonModalHtml());
+        $('#studentInactiveReasonModal #studentInactiveReasonSelect').on('change', function () {
+            if ($(this).find('option:selected').text().trim() === 'Other') {
+                $('#studentInactiveReasonModal #studentInactiveOtherGroup').show();
+            } else {
+                $('#studentInactiveReasonModal #studentInactiveOtherGroup').hide();
+                $('#studentInactiveReasonModal #studentInactiveOtherText').val('');
+            }
+        });
+        $('#studentInactiveReasonModal #confirmStudentInactiveBtn').on('click', function () {
+            var reasonId = $('#studentInactiveReasonModal #studentInactiveReasonSelect').val();
+            if (!reasonId || reasonId === '0') {
+                showMessageTheme2(0, 'Please select a reason.');
+                return false;
+            }
+            var otherReason = '';
+            if ($('#studentInactiveReasonModal #studentInactiveReasonSelect option:selected').text().trim() === 'Other') {
+                otherReason = $.trim($('#studentInactiveReasonModal #studentInactiveOtherText').val());
+                if (!otherReason) {
+                    showMessageTheme2(0, 'Please enter a reason in the Other Reason field.');
+                    return false;
+                }
+            }
+            var uid = $('#studentInactiveReasonModal').data('userId');
+            var st  = $('#studentInactiveReasonModal').data('status');
+            var rmod = $('#studentInactiveReasonModal').data('roleModuleId');
+            $('#studentInactiveReasonModal').modal('hide');
+            callStudentStatusWithReason(uid, st, rmod, reasonId, otherReason);
+        });
+    }
+    $('#studentInactiveReasonModal').data('userId', userId).data('status', status).data('roleModuleId', roleModuleId);
+    $('#studentInactiveReasonModal #studentInactiveReasonSelect').val('0');
+    $('#studentInactiveReasonModal #studentInactiveOtherGroup').hide();
+    $('#studentInactiveReasonModal #studentInactiveOtherText').val('');
+    $.ajax({
+        type: 'GET', url: getURLFor('dashboard', 'inactive-reasons'), dataType: 'json', cache: false, timeout: 30000,
+        success: function (data) {
+            var sel = $('#studentInactiveReasonModal #studentInactiveReasonSelect');
+            sel.find('option:not(:first)').remove();
+            if (data && data.reasonsList) {
+                $.each(data.reasonsList, function (i, r) { sel.append('<option value="' + r.id + '">' + r.reason + '</option>'); });
+            }
+            $('#studentInactiveReasonModal').modal('show');
+        },
+        error: function () { showMessageTheme2(0, 'Failed to load reasons. Please try again.'); }
+    });
+    return false;
+}
+
+function callStudentStatusWithReason(userId, status, roleModuleId, inactiveReasonId, otherReason) {
+    var data = {};
+    data['userId'] = userId;
+    data['status'] = status;
+    data['inactiveReasonId'] = inactiveReasonId;
+    data['otherReason'] = otherReason;
+    data['sessionUserId'] = USER_ID;
+    $.ajax({
+        type: 'POST', contentType: APPLICATION_JSON_VALUE,
+        url: getURLForHTML('dashboard', 'student-withdrown-join'),
+        data: JSON.stringify(data), dataType: 'html', cache: false, timeout: 600000,
+        success: function (htmlContent) {
+            if (htmlContent !== '') {
+                var parts = htmlContent.split('|');
+                if (parts[0] === 'SESSIONOUT') { redirectLoginPage(); }
+                else if (parts[0] === 'FAILED' || parts[0] === 'EXCEPTION') { showMessageTheme2(0, parts[1]); }
+                else if (parts[0] === 'SUCCESS') {
+                    showMessageTheme2(1, parts[1]);
+                    setTimeout(function () {
+                        callDashboardPageSchool(roleModuleId, 'manage-user-list', '', '&schoolId=' + SCHOOL_ID + '&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2');
+                    }, 1000);
+                }
+            }
+        }
+    });
+}
+
+function buildStudentInactiveReasonModalHtml() {
+    return '<div id="studentInactiveReasonModal" class="modal fade" role="dialog">' +
+        '<div class="modal-dialog"><div class="modal-content modal-md">' +
+        '<div class="modal-header primary-bg white-txt-color">' +
+        '<h5 class="modal-title" style="color:white;"><strong>Select Reason</strong></h5>' +
+        '<button type="button" class="close white-txt-color" data-dismiss="modal" style="color:#fff;opacity:1;">&times;</button></div>' +
+        '<div class="modal-body">' +
+        '<div class="form-group"><label>Reason <span class="text-danger">*</span></label>' +
+        '<select id="studentInactiveReasonSelect" class="form-control"><option value="0">-- Select Reason --</option></select></div>' +
+        '<div id="studentInactiveOtherGroup" class="form-group" style="display:none;">' +
+        '<label>Other Reason <span class="text-danger">*</span></label>' +
+        '<textarea id="studentInactiveOtherText" class="form-control" rows="3" maxlength="500" placeholder="Enter reason..."></textarea></div></div>' +
+        '<div class="modal-footer" style="text-align:center;">' +
+        '<button type="button" class="btn btn-danger" id="confirmStudentInactiveBtn">Confirm</button></div>' +
+        '</div></div></div>';
+}

@@ -246,7 +246,8 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
     };
 
     var requestType = pageRequest[pageNo];
-    if (requestType.type == "JSP") {
+    if(requestType != undefined){
+      if (requestType.type == "JSP") {
         try{
             if(requestType.file.length>0){
               await  loadScript(requestType.file);
@@ -260,23 +261,28 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         }catch(error){
             console.error("Error fetching data:", error);
         }
-    } else if(requestType.type == "JS") {
-        if(requestType.file.length>0){
-            await loadScript(requestType.file);
-        }
-        if(requestType.pageReqType == "IN"){
-            getContent(moduleId, pageNo, replaceDiv, extraParam);
-        }else if(requestType.pageReqType == "EX"){
-            getAsPost(requestType.urlSend);
-        }else{
-            console.error("Invalid pageNo: " + pageNo);
-        }
-        if(typeof requestType.funName == "function"){
-            requestType.funName();
-        }
-    } else {
-        console.error("Invalid pageNo: " + pageNo);
+      } else if(requestType.type == "JS") {
+          if(requestType.file.length>0){
+              await loadScript(requestType.file);
+          }
+          if(requestType.pageReqType == "IN"){
+              getContent(moduleId, pageNo, replaceDiv, extraParam);
+          }else if(requestType.pageReqType == "EX"){
+              getAsPost(requestType.urlSend);
+          }else{
+              console.error("Invalid pageNo: " + pageNo);
+          }
+          if(typeof requestType.funName == "function"){
+              requestType.funName();
+          }
+      } else {
+          console.warn("Invalid pageNo: " + pageNo);
+      }
+    }else{
+      console.warn("Invalid pageNo: " + pageNo);
+      return false;
     }
+    
     // console.timeEnd();
     
 }

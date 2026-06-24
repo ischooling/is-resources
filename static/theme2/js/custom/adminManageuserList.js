@@ -349,6 +349,8 @@ function getRequestForNewUser(formId) {
   signupStudentDTO["dob"] = $("#" + formId + " #dob").val();
   signupStudentDTO["schoolId"] = $("#" + formId + " #schoolId").val();
   signupStudentDTO["userActive"] = $("#" + formId + " #userActive").val();
+  signupStudentDTO["inactiveReasonId"] = $("#adminInactiveReasonId").val() || null;
+  signupStudentDTO["otherReason"] = $("#adminOtherReason").val() || null;
   signupStudentDTO["signupType"] = "Offline";
   signupStudentDTO["userType"] = "SCHOOL";
   signupStudentDTO["supportRoleId"] = $("#" + formId + " #supportRoleId").val();

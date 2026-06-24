@@ -120,9 +120,12 @@ function callUserLoginFun(formId, moduleId, loginType) {
 					$('#allReadyEmail #emailVerify').hide();
 					$('#allReadyEmail #userDeclined').hide();
 					$('#allReadyEmail').modal('toggle');
-				}else if(data.statusCode == '02') {
+				}else if(data.statusCode == '02' || data.statusCode == '0042') {
 					$('#allReadyEmail #emailNotVerify').hide();
 					$('#allReadyEmail #emailVerify').hide();
+					$('#allReadyEmailFooter').hide();
+					$('#allReadyEmailTitle').text('Access Denied!');
+					$('#allReadyEmail #userDeclinedMessage').text(data.message || 'policy violation.');
 					$('#allReadyEmail #userDeclined').show();
 					$('#allReadyEmail').modal('toggle');
 				}else{

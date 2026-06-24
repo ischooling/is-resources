@@ -197,10 +197,10 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 										}
 									}
 									if(ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y'){
-										html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to withdraw the teacher and reset the Outlook account password?','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'WITHDRAW\\\', \\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'approved\\\') '); " href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Withdraw Teacher</a>`;
+										html+=`<a class="dropdown-item" onclick="return openTeacherInactiveReasonModal('${teacherRequest.teacherId}','WITHDRAW','${moduleId}','${moduleId}','approved');" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Withdraw Teacher</a>`;
 									}
 									if(teacherRequest.blockUnblockStatus == 'N' && (ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y')){
-										html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to Block','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'BLOCK\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'approved\\\') '); " href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Block Teacher</a>`;
+										html+=`<a class="dropdown-item" onclick="return openTeacherInactiveReasonModal('${teacherRequest.teacherId}','BLOCK','${moduleId}','${moduleId}','approved');" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Block Teacher</a>`;
 									}
 									if(teacherRequest.blockUnblockStatus == 'Y' && (ROLE_MODULE.updated=='Y' || ROLE_MODULE.added=='Y')){
 										html+=`<a class="dropdown-item" onclick="return showWarningMessage('Are you sure you want to Unblock','saveTeacherOfficialMail(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'UNBLOCK\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'approved\\\') '); " href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp;Unblock Teacher</a>`;
@@ -351,4 +351,130 @@ function generateCourseSuffix(userId){
 
 function subjectSearchGofun(){
 	getSubjectListToTeacher($("#userId").val());
+}
+
+function openTeacherInactiveReasonModal(teacherId, controllType, moduleId, roleModuleId, fromUrl) {
+	$('#teacherInactiveReasonModal').remove();
+	$('body').append(buildTeacherInactiveReasonModalHtml(teacherId, controllType, moduleId, roleModuleId, fromUrl));
+	loadTeacherInactiveReasons();
+	$('#teacherInactiveReasonModal').modal('show');
+	return false;
+}
+
+function buildTeacherInactiveReasonModalHtml(teacherId, controllType, moduleId, roleModuleId, fromUrl) {
+	var title = (controllType === 'WITHDRAW') ? 'Withdraw Teacher' : 'Block Teacher';
+	return `<div class="modal fade" id="teacherInactiveReasonModal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">${title}</h5>
+					<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label>Reason for ${title}</label>
+						<select id="teacherInactiveReasonId" class="form-control">
+							<option value="">Select Reason</option>
+						</select>
+					</div>
+					<div class="form-group" id="teacherOtherReasonDiv" style="display:none;">
+						<label>Please specify reason</label>
+						<textarea id="teacherOtherReasonText" class="form-control" maxlength="500" rows="3"></textarea>
+					</div>
+					<input type="hidden" id="teacherInactiveTeacherId" value="${teacherId}">
+					<input type="hidden" id="teacherInactiveControllType" value="${controllType}">
+					<input type="hidden" id="teacherInactiveModuleId" value="${moduleId}">
+					<input type="hidden" id="teacherInactiveRoleModuleId" value="${roleModuleId}">
+					<input type="hidden" id="teacherInactiveFromUrl" value="${fromUrl}">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" onclick="callTeacherBlockWithReason();">Confirm</button>
+				</div>
+			</div>
+		</div>
+	</div>`;
+}
+
+function loadTeacherInactiveReasons() {
+	$.ajax({
+		type: 'GET',
+		url: getURLFor('dashboard', 'inactive-reasons'),
+		dataType: 'json',
+		success: function(data) {
+			var select = $('#teacherInactiveReasonModal #teacherInactiveReasonId');
+			select.find('option:not(:first)').remove();
+			if (data.status == 1 && data.reasonsList) {
+				$.each(data.reasonsList, function(i, r) {
+					select.append('<option value="' + r.id + '" data-reason="' + r.reason + '">' + r.reason + '</option>');
+				});
+			}
+		}
+	});
+	$('#teacherInactiveReasonModal').on('change', '#teacherInactiveReasonId', function() {
+		var selectedText = $(this).find('option:selected').text().toLowerCase();
+		if (selectedText === 'other') {
+			$('#teacherOtherReasonDiv').show();
+		} else {
+			$('#teacherOtherReasonDiv').hide();
+			$('#teacherOtherReasonText').val('');
+		}
+	});
+}
+
+function callTeacherBlockWithReason() {
+	var reasonId = $('#teacherInactiveReasonModal #teacherInactiveReasonId').val();
+	var otherReason = $('#teacherInactiveReasonModal #teacherOtherReasonText').val().trim();
+	var selectedText = $('#teacherInactiveReasonModal #teacherInactiveReasonId option:selected').text().toLowerCase();
+	if (!reasonId) {
+		showMessageTheme2(0, 'Please select a reason.');
+		return false;
+	}
+	if (selectedText === 'other' && !otherReason) {
+		showMessageTheme2(0, 'Please specify the reason.');
+		return false;
+	}
+	var teacherId = $('#teacherInactiveReasonModal #teacherInactiveTeacherId').val();
+	var controllType = $('#teacherInactiveReasonModal #teacherInactiveControllType').val();
+	var moduleId = $('#teacherInactiveReasonModal #teacherInactiveModuleId').val();
+	var roleModuleId = $('#teacherInactiveReasonModal #teacherInactiveRoleModuleId').val();
+	var fromUrl = $('#teacherInactiveReasonModal #teacherInactiveFromUrl').val();
+
+	var request = {};
+	var authentication = {};
+	var teacherRequestDTO = {};
+	teacherRequestDTO['controllType'] = controllType;
+	teacherRequestDTO['userId'] = $("#userId").val();
+	teacherRequestDTO['teacherId'] = teacherId;
+	teacherRequestDTO['meetingId'] = parseInt(reasonId);
+	teacherRequestDTO['action'] = (selectedText === 'other') ? otherReason : '';
+	authentication['hash'] = getHash();
+	authentication['schoolId'] = SCHOOL_ID;
+	authentication['schoolUUID'] = SCHOOL_UUID;
+	authentication['userType'] = moduleId;
+	authentication['userId'] = USER_ID;
+	request['authentication'] = authentication;
+	request['teacherRequestDTO'] = teacherRequestDTO;
+
+	$('#teacherInactiveReasonModal').modal('hide');
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('dashboard', 'save-teacher-official-email'),
+		data: JSON.stringify(request),
+		dataType: 'json',
+		success: function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				if (fromUrl === 'withdraw') {
+					setTimeout(function() { callDashboardPageSchool(roleModuleId, 'withdraw-teachers'); }, 1000);
+				} else {
+					setTimeout(function() { getApprovedTeacherList(roleModuleId, USER_ID, SCHOOL_ID, '0', '0,1', 0); }, 1000);
+				}
+			}
+		}
+	});
+	return false;
 }

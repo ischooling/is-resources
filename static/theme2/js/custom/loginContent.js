@@ -319,34 +319,33 @@ function commonEmailAllreadyExistContent(){
     var html=
     `
         <div id="allReadyEmail" class="modal fade" role="dialog">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered modal-md">
                 ${/*<!-- Modal content-->*/''}
-                <div class="modal-content modal-md">
-                    <div class="modal-header primary-bg white-txt-color">
-                        <button type="button" class="close white-txt-color" data-dismiss="modal" style="margin-top:3px;color:#fff;opacity:1">&times;</button>
-                        <h5 class="modal-title" style="color: white; text-align: center;">
-                            <strong>Error!</strong>
+                <div class="modal-content rounded-15 overflow-hidden border-0 shadow-lg">
+                    <div class="modal-header primary-bg white-txt-color justify-content-center">
+                        <button type="button" class="close white-txt-color" data-dismiss="modal" style="color:#fff;opacity:1">&times;</button>
+                        <h5 class="modal-title text-center white-txt-color">
+                            <strong id="allReadyEmailTitle">Error!</strong>
                         </h5>
                     </div>
                     <input type="hidden" id="userId" value=""/>
-                    <div class="modal-body">
-                        <p style="font: normal 16px Arial, Helvetica, sans-serif; text-align: center;margin-top:35px;font-weight: bold;" id="emailNotVerify">
+                    <div class="modal-body text-center p-4">
+                        <p class="font-16 font-weight-bold mb-0" id="emailNotVerify">
                             Your email hasn't been verified yet. Please click 
                             <a href="javascript:void(0);" id="notVerify" class="primary-txt-color">Here</a> to generate a
                             new verification email, if you haven't yet received one.
                         </p>
-                        <p style="font: normal 16px Arial, Helvetica, sans-serif; text-align: justify;margin-top:35px;" id="emailVerify">
+                        <p class="font-16 text-justify mb-0" id="emailVerify">
                             ${/* 
                             <!--You are already ${data.moduleId == 'STUDENT'? 'enrolled':'registered'} with ${schoolSettings.schoolName}. Please 
                             <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/login" class="primary-txt-color">Login</a> to continue.-> */''}
                         </p>
-                        <p style="font: normal 16px Arial, Helvetica, sans-serif; text-align: justify;margin-top:35px;" id="userDeclined">
-                            You are not an approved user. For more information please contact the
-                            <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/inquiry" id="declined" class="primary-txt-color">support team.</a> 
+                        <p class="font-16 text-center mb-0" id="userDeclined" style="padding: 1px 0 1px;">
+                            Your account has been temporarily blocked due to <span id="userDeclinedMessage"></span><br/>For more information please contact the <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/inquiry" id="declined" class="primary-txt-color">support team.</a>
                         </p>
                     </div>
-                    <div id="allReadyEmailFooter" class="modal-footer" style="text-align: center;">
-                        <a href="${schoolSettingsLinks.signupUrl}" class="btn btn-primary primary-bg white-txt-color">ENROLL NOW</a>
+                    <div id="allReadyEmailFooter" class="modal-footer text-center justify-content-center">
+                        <a href="${schoolSettingsLinks.signupUrl}" class="btn btn-primary btn-round btn-shadow primary-bg white-txt-color">ENROLL NOW</a>
                     </div>
                 </div>
             </div>

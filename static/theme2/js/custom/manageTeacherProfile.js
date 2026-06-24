@@ -539,7 +539,9 @@ function checkLinkValid(e, src){
 			   if($('#profileApprovalId #remarksStatus').val()==1){
 				   callCommonAction('','update-teacher-request','dashboard','approve',userId,remarks,'',roleModuleId);
 			   }else if($('#profileApprovalId #remarksStatus').val()==2){
-				   callCommonAction('','update-teacher-request','dashboard','decline',userId,remarks,'',roleModuleId);
+				   $('#profileApprovalModal').modal('hide');
+				   openInactiveReasonModal(userId, remarks, roleModuleId);
+				   return false;
 			   }else if($('#profileApprovalId #remarksStatus').val()==4){
 				   callCommonAction('','update-teacher-request','dashboard','hold',userId,remarks,'',roleModuleId);
 				   $("#status_"+userId).text('On Hold')
@@ -1348,4 +1350,133 @@ function getSelectedWorkingDayIds() {
         dayIds.push(parseInt($(this).val()));
     });
     return dayIds;
+}
+
+/* ---- Inactive Reason Modal (decline flow) ---- */
+function openInactiveReasonModal(userId, remarks, roleModuleId) {
+    if ($('#inactiveReasonModal').length === 0) {
+        $('body').append(buildInactiveReasonModalHtml());
+        $('#inactiveReasonModal #inactiveReasonSelect').on('change', function () {
+            var selectedText = $(this).find('option:selected').text().trim();
+            if (selectedText === 'Other') {
+                $('#inactiveReasonModal #otherReasonGroup').show();
+            } else {
+                $('#inactiveReasonModal #otherReasonGroup').hide();
+                $('#inactiveReasonModal #otherReasonText').val('');
+            }
+        });
+        $('#inactiveReasonModal #confirmDeclineBtn').on('click', function () {
+            var reasonId = $('#inactiveReasonModal #inactiveReasonSelect').val();
+            if (!reasonId || reasonId === '0') {
+                showMessageTheme2(0, 'Please select a reason for declining.');
+                return false;
+            }
+            var selectedText = $('#inactiveReasonModal #inactiveReasonSelect option:selected').text().trim();
+            var otherReason = '';
+            if (selectedText === 'Other') {
+                otherReason = $.trim($('#inactiveReasonModal #otherReasonText').val());
+                if (!otherReason) {
+                    showMessageTheme2(0, 'Please enter a reason in the Other Reason field.');
+                    return false;
+                }
+            }
+            $('#inactiveReasonModal').modal('hide');
+            callDeclineWithReason(userId, remarks, reasonId, otherReason, roleModuleId);
+        });
+    }
+    $('#inactiveReasonModal #inactiveReasonSelect').val('0');
+    $('#inactiveReasonModal #otherReasonGroup').hide();
+    $('#inactiveReasonModal #otherReasonText').val('');
+    loadInactiveReasons(roleModuleId, function () {
+        $('#inactiveReasonModal').modal('show');
+    });
+}
+
+function loadInactiveReasons(roleModuleId, callback) {
+    $.ajax({
+        type: 'GET',
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLFor('dashboard', 'inactive-reasons'),
+        dataType: 'json',
+        cache: false,
+        timeout: 30000,
+        success: function (data) {
+            var select = $('#inactiveReasonModal #inactiveReasonSelect');
+            select.find('option:not(:first)').remove();
+            if (data && data.reasonsList) {
+                $.each(data.reasonsList, function (i, r) {
+                    select.append('<option value="' + r.id + '">' + r.reason + '</option>');
+                });
+            }
+            if (callback) callback();
+        },
+        error: function () {
+            showMessageTheme2(0, 'Failed to load decline reasons. Please try again.');
+        }
+    });
+}
+
+function callDeclineWithReason(userId, remarks, inactiveReasonId, otherReason, roleModuleId) {
+    var request = {};
+    var authentication = {};
+    var requestData = {};
+    authentication['hash'] = getHash();
+    authentication['schoolId'] = SCHOOL_ID;
+    authentication['schoolUUID'] = SCHOOL_UUID;
+    authentication['userType'] = 'dashboard';
+    authentication['userId'] = userId;
+    request['authentication'] = authentication;
+    requestData['requestKey'] = 'decline';
+    requestData['requestValue'] = 'decline';
+    requestData['requestExtra'] = remarks;
+    requestData['requestExtra1'] = inactiveReasonId;
+    requestData['requestExtra2'] = otherReason;
+    request['requestData'] = requestData;
+    $.ajax({
+        type: 'POST',
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLFor('dashboard', 'update-teacher-request'),
+        data: JSON.stringify(request),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        success: function (data) {
+            if (data['status'] == '0' || data['status'] == '2') {
+                showMessageTheme2(0, data['message']);
+            } else {
+                showMessageTheme2(1, data['message']);
+                $('#approvedRequest' + userId).text('Declined');
+                $('#profileId_' + userId).remove();
+            }
+        }
+    });
+}
+
+function buildInactiveReasonModalHtml() {
+    return `<div id="inactiveReasonModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content modal-md">
+                <div class="modal-header primary-bg white-txt-color">
+                    <button type="button" class="close white-txt-color" data-dismiss="modal" style="color:#fff;opacity:1">&times;</button>
+                    <h5 class="modal-title" style="color:white;text-align:center;"><strong>Select Decline Reason</strong></h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Reason <span class="text-danger">*</span></label>
+                        <select id="inactiveReasonSelect" class="form-control">
+                            <option value="0">-- Select Reason --</option>
+                        </select>
+                    </div>
+                    <div id="otherReasonGroup" class="form-group" style="display:none;">
+                        <label>Other Reason <span class="text-danger">*</span></label>
+                        <textarea id="otherReasonText" class="form-control" rows="3" maxlength="500" placeholder="Enter reason..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="text-align:center;">
+                    <button type="button" class="btn btn-danger" id="confirmDeclineBtn">Confirm Decline</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
 }
