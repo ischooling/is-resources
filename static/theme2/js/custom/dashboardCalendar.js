@@ -8,6 +8,8 @@ var IS_CLICKED_FEEDBACK_BTN = false;
 var IS_PENDING_FEEDBACK_POPUP_REQUEST = false;
 var IS_PENDING_FEEDBACK_POPUP_REQUESTED = false;
 var SHOULD_SHOW_BULK_FEEDBACK_POPUP_TODAY = undefined;
+var userIdsForFeedback = getSettingsByTypeAndKey("CONFIGURATION", "USER_FOR_FEEDBACK_TEST", false)
+var USER_ID_FOR_FEEDBACK = getSettingMetaValue(userIdsForFeedback).split(",").includes(USER_ID);
 // Keeps the calendar event object reachable by id so the feedback button
 // (rendered on past classes) can rebuild the feedback request on click.
 var FEEDBACK_EVENT_MAP = {};
@@ -828,6 +830,8 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			});
 		}
 		var isSysTrainingEvent = (info.eventType || "").startsWith("SYS-TRAINING", 0);
+		// var userIdsForFeedback = getSettingsByTypeAndKey("CONFIGURATION", "USER_FOR_FEEDBACK_TEST", false)
+		// userIdsForFeedback = getSettingMetaValue(userIdsForFeedback).split(",").includes(USER_ID);
 
 		// ============================
 		// ⏱ LIVE / UPCOMING LOGIC
@@ -880,7 +884,9 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					var eventDateText = eventDate ? moment(eventDate).format("YYYY-MM-DD") : "";
 					var feedbackBtn = "";
 					if (showFromDate && eventDateText && eventDateText < showFromDate) {
-						// return "";
+						if(USER_ID_FOR_FEEDBACK){
+							element.append(getFeedbackBtn(info.id, info.title, info.start));
+						}
 					}else{
 						element.append(getFeedbackBtn(info.id, info.title, info.start));
 						// feedbackBtn = getFeedbackBtn(info.id, courseName, info.start);

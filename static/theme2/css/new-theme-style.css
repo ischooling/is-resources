@@ -5863,7 +5863,6 @@ border-top-right-radius:.3rem
 	background-color: red;
 	left: 24%;
 	top:33%;
-	opacity: 0;
 	z-index: -1;
 }
 .modal-header .close:hover::after{

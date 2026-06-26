@@ -186,13 +186,13 @@ function getFeedbackModalDelayMinutes() {
 }
 
 function shouldShowFeedbackPopupAfterClass() {
-    if (FEEDBACK_SHOW_POPUP_AFTER_CLASS != undefined) {
-        return FEEDBACK_SHOW_POPUP_AFTER_CLASS;
-    }
     try {
-        var setting = getSettingsByTypeAndKey("CONFIGURATION", "FEEDBACK_SHOW_POPUP_AFTER_CLASS", false);
-        var value = (getSettingMetaValue(setting) || "").toString().trim().toUpperCase();
-        FEEDBACK_SHOW_POPUP_AFTER_CLASS = value === "TRUE" || value === "Y" || value === "YES" || value === "1";
+        const setting = getSettingsByTypeAndKey("CONFIGURATION","FEEDBACK_SHOW_POPUP_AFTER_CLASS",false);
+        const testUsersSetting = getSettingsByTypeAndKey("CONFIGURATION","USER_FOR_FEEDBACK_TEST",false);
+        const isFeedbackEnabled = (getSettingMetaValue(setting) || "").trim().toUpperCase() === "TRUE";
+        const testUsers = (getSettingMetaValue(testUsersSetting) || "").split(",").map(id => id.trim());
+        const isTestUser = testUsers.includes(String(USER_ID));
+        FEEDBACK_SHOW_POPUP_AFTER_CLASS = isFeedbackEnabled || isTestUser;
     } catch (e) {
         FEEDBACK_SHOW_POPUP_AFTER_CLASS = false;
     }

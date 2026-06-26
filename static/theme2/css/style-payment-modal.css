@@ -139,13 +139,16 @@ a, a:hover, a:focus{text-decoration: none;}
 
 }
 @media(max-width:550px){
-	.payment-option-wrapper .payment-option .flex-item .payment-icon{max-height: 156px;overflow-y: auto;}
+	.payment-option-wrapper .payment-option .flex-item .payment-icon{max-height: 156px;overflow-y: auto; justify-content: center;}
+	.hide-on-mobile{display: none !important;opacity: 0 !important;}
+
 }
 @media(max-width: 480px){
 	#payment-opiton-modal .modal-lg{width: 98% !important;}
 	.section-heading{font-size: 20px;}
 	.payment-option strong{word-break: break-all;}
 	.payment-option h3{font-size: 18px;line-height: 22px;}
+	.payment-tab-mobile-view{text-align: center !important;font-size: 22px !important; height: auto !important;}
 
 } 
 

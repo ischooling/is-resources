@@ -338,7 +338,7 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 async function getPaymentGatewayOptionsModal(details){
 	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 	var html=
-	`<div id="paymentOptionsModal" class="modal theme-modal fade payment-opiton-modal" role="dialog" data-backdrop="static" data-keyboard="false" style="overflow: auto;">
+	`<div id="paymentOptionsModal" class=" modal theme-modal fade payment-opiton-modal" role="dialog" data-backdrop="static" data-keyboard="false" style="overflow: auto;">
 		<div class="modal-dialog modal-xl">
 			<div class="modal-content">
 				<div class="modal-header py-2 primary-bg white-txt-color">
@@ -350,8 +350,8 @@ async function getPaymentGatewayOptionsModal(details){
 				<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
 					<section class="payment-option-wrapper">
 						<div class="full">
-							<h4 class="section-heading primary-bg-before primary-bg-after">Payment Options Available</h4>
-							<span style="width:100%;display:inline-block"><i class="fa fa-star text-primary"></i>&nbsp;${details.schoolNameOfPaymentGateway} is trusted by the safest and most reputed payment ${SCHOOL_ID==1?'gateways, banks and wallets':'gateway and bank'}</span>
+							<h4 class="section-heading primary-bg-before primary-bg-after">Choose Your Payment Method</h4>
+							<span style="width:100%;display:inline-block; font-size:13px"> ${ SCHOOL_ID == 1 ? 'Powered by Trusted Global Payment Gateways.' : details.schoolNameOfPaymentGateway + ' is trusted by the safest and most reputed payment gateway and bank' } </span>
 						</div>
 						<div class="tab-wrapper">
 							<div class="payment-tabs">
@@ -359,7 +359,7 @@ async function getPaymentGatewayOptionsModal(details){
 									$.each(details.paymentOptions, function(k,v){
 										html+=
 										`<li role="presentation" class="nav-item">
-											<a href="#payment_option_${k+1}" aria-controls="paymentOption${k+1}" role="tab" data-toggle="tab" class="payment-option-itme secondary-border-color ${k==0?'active':''}">Option ${k+1}: Pay via ${toTitleCase(v.name)}</a>
+											<a href="#payment_option_${k+1}" aria-controls="paymentOption${k+1}" role="tab" data-toggle="tab" class="payment-tab-mobile-view payment-option-itme secondary-border-color ${k==0?'active':''}">Choose ${k+1}: Pay via ${toTitleCase(v.name)}</a>
 										</li>`;
 									});
 									html+=
@@ -550,7 +550,7 @@ async function getPaymentGatewayOptionsModal(details){
 											}
 											if(v.name=='Airwallex'){
 												html+=`
-												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
+												<div class="payment-icon justify-content-sm-end justify-content-center " style="margin-bottom:0px; margin-top:30px">
 													<div id="payButton${k+1}" class="smoov lg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
@@ -558,7 +558,7 @@ async function getPaymentGatewayOptionsModal(details){
 											}
 											else if(v.name=='YOCO'){
 												 html+= `
-												<div class="payment-icon " style="margin-top:0;margin-bottom:10px;justify-content:flex-end" style="display:none;">
+												<div class="payment-icon justify-content-sm-end justify-content-center " style="margin-bottom:0px; margin-top:30px" style="display:none;">
 													<div id="payButton${k+1}" class="smoov lg white-txt-color">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
@@ -566,7 +566,7 @@ async function getPaymentGatewayOptionsModal(details){
 											}
 											else if(v.name=='STRIPE' || v.name=='CONVERA'){
 												html+=
-												`<div class="payment-icon" style="margin-top:0;margin-bottom:10px;justify-content:flex-end">
+												`<div class="payment-icon justify-content-sm-end justify-content-center" style="margin-bottom:0px; margin-top:30px">
 													<div id="payButton${k+1}" class="smoov lg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
 													</div>
@@ -582,7 +582,7 @@ async function getPaymentGatewayOptionsModal(details){
 					</section>
 				</div>
 				<div class="modal-footer">
-					<div style="display:flex;flex-wrap:wrap;margin-right:auto;">
+					<div style="display:flex;flex-wrap:wrap;margin-right:auto; justify-content: center;">
 						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
 							<i class="fa fa-lock" style="position:relative;top:3px"></i>
 							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">SSL Secured &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
@@ -597,10 +597,6 @@ async function getPaymentGatewayOptionsModal(details){
 							<i class="fa fa-globe" style="position:relative;top:3px"></i>
 							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">Global Gateways &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
 							
-						</span>
-						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
-							<i class="fa fa-globe" style="position:relative;top:3px"></i>
-							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">We never store your card details &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
 						</span>
 					</div>
 				</div>
@@ -940,13 +936,13 @@ async function courseFeeModalTNC(responseData) {
                             </li>
                             <li style="margin-bottom: 2px;position: inherit;float: inherit;text-align: justify">Declare all information provided by me in any of the steps of the Enrollment Form are true, complete and correct to the best of my own knowledge and belief. I understand that in the event of any information being found suppressed/false or incorrect or any ineligibility detected at the time or after the enrollment, my enrollment (or that of my child/ward, as the case may be) is liable to be canceled with immediate effect</li>
                         </ol>
-                        <div class="custom-checkbox-policy">
+                        <div class="custom-checkbox-policy align-items-start">
                             <input type="checkbox" name="chkval" id="chkval" required tabindex="7">
                             <label class="mb-0" for="chkval">By checking this box, I have read & agree to the above-mentioned terms and conditions.</label>
                         </div>
                     </div>
-                    <div class="full mt-2">
-                        <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+                    <div class="full mt-2 full mt-2 text-center">
+                        <button type="button" id="payTabData" class="btn" style="background-color: green;color: white;" disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
                     </div>
                 `;
             } else {
@@ -1099,11 +1095,11 @@ async function courseFeeModalTNC(responseData) {
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary d-flex">
-                        <h5 class="modal-title text-white">${modalTitle}</h5>
+						${/* <h5 class="modal-title text-white">${modalTitle}</h5> */''}
                         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                     </div>
                     <form id="dashboardPayment" name="dashboardPayment" method="post" autocomplete="off">
-                        <div class="modal-body" style="max-height: 400px;overflow-y: auto;">
+                        <div class="modal-body">
                             <p class="scroll-down" style="margin-top:5px;"><a href="#" class="animate"></a></p>
                             <input type="hidden" id="userId" value="${userId}" />
                             <div class="agree">
@@ -1111,7 +1107,7 @@ async function courseFeeModalTNC(responseData) {
                             </div>
                         </div>
                         ${showFooter ? `
-                            <div class="modal-footer justify-content-between">
+                            <div class="modal-footer justify-content-between full mt-2 text-center">
                                 <div class="d-flex align-items-center">
                                     <span class="d-flex" style="gap: 5px;">
                                        <input type="checkbox" id="chkval" class="checkbox-lg" name="chkval">
@@ -1123,7 +1119,7 @@ async function courseFeeModalTNC(responseData) {
                                         </label>
                                    </span>
                                 </div>
-                               <button type="button" id="payTabData" class="btn btn-success " disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
+                               <button type="button" id="payTabData" class="btn " style="background-color: green;color: white;" disabled="disabled" onclick="getPaymentGatewaysOptions(${schoolId},${schoolId},'${upid}','${entityType}','${entityId}','${userId}');">Proceed</button>
                            </div>
                         ` : ''}
                     </form>
