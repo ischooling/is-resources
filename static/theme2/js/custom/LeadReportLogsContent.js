@@ -139,7 +139,7 @@ function getLeadLogsFiltersAndTable() {
 						<i class="fas fa-sync" id="callSyncRotate"></i>
 					</button>
 				</div>
-				<div class="col-12 col-lg-5 mb-2 custom-field-scope">
+				<div class="col-12 col-lg-6 mb-2 custom-field-scope">
 					<div class="row align-items-end">
 						<div class="col-12 col-md-5 hidecounselorLead mb-2 mb-md-0 custom-field">
 							<input type="text" name="counselorStartDate" id="counselorStartDate" class="form-control" readonly onkeydown="return false" />
@@ -160,6 +160,35 @@ function getLeadLogsFiltersAndTable() {
 					</button>
 				</div>
 			</div>
+	<hr/>
+	<div class="row mb-3" id="ziwoLogsSummarySection">
+		<div class="col-lg-12 col-md-12 p-0">
+			<div class="card border-primary">
+				<div class="card-header bg-primary text-white py-2 d-flex align-items-center justify-content-between">
+					<span><i class="fas fa-phone-alt mr-2"></i><b>ZIWO CALL LOGS</b></span>
+					<span class="badge badge-light text-primary" id="ziwoTotalCallsBadge">0</span>
+				</div>
+				<div class="card-body p-2">
+					<table class="table table-bordered table-sm mb-0" style="font-size:12px;">
+						<thead>
+							<tr class="bg-primary text-white text-center">
+								<th class="text-center" style="width:5%">Sr No.</th>
+								<th>User Name</th>
+								<th>User Email</th>
+								<th class="text-center">Total Calls</th>
+								<th class="text-center">Attended</th>
+								<th class="text-center">Unattended</th>
+								<th class="text-center">Action</th>
+							</tr>
+						</thead>
+						<tbody id="ziwoLogsSummaryTbody">
+							<tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 	<hr/>
 	<div class="row">
 		<div class="col-lg-12 col-md-12 p-0">
@@ -220,6 +249,7 @@ async function initializeLeadLogsPage() {
 		}
 
 		callLeadLogsCounselorsList('leadReportSearch', $("#searchLeadCounselorType").val(), startDate, endDate, 'listCounselorTbody');
+		loadZiwoLogsSummary($("#searchLeadCounselorType").val(), startDate, endDate);
 	});
 }
 
@@ -292,7 +322,7 @@ function getLeadLogsCounselorHtml(data) {
 		var actionHtml = getLeadLogsTableActionHtml(mappingRow);
 		htmlRet += '<tr>';
 		htmlRet += '<td class="text-center">' + (ind + 1) + '</td>';
-		htmlRet += '<td style="vertical-align: top !important;" class="text-left">' + sanitizeLeadLogsText(leadCounselor.assignName) + '</td>';
+		htmlRet += '<td style="vertical-align: top !important;" class="text-center">' + sanitizeLeadLogsText(leadCounselor.assignName) + '</td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showZadarmaDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.zadarma) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-success text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.zadarmaCount) + '</button>&nbsp;|&nbsp;<button onClick="showCallhippoDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.callhippo) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-info text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.callhippoCount) + '</button></td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showWatiDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.wati) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-warning text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.watiCount) + '</button></td>';
 		htmlRet += '<td style="vertical-align: top !important;" class="text-center"><button onClick="showGupshupBroadcastDetails(\'' + sanitizeLeadLogsJsValue(leadCounselor.gupshupIds) + '\')" style="border: none; outline: none; cursor: pointer;" class="bg-success text-white text-center badge font-12">' + sanitizeLeadLogsText(leadCounselor.gupshupCount) + '</button></td>';
@@ -660,11 +690,70 @@ function reloadLeadLogsDashboardReport() {
 		var endDate = $("#counselorEndDate").val();
 		if (startDate && endDate) {
 			callLeadLogsCounselorsList('leadReportSearch', filterType, startDate, endDate, 'listCounselorTbody');
+			loadZiwoLogsSummary(filterType, startDate, endDate);
 		}
 		return;
 	}
 
 	callLeadLogsCounselorsList('leadReportSearch', filterType, '', '', 'listCounselorTbody');
+	loadZiwoLogsSummary(filterType, '', '');
+}
+
+function loadZiwoLogsSummary(searchDateType, startDate, endDate) {
+	var body = {
+		searchDateType: searchDateType,
+		startDate: startDate || '',
+		endDate: endDate || ''
+	};
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: BASE_URL + CONTEXT_PATH + "ziwo/v1/get-user-wise-summary",
+		data: JSON.stringify(body),
+		dataType: 'json',
+		cache: false,
+		timeout: 60000,
+		success: function (response) {
+			if (response.statusCode === 0 && response.users) {
+				renderZiwoLogsSummary(response.users);
+			} else {
+				$("#ziwoLogsSummaryTbody").html('<tr><td colspan="7" class="text-center text-muted">No Ziwo logs found.</td></tr>');
+				$("#ziwoTotalCallsBadge").text('0');
+			}
+		},
+		error: function () {
+			$("#ziwoLogsSummaryTbody").html('<tr><td colspan="7" class="text-center text-danger">Unable to load Ziwo logs.</td></tr>');
+			$("#ziwoTotalCallsBadge").text('0');
+		}
+	});
+}
+
+function renderZiwoLogsSummary(users) {
+	var html = '';
+	var totalCalls = 0;
+
+	if (!users || !users.length) {
+		html = '<tr><td colspan="7" class="text-center text-muted">No Ziwo call logs for this period.</td></tr>';
+	} else {
+		for (var i = 0; i < users.length; i++) {
+			var u = users[i];
+			totalCalls += (u.totalCalls || 0);
+			var attendedBadge = '<span class="badge badge-success">' + (u.attendedCalls || 0) + '</span>';
+			var unattendedBadge = '<span class="badge badge-warning text-dark">' + (u.unattendedCalls || 0) + '</span>';
+			html += '<tr>';
+			html += '<td class="text-center">' + (i + 1) + '</td>';
+			html += '<td class="text-center">' + sanitizeLeadLogsText(u.userName || '') + '</td>';
+			html += '<td class="text-center">' + sanitizeLeadLogsText(u.email) + '</td>';
+			html += '<td class="text-center"><span class="badge badge-danger text-white font-12">' + (u.totalCalls || 0) + '</span></td>';
+			html += '<td class="text-center">' + attendedBadge + '</td>';
+			html += '<td class="text-center">' + unattendedBadge + '</td>';
+			html += '<td class="text-center"><button onclick="showZiwoDetails(\'' + sanitizeLeadLogsJsValue(u.ids) + '\')" class="btn btn-sm btn-danger"><i class="fas fa-eye mr-1"></i>View Logs</button></td>';
+			html += '</tr>';
+		}
+	}
+
+	$("#ziwoLogsSummaryTbody").html(html);
+	$("#ziwoTotalCallsBadge").text(totalCalls);
 }
 
 function resetLeadLogsUserMappingForm() {

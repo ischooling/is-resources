@@ -3,22 +3,26 @@ function parentStudentClassScheduleContentLoadEvent(){
     $("#startDate").datepicker({
         autoclose: true,
         format: 'M d, yyyy',
+        container: 'body',
     });
     $("#endDate").datepicker({
         autoclose: true,
         format: 'M d, yyyy',
+        container: 'body',
     });
-    $('.user-slider').slick({
-        slidesToShow:getSlidesToShow(),
-        slidesToScroll:1,
-        infinite:false,
-        arrows:true,
-        responsive:[
-            {breakpoint:992, settings:{slidesToShow:3}},
-            {breakpoint:768, settings:{slidesToShow:2}},
-            {breakpoint:576, settings:{slidesToShow:1}}
-        ]
-    });
+    if(typeof getSlidesToShow === "function" && $('.user-slider').length){
+        $('.user-slider').slick({
+            slidesToShow:getSlidesToShow(),
+            slidesToScroll:1,
+            infinite:false,
+            arrows:true,
+            responsive:[
+                {breakpoint:992, settings:{slidesToShow:3}},
+                {breakpoint:768, settings:{slidesToShow:2}},
+                {breakpoint:576, settings:{slidesToShow:1}}
+            ]
+        });
+    }
     calendarTimeInterval("Asia/Singapore");
 }
 
@@ -124,19 +128,21 @@ async function callSchoolCalendar(studentId){
         onSuccessResolved: true
     }
     var eventList = await callCommonAjax(ajaxReqDetails);
-    var timeZoneFlag = STUDENT_LIST?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID) ?.countryISOCode || ''
+    var _studentList = (typeof STUDENT_LIST !== "undefined") ? STUDENT_LIST : null;
+    var _activeStudent = _studentList?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID);
+    var timeZoneFlag = _activeStudent?.countryISOCode || ''
     $("#countryFlag").attr("src", PATH_FOLDER_FONT2+timeZoneFlag+".svg").show();
-    $(".user_timezone").html(`<label>${STUDENT_LIST?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID) ?.studentTimezone || moment.tz.guess()}&nbsp;</label>`)
+    $(".user_timezone").html(`<label>${_activeStudent?.studentTimezone || moment.tz.guess()}&nbsp;</label>`)
     var finalEvents=[];
     var events = eventList.details.schedule || [];
-       
+
     if(events.length>0){
         events.forEach(obj => {
             if(obj.id.startsWith("announce", 0) || obj.id.startsWith("holiday", 0)){
                 finalEvents.push(obj);
             }
             else{
-                var activeStudentTimezone = STUDENT_LIST?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID) ?.studentTimezone || moment.tz.guess();
+                var activeStudentTimezone = _activeStudent?.studentTimezone || moment.tz.guess();
                 obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, activeStudentTimezone, DATE_UTC+'T'+TIME_UTC);
                 obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, activeStudentTimezone, DATE_UTC+'T'+TIME_UTC);
                 ACTIVITY_CLASS_START_TIME.push({"startTime":obj.start.replace("T", " "), "endTime":obj.end.replace("T", " "), "title":"class"});
@@ -157,6 +163,22 @@ async function callSchoolCalendar(studentId){
         startDate: startFormatted,
         endDate: endFormatted
     };
+}
+
+// Submit Feedback button -> reuse the shared class-feedback flow (feedbackStudentTeacher.js).
+// openClassFeedback() refreshes FEEDBACK_WEBHOOK, hits get-feedback-submission and shows
+// the embed iframe with the respondent + webhook params attached.
+function openParentStudentClassFeedback(eventId) {
+    var event = GLOBAL_EVENTS.find(function (e) { return (e.id + "") === (eventId + ""); });
+    if (!event) return;
+
+    openClassFeedback({
+        eventId: event.entityId,
+        eventType: event.type,
+        eventTitle: event.courseName,
+        teacherName: event.teacherName,
+        start: { _i: event.start }
+    });
 }
 
 function updateEventStatuses() {
@@ -390,7 +412,8 @@ function parentStudentClassScheduleEnsureSummaryModal(){
 }
 
 function parentStudentClassScheduleSummaryBodyHTML(details, eventMeta){
-    var activeStudent = (STUDENT_LIST && STUDENT_LIST.studentBasicDetails ? STUDENT_LIST.studentBasicDetails : []).find(function(s){
+    var _sl = (typeof STUDENT_LIST !== "undefined") ? STUDENT_LIST : null;
+    var activeStudent = (_sl && _sl.studentBasicDetails ? _sl.studentBasicDetails : []).find(function(s){
         return (s.userId + "") === (ACTIVE_STUDENT_ID + "");
     }) || {};
 

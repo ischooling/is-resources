@@ -328,6 +328,11 @@ function convertLocalToUTCAs(dateTime, datetimeFormat, timezone) {
 	return moment.tz(dateTime, datetimeFormat, timezone).utc();
 }
 
+// Convert a local date/datetime (JS Date or parseable string) to UTC "YYYY-MM-DD HH:mm:ss".
+function convertLocalToUTCDateTime(dateTime) {
+	return moment(dateTime).utc().format(DATETIME_UTC_FORMATTER);
+}
+
 function convertTime(dateTime, datetimeFormat, fromTimezone, toTimezone, outputDateFormat, outputTimeFormat){
 	var m=moment.utc(moment.tz(dateTime, datetimeFormat, fromTimezone).utc()).tz(toTimezone)
 	var data={};

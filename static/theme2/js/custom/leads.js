@@ -9523,6 +9523,212 @@ function closeZadarmaModal() {
 	currentZadarmaIds = '';
 }
 
+// =========== ZIWO LOGS ===========
+var currentPageZiwo = 1;
+var currentZiwoIds = null;
+var ziwoData = [];
+
+function showZiwoDetails(ziwoIds) {
+	if (!ziwoIds || ziwoIds === '' || ziwoIds === 'undefined' || ziwoIds === 'null') {
+		showMessageTheme2(0, 'No Ziwo call logs');
+		return;
+	}
+	var body = {
+		ids: ziwoIds,
+		filterType: $('#sortZiwoLogs').val() || 'ALL',
+		pageNo: currentPageZiwo,
+		pageCount: $('#ziwoPagging').val() || 10,
+	};
+	$.ajax({
+		url: BASE_URL + CONTEXT_PATH + "ziwo/v1/get-logs-by-ids",
+		type: "POST",
+		data: JSON.stringify(body),
+		contentType: APPLICATION_JSON_VALUE,
+		success: function (response) {
+			try {
+				if (response.statusCode === 0) {
+					ZadarmaOrWati = "ziwo";
+					if (currentZiwoIds != ziwoIds) {
+						ziwoData = response.logs;
+						populateZiwoRecords(response.logs, "Ziwo Call Logs", response.totalPages, response.totalCount);
+					} else {
+						ziwoData = response.logs;
+						renderZiwoTable(response.logs);
+						$("#ziwoPagination").html(renderPagination(currentPageZiwo, response.totalPages, response.totalCount, response.logs.length));
+					}
+					currentZiwoIds = ziwoIds;
+				} else if (response.status === '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(0, response.message);
+				}
+			} catch (error) {
+				console.log("Error Fetching Ziwo Data:", error);
+			}
+		}
+	});
+}
+
+function showZiwoSortDetails() {
+	var body = {
+		ids: currentZiwoIds,
+		filterType: $('#sortZiwoLogs').val() || 'ALL',
+		pageNo: 1,
+		pageCount: $('#ziwoPagging').val() || 10,
+	};
+	$.ajax({
+		url: BASE_URL + CONTEXT_PATH + "ziwo/v1/get-logs-by-ids",
+		type: "POST",
+		data: JSON.stringify(body),
+		contentType: APPLICATION_JSON_VALUE,
+		success: function (response) {
+			try {
+				if (response.statusCode === 0) {
+					currentPageZiwo = 1;
+					ZadarmaOrWati = "ziwo";
+					ziwoData = response.logs;
+					renderZiwoTable(response.logs);
+					$("#ziwoPagination").html(renderPagination(currentPageZiwo, response.totalPages, response.totalCount, response.logs.length));
+				} else if (response.status === '3') {
+					redirectLoginPage();
+				} else {
+					showMessageTheme2(0, response.message);
+				}
+			} catch (error) {
+				console.log("Error Fetching Ziwo Data:", error);
+			}
+		}
+	});
+}
+
+function populateZiwoRecords(data, meetingTitle, totalPages, totalCount) {
+	$("#ziwoLogModal").remove();
+	$("#ziwoLogBackdrop").remove();
+
+	var modalContent = `
+	  <div id="ziwoLogBackdrop" class="recurring-modal-backdrop" onclick="closeZiwoModal();" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;z-index:999;"></div>
+	  <div id="ziwoLogModal" style="position:fixed;top:0;right:-90%;width:90%;height:100vh;background:white;box-shadow:-2px 0px 10px rgba(0,0,0,0.2);transition:right 0.3s ease-in-out;z-index:1000;">
+		<div class="p-3" style="background-color:#dc3545;">
+		  <h5 class="mb-0" style="color: white;font-size:18px;font-weight: 700;">${meetingTitle}</h5>
+		  <button onclick="closeZiwoModal();" type="button" class="p-2 cursor" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-30px;top:35px;background-color: white !important;border-radius: 5px 0px 0px 5px;font-size: 35px;border:0px;color:#000;">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="p-3 d-flex px-5 custom-field-scope" style="margin-left:auto; justify-content: space-between;">
+			<div class="custom-field mr-2" style="width:90px; flex:0 0 90px;">
+				<select name="ziwoPagging" id="ziwoPagging" class="w-100 px-2 rounded-lg" onchange="showZiwoSortDetails()">
+					<option value="10" selected="">10</option>
+					<option value="25">25</option>
+					<option value="50">50</option>
+					<option value="100">100</option>
+				</select>
+				<label class="m-0 d-block mb-1">Page Size</label>
+			</div>
+			<div class="d-flex" style="width:300px;">
+				<div class="custom-field mr-2 w-100">
+					<select class="form-control w-100" id="sortZiwoLogs" name="sortZiwoLogs" onchange="showZiwoSortDetails()">
+						<option value="ALL" selected="">All</option>
+						<option value="ATTENDED">Attended Call</option>
+						<option value="UNATTENDED">Un Attended Call</option>
+					</select>
+					<label class="m-0 d-block mb-1">Call Type</label>
+				</div>
+			</div>
+		</div>
+		<div style="background-color: #fff; height: 100vh;">
+		  <div class="px-5" style="height: 80vh;overflow-y:auto;">
+			<table id="ziwo-recordings-table" class="w-100 table table-bordered border-radius-table">
+			  <thead style="position: sticky;top: 0;z-index: 1;">
+				<tr style="font-size: 14px;">
+				  <th class="p-2 border-right-0 border-primary" style="background-color:rgb(248, 215, 218); font-weight: normal; color:#dc3545">Sr No.</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">From Number</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">To Number</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">Type</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">Start At</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">Duration</th>
+				  <th class="p-2 border-right-0 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">Status</th>
+				  <th class="p-2 border-left-0 border-primary" style="background-color:rgb(248, 215, 218);font-weight: normal; color:#dc3545">Recording</th>
+				</tr>
+			  </thead>
+			  <tbody id="ziwoLogModalTableBody"></tbody>
+			</table>
+			<div id="ziwoPagination"></div>
+		  </div>
+		</div>
+	  </div>
+	`;
+	$("body").append(modalContent);
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState("#ziwoLogModal");
+	}
+	renderZiwoTable(data);
+	$("#ziwoPagination").html(renderPagination(currentPageZiwo, totalPages, totalCount, data.length));
+	setTimeout(function () {
+		$("#ziwoLogBackdrop").fadeIn(200);
+		$("#ziwoLogModal").css("right", "0");
+		$("body").css("overflow", "hidden");
+	}, 50);
+}
+
+function renderZiwoTable(data) {
+	var modalContent = '';
+	if (!data || !data.length) {
+		modalContent = '<tr><td colspan="8" class="text-center text-muted">No Ziwo logs found.</td></tr>';
+	} else {
+		for (var i = 0; i < data.length; i++) {
+			var log = data[i];
+			var recordingHtml = '';
+			if (log.recordingUrl && log.recordingUrl !== '') {
+				var ziwoRecordingUrl = 'https://internationalschooling-api.aswat.co/callHistory/' + log.callId + '/recording?access_token=748d0f04-3eb5-498e-baa6-5157baf56166';
+				recordingHtml = '<button onClick="viewCallRecording(\'' + ziwoRecordingUrl + '\')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px; padding:4px 8px;">Play Recording</button>';
+			} else {
+				recordingHtml = '<span class="text-muted">N/A</span>';
+			}
+			var durationDisplay = log.duration ? log.duration + ' sec' : '0 sec';
+			var statusBadge = '';
+			if (log.status) {
+				var statusLower = (log.status || '').toUpperCase();
+				var statusColor = 'badge-secondary';
+				if (statusLower === 'ANSWERED') {
+					statusColor = 'badge-success';
+				} else if (statusLower === 'NO-ANSWER' || statusLower === 'NOANSWER') {
+					statusColor = 'badge-danger';
+				} else if (statusLower === 'CANCEL' || statusLower === 'BUSY') {
+					statusColor = 'badge-warning';
+				}
+				statusBadge = '<span class="badge ' + statusColor + ' text-white">' + (log.status || '') + '</span>';
+			} else {
+				statusBadge = '<span class="badge badge-secondary text-white">N/A</span>';
+			}
+			var rowIndex = ((currentPageZiwo - 1) * (parseInt($('#ziwoPagging').val()) || 10)) + i + 1;
+			modalContent += '<tr>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + rowIndex + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + (log.fromNumber || 'N/A') + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + (log.toNumber || 'N/A') + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + (log.type || 'N/A') + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + (log.startAt || 'N/A') + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + durationDisplay + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + statusBadge + '</td>';
+			modalContent += '<td class="py-2" style="font-weight:500;">' + recordingHtml + '</td>';
+			modalContent += '</tr>';
+		}
+	}
+	$("#ziwoLogModalTableBody").html(modalContent);
+}
+
+function closeZiwoModal() {
+	$("#ziwoLogModal").css("right", "-90%");
+	$("#ziwoLogBackdrop").fadeOut(200);
+	setTimeout(function () {
+		$("#ziwoLogModal").remove();
+		$("#ziwoLogBackdrop").remove();
+		$("body").css("overflow", "auto");
+	}, 300);
+	currentPageZiwo = 1;
+	currentZiwoIds = null;
+}
+// =========== END ZIWO LOGS ===========
+
 
 function populateCallhippoRecords(data, data2,meetingTitle, totalPages,totalCount){
 	$("<style>")
@@ -10737,6 +10943,9 @@ function goToPage(page) {
 	}else if(ZadarmaOrWati == 'mail'){
 		currentPageMail = page;
 		showMailBrodcastDetails(currentMailIds);
+	}else if(ZadarmaOrWati == 'ziwo'){
+		currentPageZiwo = page;
+		showZiwoDetails(currentZiwoIds);
 	}else{
 		currentPageWhatsapp = page;
 		showWhatsappDetails(currentWhatsappIds);

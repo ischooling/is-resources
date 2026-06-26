@@ -1945,7 +1945,6 @@ function callStatesNew(formId, value, elementId, bindElementId) {
 // }
 
 function callForResetPassword(formId, moduleId) {
-  console.trace()
   hideMessage("");
   if (
     $("#password").val().trim() == "" &&
@@ -6617,6 +6616,14 @@ function getSettingsByTypeAndKey(type, key, globalFlag) {
     }
   });
   return responseData;
+}
+
+function getSettingMetaValue(setting) {
+  if (typeof setting === "string") {
+    setting = JSON.parse(setting);
+  }
+
+  return setting && setting.data ? setting.data.metaValue : setting;
 }
 
 function getPlaneFormattedPhone(phoneNumber) {

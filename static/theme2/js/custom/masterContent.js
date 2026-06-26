@@ -3360,3 +3360,25 @@ function getNewReleaseNotificationModal(){
 	</div>`;
 	return html;
 }
+
+async function getAllUserRoles(){
+	var ajaxReqDetails = {
+		method : "POST",
+		url : getURLForCommon('masters'),
+		body : getRequestForMaster('', 'ROLES-LIST', SCHOOL_ID),
+		global: false,
+		showMessage: false,
+		onFaildResolved: true,
+		onSuccessResolved: true
+	};
+	var response = await callCommonAjax(ajaxReqDetails);
+	var roleList = [];
+	var list = response && response.mastersData ? response.mastersData.data : [];
+	$.each(list || [], function(_, role){
+		roleList.push({
+			id: role.key,
+			name: role.value
+		});
+	});
+	return roleList;
+}

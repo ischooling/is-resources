@@ -197,6 +197,15 @@ async function renderStudentDashboard(data){
     var endDate = moment(startDate).add(1, 'days');
     var endFormatted = endDate.format('YYYY-MM-DD');
     await callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
+    var showBulkFeedbackPopup = shouldShowBulkFeedbackPopupToday();
+    if(showBulkFeedbackPopup){
+        feedbackBulkShow = true;
+        var previousWeek = getPreviousWeekDateRange();
+        startdate = previousWeek.startDate;
+        enddate = previousWeek.endDate;
+        viewName = "agendaWeek";
+        // await callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, true);
+    }
     calendarTimeInterval();
     setTimeout(function(){
         $('button.fc-today-button').unbind("click").bind("click", function() {

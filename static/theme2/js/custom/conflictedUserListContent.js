@@ -34,15 +34,15 @@ function getConflictedUserContentCard(){
 
 
 function getConflictedUserContentList(){
-        var html = `<table class="table table-bordered table-striped responsive nowrap" id="conflictedUserListTable" style="width:100%;" >
+        var html = `<table class="table table-bordered table-striped responsive" id="conflictedUserListTable" style="width:100%;" >
                         <thead>
                             <tr class="bg-primary text-white">
                             <th style="text-align:center;font-weight:bold">S.No</th>
                             <th style="font-weight:bold">Email</th>
                             <th style="font-weight:bold">Student Id</th>
                             <th style="font-weight:bold">Role Type</th>
-                            <th style="font-weight:bold">Created Date</th>
-                            <th style="font-weight:bold">Updated Date</th>
+                            <th style="font-weight:bold;white-space:normal;min-width:130px;">Created Date</th>
+                            <th style="font-weight:bold;white-space:normal;min-width:130px;">Updated Date</th>
                             <th style="font-weight:bold">Status</th>
                             ${SCHOOL_ID==1?'<th>Action</th>':''}
 						    </tr>

@@ -268,3 +268,55 @@ function minutesToAmPm(totalMinutes) {
 
     return `${String(hour12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${ampm}`;
 }
+
+
+function convertToUTC(dateTime, timezoneFrom) {
+    if (!dateTime.includes("T")) {
+        dateTime = dateTime.replace(" ", "T");
+    }
+    const [datePart, timePart] = dateTime.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+
+    const utcGuess = new Date(Date.UTC( year, month - 1, day, hour, minute, second));
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: timezoneFrom,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+    });
+
+    const parts = formatter.formatToParts(utcGuess);
+
+    const values = {};
+    parts.forEach(part => {
+        if (part.type !== "literal") {
+            values[part.type] = part.value;
+        }
+    });
+
+    const zonedTimeAsUTC = Date.UTC(
+        Number(values.year),
+        Number(values.month) - 1,
+        Number(values.day),
+        Number(values.hour),
+        Number(values.minute),
+        Number(values.second)
+    );
+
+    const desiredTimeAsUTC = Date.UTC(year, month - 1, day, hour, minute, second);
+    const offset = desiredTimeAsUTC - zonedTimeAsUTC;
+    const utcDate = new Date(utcGuess.getTime() + offset);
+    
+    return utcDate.getUTCFullYear() + "-" +
+        String(utcDate.getUTCMonth() + 1).padStart(2, "0") + "-" +
+        String(utcDate.getUTCDate()).padStart(2, "0") + " " +
+        String(utcDate.getUTCHours()).padStart(2, "0") + ":" +
+        String(utcDate.getUTCMinutes()).padStart(2, "0") + ":" +
+        String(utcDate.getUTCSeconds()).padStart(2, "0");
+}

@@ -1,6 +1,6 @@
 var PAGE_REQUEST;
 var MODULE_ID;
-async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam) {
+async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam, extraParam1) {
     PAGE_REQUEST = pageNo;
     MODULE_ID = moduleId;
     showAndHideDashboardAndAdditionalContent("main");
@@ -27,6 +27,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "academic-year-date-settings":{url:"academic-year-date-settings?moduleId="+moduleId,file:[],type:"JSP",pageReqType:"IN"},
         "manage-lms-user":{url:"",file:[{role:"",fileName:["manageLMSContent.js","manageLMS.js","agilixbuzzApi.js","adminManageuserList.js"]}, {role:"",fileName:["dashboardStudent.js","dashboardStudentTeacherSession.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "manage-session":{url:"",file:[{role:"",fileName:["manageSessionContent.js","manageSession.js","agilixbuzzApi.js"]}, {role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "school-settings":{url:"",file:[{role:"",fileName:["SchoolSettingContent.js","SchoolSetting.js","standardFeeContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "extra-session-details":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-teacher-sessions":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}, {role:"",fileName:["dashboardCalendar.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-transcript":{url:"student-list?moduleId="+moduleId,file:[{role:"",fileName:["advanceTranscriptSearch.js"]}],type:"JSP",pageReqType:"IN"},
@@ -98,6 +99,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "manage-club":{url:"",file:[{role:"",fileName:["manageClubsContent.js","manageClubs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "Parent-dashboard":{url:"",file:[{role:"",fileName:[""]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-class-schedule":{url:"",file:[{role:"",fileName:["parentStudentClassScheduleContent.js","parentStudentClassSchedule.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "teacher-class-schedule":{url:"",file:[{role:"",fileName:["feedbackContents.js","teacherClassScheduleContent.js","teacherClassSchedule.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-attendance":{url:"",file:[{role:"",fileName:["attendaceByStudentIdContent.js","attendaceByStudentId.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // STUDENT PAGE CONFIG
         "batch-schedule":{url:"teacher-batch-time-schedule?moduleId="+moduleId+"&userId="+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
@@ -136,7 +138,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "competitive-gaming":{url:"competitive-gaming",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "global-competitions-club":{url:"global-competitions-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "game-strategy-analysis-club":{url:"game-strategy-analysis-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
-        "student-feedback":{url:"student-feedback",file:[{role:"",fileName:["studentfeedbackContent.js","studentfeedback.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
+        "student-feedback":{url:"student-feedback",file:[{role:"",fileName:["feedbackContents.js","feedbackNew.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
 
         // PARENT //
         "parent-student-login-details":{url:"",file:[{role:"",fileName:["studentParentLoginHistoryContent.js","studentParentLoginHistory.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -209,7 +211,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
         "email-template-tester":{url:"",file:[{role:"",fileName:["emailTemplateTesterContent.js","emailTemplateTester.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "log-viewer":{url:"",file:[{role:"",fileName:["logViewerContent.js","logViewer.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "location-checker-captures":{url:"location-checker-captures-content?moduleId="+moduleId,file:[],type:"JSP",pageReqType:"IN"},
-        
+        "feedback-form":{url:"",file:[{role:"",fileName:["feedbackFormContent.js","feedbackForm.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {
@@ -266,7 +268,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam)
               await loadScript(requestType.file);
           }
           if(requestType.pageReqType == "IN"){
-              getContent(moduleId, pageNo, replaceDiv, extraParam);
+              getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1);
           }else if(requestType.pageReqType == "EX"){
               getAsPost(requestType.urlSend);
           }else{

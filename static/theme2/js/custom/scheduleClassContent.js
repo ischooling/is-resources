@@ -665,33 +665,9 @@ function initScheduleClassSelect2(){
 	// These fields are plain inputs now, so no Select2 setup is needed here.
 }
 
-function addScheduleStudentNameCss(){
-	if($('#scheduleStudentNameCss').length > 0){
-		return;
-	}
-	$('head').append('<style id="scheduleStudentNameCss">'
-		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field input,'
-		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field select{height:44px !important;line-height:44px !important;padding-top:0 !important;padding-bottom:0 !important;}'
-		+'#classroomSessionFilter #standardIdDiv select,'
-		+'#classroomSessionFilter #standardIdDiv select option{color:#000 !important;}'
-		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-container,'
-		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection--single{height:44px !important;min-height:44px !important;}'
-		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection__rendered{line-height:44px !important;padding-top:0 !important;padding-bottom:0 !important;}'
-		+'.schedule-class-line-height-scope #classroomSessionFilter .custom-field .select2-selection__arrow{height:44px !important;}'
-		+'.schedule-class-line-height-scope #classroomSessionFilter #studentNameDiv .select2-selection--single{display:flex !important;align-items:center !important;}'
-		+'.schedule-class-line-height-scope #classroomSessionFilter #studentNameDiv .select2-selection__rendered{line-height:normal !important;width:100%;}'
-		+'#classroomSessionFilter #studentNameDiv .custom-field label:not(.error-msg){z-index:20;background:#fff;}'
-		+'#classroomSessionFilter #studentNameDiv .custom-field.has-value label:not(.error-msg),'
-		+'#classroomSessionFilter #studentNameDiv .custom-field.active label:not(.error-msg),'
-		+'#classroomSessionFilter #studentNameDiv .custom-field:has(.select2-container--focus) label:not(.error-msg){top:0;transform:translateY(-46%);font-size:12px;font-weight:500;color:var(--custom-field-active);}'
-		+'#classroomSessionFilter #studentNameDiv .custom-field .select2-container{position:relative;z-index:1;}'
-	+'</style>');
-}
-
 function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
-	addScheduleStudentNameCss();
 	var html=
-	'<div class="filter-wrapper custom-field-scope schedule-class-line-height-scope">'
+	'<div class="filter-wrapper custom-field-scope">'
 		// +'<div class="full">'
 		// +'<button class="btn btn-sm btn-primary float-right show-filter" onClick="toggleFilter(\'classroomSessionFilter\')"><i class="fa fa-filter"></i>&nbsp;Filter</button>'
 		// +'</div>'
@@ -757,8 +733,8 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 						'col-lg-3 col-md-4 col-sm-6 col-12',
 						'Student Name',
 						role=='TEACHER'
-							? getScheduleSelect('studentName', 'studentName', '', 'onchange="return callCoursesAssignedToteacher(this.value,'+userId+')"')
-							: getScheduleTextInput('studentName', 'studentName', '', 'maxlength="100" onkeydown="return M.isChars(event);"'),
+							? getScheduleSelect('studentName', 'studentName', '', 'onchange="return callCoursesAssignedToteacher(this.value,'+userId+')" style="height:23px !important;line-height:23px !important;"')
+							: getScheduleTextInput('studentName', 'studentName', '', 'maxlength="100" onkeydown="return M.isChars(event);" style="height:23px !important;line-height:23px !important;"'),
 						'id="studentNameDiv"'
 					);
 					html+=getScheduleCustomField(

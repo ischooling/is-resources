@@ -1,7 +1,33 @@
 function renderStudentFeedbackPage(title){
-    $('#dashboardContentInHTML').html(getFeedbackContent(title));
-     let email =  $("#userName").val();
-    loadFeedbackQuestions(2, [0,1], 0, 0, 100, 0, email, '', '');
+    getFeedbackCode();
+    showFeedbackPopup('SMS_FEEDBACK', {renderMode: 'inline',target: '#dashboardContentInHTML'});
+    // $('#dashboardContentInHTML').html(getFeedbackContent(title));
+    //  let email =  $("#userName").val();
+    // loadFeedbackQuestions(2, [0,1], 0, 0, 100, 0, email, '', '');
+}
+
+async function getFeedbackCode(){
+    let payload = {
+        userId: USER_ID,
+        schoolId: SCHOOL_ID
+    };
+    var ajaxReqDetails = {
+        method: "POST",
+        url : getURLFor('review','get-feedback-code'),
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.responseStatus.status == 1){
+        bindFeedbackQuestions(responseData.questionList);
+    }else{
+        showMessageTheme2(0, responseData.responseStatus.message);
+    }
+
 }
 async function loadFeedbackQuestions(eventid, questiontype, parentId, start, end, feedbackid, email, callfrom){
   var questionRequest = {};	

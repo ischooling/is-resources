@@ -45,7 +45,16 @@ async function renderTeacherDashboard(data){
     var startFormatted = moment(startDate).format('YYYY-MM-DD');
     var endDate = moment(startDate).add(1, 'days');
     var endFormatted = endDate.format('YYYY-MM-DD');
-    callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
+    await callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaDay', startFormatted, endFormatted, false);
+    var showBulkFeedbackPopup = shouldShowBulkFeedbackPopupToday();
+    if(showBulkFeedbackPopup){
+        feedbackBulkShow = true;
+        var previousWeek = getPreviousWeekDateRange();
+        startdate = previousWeek.startDate;
+        enddate = previousWeek.endDate;
+        viewName = "agendaWeek";
+        callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, false);
+    }
     calendarTimeInterval();
     setTimeout(function(){
         $('button.fc-today-button').unbind("click").bind("click", function() {

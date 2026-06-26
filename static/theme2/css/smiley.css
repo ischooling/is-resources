@@ -1,52 +1,93 @@
 @charset "utf-8";
-*{margin:0;font-family:calibri;box-sizing:border-box;}
+*{margin:0;font-family:Arial, Helvetica, sans-serif;box-sizing:border-box;}
 ul li{list-style:none}
-.main-div{width: 100%;float: left;text-align: right;height: 100vh;overflow-y:;}
-.image-div{width:50%;float:left;height:100vh;background-image:url(../images/template/02.png);background-size:cover;background-position:center}
+.buy-smile-site-header{width:100%;min-height:76px;padding:16px 32px;background:#fff;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #edf2f7;}
+.buy-smile-site-logo{display:inline-flex;align-items:center;justify-content:center;}
+.buy-smile-site-logo img{display:block;max-width:260px;max-height:44px;width:auto;height:auto;}
+.buy-smile-site-footer{clear:both;width:100%;padding:14px 24px;background:#f7fbff;border-top:1px solid #edf2f7;text-align:center;color:#607086;font-size:13px;}
+.buy-smile-site-footer p{margin:0;}
+.main-div{width: 100%;float: left;text-align: right;min-height:calc(100vh - 126px);background:#fff;overflow:hidden;position:relative;padding:24px;display:flex;align-items:center;justify-content:center;}
+.main-div:before{content:none;}
+.main-div:after{content:none;}
+.image-div{width:448px;max-width:50%;float:left;height:560px;min-height:560px;background:#07599f;background-image:none;background-size:cover;background-position:center;position:relative;z-index:1;border:0;border-radius:24px 0 0 24px;overflow:hidden;text-align:left;padding:40px;display:flex;flex-direction:column;justify-content:flex-start;box-shadow:0 24px 60px rgba(16,54,101,.18);}
+.image-div:before{content:'\f004  CHANGE A LIFE';font-family:FontAwesome, Arial, Helvetica, sans-serif;color:#acd3ff;font-size:14px;font-weight:700;letter-spacing:4px;line-height:1;white-space:pre;}
+.image-div:after{content:'Make a\A Difference\A Today';white-space:pre;color:#fff;font-family:Georgia, 'Times New Roman', serif;font-size:35px;font-style:italic;line-height:1.15;margin-top:72px;}
 .logo{width:35%;float:left}
-.form-buy-smile{width:50%;padding:35px;display: inline-block;background-color:#fff;height:100vh;float:right;overflow:hidden;overflow-y:auto;}
+.form-buy-smile{width:448px;max-width:50%;padding:40px;display: inline-block;background-color:#fff;height:560px;min-height:560px;float:right;overflow:hidden;position:relative;z-index:1;border:0;border-radius:0 24px 24px 0;text-align:left;box-shadow:0 24px 60px rgba(16,54,101,.18);}
+.steps{position:absolute;left:40px;right:40px;bottom:40px;width:auto;z-index:4;}
+.steps:before{content:'Your generosity transforms communities and brings hope to those who need it most.';white-space:normal;color:#b9d8ff;font-family:Arial, Helvetica, sans-serif;font-size:14px;font-style:normal;font-weight:400;line-height:1.6;position:absolute;left:0;right:0;bottom:142px;text-align:left;}
+.steps:after{content:'Step 1 of 2 — Choose your donation amount';display:block;color:#9bc8fb;font-size:12px;font-weight:400;margin-top:24px;}
 .steps ul{width:100%;margin:0px auto;display:flex;align-items:center;counter-reset:step;list-style-type:none;padding: 0;}
 .steps ul li{width:100%;float:left;text-align:center;position:relative;}
-.steps ul li:before{content: counter(step);counter-increment:step;font-size:14px;border-radius:100%;background-color:#b8edff;color:#fff;width:40px;height:40px;justify-content:center;display:flex;margin:0 auto;align-items: center;position:relative;z-index:2;}
-.steps ul li:after{content:'';width:100%;height:2px;background-color:#b8edff;z-index:1;position:absolute;top:50%;left:0;transform: translateY(-50%);}
+.steps ul li:before{content: counter(step);counter-increment:step;font-size:14px;font-weight:700;border-radius:100%;background-color:#4b90d5;color:#b7d5fb;width:40px;height:40px;justify-content:center;display:flex;margin:0 auto;align-items: center;position:relative;z-index:2;border:2px solid rgba(181,213,251,.55);}
+.steps ul li:after{content:'';width:100%;height:1px;background-color:rgba(157,202,255,.34);z-index:1;position:absolute;top:20px;left:0;transform: translateY(-50%);}
+.steps ul li:before{box-shadow:0 0 0 0 rgba(8,127,255,.15);}
+.steps ul li span:after{content:'Details';position:absolute;top:32px;left:0;right:0;color:#94bdec;font-family:Arial, Helvetica, sans-serif;font-size:12px;font-weight:400;}
+.steps ul li:first-child span:after{content:'Amount';color:#fff;}
 .step-complete i{font-size:20px;color:#fff;font-weight:500;visibility:hidden;}
 .step-complete{position: absolute;left: 0;right: 0; top: 50%; transform: translateY(-50%);z-index:3;}
 .steps ul li.next-step .step-complete i{visibility:visible;}
-.steps ul li.next-step:before{background-color:#1b8a4d;color: #1b8a4d;}
+.steps ul li.next-step:before{background-color:#087fff;color: #087fff;}
 .buy-smile{display: inline-block;width: 100%;}
-.step-1{text-align:center;width:100%;margin: 30px 0 0;}
-.step-2{display:none; margin: 30px 0;}
-.amounts{display: inline-block;}
+.step-1{text-align:center;width:100%;margin: 0;}
+.step-2{display:none;margin:0;}
+.amounts{display:flex;justify-content:space-between;gap:12px;width:100%;}
 .amounts .amount-div:first-child{margin-left:0 !important;}
-.steps ul li.next-step:after{background-color:#090;}
-.amount-div{float:left;margin-left:20px;position:relative;}
-.amount-div input[type=radio]{ cursor:pointer}
-input[type=radio]{position:absolute;opacity:0;width: 100%;height: 100%;}
-input[type=radio] + .amount {cursor: pointer;}
-input[type=radio]:checked ~ .amount{color:#1b8a4d;border-color:#1b8a4d;}
-.amount{background-color: #fff;border: 2px solid #2f2483;color: #2f2483;width: 65px;display: inline-block;text-align: center;line-height: 55px;}
+.steps ul li.next-step:after{background-color:#087fff;}
+.amount-div{float:left;margin-left:0;position:relative;flex:1;}
+.amount{background-color: #fff;border: 2px solid #c4e1ff;color: #087fff;width:100%;display: inline-block;text-align: center;line-height: 44px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;padding:0;appearance:none;-webkit-appearance:none;}
+.amount.active{color:#fff;border-color:#087fff;background:#087fff;box-shadow:0 18px 28px rgba(8,127,255,.22);}
 #form-smile .form-control{border:0;border-radius:0;padding: 5px;border-bottom: 2px solid #a0a0a0; box-shadow: none;height: 45px;width: 100%;}
-#form-smile .form-control:focus{border-color:#2f2483!important;border-radius:0;outline:none;}
-button:focus{border-color:#ffc600!important;border-radius:0;outline:#ffc600;}
-#form-smile .form-input{text-align: left;margin-top: 20px;flex: 1;padding-right: 10px;}
+#form-smile .form-control:focus{border-color:#087fff!important;border-radius:0;outline:none;}
+#form-smile .step-1>.form-input .form-control{border:2px solid #cbe6ff;border-radius:12px;padding: 5px 16px 5px 36px;height: 56px;background:#f1f8ff;color:#003f7b;font-size:18px;font-weight:700;}
+#form-smile .step-1>.form-input .form-control:focus{border-color:#087fff!important;border-radius:12px;}
+#amount-input::placeholder{color:#c9ced7;font-weight:700;}
+button:focus{border-color:#087fff!important;border-radius:26px;outline:#087fff;}
+#form-smile .form-input{text-align: left;margin-top: 24px;flex: 1;padding-right: 0;position:relative;}
+#form-smile .step-1>.form-input:before{content:'$';position:absolute;left:16px;top:206px;color:#087fff;font-size:18px;font-weight:700;z-index:2;}
 #form-smile .form-input label{font-size: 18px;color: #009ee3;width: 100%;float: left;}
+#form-smile .step-1>.form-input label{position:absolute;opacity:0;pointer-events:none;}
+#form-smile .step-2 .form-header{margin:0 0 22px;}
+#form-smile .step-2 .form-header h2{font-size:30px;margin:0;}
+#form-smile .step-2 .field-row{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;width:100%;}
+#form-smile .step-2 .field-row:has(.email),
+#form-smile .step-2 .field-row:last-of-type{grid-template-columns:1fr;}
+#form-smile .step-2 .form-input{margin:0 0 18px;padding:0;min-width:0;}
+#form-smile.custom-field-scope .step-2 .custom-field{position:relative;border:0 !important;border-radius:0 !important;box-shadow:none !important;outline:0 !important;}
+#form-smile.custom-field-scope .step-2 .custom-field label:not(.error-msg){position:absolute;top:50% !important;left:14px;width:auto;max-width:calc(100% - 28px);padding:0;margin:0;background:transparent;color:#8f98a6;font-size:15px;font-weight:500;line-height:1.2;z-index:2;transform:translateY(-50%) !important;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:top .15s ease, transform .15s ease, color .15s ease, font-size .15s ease, background-color .15s ease, padding .15s ease;}
+#form-smile.custom-field-scope .step-2 .custom-field .form-control{height:48px;border:2px solid #cbd2dc;border-radius:8px;padding:12px 14px;background:#fff;box-shadow:none;color:#3f4651;font-size:15px;font-weight:500;}
+#form-smile.custom-field-scope .step-2 .custom-field .form-control:focus{border-color:#087fff !important;box-shadow:none;outline:none;}
+#form-smile.custom-field-scope .step-2 .custom-field:focus-within label:not(.error-msg),
+#form-smile.custom-field-scope .step-2 .custom-field.has-value label:not(.error-msg){top:-8px !important;padding:0 7px;background:#fff;font-size:14px;transform:none !important;}
+#form-smile.custom-field-scope .step-2 .custom-field:focus-within label:not(.error-msg){color:#087fff;}
+#form-smile.custom-field-scope .step-2 .custom-field.has-value label:not(.error-msg){color:#6f7885;}
+#form-smile.custom-field-scope .step-2 .custom-field select.form-control{appearance:auto;padding-right:28px;}
+#form-smile.custom-field-scope .step-2 .custom-field .select-option-field{width:100%;float:none;}
+#form-smile.custom-field-scope .step-2 .custom-field .error-msg{position:absolute;left:0;top:50px;font-size:11px;line-height:1.1;margin:0;}
 .star{color:red}
-.buttons{width:100%;float:left;text-align:left;margin-top:40px;}
-.button{padding:12px 18px;background-color:#2f2483;color:#fff;box-shadow:none;border:0;float:left;font-size:17px;}
+.buttons{width:100%;float:left;text-align:left;margin-top:18px;}
+.button{padding:15px 16px;background-color:#087fff;color:#fff;box-shadow:0 8px 25px rgba(0,127,255,.4);border:0;float:left;font-size:16px;font-weight:700;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.button svg{width:18px;height:18px;flex:0 0 auto;}
+.buttons .prev{width:48%;}
 .buttons .next{float:right}
-.steps ul li.active:before{background-color:#2f2483 !important;}
-.steps ul li.active:after{background-color:#2f2483;}
+.buttons .next{width:38%;}
+.steps ul li.active:before{background-color:#087fff !important;color:#fff;border-color:#087fff;}
+.steps ul li.active:after{background-color:#087fff;}
 .field-row{display:flex; flex-wrap:wrap;width:100%;}
+.step-1 .field-row{align-items:center;justify-content:space-between;background:#f0f7ff;border-radius:12px;padding:12px 16px;margin-top:24px;}
+.step-1 .field-row label{font-size:14px;color:#707b8f;font-weight:400;margin:0;}
+.step-1 .field-row strong{font-family:Georgia, 'Times New Roman', serif;font-size:18px;color:#003f7b;font-weight:400;}
 .error-msg{font-size:14px;color:red;width:100%;float:left;text-align:left;display:none;}
 .error-msg.show{display: block;}
-.or{position:relative;top: 15px;width:100%;float:left}
+.or{position:relative;top: 0;width:100%;float:left;margin-top:24px;}
 .or hr{width: 80%;margin: 50px auto 50px;}
-.text-or{background-color: #fff;width: 10%;text-transform: uppercase; color: #009ee3;font-weight: bold;border-radius: 100%;width: 50px;height: 50px;justify-content: center;display: flex;margin: 0 auto;align-items: center;position: relative;z-index: 2;}
-.form-header{width:100%;float:left;text-align:center;color:#009ee3;font-size:18px;font-style: italic;margin:0 0 20px;} 
-.form-header h2{font-family:helvetica}
-.head-amount{padding: 50px 20px;background-color: #fffbef;}
+.text-or{background-color: #fff;width:auto;text-transform: none; color: #9ba3b2;font-weight: 400;border-radius:0;height:20px;justify-content: center;display: flex;margin: 0 auto;align-items: center;position: relative;z-index: 2;font-size:12px;padding:0 12px;}
+.form-header{width:100%;float:left;text-align:left;color:#003f7b;font-size:18px;font-style: italic;margin:0 0 32px;}
+.form-header h2{font-family:Georgia, 'Times New Roman', serif;font-size:29px;font-style:italic;font-weight:400;color:#003f7b;margin:0 0 4px;}
+.form-header p{font-size:14px;font-style:normal;font-weight:400;color:#9ba3b2;margin:0;}
+.head-amount{padding: 0;background-color: transparent;width:100%;float:left;}
 label{font-weight:700;}
-.or:after{content:'';width:100%;height:2px;background-color:#b8edff;z-index:1;position:absolute;top:50%;left:0;transform: translateY(-50%);width: 80%;right: 0;margin: 0 auto;}
+.or:after{content:'';width:100%;height:2px;background-color:#d4eaff;z-index:1;position:absolute;top:50%;left:0;transform: translateY(-50%);right: 0;margin: 0 auto;}
 
 .select-option-input{border:0;padding: 5px;border-bottom: 2px solid #a0a0a0; box-shadow: none;height: 45px;width: 100%;}
 .select-option-input:focus{border-color:#ffb100 !important;border-radius:0;outline:none;}
@@ -57,21 +98,44 @@ label{font-weight:700;}
 
 /*Responsive*/
 @media only screen and (max-width: 800px){
-	.image-div{height: 90vh;background-size: cover;background-position: top;width:100%;}
-	.form-buy-smile{width: 100%;}
+	.buy-smile-site-header{min-height:68px;padding:14px 20px;}
+	.buy-smile-site-logo img{max-width:220px;max-height:40px;}
+	.main-div{display:block;padding:16px;overflow:auto;}
+	.image-div{height:auto;min-height:420px;background-size: cover;background-position: top;width:100%;border-radius:28px 28px 0 0;border-right:0;padding:48px 32px;}
+	.image-div:after{font-size:48px;margin-top:56px;}
+	.steps:before{position:relative;bottom:auto;display:block;font-size:18px;margin-bottom:28px;}
+	.form-buy-smile{width: 100%;height:auto;min-height:0;border-radius:0 0 28px 28px;border-left:0;padding:48px 32px;}
+	.steps{position:relative;left:auto;bottom:auto;width:100%;margin-top:34px;}
 }
 @media only screen and (max-width: 480px){
+	.buy-smile-site-header{min-height:62px;}
+	.buy-smile-site-logo img{max-width:190px;max-height:36px;}
+	.buy-smile-site-footer{font-size:12px;padding:12px 16px;}
 	.form-buy-smile{height: auto;overflow: visible;}	
 	.form-input{flex: inherit;width: 100%;}
-	.image-div{height: 80vh;}
+	.image-div{height: auto;}
+	.image-div:before{font-size:20px;letter-spacing:5px;}
+	.image-div:after{font-size:38px;}
+	.steps:before{font-size:16px;}
+	.form-header h2{font-size:42px;}
+	.form-header p{font-size:20px;}
+	.amounts{gap:12px;}
+	.amount{line-height:62px;font-size:20px;border-radius:18px;}
+	#form-smile .step-1>.form-input .form-control{height:82px;font-size:24px;border-radius:18px;padding-left:54px;}
+	#form-smile .step-1>.form-input:before{top:35px;left:24px;font-size:30px;}
+	.text-or{font-size:18px;}
+	.step-1 .field-row{padding:24px 22px;margin-top:40px;}
+	.step-1 .field-row label{font-size:20px;}
+	.step-1 .field-row strong{font-size:28px;}
+	.button{font-size:24px;border-radius:18px;}
 	.or{margin-bottom:15px;}
 }
 @media only screen and (max-width: 400px){
-	.image-div{height:50vh}	
+	.image-div{height:auto}
 	.form-buy-smile{padding:20px;}
-	.head-amount {padding: 40px 15px;width:100%;float:left}
+	.head-amount {padding:0;width:100%;float:left}
 	.amounts{display:flex;flex-wrap:wrap;justify-content:space-between;width: 100%;}
-	.amount-div{margin-left:0;margin-bottom:20px;}
+	.amount-div{margin-left:0;margin-bottom:12px;flex:0 0 calc(50% - 6px);}
 	
 }
 /*Responsive*/

@@ -410,7 +410,7 @@ function getSettingDataList(tableID) {
         $.ajax({
             type: "POST",
             contentType: APPLICATION_JSON_VALUE,
-            url: getURLForHTML('dashboard', 'school-setting-setting-data'),
+            url: BASE_URL + CONTEXT_PATH  + "api/v1/settings/school-settings",
             data : JSON.stringify(data),
             dataType: 'json',
             success: function (data) {
@@ -432,7 +432,16 @@ function getSettingDataList(tableID) {
                     $("#" + tableID + " tbody").html('');
                     var html = '';
                     var sn = 0;
-                    $.each(data, function (key, value) {
+                    var settingList = [];
+                    if (Array.isArray(data)) {
+                        settingList = data;
+                    } else if (Array.isArray(data.details)) {
+                        settingList = data.details;
+                    } else if (Array.isArray(data.data)) {
+                        settingList = data.data;
+                    }
+
+                    $.each(settingList, function (key, value) {
                         html += '<tr id="schoolSettingRow'+key+'">'
                                 + '<td>' + (key + 1) + '</td>'
                                 + '<input type="hidden" id="primaryID" value="' + value.id + '"/>'

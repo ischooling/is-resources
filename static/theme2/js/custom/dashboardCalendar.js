@@ -3,6 +3,14 @@ var ACTIVITIES_WITH_CLASS = true;
 var UPCOMING_CLASS_TIMER_IMG = PATH_FOLDER_IMAGE2 + "timer.gif";
 var PRELOAD_TIMER_IMG = new Image();
 PRELOAD_TIMER_IMG.src = UPCOMING_CLASS_TIMER_IMG;
+var IS_CLASS_ENDED_STATUS_CALLED = false;
+var IS_CLICKED_FEEDBACK_BTN = false;
+var IS_PENDING_FEEDBACK_POPUP_REQUEST = false;
+var IS_PENDING_FEEDBACK_POPUP_REQUESTED = false;
+var SHOULD_SHOW_BULK_FEEDBACK_POPUP_TODAY = undefined;
+// Keeps the calendar event object reachable by id so the feedback button
+// (rendered on past classes) can rebuild the feedback request on click.
+var FEEDBACK_EVENT_MAP = {};
 const UPCOMING_ICON_HTML = `
 <b class="d-flex flex-row-reverse upcoming-icon upcoming-week-view-icon">
     <img class="timer-img" src="${UPCOMING_CLASS_TIMER_IMG}" style="filter:brightness(0) invert(1);"/> Upcoming
@@ -153,6 +161,15 @@ function updateSchoolHolidays(userId,holidayid,controllType,moduleId) {
 var CALENDAR_EVENT_DATA=[];
 function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag) {
 	return new Promise((resolve, reject) => {
+		var isFeedbackBulkRequest = feedbackBulkShow;
+		feedbackBulkShow = false;
+		if(isFeedbackBulkRequest){
+			if(feedbackBulkPopupRequestInProgress || feedbackBulkPopupRequested){
+				resolve([]);
+				return false;
+			}
+			feedbackBulkPopupRequestInProgress = true;
+		}
         $.ajax({
             type: "POST",
             contentType: APPLICATION_JSON_VALUE,
@@ -181,7 +198,9 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 							}else{
 								obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
 								obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
-								ACTIVITY_CLASS_START_TIME.push({"startTime":obj.start.replace("T", " "), "endTime":obj.end.replace("T", " "), "title":"class"});
+								// if(!isPendingFeedbackPopupRequest){
+									ACTIVITY_CLASS_START_TIME.push({"startTime":obj.start.replace("T", " "), "endTime":obj.end.replace("T", " "), "title":"class"});
+								// }
 								var baseDate=obj.start.split('T')[0];
 								if($.inArray(baseDate,data.holidays)<0){
 									finalEvents.push(obj);
@@ -189,6 +208,16 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 							}
 						});
 					};
+					if(isFeedbackBulkRequest){
+						if(feedbackBulkPopupRequested){
+							resolve(finalEvents);
+							return false;
+						}
+						feedbackBulkPopupRequested = true;
+						showPendingFeedbackPopup(finalEvents, viewName);
+						resolve(finalEvents);
+						return false;
+					}
 					ACTIVITIES_WITH_CLASS = data.activitiesWithClass;
 					CALENDAR_EVENT_DATA = finalEvents;
 					$('#schoolcalendar').fullCalendar('removeEvents');
@@ -213,10 +242,21 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
 					
 					ISCALENDARLOAD=false;
 				}
-            }
+            },
+			complete: function () {
+				if(isFeedbackBulkRequest){
+					feedbackBulkPopupRequestInProgress = false;
+				}
+			}
         });
     });
 }
+
+// function callPendingFeedbackPopupForPreviousWeek(formId, userId, UNIQUEUUID) {
+// 	var previousWeek = getPreviousWeekDateRange();
+// 	IS_PENDING_FEEDBACK_POPUP_REQUEST = true;
+// 	callSchoolCalendar(formId, userId, UNIQUEUUID, "agendaWeek", previousWeek.startDate, previousWeek.endDate, false);
+// }
 
 function getRequestForSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate) {
 	if(startdate=='' || startdate==undefined){
@@ -297,6 +337,9 @@ $(document).ready(function() {
 
 // var data1=getStudentDashboardDetails();
 var scrollEventTriggered = false;
+var feedbackBulkShow = false;
+var feedbackBulkPopupRequestInProgress = false;
+var feedbackBulkPopupRequested = false;
 function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, activityTypes) {
 	todayClassArray = [];
     var initialView = window.innerWidth < 768 ? 'listDay' : 'agendaDay';
@@ -338,6 +381,15 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					var end = view.end.format('YYYY-MM-DD');
 					// Reload events for the new date range
 					callSchoolCalendar(formId, userId, UNIQUEUUID, currentView, start, end, true);
+					var showBulkFeedbackPopup = shouldShowBulkFeedbackPopupToday();
+					if(showBulkFeedbackPopup){
+						feedbackBulkShow = true;
+						var previousWeek = getPreviousWeekDateRange();
+						startdate = previousWeek.startDate;
+						enddate = previousWeek.endDate;
+						viewName = "agendaWeek";
+						callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, true);
+					}
 				}
 				var legentHtml=
 					`<div class="d-flex w-100 flex-wrap justify-content-sm-center justify-content-start mt-1 gap-5 legent_wrapper">
@@ -387,11 +439,16 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 			});
 			
 		},
-        eventClick: function(info) {
+        eventClick: function(info, jsEvent) {
+			if (jsEvent && $(jsEvent.target).closest("[id^='feedbackBtn_']").length > 0) {
+				return false;
+			}
 			if(info.url) {
                 if (getSession()) {
-                    classDetailsOnModal(info.url);
-                    return false;
+					if(!IS_CLICKED_FEEDBACK_BTN){
+						classDetailsOnModal(info.url);
+                    	return false;
+					}
                 } else {
                     redirectLoginPage();
                 }
@@ -668,6 +725,7 @@ function getEventsInCurrentView(allEvents) {
 var updateEventIconsStyle = true;
 async function updateEventIcons(info, element, todayClassArray, viewName, activityTypes) {
 	updateTabCounts(todayClassArray);
+	FEEDBACK_EVENT_MAP[info.id] = info;
 	if (updateEventIconsStyle) {
 		$("head").append(`
 		<style>
@@ -814,10 +872,30 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 			if (now > endTime.getTime()) {
 				element.addClass("past-class");
 				element.removeClass("activity-wrapper-div");
+				// Remove button if somehow duplicated
+				element.find(`#feedbackBtn_${info.id}`).remove();
+				if (element.find(`#feedbackBtn_${info.id}`).length < 1) {
+					var showFromDate = getFeedbackShowFromDate();
+					var eventDate = info.start && info.start._i ? info.start._i : info.start;
+					var eventDateText = eventDate ? moment(eventDate).format("YYYY-MM-DD") : "";
+					var feedbackBtn = "";
+					if (showFromDate && eventDateText && eventDateText < showFromDate) {
+						// return "";
+					}else{
+						element.append(getFeedbackBtn(info.id, info.title, info.start));
+						// feedbackBtn = getFeedbackBtn(info.id, courseName, info.start);
+					}
+					// element.append(getFeedbackBtn(info.id, info.title, info.start));
+					// Week (agendaWeek) columns are narrow, so the default top-right
+					// button overlaps the class title — pin it to the bottom instead.
+					// Day view stays as-is.
+					if ($('#schoolcalendar').fullCalendar('getView').name === "agendaWeek") {
+						element.find(`#feedbackBtn_${info.id}`).css({ top: "auto", bottom: "10px" });
+					}
+				}
 			}else if (isSysTrainingEvent) {
 				element.addClass("future-class");
 			}else if (now >= startTime.getTime() && now <= endTime.getTime()) {
-				
 				var liveIcon = $(`<b class="d-flex flex-row-reverse live-symbol">🔴 Live ${liveLabel}</b>`);
 				element.find(".fc-title .class-indicator").append(liveIcon);
 				element.removeClass("activity-wrapper-div");
@@ -825,6 +903,11 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					element.addClass("live-activity-blink live-class-blink");
 				}else{
 					element.addClass("live-class-blink");
+				}
+				console.log("Live class running");
+				if(!IS_CLASS_ENDED_STATUS_CALLED){
+					checkClassEndedStatus(endTime.getTime(), info, "LIVE");
+					IS_CLASS_ENDED_STATUS_CALLED = true;
 				}
 			} else {
 				if ($(".upcoming-class-blink").length < 1) {
@@ -1333,4 +1416,3 @@ function calendarMeetingLinkValidate(){
 		</div>`;
   	return html;
 }
-

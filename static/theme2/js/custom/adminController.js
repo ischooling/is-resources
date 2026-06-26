@@ -131,11 +131,13 @@ const contentHandlers = {
     'fee-details': () => renderStudentFeeDetailsPage('Fee Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-progress-report': () => renderStudentAcademicPerformancePage('Academic Performance', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'progress-detail': () => renderStudentProgressDetailPage('Progress Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'student-feedback': () => renderStudentFeedbackPage('Student Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    // 'student-feedback': () => renderStudentFeedbackPage('Student Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-feedback': ({extraParam, extraParam1}) => rateYourTeacher(extraParam, extraParam1, {renderMode: 'inline',target: '#dashboardContentInHTML'}),
     'student-handbook': () => renderStudentHandbookPage('Student Handbook', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'batch-student-examination-sheet': () => renderStudentExaminationSheetPage("Student's Examination Schedule", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'Parent-dashboard': () => renderParentDashboardContent(),
     'parent-class-schedule': () => renderParentStudentClassScheduleContent(),
+    'teacher-class-schedule': () => renderTeacherClassScheduleContent(),
     'parent-attendance': () => renderAtendaceByStudentIdContent(),
     'enrollment-availability': () => renderEnrollmentAvalabilityContent(),
     'enrollment-reports': () => renderEnrollmentAvalabilityReportContent(),
@@ -145,7 +147,8 @@ const contentHandlers = {
     'release-note-admin-editor': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
     'release-note-user-list': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
     'log-viewer': () => renderLogViewerContent(),
-    'lead-logs': () => renderCounselorLeadLogsDashboard('Lead Logs',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY)
+    'lead-logs': () => renderCounselorLeadLogsDashboard('Lead Logs',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY),
+    'feedback-form': () => renderFeedbackFormPage()
 };
 
 const getLeadCategory = () => {
@@ -396,7 +399,7 @@ function initPartnerEnrollmentStudentsWlp() {
     populateMonths();
 }
 
-async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
+async function getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1) {
     customLoader(true);
     try {
         roleAndModule = await getUserRights(SCHOOL_ID_OF_USER, USER_ROLE_ID, USER_ID, moduleId);
@@ -404,7 +407,7 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam) {
 
         const handler = contentHandlers[pageNo];
         if (handler) {
-            await handler({ pageNo, moduleId, replaceDiv, extraParam });
+            await handler({ pageNo, moduleId, replaceDiv, extraParam, extraParam1 });
         } else {
             console.warn(`No handler found for pageNo: ${pageNo}`);
         }

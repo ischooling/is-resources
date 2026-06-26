@@ -125,7 +125,6 @@ function initSmsErrorLogTable() {
     });
 
     smsErrorLogTable.on('length.dt', function () {
-        debugger
         setTimeout(function () {
             smsErrorLogTable.columns.adjust().responsive.recalc();
         }, 500);
