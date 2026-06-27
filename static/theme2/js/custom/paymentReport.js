@@ -791,6 +791,15 @@ function saveReferralCodeFromPaymentWindow() {
     }
   });
 }
+function getSelectedWhatsappBroadcastTemplate(indexNo) {
+	if(!watiTemplateContent || !Array.isArray(watiTemplateContent.messageTemplates)) {
+		return null;
+	}
+	if(indexNo == null || indexNo === "" || isNaN(Number(indexNo))) {
+		return null;
+	}
+	return watiTemplateContent.messageTemplates[Number(indexNo)] || null;
+}
 var STUDENT_BROADCAST_PROVIDER = 'WATI';
 function getStudentBroadcastProviderMeta(provider) {
 	if ((provider || '').toUpperCase() === 'GUPSHUP') {
