@@ -22,7 +22,44 @@
 }
 .ml{margin-left: 0 !important;}
 input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
+.font-10 {
+	font-size: 10px !important;
+}
+.font-11 {
+	font-size: 11px !important;
+}
+.font-12 {
+	font-size:12px !important
+}
 
+
+.font-14 {
+	font-size: 14px !important;
+}
+.font-16 {
+	font-size: 16px !important;
+}
+.font-18 {
+	font-size: 18px !important;
+}
+.font-20 {
+	font-size: 20px !important;
+}
+.font-22 {
+	font-size: clamp(16px, 4vw, 22px);
+}
+.font-24 {
+	font-size: clamp(18px, 4vw, 24px);
+}
+.font-26 {
+	font-size: clamp(20px, 4vw, 26px);
+}
+.font-28 {
+	font-size: clamp(22px, 4vw, 28px);
+}
+.font-30 {
+	font-size: 30px !important;
+}
 /* server message css */
 .server-message{width: 100%;text-align: center;position: fixed;top:0px;right:0px;z-index: 99999999;display: none;
 	transform: translateY(-100%);-webkit-transform: translateY(-100%);-ms-transform: translateY(-100%);
@@ -52,6 +89,10 @@ input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 .mb-2{margin-bottom:0.50rem !important}
 .mb-3{margin-bottom:0.75rem !important}
 .mb-4{margin-bottom:1rem !important}
+.mt-1{margin-top:0.25rem !important}
+.mt-2{margin-top:0.50rem !important}
+.mt-3{margin-top:0.75rem !important}
+.mt-4{margin-top:1rem !important}
 .max-size-modal .modal-lg{max-width: 100%;}
 .valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;right: 30px;top: 12px;transform: scale(0); visibility: hidden;opacity: 1;font-size: 16px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
 .valid-field.true:after{content:"\f00c";color: green;}
@@ -393,7 +434,7 @@ h3 {
   .fa-globe
 ) {
   position: absolute;
-  top: 31%;
+  top: 50%;
   transform: translateY(-50%);
   font-size: 16px;
   z-index: 999;
@@ -516,7 +557,8 @@ input::placeholder {
 
 .actions ul {
 	display: flex;
-	justify-content: space-between;
+	justify-content: center;
+	gap:10px
 }
 
 .actions ul.step-4 {
@@ -567,7 +609,7 @@ input::placeholder {
 	width: 234px;
 }
 
-.copyRights{position: fixed;left: 0;right: 0;text-align: center;width: 100%;padding: 5px;bottom: 0;background-color: #fff;font-size: 12px;padding: 5px;border-top:1px solid #dedede}
+.copyRights{z-index: 9;position: fixed;left: 0;right: 0;text-align: center;width: 100%;padding: 5px;bottom: 0;background-color: #fff;font-size: 12px;padding: 5px;border-top:1px solid #dedede}
 
 @media ( max-width: 991px) {
 	.steps ul li .step-arrow {
@@ -678,6 +720,18 @@ input::placeholder {
 	.actions ul {
 		justify-content:center;
 		gap: 10px;
+	}
+	.font-sm-14{
+		font-size:14px !important
+	}
+	.font-sm-12{
+		font-size:12px !important
+	}
+	.font-sm-11{
+		font-size:11px !important
+	}
+	.font-sm-10{
+		font-size:10px !important
 	}
 }
 
@@ -1283,7 +1337,7 @@ input::placeholder {
 	transform: scale3d(0.65, 0.65, 1);
 }
 .theme-modal .radio input[type=radio]:checked~label .check {
-	background-color: #001b47 !important;
+	background-color: #24b724 !important;
 }
 .theme-modal .radio input[type=radio]:checked~label .checked-font-style{
 	color:#fff !important;
@@ -1535,7 +1589,8 @@ input::placeholder {
  .course-item .course-name-wrapper{flex: 1;}
  /* .course-item .course-name-wrapper.bg-border{border-bottom: 1px solid #e6d7fb;padding-left: 6px;} */
 /*   .course-item .course-name-wrapper.bg-border .course-name.open-dropdown a{color: #fff !important;} */
- .course-item .course-name-wrapper .course-name{padding:2px 4px 2px;font-size: 12px;position:relative;display: flex;align-items: center;}
+.selected-course-list .course-item .course-name-wrapper .course-name{padding:2px 4px 2px;font-size: 12px;position:relative;display: flex;align-items: center;white-space:nowrap}
+.course-selection-list .course-item .course-name-wrapper .course-name{padding:2px 4px 2px;font-size: 12px;position:relative;display: flex;align-items: center;}
  .course-item .course-name-wrapper .course-name a:not(a.theme-text), .course-type-title{font-size: 12px;line-height: 16px;font-weight: 600;color:#333;font-family: "Lato-Bold"}
  .course-item .course-name-wrapper .price{font-size: 12px;line-height: 14px;margin-top: 2px;color:#fff;font-weight: 400}
  .course-item .course-name-wrapper .additional-payment {float:right;font-weight:400; color:#5117a5;margin-top:3px;}
@@ -1673,6 +1728,7 @@ input::placeholder {
 	float: left;
 	position: relative;
 	z-index: 9;
+	gap: 5px;
 }
 
 .custom-tab-wrapper li a label {
@@ -1784,7 +1840,7 @@ input::placeholder {
 	padding: 10px 15px;
 	background-color: #5117a5;
 	text-transform: uppercase;
-	letter-spacing: 2px;
+	letter-spacing: 1px;
 	color: #fff;
 	margin-bottom:0;
 }
@@ -2553,13 +2609,13 @@ label.error {
 	}
 }
 .tab-and-mobile-logout-btn {
-	color: #fff;
+	color:red;
 	display: flex;
 	position: absolute;
 	z-index: 9;
 	right: 0;
-	background: var(--pc);
-	border: 0;
+	border:2px solid red;
+	border-right: 0;
 	padding: 5px 15px;
 	border-top-left-radius: 25px;
 	border-bottom-left-radius: 25px;
@@ -2573,7 +2629,7 @@ label.error {
 	padding-right: 5px;
 }
 .tab-and-mobile-logout-btn:hover, .tab-and-mobile-logout-btn:focus{
-	color: #fff;
+	/* color: #fff; */
 	outline: none;
 }
 
@@ -2818,8 +2874,9 @@ label.error {
 		margin-bottom: 10px;
 	}
 	.select-grade-title{font-size: 16px;letter-spacing:0px;margin-bottom: 5px !important;}
-	.tab-and-mobile-logout-btn{padding: 5px 8px;}
+	.tab-and-mobile-logout-btn{padding: 5px 8px; top:8px}
 	.actions{margin-top: 0px;}
+	.review_currency_note{margin-bottom:1rem;}
 	.actions li a{height: inherit;width: inherit !important;padding: 3px 6px;}
 	
 	.radio-payment-option {
@@ -2836,9 +2893,10 @@ label.error {
 	.radio-payment-option label{display: inline-flex;padding: 5px !important;align-items: center;}
 	.radio label span{position: relative;top:0px !important;}
 	.radio.radio-payment-option .checked-font-style[style]{margin-left: 10px !important;font-size: 13px;line-height: 18px !important;}
-	.radio-payment-option .primary-bg-checked{position: absolute;top:13px !important;left:15px !important;}
+	.radio-payment-option .primary-bg-checked{position: absolute;top:17px !important;left:15px !important;}
 	.table-responsive .table{font-size: 12px;min-width: inherit !important;}
 	.scholarship-details .without_h_scroll .table tbody tr td:first-child{max-width: 200px !important;}
+	.scholarship-details table tbody tr td ol{padding-left: 15px;}
 	.mobile-view{display: flex;align-items: center;}
 	.mobile-view a{display: inline-block;}
 	.mobile-view a img{max-width:35px; width:100%}
@@ -3257,4 +3315,97 @@ transform:rotate(-405deg)
 }
 .swal2-icon.swal2-success {
   border-color: #007000;
+}
+
+
+
+/*Bootstrap Calendar*/
+
+#datepickerModalView .datepicker {
+border-radius: 0;
+padding: 0;
+margin-top: 0px !important;
+top:0px !important;
+left: 0px !important;
+position: relative !important;
+}
+.datepicker-days, .datepicker-months, .datepicker-years, .datepicker-decades, .datepicker-centuries{background: var(--pc);}
+.datepicker-days tbody, .datepicker-months tbody, .datepicker-years tbody, .datepicker-decades tbody ,.datepicker-centuries tbody{background: #fff;}
+.datepicker-days table thead, .datepicker-days table tbody, .datepicker-days table tfoot {
+padding: 10px;
+/* display: list-item; */
+}
+.datepicker-days table thead, .datepicker-months table thead, .datepicker-years table thead, .datepicker-decades table thead, .datepicker-centuries table thead {
+background: var(--pc);
+color: #ffffff;
+border-radius: 0;
+}
+.datepicker-days table thead tr:nth-child(2n+0) td, .datepicker-days table thead tr:nth-child(2n+0) th {
+border-radius: 3px;
+}
+.datepicker-days table thead tr:nth-child(3n+0) {
+text-transform: uppercase;
+font-weight: 300 !important;
+font-size: 12px;
+color: rgba(255, 255, 255, 0.7);
+}
+.table-condensed > tbody > tr > td, .table-condensed > tbody > tr > th, .table-condensed > tfoot > tr > td, .table-condensed > tfoot > tr > th, .table-condensed > thead > tr > td, .table-condensed > thead > tr > th {
+padding: 11px 13px;
+}
+.datepicker-months table thead td, .datepicker-months table thead th, .datepicker-years table thead td, .datepicker-years table thead th, .datepicker-decades table thead td, .datepicker-decades table thead th, .datepicker-centuries table thead td, .datepicker-centuries table thead th {
+border-radius: 0;
+}
+.datepicker td, .datepicker th {
+border-radius: 50%;
+padding: 0 12px;
+}
+.datepicker-days table thead, .datepicker-months table thead, .datepicker-years table thead, .datepicker-decades table thead, .datepicker-centuries table thead {
+background: var(--pc);
+color: #ffffff;
+border-radius: 0;
+}
+.datepicker table tr td.active, .datepicker table tr td.active:hover, .datepicker table tr td.active.disabled, .datepicker table tr td.active.disabled:hover {
+background-image: none;
+}
+.datepicker .prev, .datepicker .next {
+color: rgba(255, 255, 255, 0.5);
+transition: 0.3s;
+width: 37px;
+height: 37px;
+}
+.datepicker .prev:hover, .datepicker .next:hover {
+background: transparent;
+color: rgba(255, 255, 255, 0.99);
+font-size: 21px;
+}
+.datepicker .datepicker-switch {
+font-size: 24px;
+font-weight: 400;
+transition: 0.3s;
+}
+.datepicker .datepicker-switch:hover {
+color: rgba(255, 255, 255, 0.7);
+background: transparent;
+}
+.datepicker table tr td span {
+border-radius: 2px;
+margin: 3%;
+width: 27%;
+}
+.datepicker table tr td span.active, .datepicker table tr td span.active:hover, .datepicker table tr td span.active.disabled, .datepicker table tr td span.active.disabled:hover {
+background-color: var(--pc);
+background-image: none;
+}
+.dropdown-menu {
+border: 1px solid rgba(0,0,0,.1);
+box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+.datepicker-dropdown.datepicker-orient-top:before {
+border-top: 7px solid rgba(0,0,0,.1);
+}
+.datepicker-dropdown::before, .datepicker-dropdown::after{display: none !important;}
+#datepickerModalView .datepicker td, .datepicker th{border-radius: 0px !important;}
+@media(max-width:350px){
+#datepickerModalView .datepicker .datepicker-switch{font-size: 18px;}
+#datepickerModalView  .table-condensed > tbody > tr > td, #datepickerModalView .table-condensed > thead > tr > th{padding: 10px;}
 }

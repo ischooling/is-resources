@@ -212,16 +212,18 @@ function getURLForSignup(suffixUrl, module) {
   return API_VERSION + apiType + "/" + suffixUrl;
 }
 function getCustomFieldCss() {
+  var customFieldActiveColor = typeof SCHOOL_ID != "undefined" && Number(SCHOOL_ID) > 0 ? "var(--pc)" : "var(--primary)";
   return `
 .custom-field-scope .custom-field{
 position:relative;
     margin-bottom:30px;
     width:100%;
-    --custom-field-default:#cfd4dc;
-    --custom-field-default-text:#9ca3af;
-    --custom-field-active:#007bff;
-    --custom-field-value:#4b5563;
-    --custom-field-bg:#fff;
+    --custom-field-default:var(--light);
+    --custom-field-default-text:var(--gray);
+    --custom-field-active:${customFieldActiveColor};
+    --custom-field-value:var(--gray-dark);
+    --custom-field-bg:var(--white);
+    --custom-field-focus-shadow:color-mix(in srgb, var(--custom-field-active) 15%, transparent);
 }
 
 .custom-field-scope .custom-field input,
@@ -520,13 +522,12 @@ position:relative;
 .custom-field-scope .custom-field.has-value label:not(.error-msg),
 .custom-field-scope .custom-field.is-filled label:not(.error-msg),
 .custom-field-scope .custom-field.active label:not(.error-msg),
-.custom-field-scope .custom-field:has(input[value]:not([value=""])) label:not(.error-msg),
-.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg){
-    top:0;
-    transform:translateY(-46%);
-    font-size:12px;
-    font-weight:500;
-    z-index:5;
+.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg) {
+    top: 0;
+    transform: translateY(-46%);
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 5;
 }
 
 /* ACTIVE / FILLED EFFECT */
@@ -558,9 +559,8 @@ position:relative;
 .custom-field-scope .custom-field.active textarea,
 .custom-field-scope .custom-field.active .select2-selection--single,
 .custom-field-scope .custom-field.active .select2-selection--multiple,
-.custom-field-scope .custom-field:has(input[value]:not([value=""])) input,
-.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) textarea{
-    border-color:var(--custom-field-active);
+.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) textarea {
+    border-color: var(--custom-field-active);
 }
 
 .custom-field-scope .custom-field input:focus + label:not(.error-msg),
@@ -580,9 +580,9 @@ position:relative;
 .custom-field-scope .custom-field.has-value label:not(.error-msg),
 .custom-field-scope .custom-field.is-filled label:not(.error-msg),
 .custom-field-scope .custom-field.active label:not(.error-msg),
-.custom-field-scope .custom-field:has(input[value]:not([value=""])) label:not(.error-msg),
-.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg){
-    color:var(--custom-field-active);
+.custom-field-scope .custom-field:has(input:not(:placeholder-shown)) label:not(.error-msg),
+.custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg) {
+    color: var(--custom-field-active);
 }
 
 /* FOCUS EFFECT */

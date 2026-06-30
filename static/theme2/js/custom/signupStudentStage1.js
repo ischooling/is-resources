@@ -27,9 +27,9 @@ $(document).ready(function(){
 	var currentStep = $(".step.active-step").index();
 	var sectionLength = $(".step").length;
 	if(currentStep == 0){
-		$(".prev-btn").css({"visibility":"hidden", "opacity":"0"});
+		$(".prev-btn").hide();
 	}else{
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 	}
 	if(currentStep+1 == sectionLength ){
 		$(".next-btn").hide();
@@ -38,6 +38,20 @@ $(document).ready(function(){
 		$(".next-btn").show();
 		$(".finish-btn").hide(); 
 	}
+	
+});
+
+$(document).on('show.bs.modal', function(e) {
+	if(e.target.id == "dob" || e.target.id == "dob"){
+		$("#datepickerModal").modal("show");
+	}
+});
+$(document).on('keyup', function(e) {
+    if (e.key === 'Tab') {
+        if ($.trim($('#datepickerModalView').html()) === '') {
+            $('#datepickerModal').modal('hide');
+        }
+    }
 });
 
 function validateRequestForSignupStudent(){
@@ -329,16 +343,17 @@ function dobInitalize(schoolId, needToInitalize, courseProviderId){
 		if(needToInitalize){
 			$('#dob').val('')
 		}
-		
 		$('#dob').datepicker('remove')
 		$('#dob').datepicker({
 		   	autoclose: true,
 		   	format: 'M dd, yyyy',
+			container: '#datepickerModalView',
 		   	startDate:startDate,
 		   	endDate:endDate
 		}).on('changeDate', function() {
 			$('#dob').valid();
 			calculateAge('signupStage1');
+			$("#datepickerModal").modal("hide");
 		});
 	// }else{
 	// 	var startDate = new Date();
@@ -481,9 +496,9 @@ function setActiveStep(step){
 		}
 		$('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'step-4-deactive.png');
 		$('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'step-5-deactive.png');
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 		$(".step1, .step2, .step3, .step4").removeClass("done-step");
-		$(".prev-btn").css({"visibility":"hidden", "opacity":"0"});
+		$(".prev-btn").hide();
 		$(".next-btn").show();
 		$(".finish-btn").hide();
 	}else if(step == 2){
@@ -495,7 +510,7 @@ function setActiveStep(step){
 		}
 		$('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'step-4-deactive.png');
 		$('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'step-5-deactive.png');
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 		$(".step1").addClass("done-step");
 		$(".step2, .step3, .step4").removeClass("done-step");
 		$(".next-btn").show();
@@ -505,7 +520,7 @@ function setActiveStep(step){
 		$('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'complete-step.png');
 		$('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'step-4.png');
 		$('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'step-5-deactive.png');
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 		$(".step1, .step2").addClass("done-step");
 		$(".step3, .step4").removeClass("done-step");
 		$(".next-btn").show();
@@ -515,14 +530,14 @@ function setActiveStep(step){
 		$('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'complete-step.png');
 		$('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'complete-step.png');
 		$('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'step-5.png');
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 		$(".step1, .step2").addClass("done-step");
 		$(".step4").removeClass("done-step");
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 		$(".next-btn").hide();
 		$(".finish-btn").show(); 
 	}else{
-		$(".prev-btn").css({"visibility":"visible", "opacity":"1"});
+		$(".prev-btn").show();
 		$(".next-btn").show();
 		$(".finish-btn").hide(); 
 	}
@@ -627,14 +642,16 @@ async function moveStep(moveType){
 		}	
 		$('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'step-4-deactive.png');
 		$('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'step-5-deactive.png');
-		$('.actions > ul > li:first-child').attr('style', 'opacity:0');
+		// $('.actions > ul > li:first-child').attr('style', 'opacity:0');
+		$('.actions > ul > li:first-child').hide();
 		$(".step2 .step3").removeClass("done-step");
 	}else if(prevStep==2){
 		$('.steps ul li:first-child a img').attr('src',PATH_FOLDER_IMAGE2+'complete-step.png');
 		
 		$('.steps ul li:nth-child(3) a img').attr('src',PATH_FOLDER_IMAGE2+'step-4.png');
 		$('.steps ul li:nth-child(4) a img').attr('src',PATH_FOLDER_IMAGE2+'step-5-deactive.png');
-		$('.actions > ul > li:first-child').attr('style', 'opacity:1');
+		// $('.actions > ul > li:first-child').attr('style', 'opacity:1');
+		$('.actions > ul > li:first-child').show();
 		if(moveType == "next"){
 			$(".step2").addClass("done-step");
 			$('.steps ul li:nth-child(2) a img').attr('src',PATH_FOLDER_IMAGE2+'complete-step.png');
@@ -676,9 +693,9 @@ async function moveStep(moveType){
 		$("body .content .step:nth-child("+(currentStep)+")").removeClass("active-step");
 		
 		if(nextStep > 1 ){
-			$(".prev-btn").css({"visibility":"visible", "opacity":"1"});    
+			$(".prev-btn").show();    
 		}else{
-			$(".prev-btn").css({"visibility":"hidden", "opacity":"0"});
+			$(".prev-btn").hide();
 		} 
 		if(nextStep == sectionLength){
 			$(".next-btn").hide();
@@ -689,7 +706,7 @@ async function moveStep(moveType){
 		$("body .content .step:nth-child("+(currentStep)+")").removeClass("active-step");
 		
 		if(prevStep == 1 ){
-			$(".prev-btn").css({"visibility":"hidden", "opacity":"0"});
+			$(".prev-btn").hide();
 		}else if(prevStep == 3){
 			if(SHOW_PAYMENT_OPTION=='Y'){
 				if(!$('#studentPaymentModal').is(':visible') || $('#studentPaymentModal').length<1){
@@ -697,7 +714,7 @@ async function moveStep(moveType){
 				}
 			}
 		}else{
-			$(".prev-btn").css({"visibility":"visible", "opacity":"1"});    
+			$(".prev-btn").show();    
 		} 
 		if(nextStep == sectionLength){
 			$(".next-btn").show();

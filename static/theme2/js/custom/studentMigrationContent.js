@@ -663,7 +663,7 @@ function getStudentMigrationHeader(csr){
 					}else{
 						html+=`<div class="w-100"><span class="d-inline-block bg-primary px-2 font-size-lg rounded text-white">${csr.registrationTypeString}</span></div>`;
 					}
-					+'<span class="text-primary d-inline-block ml-1">';
+					html+='<span class="text-primary d-inline-block ml-1">';
 						if(csr.registrationType=='ONE_TO_ONE_FLEX'){
 							html+=
 							`<div class="d-inline-flex align-items-center">
@@ -1213,7 +1213,7 @@ function getCourseSelectionContent(csr){
 				+'</div>'
 				+'<div class="full mt-2">';
 					html+='<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:var(--pc) !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse(\'' + csr.enrollmentBy + '\');">'
-					+'<div class="mb-2"><button type="button" class="btn theme-bg text-white pl-4 pr-4" onclick="displaySection1();">Back</button></div>'
+					+getCourseSelectionBackButtonContent(csr)
 				+'</div>'
 				+noTeacherAssistanceAvailableModal(csr)
 				+apCourseSelectionWarningModal()
@@ -1449,10 +1449,17 @@ function migrationCourseSelection(csr){
 			+'</div>'
 			+'<div class="full mt-2">'
 				+'<input type="submit" class="btn btn-next btn-fill pl-4 pr-4 btn-wd pull-right text-white" style="background-color:#007fff !important" name="sessionPaymentSubmit" id="nextSesionStep" value="Next" onclick="submitCourse();">'
-				+'<div class="mb-2"><button type="button" class="btn theme-bg text-white pl-4 pr-4" onclick="displaySection1();">Back</button></div>'
+				+getCourseSelectionBackButtonContent(csr)
 			+'</div>'
 		+'</div>';
 	return html;
+}
+
+function getCourseSelectionBackButtonContent(csr){
+	if(csr.registrationType=='BATCH' || csr.registrationType=='ONE_TO_ONE'){
+		return '';
+	}
+	return '<div class="mb-2"><button type="button" class="btn theme-bg text-white pl-4 pr-4" onclick="displaySection1();">Back</button></div>';
 }
 
 function switchFlexyGradeWarningModal(){
@@ -1776,7 +1783,7 @@ async function getPaymentModeContent(cdrDTO){
 			+'<div class="modal-content rounded-20">'
 				+'<div class="modal-header py-2 rounded-20 bg-white text-dark">'
 					+'<h5 class="modal-title payment-option-modal-title" style=" margin-left: 10px;">Payment Option</h5>'
-					+'<button type="button" class="close opacity-10" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-primary d-inline-block bg-light-primary rounded-circle" style="width:25px;height:25px;line-height:20px">&times;</span></button>'
+					+'<button type="button" class="close opacity-10" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-white d-inline-block bg-red " style="width:25px;height:25px;line-height:20px">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body pt-1" style="display:inline-block;width:100%;">'
 					+skeletonFeeDetails()

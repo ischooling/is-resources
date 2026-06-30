@@ -590,6 +590,7 @@ function advanceStudentSearchReset(formId) {
 	$("#" + formId + " #filterProfileFieldValue")
 		.val("")
 		.trigger("change");
+	getSessionMasterList(formId, 'activeSession', false);
 }
 
 function advanceTeacherSearchReset(formId) {

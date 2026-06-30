@@ -7694,7 +7694,9 @@ async function getLeadStatusLog(leadno, callFrom, adminStatus) {
                 var leadCall = data.data[l];
 				
 				//console.log(leadCall);
-
+				if(leadCall.leadStatus=='Demo Completed'){
+					$(".demo-last-remark-" + leadno).html(leadCall.remarks);
+				}
                 html += '<li class="' + (l === 0 ? 'follow-up-accordian-active' : '') + '">'
                     + '<span class="cursor follow-up-no text-primary p-2 text-center border-primary full bold">'
                     + '<label class="float-left">' + (incS++) + '</label> ' + (leadCall.leadStatus)

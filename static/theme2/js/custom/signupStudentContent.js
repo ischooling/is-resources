@@ -99,6 +99,10 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 		SHOW_PAYMENT_OPTION='N';
 	}
 	var html = await generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId);
+	if($("#datepickerModal").length>0){
+		$("#datepickerModal").remove();
+	}
+	$("body").append(getDatepickerMobileViewContent());
 	if(signupType == "Online"){
 		$("#studentSignupWrapper").html(html+showMessageInPopup());
 	}else{
@@ -379,7 +383,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
         <div class="wrapper-style custom-field-scope">`
 			if(signupType == "Online" || studentUserId == USER_ID){
 				html+=
-				`<a class="tab-and-mobile-logout-btn primary-bg" href="javascript:void(0)" onclick="signupLogout()">
+				`<a class="tab-and-mobile-logout-btn" href="javascript:void(0)" onclick="signupLogout()">
 					<i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
 				</a>`
 			}
@@ -440,7 +444,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
             	<input type="hidden" id="courseProviderId" value="${courseProviderId}" />
 			<input type="hidden" id="enrollmentFor" value="" />
 			<div class="fixed-button one-btn">
-				<a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn primary-bg">
+				<a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn">
 					<i class="zmdi zmdi-power"></i> Log out</i>
 				</a>
 			</div>`;
@@ -496,35 +500,35 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
                     </ul>
                 </div>
                 <div class="content">
-                    <section id="step-1" class="step active-step">
+                    <section id="step-1" class="step mt-2 active-step">
                         <div class="full step-1-skeleton skeleton-wrapper"></div>
                         <form id="signupStage1" name="signupStage1" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
                             <div id="signupStage1Content" style="display:inline-block;width: 100%;"></div>
                         </form>
                     </section>
 
-                    <section id="step-2" class="step">
+                    <section id="step-2" class="step mt-2">
                         <div class="full step-2-skeleton skeleton-wrapper"></div>
                         <form id="signupStage2" name="signupStage2" method="post" autocomplete="off" action="javascript:void(0);">
                             <div id="signupStage2Content" style="display: inline-block;width: 100%;"></div>
                         </form>
                     </section>
 
-                    <section id="step-3" class="step">
+                    <section id="step-3" class="step mt-2">
                         <div class="full step-3-skeleton skeleton-wrapper"></div>
                         <form id="signupStage3" name="signupStage3" method="post" autocomplete="off" action="javascript:void(0);">
                             <div id="signupStage3Content" style="display: inline-block;width: 100%;"></div>
                         </form>
                     </section>
 
-                    <section id="step-4" class="step">
+                    <section id="step-4" class="step mt-2">
                         <div class="full step-4-skeleton skeleton-wrapper"></div>
                         <div id="signupStage4Content" style="display: inline-block;width: 100%;"></div>
                     </section>
                 </div>
                 <div class="actions clearfix">
                     <ul role="menu" aria-label="Pagination">
-                        <li class="prev-btn" style="opacity:0;visibility: hidden;">
+                        <li class="prev-btn" style="display:none">
                             <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('prev')">Back</a>
                         </li>
                         <li class="next-btn">
@@ -1030,7 +1034,7 @@ function getStudentDetailsContent(data, signupType) {
                 </div>
             </div>
             <div class="form-holder valid-field">
-                <i class="zmdi zmdi-pin"></i>
+                <i class="zmdi zmdi-globe"></i>
                 <div class="custom-field">
                     <select name="nationality" id="nationality" class="form-control-field" required tabindex="${++tabindex}">
                         <option value="">Select Nationality*</option>
@@ -1057,7 +1061,7 @@ function getStudentDetailsContent(data, signupType) {
                 </div>
             </div>
             <div class="form-holder valid-field">
-                <i class="zmdi zmdi-pin"></i>
+                <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
                     <select name="stateId" id="stateId" class="form-control-field" required tabindex="${++tabindex}">
                         <option value="">Select State/Province*</option>
@@ -1067,7 +1071,7 @@ function getStudentDetailsContent(data, signupType) {
                 </div>
             </div>
             <div class="form-holder valid-field">
-                <i class="zmdi zmdi-pin"></i>
+                <i class="zmdi zmdi-city"></i>
                 <div class="custom-field">
                     <select name="cityId" id="cityId" class="form-control-field" required tabindex="${++tabindex}">
                         <option value="">Select City*</option>
@@ -1535,7 +1539,7 @@ function getParentDetailsContent(data) {
                 </div>
             </div>
             <div class="form-holder valid-field">
-                <i class="zmdi zmdi-pin"></i>
+                <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
                     <select name="pStateId" id="pStateId" class="form-control-field" tabindex="${++tabindex}">
                         <option value="">Select State/Province*</option>
@@ -1545,7 +1549,7 @@ function getParentDetailsContent(data) {
                 </div>
             </div>
             <div class="form-holder valid-field">
-                <i class="zmdi zmdi-pin"></i>
+                <i class="zmdi zmdi-city"></i>
                 <div class="custom-field">
                     <select name="pCityId" id="pCityId" class="form-control-field" tabindex="${++tabindex}">
                         <option value="">Select City*</option>
@@ -1559,25 +1563,27 @@ function getParentDetailsContent(data) {
 
     html += `
     <div class="form-row m-0 justify-content-center">
-        <div class="form-holder text-center" style="width:100%">
+        <div class="form-holder text-center font-sm-11" style="width:100%">
             <strong>Your Preferred Communication&nbsp;</strong>
             <b>(You may choose more than one)</b>
-            <div>
+            <div class="full d-flex justify-content-center ">
                 <label class="cursor communication-mode text-dark valid-field" for="pcModeWhatsapp">
+                    <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" />
+                    <span class="d-inline-block ml-1">WhatsApp</span>
                     <input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp"
                         ${signupParent.communicationWhatsApp == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
-                    <span>WhatsApp</span>
-                    <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" />
                 </label>
                 <label class="cursor communication-mode text-dark" for="pcModeCall">
-                    <input id="pcModeCall" name="pcModeCall" type="checkbox" value="call"
+                    <i class="fa fa-phone"></i>
+                    <span class="d-inline-block ml-1">Call</span>
+					<input id="pcModeCall" name="pcModeCall" type="checkbox" value="call"
                         ${signupParent.communicationCall == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
-                    <span>Call</span><i class="fa fa-phone"></i>
                 </label>
                 <label class="cursor communication-mode text-dark" for="pcModeEmail">
-                    <input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email"
+                    <i class="fa fa-envelope"></i>
+                    <span class="d-inline-block ml-1">Email</span>
+					<input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email"
                         ${signupParent.communicationEmail == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
-                    <span>Email</span><i class="fa fa-envelope"></i>
                 </label>
             </div>
         </div>
@@ -1689,7 +1695,7 @@ function getCourseSelectionContent(csr){
 	if(csr.standardId!=8){
 	}
 	html+=
-	'<h3 class="mb-1 select-grade-title course-selection-grade-title" style="display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:12px;">';
+	'<h3 class="mb-1 select-grade-title course-selection-grade-title" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;">';
 		if(csr.courseProviderId == 39){
 			html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 		}else{
@@ -1732,7 +1738,7 @@ function getCourseSelectionContent(csr){
 				'<span class="alternate-txt-color">&nbsp;'+csr.standardName+'</span>'
 				if($("#signupType").val() == "Online" || $("#userId").val() == USER_ID){
 					html+=
-					'<span class="change-grade primary-bg" onclick="changeSelectedGrade()">'
+					'<span class="change-grade primary-bg font-sm-12" onclick="changeSelectedGrade()">'
 						+'Change Grade <i class="fa fa-exchange" aria-hidden="true"></i>'
 					+'</span>';
 				}
@@ -1766,7 +1772,7 @@ function getCourseSelectionContent(csr){
 								if(labelHtml!=''){
 									html+=
 									'<div class="full">'
-										+'<h3 class="use-credit white-txt-color alternate-bg">'
+										+'<h3 class="use-credit white-txt-color alternate-bg font-sm-10">'
 											+labelHtml
 										'</h3>'
 									+'</div>';
@@ -1785,7 +1791,7 @@ function getCourseSelectionContent(csr){
 						html+='<div class="form-holder selected-course-view" style="width:100%">'
 							+'<div class="fixed-item full">'
 								+'<div class="full selected-course primary-bg primary-border-color head">'
-									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
+									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow font-sm-10 justify-content-center primary-bg white-txt-color">';
 										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 											if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
 												html+=csr.selectedSubjects.length;
@@ -1825,18 +1831,18 @@ function getCourseSelectionContent(csr){
 														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
 															+'<span class="count">'+(k+1)+'.&nbsp;</span>'
 															+'<div class="selected_course_name">'
-																+'<div class="course-icon"></div>'
+																// +'<div class="course-icon"></div>'
 																+'<div class="course-name-wrapper">'
 																	+'<h4 class="course-name">'
 																		+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
-																		+'<span class="price">'
-																			+' <b>';
-																				if(csr.showCourseFee =='Y'){
-																					html+=courseDetails.coursePriceSelectedString;
-																				}
-																				html+=
-																			'</b>'
-																		+'</span>'
+																		// +'<span class="price">'
+																		// 	+' <b>';
+																		// 		if(csr.showCourseFee =='Y'){
+																		// 			html+=courseDetails.coursePriceSelectedString;
+																		// 		}
+																		// 		html+=
+																		// 	'</b>'
+																		// +'</span>'
 																	+'</h4>'
 																+'</div>'
 																+'<div class="add-course-btn">'
@@ -1923,7 +1929,7 @@ function getCourseSelectionContent(csr){
 							}
 							html+='<div class="fixed-item full">'
 								+'<div class="full selected-course primary-bg primary-border-color head">'
-									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow primary-bg white-txt-color">';
+									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow font-sm-10 justify-content-center primary-bg white-txt-color">';
 										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 											if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
 												html+=csr.selectedSubjects.length;
@@ -1962,18 +1968,18 @@ function getCourseSelectionContent(csr){
 														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
 															+'<span class="count">'+(k+1)+'.&nbsp;</span>'
 															+'<div class="selected_course_name">'
-																+'<div class="course-icon"></div>'
+																// +'<div class="course-icon"></div>'
 																+'<div class="course-name-wrapper">'
 																	+'<h4 class="course-name">'
 																		+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
-																		+'<span class="price">'
-																			+' <b class="ml-3">';
-																				if(csr.showCourseFee =='Y'){
-																					html+=courseDetails.coursePriceSelectedString;
-																				}
-																				html+=
-																			'</b>'
-																		+'</span>'
+																		// +'<span class="price">'
+																		// 	+' <b class="ml-3">';
+																		// 		if(csr.showCourseFee =='Y'){
+																		// 			html+=courseDetails.coursePriceSelectedString;
+																		// 		}
+																		// 		html+=
+																		// 	'</b>'
+																		// +'</span>'
 																	+'</h4>'
 																+'</div>'
 																+'<div class="add-course-btn add-course-btn-partner">';
@@ -2068,7 +2074,7 @@ function getCourseSelectionContent(csr){
 								+'<ul class="custom-tab-wrapper">'
 									+'<li class="active-tab primary-bg white-txt-color">'
 										+'<a href="javascript:void(0)" id="ft_courses">'
-											+'<label class="full_form">';
+											+'<label class="full_form font-sm-10">';
 											if(csr.minCourseLimit>csr.totalCredit){
 												if(csr.maxCourseLimit-csr.totalCredit <= 1){
 													html+='PLEASE SELECT A COURSE ';
@@ -2601,8 +2607,9 @@ function getPaymentModeContent(){
 		+'<div class="modal-dialog modal-lg" role="document">'
 			+'<div class="modal-content mx-auto" style="max-width: 1000px;">'
 				+'<div class="modal-header primary-bg white-txt-color">'
-					+'<h4 class="modal-title " style=" margin-left: 10px;">Fee Details</h4>'
-					+'<button type="button" class="close close-with-red-color" aria-label="Close" data-dismiss="modal" style="margin-right: 5px;"><span style="color: #fff;">&times;</span></button>'
+					// +'<h4 class="modal-title " style=" margin-left: 10px;">Fee Details</h4>'
+
+					+'<button type="button" class="close close-with-red-color ml-auto" aria-label="Close" data-dismiss="modal" style="margin-right: 5px;"><span style="color: #fff;">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body" style="display:inline-block;width:100%;">'
 					+skeletonFeeDetails()
@@ -2666,7 +2673,7 @@ function paymentModalContentWithData(cdrDTO){
 								// if(cdrDTO.schoolId==5){
 								// 	html+='(4 Installments, every 3 months)';
 								// }else{
-									html+='Pay in easy installments';
+									html+='Easy installments';
 								// }
 								html+='</b><br>'+cdrDTO.monthlyFeeDetails.payableFeeString
 							+'</span>'
@@ -2681,7 +2688,7 @@ function paymentModalContentWithData(cdrDTO){
 							+'<span class="circle primary-border-color ml-0"></span>'
 							+'<span class="check primary-bg-checked"></span>'
 							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px">'
-								+'<b>Customized plan (Pay in easy installments)</b> <br>'
+								+'<b>Customized plan (Easy installments)</b> <br>'
 								+paymentCalculationResponse.paymentDetails.totalPayableAmountString
 							+'</span>'
 						+'</label>'
@@ -2703,9 +2710,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'
 												+'<tr>'
-													+'<th>Fee Description</th>'
-													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="text-align:center">Total Fee</th>'
+													+'<th>Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee</th>'
+													+'<th style="text-align:center">Total</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2719,9 +2726,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="annual-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th>Fee Description</th>'
-													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="text-align:center">Total Fee</th>'
+													+'<th>Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee</th>'
+													+'<th style="text-align:center">Total </th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2734,9 +2741,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="installment3-course-fee-details" class="installment3-course-fee-details table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th>Fee Description</th>'
-													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="ext-align:center">Total Fee</th>'
+													+'<th>Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee</th>'
+													+'<th style="ext-align:center">Total</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2745,14 +2752,14 @@ function paymentModalContentWithData(cdrDTO){
 										+'</table>'
 										+'<div class="full installment3-course-fee-details" style="display: none;">'
 											+'<div>'
-												+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">FEE SCHEDULE</h3>'
+												+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left;letter-spacing:1px">FEE SCHEDULE</h3>'
 											+'</div>'
 											+'<table class="table table-bordered table-striped without_h_scroll">'
 												+'<thead class="theme-bg primary-bg white-txt-color">'
 													+'<tr>'
-														+'<th>Fee Description</th>'
-														+'<th style="text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>'
-														+'<th style="text-align:center">Paying Now</th>'
+														+'<th>Description</th>'
+														+'<th style="text-align:center"><span class="previewPaymentOption"></span>Total</th>'
+														+'<th style="text-align:center">Paying</th>'
 													+'</tr>'
 												+'</thead>'
 												+'<tbody>'
@@ -2766,9 +2773,9 @@ function paymentModalContentWithData(cdrDTO){
 										'<table id="custom-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
-													+'<th>Fee Description</th>'
-													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ('+cdrDTO.currencyIsoCode+')</th>'
-													+'<th style="text-align:center">Total Fee</th>'
+													+'<th>Description</th>'
+													+'<th style="text-align:center"><span class="previewPaymentOption"></span> Fee</th>'
+													+'<th style="text-align:center">Total</th>'
 												+'</tr>'
 											+'</thead>'
 											+'<tbody>'
@@ -2782,13 +2789,13 @@ function paymentModalContentWithData(cdrDTO){
 							+'</div>'
 						+'</div>'
 						+'<div>'
-							+'<p><b>You are making the right decision for your child\'s education.</b></p>'
+							+'<p class="text-center font-sm-12"><b>Note:</b> All fees mentioned above are in US Dollars</p>'
 						+'</div>'
 					+'</div>'
 					+'<div class="col-md-12 col-sm-12 col-xs-12">'
 						+'<div class="row">'
-							+'<div class="col-md-10"></div>'
-							+'<div class="col-md-2 text-right">'
+							// +'<div class="col-md-10"></div>'
+							+'<div class="col-md-12 text-center">'
 								+'<button type="button" class="btn theme-bg primary-bg white-txt-color" style="width:auto;padding-left:16px;padding-right:16px;" onclick="choosePaymentOption();">Next</button>'
 							+'</div>'
 						+'</div>'
@@ -2804,6 +2811,9 @@ function paymentModalContentWithData(cdrDTO){
 function getReviewAndPayRendered(data){
 	$('#signupStage4Content').show();
 	$('#signupStage4Content').html(getReviewAndPayContent(data));
+	// $("#reference_number, #logout_modal_logout, #goToDashboardWarningMessage").remove();
+	// $("body").append();
+	
 	$('.accordion .a-title').unbind().bind('click', function(){
 		$(this).parent().closest('li').find('.a-content').stop().slideToggle();
 		$(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
@@ -2883,12 +2893,13 @@ function getReviewAndPayRendered(data){
 }
 
 function getReviewAndPayContent(data){
+
 	var html=
 	'<h4></h4>'
 	+'<section>'
 		+'<h3 class="alternate-txt-color">Kindly Review your details</h3>'
 		+'<div class="form-row form-review-partner">'
-			+'<div class="form-holder w-100">'
+			+'<div class="full w-100">'
 				+'<div class="full">'
 					+'<ul class="accordion mob-scroll">'
 						+'<li>'
@@ -2914,17 +2925,19 @@ function getReviewAndPayContent(data){
 					// 	'<hr>';
 					// }
 					if(SHOW_PAYMENT_OPTION=='Y'){
-						html+=feePaymentReview(data)
+						html+=feePaymentReview(data);
 					}
 					html+=
 				'</div>'
 			+'</div>'
 		+'</div>'
-	+'</section>'
+	+'</section>';
+	html+='<div class="text-center font-sm-12 mt-4 full review_currency_note"><b>Note:</b> All fees mentioned above are in US Dollars</div>';
 	// +bookAnEnrollmentTNCModal(data)
-	+referenceNumberModal(data)
-	+logoutModalLogout(data)
-	+goToDashboardWarningMessageModal(data)
+	html += referenceNumberModal(data);
+	html += logoutModalLogout(data);
+	html += goToDashboardWarningMessageModal(data);
+	
 	return html;
 }
 
@@ -3007,7 +3020,7 @@ function studentDetailsPreview(data){
 			}
 			html+=
 		'</div>'
-	+'</div>';
+	+'</div>'
 	return html;
 }
 
@@ -3239,9 +3252,9 @@ function feePaymentReview(data){
 			+'<table class="table-style">'
 				+'<thead>'
 					+'<tr>'
-						+'<th class="th" style="width:60%">Fee Description</th>'
-						+'<th class="th" style="text-align:center;width:20%">Fee ('+data.currencyIsoCode+')</th>'
-						+'<th class="th" style="text-align:center;width:20%">Total Fee</th>'
+						+'<th class="th" style="width:60%">Description</th>'
+						+'<th class="th" style="text-align:center;width:20%">Fee</th>'
+						+'<th class="th" style="text-align:center;width:20%">Total</th>'
 					+'</tr>'
 				+'</thead>'
 				+'<tbody>';
@@ -3266,18 +3279,21 @@ function feePaymentReview(data){
 				+'<table class="table-style">'
 					+'<thead>'
 						+'<tr>'
-							+'<th class="th" style="width:60%">Fee Description</th>'
-							+'<th class="th" style="text-align:center;width:20%">Total Fee</th>'
-							+'<th class="th" style="text-align:center;width:20%">Paying Now</th>'
+							+'<th class="th" style="width:60%">Description</th>'
+							+'<th class="th" style="text-align:center;width:20%">Total</th>'
+							+'<th class="th" style="text-align:center;width:20%">Paying</th>'
 						+'</tr>'
 					+'</thead>'
-					+'<tbody>'
-						+monthlyFeeShchedule(cdrDTO)
-					'</tbody>'
-				+'</table>';
+					+'<tbody>';
+						html+=monthlyFeeShchedule(cdrDTO)
+					+'</tbody>'
+				+'</table>'
 			}
+		
 		html+='</div>'
+		
 	+'</div>';
+	
 	return html;
 }
 
@@ -3313,7 +3329,7 @@ function commonPaymentTable(cdrDTO, prefix){
 			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
 				html+='<td>Course Fee</td>';
 			}else{
-				html+='<td>Total Fee (Enrollment Fee + Course Fee)</td>';
+				html+='<td>Total (Enrollment Fee + Course Fee)</td>';
 
 			}
 		}else{
@@ -3957,18 +3973,18 @@ function recommendedCourseContent(data){
 			+'<td>'
 				+recommendedCourse.subjectCredit
 			+'</td>'
-			+'<td class="text-center">';
+			+'<td class="text-center" style="vertical-align:middle">';
 				if(recommendedCourse.courseMandatory === 1 ){
-					html+='<label for="add_recommended_course_id_'+(k+1)+'" class="btn btn-sm btn-success white-txt-color" style="margin:0" disabled>'
-							+'<input type="checkbox" class="add-recommended-course add-recommended-course-mandatory" id="add_recommended_course_id_'+(k+1)+'" value="'+recommendedCourse.subjectId+'" style="opacity:0;width:1px;height:1px" checked disabled>'
+					html+='<label for="add_recommended_course_id_'+(k+1)+'" class="btn btn-sm btn-success white-txt-color px-2" style="margin:0" disabled>'
+							+'<input type="checkbox" class="add-recommended-course add-recommended-course-mandatory" id="add_recommended_course_id_'+(k+1)+'" value="'+recommendedCourse.subjectId+'" style="opacity:0;width:0px;height:0px" checked disabled>'
 						+'<span>Mandatory</span></label>';
 				}else if (selectedSubjects.includes(String(recommendedCourse.subjectId))) {
-					html += '<label for="add_recommended_course_id_'+(k+1)+'" class="btn btn-sm btn-danger white-txt-color" style="margin:0">'
-						+ '<input type="checkbox" class="add-recommended-course add-recommended-course-already-selected" id="add_recommended_course_id_'+(k+1)+'" value="'+recommendedCourse.subjectId+'" style="opacity:0;width:1px;height:1px" checked data-checked="true" onchange="addRecommendedCourse(this)">'
+					html += '<label for="add_recommended_course_id_'+(k+1)+'" class="btn btn-sm btn-danger white-txt-color px-2" style="margin:0">'
+						+ '<input type="checkbox" class="add-recommended-course add-recommended-course-already-selected" id="add_recommended_course_id_'+(k+1)+'" value="'+recommendedCourse.subjectId+'" style="opacity:0;width:0px;height:0px" checked data-checked="true" onchange="addRecommendedCourse(this)">'
 						+ '<span>Remove&nbsp;<i class="fa fa-trash"></i></span></label>';
 				}else{
-					html+='<label for="add_recommended_course_id_'+(k+1)+'" class="btn btn-sm primary-bg white-txt-color" style="margin:0">'
-						+'<input type="checkbox" class="add-recommended-course add-recommended-course-not-mandatory" id="add_recommended_course_id_'+(k+1)+'" value="'+recommendedCourse.subjectId+'" style="opacity:0;width:1px;height:1px" data-checked="false" onchange="addRecommendedCourse(this)">'
+					html+='<label for="add_recommended_course_id_'+(k+1)+'" class="btn btn-sm primary-bg white-txt-color px-2" style="margin:0">'
+						+'<input type="checkbox" class="add-recommended-course add-recommended-course-not-mandatory" id="add_recommended_course_id_'+(k+1)+'" value="'+recommendedCourse.subjectId+'" style="opacity:0;width:0px;height:0px" data-checked="false" onchange="addRecommendedCourse(this)">'
 					+'<span><i class="fa fa-plus"></i>&nbsp;Add</span></label>';
 				}
 			html+='</td>'
@@ -3983,45 +3999,165 @@ function recommendedCourseContent(data){
 		+'</b></td>'
 		+'<td>&nbsp;</td>'
 	+'</tr>';
-	$('#recomendedCourses tbody').html(html);
+	// $('#recomendedCourses tbody').html(html);
 	$('#recomendedCourses').attr('courses',courses);
 	toggleAddRemoveAllBtn();
 	updateConfirmButtonState();
 }
 
 function recommendedCourseModalContent(data){
+	// console.log("data",data)
+	var selectedSubjects = ($("#selectedSubjects").val() || '').split(',').map(id => id.trim());
+	var mandatorySubjects = data.recommendedCourses.filter(item => item.courseMandatory == 1);
+	var nonMandatorySubjects = data.recommendedCourses.filter(item => item.courseMandatory == 0);
+	// console.log("Mandatory:", mandatorySubjects);
+	// console.log("Non Mandatory:", nonMandatorySubjects);
+	var totalCredit = 0;
 	var html=
 	'<div class="modal fade" id="recommendedCourseModal" tabindex="-1">'
 		+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none" role="document">'
 			+'<div class="modal-content">'
-				+'<div class="modal-header primary-bg white-txt-color" style="display:flex;justify-content:space-between;border-top-left-radius:6px;border-top-right-radius:6px">'
-					+'<h5 class="modal-title">Recommended Courses</h5>'
+				+'<div class="modal-header primary-bg white-txt-color align-items-center" style="display:flex;justify-content:space-between">'
+					+'<span class="mr-2 font-26"><i class="zmdi zmdi-book"></i></span>'
+					+'<div>'
+						+'<h5 class="modal-title">Recommended Courses</h5>'
+						+'<p class="m-0 font-weight-light font-14">'+data.gradeName+'</p>'
+					+'</div>'
 					+'<button type="button" class="close" data-dismiss="modal" aria-label="Close">'
 						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div  class="modal-body" courses="">'
-					+'<h4 class="full text-center mb-2"><b>We recommend these courses for '+data.gradeName+'</b></h4>'
-					+'<table id="recomendedCourses" class="table recommend-course-table" courses="">'
-						+'<thead>'
-							+'<tr class="primary-bg white-txt-color">'
-								+'<th>S.No.</th>'
-								+'<th>Course Name</th>'
-								+'<th>Credits</th>'
-								+'<th class="text-center">'
-										+'<label id="addAllRecommendedCourse" class="btn btn-sm white-bg primary-txt-color" style="margin:0" onclick="addAllRecommendedCourse()">'
-											+'<span>Add All</span>'
-										+'</label>'
-										+'<label id="reomveAllRecommendedCourse" class="btn btn-sm btn-danger text-white" style="margin:0;display:none" onclick="reomveAllRecommendedCourse()">'
-											+'<span>Remove All</span>'
-										+'</label>'
-								+'</th>'
-							+'</tr>'
-						+'</thead>'
-						+'<tbody>'
-						+'</tbody>'
-					+'</table>'
-					+'<p class="m-0"><b>Note: By adding the above recommended courses, your current course selection will be replaced. You can still add or remove courses.</b</p>'
+					+'<div class="d-flex mb-3 align-items-center flex-wrap">'
+						+'<h4 class="mb-2 font-14 m-0"><b>We recommend these courses for '+data.gradeName+'</b></h4>'
+						+'<div class="ml-auto">'
+							+'<label id="addAllRecommendedCourse" class="btn-sm white-bg primary-txt-color cursor theme-border border font-12" style="margin:0" onclick="addAllRecommendedCourse()">'
+								+'<span>Add All</span>'
+							+'</label>'
+							+'<label id="reomveAllRecommendedCourse" class="btn-sm btn-danger text-white cursor px-2 font-12" style="margin:0;display:none" onclick="reomveAllRecommendedCourse()">'
+								+'<span>Remove All</span>'
+							+'</label>'
+						+'</div>'
+					+'</div>'
+					+'<div>'
+						+'<p class="mb-0 font-12 font-weight-bold">Required Courses ('+mandatorySubjects.length+')</p>'
+					+'</div>';
+					if(mandatorySubjects.length>0){
+						html+='<ul class="full">';
+							$.each(mandatorySubjects, function(i,v){
+								totalCredit+=(parseFloat(v.subjectCredit));
+								html+=
+								'<li class="d-flex align-items-center flex-wrap p-2 font-14 border '+(i==0? (mandatorySubjects.length == (i+1)?'rounded-bottom rounded-top':'rounded-top'):mandatorySubjects.length == (i+1)?'rounded-bottom':'')+'" style="gap:10px">'
+									+'<div class="d-inline-flex flex-grow-1 align-items-center" style="gap:10px">'
+										+'<div class="custom-control custom-checkbox d-none">'
+											+'<input type="checkbox" class="add-recommended-course add-recommended-course-mandatory custom-control-input" id="add_recommended_course_id_'+(i+1)+'" value="'+v.subjectId+'" style="opacity:0;width:0px;height:0px" checked disabled>'
+											+'<label for="add_recommended_course_id_'+(i+1)+'" class="custom-control-label" style="margin:0" disabled></label>'
+										+'</div>'
+										+'<span class="d-sm-inline-flex align-items-center justify-content-center d-none" style="color:#077507;background:#d9efd6;width:35px;height:35px;border-radius:50%">'
+											+'<i class="zmdi zmdi-book font-20"></i>'
+										+'</span>'
+										+'<div class="d-inline-flex">'+v.subjectName+'</div>'
+									+'</div>'
+									+'<div class="d-inline-flex ml-auto">'
+										+'<div class="d-flex flex-wrap align-items-center">'
+											+'<div class="align-items-center d-inline-flex ml-auto" style="gap:10px">'
+												+'<span class="d-inline-block px-2 font-12" style="color:#077507;background:#d9efd6;border-radius:30px"><i class="zmdi zmdi-lock-outline"></i>&nbsp;Required</span>'
+												+'<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>'
+											+'</div>'
+										+'</div>'
+									+'</div>'
+								+'</li>';
+							});
+						html+='</ul>';
+					}
+					html+=
+					'<div class="mt-2">'
+						+'<p class="mb-0 font-12 font-weight-bold">Recommended Courses ('+nonMandatorySubjects.length+')</p>'
+					+'</div>';
+					if(nonMandatorySubjects.length>0){
+						html+='<ul class="full">';
+							$.each(nonMandatorySubjects, function(i,v){
+								totalCredit+=(parseFloat(v.subjectCredit));
+								i+=i+1;
+								html+=
+								'<li class="d-flex align-items-center flex-wrap p-2 font-14 border '+(i==0? (nonMandatorySubjects.length == (i-1)?'rounded-bottom rounded-top':'rounded-top'):nonMandatorySubjects.length == (i-1)?'rounded-bottom':'')+'" style="gap:10px">'
+									+'<div class="d-inline-flex flex-grow-1 align-items-center" style="gap:10px">';
+										if(selectedSubjects.includes(String(v.subjectId))) {
+											html += '<div class="custom-control custom-checkbox">'
+														+'<input type="checkbox" class="add-recommended-course add-recommended-course-already-selected custom-control-input" id="add_recommended_course_id_'+(i+1)+'" value="'+v.subjectId+'" style="opacity:0;width:0px;height:0px" checked data-checked="true" onchange="addRecommendedCourse(this, \''+v.subjectId+'\')">'
+														+'<label for="add_recommended_course_id_'+(i+1)+'" class="custom-control-label" style="margin:0"></label>'
+													+'</div>';
+										}else{
+											html+='<div class="custom-control custom-checkbox">'
+													+'<input type="checkbox" class="add-recommended-course add-recommended-course-not-mandatory custom-control-input" id="add_recommended_course_id_'+(i+1)+'" value="'+v.subjectId+'" style="opacity:0;width:0px;height:0px" data-checked="false" onchange="addRecommendedCourse(this, \''+v.subjectId+'\')">'
+													+'<label for="add_recommended_course_id_'+(i+1)+'" class="custom-control-label" style="margin:0"></label>'
+												+'</div>';
+										}
+										html+=
+											'<span class="d-sm-inline-flex align-items-center justify-content-center d-none" style="color:#007fff;background:#d7eaff;width:35px;height:35px;border-radius:50%">'
+												+'<i class="zmdi zmdi-book font-20"></i>'
+											+'</span>'
+											+'<div class="d-inline-flex">'+v.subjectName+'</div>'
+									+'</div>'
+									+'<div class="d-inline-flex  ml-auto">'
+										+'<div class="d-flex flex-wrap align-items-center">'
+											+'<div class="d-inline-flex ml-auto" style="gap:10px">'
+												+'<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>'
+												+'<span class="btn-sm white-bg add-and-remove-btn cursor '+(selectedSubjects.includes(String(v.subjectId))?'border-danger text-danger':'theme-border primary-txt-color')+'  border font-12" id="add_remove_button_'+v.subjectId+'" style="color:#007fff;background:#d7eaff;" onclick="addRecommendedCourseByBtn(\''+(i+1)+'\',\''+v.subjectId+'\')">'+(selectedSubjects.includes(String(v.subjectId))? '<i class="zmdi zmdi-minus"></i>&nbsp;Remove':'<i class="zmdi zmdi-plus"></i>&nbsp;Add')+'</span>'
+											+'</div>'
+										+'</div>'
+									+'</div>'
+								+'</li>';
+							});
+						html+='</ul>';
+					}
+					html+=
+					'<div class="w-100 mt-2 d-flex rounded-lg p-2" style="background:var(--plc)">';
+						html+=
+						`<div class="d-flex align-items-center w-100">
+							<div class="mr-3 rounded-circle align-items-center d-inline-flex justify-content-center" style="color:#fff;background:#007fff;width: 40px;height: 40px;">
+								<i class="zmdi zmdi-graduation-cap font-24"></i>
+							</div>
+							<div class="flex-grow-1">
+								<div class="font-weight-bold text-dark font-18">Total Credits</div>
+								<div class="font-12">Including all recommended courses</div>
+							</div>
+							<div class="ml-auto font-28 font-weight-bold d-inline-flex primary-txt-color mr-2">${totalCredit}</div>
+						</div>`;
+					html+='</div>'
+					+'<div class="w-100 mt-2 d-flex rounded-lg p-2" style="background:#FFF8E1;border:1px solid #FFE082">';
+						html+=
+						`<div class="d-flex align-items-center w-100">
+							<div class="mr-3 rounded-circle align-items-center d-inline-flex justify-content-center text-dark" style="background:#F59E0B;min-width: 40px;height: 40px;">
+								<i class="zmdi zmdi-alert-triangle font-24"></i>
+							</div>
+							<div class="flex-grow-1 text-dark font-12">
+								<b>Note:</b> By adding the above recommended courses, your current course selection will be replaced. You can still add or remove courses.
+							</div>
+						</div>`;
+					html+='</div>'
+					// +'<div class="table-responsive">'
+					// 	+'<table id="recomendedCourses" class="table recommend-course-table" courses="" style="white-space:nowrap">'
+					// 		+'<thead>'
+					// 			+'<tr class="primary-bg white-txt-color">'
+					// 				+'<th>S.No.</th>'
+					// 				+'<th>Course Name</th>'
+					// 				+'<th>Credits</th>'
+					// 				+'<th class="text-center">'
+					// 						// +'<label id="addAllRecommendedCourse" class="btn btn-sm white-bg primary-txt-color" style="margin:0" onclick="addAllRecommendedCourse()">'
+					// 						// 	+'<span>Add All</span>'
+					// 						// +'</label>'
+					// 						// +'<label id="reomveAllRecommendedCourse" class="btn btn-sm btn-danger text-white px-2" style="margin:0;display:none" onclick="reomveAllRecommendedCourse()">'
+					// 						// 	+'<span>Remove All</span>'
+					// 						// +'</label>'
+					// 				+'</th>'
+					// 			+'</tr>'
+					// 		+'</thead>'
+					// 		+'<tbody>'
+					// 		+'</tbody>'
+					// 	+'</table>'
+					// +'</div>'
+					// +'<p class="m-0"><b>Note: By adding the above recommended courses, your current course selection will be replaced. You can still add or remove courses.</b</p>'
 				+'</div>';
 				var confirmBtn = false;
 				$.each(data.recommendedCourses, function(k, subject){

@@ -137,6 +137,9 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  linear-gradient(135deg,#5fb0ff 0%,#2f8bff 45%,#1877e6 100%);
  overflow:hidden;
 }
+.login-redesign.login-school-primary-bg{
+ background:var(--pc) !important;
+}
 .login-redesign::before{
  content:'';
  position:absolute;
@@ -269,7 +272,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  position:absolute;
  left:50%;
  display:block;
- background:#2888f8;
+ background:var(--pc);
  transform:translateX(-50%);
 }
 .login-redesign .profile-avatar-head{
@@ -294,7 +297,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  justify-content:center;
  width:36px;
  height:36px;
- background:#2888f8;
+ background:var(--pc);
  border:3px solid #fff;
  border-radius:50%;
  color:#fff;
@@ -323,7 +326,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
 .custom-field-scope{
  --custom-field-bg:#f4f8ff;
  --custom-field-default:#dae5f5;
- --custom-field-active:#2b86ff;
+ --custom-field-active:var(--pc);
  --custom-field-default-text:#8e98ab;
  --custom-field-value:#30415f;
 }

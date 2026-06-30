@@ -1,4 +1,5 @@
-var SHOW_GRADUATION_LOGIN_DESIGN = true && isGraduationLoginDesignVisible();
+var IS_INTERNATIONAL_SCHOOLING = Number(SCHOOL_ID) === 1;
+var SHOW_GRADUATION_LOGIN_DESIGN = IS_INTERNATIONAL_SCHOOLING && isGraduationLoginDesignVisible();
 
 function isGraduationLoginDesignVisible(){
     var graduationHideFromDate = new Date(2026, 6, 26);
@@ -9,15 +10,17 @@ async function loginContent(userName, fromSpoof){
     var html =``;
         html+=marqueeContent();
         html+=
-        `<div class="login-bg login-redesign bg-primary${SHOW_GRADUATION_LOGIN_DESIGN ? ' login-graduation-split' : ''}">
-            <div class="login-orbs" aria-hidden="true">
-                <span class="login-orb login-orb-1"></span>
-                <span class="login-orb login-orb-2"></span>
-                <span class="login-orb login-orb-3"></span>
-                <span class="login-orb login-orb-4"></span>
-                <span class="login-orb login-orb-5"></span>
-                <span class="login-orb login-orb-6"></span>
-            </div>
+        `<div class="login-bg login-redesign bg-primary${SHOW_GRADUATION_LOGIN_DESIGN ? ' login-graduation-split' : ''}${!IS_INTERNATIONAL_SCHOOLING ? ' login-school-primary-bg' : ''}">
+            ${IS_INTERNATIONAL_SCHOOLING ? `
+                <div class="login-orbs" aria-hidden="true">
+                    <span class="login-orb login-orb-1"></span>
+                    <span class="login-orb login-orb-2"></span>
+                    <span class="login-orb login-orb-3"></span>
+                    <span class="login-orb login-orb-4"></span>
+                    <span class="login-orb login-orb-5"></span>
+                    <span class="login-orb login-orb-6"></span>
+                </div>
+            ` : ``}
             ${SHOW_GRADUATION_LOGIN_DESIGN ? `
                 <aside class="graduation-event graduation-event-side">
                     <div class="graduation-event-content">

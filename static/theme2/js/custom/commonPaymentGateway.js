@@ -342,8 +342,8 @@ async function getPaymentGatewayOptionsModal(details){
 		<div class="modal-dialog modal-xl">
 			<div class="modal-content">
 				<div class="modal-header py-2 primary-bg white-txt-color">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true" style="color: #fff;">×</span>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
 					</button>
 					<h4 class="modal-title" style="font-size: 14px">&nbsp;</h4>
 				</div>
@@ -643,8 +643,8 @@ async function getTNCContent(responseData){
 							html+=`Fee Refund Policy And Terms & Conditions For ${paymentName}`;
 						}
 					html+=`</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true" style="color: #fff;">×</span>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
 				<div class="modal-body">
@@ -1096,7 +1096,9 @@ async function courseFeeModalTNC(responseData) {
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary d-flex">
 						${/* <h5 class="modal-title text-white">${modalTitle}</h5> */''}
-                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <form id="dashboardPayment" name="dashboardPayment" method="post" autocomplete="off">
                         <div class="modal-body">
@@ -1220,8 +1222,8 @@ function paymentStatusResponseModal(){
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
 				<div class="modal-header py-2 primary-bg white-txt-color">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true" style="color: #fff;">×</span>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
 					</button>
 				<h4 class="modal-title" style="font-size: 14px">&nbsp;</h4>
 				</div>

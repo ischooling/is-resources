@@ -101,7 +101,11 @@ function updateStudentDocumentStepActionButtons(){
 			"gap":"12px"
 		});
 	}else{
-		$(".prev-btn").show();
+		if(currentStep == 1){
+			$(".prev-btn").hide();
+		}else{
+			$(".prev-btn").show();
+		}
 		actionsList.css({
 			"display":"",
 			"justify-content":"",
@@ -1291,7 +1295,7 @@ function getSignupStatusFinal() {
 	}
 }
 
-function addRecommendedCourse(src){
+function addRecommendedCourse(src, subjectID){
 	var allChecked = true;
 	var $src = $(src);
 	var $btn = $src.parent();
@@ -1299,18 +1303,23 @@ function addRecommendedCourse(src){
 	var isNew = $src.hasClass('add-recommended-course-not-mandatory');
 
 	if($src.prop("checked")){
-		$btn.find("span").html('<span>Remove&nbsp;<i class="fa fa-trash"></i></span>');
-		$btn.addClass("btn-danger").removeClass("primary-bg");
+		// $btn.find("span").html('<span>Remove&nbsp;<i class="fa fa-trash"></i></span>');
+		$("#add_remove_button_"+subjectID).html('<i class="zmdi zmdi-minus"></i>&nbsp;Remove');
+		// $btn.addClass("btn-danger").removeClass("primary-bg");
 		$src.attr("data-checked", "true");
+		$("#add_remove_button_"+subjectID).removeClass('theme-border primary-txt-color').addClass('border-danger text-danger');
 	} else {
 		if (isAlreadySelected) {
 			$src.removeAttr("data-checked");
-			$btn.find("span").html('<span><i class="fa fa-plus"></i>&nbsp;Add Back</span>');
+			// $btn.find("span").html('<span><i class="fa fa-plus"></i>&nbsp;Add Back</span>');
+			$("#add_remove_button_"+subjectID).html('<i class="zmdi zmdi-plus"></i>&nbsp;Add Back');
 		} else {
-			$btn.find("span").html('<span><i class="fa fa-plus"></i>&nbsp;Add</span>');
+			// $btn.find("span").html('<span><i class="fa fa-plus"></i>&nbsp;Add</span>');
+			$("#add_remove_button_"+subjectID).html('<i class="zmdi zmdi-plus"></i>&nbsp;Add');
 		}
-		$btn.removeClass("btn-danger").addClass("primary-bg");
+		// $btn.removeClass("btn-danger").addClass("primary-bg");
 		$src.removeAttr("data-checked");
+		$("#add_remove_button_"+subjectID).addClass('theme-border primary-txt-color').removeClass('border-danger text-danger');
 	}
 
 	$('.add-recommended-course-not-mandatory, .add-recommended-course-already-selected').each(function () {
@@ -1328,6 +1337,11 @@ function addRecommendedCourse(src){
 	}
 	updateConfirmButtonState();
 }
+
+function addRecommendedCourseByBtn(index, subjectID){
+	$("#add_recommended_course_id_"+index).trigger("click");
+}
+
 
 // function addAllRecommendedCourse(){
 // 	$("#addAllRecommendedCourse").hide();
@@ -1362,7 +1376,9 @@ function addAllRecommendedCourse() {
 		if (!$(this).prop('checked')) {
 			$(this).prop('checked', true);
 			$(this).parent().find("span").html('<span>Remove&nbsp;<i class="fa fa-trash"></i></span>');
-			$(this).parent().addClass("btn-danger").removeClass("primary-bg");
+			// $(this).parent().addClass("btn-danger").removeClass("primary-bg");
+			$(this).closest("li").find(".add-and-remove-btn").html('<i class="zmdi zmdi-minus"></i>&nbsp;Remove');
+			$(this).closest("li").find(".add-and-remove-btn").removeClass('theme-border primary-txt-color').addClass('border-danger text-danger');
 		}
 	});
 
@@ -1376,14 +1392,15 @@ function reomveAllRecommendedCourse() {
 	$(".add-recommended-course-not-mandatory, .add-recommended-course-already-selected").each(function () {
 		$(this).prop('checked', false);
 		const $btn = $(this).parent();
-
 		if ($(this).hasClass("add-recommended-course-already-selected")) {
-			$btn.find("span").html('<span><i class="fa fa-plus"></i>&nbsp;Add Back</span>');
+			$btn.closest("li").find(".add-and-remove-btn").html('<i class="zmdi zmdi-plus"></i>&nbsp;Add Back');
+			$btn.closest("li").find(".add-and-remove-btn").addClass('theme-border primary-txt-color').removeClass('border-danger text-danger');
 		} else {
-			$btn.find("span").html('<span><i class="fa fa-plus"></i>&nbsp;Add</span>');
+			$btn.closest("li").find(".add-and-remove-btn").html('<i class="zmdi zmdi-plus"></i>&nbsp;Add');
+			$btn.closest("li").find(".add-and-remove-btn").addClass('theme-border primary-txt-color').removeClass('border-danger text-danger');
 		}
 
-		$btn.addClass("primary-bg").removeClass("btn-danger");
+		// $btn.addClass("primary-bg").removeClass("btn-danger");
 		$(this).removeAttr("data-checked");
 	});
 

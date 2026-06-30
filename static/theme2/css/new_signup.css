@@ -139,7 +139,7 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li:nth-child(5) .valid-field:after{right: 130px !important;}
 .right-section .form ul li:nth-child(5) .valid-field:before{right: 130px !important;}
 .right-section .form ul li .true.valid-field:after{content:"\f00c";color: green;visibility: visible;opacity: 1;transform: scale(1);}
-.right-section .form ul li .false.valid-field:after{content:"\f00d";color: red;visibility: visible;opacity: 1;transform: scale(1);}
+.right-section .form ul li .false.valid-field:not(.captchaWrapper):after{content:"\f00d";color: red;visibility: visible;opacity: 1;transform: scale(1);}
 .right-section .form ul li .true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
 .right-section .form ul li .false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
 .right-section .form ul li:last-child{margin-bottom: 0}
@@ -147,7 +147,7 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li label.error{position: absolute;left: 0;top:100%;color:red;}
 .right-section .form ul li .field-icon{content: '';position: absolute;left: 0;top:0;width: 45px;height: 100%;border-top-left-radius: 50px;border-bottom-left-radius: 50px;font-size: 18px;display: flex;align-items: center;justify-content: center;}
 .right-section .form ul li input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), .right-section .form ul li textarea, .right-section .form ul li select{width: 100%;float: left;font-size: 14px;padding: 10px 12px 10px 50px;border-radius: 50px;color:#737373;}
-.right-section .form ul li input[type="submit"], input[type="submit"]{display: inline-block;padding: 10px 25px;border:0;border-radius: 50px;font-size: 14px; margin: 5px auto;display: block;}
+.right-section .form ul li input[type="submit"], input[type="submit"], .right-section .form ul li button[type="submit"], button[type="submit"]{display: inline-block;padding: 10px 25px;border:0;border-radius: 50px;font-size: 14px; margin: 5px auto;display: block;}
 .right-section .form ul li .captcha-img{content: '';position: absolute;right: 0;top:0;display: flex;align-items: center;height: 100%;overflow: hidden; background: var(--pc);border-top-right-radius: 50px;border-bottom-right-radius: 50px;}
 .right-section .form ul li .captcha-img .refresh-link{display: inline-block;line-height: 14px;padding-right: 15px;color:#fff;}
 .right-section .form ul li .captcha-img img{display: inline-block;}

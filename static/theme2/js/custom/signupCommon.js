@@ -424,8 +424,10 @@ function validateRequestForSignup(formId, moduleId) {
 	}
 
 	if ($("#" + formId + " #checkTerms").is(':checked')) {
+		$("#" + formId + " #checkTerms").removeClass('terms-error');
 		showElementErrorMessage(false, 'checkTerms', '');
 	} else {
+		$("#" + formId + " #checkTerms").addClass('terms-error');
 		showElementErrorMessage(false, 'checkTerms', 'Please accept terms and conditions');
 		flag = false
 	}

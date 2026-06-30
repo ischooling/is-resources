@@ -2221,11 +2221,20 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                       +'<th class="border-0 p-1">Demo Confirm Message:</th>'
                       +'<td class="border-0 p-1">'+(leads.demoConfirmMessage!=''?leads.demoConfirmMessage:'N/A')+'</td>'
                     +'</tr>';
-                 }
+                 }//followupRemark
+                 html+='<tr>'
+									+'<th class="border-0 p-1" style="width:165px">Demo Remarks:</th>'
+									+'<td class="border-0 p-1 demo-last-remark-'+leads.leadNo+'" style="max-height: 100px; overflow-y: auto;">'
+                  
+									+'</td>'
+								+'</tr>';
                 //if(USER_ROLE=='DIRECTOR' || objectRights.searchUser){
                   if(leads.demoSummaryStatus){
                     html+='<tr>'
                            +'<td class="border-0 p-1">'
+                           +(leads.demoTranscriptUrl
+                                      ? '<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="showVTTFile(\''+leads.demoTranscriptUrl+'\', \'Transcript\',false)">Transcript</button>'
+                                      : '')
                           //   +'<div class="dropdown d-inline-block" style="position: inherit;">'
                           //     +'<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary">View Demo Summary</button>'
                           //     +'<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-lg dropdown-menu p-2" x-placement="bottom-start" style="max-width: 250px; max-height:350px; overflow: auto;">';
@@ -2250,9 +2259,6 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                            +'</td>'
                           +'<td class="border-0 p-1">'
                               +'<div class="d-flex flex-column align-items-start" style="gap:8px;">'
-                                  +(leads.demoTranscriptUrl
-                                      ? '<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="showVTTFile(\''+leads.demoTranscriptUrl+'\', \'Transcript\',false)">Transcript</button>'
-                                      : '')
                                   +'<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Demo Summary</button>'
                               +'</div>'
                           +'</td>'

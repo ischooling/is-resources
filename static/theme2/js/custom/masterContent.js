@@ -3382,3 +3382,15 @@ async function getAllUserRoles(){
 	});
 	return roleList;
 }
+
+function getDatepickerMobileViewContent(){
+	var html=
+	`<div class="modal fade fade-scale" id="datepickerModal"  aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered box-shadow-none modal-lg mx-auto" role="document" style="width: 100%;max-width: fit-content;">
+			<div class="modal-content text-center border-0" style="background: transparent;">
+				<div class="modal-body p-0" id="datepickerModalView"></div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
