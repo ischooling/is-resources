@@ -189,7 +189,7 @@ function enrollReserveModalContent(data, nextGrade){
 
 					<div class="modal-header bg-primary text-white border-b-0 justify-content-center position-relative" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
 						<h5 class="modal-title font-weight-bold">Awesome!</h5>
-						<button type="button" class="close text-white position-absolute" style="right: 14px;" data-dismiss="modal">&times;</button>
+						<button type="button" class="close text-white position-absolute" style="right: 14px;" data-dismiss="modal"><span class="text-white">&times;</span></button>
 					</div>
 
 					<div class="modal-body">

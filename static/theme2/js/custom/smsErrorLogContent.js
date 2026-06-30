@@ -162,7 +162,7 @@ function getSmsErrorLogContent(title, roleAndModule) {
                     <h5 class="modal-title" id="smsErrorDetailModalLabel">
                         <i class="fa fa-bug mr-2 text-danger"></i>Error Details
                     </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>

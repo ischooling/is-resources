@@ -271,18 +271,19 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				});
 
 				// New lead polling — ye initByRole ke baad lagao
-				setInterval(function() {
-					fetch('/api/crm/new-leads?userId=' + USER_ID)
-						.then(function(r) { return r.json(); })
-						.then(function(data) {
-							(data.leads || []).forEach(function(lead) {
-								CRMNotify.newLead(lead.leadNo, lead.leadName, lead.source);
-							});
-							if ((data.leads || []).length > 0) {
-								_lastCheck = new Date().toISOString();
-							}
-						});
-				}, 10000);
+				// notification Close
+				// setInterval(function() {
+				// 	fetch('/api/crm/new-leads?userId=' + USER_ID)
+				// 		.then(function(r) { return r.json(); })
+				// 		.then(function(data) {
+				// 			(data.leads || []).forEach(function(lead) {
+				// 				CRMNotify.newLead(lead.leadNo, lead.leadName, lead.source);
+				// 			});
+				// 			if ((data.leads || []).length > 0) {
+				// 				_lastCheck = new Date().toISOString();
+				// 			}
+				// 		});
+				// }, 10000);
 			}
 
 

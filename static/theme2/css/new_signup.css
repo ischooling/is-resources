@@ -67,6 +67,7 @@ hr{width: 100%;display: inline-block;border:1px solid rgba(255, 255, 255, 0.5) !
 .mr-auto{margin-right:auto}
 .ml-auto{margin-left:auto}
 .mobile-view{display: none;}
+.mt-2{margin-top: 0.5rem;}
 /* server message css */
 .server-message{width: 100%;text-align: center;position: fixed;top:0px;right:0px;z-index: 99999999;display: none;
 	transform: translateY(-100%);-webkit-transform: translateY(-100%);-ms-transform: translateY(-100%);
@@ -146,13 +147,13 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li label.error{position: absolute;left: 0;top:100%;color:red;}
 .right-section .form ul li .field-icon{content: '';position: absolute;left: 0;top:0;width: 45px;height: 100%;border-top-left-radius: 50px;border-bottom-left-radius: 50px;font-size: 18px;display: flex;align-items: center;justify-content: center;}
 .right-section .form ul li input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), .right-section .form ul li textarea, .right-section .form ul li select{width: 100%;float: left;font-size: 14px;padding: 10px 12px 10px 50px;border-radius: 50px;color:#737373;}
-.right-section .form ul li input[type="submit"], input[type="submit"]{display: inline-block;padding: 10px 25px;border:0;border-radius: 50px;font-size: 14px;}
+.right-section .form ul li input[type="submit"], input[type="submit"]{display: inline-block;padding: 10px 25px;border:0;border-radius: 50px;font-size: 14px; margin: 5px auto;display: block;}
 .right-section .form ul li .captcha-img{content: '';position: absolute;right: 0;top:0;display: flex;align-items: center;height: 100%;overflow: hidden; background: var(--pc);border-top-right-radius: 50px;border-bottom-right-radius: 50px;}
 .right-section .form ul li .captcha-img .refresh-link{display: inline-block;line-height: 14px;padding-right: 15px;color:#fff;}
 .right-section .form ul li .captcha-img img{display: inline-block;}
-.right-section .form ul li .terms-policy{width: 100%;float: left;line-height: 20px; font-size:14px;}
+.right-section .form ul li .terms-policy{width: 100%;float: left;line-height: 20px; font-size:14px;text-align: center;}
 .right-section .form ul li .terms-policy a{display: inline-block;line-height: 22px;font-size:14px;}
-.copywritediv{width: 100%;padding: 6px 10px;font-size: 12px;text-align: center;border-top: 1px solid #ededed;}
+.copywritediv{width: 100%;padding: 6px 10px;font-size: 12px;text-align: center;border-top: 1px solid #ededed;position: fixed;bottom:0;background-color: #fff; }
 /* scratch css end here */
 .error-msg{position:absolute;right:20px;top:100%;color:red;font-size:12px;text-align:right}
 .server-error-msg{color:red;}
@@ -238,7 +239,7 @@ body{font-family:opensans-regular !important}
 
 	.right-section .form ul li .form-field{margin-bottom:8px;}
 	.complete_process{font-size: 16px;}
-	#signupButton{float: none; margin: 10px auto 0px auto; display: block !important; padding: 5px 8px;}
+	#signupButton{float: none; margin: 10px auto 0px auto; display: block !important; padding: 8px 18px; font-size: 16px;}
 	.terms-policy{text-align: center;}
 	.terms-policy-wrapper{text-align: left;}
 	.error-msg{bottom:0;}

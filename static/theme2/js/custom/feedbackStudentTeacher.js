@@ -80,6 +80,20 @@ function getClassFeedbackTeacherName(info) {
     return (name && name !== 'N/A') ? name : 'Teacher';
 }
 
+// Display label for the modal header — adds a salutation prefix (Ms./Mr./Dr./...) when
+// info carries one. Used only for UI; webhook payload still uses the plain name.
+function getClassFeedbackTeacherDisplay(info) {
+    var name = getClassFeedbackTeacherName(info);
+    if (!name || name === 'Teacher') return name;
+    var salutation = (info.salutation || info.teacherSalutation || '').toString().trim();
+    if (!salutation) return name;
+    // Add a trailing dot for the short titles when it's missing.
+    if (/^(Ms|Mr|Mrs|Dr|Prof)$/i.test(salutation)) {
+        salutation = salutation + '.';
+    }
+    return salutation + ' ' + name;
+}
+
 // Whether a calendar entry is an activity rather than a class. Activities are flagged on the
 // dashboard calendar event by an "activity" id prefix or an "ACTIVITY" category/type.
 function isFeedbackActivity(info) {
@@ -127,18 +141,22 @@ function openClassFeedback(info) {
 
         if (code === "S001" || code === "S002") {
             if (data.details) {
-                showFeedbackIframeModal(data.details, title, classDateTime, rightSlideModal);
+                var teacherName = isFeedbackActivity(info) ? "" : getClassFeedbackTeacherDisplay(info);
+                showFeedbackIframeModal(data.details, title, classDateTime, rightSlideModal, teacherName);
             }
         } else if (code === "S003") {
             var entityKind = isFeedbackActivity(info) ? "activity" : "class";
+            var msgTeacherName = isFeedbackActivity(info) ? "" : getClassFeedbackTeacherDisplay(info);
             showFeedbackMessageModal(
                 title,
                 "You have not attended the " + entityKind + " hence you are eligible for the feedback of this " + entityKind + ".",
-                classDateTime
+                classDateTime,
+                msgTeacherName
             );
         } else if (code === "S004") {
             // S004 -> no modal, just a toast message.
-            showMessageTheme2(0, data.message);
+            // showMessageTheme2(0, data.message);
+            return false;
         }
     }).catch(function () {
         showMessageTheme2(0, "Something went wrong. Please try again.");
@@ -223,26 +241,34 @@ function buildFeedbackModalShell(title, bodyHtml, options) {
     options = options || {};
     var sizeClass = options.sizeClass !== undefined ? options.sizeClass : "modal-lg";
     var centeredClass = options.centered ? "modal-dialog-centered" : "";
-    var metaHtml = options.metaText
-        ? `<span class="badge badge-light text-primary ml-2 align-middle font-weight-semi-bold" style="font-size:12px;">${options.metaText}</span>`
+
+    // New header layout: date/time badge on top, then "Subject with Salutation Teacher",
+    // then the tagline. Activities have no teacherName, so the "with ..." part is dropped.
+    var dateBadgeHtml = options.metaText
+        ? `<div class="mb-2"><span class="badge badge-light text-primary font-weight-semi-bold px-3 py-1" style="font-size:12px;">${options.metaText}</span></div>`
+        : "";
+    var teacherSuffixHtml = options.teacherName
+        ? ` <span class="font-weight-normal" style="opacity:.95;">with</span> ${options.teacherName}`
         : "";
     var headerIconHtml = options.headerIcon
-        ? `<i class="fa fa-info-circle text-white mr-3" style="font-size:26px;"></i>`
+        ? `<i class="fa fa-info-circle text-white mr-2 align-middle" style="font-size:22px;"></i>`
         : "";
+    var titleLineHtml =
+        `<h5 class="modal-title text-white font-weight-bold mb-1">${headerIconHtml}${title}${teacherSuffixHtml}</h5>`;
+    var taglineHtml = `<small class="d-block text-white" style="opacity:.9;">Help Us Improve Your Learning Experience</small>`;
+
     if (options.rightSlideModal) {
         return `
         <div class="modal fade pr-0 right-slide-modal" id="${FEEDBACK_MODAL_ID}" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog" role="document" style="width:42%;max-width:760px;min-width:520px;">
                 <div class="modal-content border-0 rounded-0 shadow-lg">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <div class="modal-header bg-primary border-0 py-2 align-items-center">
-                        <div>
-                            <h5 class="modal-title text-white font-weight-bold mb-0 d-inline-block align-middle">${title}</h5>
-                            ${metaHtml}
-                            <small class="d-block text-white" style="opacity:.9;">Help Us Improve Your Learning Experience</small>
-                        </div>
+                    <div class="modal-header bg-primary border-0 py-3 d-block text-center">
+                        ${dateBadgeHtml}
+                        ${titleLineHtml}
+                        ${taglineHtml}
                     </div>
                     <div class="modal-body p-0 overflow-auto">${bodyHtml}</div>
                 </div>
@@ -253,17 +279,12 @@ function buildFeedbackModalShell(title, bodyHtml, options) {
     <div class="modal fade" id="${FEEDBACK_MODAL_ID}" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog ${sizeClass} ${centeredClass} shadow-none" role="document">
             <div class="modal-content" style="border-radius:16px;overflow:hidden;">
-                <div class="modal-header bg-primary border-0 py-3 align-items-center">
-                    <div class="d-flex align-items-center">
-                        ${headerIconHtml}
-                        <div>
-                            <h5 class="modal-title text-white font-weight-bold mb-0 d-inline-block align-middle">${title}</h5>
-                            ${metaHtml}
-                            <small class="d-block text-white" style="opacity:.9;">Help Us Improve Your Learning Experience</small>
-                        </div>
-                    </div>
-                    <button type="button" class="close text-white ml-auto" data-dismiss="modal" aria-label="Close">
-                        <i class="fa fa-times"></i>
+                <div class="modal-header bg-primary border-0 py-3 d-block text-center position-relative">
+                    ${dateBadgeHtml}
+                    ${titleLineHtml}
+                    ${taglineHtml}
+                    <button type="button" class="close text-white position-absolute" style="top:12px; right:16px;" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-0">${bodyHtml}</div>
@@ -282,13 +303,13 @@ function showFeedbackModalShell(html) {
     });
 }
 
-function showFeedbackIframeModal(url, title, dateTimeText, rightSlideModal) {
+function showFeedbackIframeModal(url, title, dateTimeText, rightSlideModal, teacherName) {
     var embedUrl = buildClassFeedbackEmbedUrl(url);
     var body =
         `<iframe src="${embedUrl}" title="${title}" style="width:100%;height:calc(100vh - 76px);border:0;display:block;background:#fff;"></iframe>`;
     // Show the class date/time beside the title (like the not-attended modal). The
     // inner feedback-ui page hides its own header (hideHeader=1) so we get one clean modal.
-    showFeedbackModalShell(buildFeedbackModalShell(title, body, { metaText: dateTimeText, rightSlideModal: rightSlideModal }));
+    showFeedbackModalShell(buildFeedbackModalShell(title, body, { metaText: dateTimeText, rightSlideModal: rightSlideModal, teacherName: teacherName }));
 }
 
 // The feedback form (feedback-ui /embed page) reads the respondent identity and
@@ -321,7 +342,7 @@ function buildClassFeedbackEmbedUrl(url) {
     }
 }
 
-function showFeedbackMessageModal(title, message, dateTimeText) {
+function showFeedbackMessageModal(title, message, dateTimeText, teacherName) {
     var body =
         `<div class="text-center px-4 py-4">
             <h5 class="font-weight-semi-bold mb-0 text-dark" style="line-height:1.5;">${message}</h5>
@@ -330,7 +351,8 @@ function showFeedbackMessageModal(title, message, dateTimeText) {
         sizeClass: "",          // default (smaller) width instead of modal-lg
         centered: true,
         metaText: dateTimeText, // class date/time shown beside the title
-        headerIcon: true        // info icon moved into the header
+        headerIcon: true,       // info icon moved into the header
+        teacherName: teacherName
     }));
 }
 
@@ -344,10 +366,23 @@ function showPendingFeedbackPopup(events, viewName) {
 		if(info.id.startsWith("announce", 0) || info.id.startsWith("holiday", 0)){
 			return true;
 		}
-		var isFeedbackSubmitted = info.isFeedbackSubmitted;
-		if(isFeedbackSubmitted != "N"){
-			return true;
-		}
+		// var isFeedbackSubmitted = info.isFeedbackSubmitted;
+		// if(isFeedbackSubmitted != "N"){
+		// 	return true;
+		// }
+		// var isFeedbackFormMapped = info.isFeedbackFormMapped;
+		// if(isFeedbackFormMapped == "N"){
+		// 	return true;
+		// }
+        var isFeedbackSubmitted = info.isFeedbackSubmitted;
+        if (isFeedbackSubmitted != "N") {
+            return true;
+        }
+
+        var isFeedbackFormMapped = info.isFeedbackFormMapped;
+        if (isFeedbackFormMapped == "N") {
+            return true;
+        }
 		var feedbackShowFromDate = getSettingMetaValue(getSettingsByTypeAndKey("CONFIGURATION", "FEEDBACK_SHOW_FROM_DATE", false));
 		var eventDate = info.start && info.start._i ? info.start._i : info.start;
 		var eventDateText = eventDate ? moment(eventDate).format("YYYY-MM-DD") : "";
@@ -426,7 +461,7 @@ function showPendingFeedbackPopup(events, viewName) {
 						</div>
 						<div>
 							<h5 class="font-weight-bold text-dark mb-1" style="font-size:16px;">${courseName}</h5>
-							<div class="d-flex flex-wrap align-items-center text-muted font-weight-semi-bold" style="font-size:13px;">
+							<div class="d-flex flex-nowrap align-items-center text-muted font-weight-semi-bold" style="font-size:13px;white-space:nowrap;">
 								<span class="badge badge-light text-primary font-weight-semi-bold px-3 mr-2">${category}</span>
 								${teacherHtml}
 								<span class="mr-3"><i class="fa fa-calendar-o mr-1"></i>${startDate}</span>
@@ -448,7 +483,7 @@ function showPendingFeedbackPopup(events, viewName) {
 	FEEDBACK_PENDING_POPUP_KEY = feedbackKey;
 
 	var modalHtml = `<div class="modal fade" id="pendingFeedbackPopup" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document" style="max-width:700px;">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable shadow-none" role="document" style="max-width:900px;">
 			<div class="modal-content border-0 shadow-lg" style="border-radius:22px;overflow:hidden;">
 				<div class="modal-header bg-primary border-0 d-block py-3 px-4">
 					<div class="d-flex align-items-start justify-content-between">
@@ -458,12 +493,12 @@ function showPendingFeedbackPopup(events, viewName) {
 							</div>
 							<div>
 								<h4 class="modal-title text-white font-weight-bold mb-1">Pending Feedback</h4>
-								<small class="d-block text-white">Please submit your pending weekly feedback.</small>
+								<small class="d-block text-white" style="font-size: 15px;">Please submit your pending weekly feedback.</small>
 							</div>
 						</div>
-						<button type="button" class="close text-white ml-auto" data-dismiss="modal" aria-label="Close">
-							<i class="fa fa-times"></i>
-						</button>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
 					</div>
 					<div class="row mt-3">
 						<div class="col-4">
@@ -489,10 +524,10 @@ function showPendingFeedbackPopup(events, viewName) {
 				<div class="modal-body p-3" style="background:#f7f9fc;">
 					${feedbackContent}
 				</div>
-				<div class="modal-footer bg-light border-0 justify-content-between px-4 py-3">
+				${/*<div class="modal-footer bg-light border-0 justify-content-between px-4 py-3">
 					<span class="text-muted font-weight-semi-bold"><i class="fa fa-check-circle text-primary mr-1"></i>${feedbackCount} pending sessions</span>
 					<button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4 font-weight-bold" data-dismiss="modal">Skip</button>
-				</div>
+				</div>*/''}
 			</div>
 		</div>
 	</div>`;
@@ -504,7 +539,7 @@ function showPendingFeedbackPopup(events, viewName) {
 		var rightSlideClick = viewName == "agendaWeek" ? "FEEDBACK_OPEN_IN_RIGHT_SLIDE=true;" : "";
 		$(this)
 			.removeClass("position-absolute")
-			.addClass("font-weight-bold px-4 rounded-pill shadow-sm")
+			.addClass("font-weight-bold px-4 rounded-pill shadow-sm text-nowrap")
 			.removeAttr("style")
 			.attr("onclick", rightSlideClick + clickFun);
 	});
@@ -512,13 +547,16 @@ function showPendingFeedbackPopup(events, viewName) {
 }
 
 function getFeedbackBtn(id, title, eventStart) {
+    // "Rate this activity" for activities, "Rate this class" for classes.
+    var isActivity = (id || "").toString().toLowerCase().indexOf("activity") === 0;
+    var label = isActivity ? "Rate this activity" : "Rate this class";
     return `<button
             id="feedbackBtn_${id}"
             class="btn btn-sm btn-primary position-absolute"
-            style="top:10px; right:10px; z-index:9;"
+            style="left:50%; bottom:4px; transform:translateX(-50%); z-index:9; border-radius:8px; padding:3px 8px; line-height:1.2;"
             onclick="openClassFeedbackById(event, '${id}')"
             data-className="${title}">
-            Feedback
+            ${label}
         </button>`;
 }
 

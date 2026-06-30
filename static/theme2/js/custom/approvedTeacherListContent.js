@@ -457,7 +457,9 @@ function getTeacherAddBufferAvailaibilityModel(){
 					<input type="hidden" class="form-control" id="teacherId" name="teacherId" value="">
 					<div class="modal-header py-2 bg-primary text-center text-white">
 						<h5 class="modal-title" id="myLargeModalLabel">Add/Edit Buffer Hours to Add Availaibility.</h5>
-						<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
 					</div>
 					<div class="modal-body custom-field-scope">
 						<div class="form-group col-md-12 custom-field">
@@ -488,7 +490,9 @@ function getTeacherOfficialModel(officialEmail){
 				<input type="hidden" class="form-control" id="teamMeetingId" name="teamMeetingId" value="">
 				<div class="modal-header py-2 bg-primary text-center text-white">
 					<h5 class="modal-title" id="myLargeModalLabel">Generate School Email Id</h5>
-					<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
 				</div>
 				<div class="modal-body custom-field-scope">
 					<div class="form-group col-md-12 custom-field">

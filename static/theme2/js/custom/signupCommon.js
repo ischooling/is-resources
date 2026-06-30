@@ -19,6 +19,13 @@ function signupStudentOnLoad() {
 		}
 		callForUserSignUp('userSignupForm', moduleId);
 	});
+	$("#userSignupForm").on("submit", function (e) {
+		e.preventDefault();
+		if ($("#captcha").val().trim() == "") {
+			validEndInvalidField(false, "captcha");
+		}
+		callForUserSignUp('userSignupForm', moduleId);
+	});
 	$("#resendEmail").click(function (event) {
 		event.preventDefault();
 		callForEmailResend($("#userSignupForm #email").val().trim(), moduleId, 'false');

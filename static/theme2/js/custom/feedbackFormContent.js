@@ -77,6 +77,14 @@ function getFeedbackFormEditRightSlideModal(){
                         </div>
 
                         <div class="form-group">
+                            <label class="font-weight-semi-bold">Status</label>
+                            <select id="feedbackActiveStatus" class="form-control">
+                                <option value="Y">Active</option>
+                                <option value="N">Inactive</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label class="font-weight-semi-bold">Roles</label>
                             <select id="feedbackRoleIds" class="form-control" multiple></select>
                             <small class="text-muted">Use Ctrl/Cmd to select multiple roles.</small>

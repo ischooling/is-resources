@@ -2916,14 +2916,14 @@ function getAnnouncementAndNewsContent() {
       if(!showOnlyReleaseNote){
         html += `
         <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
-            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn border text-white mb-0" onclick="openRightSideBar(\'announcement_side_wrapper\')" style="background:red; position: absolute;left: -18px;top: 20px;z-index: 99;">
                 <i class="fa fa-times"></i>
             </button>
             <div class="full" id="announcementDiv"></div>
         </div>`;
         if(USER_ROLE != "PARENT"){
         html+=`<div class="ui-theme-settings custome-ui-theme-settings" id="news_side_wrapper" ${USER_ROLE == "PARENT" ?  "displat:none":""}>
-            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn border text-white mb-0" onclick="openRightSideBar(\'news_side_wrapper\')" style="background:red; position: absolute;left: -18px;top: 20px;z-index: 99;">
                 <i class="fa fa-times"></i>
             </button>
             <div class="full mt-3" id="newsyDiv"></div>
@@ -2931,7 +2931,7 @@ function getAnnouncementAndNewsContent() {
         }
       }
       html += `<div class="ui-theme-settings custome-ui-theme-settings" id="releaseNote_side_wrapper">
-          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'releaseNote_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn  border text-white mb-0" onclick="openRightSideBar(\'releaseNote_side_wrapper\')" style="position: absolute;left: -18px;top: 20px;z-index: 99;background:red;">
               <i class="fa fa-times"></i>
           </button>
           <div class="full p-2 mt-3" id="releaseNoteDashboardPanel">
@@ -2948,7 +2948,7 @@ function getAnnouncementAndNewsContent() {
         )
       ) {
         html += `<div class="ui-theme-settings custome-ui-theme-settings" id="schoolDiary_side_wrapper">
-          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn btn btn-white border text-dark mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', true)" style="position: absolute;left: -18px;top: 20px;z-index: 99;">
+          <button type="button" class="custom-btn-open-options close-right-slide-bar-btn border text-white mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', true)" style="position: absolute;left: -18px;top: 20px;z-index: 99;background:red;">
             <i class="fa fa-times"></i>
           </button>
           <div class="full" id="schoolDiaryDiv"></div>

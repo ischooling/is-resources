@@ -368,7 +368,7 @@ function buildTeacherInactiveReasonModalHtml(teacherId, controllType, moduleId, 
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">${title}</h5>
-					<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+					<button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
 				</div>
 				<div class="modal-body">
 					<div class="form-group">

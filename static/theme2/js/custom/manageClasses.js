@@ -56,7 +56,6 @@ function getClassMeetingUrlModal(){
 			<div class="modal-content">
 				<div class="modal-header py-2 bg-primary text-white">
 					<h5 class="modal-title" id="myLargeModalLabel">Extra Class Details</h5>
-					<button type="button" class="close text-white" data-dismiss="modal" aria-hidden="true">&times;</button>
 				</div>
 				<div class="modal-body">
 					<div class="col-md-12 col-sm-12 col-xs-12">

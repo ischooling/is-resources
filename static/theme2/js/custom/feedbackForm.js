@@ -216,6 +216,7 @@ function openFeedbackFormEditModal(feedbackCode){
     $("#feedbackFormEditForm #feedbackEventNames").val(selectedEventIds).trigger("change");
 
     $("#feedbackFormEditForm #feedbackViewType").val(normalizeFeedbackViewType(selected.feedbackViewType));
+    $("#feedbackFormEditForm #feedbackActiveStatus").val((selected.active || "Y").toString().toUpperCase());
 
     $("#feedbackFormEditModal .modal-header h4").text("Edit Feedback Form - (" + (selected.code || "N/A") + ")");
     $("#feedbackFormEditModal").modal("show");
@@ -348,6 +349,7 @@ function getFeedbackFormSavePayload(){
     var roleIds = $("#feedbackFormEditForm #feedbackRoleIds").val() || [];
     var eventIds = $("#feedbackFormEditForm #feedbackEventNames").val() || [];
     var feedbackViewType = normalizeFeedbackViewType($("#feedbackFormEditForm #feedbackViewType").val());
+    var activeStatus = $.trim($("#feedbackFormEditForm #feedbackActiveStatus").val()).toUpperCase();
 
     if(!feedbackCode){
         return {isValid:false, message:"Feedback code is required."};
@@ -371,6 +373,7 @@ function getFeedbackFormSavePayload(){
             shortDescription: shortDescription,
             feedbackLabel: feedbackLabel,
             feedbackViewType: feedbackViewType,
+            active: activeStatus || "Y",
             roleIds: $.map(roleIds, function(v){ return parseInt(v, 10); }),
             eventIds: $.map(eventIds, function(v){ return parseInt(v, 10); }),
             schoolId: SCHOOL_ID
@@ -418,7 +421,7 @@ function feedbackFormUpsertLocalRow(saveData){
         dayAfterDisplay: (saveData.displayAfterDays + ""),
         feedbackViewType: saveData.feedbackViewType || "popup",
         roleIds: roleNames,
-        active: "Y",
+        active: (saveData.active || "Y").toString().toUpperCase(),
         deleted: "N"
     };
 

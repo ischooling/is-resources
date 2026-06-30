@@ -269,7 +269,9 @@ function getViewLmsCredaintial(data){
 				<div class="modal-content">
 					<div class="modal-header py-2 bg-primary text-white">
 						<h5 class="modal-title ">Manage LMS Content : ${data.userName} </h5>
-						<button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+						<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
 					</div>
 					 <div id="studentViewEditLMSData"></div>
 						<div class="col-lg-12" >

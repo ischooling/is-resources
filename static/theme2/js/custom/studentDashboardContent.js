@@ -204,7 +204,7 @@ async function renderStudentDashboard(data){
         startdate = previousWeek.startDate;
         enddate = previousWeek.endDate;
         viewName = "agendaWeek";
-        // await callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, true);
+        await callSchoolCalendar('', USER_ID, UNIQUEUUID, 'agendaWeek', startdate, enddate, true);
     }
     calendarTimeInterval();
     setTimeout(function(){

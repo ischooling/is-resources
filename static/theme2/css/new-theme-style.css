@@ -5852,7 +5852,8 @@ border-top-right-radius:.3rem
 .modal-header .close {
 	position: relative;
 	padding:1rem 1rem;
-	margin:-1rem -1rem -1rem auto
+	margin:-1rem -1rem -1rem auto;
+	opacity: 1;
 }
 .modal-header .close span{position: relative;z-index: 2;}
 .modal-header .close:not(.close-with-red-color):after{
@@ -5863,9 +5864,12 @@ border-top-right-radius:.3rem
 	background-color: red;
 	left: 24%;
 	top:33%;
-	z-index: -1;
+	z-index: 1;
 }
 .modal-header .close:hover::after{
+	opacity: 1;
+}
+.modal-header .close:not(:disabled):not(.disabled):hover, .modal-header .close:not(:disabled):not(.disabled):focus {
 	opacity: 1;
 }
 .modal-title {
@@ -33135,13 +33139,13 @@ height: 100%;
 .right-slide-modal .close{
 	position: absolute;
     left: -35px;
-    top: 62px;
-    background: #fff;
+    top: 42px;
+    background: red;
     padding: 10px;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     opacity: 1;
-    color: #000 !important;
+    color: white !important;
 }
 
 .upload-input{width:100%;position: absolute;top: 0;left: 0;opacity: 0;cursor: pointer;z-index:1}
@@ -33328,7 +33332,7 @@ input:checked + .small-switch-slider:before {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 15px;
+		padding: 10px;
 		background: var(--pc);
 		color: white;
 	}
@@ -34094,7 +34098,7 @@ color: var(--pc);
 .past-class .fc-event-dot[style]{background-color: #bfbebe !important;}
 #schoolcalendar .fc-time-grid-event.activity-wrapper-div{background-color: #ffecf0 !important;border-color:#d92550 !important;color:#343a40;border:2px solid;padding:16px 8px;}
 #schoolcalendar .fc-time-grid-event:not(.past-class, .activity-wrapper-div), #schoolcalendar  .fc-list-item.future-class:not(.past-class, .activity-wrapper-div){background-color: var(--plc) !important;border-color:var(--pc) !important;border:2px solid;padding:16px 8px;}
-#schoolcalendar .fc-time-grid-event .fc-content .class-time{background-color: var(--pc);color:#fff;}
+#schoolcalendar .fc-time-grid-event .fc-content .class-time{background-color: var(--pc);color:#fff;font-weight:bold;}
 #schoolcalendar .fc-time-grid-event .fc-content .activety-time{background-color: #d92550;color:#fff;}
 #schoolcalendar .live-class-blink .fc-content .activety-time{background-color: #007c00 !important;color:#fff;}
 #schoolcalendar .fc-header-toolbar .fc-center{position:relative;}
@@ -34167,12 +34171,12 @@ to { background-color: rgb(6, 145, 6); }
 #schoolcalendar .fc-time-grid-event.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#fff;border:2px solid;padding:16px 8px;}
 #schoolcalendar .fc-list-item.live-class-blink{background-color: #e7f9e7 !important;border-color:#007c00 !important;color:#343a40;border:2px solid;width: 100%;}
 .live-class-blink .fc-event-dot[style]{background-color: #007c00  !important;}
-#schoolcalendar .fc-time-grid-event.past-class .fc-content .class-time, #schoolcalendar .fc-time-grid-event.past-class .fc-content .activety-time{background-color: #bfbebe !important;color:#fff;}
+#schoolcalendar .fc-time-grid-event.past-class .fc-content .class-time, #schoolcalendar .fc-time-grid-event.past-class .fc-content .activety-time{background-color: #737373 !important;color:#fff;}
 #schoolcalendar .fc-time-grid-event.upcoming-class-blink .fc-content .class-time{background-color: #f7b924;color:#343a40;}
 #schoolcalendar .fc-time-grid-event.live-class-blink .fc-content .class-time{background-color: #007c00;color:#fff;}
 #schoolcalendar .fc-time-grid-event.live-class-blink .fc-content .fc-title{color:#007c00}
 .upcoming-class-blink .upcoming-icon.live-symbol{position:absolute;bottom:-12px; right: 0;padding: 6px;}
-.upcoming-week-view-icon{padding: 0px;background: #433a11;}
+.upcoming-week-view-icon{padding: 0px;background: #433a11;justify-content:center;align-items:center;gap:4px;}
 .live-week-view-icon{padding: 0px;bottom: -2px;background:#0f7c0f;right: 0px;width: 100%;}
 #schoolcalendar .fc-agendaWeek-view .upcoming-class-blink, #schoolcalendar .fc-agendaWeek-view .fc-time-grid-event.past-class, #schoolcalendar .fc-agendaWeek-view .fc-time-grid-event:not(.past-class){padding:2px;}
 

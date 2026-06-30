@@ -340,7 +340,9 @@ function viewStudentList(){
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">Student List Details</h5>
-                        <button type="button" class="btn-close close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
+                        <button type="button" class="btn-close close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <table id="studentListTable" class="table table-bordered">

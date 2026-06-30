@@ -1038,7 +1038,7 @@ function recommendedTeacherlistModal(){
 					+'<h5 class="modal-title text-white w-100">'
 						+'Get Recommended Teachers'
 					+'</h5>'
-				    +'<button type="button" class="close bg-white rounded-top-left-10 rounded-bottom-left-10 opacity-10 p-2" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-32px;top:62px">'
+				    +'<button type="button" class="close rounded-top-left-10 rounded-bottom-left-10 opacity-10 p-2" data-dismiss="modal" aria-label="Close" style="position: absolute;left:-32px;top:62px">'
 					   +'<span aria-hidden="true">&times;</span>'
 				    +'</button>'
 			   +'</div>'

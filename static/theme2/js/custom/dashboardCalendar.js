@@ -505,7 +505,7 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0) && !event.eventType.startsWith("SYS-TRAINING", 0)){
 								customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
 									<div>
-										<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</span><span class="assign-teacher-name">${event.name}</span>
+										<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':`Teacher: `}</span><span class="assign-teacher-name">${event.salutation}. ${event.name}</span>
 									</div>
 								</div>`;
 							}
@@ -803,7 +803,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					if(info.name != ""){
 						if(!info.category.startsWith("BATCH", 0) && !info.eventType.startsWith("PTM", 0) && !info.eventType.startsWith("SYS-TRAINING", 0)){
 							tooltipHTML+=
-							`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher Name: '}</p>
+							`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher: '}</p>
 							<strong>${element.find(".assign-teacher-name").text()}</strong>`;
 						}
 					}
@@ -883,13 +883,15 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					var eventDate = info.start && info.start._i ? info.start._i : info.start;
 					var eventDateText = eventDate ? moment(eventDate).format("YYYY-MM-DD") : "";
 					var feedbackBtn = "";
-					if (showFromDate && eventDateText && eventDateText < showFromDate) {
+					if (info.isFeedbackFormMapped === "Y") {
 						if(USER_ID_FOR_FEEDBACK){
+							if (showFromDate && eventDateText && eventDateText < showFromDate) {
+								element.append(getFeedbackBtn(info.id, info.title, info.start));
+							}
+						}else{
 							element.append(getFeedbackBtn(info.id, info.title, info.start));
+							// feedbackBtn = getFeedbackBtn(info.id, courseName, info.start);
 						}
-					}else{
-						element.append(getFeedbackBtn(info.id, info.title, info.start));
-						// feedbackBtn = getFeedbackBtn(info.id, courseName, info.start);
 					}
 					// element.append(getFeedbackBtn(info.id, info.title, info.start));
 					// Week (agendaWeek) columns are narrow, so the default top-right
