@@ -2127,7 +2127,7 @@ function getCourseSelectionContent(csr){
 																		html+='<i class="fa fa-info-circle" data-toggle="tooltip" title="'+courseDetails.courseDescription+'"></i>';
 																	}
 																	html+=
-																	'<i class="fa plus-icon fa-angle-down primary-txt-color"></i>'
+																	'<i class="fa fa-angle-down plus-icon primary-txt-color"></i>'
 																+'</h4>'
 															+'</div>'
 															+'<div class="a-content'+(courseDetails.subjects>6?'overflow-auto':'')+'">';
@@ -2816,9 +2816,9 @@ function getReviewAndPayRendered(data){
 	
 	$('.accordion .a-title').unbind().bind('click', function(){
 		$(this).parent().closest('li').find('.a-content').stop().slideToggle();
-		$(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
-		$(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-minus')
-		$(this).parent().closest('li').siblings().find('.plus-icon').addClass('fa-plus')
+		// $(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
+		// $(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-minus')
+		// $(this).parent().closest('li').siblings().find('.plus-icon').addClass('fa-plus')
 		$(this).parent().closest('li').siblings().find('.a-content').slideUp();
 	});
 
@@ -4040,7 +4040,7 @@ function recommendedCourseModalContent(data){
 						+'</div>'
 					+'</div>'
 					+'<div>'
-						+'<p class="mb-0 font-12 font-weight-bold">Required Courses ('+mandatorySubjects.length+')</p>'
+						+'<p class="mb-0 font-12 font-weight-bold">Mandatory Courses ('+mandatorySubjects.length+')</p>'
 					+'</div>';
 					if(mandatorySubjects.length>0){
 						html+='<ul class="full">';
@@ -4061,7 +4061,7 @@ function recommendedCourseModalContent(data){
 									+'<div class="d-inline-flex ml-auto">'
 										+'<div class="d-flex flex-wrap align-items-center">'
 											+'<div class="align-items-center d-inline-flex ml-auto" style="gap:10px">'
-												+'<span class="d-inline-block px-2 font-12" style="color:#077507;background:#d9efd6;border-radius:30px"><i class="zmdi zmdi-lock-outline"></i>&nbsp;Required</span>'
+												+'<span class="d-inline-block px-2 font-12" style="color:#077507;background:#d9efd6;border-radius:30px"><i class="zmdi zmdi-lock-outline"></i>&nbsp;Mandatory</span>'
 												+'<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>'
 											+'</div>'
 										+'</div>'

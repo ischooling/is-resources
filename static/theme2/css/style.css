@@ -434,13 +434,14 @@ h3 {
   .fa-globe
 ) {
   position: absolute;
-  top: 50%;
+  top: 30%;
   transform: translateY(-50%);
   font-size: 16px;
   z-index: 999;
   width: auto;
   right: 12px;
 }
+.student-details-info .fa-angle-down{top:50% !important}
 .form-holder i.static-icon {
 	position: relative;
 	top: inherit;
@@ -2629,7 +2630,7 @@ label.error {
 	padding-right: 5px;
 }
 .tab-and-mobile-logout-btn:hover, .tab-and-mobile-logout-btn:focus{
-	/* color: #fff; */
+	color: red;
 	outline: none;
 }
 

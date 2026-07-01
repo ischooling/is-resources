@@ -884,13 +884,14 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					var eventDateText = eventDate ? moment(eventDate).format("YYYY-MM-DD") : "";
 					var feedbackBtn = "";
 					if (info.isFeedbackFormMapped === "Y") {
-						if(USER_ID_FOR_FEEDBACK){
-							if (showFromDate && eventDateText && eventDateText < showFromDate) {
+						if (USER_ID_FOR_FEEDBACK) {
+							// Test user - date restriction ignore
+							element.append(getFeedbackBtn(info.id, info.title, info.start));
+						} else {
+							// Normal users - show only from configured date onwards
+							if (showFromDate && eventDateText && eventDateText >= showFromDate) {
 								element.append(getFeedbackBtn(info.id, info.title, info.start));
 							}
-						}else{
-							element.append(getFeedbackBtn(info.id, info.title, info.start));
-							// feedbackBtn = getFeedbackBtn(info.id, courseName, info.start);
 						}
 					}
 					// element.append(getFeedbackBtn(info.id, info.title, info.start));
