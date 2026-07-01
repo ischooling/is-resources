@@ -65,9 +65,10 @@ input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 	/* width:100%;display:flex;position: relative;overflow-x: hidden; */
 }
 .captcha-field input{padding-right:100px;}
-.captcha-field .captcha-img-wrapper{width: 85px;display: inline-block;position: absolute;right:25px;transform: translateY(-100%);}
-.captcha-field .captcha-img-wrapper img{width:100%;}
+.captcha-field .captcha-img-wrapper{width: 86px;display: inline-block;position: absolute;top:0; right:25px;height: 44px;background: #007fff;z-index: 2;}
+.captcha-field .captcha-img-wrapper img{width:100%;margin-top: 6px;}
 .captcha-field a{position: absolute !important;color: white !important;right: 0px;top: 12px;width: 24px;background: #019EFF;font-size: 19px;padding: 2px;text-align: center;}
+.captcha-field a.refresh-captcha{height:44px;display: flex;font-size: 16px;padding:8px;top:0;align-items:center;justify-content: center;}
 .fancytree-helper-hidden {
 	display: none;
 }

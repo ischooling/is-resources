@@ -1000,7 +1000,7 @@ function getStudentDetailsContent(data, signupType) {
 					value="${signupStudent.dob}"
 					placeholder=" "
 					onkeydown="return false" tabindex="${++tabindex}" readonly>
-					<label for="dob">Date of Birth* (MMM dd, yyyy)</label>
+					<label for="dob">Date of Birth* (MM DD, YYYY)</label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -4078,9 +4078,9 @@ function recommendedCourseModalContent(data){
 						html+='<ul class="full">';
 							$.each(nonMandatorySubjects, function(i,v){
 								totalCredit+=(parseFloat(v.subjectCredit));
-								i+=i+1;
+								i+=parseFloat(mandatorySubjects.length)+1;
 								html+=
-								'<li class="d-flex align-items-center flex-wrap p-2 font-14 border '+(i==0? (nonMandatorySubjects.length == (i-1)?'rounded-bottom rounded-top':'rounded-top'):nonMandatorySubjects.length == (i-1)?'rounded-bottom':'')+'" style="gap:10px">'
+								'<li class="d-flex align-items-center flex-wrap p-2 font-14 border '+(i==parseFloat(mandatorySubjects.length)+1? (nonMandatorySubjects.length == (i-1)?'rounded-bottom rounded-top':'rounded-top'):nonMandatorySubjects.length == (i-1)?'rounded-bottom':'')+'" style="gap:10px">'
 									+'<div class="d-inline-flex flex-grow-1 align-items-center" style="gap:10px">';
 										if(selectedSubjects.includes(String(v.subjectId))) {
 											html += '<div class="custom-control custom-checkbox">'

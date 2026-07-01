@@ -767,444 +767,440 @@ function getLeadFollowupFormPopup(objRights) {
 }
 
 function getLeadAdvanceSearchPopup(objRights) {
-  var html =
-    '<div id="leadAdvanceSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">' +
-    '<div class="modal-dialog modal-xl">' +
-    '    <div class="modal-content border-0">' +
-    '        <div class="modal-header py-2 bg-primary text-white">' +
-    '            <h5 class="modal-title" >Advance Search</h5>' +
-    '            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">' +
-    '                <span aria-hidden="true">&times;</span>' +
-    "            </button>" +
-    "        </div>" +
-    '        <div class="modal-body">' +
-    '       <form class="custom-field-scope" action="javascript:void(0);" id="advanceLeadNewSearchForm" name="advanceLeadNewSearchForm" autocomplete=\'off\'>' +
-    '			<input type="hidden" name="restrictedDataShow" id="restrictedDataShow" value="YES">' +
-    '			<input type="hidden" name="advancedformclick" id="advancedformclick" value="">' +
-    '			<input type="hidden" name="currentPageSearch" id="currentPageSearch" value="' +objRights.currentPage +'">' +
-    '			<input type="hidden" name="clickFromSearch" id="clickFromSearch" value="' +objRights.clickFrom +'">' +
-    '			<input type="hidden" name="leadFromSearch" id="leadFromSearch" value="' +objRights.leadFrom +'">' +
-    '			<input type="hidden" name="leadFromSearchModuleId" id="leadFromSearchModuleId" value="' +objRights.moduleId +'">' +
-    '			<input type="hidden" name="leadType" id="leadType" value="' + objRights.leadType +'">' +
-    '			<input type="hidden" name="userId" id="userId" value="' +USER_ID +
-    '">' +
-    '			<input type="hidden" name="campaignName" id="campaignName" value="">' +
-    '<div class="row">' +
-    '<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">' +
-    '	<div class="leadErrorText"></div>' +
-    "</div>" +
-    "</div>" +
-    '<div class="row">' +
-    '<div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select	name="leadAcadmicYear" id="leadAcadmicYear" class="form-control" >' +
-    "	</select>" +
-    '<label for="leadAcadmicYear">Academic Year</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<input type="text" name="leadFullSearch" id="leadFullSearch"  class="form-control" placeholder=" "/> ' +
-    '<label for="leadFullSearch">Search with any text</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadTag">' +
-    '<div class="form-group custom-field mb-2">' +
-    '<select name="leadTagSearch" id="leadTagSearch" class="form-control" multiple ></select>' +
-    '<label for="leadTagSearch">Lead Tagging</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select name="leadType" id="leadType" class="form-control" disabled>' +
-    '		<option value="">Select Type</option>' +
-    '		<option value="B2C" ' +(objRights.leadType == "B2C" ? "selected" : "") +">B2C</option>" +
-    '		<option value="B2B" ' +(objRights.leadType == "B2B" ? "selected" : "") +">B2B</option>" +
-    "	</select>" +
-    '<label for="leadType">Lead Type</label>' +
-    '</div>' +
-    "</div>" +
-    "</div>" +
-    '<div class="row">' +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select	name="leadSourceSearch" id="leadSourceSearch" class="form-control" multiple ></select>' +
-    '<label for="leadSourceSearch">Lead Source</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">' +
-    '	<label class="m-0">Lead Status</label>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="checkLeadStatus" name="checkLeadStatus" /> With Status' +
-    '	<select name="leadStatusSearch" id="leadStatusSearch" class="form-control" multiple ></select>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select name="leadGradeSearch" id="leadGradeSearch" class="form-control" >' +
-    '		<option value="">Select Grade</option>' +getStandardContent(SCHOOL_ID, true, false) +
-    "	</select>" +
-    '<label for="leadGradeSearch">Grade</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select name="countryIds" id="countryIds" class="form-control" multiple >' +
-    '		<option value="0">Select country</option>' +
-    "	</select>" +
-    '<label for="countryIds">Country</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select  name="leadSearchCampaign" id="leadSearchCampaign" class="form-control leadSearchCampaign" multiple ></select>' +
-    '<label for="leadSearchCampaign">Select Campaign</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select  name="leadSearchAdSet" id="leadSearchAdSet" class="form-control leadSearchAdSet" multiple ></select>' +
-    '<label for="leadSearchAdSet">Ad Set</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign">' +
-    '<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;' +
-    '<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead&nbsp;' +
-    '<input type="checkbox" id="checkByLeadDemo" name="checkByLeadDemo" /> Lead With Demo';
+  var html = '';
+  html += '<div id="leadAdvanceSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">';
+  html += '<div class="modal-dialog modal-xl">';
+  html += '<div class="modal-content border-0">';
+  html += '<div class="modal-header py-2 bg-primary text-white">';
+  html += '<h5 class="modal-title" >Advance Search</h5>';
+  html += '<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">';
+  html += '<span aria-hidden="true">&times;</span>';
+  html += '</button>';
+  html += '</div>';
+  html += '<div class="modal-body">';
+  html += '<form class="custom-field-scope" action="javascript:void(0);" id="advanceLeadNewSearchForm" name="advanceLeadNewSearchForm" autocomplete=\'off\'>';
+  html += '<input type="hidden" name="restrictedDataShow" id="restrictedDataShow" value="YES">';
+  html += '<input type="hidden" name="advancedformclick" id="advancedformclick" value="">';
+  html += '<input type="hidden" name="currentPageSearch" id="currentPageSearch" value="' + objRights.currentPage + '">';
+  html += '<input type="hidden" name="clickFromSearch" id="clickFromSearch" value="' + objRights.clickFrom + '">';
+  html += '<input type="hidden" name="leadFromSearch" id="leadFromSearch" value="' + objRights.leadFrom + '">';
+  html += '<input type="hidden" name="leadFromSearchModuleId" id="leadFromSearchModuleId" value="' + objRights.moduleId + '">';
+  html += '<input type="hidden" name="leadType" id="leadType" value="' + objRights.leadType + '">';
+  html += '<input type="hidden" name="userId" id="userId" value="' + USER_ID + '">';
+  html += '<input type="hidden" name="campaignName" id="campaignName" value="">';
+
+  html += '<div class="row">';
+  html += '<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-1 mt-1">';
+  html += '<div class="leadErrorText"></div>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="row">';
+  html += '<div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadAcadmicYear" id="leadAcadmicYear" class="form-control" ></select>';
+  html += '<label for="leadAcadmicYear">Academic Year</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadFullSearch" id="leadFullSearch" class="form-control" placeholder=" "/>';
+  html += '<label for="leadFullSearch">Search with any text</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadTag">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadTagSearch" id="leadTagSearch" class="form-control" multiple ></select>';
+  html += '<label for="leadTagSearch">Lead Tagging</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 priority">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadType" id="leadType" class="form-control" disabled>';
+  html += '<option value="">Select Type</option>';
+  html += '<option value="B2C" ' + (objRights.leadType == "B2C" ? "selected" : "") + '>B2C</option>';
+  html += '<option value="B2B" ' + (objRights.leadType == "B2B" ? "selected" : "") + '>B2B</option>';
+  html += '</select>';
+  html += '<label for="leadType">Lead Type</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="row">';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadSourceSearch" id="leadSourceSearch" class="form-control" multiple ></select>';
+  html += '<label for="leadSourceSearch">Lead Source</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">';
+  html += '<label class="m-0">Lead Status</label>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="checkLeadStatus" name="checkLeadStatus" /> With Status';
+  html += '<select name="leadStatusSearch" id="leadStatusSearch" class="form-control" multiple ></select>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadStatus">';
+  html += '<label class="m-0">Lead Status Exclude</label>';
+  html += '<select name="leadStatusExcludeSearch" id="leadStatusExcludeSearch" class="form-control" multiple ></select>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 grade">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadGradeSearch" id="leadGradeSearch" class="form-control" >';
+  html += '<option value="">Select Grade</option>' + getStandardContent(SCHOOL_ID, true, false);
+  html += '</select>';
+  html += '<label for="leadGradeSearch">Grade</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 country">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="countryIds" id="countryIds" class="form-control" multiple >';
+  html += '<option value="0">Select country</option>';
+  html += '</select>';
+  html += '<label for="countryIds">Country</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadSearchCampaign" id="leadSearchCampaign" class="form-control leadSearchCampaign" multiple ></select>';
+  html += '<label for="leadSearchCampaign">Select Campaign</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadSearchAdSet" id="leadSearchAdSet" class="form-control leadSearchAdSet" multiple ></select>';
+  html += '<label for="leadSearchAdSet">Ad Set</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 leadAssign">';
+  html += '<label class="m-0">Lead Assign To</label>&nbsp;&nbsp;&nbsp;&nbsp;';
+  html += '<input type="checkbox" id="checkByLead" name="checkByLead" /> Only Lead&nbsp;';
+  html += '<input type="checkbox" id="checkByLeadDemo" name="checkByLeadDemo" /> Lead With Demo';
   html += '<div class="form-group mb-2">';
   if (objRights.leadHideRights) {
-    html +='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple disabled></select>';
+    html += '<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple disabled></select>';
   } else {
-    html +='<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple></select>';
+    html += '<select name="leadAssignToSearch" id="leadAssignToSearch" class="form-control" multiple></select>';
   }
   html += '<label for="leadAssignToSearch"> </label>';
   html += '</div>';
   html += '</div>';
-  html +='<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
-    '<div class="form-group custom-field mb-2">' +
-    '<select	name="leadCreatedBy" id="leadCreatedBy" class="form-control" >' +
-    '<option value="">Select Assign</option>' +
-    '</select>' +
-    '<label for="leadCreatedBy">Lead Added by</label>' +
-    '</div>' +
-    '</div>' +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select	name="leadDemoAssignSearch" id="leadDemoAssignSearch" class="form-control" >' +
-    '		<option value="">Select Assign</option>' +
-    '	</select>' +
-    '<label for="leadDemoAssignSearch">Demo Assign</label>' +
-    '</div>' +
-    '</div>' +
-    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadstatus">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<select name="leadSupportTo" id="leadSupportTo" class="form-control"  >' +
-    '								<option value="">Select Support</option>' +
-    "							</select>" +
-    '<label for="leadSupportTo">Lead Support To</label>' +
-    '</div>' +
-    "						</div>" +
-    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<select name="leadCallback" id="leadCallback" class="form-control"  >' +
-    '								<option value="">Select Callback</option>' +
-    '								<option value="LWC">Lead With Callback</option>' +
-    '								<option value="LWOC">Lead Without Callback</option>' +
-    "							</select>" +
-    '<label for="leadCallback">Callback</label>' +
-    '</div>' +
-    "						</div>" +
-    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<select name="leadDemoBookType" id="leadDemoBookType" class="form-control"  >' +
-    '								<option value="">Select Demo Book Type</option>' +
-    '								<option value="AB">Demo By Website</option>' +
-    '								<option value="A">Demo By Link</option>' +
-    '								<option value="AG">Demo By Agent</option>' +
-    '								<option value="AC">Demo By Chat</option>' +
-    "							</select>" +
-    '<label for="leadDemoBookType">Demo Book type</label>' +
-    '</div>' +
-    "						</div>" +
-    '						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<select name="leadCallByAgent" id="leadCallByAgent" class="form-control"  >' +
-    '								<option value="">Select Call Agent</option>' +
-    '								<option value="Y">Yes</option>' +
-    '								<option value="N">No</option>' +
-    "							</select>" +
-    '<label for="leadCallByAgent">Lead Call By Agent</label>' +
-    '</div>' +
-    "						</div>" +
-    '				<div class="col-xl-3 col-lg-4 col-md-2 col-sm-2 col-12 mb-1 mt-1" >' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<select name="leadPriority" id="leadPriority" class="form-control" >' +
-    '								<option value="" ></option> ' +
-    "						</select>" +
-    '<label for="leadPriority">Priority</label>' +
-    '</div>' +
-    "						</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<input type="text" name="leadStartDateSearch" id="leadStartDateSearch" value="' +objRights.startDate +
-    '" class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">' +
-    '<label for="leadStartDateSearch">Start Date</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<input type="text" name="leadEndDateSearch" id="leadEndDateSearch" value="' +objRights.endDate +
-    '" class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">' +
-    '<label for="leadEndDateSearch">To Date</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select name="searchDateType" id="searchDateType" class="form-control"  >' +
-    '		<option value="">Select Date Type</option>' +
-    '		<option value="create-lead" ' + (objRights.searchType == "create-lead" ? "selected" : "") +" >Created Lead</option>" +
-    '		<option value="modify-lead" ' + (objRights.searchType == "modify-lead" ? "selected" : "") +">Modify Lead</option>" +
-    '		<option value="demo-Book" ' +(objRights.searchType == "demo-Book" ? "selected" : "") +">Demo Book</option>" +
-    '		<option value="demo-lead" ' + (objRights.searchType == "demo-lead" ? "selected" : "") + ">Demo Schedule</option>" +
-    '		<option value="callschedule-lead" ' + (objRights.searchType == "callschedule-lead" ? "selected" : "") + ">Call Schedule </option>" +
-    '		<option value="call-done" ' +(objRights.searchType == "call-done" ? "selected" : "") +">Call Done</option>" +
-    "	</select>" +
-    '<label for="searchDateType">Date Type</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select name="studentStage" id="studentStage" class="form-control"  >' +
-    '		<option value="">Select Date Type</option>' +
-    '		<option value="0" >ENROLLED</option>' +
-    '		<option value="10" >STUDENT DETAIL</option>' +
-    '		<option value="11" >PARENT DETAIL</option>' +
-    '		<option value="12" >ADDRESS DETAIL</option>' +
-    '		<option value="13" >COURSE SELECTION</option>' +
-    '		<option value="14,15" >REVIEW DETAIL</option>' +
-    "	</select>" +
-    '<label for="studentStage">Student Stage</label>' +
-    '</div>' +
-    "</div>" +
-    
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select  name="leadSearchTemplate" id="leadSearchTemplate" class="form-control leadSearchTemplate" multiple >' +
-    "	</select>" +
-    '<label for="leadSearchTemplate">Select Template</label>' +
-    '</div>' +
-    "</div>" +
-    '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<select  name="leadSearchDeliveredStatus" id="leadSearchDeliveredStatus" class="form-control leadSearchDeliveredStatus"  >' +
-    '		<option value=""  >-- Select Delivered Status --</option>' +
-    '		<option value="SUCCESS" >SUCCESS</option>' +
-    '		<option value="FAIL" >FAIL</option>' +
-    '		<option value="UNREACHED"  >UNREACHED</option>' +
-    '		<option value="UNSUBSCRIBED" >UNSUBSCRIBED</option>' +
-    "	</select>" +
-    '<label for="leadSearchDeliveredStatus">Select Delivered Status</label>' +
-    '</div>' +
-    "</div>";
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadCreatedBy" id="leadCreatedBy" class="form-control" >';
+  html += '<option value="">Select Assign</option>';
+  html += '</select>';
+  html += '<label for="leadCreatedBy">Lead Added by</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadDemoAssignSearch" id="leadDemoAssignSearch" class="form-control" >';
+  html += '<option value="">Select Assign</option>';
+  html += '</select>';
+  html += '<label for="leadDemoAssignSearch">Demo Assign</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadstatus">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadSupportTo" id="leadSupportTo" class="form-control" >';
+  html += '<option value="">Select Support</option>';
+  html += '</select>';
+  html += '<label for="leadSupportTo">Lead Support To</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadCallback" id="leadCallback" class="form-control" >';
+  html += '<option value="">Select Callback</option>';
+  html += '<option value="LWC">Lead With Callback</option>';
+  html += '<option value="LWOC">Lead Without Callback</option>';
+  html += '</select>';
+  html += '<label for="leadCallback">Callback</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadStartDateSearch" id="leadStartDateSearch" value="' + objRights.startDate + '" class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">';
+  html += '<label for="leadStartDateSearch">Start Date</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadEndDateSearch" id="leadEndDateSearch" value="' + objRights.endDate + '" class="form-control datepicker" readonly onkeydown="return false" placeholder=" ">';
+  html += '<label for="leadEndDateSearch">To Date</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="searchDateType" id="searchDateType" class="form-control" >';
+  html += '<option value="">Select Date Type</option>';
+  html += '<option value="create-lead" ' + (objRights.searchType == "create-lead" ? "selected" : "") + '>Created Lead</option>';
+  html += '<option value="modify-lead" ' + (objRights.searchType == "modify-lead" ? "selected" : "") + '>Modify Lead</option>';
+  html += '<option value="demo-Book" ' + (objRights.searchType == "demo-Book" ? "selected" : "") + '>Demo Book</option>';
+  html += '<option value="demo-lead" ' + (objRights.searchType == "demo-lead" ? "selected" : "") + '>Demo Schedule</option>';
+  html += '<option value="callschedule-lead" ' + (objRights.searchType == "callschedule-lead" ? "selected" : "") + '>Call Schedule </option>';
+  html += '<option value="call-done" ' + (objRights.searchType == "call-done" ? "selected" : "") + '>Call Done</option>';
+  html += '</select>';
+  html += '<label for="searchDateType">Date Type</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadDemoBookType" id="leadDemoBookType" class="form-control" >';
+  html += '<option value="">Select Demo Book Type</option>';
+  html += '<option value="AB">Demo By Website</option>';
+  html += '<option value="A">Demo By Link</option>';
+  html += '<option value="AG">Demo By Agent</option>';
+  html += '<option value="AC">Demo By Chat</option>';
+  html += '</select>';
+  html += '<label for="leadDemoBookType">Demo Book type</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 b2bLeadCallback">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadCallByAgent" id="leadCallByAgent" class="form-control" >';
+  html += '<option value="">Select Call Agent</option>';
+  html += '<option value="Y">Yes</option>';
+  html += '<option value="N">No</option>';
+  html += '</select>';
+  html += '<label for="leadCallByAgent">Lead Call By Agent</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-2 col-sm-2 col-12 mb-1 mt-1" >';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadPriority" id="leadPriority" class="form-control" >';
+  html += '<option value="" ></option>';
+  html += '</select>';
+  html += '<label for="leadPriority">Priority</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="studentStage" id="studentStage" class="form-control" >';
+  html += '<option value="">Select Date Type</option>';
+  html += '<option value="0" >ENROLLED</option>';
+  html += '<option value="10" >STUDENT DETAIL</option>';
+  html += '<option value="11" >PARENT DETAIL</option>';
+  html += '<option value="12" >ADDRESS DETAIL</option>';
+  html += '<option value="13" >COURSE SELECTION</option>';
+  html += '<option value="14,15" >REVIEW DETAIL</option>';
+  html += '</select>';
+  html += '<label for="studentStage">Student Stage</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadSearchTemplate" id="leadSearchTemplate" class="form-control leadSearchTemplate" multiple ></select>';
+  html += '<label for="leadSearchTemplate">Select Template</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 utmSource">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadSearchDeliveredStatus" id="leadSearchDeliveredStatus" class="form-control leadSearchDeliveredStatus" >';
+  html += '<option value="" >-- Select Delivered Status --</option>';
+  html += '<option value="SUCCESS" >SUCCESS</option>';
+  html += '<option value="FAIL" >FAIL</option>';
+  html += '<option value="UNREACHED" >UNREACHED</option>';
+  html += '<option value="UNSUBSCRIBED" >UNSUBSCRIBED</option>';
+  html += '</select>';
+  html += '<label for="leadSearchDeliveredStatus">Select Delivered Status</label>';
+  html += '</div>';
+  html += '</div>';
+
   if (objRights.discardPermission && USER_ROLE == "DIRECTOR") {
-    html +=
-      '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 ">' +
-      '<input type="radio"  name="checkLeadForZCall" value="Y" /> Zadarma Call Done' +
-      '<input type="radio" name="checkLeadForZCall" value="N" /> Zadarma Call Not Done' +
-      "</div>";
+    html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 ">';
+    html += '<input type="radio" name="checkLeadForZCall" value="Y" /> Zadarma Call Done';
+    html += '<input type="radio" name="checkLeadForZCall" value="N" /> Zadarma Call Not Done';
+    html += '</div>';
   }
 
-  html +=
-    "</div>" +
-    '<div class="row">' +
-    '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '	<input type="text" name="leadFollwoupDays" id="leadFollwoupDays"  class="form-control" placeholder=" "/> ' +
-    '<label for="leadFollwoupDays">Last Followup Days</label>' +
-    '</div>' +
-    "</div>" +
-    "</div>" +
-    
-    "			</form>" +
-    "        </div>" +
-    '        <div class="modal-footer">' +
-    '            <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" onclick="advanceLeadSearchStudentReset(\'advanceLeadNewSearchForm\',\'' +
-    objRights.leadType +
-    '\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
-    '			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>' +
-    '			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnNewClickLeadSearch"><i class="fa fa-search"></i>&nbsp;Search</button>' +
-    "        </div>" +
-    "    </div>" +
-    "</div>" +
-    "</div>";
+  html += '</div>';
+
+  html += '<div class="row">';
+  html += '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadFollwoupDays" id="leadFollwoupDays" class="form-control" placeholder=" "/>';
+  html += '<label for="leadFollwoupDays">Last Followup Days</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</form>';
+  html += '</div>';
+  html += '<div class="modal-footer">';
+  html += '<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" onclick="advanceLeadSearchStudentReset(\'advanceLeadNewSearchForm\',\'' + objRights.leadType + '\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>';
+  html += '<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>';
+  html += '<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="btnNewClickLeadSearch"><i class="fa fa-search"></i>&nbsp;Search</button>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+
   return html;
 }
 
 
 
 function getLeadMergeFormPopup(objRights) {
-  var html = "";
-  html +=
-    '<div id="leadMergePopup" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">' +
-    '<div class="modal-dialog modal-xl">' +
-    '    <div class="modal-content border-0">' +
-    '        <div class="modal-header py-2 bg-primary text-white">' +
-    '            <h5 class="modal-title" id="leadFormText">Merge Lead Form</h5>' +
-    '            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">' +
-    '                <span aria-hidden="true">&times;</span>' +
-    "            </button>" +
-    "        </div>" +
-    '       <div class="modal-body">' +
-    '		<form class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2 custom-field-scope" method="post" action="javascript:void(0);" id="leadMergeDataPopupForm">' +
-    '			<input type="hidden" name="leadId" id="leadId" value="" />' +
-    '			<input type="hidden" name="parentleadId" id="parentleadId" value="" />' +
-    '			<input type="hidden" name="academicId" id="academicId" value="" />' +
-    '			<input type="hidden" name="leadNo" id="leadNo" value="" />' +
-    '			<input type="hidden" name="rawLeadId" id="rawLeadId" value="" />' +
-    '			<input type="hidden" name="relationType" id="relationType" value="" />' +
-    '			<input type="hidden" name="leadSourceGroup" id="leadSourceGroup" value="" />' +
-    '			<input type="hidden" name="countrolType" id="countrolType" value="" />' +
-    '			<input type="hidden" name="mergeLeads" id="mergeLeads" value="" />' +
-    '<input type="hidden" name="isdCode" id="isdCode" value="" />' +
-    '<input type="hidden" name="pCountryCode" id="pCountryCode" value="" />' +
-    '<input type="hidden" name="isdCodeAlter" id="isdCodeAlter" value="" />' +
-    '<input type="hidden" name="pCountryCodeAlter" id="pCountryCodeAlter" value="" />' +
-    '	<input type="hidden" name="leadType" id="leadType" value="' +objRights.leadType +'" />' +
-    '			<div class="row">' +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<input type="text" name="leadGuardfname" id="leadGuardfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">' +
-    '<label for="leadGuardfname">Parent First Name*</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="text" name="leadGuardmname" id="leadGuardmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">' +
-    '<label for="leadGuardmname">Parent Middle Name</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="text" name="leadGuardlname" id="leadGuardlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">' +
-    '<label for="leadGuardlname">Parent Last Name</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<input type="text" name="leadstdfname" id="leadstdfname" value=""   class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">' +
-    '<label for="leadstdfname">Child First Name*</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="text" name="leadstdmname" id="leadstdmname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">' +
-    '<label for="leadstdmname">Child Middle Name</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="text" name="leadstdlname" id="leadstdlname" value=""  class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">' +
-    '<label for="leadstdlname">Child Last Name</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '							<input type="text" name="leadAge" id="leadAge" class="form-control" value=""  maxlength="3" placeholder=" ">' +
-    '<label for="leadAge">Age</label>' +
-    '</div>' +
-    "						</div>" +
-    '				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '					<select name="leadGrade" id="leadGrade" class="form-control" >' +
-    '						<option value="">Select Grade</option>' +
-    getStandardContent(SCHOOL_ID, true, false) +
-    "					</select>" +
-    '<label for="leadGrade">Grade*</label>' +
-    '</div>' +
-    "				</div>" +
-    '				<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<select name="countryId" id="countryId" class="form-control"  ></select>' +
-    '<label for="countryId">Country</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<select name="stateId" id="stateId" class="form-control" ></select>' +
-    '<label for="stateId">State</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<select name="cityId" id="cityId" class="form-control" ></select>' +
-    '<label for="cityId">City</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="email" name="leademailId" id="leademailId" class="form-control" value="" placeholder=" " ' +
-    '						maxlength="100" pattern="^([w-]+(?:.[w-]+)*)@((?:[w-]+.)*w[w-]{0,66}).([a-zA-Z]{2,10}(?:.[a-zA-z]{2})?)$">' +
-    '<label for="leademailId">Email*</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="email" name="leademailAlternet" id="leademailAlternet" class="form-control" value="" placeholder=" " maxlength="100"' +
-    '					pattern="^([w-]+(?:.[w-]+)*)@((?:[w-]+.)*w[w-]{0,66}).([a-zA-Z]{2,10}(?:.[a-zA-z]{2})?)$">' +
-    '<label for="leademailAlternet">Alt Email</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="text" name="phoneNo" id="phoneNo" class="form-control" value="" maxlength="15" onkeydown="return M.digit(event);" placeholder=" "/>' +
-    '<label for="phoneNo">Phone No.*</label>' +
-    '</div>' +
-    "					</div>" +
-    '					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">' +
-    '<div class="form-group custom-field mb-2">' +
-    '						<input type="text" name="phoneNoAlter" id="phoneNoAlter" class="form-control" value=""  maxlength="15" onkeydown="return M.digit(event);" placeholder=" "/>' +
-    '<label for="phoneNoAlter">Alt Phone No.</label>' +
-    '</div>' +
-    "					</div>";
+  var html = '';
+  html += '<div id="leadMergePopup" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">';
+  html += '<div class="modal-dialog modal-xl">';
+  html += '<div class="modal-content border-0">';
+  html += '<div class="modal-header py-2 bg-primary text-white">';
+  html += '<h5 class="modal-title" id="leadFormText">Merge Lead Form</h5>';
+  html += '<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">';
+  html += '<span aria-hidden="true">&times;</span>';
+  html += '</button>';
+  html += '</div>';
+  html += '<div class="modal-body">';
+  html += '<form class="col-lg-12 col-md-12 col-ms-12 col-12 pt-2 pb-2 custom-field-scope" method="post" action="javascript:void(0);" id="leadMergeDataPopupForm">';
+  html += '<input type="hidden" name="leadId" id="leadId" value="" />';
+  html += '<input type="hidden" name="parentleadId" id="parentleadId" value="" />';
+  html += '<input type="hidden" name="academicId" id="academicId" value="" />';
+  html += '<input type="hidden" name="leadNo" id="leadNo" value="" />';
+  html += '<input type="hidden" name="rawLeadId" id="rawLeadId" value="" />';
+  html += '<input type="hidden" name="relationType" id="relationType" value="" />';
+  html += '<input type="hidden" name="leadSourceGroup" id="leadSourceGroup" value="" />';
+  html += '<input type="hidden" name="countrolType" id="countrolType" value="" />';
+  html += '<input type="hidden" name="mergeLeads" id="mergeLeads" value="" />';
+  html += '<input type="hidden" name="isdCode" id="isdCode" value="" />';
+  html += '<input type="hidden" name="pCountryCode" id="pCountryCode" value="" />';
+  html += '<input type="hidden" name="isdCodeAlter" id="isdCodeAlter" value="" />';
+  html += '<input type="hidden" name="pCountryCodeAlter" id="pCountryCodeAlter" value="" />';
+  html += '<input type="hidden" name="leadType" id="leadType" value="' + objRights.leadType + '" />';
+
+  html += '<div class="row">';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadGuardfname" id="leadGuardfname" value="" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">';
+  html += '<label for="leadGuardfname">Parent First Name*</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadGuardmname" id="leadGuardmname" value="" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">';
+  html += '<label for="leadGuardmname">Parent Middle Name</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadGuardlname" id="leadGuardlname" value="" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">';
+  html += '<label for="leadGuardlname">Parent Last Name</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadstdfname" id="leadstdfname" value="" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">';
+  html += '<label for="leadstdfname">Child First Name*</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadstdmname" id="leadstdmname" value="" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">';
+  html += '<label for="leadstdmname">Child Middle Name</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadstdlname" id="leadstdlname" value="" class="form-control" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">';
+  html += '<label for="leadstdlname">Child Last Name</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="leadAge" id="leadAge" class="form-control" value="" maxlength="3" placeholder=" ">';
+  html += '<label for="leadAge">Age</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="leadGrade" id="leadGrade" class="form-control" >';
+  html += '<option value="">Select Grade</option>' + getStandardContent(SCHOOL_ID, true, false);
+  html += '</select>';
+  html += '<label for="leadGrade">Grade*</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="countryId" id="countryId" class="form-control" ></select>';
+  html += '<label for="countryId">Country</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="stateId" id="stateId" class="form-control" ></select>';
+  html += '<label for="stateId">State</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<select name="cityId" id="cityId" class="form-control" ></select>';
+  html += '<label for="cityId">City</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="email" name="leademailId" id="leademailId" class="form-control" value="" placeholder=" " maxlength="100" pattern="^([w-]+(?:.[w-]+)*)@((?:[w-]+.)*w[w-]{0,66}).([a-zA-Z]{2,10}(?:.[a-zA-z]{2})?)$">';
+  html += '<label for="leademailId">Email*</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="email" name="leademailAlternet" id="leademailAlternet" class="form-control" value="" placeholder=" " maxlength="100" pattern="^([w-]+(?:.[w-]+)*)@((?:[w-]+.)*w[w-]{0,66}).([a-zA-Z]{2,10}(?:.[a-zA-z]{2})?)$">';
+  html += '<label for="leademailAlternet">Alt Email</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="phoneNo" id="phoneNo" class="form-control" value="" maxlength="15" onkeydown="return M.digit(event);" placeholder=" "/>';
+  html += '<label for="phoneNo">Phone No.*</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-12 mb-1 mt-1">';
+  html += '<div class="form-group custom-field mb-2">';
+  html += '<input type="text" name="phoneNoAlter" id="phoneNoAlter" class="form-control" value="" maxlength="15" onkeydown="return M.digit(event);" placeholder=" "/>';
+  html += '<label for="phoneNoAlter">Alt Phone No.</label>';
+  html += '</div>';
+  html += '</div>';
 
   if (objRights.discardPermission) {
-    html +=
-      '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1 " >' +
-      '<div class="form-group custom-field mb-2">' +
-      '		<select	name="leadSource" id="leadSource" class="form-control" ></select>' +
-      '<label for="leadSource">Lead Source *</label>' +
-      '</div>' +
-      "	</div>" +
-      '	<div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 mb-1 mt-1">' +
-      '<div class="form-group custom-field mb-2">' +
-      '		<select name="leadStatus" id="leadStatus" class="form-control"></select>' +
-      '<label for="leadStatus">Lead Status*</label>' +
-      '</div>' +
-      "	</div>" +
-      '	<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1">' +
-      '<div class="form-group custom-field mb-2">' +
-      '		<select name="leadAssignTo" id="leadAssignTo" class="form-control" ></select>' +
-      '<label for="leadAssignTo">Lead Assigned To*</label>' +
-      '</div>' +
-      "	</div>" +
-      '	<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-2">' +
-      '<div class="form-group custom-field mb-2">' +
-      '		<textarea name="leadRemark" id="leadRemark" rows="3" class="form-control"></textarea>' +
-      '<label for="leadRemark">Remarks</label>' +
-      '</div>' +
-      "	</div>";
+    html += '<div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12 mb-1 mt-1 " >';
+    html += '<div class="form-group custom-field mb-2">';
+    html += '<select name="leadSource" id="leadSource" class="form-control" ></select>';
+    html += '<label for="leadSource">Lead Source *</label>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 mb-1 mt-1">';
+    html += '<div class="form-group custom-field mb-2">';
+    html += '<select name="leadStatus" id="leadStatus" class="form-control"></select>';
+    html += '<label for="leadStatus">Lead Status*</label>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 col-12 mb-1 mt-1">';
+    html += '<div class="form-group custom-field mb-2">';
+    html += '<select name="leadAssignTo" id="leadAssignTo" class="form-control" ></select>';
+    html += '<label for="leadAssignTo">Lead Assigned To*</label>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-2">';
+    html += '<div class="form-group custom-field mb-2">';
+    html += '<textarea name="leadRemark" id="leadRemark" rows="3" class="form-control"></textarea>';
+    html += '<label for="leadRemark">Remarks</label>';
+    html += '</div>';
+    html += '</div>';
   }
-  html +=
-    "			</div>" +
-    "			</form>" +
-    '		<div class="row">' +
-    '			<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-2" id="mergeleadlist"></div>	' +
-    "		</div>	" +
-    "        </div>" +
-    '        <div class="modal-footer">' +
-    '			<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>' +
-    '			<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveMergeLead">Save</button>' +
-    "        </div>" +
-    "    </div>" +
-    "</div>" +
-    "</div>";
+
+  html += '</div>';
+  html += '</form>';
+  html += '<div class="row">';
+  html += '<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-2" id="mergeleadlist"></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="modal-footer">';
+  html += '<button type="button" class="btn btn-info  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>';
+  html += '<button type="button" class="btn btn-success  float-right pr-4 pl-4" id="saveMergeLead">Save</button>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+
   return html;
 }
 
