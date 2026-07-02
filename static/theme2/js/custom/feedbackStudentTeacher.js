@@ -145,14 +145,15 @@ function openClassFeedback(info) {
                 showFeedbackIframeModal(data.details, title, classDateTime, rightSlideModal, teacherName);
             }
         } else if (code === "S003") {
-            var entityKind = isFeedbackActivity(info) ? "activity" : "class";
-            var msgTeacherName = isFeedbackActivity(info) ? "" : getClassFeedbackTeacherDisplay(info);
-            showFeedbackMessageModal(
-                title,
-                "You have not attended the " + entityKind + " hence you are eligible for the feedback of this " + entityKind + ".",
-                classDateTime,
-                msgTeacherName
-            );
+            // var entityKind = isFeedbackActivity(info) ? "activity" : "class";
+            // var msgTeacherName = isFeedbackActivity(info) ? "" : getClassFeedbackTeacherDisplay(info);
+            // showFeedbackMessageModal(
+            //     title,
+            //     "You have not attended the " + entityKind + " hence you are not eligible for the feedback of this " + entityKind + ".",
+            //     classDateTime,
+            //     msgTeacherName
+            // );
+            return false;
         } else if (code === "S004") {
             // S004 -> no modal, just a toast message.
             // showMessageTheme2(0, data.message);

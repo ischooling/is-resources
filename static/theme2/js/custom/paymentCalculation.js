@@ -98,9 +98,8 @@ function getPaymentDetails() {
 
 				$('#customePlanId').val(customPlan['customePlanId']);
 				$('#studentStandardId').val(customPlan['studentStandardId']);
-
 				$('#customPaymentPlan').html('<option value="c_annually">Advantage Plan</option><option value="c_installment">Easy Plan</option>')
-				$('#customPaymentPlan').val(customPlan['customPlanNamme']);
+				$('#customPaymentPlan').val(customPlan['customPlanNamme']).trigger("change");
 
 				$('#premiumPercentage').val(customPlan['premiumPercentage'].toFixed(2) + '%');
 				$('#premiumAmount').val(customPlan['premiumAmount'].toFixed(2))
@@ -114,13 +113,12 @@ function getPaymentDetails() {
 				$('#remainingPayableFee').val(customPlan['remainingAmount'].toFixed(2))
 
 				$('#noOfInstallment').html('<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>');
-				$('#noOfInstallment').val(customPlan['noOfInstallment'])
+				$('#noOfInstallment').val(customPlan['noOfInstallment']).trigger("change");
 				$('#durationWithin').html('<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>');
-				$('#durationWithin').val(customPlan['durationWithin'])
+				$('#durationWithin').val(customPlan['durationWithin']).trigger("change");
 				$('#gapBetweenTwoIntstallment').val(customPlan['gapBetweenTwoIntstallment'])
 				$('#tentativeFirstPayDate').val(customPlan['tentativeFirstPayDate'])
-
-				$('#discountApplicableFor').val(customPlan['discountApplicableFor'])
+				$('#discountApplicableFor').val(customPlan['discountApplicableFor']).trigger("change");
 
 				if (customPlan['customePlanId'] == 0) {
 					customPlanChange()

@@ -214,6 +214,14 @@ function getURLForSignup(suffixUrl, module) {
 function getCustomFieldCss() {
   var customFieldActiveColor = typeof SCHOOL_ID != "undefined" && Number(SCHOOL_ID) > 0 ? "var(--pc)" : "var(--primary)";
   return `
+  :root {
+	--custom-field-default: var(--light);
+	--custom-field-default-text: var(--gray);
+	--custom-field-active: var(--primary);
+	--custom-field-value: var(--gray-dark);
+	--custom-field-bg: var(--white);
+	--custom-field-focus-shadow: color-mix(in srgb, var(--custom-field-active) 15%, transparent);
+}
 .custom-field-scope .custom-field{
 position:relative;
     margin-bottom:30px;

@@ -152,7 +152,7 @@ async function savePartnerSchoolImages(schoolLetterSetup, schoolLogoSetup, color
         var fourthLight = lightenColor(fourthColor, 85);
         var primaryGradient = generateGradient(primaryColor);
         var parentColor = {
-            "rootcss": `:root{--pc:${primaryColor};--plc:${primaryLight};--sc:${secondaryColor};--slc:${secondaryLight};--pgc:${primaryGradient};--tc:${thirdColor};--tlc:${thirdLight};--fc:${fourthColor};--flc:${fourthLight};--login-bg-color:${primaryColor};}`,
+            "rootcss": `:root{--pc:${primaryColor};--plc:${primaryLight};--sc:${secondaryColor};--slc:${secondaryLight};--pgc:${primaryGradient};--tc:${thirdColor};--tlc:${thirdLight};--fc:${fourthColor};--flc:${fourthLight};--login-bg-color:${primaryColor};--custom-field-default:var(--light);--custom-field-default-text:var(--gray);--custom-field-active:var(--pc);--custom-field-value:var(--gray-dark);--custom-field-bg:var(--white);--custom-field-focus-shadow:color-mix(in srgb, var(--custom-field-active) 15%, transparent);}`,
             "HEADER_BG": "default-header-bg",
             "SIDEBAR_NEVIGATION_BG": "default-sidebar-bg"
         };

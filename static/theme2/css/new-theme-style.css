@@ -1311,6 +1311,12 @@ a.bg-alternate:hover, a.bg-alternate:focus, button.bg-alternate:hover, button.bg
 --dark: #343a40;
 --focus: #444054;
 --alternate: #794c8a;
+--custom-field-default: var(--light);
+--custom-field-default-text: var(--gray);
+--custom-field-active: var(--primary);
+--custom-field-value: var(--gray-dark);
+--custom-field-bg: var(--white);
+--custom-field-focus-shadow: color-mix(in srgb, var(--custom-field-active) 15%, transparent);
 --breakpoint-xs: 0;
 --breakpoint-sm: 576px;
 --breakpoint-md: 768px;
@@ -5855,6 +5861,8 @@ border-top-right-radius:.3rem
 	padding:1rem 1rem;
 	margin:-1rem -1rem -1rem auto;
 	opacity: 1;
+	color:#fff!important;
+	z-index:0;
 }
 .modal-header .close span{position: relative;z-index: 2;}
 .modal-header .close:not(.close-with-red-color):after{
@@ -5865,7 +5873,7 @@ border-top-right-radius:.3rem
 	background-color: red;
 	left: 24%;
 	top:33%;
-	z-index: 1;
+	z-index: -1;
 }
 .modal-header .close:hover::after{
 	opacity: 1;
