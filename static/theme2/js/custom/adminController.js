@@ -67,6 +67,7 @@ const contentHandlers = {
     'admin-partner-enrollment-list': () => renderPartnerList('Student Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'lead-demo-list': () => renderMeetingTimeDashboard('Lead Demo Calendar', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'lead-demo-report': () => renderLeadDemoReportDashboard('Lead Demo Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'ai-email-draft': () => renderAiEmailDraftDashboard('AI Email Draft', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'lead-predict-list': () => renderLeadPredictListDashboard('Lead Predict List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'lead-setting': () => initLeadSetting(),
     'email-status': () => $("#dashboardContentInHTML").html(getEmailVerifyContent("Email Verification", false)),
