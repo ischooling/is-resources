@@ -1904,21 +1904,29 @@ function getUserRights(schoolId, roleId, userId, moduleId) {
             data: JSON.stringify({ schoolId, roleId, userId, moduleId }),
             dataType: 'json',
             global: false,
+            timeout: 30000,
 
             success: function (response) {
                 if (!response || $.isEmptyObject(response)) {
-                    reject("Empty response");
+                    reject({ status: 200, reason: 'empty', message: 'Empty response' });
                     return;
                 }
                 resolve(response);
             },
 
-            error: function (e) {
+            // Reject with a structured object so callers can tell apart an aborted /
+            // interrupted request (status 0) from a real server error, instead of
+            // collapsing everything into the string "Server error".
+            error: function (xhr, textStatus) {
                 if (!navigator.onLine) {
-                    reject("offline");
-                } else {
-                    reject(e.responseText || "Server error");
+                    reject({ status: 0, reason: 'offline', message: 'offline' });
+                    return;
                 }
+                reject({
+                    status: xhr.status || 0,                 // 0 = aborted / network / CORS
+                    reason: textStatus,                      // 'abort' | 'timeout' | 'parsererror' | 'error'
+                    message: xhr.responseText || textStatus || 'Server error'
+                });
             }
         });
     });

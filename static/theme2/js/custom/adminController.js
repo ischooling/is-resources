@@ -415,9 +415,17 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1)
     }  catch (err) {
         console.error("getContent error:", err);
         const status = err?.status || err?.response?.status;
+        const reason = err?.reason;   // 'abort' | 'timeout' | 'parsererror' | 'error' | 'offline' | 'empty'
+
+        // An aborted / interrupted request (user navigated away, reloaded, or a
+        // momentary network drop) is NOT a real failure. Don't scare the user and
+        // don't pollute the backend error log with it.
+        const isAbortedOrNetwork = reason === 'abort' || reason === 'offline'
+            || err === 'offline' || err?.name === 'AbortError'
+            || (status === 0 && reason !== 'parsererror');
 
         // Send to backend error logger — fire-and-forget, never blocks UI
-        if (typeof SMSErrorLogger !== 'undefined') {
+        if (typeof SMSErrorLogger !== 'undefined' && !isAbortedOrNetwork) {
             SMSErrorLogger.log({
                 errorType:    err?.name || 'getContentError',
                 errorMessage: err?.message || String(err),
@@ -464,14 +472,18 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1)
                 showMessageTheme2(0, "Server response timeout. Please try again.");
                 break;
             default:
-                if (err === "offline") {
+                if (err === "offline" || reason === "offline") {
                     showMessageTheme2(0, "You are offline. Please check your internet connection.");
-                } else if (err === "Empty response") {
+                } else if (reason === "abort" || err?.name === "AbortError") {
+                    // Request was interrupted (user navigated / reloaded). Not an error — stay silent.
+                    console.warn("getContent: request aborted, ignoring.");
+                } else if (reason === "timeout") {
+                    showMessageTheme2(0, "Request timed out. Please try again.");
+                } else if (status === 0 || reason === "parsererror" || reason === "error"
+                           || err?.message?.includes("Network Error") || err?.message?.includes("Failed to fetch")) {
+                    showMessageTheme2(0, "Network error. Please check your internet connection and try again.");
+                } else if (err === "Empty response" || reason === "empty") {
                     showMessageTheme2(0, "Permission data not available.");
-                } else if (err?.message?.includes("Network Error") || err?.message?.includes("Failed to fetch")) {
-                    showMessageTheme2(0, "Network error. Please check your internet connection.");
-                } else if (err?.name === "AbortError") {
-                    showMessageTheme2(0, "Request was cancelled.");
                 } else {
                     showMessageTheme2(0, "Something went wrong. Please reload.");
                 }
