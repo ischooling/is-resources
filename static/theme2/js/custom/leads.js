@@ -1581,6 +1581,7 @@ leadModifyDTO['totalFollowupPendingCount'] = $("#"+formId+" #leadFollwoupDays").
 
 
 function advanceLeadSearchStudentReset(formId, leadType){
+	clearLeadMetaCache();
 	$("#"+formId+" #leadNoSearch").val('').trigger('change');
 	$("#"+formId+" #leadSourceSearch").val('').trigger('change');
 	$("#"+formId+" #leadStatusSearch").val('').trigger('change');
@@ -7680,11 +7681,42 @@ async function getLeadStatusLog(leadno, callFrom, adminStatus) {
 
         if (!data) return;
 
+        renderLeadStatusLog(leadno, callFrom, data);
+    } catch (error) {
+        console.error("Error in getLeadStatusLog:", error);
+    }
+}
+
+// Batched: one request for all visible leadNos, distribute to each row.
+// Replaces ~N per-row getLeadStatusLog calls with a single request per page.
+async function getLeadStatusLogBatch(leadNos, callFrom, adminStatus) {
+    try {
+        if (!leadNos || leadNos.length === 0) return;
+        var request = {
+            leadNos: leadNos,
+            adminStatus: adminStatus,
+            leadsFollowCount: $("#leadsFollowCount").val()
+        };
+        var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'lead-status-log-batch', request, 'api/v1/leads');
+        if (!data || !data.data) return;
+        for (var i = 0; i < leadNos.length; i++) {
+            var perLead = data.data[leadNos[i]];
+            if (perLead) {
+                renderLeadStatusLog(leadNos[i], callFrom, perLead);
+            }
+        }
+    } catch (error) {
+        console.error("Error in getLeadStatusLogBatch:", error);
+    }
+}
+
+// Renders one lead's status-log block. `data` = { leadTagging, data:[...] } — the same
+// shape returned per-lead by both the single-item and batch endpoints.
+function renderLeadStatusLog(leadno, callFrom, data) {
         var leadTagging = "<b>" + data.leadTagging + "</b>";
         $(".leadtagstatus_" + leadno).html(leadTagging);
 
-        if (data.status === '0' || data.status === '2') {
-            // showMessageTheme2(0, data.message, '', true);
+        if (!data.data || data.data.length === 0) {
             return;
         }
 
@@ -7755,9 +7787,6 @@ async function getLeadStatusLog(leadno, callFrom, adminStatus) {
             html += '</div>';
             $(".leadstatus_" + leadno).html(html);
         }
-    } catch (error) {
-        console.error("Error in getLeadStatusLog:", error);
-    }
 }
 
 
@@ -10975,6 +11004,183 @@ function curentTimeStamp(timeZoneOffset){
 	
 }
 
+// The backend caps per-request row processing to this many rows (see
+// MAX_SAFE_RECORDS_PER_PAGE in LeadsApiUtil.getLeadDatalist) because the per-lead
+// enrichment is expensive enough that larger single requests can exceed the 60s
+// Cloudflare/proxy timeout. When the UI's selected page size (25/50/100) is larger,
+// we pull it as several small sequential requests instead of one big one and merge
+// the rows before handing off to the existing render code below.
+var LEAD_LIST_SAFE_CHUNK_SIZE = 25;
+// Max chunk requests in flight at once. Sized conservatively for the smallest DB pool
+// this app runs against (dev read pool = 3 connections); each chunk triggers ~17 DB
+// queries server-side, so higher values risk Hikari connection-wait timeouts.
+var LEAD_LIST_PARALLEL_CHUNKS = 8;
+
+// Runs taskFn(0..count-1) with at most `limit` promises in flight; resolves to results
+// in index order. Queued tasks start automatically as earlier ones finish.
+async function runWithConcurrencyLimit(count, limit, taskFn) {
+	var results = new Array(count);
+	var next = 0;
+	async function worker() {
+		while (next < count) {
+			var i = next++;
+			results[i] = await taskFn(i);
+		}
+	}
+	var workers = [];
+	for (var w = 0; w < Math.min(limit, count); w++) {
+		workers.push(worker());
+	}
+	await Promise.all(workers);
+	return results;
+}
+
+// Client-side cache of the shared list metadata (statusList, campaignList, settings,
+// objectRights, totalRows/noOfPages) returned by get-lead-data-meta. Keyed by a signature
+// of the FILTER only (page number / page size excluded), so it is reused across page
+// navigations of the same filter and automatically refetched when the filter changes.
+// NOTE: only metadata is cached — row data is always fetched live per chunk below — so the
+// only value that can go briefly stale is the total-count/pager number, never the leads shown.
+var __leadMetaCache = { sig: null, resp: null };
+
+function leadFilterSignature(payload) {
+	var p = JSON.parse(JSON.stringify(payload || {}));
+	delete p.currentPage;
+	delete p.recordsPerPage;
+	delete p.metaLoaded;
+	return JSON.stringify(p);
+}
+
+function clearLeadMetaCache() {
+	__leadMetaCache.sig = null;
+	__leadMetaCache.resp = null;
+}
+
+async function getLeadMetaCached(payload) {
+	var sig = leadFilterSignature(payload);
+	if (__leadMetaCache.sig === sig && __leadMetaCache.resp) {
+		return __leadMetaCache.resp;
+	}
+	var metaResp = null;
+	try {
+		var metaPayload = JSON.parse(JSON.stringify(payload));
+		metaResp = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'get-lead-data-meta', metaPayload, 'api/v1/leads');
+	} catch (e) {
+		metaResp = null;
+	}
+	var metaOk = !!(metaResp && metaResp.status != '0' && metaResp.status != '2' && metaResp.objectRights);
+	if (metaOk) {
+		__leadMetaCache.sig = sig;
+		__leadMetaCache.resp = metaResp;
+	} else {
+		clearLeadMetaCache();
+	}
+	return metaResp;
+}
+
+async function fetchLeadDataListChunked(payload) {
+	var originalRecordsPerPage = parseInt(payload.recordsPerPage, 10) || 10;
+	var originalCurrentPage = parseInt(payload.currentPage, 10) || 0;
+
+	// Uniform flow for every page size: fetch the shared metadata first (from the per-filter
+	// cache when available), then pull the row data in lean chunks that skip recomputing it.
+	// If the meta call fails, chunks fall back to carrying full metadata themselves.
+	var metaResp = await getLeadMetaCached(payload);
+	var metaOk = !!(metaResp && metaResp.status != '0' && metaResp.status != '2' && metaResp.objectRights);
+
+	// 0-based offset of the first row of the logical page the user asked for,
+	// independent of how it gets split into chunks below.
+	var pageStartOffset = originalCurrentPage > 0 ? (originalCurrentPage - 1) * originalRecordsPerPage : 0;
+	var numChunks = Math.ceil(originalRecordsPerPage / LEAD_LIST_SAFE_CHUNK_SIZE);
+	// With a trusted totalRows from meta we know exactly how many chunks have data,
+	// so we can fire them ALL in parallel (each ~identical server cost) instead of
+	// sequentially — total wall time ≈ one chunk instead of numChunks × chunk.
+	if (metaOk && metaResp.totalRows != null) {
+		var remainingRows = Math.max(0, metaResp.totalRows - pageStartOffset);
+		numChunks = Math.min(numChunks, Math.ceil(remainingRows / LEAD_LIST_SAFE_CHUNK_SIZE));
+	}
+
+	var mergedData = [];
+	var firstChunkResponse = null;
+
+	function buildChunkPayload(i) {
+		var chunkOffset = pageStartOffset + (i * LEAD_LIST_SAFE_CHUNK_SIZE);
+		var chunkCurrentPage = Math.floor(chunkOffset / LEAD_LIST_SAFE_CHUNK_SIZE) + 1;
+		var chunkPayload = JSON.parse(JSON.stringify(payload));
+		chunkPayload.currentPage = chunkCurrentPage;
+		chunkPayload.recordsPerPage = LEAD_LIST_SAFE_CHUNK_SIZE;
+		// When metadata is already loaded, tell the backend to skip recomputing it per chunk.
+		chunkPayload.metaLoaded = metaOk;
+		return chunkPayload;
+	}
+
+	if (metaOk && numChunks > 1) {
+		// Parallel path with BOUNDED concurrency: at most LEAD_LIST_PARALLEL_CHUNKS chunks
+		// are in flight at once; the rest queue client-side and start as slots free up.
+		// Each chunk fans out ~17 DB queries server-side, so unbounded parallelism can
+		// oversubscribe the DB connection pool (Hikari waiters time out at 30s). This
+		// limiter keeps demand below that while still collapsing total wall time.
+		var chunkResponses = await runWithConcurrencyLimit(
+			numChunks,
+			LEAD_LIST_PARALLEL_CHUNKS,
+			function (i) {
+				return getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', buildChunkPayload(i), 'api/v1/leads');
+			}
+		);
+		for (var c = 0; c < chunkResponses.length; c++) {
+			var chunkResponse = chunkResponses[c];
+			if (!chunkResponse || chunkResponse.status == '0' || chunkResponse.status == '2') {
+				return chunkResponse;
+			}
+			mergedData = mergedData.concat(chunkResponse.data || []);
+			if (!firstChunkResponse) {
+				firstChunkResponse = chunkResponse;
+			}
+		}
+	} else {
+		// Sequential fallback (no meta, or single chunk): keep the early-exit behaviour
+		// since without totalRows we can't know how many chunks actually have data.
+		for (var i = 0; i < numChunks; i++) {
+			var chunkResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', buildChunkPayload(i), 'api/v1/leads');
+
+			if (!chunkResponse || chunkResponse.status == '0' || chunkResponse.status == '2') {
+				return chunkResponse;
+			}
+
+			var chunkRows = chunkResponse.data || [];
+			mergedData = mergedData.concat(chunkRows);
+
+			if (!firstChunkResponse) {
+				firstChunkResponse = chunkResponse;
+			}
+
+			// Stop early once we have enough rows, or the server ran out of matching leads.
+			if (chunkRows.length < LEAD_LIST_SAFE_CHUNK_SIZE || mergedData.length >= originalRecordsPerPage) {
+				break;
+			}
+		}
+	}
+
+	// Base the final response on the metadata (when available) so the render code sees
+	// statusList / campaignList / objectRights etc.; otherwise fall back to the first chunk
+	// (which, with metaLoaded=false, carried full metadata itself).
+	var baseResponse = metaOk ? metaResp : firstChunkResponse;
+	// Don't mutate the cached meta object — clone it so cache stays clean for reuse.
+	var finalResponse = baseResponse ? JSON.parse(JSON.stringify(baseResponse)) : null;
+	if (finalResponse) {
+		finalResponse.data = mergedData.slice(0, originalRecordsPerPage);
+		finalResponse.currentPage = originalCurrentPage > 0 ? originalCurrentPage : 1;
+		finalResponse.recordsPerPage = originalRecordsPerPage;
+		finalResponse.status = '1';
+		// Recompute noOfPages against the selected page size using the exact total count.
+		if (finalResponse.totalRows != null) {
+			finalResponse.noOfPages = Math.ceil(finalResponse.totalRows / originalRecordsPerPage);
+		}
+	}
+
+	return finalResponse;
+}
+
 async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights, roleModule) {
 	try {
 	  customLoader(true);
@@ -11004,8 +11210,8 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 	  }
 	  
 	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType, 'Y');
-  
-	  const data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-lead-data', payload, 'api/v1/leads');
+
+	  const data = await fetchLeadDataListChunked(payload);
   
 	//   console.log("start success time :" + new Date());
 	  customLoader(false);
@@ -11045,14 +11251,21 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  $('[data-toggle="tooltip"]').tooltip();
   
 		  const leaddata = data.data || [];
+		  // Per-row work below is split into: (a) client-side-only helpers that stay per-row,
+		  // and (b) the two status-log calls that were previously ~2 AJAX requests per row —
+		  // now collected and fired as ONE batched request each for the whole page.
+		  var statusLogLeadNos = [];
+		  var statusHistoryLeadIds = [];
 		  for(var i=0;i<leaddata.length;i++){
 			var leadsd = leaddata[i];
-			getLeadStatusLog(leadsd.leadNo, 'new-lead', objRights.adminStatus);
 			getLeadStartTimer(leadsd.assignLeadDatetime, leadsd.leadId);
 			updateLeadHoldIndicator(leadsd.leadId, leadsd.lockStatus === 'ACTIVE', leadsd);
 			getUpdateLeadCurrentTime(leadsd, leadsd.leadId);
-			getLeadStatusLogHistory(leadsd.leadId);
+			if (leadsd.leadNo) statusLogLeadNos.push(leadsd.leadNo);
+			if (leadsd.leadId) statusHistoryLeadIds.push(leadsd.leadId);
 		  }
+		  getLeadStatusLogBatch(statusLogLeadNos, 'new-lead', objRights.adminStatus);
+		  getLeadStatusLogHistoryBatch(statusHistoryLeadIds);
 		  curentTimeStamp(data.objectRights.timeZoneOffset);
 		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
 		  $(".leadSearchCampaign").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
@@ -13171,21 +13384,45 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 
         if (!data) return;
 
-		console.log(data);
-
-        // var leadTagging = "<b>" + data.leadTagging + "</b>";
-        // $(".leadtagstatus_" + leadno).html(leadTagging);
-
         if (data.status === '0' || data.status === '2') {
-            // showMessageTheme2(0, data.message, '', true);
             return;
         }
-        if(data.data.length>1){
+        renderLeadStatusLogHistory(leadId, data.data);
+    } catch (error) {
+        console.error("Error in getLeadStatusLogHistory:", error);
+    }
+}
+
+// Batched: one request for all visible leadIds, distribute to each row.
+// Replaces ~N per-row getLeadStatusLogHistory calls with a single request per page.
+async function getLeadStatusLogHistoryBatch(leadIds) {
+    try {
+        if (!leadIds || leadIds.length === 0) return;
+        var request = {
+            leadIds: leadIds
+        };
+        var data = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'lead-status-log-history-batch', request, 'api/v1/leads');
+        if (!data || !data.data) return;
+        for (var i = 0; i < leadIds.length; i++) {
+            var rows = data.data[leadIds[i]];
+            if (rows) {
+                renderLeadStatusLogHistory(leadIds[i], rows);
+            }
+        }
+    } catch (error) {
+        console.error("Error in getLeadStatusLogHistoryBatch:", error);
+    }
+}
+
+// Renders one lead's history dropdown. `rows` = array of history entries — the same
+// shape returned per-lead by both the single-item and batch endpoints.
+function renderLeadStatusLogHistory(leadId, rows) {
+        if(rows && rows.length>1){
 			ensureMultipleTimeApplyBlinkStyle();
 			var sr=1;
 			var html=''
 			html+=`<div class="dropdown d-inline-block">
-					<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary multiple-time-apply-blink">Multiple time apply (${data.data.length})</button>
+					<button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle btn btn-sm btn-primary multiple-time-apply-blink">Multiple time apply (${rows.length})</button>
 					<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl dropdown-menu" x-placement="top-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-111px, -384px, 0px);">
 					<table style="font-size:11px !important; width:1300px;"><tbody>
 					<tr><th class="text-center bg-primary text-white">Sr. No.</th>
@@ -13198,8 +13435,8 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 					<th class="text-center bg-primary text-white">Lead Date</th>
 					<th class="text-center bg-primary text-white">Active</th>
 					<th class="text-center bg-primary text-white">Added Type</th></tr>`;
-				for (let i = 0; i < data.data.length; i++) {
-					const leadDatass = data.data[i];
+				for (let i = 0; i < rows.length; i++) {
+					const leadDatass = rows[i];
 					html+=`<tr><td class="text-center">${sr}</td>
 					<td>${leadDatass.leadNo}</td>
 					<td>${leadDatass.leadName}</td>
@@ -13216,9 +13453,4 @@ function saveB2bAttachmentLogs(discardPermission, userId, leadId, documentsFor, 
 
 			$(".leadMultipletimes_" + leadId).html(html);
 		}
-
-
-    } catch (error) {
-        console.error("Error in getLeadStatusLog:", error);
-    }
 }
