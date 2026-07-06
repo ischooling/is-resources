@@ -635,7 +635,7 @@ function getCounselorScheduleEventCotent(data){
 								+'<div class="full mb-3">'
 									+'<div class="form-group position-relative custom-field mb-0">'
 										+'<select class="form-control" name="counselorName" id="counselorName"></select>'
-										+'<label for="counselorName" class="font-weight-bold text-black">Counselor*</label>'
+										+'<label for="counselorName" class="font-weight-bold text-black">Academic Counselor*</label>'
 									+'</div>'
 								+'</div>'
 							+'</div>'
@@ -824,7 +824,7 @@ function thankyouPageContent(data){
 		if(data.counselorAutoSelect == 'true'){
 			counsellorName = 'School Demo';
 		}else{
-			counsellorName = data.userName.replace('Counselor', data.counselorName.trim());
+			counsellorName = data.userName.replace('Academic Counselor', data.counselorName.trim());
 		}
 	}else{
 		counsellorName = data.userName

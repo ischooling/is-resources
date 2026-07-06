@@ -108,7 +108,7 @@ function getTeacherInterviewAssignDataList(){
 						<thead class="bg-primary text-white">
 							<tr>
 								<th style="width:5% !important">S. No.</th>
-								<th style="width:10% !important">Counselor Name</th>
+								<th style="width:10% !important">Academic Counselor Name</th>
 								<th style="width:5% !important">Order</th>
 								<th style="width:5% !important">Total Teacher Assign </th>
 								<th style="width:5% !important">Active/ Inactive</th>

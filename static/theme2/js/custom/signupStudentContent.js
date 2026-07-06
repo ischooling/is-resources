@@ -2890,6 +2890,12 @@ function getReviewAndPayRendered(data){
 	if($("#logoutSignupModal").length<1){
 		$("body").append(logOutModalContent());
 	}
+	if($(".copyRights").length<1){
+		getSchoolSettingsTechnical(SCHOOL_ID).then(function(schoolSettingsTechnical){
+			var copyrightText = schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.';
+			$('#signupStage4Content').closest('section').append('<p class="copyRights">'+copyrightText+'</p>');
+		});
+	}
 }
 
 function getReviewAndPayContent(data){

@@ -1804,7 +1804,7 @@ function getAllCounselorList(formId,elementId){
 				if(result.length>0){
 					var dropdown = $('#'+formId+' #'+elementId);
 					dropdown.html('');
-					dropdown.append('<option value="">Select Counselor</option>');
+					dropdown.append('<option value="">Select Academic Counselor</option>');
 					$.each(result, function(k, v) {
 						if(forAll){
 							dropdown.append('<option value="' + v.key + '">'+ v.value + ' </option>');

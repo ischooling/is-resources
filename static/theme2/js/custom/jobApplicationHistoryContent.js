@@ -416,7 +416,7 @@ function getApplicationProfessionalDetailsCard(){
 				</div>
 				<div class="col-xl-6 col-lg-6 col-md-6 col-12 mt-2">
 					<div class="opacity-6 font-weight-semi-bold">Appied User Role</div>
-					<div class="font-weight-semi-bold font-16">Addmission Counselor</div>
+					<div class="font-weight-semi-bold font-16">Admission Academic Counselor</div>
 				</div>
 			</div>
 		</div>

@@ -6382,7 +6382,7 @@ async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 					var leadWeekwise = enrollMonth.leadWeekwise;
 					var totalEnroll = enrollMonth.totalEnrollment;
 					var totalLead = enrollMonth.totalLead;
-					if(modeSearch=='MONTH'){
+					if(modeSearch=='MONTH' || modeSearch=='CUSTOM_MONTH'){
 						if(colType=='Enrollment'){
 							data.push(totalEnroll);
 						}else if(colType=='Leads'){
@@ -6805,7 +6805,7 @@ function getLeadCampaignWiseHtml(data){
 			if(!hideCounselorSection){
 				htmlRet +="<td class=\"rounded-bottom-right-10\">";
 				var sizeCounselor=(leadCampaign.assignNames.length);
-				sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Counselors':'Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
+				sizeCounselor="<b>"+sizeCounselor+"</b> "+(leadCampaign.assignNames.length>1?' Academic Counselors':'Academic Counselor')+" with <b>$"+(perLeadSmsSpent*parseInt(leadCampaign.totalLead)).toFixed(2)+"</b>";
 				htmlRet +="<span>"+sizeCounselor+" </span>";
 				htmlRet+="<span class=\"float-right\">Demo Booked: <b>"+leadCampaign.totalDemoLead+"</b> | Completed: <b>"+leadCampaign.totalDemoDone+"</b> | Enrolled: <b>"+leadCampaign.totalConverted+"</b></span>";
 				htmlRet +="<div class=\"d-flex overflow-x-auto\" style=\"max-width:550px;\">";

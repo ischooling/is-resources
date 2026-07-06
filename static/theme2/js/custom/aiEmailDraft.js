@@ -27,7 +27,7 @@ function loadAiDraftLearningCount() {
         success: function (data) {
             if (data && data.learning) {
                 var count = Array.isArray(data.learning) ? data.learning.length : 0;
-                $('#aedLearningCount').text(count + ' rules');
+                $('#aedLearningCount').text(count);
             }
         }
     });
@@ -39,9 +39,20 @@ async function initAiEmailDraftFilters() {
     $('#aiEmailDraftDateType').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity });
     $('#aiEmailDraftPriorityFilter').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity });
     $('#aiEmailDraftStatusFilter').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity });
+    // Country dropdown — load from master (value = country ID)
+    if (typeof getAllCountryList === 'function') {
+        getAllCountryList('aiEmailDraftFilterForm', 'aiEmailDraftCountryFilter');
+    }
+    $('#aiEmailDraftCountryFilter').select2({ theme: 'bootstrap4' });
+
+    // Campaign dropdown — load from master
+    if (typeof callMasterCampainList === 'function') {
+        callMasterCampainList('aiEmailDraftFilterForm', '', 'aiEmailDraftCampaignFilter');
+    }
+    $('#aiEmailDraftCampaignFilter').select2({ theme: 'bootstrap4' });
 
     // Counselor dropdown — await data load, then init select2 so it picks up options correctly
-    $('#aiEmailDraftCounselorFilter').html('<option value="">All Counselor</option>');
+    $('#aiEmailDraftCounselorFilter').html('<option value="">All Academic Counselor</option>');
     if (typeof callLeadAssignUserList === 'function') {
         await callLeadAssignUserList('aiEmailDraftFilterForm', 'B2C', 'aiEmailDraftCounselorFilter', true, true, USER_ID);
     }
@@ -81,6 +92,8 @@ function bindAiEmailDraftEvents() {
         $('#aiEmailDraftDateType').val('TODAY').trigger('change');
         $('#aiEmailDraftPriorityFilter').val('').trigger('change');
         $('#aiEmailDraftStatusFilter').val('').trigger('change');
+        $('#aiEmailDraftCountryFilter').val('').trigger('change');
+        $('#aiEmailDraftCampaignFilter').val('').trigger('change');
         var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN');
         if (isAdmin) {
             $('#aiEmailDraftCounselorFilter').val('').trigger('change');
@@ -125,7 +138,6 @@ function bindAiEmailDraftEvents() {
     // modal action buttons
     $('#aedModalSave').off('click').on('click', function () { saveAiEmailDraftEdits('saved'); });
     $('#aedModalCopy').off('click').on('click', copyAiEmailDraft);
-    $('#aedModalMarkReviewed').off('click').on('click', markAiEmailDraftReviewed);
     $('#aedModalRegenerate').off('click').on('click', function () { regenerateAiEmailDraft(); });
     $('#aedModalSendEmail').off('click').on('click', sendAiDraftEmail);
 
@@ -156,22 +168,27 @@ function bindAiEmailDraftEvents() {
         saveAiDraftLearning(feedback);
     });
 
-    // Learning panel toggle in filter area
-    $('#aedLearningToggleRow').off('click.aedlt').on('click.aedlt', function () {
-        var $panel = $('#aedLearningPanel');
-        var $chevron = $('.aed-learning-chevron');
+    // AI Learning button — open modal
+    $('#aedLearningOpenBtn').off('click.aedlt').on('click.aedlt', function () {
+        loadAiDraftLearningList();
+        $('#aedLearningModal').modal('show');
+    });
+
+    // Counselor counts panel toggle
+    $('#aedCounselorCountsToggle').off('click.aedct').on('click.aedct', function () {
+        var $panel = $('#aedCounselorCountsPanel');
+        var $chevron = $('.aed-counselor-chevron');
         if ($panel.is(':visible')) {
             $panel.slideUp(150);
             $chevron.css('transform', '');
         } else {
             $panel.slideDown(150);
             $chevron.css('transform', 'rotate(180deg)');
-            loadAiDraftLearningList();
         }
     });
 
     // filter changes re-render table from cached data
-    $('#aiEmailDraftPriorityFilter, #aiEmailDraftStatusFilter').off('change.aedfilter').on('change.aedfilter', function () {
+    $('#aiEmailDraftPriorityFilter, #aiEmailDraftStatusFilter, #aiEmailDraftCountryFilter, #aiEmailDraftCampaignFilter').off('change.aedfilter').on('change.aedfilter', function () {
         renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);
     });
 }
@@ -195,12 +212,16 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
     var counselorId  = $counselorEl.val() || $counselorEl.data('lockedValue') || '';
     if (!counselorId && $counselorEl.prop('disabled')) counselorId = String(USER_ID);
     if (counselorId) params.counselorId = counselorId;
+    var countryVal  = $('#aiEmailDraftCountryFilter').val()   || '';
+    var campaignVal = $('#aiEmailDraftCampaignFilter').val()  || '';
+    if (countryVal)  params.countryId = countryVal;
+    if (campaignVal) params.campaign = campaignVal;
     if (singleLeadId)   params.leadId = singleLeadId;
     if (forcedLanguage) params.forcedLanguage = forcedLanguage;
 
-    $('#aiEmailDraftTableBody').html('<tr><td colspan="15" class="text-center py-5"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i><div class="mt-2 text-muted" style="font-size:13px;">AI is analysing lead timelines and generating drafts… this may take a moment.</div></td></tr>');
+    $('#aiEmailDraftTableBody').html('<tr><td colspan="13" class="text-center py-5"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i><div class="mt-2 text-muted" style="font-size:13px;">AI is analysing lead timelines and generating drafts… this may take a moment.</div></td></tr>');
     $('#aiEmailDraftGenerateBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Generating…');
-
+    console.log('[AI DRAFT] Fetching drafts with params:', params);
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -227,6 +248,9 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
             }
             renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);
             updateAiEmailDraftCards(AI_EMAIL_DRAFT_STATE.allData);
+            if (!singleLeadId && rows.length > 0 && rows[0].counselorCounts) {
+                renderCounselorCountBoxes(rows[0].counselorCounts);
+            }
             if (singleLeadId) {
                 var fresh = AI_EMAIL_DRAFT_STATE.drafts[singleLeadId];
                 if (fresh) openAiEmailDraftModal(fresh);
@@ -245,13 +269,16 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
 // ── Render table ───────────────────────────────────────────────────────────────
 
 function renderAiEmailDraftTable(rows) {
-    var priorityFilter = $('#aiEmailDraftPriorityFilter').val() || '';
-    var statusFilter   = $('#aiEmailDraftStatusFilter').val()   || '';
+    var priorityFilter  = $('#aiEmailDraftPriorityFilter').val()  || '';
+    var statusFilter    = $('#aiEmailDraftStatusFilter').val()    || '';
+    var countryFilter   = $('#aiEmailDraftCountryFilter').val()   || '';
+    var campaignFilter  = $('#aiEmailDraftCampaignFilter').val()  || '';
 
     var filtered = (rows || []).filter(function (r) {
         var d = AI_EMAIL_DRAFT_STATE.drafts[r.leadId] || r;
-        if (priorityFilter && d.aiPriority !== priorityFilter) return false;
-        if (statusFilter   && d.draftStatus !== statusFilter)  return false;
+        if (priorityFilter && d.aiPriority !== priorityFilter)          return false;
+        if (statusFilter   && d.draftStatus !== statusFilter)           return false;
+        if (campaignFilter && (d.utmCampaign || '') !== campaignFilter) return false;
         return true;
     });
 
@@ -273,7 +300,7 @@ function renderAiEmailDraftTable(rows) {
     }
 
     if (filtered.length === 0) {
-        $('#aiEmailDraftTableBody').html('<tr><td colspan="15" class="text-center text-muted py-4">No drafts found.</td></tr>');
+        $('#aiEmailDraftTableBody').html('<tr><td colspan="13" class="text-center text-muted py-4">No drafts found.</td></tr>');
         return;
     }
 
@@ -283,16 +310,12 @@ function renderAiEmailDraftTable(rows) {
         var priorityBadge = getPriorityBadge(d.aiPriority);
         var riskBadge     = getRiskBadge(d.riskLevel);
         var statusBadge   = getDraftStatusBadge(d.draftStatus);
-        var confidenceBadge = d.confidence === 'HIGH'
-            ? '<span class="badge badge-success">High</span>'
-            : '<span class="badge badge-warning">Low</span>';
         var subjectPreview = (d.emailSubject || '').substring(0, 45) + ((d.emailSubject || '').length > 45 ? '…' : '');
 
         html += '<tr>'
             + '<td>' + (idx + 1) + '</td>'
-            + '<td>' + esc(d.leadNo || d.leadId) + '</td>'
-            + '<td>' + esc(d.grade) + '</td>'
-            + '<td>' + esc(d.country) + '</td>'
+            + '<td>' + esc(d.leadNo || d.leadId) + (d.grade ? '<br><small class="text-muted">' + esc(d.grade) + '</small>' : '') + '</td>'
+            + '<td>' + esc(d.country) + (d.utmCampaign ? '<br><small class="text-muted">' + esc(d.utmCampaign) + '</small>' : '') + '</td>'
             + '<td>' + esc(d.counselorName) + '</td>'
             + '<td>' + esc(d.leadStatus) + '</td>'
             + '<td class="text-center">' + esc(d.demodatetime || '—') + '</td>'
@@ -300,10 +323,9 @@ function renderAiEmailDraftTable(rows) {
             + '<td class="text-center"><strong>' + (d.priorityScore || 0) + '</strong></td>'
             + '<td class="text-center">' + riskBadge + '</td>'
             + '<td class="text-center">' + esc(formatAedDate(d.followUpDueDate) || '—') + '</td>'
-            + '<td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + esc(d.emailSubject) + '">' + esc(subjectPreview) + '</td>'
-            + '<td class="text-center">' + confidenceBadge + '</td>'
+            + '<td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + esc(d.emailSubject) + '">' + esc(d.emailSubject || '—') + '</td>'
             + '<td class="text-center">' + statusBadge + '</td>'
-            + '<td class="text-center"><button class="btn btn-sm btn-primary aed-open-modal-btn" data-leadid="' + esc(d.leadId) + '"><i class="fa fa-envelope-open mr-1"></i>Open</button></td>'
+            + '<td class="text-center"><button class="btn btn-primary btn-sm aed-open-modal-btn" style="height:28px;line-height:28px;padding:0 12px;font-size:12px;white-space:nowrap;" data-leadid="' + esc(d.leadId) + '"><i class="fa fa-envelope-open mr-1"></i>Open</button></td>'
             + '</tr>';
     });
 
@@ -318,8 +340,40 @@ function renderAiEmailDraftTable(rows) {
 
 // ── Cards ─────────────────────────────────────────────────────────────────────
 
+function renderCounselorCountBoxes(counselorCountsJson) {
+    var $container = $('#aedCounselorBoxes');
+    if (!$container.length) return;
+    try {
+        var list = typeof counselorCountsJson === 'string' ? JSON.parse(counselorCountsJson) : counselorCountsJson;
+        if (!list || !list.length) {
+            $container.html('<div class="text-muted" style="font-size:12px;">No counselor data available.</div>');
+            return;
+        }
+        var filtered = list.filter(function (c) { return c.totalLeads > 0; });
+        if (!filtered.length) {
+            $container.html('<div class="text-muted" style="font-size:12px;">No counselor data available.</div>');
+            return;
+        }
+        var html = '';
+        filtered.forEach(function (c) {
+            html += '<div style="background:#f4f6fb;border:1px solid #dce3f3;border-radius:8px;padding:8px 14px;min-width:140px;text-align:center;">'
+                  +   '<div style="font-size:11px;font-weight:600;color:#3d5af1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;" title="' + esc(c.counselorName) + '">' + esc(c.counselorName) + '</div>'
+                  +   '<div style="margin-top:4px;font-size:11px;color:#555;">'
+                  +     '<span style="color:#333;font-weight:600;">' + (c.totalLeads || 0) + '</span> Leads'
+                  +     ' &nbsp;|&nbsp; '
+                  +     '<span style="color:#28a745;font-weight:600;">' + (c.completedDemo || 0) + '</span> Demo'
+                  +   '</div>'
+                  + '</div>';
+        });
+        $container.html(html);
+    } catch(e) {
+        $container.html('<div class="text-muted" style="font-size:12px;">Could not load counselor data.</div>');
+    }
+}
+
 function updateAiEmailDraftCards(rows) {
     var total = 0, high = 0, medium = 0, reviewed = 0;
+    var totalLeadsCount = 0;
     (rows || []).forEach(function (r) {
         var d = AI_EMAIL_DRAFT_STATE.drafts[r.leadId] || r;
         total++;
@@ -327,7 +381,17 @@ function updateAiEmailDraftCards(rows) {
         if (d.aiPriority === 'MEDIUM') medium++;
         if (d.draftStatus === 'reviewed') reviewed++;
     });
-    $('#aedCardTotal').text(total);
+    // Read counts from first row (set by backend)
+    if (rows && rows.length > 0) {
+        totalLeadsCount   = rows[0].totalLeadsCount   || 0;
+    }
+    if (totalLeadsCount > 0) {
+        $('#aedCardTotal').html(totalLeadsCount + ' <span style="color:#aaa;font-weight:400;">|</span> ' + total);
+        $('#aedCardTotalLabel').text('Total Leads | Complete Demo');
+    } else {
+        $('#aedCardTotal').text(0 | 0);
+        $('#aedCardTotalLabel').text('Total Leads | Complete Demo');
+    }
     $('#aedCardHigh').text(high);
     $('#aedCardMedium').text(medium);
     $('#aedCardReviewed').text(reviewed);
@@ -437,7 +501,7 @@ function restoreModalTabs() {
     }
     if ($('#aedTabCall').find('textarea').length === 0) {
         $('#aedTabCall').html(
-            '<div class="mb-2"><label style="font-size:11px;font-weight:600;color:#555;margin-bottom:3px;">CALL PITCH (Counselor Guide)</label>'
+            '<div class="mb-2"><label style="font-size:11px;font-weight:600;color:#555;margin-bottom:3px;">CALL PITCH (Academic Counselor Guide)</label>'
             + '<textarea class="form-control" id="aedModalCallPitch" rows="14" style="font-size:13px;line-height:1.6;resize:vertical;"></textarea></div>'
         );
     }
@@ -451,6 +515,10 @@ function fetchFullDraft(leadId, forcedLanguage) {
     var counselorId  = $counselorEl.val() || $counselorEl.data('lockedValue') || '';
     if (!counselorId && $counselorEl.prop('disabled')) counselorId = String(USER_ID);
     if (counselorId) params.counselorId = counselorId;
+    var ctry2 = $('#aiEmailDraftCountryFilter').val()  || '';
+    var camp2 = $('#aiEmailDraftCampaignFilter').val() || '';
+    if (ctry2)  params.countryId = ctry2;
+    if (camp2) params.campaign = camp2;
 
     $.ajax({
         type: 'POST', contentType: APPLICATION_JSON_VALUE,
@@ -564,18 +632,6 @@ function copyAiEmailDraft() {
     }
 }
 
-function markAiEmailDraftReviewed() {
-    var leadId = $('#aiEmailDraftModal').data('leadid');
-    if (!leadId) return;
-    var d = AI_EMAIL_DRAFT_STATE.drafts[leadId]
-         || AI_EMAIL_DRAFT_STATE.allData.find(function (x) { return x.leadId == leadId; })
-         || {};
-    if (d) d.draftStatus = 'reviewed';
-    saveAiEmailDraftEdits('reviewed', function () {
-        $('#aiEmailDraftModal').modal('hide');
-    });
-}
-
 function regenerateAiEmailDraft(counselorFeedback) {
     var leadId = $('#aiEmailDraftModal').data('leadid');
     if (!leadId) return;
@@ -603,6 +659,10 @@ function regenerateAiEmailDraft(counselorFeedback) {
     if (counselorId2)   params.counselorId = counselorId2;
     if (forcedLanguage) params.forcedLanguage = forcedLanguage;
     if (hasFeedback)    params.counselorFeedback = counselorFeedback.trim();
+    var ctry3 = $('#aiEmailDraftCountryFilter').val()  || '';
+    var camp3 = $('#aiEmailDraftCampaignFilter').val() || '';
+    if (ctry3)  params.countryId = ctry3;
+    if (camp3)  params.campaign = camp3;
 
     $.ajax({
         type: 'POST',

@@ -38,7 +38,7 @@ function getLeadDemoReportDateRange(rangeType) {
 
 function initLeadDemoReportFilters() {
     var today = new Date();
-    $('#leadDemoReportCounselorId').html('<option value="">All Counselor</option>');
+    $('#leadDemoReportCounselorId').html('<option value="">All Academic Counselor</option>');
     callLeadAssignUserList('leadDemoReportFilterForm', 'B2C', 'leadDemoReportCounselorId', true, true, USER_ID);
 
     $('#leadDemoReportCounselorId').select2({ theme: 'bootstrap4' });
@@ -271,7 +271,7 @@ function exportLeadDemoReport(type) {
 }
 
 function downloadLeadDemoReportCsv(rows) {
-    var header = ['Counselor', 'Total Demo', 'Demo Done', 'Demo Not Done', 'No Status Update', 'Status Updated', 'Host Not Join', 'Attendee Not Join', 'Attendee Before Click', 'Host Wait Avg', 'Response Avg', 'User Wise Demo Done', 'Cancelled', 'Not Show', 'Demo Not Confirm', 'Reschedule'];
+    var header = ['Academic Counselor', 'Total Demo', 'Demo Done', 'Demo Not Done', 'No Status Update', 'Status Updated', 'Host Not Join', 'Attendee Not Join', 'Attendee Before Click', 'Host Wait Avg', 'Response Avg', 'User Wise Demo Done', 'Cancelled', 'Not Show', 'Demo Not Confirm', 'Reschedule'];
     var csv = [header.join(',')];
     $.each(rows, function(_, item) {
         csv.push([
@@ -305,7 +305,7 @@ function downloadLeadDemoReportCsv(rows) {
 
 function downloadLeadDemoReportExcel(rows) {
     var html = '<table border="1"><tr>'
-        + '<th>Counselor</th><th>Total Demo</th><th>Demo Done</th><th>Demo Not Done</th><th>No Status Update</th>'
+        + '<th>Academic Counselor</th><th>Total Demo</th><th>Demo Done</th><th>Demo Not Done</th><th>No Status Update</th>'
         + '<th>Status Updated</th><th>Host Not Join</th><th>Attendee Not Join</th><th>Attendee Before Click</th>'
         + '<th>Host Wait Avg</th><th>Response Avg</th><th>User Wise Demo Done</th><th>Cancelled</th>'
         + '<th>Not Show</th><th>Demo Not Confirm</th><th>Reschedule</th></tr>';

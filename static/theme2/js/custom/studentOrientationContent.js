@@ -258,7 +258,7 @@ function getStudentOrientationDataList(){
 							<th class="font-weight-normal border-bottom-0 vertical-align-middle rounded-top-left-10">All&nbsp;<input type="checkbox" id="selectAllOrientation" class="position-relative" style="top:2px" /></th>
 							<th class="font-weight-normal border-bottom-0 vertical-align-middle text-center">Sr No.</th>
 							<th class="font-weight-normal border-bottom-0 vertical-align-middle">Student Name<br/>Learning Program<br/>Grade<br/>Student Id</th>
-							<th class="font-weight-normal border-bottom-0 vertical-align-middle">Counselor Meeting Date<br/>Time<br/>Asia/Kolkata</th>
+							<th class="font-weight-normal border-bottom-0 vertical-align-middle">Academic Counselor Meeting Date<br/>Time<br/>Asia/Kolkata</th>
 							<th class="font-weight-normal border-bottom-0 vertical-align-middle">Student System Training Date<br/>Time</th>
 							<th class="font-weight-normal border-bottom-0 vertical-align-middle">Assign Name</th>
 							<th class="font-weight-normal border-bottom-0 vertical-align-middle">Status/ Meeting Link Status/ Update</th>

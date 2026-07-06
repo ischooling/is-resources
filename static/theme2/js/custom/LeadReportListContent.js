@@ -369,7 +369,17 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 				showMessageTheme2(1, 'Please choose end date','',true);
 					return false;
 			}
-			callEnrollmentListDaywise($("#searchDaywiseReportType").val(), $("#searchDaywise").val(), startDate, endDate);
+			var effectiveModeSearch = $("#searchDaywise").val();
+			if (effectiveModeSearch === 'CUSTOM' && startDate && endDate) {
+				var sParts = startDate.split('-');
+				var eParts = endDate.split('-');
+				var sDate = new Date(sParts[2], parseInt(sParts[1]) - 1, sParts[0]);
+				var eDate = new Date(eParts[2], parseInt(eParts[1]) - 1, eParts[0]);
+				if (sDate.getMonth() !== eDate.getMonth() || sDate.getFullYear() !== eDate.getFullYear()) {
+					effectiveModeSearch = 'CUSTOM_MONTH';
+				}
+			}
+			callEnrollmentListDaywise($("#searchDaywiseReportType").val(), effectiveModeSearch, startDate, endDate);
 		});
 	}
 
@@ -670,7 +680,7 @@ function getLeadCounselorReportData(objRight){
 		html+=`<div class="row custom-field-scope align-items-center">
 			<div class="col-md-12 col-lg-2 custom-field mb-0">
 				<select class="form-control" id="searchLeadCounselorReportType" name="searchLeadCounselorReportType">
-					<option value="Counselor" ${defaultReportType == 'COUNSELOR' || objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
+					<option value="Counselor" ${defaultReportType == 'COUNSELOR' || objRight.searchtype == 'Counselor'?'selected':''}>ACADEMIC COUNSELOR</option>
 					<option value="Country" ${defaultReportType == 'COUNTRY' || objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
 					<option value="Campaign" ${defaultReportType == 'CAMPAIGN' || objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
 				</select>
@@ -727,7 +737,7 @@ function getLeadCounselorReportData(objRight){
 				<thead id="listCounselorTheader">
 					<tr>
 						<th style="5% !important" class="text-center bg-primary text-white">Sr no.</th>
-						<th class="text-center bg-primary text-white" style="width:110px;"><span class="changeHeadText">Counselor</span> Name</th>
+						<th class="text-center bg-primary text-white" style="width:110px;"><span class="changeHeadText">Academic Counselor</span> Name</th>
 						<th class="bg-primary text-white" style="width:80px;"><span class="text-left" style="width:80px;">Total</span>   <span class="float-right"> U | D</span> </th>
 						<th class="bg-primary text-white" style="width:75px;"><span class="text-left">Total</span>   <span class="float-right">FB | IG</span></th>
 						<th class="text-center bg-primary text-white" style="width:50px;">Un-attended</th>
@@ -1232,7 +1242,7 @@ function getLeadCampaignPriceList(objRights, options){
 					<span class="float-left">Amount Spent</span>
 					<span class="float-right">ACTIVE + IN-ACTIVE = Total Lead | FB API</span>
 					</th>
-                    ${hideCounselorSection ? '' : '<th class="text-center bg-primary text-white" style="max-width:590px !important;width:590px">Counselor Name<br/>Lead | Active | In-active</th>'}
+                    ${hideCounselorSection ? '' : '<th class="text-center bg-primary text-white" style="max-width:590px !important;width:590px">Academic Counselor Name<br/>Lead | Active | In-active</th>'}
                 </tr>
             </thead>
             <tbody id="leadCampaignListTbody">
@@ -1333,7 +1343,7 @@ function getCounselorReviewList(objRights){
 			<thead>
 					<tr class="text-center bg-primary text-white">
 						<th>Sr no.</th>
-						<th>Counselor Name</th>
+						<th>Academic Counselor Name</th>
 						<th>Response time</th>
 						<th>Lead to Demo</th>
 						<th>Demo to Enroll</th>

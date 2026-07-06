@@ -44,7 +44,7 @@ function getLeadDemoReportContent(title) {
                     + '<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12 mb-2">'
                         + '<div class="custom-field mb-0">'
                             + '<select class="form-control" id="leadDemoReportCounselorId"></select>'
-                            + '<label class="text-primary m-0" for="leadDemoReportCounselorId">Counselor</label>'
+                            + '<label class="text-primary m-0" for="leadDemoReportCounselorId">Academic Counselor</label>'
                         + '</div>'
                     + '</div>'
 
@@ -147,7 +147,7 @@ function getLeadDemoReportContent(title) {
                         + '<thead>'
                             + '<tr class="bg-primary text-white">'
                                 + '<th>S.No.</th>'
-                                + '<th>Counselor</th>'
+                                + '<th>Academic Counselor</th>'
                                 + '<th>Total Demo</th>'
                                 + '<th>Demo Done</th>'
                                 + '<th>Demo Not Done</th>'

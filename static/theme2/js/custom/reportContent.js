@@ -159,7 +159,7 @@ function getLeadCounselorReportData(objRight){
 	html+=`<div class="row custom-field-scope" style="align-items: center;">
 			<div class="col-md-12 col-lg-2 custom-field">
 				<select class="form-control mr-1" id="searchLeadCounselorReportType" name="searchLeadCounselorReportType">
-					<option value="Counselor" ${objRight.searchtype == 'Counselor'?'selected':''}>COUNSELOR</option>
+					<option value="Counselor" ${objRight.searchtype == 'Counselor'?'selected':''}>ACADEMIC COUNSELOR</option>
 					<option value="Country" ${objRight.searchtype == 'Country'?'selected':''}>COUNTRY</option>
 					<option value="Campaign" ${objRight.searchtype == 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
 				</select>
