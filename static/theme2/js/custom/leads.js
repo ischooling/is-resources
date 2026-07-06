@@ -1568,13 +1568,13 @@ leadModifyDTO['totalFollowupPendingCount'] = $("#"+formId+" #leadFollwoupDays").
  leadCommonDTO['leadCountDetailDTO']=leadCountDetailDTO;
 
  leadAddFormRequestDTO['leadCommonDTO'] = leadCommonDTO;
- leadAddFormRequestDTO['currentPage'] = currentPage;
+ leadAddFormRequestDTO['currentPage'] = parseInt(currentPage, 10) || 0;
  var recordsPerPage = 10;
  var leadPage = $("#leadsPagging").val()!=undefined?$("#leadsPagging").val():'10';
  if(leadPage!='' && leadPage!=undefined){
 	recordsPerPage=leadPage;
  }
- leadAddFormRequestDTO['recordsPerPage']=recordsPerPage;
+ leadAddFormRequestDTO['recordsPerPage'] = parseInt(recordsPerPage, 10) || 10;
  return leadAddFormRequestDTO;
 }
 
@@ -11104,13 +11104,19 @@ async function fetchLeadDataListChunked(payload) {
 	var firstChunkResponse = null;
 
 	function buildChunkPayload(i) {
-		var chunkOffset = pageStartOffset + (i * LEAD_LIST_SAFE_CHUNK_SIZE);
-		var chunkCurrentPage = Math.floor(chunkOffset / LEAD_LIST_SAFE_CHUNK_SIZE) + 1;
 		var chunkPayload = JSON.parse(JSON.stringify(payload));
-		chunkPayload.currentPage = chunkCurrentPage;
-		chunkPayload.recordsPerPage = LEAD_LIST_SAFE_CHUNK_SIZE;
-		// When metadata is already loaded, tell the backend to skip recomputing it per chunk.
 		chunkPayload.metaLoaded = metaOk;
+		if (numChunks === 1) {
+			// No chunking — pass original page and size unchanged so backend offset = (currentPage-1)*recordsPerPage.
+			// Chunk math breaks when recordsPerPage < LEAD_LIST_SAFE_CHUNK_SIZE (e.g. 10 records/page).
+			chunkPayload.currentPage = originalCurrentPage > 0 ? originalCurrentPage : 1;
+			chunkPayload.recordsPerPage = originalRecordsPerPage;
+		} else {
+			var chunkOffset = pageStartOffset + (i * LEAD_LIST_SAFE_CHUNK_SIZE);
+			var chunkCurrentPage = Math.floor(chunkOffset / LEAD_LIST_SAFE_CHUNK_SIZE) + 1;
+			chunkPayload.currentPage = chunkCurrentPage;
+			chunkPayload.recordsPerPage = LEAD_LIST_SAFE_CHUNK_SIZE;
+		}
 		return chunkPayload;
 	}
 

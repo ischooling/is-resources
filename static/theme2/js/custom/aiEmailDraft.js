@@ -314,7 +314,7 @@ function renderAiEmailDraftTable(rows) {
 
         html += '<tr>'
             + '<td>' + (idx + 1) + '</td>'
-            + '<td>' + esc(d.leadNo || d.leadId) + (d.grade ? '<br><small class="text-muted">' + esc(d.grade) + '</small>' : '') + '</td>'
+            + '<td><a href="javascript:void(0)" onclick="getAsPost(\'/dashboard/lead-data-list?moduleId=111&leadId=' + esc(d.leadNo || d.leadId) + '&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=' + ENCRYPTED_USER_ID + '&leadType=B2C\');">' + esc(d.leadNo || d.leadId) + '</a>' + (d.grade ? '<br><small class="text-muted">' + esc(d.grade) + '</small>' : '') + '</td>'
             + '<td>' + esc(d.country) + (d.utmCampaign ? '<br><small class="text-muted">' + esc(d.utmCampaign) + '</small>' : '') + '</td>'
             + '<td>' + esc(d.counselorName) + '</td>'
             + '<td>' + esc(d.leadStatus) + '</td>'
@@ -559,7 +559,7 @@ function fetchFullDraft(leadId, forcedLanguage) {
     });
 }
 
-function saveAiEmailDraftEdits(draftStatus, onSuccess) {
+function saveAiEmailDraftEdits(draftStatus, onSuccess, suppressToast) {
     var leadId = $('#aiEmailDraftModal').data('leadid');
     if (!leadId) return;
     // Guard: if jQuery event object was accidentally passed, ignore it
@@ -595,10 +595,12 @@ function saveAiEmailDraftEdits(draftStatus, onSuccess) {
         url: getURLForHTML('/api/v1/leads', 'save-ai-email-draft'),
         data: JSON.stringify(params), dataType: 'json',
         success: function (data) {
-            if (data && data.status === '1') {
-                showMessageTheme2(1, data.message || 'Saved.', '', true);
-            } else {
-                showMessageTheme2(0, (data && data.message) || 'Error saving draft.', '', true);
+            if (!suppressToast) {
+                if (data && data.status === '1') {
+                    showMessageTheme2(1, data.message || 'Saved.', '', true);
+                } else {
+                    showMessageTheme2(0, (data && data.message) || 'Error saving draft.', '', true);
+                }
             }
             renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);
             updateAiEmailDraftCards(AI_EMAIL_DRAFT_STATE.allData);
@@ -911,7 +913,7 @@ function sendAiDraftEmail() {
                     var d = AI_EMAIL_DRAFT_STATE.drafts[leadId]
                          || AI_EMAIL_DRAFT_STATE.allData.find(function(x){ return x.leadId == leadId; });
                     if (d) { d.draftStatus = 'email_sent'; }
-                    saveAiEmailDraftEdits('email_sent');
+                    saveAiEmailDraftEdits('email_sent', null, true);
                     renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);
                     updateAiEmailDraftCards(AI_EMAIL_DRAFT_STATE.allData);
                 }
