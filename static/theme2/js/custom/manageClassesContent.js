@@ -1,9 +1,9 @@
 function getClassroomHeader(role){
 	var html=''
 	if(role!='TEACHER'){
-		html='<th>S.No.</th><th>'+(USER_ROLE=='DIRECTOR'?"ID/":"")+'Student ID/Student Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'/Application No/Teacher Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Admin Timezone</th><th width="175px">Join Class/Class ID/Passcode</th><th>Update Class Status</th><th>Added By</th><th>Added By</th>';
+		html='<th>S.No.</th><th>'+(USER_ROLE=='DIRECTOR'?"ID/":"")+'Student ID/Student Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'/Application No/Teacher Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Admin Timezone</th><th width="175px">Join Class/Class ID/Passcode</th><th>Update Class Status</th><th>Added By</th><th>Class Type</th>';
 	}else{
-		html='<th>S.No.</th><th>Student Name</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Update Class Status</th><th>Added By</th><th>Added By</th>';
+		html='<th>S.No.</th><th>Student Name</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Update Class Status</th><th>Added By</th><th>Class Type</th>';
 	}
 	return '<thead class="bg-primary text-white"><tr>'+html+'</tr></thead><tbody></tbody>';
 }
@@ -120,14 +120,14 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 		if(v.meetingResult!=''){
 			meetingResultContent='<strong>'+(v.meetingResult=="Reschedule Session"?'Reschedule Class':v.meetingResult)+'</strong><br/>';
 			if(v.meetingResult != "Cancelled"){
-				updateClassroomSessionContent='<a id="updateStatus'+v.meetingId+'" href="javascript:void(0);" onclick="meetingResultModal('+v.meetingId+','+userId+',\''+v.meetingResult+'\',\''+v.meetingCurStatus+'\',\''+role+'\',\''+showClassCancelOption+'\')">Change</a>';
+				updateClassroomSessionContent='<a id="updateStatus'+v.meetingId+'" href="javascript:void(0);" onclick="meetingResultModal('+v.meetingId+','+userId+',\''+v.meetingResult+'\',\''+v.meetingCurStatus+'\',\''+role+'\',\''+showClassCancelOption+'\',\''+v.meetingType+'\')">Change</a>';
 				if(resetMeetingRights=='Y'){
 					resetClassroomSessionContent='<a id="resetClass'+v.meetingId+'" href="javascript:void(0);" onclick="submitMeetingForStudentSessionSlots(\''+v.meetingId+'\',\'SCHOOL\',\'RESET\',\''+roleAndModule.moduleId+'\', \'STUDENT_DOUBT_SESSION\',\''+role+'\');">Reset Class</a>';
 				}
 			}
 			
 		}else{
-			updateClassroomSessionContent='<a id="updateStatus'+v.meetingId+'" href="javascript:void(0);" onclick="meetingResultModal('+v.meetingId+','+userId+',\''+v.meetingResult+'\',\''+v.meetingCurStatus+'\',\''+role+'\',\''+showClassCancelOption+'\')">Update Class Status</a>';
+			updateClassroomSessionContent='<a id="updateStatus'+v.meetingId+'" href="javascript:void(0);" onclick="meetingResultModal('+v.meetingId+','+userId+',\''+v.meetingResult+'\',\''+v.meetingCurStatus+'\',\''+role+'\',\''+showClassCancelOption+'\',\''+v.meetingType+'\')">Update Class Status</a>';
 		}
 		markSession='';
 		if(meetingResultContent=='' || 'TEACHER'!=role){

@@ -37,6 +37,8 @@ a, a:hover, a:focus{text-decoration: none;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon.lg{margin-top: 0;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon img{width: 100%; max-width: 50px;  display: inline-block;}
 .payment-option-wrapper .payment-option .flex-item .payment-icon.lg img{max-width:70px;margin-top: 0;border:0;}
+.payment-option-wrapper .payment-option .flex-item .payment-icon.lg img.payment_AFS{max-width:50px;}
+.payment-option-wrapper .payment-option .flex-item .payment-icon.lg img.payment_Airwallex{max-width:140px;margin-top: 0;border:0;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn {display: inline-block;width:auto;/*border:2px solid var(--pc);border-radius:6px;*/ padding: 3px;}
 .payment-option-wrapper .payment-option .flex-item .pay-now-btn .btn{display: inline-block;padding:10px 30px;border-radius: 4px; color:#fff;background: var(--pc);cursor: pointer; margin:0;}
 
@@ -152,3 +154,126 @@ a, a:hover, a:focus{text-decoration: none;}
 
 } 
 
+
+/* ============================================================
+   Payment Gateway Options Modal — redesigned (#paymentOptionsModal)
+   Self-contained, theme-aware (uses --pc / --sc), mobile responsive
+   ============================================================ */
+.pg-modal-v2{overflow-x:hidden;overflow-y:auto;}
+.pg-modal-v2 *{box-sizing:border-box;}
+.pg-modal-v2 .pg-dialog{max-width:1180px;width:96%;margin:1.75rem auto;}
+.pg-modal-v2 .pg-content{position:relative;border:0;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(15,23,42,.25);background:#fff;}
+
+/* top gradient bar */
+.pg-modal-v2 .pg-topbar{height:56px;background:linear-gradient(90deg, var(--pc) 0%, var(--sc, #3311bb) 100%);}
+.pg-modal-v2 .pg-close{position:absolute;top:12px;right:16px;z-index:5;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:0;border-radius:10px;background:#fff;color:var(--pc);box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer;transition:transform .15s ease, background .15s ease;}
+.pg-modal-v2 .pg-close:hover{transform:scale(1.06);background:#f3f4f6;}
+
+/* layout: sidebar + main */
+.pg-modal-v2 .pg-layout{display:flex;flex-wrap:nowrap;align-items:stretch;}
+.pg-modal-v2 .pg-sidebar{flex:0 0 300px;max-width:300px;padding:22px 20px;border-right:1px solid #eef1f6;display:flex;flex-direction:column;}
+.pg-modal-v2 .pg-main{flex:1 1 auto;min-width:0;padding:0px 30px;}
+
+/* sidebar tabs */
+.pg-modal-v2 .pg-tablist{list-style:none;margin:0;padding:0;width:100%;display:flex;flex-direction:column;gap:12px;}
+.pg-modal-v2 .pg-tab-item{width:100%;}
+.pg-modal-v2 .pg-tab{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1px solid #e8ebf2;border-radius:12px;background:#fff;color:#1f2542;cursor:pointer;transition:all .18s ease;}
+.pg-modal-v2 .pg-tab:hover{border-color:var(--pc);box-shadow:0 4px 14px rgba(15,23,42,.08);}
+.pg-modal-v2 .pg-tab .pg-tab-num{font-size:15px;font-weight:800;color:var(--pc);min-width:22px;transition:color .18s ease;}
+.pg-modal-v2 .pg-tab .pg-tab-ico{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:9px;background:#f4f6fb;overflow:hidden;flex:0 0 auto;}
+.pg-modal-v2 .pg-tab .pg-tab-ico img{max-width:26px;max-height:26px;object-fit:contain;}
+.pg-modal-v2 .pg-tab .pg-tab-text{font-size:14px;font-weight:700;line-height:1.25;}
+.pg-modal-v2 .pg-tab.active{background:var(--pc);border-color:transparent;color:#fff;box-shadow:var(pgc);}
+.pg-modal-v2 .pg-tab.active .pg-tab-num{color:#fff;}
+.pg-modal-v2 .pg-tab.active .pg-tab-ico{background:rgba(255,255,255,.9);}
+.pg-modal-v2 .pg-tab.active::after{content:"";position:absolute;right:-9px;top:50%;transform:translateY(-50%);border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:9px solid var(--pc);}
+
+/* trust card */
+.pg-modal-v2 .pg-trust{margin-top:26px;padding:16px 16px;border:1px solid #eef1f6;border-radius:12px;background:#fbfcfe;}
+.pg-modal-v2 .pg-trust-head{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#111827;margin-bottom:10px;}
+.pg-modal-v2 .pg-trust-head svg{color:var(--pc);}
+.pg-modal-v2 .pg-trust-list{list-style:none;margin:0;padding:0;}
+.pg-modal-v2 .pg-trust-list li{display:flex;align-items:center;gap:8px;font-size:13px;color:#4b5563;padding:4px 0;}
+.pg-modal-v2 .pg-tick{flex:0 0 auto;}
+
+/* main heading */
+.pg-modal-v2 .pg-title{font-size:26px;line-height:1.2;font-weight:800;color:#141b34;margin:0 0 6px;letter-spacing: 0;}
+.pg-modal-v2 .pg-subtitle{font-size:14px;color:#7a8194;margin:0 0 20px;}
+
+/* gateway banner */
+.pg-modal-v2 .pg-gateway-banner{display:flex;align-items:center;background:#f5f7fb;border:1px solid #eef1f6;border-radius:12px;padding:18px 24px;margin-bottom:22px;}
+.pg-modal-v2 .pg-gateway-banner img{max-height:30px;max-width:220px;object-fit:contain;}
+.pg-modal-v2 .pg-gateway-banner img.payment_AFS{max-height:50px;}
+.pg-modal-v2 .pg-gateway-banner img.payment_Airwallex{max-height:20px;}
+
+/* method cards grid */
+.pg-modal-v2 .pg-methods{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:14px;margin:0 0 8px;}
+.pg-modal-v2 .pg-methods a{display:block;text-decoration:none;color:inherit;}
+.pg-modal-v2 .payment-method-icon{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:104px;height:100%;padding:16px 10px;text-align:center;background:#fff;border:1px solid #e8ebf2;border-radius:12px;box-shadow:none;cursor:pointer;transition:all .18s ease;}
+.pg-modal-v2 .payment-method-icon:hover{border-color:var(--pc);box-shadow:0 8px 20px rgba(15,23,42,.1);transform:translateY(-2px);}
+.pg-modal-v2 .payment-method-icon img{max-height:34px;max-width:56px;object-fit:contain;border-radius:0;}
+.pg-modal-v2 .payment-method-icon p{margin:0;font-size:13px;font-weight:700;color:#1f2542;line-height:1.3;}
+
+/* convera / offline note */
+.pg-modal-v2 .pg-convera,.pg-modal-v2 .pg-offline-note{font-size:13px;color:#4b5563;margin-bottom:18px;}
+.pg-modal-v2 .pg-convera h3{font-size:16px;color:#141b34;}
+.pg-modal-v2 .pg-convera h4{font-size:14px;color:var(--pc);}
+
+/* actions / pay now */
+.pg-modal-v2 .pg-actions{display:flex;justify-content:flex-end;margin-top:26px;}
+.pg-modal-v2 .pg-paynow{display:inline-flex;align-items:center;gap:10px;padding:12px 26px;border-radius:12px;background:var(--pc);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(37,56,235,.3);transition:transform .15s ease, box-shadow .15s ease;}
+.pg-modal-v2 .pg-paynow:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(37,56,235,.4);}
+.pg-modal-v2 .pg-paynow .pg-paynow-text{color:#fff;}
+/* The footer + its Pay Now button are mobile-only (see mobile media query). */
+.pg-modal-v2 .pg-footer{display:none;}
+
+/* keep offline payment form fields readable in new layout */
+.pg-modal-v2 .payment-form ul{list-style:none;margin:0;padding:0;}
+.pg-modal-v2 .choose_payment_title_on_mobile{display: none;}
+
+/* ---------- responsive ---------- */
+@media (max-width:991px){
+	.pg-modal-v2 .pg-sidebar{flex-basis:250px;max-width:250px;}
+	.pg-modal-v2 .pg-main{padding:0 22px;}
+	.pg-modal-v2 .pg-title{font-size:22px;}
+}
+@media (max-width:767px){
+	.choose_payment_title_on_desktop{display:none}
+	.pg-modal-v2 .choose_payment_title_on_mobile{display:block}
+	.pg-modal-v2 .pg-dialog{width:98%;margin:1rem auto;}
+	.pg-modal-v2 .pg-layout{flex-direction:column;}
+	.pg-modal-v2 .pg-sidebar{flex-basis:auto;max-width:none;width:100%;border-right:0;border-bottom:1px solid #eef1f6;}
+	.pg-modal-v2 .pg-tablist{flex-direction:row;gap:10px;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+	.pg-modal-v2 .pg-tab-item{flex:0 0 auto;}
+	.pg-modal-v2 .pg-tab{min-width:210px;justify-content: center;}
+	.pg-modal-v2 .pg-tab.active::after{display:none;}
+	.pg-modal-v2 .pg-trust{margin-top:16px;display: none;}
+	.pg-modal-v2 .pg-methods{grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));}
+	.pg-modal-v2 .pg-main{padding:0px 16px;}
+	/* Mobile: fixed header + footer, only the body scrolls. Achieved by making
+	   the modal content a bounded-height flex column where the body is the only
+	   flex-growing, overflow-scrolling region. */
+	.pg-modal-v2{overflow:hidden;}
+	.pg-modal-v2 .pg-dialog{margin:1rem auto 0;}
+	.pg-modal-v2 .pg-content{display:flex;flex-direction:column;overflow:hidden;margin-top:0 !important;border-top-left-radius:20px;border-top-right-radius:20px;max-height:calc(100vh - 1.5rem);max-height:calc(100dvh - 1.5rem);}
+	.pg-modal-v2 .modal-header{flex:0 0 auto;border-top-left-radius:20px;border-top-right-radius:20px;}
+	.pg-modal-v2 .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+	/* Hide the in-panel (desktop) Pay Now; the footer holds the mobile Pay Now. */
+	.pg-modal-v2 .pg-actions{display:none;}
+	.pg-modal-v2 .modal-footer.pg-footer{flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:12px 14px;margin:0;background:#fff;border-top:1px solid #eef1f6;box-shadow:0 -4px 16px rgba(15,23,42,.08);}
+	.pg-modal-v2 .modal-footer.pg-footer > *{margin:0;}
+	.pg-modal-v2 .pg-pay-mobile{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 16px;border:0;border-radius:12px;background:linear-gradient(90deg, var(--pc) 0%, var(--sc, #3311bb) 100%);color:#fff;font-size:16px;font-weight:700;box-shadow:0 10px 24px rgba(37,56,235,.3);cursor:pointer;}
+	.pg-modal-v2 .pg-pay-mobile .pg-paynow-text{color:#fff;}
+	.pg-modal-v2 .pg-gateway-banner{justify-content:center}
+}
+@media (max-width:480px){
+	.pg-modal-v2 .pg-main{padding:0px 16px;}
+	.pg-modal-v2 .pg-title{font-size:19px;}
+	.pg-modal-v2 .pg-gateway-banner{padding:14px 16px;}
+	.pg-modal-v2 .pg-methods{grid-template-columns:repeat(2, 1fr);gap:10px;}
+	.pg-modal-v2 .pg-actions{justify-content:stretch;}
+	.pg-modal-v2 .pg-paynow{width:100%;justify-content:center;}
+	.pg-modal-v2 .payment-form ul li label,
+	.pg-modal-v2 .payment-form ul li input:not([type="file"]),
+	.pg-modal-v2 .payment-form ul li textarea{width:100% !important;}
+}

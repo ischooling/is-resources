@@ -117,6 +117,7 @@ function prepareClassJoinRequest(type,userId,entityId,entityType,timezone,hostId
     lensExternalUserRequest['hostId'] = hostId;
     lensExternalUserRequest['timezone'] = timezone;
     lensExternalUserRequest['subject'] = subject;
+    lensExternalUserRequest['meetingType'] = subject;
     return lensExternalUserRequest;
 }
 

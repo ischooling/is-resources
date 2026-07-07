@@ -577,6 +577,7 @@ function meetingStatusUpdateModalBodyContent(data){
                 <td>
                     <span class="full">Start: ${v.meetingStartDateTime}</span>
 					<span class="full">End: ${v.meetingEndDateTime}</span>
+					<span class="full">Type: ${v.meetingType == 'PTM' ? 'Parent Teacher Meeting' : 'One Day Class'}</span>
                 </td>
 				<td style="vertical-align: top;">
 					<span class="full">Name: ${v.attendeName}</span>
@@ -585,9 +586,13 @@ function meetingStatusUpdateModalBodyContent(data){
 				<td>
                     <select class="form-control status" name="meetingResult${i}" id="meetingResult${i}" required="">
                         <option value="" selected="">Select Status</option>
+                        ${v.meetingType == 'PTM' ? `
+                        <option value="Completed">Completed</option>
+                        ` : `
                         <option value="Reschedule Session">Reschedule Class</option>
                         <option value="Missed by Student">Missed by Student</option>
                         <option value="Completed">Completed</option>
+                        `}
                     </select>
                 </td>
             </tr>`;

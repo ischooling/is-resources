@@ -1,6 +1,5 @@
 var CHECK_PAYMENT_INTERVAL;
 var CHECK_PAYMENT_INTERVAL_COUNT=0;
-
 function getSchoolAdminChatButton() {
 	return `<a target="_blank" href="${CHAT_URL}/onboarding-support?uuid=${UNIQUEUUID}" class="btn btn-success btn-lg btn-block btn-shadow rounded-10 mb-3 scale-animate" style="width:92%;margin:0 auto 1rem auto;font-size:15px;">
 								<i class="fa fa-comments mr-2"></i>Live Chat with School Administration
@@ -281,15 +280,40 @@ function commonPayment(payBtnID){
 	$("#"+payBtnID).trigger("click");
 }
 
+// Resolve the payer's ISO country code from ip-api (or a page-captured
+// #location value / bypass default). Returns '' if it cannot be determined.
+async function getPayerCountryCodePromise() {
+	try {
+		if (typeof LOCATION_SERVICE_BYPASS != 'undefined' && LOCATION_SERVICE_BYPASS == 'true') {
+			return (JSON.parse(DEFAULT_LOCATION).countryCode) || '';
+		}
+		if ($("#location").length > 0 && $("#location").val()) {
+			try { return JSON.parse($("#location").val()).countryCode || ''; } catch (e) {}
+		}
+		var data = await new Promise(function (resolve, reject) {
+			$.ajax({ global: false, type: "GET", url: PRO_IP_API_URL,
+				success: function (d) { resolve(d); },
+				error: function (e) { reject(e); } });
+		});
+		return (data && data.countryCode) ? data.countryCode : '';
+	} catch (e) {
+		return '';
+	}
+}
+
 async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId) {
 	hideMessage('');
+	// Detect the payer's country (ip-api) so the server can gate region-specific
+	// gateways such as AFS (offered only in the Gulf region).
+	var countryCode = await getPayerCountryCodePromise();
 	var payload ={
 		'userPaymentDetailsId' : userPaymentDetailsId,
 		'entityType' : entityType,
 		'entityId' : entityId,
 		'paidByUserId' : paidByUserId,
 		'schoolIdOfPaymentGateway' : schoolIdOfPaymentGateway,
-		'schoolId' : schoolId
+		'schoolId' : schoolId,
+		'countryCode' : countryCode
 	}
 	$("#enrollReserveModal").modal("hide");
 	$("#reserveSeatModal").modal("hide");
@@ -316,6 +340,8 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 			$('#paymentOptionsModal').remove();
 		}
 		$("body").append(await getPaymentGatewayOptionsModal(responseData.details));
+		bindPaymentOptionMobileScroll();
+		syncMobilePayButton();
 		await callLocationForPaymentPromise();
 		if($("#bookAnEnrollmentModel").hasClass("show")){
 			$("#bookAnEnrollmentModel").modal("hide");
@@ -335,94 +361,122 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 	}
 }
 
+// On mobile the payment-option tabs sit at the top of the modal, so when a
+// tab is selected we scroll the modal down to the "Choose Your Payment Method"
+// area to reveal that gateway's pay icons. No-op on tablet/desktop.
+function bindPaymentOptionMobileScroll(){
+	$(document).off('shown.bs.tab.pgMobileScroll').on('shown.bs.tab.pgMobileScroll', '#paymentOptionsModal .pg-tab', function(){
+		// Keep the fixed mobile footer's Pay Now in sync with the active tab.
+		syncMobilePayButton();
+		if (!window.matchMedia || !window.matchMedia('(max-width: 767px)').matches) {
+			return;
+		}
+		var modalEl = document.getElementById('paymentOptionsModal');
+		// On mobile the scroll happens inside .modal-body (fixed header/footer).
+		var scroller = modalEl ? modalEl.querySelector('.modal-body') : null;
+		var target = modalEl ? modalEl.querySelector('.pg-main') : null;
+		if (!scroller || !target) {
+			return;
+		}
+		var delta = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+		$(scroller).stop(true).animate({ scrollTop: scroller.scrollTop + delta - 8 }, 400);
+	});
+}
+
+// The desktop "Pay Now" lives inside each payment-option panel (.pg-actions).
+// On mobile that is hidden and a single Pay Now button lives in the fixed
+// modal footer instead; clicking it triggers the active option's pay button
+// (reusing the same invoke logic). Offline options (CASH/WIRETRANSFER) have no
+// pay button — they use their own in-form Submit — so the footer is hidden then.
+function payActivePaymentOption(){
+	var modalEl = document.getElementById('paymentOptionsModal');
+	if (!modalEl) { return; }
+	var active = modalEl.querySelector('.pg-panel.active');
+	var payBtn = active ? active.querySelector('[id^="payButton"]') : null;
+	if (payBtn) { $(payBtn).trigger('click'); }
+}
+
+function syncMobilePayButton(){
+	var modalEl = document.getElementById('paymentOptionsModal');
+	if (!modalEl) { return; }
+	var footer = modalEl.querySelector('.pg-footer');
+	if (!footer) { return; }
+	var active = modalEl.querySelector('.pg-panel.active');
+	var hasPayBtn = active && active.querySelector('[id^="payButton"]');
+	// '' -> let CSS decide (visible only on mobile); 'none' -> hidden everywhere.
+	footer.style.display = hasPayBtn ? '' : 'none';
+}
+
 async function getPaymentGatewayOptionsModal(details){
-	var schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	var currencyIsoCode = (schoolSettingsTechnical && schoolSettingsTechnical.currencyIsoCode) ? schoolSettingsTechnical.currencyIsoCode : 'USD';
+	var subHeading = SCHOOL_ID == 1
+		? 'Powered by trusted global payment gateways for a secure and seamless experience.'
+		: (details.schoolNameOfPaymentGateway + ' is trusted by the safest and most reputed payment gateway and bank');
+	// Reusable green tick used in the trust column
+	var pgTick = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>`;
+
 	var html=
-	`<div id="paymentOptionsModal" class=" modal theme-modal fade payment-opiton-modal" role="dialog" data-backdrop="static" data-keyboard="false" style="overflow: auto;">
-		<div class="modal-dialog modal-xl">
-			<div class="modal-content">
-				<div class="modal-header py-2 primary-bg white-txt-color">
-					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+	`<div id="paymentOptionsModal" class="modal fade pg-modal-v2" role="dialog" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog pg-dialog" role="document">
+			<div class="modal-content pg-content">
+				
+				<div class="modal-header primary-bg white-txt-color">
+					<button type="button" class="close close-with-red-color ml-auto" aria-label="Close" data-dismiss="modal" style="margin-right: 5px;">
+						<span style="color: #fff;">&times;</span>
 					</button>
-					<h4 class="modal-title" style="font-size: 14px">&nbsp;</h4>
 				</div>
-				<div class="modal-body" style="margin-top: 0 !important; position: relative; padding: 15px !important;">
-					<section class="payment-option-wrapper">
-						<div class="full">
-							<h4 class="section-heading primary-bg-before primary-bg-after">Choose Your Payment Method</h4>
-							<span style="width:100%;display:inline-block; font-size:13px"> ${ SCHOOL_ID == 1 ? 'Powered by Trusted Global Payment Gateways.' : details.schoolNameOfPaymentGateway + ' is trusted by the safest and most reputed payment gateway and bank' } </span>
-						</div>
-						<div class="tab-wrapper">
-							<div class="payment-tabs">
-								<ul class="nav nav-tabs" role="tablist">`;
-									$.each(details.paymentOptions, function(k,v){
-										html+=
-										`<li role="presentation" class="nav-item">
-											<a href="#payment_option_${k+1}" aria-controls="paymentOption${k+1}" role="tab" data-toggle="tab" class="payment-tab-mobile-view payment-option-itme secondary-border-color ${k==0?'active':''}">Choose ${k+1}: Pay via ${toTitleCase(v.name)}</a>
-										</li>`;
-									});
-									html+=
-								`</ul>
+				<div class="modal-body"> 
+					<div class="pg-layout">
+						<aside class="pg-sidebar">
+							<div class="choose_payment_title_on_mobile">
+								<h3 class="pg-title text-left">Choose Your Payment Method</h3>
+								<p class="pg-subtitle">${subHeading}</p>
 							</div>
-							<div class="payment-option tab-content">`;
+							<ul class="nav pg-tablist" role="tablist">`;
+								$.each(details.paymentOptions, function(k,v){
+									var stepNo = (k+1) < 10 ? ('0' + (k+1)) : (k+1);
+									html+=
+									`<li role="presentation" class="pg-tab-item">
+										<a href="#payment_option_${k+1}" aria-controls="payment_option_${k+1}" role="tab" data-toggle="tab" class="pg-tab ${k==0?'active':''}">
+											<span class="pg-tab-ico">
+												<img src="${v.icon === 'Airwallex.png' ? `${PATH_FOLDER_IMAGE2}airwallex_icon.png` : PATH_FOLDER_IMAGE2 + v.icon}" alt=""/>
+											</span>
+											<span class="pg-tab-text">${v.label}</span>
+										</a>
+									</li>`;
+								});
+							html+=
+							`</ul>
+							<div class="pg-trust">
+								<div class="pg-trust-head">
+									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+									Secure &amp; Trusted
+								</div>
+								<ul class="pg-trust-list">
+									<li>${pgTick} SSL Encrypted</li>
+									<li>${pgTick} PCI-DSS Certified</li>
+									<li>${pgTick} Global Payment Gateways</li>
+								</ul>
+							</div>
+						</aside>
+						<section class="pg-main">
+							<div class="choose_payment_title_on_desktop">
+								<h3 class="pg-title text-left">Choose Your Payment Method</h3>
+								<p class="pg-subtitle">${subHeading}</p>
+							</div>
+							<div class="tab-content pg-panels">`;
 								$.each(details.paymentOptions, function(k,v){
 									html+=
-									`<div role="tabpanel" id="payment_option_${k+1}" class="tab-pane ${k==0?'active':''} credit-card-payment flex-item secondary-border-color h-100">
-										<div id="primary-pg" style="display:block;">`
-											if(v.name=='STRIPE' || v.name=='Airwallex' || v.name=='YOCO' || v.name=='WIRETRANSFER' || v.name=='CONVERA'){
+									`<div role="tabpanel" id="payment_option_${k+1}" class="tab-pane pg-panel ${k==0?'active':''}">`;
+										if(v.name=='STRIPE' || v.name=='Airwallex' || v.name=='YOCO' || v.name=='WIRETRANSFER' || v.name=='CONVERA' || v.name=='AFS'){
+											html+=`
+											<div class="pg-gateway-banner ${v.name == "AFS" ? 'py-1':''}">
+												<img class="payment_${v.name}" src="${PATH_FOLDER_IMAGE2}${v.icon}" alt="">
+											</div>`;
+											if(v.name=='STRIPE' || v.name=='YOCO' || v.name=='AFS'){
 												html+=`
-												<div class="payment-icon lg">
-													<img src="${PATH_FOLDER_IMAGE2}${v.icon}">
-												</div>`;
-												if(v.name=='STRIPE' || v.name=='YOCO'){
-													html+=
-													`<div class="payment-icon m-0">
-														<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
-															<img src="${PATH_FOLDER_IMAGE2}visa.png">
-															<p>Visa</p>
-														</div>
-														<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
-															<img src="${PATH_FOLDER_IMAGE2}master-card.png">
-															<p>Mastercard</p>
-														</div>
-													</div>`;
-												}else if(v.name=='Airwallex'){
-													html+=`<div id="paymentMethods" class="payment-icon m-0 align-items-stretch"></div>`;
-												}
-											}
-											if(v.name=='CONVERA'){
-												html+=`
-												<div class="full lg">`;
-													html+=v.addtionalDetails;
-												html+=	
-												`</div>
-												<div class="payment-icon" style="margin-bottom:0">
-													<h3 class="fw-600 text-left">Pay money from the comfort of your own home - Reliable, convenient international money transfer using your home/local currency</h3>
-													<p>&nbsp;</p>
-													<div class="row">
-														<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-															<ul class="full mt-4">
-																<li>
-																	<h4 class="fw-600 text-left full">Step 1</h4>
-																	<strong class="full">Select your preferred currency and click on Get Quote</strong>
-																</li>
-																<p style="margin:0">&nbsp;</p>
-																<li>
-																	<h4 class="fw-600 text-left full">Step 2</h4>
-																	<strong class="full">Verify your details – Student Name, Registered Email.</strong>
-																</li>
-																<li>
-																	<br/>
-																	<p>You can use a wide variety of services to complete your transactions. You can pay with your bank account or a credit/debit card* or use cash at your nearest in-person Convera agent location.</p>
-																</li>
-															</ul>
-														</div>
-														<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-														</div>
-													</div>
-												</div>
-												<div class="payment-icon m-0">
+												<div class="pg-methods">
 													<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
 														<img src="${PATH_FOLDER_IMAGE2}visa.png">
 														<p>Visa</p>
@@ -430,180 +484,210 @@ async function getPaymentGatewayOptionsModal(details){
 													<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
 														<img src="${PATH_FOLDER_IMAGE2}master-card.png">
 														<p>Mastercard</p>
-													</div>
+													</div>`;
+													if(v.name=='AFS'){
+														html+=`
+														<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+															<img src="${PATH_FOLDER_IMAGE2}american-express.png">
+															<p>Amex</p>
+														</div>`;
+													}
+													html+=`
 												</div>`;
-											}else if(v.name=='WIRETRANSFER'){
+											}else if(v.name=='Airwallex'){
+												html+=`<div id="paymentMethods" class="pg-methods"></div>`;
+											}
+										}
+										if(v.name=='CONVERA'){
+											html+=`
+											<div class="pg-convera">
+												<div class="full">${v.addtionalDetails}</div>
+												<h3 class="fw-600 text-left mt-3">Pay money from the comfort of your own home - Reliable, convenient international money transfer using your home/local currency</h3>
+												<div class="row mt-3">
+													<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+														<ul class="full">
+															<li>
+																<h4 class="fw-600 text-left full">Step 1</h4>
+																<strong class="full">Select your preferred currency and click on Get Quote</strong>
+															</li>
+															<li class="mt-3">
+																<h4 class="fw-600 text-left full">Step 2</h4>
+																<strong class="full">Verify your details – Student Name, Registered Email.</strong>
+															</li>
+															<li class="mt-3">
+																<p>You can use a wide variety of services to complete your transactions. You can pay with your bank account or a credit/debit card* or use cash at your nearest in-person Convera agent location.</p>
+															</li>
+														</ul>
+													</div>
+												</div>
+											</div>
+											<div class="pg-methods">
+												<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+													<img src="${PATH_FOLDER_IMAGE2}visa.png">
+													<p>Visa</p>
+												</div>
+												<div class="payment-method-icon" onclick="commonPayment('payButton${k+1}')" style="cursor:pointer">
+													<img src="${PATH_FOLDER_IMAGE2}master-card.png">
+													<p>Mastercard</p>
+												</div>
+											</div>`;
+										}else if(v.name=='WIRETRANSFER'){
+											html+=`
+											<div class="full pg-offline-note">`;
+												if(v.additionalDetails!=''){
+													html+=`${v.additionalDetails}`;
+												}else{
+													html+=`
+													<p>Here are the banking instructions for your payment:</p>
+													<ul>
+														<li><strong>Provide your bank details</strong></li>
+													</ul>`;
+												}
 												html+=`
-													<div class="full">`;
-														if(v.additionalDetails!=''){
-															html+=`${v.additionalDetails}`;
-														}else{
-															html+=
-															`<p>Here are the banking instructions for your payment:</p>
-															<ul>
-																<li>
-																	<strong>Provide your bank details</strong>
-																</li>
-															</ul>`;
-														}
-														html+=
-														`<p>Please clearly identify Student Name and City/State/Country in the reference information that accompanies the bank transfer, so that we can properly credit your account.</p>
-														<p>Your SMS profile will be created after the complete payment is processed in ${SCHOOL_NAME}\'s bank Account</p>
-													</div>
-													<div class="payment-form mt-0">
-														<form id="wirePaymentForm" name="wirePaymentForm">
-															<ul>
-																<li>
-																	<label>Payable Fee &nbsp;<b>${schoolSettingsTechnical.currencyIsoCode}</b></label>
-																	<input type="text" name="payAmount" disabled placeholder="Fee" id="payAmount" required="" value="${details.payAmount}">
-																</li>
-																<li>
-																	<label>Reference Number</label>
-																	<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');">
-																</li>
-																<li>
-																	<label>Proof of Payment</label>
-																	<div class="upload-btn-wrapper">
-																		<div class="file-btn">
-																			<span id="fileName9" class="fileName" style="display: none;"></span>
-																			<input type="file" name="fileupload9" id="fileupload9" value="Upload Proof of Payment"/>
-																			<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>
-																		</div>
-																		<div id="divshowDocument9" class="custom-btn mr-2 rounded pr-0" style="display: none;">
-																			<div>
-																				<a id="showDocument9" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View">
-																					<i class="fa fa-eye"></i>
-																				</a>
-																			</div>
-																		</div>
-																		<div id="divdeleteDocument9" class="custom-btn mr-2 rounded pr-0" style="display: none;">
-																			<div>
-																				<a id="deleteDocument9" href="javascript.void(0)" data-toggle="tooltip" title="Delete">
-																					<i class="fa fa-trash"></i>
-																				</a>
-																			</div>
-																		</div>
-																		<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>
+												<p>Please clearly identify Student Name and City/State/Country in the reference information that accompanies the bank transfer, so that we can properly credit your account.</p>
+												<p>Your SMS profile will be created after the complete payment is processed in ${SCHOOL_NAME}\'s bank Account</p>
+											</div>
+											<div class="payment-form mt-0">
+												<form id="wirePaymentForm" name="wirePaymentForm">
+													<ul>
+														<li>
+															<label>Payable Fee &nbsp;<b>${currencyIsoCode}</b></label>
+															<input type="text" name="payAmount" disabled placeholder="Fee" id="payAmount" required="" value="${details.payAmount}">
+														</li>
+														<li>
+															<label>Reference Number</label>
+															<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');">
+														</li>
+														<li>
+															<label>Proof of Payment</label>
+															<div class="upload-btn-wrapper">
+																<div class="file-btn">
+																	<span id="fileName9" class="fileName" style="display: none;"></span>
+																	<input type="file" name="fileupload9" id="fileupload9" value="Upload Proof of Payment"/>
+																	<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>
+																</div>
+																<div id="divshowDocument9" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																	<div>
+																		<a id="showDocument9" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View">
+																			<i class="fa fa-eye"></i>
+																		</a>
 																	</div>
-																</li>
-																<li>
-																	<label>&nbsp;</label>
-																	<div class="pay-now-btn secondary-border-color">
-																		<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="initiateOfflinePayment('wirePaymentForm','${details.upid}','signup','${details.userId}','${v.name}','${details.schoolId}', 'fileName9');">Submit</span>
+																</div>
+																<div id="divdeleteDocument9" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																	<div>
+																		<a id="deleteDocument9" href="javascript.void(0)" data-toggle="tooltip" title="Delete">
+																			<i class="fa fa-trash"></i>
+																		</a>
 																	</div>
-																</li>
-															</ul>
-														</form>
-													</div>
-												`;
-											}else if(v.name=='CASH'){
-												html+=`
-													<div class="payment-icon lg">
-														<img src="${PATH_FOLDER_IMAGE2}${v.icon}">
-													</div>
-													<div class="payment-form mt-0">
-														<form id="cashPaymentForm" name="cashPaymentForm">
-															<ul>
-																<li>
-																	<label>Payable Fee &nbsp;<b>${schoolSettingsTechnical.currencyIsoCode}</b></label>
-																	<input type="text" name="payAmount" disabled placeholder="Fee" id="payAmount" required="" value="${details.payAmount}">
-																</li>
-																<li>
-																	<label>Reference Number</label>
-																	<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');">
-																</li>
-																<li>
-																	<label>Proof of Payment</label>
-																	<div class="upload-btn-wrapper">
-																		<div class="file-btn">
-																			<span id="fileName8" class="fileName" style="display: none;"></span>
-																			<input type="file" name="fileupload8" id="fileupload8" value="Upload Proof of Payment"/>
-																			<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>
-																		</div>
-																		<div id="divshowDocument8" class="custom-btn mr-2 rounded pr-0" style="display: none;">
-																			<div>
-																				<a id="showDocument8" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View">
-																					<i class="fa fa-eye"></i>
-																				</a>
-																			</div>
-																		</div>
-																		<div id="divdeleteDocument8" class="custom-btn mr-2 rounded pr-0" style="display: none;">
-																			<div>
-																				<a id="deleteDocument8" href="javascript.void(0)" data-toggle="tooltip" title="Delete">
-																					<i class="fa fa-trash"></i>
-																				</a>
-																			</div>
-																		</div>
-																		<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>
+																</div>
+																<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>
+															</div>
+														</li>
+														<li>
+															<label>&nbsp;</label>
+															<div class="pay-now-btn secondary-border-color">
+																<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="initiateOfflinePayment('wirePaymentForm','${details.upid}','signup','${details.userId}','${v.name}','${details.schoolId}', 'fileName9');">Submit</span>
+															</div>
+														</li>
+													</ul>
+												</form>
+											</div>`;
+										}else if(v.name=='CASH'){
+											html+=`
+											<div class="pg-gateway-banner">
+												<img src="${PATH_FOLDER_IMAGE2}${v.icon}" alt="">
+											</div>
+											<div class="payment-form mt-0">
+												<form id="cashPaymentForm" name="cashPaymentForm">
+													<ul>
+														<li>
+															<label>Payable Fee &nbsp;<b>${currencyIsoCode}</b></label>
+															<input type="text" name="payAmount" disabled placeholder="Fee" id="payAmount" required="" value="${details.payAmount}">
+														</li>
+														<li>
+															<label>Reference Number</label>
+															<input type="text" id="referenceNumber" name="referenceNumber" placeholder="Reference Number" maxlength="150" required="" onKeyDown="hideModalMessage(\'\');">
+														</li>
+														<li>
+															<label>Proof of Payment</label>
+															<div class="upload-btn-wrapper">
+																<div class="file-btn">
+																	<span id="fileName8" class="fileName" style="display: none;"></span>
+																	<input type="file" name="fileupload8" id="fileupload8" value="Upload Proof of Payment"/>
+																	<span class="btn primary-bg white-txt-color">Upload Proof of Payment</span>
+																</div>
+																<div id="divshowDocument8" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																	<div>
+																		<a id="showDocument8" href="javascript:showDocument(\'\');" target="_self" data-toggle="tooltip" title="View">
+																			<i class="fa fa-eye"></i>
+																		</a>
 																	</div>
-																</li>
-																<li>
-																	<label>&nbsp;</label>
-																	<div class="pay-now-btn secondary-border-color">
-																		<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="initiateOfflinePayment('cashPaymentForm','${details.upid}','signup','${details.paidByUserId}','${v.name}','${details.schoolId}','fileName8');"">Submit</span>
+																</div>
+																<div id="divdeleteDocument8" class="custom-btn mr-2 rounded pr-0" style="display: none;">
+																	<div>
+																		<a id="deleteDocument8" href="javascript.void(0)" data-toggle="tooltip" title="Delete">
+																			<i class="fa fa-trash"></i>
+																		</a>
 																	</div>
-																</li>
-															</ul>
-														</form>
-													</div>
-												`;
-											}
-											if(v.name=='Airwallex'){
-												html+=`
-												<div class="payment-icon justify-content-sm-end justify-content-center " style="margin-bottom:0px; margin-top:30px">
-													<div id="payButton${k+1}" class="smoov lg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
-														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
-													</div>
-												</div>`;
-											}
-											else if(v.name=='YOCO'){
-												 html+= `
-												<div class="payment-icon justify-content-sm-end justify-content-center " style="margin-bottom:0px; margin-top:30px" style="display:none;">
-													<div id="payButton${k+1}" class="smoov lg white-txt-color">
-														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
-													</div>
-												</div>`;
-											}
-											else if(v.name=='STRIPE' || v.name=='CONVERA'){
-												html+=
-												`<div class="payment-icon justify-content-sm-end justify-content-center" style="margin-bottom:0px; margin-top:30px">
-													<div id="payButton${k+1}" class="smoov lg white-txt-color" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
-														<span class="paypal-button-text" optional="" style="font-size: 14px; color:#fff; vertical-align: bottom;">Pay Now</span>
-													</div>
-												</div>`;
-											}
-											html+=
-										`</div>
+																</div>
+																<p>Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 5 MB</p>
+															</div>
+														</li>
+														<li>
+															<label>&nbsp;</label>
+															<div class="pay-now-btn secondary-border-color">
+																<span class="btn ref-no-btn primary-bg white-txt-color" data-toggle="modal" onclick="initiateOfflinePayment('cashPaymentForm','${details.upid}','signup','${details.paidByUserId}','${v.name}','${details.schoolId}','fileName8');">Submit</span>
+															</div>
+														</li>
+													</ul>
+												</form>
+											</div>`;
+										}
+										if(v.name=='Airwallex'){
+											html+=`
+											<div class="pg-actions">
+												<div id="payButton${k+1}" class="pg-paynow" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
+													<span class="pg-paynow-text">Pay Now</span>
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+												</div>
+											</div>`;
+										}
+										else if(v.name=='YOCO'){
+											html+=`
+											<div class="pg-actions" style="display:none;">
+												<div id="payButton${k+1}" class="pg-paynow">
+													<span class="pg-paynow-text">Pay Now</span>
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+												</div>
+											</div>`;
+										}
+										else if(v.name=='STRIPE' || v.name=='CONVERA' || v.name=='AFS'){
+											html+=`
+											<div class="pg-actions">
+												<div id="payButton${k+1}" class="pg-paynow" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
+													<span class="pg-paynow-text">Pay Now</span>
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+												</div>
+											</div>`;
+										}
+									html+=`
 									</div>`;
 								});
-								html+=
-							`</div>
-						</div>
-					</section>
-				</div>
-				<div class="modal-footer">
-					<div style="display:flex;flex-wrap:wrap;margin-right:auto; justify-content: center;">
-						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
-							<i class="fa fa-lock" style="position:relative;top:3px"></i>
-							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">SSL Secured &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
-							
-						</span>
-						<span style="display:inline-flex;align-items:self-start; margin-right:8px;position:relative;top:0px;font-weight:bold">
-							<svg xmlns="http://www.w3.org/2000/svg" style="position:relative;top:3px" width="17px" height="17px" viewBox="0 0 64 64" stroke-width="6" stroke="#000" fill="none"><path d="M32.39,7.32,14,15a1,1,0,0,0-.61.92V32.23h0A22.87,22.87,0,0,0,24.58,51.9l8.17,4.86,8.06-4.84A22.89,22.89,0,0,0,51.9,32.31V15a1,1,0,0,0-.65-.94L33.12,7.3A1,1,0,0,0,32.39,7.32Z"/><path d="M32.83,17.92l3.64,7.37a.16.16,0,0,0,.1.08l8.14,1.18a.13.13,0,0,1,.07.23L38.9,32.51a.12.12,0,0,0,0,.12l1.39,8.1a.14.14,0,0,1-.2.15l-7.27-3.83a.15.15,0,0,0-.13,0l-7.27,3.83a.14.14,0,0,1-.2-.15l1.39-8.1a.15.15,0,0,0,0-.12l-5.88-5.73a.13.13,0,0,1,.07-.23l8.13-1.18a.15.15,0,0,0,.11-.08l3.63-7.37A.13.13,0,0,1,32.83,17.92Z" stroke-linecap="round"/></svg>
-							<span style="display: inline-flex; text-align:left;">PCI-DSS Certified &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
-							
-						</span>
-						<span style="display:inline-flex;align-items:self-start; margin-right:8px;font-weight:bold">
-							<i class="fa fa-globe" style="position:relative;top:3px"></i>
-							<span style="display: inline-flex;padding: 0px 5px; text-align:left;">Global Gateways &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg></span>
-							
-						</span>
+							html+=`
+							</div>
+						</section>
 					</div>
+				</div>
+				<div class="modal-footer pg-footer">
+					<button type="button" class="pg-pay-mobile" onclick="payActivePaymentOption()">
+						<span class="pg-paynow-text">Pay Now</span>
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+					</button>
 				</div>
 			</div>
 		</div>
 	</div>`;
-	return html;	
+	return html;
 }
 
 async function getTNCContent(responseData){

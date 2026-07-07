@@ -138,12 +138,6 @@ function getAiEmailDraftContent(title) {
                     + '<div id="aedCardMedium" style="color:#e65100;font-size:26px;font-weight:700;">0</div>'
                 + '</div>'
             + '</div>'
-            + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
-                + '<div class="card text-center py-3 px-2" style="border-radius:8px;border:none;background:#eaf6ee;">'
-                    + '<div style="color:#2e7d32;font-size:11px;font-weight:500;">Reviewed</div>'
-                    + '<div id="aedCardReviewed" style="color:#2e7d32;font-size:26px;font-weight:700;">0</div>'
-                + '</div>'
-            + '</div>'
         + '</div>'
 
         // ── Table Card ────────────────────────────────────────────────────

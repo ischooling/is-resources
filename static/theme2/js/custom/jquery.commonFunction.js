@@ -5412,6 +5412,14 @@ function changeDateFormat(date, dateFormat) {
       ", " +
       date.getFullYear()
     );
+  } else if ("MMM DD, YYYY" == dateFormat) {
+    return (
+      M.months[date.getMonth()].substring(0, 3) +
+      " " +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())  +
+      ", " +
+      date.getFullYear()
+    );
   } 
   else {
     return (

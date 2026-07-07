@@ -68,7 +68,7 @@ function buildClassFeedbackPurposeLabel(info) {
     var dateLabel = '';
     try {
         var eventStart = info.start && info.start._i ? info.start._i : info.start;
-        dateLabel = changeDateFormat(new Date(eventStart), 'yyyy-mm-dd');
+        dateLabel = changeDateFormat(new Date(eventStart), 'MMM DD, YYYY');
     } catch (e) { dateLabel = ''; }
     return dateLabel ? (className + ' - ' + dateLabel) : className;
 }
