@@ -180,10 +180,15 @@
 			email: USER_IS_CHAT.email || '',
 			name: USER_IS_CHAT.name || '',
 			role: USER_IS_CHAT.role || '',
+			templateAccess: USER_IS_CHAT.templateAccess === true,
 			available: true
 		};
 		var token = btoa(unescape(encodeURIComponent(JSON.stringify(userData))));
-		return IS_CHAT_URL + '/sso?token=' + token + '&widget=true';
+		var url = IS_CHAT_URL + '/sso?token=' + token + '&widget=true';
+		if (USER_IS_CHAT.templateAccess === true) {
+			url += '&defaultTab=templates';
+		}
+		return url;
 	}
 
 	function markISChatWidgetReady($chatFrame) {

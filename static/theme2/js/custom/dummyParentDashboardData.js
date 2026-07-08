@@ -770,7 +770,8 @@
     }
 
     function getDummyReceiptUrl(studentUserId, paymentId, paidDate) {
-        var basePath = typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2.replace(/images\/?$/, "") : "static/theme2/";
+        // var basePath = typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2.replace(/images\/?$/, "") : "static/theme2/";
+        var basePath = APP_BASE_URL+'static/theme2/';
         return basePath + "dummy-parent-fee-receipt.html?studentId=" + encodeURIComponent(studentUserId) + "&paymentId=" + encodeURIComponent(paymentId) + "&paidOn=" + encodeURIComponent(moment(paidDate, "MMM DD, YYYY").format("MMM DD, YYYY 11:00 AM"));
     }
 

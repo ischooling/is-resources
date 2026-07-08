@@ -251,7 +251,7 @@
         });
     }
     function receiptBasePath() {
-        return typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2.replace(/images\/?$/, "") : "static/theme2/";
+        return APP_BASE_URL+'static/theme2/';
     }
     function receiptUrl(paymentId, paidDate) {
         var paidOn = typeof moment === "function" ? moment(paidDate).format("MMM DD, YYYY 11:00 AM") : displayDateOnly(paidDate) + " 11:00 AM";
