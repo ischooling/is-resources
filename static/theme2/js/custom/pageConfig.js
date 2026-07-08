@@ -97,11 +97,14 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "student-weekly-progress":{url:"student-weekly-progress-report?moduleId="+moduleId,file:[{role:"",fileName:["dashboardWeeklyProgress.js"]}],type:"JSP",pageReqType:"IN"},
         "task":{url:"",file:[{role:"",fileName:["taskListContent.js","taskList.js","jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "dashboard-monitoring":{url:"",file:[{role:"",fileName:["dashboardMonitoringContent.js","dashboardMonitoring.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-dashboard-demo-data":{url:"",file:[{role:"",fileName:["parentDashboardDemoDataContent.js","parentDashboardDemoData.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "manage-club":{url:"",file:[{role:"",fileName:["manageClubsContent.js","manageClubs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "Parent-dashboard":{url:"",file:[{role:"",fileName:[""]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "Parent-dashboard":{url:"",file:[{role:"",fileName:["dummyParentDashboardData.js","parentDashboardContent.js","parentDashboard.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-class-schedule":{url:"",file:[{role:"",fileName:["parentStudentClassScheduleContent.js","parentStudentClassSchedule.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "parent-class-summary":{url:"",file:[{role:"",fileName:["parentStudentClassSummaryContent.js","parentStudentClassSummary.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-class-schedule":{url:"",file:[{role:"",fileName:["feedbackContents.js","teacherClassScheduleContent.js","teacherClassSchedule.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-attendance":{url:"",file:[{role:"",fileName:["attendaceByStudentIdContent.js","attendaceByStudentId.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "student-dashboard-management":{url:"",file:[{role:"",fileName:["dummyParentDashboardData.js","dummyStudentDashboardData.js","studentDashboardManagementContent.js","studentDashboardManagement.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // STUDENT PAGE CONFIG
         "batch-schedule":{url:"teacher-batch-time-schedule?moduleId="+moduleId+"&userId="+extraParam,file:[],funName:function(){},type:"JSP",pageReqType:"IN"},
         "student-handbook":{url:"",file:[{role:"",fileName:["studentHandbookContent.js","studentHandbook.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -148,6 +151,10 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "parent-download-academic-docs":{url:"",file:[{role:"",fileName:["parentAcademicDocsContent.js","parentAcademicDocs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-academic-performance":{url:"",file:[{role:"",fileName:["parentAcademicPerformanceContent.js","parentAcademicPerformance.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-progress":{url:"",file:[{role:"",fileName:["parentProgressContent.js","parentProgress.js","dashboardWeeklyProgress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "teacher-feedback":{url:"",file:[{role:"",fileName:["parentTeacherFeedbackContent.js","parentTeacherFeedback.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "ptm":{url:"",file:[{role:"",fileName:["parentTeacherMeetingContent.js","parentTeacherMeeting.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+
+
         
         // TEACHER //
         "teacher-home":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -289,6 +296,29 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
     // console.timeEnd();
     
 }
+
+function openParentDashboardPreviewFromQuery() {
+    try {
+        var params = new URLSearchParams(window.location.search || "");
+        if (params.get("parentDemoPreview") !== "Y") {
+            return;
+        }
+        var feedUserId = params.get("demoFeedUserId") || "";
+        if (feedUserId) {
+            localStorage.setItem("PARENT_DEMO_FEED_USER_ID", feedUserId);
+        }
+        var previewModuleId = params.get("parentDemoModuleId") || (typeof moduleId !== "undefined" ? moduleId : 0);
+        callDashboardPageSchool(previewModuleId, "Parent-dashboard");
+    } catch (e) {
+        console.warn("Unable to open parent dashboard preview", e);
+    }
+}
+
+$(function () {
+    if (typeof callDashboardPageSchool === "function") {
+        openParentDashboardPreviewFromQuery();
+    }
+});
 
 // async function openEmailTemplateTesterModule() {
     

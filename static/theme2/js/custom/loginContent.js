@@ -36,11 +36,9 @@ async function loginContent(userName, fromSpoof){
                         </p>
                         <h3 class="yellow-text graduation-event-date" style="margin-bottom:4px; font-size:18px; font-weight:600;">July 25, 2026 &bull; 2 PM UAE Time Onwards</h3>
                         <p class="graduation-description graduation-attendee-types" style="margin:4px 0 10px; font-size:16px; font-weight:600;">Graduate | Non-Graduate | Performer | Teacher | Staff</p>
-                        <p class="graduation-deadline graduation-registration-deadline" style="display:inline-block; width:max-content; max-width:none; margin-top:10px; padding:9px 18px; background:rgba(255,255,255,0.95); border-radius:8px; color:#ff4d4f; font-size:15px; font-weight:600; white-space:nowrap;"><strong style="color:#ff4d4f;">Last Date of Registration:</strong> July 06, 2026 | Till 10:00 PM SGT (Singapore Time)</p>
-                        <h3 class="yellow-text" style="margin:10px 0 14px; font-size:24px;"><strong>Few Seats Left</strong></h3>
-                        <a class="graduation-register-btn graduation-register-blink" style="font-size:17px;" href="https://www.internationalschooling.org/events" target="_blank" rel="noopener">
-                            Register Today!
-                        </a>
+                        <div class="graduation-event-heading mt-2">
+                            <span class="graduation-event-badge graduation-registration-deadline graduation-registration-closed text-uppercase" style="background:white;">Registration Closed!</span>
+                        </div>
                     </div>
                 </aside>
             ` : ``}

@@ -57,7 +57,7 @@ async function parentAssignedTeacherFetchAssignedTeacherList(studentUserId){
         onFaildResolved: true,
         onSuccessResolved: true
     };
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentAssignedTeacherList(studentUserId, ajaxReqDetails);
 }
 
 function parentAssignedTeacherMapRows(apiResponse){

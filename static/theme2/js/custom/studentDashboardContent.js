@@ -12,6 +12,7 @@ async function rendereDashboardContent(isParent){
     customLoader(true);
     $("body").append(batchImpAnnouncementModal()+newsAllListWithDetailsModalCotent());
     var data = getStudentDashboardOrMigrationSection();
+    var isDummyDashboard = typeof isDummyStudentMode === "function" && isDummyStudentMode();
     // console.log(data)
     if(data.showBatchReEnrollmentPopUp == "Y"){
         $("body").append(batchReEnrollmentModal());
@@ -74,18 +75,23 @@ async function rendereDashboardContent(isParent){
         await renderStudentDashboard(dashboardData);
         renderAnnouncement(dashboardData.userId);
         renderNews(dashboardData.userId);
-        renderSchoolDaiaryBtnCount();
-        // renderActivity(dashboardData.userId)
-        getCartCount(dashboardData.userId);
-        await getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade)
-        // setTimeout(function () {
-        //     getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
-        // }, 10000);
+        if (isDummyDashboard) {
+            renderSchoolDaiaryBtnCount();
+        }
+        if (!isDummyDashboard) {
+            renderSchoolDaiaryBtnCount();
+            // renderActivity(dashboardData.userId)
+            getCartCount(dashboardData.userId);
+            await getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade)
+            // setTimeout(function () {
+            //     getReserveASeatForNextGrade(dashboardData.userId, dashboardData.nextGrade);
+            // }, 10000);
+        }
         $("#timeStuStandardId").val(dashboardData.studentStandardId);
-        if(data.showStudentCourseSelectionModel=='Y'){
+        if(!isDummyDashboard && data.showStudentCourseSelectionModel=='Y'){
            await getStudentTimePreference(data.studentId, data.standardId, data.providerId);
         }
-        if(ORIENTSTATUS == "PENDING" || CAN_SHOW_ENROLL_RESERVE_MODAL) {
+        if(!isDummyDashboard && (ORIENTSTATUS == "PENDING" || CAN_SHOW_ENROLL_RESERVE_MODAL)) {
             renderProfileDataInModal(dashboardData);
         }
 	}else if(data.studentGraduate == 'Y'){
@@ -163,13 +169,27 @@ async function rendereDashboardContent(isParent){
     
 }
 
+function getStudentDashboardCurrentTimeText(data) {
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentCurrentTimeText === "function") {
+        return getDummyStudentCurrentTimeText();
+    }
+    return convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a');
+}
+
+function getStudentDashboardCalendarBaseDate() {
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentBaseDate === "function") {
+        return getDummyStudentBaseDate();
+    }
+    return new Date();
+}
+
 async function renderStudentDashboard(data){
     var html=dashboardContent(data);
     $('#dashboardContentInHTML').html(html);
     $(".app-main__inner").addClass("pt-0")
-    $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
+    $('#currentTimeForUser').html(getStudentDashboardCurrentTimeText(data));
     setInterval(function(){
-        $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
+        $('#currentTimeForUser').html(getStudentDashboardCurrentTimeText(data));
     }, 1000);
     var activitylength = $(".card-activity .vertical-nav-menu > .sub-menu").length;
     for(var i = 1; i<=activitylength; i++){
@@ -192,7 +212,7 @@ async function renderStudentDashboard(data){
     	$(this).parent().find(".horizontal-scroll-table").slideToggle();
     	$(this).parent().closest("li").siblings().find(".horizontal-scroll-table").slideUp();
     });
-    var startDate = new Date();
+    var startDate = getStudentDashboardCalendarBaseDate();
     var startFormatted = moment(startDate).format('YYYY-MM-DD');
     var endDate = moment(startDate).add(1, 'days');
     var endFormatted = endDate.format('YYYY-MM-DD');
@@ -209,11 +229,15 @@ async function renderStudentDashboard(data){
     calendarTimeInterval();
     setTimeout(function(){
         $('button.fc-today-button').unbind("click").bind("click", function() {
-            $('#schoolcalendar').fullCalendar('today');
+            if(typeof isDummyStudentMode === "function" && isDummyStudentMode()) {
+                $('#schoolcalendar').fullCalendar('gotoDate', moment(getStudentDashboardCalendarBaseDate()).format('YYYY-MM-DD'));
+            }else{
+                $('#schoolcalendar').fullCalendar('today');
+            }
             var viewName = $('#schoolcalendar').fullCalendar('getView').name;
             var b = $('#schoolcalendar').fullCalendar('getDate');
                 if(viewName === 'agendaDay') {
-                    var sd = new Date();
+                    var sd = getStudentDashboardCalendarBaseDate();
                     var startdate = moment(sd).format('YYYY-MM-DD');
                     var ed = moment(sd).add(1, 'days');
                     var enddate = ed.format('YYYY-MM-DD');
@@ -227,7 +251,7 @@ async function renderStudentDashboard(data){
             callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, true)
         });
     },1000);
-    if(data.schoolId==1){
+    if(!(typeof isDummyStudentMode === "function" && isDummyStudentMode()) && data.schoolId==1){
         getFeedbackQuestion(data.eventId, [0,1], 0, 0, 100, data.feedbackId, data.email, 'feedback_review', 'student-feedback');
         // if(data.registrationType!='BATCH'){
         //     callStudentTimePreference('STUDENT',data.studentStandardId);

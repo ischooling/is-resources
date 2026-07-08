@@ -84,6 +84,9 @@ async function parentLoginHistoryRenderByStudent(studentUserId, shouldStoreActiv
 }
 
 async function parentLoginHistoryFetchAttendance(studentUserId){
+    if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentParentLoginHistoryResponse === "function"){
+        return getDummyStudentParentLoginHistoryResponse(studentUserId);
+    }
     var payload = { userId: USER_ID + "", studentUserId: studentUserId + "" };
     var ajaxReqDetails = {
         method: "POST",
@@ -94,7 +97,7 @@ async function parentLoginHistoryFetchAttendance(studentUserId){
         onFaildResolved: true,
         onSuccessResolved: true
     };
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentLoginHistoryData(studentUserId, ajaxReqDetails);
 }
 
 function parentLoginHistoryBuildPageData(apiResponse){

@@ -7,6 +7,9 @@ async function renderStudentAcademicPerformancePage(){
 
 async function studentAcademicPerformanceFetch(){
     var payload = { userId: USER_ID + "", studentUserId: USER_ID + "" };
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentAcademicPerformanceResponse === "function") {
+        return getDummyStudentAcademicPerformanceResponse(payload);
+    }
     var ajaxReqDetails = {
         method: "POST",
         url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/parent/student-academic-performance",
@@ -100,6 +103,11 @@ function studentAcademicPerformanceLoadProgressDetail(studentUserId, lmsEnrollme
     customLoader(true);
     hideMessage('');
     var payload = { studentUserId: studentUserId, lmsUserId: lmsEnrollmentId, entityId: lmsCourseId };
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentAcademicProgressDetailResponse === "function") {
+        studentAcademicPerformanceBindProgressDetailData(getDummyStudentAcademicProgressDetailResponse(studentUserId, lmsEnrollmentId, lmsCourseId));
+        customLoader(false);
+        return;
+    }
     $.ajax({
         type: "POST",
         contentType: "application/json",
@@ -215,6 +223,11 @@ function studentAcademicPerformanceLoadGradeHistory(enrollId, itemId){
     customLoader(true);
     hideMessage('');
     var payload = { itemId: itemId, enrollId: enrollId };
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentAcademicGradeHistoryResponse === "function") {
+        studentAcademicPerformanceBindGradeHistoryRows(getDummyStudentAcademicGradeHistoryResponse(itemId));
+        customLoader(false);
+        return;
+    }
     $.ajax({
         type: "POST",
         contentType: "application/json",

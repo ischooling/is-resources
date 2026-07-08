@@ -103,12 +103,13 @@ function getParentFeeDetailsRowsHtml(row) {
         if (!userPayDetails.payDate) {
             html += `<td>&nbsp;&nbsp;--</td>`;
         } else {
-            html += `<td>${userPayDetails.payDate}</td>`;
+            html += `<td>${parentFeeDetailsDisplayPaidDate(userPayDetails.payDate)}</td>`;
         }
         
         // Status with color for SUCCESS
         if (userPayDetails.status === 'SUCCESS') {
-            html += `<td style="color: #58D68D; font-weight: bold">${userPayDetails.status}</td>`;
+            var isDummyParentFeeRow = typeof window.isDummyParentDashboardMode === "function" && window.isDummyParentDashboardMode();
+            html += `<td style="color: #58D68D; font-weight: bold">${isDummyParentFeeRow ? (userPayDetails.dummyStatusLabel || userPayDetails.status) : userPayDetails.status}</td>`;
         } else {
             html += `<td>${userPayDetails.status}</td>`;
         }
@@ -208,7 +209,21 @@ function getParentFeeDetailsRowsHtml(row) {
     return html;
 }
 
+function parentFeeDetailsDisplayPaidDate(payDate) {
+    if (typeof window.isDummyParentDashboardMode === "function" && window.isDummyParentDashboardMode()) {
+        if (typeof moment === "function") {
+            var parsedDate = moment(payDate, ["MMM DD, YYYY", "YYYY-MM-DD", "YYYY-MM-DD HH:mm:ss", moment.ISO_8601], true);
+            if (parsedDate.isValid()) {
+                return parsedDate.format("MMM DD, YYYY");
+            }
+        }
+        var date = new Date(payDate);
+        if (!isNaN(date.getTime())) {
+            return date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+        }
+    }
+    return payDate;
+}
+
 // Usage example:
 // generatePaymentRows(studentDueFeesDTO, schoolSettingsTechnical, roleAndModule, SCHOOL_ID);
-
-

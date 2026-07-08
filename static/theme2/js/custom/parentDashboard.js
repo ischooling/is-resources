@@ -85,22 +85,24 @@ function normalizeMonthStat(monthStat) {
 async function parentDashbaordOnLoadEvent(){
     // $("head").append(`<style>.attendance-tab.active{background:#409f5b !important;color:#fff !important}</style>`)
     var activeStudentTimezone = STUDENT_LIST?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID) ?.studentTimezone || moment.tz.guess();
-    $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, activeStudentTimezone).format('MMM DD, YYYY hh:mm:ss a'));
+    $('#currentTimeForUser').html(dummyGetParentCurrentTimeText(activeStudentTimezone));
     setInterval(function(){
-        $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, activeStudentTimezone).format('MMM DD, YYYY hh:mm:ss a'));
+        $('#currentTimeForUser').html(dummyGetParentCurrentTimeText(activeStudentTimezone));
     }, 1000);
     
-    $('.user-slider').slick({
-        slidesToShow:getSlidesToShow(),
-        slidesToScroll:1,
-        infinite:false,
-        arrows:true,
-        responsive:[
-            {breakpoint:992, settings:{slidesToShow:3}},
-            {breakpoint:768, settings:{slidesToShow:2}},
-            {breakpoint:576, settings:{slidesToShow:1}}
-        ]
-    });
+    if ($.fn.slick) {
+        $('.user-slider').slick({
+            slidesToShow:getSlidesToShow(),
+            slidesToScroll:1,
+            infinite:false,
+            arrows:true,
+            responsive:[
+                {breakpoint:992, settings:{slidesToShow:3}},
+                {breakpoint:768, settings:{slidesToShow:2}},
+                {breakpoint:576, settings:{slidesToShow:1}}
+            ]
+        });
+    }
 
     // Active state styling fix
     $('.nav-link').on('shown.bs.tab', function () {
@@ -155,8 +157,8 @@ async function getStudentDetailsByStudentID(studentUserId){
     var paymentList =  await getStudentFeeData(studentUserId);
     $("#studentPaymentListingWrapper").html(getStudentPaymentListing(paymentList.details.userPaymentDetailsList));
     
-    renderAnnouncement(STUDENT_LIST.studentBasicDetails[0].userId);
-    renderSchoolDaiaryBtnCount(studentUserId);
+    renderAnnouncement(studentUserId);
+    await dummyRenderParentSchoolDiaryBtnCount(studentUserId);
     
     if($(window).width()<=480){
         $(".school-diary-notebook").css({"height":"calc(100vh - 120px)"});
@@ -165,7 +167,9 @@ async function getStudentDetailsByStudentID(studentUserId){
 
 function initializeAttendanceChart(data) {
 
-    var currentYear = new Date().getFullYear().toString();
+    var dashboardDate = dummyGetParentDashboardCurrentDate(new Date());
+    var currentYear = dashboardDate.getFullYear().toString();
+    var currentMonthIndex = dashboardDate.getMonth();
 
     /* =========================
        Step 1: Filter Current Year
@@ -177,9 +181,9 @@ function initializeAttendanceChart(data) {
     /* =========================
        Step 2: Fixed Months
     ========================= */
-    var monthNumbers = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+    var monthNumbers = ["01","02","03","04","05","06","07","08","09","10","11","12"].slice(0, currentMonthIndex + 1);
     var monthNames = ["Jan","Feb","Mar","Apr","May","Jun",
-                      "Jul","Aug","Sep","Oct","Nov","Dec"];
+                      "Jul","Aug","Sep","Oct","Nov","Dec"].slice(0, currentMonthIndex + 1);
 
     // X-axis labels → Jan 2026, Feb 2026 ...
     var months = monthNames.map(m => m + " " + currentYear);
@@ -309,7 +313,9 @@ function getGradeFromPercentage(percentage) {
 
 function initializeGradeChartCurrentYear(gradeOverview) {
 
-    var currentYear = new Date().getFullYear().toString();
+    var dashboardDate = dummyGetParentDashboardCurrentDate(new Date());
+    var currentYear = dashboardDate.getFullYear().toString();
+    var currentMonthIndex = dashboardDate.getMonth();
 
     /* =========================
        1️⃣ Filter Current Year
@@ -322,10 +328,10 @@ function initializeGradeChartCurrentYear(gradeOverview) {
        2️⃣ Month Setup
     ========================= */
     var monthNumbers = ["01","02","03","04","05","06",
-                        "07","08","09","10","11","12"];
+                        "07","08","09","10","11","12"].slice(0, currentMonthIndex + 1);
 
     var monthNames = ["Jan","Feb","Mar","Apr","May","Jun",
-                      "Jul","Aug","Sep","Oct","Nov","Dec"];
+                      "Jul","Aug","Sep","Oct","Nov","Dec"].slice(0, currentMonthIndex + 1);
 
     // X-axis labels: Jan 2026
     var months = monthNames.map(m => m + " " + currentYear);
@@ -433,7 +439,7 @@ function initializeGradeChartCurrentYear(gradeOverview) {
 }
 
 async function getStudentPerformanceData(studentId){
-    var todayDate = new Date();
+    var todayDate = dummyGetParentDashboardCurrentDate(new Date());
     todayDate = todayDate.toISOString().split('T')[0];
     var payload = {studentUserId: studentId};
     var ajaxReqDetails = {
@@ -445,12 +451,14 @@ async function getStudentPerformanceData(studentId){
         onFaildResolved: true,
         onSuccessResolved: true
     }
-    getChat("", "PARENT");
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentStudentPerformanceData(studentId, ajaxReqDetails);
 }
 
 async function getUpcomingClassesAndActivityData(studentId){
-    var todayDate = new Date();
+    if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentScheduleResponse === "function"){
+        return getDummyStudentScheduleResponse(studentId);
+    }
+    var todayDate = dummyGetParentDashboardCurrentDate(new Date());
     todayDate = todayDate.toISOString().split('T')[0];
     var payload = {studentUserId: studentId, startDate: todayDate, endDate: todayDate};
     var ajaxReqDetails = {
@@ -462,11 +470,11 @@ async function getUpcomingClassesAndActivityData(studentId){
         onFaildResolved: true,
         onSuccessResolved: true
     }
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentUpcomingClassesAndActivityData(studentId, ajaxReqDetails);
 }
 
 async function getStudentFeeData(studentId){
-    var todayDate = new Date();
+    var todayDate = dummyGetParentDashboardCurrentDate(new Date());
     todayDate = todayDate.toISOString().split('T')[0];
     var payload = {userId:USER_ID,studentUserId: studentId};
     var ajaxReqDetails = {
@@ -478,7 +486,7 @@ async function getStudentFeeData(studentId){
         onFaildResolved: true,
         onSuccessResolved: true
     }
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentStudentFeeData(studentId, ajaxReqDetails);
 }
 
 function updateClassStatusBadges(elementId) {

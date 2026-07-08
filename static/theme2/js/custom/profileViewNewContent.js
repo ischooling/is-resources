@@ -2078,7 +2078,7 @@ function profileProgressReportConfirmModal() {
                 <div class="modal-content border-0 rm-border no-shadow rounded-20 overflow-hidden bg-white">
                     <div class="modal-header bg-primary text-white py-2">
                         <h5 class="modal-title font-weight-semi-bold m-0">Set Progress Report</h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="profileProgressReportConfirmNo()">
+                        <button type="button" class="close text-white close-with-red-color" data-dismiss="modal" aria-label="Close" onclick="profileProgressReportConfirmNo()">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>

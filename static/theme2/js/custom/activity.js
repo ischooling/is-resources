@@ -1,5 +1,14 @@
 async function renderActivity(userId) {
 	try {
+		if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyActivityDetailsResponse === "function") {
+			responseData = getDummyActivityDetailsResponse();
+			$('#activityDiv').html(await getActivityContent(responseData));
+			$("#activity-nav").metisMenu({
+				toggle: false
+			});
+			getHomePageActivityCounter();
+			return;
+		}
 		var payload = {};
 		payload['userId'] = userId;
 		var localDatetime = changeDateFormat(new Date(), 'yyyy-mm-dd') + ' ' + getCurrentTimeOnly()
@@ -154,6 +163,17 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 		return false;
 	}
 	try {
+		if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyViewActivityResponse === "function") {
+			responseData = getDummyViewActivityResponse(activityId);
+			$("#calendarActivityWrapper").html(viewActivityContentModal(responseData))
+			$("#calendarActivityModal").modal("show");
+			await studentExtraActivityOnLoadEvent(responseData);
+			$("head #activityPageStyle").remove();
+			$("head").append(activityPageStyle());
+			$(".tooltip.calendar-tooltip").remove();
+			getHomePageActivityCounter();
+			return;
+		}
 		var payload = {};
 		payload['activityId'] = activityId;
 		payload['meetingId'] = meetingId;

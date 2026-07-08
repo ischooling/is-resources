@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Schooling</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #36435a;
+            background-color: #fbfbfb;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)),
+                url("images/scheduleMeetingBg.png");
+            background-repeat: repeat;
+            background-size: 520px auto;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 42px 16px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 570px;
+            background: #fff;
+            border: 1px solid #e7eaf0;
+            border-radius: 16px;
+            box-shadow: 0 10px 32px rgba(21, 34, 66, 0.12);
+            overflow: hidden;
+        }
+
+        .card-body {
+            padding: 34px 32px 30px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 36px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #34415a;
+        }
+
+        .brand img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        .hero {
+            display: block;
+            width: 100%;
+            height: 288px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 22px;
+        }
+
+        .class-title {
+            margin: 0 0 28px;
+            text-align: center;
+            font-size: 22px;
+            line-height: 1.3;
+            color: #3b465d;
+            font-weight: 700;
+        }
+
+        .details {
+            display: grid;
+            gap: 22px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            align-items: center;
+            gap: 16px;
+            font-size: 18px;
+            line-height: 1.35;
+            font-weight: 700;
+        }
+
+        .icon-box {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #dce1ea;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6c7f;
+            background: #fbfcfe;
+        }
+
+        .icon-box svg {
+            width: 25px;
+            height: 25px;
+        }
+
+        .status {
+            margin-top: 28px;
+            height: 46px;
+            border: 1px solid #e1e5ed;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b8b8b8;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .footer {
+            border-top: 1px solid #e1e5ed;
+            padding: 30px 24px;
+            text-align: center;
+            font-size: 18px;
+            color: #59657a;
+            font-weight: 700;
+        }
+
+        .footer a {
+            color: #59657a;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 24px 18px;
+            }
+
+            .hero {
+                height: 210px;
+            }
+
+            .brand {
+                font-size: 19px;
+                margin-bottom: 24px;
+            }
+
+            .class-title {
+                font-size: 19px;
+            }
+
+            .detail-row,
+            .status,
+            .footer {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="card">
+            <div class="card-body">
+                <div class="brand">
+                    <img src="images/waiting-page-school-demo-logo.png" alt="International Schooling">
+                    <span>International Schooling</span>
+                </div>
+                <img class="hero" src="images/waiting-page-school-demo.png" alt="Class waiting room">
+                <h1 class="class-title" id="classTitle">Grade K</h1>
+                <div class="details">
+                    <div class="detail-row">
+                        <div class="icon-box" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="8" r="4"></circle>
+                                <path d="M4 20c1.6-4 14.4-4 16 0"></path>
+                            </svg>
+                        </div>
+                        <div id="teacherName">Teacher</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="icon-box" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <rect x="4" y="5" width="16" height="15" rx="2"></rect>
+                                <path d="M8 3v4M16 3v4M4 10h16"></path>
+                            </svg>
+                        </div>
+                        <div id="classDateTime">Class time</div>
+                    </div>
+                </div>
+                <div class="status" id="classStatus">Starts soon</div>
+            </div>
+            <div class="footer">If you are the host, <a href="javascript:void(0)">login</a> to start the session</div>
+        </section>
+    </main>
+    <script>
+        (function () {
+            var subject = localStorage.getItem("DUMMY_CLASS_NAME");
+            var teacher = localStorage.getItem("DUMMY_TEACHER_NAME");
+            var classDate = localStorage.getItem("DUMMY_CLASS_DATE");
+            var classTime = localStorage.getItem("DUMMY_CLASS_TIME");
+
+            document.getElementById("classTitle").textContent = subject;
+            document.getElementById("teacherName").textContent = teacher;
+            document.getElementById("classDateTime").innerHTML = classDate + "<br>" + classTime;
+            document.getElementById("classStatus").textContent = "Live class is in progress";
+        })();
+    </script>
+</body>
+</html>

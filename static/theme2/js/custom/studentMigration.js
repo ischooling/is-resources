@@ -6,6 +6,9 @@ function getRequestForStudentDashboardSelection(){
 }
 
 function getStudentDashboardOrMigrationSection() {
+	if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyGradeKDashboardOrMigrationSection === "function") {
+		return getDummyGradeKDashboardOrMigrationSection();
+	}
 	var returnData={};
 	customLoader(true);
 	$.ajax({
@@ -38,6 +41,9 @@ function getStudentDashboardOrMigrationSection() {
 }
 
 function getStudentDashboardDetails() {
+	if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyGradeKDashboardDetails === "function") {
+		return getDummyGradeKDashboardDetails();
+	}
 	var returnData={};
 	customLoader(true);
 	$.ajax({

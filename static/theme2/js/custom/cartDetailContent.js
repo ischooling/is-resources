@@ -148,7 +148,9 @@ function renderCartPaymentTerms(data){
                 <div class="modal-content">
                     <div class="modal-header pt-2 pb-2 theme-bg text-white">
                         <h5 class="modal-title">Terms and Conditions</h5>
-                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true" style="color:#fff !important;">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body" id="bookSessionTermModal">
                         <p class="scroll-down" style="margin-top:5px;"><a href="#" class="animate"></a></p>

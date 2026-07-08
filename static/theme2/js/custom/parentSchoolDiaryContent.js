@@ -213,17 +213,19 @@ function getParentSchoolDiaryTeacherCard(entry, value, timezone, courseName) {
     var createdAt = parentSchoolDiaryFormatDate(entry.createdAt, timezone);
     var safeMessage = parentSchoolDiaryHighlightMentions(entry.message || "", entry.mentions);
     var headerText = parentSchoolDiaryGetHeader(entry, false);
+    var headerCourseText = courseName ? ` | ${courseName}` : "";
+    var parentRecipientName = parentSchoolDiaryEscapeHtml(PARENT_MENTION_NAME || "Parent");
+    var senderGender = entry.senderGender || entry.teacherGender || "DONOTWANTTOSPECIFY";
     html=`
         <div class="school-diary-item school-diary-item-teacher mb-3 pr-2">`;
             html+=
             `<div class="school-diary-card teacher-card text-left mr-auto">
-                <p class="mb-1 text-primary font-weight-bold">${entry.senderGender != "DONOTWANTTOSPECIFY" ?getSalutationByGender(entry.senderGender):""} ${headerText}</p>`;
+                <p class="mb-1 text-primary font-weight-bold">${senderGender != "DONOTWANTTOSPECIFY" ? getSalutationByGender(senderGender) : ""} ${headerText}${headerCourseText}</p>`;
                 
                 if(PARENT_MENTION_ROLE.includes(entry.senderRole)){
                     html+=
-                    `<p class="mb-1 text-success">${courseName}</p>
-                    <div class="head">
-                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Parent</p>
+                    `<div class="head">
+                        <p class="font-20 font-weight-bold mb-0 caveat-font">${parentRecipientName}</p>
                         <p class="font-semi-bold text-primary mb-0 caveat-font">Greetings from ${SCHOOL_NAME}!</p>
                         <p class="font-semi-bold mb-0 caveat-font">Hope you are doing well.</p>
                     </div>`;
@@ -258,6 +260,7 @@ function getChatLabel(role){
 function getParentSchoolDiaryReplyCard(entry, value, timezone) {
     var createdAt = parentSchoolDiaryFormatDate(entry.createdAt, timezone);
     var safeMessage = parentSchoolDiaryHighlightMentions(entry.message || "", entry.mentions);
+    var parentRecipientName = parentSchoolDiaryEscapeHtml(PARENT_MENTION_NAME || "Parent");
     // var headerText = parentSchoolDiaryGetHeader(entry, true);
     var html=
         `<div class="school-diary-item school-diary-item-parent mb-3">
@@ -265,7 +268,7 @@ function getParentSchoolDiaryReplyCard(entry, value, timezone) {
                 if(PARENT_MENTION_ROLE.includes(entry.senderRole)){
                     html+=
                     `<div class="head">
-                        <p class="font-20 font-weight-bold mb-0 caveat-font">Dear Parent</p>
+                        <p class="font-20 font-weight-bold mb-0 caveat-font">${parentRecipientName}</p>
                         <p class="font-semi-bold text-primary mb-0 caveat-font">Greetings from ${SCHOOL_NAME}!</p>
                         <p class="font-semi-bold mb-0 caveat-font">Hope you are doing well.</p>
                     </div>`;
@@ -342,7 +345,7 @@ function parentSchoolDiaryHighlightMentions(message, mentions) {
     var mentionNames = [];
     if ($.isArray(mentions) && mentions.length > 0) {
         mentionNames = $.map(mentions, function (mention) {
-            return mention.userName || mention.email || "";
+            return (mention.roleType === "PARENT" && mention.userName) ? mention.userName : (mention.userName || mention.email || "");
         }).filter(function (name) { return name; });
     }
 
@@ -380,7 +383,7 @@ function parentSchoolDiaryHighlightMentionsFull(message, mentions) {
     var mentionNames = [];
     if ($.isArray(MENTION_LIST) && MENTION_LIST.length > 0) {
         mentionNames = $.map(MENTION_LIST, function (mention) {
-            return mention.userName || mention.email || "";
+            return mention.mentionName || ((mention.roleType === "PARENT" && mention.userName) ? mention.userName : (mention.userName || mention.email || ""));
         }).filter(function (name) { return name; });
     }
 
@@ -460,7 +463,7 @@ function parentSchoolDiaryResolveReceiverNames(entry) {
     var names = [];
     if (entry && $.isArray(entry.mentions) && entry.mentions.length > 0) {
         names = $.map(entry.mentions, function (mention) {
-            return mention.userName || mention.email || "";
+            return (mention.roleType === "PARENT" && mention.userName) ? mention.userName : (mention.userName || mention.email || "");
         }).filter(function (name) { return name; });
     }
     if (names.length > 0) {

@@ -1,4 +1,6 @@
 var PARENT_PROGRESS_WEEKLY_SCRIPT_LOADED = false;
+var PARENT_PROGRESS_ALL_ROWS = [];
+var PARENT_PROGRESS_FILTER_VIEW = null;
 
 async function renderParentProgressPage(){
     var students = parentProgressResolveStudentsFromGlobal();
@@ -33,6 +35,8 @@ async function parentProgressRenderByStudent(studentUserId){
     var apiResponse = await parentProgressFetchByStudent(studentUserId);
     var students = parentProgressResolveStudentsFromGlobal();
     var rows = parentProgressMapRows(apiResponse);
+    PARENT_PROGRESS_ALL_ROWS = rows;
+    PARENT_PROGRESS_FILTER_VIEW = null;
     $("#dashboardContentInHTML").html(getParentProgressContent({
         students: students,
         selectedStudentUserId: studentUserId,
@@ -44,8 +48,12 @@ async function parentProgressRenderByStudent(studentUserId){
     parentProgressInitDataTable();
 }
 
-async function parentProgressFetchByStudent(studentUserId){
+async function parentProgressFetchByStudent(studentUserId, startDate, endDate){
     var payload = { userId: USER_ID + "", studentUserId: studentUserId + "" };
+    if(startDate && endDate){
+        payload.startDate = startDate;
+        payload.endDate = endDate;
+    }
     var ajaxReqDetails = {
         method: "POST",
         url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/parent/weekly-progress-reports-detail",
@@ -55,7 +63,7 @@ async function parentProgressFetchByStudent(studentUserId){
         onFaildResolved: true,
         onSuccessResolved: true
     };
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentProgressData(studentUserId, ajaxReqDetails);
 }
 
 function parentProgressMapRows(apiResponse){
@@ -129,35 +137,7 @@ function parentProgressOpenReport(encodedUrl){
     $("#dashboardContentInHTMLAdditional").html(parentProgressAdditionalLoader());
     customLoader(true);
 
-    $.ajax({
-        type: "GET",
-        url: url,
-        dataType: "html",
-        cache: false,
-        timeout: 600000,
-        success: function(htmlContent){
-            if(htmlContent != ""){
-                var stringMessage = htmlContent.split("|");
-                if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT"){
-                    if(stringMessage[0] == "SESSIONOUT"){
-                        redirectLoginPage();
-                    }else{
-                        showMessageTheme2(0, stringMessage[1]);
-                        showAndHideDashboardAndAdditionalContent("main");
-                    }
-                    customLoader(false);
-                    return false;
-                }
-            }
-            parentProgressRenderDetailHtml(htmlContent);
-            customLoader(false);
-        },
-        error: function(){
-            showMessageTheme2(0, "Unable to load progress report detail.");
-            customLoader(false);
-            showAndHideDashboardAndAdditionalContent("main");
-        }
-    });
+    return dummyOpenParentProgressReport(url);
 }
 
 function parentProgressDetailWrapper(innerHtml){
@@ -291,6 +271,10 @@ function parentProgressSetActiveStudentThumb(studentUserId){
 }
 
 function parentProgressOnLoadEvent(){
+    if($.fn.datepicker){
+        $("#progressStartDate").datepicker({autoclose: true, format: 'M d, yyyy', container: 'body'});
+        $("#progressEndDate").datepicker({autoclose: true, format: 'M d, yyyy', container: 'body'});
+    }
     if($.fn.slick){
         if($('.user-slider').hasClass('slick-initialized')){
             $('.user-slider').slick('unslick');
@@ -340,4 +324,50 @@ function parentProgressGetSlidesToShow(){
     var itemWidth = 220;
     var slides = Math.floor(containerWidth / itemWidth);
     return slides > 0 ? slides : 1;
+}
+
+async function parentProgressViewFilter(src, filterType){
+    PARENT_PROGRESS_FILTER_VIEW = filterType;
+    $(".progress-view-button").removeClass("active");
+    $(src).addClass("active");
+    $(".progress-custom-filter-form").css("visibility","hidden");
+    await parentProgressApplyFilter();
+}
+
+function parentProgressShowCustomFilter(src){
+    PARENT_PROGRESS_FILTER_VIEW = "custom";
+    $(".progress-view-button").removeClass("active");
+    $(src).addClass("active");
+    $(".progress-custom-filter-form").css("visibility","visible");
+}
+
+async function parentProgressApplyFilter(){
+    var startDate = "", endDate = "";
+    if(PARENT_PROGRESS_FILTER_VIEW === "agendaMonth"){
+        startDate = moment().startOf('month').format('YYYY-MM-DD');
+        endDate = moment().endOf('month').format('YYYY-MM-DD');
+    }else if(PARENT_PROGRESS_FILTER_VIEW === "agendaWeek"){
+        startDate = moment().startOf('week').format('YYYY-MM-DD');
+        endDate = moment().endOf('week').format('YYYY-MM-DD');
+    }else if(PARENT_PROGRESS_FILTER_VIEW === "custom"){
+        var startVal = $("#progressStartDate").val();
+        var endVal = $("#progressEndDate").val();
+        if(!startVal || !endVal){
+            return;
+        }
+        startDate = moment(new Date(startVal)).format('YYYY-MM-DD');
+        endDate = moment(new Date(endVal)).format('YYYY-MM-DD');
+    }
+    var apiResponse = await parentProgressFetchByStudent(ACTIVE_STUDENT_ID, startDate, endDate);
+    var rows = parentProgressMapRows(apiResponse);
+    PARENT_PROGRESS_ALL_ROWS = rows;
+    parentProgressUpdateTable(rows);
+}
+
+function parentProgressUpdateTable(rows){
+    if($.fn.DataTable && $.fn.DataTable.isDataTable('#parentProgressTable')){
+        $('#parentProgressTable').DataTable().destroy();
+    }
+    $("#parentProgressTable tbody").html(getParentProgressRowsHtml(rows));
+    parentProgressInitDataTable();
 }

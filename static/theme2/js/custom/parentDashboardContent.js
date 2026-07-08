@@ -10,7 +10,7 @@ async function renderParentDashboardContent(){
         onFaildResolved: true,
         onSuccessResolved: true
     }
-    var getStudentList = await callCommonAjax(ajaxReqDetails);
+    var getStudentList = await dummyGetParentStudentList(ajaxReqDetails);
     // console.log(getStudentList);
     $('#dashboardContentInHTML').html(getParentDashboardContent(getStudentList,'getStudentDetailsByStudentID'));
     if(STUDENT_LIST.studentBasicDetails.length>0){
@@ -93,16 +93,21 @@ function getStudentTabSliderContent(data, clickFunctionName){
     var html =
     `<div class="parent-tab-slider-wrapper">
         <span id="currentTimeForUser" class="d-none"></span>
+        <h4 class="parent-dashboard-header-title text-primary font-weight-bold m-0 d-lg-none text-center py-2">
+            Parent Dashboard
+        </h4>
         <ul class="nav nav-tabs user-slider justify-content-center">`;
 
     STUDENT_LIST = data;
 
     $.each(data.studentBasicDetails, function(i, v){
+        var studentName = v.studentName || v.fullName || v.userFullName || "";
+        var studentLabel = getStudentFirstfName(studentName) || "Student";
         html +=
         `<li class="nav-item">
             <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb student-${v.userId} ${i == 0 ? 'active-student':''}"  onclick="${clickFunctionName}('${v.userId}')" style="${i == 0 ? 'padding-left:30px !important':''}"> 
                 <img src="${v.profilePic}" class="circle" style="width:25px;height:25px">
-                <span>Child ${i+1}: ${getStudentFirstfName(v.studentName)}</span>
+                <span>Child ${i+1}: ${studentLabel}${v.standardName ? ` <span class="font-12">. ${v.standardName}</span>` : ''}</span>
             </a>
         </li>`;
     });
@@ -224,6 +229,7 @@ function getStudentPerformanceDetailsCard(data){
     var welcomeMessage = getWelcomeMessage();
     var showGreetingBanner = !(typeof window !== "undefined" && window.PARENT_DASHBOARD_GREETING_SHOWN_ONCE === true);
     var salutation = getSalutationByGender(GENDER) 
+    var dashboardDate = dummyGetParentDashboardCurrentDate(new Date());
     var html=
     `<div class="card rounded-10 overflow-hidden"data>
         ${showGreetingBanner ? `
@@ -277,7 +283,7 @@ function getStudentPerformanceDetailsCard(data){
                         <div class="card-body py-2">
                             <a href="javascript:void(0)" class="d-inline-block text-center text-decoration-none w-100" onclick="callDashboardPageSchool(251,'parent-class-schedule')">
                                 <h4 class="text-review-dark font-weight-bold font-26 mb-1">${data.summary.totalClassesThisMonth}</h4>
-                                <p class="m-0 text-review-dark">No. of ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().getFullYear().toString()}</p>
+                                <p class="m-0 text-review-dark">No. of ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities ${dashboardDate.toLocaleString('en-US', { month: 'long' })} ${dashboardDate.getFullYear().toString()}</p>
                             </a>
                         </div>
                     </div>
@@ -296,7 +302,7 @@ function getStudentPerformanceDetailsCard(data){
                                                 <path d="M384 352c-17.7 0-32 14.3-32 32s14.3 32 32 32l160 0c17.7 0 32-14.3 32-32l0-160c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 82.7-169.4-169.4c-12.5-12.5-32.8-12.5-45.3 0L192 242.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0L320 205.3 466.7 352 384 352z"/>
                                             </svg>
                                         </span>
-                                        &nbsp;${data.summary.attendanceDeltaFromLastMonth}% ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().getFullYear().toString()}`;
+                                        &nbsp;${data.summary.attendanceDeltaFromLastMonth}% ${dashboardDate.toLocaleString('en-US', { month: 'long' })} ${dashboardDate.getFullYear().toString()}`;
                                     }else{
                                         html+=
                                         `<span class="bg-light-success circle mr-1 d-inline-flex justify-content-center align-items-center p-1" style="width:20px;height:20px;">    
@@ -304,7 +310,7 @@ function getStudentPerformanceDetailsCard(data){
                                                 <path d="M384 160c-17.7 0-32-14.3-32-32s14.3-32 32-32l160 0c17.7 0 32 14.3 32 32l0 160c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-82.7-169.4 169.4c-12.5 12.5-32.8 12.5-45.3 0L192 269.3 54.6 406.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160c12.5-12.5 32.8-12.5 45.3 0L320 306.7 466.7 160 384 160z"/>
                                             </svg>
                                         </span>
-                                        &nbsp;${data.summary.attendanceDeltaFromLastMonth}% ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().getFullYear().toString()}`;
+                                        &nbsp;${data.summary.attendanceDeltaFromLastMonth}% ${dashboardDate.toLocaleString('en-US', { month: 'long' })} ${dashboardDate.getFullYear().toString()}`;
                                     }
                                 html+=`</div>
                             </a>

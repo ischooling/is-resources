@@ -2,6 +2,7 @@ function getParentAcademicDocsContent(pageData){
     var backupStudentList = STUDENT_LIST;
     var sliderHtml = getStudentTabSliderContent(pageData.tabData, 'parentAcademicDocsOnStudentTabClick');
     STUDENT_LIST = backupStudentList;
+    var filteredRows = parentAcademicDocsFilterRows(pageData.rows, PARENT_ACADEMIC_DOCS_FILTER_VIEW);
     var html = `
         <div class="full">
             ${sliderHtml}
@@ -10,6 +11,12 @@ function getParentAcademicDocsContent(pageData){
                 <div class="card-body p-0">
                     <div class="d-flex flex-wrap align-items-center justify-content-between">
                         <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Academic Documents</h4>
+                    </div>
+                    <div class="px-3 pt-3 pb-2">
+                        <div class="btn-group mb-2">
+                            <button type="button" class="btn btn-light active btn-pill parent-academic-docs-filter-btn" onclick="parentAcademicDocsFilterView(this,'week')">Weekly</button>
+                            <button type="button" class="btn btn-light btn-pill parent-academic-docs-filter-btn" onclick="parentAcademicDocsFilterView(this,'month')">Monthly</button>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="table font-12 nowrap dt-responsive" id="parentAcademicDocsTable" style="width: 100%;">
@@ -25,7 +32,7 @@ function getParentAcademicDocsContent(pageData){
                                 </tr>
                             </thead>
                             <tbody id="parentAcademicDocsBody">
-                                ${getParentAcademicDocsRowsHtml(pageData.rows)}
+                                ${getParentAcademicDocsRowsHtml(filteredRows)}
                             </tbody>
                         </table>
                     </div>
@@ -59,6 +66,9 @@ function getParentAcademicDocsRowsHtml(rows){
 function getParentAcademicDocsDownloadBtn(url, showFlag){
     if(showFlag === "N" || !url){
         return `--`;
+    }
+    if(String(url).indexOf("dummy-student-transcript://") === 0){
+        return `<button type="button" class="btn btn-outline-primary btn-sm" onclick="return window.openDummyStudentTranscriptFromUrl && window.openDummyStudentTranscriptFromUrl('${url}');">Download <i class="fa fa-download ml-1"></i></button>`;
     }
     return `<a href="${url}" target="_blank" class="btn btn-outline-primary btn-sm">Download <i class="fa fa-download ml-1"></i></a>`;
 }

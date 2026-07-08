@@ -4,11 +4,13 @@ function parentStudentClassScheduleContentLoadEvent(){
         autoclose: true,
         format: 'M d, yyyy',
         container: 'body',
+        startDate: '0d'
     });
     $("#endDate").datepicker({
         autoclose: true,
         format: 'M d, yyyy',
         container: 'body',
+        startDate: '0d'
     });
     if(typeof getSlidesToShow === "function" && $('.user-slider').length){
         $('.user-slider').slick({
@@ -98,12 +100,12 @@ async function renderClassesListing(studentId){
 
 async function callSchoolCalendar(studentId){
     if(CALENDERVIEW == "agendaDay"){
-        var startDate = new Date();
-        var startFormatted = moment(startDate).format('YYYY-MM-DD');
-        var endDate = moment(startDate).add(1, 'days');
+        var startDate = dummyGetParentClassScheduleBaseMoment();
+        var startFormatted = startDate.format('YYYY-MM-DD');
+        var endDate = startDate.clone().add(1, 'days');
         var endFormatted = endDate.format('YYYY-MM-DD');
     }else if(CALENDERVIEW == "agendaWeek"){
-        var today = moment();
+        var today = dummyGetParentClassScheduleBaseMoment();
         var weekStartDate = today.clone().startOf('week');  // Sunday
         var weekEndDate = today.clone().endOf('week');      // Saturday
         var startFormatted = weekStartDate.format('YYYY-MM-DD');
@@ -127,7 +129,9 @@ async function callSchoolCalendar(studentId){
         onFaildResolved: true,
         onSuccessResolved: true
     }
-    var eventList = await callCommonAjax(ajaxReqDetails);
+    var eventList = typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentScheduleResponse === "function"
+        ? getDummyStudentScheduleResponse(studentId)
+        : await dummyGetParentStudentClassScheduleData(studentId, ajaxReqDetails);
     var _studentList = (typeof STUDENT_LIST !== "undefined") ? STUDENT_LIST : null;
     var _activeStudent = _studentList?.studentBasicDetails?.find(s => s.userId == ACTIVE_STUDENT_ID);
     var timeZoneFlag = _activeStudent?.countryISOCode || ''
@@ -153,6 +157,13 @@ async function callSchoolCalendar(studentId){
             }
         });
     };
+    // Filter out past classes — only keep events that have not ended yet
+    var _nowForFilter = moment();
+    finalEvents = finalEvents.filter(function(e) {
+        if (e.id && (e.id.toString().startsWith("announce") || e.id.toString().startsWith("holiday"))) return true;
+        return moment(e.end).isSameOrAfter(_nowForFilter);
+    });
+
     CALENDAR_EVENT_DATA = finalEvents;
     if(CALENDERVIEW == "agendaDay"){
         endFormatted = moment(endFormatted).subtract(1, 'days').format('YYYY-MM-DD');
@@ -390,7 +401,9 @@ async function showClassMeetingSummary(meetingId, eventId, eventInstanceKey){
     };
 
     try{
-        var response = await callCommonAjax(ajaxReqDetails);
+        var response = typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentClassSummaryResponse === "function"
+            ? getDummyStudentClassSummaryResponse(meetingId)
+            : await dummyGetParentStudentClassSummary(meetingId, ajaxReqDetails);
         var details = response && response.details ? response.details : {};
         details = parentStudentClassScheduleNormalizeSummaryResponse(details);
         var eventMeta = parentStudentClassScheduleGetEventMeta(meetingId, eventId, eventInstanceKey);
@@ -682,4 +695,3 @@ function parentStudentClassScheduleGetEventMeta(meetingId, eventId, eventInstanc
     meta.teacherGender = eventObj.teacherGender || ""
     return meta;
 }
-

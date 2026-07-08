@@ -117,8 +117,6 @@ function parentStudentClassScheduleContent() {
                                                     <th class="bg-primary text-white font-12">Type</th>
                                                     <th class="bg-primary text-white font-12">Status</th>
                                                     <th class="bg-primary text-white font-12">Classes Attendance</th>
-                                                    <th class="bg-primary text-white font-12">View Summary</th>
-                                                    <th class="bg-primary text-white font-12">Feedback Summary</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="font-12"></tbody>
@@ -158,7 +156,7 @@ function renderClassScheduleTable(events, startDate, endDate) {
 
         html += `
         <tr>
-            <td colspan="9" class="text-center font-weight-bold bg-light py-1 font-14">
+            <td colspan="7" class="text-center font-weight-bold bg-light py-1 font-14">
                 ${formatDateHeading(dateKey)}
             </td>
         </tr>`;
@@ -185,12 +183,6 @@ function renderClassScheduleTable(events, startDate, endDate) {
                     <td class="py-2">${typeBadge}</td>
                     <td class="py-2 status-cell">${getStatusBadge(getEventStatus(event))}</td>
                     <td class="py-2 text-primary">${event.classesAttendance == "Attended" ? event.classesAttendance + " | " + event.classesAttendanceDuration : (event.classesAttendance == "Attending" ? event.classesAttendance : "<span class='text-dark'>N/A<span>")}</td>
-                    <td class="py-2">${event.classesAttendance == "Attended" ? `<a href='javascript:void(0);' onclick='showClassMeetingSummary("${event.meetingId}","${event.id}","${eventInstanceKey}")' class='border border-primary text-primary bg-light-primary rounded-10 btn btn-sm font-11'> <i class="fa fa-eye" aria-hidden="true"></i> View</a>` : "N/A"}</td>
-                    <td class="py-2">${(event.classesAttendance == "Attended" || event.classesAttendance == "Attending")
-                        ? (event.hasFeedback
-                            ? `<a href='javascript:void(0);' onclick='openParentStudentClassFeedback("${event.id}")' class='border border-success text-success bg-light-success rounded-10 btn btn-sm font-11'><i class="fa fa-eye" aria-hidden="true"></i> View Feedback</a>`
-                            : `<a href='javascript:void(0);' onclick='openParentStudentClassFeedback("${event.id}")' class='border border-warning text-warning bg-light-warning rounded-10 btn btn-sm font-11'><i class="fa fa-pencil" aria-hidden="true"></i> Submit Feedback</a>`)
-                        : "N/A"}</td>
                 </tr>`;
             });
 

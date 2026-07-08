@@ -181,6 +181,7 @@ function getURLForAdmissionCycle(apiType, suffixUrl, session) {
 }
 function logout(suffix) {
   localStorage.clear();
+  sessionStorage.clear();
   var url =
     BASE_URL +
     CONTEXT_PATH +
@@ -4177,6 +4178,18 @@ function callSubjectsByGradeId(
   requestExtra2
 ) {
   hideMessage("");
+  if (
+    typeof isDummyStudentMode === "function" &&
+    isDummyStudentMode() &&
+    typeof getDummySubjectOptionsByGrade === "function"
+  ) {
+    buildDropdown(
+      getDummySubjectOptionsByGrade(value),
+      $("#" + formId + " #" + toElementId),
+      "Select course"
+    );
+    return;
+  }
   //	if (!validateRequestForMasterGrade(formId, elementId)) {
   //		$("#"+formId+" #"+elementId).val().trim(0);
   //		return false;
@@ -6926,6 +6939,25 @@ function detectBrave() {
 function getDashboardDataBasedUrlAndPayload(globalflag,showMessage,url,payload) {
   if(globalflag){
     customLoader(true);
+  }
+  if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && url === "book-a-class" && typeof getDummyBookAClassResponse === "function") {
+    customLoader(false);
+    return Promise.resolve(getDummyBookAClassResponse());
+  }
+  if (typeof isDummyStudentMode === "function" && isDummyStudentMode()) {
+    var dummyHandlers = {
+      "buy-extra-class": "getDummyBuyExtraClassResponse",
+      "add-to-cart": "getDummyAddToCartResponse",
+      "get-cart-count": "getDummyCartCountResponse",
+      "get-cart-details": "getDummyCartDetailsResponse",
+      "update-cart-details": "getDummyUpdateCartDetailsResponse",
+      "apply-discount-on-cart": "getDummyApplyDiscountOnCartResponse",
+      "cart-payment": "getDummyCartPaymentResponse"
+    };
+    if (dummyHandlers[url] && typeof window[dummyHandlers[url]] === "function") {
+      customLoader(false);
+      return Promise.resolve(window[dummyHandlers[url]](payload));
+    }
   }
   return new Promise(function (resolve, reject) {
     $.ajax({

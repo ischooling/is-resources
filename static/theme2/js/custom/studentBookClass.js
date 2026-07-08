@@ -24,6 +24,10 @@ function bookedCalssCotentFormReset(formID) {
 function getDetailsForStudentBookaClass(studentStandardId) {
   return new Promise(function (resolve, reject) {
     hideMessageTheme2("");
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentBookClassDetailsResponse === "function") {
+      resolve(getDummyStudentBookClassDetailsResponse(studentStandardId));
+      return;
+    }
     var data = {};
     data["studentStandardId"] = studentStandardId;
     data["schoolId"] = SCHOOL_ID;
@@ -263,18 +267,20 @@ async function bookingSlotModalNew(
   customLoader(true); // Show loader at the start
 
   try {
-    const response = await $.ajax({
-      type: "GET",
-      contentType: APPLICATION_JSON_VALUE,
-      url: getURLForHTML(
-        "dashboard",
-        "student-subject-session-booking-new?payload=" +
-          encode(JSON.stringify(data))
-      ),
-      dataType: "json",
-      cache: false,
-      timeout: 600000,
-    });
+    const response = typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyAssignedTeacherDetailsResponse === "function"
+      ? getDummyAssignedTeacherDetailsResponse(subjectId)
+      : await $.ajax({
+        type: "GET",
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLForHTML(
+          "dashboard",
+          "student-subject-session-booking-new?payload=" +
+            encode(JSON.stringify(data))
+        ),
+        dataType: "json",
+        cache: false,
+        timeout: 600000,
+      });
 
     if (
       response["status"] == "0" ||
@@ -368,6 +374,25 @@ function bookedCalssCotentFun(
       : "";
   data["dateType"] = $("#bookClassOneToOne #selectedType").val();
   // data['roleModuleId'] = roleModuleId;
+  if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentBookedClassesDetailsResponse === "function") {
+    var dummyData = getDummyStudentBookedClassesDetailsResponse(subjectId);
+    if (flag == "filter" && flag != undefined && flag != null) {
+      $("#bookedClassesWrapper").html(
+        bookedClassesThumbsContent(dummyData.subjectCountDatials) +
+          bookedClassesTableContent(dummyData.meetingDetails)
+      );
+    } else {
+      renderBookedClassContent(
+        dummyData,
+        flag,
+        teacherAssignFlag,
+        weekLeftClassCount,
+        assignedTeacherCount
+      );
+    }
+    customLoader(false);
+    return;
+  }
   $.ajax({
     type: "GET",
     contentType: APPLICATION_JSON_VALUE,
@@ -486,6 +511,19 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
     redirectLoginPage();
   }
   hideMessage("");
+  if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentBookClassSubmitResponse === "function") {
+    var data = getDummyStudentBookClassSubmitResponse();
+    showMessageTheme2(1, data["message"], "", false);
+    $("#weeklyBookClassConfirmationModal").modal("hide");
+    setTimeout(function () { renderBookClassContent(
+      `${data.studentStandardId}`,
+      `${roleModuleId}`,
+      $("#classPlanCount").attr("data-classPlanCount"),
+      false,
+      `${roleModuleId}`
+    ); }, 1000);
+    return false;
+  }
   $.ajax({
     type: "POST",
     contentType: APPLICATION_JSON_VALUE,

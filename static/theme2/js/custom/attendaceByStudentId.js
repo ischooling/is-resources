@@ -122,6 +122,9 @@ async function getStudentAttendanceDetails(studentId){
 }
 
 async function getAttendanceChartDetailsData(studentId){
+    if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentAttendanceFullResponse === "function"){
+        return getDummyStudentAttendanceFullResponse(studentId);
+    }
     // var todayDate = new Date();
     // todayDate = todayDate.toISOString().split('T')[0];
     var payload = {studentUserId: studentId};
@@ -134,7 +137,7 @@ async function getAttendanceChartDetailsData(studentId){
         onFaildResolved: true,
         onSuccessResolved: true
     }
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentAttendanceChartDetailsData(studentId, ajaxReqDetails);
 }
 
 

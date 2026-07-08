@@ -16,6 +16,9 @@ async function studentFeeDetailsFetch(){
         onFaildResolved: true,
         onSuccessResolved: true
     };
+    if (typeof window.getDummyStudentFeeDetailsResponse === "function" && typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()) {
+        return window.getDummyStudentFeeDetailsResponse(ajaxReqDetails);
+    }
     return await callCommonAjax(ajaxReqDetails);
 }
 

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>International Schooling :: Diploma</title>
+    <style>
+        * { box-sizing: border-box; margin: 0 auto; }
+        @font-face { font-family: font-1; src: url("fonts/CLOISTRK.TTF"); }
+        @font-face { font-family: font-2; src: url("fonts/FLEURISH.TTF"); }
+        body { background: #eef2f6; }
+        .diploma { width: 1035px; margin: 24px auto 10px; }
+        #Table_01 { width: 1035px; height: 800px; border-collapse: collapse; background: url("images/diploma/diploma-bg.jpg") no-repeat; background-size: 100% 100%; }
+        .multiple-logos { width: 400px; margin-top: 0; float: left; position: relative; top: -8px; }
+        .student-photo { width: 109px; height: 129px; object-fit: cover; }
+        .downloadpage { width: 100%; text-align: center; padding: 12px 0 20px; }
+        .downloadpage button { background-color: green; border: 0; border-radius: 5px; padding: 10px 18px; color: #fff; font-size: 15px; cursor: pointer; }
+        @media print {
+            html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; background: #fff; }
+            .diploma { width: 100% !important; height: 100% !important; margin: 0; }
+            #Table_01 { background-size: 100% 100% !important; height: 100% !important; }
+            .downloadpage { display: none; }
+            @page { size: letter landscape; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="diploma">
+        <table id="Table_01" border="0" cellpadding="0" cellspacing="0">
+            <tr><td colspan="12" style="height:66px;"></td></tr>
+            <tr>
+                <td colspan="3" style="width:80px;height:118px;"></td>
+                <td colspan="3" style="width:352px;height:118px;"><img src="images/tanscript_new_2026/international_schooling.png" width="330" alt="International Schooling"></td>
+                <td colspan="5" style="width:472px;height:118px;text-align:center;"><img class="multiple-logos" src="images/tanscript_new_2026/header_logo_2026_new.png" alt="Accreditations"></td>
+                <td style="width:131px;height:118px;"></td>
+            </tr>
+            <tr><td colspan="12" style="height:72px;"></td></tr>
+            <tr>
+                <td colspan="4" rowspan="2" style="width:281px;height:198px;vertical-align:top;"><div style="text-align:center;"><img style="width:69px;height:69px;" src="images/transcript/qr-code.png" alt="QR"></div></td>
+                <td colspan="5" rowspan="2" style="width:486px;height:198px;text-align:center;">
+                    <p style="font-family:font-1, Georgia, serif;font-size:22px;">this Certifies that</p>
+                    <h1 id="studentName" style="font-family:font-1, Georgia, serif;font-size:45px;font-weight:400;margin-top:8px;"></h1>
+                    <br>
+                    <p style="font-family:font-1, Georgia, serif;font-size:20px;line-height:1.35;">having satisfactorily completed all requirements of the School for the <br><span id="programName"></span> (<span id="gradeName"></span>) is hereby awarded</p>
+                </td>
+                <td rowspan="2" style="width:28px;height:198px;"></td>
+                <td style="width:109px;height:129px;"><img id="profilePic" class="student-photo" src="images/male-profile.png" alt="Student"></td>
+                <td style="width:131px;height:129px;"></td>
+            </tr>
+            <tr><td colspan="2" style="width:240px;height:69px;"></td></tr>
+            <tr><td colspan="12" style="height:77px;text-align:center;"><h2 id="diplomaTitle" style="font-family:font-2, Georgia, serif;color:#95732C;font-size:60px;font-weight:300;">American High School Diploma</h2></td></tr>
+            <tr><td colspan="12" style="height:92px;text-align:center;vertical-align:top;"><p style="font-family:font-1, Georgia, serif;font-size:20px;">by the order of International Schooling</p></td></tr>
+            <tr><td colspan="12" style="height:31px;"></td></tr>
+            <tr>
+                <td style="width:48px;height:146px;"></td>
+                <td colspan="4" style="width:350px;height:145px;vertical-align:top;"><p id="graduationDate" style="font-family:Arial, Helvetica, sans-serif;font-size:15px;margin-top:16px;color:#373435;"></p></td>
+                <td colspan="3" style="text-align:center;"><img src="images/tanscript_new_2026/footer_logos_new.png" style="margin-bottom:20px;width:90%;" alt="Accreditation logos"></td>
+                <td colspan="4" style="width:240px;height:146px;text-align:center;"><img src="images/diploma/dr-rob-sign.png" width="250" alt="Signature"><p style="font-family:Arial, Helvetica, sans-serif;font-size:13px;text-align:center;margin-right:20px;color:#373435;">Head of School</p></td>
+            </tr>
+        </table>
+    </div>
+    <div class="downloadpage"><button onclick="window.print()">Download</button></div>
+    <script>
+        (function () {
+            var students = {
+                "990001": { name: "Aarav Mehta", grade: "Grade 8", program: "Middle School Program", diploma: "Middle School Certificate", gender: "Male" },
+                "990002": { name: "Anaya Mehta", grade: "Grade 5", program: "Elementary School Program", diploma: "Elementary School Certificate", gender: "Female" }
+            };
+            var params = new URLSearchParams(window.location.search || "");
+            var student = students[params.get("studentId")] || students["990001"];
+            document.getElementById("studentName").textContent = student.name;
+            document.getElementById("programName").textContent = student.program;
+            document.getElementById("gradeName").textContent = student.grade;
+            document.getElementById("diplomaTitle").textContent = student.diploma;
+            document.getElementById("profilePic").src = student.gender === "Female" ? "images/female-profile.png" : "images/male-profile.png";
+            document.getElementById("graduationDate").textContent = "Date of Graduation: Jun 30, 2028";
+        })();
+    </script>
+</body>
+</html>

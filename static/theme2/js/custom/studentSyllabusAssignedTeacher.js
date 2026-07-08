@@ -6,6 +6,9 @@ async function renderStudentSyllabusAssignedTeacherPage(){
 }
 
 async function studentAssignedTeacherFetchList(){
+    if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentAssignedTeacherResponse === "function"){
+        return getDummyStudentAssignedTeacherResponse();
+    }
     var payload = { userId: USER_ID + "", studentUserId: USER_ID + "" };
     var ajaxReqDetails = {
         method: "POST",

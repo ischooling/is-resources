@@ -10,6 +10,24 @@ function getParentProgressContent(pageData){
                 <div class="card-body p-0">
                     <div class="d-flex flex-wrap align-items-center justify-content-between">
                         <h4 class="mb-2 mb-md-0 ml-3 font-20 font-weight-bold">Progress Report</h4>
+                        <div class="d-flex align-items-center flex-wrap mr-3 mb-2 mb-md-0">
+                            <div class="btn-group mr-2">
+                                <button type="button" class="fc-today-button btn btn-light btn-pill progress-view-button" onclick="parentProgressViewFilter(this,'agendaMonth')">Monthly</button>
+                                <button type="button" class="fc-agendaDay-button btn btn-light btn-pill progress-view-button" onclick="parentProgressViewFilter(this,'agendaWeek')">Weekly</button>
+                                <button type="button" class="fc-agendaWeek-button btn btn-light btn-pill progress-view-button" onclick="parentProgressShowCustomFilter(this)">Custom</button>
+                            </div>
+                            <div class="progress-custom-filter-form" style="visibility:hidden">
+                                <div class="d-inline-flex gap-5">
+                                    <div>
+                                        <input type="text" class="datepicker form-control form-control-sm" id="progressStartDate" placeholder="Select Start Date"/>
+                                    </div>
+                                    <div>
+                                        <input type="text" class="datepicker form-control form-control-sm" id="progressEndDate" placeholder="Select End Date"/>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="parentProgressApplyFilter()">Search</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="table font-12 nowrap dt-responsive" id="parentProgressTable" style="width:100%;">

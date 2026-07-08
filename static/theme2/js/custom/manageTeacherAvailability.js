@@ -990,6 +990,9 @@ function getRequestForTeacherTimeToShowWeeklyCalendar(teacherUserId, userRole, c
 
 function getTeacherTimeToShowWeeklyCalendar(teacherUserId,userRole,callType,studentStandardId,stDate,subjectId) {
 	var responseData=null;
+	if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyTeacherWeeklyCalendarResponse === "function") {
+		return Promise.resolve(getDummyTeacherWeeklyCalendarResponse(teacherUserId, subjectId, stDate));
+	}
 	return new Promise (function(resolve, reject) {$.ajax({
 			type: "POST",
 			contentType: APPLICATION_JSON_VALUE,
@@ -1712,5 +1715,4 @@ function checkdateIsPastOrNot(dateString) {
 	currentDate.setHours(0, 0, 0, 0);
 	return providedDate < currentDate;
   }
-
 

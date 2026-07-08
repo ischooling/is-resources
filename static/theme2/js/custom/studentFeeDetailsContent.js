@@ -62,7 +62,8 @@ function getStudentFeeDetailsRowsHtml(row) {
         }
 
         if (userPayDetails.status === 'SUCCESS') {
-            html += `<td style="color: #58D68D; font-weight: bold">${userPayDetails.status}</td>`;
+            var isDummyStudentFeeRow = typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode();
+            html += `<td style="color: #58D68D; font-weight: bold">${isDummyStudentFeeRow ? (userPayDetails.dummyStatusLabel || userPayDetails.status) : userPayDetails.status}</td>`;
         } else {
             html += `<td>${userPayDetails.status}</td>`;
         }

@@ -87,7 +87,7 @@ async function parentFeeDetailsFetchByStudent(studentUserId){
         onFaildResolved: true,
         onSuccessResolved: true
     };
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentStudentFeeData(studentUserId, ajaxReqDetails);
 }
 
 function parentFeeDetailsMapRows(apiResponse){

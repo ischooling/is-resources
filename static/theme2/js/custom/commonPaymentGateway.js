@@ -7,6 +7,12 @@ function getSchoolAdminChatButton() {
 }
 
 async function checkPayment(formId, userPaymentDetailsId, schoolId){
+	if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && formId === "bookSessionPaymentModal"){
+		if(typeof showDummyBookSessionPaymentOptions === "function"){
+			return showDummyBookSessionPaymentOptions(userPaymentDetailsId, schoolId);
+		}
+		return false;
+	}
 	var payload = {
 		'userPaymentDetailsId' : userPaymentDetailsId,
 		'schoolId' : schoolId
@@ -70,6 +76,12 @@ function isPopupBlocked() {
 	return false;
 }
 async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway) {
+	if(typeof isDummyStudentMode === "function" && isDummyStudentMode()){
+		if(typeof showDummyStripeCheckoutPage === "function"){
+			return showDummyStripeCheckoutPage(formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway);
+		}
+		return false;
+	}
     hideModalMessage('');
 
     if (paymentGateway == 'WELLSFARGO') {

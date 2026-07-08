@@ -28,6 +28,9 @@ async function studentLoginHistoryBuildPageData(extraParam){
 }
 
 async function studentLoginHistoryFetchAttendance(context){
+    if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentParentLoginHistoryResponse === "function"){
+        return getDummyStudentParentLoginHistoryResponse((context && context.studentUserId) ? context.studentUserId : USER_ID);
+    }
     var payload = {
         userId: USER_ID + "",
         studentUserId: (context && context.studentUserId) ? context.studentUserId : (USER_ID + "")
@@ -142,5 +145,4 @@ function studentLoginHistoryInitDataTable(){
         studentLoginHistoryTable.search($(this).val()).draw();
     });
 }
-
 

@@ -15,6 +15,17 @@ async function renderAnnouncement(userId){
 }
 async function showAnnounceDataById(announceId, moduleId){
 	try{
+		if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyAnnouncementById === "function"){
+			var responseData = getDummyAnnouncementById(announceId);
+			if(responseData.status==1){
+				if($("#announcementbyIdData").length>0){
+					$("#announcementbyIdData").remove();
+				}
+				$('body').append(announcementModalContent(responseData));
+				$('#announcementbyIdData').modal({backdrop: 'static', keyboard: false});
+			}
+			return;
+		}
 		var data = {};
 		data['announceId'] = announceId;
 		data['moduleId'] = moduleId;
@@ -40,6 +51,14 @@ async function showAnnounceDataById(announceId, moduleId){
 
 async function saveAnnouncementAcknowledge(announceId, userId, roleModuleId) {
     try{
+		if(typeof isDummyStudentMode === "function" && isDummyStudentMode()){
+			$('#announcementbyIdData').modal('hide');
+			$('.accepted-announcement'+announceId).addClass('d-none');
+			$("#announcementBadge").hide();
+			$("#newAnnouncementCount").text(0);
+			showMessageTheme2(1, "Acknowledged successfully", '', true);
+			return;
+		}
         var data ={}
         data['announceId']=announceId;
         data['userId']=userId;
@@ -72,6 +91,9 @@ async function saveAnnouncementAcknowledge(announceId, userId, roleModuleId) {
 }
 
 async function getAnnouncementDetails(userId, startFrom, pageSize){
+	if(typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyAnnouncementDetails === "function"){
+		return getDummyAnnouncementDetails();
+	}
 	return new Promise(function (resolve, reject) {
 		var postData = {};
 		postData['userId'] = userId;

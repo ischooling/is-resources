@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>International Schooling :: Student Transcript</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #e9eef3;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+        }
+        .page {
+            width: 794px;
+            min-height: 1123px;
+            margin: 24px auto;
+            padding: 36px 24px 30px;
+            background-color: #efffeb;
+            background-image:
+                repeating-linear-gradient(45deg, rgba(195, 226, 83, 0.42) 0 2px, transparent 2px 42px),
+                repeating-linear-gradient(-45deg, rgba(195, 226, 83, 0.36) 0 2px, transparent 2px 42px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+        }
+        .top { display: flex; align-items: center; justify-content: space-between; }
+        .brand { width: 310px; }
+        .header-logo { width: 390px; }
+        .title {
+            margin: 58px 0 30px;
+            text-align: center;
+            color: #7b7425;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .qr { position: absolute; right: 24px; top: 118px; width: 80px; height: 80px; object-fit: cover; }
+        .sheet { position: relative; }
+        table { width: 100%; border-collapse: collapse; }
+        .info td {
+            border: 1px solid #8dd9d8;
+            padding: 7px 8px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .info .label { width: 118px; font-weight: 700; }
+        .courses { margin-top: 20px; min-height: 390px; }
+        .courses th, .courses td {
+            border-left: 1px solid #8dd9d8;
+            border-right: 1px solid #8dd9d8;
+            padding: 4px 6px;
+            font-size: 13px;
+            vertical-align: top;
+        }
+        .courses th {
+            border-top: 1px solid #8dd9d8;
+            font-weight: 800;
+            text-align: left;
+        }
+        .courses tbody tr:last-child td { padding-bottom: 285px; border-bottom: 1px solid #8dd9d8; }
+        .center { text-align: center !important; }
+        .gpa-row td { border: 1px solid #8dd9d8; padding: 7px 8px; font-size: 13px; }
+        .bottom { display: flex; gap: 18px; margin-top: 48px; align-items: flex-start; }
+        .accreditation { width: 255px; }
+        .accreditation img { width: 238px; display: block; margin-bottom: 28px; }
+        .sign { width: 190px; display: block; margin-left: 10px; }
+        .head { font-size: 20px; margin-left: 70px; }
+        .remarks { flex: 1; border: 1px solid #8dd9d8; min-height: 98px; padding: 8px; font-size: 13px; }
+        .remarks-title { font-weight: 700; margin-bottom: 28px; }
+        .grading { margin-top: 24px; border: 1px solid #8dd9d8; font-size: 10px; text-align: center; }
+        .grading-title { font-weight: 800; border-bottom: 1px solid #8dd9d8; padding: 4px; font-size: 12px; }
+        .grading td { border: 1px solid #8dd9d8; padding: 3px; }
+        .downloadpage { text-align: center; margin: 0 auto 24px; }
+        .downloadpage button { background: #198754; color: #fff; border: 0; border-radius: 5px; padding: 10px 18px; font-size: 15px; cursor: pointer; }
+        @media print {
+            body { background: #fff; }
+            .page { margin: 0; width: 210mm; min-height: 297mm; box-shadow: none; }
+            .downloadpage { display: none; }
+            @page { size: A4; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page sheet">
+        <img class="qr" src="images/transcript/qr-code.png" alt="QR code">
+        <div class="top">
+            <img class="brand" src="images/tanscript_new_2026/international_schooling.png" alt="International Schooling">
+            <img class="header-logo" src="images/tanscript_new_2026/header_logo_2026_new.png" alt="Accreditations">
+        </div>
+        <h1 class="title">American School Transcript</h1>
+        <table class="info">
+            <tbody>
+                <tr><td class="label">Student ID.:</td><td id="studentCode"></td><td class="label">Grade:</td><td id="gradeShort"></td><td class="label">Status:</td><td>Regular</td><td class="label">Graduated:</td><td id="graduated"></td></tr>
+                <tr><td class="label">Student:</td><td colspan="4" id="studentName"></td><td class="label">Birth Date:</td><td colspan="2" id="birthDate"></td></tr>
+                <tr><td class="label">Nationality:</td><td colspan="4" id="nationality"></td><td class="label">Gender:</td><td colspan="2" id="gender"></td></tr>
+                <tr><td class="label">Parent/Guardian:</td><td colspan="7" id="parentName"></td></tr>
+                <tr><td class="label">School:</td><td colspan="7">International Schooling</td></tr>
+            </tbody>
+        </table>
+        <table class="courses">
+            <thead><tr><th class="center">GRADE</th><th>COURSE CODE</th><th>COURSE</th><th class="center">GRADES</th><th class="center">CREDITS</th></tr></thead>
+            <tbody id="courseRows"></tbody>
+        </table>
+        <table class="gpa-row"><tbody><tr><td class="center"><b>Print Date</b></td><td id="printDate"></td><td class="center"><b>Cumulative GPA</b></td><td class="center" id="gpa"></td></tr></tbody></table>
+        <div class="bottom">
+            <div class="accreditation">
+                <img src="images/tanscript_new_2026/footer_logos_new.png" alt="Accreditation logos">
+                <img class="sign" src="images/diploma/dr-rob-sign.png" alt="Signature">
+                <div class="head">Head of School</div>
+            </div>
+            <div class="remarks">
+                <div class="remarks-title">Remarks</div>
+                <div class="center">Academic Performance - Excellent</div>
+                <div class="center" style="margin-top:12px;">Credit Requirement - Complete</div>
+            </div>
+        </div>
+        <div class="grading">
+            <div class="grading-title">GRADING SYSTEM</div>
+            <table><tbody>
+                <tr><td>Grade</td><td>A+</td><td>A</td><td>A-</td><td>B+</td><td>B</td><td>B-</td><td>C+</td><td>C</td><td>C-</td><td>D+</td><td>D</td><td>D-</td><td>F</td></tr>
+                <tr><td>Percentage</td><td>96-100</td><td>93-95</td><td>89-92</td><td>86-88</td><td>83-85</td><td>79-82</td><td>76-78</td><td>73-75</td><td>69-72</td><td>66-68</td><td>63-65</td><td>60-62</td><td>Below 60</td></tr>
+                <tr><td>GPA</td><td>4.0</td><td>4.0</td><td>3.7</td><td>3.3</td><td>3.0</td><td>2.7</td><td>2.3</td><td>2.0</td><td>1.7</td><td>1.3</td><td>1.0</td><td>0.7</td><td>0</td></tr>
+            </tbody></table>
+        </div>
+    </main>
+    <div class="downloadpage"><button onclick="window.print()">Download</button></div>
+    <script>
+        (function () {
+            var students = {
+                "990001": { name: "Aarav Mehta", code: "INDIS260529001", grade: "Grade 8", gradeShort: "8", parent: "Rohan Mehta", birthDate: "May 18, 2014", nationality: "India", gender: "Male", gpa: "3.87", courses: ["Pre-Algebra", "World History", "Reading and Writing Workshop", "Physical Science", "Information Technology", "Fine Arts"] },
+                "990002": { name: "Anaya Mehta", code: "INDIS260529002", grade: "Grade 5", gradeShort: "5", parent: "Rohan Mehta", birthDate: "Sep 12, 2017", nationality: "India", gender: "Female", gpa: "3.75", courses: ["Mathematics Grade 5", "Science Grade 5", "Creative Writing", "Social Studies Grade 5", "Digital Literacy", "Fine Arts"] }
+            };
+            function param(name) { return new URLSearchParams(window.location.search || "").get(name); }
+            function setText(id, value) { document.getElementById(id).textContent = value; }
+            function escapeHtml(value) {
+                return String(value == null ? "" : value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+            var academicYear = "2026-2027";
+            var graduatedText = "Jun 30, 2026";
+            var student = null;
+            if (param("studentName")) {
+                var gradeName = param("gradeName") || "Grade 5";
+                var gradeShort = param("gradeShort") || gradeName.replace(/[^0-9K]/gi, "") || "5";
+                var baseDate = new Date(param("dummyDate") || Date.now());
+                if (isNaN(baseDate.getTime())) { baseDate = new Date(); }
+                academicYear = (baseDate.getFullYear() - 1) + "-" + baseDate.getFullYear();
+                graduatedText = param("graduated") || ("Jun 30, " + baseDate.getFullYear());
+                student = {
+                    name: param("studentName"),
+                    code: param("studentCode") || "INDIS260529001",
+                    grade: gradeName,
+                    gradeShort: gradeShort,
+                    parent: param("parentName") || "Mr. & Mrs. " + param("studentName").split(" ").pop(),
+                    birthDate: param("birthDate") || "Mar 14, 2014",
+                    nationality: param("nationality") || "United States",
+                    gender: param("gender") || "Male",
+                    gpa: param("gpa") || "3.85",
+                    courses: (param("courses") || "").split("|").filter(function (course) { return !!course.trim(); })
+                };
+                if (!student.courses.length) {
+                    student.courses = ["Language Arts", "Mathematics", "Science", "Art", "Technology"];
+                }
+            }
+            if (!student) {
+                student = students[param("studentId")] || students["990001"];
+            }
+            var printDate = new Date(param("dummyDate") || "2028-05-29").toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+            setText("studentCode", student.code); setText("gradeShort", student.gradeShort); setText("graduated", graduatedText);
+            setText("studentName", student.name); setText("birthDate", student.birthDate); setText("nationality", student.nationality);
+            setText("gender", student.gender); setText("parentName", student.parent); setText("printDate", printDate); setText("gpa", student.gpa);
+            document.getElementById("courseRows").innerHTML = student.courses.map(function (course, index) {
+                return "<tr><td class='center'>" + (index === 0 ? "<b>" + escapeHtml(student.grade.toUpperCase()) + "</b><br>(" + academicYear + ")" : "") + "</td><td>R-" + escapeHtml(student.gradeShort) + "0" + (index + 1) + "</td><td>" + escapeHtml(course.toUpperCase()) + "</td><td class='center'>A-</td><td class='center'>1.0</td></tr>";
+            }).join("");
+        })();
+    </script>
+</body>
+</html>

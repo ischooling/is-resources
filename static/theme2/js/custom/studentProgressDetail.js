@@ -9,6 +9,9 @@ async function renderStudentProgressDetailPage(){
 
 async function studentProgressDetailFetch(){
     var payload = { userId: USER_ID + "", studentUserId: USER_ID + "" };
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentProgressReportsResponse === "function") {
+        return getDummyStudentProgressReportsResponse(payload);
+    }
     var ajaxReqDetails = {
         method: "POST",
         url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/parent/weekly-progress-reports-detail",
@@ -77,6 +80,11 @@ function studentProgressDetailOpenReport(encodedUrl){
     showAndHideDashboardAndAdditionalContent("additional");
     $("#dashboardContentInHTMLAdditional").html(studentProgressDetailAdditionalLoader());
     customLoader(true);
+    if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentProgressReportHtml === "function" && url.indexOf("dummy-student-progress-report://") === 0) {
+        studentProgressDetailRenderDetailHtml(getDummyStudentProgressReportHtml(url));
+        customLoader(false);
+        return;
+    }
 
     $.ajax({
         type: "GET",

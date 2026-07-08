@@ -54,7 +54,7 @@ async function parentAcademicPerformanceFetchByStudent(studentUserId){
         onFaildResolved: true,
         onSuccessResolved: true
     };
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentAcademicPerformanceData(studentUserId, ajaxReqDetails);
 }
 
 function parentAcademicPerformanceMapRows(apiResponse, studentUserId){
@@ -208,29 +208,7 @@ function parentAcademicPerformanceLoadProgressDetail(studentUserId, lmsEnrollmen
     customLoader(true);
     hideMessage('');
     var payload = { studentUserId: studentUserId, lmsUserId: lmsEnrollmentId, entityId: lmsCourseId };
-    $.ajax({
-        type: "POST",
-        contentType: "application/json",
-        url: getURLForHTML('dashboard','get-student-progress-report-detail'),
-        data: JSON.stringify(payload),
-        dataType: "json",
-        cache: false,
-        timeout: 600000,
-        success: function(data){
-            if(data && data.code === "SUCCESS"){
-                parentAcademicPerformanceBindProgressDetailData(data);
-            }else{
-                showMessageTheme2(0, data && data.message ? data.message : "Unable to load course progress detail.");
-                showAndHideDashboardAndAdditionalContent("main");
-            }
-            customLoader(false);
-        },
-        error: function(){
-            showMessageTheme2(0, "Unable to load course progress detail.");
-            customLoader(false);
-            showAndHideDashboardAndAdditionalContent("main");
-        }
-    });
+    return dummyLoadParentAcademicPerformanceProgressDetail(studentUserId, lmsEnrollmentId, lmsCourseId, payload);
 }
 
 function parentAcademicPerformanceBindProgressDetailData(data){
@@ -342,27 +320,7 @@ function parentAcademicPerformanceLoadGradeHistory(enrollId, itemId){
     customLoader(true);
     hideMessage('');
     var payload = { itemId: itemId, enrollId: enrollId };
-    $.ajax({
-        type: "POST",
-        contentType: "application/json",
-        url: getURLForHTML('dashboard','get-progress-report-grade-history'),
-        data: JSON.stringify(payload),
-        dataType: "json",
-        success: function(data){
-            if(data && data.code === "SUCCESS"){
-                parentAcademicPerformanceBindGradeHistoryRows(data);
-            }else{
-                $("#studentGradeHistory").html(`<tr><td colspan="5" class="text-center">No Record</td></tr>`);
-                showMessageTheme2(0, data && data.message ? data.message : "Unable to load grade history.");
-            }
-            customLoader(false);
-        },
-        error: function(){
-            customLoader(false);
-            $("#studentGradeHistory").html(`<tr><td colspan="5" class="text-center">No Record</td></tr>`);
-            showMessageTheme2(0, "Unable to load grade history.");
-        }
-    });
+    return dummyLoadParentAcademicPerformanceGradeHistory(enrollId, itemId, payload);
 }
 
 function parentAcademicPerformanceBindGradeHistoryRows(data){

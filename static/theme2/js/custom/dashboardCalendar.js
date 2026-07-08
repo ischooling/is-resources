@@ -3,6 +3,10 @@ var ACTIVITIES_WITH_CLASS = true;
 var UPCOMING_CLASS_TIMER_IMG = PATH_FOLDER_IMAGE2 + "timer.gif";
 var PRELOAD_TIMER_IMG = new Image();
 PRELOAD_TIMER_IMG.src = UPCOMING_CLASS_TIMER_IMG;
+var DUMMY_TEACHER_NAME ="";
+var DUMMY_CLASS_NAME ="";
+var DUMMY_CLASS_DATE ="";
+var DUMMY_CLASS_TIME ="";
 var IS_CLASS_ENDED_STATUS_CALLED = false;
 var IS_CLICKED_FEEDBACK_BTN = false;
 var IS_PENDING_FEEDBACK_POPUP_REQUEST = false;
@@ -161,8 +165,66 @@ function updateSchoolHolidays(userId,holidayid,controllType,moduleId) {
 
 
 var CALENDAR_EVENT_DATA=[];
+function handleSchoolCalendarResponse(data, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, resolve, reject) {
+	if (data.status === '0' || data.status === '2') {
+		showMessageTheme2(0, data.message);
+		resolve([]);
+	} else if (data.status === '3') {
+		redirectLoginPage();
+		reject('Redirected to login');
+	} else {
+		var finalEvents=[];
+		var events = data.event || [];
+		if(events.length>0){
+			console.log(data)
+			// events.sort((a, b) => new Date(a.start) - new Date(b.start));
+			events.forEach(obj => {
+				if(obj.id.startsWith("announce", 0) || obj.id.startsWith("holiday", 0)){
+					finalEvents.push(obj);
+				}else{
+					obj.start = convertDatetimeWithFormat(obj.start, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
+					obj.end = convertDatetimeWithFormat(obj.end, obj.timezone, USER_TIMEZONE, DATE_UTC+'T'+TIME_UTC);
+					ACTIVITY_CLASS_START_TIME.push({"startTime":obj.start.replace("T", " "), "endTime":obj.end.replace("T", " "), "title":"class"});
+					var baseDate=obj.start.split('T')[0];
+					if($.inArray(baseDate,data.holidays)<0){
+						finalEvents.push(obj);
+					}
+				}
+			});
+		};
+		ACTIVITIES_WITH_CLASS = data.activitiesWithClass;
+		CALENDAR_EVENT_DATA = finalEvents;
+		$('#schoolcalendar').fullCalendar('removeEvents');
+		//$('#schoolcalendar').fullCalendar('destroy');
+		getFullCalendar(finalEvents, viewName, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, data.activityTypes);
+		if(finalEvents.length < 1){
+			CAN_SHOW_ENROLL_RESERVE_MODAL=true;
+		}else{
+			CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(finalEvents);
+		}
+		if(flag){
+			$("#schoolcalendar").fullCalendar('addEventSource', finalEvents);
+		}
+		resolve(finalEvents);
+		if($('#schoolcalendar').fullCalendar('getView').name == "agendaWeek"){
+			$(".upcoming-icon").addClass("upcoming-week-view-icon");
+			$(".live-class-blink .live-symbol").addClass("live-week-view-icon");
+		}else{
+			$(".upcoming-icon").removeClass("upcoming-week-view-icon");
+			$(".live-class-blink .live-symbol").removeClass("live-week-view-icon");
+		}
+
+		ISCALENDARLOAD=false;
+	}
+}
+
 function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag) {
 	return new Promise((resolve, reject) => {
+		var schoolCalendarRequest = getRequestForSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate);
+		if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyGradeKSchoolCalendarResponse === "function") {
+			handleSchoolCalendarResponse(getDummyGradeKSchoolCalendarResponse(schoolCalendarRequest), formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, resolve, reject);
+			return;
+		}
 		var isFeedbackBulkRequest = feedbackBulkShow;
 		feedbackBulkShow = false;
 		if(isFeedbackBulkRequest){
@@ -176,12 +238,13 @@ function callSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, end
             type: "POST",
             contentType: APPLICATION_JSON_VALUE,
             url: getURLForHTML('dashboard', 'school-calendar'),
-            data: JSON.stringify(getRequestForSchoolCalendar(formId, userId, UNIQUEUUID, viewName, startdate, enddate)),
+            data: JSON.stringify(schoolCalendarRequest),
             dataType: 'json',
             cache: false,
             timeout: 600000,
             async: true,
             success: function (data) {
+            	//handleSchoolCalendarResponse(data, formId, userId, UNIQUEUUID, viewName, startdate, enddate, flag, resolve, reject);
                 if (data.status === '0' || data.status === '2') {
                     showMessageTheme2(0, data.message);
                     resolve([]); // return empty array if error
@@ -456,6 +519,12 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
                 }
                 return false;
             } else if(!info.id.startsWith("activity", 0)) {
+				if(USER_TYPE="Y"){
+					localStorage.setItem("DUMMY_TEACHER_NAME",)
+					localStorage.setItem("DUMMY_CLASS_NAME",)
+					localStorage.setItem("DUMMY_CLASS_DATE",)
+					localStorage.setItem("DUMMY_CLASS_TIME",)
+				}
                 eventDetailsOnModal(info.id, info.eventType, info.activities);
             }
         },
@@ -503,9 +572,10 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 						}
 						if(event.name != ""){
 							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0) && !event.eventType.startsWith("SYS-TRAINING", 0)){
+								var assignedPersonName = $.trim(((event.salutation && event.salutation !== "undefined" && event.salutation !== "null") ? event.salutation + ". " : "") + (event.name || ""));
 								customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
 									<div>
-										<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':`Teacher: `}</span><span class="assign-teacher-name">${event.salutation}. ${event.name}</span>
+										<span class="font-weight-normal">${USER_ROLE == "TEACHER"?'Student Name: ':`Teacher: `}</span><span class="assign-teacher-name">${assignedPersonName}</span>
 									</div>
 								</div>`;
 							}
@@ -1164,6 +1234,9 @@ async function classDetailsOnModal(url) {
 }
 
 function getActualURL(baseUrl) {
+	if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyGradeKClassDetailsResponse === "function" && (baseUrl || "").indexOf("dummy-student-class://") === 0) {
+		return Promise.resolve(getDummyGradeKClassDetailsResponse(baseUrl));
+	}
 	return new Promise(function(resolve, reject) {
 	  $.ajax({
 		type: "GET",

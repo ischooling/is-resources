@@ -10,6 +10,7 @@ var PARENT_DIARY_ACTIVE_STUDENT_ID = null;
 var SCHOOL_DIARY_ACTIVE_CHAT = null;
 var LAST_MSG_ID;
 var MENTION_LIST;
+var PARENT_MENTION_NAME = "Parent";
 var STUDENT_ARRAY;
 var PAGE_NO=0;
 var LATEST_CHAT_FLAG=false;
@@ -191,6 +192,10 @@ async function getAssignGradeAndStudent(){
 
 
 async function getUnreadChatCount(){
+    if (typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()
+        && typeof window.getDummyStudentDiaryUnreadCount === "function") {
+        return window.getDummyStudentDiaryUnreadCount();
+    }
     if(USER_ROLE == "PARENT"){
         var payload = {sessionUserId: USER_ID,studentUserId:ACTIVE_STUDENT_ID};
     }else{
@@ -337,6 +342,17 @@ async function getChatUserList(flag){
 
 
 async function getChatUserListRecodrs(page, size){
+    if (typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()
+        && typeof window.getDummyStudentDiaryThreadList === "function") {
+        return window.getDummyStudentDiaryThreadList();
+    }
+    if (typeof window.isDummyParentDashboardMode === "function" && window.isDummyParentDashboardMode()
+        && typeof window.dummyGetParentDiaryThreadList === "function") {
+        var dummyStudentUserId = (typeof PARENT_DIARY_ACTIVE_STUDENT_ID !== "undefined" && PARENT_DIARY_ACTIVE_STUDENT_ID)
+            ? PARENT_DIARY_ACTIVE_STUDENT_ID
+            : ((typeof ACTIVE_STUDENT_ID !== "undefined" && ACTIVE_STUDENT_ID) ? ACTIVE_STUDENT_ID : null);
+        return await window.dummyGetParentDiaryThreadList(dummyStudentUserId);
+    }
     if(USER_ROLE == "PARENT"){
         var studentUserId = (typeof PARENT_DIARY_ACTIVE_STUDENT_ID !== "undefined" && PARENT_DIARY_ACTIVE_STUDENT_ID) 
             ? PARENT_DIARY_ACTIVE_STUDENT_ID 
@@ -986,8 +1002,12 @@ async function loadOldMessages(threadId, userName){
 }
 
 async function gotoChat(threadId, chatStatus, userName, studentUserId){
+    if ($("#parentSchoolDiaryStyles").length === 0 && typeof parentSchoolDiaryGetStyles === "function") {
+        $("head").append(parentSchoolDiaryGetStyles());
+    }
     if(chatStatus){
         var chatDetails = await getMessagesList(threadId, 0, true, studentUserId);
+        await suggestionList(threadId, false);
         SCHOOL_DIARY_ACTIVE_CHAT = chatDetails;
         renderSchoolDiary(chatDetails, chatStatus, userName, threadId);
         $(".back-diary-btn").attr("data-thread-id", threadId);
@@ -1007,6 +1027,12 @@ async function gotoChat(threadId, chatStatus, userName, studentUserId){
 }
 
 async function markReadSchoolDairy(threadId){
+    if (typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()) {
+        return false;
+    }
+    if (typeof window.isDummyParentDashboardMode === "function" && window.isDummyParentDashboardMode()) {
+        return false;
+    }
     var payload = {sessionUserId: USER_ID, threadId:threadId};
     var ajaxReqDetails = {
         method: "POST",
@@ -1021,6 +1047,14 @@ async function markReadSchoolDairy(threadId){
 }
 
 async function getMessagesList(threadId, pageNo, globalFlag, studentUserId){
+    if (typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()
+        && typeof window.getDummyStudentDiaryMessages === "function") {
+        return window.getDummyStudentDiaryMessages(threadId, studentUserId);
+    }
+    if (typeof window.isDummyParentDashboardMode === "function" && window.isDummyParentDashboardMode()
+        && typeof window.dummyGetParentDiaryMessages === "function") {
+        return await window.dummyGetParentDiaryMessages(threadId, studentUserId);
+    }
     if(USER_ROLE == "PARENT"){
         var payload = {sessionUserId: USER_ID, threadId:threadId, page:pageNo,size:"20", studentUserId:studentUserId};
     }else{
@@ -1158,6 +1192,43 @@ function chatDetailsConent(data, userName, reloadFlag, replyMsgFlag){
 
 
 async function suggestionList(threadId, globalFlag) {
+    if (typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()
+        && typeof window.getDummyStudentDiaryMentions === "function") {
+        var dummyStudentMentionResp = window.getDummyStudentDiaryMentions();
+        var dummyStudentDetails = dummyStudentMentionResp && dummyStudentMentionResp.details ? dummyStudentMentionResp.details : [];
+        PARENT_MENTION_NAME = "Parent";
+        MENTION_LIST = dummyStudentDetails.filter(function(user) {
+            if (USER_ROLE === "PARENT") return PARENT_MENTION_ROLE.includes(user.roleType);
+            if (USER_ROLE === "TEACHER") return TEACHER_MENTION_ROLE.includes(user.roleType);
+            if (USER_ROLE === "DIRECTOR" || USER_ROLE === "SCHOOL" || USER_ROLE === "ADMIN") return SCHOOL_MENTION_ROLE.includes(user.roleType);
+            return true;
+        }).map(function(user) {
+            user.mentionName = user.userName || user.email || "";
+            return user;
+        }).filter(function(user) {
+            return user.mentionName;
+        });
+        return;
+    }
+    if (typeof window.isDummyParentDashboardMode === "function" && window.isDummyParentDashboardMode()
+        && typeof window.dummyGetParentDiaryMentions === "function") {
+        var mentionResp = window.dummyGetParentDiaryMentions();
+        var details = mentionResp && mentionResp.details ? mentionResp.details : [];
+        var parentUser = details.find(function(user){ return user.roleType === "PARENT" && user.userName; });
+        PARENT_MENTION_NAME = parentUser ? parentUser.userName : "Parent";
+        MENTION_LIST = details.filter(function(user) {
+            if (USER_ROLE === "PARENT") return PARENT_MENTION_ROLE.includes(user.roleType);
+            if (USER_ROLE === "TEACHER") return TEACHER_MENTION_ROLE.includes(user.roleType);
+            if (USER_ROLE === "DIRECTOR" || USER_ROLE === "SCHOOL" || USER_ROLE === "ADMIN") return SCHOOL_MENTION_ROLE.includes(user.roleType);
+            return true;
+        }).map(function(user) {
+            user.mentionName = (user.roleType === "PARENT" && user.userName) ? user.userName : (user.userName || user.email || "");
+            return user;
+        }).filter(function(user) {
+            return user.mentionName;
+        });
+        return;
+    }
     var payload = { sessionUserId: USER_ID, threadId: threadId };
 
     var ajaxReqDetails = {
@@ -1172,11 +1243,18 @@ async function suggestionList(threadId, globalFlag) {
 
     var mentionResp = await callCommonAjax(ajaxReqDetails);
     var details = mentionResp?.details || [];
+    var parentUser = details.find(user => user.roleType === "PARENT" && user.userName);
+    PARENT_MENTION_NAME = parentUser ? parentUser.userName : "Parent";
     MENTION_LIST = details.filter(user => {
-        if (USER_ROLE === "PARENT") return user.roleType === PARENT_MENTION_ROLE.includes(user.roleType);
+        if (USER_ROLE === "PARENT") return PARENT_MENTION_ROLE.includes(user.roleType);
         if (USER_ROLE === "TEACHER") return TEACHER_MENTION_ROLE.includes(user.roleType);
         if (USER_ROLE === "DIRECTOR" || USER_ROLE === "SCHOOL" || USER_ROLE === "ADMIN") return SCHOOL_MENTION_ROLE.includes(user.roleType);
         return true;
+    }).map(function(user) {
+        user.mentionName = (user.roleType === "PARENT" && user.userName) ? user.userName : (user.userName || user.email || "");
+        return user;
+    }).filter(function(user) {
+        return user.mentionName;
     });
     var suggestionBox = $(".mention-suggestion-box");
     function escapeRegex(value) {
@@ -1211,13 +1289,13 @@ async function suggestionList(threadId, globalFlag) {
             var keyword = lastWord.substring(1).toLowerCase();
 
             var filtered = MENTION_LIST.filter(u =>
-                u.userName.toLowerCase().includes(keyword)
+                u.mentionName.toLowerCase().includes(keyword)
             );
 
             if (filtered.length > 0) {
                 var html = "";
                 filtered.forEach(function(u) {
-                    html += `<div class="mention-item" data-id="${u.userId}" data-name="${u.userName}" onclick="chooseMentionUser(this)">@${u.userName}</div>`;
+                    html += `<div class="mention-item" data-id="${u.userId}" data-name="${u.mentionName}" onclick="chooseMentionUser(this)">@${u.mentionName}</div>`;
                 });
 
                 suggestionBox.html(html).removeClass("d-none");
@@ -1239,12 +1317,12 @@ async function suggestionList(threadId, globalFlag) {
             if (!user) {
                 return;
             }
-            var mention = "@" + user.userName;
+            var mention = "@" + user.mentionName;
             var mentionRegex = new RegExp("(^|\\s)" + escapeRegex(mention) + "(?=\\s|$|[.,!?])", "g");
             if (mentionRegex.test(text)) {
                 updatedIds.push(id);
             } else {
-                text = removePartialMention(text, user.userName);
+                text = removePartialMention(text, user.mentionName);
                 changed = true;
             }
         });

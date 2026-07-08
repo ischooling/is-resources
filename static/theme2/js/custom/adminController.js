@@ -88,6 +88,7 @@ const contentHandlers = {
     'dashboard': () => initDashboard(),
     'partner-enrollment-students-wlp': () => initPartnerEnrollmentStudentsWlp(),
     'dashboard-monitoring': () => getDashboardMonitoringContent(),
+    'parent-dashboard-demo-data': () => renderParentDashboardDemoDataPage('Parent Demo Data'),
     'counselor-dashboard': () => renderCounselorDashboard('Counselor Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'counselor-enrollment-list': () => renderCounselorEnrollList('Student Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'task': () => renderTaskListDashboard("Task", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -138,6 +139,7 @@ const contentHandlers = {
     'batch-student-examination-sheet': () => renderStudentExaminationSheetPage("Student's Examination Schedule", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'Parent-dashboard': () => renderParentDashboardContent(),
     'parent-class-schedule': () => renderParentStudentClassScheduleContent(),
+    'parent-class-summary': () => renderParentStudentClassSummaryContent(),
     'teacher-class-schedule': () => renderTeacherClassScheduleContent(),
     'parent-attendance': () => renderAtendaceByStudentIdContent(),
     'enrollment-availability': () => renderEnrollmentAvalabilityContent(),
@@ -149,7 +151,10 @@ const contentHandlers = {
     'release-note-user-list': ({ pageNo, moduleId, extraParam }) => renderReleaseNoteDashboardPage(pageNo, moduleId, roleAndModule, extraParam),
     'log-viewer': () => renderLogViewerContent(),
     'lead-logs': () => renderCounselorLeadLogsDashboard('Lead Logs',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE, LEAD_CATEGORY),
-    'feedback-form': () => renderFeedbackFormPage()
+    'teacher-feedback': () => renderTeacherFeedbackPage("Teacher Feedback"),
+    'ptm': () => renderParentTeacherMeetingPage("PTM"),
+    'student-dashboard-management': () => renderStudentDashboardManagementPage("Student Dashboard Management"),
+
 };
 
 const getLeadCategory = () => {

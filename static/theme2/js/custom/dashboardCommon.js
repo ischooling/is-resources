@@ -1980,6 +1980,10 @@ function getChat(email, role) {
 }
 
 function redirectLms(e, isPayLmsPaymentPending) {
+	if ((!isPayLmsPaymentPending || isPayLmsPaymentPending == "") && typeof isDummyStudentMode === "function" && isDummyStudentMode()
+		&& typeof window.getDummyStudentLmsPendingMessage === "function") {
+		isPayLmsPaymentPending = window.getDummyStudentLmsPendingMessage();
+	}
 	if (isPayLmsPaymentPending != null && isPayLmsPaymentPending != "") {
 		showMessageTheme2(0, isPayLmsPaymentPending);
 		setTimeout(function() {
@@ -1988,6 +1992,9 @@ function redirectLms(e, isPayLmsPaymentPending) {
 
 	} else {
 		var go_to_url = $(e).attr('changeurl');
+		if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof window.getDummyStudentLmsProviderUrl === "function") {
+			go_to_url = window.getDummyStudentLmsProviderUrl();
+		}
 		var checkedValue = $('.redirectLmsUrl').val()
 		if ($('.redirectLmsUrl').is(":checked") == true && checkedValue == "yes") {
 			setTimeout(function() {

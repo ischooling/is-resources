@@ -1,3 +1,6 @@
+var PARENT_ACADEMIC_DOCS_ALL_ROWS = [];
+var PARENT_ACADEMIC_DOCS_FILTER_VIEW = "week";
+
 async function renderParentAcademicDocsPage(){
     var students = parentAcademicDocsResolveStudentsFromGlobal();
     if(students.length === 0){
@@ -31,6 +34,8 @@ async function parentAcademicDocsRenderByStudent(studentUserId){
     var apiResponse = await parentAcademicDocsFetchByStudent(studentUserId);
     var students = parentAcademicDocsResolveStudentsFromGlobal();
     var rows = parentAcademicDocsMapRows(apiResponse);
+    PARENT_ACADEMIC_DOCS_ALL_ROWS = rows;
+    PARENT_ACADEMIC_DOCS_FILTER_VIEW = "week";
 
     $("#dashboardContentInHTML").html(getParentAcademicDocsContent({
         students: students,
@@ -54,7 +59,7 @@ async function parentAcademicDocsFetchByStudent(studentUserId){
         onFaildResolved: true,
         onSuccessResolved: true
     };
-    return await callCommonAjax(ajaxReqDetails);
+    return await dummyGetParentAcademicDocsData(studentUserId, ajaxReqDetails);
 }
 
 function parentAcademicDocsMapRows(apiResponse){
@@ -65,6 +70,7 @@ function parentAcademicDocsMapRows(apiResponse){
             batch: item.sessionName || "N/A",
             grade: item.gradeName || "N/A",
             learningProgram: item.learningProgram || "N/A",
+            documentDate: item.graduationDate || "",
             showTranscript: item.showTranscript || "N",
             transcriptUrl: item.transcriptUrl || "",
             diplomaUrl: item.deplomaUrl || item.diplomaUrl || "",
@@ -72,6 +78,30 @@ function parentAcademicDocsMapRows(apiResponse){
         });
     });
     return rows;
+}
+
+function parentAcademicDocsFilterRows(rows, filterType){
+    var startDate = filterType === "month" ? moment().startOf('month') : moment().startOf('week');
+    var endDate = filterType === "month" ? moment().endOf('month') : moment().endOf('week');
+    return $.grep(rows || [], function(row){
+        var docDate = moment(row.documentDate, "YYYY-MM-DD", true);
+        return docDate.isValid() && docDate.isBetween(startDate, endDate, "day", "[]");
+    });
+}
+
+function parentAcademicDocsFilterView(src, filterType){
+    PARENT_ACADEMIC_DOCS_FILTER_VIEW = filterType;
+    $(".parent-academic-docs-filter-btn").removeClass("active");
+    $(src).addClass("active");
+    parentAcademicDocsUpdateTable(parentAcademicDocsFilterRows(PARENT_ACADEMIC_DOCS_ALL_ROWS, filterType));
+}
+
+function parentAcademicDocsUpdateTable(rows){
+    if($.fn.DataTable && $.fn.DataTable.isDataTable('#parentAcademicDocsTable')){
+        $('#parentAcademicDocsTable').DataTable().destroy();
+    }
+    $("#parentAcademicDocsBody").html(getParentAcademicDocsRowsHtml(rows));
+    parentAcademicDocsInitDataTable();
 }
 
 function parentAcademicDocsResolveList(apiResponse){

@@ -9,12 +9,14 @@ async function renderBookClassContent(
   payload["schoolId"] = SCHOOL_ID;
   payload["userTimezone"] = USER_TIMEZONE;
   payload["userId"] = USER_ID;
-  var responseData = await getDashboardDataBasedUrlAndPayload(
-    true,
-    true,
-    "book-a-class",
-    payload
-  );
+  var responseData = typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyBookAClassResponse === "function"
+    ? getDummyBookAClassResponse()
+    : await getDashboardDataBasedUrlAndPayload(
+      true,
+      true,
+      "book-a-class",
+      payload
+    );
   if (responseData.statusCode == "BUY_A_CLASS") {
     $("#dashboardContentInHTML").html(
       pageTitleContentForClassError() +
@@ -27,8 +29,8 @@ async function renderBookClassContent(
     );
   } else {
     data = await getDetailsForStudentBookaClass(
-      responseData.details.studentStandardId
-    );
+        responseData.details.studentStandardId
+      );
     if(!renderingflag) {
       var activeIndex = $(".courseThumb.bg-primary").index(".courseThumb") + 1;
       $("#classesThumbCotentListWrapper").html(classesThumbCotentListNew(data));
@@ -60,8 +62,8 @@ async function renderBookClassContent(
       }).on("change", async function () {
         var activeIndex = $(".courseThumb.bg-primary").index(".courseThumb") + 1;
         data = await getDetailsForStudentBookaClass(
-          responseData.details.studentStandardId
-        );
+            responseData.details.studentStandardId
+          );
         var moduleId = $("#bookClassContent").attr("data-moduleId");
         $("#classesThumbCotentListWrapper").html(classesThumbCotentListNew(data));
         $("#bookClassContentThumbList").html(
@@ -146,6 +148,8 @@ function getBookClassContent(data,moduleId,showAcademicYearValidation,classPlanC
                         html+=`</div>`;
                       }
                         
+                      var showSelectedCoursesForDummy = typeof getDummyStudentGradeKey === "function" && ["5", "6", "7", "8", "9", "10", "11", "12"].indexOf(getDummyStudentGradeKey()) >= 0;
+                      if (!(typeof isDummyStudentMode === "function" && isDummyStudentMode()) || showSelectedCoursesForDummy) {
                        html+=`<div>`;
                           html+=`<div>`;
                               if(data.subjectList[0].name != "All Courses" && data.subjectList.length != 1){
@@ -158,7 +162,9 @@ function getBookClassContent(data,moduleId,showAcademicYearValidation,classPlanC
                           html+=`</div>
                           <div class="${data.subjectList[0].name != "All Courses" ? '':'mt-3'}">${classThumbItemContent(data.subjectList, moduleId)}</div>
                         </div>
-                      </div>
+                      `;
+                      }
+                      html+=`</div>
                     </div>
                   </div>
                 </div>

@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fee Receipt</title>
+    <style>
+        :root {
+            --blue: #0784f8;
+            --text: #424852;
+            --border: #0b82f0;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #f2f4f7;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+        .receipt-page {
+            position: relative;
+            width: 794px;
+            min-height: 1123px;
+            margin: 24px auto;
+            padding: 16px 40px 34px;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        .receipt-page:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-image: url("images/is_logo_2026_blue.png");
+            background-repeat: repeat;
+            background-size: 330px auto;
+            background-position: 22px 14px;
+            opacity: 0.035;
+        }
+        .receipt-content {
+            position: relative;
+            z-index: 1;
+        }
+        .brand {
+            text-align: center;
+            border-bottom: 1px solid var(--blue);
+            padding-bottom: 4px;
+        }
+        .brand img {
+            width: 330px;
+            max-width: 80%;
+            display: block;
+            margin: 0 auto 2px;
+        }
+        .tagline {
+            color: #26842a;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: -4px;
+        }
+        .address {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .title {
+            color: var(--blue);
+            text-align: center;
+            font-weight: 700;
+            border-top: 1px solid var(--blue);
+            border-bottom: 1px solid var(--blue);
+            padding: 4px 0;
+            margin: 0 0 10px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-table td {
+            border: 1px solid #d9e0e8;
+            padding: 5px 7px;
+        }
+        .info-table td:first-child {
+            width: 40%;
+        }
+        .section-title {
+            color: var(--blue);
+            font-weight: 700;
+            margin: 14px 0 6px;
+        }
+        .fee-table th,
+        .schedule-table th {
+            background: var(--blue);
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 10px 8px;
+            font-weight: 700;
+            text-align: left;
+        }
+        .fee-table td,
+        .schedule-table td {
+            border: 1px solid var(--border);
+            padding: 7px 8px;
+            vertical-align: top;
+        }
+        .fee-table th:first-child,
+        .fee-table td:first-child {
+            width: 62px;
+            text-align: center;
+        }
+        .amount {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .course-list {
+            margin-top: 8px;
+            line-height: 1.65;
+        }
+        .total-row td {
+            font-weight: 700;
+        }
+        .schedule-table th:nth-child(2),
+        .schedule-table td:nth-child(2),
+        .schedule-table th:nth-child(3),
+        .schedule-table td:nth-child(3) {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .schedule-table th:nth-child(3),
+        .schedule-table td:nth-child(3) {
+            text-align: center;
+        }
+        .note {
+            margin-top: 18px;
+            font-weight: 700;
+        }
+        .signature {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 4px;
+            min-height: 116px;
+        }
+        .signature-box {
+            width: 210px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .signature-box img {
+            width: 82px;
+            display: block;
+            margin: 12px auto 0;
+        }
+        .policy {
+            margin-top: 34px;
+            font-size: 10px;
+            line-height: 1.45;
+            text-align: justify;
+        }
+        .ack {
+            margin-top: 18px;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+        .check {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            margin-right: 4px;
+            border-radius: 2px;
+            background: var(--blue);
+            color: #fff;
+            font-size: 10px;
+            line-height: 13px;
+            text-align: center;
+            vertical-align: -1px;
+        }
+        @media print {
+            body {
+                background: #fff;
+            }
+            .receipt-page {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="receipt-page">
+        <div class="receipt-content">
+            <header class="brand">
+                <img src="images/is_logo_2026_blue.png" alt="International Schooling">
+                <div class="address">SINGAPORE: 111 Somerset Road, Level 3, TripleOne Somerset, Singapore - 238164</div>
+            </header>
+            <div class="title">FEE RECEIPT</div>
+
+            <section class="info-grid">
+                <table class="info-table">
+                    <tbody>
+                        <tr><td>Student Name</td><td id="studentName"></td></tr>
+                        <tr><td>Student ID:</td><td id="studentCode"></td></tr>
+                        <tr><td>Country | City:</td><td id="countryCity"></td></tr>
+                        <tr><td>Learning Plan:</td><td id="learningPlan"></td></tr>
+                    </tbody>
+                </table>
+                <table class="info-table">
+                    <tbody>
+                        <tr><td>Fee for:</td><td id="feeFor"></td></tr>
+                        <tr><td>Fee Receipt No.:</td><td id="receiptNo"></td></tr>
+                        <tr><td>Fee Mode:</td><td>Credit Card/Debit Card</td></tr>
+                        <tr><td>Fee Paid on:</td><td id="paidOn"></td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="section-title">TOTAL FEE</div>
+            <table class="fee-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Fee Description</th>
+                        <th>Fee Amount</th>
+                        <th>Total Fee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1.</td>
+                        <td>
+                            <div>Enrollment Fee + Course Fee</div>
+                            <div class="course-list" id="courseList"></div>
+                        </td>
+                        <td class="amount" id="feeAmount"></td>
+                        <td class="amount" id="totalFee"></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="3" class="amount">Total Fee</td>
+                        <td class="amount" id="totalFeeBottom"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-title">FEE SCHEDULE</div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Fee Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="feeSchedule"></tbody>
+            </table>
+
+            <div class="note">Note: All fees mentioned above are in US Dollars</div>
+            <div class="signature">
+                <div class="signature-box">
+                    <div>International Schooling</div>
+                    <div>Authorised Signatory</div>
+                    <img src="images/letter/stamp-for-receipt-2023.png" alt="Authorised stamp">
+                </div>
+            </div>
+
+            <section class="policy">
+                Fee Refund Policy: Enrollment Fee is non-refundable, non-transferable, and non-adjustable under any condition, whether in the ONE-TIME, INSTALLMENT, or CUSTOMISED fee plan. Fee refunds are only applicable for students who have paid the ONE-TIME fee. The Installment and Customised fee plans are non-refundable, non-transferable, and non-adjustable under any condition. Fee refund requests must be initiated within 90 days from the academic year start date. The student is not eligible for a fee refund after the 90-day period under any condition. If all conditions are met, we refund 50% of the course fee if the enrollment period is within 15 days, 35% if the enrollment period is within 16-30 days, 25% if the enrollment period is within 31-60 days, 15% if the enrollment period is within 61-90 days, and no refund is possible after 90 days of enrollment. The refund/withdrawal must be initiated within the time frame. Calendar days are calculated on a 24-hour basis, irrespective of time zone. The parent/guardian/student must send the notice of cancellation via email to support@internationalschooling.org with the subject as "Request for Cancellation of Enrollment." No refund will be given if any personal, academic, or other details are misrepresented or hidden, or if fake documents are submitted. A transaction charge of USD 80 will be deducted from all refunds mandatorily. Refunds will only be sent to the bank account details provided by the parent/guardian/student and only after receiving confirmation via email. Refund eligibility will be calculated from the date the refund request is received via email.
+            </section>
+
+            <section class="ack">
+                <div><span class="check">&#10003;</span>I <span id="parentName"></span>, on behalf of <span id="ackStudentName"></span>, understand and agree with the above-mentioned terms and conditions of the refund policy on</div>
+                <div>Date: <span id="ackDate"></span></div>
+                <div>My Location: <span id="location"></span></div>
+                <div>My IP Address: 179.213.130.168</div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            var fallbackData = {
+                "990001": {
+                    studentName: "Aarav Mehta",
+                    studentCode: "US260529001",
+                    countryCity: "India | Delhi",
+                    learningPlan: "One-to-One Learning",
+                    grade: "Grade 8",
+                    parentName: "Rohan Mehta",
+                    location: "India, Delhi",
+                    totalFee: 4950,
+                    courses: ["Pre-Algebra (1.0 Credit)", "World History (1.0 Credit)", "Reading and Writing Workshop (1.0 Credit)", "Physical Science (1.0 Credit)", "Information Technology (1.0 Credit)", "Fine Arts (1.0 Credit)"],
+                    schedule: [
+                        ["Grade 8 - 1st of 3 Months Installment", 2190, "RECEIVED"],
+                        ["Grade 8 - 2nd of 3 Months Installment", 1380, "PENDING"],
+                        ["Grade 8 - 3rd of 3 Months Installment", 1380, "PENDING"]
+                    ]
+                },
+                "990002": {
+                    studentName: "Anaya Mehta",
+                    studentCode: "US260529002",
+                    countryCity: "India | Delhi",
+                    learningPlan: "Flexy Program",
+                    grade: "Grade 5",
+                    parentName: "Rohan Mehta",
+                    location: "India, Delhi",
+                    totalFee: 3150,
+                    courses: ["Mathematics Grade 5 (1.0 Credit)", "Science Grade 5 (1.0 Credit)", "Creative Writing (1.0 Credit)", "Social Studies Grade 5 (1.0 Credit)", "Digital Literacy (1.0 Credit)"],
+                    schedule: [
+                        ["Grade 5 - 1st of 3 Months Installment", 1440, "RECEIVED"],
+                        ["Grade 5 - 2nd of 3 Months Installment", 855, "PENDING"],
+                        ["Grade 5 - 3rd of 3 Months Installment", 855, "PENDING"]
+                    ]
+                }
+            };
+
+            function param(name) {
+                return new URLSearchParams(window.location.search || "").get(name);
+            }
+
+            function money(value) {
+                return "$" + Number(value || 0).toFixed(2);
+            }
+
+            function setText(id, value) {
+                var element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value == null ? "" : value;
+                }
+            }
+
+            function normalizeStudentCode(value) {
+                return String(value || "").replace(/^(INDIS|SG)/i, "US");
+            }
+
+            function receiptNumber(value, paymentId, paidOn) {
+                value = String(value || "");
+                if (/^REF\d{10}_\d+$/i.test(value)) {
+                    return value;
+                }
+                var date = new Date(paidOn || Date.now());
+                if (isNaN(date.getTime())) {
+                    date = new Date();
+                }
+                var yy = String(date.getFullYear()).slice(-2);
+                var mm = String(date.getMonth() + 1).padStart(2, "0");
+                var dd = String(date.getDate()).padStart(2, "0");
+                var digits = String(paymentId || value || "00000").replace(/\D/g, "");
+                return "REF" + yy + mm + dd + (digits.slice(0, 4) || "0000") + "_" + (digits.slice(-5) || "00000");
+            }
+
+            function installmentName(grade, index) {
+                var labels = ["1st", "2nd", "3rd"];
+                return (grade || "Grade") + " - " + (labels[index] || ((index + 1) + "th")) + " of 3 Months Installment";
+            }
+
+            function normalizePaymentName(value, grade, index) {
+                value = String(value || "");
+                if (!value || /month fee|course fee|installment/i.test(value) && value.indexOf("Months Installment") < 0) {
+                    return installmentName(grade, index || 0);
+                }
+                return value;
+            }
+
+            function normalizePaidOn(value) {
+                value = String(value || "").trim();
+                var match = value.match(/^([A-Za-z]{3}\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+(?:AM|PM))/i);
+                return match ? match[1] : value;
+            }
+
+            function getStoredReceipt(paymentId) {
+                try {
+                    var receipts = JSON.parse(localStorage.getItem("DUMMY_FEE_RECEIPT_DATA_BY_PAYMENT_ID") || "{}");
+                    if (receipts[String(paymentId)]) {
+                        return receipts[String(paymentId)];
+                    }
+                    receipts = JSON.parse(localStorage.getItem("PARENT_DEMO_RECEIPT_DATA_BY_PAYMENT_ID") || "{}");
+                    return receipts[String(paymentId)] || null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function appendCourseRows(courses) {
+                var courseList = document.getElementById("courseList");
+                courseList.innerHTML = "";
+                (courses || []).forEach(function (course) {
+                    var row = document.createElement("div");
+                    row.textContent = course;
+                    courseList.appendChild(row);
+                });
+            }
+
+            function appendScheduleRows(schedule) {
+                var feeSchedule = document.getElementById("feeSchedule");
+                feeSchedule.innerHTML = "";
+                (schedule || []).forEach(function (row, index) {
+                    var tr = document.createElement("tr");
+                    var description = document.createElement("td");
+                    var amount = document.createElement("td");
+                    var status = document.createElement("td");
+                    description.textContent = normalizePaymentName(row[0], student.grade, index);
+                    amount.textContent = money(row[1]);
+                    status.textContent = row[2] || "";
+                    tr.appendChild(description);
+                    tr.appendChild(amount);
+                    tr.appendChild(status);
+                    feeSchedule.appendChild(tr);
+                });
+            }
+
+            var paymentId = param("paymentId") || "";
+            var paidOn = param("paidOn") || "May 29, 2028 11:00 AM";
+            var receipt = getStoredReceipt(paymentId);
+            var fallback = fallbackData[param("studentId")] || fallbackData["990001"];
+            var student = receipt || fallback;
+            var totalFee = student.totalFee || student.feeAmount || 0;
+            var paidOnText = normalizePaidOn(student.paidOn || paidOn);
+
+            setText("studentName", student.studentName);
+            setText("studentCode", normalizeStudentCode(student.studentCode));
+            setText("countryCity", student.countryCity);
+            setText("learningPlan", student.learningPlan);
+            setText("feeFor", normalizePaymentName(student.feeFor, student.grade, 0));
+            setText("receiptNo", receiptNumber(student.receiptNo, paymentId, paidOnText));
+            setText("paidOn", paidOnText);
+            setText("feeAmount", money(student.feeAmount || totalFee));
+            setText("totalFee", money(totalFee));
+            setText("totalFeeBottom", money(totalFee));
+            setText("parentName", student.parentName);
+            setText("ackStudentName", student.studentName);
+            setText("ackDate", paidOnText.replace(" 11:00 AM", " at 11:00 AM"));
+            setText("location", student.location);
+
+            appendCourseRows(student.courses);
+            appendScheduleRows(student.schedule);
+        })();
+    </script>
+</body>
+</html>

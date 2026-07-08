@@ -1401,6 +1401,13 @@ function bookedCalssCotentFun(subjectId, studentStandardId,startDate,endDate) {
 	data['endDate'] = endDate;
 	data['dateType'] = "";
 	// data['roleModuleId'] = roleModuleId;
+	if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyStudentBookedClassesDetailsResponse === "function") {
+		var dummyData = getDummyStudentBookedClassesDetailsResponse(subjectId);
+		$("#classRecodsTumbs").html(getClassRecodsContent(dummyData.subjectCountDatials));
+		$("#classRecodsTumbs").show();
+		customLoader(false);
+		return;
+	}
 	$.ajax({
 		type: "GET",
 		contentType: APPLICATION_JSON_VALUE,

@@ -622,6 +622,13 @@ function getLmsPlatformContent(schoolId) {
 
 function getCourseContent(key,key1) {
 	var html = '<option value="">Select Course</option>';
+	if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummySubjectOptionsByGrade === "function") {
+		var dummySubjects = getDummySubjectOptionsByGrade(key);
+		$.each(dummySubjects, function (i, v) {
+			html += `<option value="${v.key}">${v.value}</option>`;
+		});
+		return html;
+	}
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
@@ -3269,15 +3276,16 @@ function getSpoofUrlModalHtml() {
     </div>`;
 }
 
-function openSpoofUrlModal(userId, userName, roleLabel) {
-	if (!userId) {
+function openSpoofUrlModal(type, entityId, userName, roleLabel) {
+	if (!entityId) {
 		showMessageTheme2(0, "Invalid user.");
 		return false;
 	}
 	if ($("#spoofUrlModal").length === 0) {
 		$("body").append(getSpoofUrlModalHtml());
 	}
-	$("#spoofUrlModal").attr("data-user-id", userId);
+	$("#spoofUrlModal").attr("data-user-type", type);
+	$("#spoofUrlModal").attr("data-user-id", entityId);
 	$("#spoofUrlUserName").text(userName || "");
 	$("#spoofUrlResultBox").hide();
 	$("#spoofUrlGeneratedUrl").val("");
@@ -3305,21 +3313,25 @@ function onSpoofUrlExpiryChange(selectEl) {
 		$("#spoofUrlResultBox").hide();
 		return;
 	}
-	var userId = $("#spoofUrlModal").attr("data-user-id");
+	var entityId = $("#spoofUrlModal").attr("data-user-id");
+	var type = $("#spoofUrlModal").attr("data-user-type");
 	var label = $select.find("option:selected").attr("data-label") || (minutes + " minutes");
-	generateSpoofUrl(userId, minutes, label);
+	generateSpoofUrl(type, entityId, minutes, label);
 }
 
-async function generateSpoofUrl(userId, expiryMinutes, validityLabel) {
+async function generateSpoofUrl(type, entityId, expiryMinutes, validityLabel) {
 	try {
 		customLoader(true);
+		var extraParams = getSpoofUrlExtraParams();
+		var requestBody = $.extend({
+			type: type + "",
+			entityId: entityId + "",
+			expiryMinutes: expiryMinutes + ""
+		}, extraParams || {});
 		var ajaxReqDetails = {
 			method: "POST",
 			url: APP_BASE_URL + SCHOOL_UUID + "/create-spoof-url/" + UNIQUEUUID,
-			body: {
-				userId: userId + "",
-				expiryMinutes: expiryMinutes + ""
-			},
+			body: requestBody,
 			global: true,
 			showMessage: true,
 			onFaildResolved: true,
@@ -3328,11 +3340,12 @@ async function generateSpoofUrl(userId, expiryMinutes, validityLabel) {
 		var response = await callCommonAjax(ajaxReqDetails);
 		if (response && (response.status === "SUCCESS" || response.statusCode === "200") && response.details) {
 			var details = response.details;
+			var spoofUrl = appendSpoofUrlExtraParams(details.spoofUrl || "", extraParams);
 			$("#spoofUrlUserName").text(details.userName || $("#spoofUrlUserName").text());
-			$("#spoofUrlGeneratedUrl").val(details.spoofUrl || "");
+			$("#spoofUrlGeneratedUrl").val(spoofUrl);
 			var invitationText = "Name - " + (details.userName || "")
 				+ "\nValidity - " + validityLabel
-				+ "\nUrl - " + (details.spoofUrl || "");
+				+ "\nUrl - " + spoofUrl;
 			$("#spoofUrlInvitationText").val(invitationText);
 			$("#spoofUrlResultBox").show();
 		} else {
@@ -3346,6 +3359,52 @@ async function generateSpoofUrl(userId, expiryMinutes, validityLabel) {
 		customLoader(false);
 	}
 }
+
+function getSpoofUrlExtraParams() {
+	try {
+		return JSON.parse($("#spoofUrlModal").attr("data-extra-params") || "{}") || {};
+	} catch (e) {
+		return {};
+	}
+}
+
+function appendSpoofUrlExtraParams(spoofUrl, extraParams) {
+	if (!spoofUrl || !extraParams || $.isEmptyObject(extraParams)) {
+		return spoofUrl || "";
+	}
+	try {
+		var url = new URL(spoofUrl, window.location.origin);
+		$.each(extraParams, function (key, value) {
+			if (value !== undefined && value !== null && value !== "") {
+				url.searchParams.set(key, value);
+			}
+		});
+		return url.toString();
+	} catch (e) {
+		return spoofUrl;
+	}
+}
+
+function openParentDashboardPreviewFromQuery() {
+	try {
+		var params = new URLSearchParams(window.location.search || "");
+		if (params.get("parentDemoPreview") !== "Y" || typeof callDashboardPageSchool !== "function") {
+			return;
+		}
+		var feedUserId = params.get("demoFeedUserId") || "";
+		if (feedUserId) {
+			localStorage.setItem("PARENT_DEMO_FEED_USER_ID", feedUserId);
+		}
+		var previewModuleId = params.get("parentDemoModuleId") || (typeof moduleId !== "undefined" ? moduleId : 0);
+		callDashboardPageSchool(previewModuleId, "Parent-dashboard");
+	} catch (e) {
+		console.warn("Unable to open parent dashboard preview", e);
+	}
+}
+
+$(function () {
+	openParentDashboardPreviewFromQuery();
+});
 
 function getNewReleaseNotificationModal(){
 	var html=
