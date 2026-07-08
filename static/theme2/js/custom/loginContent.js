@@ -37,7 +37,7 @@ async function loginContent(userName, fromSpoof){
                         <h3 class="yellow-text graduation-event-date" style="margin-bottom:4px; font-size:18px; font-weight:600;">July 25, 2026 &bull; 2 PM UAE Time Onwards</h3>
                         <p class="graduation-description graduation-attendee-types" style="margin:4px 0 10px; font-size:16px; font-weight:600;">Graduate | Non-Graduate | Performer | Teacher | Staff</p>
                         <div class="graduation-event-heading mt-2">
-                            <span class="graduation-event-badge graduation-registration-deadline graduation-registration-closed text-uppercase" style="background:white;">Registration Closed!</span>
+                            <span class="graduation-event-badge graduation-registration-deadline graduation-registration-closed" style="background:white;">Registration Closed!</span>
                         </div>
                     </div>
                 </aside>
