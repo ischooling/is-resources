@@ -143,7 +143,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "global-competitions-club":{url:"global-competitions-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "game-strategy-analysis-club":{url:"game-strategy-analysis-club",file:[{role:"",fileName:["clubsCommonContent.js","clubsCommon.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         "student-feedback":{url:"student-feedback",file:[{role:"",fileName:["feedbackContents.js","feedbackNew.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
-
+        "my-school-calendar":{url:"",file:[{role:"",fileName:["mySchoolCalendarContent.js","mySchoolCalendar.js"]}],funName:function(){},init: function(){},type:"JS",pageReqType:"IN"},
         // PARENT //
         "parent-student-login-details":{url:"",file:[{role:"",fileName:["studentParentLoginHistoryContent.js","studentParentLoginHistory.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-syllabus-assigned-teacher":{url:"",file:[{role:"",fileName:["parentSyllabusAssignedTeacherContent.js","parentSyllabusAssignedTeacher.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},

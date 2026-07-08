@@ -154,6 +154,7 @@ const contentHandlers = {
     'teacher-feedback': () => renderTeacherFeedbackPage("Teacher Feedback"),
     'ptm': () => renderParentTeacherMeetingPage("PTM"),
     'student-dashboard-management': () => renderStudentDashboardManagementPage("Student Dashboard Management"),
+    'my-school-calendar': () => renderMySchoolCalendarPage("My School Calendar"),
 
 };
 

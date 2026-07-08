@@ -9247,11 +9247,11 @@ font-size:.8rem
 transition:width .2s
 }
 .app-header__logo .logo-src {
-	height:50px;
+	height:25px;
 	width:350px;
 	background-size: contain !important;
     background-repeat: no-repeat !important;
-    background-position: center !important;
+    background-position: left !important;
 }
 .logo-bg-color{background-color: rgba(var(--white-logo-bg), 0.6) !important;}
 /*.app-header__logo .logo-src  a{display: inline-block;}
