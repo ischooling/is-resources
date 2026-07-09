@@ -23,7 +23,7 @@ function getMySchoolCalendarCard(title){
         `<div class="main-card mb-3 card col-lg-6 col-sm-8 col-12 mx-auto ronded-10">
             <div class="card-body">
                 <div class="text-center">
-                    <img src="${PATH_FOLDER_IMAGE2}empty_my_school_calendar.png" alt="check-gif" class="" style="max-width: 450px;">
+                    <img src="${PATH_FOLDER_IMAGE2}empty_my_school_calendar.png" alt="check-gif" class="" style="max-width: 450px;width:100%">
                 </div>
                 <div class="d-flex justify-content-center align-items-center flex-column pb-3 text-center">
                    <h4 class="mb-2 font-weight-bold text-primary">There is no data</h4>

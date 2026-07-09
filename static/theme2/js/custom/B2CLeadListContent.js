@@ -1904,6 +1904,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'</tr>';
 								}
 
+                
+
 								html+='<tr>'
 									+'<th class="border-0 p-1">UTM:</th>'
 									+'<td class="border-0 p-1">'
@@ -1948,48 +1950,53 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 
 												}else{
 													html+='<tr>'
-																+'<th class="border-0 p-0 font-12">Source:</th>'
+																+'<th class="border-0 p-0 font-12 bold">Source:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmSource!=''?leads.utmSource:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Medium:</th>'
+																+'<th class="border-0 p-0 font-12 bold">Medium:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmMedium!=''?leads.utmMedium:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Description:</th>'
+																+'<th class="border-0 p-0 font-12 bold">Description:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmDescription!=''?leads.utmDescription:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Campaign:</th>'
+																+'<th class="border-0 p-0 font-12 bold">Campaign:</th>'
 																+'<td class="border-0 p-0 font-12 utmCampaign-'+leads.leadId+'">'+(leads.utmCampaign!=''?leads.utmCampaign:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Is Organic:</th>'
+																+'<th class="border-0 p-0 font-12 bold">Is Organic:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.utmTerm!=''?leads.utmTerm:'N/A')+'</td>'
 															+'</tr>'
 															+'<tr>'
-																+'<th class="border-0 p-0 font-12">Gclid:</th>'
+																+'<th class="border-0 p-0 font-12 bold">Gclid:</th>'
 																+'<td class="border-0 p-0 font-12">'+(leads.gclid!=''?leads.gclid:'N/A')+'</td>'
 															+'</tr>';
 														
 												}
+                        const plainTextLanding = decodeURIComponent(leads.leadLandingUrl);
 												html+='<tr>'
-															+'<th class="border-0 p-0 font-12">Landing URL:</th>'
-															+'<td class="border-0 p-0 font-12">'+(leads.leadLandingUrl)+'</td>'
+															+'<th class="border-0 p-0 font-12 bold">Landing URL:</th>'
+															+'<td class="border-0 p-0 font-12">'+(plainTextLanding)+'</td>'
 														+'</tr>'
 														+'<tr>'
-															
 														+'</tr>'
 														+'<tr>'
-															+'<th class="border-0 p-0 font-12">Payment IP:</th>'
+															+'<th class="border-0 p-0 font-12 bold">Original URL:</th>'
+															+'<td class="border-0 p-0 font-12">'+(leads.landingUrl)+'</td>'
+														+'</tr>'	
+														+'</tr>'
+														+'<tr>'
+															+'<th class="border-0 p-0 font-12 bold">Payment IP:</th>'
 															+'<td class="border-0 p-0 font-12">'+(leads.paymentIp)+'</td>'
 														+'</tr>'
 														+'<tr>'
-															+'<th class="border-0 p-0 font-12">OS:</th>'
+															+'<th class="border-0 p-0 font-12 bold">OS:</th>'
 															+'<td class="border-0 p-0 font-12">'+(leads.os)+'</td>'
 														+'</tr>'
 														+'<tr>'
-															+'<th class="border-0 p-0 font-12">SOURCE:</th>'
+															+'<th class="border-0 p-0 font-12 bold">SOURCE:</th>'
 															+'<td class="border-0 p-0 font-12">'+(leads.sourceOriginal)+'</td>'
 														+'</tr>';
 											html+='</tbody></table></div>'
