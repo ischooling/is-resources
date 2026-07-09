@@ -220,6 +220,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "log-viewer":{url:"",file:[{role:"",fileName:["logViewerContent.js","logViewer.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "location-checker-captures":{url:"location-checker-captures-content?moduleId="+moduleId,file:[],type:"JSP",pageReqType:"IN"},
         "feedback-form":{url:"",file:[{role:"",fileName:["feedbackFormContent.js","feedbackForm.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "evaluation-config":{url:"",file:[{role:"",fileName:["evaluationConfigContent.js","evaluationConfig.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "user-rating":{url:"",file:[{role:"",fileName:["teacherRatingContent.js","teacherRating.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "teacher-my-rating":{url:"",file:[{role:"",fileName:["teacherMyRatingContent.js","teacherMyRating.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {

@@ -7901,6 +7901,10 @@ function goToPageCommon(page, context) {
       CURRENT_PAGE_MANAGE_CLUBS = page;
       getAllClubsData();
 			break;
+		case 'teacherRating':
+			trState.pageNo = page;
+			loadTeacherRatingList(false);
+			break;
 		default:
 			console.warn('Unknown pagination context:', context);
 	}

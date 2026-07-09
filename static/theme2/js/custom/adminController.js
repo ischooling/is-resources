@@ -155,7 +155,10 @@ const contentHandlers = {
     'ptm': () => renderParentTeacherMeetingPage("PTM"),
     'student-dashboard-management': () => renderStudentDashboardManagementPage("Student Dashboard Management"),
     'my-school-calendar': () => renderMySchoolCalendarPage("My School Calendar"),
-
+    'feedback-form': () => renderFeedbackFormPage(),
+    'evaluation-config': () => initEvaluationConfig(),
+    'user-rating': () => initTeacherRating(),
+    'teacher-my-rating': () => initTeacherMyRating()
 };
 
 const getLeadCategory = () => {
@@ -312,6 +315,21 @@ function initGraduationCeremonyAttendees() {
 function initEventDiscount() {
     $('#dashboardContentInHTML').html(getEventDiscountPageContent('Event Discount'));
     eventDiscountOnLoad();
+}
+
+function initEvaluationConfig() {
+    $('#dashboardContentInHTML').html(getEvaluationConfigPageContent('Evaluation Configuration'));
+    evaluationConfigOnLoad();
+}
+
+function initTeacherRating() {
+    $('#dashboardContentInHTML').html(getTeacherRatingPageContent('Teacher Rating'));
+    teacherRatingOnLoad();
+}
+
+function initTeacherMyRating() {
+    $('#dashboardContentInHTML').html(getTeacherMyRatingPageContent('My Rating'));
+    teacherMyRatingOnLoad();
 }
 
 function initUserScreeningProfiles() {

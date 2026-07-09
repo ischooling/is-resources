@@ -582,6 +582,14 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
 .login-redesign .graduation-registration-closed{
  color:#d92550 !important;
  margin-top:8px;
+ box-sizing:border-box;
+ max-width:100%;
+ padding:8px 16px;
+ font-size:clamp(17px, 4.5vw, 24px);
+ white-space:normal;
+ word-break:break-word;
+ text-align:center;
+ justify-content:center;
 }
 .login-redesign .graduation-event-heading{
  display:flex;
@@ -869,15 +877,6 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  .login-redesign.login-graduation-split .graduation-attendee-types{
  font-size:13px !important;
  line-height:1.25 !important;
- }
- .login-redesign.login-graduation-split .graduation-registration-deadline{
- box-sizing:border-box !important;
- width:100% !important;
- max-width:100% !important;
- padding:8px 10px !important;
- font-size:12px !important;
- line-height:1.25 !important;
- white-space:normal !important;
  }
  .login-redesign .login-logo img{max-width:245px;}
  .login-redesign .sms{margin:8px 0;font-size:20px;}

@@ -51,21 +51,216 @@ async function rateYourTeacher(feedbackCode, feedbackType, congigObj){
         };
         showFeedbackPopup(feedbackCode,  congigObj);
     }else if(feedbackType == 'DYNAMIC'){
-        var apiResponse = await getAssignedTeachers();
-        var rows = getAssignedTeachersAsRow(apiResponse);
-        var feedbackForm={
-            feedbackTitle: `Rate your teachers`,
-            dynamicQuestions: JSON.stringify(buildTeacherRatingQuestions(rows))
-        };
-        // Teacher feedback -> each question targets a specific teacher (questionTargets),
-        // plus a combined label for the whole submission (feedbackFor).
-        congigObj.feedbackContext = {
-            purpose: 'Teacher Feedback',
-            feedbackFor: buildTeacherFeedbackForLabel(rows),
-            questionTargets: buildTeacherQuestionTargets(rows)
-        };
-        showTemplateFeedbackPopup(feedbackCode, feedbackForm,  congigObj);
+        await renderTeacherSelectFeedbackScreen(feedbackCode, congigObj);
     }
+}
+
+// ==================== TEACHER SELECT (side-nav "management feedback") ====================
+// The teacher dropdown and the feedback form render together in one screen as soon as the
+// module opens. The form area stays covered by an overlay (which doubles as the "please
+// select a teacher" validation) until a teacher is picked, so it is never possible to reach
+// the form's own submit button without a teacher selected.
+var TEACHER_SELECT_FEEDBACK_STATE = {};
+
+async function renderTeacherSelectFeedbackScreen(feedbackCode, congigObj){
+    var targetContainer = getFeedbackTargetContainer(congigObj) || document.querySelector("#dashboardContentInHTML");
+    if(!targetContainer){
+        console.warn("[Feedback] Teacher select render target not found.");
+        return;
+    }
+
+    var teachers;
+    try{
+        teachers = await getSchoolTeacherListForFeedback();
+    }catch(e){
+        console.error("[Feedback] Unable to load teacher list:", e);
+        teachers = [];
+    }
+
+    TEACHER_SELECT_FEEDBACK_STATE = {
+        feedbackCode: feedbackCode,
+        congigObj: congigObj,
+        teachers: teachers,
+        embedUrl: null
+    };
+
+    $(targetContainer).html(buildTeacherSelectScreenHtml(teachers));
+
+    $(targetContainer).find("#teacherSelectFeedbackDropdown").on("change", function(){
+        onTeacherSelectFeedbackDropdownChange();
+    });
+
+    $(targetContainer).find("#teacherSelectFeedbackOverlay").on("click", function(){
+        showTeacherSelectFeedbackValidation();
+    });
+
+    // Load the actual feedback form immediately (no teacher picked yet) so it is visible
+    // together with the dropdown; the overlay keeps it non-interactive until then.
+    loadTeacherSelectFeedbackForm();
+}
+
+function teacherSelectFeedbackEscapeHtml(value){
+    return $("<div>").text(value == null ? "" : value).html();
+}
+
+function buildTeacherSelectScreenHtml(teachers){
+    var optionsHtml = '<option value="">-- Select Teacher --</option>';
+    $.each(teachers || [], function(_, teacher){
+        optionsHtml += '<option value="' + teacher.id + '" data-teacher-name="' + teacherSelectFeedbackEscapeHtml(teacher.name) + '">'
+            + teacherSelectFeedbackEscapeHtml(teacher.name) + '</option>';
+    });
+
+    return `
+    <div class="w-100">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <h5 class="text-primary font-weight-semi-bold mb-3 text-center">Rate Your Teacher</h5>
+                <div class="form-group mx-auto text-center"  style="max-width:420px;">
+                    <label class="font-weight-semi-bold">Select Teacher <span class="text-danger">*</span></label>
+                    <select id="teacherSelectFeedbackDropdown" class="form-control text-center">${optionsHtml}</select>
+                    <small id="teacherSelectFeedbackValidationMsg" class="text-danger d-none" style="font-size:14px;">Please select teacher.</small>
+                </div>
+            </div>
+            <div id="teacherSelectFeedbackFormWrapper" style="position:relative;height:70vh;">
+                <div id="teacherSelectFeedbackFormArea" style="height:100%;"></div>
+                <div id="teacherSelectFeedbackOverlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;cursor:not-allowed;">
+                    <div class="text-center px-4">
+                        <i class="fa fa-arrow-up text-primary mb-2 d-block" style="font-size:20px;"></i>
+                        <p class="text-muted font-weight-semi-bold mb-0" style="font-size:18px;">Please select a teacher above to give feedback.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+// Clicking the overlay (i.e. trying to use the form before a teacher is picked) surfaces
+// the same validation the user would expect from a required field.
+function showTeacherSelectFeedbackValidation(){
+    var dropdown = $("#teacherSelectFeedbackDropdown");
+    $("#teacherSelectFeedbackValidationMsg").removeClass("d-none");
+    dropdown.addClass("is-invalid");
+    dropdown.trigger("focus");
+}
+
+function onTeacherSelectFeedbackDropdownChange(){
+    var selectedOption = $("#teacherSelectFeedbackDropdown option:selected");
+    var teacherId = selectedOption.val();
+
+    if(!teacherId){
+        $("#teacherSelectFeedbackOverlay").show();
+        showTeacherSelectFeedbackValidation();
+        return;
+    }
+
+    $("#teacherSelectFeedbackValidationMsg").addClass("d-none");
+    $("#teacherSelectFeedbackDropdown").removeClass("is-invalid");
+    $("#teacherSelectFeedbackOverlay").hide();
+
+    // The teacher (and therefore feedbackUserIdTo/feedbackFor) is baked into the embed
+    // URL's query params, so the form has to reload once a teacher is chosen/changed.
+    loadTeacherSelectFeedbackForm();
+}
+
+function buildTeacherSelectFeedbackContext(){
+    var selectedOption = $("#teacherSelectFeedbackDropdown option:selected");
+    var teacherId = selectedOption.val();
+    var teacherName = selectedOption.attr("data-teacher-name");
+    var state = TEACHER_SELECT_FEEDBACK_STATE || {};
+
+    return {
+        // The submitter (admin) id, so the webhook back to is-rest-api can populate
+        // FEEDBACK_SUBMISSION.USER_ID (otherwise it comes through null).
+        userId: (typeof USER_ID !== "undefined" && USER_ID) ? USER_ID : "",
+        entityId: 0,
+        entityType: '',
+        feedbackDateTime: convertToUTC(moment().format("YYYY-MM-DD HH:mm:ss"), USER_TIMEZONE),
+        purpose: state.feedbackLabel || 'Management feedback',
+        feedbackFor: teacherName || '',
+        feedbackUserIdTo: teacherId ? parseInt(teacherId, 10) : 0
+    };
+}
+
+function loadTeacherSelectFeedbackForm(){
+    var state = TEACHER_SELECT_FEEDBACK_STATE || {};
+    var formArea = document.getElementById("teacherSelectFeedbackFormArea");
+    if(!formArea){
+        return;
+    }
+
+    // Built lazily (rather than once up front) so it always carries the freshest
+    // feedbackLabel/teacher selection, including right after the feedback-url lookup
+    // below resolves the form's label for the first time.
+    function buildInlineCongigObj(){
+        var inlineCongigObj = $.extend({}, state.congigObj || {}, {
+            renderMode: 'inline',
+            target: formArea,
+            showHeader: false,
+            height: '100%'
+        });
+        inlineCongigObj.feedbackContext = buildTeacherSelectFeedbackContext();
+        return inlineCongigObj;
+    }
+
+    if(state.embedUrl){
+        openFeedbackIframe(state.embedUrl, buildInlineCongigObj());
+        return;
+    }
+
+    $.ajax({
+        url: API_VERSION + "review/feedback-url",
+        type: "GET",
+        data: { eventCode: state.feedbackCode, schoolId: SCHOOL_ID },
+        success: function (res) {
+            if (res.status === "SUCCESS" && res.url) {
+                state.embedUrl = res.url.replace("/share/", "/embed/");
+                // FEEDBACK_FORMS.LABEL -> used as the webhook "purpose" instead of a
+                // hardcoded string.
+                state.feedbackLabel = res.label || '';
+                openFeedbackIframe(state.embedUrl, buildInlineCongigObj());
+            } else {
+                console.warn("[Feedback] No form found for code:", state.feedbackCode);
+            }
+        },
+        error: function (err) {
+            console.error("[Feedback] Error:", err);
+        }
+    });
+}
+
+// Full teacher list for the school, formatted for the teacher-select dropdown. Reuses the
+// existing Masters "TEACHER_LIST" endpoint (already used elsewhere to populate teacher
+// dropdowns) rather than adding a new backend endpoint.
+async function getSchoolTeacherListForFeedback(){
+    var ajaxReqDetails = {
+        method: "POST",
+        url: getURLForCommon("masters"),
+        body: {
+            authentication: {
+                hash: getHash(),
+                schoolId: SCHOOL_ID,
+                schoolUUID: SCHOOL_UUID,
+                userType: "COMMON"
+            },
+            requestData: {
+                requestKey: "TEACHER_LIST_APPROVED",
+                requestValue: SCHOOL_ID
+            }
+        },
+        global: false,
+        showMessage: false
+    };
+
+    var response = await callCommonAjax(ajaxReqDetails);
+    var rows = (response && response.mastersData && $.isArray(response.mastersData.data))
+        ? response.mastersData.data
+        : [];
+
+    return $.map(rows, function(row){
+        // value is "Full Name - Official Email"; keep just the name for feedbackFor.
+        var name = ((row && row.value) || "").split(" - ")[0].trim();
+        return { id: row && row.key, name: name || "Teacher" };
+    });
 }
 
 // Subject ("feedback for") of a general student feedback form.
@@ -270,6 +465,7 @@ function appendFeedbackEmbedParams(url, options) {
     var feedbackUrl = new URL(url, window.location.origin);
     var metadata = getFeedbackEmbedMetadata(options || {});
     var templateParams = getFeedbackTemplateParams(options || {});
+    feedbackUrl.searchParams.set("userId", metadata.userId);
     feedbackUrl.searchParams.set("userName", metadata.userName);
     feedbackUrl.searchParams.set("email", metadata.email);
     feedbackUrl.searchParams.set("optionalValue1", metadata.optionalValue1);
@@ -301,11 +497,13 @@ function getFeedbackWebhookData(options) {
 function getFeedbackEmbedMetadata(options) {
     var profile = (typeof commonProfileDTO === "object" && commonProfileDTO) ? commonProfileDTO : null;
     options = options || {};
+    var userId = getFeedbackMetadataValue(options.userId, (typeof USER_ID !== "undefined" ? USER_ID : (profile ? profile.userId : null)), "");
     var userName = getFeedbackMetadataValue(options.userName, profile ? profile.profileName : null, "Unknown User");
     var email = getFeedbackMetadataValue(options.email, profile ? profile.emailId : null, "");
     var optionalValue1 = getFeedbackMetadataValue(options.optionalValue1, profile ? profile.userId : null, "");
     var optionalValue2 = getFeedbackMetadataValue(options.optionalValue2, profile ? profile.profileRole : null, "");
     return {
+        userId: String(userId),
         userName: String(userName),
         email: String(email),
         optionalValue1: String(optionalValue1),

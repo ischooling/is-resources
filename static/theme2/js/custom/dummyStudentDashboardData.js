@@ -1027,7 +1027,7 @@
             + "<tr><td><table style='margin:0;width:100%;'><tbody><tr>"
             + "<td align='left' style='border:0;'><table style='margin:0;width:100%;'><tbody>"
             + "<tr><td><div class='site-logo mb-1'><img src='" + imagePath() + "is_logo_2026_blue.png' style='max-width:240px;width:100%;float:left'></div></td></tr>"
-            + "<tr><td><table class='tr-blue-border table table-striped table-bordered details-table text-left progress-summary-table'><tbody>"
+            + "<tr><td><table class='tr-blue-border table table-striped table-bordered details-table text-left progress-summary-table mt-4'><tbody>"
             + "<tr><td><span class='bold'>Student Name: </span>" + userName() + "</td></tr>"
             + "<tr><td><span class='bold'>Grade: </span>" + grade().label + "</td></tr>"
             + "<tr><td><span class='bold'>Course: </span>" + cleanCourseName(course.subjectName) + "</td></tr>"
@@ -1040,7 +1040,7 @@
             + "<tr><td><span class='bold'>Country: </span>Mexico</td></tr>"
             + "<tr><td><span class='bold'>Teacher Name: </span>" + teacher(course, index) + "</td></tr>"
             + "</tbody></table></td></tr></tbody></table></td></tr>"
-            + "<tr><td colspan='2'><div class='right-part text-center mt-1' style='width:auto;'><div class='right-title m-0'><h3 class='text-center text-uppercase bold'>Detailed Student Grading Report</h3><h4 class='text-uppercase bold'>Duration: " + displayDateOnly(reportStart) + " - " + displayDateOnly(reportEnd) + "</h4></div></div></td></tr>"
+            + "<tr><td colspan='2'><div class='right-part text-center mt-1 mb-2' style='width:auto;'><div class='right-title m-0'><h3 class='text-center text-uppercase bold'>Detailed Student Grading Report</h3><h4 class='text-uppercase bold'>Duration: " + displayDateOnly(reportStart) + " - " + displayDateOnly(reportEnd) + "</h4></div></div></td></tr>"
             + "</thead></table></div></div>"
             + "<div class='tab-pane tabs-animation fade show active'><div class='main-card mb-3' style='overflow-x:auto'>"
             + "<table class='blue-border table table-striped table-bordered dt-responsive text-center details-table activity-report-table' style='width:100%;'><thead><tr>"
@@ -1054,10 +1054,10 @@
             + "<tr><td style='text-align:center;background-color:#fff;font-size:18px;'>Number of Activities - Not Submitted:&nbsp;<b>0</b></td></tr>"
             + "</tbody></table></td><td>&nbsp;&nbsp;&nbsp;</td>"
             + "<td style='border:0;background-color:#fff'><table class='m-0 text-left details-table tr-blue-border' style='width:100%'><tbody>"
-            + "<tr><td style='text-align:right;font-weight:bold'>Course Grade:</td><td>" + (score >= 90 ? "A" : "B") + "</td></tr>"
-            + "<tr><td style='text-align:right;font-weight:bold'>Current Overall Percentage:</td><td>" + score + "%</td></tr>"
-            + "<tr><td style='text-align:right;font-weight:bold'>Current Week Percentage:</td><td>" + Math.min(100, score + 2) + "%</td></tr>"
-            + "<tr><td style='text-align:right;font-weight:bold'>Course Completion Percentage:</td><td>" + Math.min(100, 72 + (index * 6)) + "%</td></tr>"
+            + "<tr><td style='text-align:right;font-weight:bold'>Course Grade:</td><td class='pl-2'>" + (score >= 90 ? "A" : "B") + "</td></tr>"
+            + "<tr><td style='text-align:right;font-weight:bold'>Current Overall Percentage:</td><td class='pl-2'>" + score + "%</td></tr>"
+            + "<tr><td style='text-align:right;font-weight:bold'>Current Week Percentage:</td><td class='pl-2'>" + Math.min(100, score + 2) + "%</td></tr>"
+            + "<tr><td style='text-align:right;font-weight:bold'>Course Completion Percentage:</td><td class='pl-2'>" + Math.min(100, 72 + (index * 6)) + "%</td></tr>"
             + "</tbody></table></td></tr></tbody></table><br>"
             + "</div></div>";
     }
@@ -1071,7 +1071,9 @@
         return "<!doctype html><html><head><style id='gradebookSummaryStyleBlock'>" + dummyStudentProgressReportStyle() + "</style></head><body>"
             + "<div class='app-main pb-4 blue-border-table pt-0 student-progress-dummy-report'><div class='col p-0'><div class='app-main__inner p-0 report-shell'>"
             + "<div class='app-page-title mb-3 py-2 mt-2 hideOnPrint'><div class='page-title-wrapper'><div class='page-title-heading'><div class='page-title-icon'><i class='fas fa-university text-primary'></i></div><div>Grade book summary | " + userName() + "</div></div></div></div>"
-            + "<div class='main-card mb-3 card body-tabs-shadow'><div class='card-body'><div class='tab-content' id='enrollMentGrade'>" + courseHtml + "</div></div></div>"
+            + "<div class='main-card mb-3 card body-tabs-shadow'><div class='card-body'><div class='tab-content' id='enrollMentGrade'>" + courseHtml + "</div>"
+            + "<div class='text-center font-italic'>Note: This report has been graded by the teacher and is not system-generated.</div>"
+            + "</div></div>"
             + "</div></div></div><script id='gradebookSummaryInitScript'></script></body></html>";
     }
     function money(v) { return parseFloat(v || 0).toFixed(2); }

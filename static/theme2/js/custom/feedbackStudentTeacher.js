@@ -50,15 +50,20 @@ function shouldShowBulkFeedbackPopupToday() {
 
 function updateFeedbackWebhook(info) {
     var eventStart = info.start && info.start._i ? info.start._i : info.start;
+    var feedbackFor = info.salutation == "" ? getClassFeedbackTeacherName(info) : info.salutation + ". " + getClassFeedbackTeacherName(info);
     FEEDBACK_WEBHOOK = {
         userId: USER_ID,
         entityId: info.eventId,
         entityType: info.eventType,
         feedbackDateTime: convertToUTC(eventStart, USER_TIMEZONE),
-        // Purpose = which class (name + date); Feedback For = the teacher being rated.
         purpose: buildClassFeedbackPurposeLabel(info),
-        feedbackFor: getClassFeedbackTeacherName(info),
-        feedbackUserIdTo: info.feedbackUserIdTo
+        category: info.category || info.eventType || "",
+        feedbackFor: feedbackFor,
+        feedbackUserIdTo: info.feedbackUserIdTo,
+        feedbackForUserRole: info.feedbackForUserRole,
+        feedbackSubmittedByRole: info.feedbackSubmittedByRole,
+        feedbackSubmittedBySalutation: "",
+        feedbackForSalutation: info.salutation
     };
 }
 
@@ -70,7 +75,14 @@ function buildClassFeedbackPurposeLabel(info) {
         var eventStart = info.start && info.start._i ? info.start._i : info.start;
         dateLabel = changeDateFormat(new Date(eventStart), 'MMM DD, YYYY');
     } catch (e) { dateLabel = ''; }
-    return dateLabel ? (className + ' - ' + dateLabel) : className;
+    if(info.eventType == "STUDENT_DOUBT_SESSION"){
+        return info.grade + " | " + className + ' | ' + dateLabel;
+    }else if(info.eventType == "BATCH"){
+        var batchName = info.batchName || '';
+        return (batchName ? batchName + ' | ' : '') + className + ' | ' + dateLabel;
+    }else{
+        return dateLabel ? (className + ' - ' + dateLabel) : className;
+    }
 }
 
 // The teacher a class feedback is about. The calendar event carries the teacher under
