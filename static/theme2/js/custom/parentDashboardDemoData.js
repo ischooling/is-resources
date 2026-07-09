@@ -10,7 +10,7 @@ var PARENT_DEMO_FIXED_SUBJECTS = [
 ];
 
 function renderParentDashboardDemoDataPage(title) {
-    $("#dashboardContentInHTML").html(getParentDashboardDemoDataContent(title || "Parent Demo Data"));
+    $("#dashboardContentInHTML").html(getParentDashboardDemoDataContent(title || "Dummy Parent Dashboard"));
     initParentDashboardDemoDataMasters();
     loadParentDashboardDemoData();
 }
@@ -413,7 +413,7 @@ async function saveParentDashboardDemoData(src) {
         active: activeValue
     };
     if (!payload.studentName || !payload.learningProgram || !payload.learningProgramName || !payload.gradeId || !payload.gradeName) {
-        console.warn("Parent demo data missing required values", {
+        console.warn("Dummy Parent Dashboard missing required values", {
             payload: payload,
             rawStudentNameValue: $.trim(form.find("#studentName").first().val() || ""),
             rawLearningProgramValue: learningProgramSelect.val(),

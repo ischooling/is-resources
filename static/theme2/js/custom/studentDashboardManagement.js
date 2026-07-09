@@ -10,7 +10,7 @@ var STUDENT_DASHBOARD_FIXED_SUBJECTS = [
 ];
 
 function renderStudentDashboardManagementPage(title) {
-    $("#dashboardContentInHTML").html(getStudentDashboardManagementContent(title || "Student Dashboard Management"));
+    $("#dashboardContentInHTML").html(getStudentDashboardManagementContent(title || "Dummy Student Dashboard"));
     initStudentDashboardManagementMasters();
     loadStudentDashboardManagementData();
 }

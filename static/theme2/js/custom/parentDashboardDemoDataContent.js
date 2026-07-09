@@ -110,7 +110,7 @@ function getParentDashboardDemoDataContent(title) {
         <div class="app-page-title mb-3">
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
-                    <div>${title || "Parent Demo Data"}</div>
+                    <div>${title || "Dummy Parent Dashboard"}</div>
                 </div>
             </div>
         </div>

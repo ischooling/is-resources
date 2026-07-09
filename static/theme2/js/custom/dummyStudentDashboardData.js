@@ -1440,7 +1440,7 @@
                     </table>
                     <div class="footer">
                         <div class="summary"><b>Total Courses:</b> ${courses.length}<br><b>Saved Classes:</b> ${escapeHtml(row.classCount || 0)}<br><b>Saved Activities:</b> ${escapeHtml(row.activityCount || 0)}</div>
-                        <div class="summary"><b>Source:</b> Student Dashboard Management dummy data<br>This preview is generated only for dummy student mode.</div>
+                        <div class="summary"><b>Source:</b> Dummy Student Dashboard dummy data<br>This preview is generated only for dummy student mode.</div>
                     </div>
                 </main>
             </body>

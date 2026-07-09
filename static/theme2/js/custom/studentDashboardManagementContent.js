@@ -38,7 +38,7 @@ function getStudentDashboardManagementContent(title) {
         <div class="app-page-title mb-3">
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
-                    <div>${title || "Student Dashboard Management"}</div>
+                    <div>${title || "Dummy Student Dashboard"}</div>
                 </div>
             </div>
         </div>
