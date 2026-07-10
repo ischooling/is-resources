@@ -434,6 +434,7 @@ function openAiEmailDraftModal(d) {
     if (!d.emailBody) {
         var loadingMsg = '<div class="text-center py-4 text-muted" style="font-size:13px;"><i class="fa fa-spinner fa-spin fa-lg mr-2 text-primary"></i>Generating full draft… please wait (~15-30s)</div>';
         $('#aedModalTo').val(d.email || d.emailTo || '');
+        $('#aedModalFrom').val(d.counselorEmail || '');
         $('#aedModalSubject').val(d.emailSubject || '');
         $('#aedModalBody').val('');
         $('#aedModalWhatsapp').val('');
@@ -460,6 +461,7 @@ function populateModalContent(d) {
     restoreModalTabs();
 
     $('#aedModalTo').val(d.email || d.emailTo || '');
+    $('#aedModalFrom').val(d.counselorEmail || '');
     $('#aedModalSubject').val(d.emailSubject || '');
     $('#aedModalBody').val(d.emailBody || '');
     $('#aedModalWhatsapp').val(d.whatsappDraft || '');
@@ -487,6 +489,8 @@ function restoreModalTabs() {
         $('#aedTabEmail').html(
             '<div class="mb-2"><label style="font-size:11px;font-weight:600;color:#555;margin-bottom:3px;">TO</label>'
             + '<input type="text" class="form-control form-control-sm" id="aedModalTo" placeholder="Recipient email" /></div>'
+            + '<div class="mb-2"><label style="font-size:11px;font-weight:600;color:#555;margin-bottom:3px;">FROM</label>'
+            + '<input type="text" class="form-control form-control-sm" id="aedModalFrom" placeholder="Counselor email" /></div>'
             + '<div class="mb-2"><label style="font-size:11px;font-weight:600;color:#555;margin-bottom:3px;">SUBJECT</label>'
             + '<input type="text" class="form-control form-control-sm" id="aedModalSubject" placeholder="Email subject" /></div>'
             + '<div class="mb-2"><label style="font-size:11px;font-weight:600;color:#555;margin-bottom:3px;">BODY</label>'
@@ -867,9 +871,10 @@ function deleteAiDraftLearningEntry(index) {
 }
 
 function sendAiDraftEmail() {
-    var toEmail  = $('#aedModalTo').val().trim();
-    var subject  = $('#aedModalSubject').val().trim();
-    var rawBody  = $('#aedModalBody').val().trim();
+    var toEmail   = $('#aedModalTo').val().trim();
+    var fromEmail = $('#aedModalFrom').val().trim();
+    var subject   = $('#aedModalSubject').val().trim();
+    var rawBody   = $('#aedModalBody').val().trim();
 
     if (!toEmail) { showMessageTheme2(0, 'Please enter recipient email address.', '', true); return; }
     if (!subject) { showMessageTheme2(0, 'Please enter email subject.', '', true); return; }
@@ -892,11 +897,12 @@ function sendAiDraftEmail() {
     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Sending…');
 
     var params = {
-        userId:   USER_ID,
-        toEmail:  toEmail,
-        subject:  subject,
-        htmlBody: htmlBody,
-        userName: userName
+        userId:    USER_ID,
+        toEmail:   toEmail,
+        fromEmail: fromEmail,
+        subject:   subject,
+        htmlBody:  htmlBody,
+        userName:  userName
     };
 
     $.ajax({
