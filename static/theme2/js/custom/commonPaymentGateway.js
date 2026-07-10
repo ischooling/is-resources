@@ -31,38 +31,39 @@ async function checkPayment(formId, userPaymentDetailsId, schoolId){
 			}
 		}
 	}else{
-		if(responseData.details.type == "BOOKSESSION_FEE" || responseData.details.type == "EXTENSION_FEE"){
-			$('#courseFeeModalTNC').modal('hide');
-			$('#bookAnEnrollmentModel').modal('hide');
-			// $('#callPaymentStudentModal').modal('show');
-			getPaymentGatewaysOptions(responseData.details.schoolId, responseData.details.schoolId, responseData.details.upid, responseData.details.entityType, responseData.details.entityId, responseData.details.userId)
-		}else if(responseData.details.type == "REGISTRATION_FEE_ADV" || responseData.details.type ==  "REGISTRATION_FEE" || responseData.details.type == "REGISTRATION_SUBJECT_FEE_ADV"){
-			if($("#bookAnEnrollmentModel").length>0){
-				$("#bookAnEnrollmentModel").remove();
-			}
-			$("body").append(await getTNCContent(responseData));
-			$('#bookAnEnrollmentModel').modal('show');
-		}else{
-			if($("#courseFeeModalTNC").length>0){
-				$("#courseFeeModalTNC").remove();
-			}
-			$("body").append(await courseFeeModalTNC(responseData));
-			$('#courseFeeModalTNC').modal('show');
-		}
-		$("#chkval").on("change", function(){
-			if($("#chkval").is(":checked")){
-				$("#payTabData").removeAttr("disabled");
-			}else{
-				$("#payTabData").attr("disabled", true);
-			}
-		});
-		$("#bookAnEnrollmentModel #bookAnEnrollmentChkval").on("change", function(){
-			if($("#bookAnEnrollmentModel #bookAnEnrollmentChkval").is(":checked")){
-				$("#bookAnEnrollmentModel #bookAnEnrollmentData").removeAttr("disabled");
-			}else{
-				$("#bookAnEnrollmentModel #bookAnEnrollmentData").attr("disabled", true);
-			}
-		});
+		// if(responseData.details.type == "BOOKSESSION_FEE" || responseData.details.type == "EXTENSION_FEE"){
+		// 	$('#courseFeeModalTNC').modal('hide');
+		// 	$('#bookAnEnrollmentModel').modal('hide');
+		// 	// $('#callPaymentStudentModal').modal('show');
+		// 	getPaymentGatewaysOptions(responseData.details.schoolId, responseData.details.schoolId, responseData.details.upid, responseData.details.entityType, responseData.details.entityId, responseData.details.userId)
+		// }else if(responseData.details.type == "REGISTRATION_FEE_ADV" || responseData.details.type ==  "REGISTRATION_FEE" || responseData.details.type == "REGISTRATION_SUBJECT_FEE_ADV"){
+		// 	if($("#bookAnEnrollmentModel").length>0){
+		// 		$("#bookAnEnrollmentModel").remove();
+		// 	}
+		// 	$("body").append(await getTNCContent(responseData));
+		// 	$('#bookAnEnrollmentModel').modal('show');
+		// }else{
+		// 	if($("#courseFeeModalTNC").length>0){
+		// 		$("#courseFeeModalTNC").remove();
+		// 	}
+		// 	$("body").append(await courseFeeModalTNC(responseData));
+		// 	$('#courseFeeModalTNC').modal('show');
+		// }
+		// $("#chkval").on("change", function(){
+		// 	if($("#chkval").is(":checked")){
+		// 		$("#payTabData").removeAttr("disabled");
+		// 	}else{
+		// 		$("#payTabData").attr("disabled", true);
+		// 	}
+		// });
+		// $("#bookAnEnrollmentModel #bookAnEnrollmentChkval").on("change", function(){
+		// 	if($("#bookAnEnrollmentModel #bookAnEnrollmentChkval").is(":checked")){
+		// 		$("#bookAnEnrollmentModel #bookAnEnrollmentData").removeAttr("disabled");
+		// 	}else{
+		// 		$("#bookAnEnrollmentModel #bookAnEnrollmentData").attr("disabled", true);
+		// 	}
+		// });
+		getPaymentGatewaysOptions(responseData.details.schoolId, responseData.details.schoolId, responseData.details.upid, responseData.details.entityType, responseData.details.entityId, responseData.details.userId);
 	}
 }
 function isPopupBlocked() {
@@ -119,8 +120,33 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
         schoolId: schoolId,
         schoolIdOfPaymentGateway: schoolIdOfPaymentGateway,
         paymentGateway: paymentGateway,
-        initiateVia: window.location.href.includes('fee-receipt') ? 'Link' : ''
+        initiateVia: window.location.href.includes('fee-receipt') ? 'Link' : '',
+        // Explicit caller URL for the AFS external-app Back button (don't rely on the
+        // Referer header, which Safari/referrer-policy can strip on a top-level launch).
+        backUrl: window.location.href
     };
+
+    /* =========================================================================
+       SERVER-SIDE LAUNCH (default). Every gateway is launched via a plain top-level
+       GET form to /common/launch-payment-gateway, so the whole hop is a single
+       user-gesture navigation ending in a server-side 302 to the gateway. No AJAX
+       and no JS-driven window.location — this avoids the Safari gesture/popup/timing
+       issues and preserves every query param the server builds.
+
+       EXCEPTION — the gateways listed below stay on the client/AJAX path because
+       they do NOT produce a server redirect URL: inline card entry (WELLSFARGO) or
+       non-redirect / offline methods (CONVERA, YOCO, WireTransfer, Cash, PayPal
+       Transfer, Smoovpay). Matching is case-insensitive because PG_SETTINGS gateway
+       names are cased inconsistently across schools (e.g. 'STRIPE' vs 'Stripe').
+       NOTE: a new REDIRECT gateway works automatically; a new NON-redirect gateway
+       MUST be added to this list or it will render the server error page.
+    ========================================================================== */
+    var CLIENT_SIDE_GATEWAYS = ['wellsfargo', 'convera', 'yoco', 'wiretransfer', 'cash', 'paypal transfer', 'smoovpay'];
+    if (CLIENT_SIDE_GATEWAYS.indexOf((paymentGateway || '').toLowerCase()) === -1) {
+        showModalMessage(1, "Please wait while redirecting to payment gateway...");
+        submitPaymentGatewayForm(payload);
+        return;
+    }
 
     /* =========================
        3. OPEN POPUP (SAFARI SAFE)
@@ -162,6 +188,22 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
             window.location.href = responseData.details.redirectUrl;
         }
     }
+}
+
+// Build and submit a plain top-level GET form to the server-side gateway launch
+// endpoint. Uses the same AES payload encoding as the AJAX flow (encode = the JS
+// helper the $.ajaxSetup beforeSend uses), so the server decodes it identically.
+function submitPaymentGatewayForm(payload) {
+    var form = document.createElement('form');
+    form.method = 'GET';
+    form.action = getURLForHTML('common', 'launch-payment-gateway');
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = encode(JSON.stringify(payload));
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 

@@ -288,6 +288,14 @@ function renderInvoicePreview(data) {
                         <td colspan="3" class="text-right"><b>${data.discountAmount != null ? "Total after discount" : "Total"}</b></td>
                         <td><b>USD ${data.totalAmount - data.discountAmount}</b></td>
                     </tr>
+                    ${data.paidCurrency && data.paidCurrencyAmount ?
+                        `<tr>
+                            <td colspan="3" class="text-right"><b>Pay in ${data.paidCurrency}</b></td>
+                            <td><b>${data.paidCurrency} ${data.paidCurrencyAmount}</b></td>
+                        </tr>`
+                    :
+                        ``
+                    }
                 </tbody>
             </table>
             ${data.description != "" ?

@@ -6758,6 +6758,24 @@ function callWithSession(url, isSelf) {
   }
 }
 
+// Session-free navigation for the payment result (thank-you) pages.
+// The payer is already resolved server-side from the gateway reference, so the
+// success/failure result page must not gate its buttons on getSession(): mobile
+// Safari can drop the app session cookie during the gateway round-trip, and the
+// getSession() gate in callWithSession() would then logout()/bounce the payer to
+// login. This mirrors callWithSession()'s navigation, minus the session check.
+function callWithoutSession(url, isSelf) {
+  if (isSelf) {
+    if (url.includes('/show-additional-layer')) {
+      window.open(url, '_self');
+    } else {
+      goAheadGet(url, "");
+    }
+  } else {
+    openZoomJoinInAppOrFallback(url);
+  }
+}
+
 function openZoomJoinInAppOrFallback(url) {
   try {
     if (!url || typeof url !== "string") {

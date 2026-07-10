@@ -1063,21 +1063,21 @@ async function showPaymentModal() {
 	if($('#signupType').val() == 'Online' ){
 		if(SHOW_PAYMENT_OPTION=='Y'){
 			await callLocationForPaymentPromise();
-			if ($("#payMode").val() == 'registration') {
-				// $('#courseFeeModalTNC').modal('hide');
-				// $('#bookAnEnrollmentTNC').modal('show');
-				// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
-				var schoolId = $('.payabledetails').attr('schoolId');
-				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
-				checkPayment("", userPaymentDetailsId, schoolId);
-			} else {
+			// if ($("#payMode").val() == 'registration') {
+			// 	// $('#courseFeeModalTNC').modal('hide');
+			// 	// $('#bookAnEnrollmentTNC').modal('show');
+			// 	// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
+			// 	var schoolId = $('.payabledetails').attr('schoolId');
+			// 	var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+			// 	checkPayment("", userPaymentDetailsId, schoolId);
+			// } else {
 				var schoolId = $('.payabledetails').attr('schoolId');
 				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
 				var entityType = $('.payabledetails').attr('entityType');
 				var entityId = $('.payabledetails').attr('entityId');
 				var paidByUserId = $('.payabledetails').attr('paidByUserId');
 				getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
-			}
+			// }
 		} else {
 			$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
 			$('#goToDashboardWarningMessage').hide();

@@ -270,6 +270,13 @@ function buildFeedbackModalShell(title, bodyHtml, options) {
         `<h5 class="modal-title text-white font-weight-bold mb-1">${headerIconHtml}${title}${teacherSuffixHtml}</h5>`;
     var taglineHtml = `<small class="d-block text-white" style="opacity:.9;">Help Us Improve Your Learning Experience</small>`;
 
+    // Confidentiality note shown only to students — a thin strip stuck below the header.
+    var studentStripHtml = (typeof USER_ROLE !== "undefined" && USER_ROLE == "STUDENT")
+        ? `<div class="bg-light text-center py-2 px-3 border-bottom">
+                <small class="text-muted d-block font-weight-semi-bold" style="line-height:1.4;">We want to hear what you really think. Your responses are confidential, so please feel free to be honest.</small>
+            </div>`
+        : "";
+
     if (options.rightSlideModal) {
         return `
         <div class="modal fade pr-0 right-slide-modal" id="${FEEDBACK_MODAL_ID}" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
@@ -283,6 +290,7 @@ function buildFeedbackModalShell(title, bodyHtml, options) {
                         ${titleLineHtml}
                         ${taglineHtml}
                     </div>
+                    ${studentStripHtml}
                     <div class="modal-body p-0 overflow-auto">${bodyHtml}</div>
                 </div>
             </div>
@@ -300,6 +308,7 @@ function buildFeedbackModalShell(title, bodyHtml, options) {
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                ${studentStripHtml}
                 <div class="modal-body p-0">${bodyHtml}</div>
             </div>
         </div>

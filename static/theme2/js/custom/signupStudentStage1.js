@@ -550,7 +550,7 @@ async function moveStep(moveType){
 	var courseProviderId=$('#courseProviderId').val();
 	var sectionLength = $(".step").length;
 	var currentStep = $(".step.active-step").index()+1;
-	if(getSession()){
+	// if(getSession()){
 	if(moveType == "prev"){
 		if(currentStep > 1){
 			var prevStep = currentStep-1;
@@ -724,9 +724,9 @@ async function moveStep(moveType){
 	if(typeof updateStudentDocumentStepActionButtons === "function"){
 		updateStudentDocumentStepActionButtons();
 	}
-}else{
-	redirectLoginPage();
-}
+// }else{
+// 	redirectLoginPage();
+// }
 }
 
 function calculateGradeLabel(){
