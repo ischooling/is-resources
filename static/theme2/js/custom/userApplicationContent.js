@@ -928,7 +928,7 @@ function resendInterviewModalContent(userId, mailName, status){
                             }else{
                                 html+=
                                 `<div class="col-12 d-flex justify-content-center align-items-center">
-                                    <div class="custom-field col-4 mb-0">
+                                    <div class="custom-field col-5 mb-0">
                                         <input type="text" class="form-control" id="interviewBookLinkExpireDate" readonly onkeydown="return false" placeholder=" "/>
                                         <label for="interviewBookLinkExpireDate">Interview Link is valid till:</label>
                                     </div>

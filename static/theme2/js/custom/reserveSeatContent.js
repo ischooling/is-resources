@@ -96,6 +96,7 @@ function needHelpSlideContent(standardId){
 
 function getReserveSeatModal(data) {
 	var details = data.details;
+	var totalFee = details.eligibleFor == 'BAE' ? details.payableFee : details.courseFee;
 	var titleText = '';
 	if (details.eligibleFor == 'ADV') {
 		if (details.monthName) {
@@ -109,7 +110,7 @@ function getReserveSeatModal(data) {
 
 	var html = `
 	<div class="modal fade" id="reserveSeatModal" tabindex="-1" role="dialog">
-		<div class="modal-dialog modal-dialog-centered mx-auto" role="document" style="max-width: 400px; box-shadow: 0 0;">
+		<div class="modal-dialog modal-dialog-centered mx-auto" role="document" style="max-width: 500px; box-shadow: 0 0;">
 			<div class="modal-content modal-rounded border-0 rounded-15 overflow-hidden">
 
 				<div class="modal-header bg-white border-0 justify-content-start align-items-center position-relative" style="border-bottom: 1px solid #eee !important;">
@@ -127,16 +128,32 @@ function getReserveSeatModal(data) {
 					</div>
 				</div>
 
-				<div class="modal-body px-4">
-
-					<div class="d-flex justify-content-between align-items-center bg-light-primary rounded-10 py-2 px-3 my-2">
+				<div class="modal-body px-4"> 
+					<div class="d-flex justify-content-between rounded-10 py-2 px-3 font-weight-semi-bold font-18">
+						<span>Total Fee</span>
+						<span class="font-22">${totalFee}</span>
+					</div>`
+                    if(details.planDiscount && details.planDiscount != '$0.00'){
+						html+=`<div class="d-flex justify-content-between rounded-10 py-2 px-3 font-weight-semi-bold font-16  text-success">
+							<span>One Time Discount</span>
+							<span class="font-18">- ${details.planDiscount}</span>
+						</div>`;
+					}
+					if(details.eligibleForProgressionDiscount == 'Y' && details.progressionDiscount){
+						html+=`<div class="d-flex justify-content-between rounded-10 py-2 px-3 font-weight-semi-bold font-16 text-success">
+							<span>Progression Discount</span>
+							<span class="font-18">- ${details.progressionDiscount}</span>
+						</div>`;
+					}
+					if(details.addtionalDiscount && details.addtionalDiscount != '$0.00'){
+						html+=`<div class="d-flex justify-content-between rounded-10 py-2 px-3 font-weight-semi-bold font-16  text-success">
+							<span>Additional Discount</span>
+							<span class="font-18">- ${details.addtionalDiscount}</span>
+						</div>`;
+					}
+					html+=`<div class="d-flex justify-content-between align-items-center bg-light-primary rounded-10 py-2 px-3 my-2">
 						<div class="text-gray font-14 mb-1 text-left">Payable Fee (USD)</div>
 						<div class="font-18 font-weight-bold text-dark text-right">${details.payableFee}</div>
-					</div>
-
-					<div class="d-flex justify-content-between rounded-10 py-2 px-3 font-weight-semi-bold font-18 mb-3" style="background: #eef5ff; color: #0056d2;">
-						<span>Total Fee</span>
-						<span class="font-22">${details.payableFee}</span>
 					</div>
 
 					<div class="bg-light-warning text-yellowish-dark font-12 border border-warning py-2 px-3 text-left rounded-10 d-flex align-items-start">

@@ -369,3 +369,79 @@ async function pollSummaryStatus(entityId, entityName, meetingId) {
         }
     }, 30000);
 }
+
+function formatClassTranscriptTalkTime(seconds) {
+    seconds = parseInt(seconds || 0, 10);
+    if (!seconds) {
+        return "Not available";
+    }
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var remainingSeconds = seconds % 60;
+    if (hours > 0) {
+        return hours + "h " + minutes + "m " + remainingSeconds + "s";
+    }
+    return minutes + "m " + remainingSeconds + "s";
+}
+
+function renderClassTranscriptTalkTimeSummary() {
+    if (typeof USER_ROLE !== "undefined" && USER_ROLE === "TEACHER") {
+        return;
+    }
+    $(".recordings-table-wrapper").each(function() {
+        var wrapper = $(this);
+        if (wrapper.data("talk-time-loaded")) {
+            return;
+        }
+        var rowText = wrapper.closest("tr").text();
+        var meetingMatch = rowText.match(/Meeting Id:\s*([0-9]+)/i);
+        if (!meetingMatch || !meetingMatch[1]) {
+            return;
+        }
+        var meetingId = meetingMatch[1];
+        wrapper.data("talk-time-loaded", true);
+        var summaryContainer = $("<span class='float-right font-weight-normal' style='display:none; font-size:13px;'></span>");
+        wrapper.find("th:first").append(summaryContainer);
+
+        var payload = JSON.stringify({ meetingId: meetingId });
+        var encodePayload = window.btoa(unescape(encodeURIComponent(payload)));
+        $.ajax({
+            type: "GET",
+            contentType: APPLICATION_JSON_VALUE,
+            dataType: "json",
+            url: BASE_URL + CONTEXT_PATH + "transcript/talk-time?payload=" + encodePayload,
+            global: false,
+            success: function(responseData) {
+                var hostTalkTime = parseInt(responseData.hostTalkTime || 0, 10);
+                var attendeesTalkTime = parseInt(responseData.attendeesTalkTime || 0, 10);
+                if (!hostTalkTime && !attendeesTalkTime) {
+                    summaryContainer.remove();
+                    return;
+                }
+                summaryContainer.show().html(
+                    "<span style='color:#333;'><b>Talk Time:</b> " +
+                        (hostTalkTime ? "Host " + formatClassTranscriptTalkTime(hostTalkTime) : "") +
+                        (hostTalkTime && attendeesTalkTime ? " | " : "") +
+                        (attendeesTalkTime ? "Attendees " + formatClassTranscriptTalkTime(attendeesTalkTime) : "") +
+                    "</span>"
+                );
+            },
+            error: function() {
+                summaryContainer.remove();
+                wrapper.data("talk-time-loaded", false);
+            }
+        });
+    });
+}
+
+$(document).on("shown.bs.modal", "#teacherAllClassModel", function() {
+    setTimeout(renderClassTranscriptTalkTimeSummary, 300);
+});
+
+if (typeof MutationObserver !== "undefined") {
+    var classTalkTimeObserverTimer = null;
+    new MutationObserver(function() {
+        clearTimeout(classTalkTimeObserverTimer);
+        classTalkTimeObserverTimer = setTimeout(renderClassTranscriptTalkTimeSummary, 300);
+    }).observe(document.body, { childList: true, subtree: true });
+}

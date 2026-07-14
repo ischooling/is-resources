@@ -1439,123 +1439,130 @@ function getB2CLeadPopjs(objectRights, roleAndModule){
 	});
 
 
-		$("#exportLead").unbind().bind('click',function(){
+	$("#exportLead").unbind().bind('click',function(){
 		$("#errMsg").text('')
-		
-		var formId = 'advanceLeadNewSearchForm'; 
-		var moduleId=OBJECT_RIGHTS.moduleId; 
-		var leadFrom=OBJECT_RIGHTS.leadFrom;
-		var clickFrom=OBJECT_RIGHTS.clickFrom +'-'+OBJECT_RIGHTS.clickUserid; 
-		var currentPage=currentPage; 
-		var typeTheme='new'; 
-		var newTheme=true; 
-		var callbadge ='totalleads';
-		
-		var callBadge = '';
-		var calbag = clickFrom.split("-");
-		if(calbag[0]=='totalGreen'){
-			callBadge = "green";
-		}else if(calbag[0]=='totalYellow'){
-			callBadge = "yellow";
-		}else if(calbag[0]=='totalRed'){
-			callBadge = "red";
-		}else if(calbag[0]=='totalWhite'){
-			callBadge = "white";
-		}else{
-			callBadge = $("input[name='callBadgeSearch']:checked").val();
+		// Excel Export now opens the report-history modal (async generation + S3).
+		// The legacy direct-CSV download below is retained but no longer invoked.
+		if (typeof openDownloadReportsModal === 'function') {
+			openDownloadReportsModal();
+			return;
 		}
-		if(callBadge==undefined){
-			callBadge='';
-		}
-		var clickBy = 'totalleads'; 
-		if(OBJECT_RIGHTS.clickFrom!=''){
-			clickBy=OBJECT_RIGHTS.clickFrom;
-		}
-		var newTheme = typeTheme;
-		var leadFrom=leadFrom;
-		var clickFrom =clickFrom;
-		var moduleId = moduleId;
-		if(currentPage==undefined){
-			currentPage=0;
-		}
-		var leadsFollowCount=0;
-		
-		var leadNo = $("#"+formId+" #leadNoSearch").val()!=undefined?$("#"+formId+" #leadNoSearch").val():"";
-		var leadSorc="";
-		var lSource = $("#"+formId+" #leadSourceSearch").val()!=undefined?$("#"+formId+" #leadSourceSearch").val():"";
-		if(lSource.length>0){
-			leadSorc=lSource.join('@');
-		}
-		
-		var leadStatus=""; 
-		var leadSts= $("#"+formId+" #leadStatusSearch").val()!=undefined?$("#"+formId+" #leadStatusSearch").val():"";
-		if(leadSts.length>0){
-			leadStatus=leadSts.join('@');
-		}
-		var sbsbStatus="N";
-		if($("#"+formId+" #leadStatusSearch").val()=='SCHOLARSHIP'){
-			sbsbStatus="Y";
-		}
-		//var assignTo = $("#"+formId+" #leadAssignToSearch").val();
-		var assignTo=""; 
-		var assignTos= $("#"+formId+" #leadAssignToSearch").val()!=undefined?$("#"+formId+" #leadAssignToSearch").val():"";
-		if(assignTos.length>0){
-			assignTo=assignTos.join('@');
-		}
-		var followupBy =$("#"+formId+" #followMedSearch option:selected").val()!=undefined?$("#"+formId+" #followMedSearch option:selected").val():"";
-		var email = $("#"+formId+" #leademailIdSearch").val()!=undefined?$("#"+formId+" #leademailIdSearch").val():"";
-		var phoneNo = $("#"+formId+" #phoneNoSearch").val()!=undefined?$("#"+formId+" #phoneNoSearch").val():"";
-		var stdFname = $("#"+formId+" #leadstdfnameSearch").val()!=undefined?$("#"+formId+" #leadstdfnameSearch").val():"";
-		var gurdianFname = '';//$("#"+formId+" #leadParentfnameSearch").val();
-		var standard = $("#"+formId+" #leadGradeSearch option:selected").val()!=undefined?$("#"+formId+" #leadGradeSearch option:selected").val():"";
-		var country = $("#"+formId+" #countryIds").val()!=undefined?$("#"+formId+" #countryIds").val():'';
-		var state = $("#"+formId+" #stateId option:selected").val()!=undefined?$("#"+formId+" #stateId option:selected").val():"";
-		if(state==undefined){
-			state="";
-		}
-		var city = $("#"+formId+" #cityId option:selected").val()!=undefined?$("#"+formId+" #cityId option:selected").val():"";
-		if(city==undefined){
-			city="";
-		}
-		var priority = '';//$("#"+formId+" #leadPrioritySearch").val();
-		var toCall = $("#"+formId+" #callWithSearch").val()!=undefined?$("#"+formId+" #callWithSearch").val():"";
-		var leadFollowStatus = '';///$("#"+formId+" #searchStatusOfLead").val();
-		var demoAssignTo = $("#"+formId+" #leadDemoAssignSearch option:selected").val()!=undefined?$("#"+formId+" #leadDemoAssignSearch option:selected").val():"";
-		
-		var leadStartDate = $("#"+formId+" #leadStartDateSearch").val()!=undefined?$("#"+formId+" #leadStartDateSearch").val():"";
-		var leadEndDate = $("#"+formId+" #leadEndDateSearch").val()!=undefined?$("#"+formId+" #leadEndDateSearch").val():"";
-		
-		var searchDateType = $("#"+formId+" #searchDateType option:selected").val()!=undefined?$("#"+formId+" #searchDateType option:selected").val():"";
-		
-		var lastTotalCallDay = '';//$("#"+formId+" #lastTotalCallDay").val();
-		var acadmicYear = $("#"+formId+" #leadAcadmicYear").val()!=undefined?$("#"+formId+" #leadAcadmicYear").val():"";
-		if($("#leadsFollowCount").val()!=undefined){
-			leadsFollowCount=$("#leadsFollowCount").val();
-		}
-		var leadFullSearch=$("#"+formId+" #leadFullSearch").val()!=undefined?$("#"+formId+" #leadFullSearch").val():"";
-		var utmSource = $("#"+formId+" #utmSourceSearch").val()!=undefined?$("#"+formId+" #utmSourceSearch").val():"";
-		var utmCampaign ="";
-		var utmCam= $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val():"";
-		if(utmCam.length>0){
-			utmCampaign=utmCam.join('@');
-		}
-
-		var leadTemplate = $("#"+formId+" #leadSearchTemplate").val()!=undefined?$("#"+formId+" #leadSearchTemplate").val():"";
-
-
-		var sendQuery='callBadge='+callBadge+'&clickBy='+clickBy+'&leadFrom='+leadFrom+'&clickFrom='+clickFrom+'&currentPage='+currentPage+'&leadNo='+leadNo;
-		sendQuery = sendQuery +'&leadSource='+leadSorc+'&leadStatus='+leadStatus+'&assignTo='+assignTo+'&followupBy='+followupBy+'&email='+email;
-		sendQuery = sendQuery +'&phoneNo='+phoneNo+'&stdFname='+stdFname+'&gurdianFname='+gurdianFname+'&standard='+standard;
-		sendQuery = sendQuery +'&country='+country+'&state='+state+'&city='+city+'&priority='+priority+'&toCall='+toCall;
-		sendQuery = sendQuery +'&leadFollowStatus='+leadFollowStatus+'&demoAssignTo='+demoAssignTo;
-		sendQuery = sendQuery +'&leadStartDate='+leadStartDate+'&leadEndDate='+leadEndDate+'&searchDateType='+searchDateType+'&utmSource='+utmSource+'&lastTotalCallDay='+lastTotalCallDay+'&acadmicYear='+acadmicYear;
-		sendQuery = sendQuery +'&totalCallDay='+leadsFollowCount+'&leadFullSearch='+leadFullSearch+'&utmSource='+utmSource+'&utmCampaign='+utmCampaign+'&leadTemplate='+leadTemplate;
-		//console.log(sendQuery);
+		var sendQuery = getFormDataForExcelExport();
 		var urlSend = '/dashboard/report/lead-search-record-list?'+sendQuery;
 		getAsPost(urlSend);
 	});
+}
+function getFormDataForExcelExport(){
+	var formId = 'advanceLeadNewSearchForm';
+	var moduleId=OBJECT_RIGHTS.moduleId; 
+	var leadFrom=OBJECT_RIGHTS.leadFrom;
+	var clickFrom=OBJECT_RIGHTS.clickFrom +'-'+OBJECT_RIGHTS.clickUserid; 
+	var currentPage=currentPage; 
+	var typeTheme='new'; 
+	var newTheme=true; 
+	var callbadge ='totalleads';
+	
+	var callBadge = '';
+	var calbag = clickFrom.split("-");
+	if(calbag[0]=='totalGreen'){
+		callBadge = "green";
+	}else if(calbag[0]=='totalYellow'){
+		callBadge = "yellow";
+	}else if(calbag[0]=='totalRed'){
+		callBadge = "red";
+	}else if(calbag[0]=='totalWhite'){
+		callBadge = "white";
+	}else{
+		callBadge = $("input[name='callBadgeSearch']:checked").val();
+	}
+	if(callBadge==undefined){
+		callBadge='';
+	}
+	var clickBy = 'totalleads'; 
+	if(OBJECT_RIGHTS.clickFrom!=''){
+		clickBy=OBJECT_RIGHTS.clickFrom;
+	}
+	var newTheme = typeTheme;
+	var leadFrom=leadFrom;
+	var clickFrom =clickFrom;
+	var moduleId = moduleId;
+	if(currentPage==undefined){
+		currentPage=0;
+	}
+	var leadsFollowCount=0;
+	
+	var leadNo = $("#"+formId+" #leadNoSearch").val()!=undefined?$("#"+formId+" #leadNoSearch").val():"";
+	var leadSorc="";
+	var lSource = $("#"+formId+" #leadSourceSearch").val()!=undefined?$("#"+formId+" #leadSourceSearch").val():"";
+	if(lSource.length>0){
+		leadSorc=lSource.join('@');
+	}
+	
+	var leadStatus=""; 
+	var leadSts= $("#"+formId+" #leadStatusSearch").val()!=undefined?$("#"+formId+" #leadStatusSearch").val():"";
+	if(leadSts.length>0){
+		leadStatus=leadSts.join('@');
+	}
+	var sbsbStatus="N";
+	if($("#"+formId+" #leadStatusSearch").val()=='SCHOLARSHIP'){
+		sbsbStatus="Y";
+	}
+	//var assignTo = $("#"+formId+" #leadAssignToSearch").val();
+	var assignTo=""; 
+	var assignTos= $("#"+formId+" #leadAssignToSearch").val()!=undefined?$("#"+formId+" #leadAssignToSearch").val():"";
+	if(assignTos.length>0){
+		assignTo=assignTos.join('@');
+	}
+	var followupBy =$("#"+formId+" #followMedSearch option:selected").val()!=undefined?$("#"+formId+" #followMedSearch option:selected").val():"";
+	var email = $("#"+formId+" #leademailIdSearch").val()!=undefined?$("#"+formId+" #leademailIdSearch").val():"";
+	var phoneNo = $("#"+formId+" #phoneNoSearch").val()!=undefined?$("#"+formId+" #phoneNoSearch").val():"";
+	var stdFname = $("#"+formId+" #leadstdfnameSearch").val()!=undefined?$("#"+formId+" #leadstdfnameSearch").val():"";
+	var gurdianFname = '';//$("#"+formId+" #leadParentfnameSearch").val();
+	var standard = $("#"+formId+" #leadGradeSearch option:selected").val()!=undefined?$("#"+formId+" #leadGradeSearch option:selected").val():"";
+	var country = $("#"+formId+" #countryIds").val()!=undefined?$("#"+formId+" #countryIds").val():'';
+	var state = $("#"+formId+" #stateId option:selected").val()!=undefined?$("#"+formId+" #stateId option:selected").val():"";
+	if(state==undefined){
+		state="";
+	}
+	var city = $("#"+formId+" #cityId option:selected").val()!=undefined?$("#"+formId+" #cityId option:selected").val():"";
+	if(city==undefined){
+		city="";
+	}
+	var priority = '';//$("#"+formId+" #leadPrioritySearch").val();
+	var toCall = $("#"+formId+" #callWithSearch").val()!=undefined?$("#"+formId+" #callWithSearch").val():"";
+	var leadFollowStatus = '';///$("#"+formId+" #searchStatusOfLead").val();
+	var demoAssignTo = $("#"+formId+" #leadDemoAssignSearch option:selected").val()!=undefined?$("#"+formId+" #leadDemoAssignSearch option:selected").val():"";
+	
+	var leadStartDate = $("#"+formId+" #leadStartDateSearch").val()!=undefined?$("#"+formId+" #leadStartDateSearch").val():"";
+	var leadEndDate = $("#"+formId+" #leadEndDateSearch").val()!=undefined?$("#"+formId+" #leadEndDateSearch").val():"";
+	
+	var searchDateType = $("#"+formId+" #searchDateType option:selected").val()!=undefined?$("#"+formId+" #searchDateType option:selected").val():"";
+	
+	var lastTotalCallDay = '';//$("#"+formId+" #lastTotalCallDay").val();
+	var acadmicYear = $("#"+formId+" #leadAcadmicYear").val()!=undefined?$("#"+formId+" #leadAcadmicYear").val():"";
+	if($("#leadsFollowCount").val()!=undefined){
+		leadsFollowCount=$("#leadsFollowCount").val();
+	}
+	var leadFullSearch=$("#"+formId+" #leadFullSearch").val()!=undefined?$("#"+formId+" #leadFullSearch").val():"";
+	var utmSource = $("#"+formId+" #utmSourceSearch").val()!=undefined?$("#"+formId+" #utmSourceSearch").val():"";
+	var utmCampaign ="";
+	var utmCam= $("#"+formId+" #leadSearchCampaign").val()!=undefined?$("#"+formId+" #leadSearchCampaign").val():"";
+	if(utmCam.length>0){
+		utmCampaign=utmCam.join('@');
+	}
+
+	var leadTemplate = $("#"+formId+" #leadSearchTemplate").val()!=undefined?$("#"+formId+" #leadSearchTemplate").val():"";
 
 
+	var sendQuery='callBadge='+callBadge+'&clickBy='+clickBy+'&leadFrom='+leadFrom+'&clickFrom='+clickFrom+'&currentPage='+currentPage+'&leadNo='+leadNo;
+	sendQuery = sendQuery +'&leadSource='+leadSorc+'&leadStatus='+leadStatus+'&assignTo='+assignTo+'&followupBy='+followupBy+'&email='+email;
+	sendQuery = sendQuery +'&phoneNo='+phoneNo+'&stdFname='+stdFname+'&gurdianFname='+gurdianFname+'&standard='+standard;
+	sendQuery = sendQuery +'&country='+country+'&state='+state+'&city='+city+'&priority='+priority+'&toCall='+toCall;
+	sendQuery = sendQuery +'&leadFollowStatus='+leadFollowStatus+'&demoAssignTo='+demoAssignTo;
+	sendQuery = sendQuery +'&leadStartDate='+leadStartDate+'&leadEndDate='+leadEndDate+'&searchDateType='+searchDateType+'&utmSource='+utmSource+'&lastTotalCallDay='+lastTotalCallDay+'&acadmicYear='+acadmicYear;
+	sendQuery = sendQuery +'&totalCallDay='+leadsFollowCount+'&leadFullSearch='+leadFullSearch+'&utmSource='+utmSource+'&utmCampaign='+utmCampaign+'&leadTemplate='+leadTemplate;
+	//console.log(sendQuery);
+	return sendQuery;
 }
 function getTotalLead(leadType){
 	$("#advancedformclick").val("")
