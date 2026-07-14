@@ -41,6 +41,7 @@ function getCallRequestForAdvanceTranscriptSearchStudent(formId, moduleId){
 	advanceTranscriptSearchDTO['studentName'] = ($("#"+formId+" #studentName").val() || '').trim();
 	advanceTranscriptSearchDTO['studentEmail'] = studentId;
 	advanceTranscriptSearchDTO['studentId'] = studentId;
+	advanceTranscriptSearchDTO['studentEmailSearch'] = ($("#"+formId+" #studentEmailSearch").val() || '').trim();
 	advanceTranscriptSearchDTO['countryId'] = $("#"+formId+" #countryId").select2('val');
 	advanceTranscriptSearchDTO['studentRollNumber'] = ($("#"+formId+" #studentRollNumber").val() || '').trim();
 	advanceTranscriptSearchDTO['sortBy'] = $("#"+formId+" #sortBy").select2('val');
@@ -69,6 +70,7 @@ function advanceTranscriptSearchStudentReset(formId){
 	$("#"+formId+" #activeSession").val('').trigger('change');
 	$("#"+formId+" #studentName").val('');
 	$("#"+formId+" #studentId").val('');
+	$("#"+formId+" #studentEmailSearch").val('');
 	$("#"+formId+" #countryId").val('').trigger('change');
 	$("#"+formId+" #studentRollNumber").val('');
 	$("#"+formId+" #sortBy").val('DESC').trigger('change');

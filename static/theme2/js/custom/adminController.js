@@ -39,6 +39,7 @@ const contentHandlers = {
     'module': () => renderModuleListDashboard('Module List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'modulerole': () => renderRoleListDashboard('Roles List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'user-list': () => renderAdminManageUserListDashboard('Admin Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'manage-user-list': () => renderManageUserListDashboard('Manage User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'online-user': () => renderOnlineUserListDashboard('Live Online Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'delete-user': () => renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'assign-orientation': () => renderStudentOrientationAssignDashboard('Assign Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -220,6 +221,9 @@ async function initTeacherScreeningProfiles() {
 function initPayment() {
     isDiscountApplied = false;
     $("#dashboardContentInHTML").html(getManagePaymentContent("Payment Details", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
+    if(typeof isEmailSearchFilterAllowed === 'function' && isEmailSearchFilterAllowed()){
+        $('#paymentEmailFilterDiv').show();
+    }
     getSessionMasterList("advancePaymentSearchForm", "academicSession", false);
     callCountries("advancePaymentSearchForm", "", "countryId");
     if (SCHOOL_ID == 4 || SCHOOL_ID == 5) {

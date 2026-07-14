@@ -281,6 +281,14 @@ function getStudentOrientationDataList(){
 
 function getStudentOrientAdvanceSearchPopup(){
 	var html=''
+	var emailFilterField = isEmailSearchFilterAllowed()
+		? `<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
+							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+								<input type="text" name="emailIdSearch" id="emailIdSearch" class="form-control" maxlength="100" placeholder=" ">
+								<label class="m-0">Email ID</label>
+							</div>
+						</div>`
+		: '';
 	html+=`<div id="orientationSearch" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-backdrop="static">
     <div class="modal-dialog modal-xl">
         <div class="modal-content border-0">
@@ -316,6 +324,7 @@ function getStudentOrientAdvanceSearchPopup(){
 								<label class="m-0">Student ID</label>
 							</div>
 						</div>
+						${emailFilterField}
 						<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1">
 							<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
 								<input type="text" name="phoneNoSearch" id="phoneNoSearch" class="form-control" onkeydown="return M.digit(event);" maxlength="15" placeholder=""/>

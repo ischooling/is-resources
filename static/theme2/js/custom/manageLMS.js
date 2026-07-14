@@ -91,6 +91,7 @@ function bodyCreate(formId,moduleId, schoolId, UNIQUEUUID){
 	request['enrollmentType'] = $("#"+formId+" #enrollmentType").val();
 	request['ongoingStudents'] = $("#"+formId+" #ongoingStudents").val();
 	request['studentStringId'] = $("#"+formId+" #studentId").val();
+	request['studentEmailSearch'] = $("#"+formId+" #studentEmailSearch").val() ? $("#"+formId+" #studentEmailSearch").val().trim() : '';
 	request['sortBy'] = $("#"+formId+" #sortBy").val();
 	request['userId'] = USER_ID;
 	return request;

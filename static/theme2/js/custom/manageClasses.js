@@ -111,6 +111,7 @@ function getRequestForClassroomSessionsData(formId, moduleId){
 	data["courseProviderId"]=$('#'+formId+' #courseProviderId').val();
 	data["studentName"]=$('#'+formId+' #studentName').val();
 	data["studentId"]=$('#'+formId+' #studentId').val();
+	data["studentEmailSearch"]=$('#'+formId+' #studentEmailSearch').val() ? $('#'+formId+' #studentEmailSearch').val().trim() : '';
 	data["applicationNo"]=$('#'+formId+' #applicationNo').val();
 	data["teacherName"]=$('#'+formId+' #teacherName').val();
 	data["teacherEmail"]=$('#'+formId+' #teacherEmail').val();

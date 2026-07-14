@@ -210,6 +210,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 					<span>
 						<strong>Student ID:</strong> ${apsrSingle.studentRollNumber}<br>
 						<strong>Name:</strong> ${apsrSingle.studentName}<br>
+						${isEmailSearchFilterAllowed() ? '<strong>Email:</strong> '+(apsrSingle.studentEmail || '')+'<br>' : ''}
 						<strong>Grade:</strong> ${apsrSingle.gradeName}<br>
 						<strong>Learning Program:</strong> ${apsrSingle.registrationType}<br>
 						<strong>LMS Platform:</strong> ${apsrSingle.lmsPlatform}<br>
@@ -495,7 +496,7 @@ function getManagePaymentContent(title, roleAndModule, schoolId, userId, role) {
 						<label>Name</label>
 						</div>
 						</div>
-                        <div class="col-md-3 col-sm-6 col-12">
+                        <div class="col-md-3 col-sm-6 col-12" id="paymentEmailFilterDiv" style="display:none;">
                         <div class="custom-field">
 						<input type="text" name="searchEmail" id="searchEmail" style="text-transform:capitalize" class="form-control" placeholder=" ">
 						<label>Student Email</label>

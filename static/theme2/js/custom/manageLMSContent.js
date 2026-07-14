@@ -43,6 +43,7 @@ function getManageLMSUserTableBody(result, userId, role){
 					+'Name: '+v.name+'<br/>'
 					+'User Name: '+v.lmsUserName+'<br/>'
 					+'Grade: '+v.gradeName+'<br/>'
+					+(isEmailSearchFilterAllowed() ? 'Email: '+(v.email || '')+'<br/>' : '')
 				+'</td>'
 				+'<td>'
 					+'Name: '+v.parentName+'<br/>'
@@ -63,6 +64,14 @@ function getManageLMSFilter(roleAndModule, schoolId, userId, role){
 	if($('#manageLMSFilterSelect2Css').length < 1){
 		$('head').append('<style id="manageLMSFilterSelect2Css">#lmsStudentFilter .custom-field .select2-container .select2-selection--single .select2-selection__rendered{line-height:40px !important;}</style>');
 	}
+	var emailFilterField = isEmailSearchFilterAllowed()
+		? '<div class="col-md-3 col-sm-6 col-xs-12">'
+			+'<div class="input-group position-relative form-group custom-field">'
+				+'<input type="text" name="studentEmailSearch" id="studentEmailSearch" class="form-control" value="" maxlength="100" placeholder=" ">'
+				+'<label for="studentEmailSearch">Email ID</label>'
+			+'</div>'
+		+'</div>'
+		: '';
 	var html=
 	'<div class="filter-wrapper">'
 		+'<div class="full">'
@@ -121,6 +130,7 @@ function getManageLMSFilter(roleAndModule, schoolId, userId, role){
 						+'<label for="studentId">Student Id</label>'
 					+'</div>'
 				+'</div>'
+				+emailFilterField
 				+'<div class="col-md-3 col-sm-6 col-xs-12">'
 					+'<div class="input-group position-relative form-group custom-field">'
 						+'<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">'

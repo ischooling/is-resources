@@ -277,42 +277,173 @@ function showManageProfileCommonContentListingWithQueries(elementId, argument) {
 }
 
 
-function advanceStudentSearch(formId, moduleId, themetype) {
+// The backend caps /advance-student-search at 25 rows per request (see
+// ADV_STUDENT_SEARCH_MAX_PAGE_SIZE in ClientDashboardBatchController) because the search
+// query joins 20+ tables and every row gets action-menu enrichment — one big 250-row
+// request is slow enough to feel frozen. Larger page sizes are pulled as several parallel
+// 25-row chunk requests and appended progressively — same concept as the Lead List module.
+var ADV_STUDENT_SEARCH_CHUNK_SIZE = 25;
+// Max chunk requests in flight at once; keeps DB connection-pool demand bounded.
+var ADV_STUDENT_SEARCH_PARALLEL_CHUNKS = 8;
+
+// Runs taskFn(0..count-1) with at most `limit` promises in flight. Queued tasks start
+// automatically as earlier ones finish. Results are delivered through taskFn itself.
+async function runAdvSearchWithConcurrencyLimit(count, limit, taskFn) {
+	var results = new Array(count);
+	var next = 0;
+	async function worker() {
+		while (next < count) {
+			var i = next++;
+			results[i] = await taskFn(i);
+		}
+	}
+	var workers = [];
+	for (var w = 0; w < Math.min(limit, count); w++) {
+		workers.push(worker());
+	}
+	await Promise.all(workers);
+	return results;
+}
+
+function advStudentSearchAjax(requestObj, asJson) {
+	return $.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML("dashboard", asJson ? "advance-student-search-meta" : "advance-student-search"),
+		data: JSON.stringify(requestObj),
+		dataType: asJson ? "json" : "html",
+		global: false,
+		async: true,
+	});
+}
+
+// True when the HTML response is actually a status string like "FAILED|msg".
+function advStudentSearchHandleError(htmlContent) {
+	var stringMessage = String(htmlContent || "").split("|");
+	if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
+		if (stringMessage[0] == "SESSIONOUT") {
+			redirectLoginPage();
+		} else {
+			showMessage(true, stringMessage[1]);
+		}
+		return true;
+	}
+	return false;
+}
+
+function advStudentSearchProgress(loaded, total) {
+	var el = $("#advStudentSearchProgress");
+	if (!el.length) {
+		$("#manageStudent").prepend("<div id='advStudentSearchProgress' class='text-muted font-12 mb-1'></div>");
+		el = $("#advStudentSearchProgress");
+	}
+	if (loaded >= total) {
+		el.remove();
+	} else {
+		el.text("Loading students… " + loaded + " of " + total);
+	}
+}
+
+async function advanceStudentSearch(formId, moduleId, themetype) {
 	checkTextBox(formId);
 	customLoader(true);
 	hideMessage("");
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML("dashboard", "advance-student-search"),
-		data: JSON.stringify(
-			getCallRequestForadvanceStudentSearch(formId, moduleId, themetype)
-		),
-		dataType: "html",
-		async: true,
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (
-					stringMessage[0] == "FAILED" ||
-					stringMessage[0] == "EXCEPTION" ||
-					stringMessage[0] == "SESSIONOUT"
-				) {
-					if (stringMessage[0] == "SESSIONOUT") {
-						redirectLoginPage();
-					} else {
-						showMessage(true, stringMessage[1]);
-					}
-				} else {
-					$(".filter-fields").stop();
-					$("#manageStudent").html(htmlContent);
+	try {
+		var baseRequest = getCallRequestForadvanceStudentSearch(formId, moduleId, themetype);
+		// How many records the user asked for in total (the legacy pageSize field, default 250).
+		var requestedRecords = parseInt(baseRequest.studentDetailDTO.pageSize, 10);
+		if (isNaN(requestedRecords) || requestedRecords <= 0) {
+			requestedRecords = 250;
+		}
+		var startOffset = parseInt(baseRequest.studentDetailDTO.page, 10);
+		if (isNaN(startOffset) || startOffset < 0) {
+			startOffset = 0;
+		}
+
+		function buildChunkRequest(chunkIndex, chunkOnly) {
+			var req = JSON.parse(JSON.stringify(baseRequest));
+			// Backend uses page as the raw LIMIT offset.
+			req.studentDetailDTO.page = startOffset + chunkIndex * ADV_STUDENT_SEARCH_CHUNK_SIZE;
+			req.studentDetailDTO.pageSize = ADV_STUDENT_SEARCH_CHUNK_SIZE;
+			req.chunkOnly = !!chunkOnly;
+			return req;
+		}
+
+		// Fire the count query and the first chunk (table shell + first 25 rows) together.
+		var metaPromise = advStudentSearchAjax(baseRequest, true).catch(function () { return null; });
+		var firstChunkHtml = await advStudentSearchAjax(buildChunkRequest(0, false), false);
+		if (firstChunkHtml != "" && advStudentSearchHandleError(firstChunkHtml)) {
+			customLoader(false);
+			return false;
+		}
+		$(".filter-fields").stop();
+		$("#manageStudent").html(firstChunkHtml);
+		// First 25 rows are visible — release the blocking loader while the rest streams in.
+		customLoader(false);
+
+		var meta = await metaPromise;
+		var totalRows = (meta && meta.status == "1" && meta.totalRows != null) ? parseInt(meta.totalRows, 10) : null;
+		var tableApi = $("#manageAdvanceStudentContent").length ? $("#manageAdvanceStudentContent").DataTable() : null;
+		var firstChunkCount = tableApi ? tableApi.rows().count() : 0;
+		if (!tableApi || firstChunkCount < ADV_STUDENT_SEARCH_CHUNK_SIZE) {
+			// Everything already fits in the first chunk.
+			advStudentSearchProgress(1, 1);
+			return false;
+		}
+
+		// Total records still to pull after chunk 0, bounded by the exact count when we have it.
+		var remaining = requestedRecords - ADV_STUDENT_SEARCH_CHUNK_SIZE;
+		if (totalRows != null) {
+			remaining = Math.min(remaining, Math.max(0, totalRows - startOffset - ADV_STUDENT_SEARCH_CHUNK_SIZE));
+		}
+		var numChunks = Math.ceil(Math.max(0, remaining) / ADV_STUDENT_SEARCH_CHUNK_SIZE);
+		if (numChunks <= 0) {
+			advStudentSearchProgress(1, 1);
+			return false;
+		}
+
+		var totalToLoad = ADV_STUDENT_SEARCH_CHUNK_SIZE + remaining;
+		var loadedRows = firstChunkCount;
+		advStudentSearchProgress(loadedRows, totalToLoad);
+
+		// Chunks arrive out of order; append strictly in index order so S.No. stays sorted.
+		var pendingChunks = {};
+		var nextToAppend = 0;
+		function appendReadyChunks() {
+			while (pendingChunks[nextToAppend] !== undefined) {
+				var rows = $($.parseHTML(pendingChunks[nextToAppend])).filter("tr");
+				delete pendingChunks[nextToAppend];
+				nextToAppend++;
+				if (rows.length) {
+					loadedRows += rows.length;
+					tableApi.rows.add(rows).draw(false);
 				}
-				customLoader(false);
-				return false;
+				advStudentSearchProgress(loadedRows, totalToLoad);
 			}
-		},
-	});
+		}
+
+		await runAdvSearchWithConcurrencyLimit(numChunks, ADV_STUDENT_SEARCH_PARALLEL_CHUNKS, async function (i) {
+			var html = "";
+			try {
+				// Chunk i here is chunk i+1 overall (chunk 0 was the shell request above).
+				html = await advStudentSearchAjax(buildChunkRequest(i + 1, true), false);
+			} catch (e) {
+				html = "";
+			}
+			var msgType = String(html || "").split("|")[0];
+			if (msgType == "FAILED" || msgType == "EXCEPTION" || msgType == "SESSIONOUT") {
+				html = "";
+			}
+			pendingChunks[i] = html;
+			appendReadyChunks();
+			return true;
+		});
+		advStudentSearchProgress(1, 1);
+	} catch (e) {
+		console.error(e);
+		customLoader(false);
+	}
+	return false;
 }
 
 function advanceTeacherSearch(formId, moduleId) {
@@ -539,7 +670,7 @@ function getCallRequestForadvanceTeacherSearch(formId, moduleId) {
 	teacherDetailsDTO["stateId"] = $("#" + formId + " #teacherFilterStateId").val();
 	teacherDetailsDTO["cityId"] = $("#" + formId + " #teacherFilterCityId").val();
 	teacherDetailsDTO["applicationNo"] = $("#" + formId + " #applicationNo").val();
-	teacherDetailsDTO["enrollStatus"] = $("#" + formId + " #filterEnrollStatus").val();
+	teacherDetailsDTO["enrollStatus"] = $("#" + formId + " #teacherFilterEnrollStatus").val();
 	teacherDetailsDTO["employeeType"] = $("#" + formId + " #filterEmployeeType").val();
 	teacherDetailsDTO["userClickFrom"] = $("#" + formId + " #userClickFrom").val();
 	teacherDetailsDTO["page"] = $("#" + formId + " #page").val();
@@ -598,7 +729,7 @@ function advanceTeacherSearchReset(formId) {
 	$("#" + formId + " #schoolId")
 		.val(SCHOOL_ID)
 		.trigger("change");
-	$("#" + formId + " #filterEnrollStatus").val("");
+	$("#" + formId + " #teacherFilterEnrollStatus").val("");
 	$("#" + formId + " #filterEmployeeType").val("");
 	// $("#" + formId + " #filterAssignedCourses")
 	//   .val("")

@@ -19,6 +19,7 @@ function getPayStudentFeesDetais(callFrom) {
 		"schoolId": SCHOOL_ID,
         "partnerReferralCode":$("#"+callFrom+" #partnerNameSearch").val(),
         "studentId" : $("#"+callFrom+" #studentIdSearch").val(), 
+        "studentEmail" : $("#"+callFrom+" #studentEmailSearch").val(),
         "studentName" : $("#"+callFrom+" #studentNameSearch").val(),
         "standardId" : $("#"+callFrom+" #gradeSearch").val(),
         "learningProgram" : $("#"+callFrom+" #learningProgramSeach").val(),
@@ -57,6 +58,7 @@ function getPayStudentFeesDetais(callFrom) {
                             </td>
                             <td>${item.partnerName}</td>
                             <td>${item.studentId}</td>
+                            ${isEmailSearchFilterAllowed() ? '<td>'+(item.studentEmail || '')+'</td>' : ''}
                             <td>${item.studentName} | ${item.standardName}</td>
                             <td>${item.learningProgram}</td>
                             ${/*
@@ -86,6 +88,9 @@ function getPayStudentFeesDetais(callFrom) {
                 }
                 $("#schoolPaymentTable").html(html);
                 $("#schoolPaymentTableFoot").html(htmlFoot);
+                if(isEmailSearchFilterAllowed()){
+                    $('#emailColHeader').show();
+                }
 
                 $('#selectAll').on('change', function() {
                     $('.row-checkbox').prop('checked', this.checked);
@@ -266,10 +271,14 @@ function getStudentList(sprId) {
                 }
             } else {
                 $("#studentListModal").modal('show');
+                if(isEmailSearchFilterAllowed()){
+                    $('#studentListEmailColHeader').show();
+                }
                 var html = '';
                 $.each(data.studentsPaymentList, function(index, item){
                     html +=`<tr>
                         <td>${item.rollNo}</td>
+                        ${isEmailSearchFilterAllowed() ? '<td>'+(item.studentEmail || '')+'</td>' : ''}
                         <td>${item.studentName}</td>
                         <td>${item.gradeName}</td>
                         <td>${item.learningProgramName}</td>

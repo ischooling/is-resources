@@ -128,6 +128,7 @@ function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchTyp
 		&& $("#"+formId+" #cityId option:selected").val()=="0"
 		&& $("#"+formId+" #gradeSearch option:selected").val()=="0"
 		&& $("#"+formId+" #studentIdSearch").val()==""
+		&& $("#"+formId+" #emailIdSearch").val()==""
 		&& $("#"+formId+" #phoneNoSearch").val()==""
 		&& $("#"+formId+" #startDateSearch").val()==""
 		&& $("#"+formId+" #endDateSearch").val()==""
@@ -145,6 +146,7 @@ function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchTyp
 	studentOrientAssignReqest['city'] = $("#"+formId+" #cityId option:selected").val();
 	studentOrientAssignReqest['standardId'] = $("#"+formId+" #gradeSearch option:selected").val();
 	studentOrientAssignReqest['studentStringId'] = $("#"+formId+" #studentIdSearch").val().trim();
+	// studentOrientAssignReqest['email'] = $("#"+formId+" #emailIdSearch").val().trim();
 	studentOrientAssignReqest['phoneNo'] = $("#"+formId+" #phoneNoSearch").val();
 	studentOrientAssignReqest['bookStartDate'] = $("#"+formId+" #startDateSearch").val();
 	studentOrientAssignReqest['bookEndDate'] = $("#"+formId+" #endDateSearch").val();
@@ -185,7 +187,7 @@ function getOrientList(data){
 			html=html+"<tr class='row-status-"+dlist.status+"'>";
 			html=html+"<td><input type='checkbox' class='mt-1 checkOrientation' id='orientation-"+dlist.id+"' name='orientation-move-another' value="+dlist.id+" data-assignToUserId="+dlist.assignToUserId+" onchange='toggleOption(this)' /></td>";
 			html=html+"<td>"+srno+"</td>";
-			html=html+"<td><b>"+dlist.studentName+"</b><br/>"+dlist.learningPlan+"<br/>"+dlist.grade+"<br/>"+dlist.studentStringId+"</td>";
+			html=html+"<td><b>"+dlist.studentName+"</b><br/>"+dlist.learningPlan+"<br/>"+dlist.grade+"<br/>"+dlist.studentStringId+(isEmailSearchFilterAllowed() ? "<br/>"+(dlist.studentEmail || '') : '')+"</td>";
 			html=html+"<td>"+dlist.bookDate+" ("+dlist.teacherTimeZone+")</td>";
 			html=html+"<td>"+dlist.bookStudentDate+" ("+dlist.studentTimeZone+")</td>";
 			html=html+"<td>"+dlist.assignName+"</td>";
@@ -260,6 +262,7 @@ function advanceOrientationSearchStudentReset(formId){
 	$("#"+formId+" #followMedSearch").val('').trigger('change');
 	$("#"+formId+" #gradeSearch").val('').trigger('change');
 	$("#"+formId+" #studentIdSearch").val('');
+	$("#"+formId+" #emailIdSearch").val('');
 	$("#"+formId+" #phoneNoSearch").val('');
 	$("#"+formId+" #stdfnameSearch").val('');
 	$("#"+formId+" #parentfnameSearch").val('');

@@ -728,6 +728,13 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 								'Student ID',
 								getScheduleTextInput('studentIdSearch', 'studentIdSearch', '', 'maxlength="100"')
 							);
+							if(typeof isEmailSearchFilterAllowed === 'function' && isEmailSearchFilterAllowed()){
+								html+=getScheduleCustomField(
+									'col-lg-3 col-md-4 col-sm-6 col-12',
+									'Email ID',
+									getScheduleTextInput('studentEmailSearch', 'studentEmailSearch', '', 'maxlength="100"')
+								);
+							}
 						}
 					html+=getScheduleCustomField(
 						'col-lg-3 col-md-4 col-sm-6 col-12',

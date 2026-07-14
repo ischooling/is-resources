@@ -1,9 +1,10 @@
 function getClassroomHeader(role){
 	var html=''
+	var showEmail = (USER_ROLE=='DIRECTOR' || isEmailSearchFilterAllowed());
 	if(role!='TEACHER'){
-		html='<th>S.No.</th><th>'+(USER_ROLE=='DIRECTOR'?"ID/":"")+'Student ID/Student Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'/Application No/Teacher Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Admin Timezone</th><th width="175px">Join Class/Class ID/Passcode</th><th>Update Class Status</th><th>Added By</th><th>Class Type</th>';
+		html='<th>S.No.</th><th>'+(USER_ROLE=='DIRECTOR'?"ID/":"")+'Student ID/Student Name'+(showEmail?"/Email":"")+'/Application No/Teacher Name'+(USER_ROLE=='DIRECTOR'?"/Email":"")+'</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Admin Timezone</th><th width="175px">Join Class/Class ID/Passcode</th><th>Update Class Status</th><th>Added By</th><th>Added By</th>';
 	}else{
-		html='<th>S.No.</th><th>Student Name</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Update Class Status</th><th>Added By</th><th>Class Type</th>';
+		html='<th>S.No.</th><th>Student Name'+(showEmail?"/Email":"")+'</th><th>Course Name/Grade</th><th>Title</th><th>Student Timezone</th><th>Teacher Timezone</th><th>Update Class Status</th><th>Added By</th><th>Added By</th>';
 	}
 	return '<thead class="bg-primary text-white"><tr>'+html+'</tr></thead><tbody></tbody>';
 }
@@ -232,9 +233,10 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 		className='';
 		studentTeacher='';
 		if('TEACHER'==role){
-			studentTeacher=v.studentName;//+'<br>'+v.teacherName;
+			studentTeacher=v.studentName+(isEmailSearchFilterAllowed() ? '<br/>'+(v.studentEmail || '') : '');
 		}else{
-			studentTeacher=(USER_ROLE=='DIRECTOR'?v.meetingId+' | '+v.meetingIdVendor+'<br><br>':'') +v.studentStringId+"<br/>" +v.studentName+'<br><br>'+v.applicationNo+"<br/>"+v.teacherName+'<br>'+v.teacherOfficialEmail+'<br>'+(USER_ROLE=='DIRECTOR'?v.teacherEmail:'')+'<br>';
+			var showStudentEmail = (USER_ROLE=='DIRECTOR' || isEmailSearchFilterAllowed());
+			studentTeacher=(USER_ROLE=='DIRECTOR'?v.meetingId+' | '+v.meetingIdVendor+'<br><br>':'') +v.studentStringId+"<br/>" +v.studentName+(showStudentEmail ? '<br/>'+(v.studentEmail || '') : '')+'<br><br>'+v.applicationNo+"<br/>"+v.teacherName+'<br>'+v.teacherOfficialEmail+'<br>'+(USER_ROLE=='DIRECTOR'?v.teacherEmail:'')+'<br>';
 		}
 		courseStandard=v.subjectName+'<br>'+v.standardName;
 		//'/'+v.meetingId+'/'+v.bookedDate+
@@ -350,6 +352,11 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 					html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
 						'<input type="text" name="studentId" id="studentId" class="form-control-field" value="" maxlength="100" placeholder=" ">'
 						+'<label for="studentId">Student ID</label>');
+				}
+				if(role!='TEACHER' && isEmailSearchFilterAllowed()){
+					html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
+						'<input type="text" name="studentEmailSearch" id="studentEmailSearch" class="form-control-field" value="" maxlength="100" placeholder=" ">'
+						+'<label for="studentEmailSearch">Student Email</label>');
 				}
 				html+=classroomFilterField('col-md-3 col-sm-6 col-xs-12',
 					'<input type="text" name="studentName" id="studentName" class="form-control-field" value="" maxlength="100" placeholder=" " onkeydown="return M.isChars(event);">'

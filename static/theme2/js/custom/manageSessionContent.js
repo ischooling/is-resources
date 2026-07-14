@@ -2,7 +2,11 @@
 function getManageSessionTableHeader(role) {
 	var html = ''
 
-	html = '<th>S.No.</th><th>LMS Platform</th><th>Learning Program</th><th>Student Name</th><th>Grade</th><th>Student ID</th><th>Enroll Status</th>';
+	html = '<th>S.No.</th><th>LMS Platform</th><th>Learning Program</th><th>Student Name</th><th>Grade</th><th>Student ID</th>';
+	if(isEmailSearchFilterAllowed()){
+		html += '<th>Email ID</th>';
+	}
+	html += '<th>Enroll Status</th>';
 	if (SCHOOL_ID == 1) {
 		html += '<th>Default Enrollment Status</th>';
 	}
@@ -26,8 +30,11 @@ function getManageSessionTableBody(result, userId, role) {
 			// + zoomCommand
 			// + '</td>'
 			+ '<td>' + v.gradeName + '</td>'
-			+ '<td>' + v.rollNo + '</td>'
-			+ '<td>' + v.enrollStatus + '</td>';
+			+ '<td>' + v.rollNo + '</td>';
+		if(isEmailSearchFilterAllowed()){
+			html += '<td>' + (v.emailId || '') + '</td>';
+		}
+		html += '<td>' + v.enrollStatus + '</td>';
 		if (SCHOOL_ID == 1) {
 			html += '<td>' + v.defaultEnrollmentStatus + '</td>'
 		}
@@ -42,6 +49,14 @@ function getZoomCommandContent(aggrigatorName, aggrigatorStatus, aggregatorId, a
 }
 
 function getManageSessionFilter(roleAndModule, schoolId, userId, role) {
+	var emailFilterField = (typeof isEmailSearchFilterAllowed === 'function' && isEmailSearchFilterAllowed())
+		? '<div class="col-md-3 col-sm-6 col-12">'
+		+ '<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
+		+ '<input type="text" name="studentEmailSearch" id="studentEmailSearch" class="form-control" value="" maxlength="100" placeholder=" "/>'
+		+ '<label for="studentEmailSearch">Email ID</label>'
+		+ '</div>'
+		+ '</div>'
+		: '';
 	var html =
 		'<div class="col-md-12">'
 		+ '<div class="filter-wrapper">'
@@ -100,6 +115,7 @@ function getManageSessionFilter(roleAndModule, schoolId, userId, role) {
 		+ '<label for="studentId">Student ID</label>'
 		+ '</div>'
 		+ '</div>'
+		+ emailFilterField
 		+ '<div class="col-md-3 col-sm-6 col-12">'
 		+ '<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
 		+ '<input type="text" name="studentName" id="studentName" class="form-control" value="" maxlength="100" onkeydown="return M.isChars(event);" placeholder=" ">'

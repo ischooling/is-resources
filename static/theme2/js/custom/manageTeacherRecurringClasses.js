@@ -49,6 +49,7 @@ function getActiveSessionReset(formId) {
     $("#" + formId + " #standardId").val('').trigger('change');
     $("#" + formId + " #createdBy").val('').trigger('change');
     $("#" + formId + " #pageSize").val('25');
+    $("#" + formId + " #studentEmailSearch").val('');
 	$("#" + formId + " #activeSession").val('0').trigger('change');
 }
 
@@ -63,6 +64,7 @@ function getRecurringBody(formId) {
     recurringDTO['pageSize'] = $("#" + formId + " #pageSize").val();
     recurringDTO['createdBy'] = $("#" + formId + " #createdBy").val();
     recurringDTO['studentName'] = $("#" + formId + " #studentName").val();
+    recurringDTO['studentEmailSearch'] = $("#" + formId + " #studentEmailSearch").val() ? $("#" + formId + " #studentEmailSearch").val().trim() : '';
 	recurringDTO['teacherId'] = USER_ID
     request['recurringDTO']=recurringDTO;
 	request['schoolId'] = SCHOOL_ID;

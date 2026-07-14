@@ -1,4 +1,10 @@
 function getRecurringClassesFilter(roleAndModule, schoolId, userId, role){
+	var emailFilterField = (typeof isEmailSearchFilterAllowed === 'function' && isEmailSearchFilterAllowed())
+		? '<div class="col-md-3 col-sm-3 col-xs-12">'
+			+'<label class="mb-0">Email ID</label>'
+			+'<input type="text" class="form-control" id="studentEmailSearch" maxlength="100">'
+		+'</div>'
+		: '';
 	var html=
 	'<div class="filter-wrapper">'
 		+'<div class="full">'
@@ -28,6 +34,7 @@ function getRecurringClassesFilter(roleAndModule, schoolId, userId, role){
                             +'<label class="mb-0">Student Id</label>'
                             +'<input type="text" class="form-control" id="studentId">'
                         +'</div>'
+                        +emailFilterField
                         +'<div class="col-md-3 col-sm-3 col-xs-12">'
                             +'<label class="mb-0">Student Name</label>'
                             +'<input type="text" class="form-control" id="studentName">'
@@ -157,7 +164,7 @@ function getRecurringClassesBodyData(dataList){
                 //     html+='Link not generated yet';
                 // }
            html+='</td>'
-                +'<td>'+v.studentName+'<br/>'+v.timezoneStudent+'</td>'
+                +'<td>'+v.studentName+'<br/>'+v.timezoneStudent+(isEmailSearchFilterAllowed() ? '<br/>'+(v.studentEmail || '') : '')+'</td>'
                 +'<td>'+v.enrollType+'<br/>'+v.lmsPlatformString+'</td>'
                 +'<td><br/>'+v.grades+'<br/>'+v.subjects+'</td>'
                 +'<td>'+v.startDate+'-'+v.endDate+'<br/>('+v.timezone+')<br/><br/>'+v.timings+'<br/>'+v.sessionCount+' session</td>'

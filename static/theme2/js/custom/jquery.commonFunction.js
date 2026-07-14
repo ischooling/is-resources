@@ -1367,27 +1367,56 @@ function checkonlineOfflineStatus() {
 
 
 function goAheadGet(url, hash) {
+  // A GET form submission discards the query string in the action URL and
+  // rebuilds it from the form fields. Split off any query params from the URL
+  // and carry them as hidden inputs so they are preserved.
+  var actionUrl = url;
+  var queryInputs = "";
+  var queryIndex = url.indexOf("?");
+  if (queryIndex !== -1) {
+    actionUrl = url.substring(0, queryIndex);
+    var queryString = url.substring(queryIndex + 1);
+    if (queryString !== "") {
+      var pairs = queryString.split("&");
+      for (var i = 0; i < pairs.length; i++) {
+        if (pairs[i] === "") {
+          continue;
+        }
+        var eqIndex = pairs[i].indexOf("=");
+        var name =
+          eqIndex === -1 ? pairs[i] : pairs[i].substring(0, eqIndex);
+        var value = eqIndex === -1 ? "" : pairs[i].substring(eqIndex + 1);
+        queryInputs +=
+          '<input type="hidden" name="' +
+          decodeURIComponent(name) +
+          '" value="' +
+          decodeURIComponent(value) +
+          '" />';
+      }
+    }
+  }
+  var hashInput =
+    hash !== undefined && hash !== null && hash !== ""
+      ? '<input type="hidden" name="hash" id="hash" value="' + hash + '" />'
+      : "";
   var form = $(
     '<form action="' +
-      url +
+      actionUrl +
       '" method="GET">' +
-      '<input type="hidden" name="hash" id="hash" value="' +
-      hash +
-      '" />' +
+      queryInputs +
+      hashInput +
       "</form>"
   );
   $("body").append(form);
   $(form).submit();
 }
 function goAhead(url, hash) {
+  var hashInput =
+    hash !== undefined && hash !== null && hash !== ""
+      ? '<input type="hidden" name="hash" id="hash" value="' + hash + '" />'
+      : "";
   var form = $(
-    '<form action="' +
-      url +
-      '" method="POST">' +
-      '<input type="hidden" name="hash" id="hash" value="' +
-      hash +
-      '" />' +
-      "</form>"
+    '<form action="' + url + '" method="POST">' + hashInput + "</form>"
   );
   $("body").append(form);
   $(form).target = "_blank";
@@ -8443,4 +8472,24 @@ function acceptnNewReleaseRequest() {
   vcClearTimer();
   localStorage.setItem(VC_KEY_POST_RELOAD, 'true');
   location.reload();
+}
+
+function isEmailSearchFilterAllowed() {
+  if (window.__EMAIL_SEARCH_FILTER_ALLOWED !== undefined) {
+    return window.__EMAIL_SEARCH_FILTER_ALLOWED;
+  }
+  try {
+    var response = getSettingsByTypeAndKey('CONFIGURATION', 'EMAIL_SEARCH_FILTER_RIGHTS');
+    var parsed = (typeof response === 'string') ? JSON.parse(response) : response;
+    var metaValue = (parsed && parsed.data && parsed.data.metaValue != null && parsed.data.metaValue !== '') ? parsed.data.metaValue : '';
+    if (metaValue === '' || metaValue === null || metaValue === undefined) {
+      window.__EMAIL_SEARCH_FILTER_ALLOWED = false;
+      return false;
+    }
+    var allowedUserIds = metaValue.split(',').map(function(id){ return id.trim(); }).filter(function(id){ return id !== ''; });
+    window.__EMAIL_SEARCH_FILTER_ALLOWED = allowedUserIds.length > 0 && allowedUserIds.includes(String(USER_ID));
+  } catch(e) {
+    window.__EMAIL_SEARCH_FILTER_ALLOWED = false;
+  }
+  return window.__EMAIL_SEARCH_FILTER_ALLOWED;
 }

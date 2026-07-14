@@ -349,6 +349,7 @@ function viewStudentList(){
                             <thead style="background-color:#C2DDF9;">
                                 <tr>
                                     <th>Student ID</th>
+                                    <th id="studentListEmailColHeader" style="display:none;">Email ID</th>
                                     <th>Student Name</th>
                                     <th>Grade</th>
                                     <th>Leaning Program</th>
@@ -389,6 +390,14 @@ function studentFeesModalContent(){
 }
 
 function searchStudentFeesContent(){
+    var emailField = isEmailSearchFilterAllowed()
+        ? `<div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
+                <div class="position-relative custom-field mb-2 mt-3 p-0">
+                    <input type="text" id="studentEmailSearch" class="form-control" placeholder=" " />
+                    <label for="studentEmailSearch" class="full text-primary">Email ID</label>
+                </div>
+            </div>`
+        : '';
     var html=
         `<div class="row mb-3">
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
@@ -404,6 +413,7 @@ function searchStudentFeesContent(){
                     <label for="studentIdSearch" class="full text-primary">Student ID</label>
                 </div>
             </div>
+            ${emailField}
             <div class="col-xl-3 col-lg-3 col-sm-4 col-sm-6 col-12 mb-3">
                 <div class="position-relative custom-field mb-2 mt-3 p-0">
                     <input type="text" id="studentNameSearch" class="form-control" placeholder=" " />
@@ -470,6 +480,7 @@ function studentFeesTable(){
                             </th>
                             <th class="font-weight-bold text-white border-bottom-0">Partner Name</th>
                             <th class="font-weight-bold text-white border-bottom-0">Student ID</th>
+                            <th class="font-weight-bold text-white border-bottom-0" id="emailColHeader" style="display:none;">Email ID</th>
                             <th class="font-weight-bold text-white border-bottom-0" style="width:12%;">Student Name | Grade</th>
                             <th class="font-weight-bold text-white border-bottom-0">Learning Program</th>
                             ${/*

@@ -10,7 +10,12 @@ function renderInvoiceContent(withStamp, onlyHtml, payId, isAddEdit) {
       }
     }else{
         content+=`<div id="invoicePreviewContainer"></div>`;
-        content += showMessageTheme2Content() + getLoaderContent();
+        // CommonError.jsp already renders a .server-message/#msgTheme2 block on this
+        // page; adding another duplicates the id and shows an empty second bar.
+        if ($(".server-message").length === 0) {
+            content += showMessageTheme2Content();
+        }
+        content += getLoaderContent();
         $("#invoiceContentWrapper").html(content);
     }
     invoiceOnLoad(payId, isAddEdit);

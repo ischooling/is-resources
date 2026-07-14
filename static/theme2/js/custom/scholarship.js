@@ -4,6 +4,7 @@ function getScholarfilterReset(formId) {
     $("#" + formId + " #filterDiscountCode").val('');
     $("#" + formId + " #filterStudentName").val('');
     $("#" + formId + " #filterStudentId").val('');
+    $("#" + formId + " #filterStudentEmail").val('');
     $("#" + formId + " #filterAddedBy").val('All').trigger('change');
     $("#" + formId + " #filterDiscountFor").val('').trigger('change');
     $("#" + formId + " #filterLearningPlan").val('').trigger('change');
@@ -52,6 +53,7 @@ function getScholarFilterBody(formId) {
     request['discountCode'] = $('#' + formId + ' #filterDiscountCode').val();
     request['studentName'] = $('#' + formId + ' #filterStudentName').val();
     request['studentId'] = $('#' + formId + ' #filterStudentId').val();
+    request['studentEmailSearch'] = $('#' + formId + ' #filterStudentEmail').val() ? $('#' + formId + ' #filterStudentEmail').val().trim() : '';
     request['addedBy'] = $("#" + formId + " #filterAddedBy").val();
     request['discountFor'] = $("#" + formId + " #filterDiscountFor").val();
     request['learningPlan'] = $("#" + formId + " #filterLearningPlan").val();

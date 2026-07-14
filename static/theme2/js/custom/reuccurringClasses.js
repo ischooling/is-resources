@@ -6,6 +6,7 @@ function getActiveSessionReset(formId) {
     $("#" + formId + " #activeSession").val('0').trigger('change');
     $("#" + formId + " #studentName").val('');
     $("#" + formId + " #studentEmail").val('');
+    $("#" + formId + " #studentEmailSearch").val('');
     $("#" + formId + " #teacherEmail").val('')
     $("#" + formId + " #teacherName").val('');
     $("#" + formId + " #studentId").val('');
@@ -61,6 +62,7 @@ function getRecurringBody(formId) {
     recurringDTO['pageSize'] = $("#" + formId + " #pageSize").val();
     recurringDTO['createdBy'] = $("#" + formId + " #createdBy").val();
     recurringDTO['studentStringId'] = $("#" + formId + " #studentId").val();
+    recurringDTO['studentEmailSearch'] = $("#" + formId + " #studentEmailSearch").val() ? $("#" + formId + " #studentEmailSearch").val().trim() : '';
     recurringDTO['applicationNo'] = $("#" + formId + " #applicationNo").val();
     request['recurringDTO']=recurringDTO;
     return request;
