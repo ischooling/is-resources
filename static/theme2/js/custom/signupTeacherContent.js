@@ -7,75 +7,11 @@ function addTeacherSignupFieldBackgroundOverride() {
     }
     $("head").append(`
         <style id="teacherSignupFieldBackgroundOverride">
-            #teacherSignupStage1 .valid-field.true .custom-field input,
-            #teacherSignupStage1 .valid-field.true .custom-field select,
-            #teacherSignupStage1 .valid-field.true .custom-field .select2-selection--single,
-            #teacherSignupStage2 .valid-field.true .custom-field input,
-            #teacherSignupStage2 .valid-field.true .custom-field select,
-            #teacherSignupStage2 .valid-field.true .custom-field .select2-selection--single,
-            #teacherSignupStage6 .valid-field.true .custom-field input,
-            #teacherSignupStage6 .valid-field.true .custom-field select,
-            #teacherSignupStage6 .valid-field.true .custom-field .select2-selection--single {
-                background-color: #fff !important;
-                box-shadow: inset 0 0 0 1000px #fff !important;
-            }
-            #teacherSignupStage1 .custom-field .iti {
-                display: block;
-                width: 100%;
-            }
-            #teacherSignupStage1 .custom-field .iti input.form-control-field {
-                padding-left: 68px !important;
-            }
-            #teacherSignupStage1 .custom-field .iti .iti__selected-flag {
-                padding-left: 12px;
-                padding-right: 10px;
-            }
-            #teacherSignupStage5 .custom-field .iti {
-                display: block;
-                width: 100%;
-            }
-            #teacherSignupStage5 .custom-field .iti input.form-control-field {
-                padding-left: 88px !important;
-            }
-            #teacherSignupStage5 .custom-field .iti .iti__selected-flag {
-                padding-left: 12px;
-                padding-right: 10px;
-            }
-            #teacherSignupStage1 .teacher-select2-aligned-row .select2-container--default .select2-selection--single {
-                height: 42px !important;
-            }
-            #teacherSignupStage1 .teacher-select2-aligned-row .select2-container--default .select2-selection--single .select2-selection__rendered {
-                line-height: 42px !important;
-            }
-            #teacherSignupStage1 .teacher-select2-aligned-row .select2-container--default .select2-selection--single .select2-selection__arrow {
-                height: 42px !important;
-            }
-            #teacherSignupStage2 .custom-field input.form-control-field {
-                height: 42px !important;
-                line-height: 42px !important;
-            }
-            #teacherSignupStage2 .custom-field .select2-container--default .select2-selection--single {
-                height: 42px !important;
-            }
-            #teacherSignupStage2 .custom-field .select2-container--default .select2-selection--single .select2-selection__rendered {
-                line-height: 42px !important;
-            }
-            #teacherSignupStage2 .custom-field .select2-container--default .select2-selection--single .select2-selection__arrow {
-                height: 42px !important;
-            }
-            #teacherSignupStage6 .custom-field input.form-control-field,
-            #teacherSignupStage6 .custom-field select.form-control-field {
-                height: 42px !important;
-                line-height: 42px !important;
-            }
-            #teacherSignupStage6 .custom-field .select2-container--default .select2-selection--single {
-                height: 42px !important;
-            }
-            #teacherSignupStage6 .custom-field .select2-container--default .select2-selection--single .select2-selection__rendered {
-                line-height: 42px !important;
-            }
-            #teacherSignupStage6 .custom-field .select2-container--default .select2-selection--single .select2-selection__arrow {
-                height: 42px !important;
+            #teacherSignupStage1 .custom-field label:not(.error-msg),
+            #teacherSignupStage2 .custom-field label:not(.error-msg),
+            #teacherSignupStage6 .custom-field label:not(.error-msg) {
+                background: white !important;
+                padding: 0 6px;
             }
         </style>`);
 }
@@ -111,6 +47,9 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
     schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
     $("body").append(generateTeacherEnrollmentContent(moduleName));
+    if (typeof refreshCustomFieldState === "function") {
+        refreshCustomFieldState($(".wrapper-style.custom-field-scope"));
+    }
     createStepsImage();
     getFormsValidation();
     addTeacherSignupFieldBackgroundOverride();
@@ -1045,8 +984,12 @@ function getTeacherReviewAndApprovalContent(){
 
 function getTeacherVerificationDetailsContent(data){
     var html=
-        `<style>
+        `<div id="teacherVerificationDetails" class="custom-field-scope">
+        <style>
             .valid-check:after{translate: -12px;}
+            #teacherVerificationDetails .custom-field label:not(.error-msg) {
+                background: white !important;
+            }
         </style>
         <input type="hidden" id="countryData1" value="${data.employeeReference?.[0]?.isoCode || 'US'}">
         <input type="hidden" id="countryIsd1" value="${data.employeeReference?.[0]?.isdCode || '1'}">
@@ -1107,7 +1050,7 @@ function getTeacherVerificationDetailsContent(data){
                 <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
                 <div class="form-row">
                     <div class="form-holder">
-                        <label class="full">Recommendation Letter 1<sup class="text-danger">*</sup></label>
+                        <label class="full" style="font-weight: bold;color: gray;">Recommendation Letter 1<sup class="text-danger">*</sup></label>
                         <div class="full upload-item-wrapper clone-item">
                             <div class="upload-btn-wrapper mt-1 upload-item">
                                 <div class="uploaded-file valid-field valid-check" id="fileupload7Span" >${checkValueValidation(data.attachments.recommendationLetter1Name, "Upload Recommendation Letter 1")}</div>
@@ -1118,7 +1061,7 @@ function getTeacherVerificationDetailsContent(data){
                         </div>
                     </div>
                     <div class="form-holder">
-                        <label class="full">Recommendation Letter 2<sup class="text-danger">*</sup></label>
+                        <label class="full" style="font-weight: bold;color: gray;">Recommendation Letter 2<sup class="text-danger">*</sup></label>
                         <div class="full">
                             <div class="upload-btn-wrapper mt-1">
                                 <div class="uploaded-file valid-field valid-check" id="fileupload8Span">${checkValueValidation(data.attachments.recommendationLetter2Name, "Upload Recommendation Letter 2")}</div>
@@ -1130,7 +1073,7 @@ function getTeacherVerificationDetailsContent(data){
                     </div>
                 </div>
                 <div>
-                    <h6 class="mb-1" style="font-weight: bold;color: gray;">Reference 1<sup class="text-danger">*</sup></h6>
+                    <h6 class="mb-2 mt-2" style="font-weight: bold;color: gray;">Reference 1<sup class="text-danger">*</sup></h6>
                     <div class="form-row d-flex flex-wrap gap-3">
                         <div class="form-holder" style="flex: 1; min-width: 200px;">
                             <div class="custom-field">
@@ -1217,7 +1160,7 @@ function getTeacherVerificationDetailsContent(data){
                 <p style="color: red; margin-bottom: 15px">NOTE:- Please upload files in following formats (jpg, jpeg, pdf or png) with maximum size of 10 MB</p>
                 <div class="form-row">
                     <div class="form-holder">
-                        <label class="full">Police Verification<sup class="text-danger">*</sup></label>
+                        <label class="full" style="font-weight: bold;color: gray;">Police Verification<sup class="text-danger">*</sup></label>
                         <div class="full upload-item-wrapper clone-item">
                             <div class="upload-btn-wrapper mt-1 upload-item">
                                 <div class="uploaded-file valid-field valid-check" id="fileupload9Span" >${checkValueValidation(data.attachments.policeVerificationName, "Upload Police Verification")}</div>
@@ -1228,7 +1171,7 @@ function getTeacherVerificationDetailsContent(data){
                         </div>
                     </div>
                     <div class="form-holder">
-                        <label class="full">Last Salary Slip<sup class="text-danger">*</sup></label>
+                        <label class="full" style="font-weight: bold;color: gray;">Last Salary Slip<sup class="text-danger">*</sup></label>
                         <div class="full">
                             <div class="upload-btn-wrapper mt-1">
                                 <div class="uploaded-file valid-field valid-check" id="fileupload10Span">${checkValueValidation(data.attachments.previousSalarySlipName, "Upload Last Salary Slip")}</div>
@@ -1389,7 +1332,7 @@ function getTeacherBankAccountDetails(){
                     <div class="form-holder valid-field">
                         <i class="zmdi zmdi-balance"></i>
                         <div class="custom-field">
-                            <select name="accountCategory" id="accountCategory" class="form-control-field">
+                            <select name="accountCategory" id="accountCategory" class="form-control-field" style="border: 1px solid black !important;">
                             </select>
                             <label for="accountCategory">Account Type*</label>
                         </div>
@@ -1698,8 +1641,9 @@ function gradeSelectionModal(data){
                             <button type="button" class="btn k8-theme-btn secondary-bg white-txt-color" onclick="getSelectedGrades()" >Apply</button>
                         </div>
                     </div>
-                </div>
             </div>
+        </div>
+        </div>
         </div>`;
     return html;
 }

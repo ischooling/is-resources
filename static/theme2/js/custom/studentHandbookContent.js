@@ -1,5 +1,5 @@
 function getStudentHandbookContent(title, filePath){
-    var handbookImage = SCHOOL_ID == 1 ? (PATH_FOLDER_IMAGE2 + "handbook.jpg") : (PATH_FOLDER_IMAGE2 + "student-handbook.jpg");
+    var handbookImage = SCHOOL_ID == 1 ? (PATH_FOLDER_IMAGE2 + "updated_handbook.jpeg") : (PATH_FOLDER_IMAGE2 + "student-handbook.jpg");
     var policyLink = SCHOOL_ID == 1 ? "https://internationalschooling.org/student-policies-and-code-of-conduct/" : (filePath || "javascript:void(0)");
     var safeTitle = title || "Student Handbook";
     var hasFile = !!filePath;

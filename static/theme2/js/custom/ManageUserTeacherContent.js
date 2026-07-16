@@ -213,7 +213,7 @@ function buildTeacherSearchRowCells(value, rowIndex, formId, moduleId) {
 			: '<a href="javascript:void(0);" class="dropdown-item" onclick="return sendEmailForCommon(' + value.userId + ');"><i class="fa fa-envelope"></i>&nbsp;&nbsp;Send Email</a>')
 		+ '<a href="' + value.userLogUrl + '" target="_blank" class="dropdown-item"><i class="fa fa-eye"></i>&nbsp;Teacher Logs</a>'
 		+ (value.spoofLink === "Y"
-			? '<a href="javascript:void(0);" class="dropdown-item" onclick="return openSpoofUrlModal(\'' + value.userId + '\',\'' + (value.name || '').replace(/'/g, "\\'") + '\',\'teacher\');"><i class="fa fa-eye"></i>&nbsp;View as Teacher</a>'
+			? '<a href="javascript:void(0);" class="dropdown-item" onclick="return openSpoofUrlModal(\'U\',\'' + value.userId + '\',\'' + (value.name || '').replace(/'/g, "\\'") + '\',\'teacher\');"><i class="fa fa-eye"></i>&nbsp;View as Teacher</a>'
 			: '')
 		+ (value.meetingCount <= 0
 			? ""
