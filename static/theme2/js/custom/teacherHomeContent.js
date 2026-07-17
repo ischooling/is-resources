@@ -142,7 +142,7 @@ function teacherAgreementContent(data, responseData){
             <div class="modal-dialog" role="document" style="top:0%;max-width:1200px;width:100%;">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
-                        <h5 class="modal-title">Teacher Agreement</h5>	
+                        <h5 class="modal-title">${responseData.salutation ? responseData.salutation + '. ' : ''}${responseData.name}, your contract has been updated</h5>	
                         ${/*button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>*/''}
