@@ -106,6 +106,21 @@ function escapeCharacters(inputString) {
 	return inputString;
 }
 
+function unescapeCharacters(inputString) {
+	if(inputString) {
+		if(inputString.includes("%27")) {
+			inputString = inputString.replace(/%27/g,"'")
+		}
+		if(inputString.includes("%22")) {
+			inputString = inputString.replace(/%22/g,'"')
+		}
+		if(inputString.includes("%26")) {
+			inputString = inputString.replace(/%26/g,"&")
+		}
+	}
+	return inputString;
+}
+
 function escapeCharactersForSyllabus(inputString) {
 	console.log('String Before conversion '+inputString);
 	if(inputString) {

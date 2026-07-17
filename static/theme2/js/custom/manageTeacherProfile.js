@@ -206,7 +206,7 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 							<a class="dropdown-item" href="javascript:void(0);" onclick="return callPendingReqModel('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.teacherFirstReset}', '${receivedTeachedProfile.isTeacherPoliceVerifide}');">
 								<i class="fas fa-edit mr-2"></i> Update Status
 							</a>
-							<a class="dropdown-item" href="javascript:void(0);" onclick="addTeacherContract('${receivedTeachedProfile.userId}', '${receivedTeachedProfile.name}', '${receivedTeachedProfile.userName}', '${receivedTeachedProfile.contractId}');">
+							<a class="dropdown-item edit-agreement-btn-${receivedTeachedProfile.userId}" data-contract-id="${receivedTeachedProfile.contractId}" href="javascript:void(0);" onclick="addTeacherContract('${receivedTeachedProfile.userId}', '${escapeCharacters(receivedTeachedProfile.name)}', '${receivedTeachedProfile.userName}', $(this).attr('data-contract-id'));">
 								<i class="fas fa-file-contract mr-2"></i> <span id="addContractSpan${receivedTeachedProfile.userId}">${receivedTeachedProfile.contractId > 0 ? "Add/Edit Contract" : "Add Contract"}</span>
 							</a>
 							<a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication('${receivedTeachedProfile.userScreeningId}', 'USER_SCREENING', 'TEACHER_PROFILE');">
@@ -259,7 +259,7 @@ function getPendingContractListHtml(pendingContractList){
 			<td>${pendingContract.userName}</td>
 			<td>
 				${/*<a onclick="return callSchoolInneraction('teacher-agreement','?userId=${pendingContract.userId}&controlType=edit&moduleId=${moduleId}','section-linebox');" href="javascript:void(0);" class="waves-effect">Click here</a>*/''}
-				<a onclick="addTeacherContract('${pendingContract.userId}', '${pendingContract.name}', '${pendingContract.userName}', '${pendingContract.contractId}');" href="javascript:void(0);" class="waves-effect">Click here</a>
+				<a onclick="addTeacherContract('${pendingContract.userId}', '${escapeCharacters(pendingContract.name)}', '${pendingContract.userName}', $(this).attr('data-contract-id'));" href="javascript:void(0);" class="waves-effect edit-agreement-btn-${pendingContract.userId}" data-contract-id="${pendingContract.contractId}">Click here</a>
 			</td>
 			<td><a href="javascript:void(0);" onclick="return callAgreementReqModel('${pendingContract.userId}','${pendingContract.meetingId}');" class="waves-effect">Update Status</a></td>
 			<td>
@@ -826,6 +826,7 @@ function teacherVerificationAttchament(src){
 }
 
 async function addTeacherContract(userId, name, email, contractId) {
+    name = unescapeCharacters(name);
     $("#addTeacherContractModal").remove();
     var payload = { userId: userId };
     const responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-signup-agreement-details', payload, '/teacher/signup');
@@ -833,8 +834,12 @@ async function addTeacherContract(userId, name, email, contractId) {
     $("body").append(addTeacherContractModal(responseData.details.teacherAgreementDetails, userId, name, email, contractId));
     
     if (contractId != 0) {
-        $("#publishTeacherContractBtn").show();
         $("#previewTeacherContractBtn").show();
+        if (responseData.details.teacherAgreementDetails.publishDateTime) {
+            $("#publishTeacherContractBtn").hide();
+        } else {
+            $("#publishTeacherContractBtn").show();
+        }
     }
     
     setTimeout(() => {
@@ -1142,6 +1147,7 @@ async function saveTeacherContract(formId, userId){
 		$("#publishTeacherContractBtn").show();
 		$("#previewTeacherContractBtn").show();
 		$("#" + formId + " #contractId").val(responseData.responseData.contractId);
+		$(".edit-agreement-btn-" + userId).attr("data-contract-id", responseData.responseData.contractId);
 		$("#addContractSpan" + userId).text("Add/Edit Contract")
 	}else{
 		showMessageTheme2(0, responseData.message);
