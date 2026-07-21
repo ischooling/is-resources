@@ -24,10 +24,15 @@ async function rendereTeacherHomeContent(){
             $("#teacherAgreementModal").remove();
         }
         if(responseData.teacherAgreementDTO!=undefined){
-            $('body').append(teacherAgreementContent(commonProfileDTO, JSON.parse(responseData.teacherAgreementDTO)));
-            $("#teacherAgreementModal").modal('show');
-            $("#preferenceTimeavailabilityFlag").val(true);
-            callLocationDetails('teacherAgreementModal');
+            var teacherAgreementDetails = JSON.parse(responseData.teacherAgreementDTO);
+            if(teacherAgreementDetails.agreementExpiryAck != 'Y'){
+                $('body').append(teacherAgreementContent(commonProfileDTO, teacherAgreementDetails));
+                clearRecipientSignatureAndDate();
+                $("#teacherAgreementModal").modal('show');
+                $("#preferenceTimeavailabilityFlag").val(true);
+                callLocationDetails('teacherAgreementModal');
+                startTeacherContractCountdown(teacherAgreementDetails);
+            }
         }
     }
     $("body").append(newsAllListWithDetailsModalCotent()+calendarActivityModal()+viewActivityAttachmentModal());
@@ -131,13 +136,13 @@ function teacherClassModal(){
 
 function teacherAgreementContent(data, responseData){
     var html=
-        `<div class="modal fade " id="teacherAgreementModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" data-backdrop="static">
+        `<div class="modal fade " id="teacherAgreementModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" data-backdrop="false" data-keyboard="false" style="z-index:1070;background:rgba(0,0,0,0.5);">
             <input type="hidden" id="userId" value="${data.userId}">
             <input type="hidden" id="location" value="">
-            <div class="modal-dialog modal-xl" role="document" style="top:0%;">
+            <div class="modal-dialog" role="document" style="top:0%;max-width:1200px;width:100%;">
                 <div class="modal-content">
                     <div class="modal-header py-2 bg-primary text-white">
-                        <h5 class="modal-title">Teacher Agreement</h5>	
+                        <h5 class="modal-title">${responseData.salutation ? responseData.salutation + '. ' : ''}${responseData.name}, your contract has been updated</h5>	
                         ${/*button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>*/''}
@@ -153,20 +158,212 @@ function teacherAgreementContent(data, responseData){
                             `<div class="form-check flex-grow-1">
                                 <label class="form-check-label text-dark custom-checkbox">
                                     <input class="form-check-input" type="checkbox" id="agreementDeclarationConfirm">
-                                        <span class="ml-4">I hereby confirm that I have read and agree to the Terms. I understand that this agreement is digitally signed and does not require a physical signature.</span>
+                                        <span class="ml-4">I hereby confirm that I have read and agree to the terms and understand that this contract is digitally signed and does not require a physical signature.</span>
                                         <span class="form-check-sign">
                                             <span class="check"></span>
                                         </span>
-                                </label> 
+                                </label>
                             </div>`
                         }
                         html+=`
-                        <button type="submit" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info" style="float:right;">Confirm</button>
-                    </div>
+                        <button type="submit" id="teacherAgreementConfirmBtn" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info" style="float:right;">Confirm</button>
+                    </div>`
+                    if(responseData.validityEnd){
+                        html+=teacherContractValidityCard(responseData);
+                    }
+                    html+=`
                 </div>
             </div>
         </div>`;
     return html;
+}
+
+function teacherContractValidityCard(responseData){
+    var validTill = changeDateFormat(new Date(responseData.validityEnd), "MMM-dd-yyyy");
+    var html=
+        `<div class="mx-3 mb-3 p-3 bg-light-primary rounded" id="contractValidityCard" style="border-left:4px solid #007bff;">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-auto text-center text-md-left">
+                    <div class="font-weight-bold text-dark">Contract Valid Till</div>
+                    <div class="text-dark font-weight-semi-bold" style="font-size:26px;" id="contractValidTillDate">${validTill}</div>
+                </div>
+                <div class="col-12 col-md-auto ml-md-auto text-center text-md-right mt-2 mt-md-0">
+                    <div class="font-weight-bold text-dark mb-2" id="contractCountdownLabel">Time left to accept the contract</div>
+                    <div class="d-inline-flex" id="contractValidityCountdown">
+                        <div class="bg-white rounded text-center px-2 py-1 ml-2 border" style="min-width:52px;">
+                            <div class="font-18 font-weight-bold text-primary line-height-1 mb-1" id="contractCountdownDays">00</div>
+                            <div class="font-10 text-dark line-height-1">DAYS</div>
+                        </div>
+                        <div class="bg-white rounded text-center px-2 py-1 ml-2 border" style="min-width:52px;">
+                            <div class="font-18 font-weight-bold text-primary line-height-1 mb-1" id="contractCountdownHours">00</div>
+                            <div class="font-10 text-dark line-height-1">HRS</div>
+                        </div>
+                        <div class="bg-white rounded text-center px-2 py-1 ml-2 border" style="min-width:52px;">
+                            <div class="font-18 font-weight-bold text-primary line-height-1 mb-1" id="contractCountdownMinutes">00</div>
+                            <div class="font-10 text-dark line-height-1">MIN</div>
+                        </div>
+                        <div class="bg-white rounded text-center px-2 py-1 ml-2 border" style="min-width:52px;">
+                            <div class="font-18 font-weight-bold text-primary line-height-1 mb-1" id="contractCountdownSeconds">00</div>
+                            <div class="font-10 text-dark line-height-1">SEC</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-100 text-center mt-2 font-weight-bold" id="contractValidityNote" style="color:#e69500;">Please review and accept before the contract window closes.</div>
+        </div>`;
+    return html;
+}
+
+var TEACHER_CONTRACT_COUNTDOWN_INTERVAL;
+function startTeacherContractCountdown(agreementDetails){
+    var validityEnd = agreementDetails != undefined ? agreementDetails.validityEnd : "";
+    if(!validityEnd || $("#contractValidityCountdown").length < 1){
+        return;
+    }
+    var endTime = new Date(validityEnd + "T23:59:59").getTime();
+    if(isNaN(endTime)){
+        return;
+    }
+    clearInterval(TEACHER_CONTRACT_COUNTDOWN_INTERVAL);
+    var isExpiredHandled = false;
+    var pad = function(value){
+        return String(value).padStart(2, "0");
+    };
+    var updateCountdown = function(){
+        var diff = endTime - new Date().getTime();
+        if(diff <= 0){
+            diff = 0;
+            clearInterval(TEACHER_CONTRACT_COUNTDOWN_INTERVAL);
+            if(!isExpiredHandled){
+                isExpiredHandled = true;
+                showTeacherContractExpiredState(agreementDetails);
+            }
+        }
+        $("#contractCountdownDays").text(pad(Math.floor(diff / 86400000)));
+        $("#contractCountdownHours").text(pad(Math.floor(diff / 3600000) % 24));
+        $("#contractCountdownMinutes").text(pad(Math.floor(diff / 60000) % 60));
+        $("#contractCountdownSeconds").text(pad(Math.floor(diff / 1000) % 60));
+    };
+    updateCountdown();
+    if(!isExpiredHandled){
+        TEACHER_CONTRACT_COUNTDOWN_INTERVAL = setInterval(updateCountdown, 1000);
+    }
+}
+
+function clearRecipientSignatureAndDate(){
+    var recipientSignatureBox = $("#teacherAgreementModal #rightSignatureBox");
+    if(recipientSignatureBox.length){
+        recipientSignatureBox.html("<br>");
+    }
+    var recipientSignDate = $("#teacherAgreementModal #rightDate");
+    if(recipientSignDate.length){
+        recipientSignDate.text("____");
+    }
+}
+
+var TEACHER_CONTRACT_MODAL_PRIORITY_INTERVAL;
+function keepTeacherContractModalsOnTop(){
+    var agreementModal = $("#teacherAgreementModal");
+    var expiredModal = $("#contractExpiredModal");
+    var isAgreementOpen = agreementModal.hasClass("show");
+    var isExpiredOpen = expiredModal.hasClass("show");
+    if(!isAgreementOpen && !isExpiredOpen){
+        clearInterval(TEACHER_CONTRACT_MODAL_PRIORITY_INTERVAL);
+        TEACHER_CONTRACT_MODAL_PRIORITY_INTERVAL = undefined;
+        return;
+    }
+    var maxZ = 1050;
+    $(".modal.show, .modal-backdrop").not("#teacherAgreementModal, #contractExpiredModal").each(function(){
+        var z = parseInt($(this).css("z-index"), 10);
+        if(!isNaN(z) && z > maxZ){
+            maxZ = z;
+        }
+    });
+    if(isAgreementOpen){
+        var agreementZ = parseInt(agreementModal.css("z-index"), 10);
+        var agreementOutOfOrder = isNaN(agreementZ) || agreementZ <= maxZ
+            || agreementModal.nextAll(".modal.show").not("#contractExpiredModal").length > 0;
+        if(agreementOutOfOrder){
+            agreementModal.appendTo("body").css("z-index", maxZ + 10);
+        }
+    }
+    if(isExpiredOpen){
+        var agreementZNow = parseInt(agreementModal.css("z-index"), 10);
+        var minRequiredZ = Math.max(maxZ, isNaN(agreementZNow) ? 0 : agreementZNow);
+        var expiredZ = parseInt(expiredModal.css("z-index"), 10);
+        var expiredOutOfOrder = isNaN(expiredZ) || expiredZ <= minRequiredZ
+            || expiredModal.nextAll(".modal.show").length > 0;
+        if(expiredOutOfOrder){
+            expiredModal.appendTo("body").css("z-index", minRequiredZ + 10);
+        }
+    }
+    $(document).off("focusin.bs.modal");
+    if(TEACHER_CONTRACT_MODAL_PRIORITY_INTERVAL == undefined){
+        TEACHER_CONTRACT_MODAL_PRIORITY_INTERVAL = setInterval(keepTeacherContractModalsOnTop, 500);
+    }
+}
+$(document).off("shown.bs.modal.contractModalPriority").on("shown.bs.modal.contractModalPriority", ".modal", function(){
+    keepTeacherContractModalsOnTop();
+});
+$(document).off("hidden.bs.modal.contractModalPriority").on("hidden.bs.modal.contractModalPriority", ".modal", function(){
+    if($("#teacherAgreementModal").is(":visible") || $("#contractExpiredModal").is(":visible")){
+        $("body").addClass("modal-open");
+    }
+});
+
+function showTeacherContractExpiredState(agreementDetails){
+    $("#teacherAgreementConfirmBtn").prop("disabled", true);
+    $("#agreementDeclarationConfirm").prop("disabled", true);
+    $("#teacherAgreementModal #recipientSignatureUpload").prop("disabled", true);
+    $("#contractValidityCard").removeClass("bg-light-primary").css({"background-color":"#fdf1f2","border-left-color":"#dc3545"});
+    $("#contractValidTillDate").addClass("text-danger");
+    $("#contractCountdownLabel").text("Acceptance window closed");
+    $("#contractCountdownDays, #contractCountdownHours, #contractCountdownMinutes, #contractCountdownSeconds").removeClass("text-primary").addClass("text-secondary");
+    $("#contractValidityNote").css("color","#dc3545").text("This contract has expired. Please contact HR to request a new contract.");
+    $("#contractExpiredModal").remove();
+    $("body").append(teacherContractExpiredModalContent(agreementDetails));
+    $("#contractExpiredModal").modal("show");
+}
+
+function teacherContractExpiredModalContent(agreementDetails){
+    var closedOn = changeDateFormat(new Date(agreementDetails.validityEnd), "MMM-dd-yyyy");
+    var hrEmail = "hiring@internationalschooling.org";
+    var hrPhone = "+1 (585) 499-0662";
+    var html=
+    `<div class="modal fade" id="contractExpiredModal" tabindex="-1" role="dialog" data-backdrop="false" data-keyboard="false" style="z-index:1080;background:rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered shadow-none" role="document" style="max-width:600px;width:100%;">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:72px;height:72px;background:#fdecea;">
+                        <i class="fa fa-exclamation-circle text-danger" style="font-size:42px;"></i>
+                    </div>
+                    <h4 class="font-weight-bold text-danger mb-2">Contract Expired</h4>
+                    <p class="text-dark mb-3">The acceptance window for this contract closed on <b>${closedOn}</b>. This contract can no longer be accepted online.</p>
+                    <div class="text-left p-3 rounded border bg-light">
+                        <p class="mb-2 text-dark">To have a new contract issued, please contact the HR team:</p>
+                        <p class="mb-1 text-dark"><b>Email:</b> <a href="mailto:${hrEmail}" class="text-primary">${hrEmail}</a></p>
+                        <p class="mb-1 text-dark"><b>WhatsApp:</b> <a href="https://api.whatsapp.com/send?phone=${hrPhone.replace(/[^\d]/g, "")}" target="_blank" class="text-primary">${hrPhone}</a></p>
+                        ${agreementDetails.agreementRefNumber ? `<p class="mb-0 text-dark"><b>Ref:</b> ${agreementDetails.agreementRefNumber}</p>` : ""}
+                    </div>
+                    <button type="button" class="btn btn-primary px-4 mt-3" onclick="acknowledgeTeacherContractExpiry('${agreementDetails.agreementLogId}');">Acknowledge</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    return html;
+}
+
+async function acknowledgeTeacherContractExpiry(contractId){
+    var payload = {};
+    payload['userId'] = USER_ID;
+    payload['hash'] = "";
+    payload['contractId'] = parseInt(contractId);
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'save-teacher-agreement-expiry-acknowledgement', payload, '/teacher/signup');
+    if(responseData.statusCode == "SUCCESS"){
+        $("#contractExpiredModal").modal("hide");
+        $("#teacherAgreementModal").modal("hide");
+        showMessageTheme2(1, responseData.message);
+    }
 }
 
 function teacherAgreementView(data){
