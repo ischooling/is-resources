@@ -619,7 +619,7 @@ function classThumbItemListContent(subjectList, moduleId) {
     var subjectData = v;
     html += 
       `<div class="col-xl-12 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 courseThumbWrapper">
-        <div class="full p-2 rounded border cursor courseThumb ${i==0? 'bg-primary text-white border-primary':'border'}" data-subject='${JSON.stringify(subjectData)}' onclick="viewSingleCourseDetails(this, \'${moduleId}\')">
+        <div class="full p-2 rounded border cursor courseThumb ${i==0? 'bg-primary text-white border-primary':'border'}" data-subject='${JSON.stringify(subjectData).replace(/'/g, "&#39;")}' onclick="viewSingleCourseDetails(this, \'${moduleId}\')">
           <h6 class="text-center mb-2 font-14 font-weight-semi-bold">${v.name}</h6>
           <div class="d-flex flex-wrap align-items-center justify-content-between">
             <div class="font-12">Total: <span class=" total-num text-primary font-weight-semi-bold">${v.total}</span></div>

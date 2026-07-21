@@ -672,7 +672,7 @@ function getClassTypeColor(index) {
 
 function viewSingleCourseDetails(src,moduleId){
   var sujectData = $(src).attr('data-subject'); 
-  sujectData = JSON.parse(sujectData)
+  sujectData = JSON.parse(sujectData);
   $("#singleCourseView").html(getSingleCourseViewContent(sujectData,moduleId));
   $(src).addClass("bg-primary text-white");
   $(src).parent().siblings().children().removeClass("bg-primary text-white border-primary");
