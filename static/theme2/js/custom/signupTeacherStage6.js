@@ -308,94 +308,38 @@ async function callForSignupTeacherAgreement(formId, userId, agreementLogId, con
 	data['content'] = $("#editorData").html();
 	data['location'] = $("#" + formId + " #location").val();
 	data['additionalDetails'] = fillBrowserDetail();
-	try{
-		var response = await $.ajax({
-			type : "POST",
-			contentType : APPLICATION_JSON_VALUE,
-			url : getURLForHTML('teacher/signup','save-Teacher-Declaration'),
-			data : JSON.stringify(data),
-			dataType : 'json'
-		});
-		if(response.statusCode == "FAILED"){
-			if(response.status == "3"){
-				redirectLoginPage();
-			}else if(response.status == "0" || response.status == "3"){
-				showMessageTheme2(0, response.message,"", true);
-			}
-			flag=false;
-		}else{
-			if(controlType=='SIGNUP'){
-				getStage5Data();
-				showMessageTheme2(1, 'Contract accepted successfully',"", true);
-			}else{
-				$('#teacherAgreementModal').modal('hide');
-				if(typeof TEACHER_CONTRACT_COUNTDOWN_INTERVAL !== "undefined"){
-					clearInterval(TEACHER_CONTRACT_COUNTDOWN_INTERVAL);
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('teacher/signup','save-Teacher-Declaration'),
+		data : JSON.stringify(data),
+		dataType : 'json',
+		async: false,
+		success : function(response) {
+			if(response.statusCode == "FAILED"){
+				if(response.status == "3"){
+					redirectLoginPage();
+				}else if(response.status == "0" || response.status == "3"){
+					showMessageTheme2(0, response.message,"", true);
 				}
-				showContractAcceptedSuccessModal(formId);
+				flag=false;
+			}else{
+				if(controlType=='SIGNUP'){
+					getStage5Data();
+				}else{
+					$('#teacherAgreementModal').modal('hide');
+					if($('#showTimePrefModal').val() == "true"){
+						$("#timePreferencePopup").modal("show");
+					}else{
+						$("#timePreferencePopup").modal("hide");	
+					}
+				}
+				showMessageTheme2(1, 'Contract accepted successfully',"", true);
+				flag=true;
 			}
-			flag=true;
 		}
-	}catch(e){
-		flag=false;
-	}
+	});
 	return flag;
-}
-
-function showContractAcceptedSuccessModal(formId){
-	var locationDetails = {};
-	try{
-		locationDetails = JSON.parse($("#" + formId + " #location").val() || "{}");
-	}catch(e){}
-	var acceptedOn = typeof moment !== "undefined"
-		? moment().format("dddd, MMMM D, YYYY, [at] HH:mm:ss")
-		: new Date().toLocaleString();
-	$("#contractAcceptedSuccessModal").remove();
-	$("body").append(contractAcceptedSuccessModalContent(locationDetails, acceptedOn));
-	setTimeout(() => {
-		$("#contractAcceptedSuccessModal").modal("show");
-	}, 200);
-}
-
-function contractAcceptedSuccessModalContent(locationDetails, acceptedOn){
-	var locationText = [locationDetails.city, locationDetails.regionName, locationDetails.country].filter(Boolean).join(", ");
-	var html=
-	`<div class="modal fade" id="contractAcceptedSuccessModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-		<div class="modal-dialog modal-dialog-centered shadow-none" role="document" style="max-width:600px;width:100%;">
-			<div class="modal-content">
-				<div class="modal-body text-center p-4">
-					<div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:72px;height:72px;background:#e8f5e9;">
-						<i class="fa fa-check-circle text-success" style="font-size:42px;"></i>
-					</div>
-					<h4 class="font-weight-bold text-success mb-1">Contract Accepted Successfully</h4>
-					<p class="text-muted mb-3">Your acceptance has been recorded and digitally signed.</p>
-					<div class="text-left p-3 rounded bg-light-primary" style="border-left:4px solid #007bff;">
-						<div class="d-flex align-items-start">
-							<i class="fa fa-check-square text-primary mt-1 mr-2" style="font-size:18px;"></i>
-							<span class="text-dark">I hereby confirm that I have read and agree to the terms and understand that this contract is digitally signed and does not require a physical signature.</span>
-						</div>
-						<hr class="my-2"/>
-						<p class="mb-1 text-dark">Here is my Location &amp; IP details:</p>
-						<p class="mb-1 text-dark">Accepted on: <b>${acceptedOn}</b></p>
-						${locationText != "" ? `<p class="mb-1 text-dark">Location: <b>${locationText}</b></p>` : ""}
-						${locationDetails.query ? `<p class="mb-0 text-dark">IP Address: <b class="text-dark" style="font-weight:bold;">${locationDetails.query}</b></p>` : ""}
-					</div>
-					<p class="text-muted mt-3 mb-3">A copy of the contract has been sent to your email.</p>
-					<button type="button" class="btn btn-primary px-4" onclick="closeContractAcceptedSuccessModal();">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>`;
-	return html;
-}
-
-function closeContractAcceptedSuccessModal(){
-	$("#contractAcceptedSuccessModal").modal("hide");
-	if($('#showTimePrefModal').val() == "true"){
-		$("#timePreferencePopup").modal("show");
-	}else{
-		$("#timePreferencePopup").modal("hide");
-	}
 }
 
 function callForSignupTeacherAccountAndContact(formId) {

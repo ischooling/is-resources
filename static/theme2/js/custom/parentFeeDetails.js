@@ -51,6 +51,8 @@ async function parentFeeDetailsRenderByStudent(studentUserId){
     $(".student-thumb").removeClass("active active-student");
     $(".student-" + studentUserId).addClass("active active-student");
     var apiResponse = await parentFeeDetailsFetchByStudent(studentUserId);
+    
+    console.log(apiResponse)
     // var students = parentFeeDetailsResolveStudentsFromGlobal();
     var rows = parentFeeDetailsMapRows(apiResponse);
     reintiailzeDataTable();

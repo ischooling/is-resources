@@ -7,6 +7,12 @@ $(document).on("click", "#dashboardPayment #chkval", function () {
 	}
 });
 
+$(document).on("hide.bs.modal", "#enrollReserveModal, #reserveSeatModal", function () {
+	if (document.activeElement && $(this).has(document.activeElement).length) {
+		document.activeElement.blur();
+	}
+});
+
 // function showReserveSeatContent(){
 // 	$(".need-help-slide-wrapper").removeClass("slide-in");
 // 	$(".reserve-seat-btn").addClass("slide-out-btn");
@@ -114,9 +120,11 @@ function acceptReserveASeatForNextGrade(userId){
 				$('.reserve-seat-wrapper').hide();
 			} else {
 				var details = data.details;
-				$('#reserveSeatModal').remove();
-				$('.reserve-seat-wrapper').after(getReserveSeatModal(data))
-				$('#reserveSeatModal').modal({ backdrop: 'static', keyboard: false })
+				setTimeout(function () {
+					$('#reserveSeatModal').remove();
+					$('.reserve-seat-wrapper').after(getReserveSeatModal(data))
+					$('#reserveSeatModal').modal({ backdrop: 'static', keyboard: false })
+				}, 300);
 			}
 		}
 	});

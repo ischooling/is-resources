@@ -691,6 +691,7 @@
     }
 
     function getDummyFeeDetails(studentUserId) {
+        debugger
         var baseDate = getDummyBaseDate();
         var student = getDummyStudent(studentUserId);
         var gradeName = student.grade;
@@ -1496,6 +1497,7 @@
     };
 
     window.dummyGetParentStudentList = async function (ajaxReqDetails) {
+        debugger
         if (!window.isDummyParentDashboardMode()) {
             return await callCommonAjax(ajaxReqDetails);
         }

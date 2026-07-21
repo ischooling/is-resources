@@ -201,25 +201,23 @@ function trStatusMeta(status) {
     };
 }
 
-// score/star bands (score% = stars/5 × 100): 75–100% green, 52–74% amber, 0–51% red
-var TR_SCORE_AMBER_FLOOR = 52;   // amber band starts here (= 2.6★)
-
 // parameter/overall score colors (not for group scores):
-// >= threshold green, 52 to below-threshold amber, below 52 red
+// >= threshold green, within 10 below amber, else red — e.g. 75+ / 65–74 / <65
 function trScoreColor(score, threshold) {
     if (score == null) return '#9aa0a6';
     if (score >= threshold) return '#1e8a3c';
-    if (score >= TR_SCORE_AMBER_FLOOR) return '#f57c00';
+    if (score >= (threshold - 10)) return '#f57c00';
     return '#d93025';
 }
 
-// detail-page status badge — amber-tier scores (52 to below threshold,
-// the orange bar) read "Needs Improvement" instead of a hard "Fail"
+// detail-page status badge — amber-tier scores (within 10 below threshold,
+// the orange bar) read "Need Improvement" instead of a hard "Fail"
 function trDetailStatusMeta(p) {
     if (p.status === 'Pass' || p.status === 'No Response') return trStatusMeta(p.status);
-    if (p.score != null && p.score >= TR_SCORE_AMBER_FLOOR) {
+    var threshold = p.threshold != null ? p.threshold : 75;
+    if (p.score != null && p.score >= (threshold - 10)) {
         return {
-            label: 'Needs Improvement',
+            label: 'Need Improvement',
             badgeClass: 'text-white',
             badgeStyle: 'background:#f57c00',   // same orange as the bar
             color: '#f57c00'
@@ -466,11 +464,11 @@ var trRespState = {
 
 function trEscapeAttr(s) { return String(s == null ? '' : s).replace(/"/g, '&quot;'); }
 
-// star color tiers: 0–2.5 red, 2.6–3.74 yellow, 3.75–5 green
+// star color tiers: 1–2.5 red, 2.6–3.5 yellow, 3.6–5 green
 function trStarColor(rating) {
     var r = Number(rating) || 0;
-    if (r < 2.6) return '#d93025';
-    if (r < 3.75) return '#fbbc04';
+    if (r <= 2.5) return '#d93025';
+    if (r <= 3.5) return '#fbbc04';
     return '#1e8a3c';
 }
 
@@ -1500,7 +1498,7 @@ function renderTeacherRatingDetail() {
                             '<div style="flex:1;min-width:0" class="text-truncate">' + (p.parameterName || '') + '</div>' +
                             '<div class="progress" style="flex:1;height:8px;max-width:200px"><div class="progress-bar" style="width:' + barWidth + '%;background:' + barColor + ' !important"></div></div>' +
                             '<div style="width:60px;text-align:right;font-weight:500;color:' + (p.status === 'No Response' ? '#adb5bd' : barColor) + '">' + (p.status === 'No Response' ? '—' : (pScore + '%')) + '</div>' +
-                            '<div style="width:140px;flex-shrink:0;text-align:center"><span class="badge ' + statusMeta.badgeClass + '" style="white-space:nowrap;' + (statusMeta.badgeStyle || '') + '">' + statusMeta.label + '</span></div>' +
+                            '<div style="width:110px;text-align:center"><span class="badge ' + statusMeta.badgeClass + '" style="white-space:nowrap;' + (statusMeta.badgeStyle || '') + '">' + statusMeta.label + '</span></div>' +
                         '</div>';
         });
         groupCardsHtml += '<div class="main-card card mb-3">' +

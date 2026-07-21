@@ -616,7 +616,7 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                             <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
                                 <div class="form-row">
                                     <div class="form-group col-md-3 col-12 position-relative custom-field">
-                                        <input type="text" class="form-control" value="${unescapeCharacters(data.name) || name || ''}" id="teacherName" ${name || data.name ? "disabled" : ""} placeholder=" ">
+                                        <input type="text" class="form-control" value="${data.name || name || ''}" id="teacherName" ${name || data.name ? "disabled" : ""} placeholder=" ">
                                         <label>Name</label>
                                     </div>
                                     <div class="form-group col-md-3 col-12 position-relative custom-field">
@@ -798,7 +798,7 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                         </form>
                         <div class="d-flex justify-content-end gap-10">
                             <button type="button" class="btn btn-success" onclick="saveTeacherContract('teacherContractForm', '${userId}');">Save Draft</button>
-                            <button type="button" class="btn btn-primary" id="publishTeacherContractBtn" data-contract-Id="" onclick="publishTeacherContract('teacherContractForm', '${userId}');" style="display: ${isContractFilled && !data.publishDateTime ? 'block' : 'none'};">Initiate Contract</button>
+                            <button type="button" class="btn btn-primary" id="publishTeacherContractBtn" data-contract-Id="" onclick="publishTeacherContract('teacherContractForm', '${userId}');" style="display: ${isContractFilled ? 'block' : 'none'};">Initiate Contract</button>
                         </div>
                     </div>
                 </div>

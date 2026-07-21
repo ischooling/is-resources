@@ -6211,7 +6211,7 @@ function callEnrollmentListDaywise(reportType, modeSearch, startDate, endDate) {
 				showMessage(true, data['message']);
 			} else {
 				//$('#school-demo-list').dataTable().fnDestroy();
-				var httmlTop = getEnrollDaywiseHtml(data, reportType, modeSearch, startDate, endDate);
+				var httmlTop = getEnrollDaywiseHtml(data, reportType, modeSearch);
 				//$(".enrolledListTbody").html(httmlTop);
 				//$("#school-demo-list").dataTable();
 			}
@@ -6238,7 +6238,7 @@ function getRequestForEnrollDaywise(reporttype, modeSearch,startDate, endDate) {
 }
 
 
-async function getEnrollDaywiseHtml(data, colType, modeSearch, startDate, endDate){
+async function getEnrollDaywiseHtml(data, colType, modeSearch){
 	var enrollListMonth=data.enrollListMonth;
 	const responseseries = await getEnrollListTrWise(enrollListMonth, colType, modeSearch);
 	//console.log(responseseries);
@@ -6254,12 +6254,6 @@ async function getEnrollDaywiseHtml(data, colType, modeSearch, startDate, endDat
 		chart: {
 			height: 350,
 			type: 'bar',
-			events: {
-				legendClick: function(chartContext, seriesIndex, config) {
-					var clickedYear = config.config.series[seriesIndex].name;
-					openEnrollCountryWiseModal(clickedYear, modeSearch, colType, startDate, endDate);
-				}
-			},
 	  },
 	  plotOptions: {
 		bar: {
@@ -6272,9 +6266,6 @@ async function getEnrollDaywiseHtml(data, colType, modeSearch, startDate, endDat
 	  legend: {
 		show: true,
 		formatter: customLegendFormatter,
-		onItemClick: {
-			toggleDataSeries: false
-		},
 	},
 	  dataLabels: {
 		enabled: true,
@@ -6370,95 +6361,6 @@ let customLegendFormatter = (seriesName, opts) => {
 	return htmlRet;
   };
 
-function ensureEnrollCountryModal() {
-	if ($('#enrollCountryWiseModal').length) return;
-	var modalHtml = ''
-		+ '<div class="modal fade bd-example-modal-lg fade-scale" id="enrollCountryWiseModal" tabindex="-1" role="dialog" aria-labelledby="enrollCountryWiseModalLabel" aria-hidden="true">'
-		+ '  <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">'
-		+ '    <div class="modal-content border-0">'
-		+ '      <div class="modal-header py-2 bg-primary text-white">'
-		+ '        <h5 class="modal-title" id="enrollCountryWiseModalLabel">Enrollments by Country &mdash; <span id="enrollCountryModalYear"></span></h5>'
-		+ '        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
-		+ '      </div>'
-		+ '      <div class="modal-body" id="enrollCountryModalBody"></div>'
-		+ '    </div>'
-		+ '  </div>'
-		+ '</div>';
-	$('body').append(modalHtml);
-}
-
-function renderEnrollCountryWiseTable(countryList) {
-	if (!countryList || !countryList.length) {
-		$('#enrollCountryModalBody').html('<div class="text-center text-muted py-4">No enrollment data found for this year.</div>');
-		return;
-	}
-	var totalCount = 0;
-	countryList.forEach(function (row) { totalCount += (row.count || 0); });
-	var html = '<div class="mb-2 text-muted" style="font-size:13px;">' + countryList.length + ' countries &middot; <b>' + totalCount + '</b> total enrolled students</div>';
-	html += '<table id="enrollCountryWiseTable" class="table table-bordered table-hover mb-0" style="width:100%;">'
-		+ '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Country</th><th class="text-center">Enrolled Students</th></tr></thead><tbody>';
-	countryList.forEach(function (row, idx) {
-		html += '<tr><td>' + (idx + 1) + '</td><td>' + (row.country || 'Unknown') + '</td><td class="text-center"><b>' + row.count + '</b></td></tr>';
-	});
-	html += '</tbody></table>';
-	$('#enrollCountryModalBody').html(html);
-
-	if ($.fn.DataTable.isDataTable('#enrollCountryWiseTable')) {
-		$('#enrollCountryWiseTable').DataTable().destroy();
-	}
-	$('#enrollCountryWiseTable').DataTable({
-		theme: "bootstrap4",
-		order: [[2, 'desc']],
-		pageLength: 10,
-		lengthMenu: [10, 20, 50, 100, 200]
-	});
-}
-
-function getRequestForEnrollCountryWise(year, modeSearch, reportType, startDate, endDate) {
-	var authentication = {};
-	var leadReportRequest = {};
-	leadReportRequest['schoolId'] = SCHOOL_ID;
-	leadReportRequest['modeSearch'] = modeSearch;
-	leadReportRequest['startDate'] = startDate;
-	leadReportRequest['endDate'] = endDate;
-	leadReportRequest['reportType'] = reportType;
-	leadReportRequest['year'] = parseInt(year);
-
-	authentication['hash'] = getHash();
-	authentication['schoolId'] = SCHOOL_ID;
-	authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userId'] = USER_ID;
-	authentication['userType'] = 'COMMON';
-	leadReportRequest['authentication'] = authentication;
-	return leadReportRequest;
-}
-
-function openEnrollCountryWiseModal(year, modeSearch, reportType, startDate, endDate) {
-	ensureEnrollCountryModal();
-	$('#enrollCountryModalYear').text(year);
-	$('#enrollCountryModalBody').html('<div class="text-center py-4 text-muted"><i class="fa fa-spinner fa-spin mr-2"></i>Loading...</div>');
-	$('#enrollCountryWiseModal').modal('show');
-
-	$.ajax({
-		type: 'POST',
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML('dashboard', 'get-enrolled-country-wise'),
-		data: JSON.stringify(getRequestForEnrollCountryWise(year, modeSearch, reportType, startDate, endDate)),
-		dataType: 'json',
-		cache: false,
-		success: function (data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				$('#enrollCountryModalBody').html('<div class="text-center text-danger py-4">' + (data['message'] || 'Unable to load data.') + '</div>');
-				return;
-			}
-			renderEnrollCountryWiseTable(data.countryList || []);
-		},
-		error: function () {
-			$('#enrollCountryModalBody').html('<div class="text-center text-danger py-4">Unable to load country breakdown.</div>');
-		}
-	});
-}
-
 async function  getEnrollListTrWise(enrollList, colType, modeSearch){
 	//console.log(enrollList);
 	var reponse={};
@@ -6548,7 +6450,6 @@ function callLeadCampaignList(modeSearch, startDate, endDate, campaignName, even
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
-		global : false, // keep this slow call out of the shared page-level loader; the tab has its own local spinner
 		success : function(data) {
 			//console.log(data);
 			

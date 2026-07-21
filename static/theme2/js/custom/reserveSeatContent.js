@@ -231,7 +231,7 @@ function enrollReserveModalContent(data, nextGrade){
 									<img src="${PATH_FOLDER_IMAGE2}reenrollement.png${SCRIPT_VERSION}" style="width: 90px;" />
 								</div>
 								<div class="border-left pl-4 ml-3 text-center flex-grow-2">
-									<span class="bg-primary text-white d-inline-block px-3 py-1 rounded text-center w-fit-content font-weight-bold font-12 mb-2">`;
+									<span class="text-white d-inline-block px-3 py-1 rounded text-center w-fit-content font-weight-bold font-12 mb-2" style="background-color: #417ec4;">`;
 									if(data.progressionDiscount && data.progressionDiscount != 0 && data.progressionDiscount != '$0.00'){
 										html+=`EXCLUSIVE RE-ENROLLMENT OFFER`;
 									}else if(data.planDiscount && data.planDiscount != 0 && data.planDiscount != '$0.00'){
