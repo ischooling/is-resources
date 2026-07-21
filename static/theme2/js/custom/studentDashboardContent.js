@@ -124,27 +124,27 @@ async function rendereDashboardContent(isParent){
                     `<h2></h2>
                     <div class="d-flex align-items-center mx-auto justify-content-center w-100">
                         <div class="d-inline-flex align-items-center">
-                            <div class="d-inline-flex flex-column rounded bg-light-primary text-dark p-1 font-weight-bold border p-2">
-                                <div class="font-28 px-1 mb-1 text-dark" style="line-height:24px">${time.days}</div>
+                            <div class="d-inline-flex flex-column rounded text-dark p-1 font-weight-bold border p-2">
+                                <div class="font-28 px-1 mb-1 text-danger" style="line-height:24px">${time.days}</div>
                                 <span class="font-weight-semi-bold font-12 text-center">DAYS</span>
                             </div> <span class="font-22 text-primary font-weight-bold d-inline-block px-2 pb-1">:</span> 
                         </div>
                         <div class="d-inline-flex align-items-center">
-                            <div class="d-inline-flex flex-column rounded bg-light-primary text-dark p-1 font-weight-bold border p-2">
-                                <div class="font-28 px-1 mb-1 text-dark" style="line-height:24px">${time.hours}</div>
+                            <div class="d-inline-flex flex-column rounded  text-dark p-1 font-weight-bold border p-2">
+                                <div class="font-28 px-1 mb-1 text-danger" style="line-height:24px">${time.hours}</div>
                                 <span class="font-weight-semi-bold font-12 text-center">HRS</span>
                             </div> <span class="font-22 text-primary font-weight-bold d-inline-block px-2 pb-1">:</span>
                         </div>
                         <div class="d-inline-flex align-items-center">
-                            <div class="d-inline-flex flex-column rounded bg-light-primary text-dark p-1 font-weight-bold border p-2">
-                                <div class="font-28 px-1 mb-1 text-dark" style="line-height:24px">${time.minutes}</div>
+                            <div class="d-inline-flex flex-column rounded  text-dark p-1 font-weight-bold border p-2">
+                                <div class="font-28 px-1 mb-1 text-danger" style="line-height:24px">${time.minutes}</div>
                                 <span class="font-weight-semi-bold font-12 text-center">MIN</span>
                             </div> <span class="font-22 text-primary font-weight-bold d-inline-block px-2 pb-1">:</span>
                         </div>
 
                         <div class="flex-row">
-                            <div class="d-inline-flex flex-column rounded bg-light-primary text-dark p-1 font-weight-bold border p-2">
-                                <div class="font-28 px-1 mb-1 text-dark" style="line-height:24px">${time.seconds}</div>
+                            <div class="d-inline-flex flex-column rounded  text-dark p-1 font-weight-bold border p-2">
+                                <div class="font-28 px-1 mb-1 text-danger" style="line-height:24px">${time.seconds}</div>
                                 <span class="font-weight-semi-bold font-12 text-center">SEC</span>
                             </div>
                         </div>

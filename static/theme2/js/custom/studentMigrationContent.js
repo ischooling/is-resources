@@ -1781,9 +1781,9 @@ async function getPaymentModeContent(cdrDTO){
 	'<div class="modal fade max-size-modal" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
 		+'<div class="modal-dialog modal-md" role="document" style="max-width:550px">'
 			+'<div class="modal-content rounded-20">'
-				+'<div class="modal-header py-2 rounded-20 bg-white text-dark">'
+				+'<div class="modal-header py-2 rounded-10 bg-white text-dark">'
 					+'<h5 class="modal-title payment-option-modal-title" style=" margin-left: 10px;">Payment Option</h5>'
-					+'<button type="button" class="close opacity-10" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-white d-inline-block bg-red " style="width:25px;height:25px;line-height:20px">&times;</span></button>'
+					+'<button type="button" class="close opacity-10" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-white d-inline-block bg-red ">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body pt-1" style="display:inline-block;width:100%;">'
 					+skeletonFeeDetails()

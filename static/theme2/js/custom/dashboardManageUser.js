@@ -1341,3 +1341,91 @@ function buildStudentInactiveReasonModalHtml() {
         '<button type="button" class="btn btn-danger" id="confirmStudentInactiveBtn">Confirm</button></div>' +
         '</div></div></div>';
 }
+
+/* ---------------------------------------------------------------------------
+ * Manage Email - admin opt-out of re-enrollment reminder emails for a student.
+ * ------------------------------------------------------------------------- */
+function getManageEmailModalHtml() {
+	return '<div class="modal fade" id="manageEmailModal" tabindex="-1" role="dialog" aria-hidden="true">' +
+		'<div class="modal-dialog" role="document">' +
+		'<div class="modal-content">' +
+		'<div class="modal-header bg-primary text-white py-2">' +
+		'<h5 class="modal-title">Manage Email</h5>' +
+		'<button type="button" class="close text-white" data-dismiss="modal" style="opacity:1;color:#fff;"><span aria-hidden="true">&times;</span></button>' +
+		'</div>' +
+		'<div class="modal-body">' +
+		'<p class="mb-2" id="manageEmailStudentName" style="font-weight:600;"></p>' +
+		'<div class="custom-control custom-switch">' +
+		'<input type="checkbox" class="custom-control-input" id="reenrollmentEmailOptOut">' +
+		'<label class="custom-control-label" for="reenrollmentEmailOptOut">Stop re-enrollment reminder emails for this student</label>' +
+		'</div>' +
+		'<small class="text-muted d-block mt-2">When enabled, the student and parent will no longer receive re-enrollment reminder emails.</small>' +
+		'</div>' +
+		'<div class="modal-footer" style="text-align:center;">' +
+		'<button type="button" class="btn btn-primary" id="saveManageEmailBtn">Save</button>' +
+		'</div>' +
+		'</div></div></div>';
+}
+
+function openManageEmailModal(userId, studentName) {
+	if (!userId) {
+		showMessageTheme2(0, "Invalid student.");
+		return false;
+	}
+	if ($("#manageEmailModal").length === 0) {
+		$("body").append(getManageEmailModalHtml());
+	}
+	$("#manageEmailStudentName").text(studentName ? studentName : "");
+	$("#reenrollmentEmailOptOut").prop("checked", false).prop("disabled", true);
+	$("#manageEmailModal").data("user-id", userId);
+	$("#manageEmailModal").modal("show");
+
+	$.ajax({
+		type: "GET",
+		url: CONTEXT_PATH + SCHOOL_UUID + "/dashboard/reenrollment-email-status/" + UNIQUEUUID + "?userId=" + userId,
+		dataType: "json",
+		cache: false,
+		success: function (res) {
+			if (res && res.status === "session_out") {
+				redirectLoginPage();
+				return;
+			}
+			if (res && res.status === "success") {
+				$("#reenrollmentEmailOptOut").prop("checked", res.optOut === "Y").prop("disabled", false);
+			} else {
+				showMessageTheme2(0, "Unable to load email preference.");
+			}
+		},
+		error: function () {
+			showMessageTheme2(0, "Unable to load email preference.");
+		}
+	});
+	return false;
+}
+
+$(document).on("click", "#saveManageEmailBtn", function () {
+	var userId = $("#manageEmailModal").data("user-id");
+	var optOut = $("#reenrollmentEmailOptOut").is(":checked") ? "Y" : "N";
+	$.ajax({
+		type: "POST",
+		url: CONTEXT_PATH + SCHOOL_UUID + "/dashboard/reenrollment-email-optout/" + UNIQUEUUID,
+		data: { userId: userId, optOut: optOut },
+		dataType: "json",
+		cache: false,
+		success: function (res) {
+			if (res && res.status === "session_out") {
+				redirectLoginPage();
+				return;
+			}
+			if (res && res.status === "success") {
+				showMessageTheme2(1, "Email preference updated successfully.");
+				$("#manageEmailModal").modal("hide");
+			} else {
+				showMessageTheme2(0, (res && res.message) ? res.message : "Failed to update email preference.");
+			}
+		},
+		error: function () {
+			showMessageTheme2(0, "Failed to update email preference.");
+		}
+	});
+});
