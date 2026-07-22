@@ -1,51 +1,4 @@
 
-function showManageProfileParentContentListingWithQueries(elementId, argument) {
-	console.log('DEFAULT_SEARCH_STATE: ' + DEFAULT_SEARCH_STATE);
-	var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
-	console.log(elementId + ' = ' + isDataTable);
-	if (isDataTable) {
-		$('#' + elementId).dataTable().fnDestroy();
-	}
-	$('#' + elementId).DataTable({
-		"stateSave": true,
-		"searching": true,
-		"processing": true,
-		"serverSide": true,
-		"searching": true,
-		"pageLength": 10,
-		"stateLoadParams": function (settings, data) {
-			if (!DEFAULT_SEARCH_STATE) {
-				return false;
-			}
-		},
-		"ajax": {
-			"url": CONTEXT_PATH + SCHOOL_UUID + "/dashboard/manage-profile-content-1/" + UNIQUEUUID + "" + argument,
-			"data": function (data) {
-				//console.log('data '+data)
-			}
-		},
-		"fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-			$("#manageProfileParentContent thead tr th").addClass('font-weight-normal border-bottom-0 vertical-align-middle');
-			$("#manageProfileParentContent thead tr th:first-child").addClass('rounded-top-left-10');
-			$("#manageProfileParentContent thead tr th:last-child").addClass('rounded-top-right-10');
-			$(nRow).find('td:eq(3)').css('text-align', 'left');
-			$(nRow).find('td:eq(4)').css('text-align', 'left');
-			$(nRow).find('td:eq(5)').css('text-align', 'left');
-			$('tr').addClass('bg-primary text-white');
-		},
-		"columns": [
-			{ "data": "sno", "name": "sno", "title": "S.No" },
-			{ "data": "name", "name": "name", "title": "Parent Name" },
-			{ "data": "userName", "name": "userName", "title": "User Name" },
-			{ "data": "studentProfile", "name": "studentProfile", "title": "Student Details", 'text-align': 'center' },
-			{ "data": "profileStatus", "name": "profileStatus", "title": "Profile Status", 'text-align': 'center' },
-			{ "data": "action", "name": "action", "title": "Action", 'text-align': 'center' },
-		],
-	});
-	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
-}
-
-
 function showManageProfileSchoolContentListingWithQueries(elementId, argument) {
 	console.log('DEFAULT_SEARCH_STATE: ' + DEFAULT_SEARCH_STATE);
 	var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
@@ -140,52 +93,6 @@ function showManageProfileStudentContentListingWithQueries(elementId, argument) 
 		/*  drawCallback: function() {
 				this.api().state.clear();
 		  } */
-	});
-	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
-}
-
-function showManageProfileTeacherContentListingWithQueries(elementId, argument) {
-	console.log('DEFAULT_SEARCH_STATE: ' + DEFAULT_SEARCH_STATE);
-	var isDataTable = $.fn.dataTable.isDataTable('#' + elementId);
-	console.log(elementId + ' = ' + isDataTable);
-	if (isDataTable) {
-		$('#' + elementId).dataTable().fnDestroy();
-	}
-	$('#' + elementId).DataTable({
-		"stateSave": true,
-		"processing": true,
-		"serverSide": true,
-		"searching": true,
-		"pageLength": 10,
-		"stateLoadParams": function (settings, data) {
-			if (!DEFAULT_SEARCH_STATE) {
-				return false;
-			}
-		},
-		"ajax": {
-			"url": CONTEXT_PATH + SCHOOL_UUID + "/dashboard/manage-profile-content-1/" + UNIQUEUUID + "" + argument,
-			"data": function (data) {
-				//console.log('data '+data)
-			}
-		},
-		"fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-			$(nRow).find('td:eq(3)').css('text-align', 'left');
-			$(nRow).find('td:eq(4)').css('text-align', 'left');
-			$(nRow).find('td:eq(5)').css('text-align', 'left');
-			$(nRow).find('td:eq(6)').css('text-align', 'left');
-			$(nRow).find('td:eq(7)').css('text-align', 'left');
-			$('tr').addClass('success');
-		},
-		"columns": [
-			{ data: "sno", title: "S.No" },
-			{ data: "name", title: "Teacher Name" },
-			{ data: "userName", "name": "userName", "title": "User Name" },
-			{ data: "profileDescription", title: "Assigned Courses", 'text-align': 'center' },
-			{ data: "specialization", title: "Specialization", 'text-align': 'center' },
-			{ data: "profileStatus", title: "Profile Status", 'text-align': 'center' },
-			{ data: "downloadAgreement", title: "Agreement", 'text-align': 'center' },
-			{ data: "action", title: "Action", 'text-align': 'center' },
-		],
 	});
 	$('#' + elementId).dataTable().fnSetFilteringEnterPress();
 }
@@ -534,7 +441,7 @@ function advanceTeacherSearch(formId, moduleId) {
 						+ '<i class="fa fa-eye">'
 						+ '</i>&nbsp;View Profile'
 						+ '</a>'
-						+ '<a href="javascript:void(0);" class="dropdown-item" onclick="return callUserActivity(' + formId + ',' + value.userId + ',' + true + ',' + true + ',' + moduleId + ');">'
+						+ '<a href="javascript:void(0);" class="dropdown-item" onclick="return callUserActivity(\'' + formId + '\',\'' + value.userId + '\',\'true\',\'true\',' + moduleId + ');">'
 						+ '<i class="fa fa-cogs"></i>&nbsp;&nbsp;User Activity'
 						+ '</a>'
 						+ (value.batchReport === "N/A"

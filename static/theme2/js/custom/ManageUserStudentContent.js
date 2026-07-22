@@ -84,7 +84,7 @@ function getManageUserStudentTabContent(meta) {
 			'</div>';
 	}
 	var addProfileFieldButton = meta.showProfileFieldAddButton
-		? '<button class="btn btn-outline-primary " onclick="openDynamicBuilder();"><i class="fa fa-plus"></i>&nbsp;Add Profile Fields</button>'
+		? '<button class="btn btn-outline-primary mr-2" onclick="openDynamicBuilder();"><i class="fa fa-plus"></i>&nbsp;Add Profile Fields</button>'
 		: '';
 
 	return '' +

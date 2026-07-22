@@ -204,7 +204,7 @@ function buildTeacherSearchRowCells(value, rowIndex, formId, moduleId) {
 		+ '<button type="button" class="btn btn-primary  dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Action"><i class="fa fa-ellipsis-v"></i></button>'
 		+ '<div class="dropdown-menu" x-placement="bottom-start">'
 		+ '<a href="' + value.profileView + '" target="_blank" class="dropdown-item"><i class="fa fa-eye"></i>&nbsp;View Profile</a>'
-		+ '<a href="javascript:void(0);" class="dropdown-item" onclick="return callUserActivity(' + formId + ',' + value.userId + ',' + true + ',' + true + ',' + moduleId + ');"><i class="fa fa-cogs"></i>&nbsp;&nbsp;User Activity</a>'
+		+ '<a href="javascript:void(0);" class="dropdown-item" onclick="return callUserActivity(\'' + formId + '\',\'' + value.userId + '\',\'true\',\'true\',' + moduleId + ');"><i class="fa fa-cogs"></i>&nbsp;&nbsp;User Activity</a>'
 		+ (value.batchReport === "N/A"
 			? ""
 			: '<a href="' + value.batchReport + '" target="_blank" class="dropdown-item"><i class="fa fa-eye"></i>&nbsp;View Batches</a>')

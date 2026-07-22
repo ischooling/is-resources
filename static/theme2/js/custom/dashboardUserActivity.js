@@ -26,7 +26,13 @@ function callUserActivity(formId, userId, showActivityLog, showLoginHistoryLog,r
         		if(stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT" ){
         			showMessage(true, stringMessage[1]);
         		} else {
+        			if($('#userActivityHTML').length < 1){
+        				$('body').append('<div id="userActivityHTML"></div>');
+        			}
         			$('#userActivityHTML').html(htmlContent);
+        			if($('#userActivityModal').length > 0 && $.fn.modal){
+        				$('#userActivityModal').modal('show');
+        			}
         		}
         		return false;
 			}

@@ -134,69 +134,352 @@ function sendAcceleratedModeSignupLinkContent(accModeId, moduleId) {
 	});
 }
 
+// JS-rendered replacement for the BatchSubjectTeacherContent.jsp shell: builds the modal
+// (with the hidden title spans callAssignBatchSubjectTeacherContent reads) client-side,
+// then loads the linking content via JSON. Signature unchanged.
 function callBatchSubjectAndTeacherMapping(formId, batchId, batchName, standardId, controllType, moduleId) {
 	hideMessageTheme2('');
-	var data = {};
-	data['batchId'] = batchId;
-	data['standardId'] = standardId;
-	data['controllType'] = controllType;
-	data['batchName'] = batchName;
-	data['moduleId'] = moduleId;
-	data['userId'] = USER_ID;
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML('dashboard', 'batch-subject-and-teacher-mapping'),
-		data: JSON.stringify(data),
-		dataType: 'html',
-		cache: false,
-		timeout: 600000,
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessageTheme2(0, stringMessage[1]);
-				} else {
-					$('#batchSubjectTeacherSupportContent').html(htmlContent);
-				}
-				return false;
-			}
-		}
-	});
+	$('#batchSubjectTeacherSupportContent').html(getBatchSubjectTeacherShellHtml(batchId, batchName, standardId, controllType, moduleId));
+	if (controllType == 'View') {
+		callAssignBatchSubjectTeacherContent('View');
+	} else if (controllType == 'Assign') {
+		callAssignBatchSubjectTeacherContent('Assign');
+	} else {
+		callAssignBatchSubjectTeacherContent('view-assignPastStudentTeacher');
+	}
+	$('#batchSubjectTeacherMappingModel').modal('show');
+	return false;
 }
 
-function callAssignBatchSubjectTeacherContent(callFor) {
+// The modal shell — from BatchSubjectTeacherContent.jsp (title spans carry the ids the
+// linking-content loader reads back).
+function getBatchSubjectTeacherShellHtml(batchId, batchName, standardId, controllType, moduleId) {
+	var dialogSize = controllType == 'Assign' ? 'modal-lg' : 'modal-xl';
+	return '' +
+	'<div class="modal fade" id="batchSubjectTeacherMappingModel" role="dialog" aria-labelledby="subjectTeacherMappingModalLabel">' +
+		'<div class="modal-dialog ' + dialogSize + '" role="document">' +
+			'<div class="modal-content border-0">' +
+				'<div class="modal-header py-2 bg-primary text-white">' +
+					'<h5 class="modal-title" id="subjectTeacherMappingModalLabel">' + batchEsc(controllType) + ' Batch Subject Teacher Mapping: ' + batchEsc(batchName) +
+						'<span id="batchId" style="display:none;">' + batchEsc(batchId) + '</span>' +
+						'<span id="batchName" style="display:none;">' + batchEsc(batchName) + '</span>' +
+						'<span id="standardId" style="display:none;">' + batchEsc(standardId) + '</span>' +
+						'<span id="moduleId" style="display:none;">' + batchEsc(moduleId) + '</span>' +
+						'<span id="controllType" style="display:none;">' + batchEsc(controllType) + '</span>' +
+					'</h5>' +
+					'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+				'</div>' +
+				'<div class="modal-body" style="max-height:480px;margin-top:0 !important">' +
+					'<div id="studentTeacherLinkingContent" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 p-0"></div>' +
+				'</div>' +
+				'<div class="modal-footer">' +
+					'<button type="button" class="btn btn-danger " data-dismiss="modal">Close</button>' +
+				'</div>' +
+			'</div>' +
+		'</div>' +
+	'</div>' +
+	'<div class="modal fade" id="booksclassOutsideAvailabilityConfirmationModal" tabindex="-1">' +
+		'<div class="modal-dialog modal-md modal-notify modal-info" role="document">' +
+			'<div class="modal-content border-primary" style="border-top: 10px solid;">' +
+				'<div class="modal-body" style="margin-top: 0px !important;">' +
+					'<div class="text-center text-warning mb-2"><i class="fa fa-exclamation-triangle fa-3x" aria-hidden="true"></i></div>' +
+					'<div class="full my-2">' +
+						'<p class="text-center mb-1 font-weight-semi-bold text-primary">The class for <span id="studentBatchName"></span> - <span id="courseActivity"></span> will be scheduled<span id="meetingDateTime"></span>. If this class is outside teacher\'s current availability, it will be added to teacher\'s availability. Do you wish to proceed?</p>' +
+					'</div>' +
+				'</div>' +
+				'<div class="modal-footer justify-content-between">' +
+					'<button type="button" class="btn btn-sm btn-danger " data-dismiss="modal">Cancel</button>' +
+					'<button type="button" class="btn btn-sm btn-success " id="updateTeacherTimeTableScheduleBtn" onclick="">Confirm</button>' +
+				'</div>' +
+			'</div>' +
+		'</div>' +
+	'</div>';
+}
+
+async function callAssignBatchSubjectTeacherContent(callFor) {
 	var batchId = $('#subjectTeacherMappingModalLabel #batchId').html();
 	var batchName = $('#subjectTeacherMappingModalLabel #batchName').html();
 	var standardId = $('#subjectTeacherMappingModalLabel #standardId').html();
 	var moduleId = $('#subjectTeacherMappingModalLabel #moduleId').html();
 	var controllType = $('#subjectTeacherMappingModalLabel #controllType').html();
-	$('#viewStudentTeacherTab').removeClass('active');
-	$('#viewStudentTeacherTab').removeClass('inactive-tab');
-	$('#assignStudentTeacherTab').removeClass('active');
-	$('#assignStudentTeacherTab').removeClass('inactive-tab');
-	$('#viewPastStudentTeacherTab').removeClass('active');
-	$('#viewPastStudentTeacherTab').removeClass('inactive-tab');
-	if (callFor == 'View') {
-		//var controllType="new";
-		$('#viewStudentTeacherTab').addClass('active');
-		$('#assignStudentTeacherTab').addClass('inactive-tab');
-		$('#viewPastStudentTeacherTab').addClass('inactive-tab');
-		callForDashboardData('formIdIfAny', 'batch-subject-teacher-linking-content?batchId=' + batchId + "&callFor=" + callFor + "&standardId=" + standardId + "&controllType=" + controllType + "&batchName=" + batchName + "&moduleId=" + moduleId, 'studentTeacherLinkingContent');
-	} else if (callFor == 'Assign') {
-		//var controllType="new";
-		$('#viewStudentTeacherTab').addClass('inactive-tab');
-		$('#assignStudentTeacherTab').addClass('active');
-		$('#viewPastStudentTeacherTab').addClass('inactive-tab');
-		callForDashboardData('formIdIfAny', 'batch-subject-teacher-linking-content?batchId=' + batchId + "&callFor=" + callFor + "&standardId=" + standardId + "&controllType=" + controllType + "&batchName=" + batchName + "&moduleId=" + moduleId, 'studentTeacherLinkingContent');
-	} else if (callFor == 'view-assignPastStudentTeacher') {
-		//var controllType="old";
-		$('#viewStudentTeacherTab').addClass('inactive-tab');
-		$('#assignStudentTeacherTab').addClass('inactive-tab');
-		$('#viewPastStudentTeacherTab').addClass('active');
+
+	if (callFor == 'view-assignPastStudentTeacher') {
+		// Past-teacher branch is not reachable from the classroom row actions; leave the
+		// legacy HTML-fragment loader in place.
 		callForDashboardData('formIdIfAny', 'student-teacher-linking-content?studentId=' + studentId + "&callFor=" + callFor + "&standardId=" + standardId + "&controllType=" + controllType, 'studentTeacherLinkingContent');
+		return;
 	}
+
+	var ajaxReqDetails = {
+		method: "POST",
+		url: getURLForHTML('dashboard', 'batch-subject-teacher-linking-data'),
+		body: {
+			batchId: batchId,
+			standardId: standardId,
+			controllType: controllType,
+			batchName: batchName,
+			callFor: callFor,
+			moduleId: moduleId,
+		},
+		global: true,
+		showMessage: false,
+	};
+	var data = await callCommonAjax(ajaxReqDetails);
+	if (!data || data.status != "1") {
+		showMessageTheme2(0, (data && data.message) ? data.message : "Unable to load teacher mapping. Please try again.");
+		return;
+	}
+	$('#studentTeacherLinkingContent').html(getBatchTeacherLinkingHtml(data));
+	initBatchTeacherLinking(data);
+}
+
+// Client render of BatchTeacherLinkingContent.jsp from the JSON payload. Branches on
+// data.callFor: 'Assign' shows the subject/teacher assign form; otherwise the per-subject
+// schedule table (rendered only when a teacher is already assigned).
+function getBatchTeacherLinkingHtml(data) {
+	if ($("#batchTeacherLinkingCss").length < 1) {
+		$("head").append('<style id="batchTeacherLinkingCss">.emailIDDropDown{display:none;float:left;width:100%;}.batch-schedule{width:450px;}@media(max-width:570px){.batch-schedule{width:360px !important}}</style>');
+	}
+	var moduleId = data.moduleId;
+	var batchId = data.batchId;
+	var batchName = data.batchName || "";
+	var endDate = data.endDate || "";
+	var subjects = data.subjects || [];
+
+	var inner = '';
+	if (data.callFor == 'Assign') {
+		var subjectOptions = '<option value="0"> Select Subject</option>';
+		for (var i = 0; i < subjects.length; i++) {
+			var s = subjects[i];
+			subjectOptions += '<option value="' + s.subjectId + '" class="subjectIdcls" data-studentId="' + s.batchId + '" data-assignId="' + batchEsc(s.assighnTId) + '" data-subjectCode="' + batchEsc(s.subjectCode) + '" data-subjectName="' + batchEsc(s.subjectName) + '" data-subjectId="' + s.subjectId + '" data-subjectPId="' + batchEsc(s.subjectPId) + '" data-courseType="' + batchEsc(s.courseType) + '" data-standardId="' + batchEsc(s.standardId) + '">' + batchEsc(s.subjectCode) + ' - ' + batchEsc(s.subjectName) + '<br/>' + batchEsc(s.standardName) + '</option>';
+		}
+		inner =
+			'<div class="row">' +
+				'<div class="col-md-6 col-sm-12 mb-2 custom-field">' +
+					'<select id="subjectIds" name="subjectIds" class="select-style form-control" onchange="subjectBasedTeacherList(this.value);">' + subjectOptions + '</select>' +
+					'<label for="subjectIds">Select Subject</label>' +
+				'</div>' +
+				'<div class="col-md-6 col-sm-12 mb-2 custom-field">' +
+					'<select name="teacherId" class="teacherId select-style form-control" id="teacherId" onchange="changeTeacher(\'\', this.value, \'\');"></select>' +
+					'<label for="teacherId">Select Teacher</label>' +
+				'</div>' +
+				'<div class="col-md-12 col-sm-12">' +
+					'<a href="#" class="btn btn-primary btn-sm mt-2" id="assigTeacherLinkList" onclick="submitBatchSubjectTeacherAssign(\'teacherForm\',\'SCHOOL\');">Update</a>' +
+				'</div>' +
+			'</div>';
+	} else {
+		var tableInner = '';
+		if (data.numberOfAssignedTeacher != 0) {
+			var rows = '';
+			var incRow = 0;
+			for (var r = 0; r < subjects.length; r++) {
+				var sub = subjects[r];
+				if (sub.assignTSName == 'N/A') { continue; }
+				incRow++;
+				rows +=
+					'<tr class="subjectTeacherAssignTime" id="viewBatch-' + sub.subjectId + '" data-id="' + sub.subjectId + '">' +
+						'<td style="vertical-align: top;">' + incRow + '</td>' +
+						'<td style="vertical-align: top;">' + batchEsc(sub.subjectCode) + ' - ' + batchEsc(sub.subjectName) + '<br/>' + batchEsc(sub.standardName) + '</td>' +
+						'<td style="vertical-align: top;" id="assignedTeacherList">' +
+							'<div>' + buildLinkingOldTeachersHtml(sub, endDate, batchName, moduleId) + '</div>' +
+							'<hr/>' +
+							'<input type="hidden" name="oldTeacherAssignId" id="oldTeacherAssignId' + sub.subjectId + '" value="' + batchEsc(sub.assighnTId) + '" />' +
+							'<div class="custom-field" style="margin-bottom:0;">' +
+								'<select name="assignTeacherId" class="assignTeacherId select-style form-control" id="assignTeacherId' + sub.subjectId + '" onchange="callTeacherTimeScheduleBatch(\'' + batchId + '\',\'' + sub.subjectId + '\', this.value);">' +
+									'<option value="">--Select--</option>' + buildLinkingTeacherOptions(sub) +
+								'</select>' +
+								'<label for="assignTeacherId' + sub.subjectId + '">Assign Teacher</label>' +
+							'</div>' +
+						'</td>' +
+						'<td class="batch-schedule">' +
+							'<div id="batch-schedule' + sub.subjectId + '">' +
+								'<div style="display:flex;align-items:center">' +
+									'<span class="custom-field has-value" style="padding:0 5px;margin-bottom:0;width:50%;">' +
+										'<input type="text" class="teachStartDate form-control" name="startDate" placeholder=" " id="startDate' + sub.subjectId + '" value="' + batchEsc(sub.batchStartDate) + '" onchange="checkUpdatesBatch(this,\'' + sub.subjectId + '\')" data-date-start="' + batchEsc(sub.batchStartDate) + '" readonly onkeydown="return false"/>' +
+										'<label for="startDate' + sub.subjectId + '">Start Date</label>' +
+									'</span>' +
+									'<span class="custom-field has-value" style="padding:0 5px;margin-bottom:0;width:50%;">' +
+										'<input type="text" class="teachEndDate form-control " name="endDate" placeholder=" " id="endDate' + sub.subjectId + '" value="' + batchEsc(sub.batchEndDate) + '" onchange="checkUpdatesBatch(this,\'' + sub.subjectId + '\')" data-date-end="' + batchEsc(sub.batchEndDate) + '" readonly onkeydown="return false"/>' +
+										'<label for="endDate' + sub.subjectId + '">End Date</label>' +
+									'</span>' +
+								'</div>' +
+								'<hr/>' +
+								'<div class="form-row teacher-mapping-set-time-' + sub.subjectId + '" style="display:flex;align-items:center;flex-wrap: wrap;justify-content:space-between;font-size:11px;">' +
+									buildLinkingDaysGridHtml(sub) +
+								'</div>' +
+							'</div>' +
+							'<hr/>' +
+							'<div class="emailIDDropDown continueTeacher' + sub.subjectId + '">' +
+								'<div class="custom-field" style="margin-bottom:0;">' +
+									'<select name="assignContinueTeacherId" class="assignContinueTeacherId select-style form-control" style="font-size:11px" id="assignContinueTeacherId' + sub.subjectId + '">' +
+										'<option value="">--Select--</option>' + buildLinkingTeacherOptions(sub) +
+									'</select>' +
+									'<label for="assignContinueTeacherId' + sub.subjectId + '">Continue Teacher</label>' +
+								'</div>' +
+							'</div>' +
+						'</td>' +
+						'<td style="text-align:center;">' +
+							'<a href="javascript:void(0);" class="btn btn-primary btn-sm  mt-2 validateTeacherTime" onclick="validateTeacherTimeTableSchedule(\'' + batchEsc(sub.batchTeacherMappingId) + '\',\'' + sub.subjectId + '\',\'' + batchEsc(sub.assighnTId) + '\',\'' + sub.subjectId + '\',\'' + batchEsc(sub.subjectPId) + '\',\'' + batchId + '\',\'' + batchEsc(sub.standardId) + '\',\'' + batchJsArg(batchName) + '\',\'' + moduleId + '\');">Validate</a><br/>' +
+							'<a href="javascript:void(0);" class="btn btn-primary btn-sm  mt-2 proceedClassbtn" onclick="validateBatchOutsideAvailabilityConfirmationModal(\'' + batchEsc(sub.batchTeacherMappingId) + '\',\'' + sub.subjectId + '\',\'' + batchEsc(sub.assighnTId) + '\',\'' + sub.subjectId + '\',\'' + batchEsc(sub.subjectPId) + '\',\'' + batchId + '\',\'' + batchEsc(sub.standardId) + '\',\'' + batchJsArg(batchName) + '\',\'' + moduleId + '\',\'' + batchJsArg(sub.subjectName) + '\')">Update</a><br/>' +
+							'<a href="javascript:void(0);" class="btn btn-danger  btn-sm  mt-2" onclick="return showWarningMessage(\'Are you sure you want to delete subject?\', \'inactiveTeacherTimeTableSchedule(' + batchId + ',' + sub.subjectId + ',\\\'' + batchJsArg(batchName) + '\\\',' + sub.standardId + ',\\\'' + moduleId + '\\\')\');">Delete</a>' +
+						'</td>' +
+					'</tr>';
+			}
+			tableInner =
+				'<input type="hidden" name="userId" id="userId" value="' + batchEsc(data.userId) + '" />' +
+				'<input type="hidden" name="batchId" id="batchId" value="' + batchEsc(batchId) + '" />' +
+				'<input type="hidden" name="batchStartDate" id="batchStartDate" value="' + batchEsc(data.startDate) + '" />' +
+				'<input type="hidden" name="batchEndDate" id="batchEndDate" value="' + batchEsc(endDate) + '" />' +
+				'<input type="hidden" name="needToAddTimePreferrence" id="needToAddTimePreferrence" value="" />' +
+				'<input type="hidden" name="saveForcefully" id="saveForcefully" value="" />' +
+				'<table class="table table-bordered table-striped border-radius-table font-12 nowrap mb-2" id="viewAssigTeacherLink" style="min-width:1100px;width:100%">' +
+					'<thead class="position-sticky" style="top:0;left:0;z-index: 10;">' +
+						'<tr class="bg-primary text-white"><th>S.No</th><th>Course Name</th><th>Assigned Teacher</th><th>Set Time</th><th class="text-center">Action</th></tr>' +
+					'</thead>' +
+					'<tbody>' + rows + '</tbody>' +
+				'</table>';
+		} else {
+			tableInner = '<div> <h3 style="text-align: center; font-weight: bold"> No Teacher Assigned Yet </h3> </div>';
+		}
+		inner =
+			'<div><span class="txt-danger" id="errorStartEnroll"></span></div>' +
+			'<div class="text-center"><h6 style="color:var(--pc) !important; margin-top:0"><b>' + batchEsc(batchName) + ' (' + batchEsc(data.startDate) + ' - ' + batchEsc(endDate) + ')</b><br/>All timings mentioned below are in ' + batchEsc(data.timezoneValue) + ' timezone.</h6></div>' +
+			'<div class="subjectTeacherTimeError text-center text-danger mb-2"></div>' +
+			'<div class="table-responsive" style="max-height:400px">' + tableInner + '</div>' +
+			'<div id="studentTeacherMappingLogContent" class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding:0;"></div>';
+	}
+
+	return '<div id="batchTeacherLinkingContent" class="custom-field-scope">' + inner + '</div>';
+}
+
+function buildLinkingOldTeachersHtml(sub, endDate, batchName, moduleId) {
+	var list = sub.oldAssignteacherList || [];
+	var html = '';
+	for (var i = 0; i < list.length; i++) {
+		var ot = list[i];
+		if (!ot.assignedDate) { continue; }
+		var removeLink = '';
+		if ((i + 1) > 1 && i == list.length - 1) {
+			removeLink = ' <a href="javascript:void(0);" onclick="showWarningMessage(\'Are you sure you want to remove teacher timings?\',\'removeTeacherTimeTable(' + ot.batchId + ',' + ot.subjectId + ',' + ot.teacherId + ',\\\'' + batchJsArg(ot.steachStartDate) + '\\\',\\\'' + batchJsArg(endDate) + '\\\',\\\'' + batchJsArg(batchName) + '\\\',' + ot.standardId + ',' + moduleId + ')\');">Remove</a>';
+		}
+		html += '<div><b>' + batchEsc(ot.teacherName) + ' (' + batchEsc(ot.emailId) + ')</b>' + removeLink + '</div>' +
+			'<div>' + batchEsc(ot.assignedDate) + '</div>' +
+			'<div>' + batchEsc(ot.scheduleTime) + '</div>';
+	}
+	return html;
+}
+
+function buildLinkingTeacherOptions(sub) {
+	var list = sub.teacherList || [];
+	var html = '';
+	for (var i = 0; i < list.length; i++) {
+		var t = list[i];
+		var selected = (t.teacherId == sub.assighnTId) ? ' selected' : '';
+		html += '<option value="' + t.teacherId + '"' + selected + '>' + batchEsc(t.teacherName) + ' (' + batchEsc(t.emailId) + ')</option>';
+	}
+	return html;
+}
+
+function buildLinkingDaysGridHtml(sub) {
+	var days = sub.daysList || [];
+	var slots = sub.timeTableList || [];
+	var html = '';
+	for (var i = 0; i < days.length; i++) {
+		var d = days[i];
+		var checked = (d.extra == d.key) ? ' checked' : '';
+		var dataCheck = (d.extra == d.key) ? 'true' : 'false';
+		var selectedTime = (d.extra2 ? d.extra2 : '') + '-' + (d.extra3 ? d.extra3 : '');
+		var timeOptions = '<option value="">Select Time</option>';
+		for (var j = 0; j < slots.length; j++) {
+			var tt = slots[j];
+			var sel = (d.extra2 == tt.startTime) ? 'selected' : '0';
+			timeOptions += '<option value="' + batchEsc(tt.startTime) + '-' + batchEsc(tt.endTime) + '" ' + sel + '> ' + batchEsc(tt.startTime) + ' - ' + batchEsc(tt.endTime) + ' </option>';
+		}
+		html +=
+			'<div class="col-md-6 col-sm-6 col-xs-12 mb-1">' +
+				'<div class="teacher-mapping-set-time-item" style="display:flex;align-items:center;justify-content:space-between;border: 1px solid #e3e3e3; padding: 0 5px">' +
+					'<span>' +
+						'<input type="checkbox" class="teachDays" style="position:relative;top:2px;" name="teachDays' + sub.subjectId + '" value="' + batchEsc(d.key) + '" data-batchid="' + batchEsc(d.extra1) + '" id="teachDays' + sub.subjectId + batchEsc(d.key) + '"' + checked + ' onchange="checkUpdatesBatch(this,\'' + sub.subjectId + '\')" data-check="' + dataCheck + '"/>' +
+						'<label>' + batchEsc(d.value) + '</label>' +
+					'</span>' +
+					'<span>' +
+						'<select name="timeInterval" class="form-control time-selec2" style="font-size:11px;" id="timeInterval' + sub.subjectId + batchEsc(d.key) + '" data-selected-time="' + batchEsc(selectedTime) + '" onchange="checkUpdatesBatch(this,\'' + sub.subjectId + '\')">' + timeOptions + '</select>' +
+					'</span>' +
+				'</div>' +
+			'</div>';
+	}
+	return html;
+}
+
+// Init block moved from BatchTeacherLinkingContent.jsp's $(document).ready.
+function initBatchTeacherLinking(data) {
+	$('.proceedClassbtn').hide();
+	var startDate = data.startDate ? data.startDate : new Date();
+	var endDate = data.endDate ? data.endDate : new Date();
+
+	$('.inactive-tab a').on('click', function (e) {
+		$.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+	});
+	$('#modalMessage').on('click', function (e) {
+		setTimeout(function () { $('body').addClass('modal-open'); }, 1000);
+	});
+
+	$(".teachStartDate").datepicker({ format: 'mm-dd-yyyy', autoclose: true, startDate: startDate, endDate: endDate });
+	$(".teachEndDate").datepicker({ format: 'mm-dd-yyyy', autoclose: true, startDate: startDate, endDate: endDate });
+
+	$('.switch .checkTeacher').on('click', function () {
+		if ($(this).prop("checked") == true) {
+			$(".continueTeacher" + $(this).attr("data-subjectid")).hide();
+		} else {
+			$(".continueTeacher" + $(this).attr("data-subjectid")).show();
+		}
+	});
+
+	if (typeof $.fn.select2 === 'function') {
+		var batchTeacherLinkingRoot = $('#batchTeacherLinkingContent');
+		var batchTeacherLinkingModalBody = batchTeacherLinkingRoot.closest('.modal').find('.modal-body');
+		var batchTeacherLinkingDropdownParent = batchTeacherLinkingModalBody.length > 0 ? batchTeacherLinkingModalBody : batchTeacherLinkingRoot;
+		batchTeacherLinkingRoot.find('select').each(function () {
+			var selectField = $(this);
+			if (selectField.data('select2')) {
+				selectField.select2('destroy');
+			}
+			selectField.select2({ theme: 'bootstrap4', dropdownParent: batchTeacherLinkingDropdownParent });
+			var customField = selectField.closest('.custom-field');
+			selectField.next('.select2-container').css({
+				'width': '100%', 'min-height': '44px', 'position': 'relative', 'z-index': '1'
+			}).find('.select2-selection--single').css({
+				'height': '44px', 'min-height': '44px', 'padding': '0', 'display': 'flex', 'align-items': 'center'
+			}).find('.select2-selection__rendered').css({
+				'height': '42px', 'line-height': '42px', 'padding-top': '0', 'padding-bottom': '0'
+			});
+			if (customField.length > 0) {
+				refreshBatchLinkingFieldState(selectField, customField);
+				selectField.off('change.batchTeacherLinkingField select2:select.batchTeacherLinkingField select2:clear.batchTeacherLinkingField')
+					.on('change.batchTeacherLinkingField select2:select.batchTeacherLinkingField select2:clear.batchTeacherLinkingField', function () {
+						refreshBatchLinkingFieldState($(this), $(this).closest('.custom-field'));
+					});
+			}
+		});
+	}
+}
+
+function refreshBatchLinkingFieldState(selectField, customField) {
+	var selectValue = selectField.val();
+	if ($.isArray(selectValue)) {
+		selectValue = selectValue.join('');
+	}
+	selectValue = selectValue == undefined || selectValue == null ? '' : selectValue.toString().trim();
+	var hasSelectValue = selectValue !== '' && selectValue !== '0';
+	customField.toggleClass('active has-value', hasSelectValue);
+	selectField.next('.select2-container').find('.select2-selection__rendered').css('color', hasSelectValue ? '' : 'transparent');
+	customField.find('label:not(.error-msg)').first().css(hasSelectValue ? {
+		'top': '0', 'transform': 'translateY(-46%)', 'font-size': '12px', 'font-weight': '500',
+		'z-index': '25', 'background': '#fff', 'padding': '0 8px', 'color': ''
+	} : {
+		'top': '48%', 'transform': 'translateY(-50%)', 'font-size': '16px', 'font-weight': '400',
+		'z-index': '25', 'background': 'transparent', 'padding': '0 8px', 'color': '#9ca3af'
+	});
 }
 
 function submitBatchSubjectTeacherAssign(formId, moduleId) {
@@ -621,76 +904,405 @@ function changeTeacherTime(id, teacherId, elementId) {
 	$("#endDate" + elementId).val('');
 }
 
-function callStudentBatchTransfer(formId, batchId, batchName, standardId, controllType, moduleId, userId) {
+// JS-rendered replacement for the MoveBatchStudents.jsp fragment: fetches JSON from
+// /dashboard/move-student-batch-data via callCommonAjax and builds the modal client-side.
+// Signature unchanged. controllType 'Delete' still deletes server-side (inside the endpoint's
+// getBatchStudentData call) then reloads the list, exactly as before.
+async function callStudentBatchTransfer(formId, batchId, batchName, standardId, controllType, moduleId, userId) {
 	hideMessageTheme2('');
-	var data = {};
-	data['batchId'] = batchId;
-	data['standardId'] = standardId;
-	data['controllType'] = controllType;
-	data['batchName'] = batchName;
-	data['moduleId'] = moduleId;
-	data['userId'] = USER_ID;
-	data['themeType'] = "theme2";
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML('dashboard', 'move-student-batch'),
-		data: JSON.stringify(data),
-		dataType: 'html',
-		cache: false,
-		timeout: 600000,
-		success: function (htmlContent) {
-			$('#batchSubjectTeacherSupportContent').html('');
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessageTheme2(0, stringMessage[1]);
-				} else {
-					if (controllType == 'Delete') {
-						setTimeout(function () { callDashboardPageSchool(moduleId, 'manage-batch-student'); }, 1000);
-						showMessageTheme2(1, 'Batch deleted successfully.');
-					} else {
-						$('#batchSubjectTeacherSupportContent').html(htmlContent);
-					}
-				}
-				return false;
-			}
-		}
-	});
+	var ajaxReqDetails = {
+		method: "POST",
+		url: getURLForHTML('dashboard', 'move-student-batch-data'),
+		body: {
+			batchId: batchId,
+			standardId: standardId,
+			controllType: controllType,
+			batchName: batchName,
+			moduleId: moduleId,
+		},
+		global: true,
+		showMessage: false,
+	};
+	var data = await callCommonAjax(ajaxReqDetails);
+	$('#batchSubjectTeacherSupportContent').html('');
+	if (!data || data.status != "1") {
+		showMessageTheme2(0, (data && data.message) ? data.message : "Unable to load classroom students. Please try again.");
+		return false;
+	}
+	if (controllType == 'Delete') {
+		setTimeout(function () { callDashboardPageSchool(moduleId, 'manage-batch-student'); }, 1000);
+		showMessageTheme2(1, 'Batch deleted successfully.');
+		return false;
+	}
+	$('#batchSubjectTeacherSupportContent').html(getMoveBatchStudentsHtml(data));
+	initMoveBatchStudents(data);
+	return false;
 }
 
-function callBatchExaminationSheetModule(formId, batchId, batchName, standardId, controllType, moduleId, userId) {
-	hideMessageTheme2('');
-	var data = {};
-	data['batchId'] = batchId;
-	data['standardId'] = standardId;
-	data['controllType'] = controllType;
-	data['batchName'] = batchName;
-	data['moduleId'] = moduleId;
-	data['userId'] = USER_ID;
-	data['themeType'] = "theme2";
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML('dashboard', 'batch-exam-sheet'),
-		data: JSON.stringify(data),
-		dataType: 'html',
-		cache: false,
-		timeout: 600000,
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessageTheme2(0, stringMessage[1]);
-				} else {
-					$('#batchSubjectTeacherSupportContent').html(htmlContent);
+// Client render of MoveBatchStudents.jsp from the JSON payload. Branches on controllType:
+// Add / Move / Extra Class share the "select students" layout; Edit shows the full batch
+// edit form plus the student & teacher tables.
+function getMoveBatchStudentsHtml(data) {
+	var controllType = data.controllType;
+	var isEdit = controllType == 'Edit';
+	var batchName = data.batchName || "";
+	var batchId = data.batchId;
+	var moduleId = data.moduleId;
+	var stlStandardId = data.stlStandardId;
+
+	var title;
+	if (controllType == 'Move') { title = 'Move Student to Another Batch'; }
+	else if (controllType == 'Add') { title = 'Add Student to ' + batchEsc(batchName); }
+	else if (controllType == 'Edit') { title = 'Update ' + batchEsc(batchName); }
+	else { title = 'Join Extra Classes Batch'; }
+
+	var formFields;
+	if (!isEdit) {
+		var transferBatch = '';
+		if (controllType != 'Add') {
+			var opts = '<option value="0"> Select Batch</option>';
+			if (data.batchList) {
+				for (var i = 0; i < data.batchList.length; i++) {
+					opts += '<option value="' + data.batchList[i].id + '">' + batchEsc(data.batchList[i].batchName) + '</option>';
 				}
-				return false;
+			}
+			var moveLabel = (controllType == 'Move') ? 'Move To' : 'Join Batch';
+			transferBatch =
+				'<div class="col-md-6 col-sm-12 mb-2 mt-2 custom-field">' +
+					'<select id="tansferBatch" name="tansferBatch" class="select-style form-control">' + opts + '</select>' +
+					'<label>' + moveLabel + '</label>' +
+				'</div>';
+		}
+		formFields =
+			'<div class="col-md-12 col-sm-12 mb-2">' +
+				'<div class="row">' +
+					'<div class="col-md-6 col-sm-12 mb-2 mt-2 custom-field">' +
+						'<input class="form-control" type="text" name="batchName" id="batchName" placeholder=" " value="' + batchEsc(data.stlBatchName) + '" disabled/>' +
+						'<label>Batch Name</label>' +
+					'</div>' + transferBatch +
+				'</div>' +
+			'</div>';
+	} else {
+		formFields = getMoveBatchEditFieldsHtml(data);
+	}
+
+	var studentsHeading = isEdit ? '<div class="col-md-12 col-sm-12 col-xs-12"><h5 class="text-primary font-weight-bold">Students Details</h5></div>' : '';
+
+	var studentRows = '';
+	if (data.students) {
+		for (var s = 0; s < data.students.length; s++) {
+			studentRows += buildMoveStudentRowHtml(data.students[s], s + 1, isEdit, batchId, batchName, moduleId, stlStandardId);
+		}
+	}
+	var studentHead =
+		'<tr>' +
+			'<th class="text-center font-weight-bold">' + (isEdit ? ' S.No.' : 'Select Student') + '</th>' +
+			'<th class="text-center font-weight-bold">' + batchEsc(data.meetingVendor) + ' Status</th>' +
+			'<th class="text-center font-weight-bold">Student Name</th>' +
+			'<th class="text-center font-weight-bold">Student Id</th>' +
+			'<th class="text-center font-weight-bold">Student Email</th>' +
+			(isEdit ? '<th class="">Send Mail</th><th class="">Action</th>' : '') +
+		'</tr>';
+	var studentTable =
+		'<table class="table table-bordered w-100" id="moveStudentBatch">' +
+			'<thead>' + studentHead + '</thead>' +
+			'<tbody>' + studentRows + '</tbody>' +
+		'</table>';
+
+	var teacherSection = '';
+	var sendMailAllStudents = '';
+	if (isEdit) {
+		sendMailAllStudents = '<button type="button" class="btn btn-primary" onclick="return sendMailStudentMoveBatch(\'batchMoveForm\',\'STUDENT\',\'' + batchId + '\',\'\',\'SendToAll\');">Send Mail to All Students</button>';
+		var teacherRows = '';
+		if (data.teachers) {
+			for (var t = 0; t < data.teachers.length; t++) {
+				teacherRows += buildMoveTeacherRowHtml(data.teachers[t], t + 1, batchId);
 			}
 		}
+		teacherSection =
+			'<br/><br/><h5 class="text-primary font-weight-bold">Teacher Details</h5>' +
+			'<table class="table table-bordered w-100" id="moveTeacherBatch">' +
+				'<thead>' +
+					'<tr><th class="text-center font-weight-bold">S.No.</th><th class="text-center font-weight-bold">Teacher Name</th><th class="text-center font-weight-bold">Application No</th><th class="text-center font-weight-bold">Teacher Email</th><th class="">Send Mail</th></tr>' +
+				'</thead>' +
+				'<tbody>' + teacherRows + '</tbody>' +
+			'</table>' +
+			'<button type="button" class="btn btn-primary" onclick="return sendMailTeacherMoveBatch(\'batchMoveForm\',\'TEACHER\',\'' + batchId + '\',\'\', \'\',\'SendToAll\');">Send Mail to All Teachers</button>';
+	}
+
+	var footer;
+	if (!isEdit) {
+		var btnLabel = (controllType == 'Move') ? 'Move' : (controllType == 'Add' ? 'Add' : 'Join');
+		footer = '<button type="button" class="btn btn-primary" onclick="return transferStudent(\'batchMoveForm\',\'STUDENT\',\'' + moduleId + '\',\'' + batchEsc(controllType) + '\');">' + btnLabel + '</button>';
+	} else {
+		footer = '<button type="button" class="btn btn-primary" onclick="return editBatchDetails(\'batchMoveForm\',\'STUDENT\',\'' + moduleId + '\');">Update</button>';
+	}
+
+	return '' +
+	'<div class="modal fade" id="batchStudentTransferModel" role="dialog" aria-labelledby="subjectTeacherMappingModalLabel">' +
+		'<div class="modal-dialog modal-xl" role="document">' +
+			'<div class="modal-content">' +
+				'<form name="batchMoveForm" id="batchMoveForm" class="custom-field-scope" action="javascript:void(0);">' +
+					'<div class="modal-header py-2 bg-primary text-white">' +
+						'<h5 class="modal-title" id="subjectTeacherMappingModalLabel">' + title + '</h5>' +
+						'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+					'</div>' +
+					'<div class="modal-body overflow-auto">' +
+						'<div class="w-100 overflow-auto">' +
+							'<input type="hidden" name="userId" id="userId" value="' + batchEsc(data.userId) + '" />' +
+							'<input type="hidden" class="form-control" id="batchId" name="batchId" value="' + batchEsc(data.stlBatchId) + '" />' +
+							'<input type="hidden" class="form-control" id="standardId" name="standardId" value="' + batchEsc(data.stlStandardId) + '" />' +
+							'<input type="hidden" class="form-control" id="batchName" name="batchName" value="' + batchEsc(data.stlBatchName) + '"/>' +
+							'<input type="hidden" class="form-control" id="selectStudentIds" name="selectStudentIds" />' +
+							'<input type="hidden" class="form-control" id="selectStudentIdsForMail" name="selectStudentIdsForMail" />' +
+							'<input type="hidden" class="form-control" id="selectTeacherIdsForMail" name="selectTeacherIdsForMial" />' +
+							'<div class="col-md-12 text-center"><p class="text-center m-0 mt-2 font-size-md" id="modalMessageNew"></p></div>' +
+							'<div class="row">' + formFields + '</div>' +
+							studentsHeading +
+							studentTable +
+							(isEdit ? sendMailAllStudents : '') +
+							teacherSection +
+						'</div>' +
+						'<div id="studentTeacherLinkingContent" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 p-0"></div>' +
+					'</div>' +
+					'<div class="modal-footer">' + footer + '</div>' +
+				'</form>' +
+			'</div>' +
+		'</div>' +
+	'</div>';
+}
+
+function getMoveBatchEditFieldsHtml(data) {
+	var hoursOptions = '<option value=""></option>';
+	for (var h = 1; h <= 23; h++) {
+		var hv = h > 9 ? String(h) : '0' + h;
+		hoursOptions += '<option value="' + hv + '"' + (Number(data.timeHrsFrom) === h ? ' selected' : '') + '>' + hv + '</option>';
+	}
+	var minOptions = '<option value=""></option>';
+	for (var m = 0; m <= 59; m += 5) {
+		var mv = m > 9 ? String(m) : '0' + m;
+		minOptions += '<option value="' + mv + '"' + (Number(data.timeMinFrom) === m ? ' selected' : '') + '>' + mv + '</option>';
+	}
+	var durationOptions = '<option value="">Please select batch duration</option>';
+	for (var d = 1; d <= 12; d++) {
+		durationOptions += '<option value="' + d + '"' + (data.batchDuration == d ? ' selected' : '') + '>' + d + (d === 1 ? ' Hour' : ' Hours') + '</option>';
+	}
+	var intervalOptions = '<option value="0">Please select Buffer Time</option>';
+	[5, 10, 15, 20, 25, 30].forEach(function (v) {
+		intervalOptions += '<option value="' + v + '"' + (data.timeInterval == v ? ' selected' : '0') + '>' + v + ' Minutes</option>';
 	});
+	var vendorSelect;
+	if (SCHOOL_ID == 1) {
+		vendorSelect = '<select class="form-control" name="meetingVendor" id="meetingVendor"><option value="LENS"' + (data.meetingVendor == 'LENS' ? ' selected' : '') + '>LENS</option></select>';
+	} else {
+		vendorSelect = '<select disabled class="form-control" name="meetingVendor" id="meetingVendor"><option value="External"' + (data.meetingVendor == 'External' ? ' selected' : '') + '>External</option></select>';
+	}
+	var joiningOptions = '<option value="Single"' + (data.joiningType == 'Single' ? ' selected' : '') + '>Single</option>' +
+		'<option value="Multiple"' + (data.joiningType == 'Multiple' ? ' selected' : '') + '>Multiple</option>';
+
+	return '' +
+		'<div class="col-md-3 col-sm-12 col-xs-12"><div class="form-group custom-field">' +
+			'<input type="text" class="form-control" id="batchNameEdit" name="batchNameEdit" placeholder=" " onkeydown="return M.isAddressLine(event);" value="' + batchEsc(data.stlBatchName) + '"/><label>Batch Name </label></div></div>' +
+		'<div class="col-md-3 col-sm-12 col-xs-12"><div class="form-group custom-field">' +
+			'<input type="text" class="form-control" id="batchStartDate" name="batchStartDate" placeholder=" " value="' + batchEsc(data.batchStartDate) + '" readonly onkeydown="return false" /><label>Start Date</label></div></div>' +
+		'<div class="col-md-3 col-sm-12 col-xs-12"><div class="form-group custom-field">' +
+			'<input type="text" class="form-control" id="batchEndDate" name="batchEndDate" placeholder=" " value="' + batchEsc(data.batchEndDate) + '" readonly onkeydown="return false" /><label>End Date</label></div></div>' +
+		'<div class="col-md-3 col-sm-12 col-xs-12"><div class="form-group custom-field">' +
+			'<input type="text" class="form-control" id="batchHolidayDate" name="batchHolidayDate" placeholder=" " value="' + batchEsc(data.batchHolidayDate) + '" readonly onkeydown="return false" /><label>Blackout Date</label></div></div>' +
+		'<div class="col-md-3 col-sm-6 col-xs-12"><div class="form-group"><div class="position-relative w-100"><div class="row mx-n1">' +
+			'<div class="col-5 px-1 custom-field"><select id="timeHrsFrom" name="timeHrsFrom" class="form-control" onchange="getTimeFrom(this.value);">' + hoursOptions + '</select><label>Hour</label></div>' +
+			'<div class="col-2 px-1 d-flex align-items-center justify-content-center mb-4"><span>:</span></div>' +
+			'<div class="col-5 px-1 custom-field"><select id="timeMinFrom" name="timeMinFrom" class="form-control">' + minOptions + '</select><label>Minute</label></div>' +
+		'</div></div></div></div>' +
+		'<div class="col-md-3 col-sm-6 col-xs-12"><div class="form-group custom-field">' +
+			'<select class="form-control" name="batchDuration" id="batchDuration">' + durationOptions + '</select><label>Batch Duration (in Hours)</label></div></div>' +
+		'<div class="col-md-3 col-sm-6 col-xs-12"><div class="form-group custom-field">' +
+			'<input type="text" class="form-control" id="batchPeriodTime" name="batchPeriodTime" placeholder=" " onkeydown="return M.digit(event);" value="' + batchEsc(data.periodTime) + '" /><label>Period Time (In Minutes)</label></div></div>' +
+		'<div class="col-md-3 col-sm-6 col-xs-12"><div class="form-group custom-field">' +
+			'<select class="form-control" name="timeInterval" id="timeInterval">' + intervalOptions + '</select><label>Buffer Time Between Two Periods</label></div></div>' +
+		'<div class="col-md-2 col-sm-12 col-xs-12"><div class="form-group custom-field">' +
+			'<input type="text" class="form-control" id="batchSession" name="batchSession" placeholder=" " value="' + batchEsc(data.sessionName) + '" disabled/><label>Session</label></div></div>' +
+		'<div class="col-md-2 col-sm-12 col-xs-12"><div class="form-group custom-field">' + vendorSelect + '<label>Meeting Vendor</label></div></div>' +
+		'<div class="col-md-2 col-sm-12 col-xs-12"><div class="form-group custom-field">' +
+			'<select class="form-control" name="joiningType" id="joiningType" disabled>' + joiningOptions + '</select><label>Joining Type</label></div></div>';
+}
+
+function buildMoveStudentRowHtml(student, incRow, isEdit, batchId, batchName, moduleId, standardId) {
+	var firstCell = isEdit
+		? '<input type="hidden" name="checkStudentId" class="checkStudentname" value="' + student.studentId + '">' + incRow
+		: '<input type="checkbox" name="checkStudentId" class="checkStudentname" value="' + student.studentId + '">';
+	var editCells = '';
+	if (isEdit) {
+		var removeCall = "studentRemoveFromBatch(\\'formId\\'," + moduleId + "," + batchId + "," + student.studentId + ",\\'" + batchJsArg(batchName) + "\\'," + standardId + ")";
+		editCells =
+			'<td><a href="javascript:void(0);" onclick="return sendMailStudentMoveBatch(\'batchMoveForm\',\'STUDENT\',\'' + batchId + '\',\'' + student.studentId + '\',\'SendToOne\');"><i class="fa fa-envelope"></i></a></td>' +
+			'<td><a href="javascript:void(0);" class="dropdown-item" onclick="return showWarningMessage(\'Are you sure you want to remove student?\', \'' + removeCall + '\');"><i class="fa fa-trash"></i>&nbsp;&nbsp;</a></td>';
+	}
+	return '<tr class="subjectTeacherAssignTime" data-id="' + student.studentId + incRow + '">' +
+		'<td class="text-center">' + firstCell + '</td>' +
+		'<td class="text-center" id="zoomStatus_' + student.userId + '">' + batchEsc(student.zoomStatus) + ' </td>' +
+		'<td class="text-center">' + batchEsc(student.studentName) + ' </td>' +
+		'<td class="text-center">' + batchEsc(student.studentStringId) + ' </td>' +
+		'<td class="text-center">' + batchEsc(student.studentEmail) + '<br/>' + batchEsc(student.countryTimeZone) + ' </td>' +
+		editCells +
+		'</tr>';
+}
+
+function buildMoveTeacherRowHtml(teacher, incRow, batchId) {
+	return '<tr class="subjectTeacherAssignTime" data-id="' + teacher.userId + incRow + '">' +
+		'<td class="text-center"><input type="hidden" name="checkTeacherId" class="checkTeachername" value="' + teacher.teacherId + '">' + incRow + '</td>' +
+		'<td class="text-center">' + batchEsc(teacher.fullName) + '</td>' +
+		'<td class="text-center">' + batchEsc(teacher.applicationNo) + '</td>' +
+		'<td class="text-center">' + batchEsc(teacher.email) + ' <br> ' + batchEsc(teacher.timezone) + '</td>' +
+		'<td><a href="javascript:void(0);" onclick="return sendMailTeacherMoveBatch(\'batchMoveForm\',\'TEACHER\',\'' + batchId + '\',\'' + teacher.teacherId + '\', \'' + teacher.userId + '\',\'SendToOne\');"><i class="fa fa-envelope"></i></a></td>' +
+		'</tr>';
+}
+
+// Init block moved from MoveBatchStudents.jsp's $(document).ready.
+function initMoveBatchStudents(data) {
+	$('#batchStudentTransferModel').modal('show');
+	$('#batchMoveForm select').select2({ width: '100%', dropdownParent: $('#batchStudentTransferModel') });
+	if (typeof refreshCustomFieldState === 'function') {
+		refreshCustomFieldState('#batchMoveForm');
+	}
+	var startDate = new Date();
+	$('#batchStartDate').datepicker({ autoclose: true, format: 'mm-dd-yyyy', startDate: startDate });
+	$('#batchEndDate').datepicker({ autoclose: true, format: 'mm-dd-yyyy', startDate: startDate });
+	$("#batchHolidayDate").datepicker({ format: 'mm-dd-yyyy', startDate: startDate, multidate: true });
+
+	if (data.controllType != 'Edit') {
+		var studentIds = "";
+		$('#moveStudentBatch > tbody  > tr').each(function () {
+			studentIds = studentIds + $(this).find(".checkStudentname").val() + ',';
+		});
+		$("#selectStudentIdsForMail").val(studentIds.substring(0, studentIds.length - 1));
+
+		var teacherIds = "";
+		$('#moveTeacherBatch > tbody  > tr').each(function () {
+			teacherIds = teacherIds + $(this).find(".checkTeachername").val() + ',';
+		});
+		$("#selectTeacherIdsForMail").val(teacherIds.substring(0, teacherIds.length - 1));
+	}
+}
+
+// JS-rendered replacement for the BatchExamSheet.jsp fragment: fetches JSON from
+// /dashboard/batch-exam-sheet-data via callCommonAjax and builds the modal client-side.
+// Signature unchanged so the row action and the save/status refresh callers work as-is.
+async function callBatchExaminationSheetModule(formId, batchId, batchName, standardId, controllType, moduleId, userId) {
+	hideMessageTheme2('');
+	var ajaxReqDetails = {
+		method: "POST",
+		url: getURLForHTML('dashboard', 'batch-exam-sheet-data'),
+		body: {
+			batchId: batchId,
+			standardId: standardId,
+			controllType: controllType,
+			batchName: batchName,
+			moduleId: moduleId,
+		},
+		global: true,
+		showMessage: false,
+	};
+	var data = await callCommonAjax(ajaxReqDetails);
+	if (!data || data.status != "1") {
+		showMessageTheme2(0, (data && data.message) ? data.message : "Unable to load examination schedule. Please try again.");
+		return false;
+	}
+	$('#batchSubjectTeacherSupportContent').html(getBatchExamSheetModuleHtml(data));
+	$('#batchExaminationFormModel').modal('show');
+	bindFileUploadForPDF('1', data.userId);
+	$('#batchExamSheetUploadTable').DataTable();
+	return false;
+}
+
+// Build the Upload Examination Schedule modal — from BatchExamSheet.jsp.
+function getBatchExamSheetModuleHtml(data) {
+	if ($("#batchExamSheetCss").length < 1) {
+		$("head").append('<style id="batchExamSheetCss">' +
+			'.file-upload{display:block;text-align:center;font-family: Helvetica, Arial, sans-serif;font-size: 12px;}' +
+			'.file-upload .file-select{display:flex;border: 2px solid #dce4ec;color: var(--pc);cursor:pointer;height:40px;line-height:40px;text-align:left;background:#FFFFFF;overflow:hidden;position:relative;}' +
+			'.file-upload .file-select .file-select-button{background:#dce4ec;padding:0 10px;display:inline-block;height:40px;line-height:40px;}' +
+			'.file-upload .file-select .file-select-name{line-height:40px;display:inline-block;padding:0 10px;}' +
+			'.file-upload .file-select:hover{border-color:var(--pc);}' +
+			'.file-upload .file-select:hover .file-select-button{background:var(--pc);color:#FFFFFF;}' +
+			'.file-upload.active .file-select{border-color:#3fa46a;}' +
+			'.file-upload.active .file-select .file-select-button{background:#3fa46a;color:#FFFFFF;}' +
+			'.file-upload .file-select input[type=file]{z-index:100;cursor:pointer;position:absolute;height:100%;width:100%;top:0;left:0;opacity:0;filter:alpha(opacity=0);}' +
+			'</style>');
+	}
+
+	var moduleId = data.moduleId;
+	var batchId = data.batchId;
+	var rowsHtml = "";
+	if (data.rows) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var u = data.rows[i];
+			var statusCell = (u.activeStatus == 'Y')
+				? '<a onclick="callForChangeStatus(\'batchExaminationForm\',\'' + u.batchExShId + '\',\'INACTIVE\',\'' + moduleId + '\',\'' + u.batchId + '\');" href="javascript:void(0);"><i class="fa fa-circle active m-r-10" title="Click to inactivate"></i></a>'
+				: '<a onclick="callForChangeStatus(\'batchExaminationForm\',\'' + u.batchExShId + '\',\'ACTIVE\',\'' + moduleId + '\',\'' + u.batchId + '\');" href="javascript:void(0);"><i class="fa fa-circle inactive m-r-10" title="Click to activate"></i></a>';
+			rowsHtml += '<tr>' +
+				'<td style="text-align: center;">' + (i + 1) + '</td>' +
+				'<td style="text-align: center;"><a target="_blank" href="' + batchEsc(u.fileName) + '"><i class="fa fa-eye text-primary"></i></a></td>' +
+				'<td>' + batchEsc(u.uploadedDate) + '</td>' +
+				'<td>' + batchEsc(u.uploadedBy) + '</td>' +
+				'<td>' + statusCell + '</td>' +
+				'</tr>';
+		}
+	}
+
+	return '' +
+	'<div class="modal fade" id="batchExaminationFormModel" role="dialog" aria-labelledby="subjectTeacherMappingModalLabel">' +
+		'<div class="modal-dialog modal-xl" role="document">' +
+			'<div class="modal-content">' +
+				'<form name="batchExaminationForm" id="batchExaminationForm" action="javascript:void(0);">' +
+					'<div class="modal-header py-2 bg-primary text-white">' +
+						'<h5 class="modal-title" id="subjectTeacherMappingModalLabel">Upload Examination Schedule for ' + batchEsc(data.batchName) + '</h5>' +
+						'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" style="color:#fff;">&times;</span></button>' +
+					'</div>' +
+					'<div class="modal-body" style="max-height:450px;overflow-x:auto">' +
+						'<div>' +
+							'<input type="hidden" name="userId" id="userId" value="' + batchEsc(data.userId) + '" />' +
+							'<input type="hidden" class="form-control" id="batchId" name="batchId" value="' + batchEsc(data.batchId) + '" />' +
+							'<input type="hidden" class="form-control" id="standardId" name="standardId" value="' + batchEsc(data.standardId) + '" />' +
+							'<input type="hidden" class="form-control" id="batchName" name="batchName" value="' + batchEsc(data.batchName) + '"/>' +
+							'<div class="col-md-12 text-center">' +
+								'<p class="" style="font-size: 16px; text-align: center; margin: 0; height: 25px;" id="modalMessageNew"></p>' +
+							'</div>' +
+							'<div class="row">' +
+								'<div class="col-md-4 col-sm-4 col-xs-12">' +
+									'<div class="form-group">' +
+										'<label>Upload Examination Schedule:</label>' +
+										'<div class="file-upload">' +
+											'<div class="file-select">' +
+												'<div class="file-select-button" id="fileupload1Label">Choose File</div>' +
+												'<div class="file-select-name" id="fileupload1ChoosenFile">No file chosen...</div>' +
+												'<input type="file" name="fileupload1" id="fileupload1">' +
+											'</div>' +
+										'</div>' +
+									'</div>' +
+								'</div>' +
+								'<div class="col-md-3 col-sm-4 col-xs-12">' +
+									'<div class="form-group">' +
+										'<label class="full">&nbsp;</label>' +
+										'<input type="hidden" id="fileupload1" name="fileupload1" value="">' +
+										'<button type="submit" class="btn btn-primary btn-lg" id="uploadCSV" onclick="return saveBatchExaminationSheet(\'batchExaminationForm\',\'' + batchId + '\',\'' + moduleId + '\');">Upload</button>' +
+									'</div>' +
+								'</div>' +
+								'<div class="col-12">' +
+									'<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap" id="batchExamSheetUploadTable" style="width:100%;">' +
+										'<thead class="bg-primary text-white">' +
+											'<tr><th>S.No</th><th class="text-center">View Attachment</th><th>Uploaded Date-Time</th><th>Upload By</th><th>Action</th></tr>' +
+										'</thead>' +
+										'<tbody>' + rowsHtml + '</tbody>' +
+									'</table>' +
+								'</div>' +
+							'</div>' +
+						'</div>' +
+					'</div>' +
+				'</form>' +
+			'</div>' +
+		'</div>' +
+	'</div>';
 }
 
 function saveBatchExaminationSheet(formId, batchId, roleModuleId) {
@@ -872,50 +1484,64 @@ function callTeacherTimeScheduleBatch(batchId, subjectId, teacherId) {
 		newStartDate.setDate(newStartDate.getDate() + 1);
 		var batchEndDate = $("#batchEndDate").val();
 	}
-	let request = {
-		"batchId": batchId,
-		"subjectId": subjectId,
-		"teacherId": teacherId
-	}
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForHTML('dashboard', 'batch-subject-teacher-timeschedule-content'),
-		data: JSON.stringify(request),
-		dataType: 'html',
-		cache: false,
-		timeout: 600000,
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					showMessageTheme2(0, stringMessage[1]);
-				} else {
-					$("#batch-schedule" + subjectId + "").html(htmlContent).promise().done(function () {
-						$("#viewBatch-" + subjectId + " .proceedClassbtn").hide();
-						$("#startDate" + subjectId).datepicker('remove');
-						$("#startDate" + subjectId).datepicker({
-							format: 'mm-dd-yyyy',
-							startDate: new Date(newStartDate + 1),
-							endDate: new Date(batchEndDate),
-							autoclose: true,
-							todayHighlight: false,
-						});
-						$("#endDate" + subjectId).datepicker('remove');
-						$("#endDate" + subjectId).datepicker({
-							format: 'mm-dd-yyyy',
-							startDate: new Date(newStartDate + 1),
-							endDate: new Date(batchEndDate),
-							autoclose: true,
-							todayHighlight: false,
-						});
-					});
-				}
-				return false;
-			}
+	var ajaxReqDetails = {
+		method: "POST",
+		url: getURLForHTML('dashboard', 'batch-subject-teacher-timeschedule-data'),
+		body: {
+			batchId: batchId,
+			subjectId: subjectId,
+			teacherId: teacherId,
+		},
+		global: false,
+		showMessage: false,
+	};
+	callCommonAjax(ajaxReqDetails).then(function (data) {
+		if (!data || data.status != "1") {
+			showMessageTheme2(0, (data && data.message) ? data.message : "Unable to load teacher time schedule. Please try again.");
+			return;
 		}
+		$("#batch-schedule" + subjectId + "").html(getBatchTeacherTimeScheduleHtml(data)).promise().done(function () {
+			$("#viewBatch-" + subjectId + " .proceedClassbtn").hide();
+			$("#startDate" + subjectId).datepicker('remove');
+			$("#startDate" + subjectId).datepicker({
+				format: 'mm-dd-yyyy',
+				startDate: new Date(newStartDate + 1),
+				endDate: new Date(batchEndDate),
+				autoclose: true,
+				todayHighlight: false,
+			});
+			$("#endDate" + subjectId).datepicker('remove');
+			$("#endDate" + subjectId).datepicker({
+				format: 'mm-dd-yyyy',
+				startDate: new Date(newStartDate + 1),
+				endDate: new Date(batchEndDate),
+				autoclose: true,
+				todayHighlight: false,
+			});
+		});
 	});
+}
+
+// Client render of BatchTeacherTimeScheduleContent.jsp from the JSON payload. The day-grid
+// items are identical to the linking table's, so buildLinkingDaysGridHtml is reused.
+function getBatchTeacherTimeScheduleHtml(data) {
+	var sid = data.subjectId;
+	var sub = { subjectId: sid, daysList: data.days, timeTableList: data.timeTableList };
+	return '' +
+		'<div style="display: flex; align-items: center">' +
+			'<span style="padding: 0 5px">' +
+				'<input type="text" class="teachStartDate form-control" name="startDate" placeholder="Select Start Date" id="startDate' + sid + '" value="' + batchEsc(data.batchStartDate) + '" onchange="checkUpdatesBatch(this,\'' + sid + '\')" data-date-start="' + batchEsc(data.batchStartDate) + '" readonly onkeydown="return false"/>' +
+			'</span>' +
+			'<span style="padding: 0 5px">' +
+				'<input type="text" class="teachEndDate form-control " name="endDate" placeholder="Select End Date" id="endDate' + sid + '" value="' + batchEsc(data.batchEndDate) + '" onchange="checkUpdatesBatch(this,\'' + sid + '\')" data-date-end="' + batchEsc(data.batchEndDate) + '" readonly onkeydown="return false"/>' +
+			'</span>' +
+		'</div>' +
+		'<hr />' +
+		'<div>' +
+			'<div class="row teacher-mapping-set-time-' + sid + '" style="display:flex;align-items:center;flex-wrap: wrap;justify-content:space-between;font-size:11px;">' +
+				buildLinkingDaysGridHtml(sub) +
+			'</div>' +
+		'</div>';
 }
 
 function teacherTimeCheck(scheduleTime, elementId, dayid, batchId) {
@@ -1009,44 +1635,43 @@ function getCallRequestForBatchTime(batchId, scheduleTime, dayid) {
 	return request;
 }
 
+	// JS-rendered replacement for the legacy batch calendar fragment: fetches JSON from
+// /dashboard/calendar-dates-data via callCommonAjax and builds the calendar client-side
+// (batchCalendarRender.js). Signature unchanged so all nav/getToday callers keep working.
 function calendarDates(replaceId, startDate, slotType, userId, batchId) {
+	if (typeof window !== 'undefined') {
+		window.__bcCurrentCalendarStartDate = startDate;
+		window.__bcCurrentCalendarSlotType = slotType;
+	}
 	var inActDate = $("#inActDate").val();
 	var moduleId = $("#roleModuleId").val();
 	customLoader(true);
-	var data = {};
-	data['startDate'] = startDate;
-	data['slotType'] = slotType;
-	data['disabledDate'] = inActDate;
-	data['userId'] = userId;
-	data['batchId'] = batchId;
-	data['moduleId'] = moduleId;
-	$.ajax({
-		type: "POST",
-		url: getURLForHTML('dashboard', 'calendar-dates'),
-		data: JSON.stringify(data),
-		contentType: APPLICATION_JSON_VALUE,
-		dataType: 'html',
-		cache: false,
-		// async: false,
-		timeout: 600000,
-		success: function (htmlContent) {
-			if (htmlContent != "") {
-				var stringMessage = [];
-				stringMessage = htmlContent.split("|");
-				if (stringMessage[0] == "FAILED" || stringMessage[0] == "EXCEPTION" || stringMessage[0] == "SESSIONOUT") {
-					if (stringMessage[0] == "SESSIONOUT") {
-						redirectLoginPage();
-					} else {
-						showMessageTheme2(0, stringMessage[1]);
-					}
-				} else {
-					$('#monthYear').html('');
-					$('#' + replaceId).html(htmlContent);
-					customLoader(false);
-				}
-				return false;
+	var ajaxReqDetails = {
+		method: "POST",
+		url: getURLForHTML('dashboard', 'calendar-dates-data'),
+		body: {
+			startDate: startDate,
+			slotType: slotType,
+			disabledDate: inActDate,
+			userId: userId,
+			batchId: batchId,
+			moduleId: moduleId,
+		},
+		global: false,
+		showMessage: false,
+	};
+	callCommonAjax(ajaxReqDetails).then(function (data) {
+		customLoader(false);
+		if (!data || data.status != "1") {
+			// callCommonAjax already redirects on session-out (status '3').
+			if (data && data.status != "3") {
+				showMessageTheme2(0, (data && data.message) ? data.message : "Unable to load calendar. Please try again.");
 			}
+			return;
 		}
+		$('#monthYear').html('');
+		$('#' + replaceId).html(buildBatchCalendarHtml(data));
+		initBatchCalendar(data);
 	});
 }
 

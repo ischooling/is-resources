@@ -40,7 +40,6 @@ const contentHandlers = {
     'modulerole': () => renderRoleListDashboard('Roles List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'user-list': () => renderAdminManageUserListDashboard('Admin Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-user-list': () => renderManageUserListDashboard('Manage User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'enrollment-tracker': () => renderEnrollmentTracker('Enrollment Tracker', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'online-user': () => renderOnlineUserListDashboard('Live Online Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'delete-user': () => renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'assign-orientation': () => renderStudentOrientationAssignDashboard('Assign Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -160,7 +159,9 @@ const contentHandlers = {
     'feedback-form': () => renderFeedbackFormPage(),
     'evaluation-config': () => initEvaluationConfig(),
     'user-rating': () => initTeacherRating(),
-    'teacher-my-rating': () => initTeacherMyRating()
+    'teacher-my-rating': () => initTeacherMyRating(),
+    'manage-batch-student': () => renderManageBatchStudentDashboard('Manage Group Students', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'enrollment-tracker': () => renderEnrollmentTracker('Enrollment Tracker', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
 };
 
 const getLeadCategory = () => {
