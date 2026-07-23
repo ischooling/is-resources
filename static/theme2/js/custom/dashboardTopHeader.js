@@ -333,26 +333,28 @@
 		else startChatWaiting();
 	}
 
+	// Load the chat widget iframe on demand. The widget is a full app that opens
+	// its own live Firestore listeners + polling as soon as it loads, so we do
+	// NOT load it on page load anymore — only the first time the user actually
+	// opens the chat (or deep-links into a specific chat). No-op once loaded, so
+	// re-opening never reloads it.
+	function ensureChatFrameLoaded() {
+		var $frame = $('#chat-frame');
+		if (!$frame.length || $frame.attr('src')) return;
+		var widgetUrl = $frame.data('default-src') || getISChatWidgetUrl();
+		$frame.data('default-src', widgetUrl);
+		$frame.attr('src', widgetUrl);
+	}
+
 	function isChatLoad() {
-		var widgetUrl = getISChatWidgetUrl();
+		// Wire the load listener + button handlers, but DON'T set the iframe src
+		// here — lazy-load happens on first open via ensureChatFrameLoaded().
 		$('#chat-frame').off('load.isChatWidgetReady').on('load.isChatWidgetReady', function () {
 			if (!$('#chat-frame').data('widget-ready')) {
 				markISChatWidgetReady($('#chat-frame'));
 			}
 		});
-		$('#chat-frame').attr('src', widgetUrl);
-		$('#chat-frame').data('default-src', widgetUrl);
-		if (localStorage.getItem('isFirstLogin') == null) {
-			$('#chat-frame').toggle();
-			if ($('#chat-frame').is(':visible')) {
-				$('#chat-icon').hide();
-				$('#close-icon').show();
-			} else {
-				$('#chat-icon').show();
-				$('#close-icon').hide();
-			}
-			localStorage.setItem('isFirstLogin', true);
-		}
+		$('#chat-frame').data('default-src', getISChatWidgetUrl());
 
 		function hideChatFrameAndGoHome() {
 			var $frame = $('#chat-frame');
@@ -373,6 +375,8 @@
 			if ($frame.is(':visible')) {
 				hideChatFrameAndGoHome();
 			} else {
+				// Lazy-load the widget on first open; subsequent opens are no-ops.
+				ensureChatFrameLoaded();
 				$frame.show();
 				$('#chat-icon').hide();
 				$('#close-icon').show();
