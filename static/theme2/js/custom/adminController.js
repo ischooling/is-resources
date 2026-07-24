@@ -77,6 +77,7 @@ const contentHandlers = {
     'partner-school-payment': () => initPartnerSchoolPayment(),
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
     'sms-error-log': () => renderSmsErrorLog('SMS Error Log', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'manage-cron': () => renderManageCron('Manage CRON', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'event-discount': () => initEventDiscount(),
     'user-screening-profiles': () => initUserScreeningProfiles(),
     'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent(); },
