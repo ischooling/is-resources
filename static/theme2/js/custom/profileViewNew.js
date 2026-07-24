@@ -29,6 +29,7 @@ var PROFILE_STUDENT_DOCUMENT_UPLOADS = {};
 var PROFILE_STUDENT_DOCUMENT_BUCKETS = null;
 var PROFILE_STUDENT_DOCUMENT_UPLOAD_PANEL_HIDDEN = false;
 var PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = "";
+var IS_TIMEZONE_CHANGED=false;
 var SAVE_BLUK_PROFILE_DATA =
     [
         // { eleID: "firstName", keyId: "firstName" },
@@ -4441,6 +4442,7 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                     //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
                     $("#" + eleID).parent().find(".input-group-append-hide").hide();
                 } else if (keyId == 'timezone') {
+                    IS_TIMEZONE_CHANGED = true;
                     $('.countryTimezoneView').text(data['extra']).removeClass('hide-value');
                     $('.timeZoneSavedStatus').text("");
                     // $('.cancel-field-btn').removeClass('visible');

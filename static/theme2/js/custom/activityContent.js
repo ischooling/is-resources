@@ -67,7 +67,7 @@ function dashboardActivityListContent(data){
                                                         +'<div class="px-1 ">'
                                                             +'<a class="activity-btn disable-btn-color text-white font-weight-bold text-center waves-effect" style="padding: 5px !important " onclick="'+functionName+'" href="javascript:void(0);"><span>'+ead.activityTitle+'</span></a>'
                                                         +'</div>'
-                                                        +'<div class="counter-div">'
+                                                        +'<div class="counter-div text-center">'
                                                             +'<div class="px-1 text-center font-size-md text-success-custom"><b>Time Remaining</b></div>'
                                                             +'<div id="timer'+ead.id+'" class="counter-wrapper-div">'
                                                             +'<div id="days'+ead.id+'" class="count-div days"></div>'
@@ -197,7 +197,7 @@ function dashboardCalendarActivityListContent(info){
                                         +'<div class="px-1 ">'
                                             +'<a class="activity-btn disable-btn-color text-white font-weight-bold text-center waves-effect" style="padding: 5px !important " onclick="'+functionName+'" href="javascript:void(0);"><span>'+ead.activityTitle+'</span></a>'
                                         +'</div>'
-                                        +'<div class="counter-div">'
+                                        +'<div class="counter-div text-center">'
                                             +'<div class="px-1 text-center font-size-md text-success-custom"><b>Time Remaining</b></div>'
                                             +'<div id="timer'+ead.id+'" class="counter-wrapper-div">'
                                             +'<div id="days'+ead.id+'" class="count-div days"></div>'
@@ -347,53 +347,65 @@ function dashboardCalendarActivityListContent(info){
 //     return html;
 // }
 function viewActivityContentModal(data){
+    var getColorCode = getEventTextColor("activity", "ACTIVITY");
     var pdfClass=(data.uploadFile.endsWith('.pdf')?'pdf-view':'');
+    // Unique key per activity occurrence. Recurring occurrences share the same
+    // activityId, so suffix with the occurrence date to keep the timer element
+    // ids (#timer<key>, #days<key>, ... and data-timeid) distinct across dates.
+    var timerKey = data.activityId + (data.occurrenceDate ? '_' + String(data.occurrenceDate).replace(/[^0-9A-Za-z]/g, '') : '');
     var html=
     `<div class="w-100 check-activity-page-load">
         <div class="full" id="activitiesType">
-            <h4 class="px-3 font-weight-semi-bold text-dark text-center font-20">${data.categoryName}</h4>
-            <h6 class="text-center mt-1">${data.activityTitle}</h6>
-            <h6 class="font-12 mt-2 text-center" id="join-btn-message-${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the <br/> scheduled time.</h6>
+            <h4 class="font-weight-semi-bold font-20 mb-3" style="color:${getColorCode}">${escapeHtml(data.categoryName)}</h4>
+            <h6 class="font-12 mt-2 text-center" id="join-btn-message-${timerKey}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">Your joining link will be displayed ${data.showLinkBeforeMinutes} minutes before the <br/> scheduled time.</h6>
             <div class="activity-wrapper `+pdfClass+`" id="zoomMeetingCard">
                 <div class="activity-box"  id="zoomMeetingCardBox">
-                    <div class="pdf-down text-center `+pdfClass+`">
-                        <div class="pt-2" style="font-size:16px;font-weight:600;margin-bottom:35px; ${data.activityPurpose==""?'display:none':''}">${data.activityPurpose!=''?data.activityPurpose:''}</div>`;
+                    <div class="pdf-down text-left `+pdfClass+`">
+                        <div class="mb-2" style="font-size:16px;font-weight:600;${data.activityPurpose==""?'display:none':''}">${data.activityPurpose!=''?data.activityPurpose:''}</div>`;
                         var startTime = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_TIME_FORMATTER);
                         var endTime = convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_TIME_FORMATTER);
-                        var activityDate = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DAY_NAME_AND_MONTH_FULL_NAME_DATE_YEAR);
+                        var activityDate = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY);
+                        var nowTime = new Date($("#currentTimeForUser").text()).getTime();
+                        var startMs = new Date(convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime();
+                        var endMs = new Date(convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime();
+                        var isActive = nowTime >= startMs && nowTime < endMs;
                         html+=
-                            `<div class="p-2 w-100 bg-light-primary rounded-5 py-3 px-2 my-2 flex-row">
-                                <div class="d-flex mx-auto gap-5 w-100 justify-content-center">
-                                    <div class="d-inline-block py-1 px-2 rounded bg-primary text-white font-12">${startTime}</div>
-            			            <div class="d-inline-block py-1 px-2 rounded bg-primary text-white font-12">${endTime}</div>
-                                </div>
-                                <div class="full text-center mt-1 font-weight-semi-bold font-13">
-                                    <i class="fa fa-calendar"></i>&nbsp;${activityDate}
-                                </div>
-                                
-                            </div>
+                            `<ul class="full p-0 m-0 list-unstyled">
+                                ${data.startDatetime ? `<li class="d-flex mb-2">
+                                    <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:90px">Date</span>
+                                    <span class="font-14 text-black-80 font-weight-semi-bold">${activityDate}</span>
+                                </li>` : ""}
+                                <li class="d-flex align-items-center mb-2">
+                                    <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:90px">Time</span>
+                                    <span class="font-14 text-black-80 font-weight-semi-bold">${startTime}</span>
+                                </li>
+                                <li class="d-flex align-items-center mb-2">
+                                    <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:90px">Details</span>
+                                    <span class="font-14 text-black-80 font-weight-semi-bold">${data.activityTitle}</span>
+                                </li>
+                            </ul>
                             <div id="3434displayJoinLinkDiv${data.activityId}" class="mb-4" style="${(data.uploadFile == "" || data.uploadFile == "No file chosen...") && data.filePath == "" ? 'display:none':''}">`
                                 
                             html+=`</div>
-                        ${/*<div id="displayJoinLinkInfoDiv${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">*/''}
-                        <div id="displayJoinLinkInfoDiv${data.activityId}" class="my-4">
-                            <p class="text-center mb-1">Time Remaining</p>
-                            <span class="activity-block full">
-                                <ul class="m-0 full">
-                                    <li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-timeid="`+data.activityId+`" data-starttimedate="`+convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-endtimedate="`+convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-joiningBefore="${data.showLinkBeforeMinutes}">
-                                        <div class="counter-div">
-                                            <div id="timer${data.activityId}">
-                                                <div id="days${data.activityId}" class="count-div days card bg-light-primary p-2 font-22 text-dark"></div>
-                                                <div id="hours${data.activityId}" class="count-div hours card bg-light-primary p-2 font-22 text-dark"></div>
-                                                <div id="minutes${data.activityId}" class="count-div minutes card bg-light-primary p-2 font-22 text-dark"></div>
-                                                <div id="seconds${data.activityId}" class="count-div seconds card bg-light-primary p-2 font-22 text-dark"></div>
+                        ${/*<div id="displayJoinLinkInfoDiv${data.activityId}" style="${USER_ROLE == 'TEACHER'?'display:none':''}">*/''}`;
+                        html+=`<div id="displayJoinLinkInfoDiv${timerKey}" class="my-4">
+                                <p class="text-center mb-1">Time Remaining</p>
+                                <span class="activity-block full">
+                                    <ul class="m-0 full">
+                                        <li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-timeid="`+timerKey+`" data-starttimedate="`+convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-endtimedate="`+convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE,DATETIME_UTC_FORMATTER)+`" data-joiningBefore="${data.showLinkBeforeMinutes}">
+                                            <div class="counter-div text-center">
+                                                <div id="timer${timerKey}">
+                                                    <div id="days${timerKey}" class="count-div days card bg-light-primary p-2 font-22 text-dark"></div>
+                                                    <div id="hours${timerKey}" class="count-div hours card bg-light-primary p-2 font-22 text-dark"></div>
+                                                    <div id="minutes${timerKey}" class="count-div minutes card bg-light-primary p-2 font-22 text-dark"></div>
+                                                    <div id="seconds${timerKey}" class="count-div seconds card bg-light-primary p-2 font-22 text-dark"></div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </span>
-                        </div>
-                        <div class="text-center d-flex flex-wrap gap-5">`;
+                                        </li>
+                                    </ul>
+                                </span>
+                            </div>`;
+                        html+=`<div class="text-center d-flex flex-wrap gap-5">`;
                             // if(USER_ROLE == 'TEACHER'){
                             //     html+=``;
                             //         if(data.filePath != null && data.filePath != undefined && data.filePath != ""){
@@ -410,7 +422,10 @@ function viewActivityContentModal(data){
                             if(data.filePath != null && data.filePath != undefined && data.filePath != ""){
                                 html+=`<a href="javascript:void(0);" class="bg-primary d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center" onclick="viewActivityAttachmentSource(\'${data.uploadFile}\', \'${data.filePath}\')" style="font-size: 13px; border-radius: 4px;">View Attachment</a>`;
                             }
-                            html+=`<a href="javascript:void(0);" class="bg-success d-inline-flex text-center flex-grow-1 text-white font-weight-semi-bold btn justify-content-center join-activity-btn" id="joinButton${data.activityId}" onclick="classDetailsOnModalActivity('${data.joiningLink}')" style="font-size: 13px; border-radius: 4px;">Join</a>
+                            html+=`<div class="full text-right mt-3 activity_rate_wrapper">
+                                <button type="button" class="btn btn-pill btn-light px-3 activity_close_btn" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-pill btn-light px-3 text-white join-activity-btn hide-acitvity-btn" id="joinButton${timerKey}" style="background:${getColorCode}" onclick="classDetailsOnModalActivity('${data.joiningLink}')">Join Event</button>
+                            </div>
                         </div>`;
                         // if(data.message!=''){
                         //     html+=data.message;
@@ -422,6 +437,7 @@ function viewActivityContentModal(data){
             <iframe id="activity-zoom-meeting-iframe" width="100%" height="650" frameborder="0" style="display: none;"></iframe>
             </div>
         </div>
+       
     </div>`;
     return html;
 }

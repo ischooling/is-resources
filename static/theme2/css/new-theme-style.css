@@ -9960,7 +9960,8 @@ transition-duration:.25s;
 	border: 1px solid #e0f3ff
 }
 /* EXTRA ACTIVITY COUNTER CSS START */ 
-.join-activity-disabled.bg-success.join-activity-btn{pointer-events: none;background-color:#ddd !important}
+.join-activity-btn.hide-acitvity-btn{display:none}
+.join-activity-disabled.bg-success.join-activity-btn, .join-activity-disabled.join-activity-btn{display: none;}
 .count-div {
 	display: inline-block;
 	line-height: 1;
@@ -31389,7 +31390,7 @@ right:15px
 
 .right_fixed_action{width:50px;padding:10px 5px;background:#fff; border-top-left-radius:5px;border-bottom-left-radius:5px;position:fixed;top:73px; right:0 }
 .close-right-slide-bar-btn{display:none !important}
-.settings-open .close-right-slide-bar-btn{display:inline-block !important }
+.settings-open .close-right-slide-bar-btn{display:inline-block !important;cursor:pointer}
 .right-slide-download-btn{position:fixed;right:55px;top:0;transform:translateX(120%);opacity:0;pointer-events:none;transition:transform .2s ease, opacity .2s ease;z-index:160}
 .right-slide-download-btn.show{transform:translateX(0);opacity:1;pointer-events:auto}
 .ui-theme-settings .btn-open-options {

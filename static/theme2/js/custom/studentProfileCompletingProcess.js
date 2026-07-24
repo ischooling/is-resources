@@ -1221,7 +1221,7 @@ function renderOptions() {
         html += `
         <li class="list-group-item d-flex justify-content-between">
             ${value}
-            <button class="btn btn-sm btn-danger" onclick="removeFieldOption(${index})">X</button>
+            <button class="btn btn-sm btn-danger" onclick="removeFieldOption(${index})">&times;</button>
         </li>`;
     });
 

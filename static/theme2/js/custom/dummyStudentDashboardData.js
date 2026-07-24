@@ -389,6 +389,33 @@
     function subjects() { 
         return subjectsByGradeKey(gradeKey());
     }
+    function dummySelectedCourseNames() {
+        return subjects().map(function (subject) {
+            return cleanCourseName(cleanSubjectName(subject.subjectName || subject.subjectTitle || ""));
+        }).filter(function (courseName) {
+            return !!courseName;
+        });
+    }
+    function dummySelectedCourseNameMatches(courseName) {
+        var selectedCourses = dummySelectedCourseNames();
+        if (!selectedCourses.length) {
+            return true;
+        }
+        var cleanName = cleanCourseName(cleanSubjectName(courseName || ""));
+        for (var i = 0; i < selectedCourses.length; i++) {
+            if (selectedCourses[i] === cleanName) {
+                return true;
+            }
+        }
+        return false;
+    }
+    function selectedDummySubjects() {
+        var list = subjects();
+        var filteredList = list.filter(function (subject) {
+            return dummySelectedCourseNameMatches(subject.subjectName || subject.subjectTitle || "");
+        });
+        return filteredList.length > 0 ? filteredList : list;
+    }
     function tz() { 
         return DUMMY_STUDENT_TIMEZONE;
     }
@@ -580,19 +607,20 @@
         };
     }
     function dummyStudentAssignedTeacherResponse() {
-        var schedule = dummyStudentScheduleResponse().details.schedule || [];
+        var list = selectedDummySubjects();
         return {
             status: "1",
             statusCode: "S001",
             message: "Dummy student assigned teachers success",
             details: {
-                assignedTeachers: schedule.map(function (row) {
+                assignedTeachers: list.map(function (subject, index) {
+                    var courseName = cleanCourseName(cleanSubjectName(subject.subjectName || subject.subjectTitle || "Course"));
                     return {
-                        selectedCourses: row.courseName || row.subjectName || "Course",
-                        courseName: row.courseName || row.subjectName || "Course",
-                        subjectName: row.courseName || row.subjectName || "Course",
-                        teacherAssignedForTeacherSupport: row.teacherName || row.name || "Teacher",
-                        teacherName: row.teacherName || row.name || "Teacher"
+                        selectedCourses: courseName,
+                        courseName: courseName,
+                        subjectName: courseName,
+                        teacherAssignedForTeacherSupport: teacher(subject, index),
+                        teacherName: teacher(subject, index)
                     };
                 })
             }
@@ -808,7 +836,7 @@
         return list[0] || { subjectId: 0, subjectCode: "", subjectName: "", subjectIcon: "World History.jpg", teachers: [] };
     }
     function dummyBookClassSubjectRows() {
-        var base = window.getDummyStudentBaseDate(), list = subjects(), rows = [];
+        var base = window.getDummyStudentBaseDate(), list = selectedDummySubjects(), rows = [];
         for (var i = 0; i < list.length; i++) {
             var total = configuredClassCount(12), booked = Math.min(total, i % 2), completed = Math.min(Math.max(total - booked, 0), i % 3), rescheduled = total > 1 && i === 1 ? 1 : 0, missedByYou = 0, missedByTeacher = total > 2 && i === 2 ? 1 : 0, expired = 0;
             rows.push({ img: img(list[i]), assignedTeacherCount: 1, name: list[i].subjectName, subjectId: list[i].subjectId, studentStandardId: studentStandardId(), teacherName: teacher(list[i], i), total: total, booked: booked, completed: completed, rescheduled: rescheduled, missedByYou: missedByYou, missedByTeacher: missedByTeacher, expired: expired, left: total - booked - completed - rescheduled - missedByYou - missedByTeacher - expired, complimentaryTotal: 2, extraClassTotal: 10, weekLeftClass: 3 });
@@ -883,7 +911,7 @@
         return { cartCount: items.length, cart: { cartItems: items, cartTotal: total, discountCode: "", cpDiscount: 0, totalPayAmount: total, bookSessionIds: ids.join(","), subjectId: subjectId, errorMsg: "" } };
     }
     function dummyAcademicPerformanceRows() {
-        var base = window.getDummyStudentBaseDate(), list = subjects(), rows = [];
+        var base = window.getDummyStudentBaseDate(), list = selectedDummySubjects(), rows = [];
         for (var i = 0; i < list.length; i++) {
             var gradableProgress = Math.min(100, (i === 0 ? 0 : 4 + (i * 2)));
             var allProgress = Math.min(100, 3 + (i * 2));
@@ -1466,6 +1494,234 @@
         window.USER_TIMEZONE = DUMMY_STUDENT_TIMEZONE;
         try { USER_TIMEZONE = DUMMY_STUDENT_TIMEZONE; } catch (e) {}
     }
+
+    // ── Dummy Student Dashboard: School/Course Calendar ──────────────────────────
+    // isDemoUser === true => never call the real "school-calendar" API; assignments,
+    // classes and activities are generated instead, scoped to the courses actually
+    // saved in Course Name for this dummy student.
+    var ASSIGNMENT_KINDS = ["Homework", "Worksheet", "Practice Set", "Reading Assignment", "Project Task", "Quiz Preparation", "Lab Report", "Essay Draft"];
+
+    // subjects() cleans saved course names into generic buckets (e.g. "English III" ->
+    // "Language Arts") for icons/fee-receipts. The calendar needs the exact saved
+    // names, so read courseName straight off the saved rows instead.
+    function dummyAssignmentCourses() {
+        var seen = {}, rows = [];
+        dbRows().forEach(function (row, i) {
+            var names = String(row.courseName || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+            var ids = String(row.courseId || "").split(",").map(function (s) { return s.trim(); });
+            names.forEach(function (name, idx) {
+                var key = name.toLowerCase();
+                if (seen[key]) return;
+                seen[key] = true;
+                rows.push({ subjectId: parseInt(ids[idx] || name, 10) || (9300001 + i * 100 + idx), subjectName: name });
+            });
+        });
+        return rows.length ? rows : subjects(); // nothing saved -> grade-based fallback
+    }
+
+    // Every saved course gets an assignment for whatever date is being viewed.
+    // Status shifts with the date: current date = mix of Pending/Submitted, a past
+    // date = all Submitted ("Very Well Done!"), a future date = all Upcoming.
+    // timezone: tz() matters — without it a bare "YYYY-MM-DD" dueDate is read as UTC
+    // midnight and shifts back a day once converted to the student's timezone.
+    function dummyAssignmentsForDay(day) {
+        var dayDate = moment(day, "YYYY-MM-DD").toDate();
+        var dow = dayDate.getDay();
+        if (dow === 0 || dow === 6) {
+            return []; // no assignments on Saturday/Sunday
+        }
+        var courses = dummyAssignmentCourses();
+        var today = fdate(window.getDummyStudentBaseDate());
+        var isPast = day < today;
+        return courses.map(function (course, ci) {
+            var isSubmitted = day === today ? ci % 2 === 1 : isPast;
+            // dueDate stays a plain date (used for Pending/Submitted/Upcoming classification
+            // and our own day comparisons above); start only controls where it's placed on
+            // the calendar, staggered per course instead of every assignment sitting at
+            // the same fixed instant.
+            var start = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 6 + ci, 0, 0);
+            return {
+                id: "dummy-assignment-" + day + "-" + ci, category: "ASSIGNMENTS", eventTitle: null,
+                title: course.subjectName + " - " + ASSIGNMENT_KINDS[ci % ASSIGNMENT_KINDS.length],
+                courseId: course.subjectId, courseName: course.subjectName, subjectName: course.subjectName,
+                dueDate: day, start: fmt(start), timezone: tz(),
+                assignmentType: isSubmitted ? "submitted" : "",
+                submittedDate: isSubmitted ? fdate(plusDays(dayDate, -1)) : ""
+            };
+        });
+    }
+
+    // One scheduled class per saved course per day. On the current date, the first
+    // class starts 15 minutes ago so "now" always falls inside it — guaranteeing one
+    // Live class today (same trick as dummyStudentScheduleResponse()). Live/Upcoming/
+    // Completed status for every class is computed automatically by the existing
+    // calendar logic from start/end vs the real current time.
+    function dummyClassesForDay(day) {
+        var dayDate = moment(day, "YYYY-MM-DD").toDate();
+        var dow = dayDate.getDay();
+        if (dow === 0 || dow === 6) {
+            return []; // no classes on Saturday/Sunday
+        }
+        var courses = dummyAssignmentCourses();
+        var isToday = day === fdate(window.getDummyStudentBaseDate());
+        return courses.map(function (course, ci) {
+            var start = (isToday && ci === 0)
+                ? plusMinutes(window.getDummyStudentBaseDate(), -15)
+                : new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 9 + (ci * 2) % 10, 0, 0);
+            return applyTeacherFields({
+                id: "dummy-class-" + day + "-" + ci, category: "CLASS", eventTitle: course.subjectName, title: "",
+                courseName: course.subjectName, subjectName: course.subjectName,
+                courseId: course.subjectId, subjectId: course.subjectId,
+                start: fmt(start), end: fmt(plusMinutes(start, 90)), timezone: tz(), eventType: "ONE_TO_ONE"
+            }, teacher(course, ci));
+        });
+    }
+
+    // School holidays — on any of these dates, classes/activities are skipped (school
+    // is closed) but assignments can still be due. Year is derived from the dummy base
+    // date so the demo data stays current instead of drifting to a fixed year.
+    function dummyHolidays() {
+        var year = window.getDummyStudentBaseDate().getFullYear();
+        return [
+            { name: "Eid al-Adha (Bakra Eid)", start: year + "-05-26", end: year + "-05-28" },
+            { name: "Independence Day", start: year + "-07-04", end: year + "-07-04" },
+            { name: "Thanksgiving Break", start: year + "-11-26", end: year + "-11-27" },
+            { name: "Winter Break", start: year + "-12-24", end: (year + 1) + "-01-01" }
+        ];
+    }
+
+    function dummyHolidayForDay(day) {
+        var holidays = dummyHolidays();
+        for (var i = 0; i < holidays.length; i++) {
+            if (day >= holidays[i].start && day <= holidays[i].end) return holidays[i];
+        }
+        return null;
+    }
+
+    function dummyHolidayEvent(day, holiday) {
+        return { id: "dummy-holiday-" + day, category: "HOLIDAY", eventTitle: holiday.name, title: holiday.name, start: day, allDay: true, timezone: tz() };
+    }
+
+    // One activity per day, same per-day pattern as assignments/classes, so it shows
+    // up on whatever date is being viewed instead of only near the real "today".
+    // Names come from activityNames() (the existing saved-activity-count/grade source),
+    // cycling by day-of-month for variety.
+    function dummyActivitiesForDay(day) {
+        var names = activityNames();
+        if (!names.length) {
+            return [];
+        }
+        var dayDate = moment(day, "YYYY-MM-DD").toDate();
+        var name = names[dayDate.getDate() % names.length];
+        var start = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 15, 0, 0);
+        return [{ id: "dummy-activity-" + day, category: "ACTIVITY", eventTitle: name, title: name, start: fmt(start), end: fmt(plusMinutes(start, 45)), timezone: tz() }];
+    }
+
+    // Every "YYYY-MM-DD" day between startdate and enddate (inclusive), capped as a safety net.
+    function enumerateDays(startdate, enddate) {
+        var days = [], cursor = moment(startdate, "YYYY-MM-DD"), end = moment(enddate || startdate, "YYYY-MM-DD");
+        while (cursor.isSameOrBefore(end, "day") && days.length < 60) {
+            days.push(cursor.format("YYYY-MM-DD"));
+            cursor.add(1, "day");
+        }
+        return days;
+    }
+
+    // Same entry point every caller already uses (studentDashboardContent.js does
+    // callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, flag)).
+    // dashboardCalendarNew.js exposes its render helpers/state on window.dashboardCalendarNew(State),
+    // so we reuse them instead of hitting the real API or touching that file.
+    function patchDummySchoolCalendar() {
+        if (window.__dummySchoolCalendarPatched || typeof window.callSchoolCalendar !== "function" || !window.dashboardCalendarNew) {
+            return;
+        }
+        window.__dummySchoolCalendarPatched = true;
+        var original = window.callSchoolCalendar;
+        window.callSchoolCalendar = function (formId, userId, uniqueId, viewName, startdate, enddate, flag) {
+            if (!(window.isDummyStudentMode && window.isDummyStudentMode())) {
+                return original.apply(this, arguments);
+            }
+            var dc = window.dashboardCalendarNew;
+            var state = window.dashboardCalendarNewState;
+            // refreshCalendarFromCurrentView() (fired on datepicker change) only re-fetches
+            // if lastRequest is set — the real callSchoolCalendarNew sets it, so we must too.
+            state.lastRequest = { formId: formId, userId: userId, uniqueId: uniqueId };
+            if (!state.selectedDate) {
+                state.selectedDate = moment().tz(dc.getStudentTimezone()).format("YYYY-MM-DD");
+            }
+
+            // Don't trust the raw startdate/enddate params — dashboardCalendarNew.js pads
+            // them differently per view (and Today's padding overlaps neighboring days).
+            // Instead mirror exactly what each view itself renders: a single day for
+            // Today, the Sun–Sat week for Week (renderCustomWeekView), and the full
+            // calendar grid for Month — otherwise our generated dates and the UI's
+            // displayed date columns don't line up and everything looks blank.
+            var selected = moment(state.selectedDate || startdate || fdate(window.getDummyStudentBaseDate()), "YYYY-MM-DD");
+            var days;
+            if (dc.isTodayView(viewName)) {
+                days = [selected.format("YYYY-MM-DD")];
+            } else if (viewName === "agendaWeek") {
+                var weekStart = selected.clone().startOf("week");
+                days = enumerateDays(weekStart.format("YYYY-MM-DD"), weekStart.clone().add(6, "days").format("YYYY-MM-DD"));
+            } else {
+                var monthStart = selected.clone().startOf("month").startOf("week");
+                var monthEnd = selected.clone().endOf("month").endOf("week");
+                days = enumerateDays(monthStart.format("YYYY-MM-DD"), monthEnd.format("YYYY-MM-DD"));
+            }
+
+            var events = [];
+            days.forEach(function (day) {
+                var holiday = dummyHolidayForDay(day);
+                events = events.concat(dummyAssignmentsForDay(day));
+                // School's closed on a holiday — no classes/activities, just the holiday itself.
+                if (holiday) {
+                    events.push(dummyHolidayEvent(day, holiday));
+                } else {
+                    events = events.concat(dummyClassesForDay(day), dummyActivitiesForDay(day));
+                }
+            });
+            var courseDetails = dummyAssignmentCourses().map(function (course) {
+                return { courseId: course.subjectId, courseName: course.subjectName };
+            });
+
+            dc.restoreFilters();
+            state.masterEvents = events.map(function (event) { return dc.normalizeCalendarEvent(event, courseDetails); });
+            dc.applyFilters();
+            dc.renderCourseFilters();
+            dc.renderSchoolEventFilters();
+            dc.renderCategoryFilters();
+            dc.updateDatepicker();
+
+            if (viewName === "weekDayList" || state.viewName === "weekDayList") {
+                state.viewName = "weekDayList";
+                dc.renderWeekDayListView(state.selectedDate || startdate || moment().tz(dc.getStudentTimezone()).format("YYYY-MM-DD"));
+            } else if (dc.isTodayView(viewName)) {
+                state.viewName = "today";
+                dc.renderCustomTodayView();
+                dc.bindTopbarEvents();
+                dc.startActiveRefresh();
+            } else if (viewName === "agendaWeek" || state.viewName === "agendaWeek") {
+                state.viewName = "agendaWeek";
+                dc.renderCustomWeekView();
+                dc.bindTopbarEvents();
+                dc.startActiveRefresh();
+            } else if (!state.calendarReady || !$("#schoolcalendar").data("fullCalendar")) {
+                dc.initializeFullCalendar(state.filteredEvents, viewName);
+            } else {
+                $("#schoolcalendar").fullCalendar("removeEvents");
+                $("#schoolcalendar").fullCalendar("addEventSource", state.filteredEvents);
+                $("#schoolcalendar").fullCalendar("rerenderEvents");
+            }
+            return Promise.resolve(state.filteredEvents);
+        };
+    }
+    patchDummySchoolCalendar();
+    var dummySchoolCalendarPatchTimer = window.setInterval(function () {
+        patchDummySchoolCalendar();
+        if (window.__dummySchoolCalendarPatched) {
+            window.clearInterval(dummySchoolCalendarPatchTimer);
+        }
+    }, 50);
 
     window.showDummyBookSessionPaymentOptions = function (userPaymentDetailsId, schoolId) {
         $("#dummyPaymentOptionsModal").remove();

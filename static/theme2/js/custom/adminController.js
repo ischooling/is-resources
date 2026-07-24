@@ -532,6 +532,10 @@ function backToDedicatedModule(moduleUrl){
   }
 }
 function backToMain(tableId, modalID){
+  if(typeof IS_TIMEZONE_CHANGED !== "undefined" && IS_TIMEZONE_CHANGED){
+		location.reload();
+		return;
+	}
 	$("#dashboardContentInHTML").show();
 	$("#dashboardContentInHTMLAdditional").hide();
 	$('html, body').animate({ scrollTop: 0 }, 500);

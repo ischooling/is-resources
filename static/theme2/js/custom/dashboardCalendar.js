@@ -940,8 +940,8 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				element.addClass("activity-wrapper-div");
 				var activityId = info.id.split("activity");
 				activityId=activityId[1];
-				element.attr("onclick","renderViewActitifyDetails('" + activityId + "', '')");
-
+				var occurrenceDate = info.start ? info.start.format("YYYY-MM-DD") : '';
+				element.attr("onclick","renderViewActitifyDetails('" + activityId + "', '', undefined, '" + occurrenceDate + "')");
 			}
 			if (now > endTime.getTime()) {
 				element.addClass("past-class");
@@ -1366,6 +1366,28 @@ function calendarMeetingLinkValidateStudent(url, response){
 				</div>`;
 			}else{
 				html+=`<div id="classWaringMessage" class="full text-center my-4">
+					<ul class="d-full">
+						<li class="d-flex">
+							<span>Course</span>
+							<span>${response}</span>
+						</li>
+						<li class="d-flex">
+							<span>Date</span>
+							<span>${response}</span>
+						</li>
+						<li class="d-flex">
+							<span>Time</span>
+							<span>${response}</span>
+						</li>
+						<li class="d-flex">
+							<span>Teacher</span>
+							<span>${response}</span>
+						</li>
+						<li class="d-flex">
+							<span>Status</span>
+							<span>${response}</span>
+						</li>
+					</ul>
 					<h5>The class ${response.className} | ${response.subjectName} is scheduled for ` + convertDatetimeWithFormat((response.classDate), response.classTimezone, USER_TIMEZONE, DISPLAY_DATE_AND_TIME) + `.</h5>
 					<h5>You can join the class on `+ convertDatetimeWithFormat((response.canJoindateStart), response.classTimezone, USER_TIMEZONE, DISPLAY_DATE_AND_TIME) + `.</h5>
 				</div>`;

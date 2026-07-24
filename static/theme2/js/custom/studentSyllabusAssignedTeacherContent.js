@@ -38,10 +38,12 @@ function getStudentSyllabusAssignedTeacherContent(pageData){
 function getStudentSyllabusAssignedTeacherRowsHtml(rows){
     var rowsHtml = "";
     $.each(rows || [], function(index, row){
+        var courseHtml = studentAssignedTeacherEscapeHtml(row.courseName || "N/A");
+        courseHtml = `<a href="javascript:void(0)" class="text-primary font-weight-bold" data-course-name="${studentAssignedTeacherEscapeAttr(row.courseName || "")}" onclick="studentAssignedTeacherOpenCourseCalendar(this,'${studentAssignedTeacherEscapeAttr(row.lmsUserId || "")}','${studentAssignedTeacherEscapeAttr(row.lmsCourseId || "")}')">${courseHtml}</a>`;
         rowsHtml += `<tr>
                 <td class="pl-3">${index + 1}</td>
-                <td>${row.courseName || "N/A"}</td>
-                <td>${row.teacherName || "N/A"}</td>
+                <td>${courseHtml}</td>
+                <td>${studentAssignedTeacherEscapeHtml(row.teacherName || "N/A")}</td>
             </tr>`;
     });
     if(!rowsHtml){

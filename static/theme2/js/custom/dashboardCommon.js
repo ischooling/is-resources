@@ -2010,3 +2010,20 @@ function redirectLms(e, isPayLmsPaymentPending) {
 		}
 	}
 }
+
+function redirectLmsFromStudentCourse(e, isPayLmsPaymentPending, lmsProviderUrl) {
+	if (isPayLmsPaymentPending != null && isPayLmsPaymentPending != "") {
+		showMessageTheme2(0, isPayLmsPaymentPending);
+		return false;
+	}
+	if (!lmsProviderUrl) {
+		showMessageTheme2(0, "Course content is not available.");
+		return false;
+	}
+	if (getSession()) {
+		window.open(lmsProviderUrl, '_blank');
+	} else {
+		redirectLoginPage();
+	}
+	return false;
+}

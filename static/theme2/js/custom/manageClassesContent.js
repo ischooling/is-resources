@@ -520,7 +520,7 @@ function getUpdateManageMeetingResultModal(roleAndModule, role){
 					+'<input type="hidden" class="form-control" id="meetingCurStatus" name="meetingCurStatus" value="">'
 					+'<div class="modal-header p-2 bg-primary text-white">'
 						+'<h5 class="modal-title" id="myLargeModalLabel">Update Class Status</h5>'
-						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">x</button>'
+						+'<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color:#fff;">&times;</button>'
 					+'</div>'
 					+'<div class="modal-body">'
 						+'<div class="col-md-12 col-sm-12 col-12">'

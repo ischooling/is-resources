@@ -232,6 +232,7 @@ function shouldShowFeedbackPopupAfterClass() {
 
 // LIVE -> wait for the class to end plus configured feedback delay, then open. Otherwise open immediately.
 function checkClassEndedStatus(classEndTime, info, callFrom) {
+    
     if (callFrom !== "LIVE") {
         openClassFeedback(info);
         return;
@@ -242,7 +243,11 @@ function checkClassEndedStatus(classEndTime, info, callFrom) {
     var feedbackModalDelayMs = getFeedbackModalDelayMinutes() * 60 * 1000;
     var feedbackOpenTime = classEndTime + feedbackModalDelayMs;
     var intervalId = setInterval(function () {
-        var now = new Date($("#currentTimeForUser").text()).getTime();
+        // Compare in the same reference frame as classEndTime (moment.valueOf() -> absolute
+        // UTC epoch ms). Re-parsing the #currentTimeForUser string here would reinterpret a
+        // student-timezone wall-clock as browser-local time, shifting "now" by the timezone
+        // difference and firing the popup immediately instead of after the configured delay.
+        var now = Date.now();
         if (now > feedbackOpenTime) {
             clearInterval(intervalId);
             openClassFeedback(info);

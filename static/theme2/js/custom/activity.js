@@ -69,14 +69,32 @@ function makeTimer(myActId, activityStartDateTimeByUserTimezone, currentDate) {
 }
 
 
+// Registry of every countdown interval created by getHomePageActivityCounter so
+// they can be cleared before a re-render. Without this the intervals stack up:
+// each time an activity modal is (re)opened a fresh set of intervals is created
+// while the old ones keep running. When two occurrences of the same recurring
+// activity share the same activityId, the stale interval keeps writing its own
+// remaining time into the reused #days<id>/#timer<id> element, so the countdown
+// visibly flickers between the two values (e.g. 13 days <-> 41 days).
+var ACTIVITY_TIMER_INTERVALS = [];
+function clearAllActivityTimers(){
+	if (Array.isArray(ACTIVITY_TIMER_INTERVALS)) {
+		$.each(ACTIVITY_TIMER_INTERVALS, function (i, id) {
+			clearInterval(id);
+		});
+	}
+	ACTIVITY_TIMER_INTERVALS = [];
+}
 function getHomePageActivityCounter(activityID){
+	// Drop any previously registered timers and rebuild from the currently
+	// attached .myActivityLoop elements, so intervals never accumulate.
+	clearAllActivityTimers();
 	var userCurrentTime = convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, USER_TIMEZONE).format('MMM DD, YYYY hh:mm:ss a');
-	setInterval(function(){
+	ACTIVITY_TIMER_INTERVALS.push(setInterval(function(){
         userCurrentTime = convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, USER_TIMEZONE).format('MMM DD, YYYY hh:mm:ss a');
-    }, 1000);
+    }, 1000));
 	$('.myActivityLoop').each(function () {
-		var intervalId = $(this).attr('data-timeid');
-		intervalId = setInterval(function () {
+		var intervalId = setInterval(function () {
 			var acivityIndex = $(this).attr('data-activity-index');
 			var timerId = $(this).attr('data-timeid');
 			var activityStartTime = new Date($(this).attr('data-starttimedate'));
@@ -93,13 +111,13 @@ function getHomePageActivityCounter(activityID){
 					$(this).find('.joinLBtn' + timerId).hide().removeClass('d-inline-block');
 					$('#displayJoinLinkDiv' + timerId).show();
 					if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
-						$('#joinButton' + timerId).show().removeClass('join-activity-disabled');
+						$('#joinButton' + timerId).show().removeClass('join-activity-disabled hide-acitvity-btn');
 						if(USER_ROLE =="STUDENT"){
 							$("#join-btn-message-"+timerId).hide();
 						}
 					} else {
 						if(USER_ROLE=='STUDENT'){
-							$('#joinButton' + timerId).addClass('join-activity-disabled');
+							$('#joinButton' + timerId).addClass('join-activity-disabled hide-acitvity-btn');
 						}
 					}
 				} else {
@@ -108,7 +126,7 @@ function getHomePageActivityCounter(activityID){
 					$(this).find('.ongoing-div').show();
 					$(this).find('.activity-btn').hide();
 					if((activityStartTime.getTime() - currentDateTimeByUserTimeZone.getTime()) <= joiningBefore * 60000) {
-						$('#joinButton' + timerId).show().removeClass('join-activity-disabled');
+						$('#joinButton' + timerId).show().removeClass('join-activity-disabled hide-acitvity-btn');
 						if(USER_ROLE =="STUDENT"){
 							$("#join-btn-message-"+timerId).hide();
 						}
@@ -116,7 +134,7 @@ function getHomePageActivityCounter(activityID){
 						$(this).find('.joinLBtn' + timerId).show().addClass('d-inline-block');
 					} else {
 						if(USER_ROLE=='STUDENT'){
-							$('#joinButton' + timerId).addClass('join-activity-disabled');
+							$('#joinButton' + timerId).addClass('join-activity-disabled hide-acitvity-btn');
 						}
 						$('#displayJoinLinkInfoDiv'+timerId).show();
 					}
@@ -124,7 +142,7 @@ function getHomePageActivityCounter(activityID){
 					// Activity Remove if acvity end time is over 
 					if(currentDateTimeByUserTimeZone > activityEndTime){
 						if(USER_ROLE=='STUDENT'){
-							$('#joinButton' + timerId).addClass('join-activity-disabled');
+							$('#joinButton' + timerId).addClass('join-activity-disabled hide-acitvity-btn');
 						}
 						if($("#activity-li-"+acivityIndex+" > ul.mm-collapse > li > ul.mm-collapse").length>0){
 							$(this).parent().closest("li").remove();
@@ -144,18 +162,21 @@ function getHomePageActivityCounter(activityID){
 				}
 				makeTimer(timerId, activityStartTime, currentDateTimeByUserTimeZone);
 			}else{
-				$('#joinButton' + timerId).addClass('join-activity-disabled');
+				$('#joinButton' + timerId).addClass('join-activity-disabled hide-acitvity-btn');
+				$('#joinButton' + timerId).remove();
+				$("#join-btn-message-"+timerId).remove();
+				$("#displayJoinLinkInfoDiv"+timerId).remove();
 				// $(this).remove();
 				// $("#displayJoinLinkInfoDiv"+timerId).hide();
 			}
-			
-			
+
+
 		}.bind(this), 1000);
+		ACTIVITY_TIMER_INTERVALS.push(intervalId);
 	});
 }
 //EXTRA ACTIVITY COUNTER SCRIPT END HERE//
-
-async function renderViewActitifyDetails(activityId, meetingId) {
+async function renderViewActitifyDetails(activityId, meetingId, getColorCode, occurrenceDate) {
 	var userCurrentTime = new Date($("#currentTimeForUser").text());
 	var userActivityEndTime = new Date($("#activity-end-time-"+activityId).attr('data-endtimedate'));
 	if(userActivityEndTime < userCurrentTime){
@@ -165,6 +186,7 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 	try {
 		if (typeof isDummyStudentMode === "function" && isDummyStudentMode() && typeof getDummyViewActivityResponse === "function") {
 			responseData = getDummyViewActivityResponse(activityId);
+			responseData.occurrenceDate = occurrenceDate;
 			$("#calendarActivityWrapper").html(viewActivityContentModal(responseData))
 			$("#calendarActivityModal").modal("show");
 			await studentExtraActivityOnLoadEvent(responseData);
@@ -178,9 +200,13 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 		payload['activityId'] = activityId;
 		payload['meetingId'] = meetingId;
 		payload['userId'] = USER_ID;
+		if (occurrenceDate) {
+			payload['occurrenceDate'] = occurrenceDate;
+		}
 		responseData = await getDashboardDataBasedUrlAndPayload(true, true, 'view-extra-activity', payload);
 		console.log("acivity modal", responseData)
 		if (responseData.status == 1) {
+			responseData.occurrenceDate = occurrenceDate;
 			$("#calendarActivityWrapper").html(viewActivityContentModal(responseData))
 			// $('#dashboardContentInHTML').html(viewActivityContent(responseData));
 			$("#calendarActivityModal").modal("show");
@@ -190,6 +216,7 @@ async function renderViewActitifyDetails(activityId, meetingId) {
 			$(".tooltip.calendar-tooltip").remove();
 			getHomePageActivityCounter();
 			console.log('getHomePageActivityCounter code for testing');
+			$("#calendarActivityModal .modal-event-border").css({"background":getColorCode});
 		}
 	} catch (e) {
 		showMessageTheme2(0, e, '', true);
@@ -228,12 +255,16 @@ function viewActivityAttachmentSource(uploadFile, filePath){
 	var html=``;
 	if(uploadFile!='' && uploadFile !='No file chosen...'){
 		if(uploadFile.endsWith('.pdf')?'pdf-view':''){
-			$("#viewActivityAttachmentModal .modal-dialog").addClass("modal-xl").removeClass("modal-lg");
+			// $("#viewActivityAttachmentModal .modal-dialog").addClass("modal-xl").removeClass("modal-lg");
 			html+=`<iframe src="${getPdfViewerUrl(filePath)}" type="application/pdf" width="100%" height="500" style="overflow:auto;"></iframe>`;
 		}else{
-			$("#viewActivityAttachmentModal .modal-dialog").addClass("modal-lg").removeClass("modal-xl");
+			// $("#viewActivityAttachmentModal .modal-dialog").addClass("modal-lg").removeClass("modal-xl");
 			html+=`<img src="${filePath}" style="width:100%;" class="activity-upload-img"/>`;
 		}
+		html+=
+		`<div class="full text-right mt-3">
+			<button type="button" class="btn btn-pill btn-light px-3" data-dismiss="modal">Close</button>
+		</div>`;
 	}
 	$("#viewActivityAttachmentModal #viewActivityAttachmentModalWrapper").html(html);
 	$("#viewActivityAttachmentModal").modal("show");

@@ -292,7 +292,15 @@ function dashboardContent(data) {
             </div>
         </div>
     </div>
-    ${dashboardSchoolCalendar(data)}`;
+    <div class="modal fade" id="fa-more-popover" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable mx-auto" style="max-width:420px">
+            <div class="modal-content rounded-15 overflow-hidden">
+                <div class="bg-primary py-1"></div>
+                <div class="modal-body"></div>
+            </div>
+        </div>
+    </div>
+    ${typeof dashboardSchoolCalendarNew === "function" ? dashboardSchoolCalendarNew(data) : dashboardSchoolCalendar(data)}`;
     if (USER_ROLE === "STUDENT") {
         html += calendarMeetingLinkValidate();
     }
@@ -431,7 +439,7 @@ function holidayOne(){
 				+'<div class="modal-header py-2 bg-primary text-white">'
 					+'<h5 class="modal-title" id="calendarbox_title"></h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
-						+'<span aria-hidden="true">X</span>'
+						+'<span aria-hidden="true">&times;</span>'
 					+'</button>'
 				+'</div>'
 				+'<div class="modal-body">'
@@ -859,13 +867,9 @@ function calendarActivityModal(data){
 	var html=
 	`<div class="modal fade" id="calendarActivityModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog modal-md modal-dialog-centered shadow-none" role="document" style="max-width: 450px;">
-			<div class="modal-content">
-				<div class="modal-body">
-                    <button type="button" class="close text-white bg-primary position-absolute circle" style="width:30px;height:30px;right:10px;top:5px;opacity:1;z-index:1" data-dismiss="modal" aria-label="Close">
-					    <span aria-hidden="true" style="line-height:24px;font-size:24px">&times;</span>
-				    </button>
-                    <div class="full" id="calendarActivityWrapper"></div>
-				</div>
+			<div class="modal-content rounded-15 overflow-hidden">
+				<div class="py-1 modal-event-border"></div>
+                <div id="calendarActivityWrapper" class="modal-body py-4"></div>
 			</div>
 		</div>
 	</div>`;
@@ -875,12 +879,10 @@ function calendarActivityModal(data){
 function viewActivityAttachmentModal(){
 	var html=
 	`<div class="modal fade" id="viewActivityAttachmentModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-		<div class="modal-dialog modal-xl modal-dialog-centered shadow-none" role="document">
+		<div class="modal-dialog modal-lg modal-dialog-centered shadow-none" role="document">
 			<div class="modal-content">
+                <div class="py-1 modal-event-border"></div>
 				<div class="modal-body">
-                    <button type="button" class="close text-white bg-primary position-absolute circle" style="width:30px;height:30px;right:10px;top:5px;opacity:1;z-index:1" data-dismiss="modal" aria-label="Close">
-					    <span aria-hidden="true" style="line-height:24px;font-size:24px">&times;</span>
-				    </button>
                     <div class="full" id="viewActivityAttachmentModalWrapper"></div>
 				</div>
 			</div>
