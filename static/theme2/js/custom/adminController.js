@@ -45,6 +45,7 @@ const contentHandlers = {
     'assign-orientation': () => renderStudentOrientationAssignDashboard('Assign Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-orientation-list': () => renderStudentOrientationListDashboard('System training Students List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-lms-user': () => initManageLmsUser(),
+    'lms-sync': () => renderLmsSyncDashboard('SIS/LMS Sync', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-session': () => initManageSession(),
     'extra-session-details': () => initExtraSessionDetails(),
     'student-teacher-sessions': () => initStudentTeacherSessions(),

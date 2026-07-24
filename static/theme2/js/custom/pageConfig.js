@@ -28,6 +28,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "student-orientation-list":{url:"",file:[{role:"",fileName:["studentOrientationContent.js","studentOrientation.js", "commonRecordingsContent.js", "commonRecordings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "academic-year-date-settings":{url:"academic-year-date-settings?moduleId="+moduleId,file:[],type:"JSP",pageReqType:"IN"},
         "manage-lms-user":{url:"",file:[{role:"",fileName:["manageLMSContent.js","manageLMS.js","agilixbuzzApi.js","adminManageuserList.js"]}, {role:"",fileName:["dashboardStudent.js","dashboardStudentTeacherSession.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        // JS-rendered SIS/LMS Sync module (SyncLmsContent.js) — replaces the old
+        // standalone LMSSync.jsp opened via getAsPost. Reuses agilixbuzzApi.js helpers.
+        "lms-sync":{url:"",file:[{role:"",fileName:["SyncLmsContent.js","agilixbuzzApi.js","masterContent.js","copyCourseFilter.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "manage-session":{url:"",file:[{role:"",fileName:["manageSessionContent.js","manageSession.js","agilixbuzzApi.js"]}, {role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "school-settings":{url:"",file:[{role:"",fileName:["SchoolSettingContent.js","SchoolSetting.js","standardFeeContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "extra-session-details":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
