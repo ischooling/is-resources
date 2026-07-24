@@ -768,7 +768,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                                 <div class="legend-strip">
                                     <div class="mx-auto d-inline-flex align-items-center gap-10 flex-wrap">
                                         <span>Legend:</span>
-                                        <div class="leg-item"><div class="leg-box"></div>Assignment</div>
+                                        ${USER_ROLE != "TEACHER" ? `<div class="leg-item"><div class="leg-box"></div>Assignment</div>`:``}
                                         <div class="leg-item"><div class="leg-box btn-dashed"></div>Live Class</div>
                                         <div class="leg-item" style="color:#0d2a64;"><div class="leg-box school-event"></div>School Activity</div>
                                         <div class="leg-item" style="color:#1b5e20;"><div class="leg-box holiday"></div>Holiday</div>
