@@ -1460,7 +1460,6 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                             }
                         html+=`</div>`;
                     }
-                    debugger
                     html+=`<div class="dashboard-today-title font-weight-semi-bold" style="color:${colorCode};">
                         <span class="dashboard-today-dot d-inline-block" style="background:${colorCode};"></span>    
                         ${event.eventKind != "activity" ? statusBadge:""}${escapeHtml(event.title)}
@@ -1470,6 +1469,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                             /*${USER_ROLE == "STUDENT" ? getEventSubtitle(event):event.eventTitle+' '+`<b class="${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${getEventSubtitle(event)}</b>`}${getStatusLabel(status) == "PAST" && (event.eventKind != "assignment" && event.eventKind != "activity") ?`&nbsp;<label class="m-0 font-weight-semi-bold" style="color:${getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId)}">${joinStatusLabel}</label>`:""} */''
                         }
                         ${USER_ROLE == "STUDENT" ? getEventSubtitle(event):`<b class="${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${getEventSubtitle(event)}</b>`}${getStatusLabel(status) == "PAST" && (event.eventKind != "assignment" && event.eventKind != "activity") ?`&nbsp;<label class="m-0 font-weight-semi-bold" style="color:${getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId)}">${joinStatusLabel}</label>`:""}
+                        ${(event.category !="BATCH" && event.category == "CLASS" && event.eventType != "CUSTOM" && event.eventType != "PTM") ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "TEACHER" ? `Student Name: ${event.origName}`:`Teacher Name: ${event.salutation}&nbsp;${event.origName}`} </span>`:``}
                     </div>
                 </div>
             </div>`;
@@ -2489,7 +2489,6 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
     // Past-class details modal (see screenshot): Course / Date / Time / Teacher / Status
     // plus a "Rate this class" button. Reuses the shared #calendarActivityModal shell.
     function openPastClassModal(event) {
-        debugger
         var colorCode = getEventTextColor(event.eventKind, event.courseId);
         var course = studentCalendarState.courses[event.courseId];
         var courseName = (course && course.label) ? course.label

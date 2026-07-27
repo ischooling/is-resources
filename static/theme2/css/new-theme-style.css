@@ -33275,6 +33275,8 @@ input:checked + .small-switch-slider:before {
 @media(max-width:768px){
 	
 	#date-wrapper .datepicker{width:70%;    left: 50% !important;transform: translateX(-50%);}
+	.right_fixed_action{right: -12px;z-index: 2;}
+	.custom-btn-open-options{width:30px;height: 30px;}
 	
 }
 @media(max-width:480px){
