@@ -493,7 +493,7 @@ function phoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('phoneNumber', 'phoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('phoneNumber',\'${data.phoneNumber != "" && data.phoneNumber != undefined? data.phoneNumber:""}\','inputPhone','phoneNumber','phoneNumberWhatsAppStatus', '', 0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('phoneNumber',\'${data.phoneNumber != "" && data.phoneNumber != undefined? data.phoneNumber:""}\','inputPhone','phoneNumber','phoneNumberWhatsAppStatus', 0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-times"></i>
             </a>
     </div>
@@ -2144,7 +2144,7 @@ function learningProgramElement(data) {
             <select name="learningProgram" id="learningProgram" class="form-control form-control-sm" disabled>
                 ${getLearningProgramContent(SCHOOL_ID)}
             </select>
-            <label for="learningProgram" style="position:absolute;left:16px;top:-9px;transform:none;font-size:12px;font-weight:500;line-height:16px;z-index:999;background:var(--custom-field-bg);padding:0 8px;color:var(--custom-field-active);">Learning Program</label>
+            <label for="learningProgram" style="position:absolute;left:16px;top:-9px;transform:none;font-size:12px;font-weight:500;line-height:16px;z-index:999;background:#fff;padding:0 8px;color:var(--custom-field-active);">Learning Program</label>
         </div>
     </div>`;
     return html;
@@ -2155,7 +2155,7 @@ function gradeElement(data) {
         `<div class="custom-field-scope">
         <div class="form-group custom-field mb-2 mt-4 p-0">
             <select name="grade" id="grade" class="form-control form-control-sm" disabled></select>
-            <label for="grade" style="position:absolute;left:16px;top:-9px;transform:none;font-size:12px;font-weight:500;line-height:16px;z-index:999;background:var(--custom-field-bg);padding:0 8px;color:var(--custom-field-active);">Grade</label>
+            <label for="grade" style="position:absolute;left:16px;top:-9px;transform:none;font-size:12px;font-weight:500;line-height:16px;z-index:999;background:#fff;padding:0 8px;color:var(--custom-field-active);">Grade</label>
         </div>
     </div>`;
     return html;
@@ -2190,7 +2190,7 @@ function studentCourseProviderIdElement(data) {
             <select name="studentCourseProviderId" id="studentCourseProviderId" class="form-control form-control-sm" disabled>
                 ${getLmsPlatformContent(SCHOOL_ID)}
             </select>
-            <label for="studentCourseProviderId" style="position:absolute;left:16px;top:-9px;transform:none;font-size:12px;font-weight:500;line-height:16px;z-index:999;background:var(--custom-field-bg);padding:0 8px;color:var(--custom-field-active);">LMS Platform</label>
+            <label for="studentCourseProviderId" style="position:absolute;left:16px;top:-9px;transform:none;font-size:12px;font-weight:500;line-height:16px;z-index:999;background:#fff;padding:0 8px;color:var(--custom-field-active);">LMS Platform</label>
         </div>
     </div>`;
     return html;
@@ -2361,7 +2361,7 @@ function ageProofElement(data) {
             <div class="w-100" id="ageProofViewBtn" style="${data.ageProof != "" && data.ageProof != undefined ? '' : 'display:none'}">
                 <div class="d-flex w-100 align-items-center">
                     <div class="d-inline-flex align-items-center border btn-dashed border-primary px-2 py-1 rounded flex-grow-1 mr-1 overflow-hidden">
-                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="min-width:20px;height:20px;">
+                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="width:20px;height:20px;">
                             <i class="fa fa-file font-10 text-primary"></i>    
                         </span>
                         <span class="bar_count" id="ageProofFileName">${data.ageProof != "" && data.ageProof != undefined ? data.ageProofName : ''}</span>    
@@ -2395,7 +2395,7 @@ function addressProofElement(data) {
             <div class="w-100" id="addressProofViewBtn" style="${data.addressProof != "" && data.addressProof != undefined ? '' : 'display:none'}">
                 <div class="d-flex w-100 align-items-center">
                     <div class="d-inline-flex align-items-center border btn-dashed border-primary px-2 py-1 rounded flex-grow-1 mr-1 overflow-hidden">
-                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="min-width:20px;height:20px;">
+                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="width:20px;height:20px;">
                             <i class="fa fa-file font-10 text-primary"></i>    
                         </span>
                         <span class="bar_count" id="addressProofFileName">${data.addressProof != "" && data.addressProof != undefined ? data.addressProofName : ''}</span>    
@@ -2430,7 +2430,7 @@ function parentPassportProofElement(data) {
             <div class="w-100" id="parentPassportProofViewBtn" style="${data.parentPassportProof != "" && data.parentPassportProof != undefined ? '' : 'display:none'}">
                 <div class="d-flex w-100 align-items-center">
                     <div class="d-inline-flex align-items-center border btn-dashed border-primary px-2 py-1 rounded flex-grow-1 mr-1 overflow-hidden">
-                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="min-width:20px;height:20px;">
+                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="width:20px;height:20px;">
                             <i class="fa fa-file font-10 text-primary"></i>    
                         </span>
                         <span class="bar_count" id="parentPassportProofFileName">${data.parentPassportProof != "" && data.parentPassportProof != undefined ? data.parentPassportProofName : ''}</span>    
@@ -2467,7 +2467,7 @@ function lastAcademicProofElement(data) {
             <div class="w-100" id="lastAcademicProofViewBtn" style="${data.lastAcademicProof != "" && data.lastAcademicProof != undefined ? '' : 'display:none'}">
                 <div class="d-flex w-100 align-items-center">
                     <div class="d-inline-flex align-items-center border btn-dashed border-primary px-2 py-1 rounded flex-grow-1 mr-1 overflow-hidden">
-                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="min-width:20px;height:20px;">
+                        <span class="bg-light-primary rounded-circle text-center mr-2 d-inline-flex align-items-center justify-content-center" style="width:20px;height:20px;">
                             <i class="fa fa-file font-10 text-primary"></i>    
                         </span>
                         <span class="bar_count" id="lastAcademicProofFileName">${data.lastAcademicProof != "" && data.lastAcademicProof != undefined ? data.lastAcademicProofName : ''}</span>    
@@ -3452,7 +3452,7 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
 					<div class="d-flex w-100 align-items-center">
 
 						<div class="d-inline-flex align-items-center border btn-dashed border-primary px-2 py-1 rounded flex-grow-1 mr-1 overflow-hidden">
-							<span class="bg-light-primary rounded-circle mr-2 d-inline-flex align-items-center justify-content-center" style="min-width:20px;height:20px;">
+							<span class="bg-light-primary rounded-circle mr-2 d-inline-flex align-items-center justify-content-center" style="width:20px;height:20px;">
 								<i class="fa fa-file text-primary"></i>    
 							</span>
 

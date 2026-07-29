@@ -890,7 +890,8 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 											html+='<br/>'
 											+'<input class="tinyUrl" style="display: none;" type="text" id="copyURL'+key+'" value="'+item.copyLinkUrl+'">'
 											+'<b class="copy-msg-'+key+'"></b>'
-											+'<button id="copyURL'+key+'" onclick="copyURL(\'copyURL'+key+'\',\'copy-msg-'+key+'\')" class="btn btn-primary btn-sm mt-2">User joining link</button>';
+											+'<button id="copyURL'+key+'" onclick="copyURL(\'copyURL'+key+'\',\'copy-msg-'+key+'\')" class="btn btn-primary btn-sm mt-2">Copy joining link</button>'
+											+'<button id="copyURLInviteBtn'+key+'" onclick="copyScheduleEventInvitation(\''+(item.meetingFor||'').replace(/'/g,"\\'")+'\',\''+(item.inviteeMeetingDate||'').replace(/'/g,"\\'")+'\',\''+(item.inviteeStartTime||'').replace(/'/g,"\\'")+'\',\''+(item.inviteeEndTime||'').replace(/'/g,"\\'")+'\',\''+(item.inviteeTimezone||'').replace(/'/g,"\\'")+'\', document.getElementById(\'copyURL'+key+'\').value)" class="btn btn-primary btn-sm mt-2">Copy Invitation</button>';
 										}
 										
 										if((item.meetingFor == "Initial-Interview" || item.meetingFor == "Interview") && (item.meetingStatus != 'Cancelled' && item.meetingStatus != 'Reschedule')){

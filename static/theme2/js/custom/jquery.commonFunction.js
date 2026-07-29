@@ -281,7 +281,9 @@ position:relative;
    widens this for that variant. */
 .custom-field-scope .custom-field .iti input{
     height:44px;
+    padding-left:52px !important;
     padding-top:6px;
+    padding-bottom:0;
     border-radius:6px !important;
 }
 
@@ -292,7 +294,7 @@ position:relative;
 }
 
 .custom-field-scope .custom-field .iti .iti__selected-flag{
-    height:43px;
+    height:44px;
     align-items:center;
     padding:0 8px 0 10px;
 }
@@ -687,7 +689,7 @@ body > .select2-container--open .select2-dropdown,
    syncHoldPhoneInputPadding may override per-instance, but a CSS baseline
    keeps the layout correct even before/without that JS running. */
 .custom-field-scope .custom-field .iti--separate-dial-code > input{
-    padding-left:90px ;
+    padding-left:90px !important;
 }
 .custom-field-scope .custom-field:has(.iti--separate-dial-code input:focus) .iti__selected-flag,
 .custom-field-scope .custom-field.has-value:has(.iti--separate-dial-code) .iti__selected-flag,
@@ -8490,4 +8492,95 @@ function isEmailSearchFilterAllowed() {
     window.__EMAIL_SEARCH_FILTER_ALLOWED = false;
   }
   return window.__EMAIL_SEARCH_FILTER_ALLOWED;
+}
+
+function copyInvitationText(invitationText) {
+  if (!invitationText) {
+    showMessageTheme2(0, "Invalid content");
+    return;
+  }
+  copyTextToClipboard(invitationText).then(function(){
+    showMessageTheme2(1, "Invitation copied successfully!");
+  }).catch(function(){
+    showMessageTheme2(0, "Unable to copy invitation");
+  });
+}
+
+function copyMeetingInvitation(entityId, title, hostExtra) {
+  let joinUrl = joinLensUrl(""+entityId);
+  if (!joinUrl) {
+    showMessageTheme2(0, "Url Invalid");
+    return;
+  }
+  let invitationText = "You are invited to attend the "+title+" Meeting.\n\n"
+    +"Topic: "+title+"\n"
+    +"Host: "+hostExtra+"\n\n"
+    +"Join Meeting: "+joinUrl+"\n\n"
+    +"We look forward to your participation.";
+  copyInvitationText(invitationText);
+}
+
+function copyTextToClipboard(text) {
+  if (!text) {
+    return Promise.reject(new Error("Text Invalid"));
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+
+  return new Promise(function(resolve, reject) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.top = "-9999px";
+    textArea.style.left = "-9999px";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length);
+
+    try {
+      var copied = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (copied) {
+        resolve();
+        return;
+      }
+      reject(new Error("Copy command failed"));
+    } catch (error) {
+      document.body.removeChild(textArea);
+      reject(error);
+    }
+  });
+}
+
+function copyClassInvitation(subjectName, teacherName, joinUrl) {
+  if (!joinUrl) {
+    showMessageTheme2(0, "Url Invalid");
+    return;
+  }
+  var invitationText = "You are invited to attend the "+subjectName+" Class Meeting.\n\n"
+    +"Topic: "+subjectName+" Class\n"
+    +"Host: "+teacherName+"\n\n"
+    +"Join Meeting: "+joinUrl+"\n\n"
+    +"We look forward to your participation.";
+  copyInvitationText(invitationText);
+}
+
+function copyScheduleEventInvitation(meetingFor, inviteeMeetingDate, inviteeStartTime, inviteeEndTime, inviteeTimezone, joinUrl) {
+  if (!joinUrl) {
+    showMessageTheme2(0, "Url Invalid");
+    return;
+  }
+  var invitationText = "You are invited to attend the "+meetingFor+" Meeting.\n\n"
+    +"Topic: "+meetingFor+"\n"
+    +"Date: "+inviteeMeetingDate+"\n"
+    +"Time: "+inviteeStartTime+"\n"
+    +"Time zone: "+inviteeTimezone+"\n\n"
+    +"Join Meeting: "+joinUrl+"\n\n"
+    +"We look forward to your participation.";
+  copyInvitationText(invitationText);
 }

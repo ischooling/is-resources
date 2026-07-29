@@ -53,6 +53,15 @@ function tmrTier(avg, firstName) {
     };
 }
 
+// Neutral band for when no feedback has been submitted yet — a 0 score/rating here means
+// "no data", not poor performance, so we avoid the red tier and its misleading message.
+function tmrNeutralTier(firstName) {
+    return {
+        bg: 'linear-gradient(135deg,#f1f3f4,#e8eaed)', border: '#dadce0', accent: '#5f6368',
+        icon: 'fa-comments-o', message: 'No feedback yet, ' + firstName + '. Your ratings will appear here once responses come in.'
+    };
+}
+
 function renderTeacherMyRating(d) {
     var profile   = d.profile || {};
     var fullName  = profile.userFullName || ((typeof USER_FULL_NAME !== 'undefined' && USER_FULL_NAME) ? USER_FULL_NAME : '');
@@ -83,7 +92,9 @@ function renderTeacherMyRating(d) {
     // ── Rating banner ──
     // Message + colors are decided here by rating range, not by the API's eligibilityTitle.
     var avg = d.averageRating != null ? d.averageRating : 0;
-    var t = tmrTier(avg, firstName);
+    // no responses at all → neutral band instead of the red "needs improvement" tier
+    var hasResponses = (d.responses || 0) > 0 || avg > 0;
+    var t = hasResponses ? tmrTier(avg, firstName) : tmrNeutralTier(firstName);
     var message = t.message;
 
     // star distribution rows, 5★ → 1★

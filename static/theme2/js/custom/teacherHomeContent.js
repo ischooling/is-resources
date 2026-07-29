@@ -451,7 +451,7 @@ function teacherAgreementView(data){
 
 function dashboardSchoolCalendar(data) {
     var html = `
-    <div class="main-card mb-3 mr-4">
+    <div class="main-card mb-3 pr-4">
         <div class="full">
             <div class="card-body pt-0 px-0">
                 <!-- <div class="full home-page-skeleton-wrapper"> -->

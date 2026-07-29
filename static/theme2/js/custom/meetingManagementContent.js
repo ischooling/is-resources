@@ -468,6 +468,10 @@ function savedMeetingLinkHtml() {
                     <button id="startLensUrlBtn" class="btn btn-primary ">Start</button>
                     <button id="copyJoinUrlBtn" class="btn btn-success ">
                       <i class="fa fa-clone mr-2"></i>
+                      Copy Url
+                    </button>
+                    <button id="copyInvitationBtn" class="btn btn-success ">
+                      <i class="fa fa-clone mr-2"></i>
                       Copy Invitation
                     </button>
                     <button id="deleteMeetingBtn" class="btn btn-danger ">Delete</button>

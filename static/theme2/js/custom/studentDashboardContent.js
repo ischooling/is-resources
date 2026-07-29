@@ -352,7 +352,7 @@ function dashboardAnnouncement(data) {
 
 function dashboardSchoolCalendar(data) {
     var html=`
-    <div class="main-card mb-3 mr-4">
+    <div class="main-card mb-3 pr-4">
         <div class="full">
             <div class="card-body px-0 pb-0 pt-0">
                 <div class="row">

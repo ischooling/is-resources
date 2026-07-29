@@ -164,10 +164,13 @@ function buildBatchTimeHtml(dates, bt, ctx, isDay, dIdx, bIdx) {
 					if (bt.externalUserLink && bt.classStatus !== 'cancel') {
 						var cid = 'copyURL' + dIdx + bIdx;
 						var msgc = 'copy-msg-' + dIdx + bIdx;
+						var inviteId = 'copyInvitationBtn' + dIdx + bIdx;
+						var subjectBaseName = (bt.subjectName || '').split('(')[0].trim().replace(/\s+v\d+$/i, '');
 						html += '<br/><input class="tinyUrl" style="display: none;" type="text" id="' + cid + '" value="' + bcEsc(bt.externalUserLink) + '">' +
 							'<div style="display: flex;flex-direction: column;">' +
 							'<b class="' + msgc + '"></b>' +
-							'<button id="' + cid + '" onclick="copyURL(\'' + cid + '\',\'' + msgc + '\')" class="send-btn-url">Copy External Link</button>' +
+							'<button id="' + cid + '" onclick="copyURL(\'' + cid + '\',\'' + msgc + '\')" class="send-btn-url">Copy Link</button>' +
+							'<button id="' + inviteId + '" onclick="copyClassInvitation(\'' + bcJsArg(subjectBaseName) + '\',\'' + bcJsArg(bt.teacherName) + '\', document.getElementById(\'' + cid + '\').value)" class="send-btn-url">Copy Invitation</button>' +
 							'</div>';
 					}
 				} else {

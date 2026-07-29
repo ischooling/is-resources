@@ -44,7 +44,7 @@ function getSchoolDashboardContent(title, userCountList){
 			<div class="page-title-actions"></div>
 		</div>
 	</div>
-	<div class="main-card mb-3 mr-4">`
+	<div class="main-card mb-3 pr-4">`
 		+getUserCountHtml(userCountList)+getCurrentUserCountHTML()+getSchoolDashboardContent2()+getAnnouncementAndNewsContent();
 	html+=`</div>`;
 	return html;

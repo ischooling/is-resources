@@ -1619,6 +1619,8 @@ function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, 
     }
   }
   $("#copyJoinUrlBtn").attr("onclick", `copyJoinUrl(${meetingId})`);
+  var hostExtra = (hostDetails.extra || "").replace(/'/g, "\\'");
+  $("#copyInvitationBtn").attr("onclick", `copyMeetingInvitation(${meetingId}, '${meetingTitle}', '${hostExtra}')`);
   $("#savedMeetingLinkHtml").show();
   $("#filterFormAndList, #meetingFormDiv").hide();
   backToList('#backFromSaved');
@@ -1869,6 +1871,24 @@ function copyJoinUrl(entityId) {
       showMessageTheme2(1, "URL copied successfully!");
   }).catch(function(){
     showMessageTheme2(0, "Unable to copy URL");
+  });
+}
+
+function copyMeetingInvitation(entityId, title, hostExtra) {
+  let joinUrl = joinLensUrl(""+entityId);
+  if (!joinUrl) {
+    showMessageTheme2(0, "Url Invalid");
+    return;
+  }
+  let invitationText = "You are invited to attend the "+title+" Meeting.\n\n"
+    +"Topic: "+title+"\n"
+    +"Host: "+hostExtra+"\n\n"
+    +"Join Meeting: "+joinUrl+"\n\n"
+    +"We look forward to your participation.";
+  copyTextToClipboard(invitationText).then(function(){
+    showMessageTheme2(1, "Invitation copied successfully!");
+  }).catch(function(){
+    showMessageTheme2(0, "Unable to copy invitation");
   });
 }
 

@@ -315,15 +315,11 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
     }
 
     function getEventTextColor(eventType, courseId) {
-        // Night mode: the two hard-coded dark category colours (holiday green,
-        // activity navy) are unreadable on a dark event chip, so return lighter
-        // equivalents. Day mode is unchanged. Colours only — no behaviour change.
-        var dnDark = document.documentElement.getAttribute("data-theme") === "dark";
         if (eventType === "holiday") {
-            return dnDark ? "#4ac26b" : "#1b5e20";
+            return "#1b5e20";
         }
         if (eventType === "activity") {
-            return dnDark ? "#5b8def" : "#0d2a64";
+            return "#0d2a64";
         }
         return getCourseColor(courseId);
     }
@@ -734,7 +730,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var timezone = data && data.userTimezone ? data.userTimezone : getStudentTimezone();
         var countryISOCode = data && data.countryISOCode ? data.countryISOCode : "";
         return `
-            <div class="main-card mb-3 mr-4">
+            <div class="main-card mb-3 pr-4">
                 <div class="full">
                     <div class="card rounded-15 dashboard-calendar-new-card">
                         <div class="card-body p-0">
@@ -847,7 +843,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .clock-pill .clock-tod:empty { display: none; }
                 .clock-pill .clock-tod-icon { display: inline-flex; align-items: center; font-size: 15px; line-height: 1; }
                 .clock-pill .clock-tod-label { white-space: nowrap; }
-                .tod-morning { color: #ecaf02; }
+                .tod-morning { background: #fff8e5; color: #ecaf02; }
                 .tod-evening { background: #ffe8dc; color: #e94e00; }
                 .tod-night   { background: #e3e8fb; color: #1b3ba8; }
                 .clock-pill .clock-tod.tod-pop { animation: clockTodPop 0.3s ease; }
@@ -914,14 +910,9 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .dashboard-today-title { font-size: 14px; line-height: 1.25; }
                 .dashboard-today-subtitle { font-size: 12px; margin-top: 4px; line-height: 1.35; }
                 .dashboard-today-badge { display: inline-block; vertical-align: 1px; line-height: 12px;font-size: 9px;padding: 2px 8px;border-radius: 4px;margin-right: 6px;text-transform: uppercase;color:#fff}
-
-                .dashboard-today-badge.status-live { background: #e53935; }
-                .dashboard-today-badge.status-upcoming { background: #1a73e8; }
-                .dashboard-today-badge.status-submitted { background: #1b5e20; }
-                .dashboard-today-badge.status-pending { background: #f4b400; color: #343a40; }
-                .dashboard-today-badge.status-expired { background: #5f6368; }
+               
+                .dashboard-today-badge.status-upcoming { background: #6f6f00; }
                 .dashboard-today-badge.status-completed { background: #5f6368; }
-                .dashboard-week-live-badge { flex-shrink: 0; background: #e53935; color: #fff; font-size: 8px; border-radius: 3px; padding: 0 3px; font-weight: 700; margin-right: 3px; }
                 .dashboard-today-empty { padding: 42px; text-align: center; color: #9aa0a6; font-size: 14px; }
                 .fc-event.dashboard-calendar-active.is-timed-event, .today-summary-item.dashboard-calendar-active.is-timed-event, .dashboard-today-event.dashboard-calendar-active.is-timed-event { animation: dashboardCalendarPulse 1.4s ease-in-out infinite; border-style: dashed !important; border-width: 2px !important; }
                 /* Any LIVE event (class OR activity) blinks — dashboard-calendar-active is only ever set on a live timed event. Activities keep their own border style; only the pulse is shared. */
@@ -1013,7 +1004,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         badgeEl.setAttribute("data-period", tod.period);
         badgeEl.setAttribute("title", tod.label);
         badgeEl.setAttribute("aria-label", tod.label);
-        $("#dashboardCalendarClockIcon").html(`<img src="${tod.glyph}" width="27px"/>`);
+        $("#dashboardCalendarClockIcon").html(`<img src="${tod.glyph}" width="35px"/>`);
         labelEl.textContent = tod.label;
         badgeEl.classList.remove("tod-morning", "tod-evening", "tod-night", "tod-pop");
         badgeEl.classList.add("tod-" + tod.period);
@@ -1322,7 +1313,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                         + "overflow:hidden;display:flex;align-items:center;z-index:3;box-sizing:border-box;"
                         + "background:#fff;border:2px " + (isDashed ? "dashed" : "solid") + " " + textColor + ";color:" + textColor + ";"
                         + (isLive ? "animation:dashboardCalendarPulse 1.4s ease-in-out infinite;" : "");
-                    var badge = isLive ? '<span class="dashboard-week-live-badge">LIVE</span>' : "";
+                    var badge = isLive ? '<span style="flex-shrink:0;background:#e53935;color:#fff;font-size:8px;border-radius:3px;padding:0 3px;font-weight:700;margin-right:3px;">LIVE</span>' : "";
                     html += '<div class="'+activeClass+'" style="' + sty + '" data-today-event-id="' + ev.id + '">'
                         + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (status == 'live' ? statusBadge:'') +''+ (ev.category == "ASSIGNMENTS" ? escapeHtml(ev.title):escapeHtml(ev.eventTitle)) + '</span>'
                         + '</div>';
@@ -1458,7 +1449,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                         html+=
                         `<div class="full font-weight-semi-bold">`;
                         if(event.eventKind == "assignment"){
-                                html+=`<span class="dashboard-today-badge status-${aStatus.status}">${escapeHtml(aStatus.label)}</span>`;
+                                html+=`<p class="font-weight-semi-bold d-inline-flex mb-0 ${aStatus.status == "pending" ?"text-dark":"text-white"}" style="line-height:12px; background:${statusColor};font-size:9px;padding:2px 8px;border-radius:4px;margin-right:5px;text-transform:uppercase">${escapeHtml(aStatus.label)}</p>`;
                                 if (aStatus.timingLabel) {
                                     if(aStatus.timingLabel.startsWith('Early')){
                                         // html+=` <span class="font-weight-bold" style="color:${statusColor}">Very Well Done!</span>`
@@ -1781,11 +1772,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 displayColor = getDisplayStatusColor(classDisplayStatus, event.eventKind, event.courseId);
             }
         }
-        // Chip fill: white in day mode, a dark elevated surface in night mode.
-        // (Set inline with !important because FullCalendar's own inline styles
-        // would otherwise win — this is the only place CSS can't reach.)
-        var dnChipBg = document.documentElement.getAttribute("data-theme") === "dark" ? "#202226" : "#fff";
-        element.attr("style",`border:2px ${borderStyle+' '+displayColor} !important;background:${dnChipBg} !important;color:${displayColor} !important;`);
+        element.attr("style",`border:2px ${borderStyle+' '+displayColor} !important;background:#fff !important;color:${displayColor} !important;`);
 
         element.toggleClass("dashboard-calendar-active", isActive);
         // Completed classes open a read-only details modal on click — keep the pointer cursor.
@@ -2456,7 +2443,11 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             teacherSalutation: event.teacherSalutation || event.salutation || "",
             feedbackUserIdTo: event.feedbackUserIdTo,
             isFeedbackFormMapped: event.isFeedbackFormMapped,
-            isFeedbackSubmitted: event.isFeedbackSubmitted
+            isFeedbackSubmitted: event.isFeedbackSubmitted,
+            grade:event.grade,
+            feedbackForUserRole: event.feedbackForUserRole,
+            feedbackSubmittedByRole:event.feedbackSubmittedByRole,
+            feedbackSubmittedBySalutation:event.feedbackSubmittedBySalutation
         };
     }
 

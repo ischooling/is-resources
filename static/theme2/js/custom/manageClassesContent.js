@@ -100,10 +100,12 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 					joinClass+='<a id="_createLink'+v.meetingId+'" href="javascript:void(0);"  class="btn btn-sm btn-primary" onclick="meetingUrlModalTeacher('+v.meetingId+','+userId+',\''+v.externalMeetingUrl+'\',\''+v.mailSendStatus+'\',\''+ v.urlRemarks+'\')"><i data-toggle="tooltip" title="View Comments" class="fa fa-eye"></i></a>';
 				}
 			}else if(v.externalUserLink!==''){
+				var subjectBaseName = (v.subjectName||'').split('(')[0].trim().replace(/\s+v\d+$/i, '');
 				joinClass+='<br/>'
 				+'<input class="tinyUrl" style="display: none;" type="text" id="copyURL'+k+'" value="'+v.externalUserLink+'">'
 				+'<b class="copy-msg-'+k+'"></b>'
-				+'<button id="copyURL'+k+'" onclick="copyURL(\'copyURL'+k+'\',\'copy-msg-'+k+'\')" class="btn btn-primary btn-sm mt-2 class-copy-button">Copy External User link</a>'
+				+'<button id="copyURL'+k+'" onclick="copyURL(\'copyURL'+k+'\',\'copy-msg-'+k+'\')" class="btn btn-primary btn-sm mt-2 class-copy-button">Copy link</a>'
+				+'<button id="copyInvitationBtn'+k+'" onclick="copyClassInvitation(\''+subjectBaseName.replace(/'/g,"\\'")+'\',\''+(v.teacherName||'').replace(/'/g,"\\'")+'\', document.getElementById(\'copyURL'+k+'\').value)" class="btn btn-primary btn-sm mt-2 class-copy-button ml-2">Copy Invitation</button>'
 				// joinClass+='<a href="'+v.externalUserLink+'">'+v.externalUserLink+'</a>';
 			}else if(v.meetingCurStatus!='F'){
 				if(v.studentName!='N/A'){

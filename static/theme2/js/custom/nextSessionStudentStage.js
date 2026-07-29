@@ -539,6 +539,7 @@ function validateRequestForPaymentOption(formId) {
 }
 
 async function submitCourse(partnerEnrollmentFlag, enrollmentType) {
+	debugger;
 	if(enrollmentType == "REGISTRATION_REPEAT_GRADE"){
 		if(MIGRATION_DATA.registrationType == "ONE_TO_ONE" || MIGRATION_DATA.registrationType == "BATCH" || MIGRATION_DATA.registrationType == "SCHOLARSHIP" || MIGRATION_DATA.registrationType == "SSP"){
 			// $("#selectedSubjects").val(MIGRATION_DATA.migrationOptionsForImproveGrade[0].selectedSubjects);
@@ -659,7 +660,9 @@ function callForPaymentModeSelection(formId, callFrom) {
 					if(data['statusCode']=='ELIGIBLE_ADVANCE_PLAN'){
 						choosePaymentOption();
 					}else if(data['statusCode']=='ELIGIBLE_CUSTOME_PLAN' || data['statusCode']=='REDIRECT_TO_DASHBOOARD'){
-						window.location.reload();
+						showMessageTheme2(0, data['message'], '', true);
+						window.setTimeout(function(){window.location.reload();},2000);
+						
 					}else{
 						showMessageTheme2(0, data['message'], '', true);
 					}
