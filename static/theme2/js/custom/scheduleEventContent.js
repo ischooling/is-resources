@@ -1296,5 +1296,15 @@ function moveCounselorInScheduleEventModal(meetingId){
 		return html;
 	}
 	function escapeJsString(str) {
-		return String(str || '').replace(/'/g, "\\'");
+		if (str == null) return "";
+	
+		return String(str)
+			.replace(/\\/g, "\\\\")
+			.replace(/'/g, "\\'")
+			.replace(/"/g, '\\"')
+			.replace(/\r/g, "\\r")
+			.replace(/\n/g, "\\n")
+			.replace(/\t/g, "\\t")
+			.replace(/\f/g, "\\f");
 	}
+	

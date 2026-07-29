@@ -21,7 +21,7 @@ async function renderParentDashboardContent(){
 
 function getParentDashboardContent(studentList, funName){
     var html= 
-    `<div class="main-card mb-3 pr-4 parent-dashboard">
+    `<div class="main-card mb-3 mr-4 parent-dashboard">
         ${getStudentTabSliderContent(studentList, funName)+getStudentDetailsByIDWrapper()+getAnnouncementAndNewsContent()+getMobileBottomControlViewContent()}
     </div>`;
     

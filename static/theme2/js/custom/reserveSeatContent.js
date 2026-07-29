@@ -228,10 +228,10 @@ function enrollReserveModalContent(data, nextGrade){
 							html+=`<div class="bg-light-primary rounded-10 p-3 mb-4 mt-2">
 							<div class="d-flex align-items-center" style="margin-left:32px;">
 								<div class="text-center px-2" style="margin-left:25px;">
-									<img src="${PATH_FOLDER_IMAGE2}reenrollement.png${SCRIPT_VERSION}" style="width: 90px;" />
+									<img class="reenrollement-img" src="${PATH_FOLDER_IMAGE2}reenrollement.png${SCRIPT_VERSION}" style="width: 90px;" />
 								</div>
 								<div class="border-left pl-4 ml-3 text-center flex-grow-2">
-									<span class="text-white d-inline-block px-3 py-1 rounded text-center w-fit-content font-weight-bold font-12 mb-2" style="background-color: #417ec4;">`;
+									<span class="text-white d-inline-block px-3 py-1 rounded text-center w-fit-content font-weight-bold font-12 mb-2 bg-info">`;
 									if(data.progressionDiscount && data.progressionDiscount != 0 && data.progressionDiscount != '$0.00'){
 										html+=`EXCLUSIVE RE-ENROLLMENT OFFER`;
 									}else if(data.planDiscount && data.planDiscount != 0 && data.planDiscount != '$0.00'){
@@ -254,7 +254,7 @@ function enrollReserveModalContent(data, nextGrade){
 							</div>
 						</div>`;
 						if(data.progressionDiscountDueDate){
-							html+=`<div id="reserveSeatDiscountCountdownWrapper" class="d-flex align-items-center rounded-10 border border-warning mb-3 overflow-hidden" data-progression-discount-due-date="${data.progressionDiscountDueDate}" style="background:#fffaf0;">
+							html+=`<div id="reserveSeatDiscountCountdownWrapper" class="d-flex align-items-center rounded-10 border border-warning mb-3 overflow-hidden bg-light-warning" data-progression-discount-due-date="${data.progressionDiscountDueDate}">
 							<div class="d-flex align-items-center text-left px-2 py-2 flex-shrink-0" style="width:34%; min-width:260px;">
 								<div class="d-inline-flex align-items-center justify-content-center rounded-circle text-warning mr-2 flex-shrink-0" style="width:30px; height:30px; border:1px solid #ffd778; background:#fff7df;">
 									<i class="fas fa-calendar-alt"></i>

@@ -281,9 +281,7 @@ position:relative;
    widens this for that variant. */
 .custom-field-scope .custom-field .iti input{
     height:44px;
-    padding-left:52px !important;
     padding-top:6px;
-    padding-bottom:0;
     border-radius:6px !important;
 }
 
@@ -294,7 +292,7 @@ position:relative;
 }
 
 .custom-field-scope .custom-field .iti .iti__selected-flag{
-    height:44px;
+    height:43px;
     align-items:center;
     padding:0 8px 0 10px;
 }
@@ -689,7 +687,7 @@ body > .select2-container--open .select2-dropdown,
    syncHoldPhoneInputPadding may override per-instance, but a CSS baseline
    keeps the layout correct even before/without that JS running. */
 .custom-field-scope .custom-field .iti--separate-dial-code > input{
-    padding-left:90px !important;
+    padding-left:90px ;
 }
 .custom-field-scope .custom-field:has(.iti--separate-dial-code input:focus) .iti__selected-flag,
 .custom-field-scope .custom-field.has-value:has(.iti--separate-dial-code) .iti__selected-flag,

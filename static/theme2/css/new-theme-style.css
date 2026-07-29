@@ -10347,7 +10347,7 @@ visibility:hidden
 	flex:1
 }
 .app-theme-white .app-footer .app-footer__inner, .app-theme-white .app-header {
-	background:#f1f4f6
+	/* background:#f1f4f6 */
 }
 .app-theme-white .app-sidebar {
 	/* background:#fff */

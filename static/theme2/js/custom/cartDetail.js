@@ -6,6 +6,8 @@ function cartDetailsOnLoadEvent(){
             </style>
         `)
     }
+    $("#dashboardContentInHTML").show();
+    $("#dashboardContentInHTMLAdditional").hide();
 }
 
 async function getCartCount(userId) {
