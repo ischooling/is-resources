@@ -32,7 +32,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         // standalone LMSSync.jsp opened via getAsPost. Reuses agilixbuzzApi.js helpers.
         "lms-sync":{url:"",file:[{role:"",fileName:["SyncLmsContent.js","agilixbuzzApi.js","masterContent.js","copyCourseFilter.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "manage-session":{url:"",file:[{role:"",fileName:["manageSessionContent.js","manageSession.js","agilixbuzzApi.js"]}, {role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "school-settings":{url:"",file:[{role:"",fileName:["SchoolSettingContent.js","SchoolSetting.js","standardFeeContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        // JS-rendered School Settings module (schoolSettingContent.js) — replaces the old
+        // standalone SchoolSettings.jsp opened via getAsPost.
+        "school-settings":{url:"",file:[{role:"",fileName:["masterContent.js","standardFeeContent.js","schoolSetting.js","schoolSettingContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "extra-session-details":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-teacher-sessions":{url:"",file:[{role:"",fileName:["manageClassesContent.js","manageClasses.js"]}, {role:"",fileName:["dashboardCalendar.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-transcript":{url:"student-list?moduleId="+moduleId,file:[{role:"",fileName:["advanceTranscriptSearch.js"]}],type:"JSP",pageReqType:"IN"},
@@ -85,6 +87,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-list":{url:"",file:[{role:"",fileName:["leadDemoContent.js","leads.js","LeadSettingListContent.js","LeadSettings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-report":{url:"",file:[{role:"",fileName:["leadDemoReportContent.js","leadDemoReport.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "lead-demo-dashboard":{url:"",file:[{role:"",fileName:["leadDemoDashboardContent.js","leadDemoDashboard.js","leads.js","commonRecordings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "ai-email-draft":{url:"",file:[{role:"",fileName:["AIEmailDraftContent.js","aiEmailDraft.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-setting":{url:"",file:[{role:"",fileName:["LeadSettingListContent.js","LeadSettings.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-daily-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/counselor-daily-report?moduleId="+moduleId+"&userId="+USER_ID},

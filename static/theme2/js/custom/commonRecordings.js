@@ -438,10 +438,12 @@ $(document).on("shown.bs.modal", "#teacherAllClassModel", function() {
     setTimeout(renderClassTranscriptTalkTimeSummary, 300);
 });
 
-if (typeof MutationObserver !== "undefined") {
-    var classTalkTimeObserverTimer = null;
-    new MutationObserver(function() {
-        clearTimeout(classTalkTimeObserverTimer);
-        classTalkTimeObserverTimer = setTimeout(renderClassTranscriptTalkTimeSummary, 300);
-    }).observe(document.body, { childList: true, subtree: true });
-}
+$(function() {
+    if (typeof MutationObserver !== "undefined" && document.body) {
+        var classTalkTimeObserverTimer = null;
+        new MutationObserver(function() {
+            clearTimeout(classTalkTimeObserverTimer);
+            classTalkTimeObserverTimer = setTimeout(renderClassTranscriptTalkTimeSummary, 300);
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+});
