@@ -263,9 +263,13 @@ function getRequestForAgilixbuzzLMSSync(formId, moduleId, lmsProviderId) {
 
 function callAgilixbuzzLMSSync(formId, moduleId, lmsProviderId) {
 	hideMessageTheme2('');
-	customLoaderExternalPage(true);
+	// In-dashboard loader (was customLoaderExternalPage, which only shows on the
+	// old standalone SIS/LMS page — invisible inside the dashboard module).
+	var lmsSyncLoader = (typeof customLoader === 'function') ? customLoader : customLoaderExternalPage;
+	lmsSyncLoader(true);
 	$("#errMsg").text('');
 	if (!validateRequestForAgilixbuzzLMSSync(formId, moduleId, lmsProviderId)) {
+		lmsSyncLoader(false);
 		return false;
 	}
 	$.ajax({
@@ -281,7 +285,6 @@ function callAgilixbuzzLMSSync(formId, moduleId, lmsProviderId) {
 				if(data['code'] == 'SESSIONOUT'){
 					redirectLoginPage();
 				}
-				customLoaderExternalPage(false);
 			} else {
 				$("#errMsg").text(data['message']);
 				if(moduleId=='USER'){
@@ -291,11 +294,12 @@ function callAgilixbuzzLMSSync(formId, moduleId, lmsProviderId) {
 					}else if(moduleId=='VERIFYLMMSUSER'){
 					prefillLMSUserVerifyEmailResponse('lmsUserEmailVerifyResponse', data['responses']);
 				}
-				customLoaderExternalPage(false);
 			}
+			lmsSyncLoader(false);
 			return false;
 		},
 		error: function(e){
+			lmsSyncLoader(false);
 			if (checkonlineOfflineStatus()) {
 				return;
 			}

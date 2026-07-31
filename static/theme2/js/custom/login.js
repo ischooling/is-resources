@@ -310,8 +310,11 @@ function validateRequestForLogin(formId) {
 	
 
 	if (!validateEmail($("#" + formId + " #email").val().trim())) {
-		showMessage(false, 'Email is either empty or invalid');
-		return false
+		if($("#" + formId + " #email").val().trim()!=''){
+		}else{
+			showMessage(false, 'Username is either empty or invalid');
+			return false
+		}
 	}
 	if (!validPassword($("#" + formId + " #password").val().trim())) {
 		showMessage(false, 'Either password is empty or invalid');

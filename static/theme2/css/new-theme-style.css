@@ -1200,6 +1200,7 @@ table.fancytree-ext-table.fancytree-treefocus tbody tr.fancytree-selected {
 .bg-primary {
 	background-color:var(--pc) !important
 }
+
 .bg-light-primary {
 	background-color:#eef3ff !important
 }
@@ -5737,6 +5738,7 @@ button.close {
 a.close.disabled {
 	pointer-events:none
 }
+#toast-container>div{opacity: 1 !important;}
 .toast {
 	max-width:350px;
 	overflow:hidden;
@@ -6454,7 +6456,7 @@ a.bg-focus:hover, a.bg-focus:focus, button.bg-focus:hover, button.bg-focus:focus
 a.bg-alternate:hover, a.bg-alternate:focus, button.bg-alternate:hover, button.bg-alternate:focus {
 	background-color:#5c3a69 !important
 }
-.bg-white {
+.bg-white.toast-info.bg-white{
 	background-color:#fff !important
 }
 .bg-transparent {
@@ -25670,7 +25672,8 @@ position:initial !important
 }
 }
 .toast-title {
-	font-weight:bold
+	font-weight:bold;
+	color:var(--pc) !important
 }
 .toast-message {
 	-ms-word-wrap:break-word;

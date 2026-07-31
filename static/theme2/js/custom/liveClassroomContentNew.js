@@ -1,5 +1,12 @@
-function liveClassConent(){
-  $("body").append(liveClassConentPage());
+// Same-window entry: dispatched from adminController.js contentHandlers['live-classroom-status'].
+// Renders only the module body (the dashboard shell already provides header/footer/chrome) into
+// the standard in-window container, then runs the shared filter init.
+function renderLiveClassStatusDashboard(title, roleAndModule, schoolId, userId, userRole){
+  $('#dashboardContentInHTML').html(liveClassConentPageBody() + attendanceModelContent());
+  initLiveClassFilters();
+}
+
+function initLiveClassFilters(){
   var startDateTime=new Date(new Date().getTime() - 0*3600*1000);
 	var endDateTime=new Date(new Date().getTime() + 0*3600*1000);
   $("#startDate").datepicker({
@@ -30,30 +37,6 @@ function liveClassConent(){
   getSchoolClassTime();
   // initiateEvensforClass('LIVE-CLASS-STATUS',USER_ID,'0','0');
 }
-function liveClassConentPage(){
-  var html =
-          '<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">'
-            //+liveClassConentPageHeader()
-            +liveClassConentPageBody()
-          +'</div>'
-          +liveClassConentPageFooter()
-          +attendanceModelContent()
-        return html;
-}
-async function liveClassConentPageHeader(){
-  var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
-  var html =
-          '<div class="sticky-header">'
-          +'<div class="app-header header-shadow">'
-            +'<div class="app-header__logo">'
-              +'<a href="'+schoolSettingsLinks.websiteUrl+'" target="blank" class="logo-src" style="background:url('+schoolSettingsLinks.websiteLogoUrl+');"></a>'
-            +'</div>'
-            +'<div class="app-header__logo"></div>'
-          +'</div>'
-        +'</div>';
-      return html; 
-}
-
 function headClasscount(){
   var html =
   '<div class="main-card mb-3 card" style="font-size:12px !important"> '
@@ -320,26 +303,6 @@ function liveClassConentPageBody(){
     +'</div>'
   return html;  
 }
-async function liveClassConentPageFooter(){
-  var schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
-  var html = 
-            '<div class="app-wrapper-footer">'
-              +'<div class="app-footer">'
-                +'<div class="app-footer__inner">'
-                  +'<div class="app-footer__inner">'
-                    +'<div class="col">'
-                      +'<p>'+getCopyright()+'</p>'
-                    +'</div>'
-                  +'</div>'
-                +'</div>'
-                +'<div class="server-message">'
-                  +'<span class="msg" id="msgTheme2"></span>'
-                +'</div>'
-              +'</div>'
-          +'</div>';
-        return html;
-}
-
 function liveClassConentSearchForm(){
   var html =
     '<div class="row mb-2 mt-4 pt-2 custom-field-scope" style="font-size:12px !important">'
@@ -457,26 +420,27 @@ function liveClassTableNew(classes, htmlType){
     var badgeName = 'Upcoming';
     var badgeClassName = 'badge-warning';
     var firstLiveClass=0;
-    if(classes[md]['meetingStatus']=='started' && classes[md]['actualStartTime']!=""){
+    // Status is decided server-side (single source of truth) and delivered as meetingState.
+    var state = classes[md]['meetingState'] || '';
+    if(state=='LIVE'){
       badgeName = 'Live';
-      badgeClassName = 'badge-success'
+      badgeClassName = 'badge-success';
       totalLiveClasses++;
-    }else if(classes[md]['meetingStatus']=='ended' && classes[md]['actualEndTime']!=""){
+    }else if(state=='COMPLETED'){
       badgeName = 'Completed';
-      badgeClassName = 'badge-info'
+      badgeClassName = 'badge-info';
       totalCompleted++;
       if(firstLiveClass==0){
         firstLiveClass='1';
       }
+    }else if(state=='NOT_ATTENDED'){
+      badgeName = 'Not Attended';
+      badgeClassName = 'badge-warning';
+      totalNotAttended++;
     }else{
-      if(new Date(classes[md]['startTimeOrder']).getTime()<new Date().getTime()){
-        badgeName = 'Not Attended';
-        totalNotAttended++;
-      }else{
-        badgeName = 'Upcoming';
-        totalUpcoming++;
-      }
-      //based on current time singapore
+      badgeName = 'Upcoming';
+      badgeClassName = 'badge-warning';
+      totalUpcoming++;
     }
     // var badgeClassName = classes[md]['meetingStatus']=='started'?'badge-success':'badge-danger';
     // var badgeName =  classes[md]['meetingStatus']=='started'?'Live':'Offline';

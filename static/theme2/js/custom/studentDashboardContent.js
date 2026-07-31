@@ -111,10 +111,17 @@ async function rendereDashboardContent(isParent){
         if (isParent!=="false") {
             dashboardData ['isParent'] = true;
         }
+        debugger
         await renderMigrationDetailsOptionContent(data);
-        // setTimeout(showRandomToast, 30000);
-        // // Then every 3 min
-        // setInterval(showRandomToast, 1 * 60 * 1000);
+        setTimeout(showRandomToast, 30000);
+        // // // Then every 3 min
+        setInterval(showRandomToast, 1 * 60 * 1000);
+
+        // // First call after 5 seconds
+        // setTimeout(showRandomToast, 5000);
+
+        // // Then every 5 seconds
+        // setInterval(showRandomToast, 5000);
 
         var timerDiv = $("#reEnrollmentCountdown");
         reEnrollmentCountdown(

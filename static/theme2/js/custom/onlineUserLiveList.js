@@ -120,9 +120,9 @@ function ouUserDetailsCell(u){
 	return `<div class="ou-stu-cell">
 		<div class="ou-stu-avatar">${ouAvatarInner(u)}</div>
 		<div>
-			<div class="ou-stu-name">${name} ${dot}</div>
+			<div class="ou-stu-name">${name} ${dot} <span>${statusTxt}</span></div>
 			<div class="ou-stu-role">${u.userRole || 'N/A'}${u.userStringId && u.userStringId !== 'N/A' ? ' &middot; ' + ouEsc(u.userStringId) : ''}</div>
-			<div>${statusTxt}</div>
+		
 		</div>
 	</div>`;
 }

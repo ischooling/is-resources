@@ -370,85 +370,181 @@ function closeCourseDetailModal(){
 
 const studentsData = [
 		{
-			"para": "Wei Zhang enrolled successfully in Grade 6 under One-to-One learning program from China.",
-			"duration": "1 mins ago"
+			"para": "Wei Zhang enrolled successfully in Grade 6 under One-to-One learning program.",
+			"duration": "1 mins ago",
+			"country": "China",
+			"countryFlag": "CN.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Sofia Laurent enrolled successfully in English Learning under Group-Learning learning program from France.",
-			"duration": "2 mins ago"
+			"para": "Sofia Laurent enrolled successfully in English Learning under Group-Learning learning program.",
+			"duration": "2 mins ago",
+			"country": "France",
+			"countryFlag": "FR.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Faisal Al Saud enrolled successfully in Grade 10 under Dual-Diploma learning program from Saudi Arabia.",
-			"duration": "1 mins ago"
+			"para": "Faisal Al Saud enrolled successfully in Grade 10 under Dual-Diploma learning program.",
+			"duration": "1 mins ago",
+			"country": "Saudi Arabia",
+			"countryFlag": "SA.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Aino Virtanen enrolled successfully in Flexy - High School under Self-Study plus learning program from Finland.",
-			"duration": "2 mins ago"
+			"para": "Aino Virtanen enrolled successfully in Flexy - High School under Self-Study plus learning program.",
+			"duration": "2 mins ago",
+			"country": "Finland",
+			"countryFlag": "FI.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Omar Al Rashid enrolled successfully in Grade 12 under self-Study learning program from Qatar.",
-			"duration": "5 mins ago"
+			"para": "Omar Al Rashid enrolled successfully in Grade 12 under self-Study learning program.",
+			"duration": "5 mins ago",
+			"country": "Qatar",
+			"countryFlag": "QA.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Mariam Al Nuaimi enrolled successfully in Grade 8 under Flexy learning program from UAE.",
-			"duration": "3 mins ago"
+			"para": "Mariam Al Nuaimi enrolled successfully in Grade 8 under Flexy learning program.",
+			"duration": "3 mins ago",
+			"country": "UAE",
+			"countryFlag": "AE.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Chen Hao enrolled successfully in Flexy - Middle School under One-to-One learning program from China.",
-			"duration": "4 mins ago"
+			"para": "Chen Hao enrolled successfully in Flexy - Middle School under One-to-One learning program.",
+			"duration": "4 mins ago",
+			"country": "China",
+			"countryFlag": "CN.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Elena Fischer enrolled successfully in Grade 5 under Group-Learning learning program from Germany.",
-			"duration": "1 mins ago"
+			"para": "Elena Fischer enrolled successfully in Grade 5 under Group-Learning learning program.",
+			"duration": "1 mins ago",
+			"country": "Germany",
+			"countryFlag": "DE.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Khalid Bin Ahmed enrolled successfully in Maths Learning under Dual-Diploma learning program from Kuwait.",
-			"duration": "5 mins ago"
+			"para": "Khalid Bin Ahmed enrolled successfully in Maths Learning under Dual-Diploma learning program.",
+			"duration": "5 mins ago",
+			"country": "Kuwait",
+			"countryFlag": "KW.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Ella Korhonen enrolled successfully in Grade 3 under Flexy learning program from Finland.",
-			"duration": "2 mins ago"
+			"para": "Ella Korhonen enrolled successfully in Grade 3 under Flexy learning program.",
+			"duration": "2 mins ago",
+			"country": "Finland",
+			"countryFlag": "FI.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Abdullah Al Harbi enrolled successfully in Grade 11 under One-to-One learning program from Saudi Arabia.",
-			"duration": "1 mins ago"
+			"para": "Abdullah Al Harbi enrolled successfully in Grade 11 under One-to-One learning program.",
+			"duration": "1 mins ago",
+			"country": "Saudi Arabia",
+			"countryFlag": "SA.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Noura Al Mazrouei enrolled successfully in Grade 7 under Group-Learning learning program from UAE.",
-			"duration": "5 mins ago"
+			"para": "Noura Al Mazrouei enrolled successfully in Grade 7 under Group-Learning learning program.",
+			"duration": "5 mins ago",
+			"country": "UAE",
+			"countryFlag": "AE.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Yousef Al Thani enrolled successfully in Flexy - Advanced Placement under Flexy learning program from Qatar.",
-			"duration": "3 mins ago"
+			"para": "Yousef Al Thani enrolled successfully in Flexy - Advanced Placement under Flexy learning program.",
+			"duration": "3 mins ago",
+			"country": "Qatar",
+			"countryFlag": "QA.svg",
+			"img": "male-profile.png"
 		},
 		{
-			"para": "Fatima Al Sabah enrolled successfully in Grade 9 under Self-Study plus learning program from Kuwait.",
-			"duration": "2 mins ago"
+			"para": "Fatima Al Sabah enrolled successfully in Grade 9 under Self-Study plus learning program.",
+			"duration": "2 mins ago",
+			"country": "Kuwait",
+			"countryFlag": "KW.svg",
+			"img": "female-profile.png"
 		},
 		{
-			"para": "Hamad Al Khalifa enrolled successfully in Flexy - High School under Dual-Diploma learning program from Bahrain.",
-			"duration": "3 mins ago"
+			"para": "Hamad Al Khalifa enrolled successfully in Flexy - High School under Dual-Diploma learning program.",
+			"duration": "3 mins ago",
+			"country": "Bahrain",
+			"countryFlag": "BH.svg",
+			"img": "male-profile.png"
 		}
 	];
 
 toastr.options = {
     closeButton: true,
     progressBar: true,
-    positionClass: "toast-bottom-left",
-    timeOut: "10000",
-    extendedTimeOut: "1000"
+    positionClass: "toast-bottom-right",
+    timeOut: 10000,
+    extendedTimeOut: 5000
 };
 
+
+var randomToastTimer = null;
 function showRandomToast() {
+	// Only run when re-enrollment notifications are enabled (flag from CommonCustomScript.jsp).
+	if (typeof SALES_TOAST === "undefined" || !SALES_TOAST) {
+		return;
+	}
 	var item = studentsData[Math.floor(Math.random() * studentsData.length)];
 
-    toastr.info(
-        `${item.para}<br><small>${item.duration}</small>`,
-        "Recent Enrollment",
+	if (!$("#enrollmentToastStyle").length) {
+		$("head").append(`
+			<style id="enrollmentToastStyle">
+				#toast-container > .toast-enrollment { background:#fff !important; background-image:none !important; color:#3c4043 !important; width:360px; max-width:calc(100vw - 30px); padding:16px 18px !important; border-radius:14px !important; border-top-left-radius:15px !important; border-bottom-left-radius:15px !important; border-left:4px solid #1a73e8 !important; box-shadow:0 6px 22px rgba(60,64,67,0.18) !important; opacity:1 !important; cursor:default !important; }
+				#toast-container > .toast-enrollment:hover { box-shadow:0 6px 22px rgba(60,64,67,0.18) !important; cursor:default !important; }
+				.toast-enrollment .toast-close-button { position:absolute; top:10px; right:12px; color:#9aa0a6; opacity:1; font-size:18px; font-weight:400; text-shadow:none; }
+				.toast-enrollment .toast-title { display:none; }
+				.toast-enrollment .toast-progress { position:absolute; left:0; bottom:0; height:4px; background-color:#1a73e8; opacity:0.6; border-bottom-left-radius:15px; border-bottom-right-radius:14px; }
+				.enrollment-toast-avatar { width:46px; height:46px; border-radius:50%; overflow:hidden; background:#e8f0fe; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+				.enrollment-toast-avatar img { width:100%; height:100%; object-fit:cover; }
+				.enrollment-toast-title { font-size:16px; font-weight:700; color:#1a73e8; line-height:1.2; }
+				.enrollment-toast-body { font-size:13px; line-height:1.45; color:#3c4043; margin-top:3px; }
+				.enrollment-toast-meta { border-top:1px solid #eef0f2; margin-top:12px; padding-top:8px; }
+				.enrollment-toast-flag { width:20px; height:14px; border-radius:2px; object-fit:cover; }
+				.enrollment-toast-meta .meta-text { font-size:12px; color:#80868b; }
+			</style>`);
+	}
+
+	var html = `
+		<div class="d-flex align-items-start" style="gap:12px;">
+			<span class="enrollment-toast-avatar">
+				<img src="${PATH_FOLDER_IMAGE2}${item.img}" alt="Student"/>
+			</span>
+			<div class="flex-grow-1" style="min-width:0;">
+				<div class="enrollment-toast-title">Recent Enrollment</div>
+				<div class="enrollment-toast-body">${item.para}</div>
+				<div class="enrollment-toast-meta d-flex align-items-center justify-content-between">
+					<span class="d-inline-flex align-items-center" style="gap:6px;">
+						<img class="enrollment-toast-flag" src="${PATH_FOLDER_FONT2}${item.countryFlag}" alt="${item.country}"/>
+						<span class="meta-text">${item.country}</span>
+					</span>
+					<span class="d-inline-flex align-items-center meta-text" style="gap:5px;">
+						<i class="fa fa-clock-o"></i>${item.duration}
+					</span>
+				</div>
+			</div>
+		</div>`;
+
+	toastr.info(
+		html,
+		"",
 		{
-			toastClass: 'bg-primary'
+			toastClass: 'toast-enrollment'
 		}
-    );
+	);
+
+	// Schedule the next enrollment toast 2 minutes later (self-deduped so repeated
+	// calls don't stack overlapping chains).
+	if (randomToastTimer) {
+		clearTimeout(randomToastTimer);
+	}
+	randomToastTimer = setTimeout(showRandomToast, 120000);
 }
 
 function getPaymentOptionCount(cdrDTO){

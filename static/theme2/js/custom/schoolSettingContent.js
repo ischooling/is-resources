@@ -1961,27 +1961,27 @@ function getSchoolSettingAllDataTableRows(details) {
 				<input type="hidden" id="primaryID" value="${value.id || ""}"/>
 				<td style="white-space:normal;word-break:break-word;overflow-wrap:anywhere;">
 					<div class="mb-1">
-						<span class="textValue textField" data-field="metaType">
+						<span data-field="metaType">
 							<span class="badge badge-pill badge-success">${value.metaType || ""}</span>
 						</span>
-						<input type="text" class="d-none inputValue inputField" data-field="metaType" id="metaType${value.id || index}" value="${value.metaType || ""}" style="width:100%;" maxlength="100">
+						<input type="hidden" id="metaType${value.id || index}" value="${value.metaType || ""}">
 					</div>
 					<div>
-						<span class="textValue textField text-muted" data-field="metaKey" style="font-size:12px;">${value.metaKey || ""}</span>
-						<input type="text" class="d-none inputValue inputField" data-field="metaKey" id="metaKey${value.id || index}" value="${value.metaKey || ""}" style="width:100%;" maxlength="100">
+						<span class="text-muted" data-field="metaKey" style="font-size:12px;">${value.metaKey || ""}</span>
+						<input type="hidden" id="metaKey${value.id || index}" value="${value.metaKey || ""}">
 					</div>
 				</td>
-				<td style="white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;">
-					<span class="textValue textField" data-field="metaValue">${value.metaValue || ""}</span>
-					<textarea type="text" class="d-none inputValue inputField metaValue" data-field="metaValue" id="metaValue${value.id || index}" style="width:100%;min-height:70px;" maxlength="2000">${value.metaValue || ""}</textarea>
+				<td style="word-break:break-word;overflow-wrap:anywhere;">
+					<span class="textValue textField" data-field="metaValue" style="white-space:normal;">${value.metaValue || ""}</span>
+					<textarea type="text" class="d-none inputValue inputField metaValue" data-field="metaValue" id="metaValue${value.id || index}" style="width:100%;min-height:70px;white-space:pre-wrap;" maxlength="2000">${value.metaValue || ""}</textarea>
 				</td>
-				<td style="white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;">
-					<span class="textValue textField text-muted" data-field="comments" style="font-size:12px;">${value.comments || ""}</span>
-					<textarea class="d-none inputValue inputField" data-field="comments" id="comments${value.id || index}" style="width:100%;min-height:50px;" maxlength="500">${value.comments || ""}</textarea>
+				<td style="word-break:break-word;overflow-wrap:anywhere;">
+					<span class="textValue textField text-muted" data-field="comments" style="font-size:12px;white-space:normal;">${value.comments || ""}</span>
+					<textarea class="d-none inputValue inputField" data-field="comments" id="comments${value.id || index}" style="width:100%;min-height:50px;white-space:pre-wrap;" maxlength="500">${value.comments || ""}</textarea>
 				</td>
 				<td style="white-space:nowrap;text-align:center;">
-					<span class="textValue textField" data-field="parentId">${value.parentId || 0}</span>
-					<input type="number" class="d-none inputValue inputField" data-field="parentId" id="parentId${value.id || index}" value="${value.parentId || 0}" style="width:100%;">
+					<span data-field="parentId">${value.parentId || 0}</span>
+					<input type="hidden" id="parentId${value.id || index}" value="${value.parentId || 0}">
 				</td>
 				<td style="white-space:normal;word-break:break-word;overflow-wrap:anywhere;">
 					<div style="font-size:12px;">

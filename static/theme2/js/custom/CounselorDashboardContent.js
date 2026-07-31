@@ -4,8 +4,8 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 	customLoader(true);
 	
 	var commissionRate = await getCounselorCommissionRate('','counselorCommitionRate',userId);
-    var html=dashboardCounselorContent(title, roleAndModule, schoolId, userId, role, commissionRate);
-    $('#dashboardContentInHTML').html(html);
+	var html=dashboardCounselorContent(title, roleAndModule, schoolId, userId, role, commissionRate);
+	$('#dashboardContentInHTML').html(html);
 	refreshCustomFieldState('#dashboardContentInHTML');
 	
 	generateTinyUrls();

@@ -125,7 +125,7 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
 
 function generateTeacherEnrollmentContent(moduleName){
     var html=
-        `<div class="wrapper-style custom-field-scope">
+        `<div class="wrapper-style custom-field-scope full">
             <a class="tab-and-mobile-logout-btn primary-bg white-txt-color" href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}">
                 <i class="zmdi zmdi-power"></i>
                 Log out

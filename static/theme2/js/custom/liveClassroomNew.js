@@ -29,11 +29,44 @@ function getCurrentClassLiveNew(){
               }
           }else {
               $('#live-class-now').html(liveClassTableNew(data.liveClassrooms, 'old'));
+              scheduleSmartLiveRefresh(data);
              // showMessageTheme2(data['status'], data['message'],'',true);
               // setTimeout(getColleps(), 5000);
           }
       }
   });
+}
+
+// Parse an IST ("Asia/Kolkata", +05:30) datetime string ("YYYY-MM-DD HH:mm:ss") into an absolute Date.
+function parseISTToDate(s){
+  if(!s){ return null; }
+  var d = new Date(s.replace(' ', 'T') + '+05:30');
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Smart live-status refresh: only auto-poll while at least one visible class is inside its near-live
+// window [scheduledStart - graceBefore, scheduledEnd + graceAfter]. Rows that are already completed or
+// far in the future trigger no polling, so a schedule with nothing happening now stays idle.
+var __liveRefreshTimer = null;
+function scheduleSmartLiveRefresh(data){
+  if(__liveRefreshTimer){ clearTimeout(__liveRefreshTimer); __liveRefreshTimer = null; }
+  var rooms = (data && data.liveClassrooms) ? data.liveClassrooms : [];
+  var graceBefore = parseInt(data && data.graceBeforeMin != null ? data.graceBeforeMin : 10, 10);
+  var graceAfter  = parseInt(data && data.graceAfterMin  != null ? data.graceAfterMin  : 20, 10);
+  var now = new Date().getTime();
+  var nearLive = false;
+  for(var i=0; i<rooms.length; i++){
+    if(rooms[i]['meetingState'] == 'LIVE'){ nearLive = true; break; }
+    var st = parseISTToDate(rooms[i]['startTimeOrder']);
+    var en = parseISTToDate(rooms[i]['schedEndOrder']);
+    if(!st || !en){ continue; }
+    var winStart = st.getTime() - graceBefore*60000;
+    var winEnd   = en.getTime() + graceAfter*60000;
+    if(now >= winStart && now <= winEnd){ nearLive = true; break; }
+  }
+  if(nearLive){
+    __liveRefreshTimer = setTimeout(function(){ getCurrentClassLiveNew(); }, 30000);
+  }
 }
 
 function getLiveAttendeeDetails(src,elementId,meetingId,attendanceCalculated,parentRowId){

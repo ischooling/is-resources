@@ -727,6 +727,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
     }
 
     function buildStudentCalendarShell(data) {
+        debugger
         var timezone = data && data.userTimezone ? data.userTimezone : getStudentTimezone();
         var countryISOCode = data && data.countryISOCode ? data.countryISOCode : "";
         return `

@@ -31,16 +31,34 @@ async function initiateSetting(){
 
 initiateSetting();
 
+/*
+ * Motivational Quotes — "Quote of the Moment" dashboard widget.
+ * The card is inserted as a sibling BEFORE #dashboardContentInHTML, so a home
+ * renderer repainting that container never wipes it — a single call suffices.
+ */
+function mqDashboardWidget() {
+    // Gated by SETTINGS CONFIGURATION/QUOTE_SERVICE (exposed as the QUOTE_SERVICE
+    // JS global). When the service is off, skip the /my-quote call entirely.
+    if (typeof QUOTE_SERVICE === 'undefined' || QUOTE_SERVICE !== true) {
+        return;
+    }
+    if (typeof showQuoteOfMoment !== 'function') {
+        return;
+    }
+    setTimeout(showQuoteOfMoment, 900);
+}
+
 const contentHandlers = {
-    'student-home': () => { CALENDAR_EVENT = false; rendereDashboardContent(isParent); },
+    'student-home': () => { CALENDAR_EVENT = false; rendereDashboardContent(isParent);},
     'student-addon': () => renderBuyExtraClasses(USER_ID),
     'book-a-session': ({ moduleId }) => renderBookClassContent('', '', '', true, moduleId),
-    'home': () => renderSchoolDashboard('School Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'home': () => { renderSchoolDashboard('School Dashboard', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE);},
     'module': () => renderModuleListDashboard('Module List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'modulerole': () => renderRoleListDashboard('Roles List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'user-list': () => renderAdminManageUserListDashboard('Admin Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-user-list': () => renderManageUserListDashboard('Manage User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'online-user': () => renderOnlineUserListDashboard('Live Online Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'live-classroom-status': () => renderLiveClassStatusDashboard('Live Class Status', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'delete-user': () => renderDeletedUserListDashboard('Delete User List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'assign-orientation': () => renderStudentOrientationAssignDashboard('Assign Users', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-orientation-list': () => renderStudentOrientationListDashboard('System training Students List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -81,9 +99,10 @@ const contentHandlers = {
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
     'sms-error-log': () => renderSmsErrorLog('SMS Error Log', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-cron': () => renderManageCron('Manage CRON', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'manage-motivational-quotes': () => renderMotivationalQuotesDashboard('Motivational Quotes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'event-discount': () => initEventDiscount(),
     'user-screening-profiles': () => initUserScreeningProfiles(),
-    'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent(); },
+    'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent();},
     'create-manage-sessions': () => initCreateManageSessions(),
     'schedule-a-session': () => initScheduleASession(),
     'admin-task': () => initAdminTask(),
@@ -142,7 +161,7 @@ const contentHandlers = {
     'student-feedback': ({extraParam, extraParam1}) => rateYourTeacher(extraParam, extraParam1, {renderMode: 'inline',target: '#dashboardContentInHTML'}),
     'student-handbook': () => renderStudentHandbookPage('Student Handbook', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'batch-student-examination-sheet': () => renderStudentExaminationSheetPage("Student's Examination Schedule", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'Parent-dashboard': () => renderParentDashboardContent(),
+    'Parent-dashboard': () => { renderParentDashboardContent();},
     'parent-class-schedule': () => renderParentStudentClassScheduleContent(),
     'parent-class-summary': () => renderParentStudentClassSummaryContent(),
     'teacher-class-schedule': () => renderTeacherClassScheduleContent(),

@@ -202,6 +202,12 @@ function CommonLandingImageContent(data){
 }
 
 function loginFormContent(userName, fromSpoof){
+    var emailFieldIcon = 'fa-user';
+    var emailFieldLabel = 'Username';
+    if (DEPLOYMENT_MODE == 'prod') {
+        emailFieldIcon = 'fa-envelope';
+        emailFieldLabel = 'Email';
+    }
     var html=
     `
         <form class="input-with-icon login-2023-theme custom-field-scope login-form" id="loginForm" name="loginForm" method="post" autocomplete="off">
@@ -209,11 +215,11 @@ function loginFormContent(userName, fromSpoof){
             <input type="hidden" name="fromSpoof" id="fromSpoof" value="${fromSpoof}" />
             <div class="custom-field valid-field login-field login-field-email">
                 <span class="login-field-icon primary-txt-color">
-                    <i class="fa fa-envelope"></i>
+                    <i class="fa ${emailFieldIcon}"></i>
                 </span>
                 <input type="email" name="email" id="email" autocomplete="off" class="form-control"
                         value="${userName}" maxlength="50" describedby="email-addon" placeholder=" ">
-                <label class="control-label" for="email">Email</label>
+                <label class="control-label" for="email">${emailFieldLabel}</label>
                 <a href="javascript:void(0)" class="login-field-action login-field-info" data-toggle="tooltip" data-html="true" data-container=".login-wrapper"
                         data-template="<div class='tooltip login-email-tooltip' role='tooltip'><div class='tooltip-arrow'></div><div class='tooltip-inner'></div></div>"
                         title="Please login using the email &amp; password provided at the time of enrollment.">
