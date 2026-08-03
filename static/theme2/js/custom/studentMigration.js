@@ -252,7 +252,11 @@ function switchGrade(){
 	console.log('standardId=>'+standardId+", standardId field => "+$('#standardId').val().trim())
 	console.log('FT => '+$('#selectedSubjects').val().trim());
 	if($('#standardId').val().trim()==standardId){
-		$('#standardId').val(standardId);
+		// Same grade selected - still refresh if courses not loaded yet
+		if($('#divNextSessionCourseChoose .course-list-wrapper').length < 1 && $('#divNextSessionCourseChoose .migration-Content').length < 1){
+			$('#standardId').val(standardId);
+			switchGradeYes();
+		}
 	}else{
 		if($('#selectedSubjects').val().trim()!=''){
 			$('#gradeChangeWarning').remove();

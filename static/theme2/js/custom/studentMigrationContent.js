@@ -1910,7 +1910,7 @@ async function paymentModalContentWithData(cdrDTO){
 								`<div class="w-100 p-2 pb-3 rounded-10 border annual-course-fee-details" style="display: none;background-color:#F9FAFB;">
 									<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>
 									<div class="d-flex flex-wrap">
-										<span class="text-muted">Course Fee</span>
+										<span class="text-muted">${(parseInt($('#gradeId').val()) == 20) ? 'Course Fee + Enrollment Fee' : 'Course Fee'}</span>
 										<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${cdrDTO.courseFeeString}</span>
 									</div>`;
 									if(cdrDTO.oneTimePayment!='' && (cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0)){
@@ -1924,7 +1924,7 @@ async function paymentModalContentWithData(cdrDTO){
 								`<div class="w-100 bg-light p-2 pb-3 rounded-10 border installment3-course-fee-details" id="installment3-course-fee-details" style="display: none;">
 									<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>
 									<div class="d-flex flex-wrap">
-										<span class="text-muted">Course Fee</span>
+										<span class="text-muted">${(parseInt($('#gradeId').val()) == 20) ? 'Course Fee + Enrollment Fee' : 'Course Fee'}</span>
 										<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${cdrDTO.courseFeeString}</span>
 									</div>`;
 									if(cdrDTO.monthlyFeeDetails!=null &&  cdrDTO.monthlyFeeDetails!=''){

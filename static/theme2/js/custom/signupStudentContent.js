@@ -2724,7 +2724,7 @@ function paymentModalContentWithData(cdrDTO){
 		+'<div class="label-floating feePayMode">'
 			+'<div class="col-md-12 col-sm-12 col-xs-12 p-0">'
 				+'<div class="payment-item">';
-				if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
+				if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee!=null && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 					html+=
 					'<div class="radio radio-payment-option white-txt-color">'
 						+'<input id="pay-registration" value="1" type="radio" name="payModeCheckboxes">'
@@ -2802,7 +2802,7 @@ function paymentModalContentWithData(cdrDTO){
 							+'<div class="row">'
 								+'<div class="col-md-12">'
 									+'<div class="table-responsive">';
-									if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
+									if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee!=null && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 										html+=
 										'<table id="book-seat-fee-details" class="table table-bordered table-striped" style="display: none;">'
 											+'<thead class="theme-bg primary-bg white-txt-color" style="color: #fff;">'
@@ -3401,6 +3401,7 @@ function feePaymentReview(data){
 }
 
 function getBookAnEnrollmentTable(cdrDTO){
+	if(cdrDTO.enrollmentFee == null) return '';
 	var html=
 		// '<tr>'
 		// 	+'<td>Reserve an Enrollment Seat</td>'
@@ -3417,6 +3418,8 @@ function getBookAnEnrollmentTable(cdrDTO){
 }
 
 function commonPaymentTable(cdrDTO, prefix){
+	var enrollmentFeeAmount = (cdrDTO.enrollmentFee != null) ? cdrDTO.enrollmentFee.enrollmentFee : 0;
+	var currentStandardId = ($('#signupStage3 #standardId').length > 0) ? parseInt($('#signupStage3 #standardId').val()) : 0;
 	var html =
 	// '<tr>'
 	// 	+'<td>'+cdrDTO.enrollmentFee.label+'</td>'
@@ -3428,7 +3431,7 @@ function commonPaymentTable(cdrDTO, prefix){
 	// 	+'</td>'
 	// +'</tr>'+
 	'<tr>';
-		if(cdrDTO.enrollmentFee.enrollmentFee>0){
+		if(enrollmentFeeAmount>0){
 			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
 				html+='<td>Course Fee</td>';
 			}else{
@@ -3436,10 +3439,14 @@ function commonPaymentTable(cdrDTO, prefix){
 
 			}
 		}else{
-			html+='<td>Total Course Fee</td>';
+			if(currentStandardId == 20){
+				html+='<td>Total Course Fee + Enrollment Fee</td>';
+			}else{
+				html+='<td>Total Course Fee</td>';
+			}
 		}
 		if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
-			var courseFeeActucal = parseFloat(cdrDTO.courseFee)-parseFloat(cdrDTO.enrollmentFee.enrollmentFee);
+			var courseFeeActucal = parseFloat(cdrDTO.courseFee)-parseFloat(enrollmentFeeAmount);
 			var courseFeeActucalWithCurrency=currency+' '+parseFloat(courseFeeActucal).toFixed(2);
 			html+=
 			'<td style="text-align:right">'+courseFeeActucalWithCurrency+'</td>'
@@ -3596,7 +3603,7 @@ function getAnnualPaymentTable(cdrDTO){
 			}
 		}
 		if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' || $('#learingProgramHeader').val()=='DUAL_DIPLOMA' ){
-			if(cdrDTO.enrollmentFee.enrollmentFee>0){
+			if(cdrDTO.enrollmentFee!=null && cdrDTO.enrollmentFee.enrollmentFee>0){
 				html+=
 				'<tr>'
 					+'<td>Enrollment Fee</td>'
