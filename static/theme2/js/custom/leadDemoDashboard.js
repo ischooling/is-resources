@@ -379,7 +379,10 @@ function setLeadDemoDashboardAutoRefreshTimer(seconds) {
     }
 }
 
-function fetchLeadDemoDashboardSection(section) {
+// silent=true runs the section fetch without the page-wide loader — used for the background
+// AI-priority refresh so the list data shows first and the AI columns fill in later without the
+// loader spinning a second time.
+function fetchLeadDemoDashboardSection(section, silent) {
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -387,6 +390,7 @@ function fetchLeadDemoDashboardSection(section) {
         data: JSON.stringify(getLeadDemoDashboardRequestParams(section)),
         dataType: 'json',
         cache: false,
+        global: !silent,
         timeout: 600000,
         success: function (data) {
             if (!data || data.status === '0' || data.status === '2' || data.status === '3') {
@@ -1021,7 +1025,7 @@ function renderLeadDemoDashboardResponseHealth(data) {
                 + '<tbody>'
                 + data.agingLeads.map(function (l) {
                     return '<tr>'
-                        + '<td>' + (l.leadName || 'N/A') + '<div class="text-muted">' + (l.leadNo || '') + '</div></td>'
+                        + '<td>' + (l.leadName || 'N/A') + '<div>' + getLeadDemoDashboardLeadNoLink(l.leadNo) + '</div></td>'
                         + '<td>' + (l.campaign || 'N/A') + '<div class="text-muted">' + (l.country || 'N/A') + '</div></td>'
                         + '<td>' + (l.counselorName || '—') + '</td>'
                         + '<td class="ldd-resp-slow">' + (l.waitTime || '—') + '</td>'
@@ -1109,8 +1113,8 @@ function fetchLeadDemoDashboardAiInsights() {
     $('#lddAiInsightsBtn').prop('disabled', true).text('Analyzing...');
     $('#lddAiInsightsBody').html('<p class="text-muted text-center py-3"><i class="fa fa-spinner fa-spin"></i> Analyzing leads for this period...</p>');
     LEAD_DEMO_DASHBOARD_AI_LOADING = true;
-    fetchLeadDemoDashboardSection('leadList');
-    fetchLeadDemoDashboardSection('demoList');
+    fetchLeadDemoDashboardSection('leadList', true);
+    fetchLeadDemoDashboardSection('demoList', true);
 
     var range = getLeadDemoDashboardDateRange();
     var params = {
@@ -1203,7 +1207,10 @@ function fetchLeadDemoDashboardLeadPriorityAuto(fromAutoRefreshTimer, scope) {
         demoStatus: LEAD_DEMO_DASHBOARD_STATE.demoStatus,
         demoPage: LEAD_DEMO_DASHBOARD_STATE.demoShowAll ? 0 : LEAD_DEMO_DASHBOARD_STATE.demoPage,
         demoShowAll: !!LEAD_DEMO_DASHBOARD_STATE.demoShowAll,
-        priorityScope: scope || 'both'
+        // 'columns' = light both-lists pass for the AI columns only (skips the heavy aggregate
+        // "why leads aren't converting" reasons call) so the columns fill in fast in the background.
+        // The manual "Analyze with AI" button still sends no scope -> 'both' (reasons + priority).
+        priorityScope: scope || 'columns'
     };
 
     $.ajax({
@@ -1227,14 +1234,14 @@ function fetchLeadDemoDashboardLeadPriorityAuto(fromAutoRefreshTimer, scope) {
                     }
                 });
             }
-            fetchLeadDemoDashboardSection('leadList');
-            fetchLeadDemoDashboardSection('demoList');
+            fetchLeadDemoDashboardSection('leadList', true);
+            fetchLeadDemoDashboardSection('demoList', true);
         },
         error: function () {
             LEAD_DEMO_DASHBOARD_AI_LOADING = false;
             LEAD_DEMO_DASHBOARD_AI_ANALYZED = true;
-            fetchLeadDemoDashboardSection('leadList');
-            fetchLeadDemoDashboardSection('demoList');
+            fetchLeadDemoDashboardSection('leadList', true);
+            fetchLeadDemoDashboardSection('demoList', true);
         }
     });
 }
@@ -1243,7 +1250,7 @@ function renderLeadDemoDashboardAiInsightsError(message) {
     $('#lddAiInsightsBody').html('<p class="text-center py-3" style="color:#c62828;">' + message + ' <a href="javascript:void(0);" onclick="fetchLeadDemoDashboardAiInsights()">Try again</a></p>');
     // Stop showing "Analyzing..." on the Priority/Score/Risk columns since this attempt failed
     LEAD_DEMO_DASHBOARD_AI_ANALYZED = true;
-    fetchLeadDemoDashboardSection('leadList');
+    fetchLeadDemoDashboardSection('leadList', true);
 }
 
 function getLeadDemoDashboardSeverityBadge(severity) {
@@ -1273,9 +1280,9 @@ function renderLeadDemoDashboardAiInsightsResult(result, cached) {
     });
     LEAD_DEMO_DASHBOARD_AI_ANALYZED = true;
     // Redraw the currently visible Lead List / Demo List pages so "Why?" links and the AI
-    // Priority/Score/Risk/Follow-up columns pick up the new data
-    fetchLeadDemoDashboardSection('leadList');
-    fetchLeadDemoDashboardSection('demoList');
+    // Priority/Score/Risk/Follow-up columns pick up the new data (silent — no page loader)
+    fetchLeadDemoDashboardSection('leadList', true);
+    fetchLeadDemoDashboardSection('demoList', true);
 
     if (result.noData) {
         $('#lddAiInsightsSubtitle').text('');

@@ -6340,7 +6340,16 @@ async function getEnrollDaywiseHtml(data, colType, modeSearch, startDate, endDat
 	var chart = new ApexCharts(document.querySelector("#chart-enroll-yearwise"), options);
 	chart.render();
 	chart.update();
-	
+
+	if ($('#btnEnrollmentCompare').length === 0) {
+		$('#chart-enroll-yearwise').after('<div class="text-center mt-2 mb-3"><button type="button" class="btn btn-outline-primary btn-sm" id="btnEnrollmentCompare"><i class="fa fa-balance-scale mr-1"></i><span id="btnEnrollmentCompareLabel">Enrollment Compare</span></button></div>');
+	}
+	$('#btnEnrollmentCompareLabel').text(colType === 'Leads' ? 'Leads Compare' : 'Enrollment Compare');
+	var eligibleCompareYears = getEligibleYearsFromEnrollList(enrollListMonth);
+	$('#btnEnrollmentCompare').off('click').on('click', function () {
+		openEnrollmentCompareModal(eligibleCompareYears, modeSearch, colType, startDate, endDate);
+	});
+
 	//Weekday
 	//Enrollment
 	//One_To_One
@@ -6377,7 +6386,7 @@ function ensureEnrollCountryModal() {
 		+ '  <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">'
 		+ '    <div class="modal-content border-0">'
 		+ '      <div class="modal-header py-2 bg-primary text-white">'
-		+ '        <h5 class="modal-title" id="enrollCountryWiseModalLabel">Enrollments by Country &mdash; <span id="enrollCountryModalYear"></span></h5>'
+		+ '        <h5 class="modal-title" id="enrollCountryWiseModalLabel"><span id="enrollCountryModalTitle">Enrollments</span> by Country &mdash; <span id="enrollCountryModalYear"></span></h5>'
 		+ '        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 		+ '      </div>'
 		+ '      <div class="modal-body" id="enrollCountryModalBody"></div>'
@@ -6387,16 +6396,19 @@ function ensureEnrollCountryModal() {
 	$('body').append(modalHtml);
 }
 
-function renderEnrollCountryWiseTable(countryList) {
+function renderEnrollCountryWiseTable(countryList, reportType) {
+	var isLeads = reportType === 'Leads';
+	var metricLabel = isLeads ? 'Leads' : 'Enrolled Students';
+	var metricWord = isLeads ? 'leads' : 'enrolled students';
 	if (!countryList || !countryList.length) {
-		$('#enrollCountryModalBody').html('<div class="text-center text-muted py-4">No enrollment data found for this year.</div>');
+		$('#enrollCountryModalBody').html('<div class="text-center text-muted py-4">No ' + metricWord + ' found for this year.</div>');
 		return;
 	}
 	var totalCount = 0;
 	countryList.forEach(function (row) { totalCount += (row.count || 0); });
-	var html = '<div class="mb-2 text-muted" style="font-size:13px;">' + countryList.length + ' countries &middot; <b>' + totalCount + '</b> total enrolled students</div>';
+	var html = '<div class="mb-2 text-muted" style="font-size:13px;">' + countryList.length + ' countries &middot; <b>' + totalCount + '</b> total ' + metricWord + '</div>';
 	html += '<table id="enrollCountryWiseTable" class="table table-bordered table-hover mb-0" style="width:100%;">'
-		+ '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Country</th><th class="text-center">Enrolled Students</th></tr></thead><tbody>';
+		+ '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Country</th><th class="text-center">' + metricLabel + '</th></tr></thead><tbody>';
 	countryList.forEach(function (row, idx) {
 		html += '<tr><td>' + (idx + 1) + '</td><td>' + (row.country || 'Unknown') + '</td><td class="text-center"><b>' + row.count + '</b></td></tr>';
 	});
@@ -6435,6 +6447,7 @@ function getRequestForEnrollCountryWise(year, modeSearch, reportType, startDate,
 
 function openEnrollCountryWiseModal(year, modeSearch, reportType, startDate, endDate) {
 	ensureEnrollCountryModal();
+	$('#enrollCountryModalTitle').text(reportType === 'Leads' ? 'Leads' : 'Enrollments');
 	$('#enrollCountryModalYear').text(year);
 	$('#enrollCountryModalBody').html('<div class="text-center py-4 text-muted"><i class="fa fa-spinner fa-spin mr-2"></i>Loading...</div>');
 	$('#enrollCountryWiseModal').modal('show');
@@ -6451,11 +6464,143 @@ function openEnrollCountryWiseModal(year, modeSearch, reportType, startDate, end
 				$('#enrollCountryModalBody').html('<div class="text-center text-danger py-4">' + (data['message'] || 'Unable to load data.') + '</div>');
 				return;
 			}
-			renderEnrollCountryWiseTable(data.countryList || []);
+			renderEnrollCountryWiseTable(data.countryList || [], reportType);
 		},
 		error: function () {
 			$('#enrollCountryModalBody').html('<div class="text-center text-danger py-4">Unable to load country breakdown.</div>');
 		}
+	});
+}
+
+// ── Enrollment Compare (all years side-by-side, country-wise) ──────────────
+// Separate from the single-year country popup above; reuses the same
+// /get-enrolled-country-wise endpoint (once per year) and does not touch it.
+
+function getEligibleYearsFromEnrollList(enrollListMonth) {
+	var years = [];
+	if (enrollListMonth && enrollListMonth.length) {
+		enrollListMonth.forEach(function (y) {
+			if (y && y.academicYear && years.indexOf(y.academicYear) === -1) {
+				years.push(y.academicYear);
+			}
+		});
+	}
+	years.sort(function (a, b) { return a - b; });
+	return years;
+}
+
+function ensureEnrollmentCompareModal() {
+	if ($('#enrollmentCompareModal').length) return;
+	var modalHtml = ''
+		+ '<div class="modal fade bd-example-modal-lg fade-scale" id="enrollmentCompareModal" tabindex="-1" role="dialog" aria-labelledby="enrollmentCompareModalLabel" aria-hidden="true">'
+		+ '  <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">'
+		+ '    <div class="modal-content border-0">'
+		+ '      <div class="modal-header py-2 bg-primary text-white">'
+		+ '        <h5 class="modal-title" id="enrollmentCompareModalLabel"><span id="enrollCompareModalTitle">Enrollment</span> Compare &mdash; Year over Year by Country</h5>'
+		+ '        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+		+ '      </div>'
+		+ '      <div class="modal-body" id="enrollCompareModalBody"></div>'
+		+ '    </div>'
+		+ '  </div>'
+		+ '</div>';
+	$('body').append(modalHtml);
+}
+
+function renderEnrollmentCompareTable(years, perYearData, reportType) {
+	var metricWord = reportType === 'Leads' ? 'leads' : 'enrolled students';
+	var countryRows = {};
+	var countryOrder = [];
+	years.forEach(function (year, idx) {
+		var list = perYearData[idx] || [];
+		list.forEach(function (row) {
+			var country = row.country || 'Unknown';
+			if (!countryRows[country]) {
+				countryRows[country] = {};
+				countryOrder.push(country);
+			}
+			countryRows[country][year] = row.count || 0;
+		});
+	});
+
+	if (!countryOrder.length) {
+		$('#enrollCompareModalBody').html('<div class="text-center text-muted py-4">No ' + metricWord + ' found for these years.</div>');
+		return;
+	}
+
+	var yearColTotals = {};
+	years.forEach(function (y) { yearColTotals[y] = 0; });
+	var grandTotal = 0;
+
+	var rows = countryOrder.map(function (country) {
+		var rowTotal = 0;
+		var cells = years.map(function (y) {
+			var v = countryRows[country][y] || 0;
+			rowTotal += v;
+			yearColTotals[y] += v;
+			return v;
+		});
+		grandTotal += rowTotal;
+		return { country: country, cells: cells, total: rowTotal };
+	});
+	rows.sort(function (a, b) { return b.total - a.total; });
+
+	var html = '<div class="mb-2 text-muted" style="font-size:13px;">' + rows.length + ' countries &middot; <b>' + grandTotal + '</b> total ' + metricWord + ' across ' + years.length + ' years</div>';
+	html += '<table id="enrollCompareTable" class="table table-bordered table-hover mb-0" style="width:100%;">';
+	html += '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Country</th>';
+	years.forEach(function (y) { html += '<th class="text-center">' + y + '</th>'; });
+	html += '<th class="text-center">Total</th></tr></thead><tbody>';
+	rows.forEach(function (row, idx) {
+		html += '<tr><td>' + (idx + 1) + '</td><td>' + row.country + '</td>';
+		row.cells.forEach(function (v) { html += '<td class="text-center">' + v + '</td>'; });
+		html += '<td class="text-center"><b>' + row.total + '</b></td></tr>';
+	});
+	html += '</tbody>';
+	html += '<tfoot><tr class="bg-light"><th></th><th>Column Total</th>';
+	years.forEach(function (y) { html += '<th class="text-center">' + yearColTotals[y] + '</th>'; });
+	html += '<th class="text-center">' + grandTotal + '</th></tr></tfoot>';
+	html += '</table>';
+	$('#enrollCompareModalBody').html(html);
+
+	if ($.fn.DataTable.isDataTable('#enrollCompareTable')) {
+		$('#enrollCompareTable').DataTable().destroy();
+	}
+	$('#enrollCompareTable').DataTable({
+		theme: "bootstrap4",
+		order: [[years.length + 2, 'desc']],
+		pageLength: 10,
+		lengthMenu: [10, 20, 50, 100, 200]
+	});
+}
+
+function openEnrollmentCompareModal(years, modeSearch, reportType, startDate, endDate) {
+	if (!years || !years.length) {
+		showMessage(true, 'No years available to compare.');
+		return;
+	}
+	ensureEnrollmentCompareModal();
+	$('#enrollCompareModalTitle').text(reportType === 'Leads' ? 'Leads' : 'Enrollment');
+	$('#enrollCompareModalBody').html('<div class="text-center py-4 text-muted"><i class="fa fa-spinner fa-spin mr-2"></i>Loading...</div>');
+	$('#enrollmentCompareModal').modal('show');
+
+	var requests = years.map(function (year) {
+		return $.ajax({
+			type: 'POST',
+			contentType: APPLICATION_JSON_VALUE,
+			url: getURLForHTML('dashboard', 'get-enrolled-country-wise'),
+			data: JSON.stringify(getRequestForEnrollCountryWise(year, modeSearch, reportType, startDate, endDate)),
+			dataType: 'json',
+			cache: false
+		});
+	});
+
+	Promise.all(requests).then(function (responses) {
+		var perYearData = responses.map(function (data) {
+			if (!data || data['status'] == '0' || data['status'] == '2') return [];
+			return data.countryList || [];
+		});
+		renderEnrollmentCompareTable(years, perYearData, reportType);
+	}).catch(function () {
+		$('#enrollCompareModalBody').html('<div class="text-center text-danger py-4">Unable to load comparison data.</div>');
 	});
 }
 
