@@ -807,6 +807,68 @@ function getStudentBroadcastProviderMeta(provider) {
 	}
 	return { key: 'WATI', label: 'Wati', getTemplatesRoute: 'get-wati-templates-for-student-list', sendMessageRoute: 'send-wati-message-for-student' };
 }
+
+// Gupshup template placeholder mapping for the Student List (mirrors the Lead List in leads.js).
+// leads.js is not loaded on the student payment/broadcast page, so these helpers are defined
+// locally here; the two files are never loaded on the same page.
+var GUPSHUP_PARAM_FIELD_OPTIONS = [
+	{ value: 'name', label: 'Name' },
+	{ value: 'grade', label: 'Grade' },
+	{ value: 'phone', label: 'Phone' },
+	{ value: 'counsellorName', label: 'Counsellor Name' }
+];
+
+function getSelectedWhatsappBroadcastTemplateParamCount(templateData) {
+	if(!templateData) {
+		return 0;
+	}
+	if(templateData.parameterCount != null && templateData.parameterCount !== "") {
+		return Number(templateData.parameterCount) || 0;
+	}
+	if(Array.isArray(templateData.customParams)) {
+		return templateData.customParams.length;
+	}
+	return 0;
+}
+
+function renderGupshupParamMapping(selectedTemplate) {
+	var $wrap = $('#gupshupParamMappingWrap');
+	var $container = $('#gupshupParamMapping');
+	if (!$wrap.length || !$container.length) { return; }
+	var providerMeta = getStudentBroadcastProviderMeta(STUDENT_BROADCAST_PROVIDER);
+	var paramCount = getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate);
+	if (!providerMeta || providerMeta.key !== 'GUPSHUP' || paramCount <= 0) {
+		$wrap.hide();
+		$container.empty();
+		return;
+	}
+	var defaults = ['name', 'grade', 'counsellorName', 'phone'];
+	var html = '';
+	for (var i = 0; i < paramCount; i++) {
+		var def = defaults[i] || 'name';
+		html += '<div class="d-flex align-items-center" style="gap:4px;">';
+		html += '<span style="font-size:13px;">{{' + (i + 1) + '}} &rarr;</span>';
+		html += '<select class="form-control form-control-sm gupshup-param-map" data-index="' + i + '" style="width:auto;font-size:13px;">';
+		$.each(GUPSHUP_PARAM_FIELD_OPTIONS, function(_, opt) {
+			html += '<option value="' + opt.value + '"' + (opt.value === def ? ' selected' : '') + '>' + opt.label + '</option>';
+		});
+		html += '</select></div>';
+	}
+	$container.html(html);
+	$wrap.show();
+}
+
+function collectGupshupParamMapping(paramCount) {
+	var mapping = [];
+	var allowed = $.map(GUPSHUP_PARAM_FIELD_OPTIONS, function(o) { return o.value; });
+	for (var i = 0; i < paramCount; i++) {
+		var val = $('.gupshup-param-map[data-index="' + i + '"]').val();
+		if (!val || $.inArray(val, allowed) === -1) { return null; }
+		mapping.push(val);
+	}
+	return mapping;
+}
+
 function getWatiBroadcastTemplates(){
 	var providerArg = arguments.length > 0 ? arguments[0] : null;
 	var providerMeta = getStudentBroadcastProviderMeta(providerArg);
