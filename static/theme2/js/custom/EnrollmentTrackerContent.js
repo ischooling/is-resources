@@ -287,6 +287,7 @@ function etStudentCell(row) {
 		+ ' title="Live now" style="' + (row.live ? '' : 'display:none;') + '"></span>';
 	// Email shown only for users allowed by CONFIGURATION/EMAIL_SEARCH_FILTER_RIGHTS.
 	var emailAllowed = (typeof isEmailSearchFilterAllowed === 'function') && isEmailSearchFilterAllowed();
+	var studentIdLine = row.studentId ? '<div class="et-stu-id">' + etEsc(row.studentId) + '</div>' : '';
 	var emailLine = (emailAllowed && row.email)
 		? '<div class="et-stu-id">' + etEsc(row.email) + '</div>' : '';
 	// Profile photo with initials fallback if the image is missing/broken.
@@ -296,7 +297,7 @@ function etStudentCell(row) {
 		: etEsc(etInitials(row.name));
 	return '<div class="et-stu-cell"><div class="et-stu-avatar">' + avatarInner + '</div>' +
 		'<div><div class="et-stu-name">' + etEsc(row.name) + liveBadge + '</div>' +
-		'<div class="et-stu-id">' + etEsc(row.studentId) + '</div>' + emailLine + '</div></div>';
+		studentIdLine + emailLine + '</div></div>';
 }
 
 function etDiscountCell(row) {

@@ -2598,7 +2598,7 @@ function applicationSubmittedModalOffline(){
 function switchGrade(){
 	var standardId = $('#signupStage3 #gradeId').val();
 	if($('#signupStage3 #standardId').val().trim()==standardId){
-		$('#signupStage3 #standardId').val(standardId);
+		switchGradeYes();
 	}else{
 		if($('#selectedSubjects').val().trim()!=''){
 			$('#gradeChangeWarning').remove();

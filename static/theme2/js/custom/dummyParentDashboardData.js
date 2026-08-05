@@ -981,6 +981,197 @@
         return { status: 1, details: { schedule: events } };
     }
 
+    // Same rules as the Dummy Student Dashboard calendar, ported for the parent's
+    // "My Student's Class Schedule" (Today/Week) view, driven by each child's grade:
+    // - Grade K-5: 3 random subjects (stable per day), 1 class on the current date,
+    //   the other 2 on future weekdays in that same week (max 3 classes/week).
+    // - Grade 6-12: one subject's class per weekday, rotating through every saved
+    //   subject in order so a leftover subject (>5 selected) gets its turn on a later day.
+    function isElementaryParentGrade(gradeLabel) {
+        var label = String(gradeLabel || "").trim().toUpperCase();
+        if (!label) return false;
+        if (label === "K" || label === "KG" || label === "GRADE K" || label === "KINDERGARTEN") return true;
+        var match = label.match(/GRADE\s*(\d{1,2})/);
+        if (!match) return false;
+        var num = parseInt(match[1], 10);
+        return num >= 1 && num <= 5;
+    }
+    function parentSeededNumber(value) {
+        value = String(value || "");
+        var hash = 0;
+        for (var i = 0; i < value.length; i++) {
+            hash = ((hash << 5) - hash) + value.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+    function parentSeededShuffle(list, seedKey) {
+        var arr = list.slice(), seed = parentSeededNumber(seedKey);
+        for (var i = arr.length - 1; i > 0; i--) {
+            seed = (seed * 9301 + 49297) % 233280;
+            var j = seed % (i + 1), tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+        return arr;
+    }
+    function parentBusinessDayIndex(dayStr) {
+        var epoch = moment("2000-01-03", "YYYY-MM-DD"); // a Monday
+        var diffDays = moment(dayStr, "YYYY-MM-DD").diff(epoch, "days");
+        var weeks = Math.floor(diffDays / 7), extra = diffDays % 7; // 0=Mon..4=Fri
+        return weeks * 5 + Math.min(Math.max(extra, 0), 4);
+    }
+    function dummyParentRandomSeed(student) {
+        return String(student.userId) + "|" + formatDate(getDummyBaseDate());
+    }
+    function dummyParentClassCourses(student) {
+        var rows = getDummyClassRows(student.userId), seen = {}, list = [];
+        rows.forEach(function (row) {
+            if (row.type !== "CLASS" || seen[row.courseName.toLowerCase()]) return;
+            seen[row.courseName.toLowerCase()] = true;
+            list.push(row);
+        });
+        return list;
+    }
+    function dummyParentActivityRows(student) {
+        return getDummyClassRows(student.userId).filter(function (row) { return row.type === "ACTIVITY"; });
+    }
+    function dummyParentSelectedThreeSubjects(student, classCourses) {
+        if (classCourses.length <= 3) {
+            return classCourses;
+        }
+        return parentSeededShuffle(classCourses, dummyParentRandomSeed(student) + "|3subjects").slice(0, 3);
+    }
+    var PARENT_ELEMENTARY_WEEK_SCHEDULE_CACHE = {};
+    function dummyParentElementaryWeekSchedule(student, weekStartStr, classCourses) {
+        var cacheKey = student.userId + "|" + weekStartStr;
+        if (PARENT_ELEMENTARY_WEEK_SCHEDULE_CACHE[cacheKey]) {
+            return PARENT_ELEMENTARY_WEEK_SCHEDULE_CACHE[cacheKey];
+        }
+        var subjects3 = dummyParentSelectedThreeSubjects(student, classCourses);
+        var weekStart = moment(weekStartStr, "YYYY-MM-DD"), weekdays = [];
+        for (var i = 1; i <= 5; i++) {
+            weekdays.push(weekStart.clone().add(i, "days").format("YYYY-MM-DD"));
+        }
+        var today = formatDate(getDummyBaseDate()), chosenDays;
+        if (weekdays.indexOf(today) !== -1) {
+            var futureDays = weekdays.filter(function (d) { return d > today; });
+            chosenDays = [today].concat(futureDays.slice(0, 2));
+        } else if (today < weekdays[0]) {
+            chosenDays = parentSeededShuffle(weekdays, dummyParentRandomSeed(student) + "|week|" + weekStartStr).slice(0, 3).sort();
+        } else {
+            chosenDays = []; // week is fully in the past
+        }
+        var schedule = {};
+        chosenDays.forEach(function (day, idx) {
+            schedule[day] = subjects3[idx % subjects3.length];
+        });
+        PARENT_ELEMENTARY_WEEK_SCHEDULE_CACHE[cacheKey] = schedule;
+        return schedule;
+    }
+    function dummyParentClassesForDay(student, day, eventIndexSeed) {
+        var dayDate = moment(day, "YYYY-MM-DD").toDate(), dow = dayDate.getDay();
+        if (dow === 0 || dow === 6) {
+            return []; // no classes on Saturday/Sunday
+        }
+        var classCourses = dummyParentClassCourses(student);
+        if (!classCourses.length) {
+            return [];
+        }
+        var today = formatDate(getDummyBaseDate()), isToday = day === today, course;
+        if (isElementaryParentGrade(student.grade)) {
+            var weekStartStr = moment(day, "YYYY-MM-DD").startOf("week").format("YYYY-MM-DD");
+            course = dummyParentElementaryWeekSchedule(student, weekStartStr, classCourses)[day];
+            if (!course) {
+                return [];
+            }
+        } else {
+            course = classCourses[parentBusinessDayIndex(day) % classCourses.length];
+        }
+        var start = isToday ? moment(getDummyBaseDate()).add(-15, "minutes") : moment(dayDate).hour(9).minute(0).second(0);
+        var end = start.clone().add(course.duration || 45, "minutes");
+        return [{
+            id: "dummy-parent-class-" + student.userId + "-" + day,
+            entityId: 770001 + eventIndexSeed, meetingId: 880001 + eventIndexSeed,
+            type: "CLASS", category: "CLASS",
+            courseName: course.courseName, teacherName: course.teacherName, teacherGender: course.teacherGender,
+            start: start.format("YYYY-MM-DD HH:mm:ss"), end: end.format("YYYY-MM-DD HH:mm:ss"),
+            timezone: getDummyTimezone(student.userId),
+            icon: getImagePath("Icon/sidebar/Examination_Schedule_icon.png"),
+            classStatus: start.isBefore(moment(getDummyBaseDate())) ? (isToday ? "Live" : "Completed") : "Not Started",
+            classesAttendance: isToday ? course.attendance : "N/A",
+            classesAttendanceDuration: isToday && course.attendance === "Attended" ? (course.duration || 45) + " min" : "",
+            classesAttendanceStartTime: isToday && course.attendance === "Attended" ? start.format("hh:mm A") : "",
+            classesAttendanceEndTime: isToday && course.attendance === "Attended" ? end.format("hh:mm A") : "",
+            hasFeedback: !!course.hasFeedback
+        }];
+    }
+    // Activities show one per day, 1st on the current date, the rest one-per-day on
+    // the following available weekdays — same shape as the student side.
+    var PARENT_ACTIVITY_SCHEDULE_CACHE = {};
+    function dummyParentActivitySchedule(student) {
+        var activities = dummyParentActivityRows(student);
+        var key = student.userId + "|" + activities.map(function (a) { return a.courseName; }).join(",") + "|" + formatDate(getDummyBaseDate());
+        if (PARENT_ACTIVITY_SCHEDULE_CACHE[key]) {
+            return PARENT_ACTIVITY_SCHEDULE_CACHE[key];
+        }
+        var schedule = {};
+        if (activities.length) {
+            var cursor = moment(formatDate(getDummyBaseDate()), "YYYY-MM-DD"), placed = 0, guard = 0;
+            while (placed < activities.length && guard < 120) {
+                var dayStr = cursor.format("YYYY-MM-DD"), dow = cursor.day();
+                if (dow !== 0 && dow !== 6) {
+                    schedule[dayStr] = activities[placed];
+                    placed++;
+                }
+                cursor.add(1, "day");
+                guard++;
+            }
+        }
+        PARENT_ACTIVITY_SCHEDULE_CACHE[key] = schedule;
+        return schedule;
+    }
+    function dummyParentActivitiesForDay(student, day, eventIndexSeed) {
+        var activity = dummyParentActivitySchedule(student)[day];
+        if (!activity) {
+            return [];
+        }
+        var start = moment(day, "YYYY-MM-DD").hour(15).minute(0).second(0);
+        var end = start.clone().add(activity.duration || 45, "minutes");
+        return [{
+            id: "dummy-parent-activity-" + student.userId + "-" + day,
+            entityId: 780001 + eventIndexSeed, meetingId: 890001 + eventIndexSeed,
+            type: "ACTIVITY", category: "ACTIVITY",
+            courseName: activity.courseName, teacherName: activity.teacherName, teacherGender: activity.teacherGender,
+            start: start.format("YYYY-MM-DD HH:mm:ss"), end: end.format("YYYY-MM-DD HH:mm:ss"),
+            timezone: getDummyTimezone(student.userId),
+            icon: getImagePath("Icon/sidebar/Examination_Schedule_icon.png"),
+            classStatus: start.isBefore(moment(getDummyBaseDate())) ? "Completed" : "Not Started",
+            classesAttendance: "N/A", classesAttendanceDuration: "", classesAttendanceStartTime: "", classesAttendanceEndTime: "",
+            hasFeedback: false
+        }];
+    }
+    function enumerateDaysParent(startdate, enddate) {
+        var days = [], cursor = moment(startdate, "YYYY-MM-DD"), end = moment(enddate || startdate, "YYYY-MM-DD");
+        while (cursor.isSameOrBefore(end, "day") && days.length < 60) {
+            days.push(cursor.format("YYYY-MM-DD"));
+            cursor.add(1, "day");
+        }
+        return days;
+    }
+    var LAST_PARENT_RANGE_EVENTS = [];
+    function getDummyClassScheduleForRange(studentUserId, startDate, endDate) {
+        var activeStudentId = typeof ACTIVE_STUDENT_ID !== "undefined" ? ACTIVE_STUDENT_ID : "";
+        var student = getDummyStudent(studentUserId || activeStudentId);
+        var days = enumerateDaysParent(startDate || formatDate(getDummyBaseDate()), endDate || startDate || formatDate(getDummyBaseDate()));
+        var events = [];
+        days.forEach(function (day, idx) {
+            events = events.concat(dummyParentClassesForDay(student, day, idx), dummyParentActivitiesForDay(student, day, idx));
+        });
+        LAST_PARENT_RANGE_EVENTS = events;
+        return { status: 1, details: { schedule: events } };
+    }
+
     function getDummyAssignedTeacherList(studentUserId) {
         var rowsData = getDummyClassRows(studentUserId);
         var rows = [];
@@ -1451,7 +1642,7 @@
 
     function getDummyClassScheduleEventByMeetingId(meetingId) {
         var activeStudentId = typeof ACTIVE_STUDENT_ID !== "undefined" ? ACTIVE_STUDENT_ID : "";
-        var events = getDummyClassSchedule(activeStudentId).details.schedule;
+        var events = LAST_PARENT_RANGE_EVENTS.length ? LAST_PARENT_RANGE_EVENTS : getDummyClassSchedule(activeStudentId).details.schedule;
         for (var i = 0; i < events.length; i++) {
             if (String(events[i].meetingId) === String(meetingId)) {
                 return events[i];
@@ -1737,7 +1928,8 @@
             return await callCommonAjax(ajaxReqDetails);
         }
         await hydrateDummyParentDataFromDb();
-        return getDummyClassSchedule(studentId);
+        var body = (ajaxReqDetails && ajaxReqDetails.body) || {};
+        return getDummyClassScheduleForRange(studentId, body.startDate, body.endDate);
     };
 
     window.dummyGetParentStudentClassSummary = async function (meetingId, ajaxReqDetails) {

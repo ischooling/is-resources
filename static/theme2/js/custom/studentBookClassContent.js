@@ -148,8 +148,7 @@ function getBookClassContent(data,moduleId,showAcademicYearValidation,classPlanC
                         html+=`</div>`;
                       }
                         
-                      var showSelectedCoursesForDummy = typeof getDummyStudentGradeKey === "function" && ["5", "6", "7", "8", "9", "10", "11", "12"].indexOf(getDummyStudentGradeKey()) >= 0;
-                      if (!(typeof isDummyStudentMode === "function" && isDummyStudentMode()) || showSelectedCoursesForDummy) {
+                      {
                        html+=`<div>`;
                           html+=`<div>`;
                               if(data.subjectList[0].name != "All Courses" && data.subjectList.length != 1){

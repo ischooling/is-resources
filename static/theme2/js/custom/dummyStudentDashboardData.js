@@ -45,6 +45,33 @@
         11: ["Economics Forum", "Physics Problem Solving"],
         12: ["College Readiness", "Financial Literacy Lab"]
     };
+    var DUMMY_ACTIVITY_NAMES = [
+        "Meet Your Classmates",
+        "Creative Reading Circle",
+        "Math Puzzle Challenge",
+        "Science Discovery Lab",
+        "Storytelling Workshop",
+        "Art and Ideas Club",
+        "Brain Games Hour",
+        "Presentation Practice"
+    ];
+    var DUMMY_ACTIVITY_DETAILS = [
+        "Ramon activity test",
+        "Team introduction activity",
+        "Interactive practice activity",
+        "Fun learning activity",
+        "Confidence building activity",
+        "Creative thinking activity"
+    ];
+    var DUMMY_CLUB_ANNOUNCEMENT_POOL = [
+        { name: "International Diplomats & Orators Society", category: "The Debate & MUN Club", focus: "debates, model UN, and confident public speaking" },
+        { name: "International Literary Society", category: "The Book Club", focus: "reading circles, creative writing, and story discussions" },
+        { name: "Viva de Lunaria Club", category: "The Art Club", focus: "painting, sketching, and creative challenges" },
+        { name: "Ridmond Criminology Club", category: "The Criminology Club", focus: "case studies, observation, and critical thinking" },
+        { name: "Music Club", category: "The Music Club", focus: "singing, rhythm, composition, and performance practice" },
+        { name: "The Aurelian Club", category: "The STEM Club", focus: "science, technology, engineering, and math projects" }
+    ];
+    var DUMMY_ACTIVITY_NAME_CACHE = {};
     var GRADE_KEYS = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
     var DUMMY_STUDENT_TIMEZONE = "America/New_York";
     var DUMMY_STUDENT_FEE_STRUCTURE = {
@@ -192,19 +219,26 @@
         var value = parseInt(row[fieldName] || 0, 10);
         return isNaN(value) || value < 0 ? 0 : value;
     }
+    // The admin form no longer has a Class Count input, so the backend always saves
+    // classCount as 0 for new/edited rows. Every feature reading this (Book a Class
+    // quotas, meeting counts, etc.) must fall back to its own default instead of
+    // treating that backend-default 0 as "admin explicitly chose zero classes".
     function configuredClassCount(fallback) {
-        return hasDbRows() ? dbCount("classCount", fallback || 0) : fallback;
+        var value = hasDbRows() ? dbCount("classCount", fallback || 0) : fallback;
+        return value || fallback;
     }
     function configuredActivityCount(fallback) {
         return hasDbRows() ? dbCount("activityCount", fallback || 0) : fallback;
     }
-    function cleanCourseName(courseName) {
-        var cleaned = String(courseName || "")
+    function normalizeCourseNameText(courseName) {
+        return String(courseName || "")
             .replace(/\bv\d+(?:[._-]\d+)*\b/gi, " ")
             .replace(/\s*\((?:BUZZ(?:-[A-Z]+)?|GS|Honors?|Advanced|Standard|Regular)\)\s*/gi, " ")
             .replace(/\s{2,}/g, " ")
             .trim();
-        var name = cleaned.toLowerCase();
+    }
+    function courseCategoryForName(cleaned) {
+        var name = String(cleaned || "").toLowerCase();
         if (/(english|language\s*arts|reading|writing|literature)/i.test(name)) return "Language Arts";
         if (/(math|algebra|geometry|calculus|trigonometry|statistics|pre-?calculus|pre-?algebra)/i.test(name)) return "Mathematics";
         if (/(science|biology|physics|chemistry|environmental|earth|space|marine|anatomy|physiology)/i.test(name)) return "Science";
@@ -213,6 +247,13 @@
         if (/(history|geography|social\s*studies|social\s*science|government|civics|economics|political)/i.test(name)) return "Social Studies";
         if (/(physical\s*education|physical\s*fitness|\bpe\b|health)/i.test(name)) return "Physical Education";
         return cleaned;
+    }
+    function cleanCourseName(courseName) {
+        var cleaned = normalizeCourseNameText(courseName);
+        return courseCategoryForName(cleaned);
+    }
+    function exactCourseName(courseName) {
+        return normalizeCourseNameText(courseName);
     }
     function feeGradeName() {
         var g = grade();
@@ -300,7 +341,7 @@
         if (name.indexOf("spanish") >= 0) return "spanish.jpg";
         if (name.indexOf("world history") >= 0) return "World History.jpg";
         if (name.indexOf("history") >= 0) return "History.jpg";
-        if (name.indexOf("math") >= 0 || name.indexOf("algebra") >= 0 || name.indexOf("geometry") >= 0) return "Mathematics.jpg";
+        if (name.indexOf("math") >= 0 || name.indexOf("algebra") >= 0 || name.indexOf("geometry") >= 0 || name.indexOf("calculus") >= 0 || name.indexOf("statistics") >= 0 || name.indexOf("trigonometry") >= 0) return "Mathematics.jpg";
         if (name.indexOf("science") >= 0 || name.indexOf("biology") >= 0 || name.indexOf("physics") >= 0 || name.indexOf("chemistry") >= 0) return "Science.jpg";
         if (name.indexOf("english") >= 0 || name.indexOf("language arts") >= 0) return "English.jpg";
         if (name.indexOf("physical education") >= 0 || name.indexOf(" pe ") >= 0) return "Physical education.jpg";
@@ -308,15 +349,32 @@
         if (name.indexOf("economics") >= 0) return "Economics.jpg";
         return "World History.jpg";
     }
-    function splitCommaValues(value) {
+    function splitCommaValues(value, keepExactName) {
         return String(value || "")
             .split(",")
             .map(function (item) {
-                return cleanCourseName(item);
+                return keepExactName ? exactCourseName(item) : cleanCourseName(item);
             })
             .filter(function (item) {
                 return !!item;
             });
+    }
+    function splitTeacherValues(value) {
+        return String(value || "")
+            .split(",")
+            .map(safeTeacherName)
+            .filter(function (item) {
+                return !!item;
+            });
+    }
+    function isOneToOneLearningProgram(value) {
+        value = String(value || "").trim().toUpperCase();
+        if (!value || value.indexOf("FLEX") >= 0) return false;
+        return value === "ONE_TO_ONE" || value === "ONE-TO-ONE LEARNING" || value === "ONE TO ONE LEARNING" || value.indexOf("ONE TO ONE") >= 0 || value.indexOf("ONE-TO-ONE") >= 0;
+    }
+    function currentLearningProgramIsOneToOne() {
+        var row = firstDbRow();
+        return isOneToOneLearningProgram((row && (row.learningProgram || row.learningProgramName)) || params().get("demoLearningProgram") || params().get("demoLearningProgramName") || "");
     }
     function dbSubjectsByGradeKey(key) {
         if (!hasDbRows() || key !== dbGradeKey()) {
@@ -324,10 +382,11 @@
         }
         var seen = {}, rows = [];
         for (var i = 0; i < dbRows().length; i++) {
-            var row = dbRows()[i], courseNames = splitCommaValues(row.courseName || ""), courseIds = splitCommaValues(row.courseId || "");
+            var row = dbRows()[i], keepExactName = !isElementaryExtraClassGrade(), courseNames = splitCommaValues(row.courseName || "", keepExactName), courseIds = splitCommaValues(row.courseId || "", keepExactName), rowTeachers = isOneToOneLearningProgram(row.learningProgram || row.learningProgramName) ? splitTeacherValues(row.teacherName || row.teacherFullName || row.classTeacherName || row.name || "") : [];
             for (var courseIndex = 0; courseIndex < courseNames.length; courseIndex++) {
                 var courseName = courseNames[courseIndex], rawCourseId = courseIds[courseIndex] || courseName;
                 if (!courseName) continue;
+                var teacherName = rowTeachers[courseIndex] || rowTeachers[0] || "";
                 var subjectId = parseInt(rawCourseId || 0, 10);
                 var uniqueKey = courseName.toLowerCase();
                 if (seen[uniqueKey]) continue;
@@ -338,7 +397,7 @@
                     subjectName: courseName,
                     subjectIcon: subjectIconForCourseName(courseName),
                     sourceRow: row,
-                    teachers: [TEACHERS[((i + courseIndex) * 2) % TEACHERS.length], TEACHERS[((i + courseIndex) * 2 + 1) % TEACHERS.length], TEACHERS[((i + courseIndex) * 2 + 2) % TEACHERS.length]]
+                    teachers: teacherName ? [teacherName] : [TEACHERS[((i + courseIndex) * 2) % TEACHERS.length], TEACHERS[((i + courseIndex) * 2 + 1) % TEACHERS.length], TEACHERS[((i + courseIndex) * 2 + 2) % TEACHERS.length]]
                 });
             }
         }
@@ -474,6 +533,136 @@
     }
     function studentId() { return SOURCE.studentId || SOURCE.studentUserId || (9100001 + offset()); }
     function studentStandardId() { return SOURCE.studentStandardId || (9200001 + offset()); }
+    function dummyRandomSeed() {
+        var baseDate = window.getDummyStudentBaseDate ? fdate(window.getDummyStudentBaseDate()) : "";
+        return String(uid()) + "|" + gradeKey() + "|" + userName() + "|" + baseDate;
+    }
+    function seededNumber(value) {
+        value = String(value || "");
+        var hash = 0;
+        for (var i = 0; i < value.length; i++) {
+            hash = ((hash << 5) - hash) + value.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+    function dummyAnnouncement(id, title, date, remark, unread, timeLabel) {
+        return {
+            announcementId: id,
+            announceId: id,
+            announceTitle: title,
+            createdDate: fmt(date),
+            timeLabel: timeLabel || "",
+            replyStatus: unread ? "N" : "Y",
+            latestStatus: unread ? "Y" : "N",
+            latestStstus: unread ? "Y" : "N",
+            userId: uid(),
+            moduleId: typeof moduleId !== "undefined" ? moduleId : 58,
+            teacherRemark: remark,
+            fileType: "",
+            attachment: ""
+        };
+    }
+    function dummyBaseAnnouncements() {
+        var base = window.getDummyStudentBaseDate(), g = grade();
+        return [
+            dummyAnnouncement(700001 + offset(), "Welcome to " + g.label, base, "Welcome to your " + g.label + " demo dashboard. Please review your class schedule and join your live class on time.", true),
+            dummyAnnouncement(700101 + offset(), "Class Readiness Reminder", plusDays(base, -1), "Keep your notebook, pencils, and learning materials ready before every online class.", true)
+        ];
+    }
+    function dummyClubSelection() {
+        var list = DUMMY_CLUB_ANNOUNCEMENT_POOL.slice(), seed = seededNumber(dummyRandomSeed());
+        for (var i = list.length - 1; i > 0; i--) {
+            seed = (seed * 9301 + 49297) % 233280;
+            var j = seed % (i + 1), tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+        }
+        return list;
+    }
+    function clubDate(base, daysOffset, hour) {
+        var date = plusDays(base, daysOffset);
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour || 16, 0, 0);
+    }
+    function clubAnnouncement(club, index, date, upcoming) {
+        var dateText = displayDateOnly(date);
+        var remark = upcoming
+                ? club.name + " is scheduled for " + dateText + ". Join us for " + club.focus + "."
+                : club.name + " was held on " + dateText + ". Students participated in " + club.focus + ".";
+        var timeLabel = upcoming ? "upcoming" : (index === upcomingCountForDummyClubs() + 1 ? "1 day ago" : "last week");
+        return dummyAnnouncement(710000 + offset() * 100 + index, club.category + " " + (upcoming ? "Upcoming" : "Held") + ": " + club.name, date, remark, upcoming, timeLabel);
+    }
+    function upcomingCountForDummyClubs() {
+        return (seededNumber(dummyRandomSeed() + "|upcoming") % 2) + 1;
+    }
+    function dummyClubAnnouncements() {
+        var base = window.getDummyStudentBaseDate(), clubs = dummyClubSelection();
+        var upcomingCount = upcomingCountForDummyClubs();
+        var upcomingDates = [3, 10], pastDates = [-1, -8, -14], rows = [];
+        for (var i = 0; i < upcomingCount && i < clubs.length; i++) {
+            rows.push(clubAnnouncement(clubs[i], i + 1, clubDate(base, upcomingDates[i], 16 + i), true));
+        }
+        for (var j = 0; j < 3 && (j + upcomingCount) < clubs.length; j++) {
+            rows.push(clubAnnouncement(clubs[j + upcomingCount], j + upcomingCount + 1, clubDate(base, pastDates[j], 15 + j), false));
+        }
+        return rows;
+    }
+    function unreadAnnouncementCount(rows) {
+        rows = rows || [];
+        var count = 0;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].replyStatus === "N") {
+                count++;
+            }
+        }
+        return count;
+    }
+    function announcementSequence(row) {
+        if ((row || {}).timeLabel === "upcoming") return 1;
+        if ((row || {}).timeLabel === "1 day ago") return 2;
+        if ((row || {}).timeLabel === "last week") return 3;
+        var date = new Date(String((row || {}).createdDate || "").replace(" ", "T"));
+        if (isNaN(date.getTime())) return 4;
+        var diffDays = Math.floor((window.getDummyStudentBaseDate() - date) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) return 1;
+        if (diffDays === 1) return 2;
+        if (diffDays >= 7) return 3;
+        return 4;
+    }
+    function dummyAnnouncements() {
+        return dummyBaseAnnouncements().concat(dummyClubAnnouncements()).sort(function (a, b) {
+            return announcementSequence(a) - announcementSequence(b);
+        });
+    }
+    function dummyAnnouncementListing() {
+        var rows = dummyAnnouncements();
+        return { newAnnouncementCount: unreadAnnouncementCount(rows), schoolAnnounceDTO: rows };
+    }
+    function dummyAnnouncementTimeLabel(dateString) {
+        var rows = dummyAnnouncements();
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].timeLabel && rows[i].createdDate === dateString) {
+                return rows[i].timeLabel;
+            }
+        }
+        return "";
+    }
+    function patchDummyStudentAnnouncementTimeAgo() {
+        if (window.__dummyStudentAnnouncementTimeAgoPatched || typeof window.timeAgo !== "function") {
+            return;
+        }
+        window.__dummyStudentAnnouncementTimeAgoPatched = true;
+        var originalTimeAgo = window.timeAgo;
+        window.timeAgo = function (dateString) {
+            if (typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()) {
+                var label = dummyAnnouncementTimeLabel(dateString);
+                if (label) {
+                    return label;
+                }
+            }
+            return originalTimeAgo.apply(this, arguments);
+        };
+    }
     function imageBase() {
         var base = typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "";
         var contextPath = typeof CONTEXT_PATH !== "undefined" ? CONTEXT_PATH : "";
@@ -490,6 +679,9 @@
     function safeTeacherName(value) {
         value = String(value == null ? "" : value).trim();
         return value && value.toLowerCase() !== "undefined" && value.toLowerCase() !== "null" ? value : "";
+    }
+    function teacherNameWithoutHonorific(value) {
+        return safeTeacherName(value).replace(/^(Mr\.?|Mrs\.?|Ms\.?|Miss|Dr\.?)\s+/i, "");
     }
     function teacher(s, i) {
         var teachers = ((s && s.teachers) || []).map(safeTeacherName).filter(function (name) { return !!name; });
@@ -614,7 +806,8 @@
             message: "Dummy student assigned teachers success",
             details: {
                 assignedTeachers: list.map(function (subject, index) {
-                    var courseName = cleanCourseName(cleanSubjectName(subject.subjectName || subject.subjectTitle || "Course"));
+                    var rawSubjectName = subject.subjectName || subject.subjectTitle || "Course";
+                    var courseName = isElementaryExtraClassGrade() ? cleanCourseName(cleanSubjectName(rawSubjectName)) : rawSubjectName;
                     return {
                         selectedCourses: courseName,
                         courseName: courseName,
@@ -666,7 +859,7 @@
                 threadId: "dummy-student-teacher-" + uid(),
                 studentUserId: String(typeof USER_ID !== "undefined" ? USER_ID : uid()),
                 studentName: userName(),
-                teacherName: firstClass.teacherName || firstClass.name || "Olivia Parker",
+                teacherName: teacherNameWithoutHonorific(firstClass.teacherName || firstClass.name || "Olivia Parker"),
                 teacherGender: firstClass.teacherGender || firstClass.senderGender || "FEMALE",
                 chatWithRole: "TEACHER",
                 latestMessage: "Please revise today's " + (firstClass.courseName || "Language Arts") + " notes before the next class.",
@@ -696,7 +889,7 @@
         var teacherThread = threads[0];
         var schoolThread = threads[1];
         var isSchoolThread = String(threadId) === String(schoolThread.threadId);
-        var teacherName = teacherThread.teacherName || "Olivia Parker";
+        var teacherName = teacherNameWithoutHonorific(teacherThread.teacherName || "Olivia Parker");
         var courseName = (dummyStudentScheduleResponse().details.schedule[0] || {}).courseName || "Language Arts";
         var messages = isSchoolThread ? [
             {
@@ -794,20 +987,37 @@
         return event;
     }
     function cleanSubjectName(name) { return name.replace(/ Grade K$/i, "").replace(/ Grade \d+$/i, ""); }
+    function randomActivityItems(source, count, cacheKey) {
+        if (DUMMY_ACTIVITY_NAME_CACHE[cacheKey]) {
+            return DUMMY_ACTIVITY_NAME_CACHE[cacheKey].slice(0, count);
+        }
+        var pool = (source || []).slice();
+        var rows = [];
+        while (rows.length < count) {
+            if (!pool.length) {
+                pool = (source || []).slice();
+            }
+            var index = Math.floor(Math.random() * pool.length);
+            rows.push(pool.splice(index, 1)[0]);
+        }
+        DUMMY_ACTIVITY_NAME_CACHE[cacheKey] = rows;
+        return rows.slice(0, count);
+    }
     function activityNames() {
         var names = ACTIVITY_ROWS[gradeKey()] || ACTIVITY_ROWS.K;
         if (!hasDbRows()) {
             if (hasDemoContext()) {
                 return [];
             }
-            return names;
+            return randomActivityItems(DUMMY_ACTIVITY_NAMES, names.length, "activityNames-" + gradeKey());
         }
         var count = configuredActivityCount(names.length);
-        var rows = [];
-        for (var i = 0; i < count; i++) {
-            rows.push(names[i % names.length] || ("Activity " + (i + 1)));
-        }
-        return rows;
+        return randomActivityItems(DUMMY_ACTIVITY_NAMES, count, "activityNames-" + gradeKey() + "-" + count);
+    }
+    function activityDetailName(index) {
+        var count = Math.max(1, configuredActivityCount((ACTIVITY_ROWS[gradeKey()] || ACTIVITY_ROWS.K).length));
+        var details = randomActivityItems(DUMMY_ACTIVITY_DETAILS, count, "activityDetails-" + gradeKey() + "-" + count);
+        return details[index % details.length] || "Interactive practice activity";
     }
     function activityTypeRows() {
         var names = activityNames(), rows = [];
@@ -839,7 +1049,7 @@
         var base = window.getDummyStudentBaseDate(), list = selectedDummySubjects(), rows = [];
         for (var i = 0; i < list.length; i++) {
             var total = configuredClassCount(12), booked = Math.min(total, i % 2), completed = Math.min(Math.max(total - booked, 0), i % 3), rescheduled = total > 1 && i === 1 ? 1 : 0, missedByYou = 0, missedByTeacher = total > 2 && i === 2 ? 1 : 0, expired = 0;
-            rows.push({ img: img(list[i]), assignedTeacherCount: 1, name: list[i].subjectName, subjectId: list[i].subjectId, studentStandardId: studentStandardId(), teacherName: teacher(list[i], i), total: total, booked: booked, completed: completed, rescheduled: rescheduled, missedByYou: missedByYou, missedByTeacher: missedByTeacher, expired: expired, left: total - booked - completed - rescheduled - missedByYou - missedByTeacher - expired, complimentaryTotal: 2, extraClassTotal: 10, weekLeftClass: 3 });
+            rows.push({ img: img(list[i]), assignedTeacherCount: 1, name: list[i].subjectName, subjectId: list[i].subjectId, studentStandardId: studentStandardId(), teacherName: teacher(list[i], i), total: total, booked: booked, completed: completed, rescheduled: rescheduled, missedByYou: missedByYou, missedByTeacher: missedByTeacher, expired: expired, left: total - booked - completed - rescheduled - missedByYou - missedByTeacher - expired, complimentaryTotal: 2, extraClassTotal: 10, weekLeftClass: isElementaryExtraClassGrade() ? 3 : 1 });
         }
         return rows;
     }
@@ -848,6 +1058,9 @@
     }
     function isElementaryExtraClassGrade() {
         return ["K", "1", "2", "3", "4", "5"].indexOf(gradeKey()) !== -1;
+    }
+    function defaultClassPerWeek() {
+        return isElementaryExtraClassGrade() ? 3 : 6;
     }
     function dummyExtraClassPlans() {
         if (isElementaryExtraClassGrade()) {
@@ -1493,6 +1706,18 @@
     if (window.isDummyStudentMode()) {
         window.USER_TIMEZONE = DUMMY_STUDENT_TIMEZONE;
         try { USER_TIMEZONE = DUMMY_STUDENT_TIMEZONE; } catch (e) {}
+        ensureDummyAnnouncementFixStyles();
+    }
+    function ensureDummyAnnouncementFixStyles() {
+        if (document.getElementById("dummy-announcement-fix-styles")) { return; }
+        var style = document.createElement("style");
+        style.id = "dummy-announcement-fix-styles";
+        style.textContent =
+            ".announcement-ribbon-star{top:0 !important;left:2px !important;vertical-align:middle !important;}" +
+            "#announcementbyIdData .modal-header{position:relative !important;}" +
+            "#announcementbyIdData .modal-header .close{position:absolute !important;top:0 !important;right:0 !important;margin:0 !important;}" +
+            "#announcementbyIdData .modal-header .modal-title{padding-right:2rem;}";
+        document.head.appendChild(style);
     }
 
     // ── Dummy Student Dashboard: School/Course Calendar ──────────────────────────
@@ -1530,7 +1755,7 @@
         if (dow === 0 || dow === 6) {
             return []; // no assignments on Saturday/Sunday
         }
-        var courses = dummyAssignmentCourses();
+        var courses = dummyElementaryAwareCourses();
         var today = fdate(window.getDummyStudentBaseDate());
         var isPast = day < today;
         return courses.map(function (course, ci) {
@@ -1551,30 +1776,115 @@
         });
     }
 
-    // One scheduled class per saved course per day. On the current date, the first
-    // class starts 15 minutes ago so "now" always falls inside it — guaranteeing one
-    // Live class today (same trick as dummyStudentScheduleResponse()). Live/Upcoming/
-    // Completed status for every class is computed automatically by the existing
-    // calendar logic from start/end vs the real current time.
+    // Grade K-5 only: instead of one class per saved course per weekday, pick 3
+    // random courses (stable for the day, seed includes today's date so it
+    // reshuffles daily) out of whatever was selected in the Dummy Student
+    // Dashboard Management System, and cap classes at 3 per calendar week —
+    // 1 on the actual current date, up to 2 more on the future weekdays left
+    // in that same week. Weeks that don't contain today (future weeks in the
+    // month view) get their own deterministic set of up to 3 weekdays; weeks
+    // fully in the past get none, matching "only current + future dates".
+    var ELEMENTARY_WEEK_CLASS_SCHEDULE_CACHE = {};
+    function seededShuffle(list, seedKey) {
+        var arr = list.slice(), seed = seededNumber(seedKey);
+        for (var i = arr.length - 1; i > 0; i--) {
+            seed = (seed * 9301 + 49297) % 233280;
+            var j = seed % (i + 1), tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+        return arr;
+    }
+    function dummySelectedThreeSubjects() {
+        var courses = dummyAssignmentCourses();
+        if (courses.length <= 3) {
+            return courses;
+        }
+        return seededShuffle(courses, dummyRandomSeed() + "|3subjects").slice(0, 3);
+    }
+    // Grade K-5 everywhere in the calendar (assignments, course filter list, classes)
+    // must stick to the same 3 random subjects — otherwise assignments still list all
+    // saved courses and the calendar looks like nothing changed.
+    function dummyElementaryAwareCourses() {
+        return isElementaryExtraClassGrade() ? dummySelectedThreeSubjects() : dummyAssignmentCourses();
+    }
+    function dummyElementaryWeekSchedule(weekStartStr) {
+        if (ELEMENTARY_WEEK_CLASS_SCHEDULE_CACHE[weekStartStr]) {
+            return ELEMENTARY_WEEK_CLASS_SCHEDULE_CACHE[weekStartStr];
+        }
+        var subjects3 = dummySelectedThreeSubjects();
+        var weekStart = moment(weekStartStr, "YYYY-MM-DD");
+        var weekdays = [];
+        for (var i = 1; i <= 5; i++) { // Monday..Friday
+            weekdays.push(weekStart.clone().add(i, "days").format("YYYY-MM-DD"));
+        }
+        var today = fdate(window.getDummyStudentBaseDate());
+        var chosenDays;
+        if (weekdays.indexOf(today) !== -1) {
+            var futureDays = weekdays.filter(function (d) { return d > today; });
+            chosenDays = [today].concat(futureDays.slice(0, 2));
+        } else if (today < weekdays[0]) {
+            chosenDays = seededShuffle(weekdays, dummyRandomSeed() + "|week|" + weekStartStr).slice(0, 3).sort();
+        } else {
+            chosenDays = []; // week is fully in the past
+        }
+        var schedule = {};
+        chosenDays.forEach(function (day, idx) {
+            schedule[day] = subjects3[idx % subjects3.length];
+        });
+        ELEMENTARY_WEEK_CLASS_SCHEDULE_CACHE[weekStartStr] = schedule;
+        return schedule;
+    }
+    // Grade 6-12: one subject's class per weekday (Mon-Fri), rotating through every
+    // saved subject in order — Monday=subject 0, Tuesday=subject 1, ... wrapping back
+    // to subject 0 the following Monday. If more than 5 subjects are selected, the
+    // rotation just keeps going into the next week(s) instead of wrapping at 5, so a
+    // leftover subject's class shows up on whichever day its turn comes around.
+    // businessDayIndex counts weekdays since a fixed Monday epoch so the rotation is
+    // stable across days/weeks/months instead of resetting per view.
+    function businessDayIndex(dayStr) {
+        var epoch = moment("2000-01-03", "YYYY-MM-DD"); // a Monday
+        var diffDays = moment(dayStr, "YYYY-MM-DD").diff(epoch, "days");
+        var weeks = Math.floor(diffDays / 7), extra = diffDays % 7; // extra: 0=Mon..4=Fri
+        return weeks * 5 + Math.min(Math.max(extra, 0), 4);
+    }
     function dummyClassesForDay(day) {
         var dayDate = moment(day, "YYYY-MM-DD").toDate();
         var dow = dayDate.getDay();
         if (dow === 0 || dow === 6) {
             return []; // no classes on Saturday/Sunday
         }
-        var courses = dummyAssignmentCourses();
         var isToday = day === fdate(window.getDummyStudentBaseDate());
-        return courses.map(function (course, ci) {
-            var start = (isToday && ci === 0)
+        if (isElementaryExtraClassGrade()) {
+            var weekStartStr = moment(day, "YYYY-MM-DD").startOf("week").format("YYYY-MM-DD");
+            var course = dummyElementaryWeekSchedule(weekStartStr)[day];
+            if (!course) {
+                return [];
+            }
+            var elementaryStart = isToday
                 ? plusMinutes(window.getDummyStudentBaseDate(), -15)
-                : new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 9 + (ci * 2) % 10, 0, 0);
-            return applyTeacherFields({
-                id: "dummy-class-" + day + "-" + ci, category: "CLASS", eventTitle: course.subjectName, title: "",
+                : new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 9, 0, 0);
+            return [applyTeacherFields({
+                id: "dummy-class-" + day, category: "CLASS", eventTitle: course.subjectName, title: "",
                 courseName: course.subjectName, subjectName: course.subjectName,
                 courseId: course.subjectId, subjectId: course.subjectId,
-                start: fmt(start), end: fmt(plusMinutes(start, 90)), timezone: tz(), eventType: "ONE_TO_ONE"
-            }, teacher(course, ci));
-        });
+                start: fmt(elementaryStart), end: fmt(plusMinutes(elementaryStart, 90)), timezone: tz(), eventType: "ONE_TO_ONE"
+            }, teacher(course, 0))];
+        }
+        var courses = dummyAssignmentCourses();
+        if (!courses.length) {
+            return [];
+        }
+        var rotatedCourse = courses[businessDayIndex(day) % courses.length];
+        var rotatedStart = isToday
+            ? plusMinutes(window.getDummyStudentBaseDate(), -15)
+            : new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 9, 0, 0);
+        return [applyTeacherFields({
+            id: "dummy-class-" + day, category: "CLASS", eventTitle: rotatedCourse.subjectName, title: "",
+            courseName: rotatedCourse.subjectName, subjectName: rotatedCourse.subjectName,
+            courseId: rotatedCourse.subjectId, subjectId: rotatedCourse.subjectId,
+            start: fmt(rotatedStart), end: fmt(plusMinutes(rotatedStart, 90)), timezone: tz(), eventType: "ONE_TO_ONE"
+        }, teacher(rotatedCourse, 0))];
     }
 
     // School holidays — on any of these dates, classes/activities are skipped (school
@@ -1602,17 +1912,42 @@
         return { id: "dummy-holiday-" + day, category: "HOLIDAY", eventTitle: holiday.name, title: holiday.name, start: day, allDay: true, timezone: tz() };
     }
 
-    // One activity per day, same per-day pattern as assignments/classes, so it shows
-    // up on whatever date is being viewed instead of only near the real "today".
-    // Names come from activityNames() (the existing saved-activity-count/grade source),
-    // cycling by day-of-month for variety.
-    function dummyActivitiesForDay(day) {
+    // activityCount activities (the "student-dashboard-count-cell" column in the Dummy
+    // Student Dashboard Management System table) show one per day: the 1st on the
+    // actual current date, the rest one-per-day on the following available weekdays
+    // (skipping weekends/holidays) — same "today + rest on future dates" shape as
+    // classes. Total occurrences across the calendar = activityCount, for every grade.
+    var ACTIVITY_SCHEDULE_CACHE = {};
+    function dummyActivitySchedule() {
         var names = activityNames();
-        if (!names.length) {
+        var key = names.join("|") + "|" + fdate(window.getDummyStudentBaseDate());
+        if (ACTIVITY_SCHEDULE_CACHE[key]) {
+            return ACTIVITY_SCHEDULE_CACHE[key];
+        }
+        var schedule = {};
+        if (names.length) {
+            var cursor = moment(fdate(window.getDummyStudentBaseDate()), "YYYY-MM-DD");
+            var placed = 0, guard = 0;
+            while (placed < names.length && guard < 120) {
+                var dayStr = cursor.format("YYYY-MM-DD");
+                var dow = cursor.day();
+                if (dow !== 0 && dow !== 6 && !dummyHolidayForDay(dayStr)) {
+                    schedule[dayStr] = names[placed];
+                    placed++;
+                }
+                cursor.add(1, "day");
+                guard++;
+            }
+        }
+        ACTIVITY_SCHEDULE_CACHE[key] = schedule;
+        return schedule;
+    }
+    function dummyActivitiesForDay(day) {
+        var name = dummyActivitySchedule()[day];
+        if (!name) {
             return [];
         }
         var dayDate = moment(day, "YYYY-MM-DD").toDate();
-        var name = names[dayDate.getDate() % names.length];
         var start = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 15, 0, 0);
         return [{ id: "dummy-activity-" + day, category: "ACTIVITY", eventTitle: name, title: name, start: fmt(start), end: fmt(plusMinutes(start, 45)), timezone: tz() }];
     }
@@ -1627,10 +1962,6 @@
         return days;
     }
 
-    // Same entry point every caller already uses (studentDashboardContent.js does
-    // callSchoolCalendar('', USER_ID, UNIQUEUUID, viewName, startdate, enddate, flag)).
-    // dashboardCalendarNew.js exposes its render helpers/state on window.dashboardCalendarNew(State),
-    // so we reuse them instead of hitting the real API or touching that file.
     function patchDummySchoolCalendar() {
         if (window.__dummySchoolCalendarPatched || typeof window.callSchoolCalendar !== "function" || !window.dashboardCalendarNew) {
             return;
@@ -1643,19 +1974,11 @@
             }
             var dc = window.dashboardCalendarNew;
             var state = window.dashboardCalendarNewState;
-            // refreshCalendarFromCurrentView() (fired on datepicker change) only re-fetches
-            // if lastRequest is set — the real callSchoolCalendarNew sets it, so we must too.
             state.lastRequest = { formId: formId, userId: userId, uniqueId: uniqueId };
             if (!state.selectedDate) {
                 state.selectedDate = moment().tz(dc.getStudentTimezone()).format("YYYY-MM-DD");
             }
 
-            // Don't trust the raw startdate/enddate params — dashboardCalendarNew.js pads
-            // them differently per view (and Today's padding overlaps neighboring days).
-            // Instead mirror exactly what each view itself renders: a single day for
-            // Today, the Sun–Sat week for Week (renderCustomWeekView), and the full
-            // calendar grid for Month — otherwise our generated dates and the UI's
-            // displayed date columns don't line up and everything looks blank.
             var selected = moment(state.selectedDate || startdate || fdate(window.getDummyStudentBaseDate()), "YYYY-MM-DD");
             var days;
             if (dc.isTodayView(viewName)) {
@@ -1680,7 +2003,7 @@
                     events = events.concat(dummyClassesForDay(day), dummyActivitiesForDay(day));
                 }
             });
-            var courseDetails = dummyAssignmentCourses().map(function (course) {
+            var courseDetails = dummyElementaryAwareCourses().map(function (course) {
                 return { courseId: course.subjectId, courseName: course.subjectName };
             });
 
@@ -1809,18 +2132,18 @@
         if (!table.length) return;
         table.closest(".table-responsive").addClass("student-dashboard-management-table-wrap");
         if (!table.find("colgroup").length) {
-            table.prepend('<colgroup><col style="width:150px;"><col style="width:190px;"><col style="width:95px;"><col style="width:500px;"><col style="width:130px;"><col style="width:95px;"><col style="width:105px;"><col style="width:95px;"><col style="width:120px;"></colgroup>');
+            table.prepend('<colgroup><col style="width:150px;"><col style="width:190px;"><col style="width:95px;"><col style="width:500px;"><col style="width:130px;"><col style="width:105px;"><col style="width:95px;"><col style="width:120px;"></colgroup>');
         }
         var headerRow = table.find("thead tr").first();
         if (!headerRow.find(".student-dashboard-dummy-lms-head").length) {
             headerRow.find("th").eq(3).after('<th class="student-dashboard-dummy-lms-head">Dummy LMS User</th>');
-            headerRow.find("th").eq(5).text("Classes");
-            headerRow.find("th").eq(6).text("Activities");
+            headerRow.find("th").eq(5).remove(); // Class Count column removed
+            headerRow.find("th").eq(5).text("Activities");
         }
         table.find("tbody tr").each(function (index) {
             var cells = $(this).children("td");
             if (cells.length === 1 && cells.attr("colspan")) {
-                cells.attr("colspan", "9");
+                cells.attr("colspan", "8");
                 return;
 	            }
 	            if (!$(this).find(".student-dashboard-lms-cell").length) {
@@ -1829,9 +2152,9 @@
                 var label = DUMMY_STUDENT_LMS_USERS[dummyLmsUserId] || dummyLmsUserId || "-";
                 cells.eq(3).after('<td class="student-dashboard-lms-cell"><span class="badge badge-light border">' + escapeDummyHtml(label) + '</span></td>');
             }
+            $(this).children("td").eq(5).remove(); // Class Count value removed
             $(this).children("td").eq(5).addClass("student-dashboard-count-cell");
-            $(this).children("td").eq(6).addClass("student-dashboard-count-cell");
-            var statusCell = $(this).children("td").eq(7).addClass("student-dashboard-status-cell");
+            var statusCell = $(this).children("td").eq(6).addClass("student-dashboard-status-cell");
             if (!statusCell.find(".badge").length) {
                 var active = $.trim(statusCell.text()) === "Active";
                 statusCell.html('<span class="badge ' + (active ? "badge-success" : "badge-secondary") + '">' + (active ? "Active" : "Inactive") + '</span>');
@@ -1959,13 +2282,14 @@
     };
     window.getDummyGradeKDashboardDetails = function () {
         var g = grade(), base = window.getDummyStudentBaseDate();
-        return { status: "1", statusCode: "S001", message: "Dummy " + g.label + " dashboard content success", userId: uid(), userRole: "STUDENT", userName: userName(), uniqueId: typeof UNIQUEUUID !== "undefined" ? UNIQUEUUID : "dummy", schoolId: schoolId(), standardId: g.standardId, studentStandardId: studentStandardId(), moduleId: typeof moduleId !== "undefined" ? moduleId : 0, sessionCreated: true, isPayLmsPaymentPending: dummyLmsUserId() ? "" : "Dummy LMS user is not mapped.", lmsProviderURL: dummyLmsProviderUrl(), schoolLogo: "", email: "demo.student@test.local", feedbackId: 0, eventId: 0, videoUrl: "N", timePrefrenceSelectionStatus: "Y", activityTypes: activityTypeRows(), extraActivities: activityDetails(base), dashboardDetail: subjects().map(function (s, i) { return { userId: uid(), studentId: studentId(), standardId: g.standardId, standardName: g.standardName, imgURl: img(s), subjectId: s.subjectId, subjectCode: s.subjectCode, subjectName: s.subjectName, moduleName: s.subjectName, subjectTitle: s.subjectName, subjectIcon: s.subjectIcon, teacherNames: teacherList(s), subjectDesc: s.subjectName, subjectRating: 5, bgColor: "#027fff", courseType: "FT", subjectType: "FT", subjectTypeFullName: "Full Time", duration: 12, providerId: 40, studentSessionId: 9400001 + offset() * 100 + i, planCount: 0, planTotalCount: 0, remainMeeting: 0, planStartDate: fdate(plusMonths(base, -1)), planEndDate: fdate(plusMonths(base, 1)) }; }), roleAndModuleAssign: {}, schoolAnnouncements: { newAnnouncementCount: 0, schoolAnnounceDTO: [] }, registrationType: "ONE_TO_ONE", userTimezone: tz(), showGraduationCeremonyPopup: "N", graduationCeremonyRegistrationDeadline: "", countryISOCode: "US", nextGradeId: g.nextGradeId, nextGrade: g.nextGrade, payload: "", studentFeedback: 0, inactiveFlag: false };
+        return { status: "1", statusCode: "S001", message: "Dummy " + g.label + " dashboard content success", userId: uid(), userRole: "STUDENT", userName: userName(), uniqueId: typeof UNIQUEUUID !== "undefined" ? UNIQUEUUID : "dummy", schoolId: schoolId(), standardId: g.standardId, studentStandardId: studentStandardId(), moduleId: typeof moduleId !== "undefined" ? moduleId : 0, sessionCreated: true, isPayLmsPaymentPending: dummyLmsUserId() ? "" : "Dummy LMS user is not mapped.", lmsProviderURL: dummyLmsProviderUrl(), schoolLogo: "", email: "demo.student@test.local", feedbackId: 0, eventId: 0, videoUrl: "N", timePrefrenceSelectionStatus: "Y", activityTypes: activityTypeRows(), extraActivities: activityDetails(base), dashboardDetail: subjects().map(function (s, i) { return { userId: uid(), studentId: studentId(), standardId: g.standardId, standardName: g.standardName, imgURl: img(s), subjectId: s.subjectId, subjectCode: s.subjectCode, subjectName: s.subjectName, moduleName: s.subjectName, subjectTitle: s.subjectName, subjectIcon: s.subjectIcon, teacherNames: teacherList(s), subjectDesc: s.subjectName, subjectRating: 5, bgColor: "#027fff", courseType: "FT", subjectType: "FT", subjectTypeFullName: "Full Time", duration: 12, providerId: 40, studentSessionId: 9400001 + offset() * 100 + i, planCount: 0, planTotalCount: 0, remainMeeting: 0, planStartDate: fdate(plusMonths(base, -1)), planEndDate: fdate(plusMonths(base, 1)) }; }), roleAndModuleAssign: {}, schoolAnnouncements: dummyAnnouncementListing(), registrationType: "ONE_TO_ONE", userTimezone: tz(), showGraduationCeremonyPopup: "N", graduationCeremonyRegistrationDeadline: "", countryISOCode: "US", nextGradeId: g.nextGradeId, nextGrade: g.nextGrade, payload: "", studentFeedback: 0, inactiveFlag: false };
     };
     window.getDummyAnnouncementDetails = function () {
-        var base = window.getDummyStudentBaseDate(), g = grade(), rows = [[700001 + offset(), "Welcome to " + g.label, "Welcome to your " + g.label + " demo dashboard. Please review your class schedule and join your live class on time."], [700101 + offset(), "Class Readiness Reminder", "Keep your notebook, pencils, and learning materials ready before every online class."]];
-        return { status: "1", newAnnouncementCount: rows.length, announcements: rows.map(function (r, i) { return { announcementId: r[0], announceId: r[0], announceTitle: r[1], createdDate: fmt(plusDays(base, -i)), replyStatus: "N", latestStatus: "Y", userId: uid(), moduleId: 58, teacherRemark: r[2], fileType: "", attachment: "" }; }) };
+        var rows = dummyAnnouncements();
+        return { status: "1", newAnnouncementCount: unreadAnnouncementCount(rows), announcements: rows };
     };
     window.getDummyAnnouncementById = function (id) { var a = window.getDummyAnnouncementDetails().announcements; for (var i = 0; i < a.length; i++) if (a[i].announcementId == id) return { status: 1, announcement: a[i] }; return { status: 0, message: "Announcement not found" }; };
+    patchDummyStudentAnnouncementTimeAgo();
     window.getDummyNewsList = function () {
         var base = window.getDummyStudentBaseDate(), g = grade(), imageUrl = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "waiting-page-school-demo.png", logoUrl = (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "waiting-page-school-demo-logo.png", rows = [[800001 + offset(), g.label + " Learners Begin Their Demo Week", "International Schooling welcomes " + g.label + " learners to a week of interactive online classes.", "International Schooling"], [800101 + offset(), "Simple Tips for Online Classroom Success", "Learners do best with a quiet study corner, a charged device, and a few minutes of preparation.", "International Schooling"]];
         return { code: 200, totalNews: rows.length, list: rows.map(function (r, i) { return { id: r[0], title: r[1], content: r[2], sourceName: r[3], image: imageUrl, sourceLogo: logoUrl, sourceUrl: "javascript:void(0)", publishDate: fmt(plusDays(base, -i)), country: "Global", readTime: 2 }; }) };
@@ -2009,7 +2333,7 @@
         var activityList = activityDetails(base);
         for (var activityIndex = 0; activityIndex < activityList.length; activityIndex++) {
             var activity = activityList[activityIndex];
-            events.push({ id: "activity" + activity.id, title: activity.activityTitle + "~" + g.label, eventTitle: "Activity", name: "", teacherName: "", url: "", start: activity.startDateTime, end: activity.endDateTime, timezone: tz(), eventType: "ACTIVITY", category: "ACTIVITY", icon: (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "Addon-Subject.png", grade: g.label, session: "Demo", activities: [activity] });
+            events.push({ id: "activity" + activity.id, title: activity.activityTitle + "~" + activityDetailName(activityIndex), eventTitle: "", name: "", teacherName: "", url: "", start: activity.startDateTime, end: activity.endDateTime, timezone: tz(), eventType: "ACTIVITY", category: "ACTIVITY", icon: (typeof PATH_FOLDER_IMAGE2 !== "undefined" ? PATH_FOLDER_IMAGE2 : "") + "Addon-Subject.png", grade: g.label, session: "Demo", activities: [activity] });
         }
         return { status: "1", statusCode: "S001", message: "Dummy " + g.label + " calendar success", event: events, holidays: [], activityTypes: activityTypeRows(), activitiesWithClass: true };
     };
@@ -2019,16 +2343,22 @@
         if (!event) return { status: "0", message: "Class details not found" };
         var st = new Date(event.start.replace(" ", "T")), en = new Date(event.end.replace(" ", "T")), now = window.getDummyStudentBaseDate().getTime(), dateStatus = now < st.getTime() ? "future" : (now > en.getTime() ? "past" : "between"), parts = event.start.split(" "), endParts = event.end.split(" "), contextPath = typeof CONTEXT_PATH !== "undefined" && CONTEXT_PATH ? CONTEXT_PATH : "/" + window.location.pathname.split("/")[1] + "/", redirectUrl = window.location.origin + contextPath + "static/theme2/dummy-live-class.html";
         var eventTeacher = safeTeacherName(event.teacherName || event.name) || "Teacher";
+        var oneToOneClass = currentLearningProgramIsOneToOne();
+        var popupCourseName = safeTeacherName(event.title || event.eventTitle || event.courseName) || grade().label;
+        var popupClassName = oneToOneClass ? (dateStatus === "between" ? [popupCourseName, eventTeacher].filter(function (value) { return !!value; }).join(" | ") : popupCourseName) : grade().label + " - SEP Batch 1 2025-26";
+        var popupSubjectName = oneToOneClass ? eventTeacher : event.title;
         try { window.localStorage.setItem("DUMMY_TEACHER_NAME", eventTeacher); window.localStorage.setItem("DUMMY_CLASS_NAME", event.title || grade().label); window.localStorage.setItem("DUMMY_CLASS_DATE", parts[0] || ""); window.localStorage.setItem("DUMMY_CLASS_TIME", (parts[1] || "") + (endParts[1] ? " - " + endParts[1] : "")); } catch (e) {}
-        return { status: dateStatus === "between" ? "1" : "0", statusCode: "S001", redirect: false, redirectUrl: redirectUrl, commonJoinUrlOfSMS: redirectUrl, dateStatus: dateStatus, userRole: typeof USER_ROLE !== "undefined" ? USER_ROLE : "STUDENT", className: grade().label + " - SEP Batch 1 2025-26", subjectName: event.title, teacherName: eventTeacher, name: eventTeacher, classDate: event.start, canJoindateStart: event.start, classTimezone: event.timezone, classType: event.eventType, joinType: "N", meetingJoinModalHideMin: 30 };
+        return { status: dateStatus === "between" ? "1" : "0", statusCode: "S001", redirect: false, redirectUrl: redirectUrl, commonJoinUrlOfSMS: redirectUrl, dateStatus: dateStatus, userRole: typeof USER_ROLE !== "undefined" ? USER_ROLE : "STUDENT", className: popupClassName, subjectName: popupSubjectName, teacherName: eventTeacher, name: eventTeacher, classDate: event.start, canJoindateStart: event.start, classTimezone: event.timezone, classType: event.eventType, joinType: "N", meetingJoinModalHideMin: 30 };
     };
     window.getDummyBookAClassResponse = function () {
-        return { status: "1", statusCode: "S001", message: "Book a Class", details: { studentStandardId: studentStandardId(), showAcademicYearValidation: "N", classPlanCount: configuredClassCount(3) } };
+        var defaultBookAClassCount = isElementaryExtraClassGrade() ? 3 : 1;
+        return { status: "1", statusCode: "S001", message: "Book a Class", details: { studentStandardId: studentStandardId(), showAcademicYearValidation: "N", classPlanCount: configuredClassCount(defaultBookAClassCount) } };
     };
     window.getDummyStudentBookClassDetailsResponse = function () {
         var rows = dummyBookClassSubjectRows();
-        var classCount = configuredClassCount(3);
-        return { status: "1", statusCode: "S001", message: "data fetched successfully", classData: { year: [{ comp: classCount, plan: 0, extra: 120, bookedComp: Math.min(classCount, 1), bookedExtra: 0, leftExtra: 120, leftComp: Math.max(classCount - 1, 0), expiredComp: 0, expiredExtra: 0 }], week: [{ comp: classCount, plan: 0, extra: 6, bookedComp: 0, bookedExtra: 0, leftExtra: 6, leftComp: classCount, expiredComp: 0, expiredExtra: 0 }] }, registerType: "ONE_TO_ONE", compClassPerweek: classCount, compClassYear: classCount, subjectList: rows };
+        var classCount = isElementaryExtraClassGrade() ? defaultClassPerWeek() : (rows.length || 1);
+        var classYearCount = classCount * 42;
+        return { status: "1", statusCode: "S001", message: "data fetched successfully", classData: { year: [{ comp: classYearCount, plan: 0, extra: 120, bookedComp: Math.min(classYearCount, 1), bookedExtra: 0, leftExtra: 120, leftComp: Math.max(classYearCount - 1, 0), expiredComp: 0, expiredExtra: 0 }], week: [{ comp: classCount, plan: 0, extra: 6, bookedComp: 0, bookedExtra: 0, leftExtra: 6, leftComp: classCount, expiredComp: 0, expiredExtra: 0 }] }, registerType: "ONE_TO_ONE", compClassPerweek: classCount, compClassYear: classYearCount, subjectList: rows };
     };
     window.getDummyAssignedTeacherDetailsResponse = function (subjectId) {
         var s = dummySubjectById(subjectId);

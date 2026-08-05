@@ -111,7 +111,6 @@ async function rendereDashboardContent(isParent){
         if (isParent!=="false") {
             dashboardData ['isParent'] = true;
         }
-        debugger
         await renderMigrationDetailsOptionContent(data);
         setTimeout(showRandomToast, 30000);
         // // // Then every 3 min

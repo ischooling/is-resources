@@ -22,7 +22,6 @@ var signupEnrollmentToastData = [
 ];
 var signupEnrollmentToastTimer = null;
 function showSignupEnrollmentToast() {
-	debugger
 	// Only run when re-enrollment notifications are enabled (flag from CommonCustomScript.jsp).
 	if (typeof SALES_TOAST === "undefined" || !SALES_TOAST) {
 		return;

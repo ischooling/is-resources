@@ -48,6 +48,18 @@ function mqDashboardWidget() {
     setTimeout(showQuoteOfMoment, 900);
 }
 
+function isParentDemoUser() {
+    return USER_ROLE === "PARENT" && isDemoUser == true;
+}
+
+function renderParentDemoOnlyPage(renderCallback) {
+    if (!isParentDemoUser()) {
+        showMessageTheme2(0, "You do not have permission to access this page.");
+        return false;
+    }
+    return renderCallback();
+}
+
 const contentHandlers = {
     'student-home': () => { CALENDAR_EVENT = false; rendereDashboardContent(isParent);},
     'student-addon': () => renderBuyExtraClasses(USER_ID),
@@ -156,6 +168,7 @@ const contentHandlers = {
     'academic-year-extention': () => renderStudentAcademicYearExtentionPage('Academic Year Extension', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'fee-details': () => renderStudentFeeDetailsPage('Fee Details', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-progress-report': () => renderStudentAcademicPerformancePage('Academic Performance', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-attendance-overview': () => renderStudentAttendanceContent(),
     'progress-detail': () => renderStudentProgressDetailPage('Progress Report', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     // 'student-feedback': () => renderStudentFeedbackPage('Student Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-feedback': ({extraParam, extraParam1}) => rateYourTeacher(extraParam, extraParam1, {renderMode: 'inline',target: '#dashboardContentInHTML'}),

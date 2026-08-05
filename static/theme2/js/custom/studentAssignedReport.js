@@ -609,7 +609,10 @@ for (let at = 0; at < teacherReports.attendanceList.length; at++) {
 
 
 function getHtmlTeacherSalary(teacherReports){
-	var startMonthDate = $("#monthwise option:selected").text()+" "+$("#yearwise option:selected").text()
+	var selectedSalaryMonth = $("#salaryYearMonths option:selected");
+	var startMonthDate = selectedSalaryMonth.attr("year") && selectedSalaryMonth.attr("month")
+		? moment(selectedSalaryMonth.attr("year")+"-"+selectedSalaryMonth.attr("month")+"-01", "YYYY-MM-DD").format("MMM YYYY")
+		: moment().format("MMM YYYY");
 	$(".salaryTeacherName").text(teacherReports.teacherName);
 	$(".salarycityname").text(teacherReports.cityname);
 	$(".salarycountryname").text(teacherReports.countryname);
@@ -672,57 +675,58 @@ function getHtmlTeacherSalary(teacherReports){
 	$("#salary_teacher_basic").html(empBasicHtml);
 
 	var salCalHtml="";
-	salCalHtml+="<div class=\"p-2 text-white\">Salary Calculation : <b>"+startMonthDate+"</b></div>";
-	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-1 bg-white\">";
+	salCalHtml+="<div class=\"salary-panel\">";
+	salCalHtml+="<div class=\"salary-panel-title\">Salary Calculation : <b>"+startMonthDate+"</b></div>";
+	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small\">";
 	salCalHtml+="<tbody>"
-	salCalHtml+="<tr><td>Salary Agreed</td><td class=\"bold\" style=\"width:120px;color:var(--pc)\">"+teacherReports.payout.agreedPayout+"</td></tr>";
+	salCalHtml+="<tr><td class=\"metric-label\">Salary Agreed</td><td class=\"metric-value\">"+teacherReports.payout.agreedPayout+"</td></tr>";
+	salCalHtml+="<tr><td class=\"metric-label\">Salary per day</td><td class=\"metric-value\">"+teacherReports.payoutPerday+"</td></tr>";
+	salCalHtml+="<tr><td class=\"metric-label\">Salary per hour</td><td class=\"metric-value\">"+teacherReports.payoutPerhrs+"</td></tr>";
+	salCalHtml+="<tr><td class=\"metric-label\">Salary (Till now)</td><td class=\"metric-value\">"+teacherReports.currentsal+"</td></tr>";
+	salCalHtml+="<tr><td class=\"metric-label\">Total Accepted Hours till now<br/>(Class+Admin)</td><td class=\"metric-value\">"+teacherReports.total_accept_hours+"</td></tr>";
 	salCalHtml+="</tbody></table>";
-	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-0 bg-white\">";
-	salCalHtml+="<tbody>";
-	salCalHtml+="<tr><td>Salary Till Now</td><td class=\"bold text-dark\" style=\"width:120px\">"+teacherReports.currentsal+"</td></tr>";
-	salCalHtml+="</tbody></table>";
-	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-0 bg-white\">";
-	salCalHtml+="<tbody><tr><td>Total Accepted Hours till now<br/>(Class+Admin) </td><td class=\"bold text-success\" style=\"width:120px\">"+teacherReports.total_accept_hours+"</td></tr>";
-	salCalHtml+="</tbody></table>";
+	salCalHtml+="</div>";
 	$(".salary_calculation").html(salCalHtml);
 
 var class_hrsHtml="";
 
-class_hrsHtml+="<div class=\"p-2 text-white\">Classes & Hours Calculation: <b>"+startMonthDate+"</b></div>"
-class_hrsHtml+="<table class=\"table table-bordered nowrap row-height-small blue-border mb-1 bg-white\">"
+class_hrsHtml+="<div class=\"salary-panel class-hours-panel\">";
+class_hrsHtml+="<div class=\"salary-panel-title\">Classes & Hours Calculation: <b>"+startMonthDate+"</b></div>"
+class_hrsHtml+="<table class=\"table table-bordered nowrap row-height-small\">"
 class_hrsHtml+="<tbody>";
-class_hrsHtml+="<tr style=\"background:var(--slc)\">";
-class_hrsHtml+="<td></td>";
-class_hrsHtml+="<td><b>Working Hours<br/>Submitted</b></td>";
-class_hrsHtml+="<td><b>Working Hours<br/>Deducted after review</b></td>";
-class_hrsHtml+="<td><b>Working Hours<br/>Accepted</b></td>";
+class_hrsHtml+="<tr>";
+class_hrsHtml+="<th></th>";
+class_hrsHtml+="<th>Working Hours<br/>Submitted</th>";
+class_hrsHtml+="<th>Working Hours<br/>Deducted after review</th>";
+class_hrsHtml+="<th>Working Hours<br/>Accepted</th>";
 class_hrsHtml+="</tr>";
 class_hrsHtml+="<tr>";
-class_hrsHtml+="<td><b>Group</b></td> ";
-class_hrsHtml+="<td class=\"text-center\">"+teacherReports.total_review_batch_hours+"</td> ";
-class_hrsHtml+="<td class=\"bold text-center\">"+teacherReports.total_minus_batch_hours+"</td> ";
-class_hrsHtml+="<td class=\"text-center\">"+teacherReports.total_accept_batch_hours+"</td> ";
+class_hrsHtml+="<th>Group</th> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_review_batch_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value deduct-value\">"+teacherReports.total_minus_batch_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_accept_batch_hours+"</td> ";
 class_hrsHtml+="</tr> ";
 class_hrsHtml+="<tr> ";
-class_hrsHtml+="<td><b>1:1</b></td> ";
-class_hrsHtml+="<td class=\"text-center\">"+teacherReports.total_review_one_hours+"</td> ";
-class_hrsHtml+="<td class=\"text-center bold\">"+teacherReports.total_minus_one_hours+"</td> ";
-class_hrsHtml+="<td  class=\"text-center\">"+teacherReports.total_accept_one_hours+"</td> ";
+class_hrsHtml+="<th>1:1</th> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_review_one_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value deduct-value\">"+teacherReports.total_minus_one_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_accept_one_hours+"</td> ";
 class_hrsHtml+="</tr> ";
 class_hrsHtml+="<tr> ";
-class_hrsHtml+="<td><b>Admin</b></td> ";
-class_hrsHtml+="<td  class=\"text-center\">"+teacherReports.total_review_admin_hours+"</td> ";
-class_hrsHtml+="<td class=\"text-center bold\">"+teacherReports.total_minus_admin_hours+"</td> ";
-class_hrsHtml+="<td class=\"text-center\">"+teacherReports.total_accept_admin_hours+"</td> ";
+class_hrsHtml+="<th>Admin</th> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_review_admin_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value deduct-value\">"+teacherReports.total_minus_admin_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_accept_admin_hours+"</td> ";
 class_hrsHtml+="</tr> ";
 class_hrsHtml+="<tr> ";
-class_hrsHtml+="<td><b>Total</b></td> ";
-class_hrsHtml+="<td class=\"text-center\">"+teacherReports.total_review_hours+"</td> ";
-class_hrsHtml+="<td class=\"text-center\">"+teacherReports.total_minus_hours+"</td> ";
-class_hrsHtml+="<td class=\"text-center text-success bold\">"+teacherReports.total_accept_hours+"</td> ";
+class_hrsHtml+="<th>Total</th> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_review_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value\">"+teacherReports.total_minus_hours+"</td> ";
+class_hrsHtml+="<td class=\"metric-value total-accepted\">"+teacherReports.total_accept_hours+"</td> ";
 class_hrsHtml+="</tr> ";
 class_hrsHtml+="</tbody> ";
 class_hrsHtml+="</table> ";
+class_hrsHtml+="</div>";
 
 $(".class_hrs_calculation").html(class_hrsHtml);
 

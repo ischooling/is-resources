@@ -71,7 +71,7 @@ function getStudentDashboardManagementContent(title) {
                                 <label>Course Name</label>
                             </div>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-12 mb-3">
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-12 mb-3 d-none">
                             <div class="form-group custom-field">
                                 <input type="number" id="classCount" name="classCount" class="form-control" min="0" value="3" placeholder=" ">
                                 <label>Class Count</label>

@@ -433,6 +433,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 
 function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName) {
 	var responseData = getAdvancePaymentDetails(studentStandardId);
+	console.log(responseData)
 	$('body').append(customAdvanceContent(responseData, userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName));
 	var advanceFeeDetails = responseData.advanceFeeDetails;
 	if (responseData['advanceFeeStatus'] != 'C') {
@@ -491,6 +492,7 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 			$('#saveNConfirm').html('<button class="btn btn-success btn-sm" onClick="validateAdvancePayment()">Save & Confirm</button>')
 		} else {
 			$('.card-body *').prop('disabled', true);
+			$('.card-body select option').prop('disabled', false);
 			var advanceFeeDetails = "showWarningMessageShow('Are you sure you want to delete the advance payment details?','saveAdvanceFeeDetails(\\\'D\\\')',false)";
 			$('#saveNConfirm').html('<button class="btn btn-danger  btn-sm" onClick="' + advanceFeeDetails + '">Delete advance payment</button>')
 		}
@@ -535,17 +537,17 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 												<div class="full">
 													<div class="row">
 														<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-													<input type="hidden" id="firstInstallmentHidden" name="firstInstallmentHidden" class="form-control" value="" disabled="">
-													<input type="hidden" id="forGradeIdHidden" name="forGradeIdHidden" class="form-control" value="" disabled="">
-													<input type="hidden" id="currentLearningProgramHidden" name="currentLearningProgramHidden" class="form-control" value="" disabled="">
+															<input type="hidden" id="firstInstallmentHidden" name="firstInstallmentHidden" class="form-control" value="" disabled="">
+															<input type="hidden" id="forGradeIdHidden" name="forGradeIdHidden" class="form-control" value="" disabled="">
+															<input type="hidden" id="currentLearningProgramHidden" name="currentLearningProgramHidden" class="form-control" value="" disabled="">
 															<div class="position-relative form-group mb-3 custom-field">
 																<select id="learningProgram" class="form-control py-1"   onChange="applyGradeFee(this,'LP')">
-															<option value="">Select Learning Program</option>
-															${getLearningProgramContent(SCHOOL_ID)}
-														</select>
-														<label class="m-0">Select Learning Program</label>
+																	<option value="">Select Learning Program</option>
+																	${getLearningProgramContent(SCHOOL_ID)}
+																</select>
+															<label class="m-0">Select Learning Program</label>
+														</div>
 													</div>
-												</div>
 												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
 													<div class="position-relative form-group mb-3 custom-field">
 														<select id="forGradeId" class="form-control py-1"   onChange="applyGradeFee(this,'G')">

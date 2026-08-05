@@ -126,6 +126,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "syllabus-assigned-teacher":{url:"",file:[{role:"",fileName:["studentSyllabusAssignedTeacherContent.js","studentSyllabusAssignedTeacher.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "fee-details":{url:"",file:[{role:"",fileName:["studentFeeDetailsContent.js","studentFeeDetails.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-progress-report":{url:"",file:[{role:"",fileName:["studentAcademicPerformanceContent.js","studentAcademicPerformance.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "student-attendance-overview":{url:"",file:[{role:"",fileName:["studentAttendanceContent.js","studentAttendance.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "progress-detail":{url:"",file:[{role:"",fileName:["studentProgressDetailContent.js","studentProgressDetail.js","dashboardWeeklyProgress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "batch-student-examination-sheet":{url:"",file:[{role:"",fileName:["studentExaminationSheetContent.js","studentExaminationSheet.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         //JS

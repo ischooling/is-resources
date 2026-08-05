@@ -539,7 +539,6 @@ function validateRequestForPaymentOption(formId) {
 }
 
 async function submitCourse(partnerEnrollmentFlag, enrollmentType) {
-	debugger;
 	if(enrollmentType == "REGISTRATION_REPEAT_GRADE"){
 		if(MIGRATION_DATA.registrationType == "ONE_TO_ONE" || MIGRATION_DATA.registrationType == "BATCH" || MIGRATION_DATA.registrationType == "SCHOLARSHIP" || MIGRATION_DATA.registrationType == "SSP"){
 			// $("#selectedSubjects").val(MIGRATION_DATA.migrationOptionsForImproveGrade[0].selectedSubjects);
