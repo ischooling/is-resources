@@ -8474,6 +8474,16 @@ function acceptnNewReleaseRequest() {
   location.reload();
 }
 
+/**
+ * Called when the user clicks the Skip button inside #newReleaseNotificationModal.
+ * Dismisses the modal without reloading, and resumes the periodic version check
+ * so the user gets prompted again after the next interval.
+ */
+function skipNewReleaseRequest() {
+  $("#newReleaseNotificationModal").modal("hide");
+  vcSchedule(VC_DELAY_REPEAT);
+}
+
 function isEmailSearchFilterAllowed() {
   if (window.__EMAIL_SEARCH_FILTER_ALLOWED !== undefined) {
     return window.__EMAIL_SEARCH_FILTER_ALLOWED;

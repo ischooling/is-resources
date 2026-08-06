@@ -282,9 +282,12 @@ function etAvatarFallback(img) {
 }
 
 function etStudentCell(row) {
-	// Dot is always rendered (hidden when not live) so the 20s poll can toggle it in place.
+	// Dot + "Online" text are always rendered (hidden when not live) so the 20s poll can toggle them in place.
+	var liveDisplay = row.live ? 'inline-block' : 'none';
 	var liveBadge = ' <span class="et-live-dot" data-et-live-uid="' + (row.userId || '') + '"'
-		+ ' title="Live now" style="' + (row.live ? '' : 'display:none;') + '"></span>';
+		+ ' title="Live now" style="display:' + liveDisplay + ';"></span>'
+		+ '<span class="et-live-txt" data-et-live-uid="' + (row.userId || '') + '"'
+		+ ' style="display:' + liveDisplay + ';"> Online</span>';
 	// Email shown only for users allowed by CONFIGURATION/EMAIL_SEARCH_FILTER_RIGHTS.
 	var emailAllowed = (typeof isEmailSearchFilterAllowed === 'function') && isEmailSearchFilterAllowed();
 	var studentIdLine = row.studentId ? '<div class="et-stu-id">' + etEsc(row.studentId) + '</div>' : '';
@@ -534,6 +537,7 @@ function etInjectCss() {
 	'.et-disc-active{color:#16a34a;font-weight:600;}.et-disc-expired{color:#dc2626;font-weight:600;}' +
 	'.et-expiry-sub{font-size:11px;}.et-expiry-sub.left{color:#16a34a;}.et-expiry-sub.gone{color:#dc2626;}' +
 	'.et-live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-left:4px;}' +
+	'.et-live-txt{font-size:11px;color:#16a34a;font-weight:600;margin-left:3px;}' +
 	'.et-overlay{position:fixed;inset:0;background:rgba(15,20,30,.35);display:none;z-index:1040;}' +
 	'.et-overlay.et-show{display:block;}' +
 	'.et-detail-panel{position:fixed;top:0;right:0;height:100vh;width:380px;max-width:90vw;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .25s ease;z-index:1050;overflow-y:auto;}' +
@@ -587,7 +591,7 @@ async function etLiveTick() {
 
 	var liveSet = {};
 	(resp.liveUserIds || []).forEach(function (u) { liveSet[String(u)] = true; });
-	$('#etTable tbody .et-live-dot[data-et-live-uid]').each(function () {
+	$('#etTable tbody .et-live-dot[data-et-live-uid], #etTable tbody .et-live-txt[data-et-live-uid]').each(function () {
 		var u = $(this).attr('data-et-live-uid');
 		$(this).css('display', liveSet[String(u)] ? 'inline-block' : 'none');
 	});

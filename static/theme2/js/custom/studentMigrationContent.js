@@ -290,7 +290,7 @@ function migrationDetailsOptionContent(data) {
 															// 	html+='<i class="fa fa-rocket mr-2"></i>';
 															// }
 														// }
-														html+='3 Continue in '+(studentCredit.currentLearningProgram == "ONE_TO_ONE_FLEX" ? studentCredit.currentGrade:studentCredit.nextGrade)+'</a>';
+														html+='Continue in '+(studentCredit.currentLearningProgram == "ONE_TO_ONE_FLEX" ? studentCredit.currentGrade:studentCredit.nextGrade)+'</a>';
 													}else{
 														html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\')">'
 														if(data.registrationType!="ONE_TO_ONE_FLEX"){

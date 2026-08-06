@@ -62,6 +62,46 @@ var CLUBS = [
         img: "clubs/stem.webp",
         link: "/clubs/stem",
     },
+    {
+        name: "Student Council",
+        category: "Student Council",
+        description:
+            "Represent your peers, lead school initiatives, and build leadership skills through student government.",
+        img: "clubs/Leadership_Skills.webp",
+        link: "",
+    },
+    {
+        name: "The Gaming Club",
+        category: "The Gaming Club",
+        description:
+            "Compete, strategize, and connect with fellow gamers through casual and competitive gaming sessions.",
+        img: "clubs/gd.webp",
+        link: "",
+    },
+    {
+        name: "The Global Exchange Club",
+        category: "The Global Exchange Club",
+        description:
+            "Connect with students worldwide and celebrate diverse cultures through global exchange activities.",
+        img: "clubs/language.webp",
+        link: "",
+    },
+    {
+        name: "The Newsletter",
+        category: "The Newsletter",
+        description:
+            "Write, edit, and publish school news, stories, and creative pieces for the community.",
+        img: "clubs/og.webp",
+        link: "",
+    },
+    {
+        name: "The Entrepreneurship Club",
+        category: "The Entrepreneurship Club",
+        description:
+            "Build business ideas, pitch projects, and develop entrepreneurial skills with fellow innovators.",
+        img: "clubs/entrepreneurship.webp",
+        link: "",
+    },
 ]
 function clubsOnLoad(){
     bindClubs();

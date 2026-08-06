@@ -34938,9 +34938,130 @@ to { background-color: rgb(6, 145, 6); }
 }
 .emoji-globe-sub{
 	display: inline-block;
-    width: 20px;              
-    height: 20px;  
+    width: 20px;
+    height: 20px;
     background-image: url(../images/Icon/sidebar/earth.webp);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-student-council{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/student_council.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-debate-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_debate_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-book-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_book_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-art-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_art_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-stem-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_stem_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-gaming-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_gaming_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-law-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_law_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-global-exchange-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_global_exchange_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-wellness-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_wellness_club.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-newsletter-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_newsletter.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    top: 4px;
+}
+.emoji-entrepreneurship-club{
+	display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/Icon/sidebar/the_entrepreneurship_club.webp');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;

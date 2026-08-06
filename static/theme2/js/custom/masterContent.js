@@ -3419,7 +3419,8 @@ function getNewReleaseNotificationModal(){
 						</div>
 					</div>
 					<div class="full mt-2 text-center">
-						<button type="button" class="btn btn-pill btn-success px-3 mx-auto" onclick="acceptnNewReleaseRequest();">Refresh</button>
+						<button type="button" class="btn btn-pill btn-success px-3" onclick="acceptnNewReleaseRequest();">Refresh</button>
+						<button type="button" class="btn btn-pill btn-warning px-3 mr-2" onclick="skipNewReleaseRequest();">Skip</button>
 					</div>
 				</div>
 			</div>

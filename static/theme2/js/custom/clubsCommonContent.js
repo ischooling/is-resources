@@ -25,14 +25,39 @@ function getClubsCommonCard(title){
         "Competitive Gaming Club": "Competitive_Gaming.webp",
         "Global Competitions Club": "Global_Competitions.webp",
         "Game Strategy & Analysis Club": "Game_Strategy_Analysis.webp",
+
+        "Student Council": "Leadership_Skills.webp",
+        "The Debate Club": "Debate_Club.webp",
+        "The Book Club": "book.webp",
+        "The Art Club": "art_club.webp",
+        "The STEM Club": "stem.webp",
+        "The Gaming Club": "gd.webp",
+        "The Law Club": "investigation.webp",
+        "The Global Exchange Club": "language.webp",
+        "The Wellness Club": "music.webp",
+        "The Newsletter": "og.webp",
+        "The Entrepreneurship Club": "entrepreneurship.webp",
+    };
+    var clubSubtitles = {
+        "The Debate Club": "International Diplomat and Orator's Society (IDOS)",
+        "The Book Club": "International Literary Society (ILS)",
+        "The Art Club": "Viva De Lunaria",
+        "The STEM Club": "Aurelian",
+        "The Gaming Club": "Link Club",
+        "The Law Club": "Lex Orbis Legal Society",
+        "The Global Exchange Club": "Nexus",
+        "The Wellness Club": "Radiant Mind",
+        "The Newsletter": "The Horizons",
     };
     const imageName = clubImages[title]
+    const subtitle = clubSubtitles[title]
+    const subtitleHtml = subtitle ? ` &ndash; ${subtitle}` : ""
     var html=
-        `<div class="card mx-auto mt-4 rounded-10" style="max-width: 768px;">
+        `<div class="card mx-auto mt-4 rounded-10" style="max-width: 980px;">
             <div class="card-body">
                 <div class="d-flex justify-content-center align-items-center flex-column">
                     <img src="${PATH_FOLDER_IMAGE2}clubs/${imageName}" class="rounded-10" style="max-width: 65%;">
-                    <h4 class="mt-3 font-weight-bold text-dark">Be part of our ${title}!</h4>
+                    <h4 class="mt-3 font-weight-bold text-dark" style="max-width: 100%;">Be part of our ${title}!${subtitleHtml}</h4>
                     <p class="rounded-20 py-2 px-4 mt-3 font-weight-semi-bold" style="color:#C2410C; background-color:#FFEDD5;"><i class="fa fa-rocket" aria-hidden="true"></i> Sign up today.</p>
                     <a href="javascript:void(0);" onclick="applyForClub('${title}')" class="btn text-white font-18 mt-4 rounded-10" style="background: linear-gradient(90deg, #027FFE 0%, #02B9CB 100%);">Register Now</a>
                 </div>
