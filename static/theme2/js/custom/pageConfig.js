@@ -7,6 +7,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
     console.time();
     var pageRequest = {
         "home":{url:"",file:[{role:"",fileName:["schoolDashboardContent.js","schoolDashboard.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "attendance-report":{url:"",file:[{role:"",fileName:["AttendanceReportContent.js","AttendanceReport.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "module":{url:"",file:[{role:"",fileName:["moduleListContent.js","moduleList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "modulerole":{url:"",file:[{role:"",fileName:["roleListContent.js","roleList.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "rolerights":{url:"get-module-rights?moduleId="+moduleId+"&themeType=theme2"+extraParam,file:[{role:"",fileName:[]}],type:"JSP",pageReqType:"IN"},
@@ -245,6 +246,8 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "evaluation-config":{url:"",file:[{role:"",fileName:["evaluationConfigContent.js","evaluationConfig.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "user-rating":{url:"",file:[{role:"",fileName:["teacherRatingContent.js","teacherRating.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "teacher-my-rating":{url:"",file:[{role:"",fileName:["teacherMyRatingContent.js","teacherMyRating.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "contract-management":{url:"",file:[{role:"",fileName:["contractManagementContent.js","contractManagement.js","manageTeacherProfileContent.js","manageTeacherProfile.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "student-feedback-received":{url:"",file:[{role:"",fileName:["studentFeedbackReceivedContent.js","studentFeedbackReceived.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {

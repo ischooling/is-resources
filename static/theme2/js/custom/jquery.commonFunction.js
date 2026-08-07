@@ -7952,6 +7952,10 @@ function goToPageCommon(page, context) {
 			trState.pageNo = page;
 			loadTeacherRatingList(false);
 			break;
+		case 'contractManagement':
+			tcmState.currentPage = page;
+			loadTeacherContractList();
+			break;
 		default:
 			console.warn('Unknown pagination context:', context);
 	}

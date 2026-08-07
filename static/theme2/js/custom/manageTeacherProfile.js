@@ -842,6 +842,18 @@ async function addTeacherContract(userId, name, email, contractId) {
         }
     }
     
+    // Jodit is initialized while the modal is still hidden/animating, so it
+    // measures the wrong height. Recompute its layout once the modal is fully
+    // visible (fixes the collapsed/overlapping editor render).
+    $("#addTeacherContractModal").off("shown.bs.modal.jodit").on("shown.bs.modal.jodit", function () {
+        setTimeout(function () {
+            if (typeof editor !== "undefined" && editor) {
+                try { editor.e.fire("resize"); } catch (e) { }
+            }
+            try { window.dispatchEvent(new Event("resize")); } catch (e) { }
+        }, 50);
+    });
+
     setTimeout(() => {
         $("#addTeacherContractModal").modal("show");
     }, 300);
@@ -893,6 +905,7 @@ async function addTeacherContract(userId, name, email, contractId) {
         width: 794,
         height: 400,
         toolbarSticky: true,
+        readonly: true,
         uploader: { insertImageAsBase64URI: true },
         toolbarAdaptive: false,
         events: {
@@ -901,14 +914,16 @@ async function addTeacherContract(userId, name, email, contractId) {
             }
         }
     });
-    
+
+    // The editor is display-only: content is set programmatically from the
+    // selected template + live variable updates, never typed by hand.
+    editor.setReadOnly(true);
+
     if (data.content && data.content.trim() !== "") {
         editor.value = cleanBase64Images(data.content);
-        editor.setReadOnly(false);
 		$("#teacherContractForm label[for='recipientSignatureUpload']").text($("#leftSignatureBox img").data("name"));
     } else {
-        editor.setReadOnly(true);
-        editor.value = '<p class="text-muted">Please fill contract details above to enable editor.</p>';
+        editor.value = '<p class="text-muted">Select a template above to load the contract.</p>';
     }
 
 	$("#teacherContractForm #teacherNationality").select2({
@@ -964,9 +979,168 @@ async function addTeacherContract(userId, name, email, contractId) {
         "keyup change",
         "#referenceNumber, #firstPartyName, #firstPartyDesignation, #teacherName, #teacherEmail, #teacherType, #teacherDesignation, #employmentType, #workingHours, #adminHours, #monthlySalary, #contractStartDate, #contractDuration, #teacherContractCountry, #teacherContractState, #teacherContractCity",
         function () {
+            computeLiveClassesHours("teacherContractForm");
             toggleContractEditor("teacherContractForm");
+            updateContractVariables("teacherContractForm");
         }
     );
+
+    // Currency is driven by nationality; keep salary token in sync when it changes.
+    $("#teacherContractForm").on("change", "#teacherNationality, #teacherCurrency, #contractEndDate", function () {
+        updateContractVariables("teacherContractForm");
+    });
+
+    computeLiveClassesHours("teacherContractForm");
+    loadMasterAgreementTemplates("TEACHER");
+}
+
+/* Live Classes Hours = Agreed Working Hours - Admin Task Hours (read-only field). */
+function computeLiveClassesHours(formId) {
+    var $form = $("#" + formId);
+    var wv = ($form.find("#workingHours").val() || "").trim();
+    if (wv === "") {
+        $form.find("#liveClassesHours").val("");
+        return;
+    }
+    var live = (parseInt(wv, 10) || 0) - (parseInt($form.find("#adminHours").val(), 10) || 0);
+    if (live < 0) live = 0;
+    $form.find("#liveClassesHours").val(live);
+}
+
+/* Holds fetched master-agreement templates keyed by their id, so the editor
+   can be re-filled without another network call. */
+var masterAgreementTemplateMap = {};
+
+async function loadMasterAgreementTemplates(roleType) {
+    masterAgreementTemplateMap = {};
+    var $select = $("#teacherContractForm #contractTemplateSelect");
+    $select.find("option:not(:first)").remove();
+    try {
+        var ajaxReqDetails = {
+            method: "POST",
+            url: getURLFor("dashboard", "get-master-agreement-content"),
+            body: { roleType: roleType, schoolId: SCHOOL_ID },
+            global: true,
+            showMessage: false,
+            onFaildResolved: true,
+            onSuccessResolved: true
+        };
+        var responseData = await callCommonAjax(ajaxReqDetails);
+        if (responseData.status != 1 || !responseData.details) {
+            return;
+        }
+        // Backend may return a single object or an array of templates.
+        var templates = Array.isArray(responseData.details) ? responseData.details : [responseData.details];
+        templates.forEach(function (tpl) {
+            if (!tpl || tpl.id == null) return;
+            masterAgreementTemplateMap[tpl.id] = tpl.content || "";
+            $select.append('<option value="' + tpl.id + '">' + (tpl.templateName || ("Template " + tpl.id)) + '</option>');
+        });
+    } catch (e) {
+        console.log("loadMasterAgreementTemplates error", e);
+    }
+}
+
+/* On template selection, paste its content into the Jodit editor with all
+   #variable_name# (and {{variable_name}}) tokens replaced by the current
+   form values. */
+function applyContractTemplate(formId) {
+    if (typeof editor === "undefined") return;
+    var templateId = $("#" + formId + " #contractTemplateSelect").val();
+    if (!templateId) return;
+    var content = masterAgreementTemplateMap[templateId];
+    if (content == null) return;
+    var filled = replaceContractVariables(content, buildContractVariableMap(formId));
+    editor.setReadOnly(false);
+    editor.value = filled;
+    editor.setReadOnly(true);
+    // Ensure the id/data-var spans reflect the latest field values.
+    updateContractVariables(formId);
+    $("#uploadTeacherSignatureBtn").prop("disabled", false);
+}
+
+/* Live-updates the contract body: every <span class="contract-var" data-var="..">
+   inside the editor is re-filled from the current form values. Handles repeated
+   tokens (e.g. total_working_hours appears twice) since it selects by data-var. */
+function updateContractVariables(formId) {
+    if (typeof editor === "undefined" || !editor.editor) return;
+    var nodes = editor.editor.querySelectorAll(".contract-var");
+    if (!nodes.length) return;
+    var map = buildContractVariableMap(formId);
+    nodes.forEach(function (node) {
+        var key = node.getAttribute("data-var");
+        if (key && Object.prototype.hasOwnProperty.call(map, key)) {
+            node.textContent = map[key];
+        }
+    });
+}
+
+/* Builds the token => value map from the contract form fields. */
+function buildContractVariableMap(formId) {
+    var $form = $("#" + formId);
+    var workingHours = parseInt($form.find("#workingHours").val(), 10) || 0;
+    var adminHours = parseInt($form.find("#adminHours").val(), 10) || 0;
+    // Agreed working hours is the total monthly commitment; live-class hours are derived.
+    var liveClassesHours = Math.max(0, workingHours - adminHours);
+    var currency = $form.find("#teacherCurrency").val() || "";
+    var salary = $form.find("#monthlySalary").val() || "";
+
+    var durationText = $form.find("#contractDuration option:selected").val() === "0"
+        ? "" : $form.find("#contractDuration option:selected").text().trim();
+
+    var workingDays = [];
+    $(".working-day-checkbox:checked").each(function () {
+        workingDays.push($(this).data("short"));
+    });
+
+    var specText = [];
+    $form.find("#specialization option:selected").each(function () {
+        var t = $(this).text().trim();
+        if (t && t.toLowerCase() !== "select") specText.push(t);
+    });
+
+    return {
+        "agreement_ref_number": $form.find("#referenceNumber").val() || "",
+        "agreement_date": $form.find("#contractDate").val() || "",
+        "role_type": $form.find("#roleType").val() || "",
+        "first_party_name": $form.find("#firstPartyName").val() || "",
+        "first_party_designation": $form.find("#firstPartyDesignation").val() || "",
+        "teacher_name": $form.find("#teacherName").val() || "",
+        "teacher_email": $form.find("#teacherEmail").val() || "",
+        "designation": $form.find("#teacherDesignation").val() || "",
+        "employee_type": $form.find("#employmentType").val() || "",
+        "working_hours": workingHours ? String(workingHours) : "",
+        "admin_task_hours": adminHours ? String(adminHours) : "",
+        "live_classes_hours": workingHours ? String(liveClassesHours) : "",
+        "total_working_hours": (workingHours + adminHours) ? String(workingHours + adminHours) : "",
+        "currency": currency,
+        "salary_with_currency": (salary ? (salary + (currency ? " " + currency : "")) : ""),
+        "contract_duration": durationText,
+        "duration_start": $form.find("#contractStartDate").val() || "",
+        "duration_end": $form.find("#contractEndDate").val() || "",
+        "validity_start": $form.find("#contractValidityStartDate").val() || "",
+        "validity_end": $form.find("#contractValidityEndDate").val() || "",
+        "validity_days": ($form.find("#contractValidityDuration").val() && $form.find("#contractValidityDuration").val() !== "0") ? $form.find("#contractValidityDuration").val() : "",
+        "working_days": workingDays.join(", "),
+        "specialization": specText.join(", "),
+        "nationality": $form.find("#teacherNationality option:selected").text().trim(),
+        "country": $form.find("#teacherContractCountry option:selected").text().trim(),
+        "state": $form.find("#teacherContractState option:selected").text().trim(),
+        "city": $form.find("#teacherContractCity option:selected").text().trim()
+    };
+}
+
+/* Replaces every #token# and {{token}} in the html with its mapped value.
+   A single pass over each key handles repeated occurrences of the same token. */
+function replaceContractVariables(html, map) {
+    if (!html) return html;
+    Object.keys(map).forEach(function (key) {
+        var value = map[key] == null ? "" : String(map[key]);
+        var hashToken = new RegExp("#" + key + "#", "g");
+        var curlyToken = new RegExp("\\{\\{\\s*" + key + "\\s*\\}\\}", "g");
+        html = html.replace(hashToken, value).replace(curlyToken, value);
+    });
+    return html;
 }
 
 function validateTeacherContractForm(formId) {
@@ -1181,30 +1355,16 @@ function canEnableContractEditor(formId) {
 
 function toggleContractEditor(formId) {
     if (typeof editor === "undefined") return;
-    if (canEnableContractEditor(formId)) {
-        editor.setReadOnly(false);
-        if (editor.value && editor.value.indexOf("Please fill contract details above") !== -1) {
-            editor.value = "";
-        }
-    } else {
-        editor.setReadOnly(true);
-        if (!editor.value || editor.value.trim() === "" || editor.value.trim() == "<p><br></p>") {
-            editor.value = '<p class="text-muted">Please fill contract details above to enable editor.</p>';
-        }
-    }
-	if (editor.options.readonly || isEditorEmpty()) {
-        // $("#recipientSignatureUpload").prop("disabled", true);
-        $("#uploadTeacherSignatureBtn").prop("disabled", true);
-    } else {
-        // $("#recipientSignatureUpload").prop("disabled", false);
-        $("#uploadTeacherSignatureBtn").prop("disabled", false);
-    }
+    // Editor is always read-only (display-only). Only gate the signature button:
+    // it becomes available once the contract body has content (template loaded).
+    editor.setReadOnly(true);
+    $("#uploadTeacherSignatureBtn").prop("disabled", isEditorEmpty());
 }
 
 function isEditorEmpty() {
     if (typeof editor === "undefined") return true;
     var val = editor.value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim();
-    if (val === "Please fill contract details above to enable editor.") {
+    if (val === "Select a template above to load the contract.") {
         return true;
     }
     return val === "";
@@ -1259,8 +1419,11 @@ function signatureTableTeacher(formId) {
 			</tr>
 		</tbody>
 	</table><br/>`;
+	// Editor is read-only; briefly allow the programmatic signature insert.
+	editor.setReadOnly(false);
 	editor.s.setCursorIn(editor.editor, false);
 	editor.s.insertHTML(html);
+	editor.setReadOnly(true);
 }
 
 function getRequestForTeacherPublishContract(formId, userId){

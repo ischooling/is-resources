@@ -576,6 +576,10 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                         </button>
                     </div>
                     <div class="modal-body overflow-auto">
+                        <style>
+                            #addTeacherContractModal #specializationWrapper .select2-container { width: 100% !important; }
+                            #addTeacherContractModal #specializationWrapper .select2-selection--multiple { max-height: 76px; overflow-y: auto; }
+                        </style>
                         <form autocomplete="off" id="teacherContractForm" class="custom-field-scope">
                             <input type="hidden" id="contractId" value="${contractId}">
                             <h6 class="font-weight-bold mb-2">Contract Details</h6>
@@ -646,7 +650,11 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                         <input type="text" class="form-control" id="adminHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.admintTaskHours || ''}" placeholder=" ">
                                         <label>Admin Task Hours per Month</label>
                                     </div>
-									<div class="form-group col-md-4 col-12 position-relative custom-field" id="specializationWrapper">
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="liveClassesHours" readonly disabled placeholder=" ">
+                                        <label>Live Classes Hours per Month</label>
+                                    </div>
+									<div class="form-group col-md-3 col-12 position-relative custom-field" id="specializationWrapper">
                                         <select class="form-control" id="specialization" multiple>
                                             <option value="">Select</option>
                                         </select>
@@ -736,6 +744,17 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                     <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <input type="text" class="form-control" id="contractEndDate" readonly onkeydown="return false" disabled placeholder=" ">
                                         <label>Effective End Date</label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-12 mb-2">
+                                        <small class="form-text text-muted">Fill the contract details above first, then pick a template to auto-fill the editor with the values.</small>
+                                    </div>
+                                    <div class="form-group col-md-4 col-12 position-relative custom-field">
+                                        <select class="form-control" id="contractTemplateSelect" onchange="applyContractTemplate('teacherContractForm');">
+                                            <option value="">Select Template</option>
+                                        </select>
+                                        <label>Contract Template</label>
                                     </div>
                                 </div>
                                 <div class="form-row">

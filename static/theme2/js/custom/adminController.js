@@ -132,6 +132,7 @@ const contentHandlers = {
     'partner-fee-structure': () => renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'profile-view': ({ extraParam }) => renderStudentProfilePage(extraParam),
     'payment-reports': () => getPaymentReportContent(),
+    'attendance-report': () => renderAttendanceReport(),
     'onboarded-teacher-list': () => getOnboardedTeacherContent(),
     'user-feedback': () => getReviewDashboardContent('User Feedback', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'question-list': () => getQuestionDashboardContent('Question List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -207,8 +208,10 @@ const contentHandlers = {
     'evaluation-config': () => initEvaluationConfig(),
     'user-rating': () => initTeacherRating(),
     'teacher-my-rating': () => initTeacherMyRating(),
+    'contract-management': () => initContractManagement(),
     'manage-batch-student': () => renderManageBatchStudentDashboard('Manage Group Students', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'enrollment-tracker': () => renderEnrollmentTracker('Enrollment Tracker', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE)
+    'enrollment-tracker': () => renderEnrollmentTracker('Enrollment Tracker', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'student-feedback-received': () => initStudentFeedbackReceived(),
 };
 
 const getLeadCategory = () => {
@@ -383,6 +386,16 @@ function initTeacherRating() {
 function initTeacherMyRating() {
     $('#dashboardContentInHTML').html(getTeacherMyRatingPageContent('My Rating'));
     teacherMyRatingOnLoad();
+}
+
+function initStudentFeedbackReceived() {
+    $('#dashboardContentInHTML').html(getStudentFeedbackReceivedPageContent('Student Feedback'));
+    studentFeedbackReceivedOnLoad();
+}
+
+function initContractManagement() {
+    $('#dashboardContentInHTML').html(getContractManagementPageContent('Onboarded Teachers & Contracts'));
+    contractManagementOnLoad();
 }
 
 function initUserScreeningProfiles() {
