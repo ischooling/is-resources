@@ -3050,8 +3050,12 @@ function renderDashboardReleaseNotePanel() {
 	if ($releaseNoteBtn.length) {
 		if (totalCount >= 1) {
 			$releaseNoteBtn.removeClass("d-none");
+			$(".right_fixed_action").show();
 		} else {
 			$releaseNoteBtn.addClass("d-none");
+			if (SHOW_ONLY_RELEASE_NOTE === true) {
+				$(".right_fixed_action").hide();
+			}
 		}
 	}
 	if ($badge.length) {

@@ -13405,6 +13405,10 @@ function callCounselorReview(modeSearch, eventId, startDate, endDate) {
 	data['userId']=USER_ID;
 	data['schoolId']=SCHOOL_ID;
 
+	// Show a local in-tab spinner (also covers re-search) — paired with global:false below so this slow
+	// lead-counselor-review call stays off the shared full-screen page overlay, like the Campaign tab.
+	$("#"+eventId).html('<tr><td colspan="9" class="text-center"><div class="loader-wrapper d-flex justify-content-center align-items-center w-100"><div class="loader">Loading...<div class="line-scale"><div></div><div></div><div></div><div></div><div></div></div></div></div></td></tr>');
+
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -13413,6 +13417,7 @@ function callCounselorReview(modeSearch, eventId, startDate, endDate) {
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
+		global : false, // keep this slow call out of the shared page-level loader; the tab shows its own local spinner
 		success : function(data) {
 			console.log("counselor review", data);
 			if (data['status'] == '0' || data['status'] == '2') {
@@ -13427,6 +13432,11 @@ function callCounselorReview(modeSearch, eventId, startDate, endDate) {
 				var html=getLeadCounselorReviewHtml(data.counselorReviewList);
 				$("#"+eventId).html(html);
 			}
+		},
+		error : function() {
+			// global:false means the shared loader's error-hide won't run — clear the local spinner ourselves
+			// so a failed/timed-out call doesn't leave the tab spinning forever.
+			$("#"+eventId).html('<tr><td colspan="9" class="text-center text-danger">Unable to load counselor review. Please try again.</td></tr>');
 		}
 	});
 }

@@ -5,6 +5,8 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 	
 	var commissionRate = await getCounselorCommissionRate('','counselorCommitionRate',userId);
 	var html=dashboardCounselorContent(title, roleAndModule, schoolId, userId, role, commissionRate);
+	SHOW_ONLY_RELEASE_NOTE = true;
+	html += getAnnouncementAndNewsContent();
 	$('#dashboardContentInHTML').html(html);
 	refreshCustomFieldState('#dashboardContentInHTML');
 	

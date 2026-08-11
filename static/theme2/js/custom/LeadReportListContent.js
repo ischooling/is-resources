@@ -1353,7 +1353,11 @@ function getCounselorReviewList(objRights){
 						<th>Overall Rating</th>
 					</tr>
 				</thead>
-				<tbody id="reviewCounselor"></tbody>
+				<tbody id="reviewCounselor">
+						<tr><td colspan="9" class="text-center">
+							<div class="loader-wrapper d-flex justify-content-center align-items-center w-100"><div class="loader">Loading...<div class="line-scale"><div></div><div></div><div></div><div></div><div></div></div></div></div>
+						</td></tr>
+					</tbody>
 			</table>
 		</div>
 	</div>`;
