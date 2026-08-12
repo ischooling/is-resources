@@ -368,7 +368,7 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 function getLeadFormPopup(objRights) {
   var html = "";
   html +=
-    '<div id="leadPopupForm" class="modal fade bd-example-modal-lg fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">' +
+    '<div id="leadPopupForm" class="modal fade bd-example-modal-lg fade-scale" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">' +
     '<div class="modal-dialog modal-xl">' +
     '    <div class="modal-content border-0">' +
     '        <div class="modal-header py-2 bg-primary text-white">' +
@@ -1673,6 +1673,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							bgColorDemo="background-color:#2200FF !important;color:#fff";
 							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}else if(leads.demoFrom=='Demo by Agent'){
+							bgColorDemo="background-color:#2200FF !important;color:#fff";
+							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
+						}else if(leads.demoFrom=='Demo by Calendly'){
 							bgColorDemo="background-color:#2200FF !important;color:#fff";
 							html+='<span class="float-right bold p-1 rounded" style="background-color:#2200FF !important;color:#fff">'+leads.demoFrom+'</span>';
 						}
