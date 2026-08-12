@@ -31,7 +31,13 @@ function getOnlineUserLiveFilterBar(){
 			<div class="ou-filter-grid">
 				<div class="custom-field">
 					<label>Role</label>
-					<select class="form-control" id="ouFilterRole"><option value="">All Roles</option></select>
+					<select class="form-control" id="ouFilterRole">
+						<option value="">All Roles</option>
+						<option value="STUDENT">Student</option>
+						<option value="TEACHER">Teacher</option>
+						<option value="PARENT">Parent</option>
+						<option value="ADMIN">Admin</option>
+					</select>
 				</div>
 				<div class="custom-field">
 					<label>Country</label>

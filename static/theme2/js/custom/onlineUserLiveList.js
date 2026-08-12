@@ -200,15 +200,7 @@ function populateOnlineUserFilters(){
 	if (typeof getAllTimezoneList === 'function') {
 		getAllTimezoneList('ouFilterForm', 'ouFilterTimezone');
 	}
-	if (typeof getAllUserRoles === 'function') {
-		getAllUserRoles().then(function(roleList){
-			var html = '<option value="">All Roles</option>';
-			(roleList || []).forEach(function(r){
-				if (r && r.name) { html += `<option value="${ouEsc(r.name)}">${ouEsc(r.name)}</option>`; }
-			});
-			$('#ouFilterRole').html(html);
-		});
-	}
+	// Role options are now hardcoded in the content HTML (All Roles, Student, Teacher, Parent, Admin)
 }
 
 /* Label of the currently selected option (empty when the "All ..." placeholder is chosen). */
@@ -227,7 +219,7 @@ function ouNumOrNull(v){
 /* Current filter selections sent to the server. */
 function ouCurrentFilters(){
 	return {
-		role: ouSelectedLabel('#ouFilterRole'),
+		role: $('#ouFilterRole').val() || '',
 		country: ouSelectedLabel('#ouFilterCountry'),
 		grade: ouSelectedLabel('#ouFilterGrade'),
 		timezone: ouSelectedLabel('#ouFilterTimezone'),
