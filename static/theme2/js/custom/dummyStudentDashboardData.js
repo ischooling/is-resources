@@ -2119,11 +2119,31 @@
                 <div class="form-group custom-field">
                     <select id="dummyLmsUserId" name="dummyLmsUserId" class="form-control">${dummyStudentDashboardManagementLmsOptions("")}</select>
                     <label>Dummy LMS User</label>
+                    <small id="dummyLmsUserIdValidationMsg" class="text-danger d-none">Please select dummy LMS user.</small>
                 </div>
             </div>`;
         form.find("#courseName").closest(".col-xl-4, .col-lg-8, .col-md-7, .col-12").after(html);
         if ($.fn.select2) {
             form.find("#dummyLmsUserId").select2({ theme: "bootstrap4", placeholder: "" });
+        }
+        form.off("change.dummyLmsUserValidation", "#dummyLmsUserId").on("change.dummyLmsUserValidation", "#dummyLmsUserId", function () {
+            dummyStudentDashboardManagementClearLmsValidation(form);
+        });
+    }
+    function dummyStudentDashboardManagementClearLmsValidation(form) {
+        form.find("#dummyLmsUserId").removeClass("is-invalid");
+        form.find("#dummyLmsUserIdValidationMsg").addClass("d-none");
+        if ($.fn.select2) {
+            form.find("#dummyLmsUserId + .select2-container .select2-selection").removeClass("is-invalid");
+        }
+    }
+    function dummyStudentDashboardManagementShowLmsValidation(form) {
+        form.find("#dummyLmsUserId").addClass("is-invalid");
+        form.find("#dummyLmsUserIdValidationMsg").removeClass("d-none");
+        if ($.fn.select2) {
+            form.find("#dummyLmsUserId + .select2-container .select2-selection").addClass("is-invalid");
+        } else {
+            form.find("#dummyLmsUserId").trigger("focus");
         }
     }
     function dummyStudentDashboardManagementPatchTable(rows) {
@@ -2185,13 +2205,17 @@
             var result = originalEdit.apply(this, arguments);
             dummyStudentDashboardManagementEnsureForm();
             var row = (window.STUDENT_DASHBOARD_MANAGEMENT_ROWS || [])[index] || {};
-            $("#studentDashboardManagementForm #dummyLmsUserId").val(row.dummyLmsUserId || "").trigger("change");
+            var form = $("#studentDashboardManagementForm");
+            form.find("#dummyLmsUserId").val(row.dummyLmsUserId || "").trigger("change");
+            dummyStudentDashboardManagementClearLmsValidation(form);
             return result;
         };
         var originalReset = resetStudentDashboardManagementForm;
         resetStudentDashboardManagementForm = function () {
             var result = originalReset.apply(this, arguments);
-            $("#studentDashboardManagementForm #dummyLmsUserId").val("").trigger("change");
+            var form = $("#studentDashboardManagementForm");
+            form.find("#dummyLmsUserId").val("").trigger("change");
+            dummyStudentDashboardManagementClearLmsValidation(form);
             return result;
         };
         dummyStudentDashboardManagementEnsureForm();
@@ -2204,9 +2228,16 @@
         window.__dummyStudentDashboardManagementAjaxPatched = true;
         var originalAjax = getDashboardDataBasedUrlAndPayload;
         getDashboardDataBasedUrlAndPayload = function (loader, message, url, payload) {
-            if (url === "student-dashboard-management/save" && $("#studentDashboardManagementForm #dummyLmsUserId").length) {
+            var form = $("#studentDashboardManagementForm");
+            if (url === "student-dashboard-management/save" && form.find("#dummyLmsUserId").length) {
+                var dummyLmsUserId = $.trim(form.find("#dummyLmsUserId").val() || "");
+                if (!dummyLmsUserId) {
+                    dummyStudentDashboardManagementShowLmsValidation(form);
+                    return Promise.resolve(false);
+                }
+                dummyStudentDashboardManagementClearLmsValidation(form);
                 payload = payload || {};
-                payload.dummyLmsUserId = $.trim($("#studentDashboardManagementForm #dummyLmsUserId").val() || "");
+                payload.dummyLmsUserId = dummyLmsUserId;
             }
             return originalAjax.apply(this, [loader, message, url, payload]);
         };

@@ -38,7 +38,7 @@ function renderLeadDemoDashboard(title, roleAndModule, schoolId, userId, userRol
     LEAD_DEMO_DASHBOARD_AI_LAST_FETCH_TIME = 0;
     initLeadDemoDashboardFilters();
     bindLeadDemoDashboardEvents();
-    setLeadDemoDashboardAutoRefreshTimer(60);
+    setLeadDemoDashboardAutoRefreshTimer(600);
     fetchLeadDemoDashboardAll();
 }
 
@@ -123,8 +123,8 @@ function bindLeadDemoDashboardEvents() {
         $('#lddDemoShowAll').prop('checked', false);
         $('#lddDemoChips .ldd-chip').removeClass('active');
         $('#lddDemoChips .ldd-chip[data-status=""]').addClass('active');
-        $('#lddAutoRefresh').val('60');
-        setLeadDemoDashboardAutoRefreshTimer(60);
+        $('#lddAutoRefresh').val('600');
+        setLeadDemoDashboardAutoRefreshTimer(600);
         $('#lddAiPriorityToggle').prop('checked', true);
         LEAD_DEMO_DASHBOARD_AI_PRIORITY_ENABLED = true;
         resetLeadDemoDashboardAiInsights();
@@ -304,11 +304,23 @@ function getLeadDemoDashboardDateRange() {
     return { startDate: fmt(start) + ' 00:00', endDate: fmt(end) + ' 23:59' };
 }
 
+// Standard display date — "2026-08-12" -> "12-Aug-2026".
+function leadDemoDashboardFormatDateStd(dateStr) {
+    var ymd = String(dateStr || '').substring(0, 10).split('-');
+    if (ymd.length < 3) { return String(dateStr || '').substring(0, 10); }
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var mi = parseInt(ymd[1], 10) - 1;
+    if (mi < 0 || mi > 11) { return String(dateStr || '').substring(0, 10); }
+    return ymd[2] + '-' + months[mi] + '-' + ymd[0];
+}
+
 function setLeadDemoDashboardDateLabel() {
     var range = getLeadDemoDashboardDateRange();
     var labelMap = { today: 'daily view', yesterday: 'daily view', week: 'this week', month: 'this month', custom: 'custom range' };
-    $('#lddDateLabel').text(range.startDate.substring(0, 10) + ' to ' + range.endDate.substring(0, 10)
-        + ' · ' + (labelMap[LEAD_DEMO_DASHBOARD_STATE.range] || ''));
+    var start = leadDemoDashboardFormatDateStd(range.startDate);
+    var end = leadDemoDashboardFormatDateStd(range.endDate);
+    var datePart = (start === end) ? start : (start + ' to ' + end);
+    $('#lddDateLabel').text(datePart + ' · ' + (labelMap[LEAD_DEMO_DASHBOARD_STATE.range] || ''));
 }
 
 function getLeadDemoDashboardRequestParams(section) {
@@ -414,7 +426,7 @@ function renderLeadDemoDashboardSection(section, data) {
         case 'kpis': renderLeadDemoDashboardKpis(data); break;
         case 'demoBoard': renderLeadDemoDashboardBoard(data.demos || []); break;
         case 'leadList': renderLeadDemoDashboardLeadList(data.leads || [], data.totalCount || 0); break;
-        case 'demoList': renderLeadDemoDashboardDemoList(data.demos || [], data.totalCount || 0); break;
+        case 'demoList': renderLeadDemoDashboardDemoList(data.demos || [], data.totalCount || 0, data.counselorHourFiltered || []); break;
         case 'campaignPerf': renderLeadDemoDashboardGroupTable(data.campaigns || [], 'lddCampaignTableBody'); break;
         case 'countryPerf': renderLeadDemoDashboardGroupTable(data.countries || [], 'lddCountryTableBody'); break;
         case 'charts': renderLeadDemoDashboardCharts(data); break;
@@ -430,6 +442,7 @@ function renderLeadDemoDashboardKpis(kpis) {
     $('#lddKpiNotContacted').text(kpis.notContacted || 0);
     $('#lddKpiDemos').text(kpis.totalDemos || 0);
     $('#lddKpiRunning').text(kpis.runningDemos || 0);
+    $('#lddKpiAwaiting').text(kpis.awaitingDemos || 0);
     $('#lddKpiCompleted').text(kpis.completedDemos || 0);
     $('#lddKpiNoShow').text(kpis.noShowDemos || 0);
     $('#lddKpiConversion').text((kpis.conversionPct || 0) + '%');
@@ -444,6 +457,7 @@ function getLeadDemoDashboardStatusBadge(status) {
     var map = {
         UPCOMING: { cls: 'ldd-b-gray', label: 'Upcoming' },
         RUNNING: { cls: 'ldd-b-blue', label: 'Running' },
+        AWAITING: { cls: 'ldd-b-purple', label: 'Awaiting' },
         COMPLETED: { cls: 'ldd-b-green', label: 'Completed' },
         NO_SHOW: { cls: 'ldd-b-amber', label: 'No-Show' },
         CANCELLED: { cls: 'ldd-b-red', label: 'Cancelled' },
@@ -785,14 +799,16 @@ function renderLeadDemoDashboardLeadList(leads, totalCount) {
 function getLeadDemoDashboardRowHighlightClass(status) {
     var map = {
         RUNNING: 'ldd-row-running',
+        AWAITING: 'ldd-row-awaiting',
         UPCOMING: 'ldd-row-upcoming',
         COMPLETED: 'ldd-row-completed'
     };
     return map[status] || '';
 }
 
-function renderLeadDemoDashboardDemoList(demos, totalCount) {
+function renderLeadDemoDashboardDemoList(demos, totalCount, counselorHour) {
     var state = LEAD_DEMO_DASHBOARD_STATE;
+    renderLeadDemoDashboardFilteredHeatmap(counselorHour || []);
     var html = '';
     if (!demos || demos.length === 0) {
         html = '<tr><td colspan="14" class="text-center">No records found</td></tr>';
@@ -832,18 +848,54 @@ function renderLeadDemoDashboardDemoList(demos, totalCount) {
     }
 }
 
+// Filter-driven counselor × hour heatmap shown above the Demo List. Cell = total demos booked in that
+// hour for the current filter; tooltip adds the completed / no-show breakdown; each row's peak hour is
+// ringed. Reuses the same shade/label helpers and cursor tooltip as the session-wide heatmap.
+function renderLeadDemoDashboardFilteredHeatmap(counselors) {
+    var rows = counselors || [];
+    var max = 0;
+    $.each(rows, function (_, c) { $.each(c.hours || [], function (_, h) { if ((h.total || 0) > max) { max = h.total || 0; } }); });
+    if (max <= 0) {
+        $('#lddDemoFilteredHeatmap').html('<div class="text-muted" style="font-size:12px;">No demos in this filter.</div>');
+        return;
+    }
+    var html = '<div style="display:grid; grid-template-columns:130px repeat(24, minmax(0,1fr)); gap:3px; align-items:center;">';
+    html += '<div></div>';
+    for (var h = 0; h < 24; h++) {
+        html += '<div class="text-muted" style="font-size:10px; text-align:center;">' + (h % 3 === 0 ? leadDemoDashboardHourShort(h) : '') + '</div>';
+    }
+    $.each(rows, function (_, c) {
+        var arr = c.hours || [];
+        var peak = 0;
+        for (var i = 1; i < arr.length; i++) { if ((arr[i].total || 0) > (arr[peak].total || 0)) { peak = i; } }
+        html += '<div style="font-size:12px; white-space:nowrap; padding-right:6px; overflow:hidden; text-overflow:ellipsis;">' + (c.counselorName || 'N/A') + '</div>';
+        for (var hh = 0; hh < 24; hh++) {
+            var t = arr[hh].total || 0, cm = arr[hh].completed || 0, ns = arr[hh].noshow || 0;
+            var sh = leadDemoDashboardHeatShade(t, max);
+            var isPeak = (hh === peak && t > 0);
+            var border = isPeak ? '2px solid #EF9F27' : sh.b;
+            var tip = (c.counselorName || '') + ' · ' + leadDemoDashboardHourRange(arr[hh].hour) + ' : ' + t + ' demos · ' + cm + ' completed · ' + ns + ' no-show';
+            html += '<div class="ldd-heat-cell ldd-chart-tip" data-tip="' + tip + '" style="height:26px; border-radius:3px; background:' + sh.bg + '; border:' + border + '; display:flex; align-items:center; justify-content:center; font-size:11px; color:' + sh.fg + ';">' + (t > 0 ? t : '') + '</div>';
+        }
+    });
+    html += '</div>';
+    $('#lddDemoFilteredHeatmap').html(html);
+    leadDemoDashboardBindChartTooltips();
+}
+
 function renderLeadDemoDashboardGroupTable(groups, tbodyId) {
     var html = '';
     var totalLeads = 0, totalDemos = 0, totalCompleted = 0, totalNoShow = 0;
     if (!groups || groups.length === 0) {
-        html = '<tr><td colspan="6" class="text-center">No records found</td></tr>';
+        html = '<tr><td colspan="7" class="text-center">No records found</td></tr>';
     } else {
-        $.each(groups, function (_, group) {
+        $.each(groups, function (index, group) {
             totalLeads += group.totalLeads || 0;
             totalDemos += group.totalDemos || 0;
             totalCompleted += group.completedDemos || 0;
             totalNoShow += group.noShowDemos || 0;
             html += '<tr>'
+                + '<td>' + (index + 1) + '</td>'
                 + '<td title="' + (group.name || '') + '">' + (group.name || 'Unknown') + '</td>'
                 + '<td class="text-center">' + (group.totalLeads || 0) + '</td>'
                 + '<td class="text-center">' + (group.totalDemos || 0) + '</td>'
@@ -927,6 +979,174 @@ function renderLeadDemoDashboardCounselors(counselors, sectionData) {
         (sd.convertedGrandTotalFY != null ? sd.convertedGrandTotalFY : totalConvertedFY)
         + getLeadDemoDashboardConvertedGapNote(sd.convertedGapFY)
     );
+
+    // ── Best Conversion Times by Counselor (fed by the same counselorPerf payload; current session to date) ──
+    var convHtml = '';
+    var convRows = (counselors || []).filter(function (c) { return (c.bestConversionTimes || []).length; });
+    if (!convRows.length) {
+        convHtml = '<tr><td colspan="5" class="text-center">No conversion timing data yet</td></tr>';
+    } else {
+        $.each(convRows, function (i, c) {
+            var slots = c.bestConversionTimes || [];
+            convHtml += '<tr><td>' + (i + 1) + '</td>'
+                + '<td>' + (c.counselorName || 'N/A') + '</td>'
+                + getLeadDemoDashboardBestConvCell(slots[0])
+                + getLeadDemoDashboardBestConvCell(slots[1])
+                + getLeadDemoDashboardBestConvCell(slots[2])
+            + '</tr>';
+        });
+    }
+    $('#lddBestConvTimesBody').html(convHtml);
+
+    // Demo Activity sections (fed by the same counselorPerf payload; current session to date)
+    renderLeadDemoDashboardDemoActivityOverall(sd.demoActivityOverall || []);
+    renderLeadDemoDashboardDemoActivityHeatmap(counselors || []);
+    leadDemoDashboardBindChartTooltips();
+}
+
+// One "best conversion time" cell — the hour window in bold green + the converted-demo count in muted
+// parentheses, or a dash when this counselor has fewer than that many qualifying slots.
+function getLeadDemoDashboardBestConvCell(slot) {
+    if (!slot) {
+        return '<td class="text-center text-muted">&mdash;</td>';
+    }
+    return '<td class="text-center" style="white-space:nowrap;"><strong style="color:#2e7d32;">' + (slot.label || '')
+        + '</strong> <span class="text-muted">(' + (slot.count || 0) + ')</span></td>';
+}
+
+// ── Demo Activity by Hour — shared hour-label helpers ──────────────────────
+function leadDemoDashboardHour12(h) {
+    var ap = h < 12 ? 'AM' : 'PM';
+    var hr = h % 12;
+    if (hr === 0) { hr = 12; }
+    return hr + ' ' + ap;
+}
+function leadDemoDashboardHourRange(h) {
+    return leadDemoDashboardHour12(h) + ' - ' + leadDemoDashboardHour12((h + 1) % 24);
+}
+function leadDemoDashboardHourShort(h) {
+    var ap = h < 12 ? 'a' : 'p';
+    var hr = h % 12;
+    if (hr === 0) { hr = 12; }
+    return hr + ap;
+}
+// " (19%)" conversion rate suffix for tooltips — blank when there are no demos to divide by.
+function leadDemoDashboardConvPct(attended, converted) {
+    if (!attended || attended <= 0) { return ''; }
+    return ' (' + Math.round((converted * 100) / attended) + '%)';
+}
+function leadDemoDashboardStatCard(label, value, sub) {
+    return '<div style="background:#f6f7f9; border-radius:8px; padding:8px 14px; min-width:140px;">'
+        + '<div class="text-muted" style="font-size:12px;">' + label + '</div>'
+        + '<div style="font-size:20px; font-weight:600;">' + value + '</div>'
+        + '<div class="text-muted" style="font-size:11px;">' + sub + '</div>'
+    + '</div>';
+}
+
+// Section 1 — overall 24-hour demo distribution as a stacked CSS bar chart (converted at the bottom,
+// remaining attended on top), with the busiest hour highlighted in amber and summary stat cards above.
+function renderLeadDemoDashboardDemoActivityOverall(hours) {
+    hours = hours || [];
+    var hasData = false;
+    for (var k = 0; k < hours.length; k++) { if ((hours[k].attended || 0) > 0) { hasData = true; break; } }
+    if (!hasData) {
+        $('#lddDemoHourSummary').html('');
+        $('#lddDemoHourOverall').html('<div class="text-muted" style="font-size:12px;">No demo activity this session.</div>');
+        return;
+    }
+    var maxA = 1, totalA = 0, peakIdx = 0, bestConvIdx = 0;
+    $.each(hours, function (i, h) {
+        var a = h.attended || 0, c = h.converted || 0;
+        if (a > maxA) { maxA = a; }
+        if (a > (hours[peakIdx].attended || 0)) { peakIdx = i; }
+        if (c > (hours[bestConvIdx].converted || 0)) { bestConvIdx = i; }
+        totalA += a;
+    });
+    var chartH = 150;
+    var bars = '';
+    $.each(hours, function (i, h) {
+        var a = h.attended || 0, c = h.converted || 0;
+        var barH = Math.round((a / maxA) * chartH);
+        var convH = a > 0 ? Math.round((c / a) * barH) : 0;
+        var restH = barH - convH;
+        var isPeak = (i === peakIdx && a > 0);
+        bars += '<div class="ldd-hourbar ldd-chart-tip" data-tip="' + leadDemoDashboardHourRange(h.hour) + ' : ' + a + ' demos, ' + c + ' converted' + leadDemoDashboardConvPct(a, c) + '" style="flex:1; min-width:16px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">'
+            + '<div class="ldd-hourbar-fill" style="width:70%; height:' + chartH + 'px; display:flex; flex-direction:column; justify-content:flex-end;">'
+                + '<div style="height:' + restH + 'px; background:' + (isPeak ? '#FAC775' : '#9FE1CB') + '; border-radius:3px 3px 0 0;"></div>'
+                + '<div style="height:' + convH + 'px; background:' + (isPeak ? '#EF9F27' : '#199e70') + ';"></div>'
+            + '</div>'
+            + '<div class="text-muted" style="font-size:9px; margin-top:3px; height:11px;">' + (h.hour % 3 === 0 ? leadDemoDashboardHourShort(h.hour) : '') + '</div>'
+        + '</div>';
+    });
+    $('#lddDemoHourOverall').html('<div style="display:flex; align-items:flex-end; gap:2px; min-width:600px;">' + bars + '</div>');
+    $('#lddDemoHourSummary').html(
+        leadDemoDashboardStatCard('Busiest hour', leadDemoDashboardHourRange(hours[peakIdx].hour), (hours[peakIdx].attended || 0) + ' demos')
+        + leadDemoDashboardStatCard('Total demos', totalA, 'attended, this session')
+        + leadDemoDashboardStatCard('Best-converting hour', leadDemoDashboardHourRange(hours[bestConvIdx].hour), (hours[bestConvIdx].converted || 0) + ' converted')
+    );
+}
+
+// Section 2 — counselor × hour heatmap. Each cell's shade encodes attended demos in that hour; the
+// number shown is attended, the hover tooltip adds conversions, and each row's busiest hour gets a ring.
+function leadDemoDashboardHeatShade(v, max) {
+    if (v <= 0) { return { bg: '#f4f4f2', fg: '#adadad', b: '0.5px solid #e6e6e6' }; }
+    var r = v / max, bg, fg = '#04342C';
+    if (r <= 0.2) { bg = '#E1F5EE'; }
+    else if (r <= 0.4) { bg = '#9FE1CB'; }
+    else if (r <= 0.6) { bg = '#5DCAA5'; }
+    else if (r <= 0.8) { bg = '#1D9E75'; fg = '#ffffff'; }
+    else { bg = '#0F6E56'; fg = '#ffffff'; }
+    return { bg: bg, fg: fg, b: '0.5px solid rgba(0,0,0,0.04)' };
+}
+function renderLeadDemoDashboardDemoActivityHeatmap(counselors) {
+    var rows = (counselors || []).filter(function (c) { return (c.demoActivityByHour || []).length; });
+    var max = 0;
+    $.each(rows, function (_, c) { $.each(c.demoActivityByHour, function (_, h) { if ((h.attended || 0) > max) { max = h.attended || 0; } }); });
+    if (max <= 0) {
+        $('#lddDemoHourHeatmap').html('<div class="text-muted" style="font-size:12px;">No demo activity this session.</div>');
+        return;
+    }
+    var html = '<div style="display:grid; grid-template-columns:120px repeat(24, minmax(0,1fr)); gap:3px; align-items:center;">';
+    html += '<div></div>';
+    for (var h = 0; h < 24; h++) {
+        html += '<div class="text-muted" style="font-size:10px; text-align:center;">' + (h % 3 === 0 ? leadDemoDashboardHourShort(h) : '') + '</div>';
+    }
+    $.each(rows, function (_, c) {
+        var arr = c.demoActivityByHour;
+        var peak = 0;
+        for (var i = 1; i < arr.length; i++) { if ((arr[i].attended || 0) > (arr[peak].attended || 0)) { peak = i; } }
+        html += '<div style="font-size:12px; white-space:nowrap; padding-right:6px; overflow:hidden; text-overflow:ellipsis;">' + (c.counselorName || 'N/A') + '</div>';
+        for (var hh = 0; hh < 24; hh++) {
+            var a = arr[hh].attended || 0, cv = arr[hh].converted || 0;
+            var sh = leadDemoDashboardHeatShade(a, max);
+            var isPeak = (hh === peak && a > 0);
+            var border = isPeak ? '2px solid #EF9F27' : sh.b;
+            html += '<div class="ldd-heat-cell ldd-chart-tip" data-tip="' + (c.counselorName || '') + ' · ' + leadDemoDashboardHourRange(arr[hh].hour) + ' : ' + a + ' demos, ' + cv + ' converted' + leadDemoDashboardConvPct(a, cv) + '" style="height:26px; border-radius:3px; background:' + sh.bg + '; border:' + border + '; display:flex; align-items:center; justify-content:center; font-size:11px; color:' + sh.fg + ';">' + (a > 0 ? a : '') + '</div>';
+        }
+    });
+    html += '</div>';
+    $('#lddDemoHourHeatmap').html(html);
+}
+
+// Custom cursor-following tooltip + hover highlight for the demo-activity chart and heatmap. Bound once
+// via event delegation on document, so it keeps working after each re-render replaces the cells/bars.
+var LEAD_DEMO_DASHBOARD_CHART_TIP_BOUND = false;
+function leadDemoDashboardBindChartTooltips() {
+    if (LEAD_DEMO_DASHBOARD_CHART_TIP_BOUND) { return; }
+    LEAD_DEMO_DASHBOARD_CHART_TIP_BOUND = true;
+    $(document).on('mouseenter', '.ldd-chart-tip', function () {
+        var t = $(this).attr('data-tip');
+        if (!t) { return; }
+        $('#lddChartTooltip').text(t).show();
+    }).on('mousemove', '.ldd-chart-tip', function (e) {
+        var $tip = $('#lddChartTooltip');
+        var tw = $tip.outerWidth() || 0;
+        var x = e.clientX + 14, y = e.clientY + 14;
+        if (x + tw > window.innerWidth - 8) { x = e.clientX - tw - 14; }
+        $tip.css({ left: x + 'px', top: y + 'px' });
+    }).on('mouseleave', '.ldd-chart-tip', function () {
+        $('#lddChartTooltip').hide();
+    });
 }
 
 // Native `title` tooltips don't respond to clicks/taps, so this reuses the same click-to-toggle

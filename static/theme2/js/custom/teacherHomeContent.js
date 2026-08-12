@@ -18,7 +18,7 @@ async function rendereTeacherHomeContent(){
     //renderActivity(responseData.userId)
     callTeacherLastAttendance('', responseData.userId, '', '');
     getChat(responseData.email, responseData.userRole, responseData.userId);
-    if(commonProfileDTO.declarecheckshow == 'show' && commonProfileDTO.isAgreementUpdated){
+    if(commonProfileDTO.declarecheckshow == 'show'){
         $('head').append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/signupTeacherStage6.js${SCRIPT_VERSION}">`)
         if($("#teacherAgreementModal").length>0){
             $("#teacherAgreementModal").remove();
@@ -162,7 +162,7 @@ function teacherAgreementContent(data, responseData){
                             html+=teacherAgreementView(responseData)
                         html+=`</section>
                     </div>
-                    <div class="modal-footer">`
+                    <div class="modal-footer d-flex flex-column flex-md-row align-items-md-center">`
                         if(data.declarecheckshow == 'show'){
                             html+=
                             `<div class="form-check flex-grow-1">
@@ -176,7 +176,10 @@ function teacherAgreementContent(data, responseData){
                             </div>`
                         }
                         html+=`
-                        <button type="submit" id="teacherAgreementConfirmBtn" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info" style="float:right;">Confirm</button>
+                        <div class="d-flex align-items-center justify-content-end w-100 w-md-auto mt-2 mt-md-0" style="gap:10px;">
+                            ${responseData.canSkipAgreement === 'Y' ? `<button type="button" id="teacherAgreementSkipBtn" onclick="skipTeacherAgreementPopup();" class="btn btn-outline-secondary">Skip for now</button>` : ''}
+                            <button type="submit" id="teacherAgreementConfirmBtn" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info">Confirm</button>
+                        </div>
                     </div>`
                     if(responseData.validityEnd){
                         html+=teacherContractValidityCard(responseData);
@@ -190,6 +193,8 @@ function teacherAgreementContent(data, responseData){
 
 function teacherContractValidityCard(responseData){
     var validTill = changeDateFormat(new Date(responseData.validityEnd), "MMM-dd-yyyy");
+    var skipAllowedTill = responseData.agreementSkipAllowedTill ? changeDateFormat(new Date(responseData.agreementSkipAllowedTill), "MMM-dd-yyyy") : "";
+    var canSkipAgreement = responseData.canSkipAgreement === 'Y';
     var html=
         `<div class="mx-3 mb-3 p-3 bg-light-primary rounded" id="contractValidityCard" style="border-left:4px solid #007bff;">
             <div class="row align-items-center">
@@ -219,9 +224,14 @@ function teacherContractValidityCard(responseData){
                     </div>
                 </div>
             </div>
-            <div class="w-100 text-center mt-2 font-weight-bold" id="contractValidityNote" style="color:#e69500;">Please review and accept before the contract window closes.</div>
+            ${canSkipAgreement ? `<div class="w-100 text-center mt-2 font-weight-bold text-dark" id="contractSkipValidityText">Skip option is valid till <span class="text-primary">${skipAllowedTill}</span>.</div>` : `<div class="w-100 text-center mt-2 font-weight-bold text-danger" id="contractSkipValidityText">Acceptance is now mandatory — this contract cannot be skipped or dismissed.</div>`}
+            <div class="w-100 text-center mt-2 font-weight-bold" id="contractValidityNote" style="color:${canSkipAgreement ? '#e69500' : '#dc3545'};">${canSkipAgreement ? 'Please review and accept before the contract window closes.' : 'Please review and accept this contract now.'}</div>
         </div>`;
     return html;
+}
+
+function skipTeacherAgreementPopup(){
+    $("#teacherAgreementModal").modal("hide");
 }
 
 var TEACHER_CONTRACT_COUNTDOWN_INTERVAL;
@@ -323,12 +333,14 @@ $(document).off("hidden.bs.modal.contractModalPriority").on("hidden.bs.modal.con
 
 function showTeacherContractExpiredState(agreementDetails){
     $("#teacherAgreementConfirmBtn").prop("disabled", true);
+    $("#teacherAgreementSkipBtn").prop("disabled", true);
     $("#agreementDeclarationConfirm").prop("disabled", true);
     $("#teacherAgreementModal #recipientSignatureUpload").prop("disabled", true);
     $("#contractValidityCard").removeClass("bg-light-primary").css({"background-color":"#fdf1f2","border-left-color":"#dc3545"});
     $("#contractValidTillDate").addClass("text-danger");
     $("#contractCountdownLabel").text("Acceptance window closed");
     $("#contractCountdownDays, #contractCountdownHours, #contractCountdownMinutes, #contractCountdownSeconds").removeClass("text-primary").addClass("text-secondary");
+    $("#contractSkipValidityText").removeClass("text-dark").addClass("text-danger").text("Acceptance is now mandatory — this contract cannot be skipped or dismissed.");
     $("#contractValidityNote").css("color","#dc3545").text("This contract has expired. Please contact HR to request a new contract.");
     $("#contractExpiredModal").remove();
     $("body").append(teacherContractExpiredModalContent(agreementDetails));

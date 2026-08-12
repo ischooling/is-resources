@@ -8372,6 +8372,9 @@ var VC_DEBOUNCE_MS  = 60 * 1000;      // 60 seconds — multi-tab duplicate-run 
  * Handles fresh logins, mid-session page navigations, and post-reload continuation.
  */
 function initVersionChecker() {
+  // Only show the new-release notification to STUDENT, TEACHER, and PARENT roles.
+  // (Gated server-side — the call to this function is wrapped in a
+  // <c:if test="${USER_ROLE eq 'STUDENT' || ...}"> in Dashboard.jsp.)
   vcClearTimer();
 
   // ── Post-reload case: user clicked Refresh on the update modal ──

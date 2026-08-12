@@ -51,24 +51,28 @@ function getStudentDashboardManagementContent(title) {
                             <div class="form-group custom-field">
                                 <input type="text" id="studentName" name="studentName" class="form-control" placeholder=" ">
                                 <label>Student Name</label>
+                                <small id="studentNameValidationMsg" class="text-danger d-none">Please enter student name.</small>
                             </div>
                         </div>
                         <div class="col-xl-3 col-lg-6 col-md-6 col-12 mb-3">
                             <div class="form-group custom-field">
                                 <select id="learningProgram" name="learningProgram" class="form-control" onchange="studentDashboardManagementOnLearningProgramChange('studentDashboardManagementForm')"></select>
                                 <label>Learning Program</label>
+                                <small id="learningProgramValidationMsg" class="text-danger d-none">Please select learning program.</small>
                             </div>
                         </div>
                         <div class="col-xl-2 col-lg-4 col-md-5 col-12 mb-3">
                             <div class="form-group custom-field">
                                 <select id="gradeId" name="gradeId" class="form-control" onchange="studentDashboardManagementLoadCourses('studentDashboardManagementForm')"></select>
                                 <label>Grade</label>
+                                <small id="gradeIdValidationMsg" class="text-danger d-none">Please select grade.</small>
                             </div>
                         </div>
                         <div class="col-xl-4 col-lg-8 col-md-7 col-12 mb-3">
                             <div class="form-group custom-field">
                                 <select id="courseName" name="courseName" class="form-control" multiple="multiple"></select>
                                 <label>Course Name</label>
+                                <small id="courseNameValidationMsg" class="text-danger d-none">Please select at least one course.</small>
                             </div>
                         </div>
                         <div class="col-xl-2 col-lg-3 col-md-4 col-12 mb-3 d-none">

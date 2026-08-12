@@ -558,6 +558,7 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
     var contractDate = data?.agreementDate ? changeDateFormat(new Date(data.agreementDate), "MMM-dd-yyyy") : changeDateFormat(new Date(), "MMM-dd-yyyy");
     var validityStartDate = data?.validityStart ? changeDateFormat(new Date(data.validityStart), "MMM-dd-yyyy") : "";
     var validityEndDate = data?.validityEnd ? changeDateFormat(new Date(data.validityEnd), "MMM-dd-yyyy") : "";
+    var agreementSkipAllowedTillDate = data?.agreementSkipAllowedTill ? changeDateFormat(new Date(data.agreementSkipAllowedTill), "MMM-dd-yyyy") : "";
     var validityDuration = 0;
     if (data?.validityStart && data?.validityEnd) {
         var start = new Date(data.validityStart);
@@ -811,6 +812,10 @@ function addTeacherContractModal(data, userId, name, email, contractId) {
                                     <div class="form-group col-md-3 col-12 position-relative custom-field">
                                         <input type="text" class="form-control" id="contractValidityEndDate" readonly onkeydown="return false" disabled value="${validityEndDate}" placeholder=" ">
                                         <label>Effective Validity End Date</label>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12 position-relative custom-field">
+                                        <input type="text" class="form-control" id="agreementSkipAllowedTill" readonly onkeydown="return false" value="${agreementSkipAllowedTillDate}" placeholder="Select last skip date">
+                                        <label>Skip option is valid till</label>
                                     </div>
                                 </div>
                             </div>

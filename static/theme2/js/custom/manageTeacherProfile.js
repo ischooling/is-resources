@@ -960,6 +960,12 @@ async function addTeacherContract(userId, name, email, contractId) {
         startDate: new Date()
     });
 
+    $("#teacherContractForm #agreementSkipAllowedTill").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+
     if (data.validityStart && data.validityEnd) {
         var start = new Date(data.validityStart);
         var end = new Date(data.validityEnd);
@@ -968,6 +974,8 @@ async function addTeacherContract(userId, name, email, contractId) {
             $('#teacherContractForm #contractValidityDuration').val(duration).trigger('change');
         }
     }
+
+    syncTeacherAgreementSkipAllowedTillPicker("teacherContractForm");
     
     if (data.contractDurationYears > 0) {
         setTimeout(() => {
@@ -988,6 +996,10 @@ async function addTeacherContract(userId, name, email, contractId) {
     // Currency is driven by nationality; keep salary token in sync when it changes.
     $("#teacherContractForm").on("change", "#teacherNationality, #teacherCurrency, #contractEndDate", function () {
         updateContractVariables("teacherContractForm");
+    });
+
+    $("#teacherContractForm").on("change", "#contractValidityStartDate, #contractValidityDuration, #contractValidityEndDate", function () {
+        syncTeacherAgreementSkipAllowedTillPicker("teacherContractForm");
     });
 
     computeLiveClassesHours("teacherContractForm");
@@ -1249,6 +1261,23 @@ function validateTeacherContractForm(formId) {
         return false;
     }
 
+    var skipAllowedTill = $("#" + formId + " #agreementSkipAllowedTill").val().trim();
+    if (skipAllowedTill !== "") {
+        var validityStart = $("#" + formId + " #contractValidityStartDate").val().trim();
+        var validityEnd = $("#" + formId + " #contractValidityEndDate").val().trim();
+        var skipDate = new Date(skipAllowedTill);
+        var startDate = new Date(validityStart);
+        var endDate = new Date(validityEnd);
+        if (isNaN(skipDate.getTime()) || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            showMessageTheme2(0, "Please select a valid skip date");
+            return false;
+        }
+        if (skipDate < startDate || skipDate > endDate) {
+            showMessageTheme2(0, "Skip date must be between validity start and validity end");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -1287,6 +1316,7 @@ function getRequestForTeacherContract(formId, userId) {
     teacherAgreementDTO["validityStart"] = changeDateFormat(new Date($("#" + formId + " #contractValidityStartDate").val()), "yyyy-mm-dd");
     teacherAgreementDTO["validityEnd"] = changeDateFormat(new Date($("#" + formId + " #contractValidityEndDate").val()), "yyyy-mm-dd");
     teacherAgreementDTO["validityDurationDays"] = $("#" + formId + " #contractValidityDuration").val();
+    teacherAgreementDTO["agreementSkipAllowedTill"] = getTeacherContractFormattedDate($("#" + formId + " #agreementSkipAllowedTill").val());
     teacherAgreementDTO["employeeSpecialization"] = $("#" + formId + " #specialization").val();
     teacherAgreementDTO["agreementSaveType"] = "D";
     authentication["hash"] = getHash();
@@ -1368,6 +1398,49 @@ function isEditorEmpty() {
         return true;
     }
     return val === "";
+}
+
+function getTeacherContractFormattedDate(dateValue) {
+    if (!dateValue || String(dateValue).trim() === "") {
+        return "";
+    }
+    return changeDateFormat(new Date(dateValue), "yyyy-mm-dd");
+}
+
+function syncTeacherAgreementSkipAllowedTillPicker(formId) {
+    var $form = $("#" + formId);
+    var startValue = ($form.find("#contractValidityStartDate").val() || "").trim();
+    var endValue = ($form.find("#contractValidityEndDate").val() || "").trim();
+    var $skipInput = $form.find("#agreementSkipAllowedTill");
+    if (!$skipInput.length) {
+        return;
+    }
+
+    var options = {
+        autoclose: true,
+        format: 'M dd, yyyy'
+    };
+    options.startDate = startValue !== "" ? new Date(startValue) : new Date();
+    if (endValue !== "") {
+        options.endDate = new Date(endValue);
+    }
+
+    $skipInput.datepicker('destroy');
+    $skipInput.datepicker(options);
+
+    var skipValue = ($skipInput.val() || "").trim();
+    if (skipValue !== "") {
+        var skipDate = new Date(skipValue);
+        var startDate = startValue !== "" ? new Date(startValue) : null;
+        var endDate = endValue !== "" ? new Date(endValue) : null;
+        if ((startDate && skipDate < startDate) || (endDate && skipDate > endDate)) {
+            $skipInput.val('');
+        }
+    }
+
+    if (typeof refreshCustomFieldState === "function") {
+        refreshCustomFieldState($skipInput.closest('.custom-field'));
+    }
 }
 
 function signatureTableTeacher(formId) {

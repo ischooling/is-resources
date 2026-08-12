@@ -215,6 +215,9 @@ function renderTeacherContractTable() {
             if ((row.status === 'Pending' || row.status === 'Expired') && row.validTill) {
                 statusCell += '<div class="small mt-1">Valid till: <b>' + tcmEscape(row.validTill) + '</b></div>';
             }
+            if (row.agreementSkipAllowedTill) {
+                statusCell += '<div class="small mt-1 text-muted">Skip till: <b>' + tcmEscape(row.agreementSkipAllowedTill) + '</b></div>';
+            }
             if (row.status === 'Pending' && row.reminderSentOn) {
                 statusCell += '<div class="small font-weight-bold mt-1" style="color:#c77700">Reminder sent · ' +
                     tcmEscape(row.reminderSentOn) + '</div>';
@@ -345,15 +348,19 @@ function clearTcmContractValidity() {
     var $form = $('#teacherContractForm');
     if (!$form.length) return;
     var $start = $form.find('#contractValidityStartDate');
+    var $skipAllowedTill = $form.find('#agreementSkipAllowedTill');
     try { $start.datepicker('update', ''); } catch (e) {}   // also clears the picker selection
     $start.val('');
     $form.find('#contractValidityEndDate').val('');
+    try { $skipAllowedTill.datepicker('update', ''); } catch (e) {}
+    $skipAllowedTill.val('');
     // reset the days select and recompute (its onchange clears the end date too)
     $form.find('#contractValidityDuration').val('0').trigger('change');
     if (typeof refreshCustomFieldState === 'function') {
         refreshCustomFieldState($start.closest('.custom-field'));
         refreshCustomFieldState($form.find('#contractValidityDuration').closest('.custom-field'));
         refreshCustomFieldState($form.find('#contractValidityEndDate').closest('.custom-field'));
+        refreshCustomFieldState($skipAllowedTill.closest('.custom-field'));
     }
 }
 

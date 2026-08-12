@@ -168,7 +168,8 @@ function getQuoteModalHtml(data) {
 		+   '<div class="modal-body">'
 		+     '<input type="hidden" id="quoteId" />'
 		+     '<div class="form-group"><label>Quote <span class="text-danger">*</span></label>'
-		+       '<textarea id="quoteText" class="form-control" rows="3" maxlength="1000" placeholder="Enter an encouraging quote"></textarea></div>'
+		+       '<textarea id="quoteText" class="form-control" rows="3" maxlength="1000" placeholder="Enter an encouraging quote"></textarea>'
+		+       '<small class="text-muted">Wrap any phrase in **double asterisks** to highlight it in accent color, e.g. a **happy team** builds a happy school.</small></div>'
 		+     '<div class="form-group"><label>Author</label>'
 		+       '<input type="text" id="quoteAuthor" class="form-control" maxlength="255" placeholder="Optional" /></div>'
 		+     '<div class="form-group"><label>Role <span class="text-danger">*</span></label>'
@@ -326,6 +327,49 @@ function closeQuoteOfMoment() {
 	$('#quoteOfMoment').remove();
 }
 
+/* Escape the quote text but let admins highlight a phrase by wrapping it in
+   **double asterisks** (e.g. "a **happy team** builds a happy school") —
+   rendered as an accent-colored span on the "Quote of the Moment" card. */
+function mqHighlightHtml(value) {
+	var raw = String(value === undefined || value === null ? '' : value);
+	var parts = raw.split('**');
+	var html = '';
+	for (var i = 0; i < parts.length; i++) {
+		html += (i % 2 === 1) ? ('<span class="quote-of-moment-highlight">' + mqEsc(parts[i]) + '</span>') : mqEsc(parts[i]);
+	}
+	return html;
+}
+
+function ensureQuoteOfMomentCss() {
+	if ($('#quoteOfMomentCss').length > 0) {
+		return;
+	}
+	$('head').append(''
+		+ '<style id="quoteOfMomentCss">'
+		+ '#quoteOfMoment{margin:0 0 16px;}'
+		+ '#quoteOfMoment .quote-of-moment-paper{position:relative;display:inline-flex;align-items:center;gap:18px;width:auto;max-width:100%;box-sizing:border-box;overflow:hidden;'
+		+   'background:linear-gradient(135deg, var(--plc), var(--slc));border-radius:16px;padding:16px 60px 16px 20px;box-shadow:0 4px 14px rgba(0,0,0,0.06);}'
+		+ '#quoteOfMoment .quote-of-moment-icon{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;'
+		+   'color:var(--pc);font-size:16px;box-shadow:0 2px 6px rgba(0,0,0,0.10);}'
+		+ '#quoteOfMoment .quote-of-moment-divider{flex:0 0 auto;align-self:stretch;width:2px;border-radius:2px;background:var(--pc);opacity:0.35;}'
+		+ '#quoteOfMoment .quote-of-moment-body{flex:1;min-width:0;position:relative;z-index:1;}'
+		+ '#quoteOfMoment .quote-of-moment-text{font-size:16px;color:#2b2b2b;line-height:1.5;}'
+		+ '#quoteOfMoment .quote-of-moment-highlight{color:var(--pc);font-style:italic;font-weight:600;}'
+		+ '#quoteOfMoment .quote-of-moment-author{margin-top:4px;font-size:13px;color:#6b6b6b;font-weight:600;}'
+		+ '#quoteOfMoment .quote-of-moment-close{position:absolute;top:10px;right:12px;font-size:18px;line-height:1;opacity:0.4;cursor:pointer;border:none;background:transparent;z-index:2;color:#2b2b2b;}'
+		+ '#quoteOfMoment .quote-of-moment-close:hover{opacity:0.8;}'
+		+ '#quoteOfMoment .quote-of-moment-sparkle{position:absolute;color:var(--sc);pointer-events:none;}'
+		+ '#quoteOfMoment .quote-of-moment-sparkle-1{top:8px;right:46px;font-size:8px;opacity:0.55;}'
+		+ '#quoteOfMoment .quote-of-moment-sparkle-2{bottom:10px;right:30px;font-size:10px;opacity:0.7;}'
+		+ '#quoteOfMoment .quote-of-moment-sparkle-3{top:50%;right:14px;font-size:14px;opacity:0.85;transform:translateY(-50%);}'
+		+ '@media (max-width: 576px){#quoteOfMoment .quote-of-moment-paper{padding:14px 20px 14px 14px;gap:12px;flex-wrap:wrap;}'
+		+   '#quoteOfMoment .quote-of-moment-icon{width:36px;height:36px;font-size:13px;}'
+		+   '#quoteOfMoment .quote-of-moment-text{font-size:13px;}'
+		+   '#quoteOfMoment .quote-of-moment-author{font-size:11px;}'
+		+   '#quoteOfMoment .quote-of-moment-sparkle{display:none;}}'
+		+ '</style>');
+}
+
 function showQuoteOfMoment() {
 	if (__quoteOfMomentDismissed) {
 		return;
@@ -342,15 +386,18 @@ function showQuoteOfMoment() {
 					$('#quoteOfMoment').remove();
 					return;
 				}
-				var authorHtml = res.author ? '<div class="text-muted mt-1" style="font-weight:600;">— ' + mqEsc(res.author) + '</div>' : '';
+				ensureQuoteOfMomentCss();
+				var authorHtml = res.author ? '<div class="quote-of-moment-author">— ' + mqEsc(res.author) + '</div>' : '';
 				var card = ''
-					+ '<div id="quoteOfMoment" class="main-card mb-3 card" style="border-left:5px solid var(--pc);">'
-					+   '<div class="card-body" style="display:flex;align-items:center;">'
-					+     '<i class="fas fa-quote-left" style="font-size:28px;color:var(--pc);margin-right:16px;"></i>'
-					+     '<div style="flex:1;"><div style="font-size:16px;font-style:italic;">' + mqEsc(res.quoteText) + '</div>'
+					+ '<div id="quoteOfMoment">'
+					+   '<div class="quote-of-moment-paper">'
+					+     '<button type="button" class="quote-of-moment-close" aria-label="Close" title="Dismiss" onclick="closeQuoteOfMoment()">&times;</button>'
+					+     '<div class="quote-of-moment-body"><div class="quote-of-moment-text">' + mqHighlightHtml(res.quoteText) + '</div>'
 					+       authorHtml
 					+     '</div>'
-					+     '<button type="button" class="close" aria-label="Close" title="Dismiss" onclick="closeQuoteOfMoment()" style="margin-left:16px;font-size:22px;line-height:1;opacity:0.5;">&times;</button>'
+					+     '<i class="fas fa-star quote-of-moment-sparkle quote-of-moment-sparkle-1"></i>'
+					+     '<i class="fas fa-star quote-of-moment-sparkle quote-of-moment-sparkle-2"></i>'
+					+     '<i class="fas fa-star quote-of-moment-sparkle quote-of-moment-sparkle-3"></i>'
 					+   '</div>'
 					+ '</div>';
 				$('#quoteOfMoment').remove();

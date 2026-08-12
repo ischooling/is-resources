@@ -13,6 +13,7 @@ function renderStudentDashboardManagementPage(title) {
     $("#dashboardContentInHTML").html(getStudentDashboardManagementContent(title || "Dummy Student Dashboard"));
     initStudentDashboardManagementMasters();
     loadStudentDashboardManagementData();
+    studentDashboardManagementClearFieldValidationOnInput($("#studentDashboardManagementForm"));
 }
 
 function initStudentDashboardManagementMasters() {
@@ -213,6 +214,16 @@ async function openStudentDashboardManagementSpoofUrlModal(indexOrSrc) {
     return openSpoofUrlModal("DS", row.id, row.studentName, "student-demo");
 }
 
+function studentDashboardManagementClearFieldValidation(form) {
+    form.find("#studentName, #learningProgram, #gradeId, #courseName").removeClass("is-invalid");
+    form.find("#studentNameValidationMsg, #learningProgramValidationMsg, #gradeIdValidationMsg, #courseNameValidationMsg").addClass("d-none");
+}
+
+function studentDashboardManagementShowFieldValidation(form, fieldId, msgId) {
+    form.find("#" + fieldId).first().addClass("is-invalid");
+    form.find("#" + msgId).first().removeClass("d-none");
+}
+
 async function saveStudentDashboardManagementData(src) {
     var form = src ? $(src).closest("form") : $("#studentDashboardManagementForm");
     var courseSelect = form.find("#courseName").first();
@@ -228,12 +239,33 @@ async function saveStudentDashboardManagementData(src) {
     var classCount = parseInt(form.find("#classCount").val() || "0", 10);
     var activityCount = parseInt(form.find("#activityCount").val() || "0", 10);
 
-    if (!studentName || !learningProgram || !learningProgramName || !gradeId || !gradeName) {
-        showMessageTheme2(0, "Please enter student name and select learning program and grade.", "", true);
-        return false;
+    studentDashboardManagementClearFieldValidation(form);
+    var isValid = true;
+    var focusField = null;
+    if (!studentName) {
+        studentDashboardManagementShowFieldValidation(form, "studentName", "studentNameValidationMsg");
+        focusField = focusField || "studentName";
+        isValid = false;
+    }
+    if (!learningProgram || !learningProgramName) {
+        studentDashboardManagementShowFieldValidation(form, "learningProgram", "learningProgramValidationMsg");
+        focusField = focusField || "learningProgram";
+        isValid = false;
+    }
+    if (!gradeId || !gradeName) {
+        studentDashboardManagementShowFieldValidation(form, "gradeId", "gradeIdValidationMsg");
+        focusField = focusField || "gradeId";
+        isValid = false;
     }
     if (selectedCourses.length === 0) {
-        showMessageTheme2(0, "Please select course.", "", true);
+        studentDashboardManagementShowFieldValidation(form, "courseName", "courseNameValidationMsg");
+        focusField = focusField || "courseName";
+        isValid = false;
+    }
+    if (!isValid) {
+        if (focusField) {
+            form.find("#" + focusField).first().trigger("focus");
+        }
         return false;
     }
     var response = await getDashboardDataBasedUrlAndPayload(true, true, "student-dashboard-management/save", {
@@ -258,6 +290,17 @@ async function saveStudentDashboardManagementData(src) {
     showMessageTheme2(1, "Student dashboard data saved successfully.", "", true);
     resetStudentDashboardManagementForm();
     loadStudentDashboardManagementData();
+}
+
+function studentDashboardManagementClearFieldValidationOnInput(form) {
+    form.find("#studentName").off("input.studentDashboardValidation").on("input.studentDashboardValidation", function () {
+        $(this).removeClass("is-invalid");
+        form.find("#studentNameValidationMsg").addClass("d-none");
+    });
+    form.find("#learningProgram, #gradeId, #courseName").off("change.studentDashboardValidation").on("change.studentDashboardValidation", function () {
+        $(this).removeClass("is-invalid");
+        form.find("#" + $(this).attr("id") + "ValidationMsg").addClass("d-none");
+    });
 }
 
 function studentDashboardManagementSelectedCourses(courseSelect) {
@@ -306,6 +349,7 @@ function editStudentDashboardManagementData(index) {
         return;
     }
     var form = $("#studentDashboardManagementForm");
+    studentDashboardManagementClearFieldValidation(form);
     form.find("#demoDataId").val(row.id || "");
     studentDashboardManagementEnsureStudentOption(row.studentName || "");
     form.find("#studentName").val(row.studentName || "").trigger("change");
@@ -391,6 +435,7 @@ function resetStudentDashboardManagementForm() {
     $("#studentDashboardManagementForm #classCount").val("3");
     $("#studentDashboardManagementForm #activityCount").val("2");
     studentDashboardManagementOnLearningProgramChange("studentDashboardManagementForm");
+    studentDashboardManagementClearFieldValidation($("#studentDashboardManagementForm"));
 }
 
 function studentDashboardManagementEnsureStudentOption(studentName) {
