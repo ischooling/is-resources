@@ -852,11 +852,11 @@ function viewActivityAttachmentModal(){
 	return html;
 }
 
-var INTERNATIONAL_SCHOOLING_POPOVER_TIMER;
+var SCHOOL_POPOVER_TIMER;
 
-function toggleInternationalSchoolingPopover(show){
-	clearTimeout(INTERNATIONAL_SCHOOLING_POPOVER_TIMER);
-	var btn=$("#internationalSchoolingBtn"), pop=$("#internationalSchoolingSlideBtn");
+function schoolPopover(show){
+	clearTimeout(SCHOOL_POPOVER_TIMER);
+	var btn=$("#schoolBtn"), pop=$("#schoolSlideBtn");
 	if(btn.length<1 || pop.length<1) return;
 
 	if(show){
@@ -867,7 +867,7 @@ function toggleInternationalSchoolingPopover(show){
 		top=Math.max(10,Math.min(top,$(window).height()-popHeight-10));
 		pop.css("top",top+"px").addClass("show");
 	}else{
-		INTERNATIONAL_SCHOOLING_POPOVER_TIMER=setTimeout(function(){
+		SCHOOL_POPOVER_TIMER=setTimeout(function(){
 			pop.removeClass("show");
 		},150);
 	}

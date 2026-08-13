@@ -3,7 +3,7 @@ var grades_1_12=['1','2','3','4','5','6','7','8','9','10','11','12'];
 var grades_all=['KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','19', '20', '21', '22', '23'];
 var grades_KG_10 = ['KG','1','2','3','4','5','6','7','8','9','10'];
 var requiredGrades = ['N','KG','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'];
-var INTERNATIONAL_SCHOOLING_POPOVER_TIMER;
+var SCHOOL_POPOVER_TIMER;
 var SCHOOL_DIARY_INITIATES_ROLE = false;
 var SHOW_ONLY_RELEASE_NOTE = false;
 var languages = [{ code: 'aa', name: 'Afar' },
@@ -3200,9 +3200,9 @@ function openDashboardReleaseNoteModule() {
 	}
 }
 
-function toggleInternationalSchoolingPopover(show){
-	clearTimeout(INTERNATIONAL_SCHOOLING_POPOVER_TIMER);
-	var btn=$("#internationalSchoolingBtn"), pop=$("#internationalSchoolingSlideBtn");
+function schoolPopover(show){
+	clearTimeout(SCHOOL_POPOVER_TIMER);
+	var btn=$("#schoolBtn"), pop=$("#schoolSlideBtn");
 	if(btn.length<1 || pop.length<1) return;
 
 	if(show){
@@ -3213,7 +3213,7 @@ function toggleInternationalSchoolingPopover(show){
 		top=Math.max(10,Math.min(top,$(window).height()-popHeight-10));
 		pop.css("top",top+"px").addClass("show");
 	}else{
-		INTERNATIONAL_SCHOOLING_POPOVER_TIMER=setTimeout(function(){
+		SCHOOL_POPOVER_TIMER=setTimeout(function(){
 			pop.removeClass("show");
 		},150);
 	}

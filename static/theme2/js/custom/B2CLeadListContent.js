@@ -356,6 +356,11 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 				<p class="mb-0" style="color:#00897B">Demo By Chat</p>
 				<p id="demoByChatCount" class="mb-0 text-white px-2 rounded" style="background-color:#00897B;">-</p>
 			</div>`;
+      html+=`<div class="d-flex justify-content-between align-items-center w-100" style="border-bottom:2px solid #0051FF;padding: 5px 10px;font-weight: bold;">
+				<p class="mb-0" style="color:#0051FF">Demo By Calendly</p>
+				<p id="demoByCalendlyCount" class="mb-0 text-white px-2 rounded" style="background-color:#0051FF;">-</p>
+			</div>`;  
+
 
   html += "</div>";
   html += "</div>";
@@ -1456,6 +1461,12 @@ function getLeadB2CTotalHotCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalAgentUrlDemo','${leadTotalData.leadFrom}')">${leadTotalData.totalAgentUrlDemo}</a>`
       : "-";
   $("#demoByAgentCount").html(`${demoByAgentCountHTML}`);
+
+  var demoByCalendlyCountHTML =
+    leadTotalData.totalCalendlyDemo > 0
+      ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'totalCalendlyDemo','${leadTotalData.leadFrom}')">${leadTotalData.totalCalendlyDemo}</a>`
+      : "-";
+  $("#demoByCalendlyCount").html(`${demoByCalendlyCountHTML}`);
 
   var demoByChatCountHTML =
     leadTotalData.totalChatDemo > 0
